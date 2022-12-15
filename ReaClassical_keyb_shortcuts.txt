@@ -40,8 +40,6 @@ F3             3-point Insert/Replace toggle
 F4             Insert with time-stretching (All 4 S-D markers)
 =====================================================
 
-
-
 I       Swap marquee and razor edit modifiers
 V       Toggle per-track ripple editing
 
