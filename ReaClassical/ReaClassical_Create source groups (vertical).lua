@@ -214,7 +214,7 @@ function create_source_groups()
   r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
 
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  local razor_edit = r.NamedCommandLookup("_RSbf7b2e83e3ffb6ed51d039407f59c836a842e3c3")
+  local razor_edit = r.NamedCommandLookup("_RS8cadfbad0d261c15b17168bc0c105be8b64cc69e")
   r.Main_OnCommand(razor_edit, 0)
   r.Main_OnCommand(40939, 0) -- select track 01
 end
