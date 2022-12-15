@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local lock_toggle = r.NamedCommandLookup("_RS6dbff221b7cfc72702fce6bc90a13fe093b1dffb")
+local lock_toggle = r.NamedCommandLookup("_RS63db9a9d1dae64f15f6ca0b179bb5ea0bc4d06f6")
 local state = r.GetToggleCommandState(lock_toggle)
 local lock_items, unlock_items
 

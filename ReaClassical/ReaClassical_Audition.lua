@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local solo, mixer, on_stop
-local fade_editor_toggle = r.NamedCommandLookup("_RSa91c127e4694f016de8094f76aa0974ed1b79f40")
+local fade_editor_toggle = r.NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local fade_editor_state = r.GetToggleCommandState(fade_editor_toggle)
 
 function Main()

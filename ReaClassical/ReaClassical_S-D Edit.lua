@@ -26,7 +26,7 @@ local create_dest_in
 function Main()
   r.PreventUIRefresh(1)
   r.Undo_BeginBlock()
-  local replace_toggle = r.NamedCommandLookup("_RS7bc2f38348b88783a587cce99699392496c84e28")
+  local replace_toggle = r.NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
   local dest_in, dest_out, source_count = markers()
   ripple_lock_mode()
   if r.GetToggleCommandState(replace_toggle) == 1 and dest_in == 1 and dest_out == 0 and source_count == 2 then
