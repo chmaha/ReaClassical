@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local replace_toggle = r.NamedCommandLookup("_RS7bc2f38348b88783a587cce99699392496c84e28")
+local replace_toggle = r.NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
 local state = r.GetToggleCommandState(replace_toggle)
 
 if state == 0 or state == -1 then

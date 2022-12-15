@@ -22,7 +22,7 @@ local r = reaper
 local mixer, solo
 
 function Main()
-  local take_record_toggle = r.NamedCommandLookup("_RS14d72cef67a17b1ea0b06fa65e2b750e0c9504f1")
+  local take_record_toggle = r.NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
   if r.GetPlayState() == 0 then
     r.PreventUIRefresh(1)
     r.Undo_BeginBlock()
