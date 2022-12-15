@@ -28,11 +28,11 @@ X       Classical Crossfade
 Z       Edit existing crossfade across two lanes (when in Fade Editor view)
 
 =====================S-D Editing=====================
-1, Ctrl+Home   Add Destination IN marker
-2, Ctrl+End    Add Destination OUT marker (without does 3-point edit)
-3, Shift+Home  Add Source IN marker
-4, Shift+End   Add Source OUT marker
-5, Insert      One-Window S/D Editing
+1              Add Destination IN marker
+2              Add Destination OUT marker (without does 3-point edit)
+3              Add Source IN marker
+4              Add Source OUT marker
+5              One-Window S/D Editing
 Ctrl+Delete    Delete all S-D Markers
 Backspace      Delete with ripple (between 2 source markers)
 Ctrl+Backspace Delete Leaving Silence (between 2 source markers)
