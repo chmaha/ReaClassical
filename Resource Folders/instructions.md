@@ -1,5 +1,5 @@
 ### Instructions for using the zip files
-#### Tested on REAPER v6.69
+#### Tested on REAPER v6.71
 
 - Linux-x86_64.zip 
 - Linux-aarch64.zip (Raspberry Pi) 
