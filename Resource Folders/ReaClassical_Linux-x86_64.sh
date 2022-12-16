@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Install script for Linux x86_64
+
 echo "Welcome to ReaClassical installer..."
 sleep 2
 pkgver=6.71
