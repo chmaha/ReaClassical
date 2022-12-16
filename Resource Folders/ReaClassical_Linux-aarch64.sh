@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Install script for Raspberry Pi
+
 echo "Welcome to ReaClassical installer..."
 sleep 2
 pkgver=6.71
