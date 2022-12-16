@@ -22,7 +22,7 @@ Download the [script](https://raw.githubusercontent.com/chmaha/ReaClassical/main
 
 ```
 wget https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh
-sh reaclassical_Linux.sh
+sh ReaClassical_Linux.sh
 ```
 
 The script will pull both the REAPER binary archive and resource folder archive and do the required magic. NOTE: Change the `pkgver=` line to download a different version of REAPER.
