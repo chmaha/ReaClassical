@@ -28,9 +28,9 @@ sh ReaClassical_Linux.sh
 The script will pull both the REAPER binary archive and resource folder archive and do the required magic. NOTE: Change the `pkgver=` line to download a different version of REAPER.
 
 #### Manual Method 1: Portable Install
-* Windows: Download REAPER and check the "Portable Install" box when installing. Download the required resource folder into the top level of the portable install directory e.g. C:/REAPER and unzip contents.
-* MacOS: Create a REAPER folder (whatever name you like), download the resource folder archive into it and unzip contents. Download REAPER, mount the DMG and drag REAPER64.APP into the same folder.
-* Linux: Download and extract REAPER. Download the resource folder into the REAPER subdirectory and and unzip contents.
+* __Windows__: Download REAPER and check the "Portable Install" box when installing. Download the required resource folder into the top level of the portable install directory e.g. C:/REAPER and unzip contents.
+* __MacOS__: Create a REAPER folder (whatever name you like), download the resource folder archive into it and unzip contents. Download REAPER, mount the DMG and drag REAPER64.APP into the same folder.
+* __Linux__: Download and extract REAPER. Download the resource folder into the REAPER subdirectory and and unzip contents.
 
 Start REAPER and Sync ReaPack (to get latest ReaClassical scripts)
 
