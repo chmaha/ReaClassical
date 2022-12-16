@@ -16,7 +16,7 @@
 - MacOS-x86_64.zip (64-bit Intel)
 - MacOS-arm64.zip (M1 chip)
 
-#### Quick Install on Linux (MacOS and Windows scripts to follow)
+#### Quick Install on Linux
 
 Download the [script](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) for your system and run where you want to download a portable install of ReaClassical. For example:
 
