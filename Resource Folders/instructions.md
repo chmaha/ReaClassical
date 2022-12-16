@@ -3,8 +3,7 @@
 
 ##### Scripts
 
-- reaclassical_Linux-x86_64.sh
-- reaclassical_Linux-aarch64.sh (Raspberry Pi)
+- reaclassical_Linux.sh (both x86_64 and aarch64)
 <!--- reaclassical_MacOS-x86_64.sh
 - reaclassical_MacOS-arm64.sh
 - reaclassical_Windows-x64.ps1-->
@@ -19,9 +18,12 @@
 
 #### Quick Install on Linux (MacOS and Windows scripts to follow)
 
-Download the [script](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders) for your system and run where you want to download a portable install of ReaClassical. For example:
+Download the [script](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) for your system and run where you want to download a portable install of ReaClassical. For example:
 
-`sh reaclassical_Linux-x86_64.sh`
+```
+wget https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh
+sh reaclassical_Linux.sh
+```
 
 The script will pull both the REAPER binary archive and resource folder archive and do the required magic. NOTE: Change the `pkgver=` line to download a different version of REAPER.
 
