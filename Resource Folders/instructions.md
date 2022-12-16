@@ -1,28 +1,44 @@
-### Instructions for using the zip files
-#### Tested on REAPER v6.71
+### Instructions for installing ReaClassical
+#### Tested with REAPER v6.71
 
-- Linux-x86_64.zip 
-- Linux-aarch64.zip (Raspberry Pi) 
-- Windows-x64.zip 
-- MacOS-x86_64.zip (64-bit Intel) 
-- MacOS-arm64.zip (M1 chip) 
+##### Scripts
 
-1. Download and unzip the REAPER resource bundle for your system (Linux, Windows or MacOS 64-bit)
-2. Create a **portable install**:
-    * Windows: Download REAPER and check the "Portable Install" box when installing. Unzip and copy the contents of the downloaded resource folder into the portable install directory e.g. C:/REAPER.
-    * MacOS: Download REAPER and drag REAPER64.APP into the downloaded resource folder
-    * Linux: Download and unzip REAPER and drag the contents of the downloaded resource folder into the REAPER subfolder
-3. Start REAPER
-4. Sync ReaPack (to get latest ReaClassical scripts)
+- reaclassical_Linux-x86_64.sh
+- reaclassical_Linux-aarch64.sh (Raspberry Pi)
+<!--- reaclassical_MacOS-x86_64.sh
+- reaclassical_MacOS-arm64.sh
+- reaclassical_Windows-x64.ps1-->
+
+##### Resource Folder archives
+
+- Linux-x86_64.zip
+- Linux-aarch64.zip (Raspberry Pi)
+- Windows-x64.zip
+- MacOS-x86_64.zip (64-bit Intel)
+- MacOS-arm64.zip (M1 chip)
+
+#### Quick Install on Linux (MacOS and Windows scripts to follow)
+
+Download the script for your system and run where you want to download a portable install of ReaClassical. For example:
+
+`sh reaclassical_Linux-x86_64.sh`
+
+The script will pull both the REAPER binary archive and resource folder archive and do the required magic. NOTE: Change the `pkgver=` line to download a different version of REAPER.
+
+#### Manual Method 1: Portable Install
+* Windows: Download REAPER and check the "Portable Install" box when installing. Download the required resource folder into the top level of the portable install directory e.g. C:/REAPER and unzip contents.
+* MacOS: Create a REAPER folder (whatever name you like), download the resource folder archive into it and unzip contents. Download REAPER, mount the DMG and drag REAPER64.APP into the same folder.
+* Linux: Download and extract REAPER. Download the resource folder into the REAPER subdirectory and and unzip contents.
+
+Start REAPER and Sync ReaPack (to get latest ReaClassical scripts)
 
 or...
 
-1. Download and unzip the REAPER resource bundle for your system (Linux, Windows or MacOS 64-bit)
-2. Rename/backup your existing resource folder (important!) and replace with the downloaded folder
+#### Manual Method 2: Overwrite your existing install (caution!)
+1. Rename/backup the contents of your existing resource folder (important!).
+2. Create a replacement REAPER resource folder, download the resource folder archive to this location and unzip.
 3. Start REAPER
 4. Sync ReaPack (to get latest ReaClassical scripts)
-
-
 
 ### Notes
 
