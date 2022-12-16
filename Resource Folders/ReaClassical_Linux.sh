@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# Install script for Linux x86_64
+# Install script to install ReaClassical on Linux
+# Works for both x86_64 and aarch64 architectures
 
 echo "Welcome to ReaClassical installer..."
 sleep 2
 pkgver=6.71
-arch=x86_64
+arch=`uname -m`
 
 echo "Downloading REAPER from reaper.fm..."
 sleep 2
