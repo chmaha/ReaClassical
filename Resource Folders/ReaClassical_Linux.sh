@@ -10,14 +10,14 @@ arch=`uname -m`
 
 echo "Downloading REAPER from reaper.fm..."
 sleep 2
-wget –q --show-progress https://reaper.fm/files/${pkgver::1}.x//reaper${pkgver//.}_linux_$arch.tar.xz
+wget -q --show-progress --progress=bar:force https://reaper.fm/files/${pkgver::1}.x//reaper${pkgver//.}_linux_$arch.tar.xz
 echo "Extracting files from REAPER archive"
 tar -xf reaper${pkgver//.}_linux_$arch.tar.xz
 rm reaper${pkgver//.}_linux_$arch.tar.xz
 cd reaper_linux_${arch}/REAPER
 echo "Downloading ReaClassical files from Github..."
 sleep 2
-wget –q --show-progress https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Linux-${arch}.zip
+wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Linux-${arch}.zip
 echo "Extracting files from archive..."
 sleep 2
 unzip -q Linux-${arch}.zip
