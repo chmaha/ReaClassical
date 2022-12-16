@@ -19,7 +19,7 @@
 
 #### Quick Install on Linux (MacOS and Windows scripts to follow)
 
-Download the script for your system and run where you want to download a portable install of ReaClassical. For example:
+Download the [script](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders) for your system and run where you want to download a portable install of ReaClassical. For example:
 
 `sh reaclassical_Linux-x86_64.sh`
 
