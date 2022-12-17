@@ -19,9 +19,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local mixer, solo
+local mixer, solo, track_check
 
 function Main()
+  if track_check() == 0 then
+    r.ShowMessageBox("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)
+    return
+  end
   r.PreventUIRefresh(1)
   r.Undo_BeginBlock()
 
@@ -69,6 +73,10 @@ function mixer()
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
     end
   end
+end
+
+function track_check()
+  return r.CountTracks(0)
 end
 
 Main()

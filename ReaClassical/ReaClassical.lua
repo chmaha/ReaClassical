@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.2
+@version 22.12.3
 @changelog
-  v22.12.2
-  Fix main lua file
+  v22.12.3
+  Add further guard clauses to prevent error messages in empty project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

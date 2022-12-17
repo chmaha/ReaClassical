@@ -23,6 +23,10 @@ local horizontal, horizontal_color, horizontal_group, shift, vertical, vertical_
 local empty_folder_check, copy_track_items, tracks_per_folder
 
 function Main()
+  if r.CountMediaItems(0) == 0 then
+    r.ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
+    return  
+  end
   r.PreventUIRefresh(1)
   r.Undo_BeginBlock()
   r.Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
