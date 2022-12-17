@@ -19,9 +19,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local mixer, solo
+local mixer, solo, track_check
 
 function Main()
+  if track_check() == 0 then
+    r.ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
+    return
+  end
   local take_record_toggle = r.NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
   if r.GetPlayState() == 0 then
     r.PreventUIRefresh(1)
@@ -81,6 +85,10 @@ function mixer()
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
     end
   end
+end
+
+function track_check()
+  return r.CountTracks(0)
 end
 
 Main()
