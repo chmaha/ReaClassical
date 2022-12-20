@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.3
+@version 22.12.4
 @changelog
-  v22.12.3
-  Add further guard clauses to prevent error messages in empty project
+  v22.12.4
+  Switch to using native media/razor track grouping
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -21,7 +21,6 @@
   [main] ReaClassical_Whole Project View.lua
   [main] ReaClassical_Create source groups (vertical).lua
   [main] ReaClassical_Audition.lua
-  [main] ReaClassical_BirdBird Razor Children.lua
   [main] ReaClassical_3-point edit replace.lua
   [main] ReaClassical_Delete Leaving Silence.lua
   [main] ReaClassical_Delete With Ripple.lua
