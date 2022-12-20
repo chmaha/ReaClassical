@@ -3,22 +3,22 @@
 
 ##### Scripts
 
-- reaclassical_Linux.sh (both x86_64 and aarch64)
+- [reaclassical_Linux.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) (both x86_64 and aarch64)
 <!--- reaclassical_MacOS-x86_64.sh
 - reaclassical_MacOS-arm64.sh
 - reaclassical_Windows-x64.ps1-->
 
 ##### Resource Folder archives
 
-- Linux-x86_64.zip
-- Linux-aarch64.zip (Raspberry Pi)
-- Windows-x64.zip
-- MacOS-x86_64.zip (64-bit Intel)
-- MacOS-arm64.zip (M1 chip)
+- [Linux-x86_64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Linux-x86_64.zip)
+- [Linux-aarch64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Linux-aarch64.zip) (Raspberry Pi)
+- [Windows-x64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Windows-x64.zip)
+- [MacOS-x86_64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/MacOS-x86_64.zip) (64-bit Intel)
+- [MacOS-arm64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/MacOS-arm64.zip) (M1 chip)
 
 #### Quick Install on Linux
 
-Download the [script](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) for your system and run where you want to download a portable install of ReaClassical. For example:
+Download the script for your system and run where you want to download a portable install of ReaClassical:
 
 ```
 wget https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh
