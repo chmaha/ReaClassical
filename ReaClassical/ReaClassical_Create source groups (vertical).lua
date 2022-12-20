@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local create_destination_group, create_source_groups, folder_check, mixer, solo, sync_routing_and_fx
+local media_razor_group
 
 function Main()
 
@@ -30,11 +31,14 @@ function Main()
     create_destination_group()
     if folder_check() == 1 then
       create_source_groups()
+      media_razor_group()
     end
   elseif folder_check() > 1 then
     sync_routing_and_fx()
+    media_razor_group()
   elseif folder_check() == 1 then
     create_source_groups()
+    media_razor_group()
   else
     r.ShowMessageBox("In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx", "Create Source Groups", 0)
   end
@@ -114,6 +118,7 @@ function sync_routing_and_fx()
       r.Main_OnCommand(copy_folder_routing, 0) -- copy folder track routing
       local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
       r.Main_OnCommand(select_children, 0) --SWS_SELCHILDREN2
+      r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
       local copy = r.NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
       r.Main_OnCommand(copy, 0)
       local paste = r.NamedCommandLookup("_SWS_AWPASTE")
@@ -121,12 +126,10 @@ function sync_routing_and_fx()
       r.Main_OnCommand(40421, 0) -- Item: Select all items in track
       local delete_items = r.NamedCommandLookup("_SWS_DELALLITEMS")
       r.Main_OnCommand(delete_items, 0)
-
       local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
       r.Main_OnCommand(unselect_children, 0) -- unselect children
       local paste_folder_routing = r.NamedCommandLookup("_S&M_PASTSNDRCV2")
       r.Main_OnCommand(paste_folder_routing, 0) -- paste folder track routing
-
       r.Main_OnCommand(40042, 0) --move edit cursor to start
       local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
       r.Main_OnCommand(next_folder, 0) --select next folder
@@ -189,6 +192,7 @@ function create_source_groups()
   while i < 6 do
     local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
     r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
     local copy = r.NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
     r.Main_OnCommand(copy, 0)
     local paste = r.NamedCommandLookup("_SWS_AWPASTE")
@@ -197,6 +201,27 @@ function create_source_groups()
     local delete_items = r.NamedCommandLookup("_SWS_DELALLITEMS")
     r.Main_OnCommand(delete_items, 0)
     i = i + 1
+  end
+end
+
+function media_razor_group()
+  local select_all_folders = r.NamedCommandLookup("_SWS_SELALLPARENTS")
+  r.Main_OnCommand(select_all_folders, 0) -- select all folders
+  local num_of_folders = r.CountSelectedTracks(0)
+  local first_track = r.GetTrack(0, 0)
+  r.SetOnlyTrackSelected(first_track)
+  if num_of_folders > 1 then
+    for i = 1, num_of_folders, 1 do
+      local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+      r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+      r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
+      local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
+      r.Main_OnCommand(next_folder, 0) -- select next folder
+    end
+  else
+    local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+    r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+    r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
   end
   r.Main_OnCommand(40296, 0) -- Track: Select all tracks
   local collapse = r.NamedCommandLookup("_SWS_COLLAPSE")
@@ -214,8 +239,6 @@ function create_source_groups()
   r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
 
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  local razor_edit = r.NamedCommandLookup("_RS8cadfbad0d261c15b17168bc0c105be8b64cc69e")
-  r.Main_OnCommand(razor_edit, 0)
   r.Main_OnCommand(40939, 0) -- select track 01
 end
 

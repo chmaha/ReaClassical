@@ -19,8 +19,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local horizontal, horizontal_color, horizontal_group, shift, vertical, vertical_color, vertical_group
-local empty_folder_check, copy_track_items, tracks_per_folder
+local horizontal, horizontal_color, horizontal_group, shift, vertical, vertical_color_razor, vertical_group
+local copy_track_items, tracks_per_folder
 
 function Main()
   if r.CountMediaItems(0) == 0 then
@@ -63,7 +63,7 @@ function Main()
   r.Main_OnCommand(40042, 0) -- go to start of project
   r.Main_OnCommand(40939, 0) -- select track 01
   if empty then
-    r.ShowMessageBox("Your folder tracks were empty. Items from first child tracks were therefore copied to folder tracks and muted to act as guide tracks."
+    r.ShowMessageBox("Some folder tracks are empty. If the folders are not completely empty, items from first child tracks were copied to folder tracks and muted to act as guide tracks."
       , "Guide Tracks Created", 0)
   end
   r.Undo_EndBlock('Prepare Takes', 0)
@@ -83,15 +83,17 @@ function horizontal_color()
   r.Main_OnCommand(40706, 0)
 end
 
-function vertical_color()
+function vertical_color_razor()
   r.Main_OnCommand(40042, 0) -- Transport: Go to start of project
   local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
   r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
+  r.Main_OnCommand(42578,0) -- Track: Create new track media/razor editing group from selected tracks
   r.Main_OnCommand(40421, 0) -- Item: Select all items in track
   r.Main_OnCommand(40706, 0) -- Item: Set to one random color
 end
 
-local function horizontal_group()
+function horizontal_group()
   r.Main_OnCommand(40296, 0) -- Track: Select all tracks
   r.Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
   local select_under = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
@@ -130,6 +132,8 @@ function horizontal()
 
   r.DeleteTrackMediaItem(last_track, last_item)
   r.SelectAllMediaItems(0, false)
+  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
+  r.Main_OnCommand(42578,0) -- Track: Create new track media/razor editing group from selected tracks
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
   r.SetEditCurPos(0, false, false)
 end
@@ -143,7 +147,7 @@ function vertical()
   local first_track = r.GetTrack(0, 0)
   r.SetOnlyTrackSelected(first_track)
   for i = 1, num_of_folders, 1 do
-    vertical_color()
+    vertical_color_razor()
     vertical_group(length)
     local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
     r.Main_OnCommand(next_folder, 0) -- select next folder
