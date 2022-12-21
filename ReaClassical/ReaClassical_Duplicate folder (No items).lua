@@ -39,13 +39,11 @@ function Main()
   r.Main_OnCommand(40421, 0) -- Item: Select all items in track
   local delete_items = r.NamedCommandLookup("_SWS_DELALLITEMS")
   r.Main_OnCommand(delete_items, 0)
-  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
-  r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
   mixer()
   local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
   r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
   solo()
-  -- media_razor_group()
+  media_razor_group()
   r.Undo_EndBlock('Duplicate folder (No items)', 0)
   r.PreventUIRefresh(-1)
   r.UpdateArrange()
@@ -82,6 +80,8 @@ function track_check()
 end
 
 function media_razor_group()
+  r.Main_OnCommand(40296, 0) -- Select all tracks
+  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
   local select_all_folders = r.NamedCommandLookup("_SWS_SELALLPARENTS")
   r.Main_OnCommand(select_all_folders, 0) -- select all folders
   local num_of_folders = r.CountSelectedTracks(0)
@@ -94,7 +94,6 @@ function media_razor_group()
     local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
     r.Main_OnCommand(next_folder, 0) -- select next folder
   end
-  -- r.Main_OnCommand(40939, 0) -- Track: Select track 01
 end
 
 Main()
