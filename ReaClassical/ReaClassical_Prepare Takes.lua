@@ -20,15 +20,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local horizontal, horizontal_color, horizontal_group, shift, vertical, vertical_color_razor, vertical_group
-local copy_track_items, tracks_per_folder
+local copy_track_items, tracks_per_folder, clean_take_names
 
 function Main()
-  if r.CountMediaItems(0) == 0 then
+  local num_of_project_items = r.CountMediaItems(0)
+  if num_of_project_items == 0 then
     r.ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
     return  
   end
   r.PreventUIRefresh(1)
   r.Undo_BeginBlock()
+  clean_take_names(num_of_project_items)
   r.Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
   local total_tracks = r.CountTracks(0)
   local folders = 0
@@ -193,6 +195,14 @@ function tracks_per_folder()
   local selected_tracks = r.CountSelectedTracks(0)
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
   return selected_tracks
+end
+
+function clean_take_names(num_of_project_items)
+  for i = 0, num_of_project_items - 1 do
+    local item = r.GetMediaItem(0, i)
+    local take = r.GetActiveTake(item)
+    r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
+  end
 end
 
 Main()
