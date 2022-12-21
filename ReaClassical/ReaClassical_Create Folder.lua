@@ -39,8 +39,8 @@ function Main()
         local track = r.GetTrack(0, i)
         r.SetTrackSelected(track, 0)
       end
+      media_razor_group()
     end
-    media_razor_group()
   else
     r.ShowMessageBox("Please use this function with an empty project", "Create Destination Group", 0)
   end
@@ -56,19 +56,9 @@ function media_razor_group()
   local num_of_folders = r.CountSelectedTracks(0)
   local first_track = r.GetTrack(0, 0)
   r.SetOnlyTrackSelected(first_track)
-  if num_of_folders > 1 then
-    for i = 1, num_of_folders, 1 do
-      local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-      r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-      r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
-      local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
-      r.Main_OnCommand(next_folder, 0) -- select next folder
-    end
-  else
-    local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-    r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-    r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
-  end
+  local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+  r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+  r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
   r.Main_OnCommand(40939, 0) -- Track: Select track 01
 end
 
