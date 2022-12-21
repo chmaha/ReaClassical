@@ -22,18 +22,33 @@ local r = reaper
 local first_track = r.GetTrack(0, 0)
 local num_of_items = r.CountTrackMediaItems(first_track)
 local cd_markers, find_current_start, find_prev_end, create_marker, renumber_markers, add_pregap, end_marker, frame_check
-
+local get_info
 
 function Main()
-  choice = r.ShowMessageBox("WARNING: This will delete all existing markers.\nIgnore crossfaded items?",
-    "Create Initial CD markers", 3)
+  choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names.",
+    "Create CD/DDP markers", 1)
   if choice ~= 2 then
     cd_markers()
   end
 end
 
+function get_info()
+  local ret, user_inputs = r.GetUserInputs('CD/DDP Album information', 4,
+    'Album Title,Performer,Composer,Genre,extrawidth=100',
+    'My Classical Album,Performer,Composer,Classical')
+  local fields = {}
+  for word in user_inputs:gmatch('([^,]+)') do fields[#fields+1] = word end
+  if not ret then
+    r.ShowMessageBox('Only writing track metadata', "Cancelled", 0)
+  elseif #fields ~= 4 then
+    r.ShowMessageBox('Empty fields not supported: Not writing album metadata', "Warning", 0)
+  end
+  return fields
+end
+
 function cd_markers()
-  local delete_markers = reaper.NamedCommandLookup("_SWSMARKERLIST9")
+  local fields = get_info()
+  local delete_markers = r.NamedCommandLookup("_SWSMARKERLIST9")
   r.Main_OnCommand(delete_markers, 0)
 
   r.SNM_SetIntConfigVar('projfrbase', 75)
@@ -42,20 +57,22 @@ function cd_markers()
   local prev_end = 0 -- set to lowest value
 
   for i = 0, num_of_items - 1, 1 do
-    local current_start = find_current_start(i)
+    local current_start, take_name = find_current_start(i)
     if i > 0 then
       prev_end = find_prev_end(i)
     end
-    create_marker(current_start, prev_end, i)
+    create_marker(current_start, i, take_name)
   end
-  end_marker()
+  end_marker(fields)
   renumber_markers()
   add_pregap()
 end
 
 function find_current_start(i)
   local current_item = r.GetTrackMediaItem(first_track, i)
-  return r.GetMediaItemInfo_Value(current_item, "D_POSITION")
+  local take = r.GetActiveTake(current_item)
+  local _,take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME","", false)
+  return r.GetMediaItemInfo_Value(current_item, "D_POSITION"), take_name
 end
 
 function find_prev_end(i)
@@ -65,10 +82,11 @@ function find_prev_end(i)
   return prev_start + prev_length
 end
 
-function create_marker(current_start, prev_end, i)
-  if (choice == 6 and prev_end <= current_start) or choice == 7 then
+function create_marker(current_start, i, take_name)
+  if take_name ~= "" then
     local corrected_current_start = frame_check(current_start)
-    r.AddProjectMarker(0, false, corrected_current_start, 0, "#", i + 1)
+    local track_title = "#"..take_name
+    r.AddProjectMarker(0, false, corrected_current_start, 0, track_title, i + 1)
   end
 end
 
@@ -91,11 +109,15 @@ function add_pregap()
   r.SNM_SetDoubleConfigVar('projtimeoffs', 0)
 end
 
-function end_marker()
+function end_marker(fields)
   local final_item = r.GetTrackMediaItem(first_track, num_of_items - 1)
   local final_start = r.GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = r.GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
+  if #fields == 4 then
+    local album_info = "@"..fields[1].."|PERFORMER="..fields[2].. "|COMPOSER="..fields[3].. "|GENRE="..fields[4]
+    r.AddProjectMarker(0, false, final_end + 1, 0, album_info, 0)
+  end
   r.AddProjectMarker(0, false, final_end + 7, 0, "=END", 0)
 end
 
