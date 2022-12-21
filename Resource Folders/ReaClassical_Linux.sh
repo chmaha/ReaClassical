@@ -5,7 +5,7 @@
 
 echo "Welcome to ReaClassical installer..."
 sleep 2
-pkgver=6.71
+pkgver=6.72
 arch=`uname -m`
 
 echo "Downloading REAPER from reaper.fm..."
