@@ -25,7 +25,8 @@ local cd_markers, find_current_start, find_prev_end, create_marker, renumber_mar
 local get_info
 
 function Main()
-  choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names.",
+  local choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names."
+    ,
     "Create CD/DDP markers", 1)
   if choice ~= 2 then
     cd_markers()
@@ -37,7 +38,7 @@ function get_info()
     'Album Title,Performer,Composer,Genre,extrawidth=100',
     'My Classical Album,Performer,Composer,Classical')
   local fields = {}
-  for word in user_inputs:gmatch('([^,]+)') do fields[#fields+1] = word end
+  for word in user_inputs:gmatch('([^,]+)') do fields[#fields + 1] = word end
   if not ret then
     r.ShowMessageBox('Only writing track metadata', "Cancelled", 0)
   elseif #fields ~= 4 then
@@ -47,7 +48,6 @@ function get_info()
 end
 
 function cd_markers()
-  local fields = get_info()
   local delete_markers = r.NamedCommandLookup("_SWSMARKERLIST9")
   r.Main_OnCommand(delete_markers, 0)
 
@@ -55,23 +55,31 @@ function cd_markers()
   r.Main_OnCommand(40754, 0) --enable snap to grid
 
   local prev_end = 0 -- set to lowest value
-
+  local marker_count = 0
   for i = 0, num_of_items - 1, 1 do
     local current_start, take_name = find_current_start(i)
     if i > 0 then
       prev_end = find_prev_end(i)
     end
-    create_marker(current_start, i, take_name)
+    local added_marker = create_marker(current_start, marker_count, take_name)
+    if added_marker then
+      marker_count = marker_count + 1
+    end
   end
-  end_marker(fields)
-  renumber_markers()
-  add_pregap()
+  if marker_count ~= 0 then
+    local fields = get_info()
+    end_marker(fields)
+    renumber_markers()
+    add_pregap()
+  else
+    r.ShowMessageBox('Please add some take names to media items (F2)', "No track markers created", 0)
+  end
 end
 
 function find_current_start(i)
   local current_item = r.GetTrackMediaItem(first_track, i)
   local take = r.GetActiveTake(current_item)
-  local _,take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME","", false)
+  local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
   return r.GetMediaItemInfo_Value(current_item, "D_POSITION"), take_name
 end
 
@@ -82,16 +90,19 @@ function find_prev_end(i)
   return prev_start + prev_length
 end
 
-function create_marker(current_start, i, take_name)
+function create_marker(current_start, marker_count, take_name)
+  local added_marker = false
   if take_name ~= "" then
     local corrected_current_start = frame_check(current_start)
-    local track_title = "#"..take_name
-    r.AddProjectMarker(0, false, corrected_current_start, 0, track_title, i + 1)
+    local track_title = "#" .. take_name
+    r.AddProjectMarker(0, false, corrected_current_start, 0, track_title, marker_count + 1)
+    added_marker = true
   end
+  return added_marker
 end
 
 function renumber_markers()
-  reaper.Main_OnCommand(40898, 0)
+  r.Main_OnCommand(40898, 0)
 end
 
 function add_pregap()
@@ -115,7 +126,8 @@ function end_marker(fields)
   local final_length = r.GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
   if #fields == 4 then
-    local album_info = "@"..fields[1].."|PERFORMER="..fields[2].. "|COMPOSER="..fields[3].. "|GENRE="..fields[4]
+    local album_info = "@" .. fields[1] .. "|PERFORMER=" .. fields[2] .. "|COMPOSER=" .. fields[3] ..
+        "|GENRE=" .. fields[4]
     r.AddProjectMarker(0, false, final_end + 1, 0, album_info, 0)
   end
   r.AddProjectMarker(0, false, final_end + 7, 0, "=END", 0)
