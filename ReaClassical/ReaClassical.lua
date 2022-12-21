@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.5
+@version 22.12.6
 @changelog
-  v22.12.5
-  Further media/razor tweaks including duplicating folder
+  v22.12.6
+  Prepare Takes: Remove item take names
+  Create CD/DDP Markers: pull track names from item take names
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
