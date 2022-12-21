@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.4
+@version 22.12.5
 @changelog
-  v22.12.4
-  Switch to using native media/razor track grouping
+  v22.12.5
+  Further media/razor tweaks including duplicating folder
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
