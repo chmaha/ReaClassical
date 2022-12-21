@@ -1,11 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.6
+@version 22.12.7
 @changelog
-  v22.12.6
-  Prepare Takes: Remove item take names
-  Create CD/DDP Markers: pull track names from item take names
-  Create CD/DDP Markers: Further tweaks
+  v22.12.7
+  Allow for easter egg tracks in the initial pre-gap
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
