@@ -5,6 +5,7 @@
   v22.12.6
   Prepare Takes: Remove item take names
   Create CD/DDP Markers: pull track names from item take names
+  Create CD/DDP Markers: Further tweaks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
