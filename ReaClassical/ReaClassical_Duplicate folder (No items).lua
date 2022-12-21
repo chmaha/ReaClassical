@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local mixer, solo, track_check
+local mixer, solo, track_check, media_razor_group
 
 function Main()
   if track_check() == 0 then
@@ -39,11 +39,13 @@ function Main()
   r.Main_OnCommand(40421, 0) -- Item: Select all items in track
   local delete_items = r.NamedCommandLookup("_SWS_DELALLITEMS")
   r.Main_OnCommand(delete_items, 0)
+  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
+  r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
   mixer()
   local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
   r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
   solo()
-
+  -- media_razor_group()
   r.Undo_EndBlock('Duplicate folder (No items)', 0)
   r.PreventUIRefresh(-1)
   r.UpdateArrange()
@@ -77,6 +79,22 @@ end
 
 function track_check()
   return r.CountTracks(0)
+end
+
+function media_razor_group()
+  local select_all_folders = r.NamedCommandLookup("_SWS_SELALLPARENTS")
+  r.Main_OnCommand(select_all_folders, 0) -- select all folders
+  local num_of_folders = r.CountSelectedTracks(0)
+  local first_track = r.GetTrack(0, 0)
+  r.SetOnlyTrackSelected(first_track)
+  for i = 1, num_of_folders, 1 do
+    local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+    r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+    r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
+    local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
+    r.Main_OnCommand(next_folder, 0) -- select next folder
+  end
+  -- r.Main_OnCommand(40939, 0) -- Track: Select track 01
 end
 
 Main()
