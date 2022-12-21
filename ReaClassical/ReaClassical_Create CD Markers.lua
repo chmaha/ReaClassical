@@ -106,8 +106,14 @@ function renumber_markers()
 end
 
 function add_pregap()
-  local _, _, first_marker, _, _, _ = reaper.EnumProjectMarkers(0)
-  local first_pregap = first_marker - 2
+  local first_item_start, _ = find_current_start(0)
+  local _, _, first_marker, _, _, _ = r.EnumProjectMarkers(0)
+  local first_pregap
+  if first_marker - first_item_start < 2 then
+      first_pregap = first_item_start - 2 + (first_marker - first_item_start) -- Ensure initial pre-gap is at least 2 seconds in length
+  else
+    first_pregap = first_item_start
+  end
   if first_pregap > 0 then
     r.GetSet_LoopTimeRange(true, false, 0, first_pregap, false)
     r.Main_OnCommand(40201, 0) -- Time selection: Remove contents of time selection (moving later items)
