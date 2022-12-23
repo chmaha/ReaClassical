@@ -22,7 +22,7 @@ local r = reaper
 local first_track = r.GetTrack(0, 0)
 local num_of_items = r.CountTrackMediaItems(first_track)
 local cd_markers, find_current_start, find_prev_end, create_marker, renumber_markers, add_pregap, end_marker, frame_check
-local get_info
+local get_info, save_metadata
 
 function Main()
   local choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names."
@@ -34,17 +34,25 @@ function Main()
 end
 
 function get_info()
-  local ret, user_inputs = r.GetUserInputs('CD/DDP Album information', 4,
+  local metadata_saved = r.GetExtState("Create CD Markers", "Album Metadata")
+  local ret, user_inputs, fields
+  if metadata_saved then
+    ret, user_inputs = r.GetUserInputs('CD/DDP Album information', 4,
     'Album Title,Performer,Composer,Genre,extrawidth=100',
-    'My Classical Album,Performer,Composer,Classical')
-  local fields = {}
+    metadata_saved)
+  else
+    ret, user_inputs = r.GetUserInputs('CD/DDP Album information', 4,
+      'Album Title,Performer,Composer,Genre,extrawidth=100',
+      'My Classical Album,Performer,Composer,Classical')
+  end
+  fields = {}
   for word in user_inputs:gmatch('([^,]+)') do fields[#fields + 1] = word end
   if not ret then
     r.ShowMessageBox('Only writing track metadata', "Cancelled", 0)
   elseif #fields ~= 4 then
     r.ShowMessageBox('Empty fields not supported: Not writing album metadata', "Warning", 0)
   end
-  return fields
+  return user_inputs, fields
 end
 
 function cd_markers()
@@ -67,7 +75,8 @@ function cd_markers()
     end
   end
   if marker_count ~= 0 then
-    local fields = get_info()
+    local user_inputs, fields = get_info()
+    if #fields == 4 then save_metadata(user_inputs) end
     end_marker(fields)
     renumber_markers()
     add_pregap()
@@ -110,7 +119,7 @@ function add_pregap()
   local _, _, first_marker, _, _, _ = r.EnumProjectMarkers(0)
   local first_pregap
   if first_marker - first_item_start < 2 then
-      first_pregap = first_item_start - 2 + (first_marker - first_item_start) -- Ensure initial pre-gap is at least 2 seconds in length
+    first_pregap = first_item_start - 2 + (first_marker - first_item_start) -- Ensure initial pre-gap is at least 2 seconds in length
   else
     first_pregap = first_item_start
   end
@@ -145,6 +154,10 @@ function frame_check(pos)
     pos = r.BR_GetPrevGridDivision(pos)
   end
   return pos
+end
+
+function save_metadata(user_inputs)
+  r.SetExtState("Create CD Markers", "Album Metadata", user_inputs, false)
 end
 
 Main()
