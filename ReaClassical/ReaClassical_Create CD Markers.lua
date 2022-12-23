@@ -21,8 +21,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 local r = reaper
 local first_track = r.GetTrack(0, 0)
 local num_of_items = r.CountTrackMediaItems(first_track)
-local cd_markers, find_current_start, find_prev_end, create_marker, renumber_markers, add_pregap, end_marker, frame_check
-local get_info, save_metadata
+local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
+local get_info, save_metadata, find_project_end
 
 function Main()
   local choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names."
@@ -58,22 +58,28 @@ end
 function cd_markers()
   local delete_markers = r.NamedCommandLookup("_SWSMARKERLIST9")
   r.Main_OnCommand(delete_markers, 0)
+  local delete_regions = r.NamedCommandLookup("_SWSMARKERLIST10")
+  r.Main_OnCommand(delete_regions, 0)
 
   r.SNM_SetIntConfigVar('projfrbase', 75)
   r.Main_OnCommand(40754, 0) --enable snap to grid
-
-  local prev_end = 0 -- set to lowest value
+  local final_end = find_project_end()
+  local previous_start
+  local previous_takename
   local marker_count = 0
   for i = 0, num_of_items - 1, 1 do
     local current_start, take_name = find_current_start(i)
-    if i > 0 then
-      prev_end = find_prev_end(i)
-    end
     local added_marker = create_marker(current_start, marker_count, take_name)
     if added_marker then
+      if marker_count > 0 then
+        r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(current_start), previous_takename, marker_count)
+      end
+      previous_start = current_start
+      previous_takename = take_name
       marker_count = marker_count + 1
     end
   end
+  r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(final_end) + 7, previous_takename, marker_count)
   if marker_count ~= 0 then
     local user_inputs, fields = get_info()
     if #fields == 4 then save_metadata(user_inputs) end
@@ -90,13 +96,6 @@ function find_current_start(i)
   local take = r.GetActiveTake(current_item)
   local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
   return r.GetMediaItemInfo_Value(current_item, "D_POSITION"), take_name
-end
-
-function find_prev_end(i)
-  local prev_item = r.GetTrackMediaItem(first_track, i - 1)
-  local prev_start = r.GetMediaItemInfo_Value(prev_item, "D_POSITION")
-  local prev_length = r.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
-  return prev_start + prev_length
 end
 
 function create_marker(current_start, marker_count, take_name)
@@ -135,6 +134,13 @@ function add_pregap()
   r.SNM_SetDoubleConfigVar('projtimeoffs', 0)
 end
 
+function find_project_end()
+  local final_item = r.GetTrackMediaItem(first_track, num_of_items - 1)
+  local final_start = r.GetMediaItemInfo_Value(final_item, "D_POSITION")
+  local final_length = r.GetMediaItemInfo_Value(final_item, "D_LENGTH")
+  return final_start + final_length
+end
+
 function end_marker(fields)
   local final_item = r.GetTrackMediaItem(first_track, num_of_items - 1)
   local final_start = r.GetMediaItemInfo_Value(final_item, "D_POSITION")
@@ -143,9 +149,9 @@ function end_marker(fields)
   if #fields == 4 then
     local album_info = "@" .. fields[1] .. "|PERFORMER=" .. fields[2] .. "|COMPOSER=" .. fields[3] ..
         "|GENRE=" .. fields[4]
-    r.AddProjectMarker(0, false, final_end + 1, 0, album_info, 0)
+    r.AddProjectMarker(0, false, frame_check(final_end) + 1, 0, album_info, 0)
   end
-  r.AddProjectMarker(0, false, final_end + 7, 0, "=END", 0)
+  r.AddProjectMarker(0, false, frame_check(final_end) + 7, 0, "=END", 0)
 end
 
 function frame_check(pos)
