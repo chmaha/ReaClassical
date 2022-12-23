@@ -4,6 +4,7 @@
 @changelog
   v22.12.9
   Create CD Markers: Automatically add regions based on CD/DPP markers
+  Disable snap after running Create CD Markers
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

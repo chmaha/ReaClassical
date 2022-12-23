@@ -89,6 +89,7 @@ function cd_markers()
   else
     r.ShowMessageBox('Please add some take names to media items (F2)', "No track markers created", 0)
   end
+  r.Main_OnCommand(40753, 0) -- Snapping: Disable snap
 end
 
 function find_current_start(i)
