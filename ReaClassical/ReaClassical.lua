@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.11
+@version 22.12.12
 @changelog
-  v22.12.11
-  Fix packaging
+  v22.12.12
+  Create CD Markers: Improve dialog boxes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
