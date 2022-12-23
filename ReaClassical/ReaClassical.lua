@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.10
+@version 22.12.11
 @changelog
-  v22.12.10
-  Create CD Markers: Add UPC/EAN and ISRC codes
-
+  v22.12.11
+  Fix packaging
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
