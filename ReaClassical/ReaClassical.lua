@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.7
+@version 22.12.8
 @changelog
-  v22.12.7
-  Allow for easter egg tracks in the initial pre-gap
+  v22.12.8
+  Create CD Markers: Temporarily save album metadata
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
