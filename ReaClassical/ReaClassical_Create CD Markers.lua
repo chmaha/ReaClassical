@@ -198,21 +198,21 @@ function add_codes()
   local code_table = {}
   if codes_response == 6 then
     if code_saved ~= "" then
-      ret2, code_input = r.GetUserInputs('UPC/ISRC codes_response', 5,
-        'UPC or EAN,ISRC country code,ISRC Registrant Code,ISRC Year (YY),ISRC Designation Code (5 digits),extrawidth=100'
+      ret2, code_input = r.GetUserInputs('UPC/ISRC Codes', 5,
+        'UPC or EAN,ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),ISRC Designation Code (5 digits),extrawidth=100'
         ,
         code_saved)
     else
-      ret2, code_input = r.GetUserInputs('UPC/ISRC codes_response', 5,
-        'UPC or EAN,ISRC country code,ISRC Registrant Code,ISRC Year (YY),ISRC Designation Code (5 digits),extrawidth=100'
+      ret2, code_input = r.GetUserInputs('UPC/ISRC Codes', 5,
+        'UPC or EAN,ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),ISRC Designation Code (5 digits),extrawidth=100'
         ,
         ',')
     end
     for num in code_input:gmatch('([^,]+)') do code_table[#code_table + 1] = num end
     if not ret2 then
-      r.ShowMessageBox('Not writing UPC/EAN or codes_response', "Cancelled", 0)
+      r.ShowMessageBox('Not writing UPC/EAN or ISRC codes', "Cancelled", 0)
     elseif #code_table ~= 5 then
-      r.ShowMessageBox('Empty code metadata_table not supported: Not writing UPC/EAN or ISRC codes_response', "Warning",
+      r.ShowMessageBox('Empty code metadata_table not supported: Not writing UPC/EAN or ISRC codes', "Warning",
         0)
     end
   end
