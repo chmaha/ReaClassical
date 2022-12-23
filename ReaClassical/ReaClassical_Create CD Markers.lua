@@ -22,7 +22,7 @@ local r = reaper
 local first_track = r.GetTrack(0, 0)
 local num_of_items = r.CountTrackMediaItems(first_track)
 local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
-local get_info, save_metadata, find_project_end
+local get_info, save_metadata, find_project_end, add_codes, save_codes
 
 function Main()
   local choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names."
@@ -35,24 +35,24 @@ end
 
 function get_info()
   local metadata_saved = r.GetExtState("Create CD Markers", "Album Metadata")
-  local ret, user_inputs, fields
-  if metadata_saved then
+  local ret, user_inputs, metadata_table
+  if metadata_saved ~= "" then
     ret, user_inputs = r.GetUserInputs('CD/DDP Album information', 4,
-    'Album Title,Performer,Composer,Genre,extrawidth=100',
-    metadata_saved)
+      'Album Title,Performer,Composer,Genre,extrawidth=100',
+      metadata_saved)
   else
     ret, user_inputs = r.GetUserInputs('CD/DDP Album information', 4,
       'Album Title,Performer,Composer,Genre,extrawidth=100',
       'My Classical Album,Performer,Composer,Classical')
   end
-  fields = {}
-  for word in user_inputs:gmatch('([^,]+)') do fields[#fields + 1] = word end
+  metadata_table = {}
+  for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
   if not ret then
     r.ShowMessageBox('Only writing track metadata', "Cancelled", 0)
-  elseif #fields ~= 4 then
-    r.ShowMessageBox('Empty fields not supported: Not writing album metadata', "Warning", 0)
+  elseif #metadata_table ~= 4 then
+    r.ShowMessageBox('Empty metadata_table not supported: Not writing album metadata', "Warning", 0)
   end
-  return user_inputs, fields
+  return user_inputs, metadata_table
 end
 
 function cd_markers()
@@ -63,16 +63,23 @@ function cd_markers()
 
   r.SNM_SetIntConfigVar('projfrbase', 75)
   r.Main_OnCommand(40754, 0) --enable snap to grid
+
+  local code_input, code_table = add_codes()
+  if code_input ~= "" then
+    save_codes(code_input)
+  end
+
   local final_end = find_project_end()
   local previous_start
   local previous_takename
   local marker_count = 0
   for i = 0, num_of_items - 1, 1 do
     local current_start, take_name = find_current_start(i)
-    local added_marker = create_marker(current_start, marker_count, take_name)
+    local added_marker = create_marker(current_start, marker_count, take_name, code_table)
     if added_marker then
       if marker_count > 0 then
-        r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(current_start), previous_takename, marker_count)
+        r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(current_start), previous_takename,
+          marker_count)
       end
       previous_start = current_start
       previous_takename = take_name
@@ -81,9 +88,9 @@ function cd_markers()
   end
   r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(final_end) + 7, previous_takename, marker_count)
   if marker_count ~= 0 then
-    local user_inputs, fields = get_info()
-    if #fields == 4 then save_metadata(user_inputs) end
-    end_marker(fields)
+    local user_inputs, metadata_table = get_info()
+    if #metadata_table == 4 then save_metadata(user_inputs) end
+    end_marker(metadata_table, code_table)
     renumber_markers()
     add_pregap()
   else
@@ -99,11 +106,16 @@ function find_current_start(i)
   return r.GetMediaItemInfo_Value(current_item, "D_POSITION"), take_name
 end
 
-function create_marker(current_start, marker_count, take_name)
+function create_marker(current_start, marker_count, take_name, code_table)
   local added_marker = false
+  local track_title
   if take_name ~= "" then
     local corrected_current_start = frame_check(current_start)
-    local track_title = "#" .. take_name
+    if #code_table == 5 then
+      track_title = "#" .. take_name .. "|ISRC=" .. code_table[2] .. code_table[3] .. code_table[4] .. string.format("%05d", code_table[5] + marker_count)
+    else
+      track_title = "#" .. take_name
+    end
     r.AddProjectMarker(0, false, corrected_current_start, 0, track_title, marker_count + 1)
     added_marker = true
   end
@@ -142,14 +154,21 @@ function find_project_end()
   return final_start + final_length
 end
 
-function end_marker(fields)
+function end_marker(metadata_table, code_table)
   local final_item = r.GetTrackMediaItem(first_track, num_of_items - 1)
   local final_start = r.GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = r.GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
-  if #fields == 4 then
-    local album_info = "@" .. fields[1] .. "|PERFORMER=" .. fields[2] .. "|COMPOSER=" .. fields[3] ..
-        "|GENRE=" .. fields[4]
+  if #metadata_table == 4 and #code_table == 5 then
+    local album_info = "@" ..
+        metadata_table[1] ..
+        "|CATALOG=" .. code_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
+        "|GENRE=" .. metadata_table[4]
+    r.AddProjectMarker(0, false, frame_check(final_end) + 1, 0, album_info, 0)
+  elseif #metadata_table == 4 then
+    local album_info = "@" ..
+        metadata_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
+        "|GENRE=" .. metadata_table[4]
     r.AddProjectMarker(0, false, frame_check(final_end) + 1, 0, album_info, 0)
   end
   r.AddProjectMarker(0, false, frame_check(final_end) + 7, 0, "=END", 0)
@@ -165,6 +184,39 @@ end
 
 function save_metadata(user_inputs)
   r.SetExtState("Create CD Markers", "Album Metadata", user_inputs, false)
+end
+
+function save_codes(code_input)
+  r.SetExtState("Create CD Markers", "Codes", code_input, false)
+end
+
+function add_codes()
+  local code_saved = r.GetExtState("Create CD Markers", "Codes")
+  local codes_response = r.ShowMessageBox("Add UPC/ISRC codes?", "CD codes", 4)
+  local ret2
+  local code_input = ""
+  local code_table = {}
+  if codes_response == 6 then
+    if code_saved ~= "" then
+      ret2, code_input = r.GetUserInputs('UPC/ISRC codes_response', 5,
+        'UPC or EAN,ISRC country code,ISRC Registrant Code,ISRC Year (YY),ISRC Designation Code (5 digits),extrawidth=100'
+        ,
+        code_saved)
+    else
+      ret2, code_input = r.GetUserInputs('UPC/ISRC codes_response', 5,
+        'UPC or EAN,ISRC country code,ISRC Registrant Code,ISRC Year (YY),ISRC Designation Code (5 digits),extrawidth=100'
+        ,
+        ',')
+    end
+    for num in code_input:gmatch('([^,]+)') do code_table[#code_table + 1] = num end
+    if not ret2 then
+      r.ShowMessageBox('Not writing UPC/EAN or codes_response', "Cancelled", 0)
+    elseif #code_table ~= 5 then
+      r.ShowMessageBox('Empty code metadata_table not supported: Not writing UPC/EAN or ISRC codes_response', "Warning",
+        0)
+    end
+  end
+  return code_input, code_table
 end
 
 Main()
