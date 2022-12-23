@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.8
+@version 22.12.9
 @changelog
-  v22.12.8
-  Create CD Markers: Temporarily save album metadata
+  v22.12.9
+  Create CD Markers: Automatically add regions based on CD/DPP markers
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
