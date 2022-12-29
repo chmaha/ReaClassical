@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.12
+@version 22.12.13
 @changelog
-  v22.12.12
-  Create CD Markers: Improve dialog boxes
+  v22.12.13
+  Create CD Markers: Add undo block
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
