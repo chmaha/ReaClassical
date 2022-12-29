@@ -25,12 +25,14 @@ local cd_markers, find_current_start, create_marker, renumber_markers, add_prega
 local get_info, save_metadata, find_project_end, add_codes, save_codes
 
 function Main()
+  r.Undo_BeginBlock()
   local choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names."
     ,
     "Create CD/DDP markers", 1)
   if choice ~= 2 then
     cd_markers()
   end
+  r.Undo_EndBlock("Create CD/DDP Markers", -1)
 end
 
 function get_info()
