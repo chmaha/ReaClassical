@@ -22,11 +22,11 @@ local r = reaper
 local first_track = r.GetTrack(0, 0)
 local num_of_items = r.CountTrackMediaItems(first_track)
 local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
-local get_info, save_metadata, find_project_end, add_codes, save_codes
+local get_info, save_metadata, find_project_end, add_codes, save_codes, delete_markers
 
 function Main()
   r.Undo_BeginBlock()
-  local choice = r.ShowMessageBox("WARNING: This will delete all existing markers and track titles will be pulled from item take names."
+  local choice = r.ShowMessageBox("WARNING: This will delete all existing markers, regions and item take markers. Track titles will be pulled from item take names."
     ,
     "Create CD/DDP markers", 1)
   if choice ~= 2 then
@@ -58,10 +58,7 @@ function get_info()
 end
 
 function cd_markers()
-  local delete_markers = r.NamedCommandLookup("_SWSMARKERLIST9")
-  r.Main_OnCommand(delete_markers, 0)
-  local delete_regions = r.NamedCommandLookup("_SWSMARKERLIST10")
-  r.Main_OnCommand(delete_regions, 0)
+  delete_markers()
 
   r.SNM_SetIntConfigVar('projfrbase', 75)
   r.Main_OnCommand(40754, 0) --enable snap to grid
@@ -219,6 +216,16 @@ function add_codes()
     end
   end
   return code_input, code_table
+end
+
+function delete_markers()
+  local delete_markers = r.NamedCommandLookup("_SWSMARKERLIST9")
+  r.Main_OnCommand(delete_markers, 0)
+  local delete_regions = r.NamedCommandLookup("_SWSMARKERLIST10")
+  r.Main_OnCommand(delete_regions, 0)
+  r.Main_OnCommand(40182, 0) -- select all items
+  r.Main_OnCommand(42387, 0) -- Delete all take markers
+  r.Main_OnCommand(40289, 0) -- Unselect all items
 end
 
 Main()
