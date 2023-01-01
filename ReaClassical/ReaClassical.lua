@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 22.12.13
+@version 23.01
 @changelog
-  v22.12.13
-  Create CD Markers: Add undo block
+  v23.01
+  Create CD Markers: Remove any take markers as part of clean-up.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
