@@ -1,5 +1,5 @@
 ### Instructions for installing ReaClassical
-#### Tested with REAPER v6.71
+#### Tested with REAPER v6.73
 
 ##### Scripts
 
