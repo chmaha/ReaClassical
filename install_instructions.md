@@ -15,13 +15,18 @@
 - [MacOS-x86_64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/MacOS-x86_64.zip) (64-bit Intel)
 - [MacOS-arm64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/MacOS-arm64.zip) (M1 chip)
 
-#### Quick Install on Linux
+#### Quick Install on Linux and MacOS
 
 Download the script for your system and run where you want to download a portable install of ReaClassical:
 
 ```
 wget https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh
 sh ReaClassical_Linux.sh
+```
+ or
+``` 
+curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh
+sh ReaClassical_macOS.sh
 ```
 
 The script will pull both the REAPER binary archive and resource folder archive and do the required magic. NOTE: Change the `pkgver=` line to download a different version of REAPER.
