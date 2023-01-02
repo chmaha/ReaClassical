@@ -7,12 +7,11 @@ arch=`uname -m`
 osver=`sw_vers -productVersion`
 dmgtype="universal"
 bool=`echo "$osver < 10.15" | bc`
-if $bool == 1
-then
-dmgtype="x86_64"
-echo "Using x86_64 dmg file..."
+if [ $bool == 1 ]; then
+    dmgtype="x86_64"
+    echo "Using x86_64 dmg file..."
 else
-echo "Using universal dmg file..."
+    echo "Using universal dmg file..."
 fi
 
 echo "Downloading REAPER from reaper.fm"
