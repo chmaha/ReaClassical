@@ -27,6 +27,7 @@ sh ReaClassical_Linux.sh
 ``` 
 curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh
 sh ReaClassical_macOS.sh
+```
 
 The script will pull both the REAPER binary archive and resource folder archive and do the required magic. NOTE: Change the `pkgver=` line to download a different version of REAPER.
 
