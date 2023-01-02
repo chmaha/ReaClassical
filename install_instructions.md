@@ -4,9 +4,8 @@
 ##### Scripts
 
 - [reaclassical_Linux.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) (both x86_64 and aarch64)
-<!--- reaclassical_MacOS-x86_64.sh
-- reaclassical_MacOS-arm64.sh
-- reaclassical_Windows-x64.ps1-->
+- [reaclassical_macOS.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh) (all architectures and OS versions compatible with REAPER) 
+<!--- reaclassical_Windows-x64.ps1 -->
 
 ##### Resource Folder archives
 
