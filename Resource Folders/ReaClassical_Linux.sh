@@ -8,7 +8,7 @@ sleep 2
 pkgver=6.73
 arch=`uname -m`
 
-echo "Downloading REAPER from reaper.fm..."
+echo "Downloading REAPER $pkgver from reaper.fm..."
 sleep 2
 wget -q --show-progress --progress=bar:force https://reaper.fm/files/${pkgver::1}.x//reaper${pkgver//.}_linux_$arch.tar.xz
 echo "Extracting files from REAPER archive"
@@ -17,11 +17,15 @@ rm reaper${pkgver//.}_linux_$arch.tar.xz
 cd reaper_linux_${arch}/REAPER
 echo "Downloading ReaClassical files from Github..."
 sleep 2
-wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Linux-${arch}.zip
-echo "Extracting files from archive..."
+wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip
+wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Linux-${arch}.zip
+echo "Extracting files from archives..."
 sleep 2
-unzip -q Linux-${arch}.zip
-rm Linux-${arch}.zip
+unzip -q Resource_Folder_Base.zip
+rm Resource_Folder_Base.zip
+unzip -q UP_Linux-${arch}.zip -d ./UserPlugins/
+rm UP_Linux-${arch}.zip
+
 echo "Portable ReaClassical Installation complete!"
 sleep 2
 read -p "Would you like to run REAPER now? (y/n)" yn
