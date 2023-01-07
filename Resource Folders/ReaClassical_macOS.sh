@@ -1,6 +1,7 @@
 #!/bin/bash
+# by chmaha (Jan 2023)
 
-# Install script to install ReaClassical on MacOS
+# Script to install ReaClassical on MacOS
 # Works for all architectures and OS versions that are compatible with REAPER.
 # Change the pkgver number below to download an alternative REAPER version.
 
