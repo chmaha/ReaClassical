@@ -19,8 +19,8 @@ sh ReaClassical_macOS.sh
 ##### Windows
 ```
 curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1
+powershell -executionpolicy bypass -File .\ReaClassical_Win.ps1
 ```
-And then right-click on the resulting file and select "Run with PowerShell"
 
 The script will pull the REAPER binary archive, resource folder base archive + required userplugins and do the required magic.
 
