@@ -44,7 +44,7 @@ Expand-Archive -LiteralPath .\UP_Windows-x64.zip -DestinationPath .\ReaClassical
 Write-Host "Removing temporary files..."
 sleep 2
 
-rm .\Resource_Folder_Base.zip, .\UP_Windows-x64.zip, .\reaper673_x64-install.exe
+rm .\Resource_Folder_Base.zip, .\UP_Windows-x64.zip, .\reaper$($first + $second)_x64-install.exe
 rm -Recurse .\7zip\
 
 Write-Host "Done!"
