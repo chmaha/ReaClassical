@@ -26,7 +26,7 @@ curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Fo
 powershell -executionpolicy bypass -File .\ReaClassical_Win.ps1
 ```
 
-The script will pull the REAPER binary archive, resource folder base archive + required userplugins and do the required magic.
+The executable or script will pull the REAPER binary archive, resource folder base archive + required userplugins and do the required magic.
 
 NOTE: Change the **`pkgver=`** line to download a different version of REAPER.
 
