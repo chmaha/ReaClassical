@@ -13,7 +13,7 @@ sleep 2
 
 Write-Host "Downloading and extracting portable 7-zip..."
 sleep 2
-Invoke-WebRequest -Uri https://github.com/chmaha/7zip/raw/main/7zip.zip -OutFile 7zip.zip
+Invoke-WebRequest -Uri https://github.com/chmaha/7-zip/raw/main/7zip.zip -OutFile 7zip.zip
 Expand-Archive -Path .\7zip.zip -DestinationPath ./7zip
 rm 7zip.zip
 
