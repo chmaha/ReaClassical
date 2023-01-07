@@ -1,7 +1,7 @@
 ### Instructions for installing ReaClassical
 #### Tested with REAPER v6.73
 
-#### Quick Install on Linux and MacOS
+#### Quick Install on Linux, MacOS & Windows
 
 Download the script for your system and run where you want to download a portable install of ReaClassical:
 ##### Linux
@@ -15,14 +15,22 @@ sh ReaClassical_Linux.sh
 curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh
 sh ReaClassical_macOS.sh
 ```
+ or
+##### Windows
+```
+curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1
+```
+And then right-click on the resulting file and select "Run with PowerShell"
 
-The script will pull the REAPER binary archive, resource folder base archive + required userplugins and do the required magic. NOTE: Change the `pkgver=` line to download a different version of REAPER.
+The script will pull the REAPER binary archive, resource folder base archive + required userplugins and do the required magic.
+
+NOTE: Change the **`pkgver=`** line to download a different version of REAPER.
 
 ##### Scripts
 
-- [reaclassical_Linux.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) (both x86_64 and aarch64)
-- [reaclassical_macOS.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh) (all architectures and OS versions compatible with REAPER) 
-<!--- reaclassical_Windows-x64.ps1 -->
+- [ReaClassical_Linux.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) (both x86_64 and aarch64)
+- [ReaClassical_macOS.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh) (all architectures and OS versions compatible with REAPER)
+- [ReaClassical_Win.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1) (64-bit)
 
 #### Manual Method 1: Portable Install
 * __Windows__: Download REAPER and check the "Portable Install" box when installing. Download the Resource_Folder_Base.zip into the top level of the portable install directory e.g. C:/REAPER and unzip contents. Download UP_Windows-x64.zip and unzip into the newly created UserPlugins subfolder.
