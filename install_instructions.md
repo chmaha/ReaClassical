@@ -9,14 +9,18 @@ Download the script for your system and run where you want to download a portabl
 wget https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh
 sh ReaClassical_Linux.sh
 ```
- or
+or
 ##### MacOS
 ``` 
 curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh
 sh ReaClassical_macOS.sh
 ```
- or
+or
 ##### Windows
+Download [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) where you want to install ReaClassical and double-click.
+
+or...
+
 ```
 curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1
 powershell -executionpolicy bypass -File .\ReaClassical_Win.ps1
@@ -26,11 +30,12 @@ The script will pull the REAPER binary archive, resource folder base archive + r
 
 NOTE: Change the **`pkgver=`** line to download a different version of REAPER.
 
-##### Scripts
+##### Scripts and executables
 
 - [ReaClassical_Linux.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) (both x86_64 and aarch64)
 - [ReaClassical_macOS.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh) (all architectures and OS versions compatible with REAPER)
 - [ReaClassical_Win.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1) (64-bit)
+- [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit)
 
 #### Manual Method 1: Portable Install
 * __Windows__: Download REAPER and check the "Portable Install" box when installing. Download the Resource_Folder_Base.zip into the top level of the portable install directory e.g. C:/REAPER and unzip contents. Download UP_Windows-x64.zip and unzip into the newly created UserPlugins subfolder.
