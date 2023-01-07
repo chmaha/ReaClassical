@@ -2,10 +2,14 @@
 
 # Install script to install ReaClassical on Linux
 # Works for both x86_64 and aarch64 architectures
+# Change the pkgver number below to download an alternative version of REAPER.
+
+###########
+pkgver=6.73
+###########
 
 echo "Welcome to ReaClassical installer..."
 sleep 2
-pkgver=6.73
 arch=`uname -m`
 
 echo "Downloading REAPER $pkgver from reaper.fm..."

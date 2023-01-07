@@ -1,8 +1,15 @@
 #!/bin/bash
 
+# Install script to install ReaClassical on MacOS
+# Works for all architectures and OS versions that are compatible with REAPER.
+# Change the pkgver number below to download an alternative REAPER version.
+
+###########
+pkgver=6.73
+###########
+
 echo "Welcome to ReaClassical installer..."
 sleep 2
-pkgver=6.73
 arch=`uname -m`
 osver=`sw_vers -productVersion`
 dmgtype="universal"
