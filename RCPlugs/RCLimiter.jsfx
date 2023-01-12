@@ -1,0 +1,204 @@
+desc:RCLimiter (ReaClassical.org)
+author: chmaha
+version: 1.0
+Changelog:
+  Initial commit
+about:
+  Uses DSP with permission from Smooth Limiter by Geraint Luff
+  https://geraintluff.github.io/jsfx/
+  https://signalsmith-audio.co.uk/
+
+in_pin:Left
+in_pin:Right
+out_pin:Left
+out_pin:Right
+
+slider1:0<-12,12,0.1>Input Gain (dB)
+slider2:-1<-3,0,0.1>Threshold (dBTP)
+slider3:10<0.1,100,0.1>Lookahead (ms)
+slider4:50<1,200,0.1>Release (ms)
+// slider5:0<0,1,0.01>Distortion
+
+@init
+
+bufferlength = ceil(srate*1);
+buffer0 = 0;
+buffer1 = buffer0 + bufferlength;
+bufferpeak = buffer1 + bufferlength;
+freemem = bufferpeak + bufferlength;
+
+overcorrect_factor = 1.002; // about 0.02dB
+
+function tanh(x) (
+	x >= 20 ? (
+		1;
+	) : x <= -20 ? (
+		-1;
+	) : (
+		(exp(2*x) - 1)/(exp(2*x) + 1);
+	);
+);
+function atanh(x) (
+	x >= 1 ? (
+		20;
+	) ? (x <= -1) ? (
+		-20;
+	) : (
+		log((1 + x)/(1 - x))*0.5;
+	);
+);
+
+writepos = 10;
+delaysamples = 10;
+attacksamples = 10;
+releasesamples = 100;
+limit = 1;
+
+releasestartvalue = 1;
+releaseindex = srate;
+
+function update() (
+	attacksamples = ceil(slider3*srate/1000);
+	releasesamples = ceil(slider4*srate/1000);
+	delaysamples = ceil(attacksamples);
+	limit = pow(10, slider2/20);
+	pregain_factor = pow(10, slider1/20);
+);
+// Starts at 0, goes to 1
+function attackwindow(ratio) (
+	0.5 - 0.5*cos(ratio*$pi);
+);
+function releasewindow(ratio) (
+	0.5 + 0.5*cos(ratio*$pi);
+);
+
+A = 0;
+B = 1;
+function dist(x) (
+	B*x/(A*abs(x) + 1);
+);
+function distortion_for_peak(peak, limit) (
+	A = (1 - pow(limit/oldpeak, slider5))/limit;
+);
+function scaling_for_peak(peak, limit) (
+	pow(limit/peak, 1 - slider5);
+);
+
+@slider
+
+update();
+
+@block
+
+pdc_bot_ch = 0;
+pdc_top_ch = 2;
+pdc_delay = delaysamples - 1;
+
+@sample
+spl0 *= pregain_factor;
+spl1 *= pregain_factor;
+truepeak = max(abs(spl0), abs(spl1));
+releasepeak = limit;
+releaseindex < releasesamples ? (
+	releasepeak = limit + (releasestartvalue - limit)*releasewindow(releaseindex/releasesamples);
+	releaseindex += 1;
+);
+peak = max(releasepeak, truepeak);
+//peak = max(peak - releasegradient, truepeak);
+
+peak < limit ? (
+	peak = limit;
+	releasestartvalue = limit;
+	releaseindex = srate;
+) : (truepeak == peak) ? (
+	// It's a new peak
+	peak *= overcorrect_factor; // Add just a little bit extra, in the hopes that we don't have to do this again soon
+
+	// For future decay
+	//releasegradient = (peak - limit)/releasesamples;
+	releasestartvalue = peak;
+	releaseindex = 0;
+	// Attempt to extend an existing attack
+	i = 1;
+	startpeak = limit;
+	foundabove = 0;
+	foundintersection = 0;
+
+	intersectionindex = -1;
+	bestcorrection = -1;
+	bestindex = delaysamples - 1;
+	beststartpeak = limit;
+	while (i < attacksamples && !foundintersection) (
+		window = attackwindow(1 - i/attacksamples);
+
+		readpos = writepos - i;
+		readpos < 0 ? readpos += bufferlength;
+		oldpeak = bufferpeak[readpos];
+
+		newstartpeak = peak + (oldpeak - peak)/(1 - window);
+		newstartpeak > startpeak ? (
+			// Keep track of the smallest alteration,
+			//     but with a bias towards f
+			diff = (newstartpeak - startpeak)*(1 - window);
+			(bestcorrection < 0 || diff < bestcorrection) ? (
+				bestcorrection = diff;
+				bestindex = i;
+				beststartpeak = newstartpeak;
+			);
+
+			startpeak = newstartpeak;
+			intersectionindex = i;
+			foundabove = 1;
+		) : (foundabove) ? (
+			foundintersection = 1;
+		);
+		i += 1;
+	);
+
+	foundintersection ? (
+		i = 0;
+		while (i < intersectionindex) (
+			window = attackwindow(1 - i/attacksamples);
+
+			readpos = writepos - i;
+			readpos < 0 ? readpos += bufferlength;
+			newpeak = startpeak + (peak - startpeak)*window;
+			bufferpeak[readpos] = newpeak;
+			i += 1;
+		);
+	) : (
+		i = 0;
+		while (i < bestindex) (
+			window = attackwindow(1 - i/attacksamples);
+
+			readpos = writepos - i;
+			readpos < 0 ? readpos += bufferlength;
+			newpeak = beststartpeak + (peak - beststartpeak)*window;
+
+			faderatio = (1 - i/bestindex);
+			fadewindow = 1 - (1 - faderatio)*(1 - faderatio);
+			bufferpeak[readpos] += (newpeak - bufferpeak[readpos])*fadewindow;
+			i += 1;
+		);
+	);
+);
+
+buffer0[writepos] = spl0;
+buffer1[writepos] = spl1;
+bufferpeak[writepos] = peak;
+
+writepos += 1;
+writepos >= bufferlength ? (
+	writepos = 0;
+);
+
+readpos = writepos - delaysamples;
+readpos < 0 ? readpos += bufferlength;
+reduction = limit/bufferpeak[readpos];
+
+oldpeak = bufferpeak[readpos];
+B = scaling_for_peak(oldpeak, limit);
+A = distortion_for_peak(oldpeak, limit);
+
+spl0 = dist(buffer0[readpos]);
+spl1 = dist(buffer1[readpos]);
