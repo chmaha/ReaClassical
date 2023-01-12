@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="a918a49e01fe59b30d56003e53a922d950fc88e5">
+<index version="1" name="chmaha Scripts" commit="b0cc0585ee83eabbe2f356d73911bbcc34074f70">
+  <category name="RCPlugs">
+    <reapack name="RCLimiter.jsfx" type="effect" desc="RCLimiter (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP with permission from Smooth Limiter by Geraint Luff https://geraintluff.github.io/jsfx/ https://signalsmith-audio.co.uk/\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-12T18:30:32Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/b0cc0585ee83eabbe2f356d73911bbcc34074f70/RCPlugs/RCLimiter.jsfx</source>
+      </version>
+    </reapack>
+  </category>
   <category name="ReaClassical">
     <reapack name="ReaClassical.lua" type="script" desc="ReaClassical">
       <version name="22.12.3" author="chmaha" time="2022-12-17T12:12:52Z">
