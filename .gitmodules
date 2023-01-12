@@ -1,0 +1,3 @@
+[submodule "RCPlugs/RCLimiter"]
+	path = RCPlugs/RCLimiter
+	url = https://github.com/chmaha/RCLimiter.git
