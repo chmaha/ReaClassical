@@ -13,7 +13,7 @@
       </metadata>
       <version name="1.0" author="chmaha" time="2023-01-13T15:46:39Z">
         <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/83a273c2e77fcbe11e7db118976ca4acce371918/RCPlugs/RCDither.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/7312c1caa87972f43f2992ebe5e2e31da11eed7c/RCPlugs/RCDither.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ (ReaClassical.org)">
