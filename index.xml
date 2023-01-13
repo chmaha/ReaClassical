@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="1cb85ac017e25cf908d05b782df40bfd8f07bf96">
+<index version="1" name="chmaha Scripts" commit="19367a2874e73aa2a342a0c34fb161a78547d591">
   <category name="RCPlugs">
-    <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss">
+    <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -13,7 +13,7 @@
       </metadata>
       <version name="1.0" author="chmaha" time="2023-01-13T23:47:01Z">
         <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/1cb85ac017e25cf908d05b782df40bfd8f07bf96/RCPlugs/RCDeEss.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/19367a2874e73aa2a342a0c34fb161a78547d591/RCPlugs/RCDeEss.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCDither.jsfx" type="effect" desc="RCDither 16-bit (ReaClassical.org)">
