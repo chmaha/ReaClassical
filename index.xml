@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="83a273c2e77fcbe11e7db118976ca4acce371918">
+<index version="1" name="chmaha Scripts" commit="7312c1caa87972f43f2992ebe5e2e31da11eed7c">
   <category name="RCPlugs">
-    <reapack name="RCDither.jsfx" type="effect" desc="RCDither (16-bit)">
+    <reapack name="RCDither.jsfx" type="effect" desc="RCDither 16-bit (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
