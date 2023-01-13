@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="fbf4ad1024209ae84c583eca8ac1b9cf78516293">
+<index version="1" name="chmaha Scripts" commit="c4f3ca103c8cfba293f739c44fdf0fc2ca0cbcdf">
   <category name="RCPlugs">
     <reapack name="RCDither.jsfx" type="effect" desc="RCDither 16-bit (ReaClassical.org)">
       <metadata>
@@ -14,6 +14,21 @@
       <version name="1.0" author="chmaha" time="2023-01-13T15:46:39Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/7312c1caa87972f43f2992ebe5e2e31da11eed7c/RCPlugs/RCDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="RCDither24.jsfx" type="effect" desc="RCDither 24-bit (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Monitoring" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-13T22:09:46Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/c4f3ca103c8cfba293f739c44fdf0fc2ca0cbcdf/RCPlugs/RCDither24.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ (ReaClassical.org)">
