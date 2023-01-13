@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="b0cc0585ee83eabbe2f356d73911bbcc34074f70">
+<index version="1" name="chmaha Scripts" commit="83a273c2e77fcbe11e7db118976ca4acce371918">
   <category name="RCPlugs">
+    <reapack name="RCDither.jsfx" type="effect" desc="RCDither (16-bit)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Monitoring" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-13T15:46:39Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/83a273c2e77fcbe11e7db118976ca4acce371918/RCPlugs/RCDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Baxandall" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-13T15:46:39Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/83a273c2e77fcbe11e7db118976ca4acce371918/RCPlugs/RCEQ.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="RCLimiter.jsfx" type="effect" desc="RCLimiter (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
