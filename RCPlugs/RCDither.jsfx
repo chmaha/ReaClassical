@@ -1,8 +1,8 @@
 desc:RCDither (ReaClassical.org)
 author: chmaha
-version: 1.0
+version: 1.1
 Changelog:
-  Initial commit
+  Combine 16- and 24-bit NJAD dithers
 about:
   Uses DSP from airwindows "Monitoring" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License)
