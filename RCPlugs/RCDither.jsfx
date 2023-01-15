@@ -2,8 +2,6 @@ desc:RCDither (ReaClassical.org)
 author: chmaha
 version: 1.2
 Changelog:
-  Combine 16- and 24-bit NJAD dithers
-about:
   Uses DSP from airwindows "Monitoring" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License)
   JSFX version released under GPLv3 license
@@ -88,7 +86,7 @@ hotbinA = floor(benfordize);
 totalA = 0;
 ((hotbinA > 0) && (hotbinA < 10)) ?
 (
-  bynL[hotbinA] += 1; (bynL[hotbinA] > 982) ? cutbinsL 1;
+  bynL[hotbinA] += 1; (bynL[hotbinA] > 982) ? cutbinsL  = 1;
   totalA += (301-bynL[1]); totalA += (176-bynL[2]); totalA += (125-bynL[3]);
   totalA += (97-bynL[4]); totalA += (79-bynL[5]); totalA += (67-bynL[6]);
   totalA += (58-bynL[7]); totalA += (51-bynL[8]); totalA += (46-bynL[9]); bynL[hotbinA] -= 1;
@@ -102,7 +100,7 @@ hotbinB = floor(benfordize);
 totalB = 0;
 ((hotbinB > 0) && (hotbinB < 10)) ?
 (
-  bynL[hotbinB] += 1; (bynL[hotbinB] > 982) ? cutbinsL 1;
+  bynL[hotbinB] += 1; (bynL[hotbinB] > 982) ? cutbinsL  = 1;
   totalB += (301-bynL[1]); totalB += (176-bynL[2]); totalB += (125-bynL[3]);
   totalB += (97-bynL[4]); totalB += (79-bynL[5]); totalB += (67-bynL[6]);
   totalB += (58-bynL[7]); totalB += (51-bynL[8]); totalB += (46-bynL[9]); bynL[hotbinB] -= 1;
@@ -135,7 +133,7 @@ hotbinA = floor(benfordize);
 totalA = 0;
 ((hotbinA > 0) && (hotbinA < 10)) ?
 (
-  bynR[hotbinA] += 1; (bynR[hotbinA] > 982) ? cutbinsR 1;
+  bynR[hotbinA] += 1; (bynR[hotbinA] > 982) ? cutbinsR = 1;
   totalA += (301-bynR[1]); totalA += (176-bynR[2]); totalA += (125-bynR[3]);
   totalA += (97-bynR[4]); totalA += (79-bynR[5]); totalA += (67-bynR[6]);
   totalA += (58-bynR[7]); totalA += (51-bynR[8]); totalA += (46-bynR[9]); bynR[hotbinA] -= 1;
@@ -149,7 +147,7 @@ hotbinB = floor(benfordize);
 totalB = 0;
 ((hotbinB > 0) && (hotbinB < 10)) ?
 (
-  bynR[hotbinB] += 1;(bynR[hotbinB] > 982) ? cutbinsR 1;
+  bynR[hotbinB] += 1;(bynR[hotbinB] > 982) ? cutbinsR = 1;
   totalB += (301-bynR[1]); totalB += (176-bynR[2]); totalB += (125-bynR[3]);
   totalB += (97-bynR[4]); totalB += (79-bynR[5]); totalB += (67-bynR[6]);
   totalB += (58-bynR[7]); totalB += (51-bynR[8]); totalB += (46-bynR[9]); bynR[hotbinB] -= 1;
