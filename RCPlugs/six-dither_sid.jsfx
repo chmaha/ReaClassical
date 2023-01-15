@@ -1,8 +1,8 @@
 desc:Six-Dither Sid (ReaClassical.org)
 author: chmaha
-version: 1.1
+version: 1.2
 Changelog:
-  Combine 16- and 24-bit NJAD, Dark and Nine Tens into Dark dithers
+  Fix missing equals signs
 about:
   Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License)
