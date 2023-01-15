@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 23.01
+@version 23.02
 @changelog
-  v23.01
-  Create CD Markers: Remove any take markers as part of clean-up.
+  v23.02
+  Change versioning (again) but with less disruption. Continue with CalVer-style but move to YY.xx where YY is two-digit year and xx is padded minor version.
+  Add guard clause to Create CD Markers script in the event of no tracks or items.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

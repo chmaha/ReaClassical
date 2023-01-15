@@ -20,12 +20,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local first_track = r.GetTrack(0, 0)
-local num_of_items = r.CountTrackMediaItems(first_track)
+if first_track then NUM_OF_ITEMS = r.CountTrackMediaItems(first_track) end
 local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
 local get_info, save_metadata, find_project_end, add_codes, save_codes, delete_markers
 
 function Main()
   r.Undo_BeginBlock()
+  if not first_track or NUM_OF_ITEMS == 0 then
+    r.ShowMessageBox("No media items found.","Error",0)
+    return
+  end
   local choice = r.ShowMessageBox("WARNING: This will delete all existing markers, regions and item take markers. Track titles will be pulled from item take names."
     ,
     "Create CD/DDP markers", 1)
@@ -72,7 +76,7 @@ function cd_markers()
   local previous_start
   local previous_takename
   local marker_count = 0
-  for i = 0, num_of_items - 1, 1 do
+  for i = 0, NUM_OF_ITEMS - 1, 1 do
     local current_start, take_name = find_current_start(i)
     local added_marker = create_marker(current_start, marker_count, take_name, code_table)
     if added_marker then
@@ -147,14 +151,14 @@ function add_pregap()
 end
 
 function find_project_end()
-  local final_item = r.GetTrackMediaItem(first_track, num_of_items - 1)
+  local final_item = r.GetTrackMediaItem(first_track, NUM_OF_ITEMS - 1)
   local final_start = r.GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = r.GetMediaItemInfo_Value(final_item, "D_LENGTH")
   return final_start + final_length
 end
 
 function end_marker(metadata_table, code_table)
-  local final_item = r.GetTrackMediaItem(first_track, num_of_items - 1)
+  local final_item = r.GetTrackMediaItem(first_track, NUM_OF_ITEMS - 1)
   local final_start = r.GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = r.GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
