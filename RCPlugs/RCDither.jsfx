@@ -1,4 +1,4 @@
-desc:RCDither 16-bit (ReaClassical.org)
+desc:RCDither (ReaClassical.org)
 author: chmaha
 version: 1.0
 Changelog:
@@ -12,6 +12,8 @@ in_pin:left input
 in_pin:right input
 out_pin:left output
 out_pin:right output
+
+slider1:bitdepth=0<0,1,1{16-bit, 24-bit}>Bitdepth
 
 @init
 
@@ -62,9 +64,13 @@ inputSampleR = spl1;
 (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
 (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
 
-inputSampleL = inputSampleL * 32768.0;
-inputSampleR = inputSampleR * 32768.0; 
-
+(bitdepth == 0) ? (
+  inputSampleL = inputSampleL * 32768.0; //or 16 bit option
+  inputSampleR = inputSampleR * 32768.0; //or 16 bit option
+) : (
+  inputSampleL = inputSampleL * 8388608.0; //for literally everything else
+  inputSampleR = inputSampleR * 8388608.0; //we will apply the 24 bit NJAD
+);
 
 cutbinsL = false;
 cutbinsR = false;
@@ -106,13 +112,16 @@ totalB = 0;
 : (bynL[hotbinB] += 1; outputSample = floor(inputSampleL+1););
 
 (cutbinsL) ? (
-  bynL[1] *= 0.99; bynL[2] *= 0.99; bynL[3] *= 0.99; bynL[4] *= 0.99; bynL[5] *= 0.99; 
-  bynL[6] *= 0.99; bynL[7] *= 0.99; bynL[8] *= 0.99; bynL[9] *= 0.99; bynL[10] *= 0.99; 
+  bynL[1] *= 0.99; bynL[2] *= 0.99; bynL[3] *= 0.99; bynL[4] *= 0.99; bynL[5] *= 0.99;
+  bynL[6] *= 0.99; bynL[7] *= 0.99; bynL[8] *= 0.99; bynL[9] *= 0.99; bynL[10] *= 0.99;
 );
-noiseShapingL += outputSample - drySampleL;      
+noiseShapingL += outputSample - drySampleL;
 (noiseShapingL > abs(inputSampleL)) ? noiseShapingL = abs(inputSampleL);
 (noiseShapingL < -abs(inputSampleL)) ? noiseShapingL = -abs(inputSampleL);
-inputSampleL = outputSample / 32768.0;
+
+(bitdepth == 0) ? inputSampleL = outputSample / 32768.0
+: inputSampleL = outputSample / 8388608.0;
+
 (inputSampleL > 1.0) ? inputSampleL = 1.0;
 (inputSampleL < -1.0)? inputSampleL = -1.0;
 //finished NJAD L
@@ -120,7 +129,7 @@ inputSampleL = outputSample / 32768.0;
 //NJAD R
 benfordize = floor(inputSampleR);
 while (benfordize >= 1.0) (benfordize /= 10);
-while (benfordize < 1.0 && benfordize > 0.0000001) (benfordize *= 10);    
+while (benfordize < 1.0 && benfordize > 0.0000001) (benfordize *= 10);
 hotbinA = floor(benfordize);
 
 totalA = 0;
@@ -134,7 +143,7 @@ totalA = 0;
 
 benfordize = ceil(inputSampleR);
 while (benfordize >= 1.0) (benfordize /= 10);
-while (benfordize < 1.0 && benfordize > 0.0000001) (benfordize *= 10);    
+while (benfordize < 1.0 && benfordize > 0.0000001) (benfordize *= 10);
 hotbinB = floor(benfordize);
 
 totalB = 0;
@@ -150,16 +159,18 @@ totalB = 0;
 : (bynR[hotbinB] += 1; outputSample = floor(inputSampleR+1););
 
 (cutbinsR) ? (
-  bynR[1] *= 0.99; bynR[2] *= 0.99; bynR[3] *= 0.99; bynR[4] *= 0.99; bynR[5] *= 0.99; 
-  bynR[6] *= 0.99; bynR[7] *= 0.99; bynR[8] *= 0.99; bynR[9] *= 0.99; bynR[10] *= 0.99; 
+  bynR[1] *= 0.99; bynR[2] *= 0.99; bynR[3] *= 0.99; bynR[4] *= 0.99; bynR[5] *= 0.99;
+  bynR[6] *= 0.99; bynR[7] *= 0.99; bynR[8] *= 0.99; bynR[9] *= 0.99; bynR[10] *= 0.99;
 );
-noiseShapingR += outputSample - drySampleR;      
+noiseShapingR += outputSample - drySampleR;
 (noiseShapingR > abs(inputSampleR)) ?noiseShapingR = abs(inputSampleR);
 (noiseShapingR < -abs(inputSampleR))? noiseShapingR = -abs(inputSampleR);
-inputSampleR = outputSample / 32768.0;
+
+(bitdepth == 0) ? inputSampleR = outputSample / 32768.0
+: inputSampleR = outputSample / 8388608.0;
+
 (inputSampleR > 1.0) ? inputSampleR = 1.0;
 (inputSampleR < -1.0)? inputSampleR = -1.0;
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
-
