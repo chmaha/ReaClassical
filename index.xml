@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="b0a97e1d598ce4664cc847177f0083a8a95ede89">
+<index version="1" name="chmaha Scripts" commit="612b58b4bdf9dd2ec13afba86e4a1062db3dd20d">
   <category name="RCPlugs">
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
       <metadata>
@@ -14,6 +14,10 @@
       <version name="1.0" time="2023-01-14T21:59:09Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/ab1dccc062b676f0337695fb40daa370aae277ce/RCPlugs/RCComp.jsfx</source>
+      </version>
+      <version name="1.01" time="2023-01-15T09:53:12Z">
+        <changelog><![CDATA[With introduction of RCParallelK, reduce ratio range for insert use.]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/612b58b4bdf9dd2ec13afba86e4a1062db3dd20d/RCPlugs/RCComp.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss (ReaClassical.org)">
