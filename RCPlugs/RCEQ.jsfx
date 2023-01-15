@@ -1,6 +1,6 @@
 desc:RCEQ (ReaClassical.org)
 author: chmaha
-version: 1.0
+version: 1.1
 Changelog:
   Initial commit
 about:
@@ -46,7 +46,7 @@ x = 0; loop(9,
   bassBR[x] = 0.0;
   x+=1;
 );
-flip = false;
+flip = 0;
 fpdL = 1.0; 
 while (fpdL < 16386) (
   fpdL = rand()*UINT32_MAX;
