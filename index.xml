@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="67fff07cf74cefd31bd0d242bee8034519b90a9e">
+<index version="1" name="chmaha Scripts" commit="059fdbb7cef5e100feed5c610e42d3983113b9e1">
   <category name="RCPlugs">
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
       <metadata>
@@ -112,6 +112,21 @@
       <version name="1.0" time="2023-01-15T09:49:22Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/b0a97e1d598ce4664cc847177f0083a8a95ede89/RCPlugs/RCParallelK.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="six-dither_sid.jsfx" type="effect" desc="Six-Dither Sid (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-15T22:21:24Z">
+        <changelog><![CDATA[Combine 16- and 24-bit NJAD, Dark and Nine Tens into Dark dithers]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/059fdbb7cef5e100feed5c610e42d3983113b9e1/RCPlugs/six-dither_sid.jsfx</source>
       </version>
     </reapack>
   </category>
