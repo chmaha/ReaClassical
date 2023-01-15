@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="54a139f11674bbd89f0617ea5a78abc3ddc91404">
+<index version="1" name="chmaha Scripts" commit="67fff07cf74cefd31bd0d242bee8034519b90a9e">
   <category name="RCPlugs">
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
       <metadata>
@@ -48,6 +48,10 @@
       <version name="1.0" author="chmaha" time="2023-01-13T15:46:39Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/7312c1caa87972f43f2992ebe5e2e31da11eed7c/RCPlugs/RCDither.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-01-15T11:36:51Z">
+        <changelog><![CDATA[Combine 16- and 24-bit NJAD dithers]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/67fff07cf74cefd31bd0d242bee8034519b90a9e/RCPlugs/RCDither.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ (ReaClassical.org)">
