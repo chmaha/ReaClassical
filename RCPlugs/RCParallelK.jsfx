@@ -1,7 +1,8 @@
 desc:RCParallelK (ReaClassical.org)
-version: 1.0
+author: chmaha
+version: 1.1
 Changelog:
-  Initial commit
+  Add author
 about:
   Express Bus Compressor (Stillwell) modified for classical music parallel compression use by chmaha
   See below the code for copyright notices, list of conditions and disclaimers
