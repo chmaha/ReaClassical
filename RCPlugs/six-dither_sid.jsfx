@@ -210,8 +210,9 @@ noiseShapingR += outputSample - drySampleR;
     (testA < testB) ? inputSampleL = quantA
     : inputSampleL = quantB;
 
-    x = depth; while(x >=0; x-=1) (
+    x = depth; while(x >=0) (
       darkSampleL[x+1] = darkSampleL[x];
+      x-=1;
     );
     darkSampleL[0] = inputSampleL;
     //end Dark left
