@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="6a527ebb4687c951ade1c9dfb36f3c2809c55f85">
+<index version="1" name="chmaha Scripts" commit="1e0e63a993874dea17c8513cae99fa1a94eef257">
   <category name="RCPlugs">
     <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
       <metadata>
@@ -205,6 +205,21 @@
       <version name="1.1" author="chmaha" time="2023-01-17T17:23:37Z">
         <changelog><![CDATA[Add ReaClassical to description]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/6a527ebb4687c951ade1c9dfb36f3c2809c55f85/RCPlugs/Stan.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Twilight.jsfx" type="effect" desc="Twilight (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses "Dark" DSP from airwindows "Monitoring2" plugin by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-17T18:10:28Z">
+        <changelog><![CDATA[Initial Commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/1e0e63a993874dea17c8513cae99fa1a94eef257/RCPlugs/Twilight.jsfx</source>
       </version>
     </reapack>
   </category>
