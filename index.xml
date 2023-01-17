@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="f6d9b375b231dc12540eb0c00f5f2711e9f11801">
+<index version="1" name="chmaha Scripts" commit="99d79e27bc9795be4df7e0bae361d21afa2714ee">
   <category name="RCPlugs">
     <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
       <metadata>
@@ -178,6 +178,21 @@
       <version name="1.4" author="chmaha" time="2023-01-17T16:29:05Z">
         <changelog><![CDATA[Revert to Nine Tens into Dark]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/f6d9b375b231dc12540eb0c00f5f2711e9f11801/RCPlugs/six-dither_sid.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Stan.jsfx" type="effect" desc="Stan">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "StudioTan" plugin by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/StudioTan (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-17T17:18:09Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/99d79e27bc9795be4df7e0bae361d21afa2714ee/RCPlugs/Stan.jsfx</source>
       </version>
     </reapack>
   </category>
