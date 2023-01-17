@@ -1,6 +1,6 @@
 desc:Stan (ReaClassical.org)
 author: chmaha
-version: 1.1
+version: 1.2
 Changelog:
   Add ReaClassical to description
 about:
@@ -8,7 +8,7 @@ about:
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/StudioTan (MIT License)
   JSFX version released under GPLv3 license
 
-slider1:bitdepth=0<0,1,1{StudioTan 16-bit,StudioTan 24-bit}>Bitdepth
+slider1:bitdepth=0<0,1,1{Stan 16-bit,Stan 24-bit}>Bitdepth
 
 in_pin:left input
 in_pin:right input
