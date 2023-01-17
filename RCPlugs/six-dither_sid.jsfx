@@ -1,10 +1,11 @@
 desc:Six-Dither Sid (ReaClassical.org)
 author: chmaha
-version: 1.4
+version: 1.5
 Changelog:
-  Revert to Nine Tens into Dark
+  Change internal naming
 about:
   Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson
+  Names: RCDither = NJAD, Twilight = Dark, Nintenda = Nine Tens into Dark
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License)
   JSFX version released under GPLv3 license
 
@@ -13,7 +14,7 @@ in_pin:right input
 out_pin:left output
 out_pin:right output
 
-slider1:bitdepth=0<0,5,1{NJAD 16-bit,Dark 16-bit,Nine Tens into Dark 16-bit,NJAD 24-bit,Dark 24-bit,Nine Tens into Dark 24-bit}>WordLength Reducer
+slider1:bitdepth=0<0,5,1{RCDither 16-bit,Twilight 16-bit,Nintenda 16-bit,RCDither 24-bit,Twilight 24-bit,Nintenda 24-bit}>WordLength Reducer
 
 @init
 freemem = 0;
