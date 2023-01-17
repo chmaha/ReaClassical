@@ -1,6 +1,6 @@
 desc:Twilight (ReaClassical.org)
 author: chmaha
-version: 1.0
+version: 1.1
 Changelog:
   Initial Commit
 about:
@@ -13,7 +13,7 @@ in_pin:right input
 out_pin:left output
 out_pin:right output
 
-slider1:bitdepth=0<0,1,1{Dark 16-bit,Dark 24-bit}>Bitdepth
+slider1:bitdepth=0<0,1,1{Twilight 16-bit,Twilight 24-bit}>Bitdepth
 
 @init
 freemem = 0;
