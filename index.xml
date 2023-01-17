@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="99d79e27bc9795be4df7e0bae361d21afa2714ee">
+<index version="1" name="chmaha Scripts" commit="6fd1020f8fc063c2f315cbe6547cbd79235ebc37">
   <category name="RCPlugs">
     <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
       <metadata>
@@ -33,6 +33,10 @@
       <version name="1.01" time="2023-01-15T09:53:12Z">
         <changelog><![CDATA[With introduction of RCParallelK, reduce ratio range for insert use.]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/612b58b4bdf9dd2ec13afba86e4a1062db3dd20d/RCPlugs/RCComp.jsfx</source>
+      </version>
+      <version name="1.02" author="chmaha" time="2023-01-17T17:21:49Z">
+        <changelog><![CDATA[Add author]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/6fd1020f8fc063c2f315cbe6547cbd79235ebc37/RCPlugs/RCComp.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss (ReaClassical.org)">
@@ -143,6 +147,10 @@
       <version name="1.0" time="2023-01-15T09:49:22Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/b0a97e1d598ce4664cc847177f0083a8a95ede89/RCPlugs/RCParallelK.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-01-17T17:21:49Z">
+        <changelog><![CDATA[Add author]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/6fd1020f8fc063c2f315cbe6547cbd79235ebc37/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
     <reapack name="six-dither_sid.jsfx" type="effect" desc="Six-Dither Sid (ReaClassical.org)">
