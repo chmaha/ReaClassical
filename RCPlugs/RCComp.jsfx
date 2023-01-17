@@ -1,7 +1,8 @@
 desc:RCComp (ReaClassical.org)
-version: 1.01
+author: chmaha
+version: 1.02
 Changelog:
-  With introduction of RCParallelK, reduce ratio range for insert use.
+  Add author
 about:
   Express Bus Compressor (Stillwell) modified for classical music use by chmaha
   See below the code for copyright notices, list of conditions and disclaimers
