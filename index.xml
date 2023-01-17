@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="6c92a4c5f9ba1afd723ed6e34651082b03642d9b">
+<index version="1" name="chmaha Scripts" commit="7852ad23637c76d9b482de637d790b53e5a2c3d7">
   <category name="RCPlugs">
+    <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses "Nine Tens into Dark" DSP from airwindows "Monitoring3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-17T14:34:24Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/7852ad23637c76d9b482de637d790b53e5a2c3d7/RCPlugs/NineTens.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
