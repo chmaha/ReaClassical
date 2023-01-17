@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="1e0e63a993874dea17c8513cae99fa1a94eef257">
+<index version="1" name="chmaha Scripts" commit="e5efb339f041900e9540f54e0a958d1e7d2f446d">
   <category name="RCPlugs">
     <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
       <metadata>
@@ -14,6 +14,10 @@
       <version name="1.0" author="chmaha" time="2023-01-17T14:34:24Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/7852ad23637c76d9b482de637d790b53e5a2c3d7/RCPlugs/NineTens.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-01-17T19:02:53Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/NineTens.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
@@ -64,7 +68,7 @@
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Monitoring" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses "NJAD" DSP from airwindows "Monitoring" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
 }
 ]]></description>
       </metadata>
@@ -83,6 +87,10 @@
       <version name="1.3" author="chmaha" time="2023-01-15T23:58:34Z">
         <changelog><![CDATA[Fix missing equals signs]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/ea55830c02728fa40b6f050e60104625d90dd942/RCPlugs/RCDither.jsfx</source>
+      </version>
+      <version name="1.3.1" author="chmaha" time="2023-01-17T19:02:53Z">
+        <changelog><![CDATA[Fix missing equals signs]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/RCDither.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ (ReaClassical.org)">
@@ -206,6 +214,10 @@
         <changelog><![CDATA[Add ReaClassical to description]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/6a527ebb4687c951ade1c9dfb36f3c2809c55f85/RCPlugs/Stan.jsfx</source>
       </version>
+      <version name="1.2" author="chmaha" time="2023-01-17T19:02:53Z">
+        <changelog><![CDATA[Add ReaClassical to description]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/Stan.jsfx</source>
+      </version>
     </reapack>
     <reapack name="Twilight.jsfx" type="effect" desc="Twilight (ReaClassical.org)">
       <metadata>
@@ -220,6 +232,10 @@
       <version name="1.0" author="chmaha" time="2023-01-17T18:10:28Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/1e0e63a993874dea17c8513cae99fa1a94eef257/RCPlugs/Twilight.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-01-17T19:02:53Z">
+        <changelog><![CDATA[Initial Commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/Twilight.jsfx</source>
       </version>
     </reapack>
   </category>
