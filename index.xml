@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="5e1a53de9a6e4e7f87aadee9d9ef2cb7fbb68660">
+<index version="1" name="chmaha Scripts" commit="af61553514b9af3e3ef5c3ed719eed302b9061d0">
   <category name="RCPlugs">
+    <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Channel9" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Channel9 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-18T23:03:34Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/af61553514b9af3e3ef5c3ed719eed302b9061d0/RCPlugs/MagicFairyDust.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
