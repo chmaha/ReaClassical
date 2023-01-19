@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="af61553514b9af3e3ef5c3ed719eed302b9061d0">
+<index version="1" name="chmaha Scripts" commit="7b80956c14589f392636d1e267b10c84eda96f59">
   <category name="RCPlugs">
     <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust (ReaClassical.org)">
       <metadata>
@@ -114,7 +114,7 @@
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Baxandall" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License) JSFX version released under GPLv3 license\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Baxandall" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License)\par}
 }
 ]]></description>
       </metadata>
@@ -125,6 +125,10 @@
       <version name="1.1" author="chmaha" time="2023-01-15T23:50:01Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/d2c209883e55b7e6291e6a730b666336fc59bcf4/RCPlugs/RCEQ.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-01-19T10:12:31Z">
+        <changelog><![CDATA[Add LPF and HPF]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/7b80956c14589f392636d1e267b10c84eda96f59/RCPlugs/RCEQ.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCGain.jsfx" type="effect" desc="RCGain (ReaClassical.org)">
