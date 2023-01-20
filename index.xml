@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="7b80956c14589f392636d1e267b10c84eda96f59">
+<index version="1" name="chmaha Scripts" commit="aadd7ab3ed01e91e0f0625f57353ce9d4aa92bfd">
   <category name="RCPlugs">
+    <reapack name="flattop.jsfx" type="effect" desc="Flattop">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ClipOnly2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipOnly2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="0.9" author="chmaha" time="2023-01-20T15:31:40Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/aadd7ab3ed01e91e0f0625f57353ce9d4aa92bfd/RCPlugs/flattop.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
