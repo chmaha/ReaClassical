@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="aadd7ab3ed01e91e0f0625f57353ce9d4aa92bfd">
+<index version="1" name="chmaha Scripts" commit="5a6abaa3343b2fbb9debfc7bf9aa9e3671ce342c">
   <category name="RCPlugs">
-    <reapack name="flattop.jsfx" type="effect" desc="Flattop">
+    <reapack name="flattop.jsfx" type="effect" desc="Flattop (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -14,6 +14,10 @@
       <version name="0.9" author="chmaha" time="2023-01-20T15:31:40Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/aadd7ab3ed01e91e0f0625f57353ce9d4aa92bfd/RCPlugs/flattop.jsfx</source>
+      </version>
+      <version name="0.95" author="chmaha" time="2023-01-20T15:38:11Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/5a6abaa3343b2fbb9debfc7bf9aa9e3671ce342c/RCPlugs/flattop.jsfx</source>
       </version>
     </reapack>
     <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust (ReaClassical.org)">
