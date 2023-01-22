@@ -1,21 +1,23 @@
 desc: Amphitrite (ReaClassical.org)
 author: chmaha
-version: 1.1
+version: 1.2
 Changelog:
-  Re-introduce Squish output slider
+  Add sliders to activate sections
 about:
   Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License)
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SurgeTide (MIT License)
   JSFX version released under GPLv3 license
 
-slider1:0<0,1,0.01>Squish
-slider2:0<0,1,0.01>Bass Bloom
-slider3:1<0,1,0.01>Squish Output
+slider1:1<0,1,1{No,Yes}>Enable Squish?
+slider2:0<0,1,0.01>Squish
+slider3:0<0,1,0.01>Bass Bloom
+slider4:1<0,1,0.01>Squish Output
 // slider4:1<0,1,0.01>PurestSquish Dry/Wet
-slider4:0.5<0,1,0.01>SurgeNode
-slider5:0.3<0,1,0.01>SurgeRate
-slider6:1<0,1,0.01>Dry/Wet
+slider5:1<0,1,1{No,Yes}>Enable Surge?
+slider6:0.5<0,1,0.01>SurgeNode
+slider7:0.3<0,1,0.01>SurgeRate
+slider8:1<0,1,0.01>Dry/Wet
 
 in_pin:left input
 in_pin:right input
@@ -91,13 +93,15 @@ M_PI = 3.1415926535897932384626433;
 
 @slider
 
-A = slider1;
-B = slider2;   
-C = slider3;
+squish_enable = slider1; 
+A = slider2;
+B = slider3;   
+C = slider4;
 // D = slider6;
-E = slider4;
-F = slider5;
-G = slider6;
+surge_enable = slider5;
+E = slider6;
+F = slider7;
+G = slider8;
 
 
 @block
@@ -121,6 +125,7 @@ fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 
 @sample
 
+(squish_enable == 1) ? (
 inputSampleL = spl0;
 inputSampleR = spl1;
 
@@ -491,17 +496,24 @@ fpFlip = !fpFlip;
   inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
 );
 
-//begin 64 bit stereo floating point dither
-//int expon; frexp((double)inputSampleL, &expon);
+
 fpdL ^= fpdL << 13; fpdL ^= fpdL >> 17; fpdL ^= fpdL << 5;
-//inputSampleL += ((double(fpdL)-uint32_t(0x7fffffff)) * 1.1e-44l * pow(2,expon+62));
-//frexp((double)inputSampleR, &expon);
 fpdR ^= fpdR << 13; fpdR ^= fpdR >> 17; fpdR ^= fpdR << 5;
-//inputSampleR += ((double(fpdR)-uint32_t(0x7fffffff)) * 1.1e-44l * pow(2,expon+62));
-//end 64 bit stereo floating point dither
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+
+);
 
 
 //=====================================//
+
+(surge_enable == 1 ) ? (
+
+inputSampleL = spl0;
+inputSampleR = spl1;
 
 (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
 (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
@@ -548,3 +560,5 @@ fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
+
+);
