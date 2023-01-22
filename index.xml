@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="63c91b278492f10b267cb792161efe6b754e7437">
+<index version="1" name="chmaha Scripts" commit="e91364a8c998bb5ea0748246c45546ba4bb7deab">
   <category name="RCPlugs">
     <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite (ReaClassical.org)">
       <metadata>
@@ -18,6 +18,10 @@
       <version name="1.1" author="chmaha" time="2023-01-22T23:10:06Z">
         <changelog><![CDATA[Re-introduce Squish output slider]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/63c91b278492f10b267cb792161efe6b754e7437/RCPlugs/Amphitrite.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-01-22T23:49:50Z">
+        <changelog><![CDATA[Add sliders to activate sections]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e91364a8c998bb5ea0748246c45546ba4bb7deab/RCPlugs/Amphitrite.jsfx</source>
       </version>
     </reapack>
     <reapack name="flattop.jsfx" type="effect" desc="Flattop (ReaClassical.org)">
