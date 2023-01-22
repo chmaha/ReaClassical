@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="5a6abaa3343b2fbb9debfc7bf9aa9e3671ce342c">
+<index version="1" name="chmaha Scripts" commit="2b2b10904548f109ef4b550db2f67f9f6a47d7a5">
   <category name="RCPlugs">
     <reapack name="flattop.jsfx" type="effect" desc="Flattop (ReaClassical.org)">
       <metadata>
@@ -52,6 +52,96 @@
       <version name="1.1" author="chmaha" time="2023-01-17T19:02:53Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/NineTens.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus_Bus_In.jsfx" type="effect" desc="Orpheus Bus In (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Bus_In.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus_Bus_Out.jsfx" type="effect" desc="Orpheus Bus Out (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Bus_Out.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus_Channel_In.jsfx" type="effect" desc="Orpheus Channel In (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Channel_In.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus_Channel_Out.jsfx" type="effect" desc="Orpheus Channel Out (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Channel_Out.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus_Sub_In.jsfx" type="effect" desc="Orpheus Sub|Aux In (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Sub_In.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus_Sub_Out.jsfx" type="effect" desc="Orpheus Sub|Aux Out (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Sub_Out.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
