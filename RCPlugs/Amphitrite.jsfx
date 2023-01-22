@@ -1,8 +1,8 @@
 desc: Amphitrite (ReaClassical.org)
 author: chmaha
-version: 1.0
+version: 1.1
 Changelog:
-  Initial commit
+  Re-introduce Squish output slider
 about:
   Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License)
@@ -11,11 +11,11 @@ about:
 
 slider1:0<0,1,0.01>Squish
 slider2:0<0,1,0.01>Bass Bloom
-/slider3:1<0,1,0.01>Output
-/slider4:1<0,1,0.01>PurestSquish Dry/Wet
-slider3:0.5<0,1,0.01>SurgeNode
-slider4:0.3<0,1,0.01>SurgeRate
-slider5:1<0,1,0.01>SurgeTide Dry/Wet
+slider3:1<0,1,0.01>Squish Output
+// slider4:1<0,1,0.01>PurestSquish Dry/Wet
+slider4:0.5<0,1,0.01>SurgeNode
+slider5:0.3<0,1,0.01>SurgeRate
+slider6:1<0,1,0.01>Dry/Wet
 
 in_pin:left input
 in_pin:right input
@@ -93,11 +93,11 @@ M_PI = 3.1415926535897932384626433;
 
 A = slider1;
 B = slider2;   
-//C = slider3;
-D = slider5;
-E = slider3;
-F = slider4;
-G = slider5;
+C = slider3;
+// D = slider6;
+E = slider4;
+F = slider5;
+G = slider6;
 
 
 @block
@@ -109,7 +109,7 @@ overallscale *= srate;
 threshold = 1.01 - (1.0-pow(1.0-(A*0.5),4));
 iirAmount = pow(B,4)/overallscale;
 output = C;
-wet = D;
+wet = G;
 
 intensity = E;
 attack = ((F+0.1)*0.0005)/overallscale;
@@ -548,4 +548,3 @@ fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
-
