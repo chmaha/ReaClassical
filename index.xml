@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="2b2b10904548f109ef4b550db2f67f9f6a47d7a5">
+<index version="1" name="chmaha Scripts" commit="8077913c1f8ef51c7b632753c065ef550f09691e">
   <category name="RCPlugs">
+    <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SurgeTide (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-22T22:51:50Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/8077913c1f8ef51c7b632753c065ef550f09691e/RCPlugs/Amphitrite.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="flattop.jsfx" type="effect" desc="Flattop (ReaClassical.org)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
