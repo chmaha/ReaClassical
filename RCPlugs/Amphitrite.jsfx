@@ -1,8 +1,8 @@
 desc: Amphitrite (ReaClassical.org)
 author: chmaha
-version: 1.2
+version: 1.3
 Changelog:
-  Add sliders to activate sections
+  Reduce ranges and set new defaults
 about:
   Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License)
@@ -10,13 +10,13 @@ about:
   JSFX version released under GPLv3 license
 
 slider1:1<0,1,1{No,Yes}>Enable Squish?
-slider2:0<0,1,0.01>Squish
-slider3:0<0,1,0.01>Bass Bloom
+slider2:0.25<0,0.5,0.01>Squish
+slider3:0.25<0,0.5,0.01>Bass Bloom
 slider4:1<0,1,0.01>Squish Output
 // slider4:1<0,1,0.01>PurestSquish Dry/Wet
 slider5:1<0,1,1{No,Yes}>Enable Surge?
-slider6:0.5<0,1,0.01>SurgeNode
-slider7:0.3<0,1,0.01>SurgeRate
+slider6:0.25<0,0.5,0.01>SurgeNode
+slider7:0.25<0,0.5,0.01>SurgeRate
 slider8:1<0,1,0.01>Dry/Wet
 
 in_pin:left input
@@ -26,8 +26,8 @@ out_pin:right output
 
 @init
 
-A = 0.0;
-B = 0.0;
+A = 0.3;
+B = 0.3;
 C = 1.0;
 D = 1.0;
 
@@ -78,7 +78,7 @@ muVaryR = 1;
 count = 1;
 fpFlip = 1;
 
-E = 0.5;
+E = 0.3;
 F = 0.3;
 G = 1.0;
 fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
