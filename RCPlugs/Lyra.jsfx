@@ -1,0 +1,264 @@
+desc:Lyra (ReaClassical.org)
+author: chmaha
+version: 1.0
+Changelog:
+  Initial commit
+about:
+  Uses DSP from airwindows "ButterComp2" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ButterComp2 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,1,0.01>Compress
+slider2:1<0,2,0.01>Output
+slider3:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+controlAposL = 1.0;
+controlAnegL = 1.0;
+controlBposL = 1.0;
+controlBnegL = 1.0;
+targetposL = 1.0;
+targetnegL = 1.0;
+lastOutputL = 0.0;
+
+controlAposR = 1.0;
+controlAnegR = 1.0;
+controlBposR = 1.0;
+controlBnegR = 1.0;
+targetposR = 1.0;
+targetnegR = 1.0;
+lastOutputR = 0.0;
+
+flip = 0;
+A = 0.0;
+B = 0.5;
+C = 1.0;
+
+UINT32_MAX = 4294967295;
+M_PI = 3.1415926535897932384626433;
+
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+A = slider1;
+B = slider2/2.0;
+C = slider3;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;//
+
+inputgain = pow(10.0,(A*14.0)/20.0);
+compfactor = 0.012 * (A / 135.0);
+output = B * 2.0;
+wet = C;
+//removed extra dry variable
+outputgain = inputgain;
+outputgain -= 1.0;
+outputgain /= 1.5;
+outputgain += 1.0;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+noisesourceL = 0;
+noisesourceR = 850010;
+
+noisesourceL = noisesourceL % 1700021; noisesourceL+=1;
+residue = noisesourceL * noisesourceL;
+residue = residue % 170003; residue *= residue;
+residue = residue % 17011; residue *= residue;
+residue = residue % 1709; residue *= residue;
+residue = residue % 173; residue *= residue;
+residue = residue % 17;
+applyresidue = residue;
+applyresidue *= 0.00000001;
+applyresidue *= 0.00000001;
+inputSampleL += applyresidue;
+(inputSampleL<1.2*10^-38 && -inputSampleL<1.2*10^-38) ? inputSampleL -= applyresidue;
+
+noisesourceR = noisesourceR % 1700021; noisesourceR+=1;
+residue = noisesourceR * noisesourceR;
+residue = residue % 170003; residue *= residue;
+residue = residue % 17011; residue *= residue;
+residue = residue % 1709; residue *= residue;
+residue = residue % 173; residue *= residue;
+residue = residue % 17;
+applyresidue = residue;
+applyresidue *= 0.00000001;
+applyresidue *= 0.00000001;
+inputSampleR += applyresidue;
+(inputSampleR<1.2*10^-38 && -inputSampleR<1.2*10^-38) ? inputSampleR -= applyresidue;
+
+//for live air, we always apply the dither noise. Then, if our result is 
+//effectively digital black, we'll subtract it aButterComp2. We want a 'air' hiss
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+inputSampleL *= inputgain;
+inputSampleR *= inputgain;
+
+divisor = compfactor / (1.0+abs(lastOutputL));
+//this is slowing compressor recovery while output waveforms were high
+divisor /= overallscale;
+remainder = divisor;
+divisor = 1.0 - divisor;
+//recalculate divisor every sample    
+inputposL = inputSampleL + 1.0;
+(inputposL < 0.0) ? inputposL = 0.0;
+outputposL = inputposL / 2.0;
+(outputposL > 1.0) ? outputposL = 1.0;    
+inputposL *= inputposL;
+targetposL *= divisor;
+targetposL += (inputposL * remainder);
+calcposL = pow((1.0/targetposL),2);
+
+inputnegL = (-inputSampleL) + 1.0;
+(inputnegL < 0.0) ? inputnegL = 0.0;
+outputnegL = inputnegL / 2.0;
+(outputnegL > 1.0) ? outputnegL = 1.0;    
+inputnegL *= inputnegL;
+targetnegL *= divisor;
+targetnegL += (inputnegL * remainder);
+calcnegL = pow((1.0/targetnegL),2);
+//now we have mirrored targets for comp
+//outputpos and outputneg go from 0 to 1
+
+(inputSampleL > 0) ?
+( //working on pos
+  (flip) ?
+  (
+    controlAposL *= divisor;
+    controlAposL += (calcposL*remainder);
+    
+  )
+  :
+  (
+    controlBposL *= divisor;
+    controlBposL += (calcposL*remainder);
+  );
+)
+:
+( //working on neg
+  (flip) ?
+  (
+    controlAnegL *= divisor;
+    controlAnegL += (calcnegL*remainder);
+  )
+  :
+  (
+    controlBnegL *= divisor;
+    controlBnegL += (calcnegL*remainder);
+  );
+);
+//this causes each of the four to update only when active and in the correct 'flip'
+
+divisor = compfactor / (1.0+abs(lastOutputR));
+//this is slowing compressor recovery while output waveforms were high
+divisor /= overallscale;
+remainder = divisor;
+divisor = 1.0 - divisor;
+//recalculate divisor every sample    
+
+inputposR = inputSampleR + 1.0;
+(inputposR < 0.0) ? inputposR = 0.0;
+outputposR = inputposR / 2.0;
+(outputposR > 1.0) ? outputposR = 1.0;    
+inputposR *= inputposR;
+targetposR *= divisor;
+targetposR += (inputposR * remainder);
+calcposR = pow((1.0/targetposR),2);
+
+inputnegR = (-inputSampleR) + 1.0;
+(inputnegR < 0.0) ? inputnegR = 0.0;
+outputnegR = inputnegR / 2.0;
+(outputnegR > 1.0) ? outputnegR = 1.0;    
+inputnegR *= inputnegR;
+targetnegR *= divisor;
+targetnegR += (inputnegR * remainder);
+calcnegR = pow((1.0/targetnegR),2);
+//now we have mirrored targets for comp
+//outputpos and outputneg go from 0 to 1
+
+(inputSampleR > 0) ?
+( //working on pos
+  (flip) ?
+  (
+    controlAposR *= divisor;
+    controlAposR += (calcposR*remainder);
+    
+  )
+  :
+  (
+    controlBposR *= divisor;
+    controlBposR += (calcposR*remainder);
+  );
+)
+:
+( //working on neg
+  (flip) ?
+  (
+    controlAnegR *= divisor;
+    controlAnegR += (calcnegR*remainder);
+  )
+  :
+  (
+    controlBnegR *= divisor;
+    controlBnegR += (calcnegR*remainder);
+  );
+);
+//this causes each of the four to update only when active and in the correct 'flip'
+
+(flip) ?
+(
+  totalmultiplierL = (controlAposL * outputposL) + (controlAnegL * outputnegL);
+  totalmultiplierR = (controlAposR * outputposR) + (controlAnegR * outputnegR);
+)
+:
+(
+  totalmultiplierL = (controlBposL * outputposL) + (controlBnegL * outputnegL);
+  totalmultiplierR = (controlBposR * outputposR) + (controlBnegR * outputnegR);
+);
+//this combines the sides according to flip, blending relative to the input value
+
+inputSampleL *= totalmultiplierL;
+inputSampleL /= outputgain;
+
+inputSampleR *= totalmultiplierR;
+inputSampleR /= outputgain;
+
+(output != 1.0) ? (
+  inputSampleL *= output;
+  inputSampleR *= output;
+);
+
+(wet !=1.0) ? (
+  inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0-wet));
+  inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
+);
+
+lastOutputL = inputSampleL;
+lastOutputR = inputSampleR;
+//we will make this factor respond to use of dry/wet
+
+flip = !flip;
+
+
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+
