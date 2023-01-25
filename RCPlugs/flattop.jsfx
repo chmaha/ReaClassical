@@ -1,8 +1,8 @@
 desc:Flattop (ReaClassical.org)
 author: chmaha
-version: 0.95
+version: 1.0
 Changelog:
-  Initial commit
+  Remove latency code
 about:
   Uses DSP from airwindows "ClipOnly2" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipOnly2 (MIT License)
@@ -33,9 +33,6 @@ x = 0; while(x < 16) (intermediateL[x] = 0.0; intermediateR[x] = 0.0;x+=1;);
 overallscale = 1.0;
 overallscale /= 44100.0; 
 overallscale *= srate;
-
-pdc_delay = spacing;
-pdc_bot_ch=0; pdc_top_ch=2; 
 
 spacing = floor(overallscale); 
 (spacing < 1) ? spacing = 1; (spacing > 16) ? spacing = 16;
