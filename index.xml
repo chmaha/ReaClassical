@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="2f27d01d80ec9dc48f82206fde6c3c78d16e9961">
+<index version="1" name="chmaha Scripts" commit="00ab3c03ddc9c40511a25b6c13c631f0b89abb01">
   <category name="RCPlugs">
     <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite (ReaClassical.org)">
       <metadata>
@@ -348,6 +348,21 @@
       <version name="1.1" author="chmaha" time="2023-01-17T17:21:49Z">
         <changelog><![CDATA[Add author]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/6fd1020f8fc063c2f315cbe6547cbd79235ebc37/RCPlugs/RCParallelK.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Sillons.jsfx" type="effect" desc="Sillons (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToVinyl4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToVinyl4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-25T10:42:56Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/00ab3c03ddc9c40511a25b6c13c631f0b89abb01/RCPlugs/Sillons.jsfx</source>
       </version>
     </reapack>
     <reapack name="six-dither_sid.jsfx" type="effect" desc="Six-Dither Sid (ReaClassical.org)">
