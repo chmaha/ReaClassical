@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="1828a4d3aef01ea2ebcda13955250d8c0c69673e">
+<index version="1" name="chmaha Scripts" commit="2f27d01d80ec9dc48f82206fde6c3c78d16e9961">
   <category name="RCPlugs">
     <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite (ReaClassical.org)">
       <metadata>
@@ -75,6 +75,21 @@
       <version name="1.0" author="chmaha" time="2023-01-18T23:03:34Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/af61553514b9af3e3ef5c3ed719eed302b9061d0/RCPlugs/MagicFairyDust.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Magnetique.jsfx" type="effect" desc="Magnétique (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToTape6" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToTape6 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-01-25T09:50:56Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2f27d01d80ec9dc48f82206fde6c3c78d16e9961/RCPlugs/Magnetique.jsfx</source>
       </version>
     </reapack>
     <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
