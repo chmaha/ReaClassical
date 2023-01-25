@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.02
+@version 23.03
 @changelog
-  v23.02
-  Change versioning (again) but with less disruption. Continue with CalVer-style but move to YY.xx where YY is two-digit year and xx is padded minor version.
-  Add guard clause to Create CD Markers script in the event of no tracks or items.
+  v23.03
+  Add rudimentary help system
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -29,6 +28,7 @@
   [main] ReaClassical_Create Folder.lua
   [main] ReaClassical_Lock_toggle.lua
   [main] ReaClassical_Create CD Markers.lua
+  [main] ReaClassical_Help.lua
 
 @about
   These scripts provide dedicated source-destination markers, edits, crossfade
