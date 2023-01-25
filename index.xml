@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="00ab3c03ddc9c40511a25b6c13c631f0b89abb01">
+<index version="1" name="chmaha Scripts" commit="1dbef384aab6d4fbc2365b7624dd2ff134f92ddc">
+  <category name="PDF_Guide">
+    <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
+      <version name="1.0" time="2023-01-25T13:08:55Z">
+        <source main="main">https://github.com/chmaha/ReaClassical/raw/1dbef384aab6d4fbc2365b7624dd2ff134f92ddc/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
+        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/ReaClassical%20User%20Guide.pdf</source>
+      </version>
+    </reapack>
+  </category>
   <category name="RCPlugs">
     <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite (ReaClassical.org)">
       <metadata>
