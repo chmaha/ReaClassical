@@ -1,6 +1,6 @@
 desc:RCDeEss (ReaClassical.org)
 author: chmaha
-version: 1.1
+version: 1.2
 Changelog:
   Initial commit
 about:
@@ -9,8 +9,8 @@ about:
   JSFX version released under GPLv3 license
 
 slider1:0<0,1,0.01>Intensity
-slider2:-24<-48,0,0.01>Max DS (dB)
-slider3:0.5<0,1,0.01>Freq
+slider2:-24<-48,0,0.01>Max DeEss (dB)
+slider3:0.5<0,1,0.01>Frequency
 
 in_pin:left input
 in_pin:right input
