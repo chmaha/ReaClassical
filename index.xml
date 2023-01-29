@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="cccb4df68871c81bf8c0534447963cbdf3c0e4cf">
+<index version="1" name="chmaha Scripts" commit="039815277c0ddb42d990eee62197416be139750d">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -156,6 +156,10 @@
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Bus_In.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Bus_In.jsfx</source>
+      </version>
     </reapack>
     <reapack name="Orpheus_Bus_Out.jsfx" type="effect" desc="Orpheus Bus Out (ReaClassical.org)">
       <metadata>
@@ -170,6 +174,10 @@
       <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Bus_Out.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Bus_Out.jsfx</source>
       </version>
     </reapack>
     <reapack name="Orpheus_Channel_In.jsfx" type="effect" desc="Orpheus Channel In (ReaClassical.org)">
@@ -186,6 +194,10 @@
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Channel_In.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Channel_In.jsfx</source>
+      </version>
     </reapack>
     <reapack name="Orpheus_Channel_Out.jsfx" type="effect" desc="Orpheus Channel Out (ReaClassical.org)">
       <metadata>
@@ -200,6 +212,10 @@
       <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Channel_Out.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Channel_Out.jsfx</source>
       </version>
     </reapack>
     <reapack name="Orpheus_Sub_In.jsfx" type="effect" desc="Orpheus Sub|Aux In (ReaClassical.org)">
@@ -216,6 +232,10 @@
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Sub_In.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Sub_In.jsfx</source>
+      </version>
     </reapack>
     <reapack name="Orpheus_Sub_Out.jsfx" type="effect" desc="Orpheus Sub|Aux Out (ReaClassical.org)">
       <metadata>
@@ -230,6 +250,10 @@
       <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Sub_Out.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Sub_Out.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
