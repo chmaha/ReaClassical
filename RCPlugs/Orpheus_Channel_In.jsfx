@@ -1,6 +1,6 @@
 desc:Orpheus Channel In (ReaClassical.org)
 author: chmaha
-version: 1.0
+version: 1.1
 Changelog:
   Initial commit
 about:
@@ -115,7 +115,7 @@ softR[9] = ((softR[0]-softR[4])-(softR[4]-softR[8]));
   fix_sL2 = (inputSampleL * fix_a2) - (outSample * fix_b2);
   inputSampleL = outSample;
   outSample = (inputSampleR * fix_a0) + fix_sR1;
-  fix_sR1 = (inputSampleR * fix_a1) - (outSample * ffix_b1) + fix_sR2;
+  fix_sR1 = (inputSampleR * fix_a1) - (outSample * fix_b1) + fix_sR2;
   fix_sR2 = (inputSampleR * fix_a2) - (outSample * fix_b2);
   inputSampleR = outSample;
 ); //fixed biquad filtering ultrasonics    
