@@ -1,6 +1,6 @@
 desc:RCGain (ReaClassical.org)
 author: chmaha
-version: 1.1
+version: 1.2
 Changelog:
   Remove superfluous code
 about:
@@ -9,7 +9,6 @@ about:
   JSFX version released under GPLv3 license
 
 slider1:0<-20,20,0.1>Gain (dB)
-// slider2:1.0<0,1,0.01>Slow Fade
 
 in_pin:left input
 in_pin:right input
