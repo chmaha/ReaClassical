@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="13c3b9175f4e227b06f918abb9a96040c737a5e0">
+<index version="1" name="chmaha Scripts" commit="c6485ef6d33b557379d4863471be0e381449f928">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -38,6 +38,10 @@
       <version name="1.3" author="chmaha" time="2023-01-23T09:36:55Z">
         <changelog><![CDATA[Reduce ranges and set new defaults]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/3bcaaa22fe36b3ba6860504504359bb782d7041a/RCPlugs/Amphitrite.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-02-01T10:08:38Z">
+        <changelog><![CDATA[Reduce ranges and set new defaults]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/c6485ef6d33b557379d4863471be0e381449f928/RCPlugs/Amphitrite.jsfx</source>
       </version>
     </reapack>
     <reapack name="Elsa.jsfx" type="effect" desc="ELSA: Extremely Light Saturation Applier (ReaClassical.org)">
