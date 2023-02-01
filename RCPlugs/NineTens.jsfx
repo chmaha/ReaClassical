@@ -1,6 +1,6 @@
 desc:Nintenda (ReaClassical.org)
 author: chmaha
-version: 1.1
+version: 1.2
 Changelog:
   Initial commit
 about:
@@ -49,8 +49,10 @@ inputSampleR = spl1;
 
 (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
 fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
 (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
 fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdR < 0) ? fpdR += UINT32_MAX;
 //we need to make our dither run up here, there's no spot on the end to do it
 
 //begin Dark    

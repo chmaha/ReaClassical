@@ -1,6 +1,6 @@
 desc:Six-Dither Sid (ReaClassical.org)
 author: chmaha
-version: 1.6
+version: 1.7
 Changelog:
   Change internal naming
 about:
@@ -80,6 +80,13 @@ inputSampleR = spl1;
 
 (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
 (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
+(bitdepth == 1) || (bitdepth == 2) || (bitdepth == 4) || (bitdepth == 5) ? (
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+);
 
 (bitdepth < 3) ? (
   inputSampleL = inputSampleL * 32768.0; //16-bit
