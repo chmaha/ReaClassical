@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="edac77251c4bd7931c7cf05180bf206d4509102d">
+<index version="1" name="chmaha Scripts" commit="07256ee82d48fc0d0679445bbbf7f49b87c48157">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -531,6 +531,21 @@
       <version name="1.2" author="chmaha" time="2023-02-01T11:31:39Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/edac77251c4bd7931c7cf05180bf206d4509102d/RCPlugs/Twilight.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="WTFDither.jsfx" type="effect" desc="WTFDither (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "TPDFDither" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TPDFDither (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-01T11:33:50Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/07256ee82d48fc0d0679445bbbf7f49b87c48157/RCPlugs/WTFDither.jsfx</source>
       </version>
     </reapack>
   </category>
