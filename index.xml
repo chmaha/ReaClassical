@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="c6485ef6d33b557379d4863471be0e381449f928">
+<index version="1" name="chmaha Scripts" commit="edac77251c4bd7931c7cf05180bf206d4509102d">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -144,6 +144,10 @@
       <version name="1.1" author="chmaha" time="2023-01-17T19:02:53Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/NineTens.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-02-01T11:31:39Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/edac77251c4bd7931c7cf05180bf206d4509102d/RCPlugs/NineTens.jsfx</source>
       </version>
     </reapack>
     <reapack name="Orpheus_Bus_In.jsfx" type="effect" desc="Orpheus Bus In (ReaClassical.org)">
@@ -478,6 +482,10 @@
         <changelog><![CDATA[Change internal naming]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/a7d33d94b51229a32b0c8c5690286c20c3610ad0/RCPlugs/six-dither_sid.jsfx</source>
       </version>
+      <version name="1.7" author="chmaha" time="2023-02-01T11:31:39Z">
+        <changelog><![CDATA[Change internal naming]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/edac77251c4bd7931c7cf05180bf206d4509102d/RCPlugs/six-dither_sid.jsfx</source>
+      </version>
     </reapack>
     <reapack name="Stan.jsfx" type="effect" desc="Stan (ReaClassical.org)">
       <metadata>
@@ -519,6 +527,10 @@
       <version name="1.1" author="chmaha" time="2023-01-17T19:02:53Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/Twilight.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-02-01T11:31:39Z">
+        <changelog><![CDATA[Initial Commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/edac77251c4bd7931c7cf05180bf206d4509102d/RCPlugs/Twilight.jsfx</source>
       </version>
     </reapack>
   </category>
