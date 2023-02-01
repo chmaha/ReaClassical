@@ -2,7 +2,7 @@ desc:Nintenda (ReaClassical.org)
 author: chmaha
 version: 1.2
 Changelog:
-  Initial commit
+  Add fpdL safety lines
 about:
   Uses "Nine Tens into Dark" DSP from airwindows "Monitoring3" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License)
