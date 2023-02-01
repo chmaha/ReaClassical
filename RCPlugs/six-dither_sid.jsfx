@@ -2,7 +2,7 @@ desc:Six-Dither Sid (ReaClassical.org)
 author: chmaha
 version: 1.7
 Changelog:
-  Change internal naming
+  Add missing block for Twilight/Nintenda
 about:
   Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson
   Names: Avant-garde = NJAD, Twilight = Dark, Nintenda = Nine Tens into Dark
