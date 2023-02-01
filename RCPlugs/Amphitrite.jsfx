@@ -1,6 +1,6 @@
 desc: Amphitrite (ReaClassical.org)
 author: chmaha
-version: 1.3
+version: 1.4
 Changelog:
   Reduce ranges and set new defaults
 about:
@@ -497,8 +497,8 @@ fpFlip = !fpFlip;
 );
 
 
-fpdL ^= fpdL << 13; fpdL ^= fpdL >> 17; fpdL ^= fpdL << 5;
-fpdR ^= fpdR << 13; fpdR ^= fpdR >> 17; fpdR ^= fpdR << 5;
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
 (fpdL < 0) ? fpdL += UINT32_MAX;
 (fpdR < 0) ? fpdR += UINT32_MAX;
 
