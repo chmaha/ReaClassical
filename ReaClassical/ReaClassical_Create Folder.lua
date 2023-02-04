@@ -22,10 +22,11 @@ local r = reaper
 local track_check, media_razor_group
 
 function Main()
-
+  r.Undo_BeginBlock()
   if track_check() == 0 then
     local boolean, num = r.GetUserInputs("Create Folder", 1, "How many tracks?", 10)
-    if boolean == true then
+    num = tonumber(num)
+    if boolean == true and num > 0 then
       for i = 1, tonumber(num), 1 do
         r.InsertTrackAtIndex(0, true)
       end
@@ -40,10 +41,13 @@ function Main()
         r.SetTrackSelected(track, 0)
       end
       media_razor_group()
+    else
+    r.ShowMessageBox("You can't have zero tracks in a folder!", "Create Folder", 0)
     end
   else
-    r.ShowMessageBox("Please use this function with an empty project", "Create Destination Group", 0)
+    r.ShowMessageBox("Please use this function with an empty project", "Create Folder", 0)
   end
+  r.Undo_EndBlock("Create Folder", -1)
 end
 
 function track_check()

@@ -28,7 +28,13 @@ function Main()
   r.Undo_BeginBlock()
 
   if r.CountTracks(0) == 0 then
-    create_destination_group()
+    boolean, num = r.GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
+    num = tonumber(num)
+    if boolean == true and num > 1 then 
+      create_destination_group() 
+    elseif boolean == true and num < 2 then
+      r.ShowMessageBox("You need 2 or more tracks to make a source group!","Create Source Groups",0)
+    end
     if folder_check() == 1 then
       create_source_groups()
       media_razor_group()
@@ -49,24 +55,20 @@ function Main()
 end
 
 function create_destination_group()
-  local boolean, num = r.GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
-
-  if boolean == true then
-    for i = 1, tonumber(num), 1 do
+    for i = 1, num, 1 do
       r.InsertTrackAtIndex(0, true)
     end
-    for i = 0, tonumber(num) - 1, 1 do
+    for i = 0, num - 1, 1 do
       local track = r.GetTrack(0, i)
       r.SetTrackSelected(track, 1)
     end
     local make_folder = r.NamedCommandLookup("_SWS_MAKEFOLDER")
     r.Main_OnCommand(make_folder, 0) -- make folder from tracks
-    for i = 0, tonumber(num) - 1, 1 do
+    for i = 0, num - 1, 1 do
       local track = r.GetTrack(0, i)
       r.SetTrackSelected(track, 0)
     end
   end
-end
 
 function solo()
   local track = r.GetSelectedTrack(0, 0)
