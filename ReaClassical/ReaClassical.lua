@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 23.03
+@version 23.04
 @changelog
-  v23.03
-  Add rudimentary help system
+  v23.04
+  Add feedback when creating folders and source groups
+  Add extra conditional to avoid error if trying to enter zero tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
