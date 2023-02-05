@@ -1,6 +1,10 @@
 ### Instructions for installing ReaClassical
 
-#### Quick Install on Linux, MacOS & Windows
+For just the scripts, import my repo into ReaPack by right-clicking and copying this [link](https://github.com/chmaha/ReaClassical/raw/main/index.xml).
+
+For the complete experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
+
+#### Quick Full Portable Install on Linux, MacOS & Windows
 
 Download the script for your system and run where you want to download a portable install of ReaClassical:
 ##### Linux
