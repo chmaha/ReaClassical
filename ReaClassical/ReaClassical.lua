@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.05
+@version 23.06
 @changelog
-  v23.05
-   Add guard clause if no take names present with user-friendly message
+  v23.06
+  Display message that edit classical fade only works while in fade editor
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
