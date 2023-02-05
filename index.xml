@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="8df945ed069480255c1c56f874364d96b776063a">
+<index version="1" name="chmaha Scripts" commit="e7ad4f959141a271f8a916fb4cd7df7c41d9427a">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -69,6 +69,36 @@
       <version name="1.0" author="chmaha" time="2023-01-26T13:27:41Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/3608693307202fdea254114fafc50979f11bbd04/RCPlugs/Elsa.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Eurydice_Bus.jsfx" type="effect" desc="Eurydice Bus">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestConsole2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestConsole2Buss (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-05T22:44:04Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e7ad4f959141a271f8a916fb4cd7df7c41d9427a/RCPlugs/Eurydice_Bus.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Eurydice_Channel.jsfx" type="effect" desc="Eurydice Channel">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestConsole2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestConsole2Channel (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-05T22:44:04Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e7ad4f959141a271f8a916fb4cd7df7c41d9427a/RCPlugs/Eurydice_Channel.jsfx</source>
       </version>
     </reapack>
     <reapack name="flattop.jsfx" type="effect" desc="Flattop (ReaClassical.org)">
