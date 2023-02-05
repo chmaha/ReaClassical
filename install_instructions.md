@@ -2,7 +2,7 @@
 
 To just use the scripts without any customization of theme, keymaps, toolbar etc, import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml).
 
-For the complete experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
+For the complete and recommended experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
 
 #### Quick Full Portable Install on Linux, MacOS & Windows
 
