@@ -1,6 +1,6 @@
 ### Instructions for installing ReaClassical
 
-For just the scripts, import my repo into ReaPack by right-clicking and copying this [link](https://github.com/chmaha/ReaClassical/raw/main/index.xml).
+To just use the scripts without any customization of theme, keymaps, toolbar etc, import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml).
 
 For the complete experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
 
