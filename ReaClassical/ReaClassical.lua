@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.04
+@version 23.05
 @changelog
-  v23.04
-  Add feedback when creating folders and source groups
-  Add extra conditional to avoid error if trying to enter zero tracks
+  v23.05
+   Add guard clause if no take names present with user-friendly message
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
