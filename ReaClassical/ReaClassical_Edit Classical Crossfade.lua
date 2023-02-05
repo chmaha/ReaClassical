@@ -51,6 +51,8 @@ if fade_editor_state == 1 and item ~= nil then
     -- r.Main_OnCommand(go_home, 0) -- XENAKIOS_TVPAGEHOME
     local center_scroll = r.NamedCommandLookup("_SWS_HSCROLL50") -- SWS: Horizontal scroll to put edit cursor at 50%
     r.Main_OnCommand(center_scroll, 0)
+else
+    r.ShowMessageBox('This ReaClassical script only works while in the fade editor (F)', "Edit Classical Crossfade", 0)
 end
 
 r.Undo_EndBlock('Edit Classical Crossfade', 0)
