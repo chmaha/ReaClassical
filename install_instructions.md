@@ -1,5 +1,4 @@
 ### Instructions for installing ReaClassical
-#### Tested with REAPER v6.73
 
 #### Quick Install on Linux, MacOS & Windows
 
