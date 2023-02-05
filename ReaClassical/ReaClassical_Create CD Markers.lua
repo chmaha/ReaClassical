@@ -89,6 +89,10 @@ function cd_markers()
       marker_count = marker_count + 1
     end
   end
+  if marker_count == 0 then
+    r.ShowMessageBox('Please add take names to all items that you want to be CD tracks (Select item then press F2)', "No track markers created", 0)
+    return
+  end
   r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(final_end) + 7, previous_takename, marker_count)
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info()
@@ -96,8 +100,6 @@ function cd_markers()
     end_marker(metadata_table, code_table)
     renumber_markers()
     add_pregap()
-  else
-    r.ShowMessageBox('Please add some take names to media items (F2)', "No track markers created", 0)
   end
   r.Main_OnCommand(40753, 0) -- Snapping: Disable snap
 end
