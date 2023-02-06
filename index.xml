@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="2f7c835d9929e21d5811462b6c07195403c6ef64">
+<index version="1" name="chmaha Scripts" commit="733e52601c23aef01e3f24f1330df8998a708c14">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -603,6 +603,21 @@
       <version name="1.0" author="chmaha" time="2023-02-03T11:51:31Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/92ec505101bd8c6bc8b8288c7ac426c7be04b307/RCPlugs/WTFDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Xonnos Dither.jsfx" type="effect" desc="Xonnos Dither (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PaulDither" & "DoublePaul" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PaulDither (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DoublePaul (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-06T19:33:07Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/733e52601c23aef01e3f24f1330df8998a708c14/RCPlugs/Xonnos%20Dither.jsfx</source>
       </version>
     </reapack>
   </category>
