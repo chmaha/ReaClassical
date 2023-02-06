@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="fa4304ea426d062d3d1ab47b47310c7928dbe54e">
+<index version="1" name="chmaha Scripts" commit="2f7c835d9929e21d5811462b6c07195403c6ef64">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -304,6 +304,21 @@
       <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Sub_Out.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Compressor and Gate Uses DSP from airwindows "Dynamics" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dynamics (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-06T11:09:13Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/2f7c835d9929e21d5811462b6c07195403c6ef64/RCPlugs/port-and-lemon.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
