@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="fffaa8fcce433b8b44bff26edecc06047276566b">
+<index version="1" name="chmaha Scripts" commit="e149ac22e9f5e0674288c2bc44f6993709e66e9e">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -476,6 +476,10 @@
       <version name="1.0" author="chmaha" time="2023-01-12T18:30:32Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/b0cc0585ee83eabbe2f356d73911bbcc34074f70/RCPlugs/RCLimiter.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-07T22:26:20Z">
+        <changelog><![CDATA[Remove erroneous dBTP label. Not a true-peak limiter...]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/e149ac22e9f5e0674288c2bc44f6993709e66e9e/RCPlugs/RCLimiter.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK (ReaClassical.org)">
