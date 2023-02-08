@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="18c00aef7c84806ec5c0b0d2384adea3eb7687a3">
+<index version="1" name="chmaha Scripts" commit="69f342c3a84aa9a2897769a02aa498430ae36a1f">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -469,7 +469,7 @@
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP with permission from Smooth Limiter by Geraint Luff https://geraintluff.github.io/jsfx/ https://signalsmith-audio.co.uk/\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP with permission from Smooth Limiter by Geraint Luff Uses oversampling code by user "Smashed Transistors" (https://forum.cockos.com/showthread.php?t=178543) https://geraintluff.github.io/jsfx/ https://signalsmith-audio.co.uk/\par}
 }
 ]]></description>
       </metadata>
@@ -480,6 +480,10 @@
       <version name="1.1" author="chmaha" time="2023-02-07T22:26:20Z">
         <changelog><![CDATA[Remove erroneous dBTP label. Not a true-peak limiter...]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/e149ac22e9f5e0674288c2bc44f6993709e66e9e/RCPlugs/RCLimiter.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-02-08T13:54:55Z">
+        <changelog><![CDATA[Add 4x oversampling. It's back to being a TP limiter!]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/69f342c3a84aa9a2897769a02aa498430ae36a1f/RCPlugs/RCLimiter.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK (ReaClassical.org)">
