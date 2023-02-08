@@ -70,7 +70,7 @@ function flush() (
 );
 
 function update() ( 
-	(s4 == 0 && slider4 == 1) ? flush();
+	(s4 != slider4) ? flush();
 	slider4 == 0 ? (s4 = 0;over_srate = 4 * srate) : (s4 = 1;over_srate = srate); 
 	attacksamples = ceil(10*srate/1000);
 	releasesamples = ceil(slider3*srate/1000);
