@@ -1,7 +1,8 @@
 desc:RCLimiter (ReaClassical.org)
 author: chmaha
-version: 1.2
+version: 1.3
 Changelog:
+  Label shows dbTP again
   Add 4x oversampling. It's back to being a TP limiter!
 about:
   Uses DSP with permission from Smooth Limiter by Geraint Luff
@@ -15,7 +16,7 @@ out_pin:Left
 out_pin:Right
 
 slider1:0<-12,12,0.1>Input Gain (dB)
-slider2:-1<-3,0,0.1>Threshold (dB)
+slider2:-1<-3,0,0.1>Threshold (dBTP)
 slider3:10<0.1,100,0.1>Lookahead (ms)
 slider4:50<1,200,0.1>Release (ms)
 // slider5:0<0,1,0.01>Distortion
