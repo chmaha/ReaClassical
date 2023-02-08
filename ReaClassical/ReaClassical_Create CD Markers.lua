@@ -40,7 +40,7 @@ function Main()
 end
 
 function get_info()
-  local metadata_saved = r.GetExtState("Create CD Markers", "Album Metadata")
+  local _, metadata_saved = r.GetProjExtState(0, "Create CD Markers", "Album Metadata")
   local ret, user_inputs, metadata_table
   if metadata_saved ~= "" then
     ret, user_inputs = r.GetUserInputs('CD/DDP Album information', 4,
@@ -188,15 +188,15 @@ function frame_check(pos)
 end
 
 function save_metadata(user_inputs)
-  r.SetExtState("Create CD Markers", "Album Metadata", user_inputs, false)
+  r.SetProjExtState(0, "Create CD Markers", "Album Metadata", user_inputs)
 end
 
 function save_codes(code_input)
-  r.SetExtState("Create CD Markers", "Codes", code_input, false)
+  r.SetProjExtState(0, "Create CD Markers", "Codes", code_input)
 end
 
 function add_codes()
-  local code_saved = r.GetExtState("Create CD Markers", "Codes")
+  local _, code_saved = r.GetProjExtState(0, "Create CD Markers", "Codes")
   local codes_response = r.ShowMessageBox("Add UPC/ISRC codes?", "CD codes", 4)
   local ret2
   local code_input = ""
