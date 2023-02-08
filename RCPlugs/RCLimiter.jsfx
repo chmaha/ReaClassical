@@ -2,6 +2,7 @@ desc:RCLimiter (ReaClassical.org)
 author: chmaha
 version: 1.3
 Changelog:
+  Reduce lookahead range
   Label shows dBTP again
   Add 4x oversampling. It's back to being a TP limiter!
 about:
@@ -17,7 +18,7 @@ out_pin:Right
 
 slider1:0<-12,12,0.1>Input Gain (dB)
 slider2:-1<-3,0,0.1>Threshold (dBTP)
-slider3:10<0.1,100,0.1>Lookahead (ms)
+slider3:10<10,100,0.1>Lookahead (ms)
 slider4:50<1,200,0.1>Release (ms)
 // slider5:0<0,1,0.01>Distortion
 
@@ -63,8 +64,8 @@ releasestartvalue = 1;
 releaseindex = over_srate;
 
 function update() (
-	attacksamples = ceil(slider3*over_srate/1000);
-	releasesamples = ceil(slider4*over_srate/1000);
+	attacksamples = ceil(slider3*srate/1000);
+	releasesamples = ceil(slider4*srate/1000);
 	delaysamples = ceil(attacksamples);
 	limit = pow(10, slider2/20);
 	pregain_factor = pow(10, slider1/20);
