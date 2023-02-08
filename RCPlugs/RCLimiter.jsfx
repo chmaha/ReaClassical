@@ -2,7 +2,7 @@ desc:RCLimiter (ReaClassical.org)
 author: chmaha
 version: 1.3
 Changelog:
-  Label shows dbTP again
+  Label shows dBTP again
   Add 4x oversampling. It's back to being a TP limiter!
 about:
   Uses DSP with permission from Smooth Limiter by Geraint Luff
