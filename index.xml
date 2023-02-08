@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="bf5d9211b9d4ef0ec4146b3fd674e46fe6acaa37">
+<index version="1" name="chmaha Scripts" commit="54c1f1ae2a3f122845ed605d3372e6c8d7da73d3">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -494,6 +494,10 @@ Add 4x oversampling. It's back to being a TP limiter!]]></changelog>
       <version name="1.4" author="chmaha" time="2023-02-08T19:17:56Z">
         <changelog><![CDATA[Remove lookahead slider (set permanently to 10ms), change release default to 10ms]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/bf5d9211b9d4ef0ec4146b3fd674e46fe6acaa37/RCPlugs/RCLimiter.jsfx</source>
+      </version>
+      <version name="1.5" author="chmaha" time="2023-02-08T21:11:32Z">
+        <changelog><![CDATA[Add true peak enable dropdown]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/54c1f1ae2a3f122845ed605d3372e6c8d7da73d3/RCPlugs/RCLimiter.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK (ReaClassical.org)">
