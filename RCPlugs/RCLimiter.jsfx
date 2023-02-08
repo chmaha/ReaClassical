@@ -1,10 +1,11 @@
 desc:RCLimiter (ReaClassical.org)
 author: chmaha
-version: 1.1
+version: 1.2
 Changelog:
-  Remove erroneous dBTP label. Not a true-peak limiter...
+  Add 4x oversampling. It's back to being a TP limiter!
 about:
   Uses DSP with permission from Smooth Limiter by Geraint Luff
+  Uses oversampling code by user "Smashed Transistors" (https://forum.cockos.com/showthread.php?t=178543)
   https://geraintluff.github.io/jsfx/
   https://signalsmith-audio.co.uk/
 
@@ -21,13 +22,16 @@ slider4:50<1,200,0.1>Release (ms)
 
 @init
 
-bufferlength = ceil(srate*1);
+over_srate = 4 * srate;
+
+bufferlength = ceil(over_srate*1);
 buffer0 = 0;
 buffer1 = buffer0 + bufferlength;
 bufferpeak = buffer1 + bufferlength;
 freemem = bufferpeak + bufferlength;
 
-overcorrect_factor = 1.002; // about 0.02dB
+overcorrect_factor = 1.1; // about 0.1dB
+
 
 function tanh(x) (
 	x >= 20 ? (
@@ -55,11 +59,11 @@ releasesamples = 100;
 limit = 1;
 
 releasestartvalue = 1;
-releaseindex = srate;
+releaseindex = over_srate;
 
 function update() (
-	attacksamples = ceil(slider3*srate/1000);
-	releasesamples = ceil(slider4*srate/1000);
+	attacksamples = ceil(slider3*over_srate/1000);
+	releasesamples = ceil(slider4*over_srate/1000);
 	delaysamples = ceil(attacksamples);
 	limit = pow(10, slider2/20);
 	pregain_factor = pow(10, slider1/20);
@@ -95,96 +99,109 @@ pdc_top_ch = 2;
 pdc_delay = delaysamples - 1;
 
 @sample
-spl0 *= pregain_factor;
-spl1 *= pregain_factor;
-truepeak = max(abs(spl0), abs(spl1));
-releasepeak = limit;
-releaseindex < releasesamples ? (
-	releasepeak = limit + (releasestartvalue - limit)*releasewindow(releaseindex/releasesamples);
-	releaseindex += 1;
+function sat(x)(  min(1,max(-1,x)); );
+function dec2(x0 x1) 
+	instance(R1 R2 R3 R4 R5 R6) local(h5x0 h3x0 h1x0) (
+	h5x0 = 0.01300578 * x0; h3x0 = -0.0635838 * x0; h1x0 = 0.300578 * x0;
+	R6 = R5 + h5x0; R5 = R4 + h3x0; R4 = R3 + h1x0;
+	R3 = R2 + h1x0 + 0.5 * x1;  R2 = R1 + h3x0;  R1 = h5x0;
+	R6;
 );
-peak = max(releasepeak, truepeak);
-//peak = max(peak - releasegradient, truepeak);
-
-peak < limit ? (
-	peak = limit;
-	releasestartvalue = limit;
-	releaseindex = srate;
-) : (truepeak == peak) ? (
-	// It's a new peak
-	peak *= overcorrect_factor; // Add just a little bit extra, in the hopes that we don't have to do this again soon
-
-	// For future decay
-	//releasegradient = (peak - limit)/releasesamples;
-	releasestartvalue = peak;
-	releaseindex = 0;
-	// Attempt to extend an existing attack
-	i = 1;
-	startpeak = limit;
-	foundabove = 0;
-	foundintersection = 0;
-
-	intersectionindex = -1;
-	bestcorrection = -1;
-	bestindex = delaysamples - 1;
-	beststartpeak = limit;
-	while (i < attacksamples && !foundintersection) (
-		window = attackwindow(1 - i/attacksamples);
-
-		readpos = writepos - i;
-		readpos < 0 ? readpos += bufferlength;
-		oldpeak = bufferpeak[readpos];
-
-		newstartpeak = peak + (oldpeak - peak)/(1 - window);
-		newstartpeak > startpeak ? (
-			// Keep track of the smallest alteration,
-			//     but with a bias towards f
-			diff = (newstartpeak - startpeak)*(1 - window);
-			(bestcorrection < 0 || diff < bestcorrection) ? (
-				bestcorrection = diff;
-				bestindex = i;
-				beststartpeak = newstartpeak;
-			);
-
-			startpeak = newstartpeak;
-			intersectionindex = i;
-			foundabove = 1;
-		) : (foundabove) ? (
-			foundintersection = 1;
-		);
-		i += 1;
-	);
-
-	foundintersection ? (
-		i = 0;
-		while (i < intersectionindex) (
-			window = attackwindow(1 - i/attacksamples);
-
-			readpos = writepos - i;
-			readpos < 0 ? readpos += bufferlength;
-			newpeak = startpeak + (peak - startpeak)*window;
-			bufferpeak[readpos] = newpeak;
-			i += 1;
-		);
-	) : (
-		i = 0;
-		while (i < bestindex) (
-			window = attackwindow(1 - i/attacksamples);
-
-			readpos = writepos - i;
-			readpos < 0 ? readpos += bufferlength;
-			newpeak = beststartpeak + (peak - beststartpeak)*window;
-
-			faderatio = (1 - i/bestindex);
-			fadewindow = 1 - (1 - faderatio)*(1 - faderatio);
-			bufferpeak[readpos] += (newpeak - bufferpeak[readpos])*fadewindow;
-			i += 1;
-		);
-	);
+function dec4(x0 x1 x2 x3) (
+this.dec2(this.sub.dec2(x0, x1), this.sub.dec2(x2, x3)); 
 );
 
-buffer0[writepos] = spl0;
-buffer1[writepos] = spl1;
+function over_sample()(
+    over_spl0 *= pregain_factor;
+    over_spl1 *= pregain_factor;
+    truepeak = max(abs(over_spl0), abs(over_spl1));
+    releasepeak = limit;
+    releaseindex < releasesamples ? (
+	    releasepeak = limit + (releasestartvalue - limit)*releasewindow(releaseindex/releasesamples);
+	    releaseindex += 1;
+    );
+    peak = max(releasepeak, truepeak);
+    //peak = max(peak - releasegradient, truepeak);
+
+    peak < limit ? (
+	    peak = limit;
+	    releasestartvalue = limit;
+	    releaseindex = over_srate;
+    ) : (truepeak == peak) ? (
+	    // It's a new peak
+	    peak *= overcorrect_factor; // Add just a little bit extra, in the hopes that we don't have to do this again soon
+
+	    // For future decay
+	    //releasegradient = (peak - limit)/releasesamples;
+	    releasestartvalue = peak;
+	    releaseindex = 0;
+	    // Attempt to extend an existing attack
+	    i = 1;
+	    startpeak = limit;
+	    foundabove = 0;
+	    foundintersection = 0;
+
+	    intersectionindex = -1;
+	    bestcorrection = -1;
+	    bestindex = delaysamples - 1;
+	    beststartpeak = limit;
+	    while (i < attacksamples && !foundintersection) (
+		    window = attackwindow(1 - i/attacksamples);
+
+		    readpos = writepos - i;
+		    readpos < 0 ? readpos += bufferlength;
+		    oldpeak = bufferpeak[readpos];
+
+		    newstartpeak = peak + (oldpeak - peak)/(1 - window);
+		    newstartpeak > startpeak ? (
+			    // Keep track of the smallest alteration,
+			    //     but with a bias towards f
+			    diff = (newstartpeak - startpeak)*(1 - window);
+			    (bestcorrection < 0 || diff < bestcorrection) ? (
+				    bestcorrection = diff;
+				    bestindex = i;
+				    beststartpeak = newstartpeak;
+			    );
+
+			    startpeak = newstartpeak;
+			    intersectionindex = i;
+			    foundabove = 1;
+		    ) : (foundabove) ? (
+			    foundintersection = 1;
+		    );
+		    i += 1;
+	    );
+
+	    foundintersection ? (
+		    i = 0;
+		    while (i < intersectionindex) (
+			    window = attackwindow(1 - i/attacksamples);
+
+			    readpos = writepos - i;
+			    readpos < 0 ? readpos += bufferlength;
+			    newpeak = startpeak + (peak - startpeak)*window;
+			    bufferpeak[readpos] = newpeak;
+			    i += 1;
+		    );
+	    ) : (
+		    i = 0;
+		    while (i < bestindex) (
+			    window = attackwindow(1 - i/attacksamples);
+
+			    readpos = writepos - i;
+			    readpos < 0 ? readpos += bufferlength;
+			    newpeak = beststartpeak + (peak - beststartpeak)*window;
+
+			    faderatio = (1 - i/bestindex);
+			    fadewindow = 1 - (1 - faderatio)*(1 - faderatio);
+			    bufferpeak[readpos] += (newpeak - bufferpeak[readpos])*fadewindow;
+			    i += 1;
+		    );
+	    );
+);
+
+buffer0[writepos] = over_spl0;
+buffer1[writepos] = over_spl1;
 bufferpeak[writepos] = peak;
 
 writepos += 1;
@@ -200,5 +217,28 @@ oldpeak = bufferpeak[readpos];
 B = scaling_for_peak(oldpeak, limit);
 A = distortion_for_peak(oldpeak, limit);
 
-spl0 = dist(buffer0[readpos]);
-spl1 = dist(buffer1[readpos]);
+over_spl0 = dist(buffer0[readpos]);
+over_spl1 = dist(buffer1[readpos]);
+);
+
+delta_spl0 = 0.25 * (spl0 - interp_spl0);
+delta_spl1 = 0.25 * (spl1 - interp_spl1);
+
+over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+over_sample(); spl0_0 = over_spl0; spl1_0 = over_spl1;
+
+over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+over_sample(); spl0_1 = over_spl0; spl1_1 = over_spl1;
+
+over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+over_sample(); spl0_2 = over_spl0; spl1_2 = over_spl1;
+
+over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+over_sample(); spl0_3 = over_spl0; spl1_3 = over_spl1;
+
+spl0 =  left.dec4(spl0_0, spl0_1, spl0_2, spl0_3);
+spl1 = right.dec4(spl1_0, spl1_1, spl1_2, spl1_3);
