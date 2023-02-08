@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="81f00f40f10eaeb31fe40d0cf17f36f74995f2bd">
+<index version="1" name="chmaha Scripts" commit="6b7831c3daaf5304eeffa5b05536c38611e68dad">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -488,7 +488,7 @@
       <version name="1.3" author="chmaha" time="2023-02-08T14:00:41Z">
         <changelog><![CDATA[Label shows dBTP again
 Add 4x oversampling. It's back to being a TP limiter!]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/81f00f40f10eaeb31fe40d0cf17f36f74995f2bd/RCPlugs/RCLimiter.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/6b7831c3daaf5304eeffa5b05536c38611e68dad/RCPlugs/RCLimiter.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK (ReaClassical.org)">
