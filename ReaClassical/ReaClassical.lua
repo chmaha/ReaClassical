@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.06
+@version 23.07
 @changelog
-  v23.06
-  Display message that edit classical fade only works while in fade editor
+  v23.07
+  ISRC and album metadata now saved to project file
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
