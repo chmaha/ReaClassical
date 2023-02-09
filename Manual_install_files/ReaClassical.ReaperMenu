@@ -16,7 +16,7 @@ icon_13=Insert with timestretching.png
 icon_14=delete with ripple.png
 icon_15=delete leaving silence.png
 icon_16=Fade Editor.png
-icon_17=Lock Toggle.png
+icon_17=toolbar_misc_tea_mmmmm_tea.png
 item_0=_RS63665092232578f8c8d10c5936ca5013a9ecab51 Script: ReaClassical_Whole Project View.lua
 item_1=_RSfc11d994a7848e13d22db277971a3afd01ba1cea Script: ReaClassical_Create Folder.lua
 item_2=_RSd7bf4eb95ac7700edb48a275153ad1fc1ce3aff6 Script: ReaClassical_Create source groups (vertical).lua
@@ -34,5 +34,5 @@ item_13=_RS80d337effa4b34bfbf896a4f3e0b85a7a93254ec Script: ReaClassical_Insert 
 item_14=_RS85a54e40656d9858d893dd178e347be59d49d90e Script: ReaClassical_Delete With Ripple.lua
 item_15=_RSe8d03b09dbdb5424af5ee4587891eb36be04c131 Script: ReaClassical_Delete Leaving Silence.lua
 item_16=_RScc8cfd9f58e03fed9f8f467b7dae42089b826067 Script: ReaClassical_Classical Crossfade Editor.lua
-item_17=_RS63db9a9d1dae64f15f6ca0b179bb5ea0bc4d06f6 Script: ReaClassical_Lock_toggle.lua
+item_17=_RSa00edf5f46de174e455de2f03cf326ab3db034b9 Script: ReaClassical_Create CD Markers.lua
 
