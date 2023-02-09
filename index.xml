@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="32f9f803d1992ed61bdaa679220f9a10574eb806">
+<index version="1" name="chmaha Scripts" commit="cce0e44d91c97dc086769cce9dda5b5fc08cf7fd">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -942,18 +942,18 @@ ISRC and album metadata now saved to project file]]></changelog>
       </version>
     </reapack>
     <reapack name="ReaClassical.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:57:49Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/fce249a35557a00d7d283566b29efc4089a28118/ReaClassical/ReaClassical.RPP</source>
+      <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
+        <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical.RPP</source>
       </version>
     </reapack>
     <reapack name="ReaClassical_Eurydice.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:57:49Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/fce249a35557a00d7d283566b29efc4089a28118/ReaClassical/ReaClassical_Eurydice.RPP</source>
+      <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
+        <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical_Eurydice.RPP</source>
       </version>
     </reapack>
     <reapack name="ReaClassical_Orpheus.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:57:49Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/fce249a35557a00d7d283566b29efc4089a28118/ReaClassical/ReaClassical_Orpheus.RPP</source>
+      <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
+        <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical_Orpheus.RPP</source>
       </version>
     </reapack>
   </category>
