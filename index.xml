@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="c4b866c4a4f75d6cd79a831981eec1f39c63af99">
+<index version="1" name="chmaha Scripts" commit="fce249a35557a00d7d283566b29efc4089a28118">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -937,21 +937,19 @@ ISRC and album metadata now saved to project file]]></changelog>
         <source main="main" file="ReaClassical_Help.lua">https://github.com/chmaha/ReaClassical/raw/18c00aef7c84806ec5c0b0d2384adea3eb7687a3/ReaClassical/ReaClassical_Help.lua</source>
       </version>
     </reapack>
-  </category>
-  <category name="ReaClassical_Project _Templates">
     <reapack name="ReaClassical.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:54:09Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/c4b866c4a4f75d6cd79a831981eec1f39c63af99/ReaClassical_Project%20_Templates/ReaClassical.RPP</source>
+      <version name="1.0" time="2023-02-09T13:57:49Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/fce249a35557a00d7d283566b29efc4089a28118/ReaClassical/ReaClassical.RPP</source>
       </version>
     </reapack>
     <reapack name="ReaClassical_Eurydice.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:54:09Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/c4b866c4a4f75d6cd79a831981eec1f39c63af99/ReaClassical_Project%20_Templates/ReaClassical_Eurydice.RPP</source>
+      <version name="1.0" time="2023-02-09T13:57:49Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/fce249a35557a00d7d283566b29efc4089a28118/ReaClassical/ReaClassical_Eurydice.RPP</source>
       </version>
     </reapack>
     <reapack name="ReaClassical_Orpheus.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:54:09Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/c4b866c4a4f75d6cd79a831981eec1f39c63af99/ReaClassical_Project%20_Templates/ReaClassical_Orpheus.RPP</source>
+      <version name="1.0" time="2023-02-09T13:57:49Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/fce249a35557a00d7d283566b29efc4089a28118/ReaClassical/ReaClassical_Orpheus.RPP</source>
       </version>
     </reapack>
   </category>
