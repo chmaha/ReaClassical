@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.07
+@version 23.08
 @changelog
-  v23.07
-  ISRC and album metadata now saved to project file
+  v23.08
+  Whole Project View is now a toggle
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
