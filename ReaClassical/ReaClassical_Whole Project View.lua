@@ -22,12 +22,24 @@ local r = reaper
 r.PreventUIRefresh(1)
 r.Undo_BeginBlock()
 
-r.Main_OnCommand(40296, 0) -- Track: Select all tracks
-local zoom = r.NamedCommandLookup("_SWS_VZOOMFIT")
-r.Main_OnCommand(zoom, 0) -- SWS: Vertical zoom to selected tracks
-r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-r.Main_OnCommand(40295, 0) -- View: Zoom out project
+local _, zs = r.GetProjExtState(0, "Whole Project View", "Zoom Start")
+local _, ze = r.GetProjExtState(0, "Whole Project View", "Zoom End")
+zs = tonumber(string.format("%.3f", zs))
+ze = tonumber(string.format("%.3f", ze))
+local inits, inite = r.GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
+inits = tonumber(string.format("%.3f", inits))
+inite = tonumber(string.format("%.3f", inite))
 
+if inits == zs and inite == ze then
+r.Main_OnCommand(40848, 0) -- restore previous zoom
+else
+r.Main_OnCommand(40182, 0) -- Select all items
+r.Main_OnCommand(41622, 0) -- toggle zoom to items
+local zooms, zoome = r.GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
+r.SetProjExtState(0, "Whole Project View", "Zoom Start", zooms)
+r.SetProjExtState(0, "Whole Project View", "Zoom End", zoome)
+r.Main_OnCommand(40769, 0) -- unselect items
+end
 r.Undo_EndBlock('Whole Project View', 0)
 r.PreventUIRefresh(-1)
 r.UpdateArrange()
