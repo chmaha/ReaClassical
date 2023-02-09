@@ -22,6 +22,10 @@ local r = reaper
 r.PreventUIRefresh(1)
 r.Undo_BeginBlock()
 
+if r.CountMediaItems(0) == 0 then 
+reaper.ShowMessageBox("The script cannot be used on an empty project", "Whole Project View", 0)
+return 
+end
 local _, zs = r.GetProjExtState(0, "Whole Project View", "Zoom Start")
 local _, ze = r.GetProjExtState(0, "Whole Project View", "Zoom End")
 zs = tonumber(string.format("%.3f", zs))
