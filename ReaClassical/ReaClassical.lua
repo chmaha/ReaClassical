@@ -2,8 +2,9 @@
 @author chmaha
 @version 23.08
 @changelog
-  v23.08
+  v23.08  
   Whole Project View is now a toggle
+  Add guard clause for empty project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
