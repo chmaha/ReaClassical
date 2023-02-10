@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="faa08f39428238a99100e5fda3be55d36341fbea">
+<index version="1" name="chmaha Scripts" commit="9e593542c14b95257c2a6870c83d51d16b4c4bea">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -66,6 +66,21 @@
       <version name="1.4" author="chmaha" time="2023-02-01T10:08:38Z">
         <changelog><![CDATA[Reduce ranges and set new defaults]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/c6485ef6d33b557379d4863471be0e381449f928/RCPlugs/Amphitrite.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Aurora.jsfx" type="effect" desc="Aurora (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Dubly" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-10T10:50:01Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/9e593542c14b95257c2a6870c83d51d16b4c4bea/RCPlugs/Aurora.jsfx</source>
       </version>
     </reapack>
     <reapack name="Cora.jsfx" type="effect" desc="Cora (ReaClassical.org)">
