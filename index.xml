@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="6c91e7a676226539be955ca656453562f9f2010c">
+<index version="1" name="chmaha Scripts" commit="e9db46a87478f29ea9fac0f6d2ef99b7db60392e">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -80,7 +80,7 @@
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-10T10:50:01Z">
         <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/6c91e7a676226539be955ca656453562f9f2010c/RCPlugs/Aurora.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/e9db46a87478f29ea9fac0f6d2ef99b7db60392e/RCPlugs/Aurora.jsfx</source>
       </version>
     </reapack>
     <reapack name="Cora.jsfx" type="effect" desc="Cora (ReaClassical.org)">
