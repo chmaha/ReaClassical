@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="ce898b6d2569ade6d44fb0ed64ce1861f6eb71d4">
+<index version="1" name="chmaha Scripts" commit="faa08f39428238a99100e5fda3be55d36341fbea">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -629,6 +629,21 @@ Add 4x oversampling. It's back to being a TP limiter!]]></changelog>
       <version name="1.2" author="chmaha" time="2023-01-17T19:02:53Z">
         <changelog><![CDATA[Add ReaClassical to description]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/Stan.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Titan.jsfx" type="effect" desc="Titan (ReaClassical.org)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Capacitor2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Capacitor2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-10T10:30:08Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/faa08f39428238a99100e5fda3be55d36341fbea/RCPlugs/Titan.jsfx</source>
       </version>
     </reapack>
     <reapack name="Twilight.jsfx" type="effect" desc="Twilight (ReaClassical.org)">
