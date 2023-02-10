@@ -27,7 +27,7 @@ local get_info, save_metadata, find_project_end, add_codes, save_codes, delete_m
 function Main()
   r.Undo_BeginBlock()
   if not first_track or NUM_OF_ITEMS == 0 then
-    r.ShowMessageBox("No media items found.","Error",0)
+    r.ShowMessageBox("Error: No media items found.","Create CD Markers",0)
     return
   end
   local choice = r.ShowMessageBox("WARNING: This will delete all existing markers, regions and item take markers. Track titles will be pulled from item take names."
