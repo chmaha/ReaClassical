@@ -1,0 +1,103 @@
+desc:Aurora (ReaClassical.org)
+author: chmaha
+version: 1.0
+Changelog:
+  Initial commit
+about:
+  Uses DSP from airwindows "Dubly" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Dubly
+slider2:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+
+UINT32_MAX = 4294967295;
+M_PI = 3.1415926535897932384626433;
+
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+A = slider1;
+B = slider2;
+
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+dublyAmount = pow(A,3)*0.16;
+outlyAmount = pow(A,3)*0.160618;
+gain = outlyAmount+1.0;
+iirAmount = 0.4275/overallscale;
+wet = B;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+iirSampleAL = (iirSampleAL * (1.0 - iirAmount)) + (inputSampleL * iirAmount);
+doubly = inputSampleL - iirSampleAL;
+(doubly > 1.0) ? doubly = 1.0; (doubly < -1.0) ? doubly = -1.0;
+(doubly > 0) ? doubly = log(1.0+(255*abs(doubly)))/2.40823996531;
+(doubly < 0) ? doubly = -log(1.0+(255*abs(doubly)))/2.40823996531;
+inputSampleL += doubly*dublyAmount;
+
+iirSampleAR = (iirSampleAR * (1.0 - iirAmount)) + (inputSampleR * iirAmount);
+doubly = inputSampleR - iirSampleAR;
+(doubly > 1.0) ? doubly = 1.0; (doubly < -1.0) ? doubly = -1.0;
+(doubly > 0) ? doubly = log(1.0+(255*abs(doubly)))/2.40823996531;
+(doubly < 0) ? doubly = -log(1.0+(255*abs(doubly)))/2.40823996531;
+inputSampleR += doubly*dublyAmount;
+
+inputSampleL *= gain;
+inputSampleL = sin(inputSampleL);
+inputSampleL /= gain;
+
+inputSampleR *= gain;
+inputSampleR = sin(inputSampleR);
+inputSampleR /= gain;
+
+iirSampleBL = (iirSampleBL * (1.0 - iirAmount)) + (inputSampleL * iirAmount);
+doubly = inputSampleL - iirSampleBL;
+(doubly > 1.0) ? doubly = 1.0; (doubly < -1.0) ? doubly = -1.0;
+(doubly > 0) ? doubly = log(1.0+(255*abs(doubly)))/2.40823996531;
+(doubly < 0) ? doubly = -log(1.0+(255*abs(doubly)))/2.40823996531;
+inputSampleL -= doubly*outlyAmount;
+
+iirSampleBR = (iirSampleBR * (1.0 - iirAmount)) + (inputSampleR * iirAmount);
+doubly = inputSampleR - iirSampleBR;
+(doubly > 1.0) ? doubly = 1.0; (doubly < -1.0) ? doubly = -1.0;
+(doubly > 0) ? doubly = log(1.0+(255*abs(doubly)))/2.40823996531;
+(doubly < 0) ? doubly = -log(1.0+(255*abs(doubly)))/2.40823996531;
+inputSampleR -= doubly*outlyAmount;
+//end Dubly decode
+
+(wet !=1.0) ? (
+  inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0-wet));
+  inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
+);
+
+
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
