@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="ee787f8a67f9ee5ecf513d3d11bef5672d273e75">
+<index version="1" name="chmaha Scripts" commit="21285fbd1be225629cdac9641c71ea03bf61d8f3">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -1071,6 +1071,11 @@ Tweak error message in Create CD Markers script if no items present]]></changelo
     <reapack name="ReaClassical.RPP" type="projecttpl">
       <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
         <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical.RPP</source>
+      </version>
+    </reapack>
+    <reapack name="ReaClassical_Cora.RPP" type="projecttpl">
+      <version name="1.0" author="chmaha" time="2023-02-10T14:37:17Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/21285fbd1be225629cdac9641c71ea03bf61d8f3/ReaClassical/ReaClassical_Cora.RPP</source>
       </version>
     </reapack>
     <reapack name="ReaClassical_Eurydice.RPP" type="projecttpl">
