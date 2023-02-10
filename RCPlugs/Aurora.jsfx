@@ -8,7 +8,7 @@ about:
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly (MIT License)
   JSFX version released under GPLv3 license
 
-slider1:0.5<0,1,0.01>Ionization 
+slider1:0.5<0,1,0.01>Ionization
 slider2:1<0,1,0.01>Dry/Wet
 
 in_pin:left input
