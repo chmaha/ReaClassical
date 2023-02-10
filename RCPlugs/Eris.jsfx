@@ -1,0 +1,154 @@
+desc:Eris (ReaClassical.org)
+author: chmaha
+version: 1.0
+Changelog:
+  Initial commit
+about:
+  Uses DSP from airwindows "Focus" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Focus (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,12,0.1>Boost (dB)
+slider2:0.5<0,1,0.01>Focus
+slider3:mode=2<0,4,1{Density,Drive,Spiral,Mojo,Dyno}>Mode
+slider4:1<0,1,0.01>Output
+slider5:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+figureL = freemem; freemem += 9;
+figureR = freemem; freemem += 9;
+
+UINT32_MAX = 4294967295;
+
+x=0; while(x < 9) (figureL[x] = 0.0;figureR[x] = 0.0;x+=1;);
+
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+A = slider1/12;
+B = slider2;
+C = slider4;
+D = slider5;
+
+@block
+boost = pow(10.0,(A*12.0)/20.0);
+figureL[0] = figureR[0] = 3515.775/srate; 
+figureL[1] = figureR[1] = pow(pow(B,3)*2,2)+0.0001; 
+output = C;
+wet = D;
+
+K = tan($pi * figureR[0]);
+norm = 1.0 / (1.0 + K / figureR[1] + K * K);
+figureL[2] = figureR[2] = K / figureR[1] * norm;
+figureL[4] = figureR[4] = -figureR[2];
+figureL[5] = figureR[5] = 2.0 * (K * K - 1.0) * norm;
+figureL[6] = figureR[6] = (1.0 - K / figureR[1] + K * K) * norm;
+
+
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+inputSampleL = sin(inputSampleL);
+inputSampleR = sin(inputSampleR);
+
+tempSample = (inputSampleL * figureL[2]) + figureL[7];
+figureL[7] = -(tempSample * figureL[5]) + figureL[8];
+figureL[8] = (inputSampleL * figureL[4]) - (tempSample * figureL[6]);
+inputSampleL = tempSample;
+
+tempSample = (inputSampleR * figureR[2]) + figureR[7];
+figureR[7] = -(tempSample * figureR[5]) + figureR[8];
+figureR[8] = (inputSampleR * figureR[4]) - (tempSample * figureR[6]);
+inputSampleR = tempSample;
+
+(inputSampleL > 1.0) ? inputSampleL = 1.0;
+(inputSampleL < -1.0) ? inputSampleL = -1.0;
+(inputSampleR > 1.0) ? inputSampleR = 1.0;
+(inputSampleR < -1.0) ? inputSampleR = -1.0;
+
+inputSampleL = asin(inputSampleL);
+inputSampleR = asin(inputSampleR);
+
+
+groundSampleL = drySampleL - inputSampleL; 
+groundSampleR = drySampleR - inputSampleR; 
+inputSampleL *= boost; 
+inputSampleR *= boost; 
+
+(mode == 0) ?
+(
+    (inputSampleL > 1.570796326794897) ? inputSampleL = 1.570796326794897;
+    (inputSampleL < -1.570796326794897) ? inputSampleL = -1.570796326794897;
+    (inputSampleR > 1.570796326794897) ? inputSampleR = 1.570796326794897;
+    (inputSampleR < -1.570796326794897) ? inputSampleR = -1.570796326794897;
+    inputSampleL = sin(inputSampleL);
+    inputSampleR = sin(inputSampleR);
+) : (mode == 1) ? 
+(      
+    (inputSampleL > 1.0) ? inputSampleL = 1.0;
+    (inputSampleL < -1.0) ? inputSampleL = -1.0;
+    (inputSampleR > 1.0) ? inputSampleR = 1.0;
+    (inputSampleR < -1.0) ? inputSampleR = -1.0;
+    inputSampleL -= (inputSampleL * (abs(inputSampleL) * 0.6) * (abs(inputSampleL) * 0.6));
+    inputSampleR -= (inputSampleR * (abs(inputSampleR) * 0.6) * (abs(inputSampleR) * 0.6));
+    inputSampleL *= 1.6;
+    inputSampleR *= 1.6;
+) : (mode == 2) ?
+(
+    (inputSampleL > 1.2533141373155) ? inputSampleL = 1.2533141373155;
+    (inputSampleL < -1.2533141373155) ? inputSampleL = -1.2533141373155;
+    (inputSampleR > 1.2533141373155) ? inputSampleR = 1.2533141373155;
+    (inputSampleR < -1.2533141373155) ? inputSampleR = -1.2533141373155;
+    inputSampleL = sin(inputSampleL * abs(inputSampleL)) / abs(inputSampleL);
+    inputSampleR = sin(inputSampleR * abs(inputSampleR)) / abs(inputSampleR);
+) : (mode == 3) ?
+(
+    mojo = pow(abs(inputSampleL),0.25);
+    (mojo > 0.0) ? inputSampleL = (sin(inputSampleL * mojo * $pi * 0.5) / mojo) * 0.987654321;
+    mojo = pow(abs(inputSampleR),0.25);
+    (mojo > 0.0) ? inputSampleR = (sin(inputSampleR * mojo * $pi * 0.5) / mojo) * 0.987654321;
+) : (mode == 4) ?
+(
+    dyno = pow(abs(inputSampleL),4);
+    (dyno > 0.0) ? inputSampleL = (sin(inputSampleL * dyno) / dyno) * 1.1654321;
+    dyno = pow(abs(inputSampleR),4);
+    (dyno > 0.0) ? inputSampleR = (sin(inputSampleR * dyno) / dyno) * 1.1654321;
+);      
+
+(output != 1.0) ? (
+  inputSampleL *= output;
+  inputSampleR *= output;
+);
+
+inputSampleL += groundSampleL;
+inputSampleR += groundSampleR;
+
+(wet !=1.0) ? (
+  inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0-wet));
+  inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
+);
+
+
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
