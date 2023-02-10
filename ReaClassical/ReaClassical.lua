@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.08
+@version 23.09
 @changelog
-  v23.08  
-  Whole Project View is now a toggle
-  Add guard clause for empty project
+  v23.09 
+  Tweak error message in Create CD Markers script if no items present
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
