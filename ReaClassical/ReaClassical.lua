@@ -4,7 +4,7 @@
 @changelog
   v23.10 
   Classical Crossfade Editor (F): Major re-write prioritizing safety and visual clarity
-  Edit Classical Crossfade (Z): Complete re-write. Use in the same manner as the audition tool
+  Edit Classical Crossfade (Z): Complete re-write. Now use in the same manner as the audition tool
   Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigation
 @metapackage
 @provides

@@ -28,12 +28,27 @@ function Main()
   if fade_editor_state ~= 1 then
     r.ShowMessageBox('This ReaClassical script only works while in the fade editor (F)', "Edit Classical Crossfade", 0)
   end
-  local item_one = r.GetSelectedMediaItem(0, 0)
-  local item_two = r.GetSelectedMediaItem(0, 1)
-  if item_one == nil or item_two == nil then
-    r.ShowMessageBox("Please select both items involved in the crossfade", "Edit Classical Crossfade", 0)
+  local item_one, item_two, color, prev_item, next_item, curpos, diff
+
+  item_one = r.GetSelectedMediaItem(0, 0)
+  item_two = r.GetSelectedMediaItem(0, 1)
+  
+  if not item_one and not item_two then
+    r.ShowMessageBox("Please select at least one of the items involved in the crossfade", "Edit Classical Crossfade", 0)
     return
+  elseif item_one and not item_two then
+    color = r.GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
+    if color == 20967993 then
+      item_two = item_one
+      prev_item = r.NamedCommandLookup("_SWS_SELPREVITEM")
+      r.Main_OnCommand(prev_item, 0)
+      item_one = r.GetSelectedMediaItem(0, 0)
+  else
+      next_item = r.NamedCommandLookup("_SWS_SELNEXTITEM")
+      r.Main_OnCommand(next_item, 0)
+      item_two = r.GetSelectedMediaItem(0, 0)
   end
+end
     local one_pos = r.GetMediaItemInfo_Value(item_one, "D_POSITION")
     local one_length = r.GetMediaItemInfo_Value(item_one, "D_LENGTH")
     local two_pos = r.GetMediaItemInfo_Value(item_two, "D_POSITION")
@@ -49,12 +64,12 @@ function Main()
     if not item_hover and mouse_pos < two_pos then
       r.SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
       r.SetEditCurPos(mouse_pos, false, false)
-      local curpos = r.GetCursorPosition()
+      curpos = r.GetCursorPosition()
       r.SetMediaItemSelected(item_two, true)
       r.Main_OnCommand(41305,0) -- extend item left
       r.SetMediaItemSelected(item_two, false)
       r.SetMediaItemSelected(item_one, true)
-      local diff = end_of_one - curpos
+      diff = end_of_one - curpos
       r.SetEditCurPos(end_of_one + diff, false, false)
       r.Main_OnCommand(41991,0) -- toggle ripple-all OFF
       r.Main_OnCommand(41311,0) -- extend item right
@@ -63,7 +78,7 @@ function Main()
     elseif not item_hover and mouse_pos > two_pos then
       r.SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
       r.SetEditCurPos(mouse_pos, false, false)
-      local curpos = r.GetCursorPosition()
+      curpos = r.GetCursorPosition()
       r.SetMediaItemSelected(item_one, true)
       r.Main_OnCommand(41991,0) -- toggle ripple-all OFF
       r.Main_OnCommand(41311,0) -- extend item right
@@ -72,12 +87,12 @@ function Main()
       r.SetMediaItemSelected(item_two, true)
       one_length = r.GetMediaItemInfo_Value(item_one, "D_LENGTH")
       end_of_one = one_pos + one_length
-      local diff = end_of_one - two_pos
+      diff = end_of_one - two_pos
       r.SetEditCurPos(two_pos - diff, false, false)
       r.Main_OnCommand(41305,0) -- extend item left
       r.Main_OnCommand(41991,0) -- toggle ripple-all ON
-      
     end
+    
     r.SetMediaItemSelected(item_one, false)
     r.SetMediaItemSelected(item_two, false)
     two_pos = r.GetMediaItemInfo_Value(item_two, "D_POSITION")
