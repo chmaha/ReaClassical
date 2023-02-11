@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="2c9fe0978ea8b97eeb359e9dc8b4a1117356268c">
+<index version="1" name="chmaha Scripts" commit="1909f1ad39af1100e0afe51dacc0676298145c8a">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -36,6 +36,10 @@
       </version>
       <version name="23.09" author="chmaha" time="2023-02-10T14:35:07Z">
         <source main="main">https://github.com/chmaha/ReaClassical/raw/ee787f8a67f9ee5ecf513d3d11bef5672d273e75/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
+        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
+      </version>
+      <version name="23.10" author="chmaha" time="2023-02-11T23:38:13Z">
+        <source main="main">https://github.com/chmaha/ReaClassical/raw/1909f1ad39af1100e0afe51dacc0676298145c8a/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
         <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
       </version>
     </reapack>
