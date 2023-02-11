@@ -19,27 +19,42 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
+local move_to_item, deselect
 local fadeStart, fadeEnd, zoom, view, lock_items, unlock_items, select_check
-local fade_editor_toggle = r.NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-local state = r.GetToggleCommandState(fade_editor_toggle)
 local lock_previous_items, save_color, paint, load_color, move_cur_to_mid
+local fade_editor_toggle = r.NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
+local xfade_state = r.GetToggleCommandState(fade_editor_toggle)
+local win_state = r.GetToggleCommandState(41827)
 
-function Main()
-  r.Undo_BeginBlock()
-  if state == -1 or state == 0 then
-    local check = select_check()
-    if check == -1 then
-      r.ShowMessageBox("Please select—and place your cursor on—the left item of a crossfade pair", "Crossfade Editor", 0)
+function main()
+
+  if win_state ~= 1 then
+    move_to_item()
+    deselect()
+  else
+    sel = fadeEnd()
+    if sel == -1 then
       return
     end
+    move_to_item()
+    move_to_item()
+    local check = select_check()
+    move_cur_to_mid(check)
     lock_previous_items(check)
     fadeStart()
-  else
-    fadeEnd()
+    r.UpdateArrange()
+    r.UpdateTimeline()
   end
-  r.Undo_EndBlock('Classical Crossfade Editor', 0)
-  r.UpdateArrange()
-  r.UpdateTimeline()
+end
+
+function move_to_item()
+  r.Main_OnCommand(40416, 0) -- Select and move to prev item
+  local item = r.GetSelectedMediaItem(0, 0)
+  return item
+end
+
+function deselect()
+  r.Main_OnCommand(40289, 0) -- deselect all items
 end
 
 function select_check()
@@ -50,13 +65,8 @@ function select_check()
     item_end = item_position + item_length
   end
   local cursor_position = r.GetCursorPosition()
-  if item == nil or (cursor_position <= item_position or cursor_position >= item_end) then
-    return -1
-  else
-    return item
-  end
+  return item
 end
-
 
 function exit_check()
   local item = r.GetSelectedMediaItem(0, 0)
@@ -105,11 +115,11 @@ end
 function fadeEnd()
   local item = exit_check()
   if item == -1 then
-    r.ShowMessageBox("Please select—and place your cursor on—the left or right item of the crossfade pair to exit the fade editor", "Crossfade Editor", 0)
-    return
+    r.ShowMessageBox("Please select the left or right item of the crossfade pair to move to another crossfade", "Crossfade Editor", 0)
+    return -1
   end
   local color = r.GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-  if color == 20967993 then
+  if color == 20967993 then -- if green
     local prev_item = r.NamedCommandLookup("_SWS_SELPREVITEM2")
     r.Main_OnCommand(prev_item, 0)
     item = r.GetSelectedMediaItem(0, 0)
@@ -138,6 +148,7 @@ function fadeEnd()
   local _,end_time = r.GetProjExtState(0, "Classical Crossfade Editor", "end_time")
   r.GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
   r.Main_OnCommand(40310, 0) -- Set ripple editing per-track
+  return 1
 end
 
 function zoom()
@@ -156,7 +167,7 @@ end
 function view()
   local track1 = r.NamedCommandLookup("_SWS_SEL1")
   local tog_state = r.GetToggleCommandState(fade_editor_toggle)
-  local win_state = r.GetToggleCommandState(41827)
+  --local win_state = r.GetToggleCommandState(41827)
   local overlap_state = r.GetToggleCommandState(40507)
   r.Main_OnCommand(track1, 0) -- select only track 1
 
@@ -169,9 +180,9 @@ function view()
     r.Main_OnCommand(40507, 0) -- Options: Offset overlapping media items vertically
   end
 
-  if tog_state ~= win_state then
-    r.Main_OnCommand(41827, 0) -- View: Show crossfade editor window
-  end
+  --if tog_state ~= win_state then
+  --  r.Main_OnCommand(41827, 0) -- View: Show crossfade editor window
+  --end
 
   local scroll_home = r.NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
   r.Main_OnCommand(scroll_home, 0) -- XENAKIOS_TVPAGEHOME
@@ -219,4 +230,4 @@ function move_cur_to_mid(item)
   r.SetEditCurPos(pos+len/2, false, false)
 end
 
-Main()
+main()
