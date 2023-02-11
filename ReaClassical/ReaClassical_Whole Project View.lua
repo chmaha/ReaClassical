@@ -28,8 +28,10 @@ return
 end
 local _, zs = r.GetProjExtState(0, "Whole Project View", "Zoom Start")
 local _, ze = r.GetProjExtState(0, "Whole Project View", "Zoom End")
-zs = tonumber(string.format("%.3f", zs))
-ze = tonumber(string.format("%.3f", ze))
+if zs ~= "" and ze ~= "" then
+  zs = tonumber(string.format("%.3f", zs))
+  ze = tonumber(string.format("%.3f", ze))
+end
 local inits, inite = r.GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
 inits = tonumber(string.format("%.3f", inits))
 inite = tonumber(string.format("%.3f", inite))
