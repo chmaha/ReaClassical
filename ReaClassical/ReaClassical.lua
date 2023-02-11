@@ -2,7 +2,8 @@
 @author chmaha
 @version 23.10
 @changelog
-  v23.10 
+  v23.10
+  Fix Whole Project View when no saved data 
   Classical Crossfade Editor (F): Major re-write prioritizing safety and visual clarity
   Edit Classical Crossfade (Z): Complete re-write. Now use in the same manner as the audition tool
   Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigation
