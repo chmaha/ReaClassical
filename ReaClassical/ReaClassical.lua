@@ -1,9 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 23.09
+@version 23.10
 @changelog
-  v23.09 
-  Tweak error message in Create CD Markers script if no items present
+  v23.10 
+  Classical Crossfade Editor (F): Major re-write prioritizing safety and visual clarity
+  Edit Classical Crossfade (Z): Complete re-write. Use in the same manner as the audition tool
+  Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigation
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -29,6 +31,8 @@
   [main] ReaClassical_Lock_toggle.lua
   [main] ReaClassical_Create CD Markers.lua
   [main] ReaClassical_Help.lua
+  [main] ReaClassical_Next Item or Fade.lua
+  [main] ReaClassical_Previous Item or Fade.lua
 
 @about
   These scripts provide dedicated source-destination markers, edits, crossfade
