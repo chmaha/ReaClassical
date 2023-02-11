@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="5937fc34b0940dcf6ec9c2586220151c2d09b570">
+<index version="1" name="chmaha Scripts" commit="73d8c8825a86b9118813a29cf71cb746ba3327ce">
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -1103,20 +1103,32 @@ Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigat
       <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
         <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical.RPP</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-11T23:11:07Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical.RPP</source>
+      </version>
     </reapack>
     <reapack name="ReaClassical_Cora.RPP" type="projecttpl">
       <version name="1.0" author="chmaha" time="2023-02-10T14:37:17Z">
         <source>https://github.com/chmaha/ReaClassical/raw/21285fbd1be225629cdac9641c71ea03bf61d8f3/ReaClassical/ReaClassical_Cora.RPP</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-11T23:11:07Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical_Cora.RPP</source>
       </version>
     </reapack>
     <reapack name="ReaClassical_Eurydice.RPP" type="projecttpl">
       <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
         <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical_Eurydice.RPP</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-11T23:11:07Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical_Eurydice.RPP</source>
+      </version>
     </reapack>
     <reapack name="ReaClassical_Orpheus.RPP" type="projecttpl">
       <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
         <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical_Orpheus.RPP</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-11T23:11:07Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical_Orpheus.RPP</source>
       </version>
     </reapack>
     <reapack name="ReaClassical_Theme.lua" type="script" desc="ReaClassical Theme">
