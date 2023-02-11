@@ -204,7 +204,7 @@ function save_color(num,item)
   r.SetProjExtState(0, "Classical Crossfade Editor", "item" .. " " .. num .. " color", color) -- save to project file
 end
 
-function paint(item,color)
+function paint(item, color)
   r.SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
 end
 
