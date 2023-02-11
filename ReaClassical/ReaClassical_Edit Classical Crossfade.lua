@@ -22,40 +22,72 @@ local r = reaper
 local fade_editor_toggle = r.NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local fade_editor_state = r.GetToggleCommandState(fade_editor_toggle)
 
-r.PreventUIRefresh(1)
-r.Undo_BeginBlock()
-
-local item = r.GetSelectedMediaItem(0,0)
-if fade_editor_state == 1 and item ~= nil then
-    r.Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
-    r.SetMediaItemSelected(item, true)
-    r.Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    r.Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
-    r.Main_OnCommand(40839, 0) -- Move edit cursor forward one measure (no seek)
-    r.Main_OnCommand(40839, 0) -- Move edit cursor forward one measure (no seek)
-    local trim_right = r.NamedCommandLookup("_XENAKIOS_TRIM_RIGHTEDGETO_EDCURSOR")
-    r.Main_OnCommand(trim_right, 0) -- XENAKIOS_TRIM_RIGHTEDGETO_EDCURSOR
-    r.Main_OnCommand(40841, 0) -- Move edit cursor forward one beat (no seek)
-    local select_under = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    r.Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
-    r.Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    r.Main_OnCommand(41173, 0) -- Item navigation: Move cursor to start of items
-    r.Main_OnCommand(40840, 0) -- Move edit cursor back one measure (no seek)
-    r.Main_OnCommand(40840, 0) -- Move edit cursor back one measure (no seek)
-    local trim_left = r.NamedCommandLookup("_XENAKIOS_TRIM_LEFTEDGETO_EDCURSOR")
-    r.Main_OnCommand(trim_left, 0) -- XENAKIOS_TRIM_LEFTEDGETO_EDCURSOR
-    r.Main_OnCommand(40839, 0) -- Move edit cursor forward one measure (no seek)
-    r.Main_OnCommand(40839, 0) -- Move edit cursor forward one measure (no seek)
-    r.Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
-    -- local go_home = r.NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
-    -- r.Main_OnCommand(go_home, 0) -- XENAKIOS_TVPAGEHOME
-    local center_scroll = r.NamedCommandLookup("_SWS_HSCROLL50") -- SWS: Horizontal scroll to put edit cursor at 50%
-    r.Main_OnCommand(center_scroll, 0)
-else
+function Main()
+  r.PreventUIRefresh(1)
+  r.Undo_BeginBlock()
+  if fade_editor_state ~= 1 then
     r.ShowMessageBox('This ReaClassical script only works while in the fade editor (F)', "Edit Classical Crossfade", 0)
+  end
+  local item_one = r.GetSelectedMediaItem(0, 0)
+  local item_two = r.GetSelectedMediaItem(0, 1)
+  if item_one == nil or item_two == nil then
+    r.ShowMessageBox("Please select both items involved in the crossfade", "Edit Classical Crossfade", 0)
+    return
+  end
+    local one_pos = r.GetMediaItemInfo_Value(item_one, "D_POSITION")
+    local one_length = r.GetMediaItemInfo_Value(item_one, "D_LENGTH")
+    local two_pos = r.GetMediaItemInfo_Value(item_two, "D_POSITION")
+    r.Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
+    r.BR_GetMouseCursorContext()
+    local mouse_pos = r.BR_GetMouseCursorContext_Position()
+    local item_hover = r.BR_GetMouseCursorContext_Item()
+    local end_of_one = one_pos + one_length
+    local overlap = end_of_one - two_pos
+    local mouse_to_item_two = two_pos - mouse_pos
+    local total_time = 2 * mouse_to_item_two + overlap
+    
+    if not item_hover and mouse_pos < two_pos then
+      r.SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
+      r.SetEditCurPos(mouse_pos, false, false)
+      local curpos = r.GetCursorPosition()
+      r.SetMediaItemSelected(item_two, true)
+      r.Main_OnCommand(41305,0) -- extend item left
+      r.SetMediaItemSelected(item_two, false)
+      r.SetMediaItemSelected(item_one, true)
+      local diff = end_of_one - curpos
+      r.SetEditCurPos(end_of_one + diff, false, false)
+      r.Main_OnCommand(41991,0) -- toggle ripple-all OFF
+      r.Main_OnCommand(41311,0) -- extend item right
+      r.Main_OnCommand(41991,0) -- toggle ripple-all ON
+      r.SetMediaItemInfo_Value(item_one, "C_LOCK", 1) --lock item 1
+    elseif not item_hover and mouse_pos > two_pos then
+      r.SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
+      r.SetEditCurPos(mouse_pos, false, false)
+      local curpos = r.GetCursorPosition()
+      r.SetMediaItemSelected(item_one, true)
+      r.Main_OnCommand(41991,0) -- toggle ripple-all OFF
+      r.Main_OnCommand(41311,0) -- extend item right
+      r.SetMediaItemSelected(item_one, false)
+      r.SetMediaItemInfo_Value(item_one, "C_LOCK", 1) --lock item 1
+      r.SetMediaItemSelected(item_two, true)
+      one_length = r.GetMediaItemInfo_Value(item_one, "D_LENGTH")
+      end_of_one = one_pos + one_length
+      local diff = end_of_one - two_pos
+      r.SetEditCurPos(two_pos - diff, false, false)
+      r.Main_OnCommand(41305,0) -- extend item left
+      r.Main_OnCommand(41991,0) -- toggle ripple-all ON
+      
+    end
+    r.SetMediaItemSelected(item_one, false)
+    r.SetMediaItemSelected(item_two, false)
+    two_pos = r.GetMediaItemInfo_Value(item_two, "D_POSITION")
+    one_length = r.GetMediaItemInfo_Value(item_one, "D_LENGTH")
+    local one_end = one_pos + one_length
+    r.SetEditCurPos(two_pos + ((one_end - two_pos)/2), false, false)
+    r.Undo_EndBlock('Edit Classical Crossfade', 0)
+    r.PreventUIRefresh(-1)
+    r.UpdateArrange()
+    r.UpdateTimeline()
 end
 
-r.Undo_EndBlock('Edit Classical Crossfade', 0)
-r.PreventUIRefresh(-1)
-r.UpdateArrange()
-r.UpdateTimeline()
+Main()
