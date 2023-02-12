@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="db4aaef293840b80da252d98312544a3a3007b4e">
+<index version="1" name="chmaha Scripts" commit="fd414a703f5995821d4c0cc0b1732845ea9a8168">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Consoles">
       <metadata>
@@ -98,25 +98,25 @@
     </reapack>
   </category>
   <category name="RCPlugs">
-    <reapack name="RCPlugs.jsfx" type="effect" desc="RCPlugs">
+    <reapack name="RCPlugs.jsfx" type="effect" desc="ReaClassical Essential Plugins">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx plugins provide everything you need for classical music mixing and mastering. Compressor, Parallel Compressor, EQ, Limiter, DeEsser, Gain and Dither.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 These essential jsfx plugins provide everything you need for classical music mixing and mastering. Compressor, Parallel Compressor, EQ, Limiter, DeEsser, Gain and Dither.\par}
 }
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
         <changelog><![CDATA[Initial metapackage release]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCDither.jsfx</source>
-        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/fd414a703f5995821d4c0cc0b1732845ea9a8168/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/fd414a703f5995821d4c0cc0b1732845ea9a8168/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/fd414a703f5995821d4c0cc0b1732845ea9a8168/RCPlugs/RCDither.jsfx</source>
+        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/fd414a703f5995821d4c0cc0b1732845ea9a8168/RCPlugs/RCEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/fd414a703f5995821d4c0cc0b1732845ea9a8168/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/fd414a703f5995821d4c0cc0b1732845ea9a8168/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/fd414a703f5995821d4c0cc0b1732845ea9a8168/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
