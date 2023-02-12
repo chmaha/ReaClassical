@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="433f21fcc77260a4afb761962bdb5b64a7b6126f">
+<index version="1" name="chmaha Scripts" commit="bfd76b490c35208dd16520c846bfb068c5f556a0">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Consoles">
       <metadata>
@@ -44,12 +44,12 @@
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
         <changelog><![CDATA[Initial metapackage release]]></changelog>
-        <source file="Nintenda.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Nintenda.jsfx</source>
-        <source file="six-dither_sid.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/six-dither_sid.jsfx</source>
-        <source file="Stan.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Stan.jsfx</source>
-        <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Twilight.jsfx</source>
-        <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/WTFDither.jsfx</source>
-        <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Xonnos%20Dither.jsfx</source>
+        <source file="Nintenda.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Dithers/Nintenda.jsfx</source>
+        <source file="six-dither_sid.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Dithers/six-dither_sid.jsfx</source>
+        <source file="Stan.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Dithers/Stan.jsfx</source>
+        <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Dithers/Twilight.jsfx</source>
+        <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Dithers/WTFDither.jsfx</source>
+        <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Dithers/Xonnos%20Dither.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -110,13 +110,13 @@
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
         <changelog><![CDATA[Initial metapackage release]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/df0825a3e836aad8f0828920cf91719adbfd9383/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/df0825a3e836aad8f0828920cf91719adbfd9383/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/df0825a3e836aad8f0828920cf91719adbfd9383/RCPlugs/RCDither.jsfx</source>
-        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/df0825a3e836aad8f0828920cf91719adbfd9383/RCPlugs/RCEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/df0825a3e836aad8f0828920cf91719adbfd9383/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/df0825a3e836aad8f0828920cf91719adbfd9383/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/df0825a3e836aad8f0828920cf91719adbfd9383/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCDither.jsfx</source>
+        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -546,16 +546,16 @@ Add ReaClassical project template to metapackage]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
         <changelog><![CDATA[Initial metapackage release]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Titan.jsfx</source>
+        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Amphitrite.jsfx</source>
+        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Aurora.jsfx</source>
+        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Eris.jsfx</source>
+        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/flattop.jsfx</source>
+        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Lyra.jsfx</source>
+        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Magnetique.jsfx</source>
+        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/MuTube.jsfx</source>
+        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/port-and-lemon.jsfx</source>
+        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Sillons.jsfx</source>
+        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Titan.jsfx</source>
       </version>
     </reapack>
   </category>
