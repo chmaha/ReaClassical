@@ -6,4 +6,4 @@ Everything you need to do professional classical editing in REAPER for free. Ple
 
 For a full ReaClassical experience read the [Installation guide](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md).
 
-To just use the scripts without any customization of theme, keymaps, toolbar etc, import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml).
+To just use the scripts, jsfx plugins, theme, default template but without keymaps, toolbar etc, import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml).
