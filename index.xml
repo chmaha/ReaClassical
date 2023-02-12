@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="d03e2f4430c0d4a916a1eb95a411c2b46a616bf3">
+<index version="1" name="chmaha Scripts" commit="3e8ba8c5326f4bafc7cfa9838fbebbb87b510899">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Consoles">
       <metadata>
@@ -119,6 +119,10 @@
       <version name="23.10" author="chmaha" time="2023-02-11T23:38:13Z">
         <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
         <source>https://github.com/chmaha/ReaClassical/raw/6c11a7d3e34a9a487d02e42ccc448d820b65e02f/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
+      </version>
+      <version name="23.11" author="chmaha" time="2023-02-12T19:27:13Z">
+        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/3e8ba8c5326f4bafc7cfa9838fbebbb87b510899/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
       </version>
     </reapack>
   </category>
