@@ -1,0 +1,17 @@
+@description RCPlugs
+@author chmaha
+@version 1.0
+@changelog
+  Initial metapackage release
+@metapackage
+@provides
+  [main] RCComp.jsfx
+  [main] RCDeEss.jsfx
+  [main] RCDither.jsfx
+  [main] RCEQ.jsfx
+  [main] RCGain.jsfx
+  [main] RCLimiter.jsfx
+  [main] RCParallelK.jsfx
+@about
+  These jsfx plugins provide everything you need for classical music mixing and mastering.
+  Compressor, Parallel Compressor, EQ, Limiter, DeEsser, Gain and Dither.
