@@ -1,5 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="1909f1ad39af1100e0afe51dacc0676298145c8a">
+<index version="1" name="chmaha Scripts" commit="db4aaef293840b80da252d98312544a3a3007b4e">
+  <category name="Consoles">
+    <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Consoles">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx console emulation plugins provide for analog and digital variants. Includes Orpheus (analog), Eurydice (digital), Cora (more general analog circuitry) and final plugins for flavor including MagicFairyDust, ELSA. Also included are three console project templates with plugins already in place.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
+        <changelog><![CDATA[Initial metapackage release]]></changelog>
+        <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Cora.jsfx</source>
+        <source file="Elsa.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Elsa.jsfx</source>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Eurydice_Channel.jsfx</source>
+        <source file="MagicFairyDust.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/MagicFairyDust.jsfx</source>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/RCGain.jsfx</source>
+        <source file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/ReaClassical_Cora.RPP</source>
+        <source file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/ReaClassical_Eurydice.RPP</source>
+        <source file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Consoles/ReaClassical_Orpheus.RPP</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Dithers">
+    <reapack name="Dithers.jsfx" type="effect" desc="ReaClassical Dithers">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx Dithers plugins provide for every sort of Dither you could ever need. Includes TPDF, single-pole high-pass, and various other boutique wordlength reducers from airwindows.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
+        <changelog><![CDATA[Initial metapackage release]]></changelog>
+        <source file="Nintenda.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Nintenda.jsfx</source>
+        <source file="six-dither_sid.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/six-dither_sid.jsfx</source>
+        <source file="Stan.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Stan.jsfx</source>
+        <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Twilight.jsfx</source>
+        <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/WTFDither.jsfx</source>
+        <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Dithers/Xonnos%20Dither.jsfx</source>
+      </version>
+    </reapack>
+  </category>
   <category name="PDF_Guide">
     <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
       <version name="1.0" time="2023-01-25T13:08:55Z">
@@ -45,704 +98,25 @@
     </reapack>
   </category>
   <category name="RCPlugs">
-    <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite (ReaClassical.org)">
+    <reapack name="RCPlugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SurgeTide (MIT License) JSFX version released under GPLv3 license\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx plugins provide everything you need for classical music mixing and mastering. Compressor, Parallel Compressor, EQ, Limiter, DeEsser, Gain and Dither.\par}
 }
 ]]></description>
       </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-22T22:51:50Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/8077913c1f8ef51c7b632753c065ef550f09691e/RCPlugs/Amphitrite.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-22T23:10:06Z">
-        <changelog><![CDATA[Re-introduce Squish output slider]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/63c91b278492f10b267cb792161efe6b754e7437/RCPlugs/Amphitrite.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-01-22T23:49:50Z">
-        <changelog><![CDATA[Add sliders to activate sections]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/e91364a8c998bb5ea0748246c45546ba4bb7deab/RCPlugs/Amphitrite.jsfx</source>
-      </version>
-      <version name="1.3" author="chmaha" time="2023-01-23T09:36:55Z">
-        <changelog><![CDATA[Reduce ranges and set new defaults]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/3bcaaa22fe36b3ba6860504504359bb782d7041a/RCPlugs/Amphitrite.jsfx</source>
-      </version>
-      <version name="1.4" author="chmaha" time="2023-02-01T10:08:38Z">
-        <changelog><![CDATA[Reduce ranges and set new defaults]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/c6485ef6d33b557379d4863471be0e381449f928/RCPlugs/Amphitrite.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Aurora.jsfx" type="effect" desc="Aurora (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Dubly" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-10T10:50:01Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/e9db46a87478f29ea9fac0f6d2ef99b7db60392e/RCPlugs/Aurora.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-02-10T11:14:00Z">
-        <changelog><![CDATA[Change Ionization slider to percentage]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/209e9b0f491bd4fe562ce72693ff0364e7ba53f8/RCPlugs/Aurora.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Cora.jsfx" type="effect" desc="Cora (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Interstage" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Interstage (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-10T09:35:12Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/ce898b6d2569ade6d44fb0ed64ce1861f6eb71d4/RCPlugs/Cora.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Elsa.jsfx" type="effect" desc="ELSA: Extremely Light Saturation Applier (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestDrive" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestDrive (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-26T13:27:41Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/3608693307202fdea254114fafc50979f11bbd04/RCPlugs/Elsa.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Eris.jsfx" type="effect" desc="Eris (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Focus" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Focus (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-10T13:26:42Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/c86b8b3d891060858395025a77529ad3f752e6ab/RCPlugs/Eris.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Eurydice_Bus.jsfx" type="effect" desc="Eurydice Bus (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestConsole2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestConsole2Buss (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-05T22:44:04Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/fa4304ea426d062d3d1ab47b47310c7928dbe54e/RCPlugs/Eurydice_Bus.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Eurydice_Channel.jsfx" type="effect" desc="Eurydice Channel (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestConsole2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestConsole2Channel (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-05T22:44:04Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/fa4304ea426d062d3d1ab47b47310c7928dbe54e/RCPlugs/Eurydice_Channel.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="flattop.jsfx" type="effect" desc="Flattop (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ClipOnly2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipOnly2 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="0.9" author="chmaha" time="2023-01-20T15:31:40Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/aadd7ab3ed01e91e0f0625f57353ce9d4aa92bfd/RCPlugs/flattop.jsfx</source>
-      </version>
-      <version name="0.95" author="chmaha" time="2023-01-20T15:38:11Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/5a6abaa3343b2fbb9debfc7bf9aa9e3671ce342c/RCPlugs/flattop.jsfx</source>
-      </version>
-      <version name="1.0" author="chmaha" time="2023-01-25T13:59:10Z">
-        <changelog><![CDATA[Remove latency code]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/6849dd99d669d2c95b50ecd97f9599781be233b4/RCPlugs/flattop.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Lyra.jsfx" type="effect" desc="Lyra (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ButterComp2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ButterComp2 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-23T10:36:29Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/dfa992ce9a04403b5963e91484b10cd98190ef55/RCPlugs/Lyra.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Channel9" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Channel9 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-18T23:03:34Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/af61553514b9af3e3ef5c3ed719eed302b9061d0/RCPlugs/MagicFairyDust.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Magnetique.jsfx" type="effect" desc="Magnétique (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToTape6" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToTape6 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-25T09:50:56Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2f27d01d80ec9dc48f82206fde6c3c78d16e9961/RCPlugs/Magnetique.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="MuTube.jsfx" type="effect" desc="MuTube (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "VariMu" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/VariMu (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-07T19:12:34Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/fffaa8fcce433b8b44bff26edecc06047276566b/RCPlugs/MuTube.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="NineTens.jsfx" type="effect" desc="Nintenda (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses "Nine Tens into Dark" DSP from airwindows "Monitoring3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-17T14:34:24Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/7852ad23637c76d9b482de637d790b53e5a2c3d7/RCPlugs/NineTens.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-17T19:02:53Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/NineTens.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-02-01T11:31:39Z">
-        <changelog><![CDATA[Add fpdL safety lines]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/5f91ffd2f3cb6e05c4e31aa5a2d95b17a1491619/RCPlugs/NineTens.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Orpheus_Bus_In.jsfx" type="effect" desc="Orpheus Bus In (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Bus_In.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Bus_In.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Orpheus_Bus_Out.jsfx" type="effect" desc="Orpheus Bus Out (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Bus_Out.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Bus_Out.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Orpheus_Channel_In.jsfx" type="effect" desc="Orpheus Channel In (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Channel_In.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Channel_In.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Orpheus_Channel_Out.jsfx" type="effect" desc="Orpheus Channel Out (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Channel_Out.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Channel_Out.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Orpheus_Sub_In.jsfx" type="effect" desc="Orpheus Sub|Aux In (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Sub_In.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Sub_In.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Orpheus_Sub_Out.jsfx" type="effect" desc="Orpheus Sub|Aux Out (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Console8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-22T12:25:08Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2b2b10904548f109ef4b550db2f67f9f6a47d7a5/RCPlugs/Orpheus_Sub_Out.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-29T10:41:36Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/039815277c0ddb42d990eee62197416be139750d/RCPlugs/Orpheus_Sub_Out.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Compressor and Gate Uses DSP from airwindows "Dynamics" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dynamics (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-06T11:09:13Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/2f7c835d9929e21d5811462b6c07195403c6ef64/RCPlugs/port-and-lemon.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="RCComp.jsfx" type="effect" desc="RCComp (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Express Bus Compressor (Stillwell) modified for classical music use by chmaha See below the code for copyright notices, list of conditions and disclaimers\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" time="2023-01-14T21:59:09Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/ab1dccc062b676f0337695fb40daa370aae277ce/RCPlugs/RCComp.jsfx</source>
-      </version>
-      <version name="1.01" time="2023-01-15T09:53:12Z">
-        <changelog><![CDATA[With introduction of RCParallelK, reduce ratio range for insert use.]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/612b58b4bdf9dd2ec13afba86e4a1062db3dd20d/RCPlugs/RCComp.jsfx</source>
-      </version>
-      <version name="1.02" author="chmaha" time="2023-01-17T17:21:49Z">
-        <changelog><![CDATA[Add author]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/6fd1020f8fc063c2f315cbe6547cbd79235ebc37/RCPlugs/RCComp.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "DeEss" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DeEss (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-13T23:47:01Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/19367a2874e73aa2a342a0c34fb161a78547d591/RCPlugs/RCDeEss.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-15T23:50:01Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/d2c209883e55b7e6291e6a730b666336fc59bcf4/RCPlugs/RCDeEss.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-01-27T10:46:54Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/cccb4df68871c81bf8c0534447963cbdf3c0e4cf/RCPlugs/RCDeEss.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="RCDither.jsfx" type="effect" desc="RCDither (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses "NJAD" DSP from airwindows "Monitoring" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-13T15:46:39Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/7312c1caa87972f43f2992ebe5e2e31da11eed7c/RCPlugs/RCDither.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-15T11:36:51Z">
-        <changelog><![CDATA[Combine 16- and 24-bit NJAD dithers]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/67fff07cf74cefd31bd0d242bee8034519b90a9e/RCPlugs/RCDither.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-01-15T23:50:01Z">
-        <changelog><![CDATA[Combine 16- and 24-bit NJAD dithers]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/d2c209883e55b7e6291e6a730b666336fc59bcf4/RCPlugs/RCDither.jsfx</source>
-      </version>
-      <version name="1.3" author="chmaha" time="2023-01-15T23:58:34Z">
-        <changelog><![CDATA[Fix missing equals signs]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/ea55830c02728fa40b6f050e60104625d90dd942/RCPlugs/RCDither.jsfx</source>
-      </version>
-      <version name="1.3.1" author="chmaha" time="2023-01-17T19:02:53Z">
-        <changelog><![CDATA[Fix missing equals signs]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/RCDither.jsfx</source>
-      </version>
-      <version name="1.4" author="chmaha" time="2023-01-23T23:15:43Z">
-        <changelog><![CDATA[Add internal name]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/1828a4d3aef01ea2ebcda13955250d8c0c69673e/RCPlugs/RCDither.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Baxandall" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License)\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-13T15:46:39Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/83a273c2e77fcbe11e7db118976ca4acce371918/RCPlugs/RCEQ.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-15T23:50:01Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/d2c209883e55b7e6291e6a730b666336fc59bcf4/RCPlugs/RCEQ.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-01-19T10:12:31Z">
-        <changelog><![CDATA[Add LPF and HPF]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/7b80956c14589f392636d1e267b10c84eda96f59/RCPlugs/RCEQ.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="RCGain.jsfx" type="effect" desc="RCGain (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestGain" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestGain (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-13T18:29:57Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/fbf4ad1024209ae84c583eca8ac1b9cf78516293/RCPlugs/RCGain.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-30T17:53:56Z">
-        <changelog><![CDATA[Remove superfluous code]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/34a10632aa3883d67d7b37588d0a558b500a75d5/RCPlugs/RCGain.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-01-30T17:56:46Z">
-        <changelog><![CDATA[Remove superfluous code]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/13c3b9175f4e227b06f918abb9a96040c737a5e0/RCPlugs/RCGain.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="RCLimiter.jsfx" type="effect" desc="RCLimiter (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP with permission from Smooth Limiter by Geraint Luff Uses oversampling code by user "Smashed Transistors" (https://forum.cockos.com/showthread.php?t=178543) https://geraintluff.github.io/jsfx/ https://signalsmith-audio.co.uk/\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-12T18:30:32Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/b0cc0585ee83eabbe2f356d73911bbcc34074f70/RCPlugs/RCLimiter.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-02-07T22:26:20Z">
-        <changelog><![CDATA[Remove erroneous dBTP label. Not a true-peak limiter...]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/e149ac22e9f5e0674288c2bc44f6993709e66e9e/RCPlugs/RCLimiter.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-02-08T13:54:55Z">
-        <changelog><![CDATA[Add 4x oversampling. It's back to being a TP limiter!]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/69f342c3a84aa9a2897769a02aa498430ae36a1f/RCPlugs/RCLimiter.jsfx</source>
-      </version>
-      <version name="1.3" author="chmaha" time="2023-02-08T14:00:41Z">
-        <changelog><![CDATA[Reduce lookahead range
-Label shows dBTP again
-Add 4x oversampling. It's back to being a TP limiter!]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/b1ae6b9accc13bb4e2111c90fb8ce4a4543d175c/RCPlugs/RCLimiter.jsfx</source>
-      </version>
-      <version name="1.4" author="chmaha" time="2023-02-08T19:17:56Z">
-        <changelog><![CDATA[Remove lookahead slider (set permanently to 10ms), change release default to 10ms]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/bf5d9211b9d4ef0ec4146b3fd674e46fe6acaa37/RCPlugs/RCLimiter.jsfx</source>
-      </version>
-      <version name="1.5" author="chmaha" time="2023-02-08T21:11:32Z">
-        <changelog><![CDATA[Add true peak enable dropdown]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/0eccdc92912a11ab82a5607a0e390ee3e36f668e/RCPlugs/RCLimiter.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Express Bus Compressor (Stillwell) modified for classical music parallel compression use by chmaha See below the code for copyright notices, list of conditions and disclaimers\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" time="2023-01-15T09:49:22Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/b0a97e1d598ce4664cc847177f0083a8a95ede89/RCPlugs/RCParallelK.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-17T17:21:49Z">
-        <changelog><![CDATA[Add author]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/6fd1020f8fc063c2f315cbe6547cbd79235ebc37/RCPlugs/RCParallelK.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Sillons.jsfx" type="effect" desc="Sillons (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToVinyl4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToVinyl4 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-25T10:42:56Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/00ab3c03ddc9c40511a25b6c13c631f0b89abb01/RCPlugs/Sillons.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="six-dither_sid.jsfx" type="effect" desc="Six-Dither Sid (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson Names: Avant-garde = NJAD, Twilight = Dark, Nintenda = Nine Tens into Dark https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-15T22:21:24Z">
-        <changelog><![CDATA[Combine 16- and 24-bit NJAD, Dark and Nine Tens into Dark dithers]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/059fdbb7cef5e100feed5c610e42d3983113b9e1/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-15T23:50:01Z">
-        <changelog><![CDATA[Combine 16- and 24-bit NJAD, Dark and Nine Tens into Dark dithers]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/d2c209883e55b7e6291e6a730b666336fc59bcf4/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-01-15T23:58:34Z">
-        <changelog><![CDATA[Fix missing equals signs]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/ea55830c02728fa40b6f050e60104625d90dd942/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.3" author="chmaha" time="2023-01-17T12:12:35Z">
-        <changelog><![CDATA[Replace Nine Tens into Dark with StudioTan]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/0c58b0feb8ef52cc853415a880fcb95e615877b3/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.3.1" author="chmaha" time="2023-01-17T14:23:06Z">
-        <changelog><![CDATA[Replace Nine Tens into Dark with StudioTan]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/6c92a4c5f9ba1afd723ed6e34651082b03642d9b/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.4" author="chmaha" time="2023-01-17T16:29:05Z">
-        <changelog><![CDATA[Revert to Nine Tens into Dark]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/f6d9b375b231dc12540eb0c00f5f2711e9f11801/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.5" author="chmaha" time="2023-01-17T19:08:23Z">
-        <changelog><![CDATA[Change internal naming]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/5e1a53de9a6e4e7f87aadee9d9ef2cb7fbb68660/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.6" author="chmaha" time="2023-01-23T23:09:55Z">
-        <changelog><![CDATA[Change internal naming]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/a7d33d94b51229a32b0c8c5690286c20c3610ad0/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-      <version name="1.7" author="chmaha" time="2023-02-01T11:31:39Z">
-        <changelog><![CDATA[Add missing block for Twilight/Nintenda]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/5f91ffd2f3cb6e05c4e31aa5a2d95b17a1491619/RCPlugs/six-dither_sid.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Stan.jsfx" type="effect" desc="Stan (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "StudioTan" plugin by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/StudioTan (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-17T17:18:09Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/99d79e27bc9795be4df7e0bae361d21afa2714ee/RCPlugs/Stan.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-17T17:23:37Z">
-        <changelog><![CDATA[Add ReaClassical to description]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/6a527ebb4687c951ade1c9dfb36f3c2809c55f85/RCPlugs/Stan.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-01-17T19:02:53Z">
-        <changelog><![CDATA[Add ReaClassical to description]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/Stan.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Titan.jsfx" type="effect" desc="Titan (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Capacitor2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Capacitor2 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-10T10:30:08Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/faa08f39428238a99100e5fda3be55d36341fbea/RCPlugs/Titan.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Twilight.jsfx" type="effect" desc="Twilight (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses "Dark" DSP from airwindows "Monitoring2" plugin by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring2 (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-01-17T18:10:28Z">
-        <changelog><![CDATA[Initial Commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/1e0e63a993874dea17c8513cae99fa1a94eef257/RCPlugs/Twilight.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-01-17T19:02:53Z">
-        <changelog><![CDATA[Initial Commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/e5efb339f041900e9540f54e0a958d1e7d2f446d/RCPlugs/Twilight.jsfx</source>
-      </version>
-      <version name="1.2" author="chmaha" time="2023-02-01T11:31:39Z">
-        <changelog><![CDATA[Add fpdL safety lines ]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/5f91ffd2f3cb6e05c4e31aa5a2d95b17a1491619/RCPlugs/Twilight.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="WTFDither.jsfx" type="effect" desc="WTFDither (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 "Wipe The Floor" Triangular Dither Uses DSP from airwindows "TPDFDither" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TPDFDither (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-03T11:51:31Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/92ec505101bd8c6bc8b8288c7ac426c7be04b307/RCPlugs/WTFDither.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="Xonnos Dither.jsfx" type="effect" desc="Xonnos Dither (ReaClassical.org)">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PaulDither" & "DoublePaul" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PaulDither (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DoublePaul (MIT License) JSFX version released under GPLv3 license\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-06T19:33:07Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/733e52601c23aef01e3f24f1330df8998a708c14/RCPlugs/Xonnos%20Dither.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-02-07T15:51:41Z">
-        <changelog><![CDATA[Add Xonnos Wide]]></changelog>
-        <source>https://github.com/chmaha/ReaClassical/raw/c4c39809f58fb3d4dc62e32d71c087437dea1104/RCPlugs/Xonnos%20Dither.jsfx</source>
+      <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
+        <changelog><![CDATA[Initial metapackage release]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCDither.jsfx</source>
+        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -1112,30 +486,6 @@ Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigat
         <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical.RPP</source>
       </version>
     </reapack>
-    <reapack name="ReaClassical_Cora.RPP" type="projecttpl">
-      <version name="1.0" author="chmaha" time="2023-02-10T14:37:17Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/21285fbd1be225629cdac9641c71ea03bf61d8f3/ReaClassical/ReaClassical_Cora.RPP</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-02-11T23:11:07Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical_Cora.RPP</source>
-      </version>
-    </reapack>
-    <reapack name="ReaClassical_Eurydice.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
-        <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical_Eurydice.RPP</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-02-11T23:11:07Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical_Eurydice.RPP</source>
-      </version>
-    </reapack>
-    <reapack name="ReaClassical_Orpheus.RPP" type="projecttpl">
-      <version name="1.0" time="2023-02-09T13:57:49Z" author="chmaha">
-        <source>https://github.com/chmaha/ReaClassical/raw/cce0e44d91c97dc086769cce9dda5b5fc08cf7fd/ReaClassical/ReaClassical_Orpheus.RPP</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2023-02-11T23:11:07Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical_Orpheus.RPP</source>
-      </version>
-    </reapack>
     <reapack name="ReaClassical_Theme.lua" type="script" desc="ReaClassical Theme">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
@@ -1149,6 +499,32 @@ Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigat
       <version name="1.0" author="chmaha" time="2023-02-09T22:08:01Z">
         <source main="main">https://github.com/chmaha/ReaClassical/raw/48cd9c44d2b9e2077cefc91fecfb9e676030ffe5/ReaClassical/ReaClassical_Theme.lua</source>
         <source file="ReaClassical.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/main/Manual_install_files/ReaClassical.ReaperThemeZip</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Various">
+    <reapack name="Various.jsfx" type="effect" desc="Other ReaClassical Plugins">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
+        <changelog><![CDATA[Initial metapackage release]]></changelog>
+        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Amphitrite.jsfx</source>
+        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Aurora.jsfx</source>
+        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Eris.jsfx</source>
+        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/flattop.jsfx</source>
+        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Lyra.jsfx</source>
+        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Magnetique.jsfx</source>
+        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/MuTube.jsfx</source>
+        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/port-and-lemon.jsfx</source>
+        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Sillons.jsfx</source>
+        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/db4aaef293840b80da252d98312544a3a3007b4e/Various/Titan.jsfx</source>
       </version>
     </reapack>
   </category>
