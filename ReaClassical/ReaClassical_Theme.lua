@@ -1,6 +1,8 @@
 @description ReaClassical Theme
 @version 1.0
-@provides ReaClassical.ReaperThemeZip https://github.com/chmaha/ReaClassical/raw/main/Manual_install_files/ReaClassical.ReaperThemeZip
+@provides 
+  ReaClassical.ReaperThemeZip https://github.com/chmaha/ReaClassical/raw/main/Manual_install_files/ReaClassical.ReaperThemeZip
+  [nomain] .
 @author chmaha
 @about
   Theme for ReaClassical that includes supercollapsed value of 0 inside of rtconfig.txt
