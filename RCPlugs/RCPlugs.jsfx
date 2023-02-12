@@ -1,4 +1,4 @@
-@description RCPlugs
+@description ReaClassical Essential Plugins
 @author chmaha
 @version 1.0
 @changelog
@@ -13,5 +13,5 @@
   [main] RCLimiter.jsfx
   [main] RCParallelK.jsfx
 @about
-  These jsfx plugins provide everything you need for classical music mixing and mastering.
+  These essential jsfx plugins provide everything you need for classical music mixing and mastering.
   Compressor, Parallel Compressor, EQ, Limiter, DeEsser, Gain and Dither.
