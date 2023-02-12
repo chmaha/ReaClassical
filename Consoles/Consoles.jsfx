@@ -5,21 +5,21 @@
   Initial metapackage release
 @metapackage
 @provides
-  [main] Cora.jsfx
-  [main] Elsa.jsfx
-  [main] Eurydice_Bus.jsfx
-  [main] Eurydice_Channel.jsfx
-  [main] MagicFairyDust.jsfx
-  [main] Orpheus_Bus_In.jsfx
-  [main] Orpheus_Bus_Out.jsfx
-  [main] Orpheus_Channel_In.jsfx
-  [main] Orpheus_Channel_Out.jsfx
-  [main] Orpheus_Sub_In.jsfx
-  [main] Orpheus_Sub_Out.jsfx
-  [main] RCGain.jsfx
-  [main] ReaClassical_Cora.RPP
-  [main] ReaClassical_Eurydice.RPP
-  [main] ReaClassical_Orpheus.RPP
+  Cora.jsfx
+  lsa.jsfx
+  Eurydice_Bus.jsfx
+  Eurydice_Channel.jsfx
+  MagicFairyDust.jsfx
+  Orpheus_Bus_In.jsfx
+  Orpheus_Bus_Out.jsfx
+  Orpheus_Channel_In.jsfx
+  Orpheus_Channel_Out.jsfx
+  Orpheus_Sub_In.jsfx
+  Orpheus_Sub_Out.jsfx
+  RCGain.jsfx
+  [rpp] ReaClassical_Cora.RPP
+  [rpp] ReaClassical_Eurydice.RPP
+  [rpp] ReaClassical_Orpheus.RPP
 @about
   These jsfx console emulation plugins provide for analog and digital variants.
   Includes Orpheus (analog), Eurydice (digital), Cora (more general analog circuitry) and final plugins for flavor including MagicFairyDust, ELSA.
