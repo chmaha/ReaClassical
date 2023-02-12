@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="1a4fb80480229434e8a9685f85b5767795473532">
+<index version="1" name="chmaha Scripts" commit="3249a6f24308e2bc61321b5bfc6779b5b6aee9bb">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Consoles">
       <metadata>
@@ -116,6 +116,16 @@
         <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCGain.jsfx</source>
         <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCLimiter.jsfx</source>
         <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCParallelK.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-12T18:47:23Z">
+        <changelog><![CDATA[Initial metapackage release]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/RCPlugs/RCDither.jsfx</source>
+        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/RCPlugs/RCEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -555,6 +565,19 @@ Add ReaClassical project template to metapackage]]></changelog>
         <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/port-and-lemon.jsfx</source>
         <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Sillons.jsfx</source>
         <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Titan.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-12T18:47:23Z">
+        <changelog><![CDATA[Initial metapackage release]]></changelog>
+        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/Amphitrite.jsfx</source>
+        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/Aurora.jsfx</source>
+        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/Eris.jsfx</source>
+        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/flattop.jsfx</source>
+        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/Lyra.jsfx</source>
+        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/Magnetique.jsfx</source>
+        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/MuTube.jsfx</source>
+        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/port-and-lemon.jsfx</source>
+        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/Sillons.jsfx</source>
+        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/3249a6f24308e2bc61321b5bfc6779b5b6aee9bb/Various/Titan.jsfx</source>
       </version>
     </reapack>
   </category>
