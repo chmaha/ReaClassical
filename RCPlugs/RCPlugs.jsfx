@@ -5,13 +5,13 @@
   Initial metapackage release
 @metapackage
 @provides
-  [main] RCComp.jsfx
-  [main] RCDeEss.jsfx
-  [main] RCDither.jsfx
-  [main] RCEQ.jsfx
-  [main] RCGain.jsfx
-  [main] RCLimiter.jsfx
-  [main] RCParallelK.jsfx
+   RCComp.jsfx
+   RCDeEss.jsfx
+   RCDither.jsfx
+   RCEQ.jsfx
+   RCGain.jsfx
+   RCLimiter.jsfx
+   RCParallelK.jsfx
 @about
   These essential jsfx plugins provide everything you need for classical music mixing and mastering.
   Compressor, Parallel Compressor, EQ, Limiter, DeEsser, Gain and Dither.

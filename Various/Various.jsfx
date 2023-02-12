@@ -5,15 +5,15 @@
   Initial metapackage release
 @metapackage
 @provides
-  [main] Amphitrite.jsfx
-  [main] Aurora.jsfx
-  [main] Eris.jsfx
-  [main] flattop.jsfx
-  [main] Lyra.jsfx
-  [main] Magnetique.jsfx
-  [main] MuTube.jsfx
-  [main] port-and-lemon.jsfx
-  [main] Sillons.jsfx
-  [main] Titan.jsfx
+   Amphitrite.jsfx
+   Aurora.jsfx
+   Eris.jsfx
+   flattop.jsfx
+   Lyra.jsfx
+   Magnetique.jsfx
+   MuTube.jsfx
+   port-and-lemon.jsfx
+   Sillons.jsfx
+   Titan.jsfx
 @about
   Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...
