@@ -33,5 +33,5 @@
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
 @about
-  These scripts, along with custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
+  These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
