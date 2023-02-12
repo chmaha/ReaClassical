@@ -1,4 +1,4 @@
-@noindex
+NoIndex: true
 desc:Orpheus Channel Out (ReaClassical.org)
 author: chmaha
 version: 1.1
