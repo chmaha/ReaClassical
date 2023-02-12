@@ -1,0 +1,263 @@
+@noindex
+desc:MuTube (ReaClassical.org)
+author: chmaha
+version: 1.0
+Changelog:
+  Initial commit
+about:
+  Uses DSP from airwindows "VariMu" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/VariMu (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,1,0.01>Intensity
+slider2:0.5<0,1,0.01>Speed
+slider3:1<0,1,0.01>Output
+slider4:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+UINT32_MAX = 4294967295;
+M_PI = 3.1415926535897932384626433;
+
+muSpeedAL = 10000;
+muSpeedBL = 10000;
+muCoefficientAL = 1;
+muCoefficientBL = 1;
+muVaryL = 1;
+previousL = 0.0;
+
+muSpeedAR = 10000;
+muSpeedBR = 10000;
+muCoefficientAR = 1;
+muCoefficientBR = 1;
+muVaryR = 1;
+previousR = 0.0;
+flip = 0;
+
+
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+
+
+@block
+overallscale = 2.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+threshold = 1.001 - (1.0-pow(1.0-A,3));
+muMakeupGain = sqrt(1.0 / threshold);
+muMakeupGain = (muMakeupGain + sqrt(muMakeupGain))/2.0;
+muMakeupGain = sqrt(muMakeupGain);
+outGain = sqrt(muMakeupGain);
+
+release = pow((1.15-B),5)*32768.0;
+release /= overallscale;
+fastest = sqrt(release);
+output = outGain * C;
+wet = D;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+noisesourceL = 0;
+noisesourceR = 850010;
+
+noisesourceL = noisesourceL % 1700021; noisesourceL+=1;
+residue = noisesourceL * noisesourceL;
+residue = residue % 170003; residue *= residue;
+residue = residue % 17011; residue *= residue;
+residue = residue % 1709; residue *= residue;
+residue = residue % 173; residue *= residue;
+residue = residue % 17;
+applyresidue = residue;
+applyresidue *= 0.00000001;
+applyresidue *= 0.00000001;
+inputSampleL += applyresidue;
+(inputSampleL<1.2*10^-38 && -inputSampleL<1.2*10^-38) ? (
+  inputSampleL -= applyresidue;
+);
+
+noisesourceR = noisesourceR % 1700021; noisesourceR+=1;
+residue = noisesourceR * noisesourceR;
+residue = residue % 170003; residue *= residue;
+residue = residue % 17011; residue *= residue;
+residue = residue % 1709; residue *= residue;
+residue = residue % 173; residue *= residue;
+residue = residue % 17;
+applyresidue = residue;
+applyresidue *= 0.00000001;
+applyresidue *= 0.00000001;
+inputSampleR += applyresidue;
+(inputSampleR<1.2*10^-38 && -inputSampleR<1.2*10^-38) ? (
+  inputSampleR -= applyresidue;
+);
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+(abs(inputSampleL) > abs(previousL)) ? squaredSampleL = previousL * previousL
+: squaredSampleL = inputSampleL * inputSampleL;
+previousL = inputSampleL;
+inputSampleL *= muMakeupGain;
+
+(abs(inputSampleR) > abs(previousR)) ? squaredSampleR = previousR * previousR
+: squaredSampleR = inputSampleR * inputSampleR;
+previousR = inputSampleR;
+inputSampleR *= muMakeupGain;
+
+(flip) ?
+(
+  (abs(squaredSampleL) > threshold) ?
+  (
+    muVaryL = threshold / abs(squaredSampleL);
+    muAttackL = sqrt(abs(muSpeedAL));
+    muCoefficientAL = muCoefficientAL * (muAttackL-1.0);
+    (muVaryL < threshold) ?
+    (
+      muCoefficientAL = muCoefficientAL + threshold;
+    )
+    :
+    (
+      muCoefficientAL = muCoefficientAL + muVaryL;
+    );
+    muCoefficientAL = muCoefficientAL / muAttackL;
+  )
+  :
+  (
+    muCoefficientAL = muCoefficientAL * ((muSpeedAL * muSpeedAL)-1.0);
+    muCoefficientAL = muCoefficientAL + 1.0;
+    muCoefficientAL = muCoefficientAL / (muSpeedAL * muSpeedAL);
+  );
+  muNewSpeedL = muSpeedAL * (muSpeedAL-1);
+  muNewSpeedL = muNewSpeedL + abs(squaredSampleL*release)+fastest;
+  muSpeedAL = muNewSpeedL / muSpeedAL;
+)
+:
+(
+  (abs(squaredSampleL) > threshold) ?
+  (
+    muVaryL = threshold / abs(squaredSampleL);
+    muAttackL = sqrt(abs(muSpeedBL));
+    muCoefficientBL = muCoefficientBL * (muAttackL-1);
+    (muVaryL < threshold) ?
+    (
+      muCoefficientBL = muCoefficientBL + threshold;
+    )
+    :
+    (
+      muCoefficientBL = muCoefficientBL + muVaryL;
+    );
+    muCoefficientBL = muCoefficientBL / muAttackL;
+  )
+  :
+  (
+    muCoefficientBL = muCoefficientBL * ((muSpeedBL * muSpeedBL)-1.0);
+    muCoefficientBL = muCoefficientBL + 1.0;
+    muCoefficientBL = muCoefficientBL / (muSpeedBL * muSpeedBL);
+  );
+  muNewSpeedL = muSpeedBL * (muSpeedBL-1);
+  muNewSpeedL = muNewSpeedL + abs(squaredSampleL*release)+fastest;
+  muSpeedBL = muNewSpeedL / muSpeedBL;
+);
+
+(flip) ?
+(
+  (abs(squaredSampleR) > threshold) ?
+  (
+    muVaryR = threshold / abs(squaredSampleR);
+    muAttackR = sqrt(abs(muSpeedAR));
+    muCoefficientAR = muCoefficientAR * (muAttackR-1.0);
+    (muVaryR < threshold) ?
+    (
+      muCoefficientAR = muCoefficientAR + threshold;
+    )
+    :
+    (
+      muCoefficientAR = muCoefficientAR + muVaryR;
+    );
+    muCoefficientAR = muCoefficientAR / muAttackR;
+  )
+  :
+  (
+    muCoefficientAR = muCoefficientAR * ((muSpeedAR * muSpeedAR)-1.0);
+    muCoefficientAR = muCoefficientAR + 1.0;
+    muCoefficientAR = muCoefficientAR / (muSpeedAR * muSpeedAR);
+  );
+  muNewSpeedR = muSpeedAR * (muSpeedAR-1);
+  muNewSpeedR = muNewSpeedR + abs(squaredSampleR*release)+fastest;
+  muSpeedAR = muNewSpeedR / muSpeedAR;
+)
+:
+(
+  (abs(squaredSampleR) > threshold) ?
+  (
+    muVaryR = threshold / abs(squaredSampleR);
+    muAttackR = sqrt(abs(muSpeedBR));
+    muCoefficientBR = muCoefficientBR * (muAttackR-1);
+    (muVaryR < threshold) ?
+    (
+      muCoefficientBR = muCoefficientBR + threshold;
+    )
+    :
+    (
+      muCoefficientBR = muCoefficientBR + muVaryR;
+    );
+    muCoefficientBR = muCoefficientBR / muAttackR;
+  )
+  :
+  (
+    muCoefficientBR = muCoefficientBR * ((muSpeedBR * muSpeedBR)-1.0);
+    muCoefficientBR = muCoefficientBR + 1.0;
+    muCoefficientBR = muCoefficientBR / (muSpeedBR * muSpeedBR);
+  );
+  muNewSpeedR = muSpeedBR * (muSpeedBR-1);
+  muNewSpeedR = muNewSpeedR + abs(squaredSampleR*release)+fastest;
+  muSpeedBR = muNewSpeedR / muSpeedBR;
+);
+
+
+(flip) ?
+(
+  coefficient = (muCoefficientAL + pow(muCoefficientAL,2))/2.0;
+  inputSampleL *= coefficient;
+  coefficient = (muCoefficientAR + pow(muCoefficientAR,2))/2.0;
+  inputSampleR *= coefficient;
+)
+:
+(
+  coefficient = (muCoefficientBL + pow(muCoefficientBL,2))/2.0;
+  inputSampleL *= coefficient;
+  coefficient = (muCoefficientBR + pow(muCoefficientBR,2))/2.0;
+  inputSampleR *= coefficient;
+);
+
+flip = !flip;    
+
+(output < 1.0) ? (
+  inputSampleL *= output;
+  inputSampleR *= output;
+);
+(wet < 1.0) ? (
+  inputSampleL = (drySampleL * (1.0-wet)) + (inputSampleL * wet);
+  inputSampleR = (drySampleR * (1.0-wet)) + (inputSampleR * wet);
+);
+
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

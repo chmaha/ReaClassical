@@ -1,11 +1,12 @@
 @noindex
-desc:RCDither (ReaClassical.org)
+desc:Six-Dither Sid (ReaClassical.org)
 author: chmaha
-version: 1.4
+version: 1.7
 Changelog:
-  Add internal name
+  Add missing block for Twilight/Nintenda
 about:
-  Uses "NJAD" DSP from airwindows "Monitoring" by Chris Johnson
+  Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson
+  Names: Avant-garde = NJAD, Twilight = Dark, Nintenda = Nine Tens into Dark
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License)
   JSFX version released under GPLv3 license
 
@@ -14,13 +15,14 @@ in_pin:right input
 out_pin:left output
 out_pin:right output
 
-slider1:bitdepth=0<0,1,1{Avant-garde 16-bit,Avant-garde 24-bit}>Bitdepth
+slider1:bitdepth=0<0,5,1{Avant-garde 16-bit,Twilight 16-bit,Nintenda 16-bit,Avant-garde 24-bit,Twilight 24-bit,Nintenda 24-bit}>WordLength Reducer
 
 @init
-
 freemem = 0;
 bynL = freemem; freemem+=13;
 bynR = freemem; freemem+=13;
+darkSampleL = freemem; freemem+=100;
+darkSampleR = freemem; freemem+=100;
 
 bynL[0] = 1000.0;
 bynL[1] = 301.0;
@@ -47,6 +49,13 @@ bynR[9] = 46.0;
 bynR[10] = 1000.0;
 noiseShapingR = 0.0;
 
+
+NSOddL = 0.0; NSEvenL = 0.0; prevShapeL = 0.0;
+NSOddR = 0.0; NSEvenR = 0.0; prevShapeR = 0.0;
+(bitdepth == 2) || (bitdepth == 5) ? flip = 1; //Ten Nines
+
+count = 0; loop(99, darkSampleL[count] = 0; darkSampleR[count] = 0; count+=1;);
+
 UINT32_MAX = 4294967295;
 
 A = 0.0;
@@ -57,6 +66,14 @@ fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 
 @block
 
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+depth = (17.0*overallscale) | 0;
+(depth < 3) ? depth = 3;
+(depth > 98) ? depth = 98; //for Dark
+
 @sample
 
 inputSampleL = spl0;
@@ -65,14 +82,22 @@ inputSampleR = spl1;
 (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
 (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
 
-(bitdepth == 0) ? (
-  inputSampleL = inputSampleL * 32768.0; //or 16 bit option
-  inputSampleR = inputSampleR * 32768.0; //or 16 bit option
-) : (
-  inputSampleL = inputSampleL * 8388608.0; //for literally everything else
-  inputSampleR = inputSampleR * 8388608.0; //we will apply the 24 bit NJAD
+(bitdepth == 1) || (bitdepth == 2) || (bitdepth == 4) || (bitdepth == 5) ? (
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdR < 0) ? fpdR += UINT32_MAX;
 );
 
+(bitdepth < 3) ? (
+  inputSampleL = inputSampleL * 32768.0; //16-bit
+  inputSampleR = inputSampleR * 32768.0;
+) : (
+  inputSampleL = inputSampleL * 8388608.0; //24-bit
+  inputSampleR = inputSampleR * 8388608.0;
+);
+
+(bitdepth == 0) || (bitdepth == 3) ? ( // NJAD
 cutbinsL = 0;
 cutbinsR = 0;
 drySampleL = inputSampleL;
@@ -89,7 +114,7 @@ hotbinA = floor(benfordize);
 totalA = 0;
 ((hotbinA > 0) && (hotbinA < 10)) ?
 (
-  bynL[hotbinA] += 1; (bynL[hotbinA] > 982) ? cutbinsL  = 1;
+  bynL[hotbinA] += 1; (bynL[hotbinA] > 982) ? cutbinsL = 1;
   totalA += (301-bynL[1]); totalA += (176-bynL[2]); totalA += (125-bynL[3]);
   totalA += (97-bynL[4]); totalA += (79-bynL[5]); totalA += (67-bynL[6]);
   totalA += (58-bynL[7]); totalA += (51-bynL[8]); totalA += (46-bynL[9]); bynL[hotbinA] -= 1;
@@ -103,7 +128,7 @@ hotbinB = floor(benfordize);
 totalB = 0;
 ((hotbinB > 0) && (hotbinB < 10)) ?
 (
-  bynL[hotbinB] += 1; (bynL[hotbinB] > 982) ? cutbinsL  = 1;
+  bynL[hotbinB] += 1; (bynL[hotbinB] > 982) ? cutbinsL = 1;
   totalB += (301-bynL[1]); totalB += (176-bynL[2]); totalB += (125-bynL[3]);
   totalB += (97-bynL[4]); totalB += (79-bynL[5]); totalB += (67-bynL[6]);
   totalB += (58-bynL[7]); totalB += (51-bynL[8]); totalB += (46-bynL[9]); bynL[hotbinB] -= 1;
@@ -172,6 +197,108 @@ noiseShapingR += outputSample - drySampleR;
 
 (inputSampleR > 1.0) ? inputSampleR = 1.0;
 (inputSampleR < -1.0)? inputSampleR = -1.0;
+)
+: (bitdepth == 1) || (bitdepth == 2) || (bitdepth == 4) || (bitdepth == 5) ? // Dark & Nine Tens Into Dark
+(
+  (bitdepth == 2) || (bitdepth == 5) ? (
+    correction = 0;
+    (flip) ? (
+      NSOddL = (NSOddL * 0.9999999999) + prevShapeL;
+      NSEvenL = (NSEvenL * 0.9999999999) - prevShapeL;
+      correction = NSOddL;
+    ) : (
+      NSOddL = (NSOddL * 0.9999999999) - prevShapeL;
+      NSEvenL = (NSEvenL * 0.9999999999) + prevShapeL;
+      correction = NSEvenL;
+    );
+    shapedSampleL = inputSampleL+correction;
+  );
+//begin left
+      (bitdepth == 1) || (bitdepth == 4) ? (
+      quantA = floor(inputSampleL);
+      quantB = floor(inputSampleL+1.0););
+
+     (bitdepth == 2) || (bitdepth == 5) ? (
+     quantA = floor(shapedSampleL);
+     quantB = floor(shapedSampleL+1.0););
+
+    expectedSlew = 0;
+    x = 0; while(x < depth)(
+      expectedSlew += (darkSampleL[x+1] - darkSampleL[x]);
+      x+=1;
+    );
+    expectedSlew /= depth;
+
+    testA = abs((darkSampleL[0] - quantA) - expectedSlew);
+    testB = abs((darkSampleL[0] - quantB) - expectedSlew);
+
+    (testA < testB) ? inputSampleL = quantA
+    : inputSampleL = quantB;
+
+    x = depth; while(x >=0) (
+      darkSampleL[x+1] = darkSampleL[x];
+      x-=1;
+    );
+    darkSampleL[0] = inputSampleL;
+    //end Dark left
+    (bitdepth == 2) || (bitdepth == 5) ? (
+    prevShapeL = (floor(shapedSampleL) - inputSampleL)*0.9999999999;);
+
+    //begin right
+    (bitdepth == 2) || (bitdepth == 5) ? (
+      correction = 0;
+      (flip) ? (
+        NSOddR = (NSOddR * 0.9999999999) + prevShapeR;
+        NSEvenR = (NSEvenR * 0.9999999999) - prevShapeR;
+        correction = NSOddR;
+      ) : (
+        NSOddR = (NSOddR * 0.9999999999) - prevShapeR;
+        NSEvenR = (NSEvenR * 0.9999999999) + prevShapeR;
+        correction = NSEvenR;
+    );
+    shapedSampleR = inputSampleR+correction;);
+
+      (bitdepth == 1) || (bitdepth == 4) ? (
+      quantA = floor(inputSampleR);
+      quantB = floor(inputSampleR+1.0););
+
+     (bitdepth == 2) || (bitdepth == 5) ? (
+     quantA = floor(shapedSampleR);
+     quantB = floor(shapedSampleR+1.0););
+
+    expectedSlew = 0;
+    x = 0; while(x < depth)(
+      expectedSlew += (darkSampleR[x+1] - darkSampleR[x]);
+      x+=1;
+    );
+    expectedSlew /= depth;
+
+    testA = abs((darkSampleR[0] - quantA) - expectedSlew);
+    testB = abs((darkSampleR[0] - quantB) - expectedSlew);
+
+    (testA < testB) ? inputSampleR = quantA
+    : inputSampleR = quantB;
+
+    x = depth; while(x >=0) (
+      darkSampleR[x+1] = darkSampleR[x];
+      x-=1;
+    );
+    darkSampleR[0] = inputSampleR;
+    //end Dark right
+    (bitdepth == 2) || (bitdepth == 5) ? (
+    prevShapeR = (floor(shapedSampleR) - inputSampleR)*0.9999999999;
+    flip = !flip;
+    );
+
+   (bitdepth < 3 ) ? (
+      inputSampleL /= 32768.0;
+      inputSampleR /= 32768.0;
+    ) : (
+      inputSampleL /= 8388608.0;
+      inputSampleR /= 8388608.0;
+    );
+);
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
+
