@@ -6,7 +6,7 @@
 @metapackage
 @provides
   Cora.jsfx
-  lsa.jsfx
+  Elsa.jsfx
   Eurydice_Bus.jsfx
   Eurydice_Channel.jsfx
   MagicFairyDust.jsfx
