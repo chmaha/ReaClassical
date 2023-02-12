@@ -1,4 +1,4 @@
-@noindex
+NoIndex: true
 desc: Amphitrite (ReaClassical.org)
 author: chmaha
 version: 1.4

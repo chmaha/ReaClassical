@@ -1,4 +1,4 @@
-@noindex
+NoIndex: true
 desc: ELSA: Extremely Light Saturation Applier (ReaClassical.org)
 author: chmaha
 version: 1.0
