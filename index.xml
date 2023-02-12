@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="dfbbb2661fe0e617703595f440a44ac6e2a17558">
+<index version="1" name="chmaha Scripts" commit="2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c">
   <category name="Consoles">
-    <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Consoles">
+    <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -30,25 +30,25 @@
       </version>
       <version name="1.1" author="chmaha" time="2023-02-12T18:49:31Z">
         <changelog><![CDATA[Change reapack headers]]></changelog>
-        <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Cora.jsfx</source>
-        <source file="Elsa.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Elsa.jsfx</source>
-        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Eurydice_Bus.jsfx</source>
-        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Eurydice_Channel.jsfx</source>
-        <source file="MagicFairyDust.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/MagicFairyDust.jsfx</source>
-        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Orpheus_Bus_In.jsfx</source>
-        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Orpheus_Bus_Out.jsfx</source>
-        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Orpheus_Channel_In.jsfx</source>
-        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Orpheus_Channel_Out.jsfx</source>
-        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Orpheus_Sub_In.jsfx</source>
-        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/Orpheus_Sub_Out.jsfx</source>
-        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/ReaClassical_Cora.RPP</source>
-        <source type="projecttpl" file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/ReaClassical_Eurydice.RPP</source>
-        <source type="projecttpl" file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Consoles/ReaClassical_Orpheus.RPP</source>
+        <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Cora.jsfx</source>
+        <source file="Elsa.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Elsa.jsfx</source>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Eurydice_Channel.jsfx</source>
+        <source file="MagicFairyDust.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/MagicFairyDust.jsfx</source>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/ReaClassical_Cora.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/ReaClassical_Eurydice.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Consoles/ReaClassical_Orpheus.RPP</source>
       </version>
     </reapack>
   </category>
   <category name="Dithers">
-    <reapack name="Dithers.jsfx" type="effect" desc="ReaClassical Dithers">
+    <reapack name="Dithers.jsfx" type="effect" desc="ReaClassical Dither Plugins">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -69,12 +69,12 @@
       </version>
       <version name="1.1" author="chmaha" time="2023-02-12T18:51:23Z">
         <changelog><![CDATA[Change reapack headers]]></changelog>
-        <source file="Nintenda.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Dithers/Nintenda.jsfx</source>
-        <source file="six-dither_sid.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Dithers/six-dither_sid.jsfx</source>
-        <source file="Stan.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Dithers/Stan.jsfx</source>
-        <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Dithers/Twilight.jsfx</source>
-        <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Dithers/WTFDither.jsfx</source>
-        <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Dithers/Xonnos%20Dither.jsfx</source>
+        <source file="Nintenda.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/Nintenda.jsfx</source>
+        <source file="six-dither_sid.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/six-dither_sid.jsfx</source>
+        <source file="Stan.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/Stan.jsfx</source>
+        <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/Twilight.jsfx</source>
+        <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/WTFDither.jsfx</source>
+        <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/Xonnos%20Dither.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -131,7 +131,7 @@
     </reapack>
   </category>
   <category name="RCPlugs">
-    <reapack name="RCPlugs.jsfx" type="effect" desc="ReaClassical Essentials">
+    <reapack name="RCPlugs.jsfx" type="effect" desc="ReaClassical Essential Plugins">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -153,13 +153,13 @@
       </version>
       <version name="1.1" author="chmaha" time="2023-02-12T18:47:23Z">
         <changelog><![CDATA[Change reapack headers]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/RCPlugs/RCDither.jsfx</source>
-        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/RCPlugs/RCEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/RCPlugs/RCDither.jsfx</source>
+        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/RCPlugs/RCEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -592,7 +592,7 @@ Add ReaClassical project template to metapackage]]></changelog>
     </reapack>
   </category>
   <category name="Various">
-    <reapack name="Various.jsfx" type="effect" desc="Other ReaClassical Plugins">
+    <reapack name="Various.jsfx" type="effect" desc="ReaClassical Miscellaneous Plugins">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -617,16 +617,16 @@ Add ReaClassical project template to metapackage]]></changelog>
       </version>
       <version name="1.1" author="chmaha" time="2023-02-12T18:47:23Z">
         <changelog><![CDATA[Change reapack headers]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/d03e2f4430c0d4a916a1eb95a411c2b46a616bf3/Various/Titan.jsfx</source>
+        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/Amphitrite.jsfx</source>
+        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/Aurora.jsfx</source>
+        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/Eris.jsfx</source>
+        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/flattop.jsfx</source>
+        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/Lyra.jsfx</source>
+        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/Magnetique.jsfx</source>
+        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/MuTube.jsfx</source>
+        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/port-and-lemon.jsfx</source>
+        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/Sillons.jsfx</source>
+        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Various/Titan.jsfx</source>
       </version>
     </reapack>
   </category>
