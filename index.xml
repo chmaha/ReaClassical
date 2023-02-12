@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="6c11a7d3e34a9a487d02e42ccc448d820b65e02f">
+<index version="1" name="chmaha Scripts" commit="a66ade110ca2c303d9f1d30880ae15508ba2463f">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Consoles">
       <metadata>
@@ -486,7 +486,7 @@ Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigat
         <source>https://github.com/chmaha/ReaClassical/raw/73d8c8825a86b9118813a29cf71cb746ba3327ce/ReaClassical/ReaClassical.RPP</source>
       </version>
     </reapack>
-    <reapack name="ReaClassical_Theme.lua" type="script" desc="ReaClassical Theme">
+    <reapack name="ReaClassical_Theme.theme" type="theme" desc="ReaClassical Theme">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -496,9 +496,9 @@ Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigat
 }
 ]]></description>
       </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-09T22:08:01Z">
+      <version name="1.0" author="chmaha" time="2023-02-12T14:17:05Z">
         <source file="ReaClassical.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/main/Manual_install_files/ReaClassical.ReaperThemeZip</source>
-        <source>https://github.com/chmaha/ReaClassical/raw/6c11a7d3e34a9a487d02e42ccc448d820b65e02f/ReaClassical/ReaClassical_Theme.lua</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/a66ade110ca2c303d9f1d30880ae15508ba2463f/ReaClassical/ReaClassical_Theme.theme</source>
       </version>
     </reapack>
   </category>
