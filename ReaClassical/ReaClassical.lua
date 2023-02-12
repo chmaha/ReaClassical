@@ -32,6 +32,7 @@
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Previous Item or Fade.lua
   [rpp] ReaClassical.RPP
+  ReaClassical_Theme.theme https://github.com/chmaha/ReaClassical/raw/main/Manual_install_files/ReaClassical.ReaperThemeZip
 
 @about
   These scripts provide dedicated source-destination markers, edits, crossfade
