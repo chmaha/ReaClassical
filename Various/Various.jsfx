@@ -1,0 +1,19 @@
+@description Other ReaClassical Plugins
+@author chmaha
+@version 1.0
+@changelog
+  Initial metapackage release
+@metapackage
+@provides
+  [main] Amphitrite.jsfx
+  [main] Aurora.jsfx
+  [main] Eris.jsfx
+  [main] flattop.jsfx
+  [main] Lyra.jsfx
+  [main] Magnetique.jsfx
+  [main] MuTube.jsfx
+  [main] port-and-lemon.jsfx
+  [main] Sillons.jsfx
+  [main] Titan.jsfx
+@about
+  Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...

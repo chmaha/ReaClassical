@@ -1,0 +1,67 @@
+@noindex
+desc: ELSA: Extremely Light Saturation Applier (ReaClassical.org)
+author: chmaha
+version: 1.0
+Changelog:
+  Initial commit
+about:
+  Uses DSP from airwindows "PurestDrive" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestDrive (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,100,1>Drive (%)
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+UINT32_MAX = 4294967295;
+
+A = 0.0;
+
+previousSampleL = 0.0;
+previousSampleR = 0.0;
+  
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+A = slider1/100;
+
+
+@block
+intensity = A;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+inputSampleL = sin(inputSampleL);
+apply = (abs(previousSampleL + inputSampleL) / 2.0) * intensity;
+inputSampleL = (drySampleL * (1.0 - apply)) + (inputSampleL * apply);    
+previousSampleL = sin(drySampleL);
+
+inputSampleR = sin(inputSampleR);
+apply = (abs(previousSampleR + inputSampleR) / 2.0) * intensity;
+inputSampleR = (drySampleR * (1.0 - apply)) + (inputSampleR * apply);    
+previousSampleR = sin(drySampleR);
+
+
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+
