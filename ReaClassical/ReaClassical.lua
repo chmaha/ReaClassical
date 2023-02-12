@@ -1,12 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.10
+@version 23.11
 @changelog
-  v23.10
-  Fix Whole Project View when no saved data 
-  Classical Crossfade Editor (F): Major re-write prioritizing safety and visual clarity
-  Edit Classical Crossfade (Z): Complete re-write. Now use in the same manner as the audition tool
-  Next / Prev Item or Fade(Q & W): New scripts made for item and crossfade navigation
+  v23.11
+  Add ReaClassical project template to metapackage
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -34,6 +31,7 @@
   [main] ReaClassical_Help.lua
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Previous Item or Fade.lua
+  [rpp] ReaClassical.RPP
 
 @about
   These scripts provide dedicated source-destination markers, edits, crossfade
