@@ -33,5 +33,5 @@
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
 @about
-  These scripts provide dedicated source-destination markers, edits, crossfade
-  editor and more for classical music editing in REAPER.
+  These scripts, along with custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
+
