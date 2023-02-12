@@ -1,8 +1,7 @@
 @description ReaClassical
 @author chmaha
-@version 23.11
+@version 23.12
 @changelog
-  v23.11
   Add ReaClassical project template to metapackage
 @metapackage
 @provides
@@ -32,6 +31,7 @@
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Previous Item or Fade.lua
   [rpp] ReaClassical.RPP
+  [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
 @about
   These scripts provide dedicated source-destination markers, edits, crossfade
   editor and more for classical music editing in REAPER.
