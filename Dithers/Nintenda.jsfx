@@ -1,0 +1,181 @@
+@noindex
+desc:Nintenda (ReaClassical.org)
+author: chmaha
+version: 1.2
+Changelog:
+  Add fpdL safety lines
+about:
+  Uses "Nine Tens into Dark" DSP from airwindows "Monitoring3" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License)
+  JSFX version released under GPLv3 license
+slider1:wordreducer=0<0,2,1{Nintenda 16-bit,Nintenda 24-bit}>Bitdepth
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+freemem = 0;
+darkSampleL = freemem; freemem+=100;
+darkSampleR = freemem; freemem+=100;
+
+NSOddL = 0.0; NSEvenL = 0.0; prevShapeL = 0.0;
+NSOddR = 0.0; NSEvenR = 0.0; prevShapeR = 0.0;
+flip = 1; //Ten Nines
+count = 0; loop(98,darkSampleL[count] = 0;darkSampleR[count] = 0;count +=1;);
+
+UINT32_MAX = 4294967295;
+
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+
+@block
+
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+depth = (17.0*overallscale) | 0;
+(depth < 3) ? depth = 3;
+(depth > 98) ? depth = 98; //for Dark
+
+@sample
+
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+//we need to make our dither run up here, there's no spot on the end to do it
+
+//begin Dark    
+    (wordreducer == 0) ? (
+      inputSampleL *= 32768.0; //or 16 bit option
+      inputSampleR *= 32768.0; //or 16 bit option
+    ) : (
+      inputSampleL *= 8388608.0; //for literally everything else
+      inputSampleR *= 8388608.0; //we will apply the 24 bit Dark
+    ); //on the not unreasonable assumption that we are very likely playing back on 24 bit DAC
+    
+    //We are doing it first Left, then Right, because the loops may run faster if
+    //they aren't too jammed full of variables. This means re-running code.
+    
+    //begin left
+    correction = 0;
+    (flip) ? (
+      NSOddL = (NSOddL * 0.9999999999) + prevShapeL;
+      NSEvenL = (NSEvenL * 0.9999999999) - prevShapeL;
+      correction = NSOddL;
+    ) : (
+      NSOddL = (NSOddL * 0.9999999999) - prevShapeL;
+      NSEvenL = (NSEvenL * 0.9999999999) + prevShapeL;
+      correction = NSEvenL;
+    );
+    shapedSampleL = inputSampleL+correction;
+    //end Ten Nines
+    
+    //begin Dark
+    quantA = floor(shapedSampleL);
+    quantB = floor(shapedSampleL+1.0);
+    //to do this style of dither, we quantize in either direction and then
+    //do a reconstruction of what the result will be for each choice.
+    //We then evaluate which one we like, and keep a history of what we previously had
+    
+    expectedSlew = 0;
+    x = 0; while(x < depth)
+      (expectedSlew += (darkSampleL[x+1] - darkSampleL[x]);
+      x+=1;
+    );
+    expectedSlew /= depth; //we have an average of all recent slews
+    //we are doing that to voice the thing down into the upper mids a bit
+    //it mustn't just soften the brightest treble, it must smooth high mids too
+    
+    testA = abs((darkSampleL[0] - quantA) - expectedSlew);
+    testB = abs((darkSampleL[0] - quantB) - expectedSlew);
+    
+    (testA < testB) ? inputSampleL = quantA
+    : inputSampleL = quantB;
+    //select whichever one departs LEAST from the vector of averaged
+    //reconstructed previous final samples. This will force a kind of dithering
+    //as it'll make the output end up as smooth as possible
+    
+    x = depth; while(x >=0)
+      (darkSampleL[x+1] = darkSampleL[x];
+      x-=1;
+    );
+    darkSampleL[0] = inputSampleL;
+    //end Dark left
+    
+    prevShapeL = (floor(shapedSampleL) - inputSampleL)*0.9999999999;
+    //end Ten Nines left
+    
+    //begin right
+    correction = 0;
+    (flip) ? (
+      NSOddR = (NSOddR * 0.9999999999) + prevShapeR;
+      NSEvenR = (NSEvenR * 0.9999999999) - prevShapeR;
+      correction = NSOddR;
+    ) : (
+      NSOddR = (NSOddR * 0.9999999999) - prevShapeR;
+      NSEvenR = (NSEvenR * 0.9999999999) + prevShapeR;
+      correction = NSEvenR;
+    );
+    shapedSampleR = inputSampleR+correction;
+    //end Ten Nines
+    
+    //begin Dark
+    quantA = floor(shapedSampleR);
+    quantB = floor(shapedSampleR+1.0);
+    //to do this style of dither, we quantize in either direction and then
+    //do a reconstruction of what the result will be for each choice.
+    //We then evaluate which one we like, and keep a history of what we previously had
+    
+    expectedSlew = 0;
+    x = 0; while(x < depth)      
+    (expectedSlew += (darkSampleR[x+1] - darkSampleR[x]);
+    x+=1;
+    );
+    expectedSlew /= depth; //we have an average of all recent slews
+    //we are doing that to voice the thing down into the upper mids a bit
+    //it mustn't just soften the brightest treble, it must smooth high mids too
+    
+    testA = abs((darkSampleR[0] - quantA) - expectedSlew);
+    testB = abs((darkSampleR[0] - quantB) - expectedSlew);
+    
+    (testA < testB) ? inputSampleR = quantA
+    : inputSampleR = quantB;
+    //select whichever one departs LEAST from the vector of averaged
+    //reconstructed previous final samples. This will force a kind of dithering
+    //as it'll make the output end up as smooth as possible
+    
+    x = depth; while(x >=0)
+      (darkSampleR[x+1] = darkSampleR[x];
+      x-=1;
+    );
+    darkSampleR[0] = inputSampleR;
+    //end Dark right
+    
+    prevShapeR = (floor(shapedSampleR) - inputSampleR)*0.9999999999;
+    //end Ten Nines
+    flip = !flip;
+    
+    (wordreducer == 0) ? (
+      inputSampleL /= 32768.0;
+      inputSampleR /= 32768.0;
+    ) : (
+      inputSampleL /= 8388608.0;
+      inputSampleR /= 8388608.0;
+    );
+    //does not use 64 bit stereo floating point dither
+    
+    spl0 = inputSampleL;
+    spl1 = inputSampleR;
+
