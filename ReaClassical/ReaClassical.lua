@@ -2,7 +2,7 @@
 @author chmaha
 @version 23.12
 @changelog
-  Add ReaClassical project template to metapackage
+  Add ReaClassical theme to metapackage
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
