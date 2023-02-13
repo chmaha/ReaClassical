@@ -1,9 +1,6 @@
 NoIndex: true
 desc:RCComp (ReaClassical.org)
 author: chmaha
-version: 1.02
-Changelog:
-  Add author
 about:
   Express Bus Compressor (Stillwell) modified for classical music use by chmaha
   See below the code for copyright notices, list of conditions and disclaimers

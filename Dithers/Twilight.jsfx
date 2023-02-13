@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Twilight Dither (ReaClassical.org)
 author: chmaha
-version: 1.2
-Changelog:
-  Add fpdL safety lines 
 about:
   Uses "Dark" DSP from airwindows "Monitoring2" plugin by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring2 (MIT License)

@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Eurydice Bus (ReaClassical.org)
 author: chmaha
-version: 1.0
-Changelog:
-  Initial commit
 about:
   Uses DSP from airwindows "PurestConsole2" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestConsole2Buss (MIT License)

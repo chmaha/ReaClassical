@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Port-and-Lemon (ReaClassical.org)
 author: chmaha
-version: 1.0
-Changelog:
-  Initial commit
 about:
   Compressor and Gate
   Uses DSP from airwindows "Dynamics" by Chris Johnson

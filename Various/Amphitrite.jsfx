@@ -1,9 +1,6 @@
 NoIndex: true
 desc: Amphitrite (ReaClassical.org)
 author: chmaha
-version: 1.4
-Changelog:
-  Reduce ranges and set new defaults
 about:
   Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License)
