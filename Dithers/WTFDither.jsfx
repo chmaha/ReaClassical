@@ -3,11 +3,13 @@ desc:WTFDither (ReaClassical.org)
 author: chmaha
 about:
   "Wipe The Floor" Triangular Dither
-  Uses DSP from airwindows "TPDFDither" by Chris Johnson
+  Uses DSP from airwindows "TPDFDither" and "TPDFWide" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TPDFDither (MIT License)
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TPDFWide (MIT License)
   JSFX version released under GPLv3 license
 
-slider1:0<0,1,1{16-bit,24-bit}>Bitdepth
+slider1:0<0,1,1{WTF,WTF Wide}>Dither
+slider2:0<0,1,1{16-bit,24-bit}>Bitdepth
 
 in_pin:left input
 in_pin:right input
@@ -25,37 +27,81 @@ fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 
 
 @block
-(slider1 == 1) ? scaleFactor = 8388608.0 : scaleFactor = 32768.0;
+(slider2 == 1) ? scaleFactor = 8388608.0 : scaleFactor = 32768.0;
 
 @sample
 
 inputSampleL = spl0;
 inputSampleR = spl1;
 
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
-(fpdL < 0) ? fpdL += UINT32_MAX;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
-fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
-(fpdR < 0) ? fpdR += UINT32_MAX;
-
-inputSampleL *= scaleFactor;
-inputSampleR *= scaleFactor;
-
-inputSampleL -= 1.0;
-inputSampleR -= 1.0;
-
-inputSampleL += fpdL/UINT32_MAX;
-inputSampleR += fpdR/UINT32_MAX;
-fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
-fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
-(fpdL < 0) ? fpdL += UINT32_MAX;
-(fpdR < 0) ? fpdR += UINT32_MAX;
-inputSampleL += fpdL/UINT32_MAX;
-inputSampleR += fpdR/UINT32_MAX;
-
-inputSampleL = floor(inputSampleL);
-inputSampleR = floor(inputSampleR);
+(slider1 == 0) ? 
+(
+  (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+  fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+  (fpdL < 0) ? fpdL += UINT32_MAX;
+  (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+  fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+  (fpdR < 0) ? fpdR += UINT32_MAX;
+  
+  inputSampleL *= scaleFactor;
+  inputSampleR *= scaleFactor;
+  
+  inputSampleL -= 1.0;
+  inputSampleR -= 1.0;
+  
+  inputSampleL += fpdL/UINT32_MAX;
+  inputSampleR += fpdR/UINT32_MAX;
+  fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+  fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+  (fpdL < 0) ? fpdL += UINT32_MAX;
+  (fpdR < 0) ? fpdR += UINT32_MAX;
+  inputSampleL += fpdL/UINT32_MAX;
+  inputSampleR += fpdR/UINT32_MAX;
+  
+  inputSampleL = floor(inputSampleL);
+  inputSampleR = floor(inputSampleR);
+) : (slider1 == 1) ?
+(
+  (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+  (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+  
+  inputSampleL *= scaleFactor;
+  inputSampleR *= scaleFactor;
+  
+  ditherL = -1.0;
+  ditherL += fpdL/UINT32_MAX;
+  fpdL = rand(UINT32_MAX);
+  ditherL += fpdL/UINT32_MAX;
+  
+  ditherR = -1.0;
+  ditherR += fpdR/UINT32_MAX;
+  fpdR  = rand(UINT32_MAX);
+  ditherR += fpdR/UINT32_MAX;
+  
+  (abs(ditherL-ditherR) < 0.5) ? (
+  ditherL = -1.0;
+  ditherL += fpdL/UINT32_MAX;
+  fpdL = rand(UINT32_MAX);
+  ditherL += fpdL/UINT32_MAX;
+  );
+  
+  (abs(ditherL-ditherR) < 0.5) ? (
+  ditherR = -1.0;
+  ditherR += fpdR/UINT32_MAX;
+  fpdR  = rand(UINT32_MAX);
+  ditherR += fpdR/UINT32_MAX;
+  );
+  
+  (abs(ditherL-ditherR) < 0.5) ? (
+  ditherL = -1.0;
+  ditherL += fpdL/UINT32_MAX;
+  fpdL = rand(UINT32_MAX);
+  ditherL += fpdL/UINT32_MAX;
+  );
+  
+  inputSampleL = floor(inputSampleL+ditherL);
+  inputSampleR = floor(inputSampleR+ditherR);
+);
 
 inputSampleL /= scaleFactor;
 inputSampleR /= scaleFactor;
