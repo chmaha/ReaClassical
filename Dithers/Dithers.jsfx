@@ -1,9 +1,8 @@
 @description ReaClassical Dither Plugins
 @author chmaha
-@version 1.2
+@version 1.3
 @changelog
-  Remove ver and changelog from individual jsfx
-  Add dither if missing from name to aid search in FX browser
+  Add Reel and Groovy Dithers
 @metapackage
 @provides
    Nintenda.jsfx
@@ -12,6 +11,8 @@
    Twilight.jsfx
    WTFDither.jsfx
    Xonnos Dither.jsfx
+   ReelDither.jsfx
+   GroovyDither.jsfx
 @about
   These jsfx Dithers plugins provide for every sort of Dither you could ever need.
   Includes TPDF, single-pole high-pass, and various other boutique wordlength reducers from airwindows.
