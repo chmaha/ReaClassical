@@ -1,0 +1,76 @@
+NoIndex: true
+desc:ReelDither (ReaClassical.org)
+author: chmaha
+about:
+  Uses DSP from airwindows "TapeDither" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TapeDither (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,1,1{16-bit,24-bit}>Bitdepth
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+UINT32_MAX = 4294967295;
+
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+@block
+
+(slider1 == 1) ? scaleFactor = 8388608.0
+: scaleFactor = 32768.0;
+
+
+@sample
+
+inputSampleL = spl0;
+inputSampleR = spl1;
+(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+
+inputSampleL *= scaleFactor;
+inputSampleR *= scaleFactor;
+
+currentDitherL = fpdL/UINT32_MAX;
+currentDitherR = fpdR/UINT32_MAX;
+
+inputSampleL += currentDitherL;
+inputSampleR += currentDitherR;
+inputSampleL -= previousDither4L;
+inputSampleR -= previousDither4R;
+
+inputSampleL = floor(inputSampleL);
+inputSampleR = floor(inputSampleR);
+
+previousDither4L = previousDither3L;
+previousDither3L = previousDither2L;
+previousDither2L = previousDither1L;
+previousDither1L = currentDitherL;
+
+previousDither4R = previousDither3R;
+previousDither3R = previousDither2R;
+previousDither2R = previousDither1R;
+previousDither1R = currentDitherR;
+
+inputSampleL /= scaleFactor;
+inputSampleR /= scaleFactor;
+
+
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX);
+
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
