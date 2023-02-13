@@ -1,8 +1,8 @@
 @description ReaClassical Dither Plugins
 @author chmaha
-@version 1.3
+@version 1.4
 @changelog
-  Add Reel and Groovy Dithers
+  Add WTF Wide to WTFDither
 @metapackage
 @provides
    Nintenda.jsfx
