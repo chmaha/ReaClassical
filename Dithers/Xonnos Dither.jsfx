@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Xonnos Dither (ReaClassical.org)
 author: chmaha
-version: 1.1
-Changelog:
-  Add Xonnos Wide
 about:
   Uses DSP from airwindows "PaulDither" & "DoublePaul" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PaulDither (MIT License)

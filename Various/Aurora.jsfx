@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Aurora (ReaClassical.org)
 author: chmaha
-version: 1.1
-Changelog:
-  Change Ionization slider to percentage
 about:
   Uses DSP from airwindows "Dubly" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly (MIT License)
