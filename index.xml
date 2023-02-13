@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="cc5d17ed1ece9a6b3b3d70de3116be63c0878151">
+<index version="1" name="chmaha Scripts" commit="65852e6e3dd7a463c6886c82d23da7a5d6abeff5">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -97,6 +97,17 @@ Add dither if missing from name to aid search in FX browser]]></changelog>
         <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/d4c9aa74948ccf78b0fc463a265ab2be0cb5a8c7/Dithers/Xonnos%20Dither.jsfx</source>
         <source file="ReelDither.jsfx">https://github.com/chmaha/ReaClassical/raw/d4c9aa74948ccf78b0fc463a265ab2be0cb5a8c7/Dithers/ReelDither.jsfx</source>
         <source file="GroovyDither.jsfx">https://github.com/chmaha/ReaClassical/raw/d4c9aa74948ccf78b0fc463a265ab2be0cb5a8c7/Dithers/GroovyDither.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-02-13T23:16:36Z">
+        <changelog><![CDATA[Add WTF Wide to WTFDither]]></changelog>
+        <source file="Nintenda.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/Nintenda.jsfx</source>
+        <source file="six-dither_sid.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/six-dither_sid.jsfx</source>
+        <source file="Stan.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/Stan.jsfx</source>
+        <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/Twilight.jsfx</source>
+        <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/WTFDither.jsfx</source>
+        <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/Xonnos%20Dither.jsfx</source>
+        <source file="ReelDither.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/ReelDither.jsfx</source>
+        <source file="GroovyDither.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/GroovyDither.jsfx</source>
       </version>
     </reapack>
   </category>
