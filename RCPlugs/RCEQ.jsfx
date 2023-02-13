@@ -1,9 +1,6 @@
 NoIndex: true
 desc:RCEQ (ReaClassical.org)
 author: chmaha
-version: 1.2
-Changelog:
-  Add LPF and HPF
 about:
   Uses DSP from airwindows "Baxandall" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License)

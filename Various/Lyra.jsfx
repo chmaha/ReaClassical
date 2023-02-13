@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Lyra (ReaClassical.org)
 author: chmaha
-version: 1.0
-Changelog:
-  Initial commit
 about:
   Uses DSP from airwindows "ButterComp2" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ButterComp2 (MIT License)

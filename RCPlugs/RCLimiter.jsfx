@@ -1,9 +1,6 @@
 NoIndex: true
 desc:RCLimiter (ReaClassical.org)
 author: chmaha
-version: 1.5
-Changelog:
-  Add true peak enable dropdown
 about:
   Uses DSP with permission from Smooth Limiter by Geraint Luff
   Uses oversampling code by user "Smashed Transistors" (https://forum.cockos.com/showthread.php?t=178543)

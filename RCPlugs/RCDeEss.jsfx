@@ -1,9 +1,6 @@
 NoIndex: true
 desc:RCDeEss (ReaClassical.org)
 author: chmaha
-version: 1.2
-Changelog:
-  Initial commit
 about:
   Uses DSP from airwindows "DeEss" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DeEss (MIT License)

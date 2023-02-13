@@ -2,6 +2,7 @@
 @author chmaha
 @version 1.2
 @changelog
+  Remove ver and changelog from individual jsfx
   Add dither if missing from name to aid search in FX browser
 @metapackage
 @provides

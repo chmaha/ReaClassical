@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Magnétique (ReaClassical.org)
 author: chmaha
-version: 1.0
-Changelog:
-  Initial commit
 about:
   Uses DSP from airwindows "ToTape6" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToTape6 (MIT License)

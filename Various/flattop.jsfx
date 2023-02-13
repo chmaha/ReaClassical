@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Flattop (ReaClassical.org)
 author: chmaha
-version: 1.0
-Changelog:
-  Remove latency code
 about:
   Uses DSP from airwindows "ClipOnly2" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipOnly2 (MIT License)
