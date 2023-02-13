@@ -1,9 +1,6 @@
 NoIndex: true
 desc:RCDither (ReaClassical.org)
 author: chmaha
-version: 1.4
-Changelog:
-  Add internal name
 about:
   Uses "NJAD" DSP from airwindows "Monitoring" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License)

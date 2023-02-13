@@ -1,9 +1,6 @@
 NoIndex: true
 desc:Stan Dither (ReaClassical.org)
 author: chmaha
-version: 1.2
-Changelog:
-  Add ReaClassical to description
 about:
   Uses DSP from airwindows "StudioTan" plugin by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/StudioTan (MIT License)
