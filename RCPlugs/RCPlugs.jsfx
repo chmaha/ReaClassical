@@ -2,8 +2,7 @@
 @author chmaha
 @version 1.2
 @changelog
-  Remove ver and changelog from individual plugins
-  Change reapack headers
+  Add RCDeEss Advanced
 @metapackage
 @provides
    RCComp.jsfx
