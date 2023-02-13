@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="02245a96beea6282c492e8a639ff6a9fcbc4e71d">
+<index version="1" name="chmaha Scripts" commit="4e81fe50fe4c77e87664270863e1a0b5510c3e93">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -75,6 +75,15 @@
         <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/Twilight.jsfx</source>
         <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/WTFDither.jsfx</source>
         <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/2a2f644fe894330a6e9fe3f283ad866fdd4c0f9c/Dithers/Xonnos%20Dither.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-02-13T08:13:36Z">
+        <changelog><![CDATA[Add dither if missing from name to aid search in FX browser]]></changelog>
+        <source file="Nintenda.jsfx">https://github.com/chmaha/ReaClassical/raw/4e81fe50fe4c77e87664270863e1a0b5510c3e93/Dithers/Nintenda.jsfx</source>
+        <source file="six-dither_sid.jsfx">https://github.com/chmaha/ReaClassical/raw/4e81fe50fe4c77e87664270863e1a0b5510c3e93/Dithers/six-dither_sid.jsfx</source>
+        <source file="Stan.jsfx">https://github.com/chmaha/ReaClassical/raw/4e81fe50fe4c77e87664270863e1a0b5510c3e93/Dithers/Stan.jsfx</source>
+        <source file="Twilight.jsfx">https://github.com/chmaha/ReaClassical/raw/4e81fe50fe4c77e87664270863e1a0b5510c3e93/Dithers/Twilight.jsfx</source>
+        <source file="WTFDither.jsfx">https://github.com/chmaha/ReaClassical/raw/4e81fe50fe4c77e87664270863e1a0b5510c3e93/Dithers/WTFDither.jsfx</source>
+        <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/4e81fe50fe4c77e87664270863e1a0b5510c3e93/Dithers/Xonnos%20Dither.jsfx</source>
       </version>
     </reapack>
   </category>
