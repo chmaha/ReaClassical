@@ -1,8 +1,8 @@
 @description ReaClassical Dither Plugins
 @author chmaha
-@version 1.1
+@version 1.2
 @changelog
-  Change reapack headers
+  Add dither if missing from name to aid search in FX browser
 @metapackage
 @provides
    Nintenda.jsfx
