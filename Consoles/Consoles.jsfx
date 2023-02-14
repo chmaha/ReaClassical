@@ -1,9 +1,8 @@
 @description ReaClassical Console Plugins
 @author chmaha
-@version 1.2
+@version 1.2.1
 @changelog
-  Add Clio (airwindows BussColors4) to the collection.
-  NO-OP: Add missing end curly brace to slider1.
+  Remove Clio for now until clarity on blocksize and CPU usage.
 @metapackage
 @provides
   Cora.jsfx
