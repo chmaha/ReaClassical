@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea">
+<index version="1" name="chmaha Scripts" commit="e6631e2a2d3dda65b9809e05db411bee419b19d9">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -67,21 +67,20 @@ NO-OP: Add missing end curly brace to slider1.]]></changelog>
       </version>
       <version name="1.2.1" author="chmaha" time="2023-02-14T13:53:06Z">
         <changelog><![CDATA[Remove Clio for now until clarity on blocksize and CPU usage.]]></changelog>
-        <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Cora.jsfx</source>
-        <source file="Elsa.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Elsa.jsfx</source>
-        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Eurydice_Bus.jsfx</source>
-        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Eurydice_Channel.jsfx</source>
-        <source file="MagicFairyDust.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/MagicFairyDust.jsfx</source>
-        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Orpheus_Bus_In.jsfx</source>
-        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Orpheus_Bus_Out.jsfx</source>
-        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Orpheus_Channel_In.jsfx</source>
-        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Orpheus_Channel_Out.jsfx</source>
-        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Orpheus_Sub_In.jsfx</source>
-        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Orpheus_Sub_Out.jsfx</source>
-        <source file="Clio.jsfx">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/Clio.jsfx</source>
-        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/ReaClassical_Cora.RPP</source>
-        <source type="projecttpl" file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/ReaClassical_Eurydice.RPP</source>
-        <source type="projecttpl" file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/098e4eb6127e2c6ac6e4cd91c60368b97e4a25ea/Consoles/ReaClassical_Orpheus.RPP</source>
+        <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Cora.jsfx</source>
+        <source file="Elsa.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Elsa.jsfx</source>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Eurydice_Channel.jsfx</source>
+        <source file="MagicFairyDust.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/MagicFairyDust.jsfx</source>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/ReaClassical_Cora.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/ReaClassical_Eurydice.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/e6631e2a2d3dda65b9809e05db411bee419b19d9/Consoles/ReaClassical_Orpheus.RPP</source>
       </version>
     </reapack>
   </category>
