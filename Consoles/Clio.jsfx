@@ -6,7 +6,7 @@ about:
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BussColors4 (MIT License)
   JSFX version released under GPLv3 license
 
-slider1:0<0,7,1{Dark,Rock,Lush,Vibe,Holo,Punch,Steel,Tube>Color
+slider1:0<0,7,1{Dark,Rock,Lush,Vibe,Holo,Punch,Steel,Tube}>Color
 slider2:0<-18,18,0.1>Input Trim
 slider3:0<-18,18,0.1>Output Trim
 slider4:1<0,1,0.01>Dry/Wet
