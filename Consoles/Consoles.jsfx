@@ -3,6 +3,7 @@
 @version 1.2
 @changelog
   Add Clio (airwindows BussColors4) to the collection.
+  NO-OP: Add missing end curly brace to slider1.
 @metapackage
 @provides
   Cora.jsfx
