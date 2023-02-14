@@ -1,9 +1,8 @@
 @description ReaClassical Console Plugins
 @author chmaha
-@version 1.1
+@version 1.2
 @changelog
-  Remove ver and changelog from individual plugins
-  Change reapack headers
+  Add Clio (airwindows BussColors4) to the collection.
 @metapackage
 @provides
   Cora.jsfx
@@ -17,10 +16,11 @@
   Orpheus_Channel_Out.jsfx
   Orpheus_Sub_In.jsfx
   Orpheus_Sub_Out.jsfx
+  Clio.jsfx
   [rpp] ReaClassical_Cora.RPP
   [rpp] ReaClassical_Eurydice.RPP
   [rpp] ReaClassical_Orpheus.RPP
 @about
   These jsfx console emulation plugins provide for analog and digital variants.
-  Includes Orpheus (analog), Eurydice (digital), Cora (more general analog circuitry) and final plugins for flavor including MagicFairyDust, ELSA.
+  Includes Orpheus (analog), Eurydice (digital), Cora (more general analog circuitry) and final plugins for flavor including MagicFairyDust, Clio and ELSA.
   Also included are three console project templates with plugins already in place.
