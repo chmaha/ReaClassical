@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="65852e6e3dd7a463c6886c82d23da7a5d6abeff5">
+<index version="1" name="chmaha Scripts" commit="2654f06fe9ad7e6e8910820c49b4d0b8e66facd8">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -7,7 +7,7 @@
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx console emulation plugins provide for analog and digital variants. Includes Orpheus (analog), Eurydice (digital), Cora (more general analog circuitry) and final plugins for flavor including MagicFairyDust, ELSA. Also included are three console project templates with plugins already in place.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx console emulation plugins provide for analog and digital variants. Includes Orpheus (analog), Eurydice (digital), Cora (more general analog circuitry) and final plugins for flavor including MagicFairyDust, Clio and ELSA. Also included are three console project templates with plugins already in place.\par}
 }
 ]]></description>
       </metadata>
@@ -45,6 +45,24 @@ Change reapack headers]]></changelog>
         <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Consoles/ReaClassical_Cora.RPP</source>
         <source type="projecttpl" file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Consoles/ReaClassical_Eurydice.RPP</source>
         <source type="projecttpl" file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Consoles/ReaClassical_Orpheus.RPP</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-02-14T11:17:28Z">
+        <changelog><![CDATA[Add Clio (airwindows BussColors4) to the collection.]]></changelog>
+        <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Cora.jsfx</source>
+        <source file="Elsa.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Elsa.jsfx</source>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Eurydice_Channel.jsfx</source>
+        <source file="MagicFairyDust.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/MagicFairyDust.jsfx</source>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source file="Clio.jsfx">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/Clio.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/ReaClassical_Cora.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/ReaClassical_Eurydice.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/2654f06fe9ad7e6e8910820c49b4d0b8e66facd8/Consoles/ReaClassical_Orpheus.RPP</source>
       </version>
     </reapack>
   </category>
