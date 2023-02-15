@@ -1,8 +1,8 @@
 @description ReaClassical Miscellaneous Plugins
 @author chmaha
-@version 1.4
+@version 1.5
 @changelog
-  Add Pascal
+  Add Oxonia
 @metapackage
 @provides
    Amphitrite.jsfx
@@ -18,5 +18,6 @@
    Discordia.jsfx
    SAW.jsfx
    Pascal.jsfx
+  Oxonia.jsfx
 @about
   Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...
