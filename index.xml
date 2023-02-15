@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="fc735f0c4bb1e3b322ab1921e024f109f5e4e588">
+<index version="1" name="chmaha Scripts" commit="d3ba2f833253408c95a5f887064efe962bb9c1c6">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -773,6 +773,22 @@ Change reapack headers]]></changelog>
         <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Discordia.jsfx</source>
         <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/SAW.jsfx</source>
         <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Pascal.jsfx</source>
+      </version>
+      <version name="1.5" author="chmaha" time="2023-02-15T23:58:20Z">
+        <changelog><![CDATA[Add Oxonia]]></changelog>
+        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Amphitrite.jsfx</source>
+        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Aurora.jsfx</source>
+        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Eris.jsfx</source>
+        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/flattop.jsfx</source>
+        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Lyra.jsfx</source>
+        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Magnetique.jsfx</source>
+        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/MuTube.jsfx</source>
+        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/port-and-lemon.jsfx</source>
+        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Sillons.jsfx</source>
+        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Titan.jsfx</source>
+        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Discordia.jsfx</source>
+        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/SAW.jsfx</source>
+        <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/d3ba2f833253408c95a5f887064efe962bb9c1c6/Various/Pascal.jsfx</source>
       </version>
     </reapack>
   </category>
