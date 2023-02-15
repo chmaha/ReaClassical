@@ -2,7 +2,7 @@
 @author chmaha
 @version 1.3
 @changelog
-  Remove Clio for now until clarity on blocksize and CPU usage.
+  Add Supersonic
 @metapackage
 @provides
   Cora.jsfx
