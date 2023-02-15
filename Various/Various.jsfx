@@ -1,8 +1,8 @@
 @description ReaClassical Miscellaneous Plugins
 @author chmaha
-@version 1.2
+@version 1.3
 @changelog
-  Add Discordia
+  Add SAW
 @metapackage
 @provides
    Amphitrite.jsfx
@@ -16,5 +16,6 @@
    Sillons.jsfx
    Titan.jsfx
    Discordia.jsfx
+   SAW.jsfx
 @about
   Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...
