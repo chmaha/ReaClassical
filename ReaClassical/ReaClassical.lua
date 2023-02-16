@@ -33,7 +33,7 @@
   [main] ReaClassical_Previous Item or Fade.lua
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
-  ../PDF_Guide/PDFReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
+  ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
