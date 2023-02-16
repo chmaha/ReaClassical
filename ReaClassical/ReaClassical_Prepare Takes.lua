@@ -29,7 +29,7 @@ function Main()
     return  
   end
   if xfade_check() == true then
-    response = r.ShowMessageBox("Prepare Takes coloring and grouping is disabled \ngiven there are existing overlaps and/or fades. \n\nWould you like to remove take names?", "Prepare Takes", 3)
+    response = r.ShowMessageBox("Prepare Takes coloring and grouping is disabled \ngiven there are existing overlaps and/or fades. \n\nWould you still like to clean up take names?", "Prepare Takes", 3)
     if response == 6 then
       clean_take_names(num_of_project_items)
     end

@@ -2,7 +2,7 @@
 @author chmaha
 @version 23.16
 @changelog
-  Prepare Takes: Disable with message if there already overlaps and fades. 
+  Prepare Takes: Disable with message if there already overlaps and fades. Offer to clean up take names.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
