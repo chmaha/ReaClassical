@@ -7,7 +7,7 @@ about:
   JSFX version released under GPLv3 license
 
 slider1:0<-20,20,0.01>Threshold (dB)
-slider2:1.6<1,16,0.01>Ratio / 1
+slider2:1.6<1,16,0.01>Ratio
 slider3:5<1,100,0.01>Reaction Speed (ms)
 slider4:0<-20,20,0.01>Makeup Gain (dB)
 slider5:1<0,1,0.01>Dry/Wet
