@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.13
+@version 23.14
 @changelog
-  Add PDF Guide to metapackage
-  ReaClassical_Help: Change path to PDF Guide
+  Classical Take Record: Auto move to next folder, create new folder if not present.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
