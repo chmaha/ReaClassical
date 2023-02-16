@@ -1,11 +1,8 @@
 --[[
 @noindex
-
 This file is a part of "ReaClassical" package.
 See "ReaClassical.lua" for more information.
-
 Copyright (C) 2022 chmaha
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -19,34 +16,38 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-r.PreventUIRefresh(1)
-r.Undo_BeginBlock()
+local folder_check
 
-if r.CountMediaItems(0) == 0 then 
-reaper.ShowMessageBox("The script cannot be used on an empty project", "Whole Project View", 0)
-return 
+function Main()
+  r.PreventUIRefresh(1)
+  r.Undo_BeginBlock()
+  r.Main_OnCommand(40296, 0) -- Track: Select all tracks
+  folders = folder_check()
+  if folders > 1 then
+    collapse = r.NamedCommandLookup("_SWS_COLLAPSE")
+    r.Main_OnCommand(collapse, 0) -- collapse selected folders
+  end
+  local zoom = r.NamedCommandLookup("_SWS_VZOOMFIT")
+  r.Main_OnCommand(zoom, 0) -- SWS: Vertical zoom to selected tracks
+  r.Main_OnCommand(40295, 0) -- View: Zoom out project
+  r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+  
+  r.Undo_EndBlock('Whole Project View', 0)
+  r.PreventUIRefresh(-1)
+  r.UpdateArrange()
+  r.UpdateTimeline()
 end
-local _, zs = r.GetProjExtState(0, "Whole Project View", "Zoom Start")
-local _, ze = r.GetProjExtState(0, "Whole Project View", "Zoom End")
-if zs ~= "" and ze ~= "" then
-  zs = tonumber(string.format("%.3f", zs))
-  ze = tonumber(string.format("%.3f", ze))
-end
-local inits, inite = r.GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
-inits = tonumber(string.format("%.3f", inits))
-inite = tonumber(string.format("%.3f", inite))
 
-if inits == zs and inite == ze then
-r.Main_OnCommand(40848, 0) -- restore previous zoom
-else
-r.Main_OnCommand(40182, 0) -- Select all items
-r.Main_OnCommand(41622, 0) -- toggle zoom to items
-local zooms, zoome = r.GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
-r.SetProjExtState(0, "Whole Project View", "Zoom Start", zooms)
-r.SetProjExtState(0, "Whole Project View", "Zoom End", zoome)
-r.Main_OnCommand(40769, 0) -- unselect items
+function folder_check()
+  local folders = 0
+  local total_tracks = r.CountTracks(0)
+  for i = 0, total_tracks - 1, 1 do
+    local track = r.GetTrack(0, i)
+    if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+      folders = folders + 1
+    end
+  end
+  return folders
 end
-r.Undo_EndBlock('Whole Project View', 0)
-r.PreventUIRefresh(-1)
-r.UpdateArrange()
-r.UpdateTimeline()
+
+Main()
