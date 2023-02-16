@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.14
+@version 23.15
 @changelog
-  Classical Take Record: Auto move to next folder, create new folder if not present.
+  Revert whole project view toggle
+  Whole Project View: Collapse folders if multiple
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
