@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 local r = reaper
 local file_exists, retrieve
 local resource_path = r.GetResourcePath()
-local relative_path = "Scripts/chmaha Scripts/PDF_Guide/ReaClassical_PDF_Guide.pdf"
+local relative_path = "Scripts/chmaha Scripts/ReaClassical/ReaClassical_PDF_Guide.pdf"
 local pdf = resource_path .. "/" .. relative_path
 
 function main()
@@ -29,7 +29,7 @@ function main()
   if bool == true then
     reaper.CF_ShellExecute(pdf)
   else
-    r.ShowMessageBox("Install ReaClassical PDF guide via ReaPack first!", "ReaClassical PDF Guide not found!", 0)
+    r.ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!", "ReaClassical PDF Guide not found!", 0)
   end
 end
 
