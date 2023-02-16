@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.12
+@version 23.13
 @changelog
-  Add ReaClassical theme to metapackage
+  Add PDF Guide to metapackage
+  ReaClassical_Help: Change path to PDF Guide
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -32,6 +33,7 @@
   [main] ReaClassical_Previous Item or Fade.lua
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
+  ../PDF_Guide/PDFReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
