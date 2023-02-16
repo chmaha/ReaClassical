@@ -4,6 +4,7 @@
 @changelog
   Add Oxonia
   Change reaction speed default
+  Change ratio label
 @metapackage
 @provides
    Amphitrite.jsfx
