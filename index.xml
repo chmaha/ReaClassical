@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="c3171645e18a6cbb5f3e68bc7c16a931d50f0a11">
+<index version="1" name="chmaha Scripts" commit="2932a89f131a262baa6dd7c1b9560813842255b3">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -162,58 +162,6 @@ Add dither if missing from name to aid search in FX browser]]></changelog>
         <source file="Xonnos Dither.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/Xonnos%20Dither.jsfx</source>
         <source file="ReelDither.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/ReelDither.jsfx</source>
         <source file="GroovyDither.jsfx">https://github.com/chmaha/ReaClassical/raw/65852e6e3dd7a463c6886c82d23da7a5d6abeff5/Dithers/GroovyDither.jsfx</source>
-      </version>
-    </reapack>
-  </category>
-  <category name="PDF_Guide">
-    <reapack name="ReaClassical_PDF_Guide.lua" type="script" desc="ReaClassical PDF Guide">
-      <version name="1.0" time="2023-01-25T13:08:55Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/1dbef384aab6d4fbc2365b7624dd2ff134f92ddc/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.03" author="chmaha" time="2023-01-25T13:23:00Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/ffdf9e9a1cd7085b889c64c5e998efb235c84628/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.04" author="chmaha" time="2023-02-04T16:39:52Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/7cf9b809356fac1811fa920375f29c6524227463/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.05" author="chmaha" time="2023-02-05T16:13:25Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/83ec113c6f482d6c4ed07ae1c637823f02c1df24/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.06" author="chmaha" time="2023-02-05T17:18:20Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/8df945ed069480255c1c56f874364d96b776063a/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.07" author="chmaha" time="2023-02-09T12:50:01Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/5052b53e14a79550f465f536cff687032c463c55/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.07.1" author="chmaha" time="2023-02-09T14:08:29Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/32f9f803d1992ed61bdaa679220f9a10574eb806/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.08" author="chmaha" time="2023-02-09T19:27:02Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/8bcd210362c7edccf23f3bfc884bb42216062b5e/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.09" author="chmaha" time="2023-02-10T14:35:07Z">
-        <source main="main">https://github.com/chmaha/ReaClassical/raw/ee787f8a67f9ee5ecf513d3d11bef5672d273e75/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
-      </version>
-      <version name="23.10" author="chmaha" time="2023-02-11T23:38:13Z">
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
-        <source>https://github.com/chmaha/ReaClassical/raw/6c11a7d3e34a9a487d02e42ccc448d820b65e02f/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-      </version>
-      <version name="23.11" author="chmaha" time="2023-02-12T19:27:13Z">
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/55625f52b4550ca4412aed716a71e317a95115cc/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
-        <source>https://github.com/chmaha/ReaClassical/raw/55625f52b4550ca4412aed716a71e317a95115cc/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
-      </version>
-      <version name="23.12" author="chmaha" time="2023-02-12T23:06:59Z">
-        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/dfbbb2661fe0e617703595f440a44ac6e2a17558/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
-        <source>https://github.com/chmaha/ReaClassical/raw/dfbbb2661fe0e617703595f440a44ac6e2a17558/PDF_Guide/ReaClassical_PDF_Guide.lua</source>
       </version>
     </reapack>
   </category>
@@ -688,6 +636,38 @@ Add ReaClassical project template to metapackage]]></changelog>
         <source main="main" file="ReaClassical_Previous Item or Fade.lua">https://github.com/chmaha/ReaClassical/raw/02245a96beea6282c492e8a639ff6a9fcbc4e71d/ReaClassical/ReaClassical_Previous%20Item%20or%20Fade.lua</source>
         <source type="projecttpl" file="ReaClassical.RPP">https://github.com/chmaha/ReaClassical/raw/02245a96beea6282c492e8a639ff6a9fcbc4e71d/ReaClassical/ReaClassical.RPP</source>
         <source type="theme" file="ReaClassical.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/02245a96beea6282c492e8a639ff6a9fcbc4e71d/Manual_install_files/ReaClassical.ReaperThemeZip</source>
+      </version>
+      <version name="23.13" author="chmaha" time="2023-02-16T10:53:45Z">
+        <changelog><![CDATA[Add PDF Guide to metapackage
+ReaClassical_Help: Change path to PDF Guide]]></changelog>
+        <source main="main" file="ReaClassical_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Add%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Add%20Destination%20OUT%20Marker.lua</source>
+        <source main="main" file="ReaClassical_Add Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Add%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Add Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Add%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaClassical_Classical Crossfade Editor.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Classical%20Crossfade%20Editor.lua</source>
+        <source main="main" file="ReaClassical_Classical Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Classical%20Crossfade.lua</source>
+        <source main="main" file="ReaClassical_Classical Take Record.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Classical%20Take%20Record.lua</source>
+        <source main="main" file="ReaClassical_Delete All S-D markers.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Delete%20All%20S-D%20markers.lua</source>
+        <source main="main" file="ReaClassical_Duplicate folder (No items).lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Duplicate%20folder%20(No%20items).lua</source>
+        <source main="main" file="ReaClassical_Edit Classical Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Edit%20Classical%20Crossfade.lua</source>
+        <source main="main" file="ReaClassical_Prepare Takes.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Prepare%20Takes.lua</source>
+        <source main="main" file="ReaClassical_S-D Edit.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_S-D%20Edit.lua</source>
+        <source main="main" file="ReaClassical_Whole Project View.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Whole%20Project%20View.lua</source>
+        <source main="main" file="ReaClassical_Create source groups (vertical).lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Create%20source%20groups%20(vertical).lua</source>
+        <source main="main" file="ReaClassical_Audition.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Audition.lua</source>
+        <source main="main" file="ReaClassical_3-point edit replace.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_3-point%20edit%20replace.lua</source>
+        <source main="main" file="ReaClassical_Delete Leaving Silence.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Delete%20Leaving%20Silence.lua</source>
+        <source main="main" file="ReaClassical_Delete With Ripple.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Delete%20With%20Ripple.lua</source>
+        <source main="main" file="ReaClassical_Insert with timestretching.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Insert%20with%20timestretching.lua</source>
+        <source main="main" file="ReaClassical_Create Folder.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Create%20Folder.lua</source>
+        <source main="main" file="ReaClassical_Lock_toggle.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Lock_toggle.lua</source>
+        <source main="main" file="ReaClassical_Create CD Markers.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Create%20CD%20Markers.lua</source>
+        <source main="main" file="ReaClassical_Help.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Help.lua</source>
+        <source main="main" file="ReaClassical_Next Item or Fade.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Next%20Item%20or%20Fade.lua</source>
+        <source main="main" file="ReaClassical_Previous Item or Fade.lua">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical_Previous%20Item%20or%20Fade.lua</source>
+        <source type="projecttpl" file="ReaClassical.RPP">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/ReaClassical/ReaClassical.RPP</source>
+        <source type="theme" file="ReaClassical.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/Manual_install_files/ReaClassical.ReaperThemeZip</source>
+        <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/2932a89f131a262baa6dd7c1b9560813842255b3/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
       </version>
     </reapack>
   </category>
