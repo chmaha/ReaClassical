@@ -28,7 +28,6 @@ function Main()
   end
   local take_record_toggle = r.NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
   if r.GetPlayState() == 0 then
-    r.PreventUIRefresh(1)
     r.Undo_BeginBlock()
     r.SetToggleCommandState(1, take_record_toggle, 1)
     r.RefreshToolbar2(1, take_record_toggle)
@@ -46,7 +45,6 @@ function Main()
     r.UpdateArrange()
     r.UpdateTimeline()
   else
-    r.PreventUIRefresh(1)
     r.Undo_BeginBlock()
     r.SetToggleCommandState(1, take_record_toggle, 0)
     r.RefreshToolbar2(1, take_record_toggle)
@@ -55,9 +53,28 @@ function Main()
     r.Main_OnCommand(unarm, 0) -- Xenakios/SWS: Set selected tracks record unarmed
     local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
     r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-
+    
+    local num_tracks = r.CountTracks(0)
+    local selected_track = r.GetSelectedTrack(0,0)
+    local current_num = r.GetMediaTrackInfo_Value(selected_track, 'IP_TRACKNUMBER')
+    local bool = false
+    for i=current_num,num_tracks-1,1 do
+      local track = r.GetTrack(0, i)
+      if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        r.Main_OnCommand(40297,0) -- deselect all tracks
+        r.SetTrackSelected(track, true)
+        r.Main_OnCommand(40913,0) -- adjust scroll to selected tracks
+        bool = true
+        break
+      end
+    end
+    if bool == false then
+      local duplicate = reaper.NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
+      r.Main_OnCommand(duplicate,0)
+      r.Main_OnCommand(40913,0) -- adjust scroll to selected tracks
+    end
+    
     r.Undo_EndBlock('Classical Take Record Stop', 0)
-    r.PreventUIRefresh(-1)
     r.UpdateArrange()
     r.UpdateTimeline()
   end
