@@ -20,12 +20,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local horizontal, horizontal_color, horizontal_group, shift, vertical, vertical_color_razor, vertical_group
-local copy_track_items, tracks_per_folder, clean_take_names
+local copy_track_items, tracks_per_folder, clean_take_names, xfade_check
 
 function Main()
   local num_of_project_items = r.CountMediaItems(0)
   if num_of_project_items == 0 then
     r.ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
+    return  
+  end
+  if xfade_check() == true then
+    response = r.ShowMessageBox("Prepare Takes coloring and grouping is disabled \ngiven there are existing overlaps and/or fades. \n\nWould you like to remove take names?", "Prepare Takes", 3)
+    if response == 6 then
+      clean_take_names(num_of_project_items)
+    end
     return  
   end
   r.PreventUIRefresh(1)
@@ -203,6 +210,25 @@ function clean_take_names(num_of_project_items)
     local take = r.GetActiveTake(item)
     r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
   end
+end
+
+function xfade_check()
+  local first_track = r.GetTrack(0,0)
+  local num_of_items = r.CountTrackMediaItems(first_track)
+  local xfade = false
+  for i=0,num_of_items-2 do
+    local item1 = r.GetTrackMediaItem(first_track, i)
+    local item2 = r.GetTrackMediaItem(first_track, i+1)
+    local pos1 = r.GetMediaItemInfo_Value(item1, "D_POSITION")
+    local pos2 = r.GetMediaItemInfo_Value(item2, "D_POSITION")
+    local len1 = r.GetMediaItemInfo_Value(item1, "D_LENGTH")
+    local end1 = pos1 + len1
+    if end1 > pos2 then
+      xfade = true
+      break
+    end
+  end
+  return xfade
 end
 
 Main()

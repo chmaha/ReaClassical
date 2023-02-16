@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.15
+@version 23.16
 @changelog
-  Revert whole project view toggle
-  Whole Project View: Collapse folders if multiple
+  Prepare Takes: Disable with message if there already overlaps and fades. 
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
