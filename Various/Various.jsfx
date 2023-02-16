@@ -3,6 +3,7 @@
 @version 1.5
 @changelog
   Add Oxonia
+  Change reaction speed default
 @metapackage
 @provides
    Amphitrite.jsfx
