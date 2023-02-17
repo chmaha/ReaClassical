@@ -155,15 +155,14 @@ interpolMR = (aMR[workingMR-((workingMR > delayM)?delayM+1:0)] * (1-(offsetMR-fl
 interpolMR += (aMR[workingMR+1-((workingMR+1 > delayM)?delayM+1:0)] * ((offsetMR-floor(offsetMR))) );
 inputSampleL = interpolML;
 inputSampleR = interpolMR;
-//predelay that applies vibrato
-//want vibrato speed AND depth like in MatrixVerb
+
 
 iirAL = (iirAL*(1.0-lowpass))+(inputSampleL*lowpass); inputSampleL = iirAL;
 iirAR = (iirAR*(1.0-lowpass))+(inputSampleR*lowpass); inputSampleR = iirAR;
-//initial filter
+
 
 cycle+=1;
-(cycle == cycleEnd) ? ( //hit the end point and we do a reverb sample
+(cycle == cycleEnd) ? ( 
   aIL[countI] = inputSampleL + (feedbackAR * regen);
   aJL[countJ] = inputSampleL + (feedbackBR * regen);
   aKL[countK] = inputSampleL + (feedbackCR * regen);
@@ -186,7 +185,6 @@ cycle+=1;
   outJR = aJR[countJ-((countJ > delayJ)?delayJ+1:0)];
   outKR = aKR[countK-((countK > delayK)?delayK+1:0)];
   outLR = aLR[countL-((countL > delayL)?delayL+1:0)];
-  //first block: now we have four outputs
   
   aAL[countA] = (outIL - (outJL + outKL + outLL));
   aBL[countB] = (outJL - (outIL + outKL + outLL));
@@ -210,7 +208,6 @@ cycle+=1;
   outBR = aBR[countB-((countB > delayB)?delayB+1:0)];
   outCR = aCR[countC-((countC > delayC)?delayC+1:0)];
   outDR = aDR[countD-((countD > delayD)?delayD+1:0)];
-  //second block: four more outputs
   
   aEL[countE] = (outAL - (outBL + outCL + outDL));
   aFL[countF] = (outBL - (outAL + outCL + outDL));
@@ -234,7 +231,6 @@ cycle+=1;
   outFR = aFR[countF-((countF > delayF)?delayF+1:0)];
   outGR = aGR[countG-((countG > delayG)?delayG+1:0)];
   outHR = aHR[countH-((countH > delayH)?delayH+1:0)];
-  //third block: final outputs
   
   feedbackAL = (outEL - (outFL + outGL + outHL));
   feedbackBL = (outFL - (outEL + outGL + outHL));
@@ -244,40 +240,39 @@ cycle+=1;
   feedbackBR = (outFR - (outER + outGR + outHR));
   feedbackCR = (outGR - (outER + outFR + outHR));
   feedbackDR = (outHR - (outER + outFR + outGR));
-  //which we need to feed back into the input again, a bit
   
   inputSampleL = (outEL + outFL + outGL + outHL)/8.0;
   inputSampleR = (outER + outFR + outGR + outHR)/8.0;
-  //and take the final combined sum of outputs
+  
   (cycleEnd == 4) ? (
-    lastRefL[0] = lastRefL[4]; //start from previous last
-    lastRefL[2] = (lastRefL[0] + inputSampleL)/2; //half
-    lastRefL[1] = (lastRefL[0] + lastRefL[2])/2; //one quarter
-    lastRefL[3] = (lastRefL[2] + inputSampleL)/2; //three quarters
-    lastRefL[4] = inputSampleL; //full
-    lastRefR[0] = lastRefR[4]; //start from previous last
-    lastRefR[2] = (lastRefR[0] + inputSampleR)/2; //half
-    lastRefR[1] = (lastRefR[0] + lastRefR[2])/2; //one quarter
-    lastRefR[3] = (lastRefR[2] + inputSampleR)/2; //three quarters
-    lastRefR[4] = inputSampleR; //full
+    lastRefL[0] = lastRefL[4]; 
+    lastRefL[2] = (lastRefL[0] + inputSampleL)/2; 
+    lastRefL[1] = (lastRefL[0] + lastRefL[2])/2; 
+    lastRefL[3] = (lastRefL[2] + inputSampleL)/2; 
+    lastRefL[4] = inputSampleL; 
+    lastRefR[0] = lastRefR[4]; 
+    lastRefR[2] = (lastRefR[0] + inputSampleR)/2; 
+    lastRefR[1] = (lastRefR[0] + lastRefR[2])/2; 
+    lastRefR[3] = (lastRefR[2] + inputSampleR)/2; 
+    lastRefR[4] = inputSampleR; 
   );
   (cycleEnd == 3) ? (
-    lastRefL[0] = lastRefL[3]; //start from previous last
-    lastRefL[2] = (lastRefL[0]+lastRefL[0]+inputSampleL)/3; //third
-    lastRefL[1] = (lastRefL[0]+inputSampleL+inputSampleL)/3; //two thirds
-    lastRefL[3] = inputSampleL; //full
-    lastRefR[0] = lastRefR[3]; //start from previous last
-    lastRefR[2] = (lastRefR[0]+lastRefR[0]+inputSampleR)/3; //third
-    lastRefR[1] = (lastRefR[0]+inputSampleR+inputSampleR)/3; //two thirds
-    lastRefR[3] = inputSampleR; //full
+    lastRefL[0] = lastRefL[3]; 
+    lastRefL[2] = (lastRefL[0]+lastRefL[0]+inputSampleL)/3; 
+    lastRefL[1] = (lastRefL[0]+inputSampleL+inputSampleL)/3; 
+    lastRefL[3] = inputSampleL; 
+    lastRefR[0] = lastRefR[3]; 
+    lastRefR[2] = (lastRefR[0]+lastRefR[0]+inputSampleR)/3; 
+    lastRefR[1] = (lastRefR[0]+inputSampleR+inputSampleR)/3; 
+    lastRefR[3] = inputSampleR; 
   );
   (cycleEnd == 2) ? (
-    lastRefL[0] = lastRefL[2]; //start from previous last
-    lastRefL[1] = (lastRefL[0] + inputSampleL)/2; //half
-    lastRefL[2] = inputSampleL; //full
-    lastRefR[0] = lastRefR[2]; //start from previous last
-    lastRefR[1] = (lastRefR[0] + inputSampleR)/2; //half
-    lastRefR[2] = inputSampleR; //full
+    lastRefL[0] = lastRefL[2]; 
+    lastRefL[1] = (lastRefL[0] + inputSampleL)/2; 
+    lastRefL[2] = inputSampleL; 
+    lastRefR[0] = lastRefR[2]; /
+    lastRefR[1] = (lastRefR[0] + inputSampleR)/2; 
+    lastRefR[2] = inputSampleR; 
   );
   (cycleEnd == 1) ? (
     lastRefL[0] = inputSampleL;
@@ -289,12 +284,10 @@ cycle+=1;
 ) : (
   inputSampleL = lastRefL[cycle];
   inputSampleR = lastRefR[cycle];
-  //we are going through our references now
 );
 
 iirBL = (iirBL*(1.0-lowpass))+(inputSampleL*lowpass); inputSampleL = iirBL;
 iirBR = (iirBR*(1.0-lowpass))+(inputSampleR*lowpass); inputSampleR = iirBR;
-//end filter
 
 (wet < 1.0) ? (
   inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0-wet));
