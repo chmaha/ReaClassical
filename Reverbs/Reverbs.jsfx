@@ -2,11 +2,11 @@
 @author chmaha
 @version 1.1
 @changelog
-  Add Bricastique
+  Add Bricastic2
   Remove stray forward slash
 @metapackage
 @provides
   Interstellar.jsfx
-  Bricastique.jsfx
+  Bricastic2.jsfx
 @about
   These jsfx reverbs plugins are ports of airwindows reverbs.
