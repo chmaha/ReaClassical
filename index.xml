@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="63cad7caf9abc2d806d03ba25359c444b2b36093">
+<index version="1" name="chmaha Scripts" commit="5496855b74187f8b94483b095f82226e780417ce">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -787,6 +787,12 @@ Remove stray forward slash
 Fix desc]]></changelog>
         <source file="Interstellar.jsfx">https://github.com/chmaha/ReaClassical/raw/63cad7caf9abc2d806d03ba25359c444b2b36093/Reverbs/Interstellar.jsfx</source>
         <source file="Bricastic2.jsfx">https://github.com/chmaha/ReaClassical/raw/63cad7caf9abc2d806d03ba25359c444b2b36093/Reverbs/Bricastic2.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-02-17T13:04:15Z">
+        <changelog><![CDATA[Add Bricastic (original)]]></changelog>
+        <source file="Interstellar.jsfx">https://github.com/chmaha/ReaClassical/raw/5496855b74187f8b94483b095f82226e780417ce/Reverbs/Interstellar.jsfx</source>
+        <source file="Bricastic2.jsfx">https://github.com/chmaha/ReaClassical/raw/5496855b74187f8b94483b095f82226e780417ce/Reverbs/Bricastic2.jsfx</source>
+        <source file="Bricastic.jsfx">https://github.com/chmaha/ReaClassical/raw/5496855b74187f8b94483b095f82226e780417ce/Reverbs/Bricastic.jsfx</source>
       </version>
     </reapack>
   </category>
