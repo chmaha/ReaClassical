@@ -4,6 +4,7 @@
 @changelog
   Add Bricastic2
   Remove stray forward slash
+  Fix desc
 @metapackage
 @provides
   Interstellar.jsfx
