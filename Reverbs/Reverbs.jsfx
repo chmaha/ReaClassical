@@ -1,11 +1,11 @@
 @description ReaClassical Reverb Plugins
 @author chmaha
-@version 1.0
+@version 1.1
 @changelog
-  Initial commit
-  Make delays values integers
+  Add Bricastique
 @metapackage
 @provides
   Interstellar.jsfx
+  Bricastique.jsfx
 @about
   These jsfx reverbs plugins are ports of airwindows reverbs.
