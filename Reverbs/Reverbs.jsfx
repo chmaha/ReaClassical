@@ -1,0 +1,10 @@
+@description ReaClassical Reverb Plugins
+@author chmaha
+@version 1.0
+@changelog
+  Initial Commit
+@metapackage
+@provides
+  Interstellar.jsfx
+@about
+  These jsfx reverbs plugins are ports of airwindows reverbs.
