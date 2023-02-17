@@ -110,18 +110,18 @@ drift = pow(C,3)*0.001;
 size = (D*1.77)+0.1;
 wet = 1.0-(pow(1.0-E,3));
 
-delayI = 3407.0*size;
-delayJ = 1823.0*size;
-delayK = 859.0*size;
-delayL = 331.0*size;
-delayA = 4801.0*size;
-delayB = 2909.0*size;
-delayC = 1153.0*size;
-delayD = 461.0*size;
-delayE = 7607.0*size;
-delayF = 4217.0*size;
-delayG = 2269.0*size;
-delayH = 1597.0*size;
+delayI = 3407.0*size | 0;
+delayJ = 1823.0*size | 0;
+delayK = 859.0*size | 0;
+delayL = 331.0*size | 0;
+delayA = 4801.0*size | 0;
+delayB = 2909.0*size | 0;
+delayC = 1153.0*size | 0;
+delayD = 461.0*size | 0;
+delayE = 7607.0*size | 0;
+delayF = 4217.0*size | 0;
+delayG = 2269.0*size | 0;
+delayH = 1597.0*size | 0;
 delayM = 256;
 
 
