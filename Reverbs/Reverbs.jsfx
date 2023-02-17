@@ -1,13 +1,12 @@
 @description ReaClassical Reverb Plugins
 @author chmaha
-@version 1.1
+@version 1.2
 @changelog
-  Add Bricastic2
-  Remove stray forward slash
-  Fix desc
+  Add Bricastic (original)
 @metapackage
 @provides
   Interstellar.jsfx
   Bricastic2.jsfx
+  Bricastic.jsfx
 @about
   These jsfx reverbs plugins are ports of airwindows reverbs.
