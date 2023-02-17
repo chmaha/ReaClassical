@@ -270,7 +270,7 @@ cycle+=1;
     lastRefL[0] = lastRefL[2]; 
     lastRefL[1] = (lastRefL[0] + inputSampleL)/2; 
     lastRefL[2] = inputSampleL; 
-    lastRefR[0] = lastRefR[2]; /
+    lastRefR[0] = lastRefR[2];
     lastRefR[1] = (lastRefR[0] + inputSampleR)/2; 
     lastRefR[2] = inputSampleR; 
   );
