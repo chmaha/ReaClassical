@@ -2,7 +2,8 @@
 @author chmaha
 @version 1.0
 @changelog
-  Initial Commit
+  Initial commit
+  Make delays values integers
 @metapackage
 @provides
   Interstellar.jsfx
