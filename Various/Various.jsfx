@@ -1,10 +1,8 @@
 @description ReaClassical Miscellaneous Plugins
 @author chmaha
-@version 1.5
+@version 1.6
 @changelog
-  Add Oxonia
-  Change reaction speed default
-  Change ratio label
+  Add Reelty
 @metapackage
 @provides
    Amphitrite.jsfx
@@ -21,5 +19,6 @@
    SAW.jsfx
    Pascal.jsfx
    Oxonia.jsfx
+   Reelty.jsfx
 @about
   Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...
