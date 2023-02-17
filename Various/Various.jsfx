@@ -1,8 +1,8 @@
 @description ReaClassical Miscellaneous Plugins
 @author chmaha
-@version 1.6
+@version 1.7
 @changelog
-  Add Reelty
+  Add Solar Wind
 @metapackage
 @provides
    Amphitrite.jsfx
@@ -20,5 +20,6 @@
    Pascal.jsfx
    Oxonia.jsfx
    Reelty.jsfx
+   Solar_Wind.jsfx
 @about
   Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...
