@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="f807b6da67b8580b18a53a07c4195d4e3528f087">
+<index version="1" name="chmaha Scripts" commit="2ad2d94e0d61b1bacb056bbb9f46140e41d78d9c">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -794,6 +794,13 @@ Fix desc]]></changelog>
         <source file="Interstellar.jsfx">https://github.com/chmaha/ReaClassical/raw/5496855b74187f8b94483b095f82226e780417ce/Reverbs/Interstellar.jsfx</source>
         <source file="Bricastic2.jsfx">https://github.com/chmaha/ReaClassical/raw/5496855b74187f8b94483b095f82226e780417ce/Reverbs/Bricastic2.jsfx</source>
         <source file="Bricastic.jsfx">https://github.com/chmaha/ReaClassical/raw/5496855b74187f8b94483b095f82226e780417ce/Reverbs/Bricastic.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-02-18T14:48:00Z">
+        <changelog><![CDATA[Add PhiVerb]]></changelog>
+        <source file="Interstellar.jsfx">https://github.com/chmaha/ReaClassical/raw/2ad2d94e0d61b1bacb056bbb9f46140e41d78d9c/Reverbs/Interstellar.jsfx</source>
+        <source file="Bricastic2.jsfx">https://github.com/chmaha/ReaClassical/raw/2ad2d94e0d61b1bacb056bbb9f46140e41d78d9c/Reverbs/Bricastic2.jsfx</source>
+        <source file="Bricastic.jsfx">https://github.com/chmaha/ReaClassical/raw/2ad2d94e0d61b1bacb056bbb9f46140e41d78d9c/Reverbs/Bricastic.jsfx</source>
+        <source file="PhiVerb.jsfx">https://github.com/chmaha/ReaClassical/raw/2ad2d94e0d61b1bacb056bbb9f46140e41d78d9c/Reverbs/PhiVerb.jsfx</source>
       </version>
     </reapack>
   </category>
