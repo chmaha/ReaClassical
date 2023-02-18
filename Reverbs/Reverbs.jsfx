@@ -1,12 +1,13 @@
 @description ReaClassical Reverb Plugins
 @author chmaha
-@version 1.2
+@version 1.3
 @changelog
-  Add Bricastic (original)
+  Add PhiVerb
 @metapackage
 @provides
   Interstellar.jsfx
   Bricastic2.jsfx
   Bricastic.jsfx
+  PhiVerb.jsfx
 @about
   These jsfx reverbs plugins are ports of airwindows reverbs.
