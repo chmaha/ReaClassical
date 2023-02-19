@@ -3,6 +3,7 @@
 @version 1.0
 @changelog
   Initial Commit
+  Add Console to names
 @metapackage
 @provides
   Orpheus_Lite_Channel.jsfx
