@@ -1,0 +1,17 @@
+@description Orpheus Console
+@author chmaha
+@version 1.0
+@changelog
+  Initial Commit
+@metapackage
+@provides
+  Orpheus_Bus_In.jsfx
+  Orpheus_Bus_Out.jsfx
+  Orpheus_Channel_In.jsfx
+  Orpheus_Channel_Out.jsfx
+  Orpheus_Sub_In.jsfx
+  Orpheus_Sub_Out.jsfx
+  [rpp] ReaClassical_Orpheus.RPP
+@about
+  These jsfx analog console emulation plugins use DSP from airwindows Console8.
+  Also included is the Orpheus project template with plugins already in place (requires MagicFairyDust and RCGain to be installed)

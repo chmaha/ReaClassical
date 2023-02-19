@@ -1,5 +1,5 @@
-NoIndex: true
-desc: ELSA: Extremely Light Saturation Applier (ReaClassical.org)
+Version: 1.0
+desc: ELSA: Extremely Light Saturation Applier
 author: chmaha
 about:
   Uses DSP from airwindows "PurestDrive" by Chris Johnson
