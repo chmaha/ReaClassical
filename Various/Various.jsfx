@@ -1,8 +1,8 @@
 @description ReaClassical Miscellaneous Plugins
 @author chmaha
-@version 1.7
+@version 1.8
 @changelog
-  Add Solar Wind
+  Add Bass plugins: Coral Bones, Buttress and Heft
 @metapackage
 @provides
    Amphitrite.jsfx
@@ -21,5 +21,8 @@
    Oxonia.jsfx
    Reelty.jsfx
    Solar_Wind.jsfx
+   CoralBones.jsfx
+   Buttress.jsfx
+   Heft.jsfx
 @about
-  Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...
+  Various other jsfx plugins including compressors, gate, saturation/distortion, Bass-related, clipper, Vinyl and Tape emulations...
