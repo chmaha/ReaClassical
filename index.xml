@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="2ad2d94e0d61b1bacb056bbb9f46140e41d78d9c">
+<index version="1" name="chmaha Scripts" commit="f1b20ada404a13e075236d5db585a8c790dc531e">
   <category name="Consoles">
     <reapack name="Consoles.jsfx" type="effect" desc="ReaClassical Console Plugins">
       <metadata>
@@ -811,7 +811,7 @@ Fix desc]]></changelog>
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Various other jsfx plugins including compressors, gate, saturation/distortion, clipper, Vinyl and Tape emulations...\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Various other jsfx plugins including compressors, gate, saturation/distortion, Bass-related, clipper, Vinyl and Tape emulations...\par}
 }
 ]]></description>
       </metadata>
@@ -942,6 +942,28 @@ Change ratio label]]></changelog>
         <source file="Oxonia.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Oxonia.jsfx</source>
         <source file="Reelty.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Reelty.jsfx</source>
         <source file="Solar_Wind.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Solar_Wind.jsfx</source>
+      </version>
+      <version name="1.8" author="chmaha" time="2023-02-19T10:09:49Z">
+        <changelog><![CDATA[Add Bass plugins: Coral Bones, Buttress and Heft]]></changelog>
+        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Amphitrite.jsfx</source>
+        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Aurora.jsfx</source>
+        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Eris.jsfx</source>
+        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/flattop.jsfx</source>
+        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Lyra.jsfx</source>
+        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Magnetique.jsfx</source>
+        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/MuTube.jsfx</source>
+        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/port-and-lemon.jsfx</source>
+        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Sillons.jsfx</source>
+        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Titan.jsfx</source>
+        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Discordia.jsfx</source>
+        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/SAW.jsfx</source>
+        <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Pascal.jsfx</source>
+        <source file="Oxonia.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Oxonia.jsfx</source>
+        <source file="Reelty.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Reelty.jsfx</source>
+        <source file="Solar_Wind.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Solar_Wind.jsfx</source>
+        <source file="CoralBones.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/CoralBones.jsfx</source>
+        <source file="Buttress.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Buttress.jsfx</source>
+        <source file="Heft.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Heft.jsfx</source>
       </version>
     </reapack>
   </category>
