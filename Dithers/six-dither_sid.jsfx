@@ -1,5 +1,5 @@
-NoIndex: true
-desc:Six-Dither Sid (ReaClassical.org)
+Version: 1.0
+desc:Six-Dither Sid
 author: chmaha
 about:
   Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson
