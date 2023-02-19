@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="4210b5cb431c06cdb235b862c25c617238df0e19">
+<index version="1" name="chmaha Scripts" commit="af63c8824471ddefcddc67903b49f1d7eaf202ad">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -195,48 +195,116 @@
     </reapack>
   </category>
   <category name="RCPlugs">
-    <reapack name="RCPlugs.jsfx" type="effect" desc="ReaClassical Essential Plugins">
+    <reapack name="RCComp.jsfx" type="effect" desc="RCCompressor">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 These essential jsfx plugins provide everything you need for classical music mixing and mastering. Compressor, Parallel Compressor, EQ, True Peak Limiter, DeEsser, Gain and the world's best Dither.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Express Bus Compressor (Stillwell) modified for classical music use by chmaha See below the code for copyright notices, list of conditions and disclaimers\par}
 }
 ]]></description>
       </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
-        <changelog><![CDATA[Initial metapackage release]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCDither.jsfx</source>
-        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/RCPlugs/RCParallelK.jsfx</source>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCComp.jsfx</source>
       </version>
-      <version name="1.1" author="chmaha" time="2023-02-12T18:47:23Z">
-        <changelog><![CDATA[Remove ver and changelog from individual plugins
-Change reapack headers]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/RCPlugs/RCDither.jsfx</source>
-        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/RCPlugs/RCEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/RCPlugs/RCParallelK.jsfx</source>
+    </reapack>
+    <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss Standard">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "DeEss" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DeEss (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCDeEss.jsfx</source>
       </version>
-      <version name="1.2" author="chmaha" time="2023-02-13T12:29:19Z">
-        <changelog><![CDATA[Add RCDeEss Advanced
-Rename original to RCDeEss Standard]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCDither.jsfx</source>
-        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCParallelK.jsfx</source>
-        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/b607634ef06cafdaf1b816305c5431aea53b07b9/RCPlugs/RCDeEss_Advanced.jsfx</source>
+    </reapack>
+    <reapack name="RCDeEss_Advanced.jsfx" type="effect" desc="RCDeEss Advanced">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "DeBess" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DeBess (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCDeEss_Advanced.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="RCDither.jsfx" type="effect" desc="RCDither">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses "NJAD" DSP from airwindows "Monitoring" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Baxandall" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCEQ.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="RCGain.jsfx" type="effect" desc="RCGain">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestGain" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestGain (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCGain.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="RCLimiter.jsfx" type="effect" desc="RCLimiter">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP with permission from Smooth Limiter by Geraint Luff Uses oversampling code by user "Smashed Transistors" (https://forum.cockos.com/showthread.php?t=178543) https://geraintluff.github.io/jsfx/ https://signalsmith-audio.co.uk/\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCLimiter.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK Compressor">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Express Bus Compressor (Stillwell) modified for classical music parallel compression use by chmaha See below the code for copyright notices, list of conditions and disclaimers\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
