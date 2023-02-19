@@ -1,5 +1,5 @@
-NoIndex: true
-desc: Oxonia (ReaClassical.org)
+Version: 1.0
+desc: Oxonia Compressor
 author: chmaha
 about:
   Uses DSP from airwindows "Logical4" by Chris Johnson
