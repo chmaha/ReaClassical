@@ -1,0 +1,1277 @@
+@noindex
+@author chmaha
+
+<REAPER_PROJECT 0.1 "6.75/linux-x86_64" 1676845634
+  RIPPLE 1
+  GROUPOVERRIDE 0 0 2
+  AUTOXFADE 128
+  ENVATTACH 1
+  POOLEDENVATTACH 0
+  MIXERUIFLAGS 11 52
+  PEAKGAIN 1
+  FEEDBACK 0
+  PANLAW 1
+  PROJOFFS 0 0 0
+  MAXPROJLEN 0 600
+  GRID 36222 8 0.015625 8 1 0 3 0
+  TIMEMODE 5 6 5 75 0 -1 -1
+  VIDEO_CONFIG 0 0 256
+  PANMODE 3
+  CURSOR 0
+  ZOOM 11.45107878330356 0 0
+  VZOOMEX 0 0
+  USE_REC_CFG 0
+  RECMODE 1
+  SMPTESYNC 0 18.75 100 40 1000 300 0 0 1 0 0
+  LOOP 0
+  LOOPGRAN 0 4
+  RECORD_PATH "media" ""
+  <RECORD_CFG
+    ZXZhdxgAAA==
+  >
+  <APPLYFX_CFG
+  >
+  RENDER_FILE ""
+  RENDER_PATTERN ""
+  RENDER_FMT 0 2 0
+  RENDER_1X 0
+  RENDER_RANGE 1 0 0 18 1000
+  RENDER_RESAMPLE 10 0 1
+  RENDER_ADDTOPROJ 0
+  RENDER_STEMS 0
+  RENDER_DITHER 0
+  TIMELOCKMODE 1
+  TEMPOENVLOCKMODE 1
+  ITEMMIX 0
+  DEFPITCHMODE 589824 0
+  TAKELANE 1
+  SAMPLERATE 44100 0 0
+  <RENDER_CFG
+    ZXZhdxgAAA==
+  >
+  LOCK 1
+  <METRONOME 6 2
+    VOL 0.25 0.125
+    FREQ 800 1600 1
+    BEATLEN 4
+    SAMPLES "" ""
+    PATTERN 2863311530 2863311529
+    MULT 1
+  >
+  GLOBAL_AUTO -1
+  TEMPO 120 4 4
+  PLAYRATE 1 0 0.25 4
+  SELECTION 0 0
+  SELECTION2 0 0
+  MASTERAUTOMODE 0
+  MASTERTRACKHEIGHT 0 0
+  MASTERPEAKCOL 16576
+  MASTERMUTESOLO 0
+  MASTERTRACKVIEW 0 0.6667 0.5 0.5 0 -1 0 0 0 0 -1 -1 0
+  MASTERHWOUT 0 0 1 0 0 0 0 -1
+  MASTER_NCH 2 2
+  MASTER_VOLUME 1 0 -1 -1 1
+  MASTER_PANMODE 3
+  MASTER_FX 1
+  MASTER_SEL 0
+  <MASTERFXLIST
+    WNDRECT 32 94 852 150
+    SHOW 0
+    LASTSEL 0
+    DOCKED 0
+    BYPASS 0 0 0
+    <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    >
+    FLOATPOS 32 60 619 120
+    FXID {B8B8EE85-227A-8557-64CC-3B1E6DF02D6F}
+    WAK 0 0
+    BYPASS 0 0 0
+    <JS "chmaha Scripts/RCPlugs/Elsa.jsfx" ""
+      0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    >
+    FLOATPOS 32 60 619 120
+    FXID {A7CD3461-2417-CEAB-281D-DFAFAF5F313B}
+    WAK 0 0
+  >
+  <MASTERPLAYSPEEDENV
+    EGUID {8E56A879-79FC-19F7-E004-2C73916725C6}
+    ACT 0 -1
+    VIS 0 1 1
+    LANEHEIGHT 0 0
+    ARM 0
+    DEFSHAPE 0 -1 -1
+  >
+  <TEMPOENVEX
+    EGUID {8F48C16F-E617-2B4F-2E14-BCF8D69E6FD8}
+    ACT 0 -1
+    VIS 1 0 1
+    LANEHEIGHT 0 0
+    ARM 0
+    DEFSHAPE 1 -1 -1
+  >
+  <PROJBAY
+  >
+  <TRACK {DBAEE568-E821-F35A-02B7-D37CA2A79FA8}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 1
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {DBAEE568-E821-F35A-02B7-D37CA2A79FA8}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 68 852 150
+      SHOW 0
+      LASTSEL 1
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 32 60 619 120
+      FXID {938967C0-A909-568D-40BB-174497DD8E4C}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {63DCAA7A-2058-8DC7-5F2B-8B73850D0D5D}
+      WAK 0 0
+    >
+  >
+  <TRACK {27051325-404F-416F-F362-B8208ED52054}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {27051325-404F-416F-F362-B8208ED52054}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 34 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {CCD894C7-A53F-BE82-7F8E-028383C972AD}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {21713405-F72B-5CAF-D447-5EC74F1229C4}
+      WAK 0 0
+    >
+  >
+  <TRACK {A0364334-A87B-2FA1-A519-8851709982C3}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {A0364334-A87B-2FA1-A519-8851709982C3}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 32 60 619 120
+      FXID {B04B878A-53C4-0E81-8860-579C124A2E34}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {3B9221F9-DF22-E0AD-DFE7-99B484686E11}
+      WAK 0 0
+    >
+  >
+  <TRACK {8C62F70A-CC2C-F424-48DF-BA7A1399FB19}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {8C62F70A-CC2C-F424-48DF-BA7A1399FB19}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 32 94 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {FF51F61A-ABA3-02E4-DD7E-4CD8AE7D8945}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {FA2872DB-F1C0-1D9C-2FD5-5CFDC9461090}
+      WAK 0 0
+    >
+  >
+  <TRACK {7EA4220D-1DA4-BEF3-DE61-82D2C37FFA18}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {7EA4220D-1DA4-BEF3-DE61-82D2C37FFA18}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {18089075-DB56-F1A8-FCDF-7DF6EFA93B7A}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {109EC918-41BF-DB3C-EB96-D9FB09D11CD6}
+      WAK 0 0
+    >
+  >
+  <TRACK {5C8865B8-DB56-EB2A-E835-AE027E1E0841}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {5C8865B8-DB56-EB2A-E835-AE027E1E0841}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {A3632D2F-CF6F-239B-B532-4DA35D80D44C}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {53614339-D272-3088-EC56-962C0B532F34}
+      WAK 0 0
+    >
+  >
+  <TRACK {8C9CFA57-E96F-D7F5-D07A-0C1ED887903B}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {8C9CFA57-E96F-D7F5-D07A-0C1ED887903B}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {DC55AA50-6A7A-12C2-4230-BB68C70CD459}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {4C43B6C1-C8F1-F9DD-28C6-E3A8B32F5C93}
+      WAK 0 0
+    >
+  >
+  <TRACK {D382B0E4-65DC-FB1B-627B-9399EEA5AE41}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {D382B0E4-65DC-FB1B-627B-9399EEA5AE41}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {766C66C5-DFE3-B72D-8767-3AF57D234BBD}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {3B3068C6-7781-1294-19EA-014B735B28A9}
+      WAK 0 0
+    >
+  >
+  <TRACK {C19BBC3E-52CE-48C7-BCF9-818FFDC60564}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {C19BBC3E-52CE-48C7-BCF9-818FFDC60564}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 34 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {7CCECE00-28CC-25FA-668D-C9E06317D8E5}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {C4BD0632-54B0-36CA-7759-2ABDD4514BFF}
+      WAK 0 0
+    >
+  >
+  <TRACK {86F5B91F-3126-40AB-ED09-7F0D4684A63D}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {86F5B91F-3126-40AB-ED09-7F0D4684A63D}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {A1E8313B-3B18-2573-49D4-D16D28794C26}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {49B800F1-5A32-2355-E982-538ECE46F981}
+      WAK 0 0
+    >
+  >
+  <TRACK {8FDA55C7-67FF-3AAF-35B2-C9CB290FEA05}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {8FDA55C7-67FF-3AAF-35B2-C9CB290FEA05}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {618AD14F-5FF2-7B2A-25F8-A9865100A2A8}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {E10D2026-880B-4581-94FA-A61FFC7CE229}
+      WAK 0 0
+    >
+  >
+  <TRACK {B0ACE787-B324-CAC7-BC1D-80D215AF5A8D}
+    NAME ""
+    PEAKCOL 0
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {B0ACE787-B324-CAC7-BC1D-80D215AF5A8D}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {5AAD9E3D-AE4D-A375-FA2D-7F64326E441C}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {AFC0E3D7-DE1A-C5A4-960B-7D20014FB214}
+      WAK 0 0
+    >
+  >
+  <TRACK {C040D315-F9D0-DD7C-20F6-363C37C3C3C3}
+    NAME "MixBus 1"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {C040D315-F9D0-DD7C-20F6-363C37C3C3C3}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 32 111 852 152
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 32 60 619 120
+      FXID {A1164518-25BC-591D-1B0F-AA3D69E60CD2}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {4699AC99-66D4-D161-2590-46F1928CBCB1}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 32 60 619 120
+      FXID {B678523B-BD1F-DD43-52A4-2078480E1B7A}
+      WAK 0 0
+    >
+  >
+  <TRACK {79F58065-3432-CEE9-116A-5680CCDACC41}
+    NAME "MixBus 2"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {79F58065-3432-CEE9-116A-5680CCDACC41}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {B3B5E964-BF39-88AC-2EBE-BEA08C4DF6E9}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {0B8CBCE1-2186-FC29-C955-1F4A63A3B626}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {97A847D6-7FE0-BC06-5EF0-8138D95CF985}
+      WAK 0 0
+    >
+  >
+  <TRACK {E90DD4C6-6315-3ADA-9722-47910B44C09A}
+    NAME "MixBus 3"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {E90DD4C6-6315-3ADA-9722-47910B44C09A}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {1FDCD0AA-6E15-0824-BBB1-1A406DFF0628}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {DF68D48D-4D65-DA45-5EF4-4DA5AE612E76}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {8FFB3171-D966-28C6-F3CA-9B19F10B6459}
+      WAK 0 0
+    >
+  >
+  <TRACK {27717AC1-8CE8-4918-245F-ABF69C0A2D52}
+    NAME "MixBus 4"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {27717AC1-8CE8-4918-245F-ABF69C0A2D52}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {FA708515-26E1-0E66-3DF6-A6BAE90445D5}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {EEB9A948-3FDF-884B-A748-074299A4CFA2}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {CC8BF543-F336-44BC-5CD2-CD315E5ABD73}
+      WAK 0 0
+    >
+  >
+  <TRACK {E3FEBA4B-F10D-01F8-4423-25B714A086A0}
+    NAME "MixBus 5"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {E3FEBA4B-F10D-01F8-4423-25B714A086A0}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {2E4B7482-BEAB-7B2B-FA08-3688B54D0431}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {A9619AE6-883B-3953-F76E-233E5D7F4CEF}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {B8F47687-3AC0-2AB2-8058-397E7BC3A5D2}
+      WAK 0 0
+    >
+  >
+  <TRACK {9C0148C8-5D0E-D7FE-87F7-59F08B9C2219}
+    NAME "MixBus 6"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {9C0148C8-5D0E-D7FE-87F7-59F08B9C2219}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {2E826E2A-149A-3AD2-0ED1-F12F342BA37D}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {363A2650-2D03-ABFB-1179-5FC8B36B7D86}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {55A29D3C-EB65-5870-EEAB-6B6F00CFB9CF}
+      WAK 0 0
+    >
+  >
+  <TRACK {4BCDEBDB-88EE-7005-F3E6-BF71A4D5DAE3}
+    NAME "MixBus 7"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {4BCDEBDB-88EE-7005-F3E6-BF71A4D5DAE3}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {A5377876-DDE9-2CF9-776D-5094678D9AA4}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {D8B55ADB-9478-7FC8-35B7-22F619958703}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {FC3CFC35-4652-FF76-ACEC-57A12D83CCB7}
+      WAK 0 0
+    >
+  >
+  <TRACK {E8BB8B20-903B-4CB3-CD47-7BAE7A0AB0CA}
+    NAME "MixBus 8"
+    PEAKCOL 22520950
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {E8BB8B20-903B-4CB3-CD47-7BAE7A0AB0CA}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 0 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {C957C416-A06A-AEB0-B536-6D6F020C0BB9}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {927E139E-8291-6ED1-FEDF-C2ED213C2B31}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {3E69F31A-A17B-B286-4F13-E911FB2BBB99}
+      WAK 0 0
+    >
+  >
+  <TRACK {A000AF9E-9096-713C-557C-83E239271C38}
+    NAME "SumBus 1"
+    PEAKCOL 20616594
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {A000AF9E-9096-713C-557C-83E239271C38}
+    PERF 0
+    AUXRECV 0 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 1 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 2 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 3 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 4 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 5 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 6 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 7 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 8 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 9 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 10 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 11 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 12 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 13 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 14 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 15 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 16 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 17 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 18 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    AUXRECV 19 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
+    MIDIOUT -1
+    MAINSEND 1 0
+    <FXCHAIN
+      WNDRECT 32 94 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {073DEC1D-951C-0E49-C760-39BC601001DD}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {9DA1BEF2-9E56-FF1B-5ACB-737FF89081D4}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {D0E0B61E-65F9-E00A-F8A3-2871F716777F}
+      WAK 0 0
+    >
+  >
+  <TRACK {870A40F7-44C8-FAAC-1967-D2CA9C778282}
+    NAME "SumBus 2"
+    PEAKCOL 20616594
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {870A40F7-44C8-FAAC-1967-D2CA9C778282}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {EFA83D8E-CF5D-267E-16AC-CE86422E110A}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {841E730E-A6C2-FA78-EC45-C82F108B9FA0}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {728CFCD8-C31A-6513-DDE0-807F18A78AD7}
+      WAK 0 0
+    >
+  >
+  <TRACK {BC1C2975-72CC-B47F-7149-6CEE253E6BBC}
+    NAME "SumBus 3"
+    PEAKCOL 20616594
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {BC1C2975-72CC-B47F-7149-6CEE253E6BBC}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {4D12213D-D03A-A40C-7564-65B3B0A40658}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {791AC0ED-C01E-4B3C-5494-9B899B1C5A87}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {846F6C88-64A8-A938-E671-6103BB925F08}
+      WAK 0 0
+    >
+  >
+  <TRACK {B083B603-A52B-F94D-5AE8-4794A271F353}
+    NAME "SumBus 4"
+    PEAKCOL 20616594
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
+    SEL 0
+    REC 0 0 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {B083B603-A52B-F94D-5AE8-4794A271F353}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <FXCHAIN
+      WNDRECT 0 17 852 150
+      SHOW 0
+      LASTSEL 2
+      DOCKED 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {24C9FE69-D855-B3F3-0E2D-B0AC9955DE53}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/RCGain.jsfx" ""
+        0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {555DF1B1-A029-33AE-081A-0930A8678588}
+      WAK 0 0
+      BYPASS 0 0 0
+      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      >
+      FLOATPOS 0 0 0 0
+      FXID {1DBD3B01-B20C-2B36-F798-8ED935070061}
+      WAK 0 0
+    >
+  >
+  <EXTENSIONS
+  >
+>

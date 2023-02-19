@@ -7,8 +7,8 @@
 @provides
   Eurydice_Bus.jsfx
   Eurydice_Channel.jsfx
-  [rpp] ReaClassical_Eurydice.RPP
-  
+  [rpp] ReaClassical_Eurydice_A.RPP
+  [rpp] ReaClassical_Eurydice_B.RPP
 @about
   These jsfx digital console emulation plugins use DSP from airwindows PurestConsole2.
   Also included is the Eurydice project template with plugins already in place (requires ELSA and RCGain to be installed)

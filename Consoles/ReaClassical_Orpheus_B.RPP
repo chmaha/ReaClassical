@@ -1,7 +1,7 @@
 @noindex
 @author chmaha
 
-<REAPER_PROJECT 0.1 "6.75/linux-x86_64" 1676156750
+<REAPER_PROJECT 0.1 "6.75/linux-x86_64" 1676845465
   RIPPLE 1
   GROUPOVERRIDE 0 0 2
   AUTOXFADE 128
@@ -73,11 +73,11 @@
   MASTER_VOLUME 1 0 -1 -1 1
   MASTER_PANMODE 3
   MASTER_FX 1
-  MASTER_SEL 0
+  MASTER_SEL 1
   <MASTERFXLIST
-    WNDRECT 32 77 852 150
+    WNDRECT 32 111 852 172
     SHOW 0
-    LASTSEL 0
+    LASTSEL 2
     DOCKED 0
     BYPASS 0 0 0
     <JS "chmaha Scripts/RCPlugs/Orpheus_Bus_In.jsfx" ""
@@ -131,7 +131,7 @@
     ISBUS 0 0
     BUSCOMP 0 0 0 0 0
     SHOWINMIX 1 0.6667 0.5 1 0.5 0 -1 0
-    SEL 1
+    SEL 0
     REC 0 0 1 0 0 0 0 0
     VU 2
     TRACKHEIGHT 0 0 0 0 0 0
@@ -143,7 +143,7 @@
     MIDIOUT -1
     MAINSEND 0 0
     <FXCHAIN
-      WNDRECT 0 0 852 150
+      WNDRECT 0 32 852 150
       SHOW 0
       LASTSEL 1
       DOCKED 0
@@ -627,7 +627,7 @@
     MIDIOUT -1
     MAINSEND 0 0
     <FXCHAIN
-      WNDRECT 0 0 852 150
+      WNDRECT 0 49 852 150
       SHOW 0
       LASTSEL 1
       DOCKED 0
@@ -647,360 +647,8 @@
       WAK 0 0
     >
   >
-  <TRACK {C040D315-F9D0-DD7C-20F6-363C37C3C3C3}
-    NAME "MixBus 1"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {C040D315-F9D0-DD7C-20F6-363C37C3C3C3}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 32 94 852 150
-      SHOW 0
-      LASTSEL 0
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {6F7EA213-AE7B-AE72-BF81-FACEFE992793}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {520120F1-D44C-DE10-738B-31FD575CDB24}
-      WAK 0 0
-    >
-  >
-  <TRACK {79F58065-3432-CEE9-116A-5680CCDACC41}
-    NAME "MixBus 2"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {79F58065-3432-CEE9-116A-5680CCDACC41}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 0 0 852 150
-      SHOW 0
-      LASTSEL 1
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {A3147153-EFC5-20BF-BCB1-E446BD3F70AE}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {BA4D531A-F97A-54CD-2E5D-ACC42A30B150}
-      WAK 0 0
-    >
-  >
-  <TRACK {E90DD4C6-6315-3ADA-9722-47910B44C09A}
-    NAME "MixBus 3"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {E90DD4C6-6315-3ADA-9722-47910B44C09A}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 0 0 852 150
-      SHOW 0
-      LASTSEL 1
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {CC71A99E-2D4E-999D-1CD5-650106240A8E}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {7E7D36A6-7717-63E9-115D-32B35C17CB70}
-      WAK 0 0
-    >
-  >
-  <TRACK {27717AC1-8CE8-4918-245F-ABF69C0A2D52}
-    NAME "MixBus 4"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {27717AC1-8CE8-4918-245F-ABF69C0A2D52}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 0 0 852 150
-      SHOW 0
-      LASTSEL 1
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {027CEC99-A3E3-C287-8947-885B06593B7A}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {C3000038-CB2A-7793-A148-9545849C71B0}
-      WAK 0 0
-    >
-  >
-  <TRACK {E3FEBA4B-F10D-01F8-4423-25B714A086A0}
-    NAME "MixBus 5"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {E3FEBA4B-F10D-01F8-4423-25B714A086A0}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 0 0 852 150
-      SHOW 0
-      LASTSEL 1
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {BBF24589-4F9D-4055-B954-446AD7BE912E}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {8539E653-0014-75D1-B8B0-6F53A7FD50B2}
-      WAK 0 0
-    >
-  >
-  <TRACK {9C0148C8-5D0E-D7FE-87F7-59F08B9C2219}
-    NAME "MixBus 6"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {9C0148C8-5D0E-D7FE-87F7-59F08B9C2219}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 0 0 852 150
-      SHOW 0
-      LASTSEL 1
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {C3871C3F-0149-F698-8B96-0796731CCD00}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {DAB07F2A-DCCD-F325-D601-331FBB2EEE29}
-      WAK 0 0
-    >
-  >
-  <TRACK {4BCDEBDB-88EE-7005-F3E6-BF71A4D5DAE3}
-    NAME "MixBus 7"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {4BCDEBDB-88EE-7005-F3E6-BF71A4D5DAE3}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 0 0 852 150
-      SHOW 0
-      LASTSEL 1
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {A731B372-4865-DD77-9AC1-87C0819A2D23}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {59595273-9702-D685-46C6-41B18F113903}
-      WAK 0 0
-    >
-  >
-  <TRACK {E8BB8B20-903B-4CB3-CD47-7BAE7A0AB0CA}
-    NAME "MixBus 8"
-    PEAKCOL 22520950
-    BEAT -1
-    AUTOMODE 0
-    VOLPAN 1 0 -1 -1 1
-    MUTESOLO 0 0 0
-    IPHASE 0
-    PLAYOFFS 0 1
-    ISBUS 0 0
-    BUSCOMP 0 0 0 0 0
-    SHOWINMIX 1 0.6667 0.5 0 0.5 0 -1 0
-    SEL 0
-    REC 0 0 1 0 0 0 0 0
-    VU 2
-    TRACKHEIGHT 0 0 0 0 0 0
-    INQ 0 0 0 0.5 100 0 0 100
-    NCHAN 2
-    FX 1
-    TRACKID {E8BB8B20-903B-4CB3-CD47-7BAE7A0AB0CA}
-    PERF 0
-    MIDIOUT -1
-    MAINSEND 0 0
-    <FXCHAIN
-      WNDRECT 0 0 852 150
-      SHOW 0
-      LASTSEL 1
-      DOCKED 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {FE4AE5F9-6B03-7261-9D90-3972215E8BBF}
-      WAK 0 0
-      BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
-        0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      >
-      FLOATPOS 0 0 0 0
-      FXID {1D22819A-7450-A033-3172-31F622F54E03}
-      WAK 0 0
-    >
-  >
   <TRACK {A000AF9E-9096-713C-557C-83E239271C38}
-    NAME "SumBus 1"
+    NAME "Submix 1"
     PEAKCOL 20616594
     BEAT -1
     AUTOMODE 0
@@ -1032,18 +680,10 @@
     AUXRECV 9 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
     AUXRECV 10 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
     AUXRECV 11 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 12 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 13 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 14 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 15 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 16 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 17 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 18 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
-    AUXRECV 19 0 1 0 0 0 0 0 0 -1:U 0 -1 ''
     MIDIOUT -1
     MAINSEND 1 0
     <FXCHAIN
-      WNDRECT 32 77 852 150
+      WNDRECT 32 128 852 150
       SHOW 0
       LASTSEL 0
       DOCKED 0
@@ -1064,7 +704,7 @@
     >
   >
   <TRACK {870A40F7-44C8-FAAC-1967-D2CA9C778282}
-    NAME "SumBus 2"
+    NAME "Submix 2"
     PEAKCOL 20616594
     BEAT -1
     AUTOMODE 0
@@ -1087,9 +727,9 @@
     MIDIOUT -1
     MAINSEND 1 0
     <FXCHAIN
-      WNDRECT 0 0 852 150
+      WNDRECT 0 32 852 150
       SHOW 0
-      LASTSEL 1
+      LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
       <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
@@ -1108,7 +748,7 @@
     >
   >
   <TRACK {BC1C2975-72CC-B47F-7149-6CEE253E6BBC}
-    NAME "SumBus 3"
+    NAME "Submix 3"
     PEAKCOL 20616594
     BEAT -1
     AUTOMODE 0
@@ -1152,7 +792,7 @@
     >
   >
   <TRACK {B083B603-A52B-F94D-5AE8-4794A271F353}
-    NAME "SumBus 4"
+    NAME "Submix 4"
     PEAKCOL 20616594
     BEAT -1
     AUTOMODE 0
@@ -1175,7 +815,7 @@
     MIDIOUT -1
     MAINSEND 1 0
     <FXCHAIN
-      WNDRECT 0 0 852 150
+      WNDRECT 0 49 852 150
       SHOW 0
       LASTSEL 1
       DOCKED 0
