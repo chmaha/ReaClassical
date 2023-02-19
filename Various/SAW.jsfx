@@ -1,5 +1,5 @@
-NoIndex: true
-desc:SAW (ReaClassical.org)
+Version: 1.0
+desc:SAW Stereo Widener
 author: chmaha
 about:
   SAW - Seriously Amazing Widener. Uses DSP from airwindows "Srsly2" by Chris Johnson

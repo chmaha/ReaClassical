@@ -1,5 +1,5 @@
-NoIndex: true
-desc:MuTube (ReaClassical.org)
+Version: 1.0
+desc:MuTube Compressor
 author: chmaha
 about:
   Uses DSP from airwindows "VariMu" by Chris Johnson

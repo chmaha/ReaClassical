@@ -1,5 +1,5 @@
-NoIndex: true
-desc:Flattop (ReaClassical.org)
+Version: 1.0
+desc:Flattop Clipper
 author: chmaha
 about:
   Uses DSP from airwindows "ClipOnly2" by Chris Johnson

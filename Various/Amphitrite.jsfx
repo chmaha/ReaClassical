@@ -1,5 +1,5 @@
-NoIndex: true
-desc: Amphitrite (ReaClassical.org)
+Version: 1.0
+desc: Amphitrite Compressor
 author: chmaha
 about:
   Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson
