@@ -1,5 +1,5 @@
-NoIndex: true
-desc:Xonnos Dither (ReaClassical.org)
+Version: 1.0
+desc:Xonnos Dither
 author: chmaha
 about:
   Uses DSP from airwindows "PaulDither" & "DoublePaul" by Chris Johnson

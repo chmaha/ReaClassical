@@ -1,5 +1,5 @@
-NoIndex: true
-desc:Stan Dither (ReaClassical.org)
+Version: 1.0
+desc:Stan Dither
 author: chmaha
 about:
   Uses DSP from airwindows "StudioTan" plugin by Chris Johnson
