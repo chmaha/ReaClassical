@@ -1,5 +1,5 @@
-NoIndex: true
-desc:RCDeEss Standard (ReaClassical.org)
+Version: 1.0
+desc:RCDeEss Standard
 author: chmaha
 about:
   Uses DSP from airwindows "DeEss" by Chris Johnson
