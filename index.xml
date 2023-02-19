@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="870ffd6a8c9277c81d266cdf5e89c8da2221daab">
+<index version="1" name="chmaha Scripts" commit="413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -87,11 +87,12 @@
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T22:01:34Z">
-        <changelog><![CDATA[Initial Commit]]></changelog>
-        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Lite_Channel.jsfx</source>
-        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Lite_Bus.jsfx</source>
-        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
-        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
+        <changelog><![CDATA[Initial Commit
+Add Console to names]]></changelog>
+        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a/Consoles/Orpheus_Lite_Channel.jsfx</source>
+        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a/Consoles/Orpheus_Lite_Bus.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/ReaClassical/raw/413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/ReaClassical/raw/413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
       </version>
     </reapack>
     <reapack name="Supersonic.jsfx" type="effect" desc="Supersonic Filter">
