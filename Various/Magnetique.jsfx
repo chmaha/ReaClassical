@@ -1,5 +1,5 @@
-NoIndex: true
-desc:Magnétique (ReaClassical.org)
+Version: 1.0
+desc:Magnétique Tape Emulation
 author: chmaha
 about:
   Uses DSP from airwindows "ToTape6" by Chris Johnson
