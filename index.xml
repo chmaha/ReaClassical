@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="e18a32ca69e7d8a15bb6f99cee4f25b3da138a0f">
+<index version="1" name="chmaha Scripts" commit="183200ed0e14777e50d88e2d5984a6aa15f2a0a6">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -922,165 +922,256 @@ Update PDF Guide for new reverb plugins]]></changelog>
     </reapack>
   </category>
   <category name="Various">
-    <reapack name="Various.jsfx" type="effect" desc="ReaClassical Miscellaneous Plugins">
+    <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite Compressor">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Various other jsfx plugins including compressors, gate, saturation/distortion, Bass-related, clipper, Vinyl and Tape emulations...\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SurgeTide (MIT License) JSFX version released under GPLv3 license\par}
 }
 ]]></description>
       </metadata>
-      <version name="1.0" author="chmaha" time="2023-02-12T11:47:19Z">
-        <changelog><![CDATA[Initial metapackage release]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/bfd76b490c35208dd16520c846bfb068c5f556a0/Various/Titan.jsfx</source>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Amphitrite.jsfx</source>
       </version>
-      <version name="1.1" author="chmaha" time="2023-02-12T18:47:23Z">
-        <changelog><![CDATA[Remove ver and changelog from individual plugins
-Change reapack headers]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/7661f51b57f6e1db06d778250d53fc42ef5accb6/Various/Titan.jsfx</source>
+    </reapack>
+    <reapack name="Aurora.jsfx" type="effect" desc="Aurora Exciter">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Dubly" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Aurora.jsfx</source>
       </version>
-      <version name="1.2" author="chmaha" time="2023-02-13T22:21:07Z">
-        <changelog><![CDATA[Add Discordia]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Titan.jsfx</source>
-        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/cc5d17ed1ece9a6b3b3d70de3116be63c0878151/Various/Discordia.jsfx</source>
+    </reapack>
+    <reapack name="Buttress.jsfx" type="effect" desc="Buttress Bass">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "BassKit" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BassKit (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Buttress.jsfx</source>
       </version>
-      <version name="1.3" author="chmaha" time="2023-02-15T13:58:58Z">
-        <changelog><![CDATA[Add SAW]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Titan.jsfx</source>
-        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/Discordia.jsfx</source>
-        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/afa92eb3640e98c39418a59b1dce5f8e51091196/Various/SAW.jsfx</source>
+    </reapack>
+    <reapack name="CoralBones.jsfx" type="effect" desc="Coral Bones Bass">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "FathomFive" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/FathomFive (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/CoralBones.jsfx</source>
       </version>
-      <version name="1.4" author="chmaha" time="2023-02-15T17:19:55Z">
-        <changelog><![CDATA[Add Pascal]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Titan.jsfx</source>
-        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Discordia.jsfx</source>
-        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/SAW.jsfx</source>
-        <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/fc735f0c4bb1e3b322ab1921e024f109f5e4e588/Various/Pascal.jsfx</source>
+    </reapack>
+    <reapack name="Discordia.jsfx" type="effect" desc="Discordia Distortion">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Distorion" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Distorion (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Discordia.jsfx</source>
       </version>
-      <version name="1.5" author="chmaha" time="2023-02-15T23:58:20Z">
-        <changelog><![CDATA[Add Oxonia
-Change reaction speed default
-Change ratio label]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Titan.jsfx</source>
-        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Discordia.jsfx</source>
-        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/SAW.jsfx</source>
-        <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Pascal.jsfx</source>
-        <source file="Oxonia.jsfx">https://github.com/chmaha/ReaClassical/raw/c3171645e18a6cbb5f3e68bc7c16a931d50f0a11/Various/Oxonia.jsfx</source>
+    </reapack>
+    <reapack name="Eris.jsfx" type="effect" desc="Eris Distortion">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Focus" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Focus (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Eris.jsfx</source>
       </version>
-      <version name="1.6" author="chmaha" time="2023-02-17T19:33:07Z">
-        <changelog><![CDATA[Add Reelty]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Titan.jsfx</source>
-        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Discordia.jsfx</source>
-        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/SAW.jsfx</source>
-        <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Pascal.jsfx</source>
-        <source file="Oxonia.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Oxonia.jsfx</source>
-        <source file="Reelty.jsfx">https://github.com/chmaha/ReaClassical/raw/340b9f33d777141c5374e95f84b590053b1641f5/Various/Reelty.jsfx</source>
+    </reapack>
+    <reapack name="flattop.jsfx" type="effect" desc="Flattop Clipper">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ClipOnly2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipOnly2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/flattop.jsfx</source>
       </version>
-      <version name="1.7" author="chmaha" time="2023-02-17T22:39:31Z">
-        <changelog><![CDATA[Add Solar Wind]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Titan.jsfx</source>
-        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Discordia.jsfx</source>
-        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/SAW.jsfx</source>
-        <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Pascal.jsfx</source>
-        <source file="Oxonia.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Oxonia.jsfx</source>
-        <source file="Reelty.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Reelty.jsfx</source>
-        <source file="Solar_Wind.jsfx">https://github.com/chmaha/ReaClassical/raw/f807b6da67b8580b18a53a07c4195d4e3528f087/Various/Solar_Wind.jsfx</source>
+    </reapack>
+    <reapack name="Heft.jsfx" type="effect" desc="Heft Bass">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Weight" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Weight (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Heft.jsfx</source>
       </version>
-      <version name="1.8" author="chmaha" time="2023-02-19T10:09:49Z">
-        <changelog><![CDATA[Add Bass plugins: Coral Bones, Buttress and Heft]]></changelog>
-        <source file="Amphitrite.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Amphitrite.jsfx</source>
-        <source file="Aurora.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Aurora.jsfx</source>
-        <source file="Eris.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Eris.jsfx</source>
-        <source file="flattop.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/flattop.jsfx</source>
-        <source file="Lyra.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Lyra.jsfx</source>
-        <source file="Magnetique.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Magnetique.jsfx</source>
-        <source file="MuTube.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/MuTube.jsfx</source>
-        <source file="port-and-lemon.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/port-and-lemon.jsfx</source>
-        <source file="Sillons.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Sillons.jsfx</source>
-        <source file="Titan.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Titan.jsfx</source>
-        <source file="Discordia.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Discordia.jsfx</source>
-        <source file="SAW.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/SAW.jsfx</source>
-        <source file="Pascal.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Pascal.jsfx</source>
-        <source file="Oxonia.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Oxonia.jsfx</source>
-        <source file="Reelty.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Reelty.jsfx</source>
-        <source file="Solar_Wind.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Solar_Wind.jsfx</source>
-        <source file="CoralBones.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/CoralBones.jsfx</source>
-        <source file="Buttress.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Buttress.jsfx</source>
-        <source file="Heft.jsfx">https://github.com/chmaha/ReaClassical/raw/f1b20ada404a13e075236d5db585a8c790dc531e/Various/Heft.jsfx</source>
+    </reapack>
+    <reapack name="Lyra.jsfx" type="effect" desc="Lyra Compressor">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ButterComp2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ButterComp2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Lyra.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Magnetique.jsfx" type="effect" desc="Magnétique Tape Emulation">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToTape6" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToTape6 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Magnetique.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="MuTube.jsfx" type="effect" desc="MuTube Compressor">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "VariMu" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/VariMu (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/MuTube.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Oxonia.jsfx" type="effect" desc="Oxonia Compressor">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Logical4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Logical4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Oxonia.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon Compressor / Gate">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Compressor and Gate Uses DSP from airwindows "Dynamics" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dynamics (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/port-and-lemon.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Reelty.jsfx" type="effect" desc="Reelty Tape Emulation">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "FromTape" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/FromTape (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Reelty.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="SAW.jsfx" type="effect" desc="SAW Stereo Widener">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 SAW - Seriously Amazing Widener. Uses DSP from airwindows "Srsly2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Srsly2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/SAW.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Sillons.jsfx" type="effect" desc="Sillons Vinyl Emulation">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToVinyl4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToVinyl4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Sillons.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Solar_Wind.jsfx" type="effect" desc="Solar Wind Aural Exciter">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Hype" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Hype (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Solar_Wind.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Titan.jsfx" type="effect" desc="Titan Capacitor Distortion">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Capacitor2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Capacitor2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Titan.jsfx</source>
       </version>
     </reapack>
   </category>
