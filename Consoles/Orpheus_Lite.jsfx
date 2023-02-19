@@ -1,0 +1,12 @@
+@description Orpheus Lite Console
+@author chmaha
+@version 1.0
+@changelog
+  Initial Commit
+@metapackage
+@provides
+  Orpheus_Lite_Channel.jsfx
+  Orpheus_Lite_Bus.jsfx
+@about
+  These jsfx analog console emulation plugins use DSP from airwindows Console8Lite.
+  Also included is the Orpheus Lite project template with plugins already in place (requires MagicFairyDust and RCGain to be installed)
