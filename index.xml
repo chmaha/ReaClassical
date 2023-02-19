@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="d630c92de48870d5de4f850350b1421fb1fe8b53">
+<index version="1" name="chmaha Scripts" commit="870ffd6a8c9277c81d266cdf5e89c8da2221daab">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -23,11 +23,21 @@
       </version>
     </reapack>
     <reapack name="Eurydice.jsfx" type="effect" desc="Eurydice Console">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx digital console emulation plugins use DSP from airwindows PurestConsole2. Also included is the Eurydice project template with plugins already in place (requires ELSA and RCGain to be installed)\par}
+}
+]]></description>
+      </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
-        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Eurydice_Bus.jsfx</source>
-        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Eurydice_Channel.jsfx</source>
-        <source type="projecttpl" file="ReaClassical_Eurydice.RPP">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/ReaClassical_Eurydice.RPP</source>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Eurydice_Channel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_A.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Eurydice_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_B.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Eurydice_B.RPP</source>
       </version>
     </reapack>
     <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust Console Saturation">
@@ -56,13 +66,14 @@
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
-        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Orpheus_Bus_In.jsfx</source>
-        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Orpheus_Bus_Out.jsfx</source>
-        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Orpheus_Channel_In.jsfx</source>
-        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Orpheus_Channel_Out.jsfx</source>
-        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Orpheus_Sub_In.jsfx</source>
-        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Orpheus_Sub_Out.jsfx</source>
-        <source type="projecttpl" file="ReaClassical_Orpheus.RPP">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/ReaClassical_Orpheus.RPP</source>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_A.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_B.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_B.RPP</source>
       </version>
     </reapack>
     <reapack name="Orpheus_Lite.jsfx" type="effect" desc="Orpheus Lite Console">
@@ -77,8 +88,10 @@
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T22:01:34Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
-        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/d630c92de48870d5de4f850350b1421fb1fe8b53/Consoles/Orpheus_Lite_Channel.jsfx</source>
-        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/d630c92de48870d5de4f850350b1421fb1fe8b53/Consoles/Orpheus_Lite_Bus.jsfx</source>
+        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Lite_Channel.jsfx</source>
+        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/Orpheus_Lite_Bus.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
       </version>
     </reapack>
     <reapack name="Supersonic.jsfx" type="effect" desc="Supersonic Filter">
