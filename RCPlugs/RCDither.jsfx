@@ -1,5 +1,5 @@
-NoIndex: true
-desc:RCDither (ReaClassical.org)
+Version: 1.0
+desc:RCDither
 author: chmaha
 about:
   Uses "NJAD" DSP from airwindows "Monitoring" by Chris Johnson

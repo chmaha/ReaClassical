@@ -1,5 +1,5 @@
-NoIndex: true
-desc:RCLimiter (ReaClassical.org)
+Version: 1.0
+desc:RCLimiter
 author: chmaha
 about:
   Uses DSP with permission from Smooth Limiter by Geraint Luff
