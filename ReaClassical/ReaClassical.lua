@@ -3,7 +3,7 @@
 @version 23.16
 @changelog
   Prepare Takes: Disable with message if there already overlaps and fades. Offer to clean up take names.
-  Update PDF Guide for new reverb plugins
+  Update PDF Guide for new JSFX plugins information
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
