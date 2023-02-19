@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a">
+<index version="1" name="chmaha Scripts" commit="dbac0b48ce2ed8e9eec29b1e95d1a8533ef5725c">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1118,6 +1118,20 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Oxonia.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Pascal.jsfx" type="effect" desc="Pascal Compressor">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pressure5" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pressure5 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-19T23:21:39Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/dbac0b48ce2ed8e9eec29b1e95d1a8533ef5725c/Various/Pascal.jsfx</source>
       </version>
     </reapack>
     <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon Compressor / Gate">
