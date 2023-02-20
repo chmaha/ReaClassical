@@ -1,5 +1,5 @@
 Version: 1.2
-desc:SAW Stereo Widener (chmaha)
+desc:SAW — Seriously Amazing Widener (chmaha)
 author: chmaha
 about:
   SAW - Seriously Amazing Widener. Uses DSP from airwindows "Srsly2" by Chris Johnson
@@ -32,8 +32,6 @@ biquadS3 = freemem; freemem +=11;
 biquadS5 = freemem; freemem +=11;
 
 UINT32_MAX = 4294967295;
-
-
 
 @slider
 
