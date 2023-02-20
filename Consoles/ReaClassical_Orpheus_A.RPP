@@ -80,21 +80,21 @@
     LASTSEL 0
     DOCKED 0
     BYPASS 0 0 0
-    <JS "chmaha Scripts/RCPlugs/Orpheus_Bus_In.jsfx" ""
+    <JS "chmaha Scripts/Consoles/Orpheus_Bus_In.jsfx" ""
       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     >
     FLOATPOS 32 60 619 120
     FXID {33533D9C-430B-6350-49EA-B940943DF9A4}
     WAK 0 0
     BYPASS 0 0 0
-    <JS "chmaha Scripts/RCPlugs/Orpheus_Bus_Out.jsfx" ""
+    <JS "chmaha Scripts/Consoles/Orpheus_Bus_Out.jsfx" ""
       0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     >
     FLOATPOS 32 60 619 120
     FXID {9DD17DE2-4C00-530A-0D2D-17EFB55198DC}
     WAK 0 0
     BYPASS 0 0 0
-    <JS "chmaha Scripts/RCPlugs/MagicFairyDust.jsfx" ""
+    <JS "chmaha Scripts/Consoles/MagicFairyDust.jsfx" ""
       0 0 1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     >
     FLOATPOS 64 92 619 123
@@ -148,14 +148,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {3C3DD20A-6210-7740-9C2C-BE3551D242F7}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -192,14 +192,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {EED0476A-B7B3-6A2C-4FFB-66FC28D7BB0D}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -236,14 +236,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {DF23D72F-C078-CDCF-000D-98E351CB2D7A}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -280,14 +280,14 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 32 60 619 120
       FXID {25EF868D-3B95-49F4-28F2-C22DFA2FD5CB}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 32 60 619 120
@@ -324,14 +324,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {E9D301E8-8B69-6923-EA26-E9FE8B72EBAB}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -368,14 +368,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {7ABF0CA8-0F3B-3CBE-5FE4-7D34E4B9C8F5}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -412,14 +412,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {E5D235F0-74F8-0FE1-679C-610655C5A017}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -456,14 +456,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {42C03A8F-0C06-F6E2-12D4-EF8309206B6C}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -500,14 +500,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {6496D1BB-BB4C-14D4-C83B-D7B2ED35EA9D}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -544,14 +544,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {08CAFA10-4397-648D-23B7-FC31858DD256}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -588,14 +588,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {40D6CCDF-C507-FC62-2C31-9C8A792948D8}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -632,14 +632,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {693B3629-E1C5-F272-0774-35CD84A6C50D}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Channel_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Channel_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -676,14 +676,14 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {6F7EA213-AE7B-AE72-BF81-FACEFE992793}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -720,14 +720,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {A3147153-EFC5-20BF-BCB1-E446BD3F70AE}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -764,14 +764,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {CC71A99E-2D4E-999D-1CD5-650106240A8E}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -808,14 +808,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {027CEC99-A3E3-C287-8947-885B06593B7A}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -852,14 +852,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {BBF24589-4F9D-4055-B954-446AD7BE912E}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -896,14 +896,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {C3871C3F-0149-F698-8B96-0796731CCD00}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -940,14 +940,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {A731B372-4865-DD77-9AC1-87C0819A2D23}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -984,14 +984,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {FE4AE5F9-6B03-7261-9D90-3972215E8BBF}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1048,14 +1048,14 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {53D54908-DE77-A3C0-81BD-6F52EDC5C334}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1092,14 +1092,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {E21C222A-5A71-6EB0-C93D-0F12516E4F54}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1136,14 +1136,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {775EBEE6-7399-9B3E-538B-AAD2AB3D5502}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1180,14 +1180,14 @@
       LASTSEL 1
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_In.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_In.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
       FXID {8C4C28F0-6BFB-39BE-D405-14A672C89B49}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Orpheus_Sub_Out.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Orpheus_Sub_Out.jsfx" ""
         0.5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
