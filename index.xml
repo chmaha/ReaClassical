@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="a04ae8c86a8b4d308b0ec27bdcdf480cbadb13b7">
+<index version="1" name="chmaha Scripts" commit="f5551259577c4942a3c5b15ce11be60aa0cb05f5">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1452,7 +1452,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Reelty.jsfx</source>
       </version>
     </reapack>
-    <reapack name="SAW.jsfx" type="effect" desc="SAW Stereo Widener (chmaha)">
+    <reapack name="SAW.jsfx" type="effect" desc="SAW — Seriously Amazing Widener (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1469,7 +1469,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/SAW.jsfx</source>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/SAW.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/f5551259577c4942a3c5b15ce11be60aa0cb05f5/Various/SAW.jsfx</source>
       </version>
     </reapack>
     <reapack name="Sillons.jsfx" type="effect" desc="Sillons Vinyl Emulation (chmaha)">
