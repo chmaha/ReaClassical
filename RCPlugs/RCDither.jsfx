@@ -47,8 +47,6 @@ noiseShapingR = 0.0;
 UINT32_MAX = 4294967295;
 
 A = 0.0;
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 
 @slider
 
