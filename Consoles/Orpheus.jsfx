@@ -2,7 +2,7 @@
 @author chmaha
 @version 1.2
 @changelog
-  Initial Commit
+  Fix desc in templates
 @metapackage
 @provides
   Orpheus_Bus_In.jsfx
