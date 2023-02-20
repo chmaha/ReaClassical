@@ -1,5 +1,5 @@
-Version: 1.0
-desc:Aurora Exciter
+Version: 1.1
+desc:Aurora Exciter (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "Dubly" by Chris Johnson
@@ -92,10 +92,8 @@ inputSampleR -= doubly*outlyAmount;
 );
 
 
-fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
-fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
-(fpdL < 0) ? fpdL += UINT32_MAX;
-(fpdR < 0) ? fpdR += UINT32_MAX;
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX);
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

@@ -1,5 +1,5 @@
-Version: 1.0
-desc:GroovyDither
+Version: 1.1
+desc:GroovyDither (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "VinylDither" by Chris Johnson
