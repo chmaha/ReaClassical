@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:WTFDither (chmaha)
 author: chmaha
 about:
@@ -36,10 +36,10 @@ inputSampleR = spl1;
 
 (slider1 == 0) ? 
 (
-  (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
+  
   fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
   (fpdL < 0) ? fpdL += UINT32_MAX;
-  (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+  
   fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
   (fpdR < 0) ? fpdR += UINT32_MAX;
   
@@ -62,8 +62,6 @@ inputSampleR = spl1;
   inputSampleR = floor(inputSampleR);
 ) : (slider1 == 1) ?
 (
-  (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-  (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
   
   inputSampleL *= scaleFactor;
   inputSampleR *= scaleFactor;

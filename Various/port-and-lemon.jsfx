@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:Port-and-Lemon Compressor / Gate (chmaha)
 author: chmaha
 about:
@@ -53,8 +53,7 @@ nvgRA = nvgRB = 0.0;
 
 flip = 0;
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -85,8 +84,7 @@ wet = D;
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 
 drySampleL = inputSampleL;
@@ -290,8 +288,7 @@ flip = !flip;
   inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
 );
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX);
+
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

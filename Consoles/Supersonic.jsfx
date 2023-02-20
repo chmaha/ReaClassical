@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:Supersonic Filter (chmaha)
 author: chmaha
 about:
@@ -32,8 +32,7 @@ biquadE = freemem; freemem +=15;
 
 UINT32_MAX = 4294967295;
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -209,8 +208,8 @@ inputSampleR = spl1;
 
 (slider1 == 0) ? (
 
-//(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-//(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+//
+//
 
 outSample = (inputSampleL * fixA[2]) + fixA[7];
 fixA[7] = (inputSampleL * fixA[3]) - (outSample * fixA[5]) + fixA[8];
@@ -277,8 +276,8 @@ inputSampleR = outSample;
 
 ) : (slider1 == 1) ? (
 
-  (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-  (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+  
+  
   
   outSampleL = biquadA[2]*inputSampleL+biquadA[3]*biquadA[7]+biquadA[4]*biquadA[8]-biquadA[5]*biquadA[9]-biquadA[6]*biquadA[10];
   biquadA[8] = biquadA[7]; biquadA[7] = inputSampleL; inputSampleL = outSampleL; biquadA[10] = biquadA[9]; biquadA[9] = inputSampleL; //DF1 left
@@ -310,13 +309,11 @@ inputSampleR = outSample;
   outSampleR = biquadE[2]*inputSampleR+biquadE[3]*biquadE[11]+biquadE[4]*biquadE[12]-biquadE[5]*biquadE[13]-biquadE[6]*biquadE[14];
   biquadE[12] = biquadE[11]; biquadE[11] = inputSampleR; inputSampleR = outSampleR; biquadE[14] = biquadE[13]; biquadE[13] = inputSampleR; //DF1 right
 
-  fpdL = rand(UINT32_MAX);
-  fpdR = rand(UINT32_MAX);
   
 ) : (slider1 == 2) ? (
 
-  (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-  (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+  
+  
 
   outSampleL = biquadA[2]*inputSampleL+biquadA[3]*biquadA[7]+biquadA[4]*biquadA[8]-biquadA[5]*biquadA[9]-biquadA[6]*biquadA[10];
   biquadA[8] = biquadA[7]; biquadA[7] = inputSampleL; inputSampleL = outSampleL; biquadA[10] = biquadA[9]; biquadA[9] = inputSampleL; //DF1 left
@@ -330,22 +327,17 @@ inputSampleR = outSample;
   outSampleR = biquadB[2]*inputSampleR+biquadB[3]*biquadB[11]+biquadB[4]*biquadB[12]-biquadB[5]*biquadB[13]-biquadB[6]*biquadB[14];
   biquadB[12] = biquadB[11]; biquadB[11] = inputSampleR; inputSampleR = outSampleR; biquadB[14] = biquadB[13]; biquadB[13] = inputSampleR; //DF1 right
 
-  fpdL = rand(UINT32_MAX);
-  fpdR = rand(UINT32_MAX);
 
 ) : (slider1 == 3) ? (
 
-  (abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-  (abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+  
+  
     
   outSampleL = biquadA[2]*inputSampleL+biquadA[3]*biquadA[7]+biquadA[4]*biquadA[8]-biquadA[5]*biquadA[9]-biquadA[6]*biquadA[10];
   biquadA[8] = biquadA[7]; biquadA[7] = inputSampleL; inputSampleL = outSampleL; biquadA[10] = biquadA[9]; biquadA[9] = inputSampleL; //DF1 left
   
   outSampleR = biquadA[2]*inputSampleR+biquadA[3]*biquadA[11]+biquadA[4]*biquadA[12]-biquadA[5]*biquadA[13]-biquadA[6]*biquadA[14];
   biquadA[12] = biquadA[11]; biquadA[11] = inputSampleR; inputSampleR = outSampleR; biquadA[14] = biquadA[13]; biquadA[13] = inputSampleR; //DF1 right
-  
-  fpdL = rand(UINT32_MAX);
-  fpdR = rand(UINT32_MAX);
   
 );
 
