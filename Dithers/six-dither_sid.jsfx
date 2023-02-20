@@ -1,5 +1,5 @@
-Version: 1.0
-desc:Six-Dither Sid
+Version: 1.1
+desc:Six-Dither Sid (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson
