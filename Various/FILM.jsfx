@@ -1,0 +1,296 @@
+Version: 1.0
+desc:FILM — Flippin' Incredible Loudness Maximizer (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "NC-17" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/NCSeventeen (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,24,0.01>Louder (dB)
+slider2:1<0,1,0.01>Output
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+
+@slider
+
+A = slider1/24;
+B = slider2;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+IIRscaleback = 0.0004716;
+bassScaleback = 0.0002364;
+trebleScaleback = 0.0005484;
+addBassBuss = 0.000243;
+addTrebBuss = 0.000407;
+addShortBuss = 0.000326;
+IIRscaleback /= overallscale;
+bassScaleback /= overallscale;
+trebleScaleback /= overallscale;
+addBassBuss /= overallscale;
+addTrebBuss /= overallscale;
+addShortBuss /= overallscale;
+limitingBass = 0.39;
+limitingTreb = 0.6;
+limiting = 0.36;
+maxfeedBass = 0.972;
+maxfeedTreb = 0.972;
+maxfeed = 0.975;
+lowSampleL = 0.0;
+lowSampleR = 0.0;
+gain = pow(10.0,(A*24.0)/20);
+outlevel = B;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+inputSampleL *= gain;
+inputSampleR *= gain;
+
+(flip) ? 
+(
+  iirSampleAL = (iirSampleAL * 0.9) + (inputSampleL * 0.1);
+  lowSampleL = iirSampleAL;
+  iirSampleAR = (iirSampleAR * 0.9) + (inputSampleR * 0.1);
+  lowSampleR = iirSampleAR;
+)
+:
+(
+  iirSampleBL = (iirSampleBL * 0.9) + (inputSampleL * 0.1);
+  lowSampleL = iirSampleBL;
+  iirSampleBR = (iirSampleBR * 0.9) + (inputSampleR * 0.1);
+  lowSampleR = iirSampleBR;
+);
+highSampleL = inputSampleL - lowSampleL;
+highSampleR = inputSampleR - lowSampleR;
+flip = !flip;
+
+inP2 = lowSampleL * lowSampleL;
+(inP2 > 1.0) ? inP2 = 1.0; (inP2 < -1.0) ? inP2 = -1.0;
+chebyshev = (2 * inP2);
+chebyshev *= basslevL;
+
+(basslevL > 0) ? basslevL -= bassScaleback;
+(basslevL < 0) ? basslevL += bassScaleback;
+
+bridgerectifier = abs(lowSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(lowSampleL > 0.0) ? distSampleL = bridgerectifier
+: distSampleL = -bridgerectifier;
+minusSampleL = lowSampleL - distSampleL;
+plusSampleL = lowSampleL + distSampleL;
+(minusSampleL > maxfeedBass) ? minusSampleL = maxfeedBass;
+(plusSampleL > maxfeedBass) ? plusSampleL = maxfeedBass;
+(plusSampleL < -maxfeedBass) ? plusSampleL = -maxfeedBass;
+(minusSampleL < -maxfeedBass) ? minusSampleL = -maxfeedBass;
+(lowSampleL > distSampleL) ? basslevL += (minusSampleL*addBassBuss);
+(lowSampleL < -distSampleL) ? basslevL -= (plusSampleL*addBassBuss);
+(basslevL > 1.0) ? basslevL = 1.0;
+(basslevL < -1.0) ? basslevL = -1.0;
+bridgerectifier = abs(lowSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(lowSampleL > 0.0) ? lowSampleL = bridgerectifier
+: lowSampleL = -bridgerectifier;
+
+lowSampleL /= (1.0+abs(basslevL*limitingBass));
+lowSampleL += chebyshev;
+
+inP2 = lowSampleR * lowSampleR;
+(inP2 > 1.0) ? inP2 = 1.0; (inP2 < -1.0) ? inP2 = -1.0;
+chebyshev = (2 * inP2);
+chebyshev *= basslevR;
+
+(basslevR > 0) ? basslevR -= bassScaleback;
+(basslevR < 0) ? basslevR += bassScaleback;
+
+bridgerectifier = abs(lowSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(lowSampleR > 0.0) ? distSampleR = bridgerectifier
+: distSampleR = -bridgerectifier;
+minusSampleR = lowSampleR - distSampleR;
+plusSampleR = lowSampleR + distSampleR;
+(minusSampleR > maxfeedBass) ? minusSampleR = maxfeedBass;
+(plusSampleR > maxfeedBass) ? plusSampleR = maxfeedBass;
+(plusSampleR < -maxfeedBass) ? plusSampleR = -maxfeedBass;
+(minusSampleR < -maxfeedBass) ? minusSampleR = -maxfeedBass;
+(lowSampleR > distSampleR) ? basslevR += (minusSampleR*addBassBuss);
+(lowSampleR < -distSampleR) ? basslevR -= (plusSampleR*addBassBuss);
+(basslevR > 1.0)  ? basslevR = 1.0;
+(basslevR < -1.0) ? basslevR = -1.0;
+bridgerectifier = abs(lowSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(lowSampleR > 0.0) ? lowSampleR = bridgerectifier
+: lowSampleR = -bridgerectifier;
+
+lowSampleR /= (1.0+abs(basslevR*limitingBass));
+lowSampleR += chebyshev;
+
+inP2 = highSampleL * highSampleL;
+(inP2 > 1.0) ? inP2 = 1.0; (inP2 < -1.0) ? inP2 = -1.0;
+chebyshev = (2 * inP2);
+chebyshev *= treblevL;
+
+(treblevL > 0) ? treblevL -= trebleScaleback;
+(treblevL < 0) ? treblevL += trebleScaleback;
+
+bridgerectifier = abs(highSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(highSampleL > 0.0) ? distSampleL = bridgerectifier
+: distSampleL = -bridgerectifier;
+minusSampleL = highSampleL - distSampleL;
+plusSampleL = highSampleL + distSampleL;
+(minusSampleL > maxfeedTreb) ? minusSampleL = maxfeedTreb;
+(plusSampleL > maxfeedTreb) ? plusSampleL = maxfeedTreb;
+(plusSampleL < -maxfeedTreb) ? plusSampleL = -maxfeedTreb;
+(minusSampleL < -maxfeedTreb) ? minusSampleL = -maxfeedTreb;
+(highSampleL > distSampleL) ? treblevL += (minusSampleL*addTrebBuss);
+(highSampleL < -distSampleL) ? treblevL -= (plusSampleL*addTrebBuss);
+(treblevL > 1.0) ? treblevL = 1.0;
+(treblevL < -1.0) ? treblevL = -1.0;
+bridgerectifier = abs(highSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(highSampleL > 0.0) ? highSampleL = bridgerectifier
+: highSampleL = -bridgerectifier;
+
+highSampleL /= (1.0+abs(treblevL*limitingTreb));
+highSampleL += chebyshev;
+
+inP2 = highSampleR * highSampleR;
+(inP2 > 1.0) ? inP2 = 1.0; (inP2 < -1.0) ? inP2 = -1.0;
+chebyshev = (2 * inP2);
+chebyshev *= treblevR;
+
+(treblevR > 0) ? treblevR -= trebleScaleback;
+(treblevR < 0) ? treblevR += trebleScaleback;
+
+bridgerectifier = abs(highSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(highSampleR > 0.0) ? distSampleR = bridgerectifier
+: distSampleR = -bridgerectifier;
+minusSampleR = highSampleR - distSampleR;
+plusSampleR = highSampleR + distSampleR;
+(minusSampleR > maxfeedTreb) ? minusSampleR = maxfeedTreb;
+(plusSampleR > maxfeedTreb) ? plusSampleR = maxfeedTreb;
+(plusSampleR < -maxfeedTreb) ? plusSampleR = -maxfeedTreb;
+(minusSampleR < -maxfeedTreb) ? minusSampleR = -maxfeedTreb;
+(highSampleR > distSampleR) ? treblevR += (minusSampleR*addTrebBuss);
+(highSampleR < -distSampleR) ? treblevR -= (plusSampleR*addTrebBuss);
+(treblevR > 1.0) ? treblevR = 1.0;
+(treblevR < -1.0) ? treblevR = -1.0;
+bridgerectifier = abs(highSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(highSampleR > 0.0) ? highSampleR = bridgerectifier
+: highSampleR = -bridgerectifier;
+
+highSampleR /= (1.0+abs(treblevR*limitingTreb));
+highSampleR += chebyshev;
+
+inputSampleL = lowSampleL + highSampleL;
+inputSampleR = lowSampleR + highSampleR;
+
+inP2 = inputSampleL * inputSampleL;
+(inP2 > 1.0) ? inP2 = 1.0; (inP2 < -1.0) ? inP2 = -1.0;
+chebyshev = (2 * inP2);
+chebyshev *= cheblevL;
+
+(cheblevL > 0) ? cheblevL -= (IIRscaleback);
+(cheblevL < 0) ? cheblevL += (IIRscaleback);
+
+bridgerectifier = abs(inputSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(inputSampleL > 0.0) ? distSampleL = bridgerectifier
+: distSampleL = -bridgerectifier;
+minusSampleL = inputSampleL - distSampleL;
+plusSampleL = inputSampleL + distSampleL;
+(minusSampleL > maxfeed) ? minusSampleL = maxfeed;
+(plusSampleL > maxfeed) ? plusSampleL = maxfeed;
+(plusSampleL < -maxfeed) ? plusSampleL = -maxfeed;
+(minusSampleL < -maxfeed) ? minusSampleL = -maxfeed;
+(inputSampleL > distSampleL) ? cheblevL += (minusSampleL*addShortBuss);
+(inputSampleL < -distSampleL) ? cheblevL -= (plusSampleL*addShortBuss);
+(cheblevL > 1.0) ? cheblevL = 1.0;
+(cheblevL < -1.0) ? cheblevL = -1.0;
+bridgerectifier = abs(inputSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(inputSampleL > 0.0) ? inputSampleL = bridgerectifier
+: inputSampleL = -bridgerectifier;
+
+inputSampleL /= (1.0+abs(cheblevL*limiting));
+inputSampleL += chebyshev;
+
+inP2 = inputSampleR * inputSampleR;
+(inP2 > 1.0) ? inP2 = 1.0; (inP2 < -1.0) ? inP2 = -1.0;
+chebyshev = (2 * inP2);
+chebyshev *= cheblevR;
+
+(cheblevR > 0) ? cheblevR -= IIRscaleback;
+(cheblevR < 0) ? cheblevR += IIRscaleback;
+
+bridgerectifier = abs(inputSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(inputSampleR > 0.0) ? distSampleR = bridgerectifier
+: distSampleR = -bridgerectifier;
+minusSampleR = inputSampleR - distSampleR;
+plusSampleR = inputSampleR + distSampleR;
+(minusSampleR > maxfeed) ? minusSampleR = maxfeed;
+(plusSampleR > maxfeed) ? plusSampleR = maxfeed;
+(plusSampleR < -maxfeed) ? plusSampleR = -maxfeed;
+(minusSampleR < -maxfeed) ? minusSampleR = -maxfeed;
+(inputSampleR > distSampleR) ? cheblevR += (minusSampleR*addShortBuss);
+(inputSampleR < -distSampleR) ? cheblevR -= (plusSampleR*addShortBuss);
+(cheblevR > 1.0) ? cheblevR = 1.0;
+(cheblevR < -1.0) ? cheblevR = -1.0;
+bridgerectifier = abs(inputSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+bridgerectifier = sin(bridgerectifier);
+(inputSampleR > 0.0) ? inputSampleR = bridgerectifier
+: inputSampleR = -bridgerectifier;
+
+inputSampleR /= (1.0+abs(cheblevR*limiting));
+inputSampleR += chebyshev;
+
+(outlevel < 1.0) ? (
+  inputSampleL *= outlevel;
+  inputSampleR *= outlevel;
+);    
+
+(inputSampleL > 0.95) ? inputSampleL = 0.95;
+(inputSampleL < -0.95) ? inputSampleL = -0.95;
+(inputSampleR > 0.95) ? inputSampleR = 0.95;
+(inputSampleR < -0.95) ? inputSampleR = -0.95;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
