@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc: Amphitrite Compressor (chmaha)
 author: chmaha
 about:
@@ -79,8 +79,7 @@ fpFlip = 1;
 E = 0.3;
 F = 0.3;
 G = 1.0;
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 flip = 1;
 chaseA = 0.0;
 chaseB = 0.0;
@@ -118,8 +117,7 @@ attack = ((F+0.1)*0.0005)/overallscale;
 decay = ((F+0.001)*0.00005)/overallscale;
 wet2 = G;
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @sample
 
@@ -127,8 +125,7 @@ fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 inputSampleL = spl0;
 inputSampleR = spl1;
 
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
 
@@ -495,11 +492,6 @@ fpFlip = !fpFlip;
 );
 
 
-fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
-fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
-(fpdL < 0) ? fpdL += UINT32_MAX;
-(fpdR < 0) ? fpdR += UINT32_MAX;
-
 spl0 = inputSampleL;
 spl1 = inputSampleR;
 
@@ -513,8 +505,7 @@ spl1 = inputSampleR;
 inputSampleL = spl0;
 inputSampleR = spl1;
 
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
@@ -550,8 +541,7 @@ inputSampleR *= chaseC;
 inputSampleR = drySampleR - (inputSampleR * intensity);
 inputSampleR = (drySampleR * (1.0-wet2)) + (inputSampleR * wet2);    
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX);
+
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

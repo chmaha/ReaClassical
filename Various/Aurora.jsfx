@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:Aurora Exciter (chmaha)
 author: chmaha
 about:
@@ -20,8 +20,7 @@ freemem = 0;
 UINT32_MAX = 4294967295;
 M_PI = 3.1415926535897932384626433;
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -43,8 +42,7 @@ wet = B;
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
@@ -92,8 +90,7 @@ inputSampleR -= doubly*outlyAmount;
 );
 
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX);
+
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:Solar Wind Aural Exciter (chmaha)
 author: chmaha
 about:
@@ -27,8 +27,7 @@ cycleEnd = floor(overallscale);
 (cycleEnd == 3) ? cycleEnd = 4;
 (cycleEnd > 4) ? cycleEnd = 4;
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -38,8 +37,7 @@ fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 (cycleEnd == 4) ? (
   softL[8] = softL[7]; softL[7] = softL[6]; softL[6] = softL[5]; softL[5] = softL[4];
@@ -74,8 +72,7 @@ softR[9] = ((softR[0]-softR[4])-(softR[4]-softR[8]));
 (softR[9] > 1.57079633) ? softR[9] = 1.57079633;
 inputSampleR = softR[8]+(sin(softR[9])*0.61803398);
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX);
+
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

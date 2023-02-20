@@ -20,8 +20,7 @@ UINT32_MAX = 4294967295;
 M_PI = 3.1415926535897932384626433;
 
 x = 0; while(x < 15) (biquadA[x] = 0.0;x+=1;);
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -42,8 +41,7 @@ biquadA[6] = (1.0 - K / biquadA[1] + K * K) * norm;
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 
 (biquadA[0] < 0.49999) ? (
@@ -64,8 +62,7 @@ inputSampleL = sin(inputSampleL);
 inputSampleR = sin(inputSampleR);
 
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX); 
+ 
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
