@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="fac2d0393ed29d50a6170057167965f69d4ffab0">
+<index version="1" name="chmaha Scripts" commit="6d7c63071202f0e601ae898e81741d85547f3546">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1270,6 +1270,20 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Eris.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="FILM.jsfx" type="effect" desc="FILM — Flippin' Incredible Loudness Maximizer (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "NC-17" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/NCSeventeen (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-20T23:16:38Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/6d7c63071202f0e601ae898e81741d85547f3546/Various/FILM.jsfx</source>
       </version>
     </reapack>
     <reapack name="flattop.jsfx" type="effect" desc="Flattop Clipper (chmaha)">
