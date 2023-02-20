@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="dbac0b48ce2ed8e9eec29b1e95d1a8533ef5725c">
+<index version="1" name="chmaha Scripts" commit="b0617d529fa89a0882fdacd595cffbf7c8abd541">
   <category name="Consoles">
-    <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry">
+    <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
         <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Cora.jsfx</source>
         <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/ReaClassical_Cora.RPP</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <changelog><![CDATA[Initial Commit]]></changelog>
+        <source file="Cora.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Cora.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/ReaClassical_Cora.RPP</source>
+      </version>
     </reapack>
-    <reapack name="Elsa.jsfx" type="effect" desc="ELSA: Extremely Light Saturation Applier">
+    <reapack name="Elsa.jsfx" type="effect" desc="ELSA: Extremely Light Saturation Applier (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -21,8 +26,11 @@
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
         <source>https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Elsa.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Elsa.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Eurydice.jsfx" type="effect" desc="Eurydice Console">
+    <reapack name="Eurydice.jsfx" type="effect" desc="Eurydice Console (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -39,8 +47,15 @@
         <source type="projecttpl" file="ReaClassical_Eurydice_A.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Eurydice_A.RPP</source>
         <source type="projecttpl" file="ReaClassical_Eurydice_B.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Eurydice_B.RPP</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <changelog><![CDATA[Initial Commit]]></changelog>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Eurydice_Channel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_A.RPP">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/ReaClassical_Eurydice_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_B.RPP">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/ReaClassical_Eurydice_B.RPP</source>
+      </version>
     </reapack>
-    <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust Console Saturation">
+    <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust Console Saturation (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -53,8 +68,11 @@
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
         <source>https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/MagicFairyDust.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/MagicFairyDust.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Orpheus.jsfx" type="effect" desc="Orpheus Console">
+    <reapack name="Orpheus.jsfx" type="effect" desc="Orpheus Console (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -75,8 +93,19 @@
         <source type="projecttpl" file="ReaClassical_Orpheus_A.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_A.RPP</source>
         <source type="projecttpl" file="ReaClassical_Orpheus_B.RPP">https://github.com/chmaha/ReaClassical/raw/870ffd6a8c9277c81d266cdf5e89c8da2221daab/Consoles/ReaClassical_Orpheus_B.RPP</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <changelog><![CDATA[Initial Commit]]></changelog>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_A.RPP">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/ReaClassical_Orpheus_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_B.RPP">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/ReaClassical_Orpheus_B.RPP</source>
+      </version>
     </reapack>
-    <reapack name="Orpheus_Lite.jsfx" type="effect" desc="Orpheus Lite Console">
+    <reapack name="Orpheus_Lite.jsfx" type="effect" desc="Orpheus Lite Console (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -94,8 +123,16 @@ Add Console to names]]></changelog>
         <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/ReaClassical/raw/413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
         <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/ReaClassical/raw/413d01b6c7a4ea4af92e0e8a5ed00ecfdad8e84a/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <changelog><![CDATA[Initial Commit
+Add Console to names]]></changelog>
+        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Lite_Channel.jsfx</source>
+        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Orpheus_Lite_Bus.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
+      </version>
     </reapack>
-    <reapack name="Supersonic.jsfx" type="effect" desc="Supersonic Filter">
+    <reapack name="Supersonic.jsfx" type="effect" desc="Supersonic Filter (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -108,10 +145,13 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
         <source>https://github.com/chmaha/ReaClassical/raw/aa3d5702b89235d8fdad4da296d41e3221ca8288/Consoles/Supersonic.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Consoles/Supersonic.jsfx</source>
+      </version>
     </reapack>
   </category>
   <category name="Dithers">
-    <reapack name="GroovyDither.jsfx" type="effect" desc="GroovyDither">
+    <reapack name="GroovyDither.jsfx" type="effect" desc="GroovyDither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -124,8 +164,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/GroovyDither.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/GroovyDither.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Nintenda.jsfx" type="effect" desc="Nintenda Dither">
+    <reapack name="Nintenda.jsfx" type="effect" desc="Nintenda Dither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -138,8 +181,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/Nintenda.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/Nintenda.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="ReelDither.jsfx" type="effect" desc="ReelDither">
+    <reapack name="ReelDither.jsfx" type="effect" desc="ReelDither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -152,8 +198,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/ReelDither.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/ReelDither.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="six-dither_sid.jsfx" type="effect" desc="Six-Dither Sid">
+    <reapack name="six-dither_sid.jsfx" type="effect" desc="Six-Dither Sid (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -166,8 +215,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/six-dither_sid.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/six-dither_sid.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Stan.jsfx" type="effect" desc="Stan Dither">
+    <reapack name="Stan.jsfx" type="effect" desc="Stan Dither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -180,8 +232,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/Stan.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/Stan.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Twilight.jsfx" type="effect" desc="Twilight Dither">
+    <reapack name="Twilight.jsfx" type="effect" desc="Twilight Dither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -194,8 +249,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/Twilight.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/Twilight.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="WTFDither.jsfx" type="effect" desc="WTFDither">
+    <reapack name="WTFDither.jsfx" type="effect" desc="WTFDither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -208,8 +266,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/WTFDither.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/WTFDither.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Xonnos Dither.jsfx" type="effect" desc="Xonnos Dither">
+    <reapack name="Xonnos Dither.jsfx" type="effect" desc="Xonnos Dither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -221,6 +282,9 @@ Add Console to names]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T12:17:25Z">
         <source>https://github.com/chmaha/ReaClassical/raw/4210b5cb431c06cdb235b862c25c617238df0e19/Dithers/Xonnos%20Dither.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Dithers/Xonnos%20Dither.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -238,8 +302,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCComp.jsfx</source>
       </version>
+      <version name="1.1  (chmaha)" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCComp.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss Standard">
+    <reapack name="RCDeEss.jsfx" type="effect" desc="RCDeEss Standard  (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -252,8 +319,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCDeEss.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCDeEss.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="RCDeEss_Advanced.jsfx" type="effect" desc="RCDeEss Advanced">
+    <reapack name="RCDeEss_Advanced.jsfx" type="effect" desc="RCDeEss Advanced  (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -266,8 +336,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCDeEss_Advanced.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCDeEss_Advanced.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="RCDither.jsfx" type="effect" desc="RCDither">
+    <reapack name="RCDither.jsfx" type="effect" desc="RCDither  (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -280,8 +353,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCDither.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCDither.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ">
+    <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ  (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -294,8 +370,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCEQ.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCEQ.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="RCGain.jsfx" type="effect" desc="RCGain">
+    <reapack name="RCGain.jsfx" type="effect" desc="RCGain  (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -308,8 +387,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCGain.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCGain.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="RCLimiter.jsfx" type="effect" desc="RCLimiter">
+    <reapack name="RCLimiter.jsfx" type="effect" desc="RCLimiter  (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -322,8 +404,11 @@ Add Console to names]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCLimiter.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCLimiter.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK Compressor">
+    <reapack name="RCParallelK.jsfx" type="effect" desc="RCParallelK Compressor  (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -335,6 +420,9 @@ Add Console to names]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T12:21:24Z">
         <source>https://github.com/chmaha/ReaClassical/raw/af63c8824471ddefcddc67903b49f1d7eaf202ad/RCPlugs/RCParallelK.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
@@ -894,7 +982,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
     </reapack>
   </category>
   <category name="Reverbs">
-    <reapack name="Bricastic.jsfx" type="effect" desc="Bricastic Reverb">
+    <reapack name="Bricastic.jsfx" type="effect" desc="Bricastic Reverb (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -907,8 +995,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:25:06Z">
         <source>https://github.com/chmaha/ReaClassical/raw/e18a32ca69e7d8a15bb6f99cee4f25b3da138a0f/Reverbs/Bricastic.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Reverbs/Bricastic.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Bricastic2.jsfx" type="effect" desc="Bricastic2 Reverb">
+    <reapack name="Bricastic2.jsfx" type="effect" desc="Bricastic2 Reverb (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -921,8 +1012,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:25:06Z">
         <source>https://github.com/chmaha/ReaClassical/raw/e18a32ca69e7d8a15bb6f99cee4f25b3da138a0f/Reverbs/Bricastic2.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Reverbs/Bricastic2.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Interstellar.jsfx" type="effect" desc="Interstellar Reverb">
+    <reapack name="Interstellar.jsfx" type="effect" desc="Interstellar Reverb (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -935,8 +1029,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:25:06Z">
         <source>https://github.com/chmaha/ReaClassical/raw/e18a32ca69e7d8a15bb6f99cee4f25b3da138a0f/Reverbs/Interstellar.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Reverbs/Interstellar.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="PhiVerb.jsfx" type="effect" desc="PhiVerb Reverb">
+    <reapack name="PhiVerb.jsfx" type="effect" desc="PhiVerb Reverb (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -949,10 +1046,13 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:25:06Z">
         <source>https://github.com/chmaha/ReaClassical/raw/e18a32ca69e7d8a15bb6f99cee4f25b3da138a0f/Reverbs/PhiVerb.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Reverbs/PhiVerb.jsfx</source>
+      </version>
     </reapack>
   </category>
   <category name="Various">
-    <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite Compressor">
+    <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite Compressor (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -965,8 +1065,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Amphitrite.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Amphitrite.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Aurora.jsfx" type="effect" desc="Aurora Exciter">
+    <reapack name="Aurora.jsfx" type="effect" desc="Aurora Exciter (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -979,8 +1082,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Aurora.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Aurora.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Buttress.jsfx" type="effect" desc="Buttress Bass">
+    <reapack name="Buttress.jsfx" type="effect" desc="Buttress Bass (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -993,8 +1099,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Buttress.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Buttress.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="CoralBones.jsfx" type="effect" desc="Coral Bones Bass">
+    <reapack name="CoralBones.jsfx" type="effect" desc="Coral Bones Bass (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1007,8 +1116,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/CoralBones.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/CoralBones.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Discordia.jsfx" type="effect" desc="Discordia Distortion">
+    <reapack name="Discordia.jsfx" type="effect" desc="Discordia Distortion (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1021,8 +1133,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Discordia.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Discordia.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Eris.jsfx" type="effect" desc="Eris Distortion">
+    <reapack name="Eris.jsfx" type="effect" desc="Eris Distortion (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1035,8 +1150,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Eris.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Eris.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="flattop.jsfx" type="effect" desc="Flattop Clipper">
+    <reapack name="flattop.jsfx" type="effect" desc="Flattop Clipper (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1049,8 +1167,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/flattop.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/flattop.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Heft.jsfx" type="effect" desc="Heft Bass">
+    <reapack name="Heft.jsfx" type="effect" desc="Heft Bass (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1063,8 +1184,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Heft.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Heft.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Lyra.jsfx" type="effect" desc="Lyra Compressor">
+    <reapack name="Lyra.jsfx" type="effect" desc="Lyra Compressor (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1077,8 +1201,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Lyra.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Lyra.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Magnetique.jsfx" type="effect" desc="Magnétique Tape Emulation">
+    <reapack name="Magnetique.jsfx" type="effect" desc="Magnétique Tape Emulation (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1091,8 +1218,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Magnetique.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Magnetique.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="MuTube.jsfx" type="effect" desc="MuTube Compressor">
+    <reapack name="MuTube.jsfx" type="effect" desc="MuTube Compressor (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1105,8 +1235,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/MuTube.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/MuTube.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Oxonia.jsfx" type="effect" desc="Oxonia Compressor">
+    <reapack name="Oxonia.jsfx" type="effect" desc="Oxonia Compressor (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1119,8 +1252,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Oxonia.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Oxonia.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Pascal.jsfx" type="effect" desc="Pascal Compressor">
+    <reapack name="Pascal.jsfx" type="effect" desc="Pascal Compressor (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1133,8 +1269,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T23:21:39Z">
         <source>https://github.com/chmaha/ReaClassical/raw/dbac0b48ce2ed8e9eec29b1e95d1a8533ef5725c/Various/Pascal.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Pascal.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon Compressor / Gate">
+    <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon Compressor / Gate (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1147,8 +1286,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/port-and-lemon.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/port-and-lemon.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Reelty.jsfx" type="effect" desc="Reelty Tape Emulation">
+    <reapack name="Reelty.jsfx" type="effect" desc="Reelty Tape Emulation (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1161,8 +1303,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Reelty.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Reelty.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="SAW.jsfx" type="effect" desc="SAW Stereo Widener">
+    <reapack name="SAW.jsfx" type="effect" desc="SAW Stereo Widener (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1175,8 +1320,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/SAW.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/SAW.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Sillons.jsfx" type="effect" desc="Sillons Vinyl Emulation">
+    <reapack name="Sillons.jsfx" type="effect" desc="Sillons Vinyl Emulation (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1189,8 +1337,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Sillons.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Sillons.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Solar_Wind.jsfx" type="effect" desc="Solar Wind Aural Exciter">
+    <reapack name="Solar_Wind.jsfx" type="effect" desc="Solar Wind Aural Exciter (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1203,8 +1354,11 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Solar_Wind.jsfx</source>
       </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Solar_Wind.jsfx</source>
+      </version>
     </reapack>
-    <reapack name="Titan.jsfx" type="effect" desc="Titan Capacitor Distortion">
+    <reapack name="Titan.jsfx" type="effect" desc="Titan Capacitor Distortion (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1216,6 +1370,9 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-19T12:31:55Z">
         <source>https://github.com/chmaha/ReaClassical/raw/183200ed0e14777e50d88e2d5984a6aa15f2a0a6/Various/Titan.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-20T11:54:59Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/Various/Titan.jsfx</source>
       </version>
     </reapack>
   </category>
