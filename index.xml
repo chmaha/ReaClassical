@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="e29d8d6d3a3737eb636eda62d08ec467a7c540df">
+<index version="1" name="chmaha Scripts" commit="a04ae8c86a8b4d308b0ec27bdcdf480cbadb13b7">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -413,7 +413,7 @@ Add Console to names]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/RCPlugs/RCDeEss_Advanced.jsfx</source>
       </version>
     </reapack>
-    <reapack name="RCDither.jsfx" type="effect" desc="RCDither  (chmaha)">
+    <reapack name="RCDither.jsfx" type="effect" desc="RCDither (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -430,7 +430,7 @@ Add Console to names]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/b0617d529fa89a0882fdacd595cffbf7c8abd541/RCPlugs/RCDither.jsfx</source>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/e29d8d6d3a3737eb636eda62d08ec467a7c540df/RCPlugs/RCDither.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/a04ae8c86a8b4d308b0ec27bdcdf480cbadb13b7/RCPlugs/RCDither.jsfx</source>
       </version>
     </reapack>
     <reapack name="RCEQ.jsfx" type="effect" desc="RCEQ  (chmaha)">
