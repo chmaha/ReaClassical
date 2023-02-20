@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:Lyra Compressor (chmaha)
 author: chmaha
 about:
@@ -41,8 +41,7 @@ C = 1.0;
 UINT32_MAX = 4294967295;
 M_PI = 3.1415926535897932384626433;
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -252,8 +251,7 @@ lastOutputR = inputSampleR;
 flip = !flip;
 
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX);
+
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

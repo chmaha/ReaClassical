@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:Buttress Bass (chmaha)
 author: chmaha
 about:
@@ -51,8 +51,7 @@ fuzz = 0.111;
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 
     ataLowpass = (inputSampleL + inputSampleR) / 2.0;
@@ -183,7 +182,7 @@ inputSampleR = spl1;
 
 
 fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX); 
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

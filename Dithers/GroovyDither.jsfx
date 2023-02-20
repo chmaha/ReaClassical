@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:GroovyDither (chmaha)
 author: chmaha
 about:
@@ -34,9 +34,6 @@ fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
-
 
 inputSampleL *= scaleFactor;
 inputSampleR *= scaleFactor;

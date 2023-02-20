@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:RCEQ  (chmaha)
 author: chmaha
 about:
@@ -46,16 +46,6 @@ x = 0; loop(9,
   x+=1;
 );
 flip = 0;
-fpdL = 1.0;
-while (fpdL < 16386) (
-  fpdL = rand()*UINT32_MAX;
-  );
-fpdR = 1.0;
-while (fpdR < 16386) (
-  fpdR = rand()*UINT32_MAX;
-  );
-// fpdL |= 0;
-// fpdR |= 0;
 
   ext_tail_size = -1;
   hpf = 0;
@@ -294,8 +284,7 @@ inputSampleL = asin(inputSampleL);
 inputSampleR = asin(inputSampleR);
 );
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX); 
+ 
 
 
 spl0 = inputSampleL;

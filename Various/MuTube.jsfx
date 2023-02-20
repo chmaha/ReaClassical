@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:MuTube Compressor (chmaha)
 author: chmaha
 about:
@@ -37,8 +37,7 @@ previousR = 0.0;
 flip = 0;
 
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -251,8 +250,7 @@ flip = !flip;
   inputSampleR = (drySampleR * (1.0-wet)) + (inputSampleR * wet);
 );
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX);
+
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
