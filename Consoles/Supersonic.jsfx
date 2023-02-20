@@ -1,5 +1,5 @@
-Version: 1.0
-desc:Supersonic Filter
+Version: 1.1
+desc:Supersonic Filter (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "HyperSonic" and "Ultrasonic" by Chris Johnson

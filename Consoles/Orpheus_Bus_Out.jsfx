@@ -1,5 +1,5 @@
 NoIndex: true
-desc:Orpheus Console Bus Out
+desc:Orpheus Console Bus Out (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "Console8" by Chris Johnson
@@ -71,10 +71,8 @@ inputSampleR = sin(inputSampleR);
 ); 
 inputSampleL *= inTrim; inputSampleR *= inTrim;
 
-fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
-fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
-(fpdL < 0) ? fpdL += UINT32_MAX;
-(fpdR < 0) ? fpdR += UINT32_MAX;
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX); 
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

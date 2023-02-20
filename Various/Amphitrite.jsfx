@@ -1,5 +1,5 @@
-Version: 1.0
-desc: Amphitrite Compressor
+Version: 1.1
+desc: Amphitrite Compressor (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson
@@ -550,11 +550,8 @@ inputSampleR *= chaseC;
 inputSampleR = drySampleR - (inputSampleR * intensity);
 inputSampleR = (drySampleR * (1.0-wet2)) + (inputSampleR * wet2);    
 
-
-fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
-fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
-(fpdL < 0) ? fpdL += UINT32_MAX;
-(fpdR < 0) ? fpdR += UINT32_MAX;
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX);
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
