@@ -80,14 +80,14 @@
     LASTSEL 0
     DOCKED 0
     BYPASS 0 0 0
-    <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+    <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     >
     FLOATPOS 32 60 619 120
     FXID {B8B8EE85-227A-8557-64CC-3B1E6DF02D6F}
     WAK 0 0
     BYPASS 0 0 0
-    <JS "chmaha Scripts/RCPlugs/Elsa.jsfx" ""
+    <JS "chmaha Scripts/Consoles/Elsa.jsfx" ""
       0 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     >
     FLOATPOS 32 60 619 120
@@ -148,7 +148,7 @@
       FXID {938967C0-A909-568D-40BB-174497DD8E4C}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -192,7 +192,7 @@
       FXID {CCD894C7-A53F-BE82-7F8E-028383C972AD}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -236,7 +236,7 @@
       FXID {B04B878A-53C4-0E81-8860-579C124A2E34}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -280,7 +280,7 @@
       FXID {FF51F61A-ABA3-02E4-DD7E-4CD8AE7D8945}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -324,7 +324,7 @@
       FXID {18089075-DB56-F1A8-FCDF-7DF6EFA93B7A}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -368,7 +368,7 @@
       FXID {A3632D2F-CF6F-239B-B532-4DA35D80D44C}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -412,7 +412,7 @@
       FXID {DC55AA50-6A7A-12C2-4230-BB68C70CD459}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -456,7 +456,7 @@
       FXID {766C66C5-DFE3-B72D-8767-3AF57D234BBD}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -500,7 +500,7 @@
       FXID {7CCECE00-28CC-25FA-668D-C9E06317D8E5}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -544,7 +544,7 @@
       FXID {A1E8313B-3B18-2573-49D4-D16D28794C26}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -588,7 +588,7 @@
       FXID {618AD14F-5FF2-7B2A-25F8-A9865100A2A8}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -632,7 +632,7 @@
       FXID {5AAD9E3D-AE4D-A375-FA2D-7F64326E441C}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -669,7 +669,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 32 60 619 120
@@ -683,7 +683,7 @@
       FXID {4699AC99-66D4-D161-2590-46F1928CBCB1}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 32 60 619 120
@@ -720,7 +720,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -734,7 +734,7 @@
       FXID {0B8CBCE1-2186-FC29-C955-1F4A63A3B626}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -771,7 +771,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -785,7 +785,7 @@
       FXID {DF68D48D-4D65-DA45-5EF4-4DA5AE612E76}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -822,7 +822,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -836,7 +836,7 @@
       FXID {EEB9A948-3FDF-884B-A748-074299A4CFA2}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -873,7 +873,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -887,7 +887,7 @@
       FXID {A9619AE6-883B-3953-F76E-233E5D7F4CEF}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -924,7 +924,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -938,7 +938,7 @@
       FXID {363A2650-2D03-ABFB-1179-5FC8B36B7D86}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -975,7 +975,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -989,7 +989,7 @@
       FXID {D8B55ADB-9478-7FC8-35B7-22F619958703}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1026,7 +1026,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1040,7 +1040,7 @@
       FXID {927E139E-8291-6ED1-FEDF-C2ED213C2B31}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1097,7 +1097,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1111,7 +1111,7 @@
       FXID {9DA1BEF2-9E56-FF1B-5ACB-737FF89081D4}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1148,7 +1148,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1162,7 +1162,7 @@
       FXID {841E730E-A6C2-FA78-EC45-C82F108B9FA0}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1199,7 +1199,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1213,7 +1213,7 @@
       FXID {791AC0ED-C01E-4B3C-5494-9B899B1C5A87}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1250,7 +1250,7 @@
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Bus.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Bus.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1264,7 +1264,7 @@
       FXID {555DF1B1-A029-33AE-081A-0930A8678588}
       WAK 0 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Eurydice_Channel.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Eurydice_Channel.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0

@@ -80,7 +80,7 @@
     LASTSEL 0
     DOCKED 0
     BYPASS 0 0 0
-    <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+    <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     >
     FLOATPOS 0 0 0 0
@@ -134,7 +134,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -171,7 +171,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -208,7 +208,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -245,7 +245,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -282,7 +282,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -319,7 +319,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -356,7 +356,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -393,7 +393,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -430,7 +430,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -467,7 +467,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -504,7 +504,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -541,7 +541,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -578,7 +578,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -615,7 +615,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -652,7 +652,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -689,7 +689,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -726,7 +726,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -763,7 +763,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -800,7 +800,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -837,7 +837,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -894,7 +894,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -931,7 +931,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -968,7 +968,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
@@ -1005,7 +1005,7 @@
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
-      <JS "chmaha Scripts/RCPlugs/Cora.jsfx" ""
+      <JS "chmaha Scripts/Consoles/Cora.jsfx" ""
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       >
       FLOATPOS 0 0 0 0
