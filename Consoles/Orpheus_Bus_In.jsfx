@@ -21,8 +21,7 @@ M_PI = 3.1415926535897932384626433;
 
 iirAL = 0.0; iirBL = 0.0; iirAR = 0.0; iirBR = 0.0;
 x=0;while(x < 10) (softL[x] = 0.0; softR[x] = 0.0;x+=1;);
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 @slider
 
@@ -59,8 +58,7 @@ cycleEnd = floor(overallscale);
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 
 iirAL = (iirAL * (1.0 - iirAmountA)) + (inputSampleL * iirAmountA);
@@ -122,8 +120,7 @@ inputSampleL = asin(inputSampleL); //Console8 decode
 inputSampleR = asin(inputSampleR); //Console8 decode
 
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX); 
+ 
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;

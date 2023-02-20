@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:RCDither  (chmaha)
 author: chmaha
 about:
@@ -59,8 +59,7 @@ fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
 inputSampleL = spl0;
 inputSampleR = spl1;
 
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 (bitdepth == 0) ? (
   inputSampleL = inputSampleL * 32768.0; //or 16 bit option

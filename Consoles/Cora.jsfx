@@ -15,8 +15,7 @@ out_pin:right output
 
 UINT32_MAX = 4294967295;
 
-fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
-fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
 
 flip = 1;
 
@@ -35,8 +34,7 @@ threshold = 0.381966011250105;
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
-(abs(inputSampleL)<1.18*10^-23) ? inputSampleL = fpdL * 1.18*10^-17;
-(abs(inputSampleR)<1.18*10^-23) ? inputSampleR = fpdR * 1.18*10^-17;
+
 
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
@@ -85,8 +83,7 @@ lastSampleL = inputSampleL;
 lastSampleR = inputSampleR;
 
 
-fpdL = rand(UINT32_MAX);
-fpdR = rand(UINT32_MAX); 
+ 
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
