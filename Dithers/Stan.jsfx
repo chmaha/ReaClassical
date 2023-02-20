@@ -1,5 +1,5 @@
-Version: 1.0
-desc:Stan Dither
+Version: 1.1
+desc:Stan Dither (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "StudioTan" plugin by Chris Johnson

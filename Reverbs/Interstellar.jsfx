@@ -1,5 +1,5 @@
-Version: 1.0
-desc:Interstellar Reverb
+Version: 1.1
+desc:Interstellar Reverb (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "Galactic" by Chris Johnson
@@ -294,11 +294,8 @@ iirBR = (iirBR*(1.0-lowpass))+(inputSampleR*lowpass); inputSampleR = iirBR;
   inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
 );
 
-
-fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
-fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
-(fpdL < 0) ? fpdL += UINT32_MAX;
-(fpdR < 0) ? fpdR += UINT32_MAX;
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX); 
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
