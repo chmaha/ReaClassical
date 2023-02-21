@@ -1,0 +1,209 @@
+Version: 1.0
+desc:A-coo-sticks tape delay echo (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "TapeDelay2" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TapeDelay2 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:1<0,1,0.01>Time
+slider2:0<0,1,0.01>Regen
+slider3:0.5<0,1,0.01>Freq
+slider4:0<0,1,0.01>Reso
+slider5:0<0,1,0.01>Flutter
+slider6:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+dL = freemem; freemem+=88211;
+regenFilterL = freemem; freemem+=9;
+outFilterL = freemem; freemem+=9;
+lastRefL = freemem; freemem+=10;
+
+dR = freemem; freemem+=88211;
+regenFilterR = freemem; freemem+=9;
+outFilterR = freemem; freemem+=9;
+lastRefR = freemem; freemem+=10;
+
+UINT32_MAX = 4294967295;
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+E = slider5;
+F = slider6;
+
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+cycleEnd = floor(overallscale);
+(cycleEnd < 1) ? cycleEnd = 1;
+(cycleEnd > 4) ? cycleEnd = 4;
+(cycle > cycleEnd-1) ? cycle = cycleEnd-1;
+
+baseSpeed = (pow(A,4)*25.0)+1.0;
+feedback = pow(B,2);
+
+regenFilterL[0] = regenFilterR[0] = ((pow(C,3)*0.4)+0.0001);
+regenFilterL[1] = regenFilterR[1] = pow(D,2)+0.01; 
+K = tan($pi * regenFilterR[0]);
+norm = 1.0 / (1.0 + K / regenFilterR[1] + K * K);
+regenFilterL[2] = regenFilterR[2] = K / regenFilterR[1] * norm;
+regenFilterL[4] = regenFilterR[4] = -regenFilterR[2];
+regenFilterL[5] = regenFilterR[5] = 2.0 * (K * K - 1.0) * norm;
+regenFilterL[6] = regenFilterR[6] = (1.0 - K / regenFilterR[1] + K * K) * norm;
+
+outFilterL[0] = outFilterR[0] = regenFilterR[0];
+outFilterL[1] = outFilterR[1] = regenFilterR[1] * 1.618033988749894848204586; 
+K = tan($pi * outFilterR[0]);
+norm = 1.0 / (1.0 + K / outFilterR[1] + K * K);
+outFilterL[2] = outFilterR[2] = K / outFilterR[1] * norm;
+outFilterL[4] = outFilterR[4] = -outFilterR[2];
+outFilterL[5] = outFilterR[5] = 2.0 * (K * K - 1.0) * norm;
+outFilterL[6] = outFilterR[6] = (1.0 - K / outFilterR[1] + K * K) * norm;
+
+vibSpeed = pow(E,5) * baseSpeed * ((regenFilterR[0]*0.09)+0.025);
+wet = F*2.0;
+dry = 2.0 - wet;
+(wet > 1.0) ? wet = 1.0;
+(wet < 0.0) ? wet = 0.0;
+(dry > 1.0) ? dry = 1.0;
+(dry < 0.0) ? dry = 0.0;
+
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+cycle+=1;
+(cycle == cycleEnd) ? (
+  speedL = baseSpeed + (vibSpeed * (sin(sweepL)+1.0));
+  speedR = baseSpeed + (vibSpeed * (sin(sweepR)+1.0));
+  sweepL += (0.05*inputSampleL*inputSampleL); (sweepL > 6.283185307179586) ? sweepL -= 6.283185307179586;
+  sweepR += (0.05*inputSampleR*inputSampleR); (sweepR > 6.283185307179586) ? sweepR -= 6.283185307179586;
+
+  pos = floor(delayL);
+  newSample = inputSampleL + dL[pos]*feedback;
+  tempSample = (newSample * regenFilterL[2]) + regenFilterL[7];
+  regenFilterL[7] = -(tempSample * regenFilterL[5]) + regenFilterL[8];
+  regenFilterL[8] = (newSample * regenFilterL[4]) - (tempSample * regenFilterL[6]);
+  newSample = tempSample;
+  
+  delayL -= speedL; (delayL < 0) ? delayL += 88200.0;
+  increment = (newSample - prevSampleL) / speedL;
+  dL[pos] = prevSampleL;
+  while (pos != floor(delayL)) (
+    dL[pos] = prevSampleL;
+    prevSampleL += increment;
+    pos-=1; (pos < 0) ? pos += 88200;
+  );
+  prevSampleL = newSample;
+  pos = floor(delayL); inputSampleL = dL[pos];
+  tempSample = (inputSampleL * outFilterL[2]) + outFilterL[7];
+  outFilterL[7] = -(tempSample * outFilterL[5]) + outFilterL[8];
+  outFilterL[8] = (inputSampleL * outFilterL[4]) - (tempSample * outFilterL[6]);
+  inputSampleL = tempSample;
+
+  pos = floor(delayR);
+  newSample = inputSampleR + dR[pos]*feedback;
+  tempSample = (newSample * regenFilterR[2]) + regenFilterR[7];
+  regenFilterR[7] = -(tempSample * regenFilterR[5]) + regenFilterR[8];
+  regenFilterR[8] = (newSample * regenFilterR[4]) - (tempSample * regenFilterR[6]);
+  newSample = tempSample;
+  
+  delayR -= speedR; (delayR < 0) ? delayR += 88200.0;
+  increment = (newSample - prevSampleR) / speedR;
+  dR[pos] = prevSampleR;
+  while (pos != floor(delayR)) (
+    dR[pos] = prevSampleR;
+    prevSampleR += increment;
+    pos-=1; (pos < 0) ? pos += 88200;
+  );
+  prevSampleR = newSample;
+  pos = floor(delayR); inputSampleR = dR[pos];
+  tempSample = (inputSampleR * outFilterR[2]) + outFilterR[7];
+  outFilterR[7] = -(tempSample * outFilterR[5]) + outFilterR[8];
+  outFilterR[8] = (inputSampleR * outFilterR[4]) - (tempSample * outFilterR[6]);
+  inputSampleR = tempSample;
+  
+  (cycleEnd == 4) ? (
+    lastRefL[0] = lastRefL[4]; 
+    lastRefL[2] = (lastRefL[0] + inputSampleL)/2; 
+    lastRefL[1] = (lastRefL[0] + lastRefL[2])/2; 
+    lastRefL[3] = (lastRefL[2] + inputSampleL)/2; 
+    lastRefL[4] = inputSampleL; 
+    lastRefR[0] = lastRefR[4]; 
+    lastRefR[2] = (lastRefR[0] + inputSampleR)/2; 
+    lastRefR[1] = (lastRefR[0] + lastRefR[2])/2; 
+    lastRefR[3] = (lastRefR[2] + inputSampleR)/2; 
+    lastRefR[4] = inputSampleR;
+  );
+  (cycleEnd == 3) ? (
+    lastRefL[0] = lastRefL[3]; 
+    lastRefL[2] = (lastRefL[0]+lastRefL[0]+inputSampleL)/3; 
+    lastRefL[1] = (lastRefL[0]+inputSampleL+inputSampleL)/3; 
+    lastRefL[3] = inputSampleL; 
+    lastRefR[0] = lastRefR[3]; 
+    lastRefR[2] = (lastRefR[0]+lastRefR[0]+inputSampleR)/3; 
+    lastRefR[1] = (lastRefR[0]+inputSampleR+inputSampleR)/3; 
+    lastRefR[3] = inputSampleR; 
+  );
+  (cycleEnd == 2) ? (
+    lastRefL[0] = lastRefL[2]; 
+    lastRefL[1] = (lastRefL[0] + inputSampleL)/2; 
+    lastRefL[2] = inputSampleL; 
+    lastRefR[0] = lastRefR[2]; 
+    lastRefR[1] = (lastRefR[0] + inputSampleR)/2; 
+    lastRefR[2] = inputSampleR; 
+  );
+  (cycleEnd == 1) ? (
+    lastRefL[0] = inputSampleL;
+    lastRefR[0] = inputSampleR;
+  );
+  cycle = 0;
+  inputSampleL = lastRefL[cycle];
+  inputSampleR = lastRefR[cycle];
+) : (
+  inputSampleL = lastRefL[cycle];
+  inputSampleR = lastRefR[cycle];
+);
+(cycleEnd == 4) ?
+(
+    lastRefL[8] = inputSampleL; inputSampleL = (inputSampleL+lastRefL[7])*0.5;
+    lastRefL[7] = lastRefL[8]; 
+    lastRefR[8] = inputSampleR; inputSampleR = (inputSampleR+lastRefR[7])*0.5;
+    lastRefR[7] = lastRefR[8];);
+    
+(cycleEnd == 4 || cycleEnd == 3) ?
+(
+    lastRefL[8] = inputSampleL; inputSampleL = (inputSampleL+lastRefL[6])*0.5;
+    lastRefL[6] = lastRefL[8]; 
+    lastRefR[8] = inputSampleR; inputSampleR = (inputSampleR+lastRefR[6])*0.5;
+    lastRefR[6] = lastRefR[8];);
+    
+(cycleEnd == 4 || cycleEnd == 3 || cycleEnd == 2) ?
+(
+    lastRefL[8] = inputSampleL; inputSampleL = (inputSampleL+lastRefL[5])*0.5;
+    lastRefL[5] = lastRefL[8];
+    lastRefR[8] = inputSampleR; inputSampleR = (inputSampleR+lastRefR[5])*0.5;
+    lastRefR[5] = lastRefR[8];);
+
+(wet < 1.0) ? (inputSampleL *= wet; inputSampleR *= wet;);
+(dry < 1.0) ? (drySampleL *= dry; drySampleR *= dry;);
+inputSampleL += drySampleL; inputSampleR += drySampleR;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
