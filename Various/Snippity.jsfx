@@ -1,0 +1,59 @@
+Version: 1.0
+desc:Snippity Soft Clipper (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "ClipSoftly" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipSoftly (MIT License)
+  JSFX version released under GPLv3 license
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+intermediateL = freemem; freemem +=16;
+intermediateR = freemem; freemem +=16;
+
+@slider
+
+
+@block
+
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+spacing = floor(overallscale);
+(spacing < 1) ? spacing = 1; (spacing > 16) ? spacing = 16;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+softSpeed = abs(inputSampleL);
+(softSpeed < 1.0) ? softSpeed = 1.0 : softSpeed = 1.0/softSpeed;
+(inputSampleL > 1.57079633) ? inputSampleL = 1.57079633;
+(inputSampleL < -1.57079633) ? inputSampleL = -1.57079633;
+inputSampleL = sin(inputSampleL)*0.9549925859;
+inputSampleL = (inputSampleL*softSpeed)+(lastSampleL*(1.0-softSpeed));
+
+softSpeed = abs(inputSampleR);
+(softSpeed < 1.0) ? softSpeed = 1.0 : softSpeed = 1.0/softSpeed;
+(inputSampleR > 1.57079633) ? inputSampleR = 1.57079633;
+(inputSampleR < -1.57079633) ? inputSampleR = -1.57079633;
+inputSampleR = sin(inputSampleR)*0.9549925859;
+inputSampleR = (inputSampleR*softSpeed)+(lastSampleR*(1.0-softSpeed));
+
+intermediateL[spacing] = inputSampleL;
+inputSampleL = lastSampleL;
+x = spacing; while(x > 0) (intermediateL[x-1] = intermediateL[x];x-=1;);
+lastSampleL = intermediateL[0];
+
+intermediateR[spacing] = inputSampleR;
+inputSampleR = lastSampleR;
+x = spacing; while(x > 0) (intermediateR[x-1] = intermediateR[x];x-=1;);
+lastSampleR = intermediateR[0];
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
