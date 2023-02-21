@@ -1,0 +1,168 @@
+Version: 1.0
+desc:ClippySquish (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Compresaturator" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Compresaturator (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<-12,12,0.01>Drive (dB)
+slider2:50<0,100,0.01>Clamp (%)
+slider3:500<50,5000,1:log=500>Expand (samples)
+slider4:1<0,1,0.01>Output
+slider5:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+dL = freemem; freemem +=11000;
+dR = freemem; freemem +=11000;
+
+UINT32_MAX = 4294967295;
+
+lastWidthL = 500;
+lastWidthR = 500;
+
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX);
+
+@slider
+
+A = (slider1+12)/24;
+B = slider2/100;
+D = slider4;
+E = slider5;
+
+@block
+
+inputgain = pow(10.0,((A*24.0)-12.0)/20.0);
+satComp = B*2.0;
+widestRange = slider3;
+satComp += ((widestRange/3000.0)*satComp);
+output = D;
+wet = E;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+(dCount < 1 || dCount > 5000) ? dCount = 5000;
+
+temp = inputSampleL;
+variSpeed = 1.0 + ((padFactorL/lastWidthL)*satComp);
+(variSpeed < 1.0) ? variSpeed = 1.0;
+totalgain = inputgain / variSpeed;
+(totalgain != 1.0) ? (
+  inputSampleL *= totalgain;
+  (totalgain < 1.0) ? (
+    temp *= totalgain;
+  );
+);
+
+bridgerectifier = abs(inputSampleL);
+overspill = 0;
+targetWidth = widestRange | 0;
+(bridgerectifier < 0.01) ? padFactorL *= 0.9999;
+(bridgerectifier > 1.57079633) ? (
+  bridgerectifier = 1.57079633;
+  targetWidth = 8;
+);
+
+bridgerectifier = sin(bridgerectifier);
+(inputSampleL > 0) ? (
+  inputSampleL = bridgerectifier;
+  overspill = temp - bridgerectifier;
+);
+
+(inputSampleL < 0) ? (
+  inputSampleL = -bridgerectifier;
+  overspill = (-temp) - bridgerectifier;
+);
+
+dL[dCount + 5000] = dL[dCount] = overspill * satComp;
+
+padFactorL += dL[dCount];
+randy = fpdL/UINT32_MAX;
+((targetWidth*randy) > lastWidthL) ? (
+  lastWidthL += 1;
+) : (
+  padFactorL -= dL[dCount+lastWidthL];
+  (targetWidth < lastWidthL) ? (
+    lastWidthL -= 1;
+    (lastWidthL < 2) ? lastWidthL = 2;
+    padFactorL -= dL[dCount+lastWidthL];
+  );
+);
+(padFactorL < 0) ? padFactorL = 0;
+
+temp = inputSampleR;
+variSpeed = 1.0 + ((padFactorR/lastWidthR)*satComp);
+(variSpeed < 1.0) ? variSpeed = 1.0;
+totalgain = inputgain / variSpeed;
+(totalgain != 1.0) ? (
+  inputSampleR *= totalgain;
+  (totalgain < 1.0) ? (
+    temp *= totalgain;
+  );
+);
+
+bridgerectifier = abs(inputSampleR);
+overspill = 0;
+targetWidth = widestRange;
+(bridgerectifier < 0.01) ? padFactorR *= 0.9999;
+(bridgerectifier > 1.57079633) ? (
+  bridgerectifier = 1.57079633;
+  targetWidth = 8;
+);
+
+bridgerectifier = sin(bridgerectifier);
+(inputSampleR > 0) ? (
+  inputSampleR = bridgerectifier;
+  overspill = temp - bridgerectifier;
+);
+
+(inputSampleR < 0) ? (
+  inputSampleR = -bridgerectifier;
+  overspill = (-temp) - bridgerectifier;
+);
+
+dR[dCount + 5000] = dR[dCount] = overspill * satComp;
+
+padFactorR += dR[dCount];
+randy = (fpdR/UINT32_MAX);
+((targetWidth*randy) > lastWidthR) ? (
+  lastWidthR += 1;
+) : (
+  padFactorR -= dR[dCount+lastWidthR];
+  (targetWidth < lastWidthR) ? (
+    lastWidthR -= 1;
+    (lastWidthR < 2) ? lastWidthR = 2;
+    padFactorR -= dR[dCount+lastWidthR];
+  );
+);
+
+(padFactorR < 0) ? padFactorR = 0;
+
+dCount-=1;
+(output < 1.0) ? (
+  inputSampleL *= output;
+  inputSampleR *= output;
+);
+
+(wet < 1.0) ? (
+  inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0-wet));
+  inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
+);
+
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
