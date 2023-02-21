@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="457b8b322957493837bdf6c17c1a401927c9f904">
+<index version="1" name="chmaha Scripts" commit="6c0e5acca8c0ee4e7a5eb694f7bd0676fc5bbd86">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1226,7 +1226,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Buttress.jsfx</source>
       </version>
     </reapack>
-    <reapack name="ClippySquish.jsfx" type="effect" desc="ClippySquish (chmaha)">
+    <reapack name="ClippySquish.jsfx" type="effect" desc="ClippySquish Compressor Soft Clipper (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1237,7 +1237,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-21T11:11:34Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/457b8b322957493837bdf6c17c1a401927c9f904/Various/ClippySquish.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/6c0e5acca8c0ee4e7a5eb694f7bd0676fc5bbd86/Various/ClippySquish.jsfx</source>
       </version>
     </reapack>
     <reapack name="CoralBones.jsfx" type="effect" desc="Coral Bones Bass (chmaha)">
