@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="6c0e5acca8c0ee4e7a5eb694f7bd0676fc5bbd86">
+<index version="1" name="chmaha Scripts" commit="b834dc6127fa594b52f1dac9cd9d6d83a68f0f14">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1572,6 +1572,20 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Titan.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Valvity.jsfx" type="effect" desc="Valvity Tube Saturation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Tube2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Tube2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-21T11:43:50Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b834dc6127fa594b52f1dac9cd9d6d83a68f0f14/Various/Valvity.jsfx</source>
       </version>
     </reapack>
   </category>
