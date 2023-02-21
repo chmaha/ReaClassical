@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="b3e5b3f308420579f5fe753aa98c5f7ded1fb6f2">
+<index version="1" name="chmaha Scripts" commit="a657ea61a3066e81d3ebae0e0a1944c6e1e292b0">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1152,6 +1152,20 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
     </reapack>
   </category>
   <category name="Various">
+    <reapack name="A-coo-sticks.jsfx" type="effect" desc="A-coo-sticks tape delay echo (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "TapeDelay2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TapeDelay2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-21T22:03:39Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/a657ea61a3066e81d3ebae0e0a1944c6e1e292b0/Various/A-coo-sticks.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="Altitude.jsfx" type="effect" desc="Altitude Brightness EQ (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
