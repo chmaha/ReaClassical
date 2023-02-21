@@ -30,8 +30,6 @@ regenFilterR = freemem; freemem+=9;
 outFilterR = freemem; freemem+=9;
 lastRefR = freemem; freemem+=10;
 
-UINT32_MAX = 4294967295;
-
 @slider
 
 A = slider1;
