@@ -1,0 +1,117 @@
+Version: 1.0
+desc:Valvity Tube Saturation (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Tube2" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Tube2 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Input Pad
+slider2:0.5<0,1,0.01>Tube
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+
+A = slider1;
+B = slider2;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+inputPad = A;
+iterations = 1.0-B;
+powerfactor = ((9.0*iterations)+1) | 0;
+asymPad = powerfactor;
+gainscaling = 1.0/(powerfactor+1);
+outputscaling = 1.0 + (1.0/(powerfactor));
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+(inputPad < 1.0) ? (
+  inputSampleL *= inputPad;
+  inputSampleR *= inputPad;
+);
+
+(overallscale > 1.9) ? (
+  stored = inputSampleL;
+  inputSampleL += previousSampleA; previousSampleA = stored; inputSampleL *= 0.5;
+  stored = inputSampleR;
+  inputSampleR += previousSampleB; previousSampleB = stored; inputSampleR *= 0.5;
+);   
+
+(inputSampleL > 1.0) ? inputSampleL = 1.0;
+(inputSampleL < -1.0) ? inputSampleL = -1.0;
+(inputSampleR > 1.0) ? inputSampleR = 1.0;
+(inputSampleR < -1.0) ? inputSampleR = -1.0;
+
+inputSampleL /= asymPad;
+sharpen = -inputSampleL;
+(sharpen > 0.0) ? sharpen = 1.0+sqrt(sharpen)
+: sharpen = 1.0-sqrt(-sharpen);
+inputSampleL -= inputSampleL*abs(inputSampleL)*sharpen*0.25;
+inputSampleL *= asymPad;
+inputSampleR /= asymPad;
+sharpen = -inputSampleR;
+(sharpen > 0.0) ? sharpen = 1.0+sqrt(sharpen)
+: sharpen = 1.0-sqrt(-sharpen);
+inputSampleR -= inputSampleR*abs(inputSampleR)*sharpen*0.25;
+inputSampleR *= asymPad;
+
+factor = inputSampleL; 
+x = 0; while(x < powerfactor) (factor *= inputSampleL;x+=1;);
+((powerfactor % 2 == 1) && (inputSampleL != 0.0)) ? factor = (factor/inputSampleL)*abs(inputSampleL);
+factor *= gainscaling;
+inputSampleL -= factor;
+inputSampleL *= outputscaling;
+factor = inputSampleR; 
+x = 0; while(x < powerfactor) (factor *= inputSampleR;x+=1;);
+((powerfactor % 2 == 1) && (inputSampleR != 0.0)) ? factor = (factor/inputSampleR)*abs(inputSampleR);
+factor *= gainscaling;
+inputSampleR -= factor;
+inputSampleR *= outputscaling;
+
+(overallscale > 1.9) ? (
+  stored = inputSampleL;
+  inputSampleL += previousSampleC; previousSampleC = stored; inputSampleL *= 0.5;
+  stored = inputSampleR;
+  inputSampleR += previousSampleD; previousSampleD = stored; inputSampleR *= 0.5;
+);
+
+slew = previousSampleE - inputSampleL;
+(overallscale > 1.9) ? (
+  stored = inputSampleL;
+  inputSampleL += previousSampleE; previousSampleE = stored; inputSampleL *= 0.5;
+) : previousSampleE = inputSampleL; 
+(slew > 0.0) ? slew = 1.0+(sqrt(slew)*0.5)
+: slew = 1.0-(sqrt(-slew)*0.5);
+inputSampleL -= inputSampleL*abs(inputSampleL)*slew*gainscaling;
+
+(inputSampleL > 0.52) ? inputSampleL = 0.52;
+(inputSampleL < -0.52) ? inputSampleL = -0.52;
+inputSampleL *= 1.923076923076923;
+
+slew = previousSampleF - inputSampleR;
+(overallscale > 1.9) ? (
+  stored = inputSampleR;
+  inputSampleR += previousSampleF; previousSampleF = stored; inputSampleR *= 0.5;
+) : previousSampleF = inputSampleR; 
+(slew > 0.0) ? slew = 1.0+(sqrt(slew)*0.5)
+: slew = 1.0-(sqrt(-slew)*0.5);
+inputSampleR -= inputSampleR*abs(inputSampleR)*slew*gainscaling;
+
+(inputSampleR > 0.52) ? inputSampleR = 0.52;
+(inputSampleR < -0.52) ? inputSampleR = -0.52;
+inputSampleR *= 1.923076923076923;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
