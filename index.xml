@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="7b8d2f85297030b65ee2e79405a3a84f06f9ef61">
+<index version="1" name="chmaha Scripts" commit="b3e5b3f308420579f5fe753aa98c5f7ded1fb6f2">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1372,6 +1372,20 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Lyra.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="MadHatter.jsfx" type="effect" desc="Mad Hatter Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pop2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pop2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-21T17:28:43Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/b3e5b3f308420579f5fe753aa98c5f7ded1fb6f2/Various/MadHatter.jsfx</source>
       </version>
     </reapack>
     <reapack name="Magnetique.jsfx" type="effect" desc="Magnétique Tape Emulation (chmaha)">
