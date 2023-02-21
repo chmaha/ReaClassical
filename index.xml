@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="a657ea61a3066e81d3ebae0e0a1944c6e1e292b0">
+<index version="1" name="chmaha Scripts" commit="7291e8a144c5493a043a1094da9d5fce07d653ca">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1163,7 +1163,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-21T22:03:39Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/a657ea61a3066e81d3ebae0e0a1944c6e1e292b0/Various/A-coo-sticks.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/7291e8a144c5493a043a1094da9d5fce07d653ca/Various/A-coo-sticks.jsfx</source>
       </version>
     </reapack>
     <reapack name="Altitude.jsfx" type="effect" desc="Altitude Brightness EQ (chmaha)">
