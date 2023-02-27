@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="7291e8a144c5493a043a1094da9d5fce07d653ca">
+<index version="1" name="chmaha Scripts" commit="672fbaf4bb41c6f1cdfdc33ca6160eeb3267a479">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1178,6 +1178,10 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-21T09:41:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/1931c6724db8691a231c763404ab156be4773ae6/Various/Altitude.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-02-27T14:53:08Z">
+        <changelog><![CDATA[Update to match airwindows commit 09cdb13]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/672fbaf4bb41c6f1cdfdc33ca6160eeb3267a479/Various/Altitude.jsfx</source>
       </version>
     </reapack>
     <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite Compressor (chmaha)">
