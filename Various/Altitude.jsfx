@@ -2,7 +2,7 @@ Version: 1.1
 desc:Altitude Brightness EQ (chmaha)
 author: chmaha
 changelog:
-  Update to match airwindows commit 09cdb13
+  Update according to airwindows commit 09cdb13
 about:
   Uses DSP from airwindows "SlewSonic" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SlewSonic (MIT License)
@@ -108,10 +108,10 @@ outSampleR = 0.0;
   biquadB[12] = biquadB[11]; biquadB[11] = inputSampleR; inputSampleR = outSampleR; biquadB[14] = biquadB[13]; biquadB[13] = inputSampleR; //DF1 right
   outSampleL = (inputSampleL - lastSampleBL)*trim;
   lastSampleBL = inputSampleL; inputSampleL = outSampleL;
-  dryStageBL = inputSampleL = (inputSampleL * bWet) + (lastSampleAL * (1.0-bWet));
+  dryStageBL = inputSampleL = (inputSampleL * bWet) + (dryStageAL * (1.0-bWet));
   outSampleR = (inputSampleR - lastSampleBR)*trim;
   lastSampleBR = inputSampleR; inputSampleR = outSampleR;
-  dryStageBR = inputSampleR = (inputSampleR * bWet) + (lastSampleAR * (1.0-bWet));
+  dryStageBR = inputSampleR = (inputSampleR * bWet) + (dryStageAR * (1.0-bWet));
 );
 
 (cWet > 0.0) ? (
