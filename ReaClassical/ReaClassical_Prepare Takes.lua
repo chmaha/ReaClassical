@@ -20,12 +20,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local horizontal, horizontal_color, horizontal_group, shift, vertical, vertical_color_razor, vertical_group
-local copy_track_items, tracks_per_folder, clean_take_names, xfade_check
+local copy_track_items, tracks_per_folder, clean_take_names, xfade_check, empty_items_check
 
 function Main()
   local num_of_project_items = r.CountMediaItems(0)
   if num_of_project_items == 0 then
     r.ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
+    return  
+  end
+  local empty_count = empty_items_check(num_of_project_items)
+  if empty_count > 0 then
+    r.ShowMessageBox("Error: Empty items found. Delete them to continue.", "Prepare Takes", 0)
     return  
   end
   if xfade_check() == true then
@@ -208,7 +213,9 @@ function clean_take_names(num_of_project_items)
   for i = 0, num_of_project_items - 1 do
     local item = r.GetMediaItem(0, i)
     local take = r.GetActiveTake(item)
-    r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
+    if take then 
+      r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true) 
+    end
   end
 end
 
@@ -229,6 +236,18 @@ function xfade_check()
     end
   end
   return xfade
+end
+
+function empty_items_check(num_of_items)
+  local count = 0
+  for i = 0, num_of_items - 1, 1 do
+    local current_item = r.GetMediaItem(0, i)
+    local take = r.GetActiveTake(current_item)
+    if not take then 
+      count = count + 1 
+    end 
+  end
+  return count
 end
 
 Main()

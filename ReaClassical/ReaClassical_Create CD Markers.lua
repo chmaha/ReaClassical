@@ -19,15 +19,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
+local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
+local get_info, save_metadata, find_project_end, add_codes, save_codes, delete_markers, empty_items_check
 local first_track = r.GetTrack(0, 0)
 if first_track then NUM_OF_ITEMS = r.CountTrackMediaItems(first_track) end
-local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
-local get_info, save_metadata, find_project_end, add_codes, save_codes, delete_markers
 
 function Main()
   r.Undo_BeginBlock()
   if not first_track or NUM_OF_ITEMS == 0 then
     r.ShowMessageBox("Error: No media items found.","Create CD Markers",0)
+    return
+  end
+  local empty_count = empty_items_check()
+  if empty_count > 0 then
+    r.ShowMessageBox("Error: Empty items found on first track. Delete them to continue.","Create CD Markers",0)
     return
   end
   local choice = r.ShowMessageBox("WARNING: This will delete all existing markers, regions and item take markers. Track titles will be pulled from item take names."
@@ -232,6 +237,18 @@ function delete_markers()
   r.Main_OnCommand(40182, 0) -- select all items
   r.Main_OnCommand(42387, 0) -- Delete all take markers
   r.Main_OnCommand(40289, 0) -- Unselect all items
+end
+
+function empty_items_check()
+  local count = 0
+  for i = 0, NUM_OF_ITEMS - 1, 1 do
+    local current_item = r.GetTrackMediaItem(first_track, i)
+    local take = r.GetActiveTake(current_item)
+    if not take then 
+      count = count + 1 
+    end 
+  end
+  return count
 end
 
 Main()
