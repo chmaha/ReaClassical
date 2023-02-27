@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.16
+@version 23.17
 @changelog
-  Prepare Takes: Disable with message if there already overlaps and fades. Offer to clean up take names.
-  Update PDF Guide for new JSFX plugins information
+  Show message if empty items are present when preparing takes or creating CD markers
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
