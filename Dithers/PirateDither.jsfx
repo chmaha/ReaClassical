@@ -7,7 +7,7 @@ about:
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DitherMeDiskers (MIT License)
   JSFX version released under GPLv3 license
 
-slider1:0<0,1,1{16-bit,24-bit}>Bitdepth
+slider1:0<0,1,1{Pirate 16-bit,Pirate 24-bit}>Bitdepth
 
 in_pin:left input
 in_pin:right input
