@@ -85,6 +85,12 @@ inputSampleR = spl1;
 
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
+dryStageAL = 0.0;
+dryStageBL = 0.0;
+dryStageAR = 0.0;
+dryStageBR = 0.0;
+dryFinalBiquadL = 0.0;
+dryFinalBiquadR = 0.0;
 outSampleL = 0.0;
 outSampleR = 0.0;
 
