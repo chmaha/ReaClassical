@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="ade6333d29bc19be5f041b2d659bd340d07c19c0">
+<index version="1" name="chmaha Scripts" commit="d99a11d915a8808f065f35b4147d19593bf7c450">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -242,7 +242,7 @@ Add Console to names]]></changelog>
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-27T22:38:04Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/ade6333d29bc19be5f041b2d659bd340d07c19c0/Dithers/PirateDither.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/d99a11d915a8808f065f35b4147d19593bf7c450/Dithers/PirateDither.jsfx</source>
       </version>
     </reapack>
     <reapack name="ReelDither.jsfx" type="effect" desc="ReelDither (chmaha)">
