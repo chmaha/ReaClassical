@@ -1,0 +1,374 @@
+Version: 1.0
+desc:All Ears (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Monitoring3" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,14,1{Peaks,Slew,Subs,Mono,Side,Vinyl,Aurat,MonoRat,MonoLat,Phone,Cans A,Cans B,Cans C,Cans D,V Trick>Type
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+biquad = freemem; freemem +=11;
+aL = freemem; freemem +=1503;
+bL = freemem; freemem +=1503;
+cL = freemem; freemem +=1503;
+dL = freemem; freemem +=1503;
+aR = freemem; freemem +=1503;
+bR = freemem; freemem +=1503;
+cR = freemem; freemem +=1503;
+dR = freemem; freemem +=1503;
+
+ax = 1; bx = 1; cx = 1; dx = 1;
+
+@slider
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+am = 149.0 * overallscale | 0;
+bm = 179.0 * overallscale | 0;
+cm = 191.0 * overallscale | 0;
+dm = 223.0 * overallscale | 0; 
+
+biquad[0] = 0.0375/overallscale; biquad[1] = 0.1575;
+(slider1 == 5) ? (biquad[0] = 0.0385/overallscale; biquad[1] = 0.0825;);
+(slider1 == 9) ? (biquad[0] = 0.1245/overallscale; biquad[1] = 0.46;);
+K = tan($pi * biquad[0]);
+norm = 1.0 / (1.0 + K / biquad[1] + K * K);
+biquad[2] = K / biquad[1] * norm;
+biquad[4] = -biquad[2];
+biquad[5] = 2.0 * (K * K - 1.0) * norm;
+biquad[6] = (1.0 - K / biquad[1] + K * K) * norm;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+(slider1 == 0) ? (
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0; inputSampleL = asin(inputSampleL);
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0; inputSampleR = asin(inputSampleR);
+
+  allpasstemp = ax - 1; (allpasstemp < 0 || allpasstemp > am) ? allpasstemp = am;
+  inputSampleL -= aL[allpasstemp]*0.5; aL[ax] = inputSampleL; inputSampleL *= 0.5;
+  inputSampleR -= aR[allpasstemp]*0.5; aR[ax] = inputSampleR; inputSampleR *= 0.5;
+  ax-=1; (ax < 0 || ax > am) ? ax = am;
+  inputSampleL += (aL[ax]);
+  inputSampleR += (aR[ax]);
+  
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0; inputSampleL = asin(inputSampleL);
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0; inputSampleR = asin(inputSampleR);
+  
+  allpasstemp = bx - 1; (allpasstemp < 0 || allpasstemp > bm) ? allpasstemp = bm;
+  inputSampleL -= bL[allpasstemp]*0.5; bL[bx] = inputSampleL; inputSampleL *= 0.5;
+  inputSampleR -= bR[allpasstemp]*0.5; bR[bx] = inputSampleR; inputSampleR *= 0.5;
+  bx-=1; (bx < 0 || bx > bm) ? bx = bm;
+  inputSampleL += (bL[bx]);
+  inputSampleR += (bR[bx]);
+  
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0; inputSampleL = asin(inputSampleL);
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0; inputSampleR = asin(inputSampleR);
+
+  
+  allpasstemp = cx - 1; (allpasstemp < 0 || allpasstemp > cm) ? allpasstemp = cm;
+  inputSampleL -= cL[allpasstemp]*0.5; cL[cx] = inputSampleL; inputSampleL *= 0.5;
+  inputSampleR -= cR[allpasstemp]*0.5; cR[cx] = inputSampleR; inputSampleR *= 0.5;
+  cx-=1; (cx < 0 || cx > cm) ? cx = cm;
+  inputSampleL += (cL[cx]);
+  inputSampleR += (cR[cx]);
+
+  
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0; inputSampleL = asin(inputSampleL);
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0; inputSampleR = asin(inputSampleR);
+
+  
+  allpasstemp = dx - 1; (allpasstemp < 0 || allpasstemp > dm) ? allpasstemp = dm;
+  inputSampleL -= dL[allpasstemp]*0.5; dL[dx] = inputSampleL; inputSampleL *= 0.5;
+  inputSampleR -= dR[allpasstemp]*0.5; dR[dx] = inputSampleR; inputSampleR *= 0.5;
+  dx-=1; (dx < 0 || dx > dm) ? dx = dm;
+  inputSampleL += (dL[dx]);
+  inputSampleR += (dR[dx]);
+
+  
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0; inputSampleL = asin(inputSampleL);
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0; inputSampleR = asin(inputSampleR);
+
+  
+  inputSampleL *= 0.63679; inputSampleR *= 0.63679;
+
+) : (slider1 == 1) ? (
+  trim = 2.302585092994045684017991;
+  slewSample = (inputSampleL - lastSampleL)*trim;
+  lastSampleL = inputSampleL;
+  (slewSample > 1.0) ? slewSample = 1.0; (slewSample < -1.0) ? slewSample = -1.0;
+  inputSampleL = slewSample;
+  slewSample = (inputSampleR - lastSampleR)*trim;
+  lastSampleR = inputSampleR;
+  (slewSample > 1.0) ? slewSample = 1.0; (slewSample < -1.0) ? slewSample = -1.0;
+  inputSampleR = slewSample;
+
+) : (slider1 == 2) ? (
+  iirAmount = (2250/44100.0) / overallscale;
+  gain = 1.42;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  
+  iirSampleAL = (iirSampleAL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleAL;
+  iirSampleAR = (iirSampleAR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleAR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleBL = (iirSampleBL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleBL;
+  iirSampleBR = (iirSampleBR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleBR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleCL = (iirSampleCL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleCL;
+  iirSampleCR = (iirSampleCR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleCR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleDL = (iirSampleDL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleDL;
+  iirSampleDR = (iirSampleDR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleDR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleEL = (iirSampleEL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleEL;
+  iirSampleER = (iirSampleER * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleER;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleFL = (iirSampleFL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleFL;
+  iirSampleFR = (iirSampleFR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleFR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleGL = (iirSampleGL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleGL;
+  iirSampleGR = (iirSampleGR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleGR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleHL = (iirSampleHL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleHL;
+  iirSampleHR = (iirSampleHR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleHR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleIL = (iirSampleIL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleIL;
+  iirSampleIR = (iirSampleIR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleIR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleJL = (iirSampleJL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleJL;
+  iirSampleJR = (iirSampleJR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleJR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleKL = (iirSampleKL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleKL;
+  iirSampleKR = (iirSampleKR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleKR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleLL = (iirSampleLL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleLL;
+  iirSampleLR = (iirSampleLR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleLR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleML = (iirSampleML * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleML;
+  iirSampleMR = (iirSampleMR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleMR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleNL = (iirSampleNL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleNL;
+  iirSampleNR = (iirSampleNR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleNR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleOL = (iirSampleOL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleOL;
+  iirSampleOR = (iirSampleOR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleOR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSamplePL = (iirSamplePL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSamplePL;
+  iirSamplePR = (iirSamplePR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSamplePR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleQL = (iirSampleQL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleQL;
+  iirSampleQR = (iirSampleQR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleQR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleRL = (iirSampleRL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleRL;
+  iirSampleRR = (iirSampleRR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleRR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleSL = (iirSampleSL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleSL;
+  iirSampleSR = (iirSampleSR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleSR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleTL = (iirSampleTL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleTL;
+  iirSampleTR = (iirSampleTR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleTR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleUL = (iirSampleUL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleUL;
+  iirSampleUR = (iirSampleUR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleUR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleVL = (iirSampleVL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleVL;
+  iirSampleVR = (iirSampleVR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleVR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleWL = (iirSampleWL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleWL;
+  iirSampleWR = (iirSampleWR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleWR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleXL = (iirSampleXL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleXL;
+  iirSampleXR = (iirSampleXR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleXR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleYL = (iirSampleYL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleYL;
+  iirSampleYR = (iirSampleYR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleYR;
+  inputSampleL *= gain; inputSampleR *= gain; gain = ((gain-1)*0.75)+1;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+  
+  iirSampleZL = (iirSampleZL * (1.0-iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleZL;
+  iirSampleZR = (iirSampleZR * (1.0-iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleZR;
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;        
+  //SubsOnly
+) : (slider1 < 5 ) ? (
+
+  mid; mid = inputSampleL + inputSampleR;
+  side; side = inputSampleL - inputSampleR;
+  (slider1 == 3) ? side = 0.0 : mid = 0.0; 
+  inputSampleL = (mid+side)/2.0;
+  inputSampleR = (mid-side)/2.0; 
+) : (slider1 < 10) ? (
+
+  (slider1 == 7) ? (inputSampleR = (inputSampleL + inputSampleR)*0.5;inputSampleL = 0.0;);
+  (slider1 == 8) ? (inputSampleL = (inputSampleL + inputSampleR)*0.5;inputSampleR = 0.0;);
+  (slider1 == 9) ? (M = (inputSampleL + inputSampleR)*0.5; inputSampleL = M;inputSampleR = M;);
+  
+  inputSampleL = sin(inputSampleL); inputSampleR = sin(inputSampleR);
+  
+  tempSampleL; tempSampleL = (inputSampleL * biquad[2]) + biquad[7];
+  biquad[7] = (-tempSampleL * biquad[5]) + biquad[8];
+  biquad[8] = (inputSampleL * biquad[4]) - (tempSampleL * biquad[6]);
+  inputSampleL = tempSampleL;
+  
+  tempSampleR; tempSampleR = (inputSampleR * biquad[2]) + biquad[9];
+  biquad[9] = (-tempSampleR * biquad[5]) + biquad[10];
+  biquad[10] = (inputSampleR * biquad[4]) - (tempSampleR * biquad[6]);
+  inputSampleR = tempSampleR;
+  
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0;
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0;
+
+  inputSampleL = asin(inputSampleL); inputSampleR = asin(inputSampleR);
+
+) : (slider1 < 14) ? (
+
+  (slider1 == 10) ? (inputSampleL *= 0.855; inputSampleR *= 0.855;);
+  (slider1 == 11) ? (inputSampleL *= 0.748; inputSampleR *= 0.748;);
+  (slider1 == 12) ? (inputSampleL *= 0.713; inputSampleR *= 0.713;);
+  (slider1 == 13) ? (inputSampleL *= 0.680; inputSampleR *= 0.680;);
+
+  inputSampleL = sin(inputSampleL);
+  inputSampleR = sin(inputSampleR);
+  drySampleL = inputSampleL;
+  drySampleR = inputSampleR;
+  bass = (slider1 * slider1 * 0.00001) / overallscale;
+  
+  mid = inputSampleL + inputSampleR; side = inputSampleL - inputSampleR;
+  iirSampleAL = (iirSampleAL * (1.0 - (bass*0.618))) + (side * bass * 0.618); side = side - iirSampleAL;
+  inputSampleL = (mid+side)/2.0; inputSampleR = (mid-side)/2.0;
+  
+  allpasstemp = ax - 1; (allpasstemp < 0 || allpasstemp > am) ? allpasstemp = am;
+  inputSampleL -= aL[allpasstemp]*0.5; aL[ax] = inputSampleL; inputSampleL *= 0.5;
+  inputSampleR -= aR[allpasstemp]*0.5; aR[ax] = inputSampleR; inputSampleR *= 0.5;
+  
+  ax-=1; (ax < 0 || ax > am) ? ax = am;
+  inputSampleL += (aL[ax])*0.5; inputSampleR += (aR[ax])*0.5;
+  (ax == am) ? (inputSampleL += (aL[0])*0.5; inputSampleR += (aR[0])*0.5;)
+  : (inputSampleL += (aL[ax+1])*0.5; inputSampleR += (aR[ax+1])*0.5;);
+
+  (slider1 == 10) ? (inputSampleL *= 0.125; inputSampleR *= 0.125;);
+  (slider1 == 11) ? (inputSampleL *= 0.25; inputSampleR *= 0.25;);
+  (slider1 == 12) ? (inputSampleL *= 0.30; inputSampleR *= 0.30;);
+  (slider1 == 13) ? (inputSampleL *= 0.35; inputSampleR *= 0.35;);
+  
+  drySampleL += inputSampleR;
+  drySampleR += inputSampleL;
+  
+  allpasstemp = dx - 1; (allpasstemp < 0 || allpasstemp > dm) ? allpasstemp = dm;
+  inputSampleL -= dL[allpasstemp]*0.5; dL[dx] = inputSampleL; inputSampleL *= 0.5;
+  inputSampleR -= dR[allpasstemp]*0.5; dR[dx] = inputSampleR; inputSampleR *= 0.5;
+  
+  dx-=1; (dx < 0 || dx > dm) ? dx = dm;
+  inputSampleL += (dL[dx])*0.5; inputSampleR += (dR[dx])*0.5;
+  (dx == dm) ? (inputSampleL += (dL[0])*0.5; inputSampleR += (dR[0])*0.5;)
+  : (inputSampleL += (dL[dx+1])*0.5; inputSampleR += (dR[dx+1])*0.5;);
+  
+  inputSampleL *= 0.25; inputSampleR *= 0.25;
+  
+  drySampleL += inputSampleR;
+  drySampleR += inputSampleL; 
+  
+  inputSampleL = drySampleL;
+  inputSampleR = drySampleR;
+  
+  mid = inputSampleL + inputSampleR; side = inputSampleL - inputSampleR;
+  iirSampleAR = (iirSampleAR * (1.0 - bass)) + (side * bass); side = side - iirSampleAR;
+  inputSampleL = (mid+side)/2.0; inputSampleR = (mid-side)/2.0;
+  
+  (inputSampleL > 1.0) ? inputSampleL = 1.0; (inputSampleL < -1.0) ? inputSampleL = -1.0; inputSampleL = asin(inputSampleL);
+  (inputSampleR > 1.0) ? inputSampleR = 1.0; (inputSampleR < -1.0) ? inputSampleR = -1.0; inputSampleR = asin(inputSampleR);
+
+) : (
+
+  inputSample = (inputSampleL + inputSampleR) * 0.5;
+  inputSampleL = -inputSample;
+  inputSampleR = inputSample;
+);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+
