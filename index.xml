@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="ddbd16d9895bbd5e98886b686368d88833319389">
+<index version="1" name="chmaha Scripts" commit="90eb1490359dbd20da0e0d2b03b9818d88513dce">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1209,6 +1209,20 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-21T22:03:39Z">
         <source>https://github.com/chmaha/ReaClassical/raw/7291e8a144c5493a043a1094da9d5fce07d653ca/Various/A-coo-sticks.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="AllEars.jsfx" type="effect" desc="All Ears (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Monitoring3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-02-28T12:58:02Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/90eb1490359dbd20da0e0d2b03b9818d88513dce/Various/AllEars.jsfx</source>
       </version>
     </reapack>
     <reapack name="Altitude.jsfx" type="effect" desc="Altitude Brightness EQ (chmaha)">
