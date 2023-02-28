@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="90eb1490359dbd20da0e0d2b03b9818d88513dce">
+<index version="1" name="chmaha Scripts" commit="5faa8f4d42bd61ab732bc03744d9081dd7f36ad7">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1211,7 +1211,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/7291e8a144c5493a043a1094da9d5fce07d653ca/Various/A-coo-sticks.jsfx</source>
       </version>
     </reapack>
-    <reapack name="AllEars.jsfx" type="effect" desc="All Ears (chmaha)">
+    <reapack name="AllEars.jsfx" type="effect" desc="All Ears Monitoring Utility (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1222,7 +1222,7 @@ Update PDF Guide for new JSFX plugins information]]></changelog>
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-02-28T12:58:02Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/90eb1490359dbd20da0e0d2b03b9818d88513dce/Various/AllEars.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/5faa8f4d42bd61ab732bc03744d9081dd7f36ad7/Various/AllEars.jsfx</source>
       </version>
     </reapack>
     <reapack name="Altitude.jsfx" type="effect" desc="Altitude Brightness EQ (chmaha)">
