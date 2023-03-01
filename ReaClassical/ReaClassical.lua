@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.17
+@version 23.18
 @changelog
-  Show message if empty items are present when preparing takes or creating CD markers
+  Whole Project View: Switch to using _SWS_VZOOMFITMIN due to 6.76 breakage
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
