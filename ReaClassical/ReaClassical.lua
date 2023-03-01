@@ -3,6 +3,7 @@
 @version 23.18
 @changelog
   Whole Project View: Switch to using _SWS_VZOOMFITMIN due to 6.76 breakage
+  Update PDF Guide
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
