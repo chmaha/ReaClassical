@@ -6,7 +6,7 @@
 # Change the pkgver number below to download an alternative REAPER version.
 
 ###########
-pkgver=6.76
+pkgver=6.75
 ###########
 
 echo "Welcome to ReaClassical installer..."
