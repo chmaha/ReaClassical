@@ -27,7 +27,7 @@ function Main()
     collapse = r.NamedCommandLookup("_SWS_COLLAPSE")
     r.Main_OnCommand(collapse, 0) -- collapse selected folders
   end
-  local zoom = r.NamedCommandLookup("_SWS_VZOOMFIT")
+  local zoom = r.NamedCommandLookup("_SWS_VZOOMFITMIN")
   r.Main_OnCommand(zoom, 0) -- SWS: Vertical zoom to selected tracks
   r.Main_OnCommand(40295, 0) -- View: Zoom out project
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
