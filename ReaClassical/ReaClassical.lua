@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.18+dev0303
+@version 23.19pre1
 @changelog
-  General PDF guide improvements in advance of April 2023 public release
+  General PDF guide improvements in advance of 2nd quarter 2023 public release
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
