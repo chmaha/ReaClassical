@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="1eb6d65de7b54ea0b258d7d9b75bcb05dd64369b">
+<index version="1" name="chmaha Scripts" commit="0db1d0b63d477b1e879af580d68e6563812ee243">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1493,6 +1493,20 @@ Fix pre-release versioning in PDF guide]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Heft.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Hippity Hoppity.jsfx" type="effect" desc="Hippity Hoppity (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pockey2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pockey2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-03T21:17:14Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/0db1d0b63d477b1e879af580d68e6563812ee243/Various/Hippity%20Hoppity.jsfx</source>
       </version>
     </reapack>
     <reapack name="Lyra.jsfx" type="effect" desc="Lyra Compressor (chmaha)">
