@@ -14,8 +14,7 @@ SCR 4 0 RS031d589795343cd585a36b488d1979a2da61641f "Custom: ReaClassical_Add Des
 SCR 4 0 RS5d87205205af827b4ef805777edcf5d6ba6dea1d "Custom: ReaClassical_Add Destination OUT Marker.lua" "chmaha Scripts/ReaClassical/ReaClassical_Add Destination OUT Marker.lua"
 SCR 4 0 RS0505890a43ab5e3f1a87aea5318f4ec1f6e2b658 "Custom: ReaClassical_Add Source IN marker.lua" "chmaha Scripts/ReaClassical/ReaClassical_Add Source IN marker.lua"
 SCR 4 0 RS0a405e899518bea92ade6794a4ec1b8c07615285 "Custom: ReaClassical_Add Source OUT marker.lua" "chmaha Scripts/ReaClassical/ReaClassical_Add Source OUT marker.lua"
-SCR 4 0 RS3bf189919fc14c4aa39e2e2a1933df83714aa5c5 "Custom: ReaClassical_Audition.lua" "chmaha Scripts/ReaClassical/ReaClassical_Audition.lua"
-SCR 4 0 RS8cadfbad0d261c15b17168bc0c105be8b64cc69e "Custom: ReaClassical_BirdBird Razor Children.lua" "chmaha Scripts/ReaClassical/ReaClassical_BirdBird Razor Children.lua"
+SCR 516 0 RS3bf189919fc14c4aa39e2e2a1933df83714aa5c5 "Custom: ReaClassical_Audition.lua" "chmaha Scripts/ReaClassical/ReaClassical_Audition.lua"
 SCR 4 0 RS84ea2da3fbaba0420c9ea7b071561208d7908ad8 "Custom: ReaClassical_Classical Crossfade.lua" "chmaha Scripts/ReaClassical/ReaClassical_Classical Crossfade.lua"
 SCR 4 0 RSa00edf5f46de174e455de2f03cf326ab3db034b9 "Custom: ReaClassical_Create CD Markers.lua" "chmaha Scripts/ReaClassical/ReaClassical_Create CD Markers.lua"
 SCR 4 0 RSfc11d994a7848e13d22db277971a3afd01ba1cea "Custom: ReaClassical_Create Folder.lua" "chmaha Scripts/ReaClassical/ReaClassical_Create Folder.lua"
@@ -29,6 +28,11 @@ SCR 4 0 RS80d337effa4b34bfbf896a4f3e0b85a7a93254ec "Custom: ReaClassical_Insert 
 SCR 4 0 RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1 "Custom: ReaClassical_Prepare Takes.lua" "chmaha Scripts/ReaClassical/ReaClassical_Prepare Takes.lua"
 SCR 4 0 RS9f29e53917d53d84820659200ed1882f94a0dddb "Custom: ReaClassical_S-D Edit.lua" "chmaha Scripts/ReaClassical/ReaClassical_S-D Edit.lua"
 SCR 4 0 RS63665092232578f8c8d10c5936ca5013a9ecab51 "Custom: ReaClassical_Whole Project View.lua" "chmaha Scripts/ReaClassical/ReaClassical_Whole Project View.lua"
+SCR 4 0 RSf03944e159952885b66c7c1be2754e2b3c7d4b07 "Custom: ReaClassical_Help.lua" "chmaha Scripts/ReaClassical/ReaClassical_Help.lua"
+SCR 4 0 RS852f0872789b997921f7f9d40e6f997553bd5147 "Custom: REAPER Update Utility.lua" "FTC Tools/Various/REAPER Update Utility.lua"
+SCR 4 0 RS32ef6149afbb590d7e86127883edf97c31519b13 "Custom: ReaClassical_Next Item or Fade.lua" "chmaha Scripts/ReaClassical/ReaClassical_Next Item or Fade.lua"
+SCR 4 0 RSd822317d30519d2c436a221d58e85c2570459f66 "Custom: ReaClassical_Previous Item or Fade.lua" "chmaha Scripts/ReaClassical/ReaClassical_Previous Item or Fade.lua"
+SCR 4 0 RS026f22442e253b97d7a21b40e4065f1854ca279a "Custom: ReaClassical_PDF_Guide.lua" "chmaha Scripts/PDF_Guide/ReaClassical_PDF_Guide.lua"
 KEY 25 82 0 0
 KEY 9 80 0 0
 KEY 17 13 0 0
@@ -36,7 +40,6 @@ KEY 0 126 0 0
 KEY 1 98 0 0
 KEY 1 100 0 0
 KEY 1 97 0 0
-KEY 5 77 0 0
 KEY 5 70 0 0
 KEY 5 88 0 0
 KEY 5 67 0 0
@@ -50,8 +53,8 @@ KEY 13 68 0 0
 KEY 9 68 0 0
 KEY 5 84 0 0
 KEY 1 102 0 0
-KEY 1 116 0 0
 KEY 1 32813 0 0
+KEY 1 116 0 0
 KEY 17 80 1155 0
 KEY 1 82 40015 0
 KEY 1 79 40016 0
@@ -62,8 +65,6 @@ KEY 0 44 40172 0
 KEY 0 46 40173 0
 KEY 0 35 40174 0
 KEY 0 47 40290 0
-KEY 1 81 40318 0
-KEY 1 87 40319 0
 KEY 0 39 40348 0
 KEY 1 117 40507 0
 KEY 0 91 40625 0
@@ -72,6 +73,9 @@ KEY 1 107 40861 0
 KEY 1 66 41076 0
 KEY 1 74 41588 0
 KEY 1 86 41990 0
+KEY 5 78 42385 0
+KEY 5 32814 42387 0
+KEY 5 77 42390 0
 KEY 1 73 42401 0
 KEY 1 76 _SWSMARKERLIST1 0
 KEY 0 59 _SWS_REGIONSFROMITEMS 0
@@ -101,4 +105,8 @@ KEY 1 115 _RS80d337effa4b34bfbf896a4f3e0b85a7a93254ec 0
 KEY 1 84 _RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1 0
 KEY 1 53 _RS9f29e53917d53d84820659200ed1882f94a0dddb 0
 KEY 0 96 _RS63665092232578f8c8d10c5936ca5013a9ecab51 0
+KEY 1 72 _RSf03944e159952885b66c7c1be2754e2b3c7d4b07 0
+KEY 9 85 _RS852f0872789b997921f7f9d40e6f997553bd5147 0
+KEY 1 87 _RS32ef6149afbb590d7e86127883edf97c31519b13 0
+KEY 1 81 _RSd822317d30519d2c436a221d58e85c2570459f66 0
 KEY 1 9 40440 32060
