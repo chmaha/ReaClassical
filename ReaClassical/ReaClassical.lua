@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre1
+@version 23.19pre2
 @changelog
-  General PDF guide improvements in advance of 2nd quarter 2023 public release
-  Fix pre-release versioning in PDF guide
+  Add detail in Appendix A of PDF guide about markers snapping to CD frames
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
