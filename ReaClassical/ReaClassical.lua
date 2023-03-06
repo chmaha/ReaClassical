@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre2
+@version 23.19pre3
 @changelog
-  Add detail in Appendix A of PDF guide about markers snapping to CD frames
+  PDF Guide: Add detail about RCPlugins in Mastering section and add cross reference.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
