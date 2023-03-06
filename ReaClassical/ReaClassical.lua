@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre3
+@version 23.19pre4
 @changelog
-  PDF Guide: Add detail about RCPlugins in Mastering section and add cross reference.
+  Whole Project View: Switch back to original vertical zoom function in preparation for 23.19 and updated SWS
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
