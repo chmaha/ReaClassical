@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="54676b4a07eb40769e4d2e29f052efeb0cc56517">
+<index version="1" name="chmaha Scripts" commit="efb4cea2e1ee04b41d1870c3eebdd33566f04e9b">
   <category name="Consoles">
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
@@ -1566,6 +1566,20 @@ Fix pre-release versioning in PDF guide]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/flattop.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Flutternutter.jsfx" type="effect" desc="Flutternutter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Flutter" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Flutter (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-08T22:32:08Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/efb4cea2e1ee04b41d1870c3eebdd33566f04e9b/Various/Flutternutter.jsfx</source>
       </version>
     </reapack>
     <reapack name="Heft.jsfx" type="effect" desc="Heft Bass (chmaha)">
