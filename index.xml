@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="efb4cea2e1ee04b41d1870c3eebdd33566f04e9b">
+<index version="1" name="chmaha Scripts" commit="bee10c939f8dd5336155b5a851d17f6ac49d7903">
   <category name="Consoles">
+    <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Desk", "TransDesk" and "TubeDeck" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Deck (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TransDeck (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TubeDeck (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-08T23:35:05Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/bee10c939f8dd5336155b5a851d17f6ac49d7903/Consoles/Analog-a-licious.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
       <version name="1.0" author="chmaha" time="2023-02-19T12:15:13Z">
         <changelog><![CDATA[Initial Commit]]></changelog>
