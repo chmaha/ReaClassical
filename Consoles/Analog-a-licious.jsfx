@@ -18,8 +18,8 @@ out_pin:right output
 @init
 
 freemem = 0;
-dL = freemee; freemem+=5000;
-dR = freemee; freemem+=5000;
+dL = freemem; freemem+=5000;
+dR = freemem; freemem+=5000;
 
 @slider
 
