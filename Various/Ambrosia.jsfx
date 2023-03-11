@@ -8,6 +8,7 @@ about:
 
 slider1:0<-12,12,0.01>Slam (dB)
 slider2:0.5<0,1,0.01>Bump
+slider3:0<-20,20,0.1>Output Gain (dB)
 
 in_pin:left input
 in_pin:right input
@@ -67,6 +68,8 @@ inputSampleR = spl1;
   inputSampleL *= inputgain;
   inputSampleR *= inputgain;
 );
+
+outputgain = pow(10.0,slider3/20.0);
 
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
@@ -277,6 +280,12 @@ lastSampleR = inputSampleR;
 
 (inputSampleR > 0.99) ? inputSampleR = 0.99;
 (inputSampleR < -0.99) ? inputSampleR = -0.99;
+
+(outputgain != 1.0) ?
+(
+  inputSampleL *= outputgain;
+  inputSampleR *= outputgain;
+);
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
