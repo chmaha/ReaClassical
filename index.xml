@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="ed8a5a58e41c4cc50e05022f3b96d2c1a6d607fe">
+<index version="1" name="chmaha Scripts" commit="00089860f0ef7e80e574a0c01770282e77c0f7b9">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1439,7 +1439,7 @@ Fix pre-release versioning in PDF guide]]></changelog>
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-03-11T20:51:49Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/ed8a5a58e41c4cc50e05022f3b96d2c1a6d607fe/Various/Ambrosia.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/00089860f0ef7e80e574a0c01770282e77c0f7b9/Various/Ambrosia.jsfx</source>
       </version>
     </reapack>
     <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite Compressor (chmaha)">
