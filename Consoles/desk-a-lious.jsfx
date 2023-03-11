@@ -1,0 +1,173 @@
+Version: 1.0
+desc:Desk-a-licious Console Colors (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Desk4" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Desk4 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.27<0,1,0.01>Overdrive
+slider2:0.18<0,1,0.01>Treble Choke
+slider3:0.26<0,1,0.01>Power Sag
+slider4:0.54<0,1,0.01>Frequency
+slider5:0.84<0,1,0.01>Output Trim
+slider6:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+dL = freemem; freemem+=10000;
+dR = freemem; freemem+=10000;
+
+@slider
+
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+gain = (pow(slider1,2)*10)+0.0001;
+gaintrim = (pow(slider1,2)*2)+1.0;
+slewgain = (pow(slider2,3)*40)+0.0001;  
+prevslew = 0.105;
+intensity = (pow(slider3,6)*15)+0.0001;
+depthA = (pow(slider4,4)*940)+0.00001;
+offsetA = (depthA * overallscale) | 0;
+(offsetA < 1) ? offsetA = 1;
+(offsetA > 4880) ? offsetA = 4880;
+balanceB = 0.0001;  
+slewgain *= overallscale;
+prevslew *= overallscale;
+balanceB /= overallscale;
+outputgain = slider5;
+wet = slider6;
+balanceA = 1.0 - balanceB;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+(gcount < 0 || gcount > 4900) ? gcount = 4900;
+
+dL[gcount+4900] = dL[gcount] = abs(inputSampleL)*intensity;
+controlL += (dL[gcount] / offsetA);
+controlL -= (dL[gcount+offsetA] / offsetA);
+controlL -= 0.000001;
+clampL = 1;
+(controlL < 0) ? controlL = 0;
+(controlL > 1) ? (clampL -= (controlL - 1); controlL = 1;);
+(clampL < 0.5) ? clampL = 0.5;
+
+dR[gcount+4900] = dR[gcount] = abs(inputSampleR)*intensity;
+controlR += (dR[gcount] / offsetA);
+controlR -= (dR[gcount+offsetA] / offsetA);
+controlR -= 0.000001;
+clampR = 1;
+(controlR < 0) ? controlR = 0;
+(controlR > 1) ? (clampR -= (controlR - 1); controlR = 1;);
+(clampR < 0.5) ? clampR = 0.5;
+
+
+gcount-=1;
+
+thicknessL = ((1.0 - controlL) * 2.0) - 1.0;
+thicknessR = ((1.0 - controlR) * 2.0) - 1.0;
+
+out = abs(thicknessL);    
+bridgerectifier = abs(inputSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+(thicknessL > 0) ? bridgerectifier = sin(bridgerectifier)
+: bridgerectifier = 1-cos(bridgerectifier);
+
+(inputSampleL > 0) ? inputSampleL = (inputSampleL*(1-out))+(bridgerectifier*out)
+: inputSampleL = (inputSampleL*(1-out))-(bridgerectifier*out);
+
+out = abs(thicknessR);    
+bridgerectifier = abs(inputSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.57079633;
+
+(thicknessR > 0) ? bridgerectifier = sin(bridgerectifier)
+: bridgerectifier = 1-cos(bridgerectifier);
+
+(inputSampleR > 0) ? inputSampleR = (inputSampleR*(1-out))+(bridgerectifier*out)
+: inputSampleR = (inputSampleR*(1-out))-(bridgerectifier*out);
+
+inputSampleL *= clampL;
+inputSampleR *= clampR;
+
+slewL = inputSampleL - lastSampleL;
+lastSampleL = inputSampleL;
+
+slewR = inputSampleR - lastSampleR;
+lastSampleR = inputSampleR;
+
+bridgerectifier = abs(slewL*slewgain);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+(slewL > 0) ? slewL = bridgerectifier/slewgain
+: slewL = -(bridgerectifier/slewgain);
+
+bridgerectifier = abs(slewR*slewgain);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+(slewR > 0) ? slewR = bridgerectifier/slewgain
+: slewR = -(bridgerectifier/slewgain);
+
+inputSampleL = (lastOutSampleL*balanceA) + (lastSampleL*balanceB) + slewL;
+lastOutSampleL = inputSampleL;
+
+inputSampleR = (lastOutSampleR*balanceA) + (lastSampleR*balanceB) + slewR;
+lastOutSampleR = inputSampleR;
+
+combSampleL = abs(drySampleL*lastSampleL);
+(combSampleL > 1.0) ? combSampleL = 1.0;
+
+combSampleR = abs(drySampleR*lastSampleR);
+(combSampleR > 1.0) ? combSampleR = 1.0;
+
+inputSampleL -= (lastSlewL * combSampleL * prevslew);
+lastSlewL = slewL;
+
+inputSampleR -= (lastSlewR * combSampleR * prevslew);
+lastSlewR = slewR;
+
+inputSampleL *= gain;
+bridgerectifier = abs(inputSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+(inputSampleL > 0) ? inputSampleL = bridgerectifier
+: inputSampleL = -bridgerectifier;
+
+inputSampleL /= gain;
+inputSampleL *= gaintrim;
+
+inputSampleR *= gain;
+bridgerectifier = abs(inputSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+(inputSampleR > 0) ? inputSampleR = bridgerectifier
+: inputSampleR = -bridgerectifier;
+
+inputSampleR /= gain;
+inputSampleR *= gaintrim;
+
+(outputgain != 1.0) ? (
+  inputSampleL *= outputgain;
+  inputSampleR *= outputgain;
+);
+
+(wet !=1.0) ? (
+  inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0-wet));
+  inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
+);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
