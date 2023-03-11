@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="25345875cd7e993bf9f8efc23939e0d84b33a275">
+<index version="1" name="chmaha Scripts" commit="ed8a5a58e41c4cc50e05022f3b96d2c1a6d607fe">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1426,6 +1426,20 @@ Fix pre-release versioning in PDF guide]]></changelog>
       <version name="1.1" author="chmaha" time="2023-02-27T14:53:08Z">
         <changelog><![CDATA[Update according to airwindows commit 09cdb13]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/19931912f5b59273620fc723191b0b04fb4c8f75/Various/Altitude.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Ambrosia.jsfx" type="effect" desc="Ambrosia Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Tape" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Tape (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-11T20:51:49Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/ed8a5a58e41c4cc50e05022f3b96d2c1a6d607fe/Various/Ambrosia.jsfx</source>
       </version>
     </reapack>
     <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite Compressor (chmaha)">
