@@ -1,0 +1,11 @@
+@description Genesis Console (chmaha)
+@author chmaha
+@version 1.0
+@changelog
+  Initial commit
+@metapackage
+@provides
+  GenesisBus.jsfx
+  GenesisChannel.jsfx
+@about
+  These jsfx analog console emulation plugins use DSP from airwindows Console0.
