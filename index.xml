@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="80d55868866622952a1a83fb58910cd92ed20517">
+<index version="1" name="chmaha Scripts" commit="5e2a5f72c7ca21314bf0322029ab6a772ba32d22">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1571,6 +1571,20 @@ Fix pre-release versioning in PDF guide]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Discordia.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Domar.jsfx" type="effect" desc="Domar Brightness Acceleration Limiter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Acceleration2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Acceleration2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-12T23:11:39Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/5e2a5f72c7ca21314bf0322029ab6a772ba32d22/Various/Domar.jsfx</source>
       </version>
     </reapack>
     <reapack name="Eris.jsfx" type="effect" desc="Eris Distortion (chmaha)">
