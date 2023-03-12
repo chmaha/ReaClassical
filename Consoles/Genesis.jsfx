@@ -3,6 +3,7 @@
 @version 1.0
 @changelog
   Initial commit
+  Add Console to plugin name
 @metapackage
 @provides
   GenesisBus.jsfx
