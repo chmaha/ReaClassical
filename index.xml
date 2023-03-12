@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="e8d944d82482f6fc90de37dbce918e74248f4fe3">
+<index version="1" name="chmaha Scripts" commit="5fcccf04ac943fb46bd0c476e54af58faf971805">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -96,6 +96,22 @@
         <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/fac2d0393ed29d50a6170057167965f69d4ffab0/Consoles/Eurydice_Channel.jsfx</source>
         <source type="projecttpl" file="ReaClassical_Eurydice_A.RPP">https://github.com/chmaha/ReaClassical/raw/fac2d0393ed29d50a6170057167965f69d4ffab0/Consoles/ReaClassical_Eurydice_A.RPP</source>
         <source type="projecttpl" file="ReaClassical_Eurydice_B.RPP">https://github.com/chmaha/ReaClassical/raw/fac2d0393ed29d50a6170057167965f69d4ffab0/Consoles/ReaClassical_Eurydice_B.RPP</source>
+      </version>
+    </reapack>
+    <reapack name="Genesis.jsfx" type="effect" desc="Genesis Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx analog console emulation plugins use DSP from airwindows Console0.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-12T11:31:40Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source file="GenesisBus.jsfx">https://github.com/chmaha/ReaClassical/raw/5fcccf04ac943fb46bd0c476e54af58faf971805/Consoles/GenesisBus.jsfx</source>
+        <source file="GenesisChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/5fcccf04ac943fb46bd0c476e54af58faf971805/Consoles/GenesisChannel.jsfx</source>
       </version>
     </reapack>
     <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust Console Saturation (chmaha)">
