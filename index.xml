@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="5fcccf04ac943fb46bd0c476e54af58faf971805">
+<index version="1" name="chmaha Scripts" commit="80d55868866622952a1a83fb58910cd92ed20517">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -109,9 +109,10 @@
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-03-12T11:31:40Z">
-        <changelog><![CDATA[Initial commit]]></changelog>
-        <source file="GenesisBus.jsfx">https://github.com/chmaha/ReaClassical/raw/5fcccf04ac943fb46bd0c476e54af58faf971805/Consoles/GenesisBus.jsfx</source>
-        <source file="GenesisChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/5fcccf04ac943fb46bd0c476e54af58faf971805/Consoles/GenesisChannel.jsfx</source>
+        <changelog><![CDATA[Initial commit
+Add Console to plugin name]]></changelog>
+        <source file="GenesisBus.jsfx">https://github.com/chmaha/ReaClassical/raw/80d55868866622952a1a83fb58910cd92ed20517/Consoles/GenesisBus.jsfx</source>
+        <source file="GenesisChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/80d55868866622952a1a83fb58910cd92ed20517/Consoles/GenesisChannel.jsfx</source>
       </version>
     </reapack>
     <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust Console Saturation (chmaha)">
