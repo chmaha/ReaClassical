@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="00089860f0ef7e80e574a0c01770282e77c0f7b9">
+<index version="1" name="chmaha Scripts" commit="e8d944d82482f6fc90de37dbce918e74248f4fe3">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1574,6 +1574,20 @@ Fix pre-release versioning in PDF guide]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Eris.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Evolution.jsfx" type="effect" desc="Evolution Channel Strip (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "CStrip2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/CStrip2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-12T11:02:05Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/e8d944d82482f6fc90de37dbce918e74248f4fe3/Various/Evolution.jsfx</source>
       </version>
     </reapack>
     <reapack name="FILM.jsfx" type="effect" desc="FILM: Flippin' Incredible Loudness Maximizer (chmaha)">
