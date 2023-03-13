@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="5e2a5f72c7ca21314bf0322029ab6a772ba32d22">
+<index version="1" name="chmaha Scripts" commit="70b72ed462fdb51a4e77c7df7ad8987daf90df58">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -212,6 +212,13 @@ Add Console to names]]></changelog>
         <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Consoles/Orpheus_Lite_Bus.jsfx</source>
         <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
         <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-03-13T13:35:05Z">
+        <changelog><![CDATA[Fix routing issue in B template]]></changelog>
+        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/ReaClassical/raw/70b72ed462fdb51a4e77c7df7ad8987daf90df58/Consoles/Orpheus_Lite_Channel.jsfx</source>
+        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/ReaClassical/raw/70b72ed462fdb51a4e77c7df7ad8987daf90df58/Consoles/Orpheus_Lite_Bus.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/ReaClassical/raw/70b72ed462fdb51a4e77c7df7ad8987daf90df58/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/ReaClassical/raw/70b72ed462fdb51a4e77c7df7ad8987daf90df58/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
       </version>
     </reapack>
     <reapack name="Supersonic.jsfx" type="effect" desc="Supersonic Filter (chmaha)">
