@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="0628fbcb0a015a327d5fc428940c0f02f2cd2598">
+<index version="1" name="chmaha Scripts" commit="7a0f6e5d2a6f90f2e5c1e8fea5fb072018bd2fe1">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1512,6 +1512,20 @@ Fix pre-release versioning in PDF guide]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Various/Aurora.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Biquadicus.jsfx" type="effect" desc="Biquadicus Biquad Filters (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Biquad", "BiquadDouble" & "BiquadTriple" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Biquad (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Biquad(MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BiquadTriple (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-03-14T23:13:25Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/7a0f6e5d2a6f90f2e5c1e8fea5fb072018bd2fe1/Various/Biquadicus.jsfx</source>
       </version>
     </reapack>
     <reapack name="Buttress.jsfx" type="effect" desc="Buttress Bass (chmaha)">
