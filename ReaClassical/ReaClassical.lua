@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre4
+@version 23.19pre5
 @changelog
-  Whole Project View: Switch back to original vertical zoom function in preparation for 23.19 and updated SWS
+  PDF Guide: Update tested with REAPER v6.78
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
