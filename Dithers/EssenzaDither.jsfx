@@ -7,7 +7,7 @@ about:
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/RawGlitters (MIT License)
   JSFX version released under GPLv3 license
 
-slider1:0<0,3,1{Sotto,Sopra>16-bit Dither Type
+slider1:0<0,1,1{Sotto,Sopra>16-bit Dither Type
 
 in_pin:left input
 in_pin:right input
