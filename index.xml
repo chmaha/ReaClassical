@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="b81f11691c498e40d0ffe5b8b81cb1f620274285">
+<index version="1" name="chmaha Scripts" commit="593943aa251c77ed9a5080696736f14fd809293c">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -262,7 +262,7 @@ Add Console to names]]></changelog>
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-03-16T18:59:40Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/b81f11691c498e40d0ffe5b8b81cb1f620274285/Dithers/EssenzaDither.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/593943aa251c77ed9a5080696736f14fd809293c/Dithers/EssenzaDither.jsfx</source>
       </version>
     </reapack>
     <reapack name="GroovyDither.jsfx" type="effect" desc="GroovyDither (chmaha)">
