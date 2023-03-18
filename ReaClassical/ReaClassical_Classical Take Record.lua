@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local mixer, solo, track_check
+local mixer, solo, track_check, bus_check
 
 function Main()
   if track_check() == 0 then
@@ -27,25 +27,23 @@ function Main()
     return
   end
   local take_record_toggle = r.NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+  r.Undo_BeginBlock()
   if r.GetPlayState() == 0 then
-    r.Undo_BeginBlock()
     r.SetToggleCommandState(1, take_record_toggle, 1)
     r.RefreshToolbar2(1, take_record_toggle)
-    solo()
-    r.Main_OnCommand(40491, 0) -- Track: Unarm all tracks for recording
     local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
     r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
     mixer()
+    solo()
+    r.Main_OnCommand(40491, 0) -- Track: Unarm all tracks for recording
     local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
     r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
     r.Main_OnCommand(1013, 0) -- Transport: Record
 
     r.Undo_EndBlock('Classical Take Record', 0)
-    r.PreventUIRefresh(-1)
     r.UpdateArrange()
     r.UpdateTimeline()
   else
-    r.Undo_BeginBlock()
     r.SetToggleCommandState(1, take_record_toggle, 0)
     r.RefreshToolbar2(1, take_record_toggle)
     r.Main_OnCommand(40667, 0) -- Transport: Stop (save all recorded media)
@@ -93,10 +91,15 @@ function solo()
   end
 end
 
+function bus_check(track)
+  _, trackname = r.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+  return string.find(trackname, "^@")
+end
+
 function mixer()
   for i = 0, r.CountTracks(0) - 1, 1 do
     local track = r.GetTrack(0, i)
-    if r.IsTrackSelected(track) then
+    if r.IsTrackSelected(track) or bus_check(track) then
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
     else
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

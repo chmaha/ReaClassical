@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local solo, mixer, on_stop
+local solo, mixer, on_stop, bus_check
 local fade_editor_toggle = r.NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local fade_editor_state = r.GetToggleCommandState(fade_editor_toggle)
 
@@ -121,10 +121,15 @@ function solo()
   end
 end
 
+function bus_check(track)
+  _, trackname = r.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+  return string.find(trackname, "^@")
+end
+
 function mixer()
   for i = 0, r.CountTracks(0) - 1, 1 do
     local track = r.GetTrack(0, i)
-    if r.IsTrackSelected(track) then
+    if r.IsTrackSelected(track) or bus_check(track) then
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
     else
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
