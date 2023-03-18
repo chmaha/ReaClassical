@@ -4,6 +4,7 @@
 @changelog
   Aux and submix: Allow for creation of aux and submix (@ track prefix) that stay visible
   Sync FX and routing: All child routing is now also copied from destination to source groups
+  Update PDF Guide for above changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
