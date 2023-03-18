@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local mixer, solo, track_check, media_razor_group
+local mixer, solo, track_check, media_razor_group, bus_check
 
 function Main()
   if track_check() == 0 then
@@ -64,10 +64,15 @@ function solo()
   end
 end
 
+function bus_check(track)
+  _, trackname = r.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+  return string.find(trackname, "^@")
+end
+
 function mixer()
   for i = 0, r.CountTracks(0) - 1, 1 do
     local track = r.GetTrack(0, i)
-    if r.IsTrackSelected(track) then
+    if r.IsTrackSelected(track) or bus_check(track) then
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
     else
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

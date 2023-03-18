@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local create_destination_group, create_source_groups, folder_check, mixer, solo, sync_routing_and_fx
-local media_razor_group
+local media_razor_group, bus_check
 
 function Main()
 
@@ -83,10 +83,15 @@ function solo()
   end
 end
 
+function bus_check(track)
+  _, trackname = r.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+  return string.find(trackname, "^@")
+end
+
 function mixer()
   for i = 0, r.CountTracks(0) - 1, 1 do
     local track = r.GetTrack(0, i)
-    if r.IsTrackSelected(track) then
+    if r.IsTrackSelected(track) or bus_check(track) then
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
     else
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -116,10 +121,10 @@ function sync_routing_and_fx()
     r.Main_OnCommand(collapse, 0) -- collapse folder
 
     for i = 1, folder_check() - 1, 1 do
-      local copy_folder_routing = r.NamedCommandLookup("_S&M_COPYSNDRCV2")
-      r.Main_OnCommand(copy_folder_routing, 0) -- copy folder track routing
       local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
       r.Main_OnCommand(select_children, 0) --SWS_SELCHILDREN2
+      local copy_folder_routing = r.NamedCommandLookup("_S&M_COPYSNDRCV2")
+      r.Main_OnCommand(copy_folder_routing, 0) -- copy folder track routing
       r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
       local copy = r.NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
       r.Main_OnCommand(copy, 0)
@@ -128,10 +133,10 @@ function sync_routing_and_fx()
       r.Main_OnCommand(40421, 0) -- Item: Select all items in track
       local delete_items = r.NamedCommandLookup("_SWS_DELALLITEMS")
       r.Main_OnCommand(delete_items, 0)
-      local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
-      r.Main_OnCommand(unselect_children, 0) -- unselect children
       local paste_folder_routing = r.NamedCommandLookup("_S&M_PASTSNDRCV2")
       r.Main_OnCommand(paste_folder_routing, 0) -- paste folder track routing
+      local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
+      r.Main_OnCommand(unselect_children, 0) -- unselect children
       r.Main_OnCommand(40042, 0) --move edit cursor to start
       local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
       r.Main_OnCommand(next_folder, 0) --select next folder
