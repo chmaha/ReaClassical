@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre5
+@version 23.19pre6
 @changelog
-  PDF Guide: Update tested with REAPER v6.78
+  Aux and submix: Allow for creation of aux and submix (@ track prefix) that stay visible
+  Sync FX and routing: All child routing is now also copied from destination to source groups
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
