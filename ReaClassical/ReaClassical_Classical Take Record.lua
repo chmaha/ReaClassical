@@ -34,7 +34,12 @@ function Main()
     local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
     r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
     mixer()
-    solo()
+    local selected = solo()
+    if not selected then
+      r.ShowMessageBox("Please select a folder or track before running", "Classical Take Record", 0)
+      r.SetToggleCommandState(1, take_record_toggle, 0)
+      return
+    end
     r.Main_OnCommand(40491, 0) -- Track: Unarm all tracks for recording
     local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
     r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
@@ -80,6 +85,9 @@ end
 
 function solo()
   local track = r.GetSelectedTrack(0, 0)
+  if not track then
+    return false
+  end
   r.SetMediaTrackInfo_Value(track, "I_SOLO", 1)
 
   for i = 0, r.CountTracks(0) - 1, 1 do
@@ -89,6 +97,7 @@ function solo()
       i = i + 1
     end
   end
+  return true
 end
 
 function bus_check(track)
