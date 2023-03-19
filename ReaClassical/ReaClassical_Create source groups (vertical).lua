@@ -72,7 +72,7 @@ function create_destination_group()
 
 function solo()
   local track = r.GetSelectedTrack(0, 0)
-  r.SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+  r.SetMediaTrackInfo_Value(track, "I_SOLO", 2)
 
   for i = 0, r.CountTracks(0) - 1, 1 do
     track = r.GetTrack(0, i)
@@ -181,16 +181,18 @@ function create_source_groups()
   local i = 0
   while i < total_tracks do
     local track = r.GetTrack(0, i)
-    r.GetSetTrackGroupMembership(track, "VOLUME_LEAD", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "VOLUME_FOLLOW", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "PAN_LEAD", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "PAN_FOLLOW", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "POLARITY_LEAD", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "POLARITY_FOLLOW", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "AUTOMODE_LEAD", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "AUTOMODE_FOLLOW", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "MUTE_LEAD", 2 ^ i, 2 ^ i)
-    r.GetSetTrackGroupMembership(track, "MUTE_FOLLOW", 2 ^ i, 2 ^ i)
+    if not bus_check(track) then
+      r.GetSetTrackGroupMembership(track, "VOLUME_LEAD", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "VOLUME_FOLLOW", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "PAN_LEAD", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "PAN_FOLLOW", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "POLARITY_LEAD", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "POLARITY_FOLLOW", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "AUTOMODE_LEAD", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "AUTOMODE_FOLLOW", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "MUTE_LEAD", 2 ^ i, 2 ^ i)
+      r.GetSetTrackGroupMembership(track, "MUTE_FOLLOW", 2 ^ i, 2 ^ i)
+    end
     i = i + 1
   end
   local first_track = r.GetTrack(0, 0)

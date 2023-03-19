@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre8
+@version 23.19pre10
 @changelog
-  New: Add Aux/Submix @ track to end of tracklist
+  Various: Use Solo in Place to allow for unmuted sends to aux/submixes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
