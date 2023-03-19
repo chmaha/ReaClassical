@@ -4,6 +4,7 @@
 @changelog
   Create Source Groups: Don't apply grouping for aux/submix tracks
   Various: Use Solo in Place to allow for unmuted sends to aux/submixes
+  PDF Guide: Bump pre-release number
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
