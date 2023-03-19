@@ -2,7 +2,7 @@
 @author chmaha
 @version 23.19pre8
 @changelog
-  New: Add Aux/Submix @ track to end of mixer
+  New: Add Aux/Submix @ track to end of tracklist
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

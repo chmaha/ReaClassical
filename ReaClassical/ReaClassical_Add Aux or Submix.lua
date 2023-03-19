@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 r.Undo_BeginBlock()
-r.Main_OnCommand(41147,0) -- Add track to end of mixer
+r.Main_OnCommand(40702,0) -- Add track to end of tracklist
 track = r.GetSelectedTrack(0, 0)
 native_color = r.ColorToNative(76,145,101)
 r.SetTrackColor(track, native_color)
