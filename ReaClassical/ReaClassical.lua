@@ -3,7 +3,7 @@
 @version 23.19pre9
 @changelog
   Create Source Groups: Don't apply grouping for aux/submix tracks
-  Various: Use Solo in Place to allow for unmuted sends to aux/submixes
+  Various Scripts: Use Solo in Place to allow for unmuted sends to aux/submixes
   PDF Guide: Bump pre-release number
 @metapackage
 @provides
