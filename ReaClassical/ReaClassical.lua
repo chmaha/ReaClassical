@@ -3,6 +3,7 @@
 @version 23.19pre7
 @changelog
   Classical Take Record: Add guard clause if no folder/track selected
+  PDF Guide: Bump pre-release number
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
