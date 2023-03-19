@@ -1,7 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre10
+@version 23.19pre9
 @changelog
+  Create Source Groups: Don't apply grouping for aux/submix tracks
   Various: Use Solo in Place to allow for unmuted sends to aux/submixes
 @metapackage
 @provides
