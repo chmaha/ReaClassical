@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre7
+@version 23.19pre8
 @changelog
-  Classical Take Record: Add guard clause if no folder/track selected
-  PDF Guide: Bump pre-release number
+  New: Add Aux/Submix @ track to end of mixer
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -31,6 +30,7 @@
   [main] ReaClassical_Help.lua
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Previous Item or Fade.lua
+  [main] ReaClassical_Add Aux or Submix.lua
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
