@@ -88,7 +88,7 @@ function solo()
   if not track then
     return false
   end
-  r.SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+  r.SetMediaTrackInfo_Value(track, "I_SOLO", 2)
 
   for i = 0, r.CountTracks(0) - 1, 1 do
     track = r.GetTrack(0, i)
