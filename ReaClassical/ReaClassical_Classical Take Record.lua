@@ -108,6 +108,11 @@ end
 function mixer()
   for i = 0, r.CountTracks(0) - 1, 1 do
     local track = r.GetTrack(0, i)
+    if bus_check(track) then
+      native_color = r.ColorToNative(76,145,101)
+      r.SetTrackColor(track, native_color)
+      r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+    end
     if r.IsTrackSelected(track) or bus_check(track) then
       r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
     else
