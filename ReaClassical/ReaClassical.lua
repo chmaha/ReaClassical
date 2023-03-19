@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre9
+@version 23.19pre10
 @changelog
-  Create Source Groups: Don't apply grouping for aux/submix tracks
-  Various Scripts: Use Solo in Place to allow for unmuted sends to aux/submixes
-  PDF Guide: Bump pre-release number
+  Various scripts: Change color of @ track if created manually.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
