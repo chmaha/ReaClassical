@@ -22,7 +22,7 @@ local r = reaper
 local get_grouped_items, copy_shift
 
 function main()
-  reaper.Undo_BeginBlock()
+  r.Undo_BeginBlock()
   local gap, choice
   local bool, gap = reaper.GetUserInputs('Reposition Tracks',1,"No. of seconds between items?",',')
   
@@ -60,7 +60,10 @@ function main()
       copy_shift(grouped_items, shift)
     end
   end
-  reaper.Undo_EndBlock("Reposition Tracks",0)
+  local create_cd_markers = reaper.NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
+  local _, run = r.GetProjExtState(0, "Create CD Markers", "Run?")
+  if run == "yes" then r.Main_OnCommand(create_cd_markers, 0) end
+  r.Undo_EndBlock("Reposition Tracks",0)
 end
 
 function get_grouped_items(item)
