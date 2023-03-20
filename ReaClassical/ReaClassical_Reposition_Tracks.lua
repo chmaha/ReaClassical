@@ -19,6 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
+local copy_shift
 
 function main()
   reaper.Undo_BeginBlock()
@@ -31,39 +32,52 @@ function main()
     choice = r.ShowMessageBox("Please enter a number!", "Reposition Tracks", 0)
     return
   else
-    track_count = r.CountTracks(0)
-    for i=0,track_count-1 do
-      track = r.GetTrack(0,i)
-      local track_items = {}
-      local item_count = r.CountTrackMediaItems(track)
-      for i=0, item_count - 1 do
-        track_items[i] = r.GetTrackMediaItem(track, i)
+    track = r.GetTrack(0,0)
+    local track_items = {}
+    local item_count = r.CountTrackMediaItems(track)
+    for i=0, item_count - 1 do
+      track_items[i] = r.GetTrackMediaItem(track, i)
+    end
+    local shift = 0;
+    for i=1,item_count-1,1 do
+      local prev_item = track_items[i-1]
+      local PrevItemStart = r.GetMediaItemInfo_Value(prev_item, "D_POSITION")
+      local prev_length = r.GetMediaItemInfo_Value(prev_item, "D_LENGTH") 
+      local current_item = track_items[i]
+      local CurrentItemStart = r.GetMediaItemInfo_Value(current_item, "D_POSITION")
+      local take = r.GetActiveTake(current_item)
+      local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+      local NewPos = 0
+      if take_name ~= "" then
+        NewPos = PrevItemStart + prev_length + gap
+        r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
+      else
+        NewPos = CurrentItemStart + shift
+        r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
       end
-      local shift = 0;
-      for i=1,item_count-1,1 do
-        local prev_item = track_items[i-1]
-        local PrevItemStart = r.GetMediaItemInfo_Value(prev_item, "D_POSITION")
-        local prev_length = r.GetMediaItemInfo_Value(prev_item, "D_LENGTH") 
-        local current_item = track_items[i]
-        local CurrentItemStart = r.GetMediaItemInfo_Value(current_item, "D_POSITION")
-        local take = r.GetActiveTake(current_item)
-        local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-        local NewPos = 0
-        if take_name ~= "" then
-          NewPos = PrevItemStart + prev_length + gap
-          r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
-        else
-          NewPos = CurrentItemStart + shift
-          r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
-        end
-        shift = NewPos - CurrentItemStart
-      end
-      if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == -1 then
-        break
-      end
+      shift = NewPos - CurrentItemStart
+      copy_shift(current_item, shift)
     end
   end
   reaper.Undo_EndBlock("Reposition Tracks",0)
+end
+
+function copy_shift(item, shift)
+  r.Main_OnCommand(40289,0) -- unselect all items
+  r.SetMediaItemSelected(item, true)
+  r.Main_OnCommand(40034,0) -- Item grouping: Select all items in groups
+  selected_item_count = r.CountSelectedMediaItems(0)
+  
+  selected_items = {}
+  
+  for i=1,selected_item_count - 1 do
+    selected_items[i] = r.GetSelectedMediaItem(0, i)
+  end
+  for _,v in pairs(selected_items) do
+   local start = r.GetMediaItemInfo_Value(v, "D_POSITION")
+   r.SetMediaItemInfo_Value(v, "D_POSITION", start + shift)
+  end
+  r.Main_OnCommand(40289,0) -- unselect all items
 end
 
 main()
