@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local copy_shift
+local get_grouped_items, copy_shift
 
 function main()
   reaper.Undo_BeginBlock()
@@ -48,6 +48,7 @@ function main()
       local take = r.GetActiveTake(current_item)
       local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
       local NewPos = 0
+      local grouped_items = get_grouped_items(current_item)
       if take_name ~= "" then
         NewPos = PrevItemStart + prev_length + gap
         r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
@@ -56,24 +57,30 @@ function main()
         r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
       end
       shift = NewPos - CurrentItemStart
-      copy_shift(current_item, shift)
+      copy_shift(grouped_items, shift)
     end
   end
   reaper.Undo_EndBlock("Reposition Tracks",0)
 end
 
-function copy_shift(item, shift)
-  r.Main_OnCommand(40289,0) -- unselect all items
-  r.SetMediaItemSelected(item, true)
-  r.Main_OnCommand(40034,0) -- Item grouping: Select all items in groups
-  selected_item_count = r.CountSelectedMediaItems(0)
+function get_grouped_items(item)
+ r.Main_OnCommand(40289,0) -- unselect all items
+ r.SetMediaItemSelected(item, true)
+ r.Main_OnCommand(40034,0) -- Item grouping: Select all items in groups
+ 
+ selected_item_count = r.CountSelectedMediaItems(0)
+ 
+ selected_items = {}
+ 
+ for i=1,selected_item_count - 1 do
+   selected_items[i] = r.GetSelectedMediaItem(0, i)
+ end
+ return selected_items
+end
+
+function copy_shift(grouped_items, shift)
   
-  selected_items = {}
-  
-  for i=1,selected_item_count - 1 do
-    selected_items[i] = r.GetSelectedMediaItem(0, i)
-  end
-  for _,v in pairs(selected_items) do
+  for _,v in pairs(grouped_items) do
    local start = r.GetMediaItemInfo_Value(v, "D_POSITION")
    r.SetMediaItemInfo_Value(v, "D_POSITION", start + shift)
   end

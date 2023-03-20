@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre11
+@version 23.19pre12
 @changelog
-  New Script: Reposition destination group tracks including all children
+  Reposition Tracks: Works with both Prepared Takes grouping and newer media/razor grouping
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
