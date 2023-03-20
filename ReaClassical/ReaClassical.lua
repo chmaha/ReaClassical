@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre10
+@version 23.19pre11
 @changelog
-  Various scripts: Change color of @ track if created manually.
+  New Script: Reposition Tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -31,6 +31,7 @@
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Previous Item or Fade.lua
   [main] ReaClassical_Add Aux or Submix.lua
+  [main] ReaClassical_Reposition_Tracks.lua
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
