@@ -2,7 +2,7 @@
 @author chmaha
 @version 23.19pre11
 @changelog
-  New Script: Reposition Tracks
+  New Script: Reposition destination group tracks including all children
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
