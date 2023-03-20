@@ -35,10 +35,11 @@ function Main()
     r.ShowMessageBox("Error: Empty items found on first track. Delete them to continue.","Create CD Markers",0)
     return
   end
-  local choice = r.ShowMessageBox("WARNING: This will delete all existing markers, regions and item take markers. Track titles will be pulled from item take names."
+  local choice = r.ShowMessageBox("WARNING: This will delete all existing markers, regions and item take markers. Track titles will be pulled from item take names. Continue?"
     ,
-    "Create CD/DDP markers", 1)
-  if choice ~= 2 then
+    "Create CD/DDP markers", 4)
+  if choice == 6 then
+    r.SetProjExtState(0, "Create CD Markers", "Run?", "yes")
     cd_markers()
   end
   r.Undo_EndBlock("Create CD/DDP Markers", -1)
