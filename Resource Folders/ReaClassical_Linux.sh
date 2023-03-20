@@ -1,5 +1,5 @@
 #!/bin/bash
-# by chmaha (Jan 2023)
+# by chmaha (April 2023)
 
 # Script to install ReaClassical on Linux
 # Works for both x86_64 and aarch64 architectures
@@ -15,11 +15,12 @@ arch=`uname -m`
 
 echo "Downloading REAPER $pkgver from reaper.fm..."
 sleep 2
-wget -q --show-progress --progress=bar:force https://reaper.fm/files/${pkgver::1}.x//reaper${pkgver//.}_linux_$arch.tar.xz
+wget -q --show-progress --progress=bar:force https://reaper.fm/files/${pkgver::1}.x/reaper${pkgver//.}_linux_$arch.tar.xz
 echo "Extracting files from REAPER archive"
 tar -xf reaper${pkgver//.}_linux_$arch.tar.xz
+mv reaper_linux_$arch/ ReaClassical/
 rm reaper${pkgver//.}_linux_$arch.tar.xz
-cd reaper_linux_${arch}/REAPER
+cd ReaClassical/REAPER
 echo "Downloading ReaClassical files from Github..."
 sleep 2
 wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip
