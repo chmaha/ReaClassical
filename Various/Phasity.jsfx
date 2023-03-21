@@ -1,4 +1,4 @@
-Version: 1.0
+Version: 1.1
 desc:Phasity Delay Timing Tool (chmaha)
 author: chmaha
 about:
@@ -44,7 +44,7 @@ inputSampleR = spl1;
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
 
-(gcount < 1 || gcount > maxtime) ? gcount = maxtime;
+(gcount < 0 || gcount > maxtime) ? gcount = maxtime;
 count = gcount;
 pL[count] = inputSampleL;
 pR[count] = inputSampleR;
