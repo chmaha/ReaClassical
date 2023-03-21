@@ -19,10 +19,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local get_grouped_items, copy_shift
+local get_grouped_items, copy_shift, empty_items_check
+local first_track = r.GetTrack(0, 0)
+if first_track then NUM_OF_ITEMS = r.CountTrackMediaItems(first_track) end
 
 function main()
   r.Undo_BeginBlock()
+  if not first_track or NUM_OF_ITEMS == 0 then
+    r.ShowMessageBox("Error: No media items found.","Reposition Tracks",0)
+    return
+  end
+  local empty_count = empty_items_check()
+  if empty_count > 0 then
+    r.ShowMessageBox("Error: Empty items found on first track. Delete them to continue.","Reposition Tracks",0)
+    return
+  end
   local gap, choice
   local bool, gap = reaper.GetUserInputs('Reposition Tracks',1,"No. of seconds between items?",',')
   
@@ -88,6 +99,18 @@ function copy_shift(grouped_items, shift)
    r.SetMediaItemInfo_Value(v, "D_POSITION", start + shift)
   end
   r.Main_OnCommand(40289,0) -- unselect all items
+end
+
+function empty_items_check()
+  local count = 0
+  for i = 0, NUM_OF_ITEMS - 1, 1 do
+    local current_item = r.GetTrackMediaItem(first_track, i)
+    local take = r.GetActiveTake(current_item)
+    if not take then 
+      count = count + 1 
+    end 
+  end
+  return count
 end
 
 main()
