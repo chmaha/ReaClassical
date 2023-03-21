@@ -3,6 +3,7 @@
 @version 23.19pre14
 @changelog
   Add guard clauses to deal with zero track count or no media items present
+  Update PDF Guide version
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
