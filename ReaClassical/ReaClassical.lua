@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre13
+@version 23.19pre14
 @changelog
-  Create CD markers: If run save a key/value pair
-  Reposition Tracks: Use key/value pair to automatically re-run Create CD Markers after repositioning
+  Add guard clauses to deal with zero track count or no media items present
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
