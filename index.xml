@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="c12b81d5e48f8ec625575df3d78350df3fe97103">
+<index version="1" name="chmaha Scripts" commit="998e32668c91681afcb8d09dd39d76328417b2b3">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -2180,6 +2180,9 @@ Reposition Tracks: Use key/value pair to automatically re-run Create CD Markers 
       </metadata>
       <version name="1.0" author="chmaha" time="2023-03-18T23:15:05Z">
         <source>https://github.com/chmaha/ReaClassical/raw/2f0a98beac6f6eed4f0df44cad4f949a7c2bedeb/Various/Phasity.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-03-21T09:14:56Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/998e32668c91681afcb8d09dd39d76328417b2b3/Various/Phasity.jsfx</source>
       </version>
     </reapack>
     <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon Compressor / Gate (chmaha)">
