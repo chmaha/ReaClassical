@@ -3,6 +3,7 @@
 @version 23.19pre15
 @changelog
   Rename Reposition Tracks to Reposition Album Tracks to avoid confusion
+  Bump PDF version
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
