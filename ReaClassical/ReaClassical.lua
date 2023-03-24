@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre14
+@version 23.19pre15
 @changelog
-  Add guard clauses to deal with zero track count or no media items present
-  Update PDF Guide version
+  Rename Reposition Tracks to Reposition Album Tracks to avoid confusion
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -32,7 +31,7 @@
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Previous Item or Fade.lua
   [main] ReaClassical_Add Aux or Submix.lua
-  [main] ReaClassical_Reposition_Tracks.lua
+  [main] ReaClassical_Reposition_Album_Tracks.lua
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
