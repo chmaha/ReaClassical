@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="b6f8db0b9d1938b4b816a503d9598403f5c1a930">
+<index version="1" name="chmaha Scripts" commit="e34266d5bddde7d770dd3ea0cfc67b6ef0a6253b">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -2242,7 +2242,7 @@ Bump PDF version]]></changelog>
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SampleDelay" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SampleDelay (MIT License) JSFX version released under GPLv3 license\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SampleDelay" by Chris Johnson with adaptation by chmaha https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SampleDelay (MIT License) JSFX version released under GPLv3 license\par}
 }
 ]]></description>
       </metadata>
@@ -2251,6 +2251,9 @@ Bump PDF version]]></changelog>
       </version>
       <version name="1.1" author="chmaha" time="2023-03-21T09:14:56Z">
         <source>https://github.com/chmaha/ReaClassical/raw/998e32668c91681afcb8d09dd39d76328417b2b3/Various/Phasity.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2023-03-25T09:16:56Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/e34266d5bddde7d770dd3ea0cfc67b6ef0a6253b/Various/Phasity.jsfx</source>
       </version>
     </reapack>
     <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon Compressor / Gate (chmaha)">
