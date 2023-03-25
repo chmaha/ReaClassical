@@ -32,7 +32,8 @@ SCR 4 0 RSf03944e159952885b66c7c1be2754e2b3c7d4b07 "Custom: ReaClassical_Help.lu
 SCR 4 0 RS852f0872789b997921f7f9d40e6f997553bd5147 "Custom: REAPER Update Utility.lua" "FTC Tools/Various/REAPER Update Utility.lua"
 SCR 4 0 RS32ef6149afbb590d7e86127883edf97c31519b13 "Custom: ReaClassical_Next Item or Fade.lua" "chmaha Scripts/ReaClassical/ReaClassical_Next Item or Fade.lua"
 SCR 4 0 RSd822317d30519d2c436a221d58e85c2570459f66 "Custom: ReaClassical_Previous Item or Fade.lua" "chmaha Scripts/ReaClassical/ReaClassical_Previous Item or Fade.lua"
-SCR 4 0 RS026f22442e253b97d7a21b40e4065f1854ca279a "Custom: ReaClassical_PDF_Guide.lua" "chmaha Scripts/PDF_Guide/ReaClassical_PDF_Guide.lua"
+SCR 4 0 RS92c9e0d95f3a6bd63e93e47b1c1b14ae718d97b7 "Custom: ReaClassical_Add Aux or Submix.lua" "chmaha Scripts/ReaClassical/ReaClassical_Add Aux or Submix.lua"
+SCR 4 0 RScd77c8197880fdf5bef78b3cf0227a460e75d40c "Custom: ReaClassical_Reposition_Album_Tracks.lua" "chmaha Scripts/ReaClassical/ReaClassical_Reposition_Album_Tracks.lua"
 KEY 25 82 0 0
 KEY 9 80 0 0
 KEY 17 13 0 0
@@ -60,6 +61,7 @@ KEY 1 82 40015 0
 KEY 1 79 40016 0
 KEY 1 80 40021 0
 KEY 1 32 40044 0
+KEY 1 48 40160 0
 KEY 1 78 40171 0
 KEY 0 44 40172 0
 KEY 0 46 40173 0
@@ -109,4 +111,6 @@ KEY 1 72 _RSf03944e159952885b66c7c1be2754e2b3c7d4b07 0
 KEY 9 85 _RS852f0872789b997921f7f9d40e6f997553bd5147 0
 KEY 1 87 _RS32ef6149afbb590d7e86127883edf97c31519b13 0
 KEY 1 81 _RSd822317d30519d2c436a221d58e85c2570459f66 0
+KEY 0 64 _RS92c9e0d95f3a6bd63e93e47b1c1b14ae718d97b7 0
+KEY 9 89 _RScd77c8197880fdf5bef78b3cf0227a460e75d40c 0
 KEY 1 9 40440 32060
