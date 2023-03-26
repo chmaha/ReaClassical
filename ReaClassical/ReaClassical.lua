@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre15
+@version 23.19pre16
 @changelog
-  Rename Reposition Tracks to Reposition Album Tracks to avoid confusion
-  Bump PDF version
+  Only allow use of Add aux/submix track if a folder exists already
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
