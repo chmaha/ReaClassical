@@ -2,3 +2,4 @@
 *.lyx*
 user_guide_images/
 cleanrf.sh
+*.xcf
