@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre17
+@version 23.19pre18
 @changelog
-  Prepare Takes: Change messagebox to yes/no if edits present
+  Reposition Album Tracks: Show message if no media item take names found
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
