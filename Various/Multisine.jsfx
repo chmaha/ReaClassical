@@ -1,0 +1,175 @@
+Version: 1.0
+desc:Multisine Chebyshev Filter (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Pafnuty2" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pafnuty2 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<-1,1,0.01>Second
+slider2:0<-1,1,0.01>Third
+slider3:0<-1,1,0.01>Fourth
+slider4:0<-1,1,0.01>Fifth
+slider5:0<-1,1,0.01>Sixth
+slider6:0<-1,1,0.01>Seventh
+slider7:0<-1,1,0.01>Eigth
+slider8:0<-1,1,0.01>Ninth
+slider9:0<-1,1,0.01>Tenth
+slider10:0<-1,1,0.01>Inv/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+
+@block
+
+second = slider1*1.0;
+second = second * abs(second);
+third = -slider2*0.60;
+third = third * abs(third);
+fourth = -slider3*0.60;
+fourth = fourth * abs(fourth);
+fifth = slider4*0.45;
+fifth = fifth * abs(fifth);
+sixth = slider5*0.45;
+sixth = sixth * abs(sixth);
+seventh = -slider6*0.38;
+seventh = seventh * abs(seventh);
+eighth = -slider7*0.38;
+eighth = eighth * abs(eighth);
+ninth = slider8*0.35;
+ninth = ninth * abs(ninth);
+tenth = slider9*0.35;
+tenth = tenth * abs(tenth);
+amount = slider10;
+amount = amount * abs(amount);
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+effect = 0.0;
+inP2 = inputSampleL * inputSampleL;
+inP3 = inP2 * inputSampleL;
+inP4 = inP3 * inputSampleL;
+inP5 = inP4 * inputSampleL;
+inP6 = inP5 * inputSampleL;
+inP7 = inP6 * inputSampleL;
+inP8 = inP7 * inputSampleL;
+inP9 = inP8 * inputSampleL;
+inP10 = inP9 * inputSampleL;
+
+(second != 0.0) ?
+(
+  chebyshev = (2 * inP2);
+  effect += (chebyshev * second);
+);
+(third != 0.0) ?
+(
+  chebyshev = (4 * inP3) - (3*inputSampleL);
+  effect += (chebyshev * third);
+);
+(fourth != 0.0) ?
+(
+  chebyshev = (8 * inP4) - (8 * inP2);
+  effect += (chebyshev * fourth);
+);
+(fifth != 0.0) ?
+(
+  chebyshev = (16 * inP5) - (20 * inP3) + (5*inputSampleL);
+  effect += (chebyshev * fifth);
+);
+(sixth != 0.0) ?
+(
+  chebyshev = (32 * inP6) - (48 * inP4) + (18 * inP2);
+  effect += (chebyshev * sixth);
+);
+(seventh != 0.0) ?
+(
+  chebyshev = (64 * inP7) - (112 * inP5) + (56 * inP3) - (7*inputSampleL);
+  effect += (chebyshev * seventh);
+);
+(eighth != 0.0) ?
+(
+  chebyshev = (128 * inP8) - (256 * inP6) + (160 * inP4) - (32 * inP2);
+  effect += (chebyshev * eighth);
+);
+(ninth != 0.0) ?
+(
+  chebyshev = (256 * inP9) - (576 * inP7) + (432 * inP5) - (120 * inP3) + (9*inputSampleL);
+  effect += (chebyshev * ninth);
+);
+(tenth != 0.0) ?
+(
+  chebyshev = (512 * inP10) - (1280 * inP8) + (1120 * inP6) - (400 * inP4) + (50 * inP2);
+  effect += (chebyshev * tenth);
+);
+
+inputSampleL += (effect * amount);
+
+effect = 0.0;
+inP2 = inputSampleR * inputSampleR;
+inP3 = inP2 * inputSampleR;
+inP4 = inP3 * inputSampleR;
+inP5 = inP4 * inputSampleR;
+inP6 = inP5 * inputSampleR;
+inP7 = inP6 * inputSampleR;
+inP8 = inP7 * inputSampleR;
+inP9 = inP8 * inputSampleR;
+inP10 = inP9 * inputSampleR;
+
+(second != 0.0) ?
+(
+  chebyshev = (2 * inP2);
+  effect += (chebyshev * second);
+);
+(third != 0.0) ?
+(
+  chebyshev = (4 * inP3) - (3*inputSampleR);
+  effect += (chebyshev * third);
+);
+(fourth != 0.0) ?
+(
+  chebyshev = (8 * inP4) - (8 * inP2);
+  effect += (chebyshev * fourth);
+);
+(fifth != 0.0) ?
+(
+  chebyshev = (16 * inP5) - (20 * inP3) + (5*inputSampleR);
+  effect += (chebyshev * fifth);
+);
+(sixth != 0.0) ?
+(
+  chebyshev = (32 * inP6) - (48 * inP4) + (18 * inP2);
+  effect += (chebyshev * sixth);
+);
+(seventh != 0.0) ?
+(
+  chebyshev = (64 * inP7) - (112 * inP5) + (56 * inP3) - (7*inputSampleR);
+  effect += (chebyshev * seventh);
+);
+(eighth != 0.0) ?
+(
+  chebyshev = (128 * inP8) - (256 * inP6) + (160 * inP4) - (32 * inP2);
+  effect += (chebyshev * eighth);
+);
+(ninth != 0.0) ?
+(
+  chebyshev = (256 * inP9) - (576 * inP7) + (432 * inP5) - (120 * inP3) + (9*inputSampleR);
+  effect += (chebyshev * ninth);
+);
+(tenth != 0.0) ?
+(
+  chebyshev = (512 * inP10) - (1280 * inP8) + (1120 * inP6) - (400 * inP4) + (50 * inP2);
+  effect += (chebyshev * tenth);
+);
+
+inputSampleR += (effect * amount);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
