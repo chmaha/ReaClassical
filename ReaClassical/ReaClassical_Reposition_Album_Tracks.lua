@@ -23,7 +23,7 @@ local get_grouped_items, copy_shift, empty_items_check
 local first_track = r.GetTrack(0, 0)
 if first_track then NUM_OF_ITEMS = r.CountTrackMediaItems(first_track) end
 
-function main()
+function Main()
   r.Undo_BeginBlock()
   if not first_track or NUM_OF_ITEMS == 0 then
     r.ShowMessageBox("Error: No media items found.","Reposition Album Tracks",0)
@@ -35,7 +35,7 @@ function main()
     return
   end
   
-  local bool, gap = reaper.GetUserInputs('Reposition Tracks',1,"No. of seconds between items?",',')
+  local bool, gap = r.GetUserInputs('Reposition Tracks',1,"No. of seconds between items?",',')
   
   if not bool then
     return
@@ -43,7 +43,7 @@ function main()
     r.ShowMessageBox("Please enter a number!", "Reposition Album Tracks", 0)
     return
   else
-    track = r.GetTrack(0,0)
+    local track = r.GetTrack(0,0)
     local track_items = {}
     local item_count = r.CountTrackMediaItems(track)
     for i=0, item_count - 1 do
@@ -53,23 +53,24 @@ function main()
     local num_tracks = 0
     for i=1,item_count-1,1 do
       local prev_item = track_items[i-1]
-      local PrevItemStart = r.GetMediaItemInfo_Value(prev_item, "D_POSITION")
-      local prev_length = r.GetMediaItemInfo_Value(prev_item, "D_LENGTH") 
+      local prev_item_start = r.GetMediaItemInfo_Value(prev_item, "D_POSITION")
+      local prev_length = r.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
+      local prev_end = prev_item_start + prev_length
       local current_item = track_items[i]
-      local CurrentItemStart = r.GetMediaItemInfo_Value(current_item, "D_POSITION")
+      local current_item_start = r.GetMediaItemInfo_Value(current_item, "D_POSITION")
       local take = r.GetActiveTake(current_item)
       local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-      local NewPos = 0
+      local new_pos = 0
       local grouped_items = get_grouped_items(current_item)
-      if take_name ~= "" then
-        NewPos = PrevItemStart + prev_length + gap
-        r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
+      if take_name ~= "" and (current_item_start + shift > prev_end) then
+        new_pos = prev_end + gap
+        r.SetMediaItemInfo_Value(current_item, "D_POSITION", new_pos)
         num_tracks = num_tracks + 1
       else
-        NewPos = CurrentItemStart + shift
-        r.SetMediaItemInfo_Value(current_item, "D_POSITION", NewPos)
+        new_pos = current_item_start + shift
+        r.SetMediaItemInfo_Value(current_item, "D_POSITION", new_pos)
       end
-      shift = NewPos - CurrentItemStart
+      shift = new_pos - current_item_start
       copy_shift(grouped_items, shift)
     end
     if num_tracks == 0 then
@@ -77,7 +78,7 @@ function main()
       return
     end
   end
-  local create_cd_markers = reaper.NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
+  local create_cd_markers = r.NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
   local _, run = r.GetProjExtState(0, "Create CD Markers", "Run?")
   if run == "yes" then r.Main_OnCommand(create_cd_markers, 0) end
   r.Undo_EndBlock("Reposition Tracks",0)
@@ -88,14 +89,14 @@ function get_grouped_items(item)
  r.SetMediaItemSelected(item, true)
  r.Main_OnCommand(40034,0) -- Item grouping: Select all items in groups
  
- selected_item_count = r.CountSelectedMediaItems(0)
+ Selected_item_count = r.CountSelectedMediaItems(0)
  
- selected_items = {}
+ Selected_items = {}
  
- for i=1,selected_item_count - 1 do
-   selected_items[i] = r.GetSelectedMediaItem(0, i)
+ for i=1,Selected_item_count - 1 do
+   Selected_items[i] = r.GetSelectedMediaItem(0, i)
  end
- return selected_items
+ return Selected_items
 end
 
 function copy_shift(grouped_items, shift)
@@ -119,7 +120,7 @@ function empty_items_check()
   return count
 end
 
-main()
+Main()
 
 
 
