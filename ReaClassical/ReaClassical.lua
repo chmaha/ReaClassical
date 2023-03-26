@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre16
+@version 23.19pre17
 @changelog
-  Only allow use of Add aux/submix track if a folder exists already
+  Prepare Takes: Change messagebox to yes/no if edits present
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
