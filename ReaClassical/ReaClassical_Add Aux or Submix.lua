@@ -19,12 +19,36 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-r.Undo_BeginBlock()
-r.Main_OnCommand(40702,0) -- Add track to end of tracklist
-track = r.GetSelectedTrack(0, 0)
-native_color = r.ColorToNative(76,145,101)
-r.SetTrackColor(track, native_color)
-r.GetSetMediaTrackInfo_String(track, "P_NAME", "@", true) -- Add @ as track name
-r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-r.Main_OnCommand(40297,0)
-r.Undo_EndBlock("Add Aux/Submix track",0)
+local track_count = r.CountTracks(0)
+local folder_check
+
+function main()
+  folders = folder_check()
+  if folders == 0 then
+    r.ShowMessageBox("Please use either the 'Create folder' or 'Create Source Groups' script first!","Add Aux/Submix track",0)
+    return
+  end
+  r.Undo_BeginBlock()
+  r.Main_OnCommand(40702,0) -- Add track to end of tracklist
+  track = r.GetSelectedTrack(0, 0)
+  native_color = r.ColorToNative(76,145,101)
+  r.SetTrackColor(track, native_color)
+  r.GetSetMediaTrackInfo_String(track, "P_NAME", "@", true) -- Add @ as track name
+  r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+  r.Main_OnCommand(40297,0)
+  r.Undo_EndBlock("Add Aux/Submix track",0)
+end
+
+function folder_check()
+  local folders = 0
+  local total_tracks = r.CountTracks(0)
+  for i = 0, total_tracks - 1, 1 do
+    local track = r.GetTrack(0, i)
+    if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+      folders = folders + 1
+    end
+  end
+  return folders
+end
+
+main()
