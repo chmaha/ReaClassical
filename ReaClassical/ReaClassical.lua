@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre19
+@version 23.19pre20
 @changelog
-  Reposition Album Tracks: Respect relative positions of named tracks that run on from previous tracks
+  Prepare Takes: Change wording when offering to remove item take names
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
