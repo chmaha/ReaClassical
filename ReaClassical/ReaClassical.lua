@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre20
+@version 23.19pre21
 @changelog
-  Prepare Takes: Change wording when offering to remove item take names
+  Prepare Takes: Always ask to remove item take names
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
