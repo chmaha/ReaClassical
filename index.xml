@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="91ff1d0194c57e650ed8521a86396fb0cd2f4ab7">
+<index version="1" name="chmaha Scripts" commit="a1af9b8cf1ccda2c22b3856fede710df32856b29">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1966,6 +1966,20 @@ Bump PDF version]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Reverbs/Interstellar.jsfx</source>
       </version>
     </reapack>
+    <reapack name="NW8PlateReverb.jsfx" type="effect" desc="NW8 Plate Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "kPlateA" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kPlateA (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-04T07:37:08Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/a1af9b8cf1ccda2c22b3856fede710df32856b29/Reverbs/NW8PlateReverb.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="PhiVerb.jsfx" type="effect" desc="PhiVerb Reverb (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
@@ -2372,6 +2386,20 @@ Bump PDF version]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-03-07T18:29:20Z">
         <source>https://github.com/chmaha/ReaClassical/raw/54676b4a07eb40769e4d2e29f052efeb0cc56517/Various/Millie.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="multisine.jsfx" type="effect" desc="Multisine Chebyshev Filter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pafnuty2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pafnuty2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-04T07:37:08Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/a1af9b8cf1ccda2c22b3856fede710df32856b29/Various/multisine.jsfx</source>
       </version>
     </reapack>
     <reapack name="MuTube.jsfx" type="effect" desc="MuTube Compressor (chmaha)">
