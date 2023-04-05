@@ -25,6 +25,7 @@ SCR 4 0 RSd822317d30519d2c436a221d58e85c2570459f66 "Custom: ReaClassical_Previou
 SCR 4 0 RScd77c8197880fdf5bef78b3cf0227a460e75d40c "Custom: ReaClassical_Reposition_Album_Tracks.lua" "chmaha Scripts/ReaClassical/ReaClassical_Reposition_Album_Tracks.lua"
 SCR 4 0 RS9f29e53917d53d84820659200ed1882f94a0dddb "Custom: ReaClassical_S-D Edit.lua" "chmaha Scripts/ReaClassical/ReaClassical_S-D Edit.lua"
 SCR 4 0 RS63665092232578f8c8d10c5936ca5013a9ecab51 "Custom: ReaClassical_Whole Project View.lua" "chmaha Scripts/ReaClassical/ReaClassical_Whole Project View.lua"
+SCR 4 0 RSa012bb075440de1ce27f06b6e12b88877848ca5b "Custom: ReaClassical_mpl_Markers to CUE.lua" "chmaha Scripts/ReaClassical/ReaClassical_mpl_Markers to CUE.lua"
 KEY 1 114 _RSfb9968dc637180b9e9d1627a5be31048ae2034e9 0
 KEY 0 64 _RS92c9e0d95f3a6bd63e93e47b1c1b14ae718d97b7 0
 KEY 1 49 _RS031d589795343cd585a36b488d1979a2da61641f 0
@@ -52,3 +53,4 @@ KEY 1 81 _RSd822317d30519d2c436a221d58e85c2570459f66 0
 KEY 9 89 _RScd77c8197880fdf5bef78b3cf0227a460e75d40c 0
 KEY 1 53 _RS9f29e53917d53d84820659200ed1882f94a0dddb 0
 KEY 0 96 _RS63665092232578f8c8d10c5936ca5013a9ecab51 0
+KEY 1 67 _RSa012bb075440de1ce27f06b6e12b88877848ca5b 0
