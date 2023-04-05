@@ -3,6 +3,7 @@
 @version 23.19pre26
 @changelog
   Markers to CUE: Fix bug when dot but no extension is present
+  Markers to CUE: Generate uppercase extension as part of the one function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

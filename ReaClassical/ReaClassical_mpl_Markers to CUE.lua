@@ -70,12 +70,12 @@ function get_data(filename)
     ShowMessageBox('Sorry. Empty fields not supported.', "Create CUE file", 0)
     return false
   end
-  local extension = fields[5]:match('%.([a-zA-Z]+)$')
+  local extension = fields[5]:match('%.([a-zA-Z0-9]+)$')
   if not extension then
     ShowMessageBox('Please enter filename with an extension', "Create CUE file", 0)
     return false
   end
-  return true, fields, extension
+  return true, fields, extension:upper()
 end
 
 ----------------------------------------------------------
@@ -130,11 +130,11 @@ function pattern_match(name_out)
 end
 
 ----------------------------------------------------------
-function ext_mod(ext)
+function ext_mod(extension)
   local list = { "AIFF", "MP3" }
   for _, v in pairs(list) do
-    if ext == v then
-      return ext
+    if extension == v then
+      return extension
     end
   end
   return "WAV"
