@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre21
+@version 23.19pre22
 @changelog
-  Prepare Takes: Always ask to remove item take names
+  Add revised mpl/chmaha Markers to CUE script
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -32,6 +32,7 @@
   [main] ReaClassical_Previous Item or Fade.lua
   [main] ReaClassical_Add Aux or Submix.lua
   [main] ReaClassical_Reposition_Album_Tracks.lua
+  [main] ReaClassical_mpl_Markers to CUE.lua
   [rpp] ReaClassical.RPP
   [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
