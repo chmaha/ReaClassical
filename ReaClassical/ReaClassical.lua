@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre24
+@version 23.19pre25
 @changelog
-  Markers to CUE: Simplify Main() with separate functions
-  Markers to CUE: Remove superfluous code
-  Markers to CUE: Add pairs(reaper) code
+  Markers to CUE: Remove JS API dependency
+  PDF Guide: Remove references to mpl_Various functions.lua and JS API
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

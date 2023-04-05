@@ -150,24 +150,26 @@ function save_file(filename, out_str)
   else
     path = path:match("(.+)/.+[.]RPP")
   end
-  local retval0, file = JS_Dialog_BrowseForSaveFile('Generate CUE file', path, filename, ".cue")
-  if retval0 == 1 then
-    if not file:lower():match('%.cue') then file = file .. '.cue' end
-    local f = io.open(file, 'w')
-    if f then
-      f:write(out_str)
-      f:close()
-    else
-      ShowMessageBox(
-        "There was an error creating the file. Copy and paste the contents of the following console window to a new .cue file.",
-        "Create CUE file", 0)
-      ShowConsoleMsg(out_str)
-    end
+  local os = GetOS()
+  local slash = "/"
+  if os:match("Win.+") then
+    slash = "\\"
+  end
+  local file = path .. slash .. filename .. '.cue'
+  local f = io.open(file, 'w')
+  if f then
+    f:write(out_str)
+    f:close()
+    ShowMessageBox("CUE file written to " .. file, "Create CUE file", 0)
+  else
+    ShowMessageBox(
+      "There was an error creating the file. Copy and paste the contents of the following console window to a new .cue file.",
+      "Create CUE file", 0)
+    ShowConsoleMsg(out_str)
   end
 end
 
 ----------------------------------------------------------
 
 Main()
-
 
