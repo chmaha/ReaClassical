@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre25
+@version 23.19pre26
 @changelog
-  Markers to CUE: Remove JS API dependency
-  PDF Guide: Remove references to mpl_Various functions.lua and JS API
+  Markers to CUE: Fix bug when dot but no extension is present
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
