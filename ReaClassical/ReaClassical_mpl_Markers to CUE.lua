@@ -20,9 +20,9 @@ chmaha 04.04.23 changelog:
 
 local r = reaper
 local pattern_match, ext_mod, get_proj_path, save_file
-
+----------------------------------------------------------
 function Main()
-  local _, num_of_markers = r.CountProjectMarkers(0)
+  local num_of_markers = r.CountProjectMarkers(0)
   if not num_of_markers or num_of_markers == 0 then
     r.ShowMessageBox('Please use "Create CD Markers script" first', "Create CUE file", 0)
     return
@@ -73,8 +73,8 @@ function Main()
   local has_pattern
   local include
 
-  for i = 1, num_of_markers do
-    local _, _, pos_out, _, name_out, markrgnindexnumber = r.EnumProjectMarkers2(0, i - 1)
+  for i = 0, num_of_markers - 1 do
+    local _, _, pos_out, _, name_out, markrgnindexnumber = r.EnumProjectMarkers2(0, i)
     if not has_pattern then
       has_pattern = pattern_match(name_out) == '#'
           or pattern_match(name_out) == '!'
@@ -83,8 +83,8 @@ function Main()
     if not include then include = pattern_match(name_out) == '#' end
   end
 
-  for i = 1, num_of_markers do
-    local _, _, pos_out, _, name_out, markrgnindexnumber = r.EnumProjectMarkers2(0, i - 1)
+  for i = 0, num_of_markers - 1 do
+    local _, _, pos_out, _, name_out, markrgnindexnumber = r.EnumProjectMarkers2(0, i)
     if (has_time_sel and not (pos_out >= ts_start and pos_out <= tsend)) or
         (pattern_match(name_out) == '!' or pattern_match(name_out) == '@') or (include and pattern_match(name_out) ~= '#')
     then
@@ -123,11 +123,11 @@ function Main()
 
   save_file(path, filename, out_str)
 end
-
+----------------------------------------------------------
 function pattern_match(name_out)
   return name_out:gsub('%s', ''):sub(0, 1)
 end
-
+----------------------------------------------------------
 function ext_mod(ext)
   local list = { "AIFF", "MP3" }
   for _, v in pairs(list) do
@@ -137,7 +137,7 @@ function ext_mod(ext)
   end
   return "WAV"
 end
-
+----------------------------------------------------------
 function get_proj_path()
   local _, path = r.EnumProjects(-1, "")
   if path == "" then
@@ -146,7 +146,7 @@ function get_proj_path()
     return path:match("(.+)/.+[.]RPP")
   end
 end
-
+----------------------------------------------------------
 function save_file(path, filename, out_str)
   local retval0, file = r.JS_Dialog_BrowseForSaveFile('Generate CUE file', path, filename, ".cue")
   if retval0 == 1 then
@@ -163,5 +163,6 @@ function save_file(path, filename, out_str)
     end
   end
 end
+----------------------------------------------------------
 
 Main()

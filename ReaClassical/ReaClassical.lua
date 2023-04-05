@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre22
+@version 23.19pre23
 @changelog
-  Add revised mpl/chmaha Markers to CUE script
-  Update PDF guide version
+  Fix iterating through markers to allow for regions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
