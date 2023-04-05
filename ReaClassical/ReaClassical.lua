@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre23
+@version 23.19pre24
 @changelog
-  Fix iterating through markers to allow for regions
+  Markers to CUE: Simplify Main() with separate functions
+  Add pairs(reaper) code
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
