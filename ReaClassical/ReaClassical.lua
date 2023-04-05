@@ -3,7 +3,8 @@
 @version 23.19pre24
 @changelog
   Markers to CUE: Simplify Main() with separate functions
-  Add pairs(reaper) code
+  Markers to CUE: Remove superfluous code
+  Markers to CUE: Add pairs(reaper) code
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

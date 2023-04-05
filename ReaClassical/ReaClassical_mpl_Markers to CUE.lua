@@ -19,6 +19,7 @@ chmaha 04.04.23 changelog:
 
 chmaha 05.04.23 changelog:
   Simplify Main() with separate functions
+  Remove superfluous code
   Add pairs(reaper) code
 ]]
 for key in pairs(reaper) do _G[key] = reaper[key] end
@@ -29,8 +30,8 @@ local count_markers, create_filename, create_string, get_data
 function Main()
   local ret, num_of_markers = count_markers() if not ret then return end
   local ret, filename = create_filename() if not ret then return end
-  local ret, fields, ext_len = get_data(filename) if not ret then return end
-  local string = create_string(fields, num_of_markers, ext_len)
+  local ret, fields, extension = get_data(filename) if not ret then return end
+  local string = create_string(fields, num_of_markers, extension)
   save_file(filename, string)
 end
 
@@ -47,7 +48,7 @@ end
 ----------------------------------------------------------
 function create_filename()
   local full_project_name = GetProjectName(0)
-  if not full_project_name then
+  if full_project_name == "" then
     ShowMessageBox("Please save your project first!", "Create CUE file", 0)
     return false
   else
@@ -69,17 +70,17 @@ function get_data(filename)
     ShowMessageBox('Sorry. Empty fields not supported.', "Create CUE file", 0)
     return false
   end
-  local ext_len = fields[5]:reverse():find('%.')
-  if not ext_len then
+  local extension = fields[5]:reverse():find('%.')
+  if not extension then
     ShowMessageBox('Please enter filename with an extension', "Create CUE file", 0)
     return false
   end
-  return true, fields, ext_len
+  return true, fields, extension
 end
 
 ----------------------------------------------------------
-function create_string(fields, num_of_markers, ext_len)
-  local ext = fields[5]:sub(1 - ext_len):upper()
+function create_string(fields, num_of_markers, extension)
+  local ext = fields[5]:sub(1 - extension):upper()
 
   local format = ext_mod(ext)
 
@@ -168,4 +169,5 @@ end
 ----------------------------------------------------------
 
 Main()
+
 
