@@ -70,7 +70,7 @@ function get_data(filename)
     ShowMessageBox('Sorry. Empty fields not supported.', "Create CUE file", 0)
     return false
   end
-  local extension = fields[5]:reverse():find('%.')
+  local extension = fields[5]:match('%.([a-zA-Z]+)$')
   if not extension then
     ShowMessageBox('Please enter filename with an extension', "Create CUE file", 0)
     return false
@@ -80,10 +80,8 @@ end
 
 ----------------------------------------------------------
 function create_string(fields, num_of_markers, extension)
-  local ext = fields[5]:sub(1 - extension):upper()
-
-  local format = ext_mod(ext)
-
+  local format = ext_mod(extension)
+  
   local out_str =
       ' REM GENRE ' .. fields[1] ..
       '\n REM DATE ' .. fields[2] ..
