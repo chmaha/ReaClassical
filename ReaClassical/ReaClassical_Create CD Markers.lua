@@ -86,8 +86,11 @@ function cd_markers()
     local current_start, take_name = find_current_start(i)
     local added_marker = create_marker(current_start, marker_count, take_name, code_table)
     if added_marker then
+      if take_name:match("^!") and marker_count > 0 then
+        r.AddProjectMarker(0, false, frame_check(current_start) - 3, 0, "!", marker_count)
+      end
       if marker_count > 0 then
-        r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(current_start), previous_takename,
+        r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(current_start), previous_takename:match("^[!]*(.+)"),
           marker_count)
       end
       previous_start = current_start
@@ -123,9 +126,9 @@ function create_marker(current_start, marker_count, take_name, code_table)
   if take_name ~= "" then
     local corrected_current_start = frame_check(current_start)
     if #code_table == 5 then
-      track_title = "#" .. take_name .. "|ISRC=" .. code_table[2] .. code_table[3] .. code_table[4] .. string.format("%05d", code_table[5] + marker_count)
+      track_title = "#" .. take_name:match("^[!]*(.+)") .. "|ISRC=" .. code_table[2] .. code_table[3] .. code_table[4] .. string.format("%05d", code_table[5] + marker_count)
     else
-      track_title = "#" .. take_name
+      track_title = "#" .. take_name:match("^[!]*(.+)")
     end
     r.AddProjectMarker(0, false, corrected_current_start, 0, track_title, marker_count + 1)
     added_marker = true
