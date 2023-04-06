@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre26
+@version 23.19pre27
 @changelog
-  Markers to CUE: Fix bug when dot but no extension is present
-  Markers to CUE: Generate uppercase extension as part of the one function
+  Create Source Groups: Allow for creating lead/follow groups with existing manually-created folders
+  Create CD Markers: Create pregap markers by prefixing take name with "!"
+  Markers to CUE: Match CUE file name with audio filename given in dialog
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
