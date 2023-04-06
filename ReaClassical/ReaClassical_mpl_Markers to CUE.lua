@@ -32,7 +32,7 @@ function Main()
   local ret, filename = create_filename() if not ret then return end
   local ret, fields, extension = get_data(filename) if not ret then return end
   local string = create_string(fields, num_of_markers, extension)
-  save_file(filename, string)
+  save_file(fields, string)
 end
 
 ----------------------------------------------------------
@@ -141,7 +141,7 @@ function ext_mod(extension)
 end
 
 ----------------------------------------------------------
-function save_file(filename, out_str)
+function save_file(fields, out_str)
   local _, path = EnumProjects(-1, "")
   if path == "" then
     path = GetProjectPath("")
@@ -153,7 +153,7 @@ function save_file(filename, out_str)
   if os:match("Win.+") then
     slash = "\\"
   end
-  local file = path .. slash .. filename .. '.cue'
+  local file = path .. slash .. fields[5]:match('^(.+)[.].+') .. '.cue'
   local f = io.open(file, 'w')
   if f then
     f:write(out_str)
