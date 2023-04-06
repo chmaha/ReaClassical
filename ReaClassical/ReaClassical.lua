@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre27
+@version 23.19pre28
 @changelog
-  Create Source Groups: Allow for creating lead/follow groups with existing manually-created folders
-  Create CD Markers: Create pregap markers by prefixing take name with "!"
-  Markers to CUE: Match CUE file name with audio filename given in dialog
+  Markers to CUE: Save user-inputted data in project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
