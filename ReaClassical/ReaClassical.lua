@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre28
+@version 23.19pre29
 @changelog
-  Markers to CUE: Save user-inputted data in project
+  Create Source Groups: Show error if folders don't have the same number of tracks
+  Create Source Groups: More refactoring
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

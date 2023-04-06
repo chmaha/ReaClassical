@@ -17,41 +17,33 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
-
 local r = reaper
 local create_destination_group, create_source_groups, folder_check, mixer, solo, sync_routing_and_fx
-local media_razor_group, bus_check, remove_track_groups, add_track_groups
+local media_razor_group, bus_check, remove_track_groups, add_track_groups, folder_size_check
 
 function Main()
-
   r.PreventUIRefresh(1)
   r.Undo_BeginBlock()
 
   if r.CountTracks(0) == 0 then
     boolean, num = r.GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
     num = tonumber(num)
-    if boolean == true and num > 1 then 
-      create_destination_group() 
+    if boolean == true and num > 1 then
+      create_destination_group()
     elseif boolean == true and num < 2 then
-      r.ShowMessageBox("You need 2 or more tracks to make a source group!","Create Source Groups",0)
+      r.ShowMessageBox("You need 2 or more tracks to make a source group!", "Create Source Groups", 0)
     end
     if folder_check() == 1 then
       create_source_groups()
-      add_track_groups()
-      media_razor_group()
     end
   elseif folder_check() > 1 then
     sync_routing_and_fx()
-    remove_track_groups()
-    add_track_groups()
-    media_razor_group()
   elseif folder_check() == 1 then
-    remove_track_groups()
     create_source_groups()
-    add_track_groups()
-    media_razor_group()
   else
-    r.ShowMessageBox("In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx", "Create Source Groups", 0)
+    r.ShowMessageBox(
+    "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
+    "Create Source Groups", 0)
   end
   r.Undo_EndBlock('Create Source Groups', 0)
   r.PreventUIRefresh(-1)
@@ -60,20 +52,20 @@ function Main()
 end
 
 function create_destination_group()
-    for i = 1, num, 1 do
-      r.InsertTrackAtIndex(0, true)
-    end
-    for i = 0, num - 1, 1 do
-      local track = r.GetTrack(0, i)
-      r.SetTrackSelected(track, 1)
-    end
-    local make_folder = r.NamedCommandLookup("_SWS_MAKEFOLDER")
-    r.Main_OnCommand(make_folder, 0) -- make folder from tracks
-    for i = 0, num - 1, 1 do
-      local track = r.GetTrack(0, i)
-      r.SetTrackSelected(track, 0)
-    end
+  for i = 1, num, 1 do
+    r.InsertTrackAtIndex(0, true)
   end
+  for i = 0, num - 1, 1 do
+    local track = r.GetTrack(0, i)
+    r.SetTrackSelected(track, 1)
+  end
+  local make_folder = r.NamedCommandLookup("_SWS_MAKEFOLDER")
+  r.Main_OnCommand(make_folder, 0)   -- make folder from tracks
+  for i = 0, num - 1, 1 do
+    local track = r.GetTrack(0, i)
+    r.SetTrackSelected(track, 0)
+  end
+end
 
 function solo()
   local track = r.GetSelectedTrack(0, 0)
@@ -97,7 +89,7 @@ function mixer()
   for i = 0, r.CountTracks(0) - 1, 1 do
     local track = r.GetTrack(0, i)
     if bus_check(track) then
-      native_color = r.ColorToNative(76,145,101)
+      native_color = r.ColorToNative(76, 145, 101)
       r.SetTrackColor(track, native_color)
       r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
     end
@@ -122,9 +114,14 @@ function folder_check()
 end
 
 function sync_routing_and_fx()
-  local ans = r.ShowMessageBox("This will sync your source group routing and fx \nto match that of the destination group. Continue?", "Sync Source & Destination", 4)
+  local ans = r.ShowMessageBox(
+  "This will (re)create track groups and sync your source group routing and fx \nto match that of the destination group. Continue?",
+  "Sync Source & Destination", 4)
 
   if ans == 6 then
+    remove_track_groups()
+    add_track_groups()
+
     local first_track = r.GetTrack(0, 0)
     r.SetOnlyTrackSelected(first_track)
     local collapse = r.NamedCommandLookup("_SWS_COLLAPSE")
@@ -132,10 +129,10 @@ function sync_routing_and_fx()
 
     for i = 1, folder_check() - 1, 1 do
       local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-      r.Main_OnCommand(select_children, 0) --SWS_SELCHILDREN2
+      r.Main_OnCommand(select_children, 0)                  --SWS_SELCHILDREN2
       local copy_folder_routing = r.NamedCommandLookup("_S&M_COPYSNDRCV2")
-      r.Main_OnCommand(copy_folder_routing, 0) -- copy folder track routing
-      r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
+      r.Main_OnCommand(copy_folder_routing, 0)              -- copy folder track routing
+      r.Main_OnCommand(42579, 0)                            -- Track: Remove selected tracks from all track media/razor editing groups
       local copy = r.NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
       r.Main_OnCommand(copy, 0)
       local paste = r.NamedCommandLookup("_SWS_AWPASTE")
@@ -146,10 +143,10 @@ function sync_routing_and_fx()
       local paste_folder_routing = r.NamedCommandLookup("_S&M_PASTSNDRCV2")
       r.Main_OnCommand(paste_folder_routing, 0) -- paste folder track routing
       local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
-      r.Main_OnCommand(unselect_children, 0) -- unselect children
-      r.Main_OnCommand(40042, 0) --move edit cursor to start
+      r.Main_OnCommand(unselect_children, 0)    -- unselect children
+      r.Main_OnCommand(40042, 0)                --move edit cursor to start
       local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
-      r.Main_OnCommand(next_folder, 0) --select next folder
+      r.Main_OnCommand(next_folder, 0)          --select next folder
 
       --Account for empty folders
       local length = r.GetProjectLength(0)
@@ -159,13 +156,13 @@ function sync_routing_and_fx()
 
       select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
       r.Main_OnCommand(select_children, 0) --SWS_SELCHILDREN2
-      r.Main_OnCommand(40421, 0) --select all items on track
+      r.Main_OnCommand(40421, 0)           --select all items on track
 
       local selected_tracks = r.CountSelectedTracks(0)
       for i = 1, selected_tracks, 1 do
-        r.Main_OnCommand(40117, 0) -- Move items up to previous folder
+        r.Main_OnCommand(40117, 0)     -- Move items up to previous folder
       end
-      r.Main_OnCommand(40005, 0) --delete selected tracks
+      r.Main_OnCommand(40005, 0)       --delete selected tracks
       local select_only = r.NamedCommandLookup("_SWS_SELTRKWITEM")
       r.Main_OnCommand(select_only, 0) --SWS: Select only track(s) with selected item(s)
       local dup_tr = r.GetSelectedTrack(0, 0)
@@ -174,7 +171,7 @@ function sync_routing_and_fx()
       r.DeleteTrackMediaItem(dup_tr, last_item)
       r.Main_OnCommand(40289, 0) -- Unselect all items
     end
-
+    media_razor_group()
     local first_track = r.GetTrack(0, 0)
     r.SetOnlyTrackSelected(first_track)
     solo()
@@ -187,13 +184,14 @@ function sync_routing_and_fx()
 end
 
 function create_source_groups()
+  remove_track_groups()
   local first_track = r.GetTrack(0, 0)
   r.SetOnlyTrackSelected(first_track)
   i = 0
   while i < 6 do
     local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-    r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-    r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
+    r.Main_OnCommand(select_children, 0)                  -- SWS: Select children of selected folder track(s)
+    r.Main_OnCommand(42579, 0)                            -- Track: Remove selected tracks from all track media/razor editing groups
     local copy = r.NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
     r.Main_OnCommand(copy, 0)
     local paste = r.NamedCommandLookup("_SWS_AWPASTE")
@@ -203,6 +201,8 @@ function create_source_groups()
     r.Main_OnCommand(delete_items, 0)
     i = i + 1
   end
+  add_track_groups()
+  media_razor_group()
 end
 
 function media_razor_group()
@@ -215,22 +215,22 @@ function media_razor_group()
     for i = 1, num_of_folders, 1 do
       local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
       r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-      r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
+      r.Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
       local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
-      r.Main_OnCommand(next_folder, 0) -- select next folder
+      r.Main_OnCommand(next_folder, 0)     -- select next folder
     end
   else
     local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
     r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-    r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
+    r.Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
   end
-  r.Main_OnCommand(40296, 0) -- Track: Select all tracks
+  r.Main_OnCommand(40296, 0)             -- Track: Select all tracks
   local collapse = r.NamedCommandLookup("_SWS_COLLAPSE")
-  r.Main_OnCommand(collapse, 0) -- collapse folder
-  r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  r.Main_OnCommand(40939, 0) -- Track: Select track 01
+  r.Main_OnCommand(collapse, 0)          -- collapse folder
+  r.Main_OnCommand(40297, 0)             -- Track: Unselect (clear selection of) all tracks
+  r.Main_OnCommand(40939, 0)             -- Track: Select track 01
   local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-  r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+  r.Main_OnCommand(select_children, 0)   -- SWS: Select children of selected folder track(s)
 
   solo()
   local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
@@ -239,16 +239,16 @@ function media_razor_group()
   local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
   r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
 
-  r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  r.Main_OnCommand(40939, 0) -- select track 01
+  r.Main_OnCommand(40297, 0)             -- Track: Unselect (clear selection of) all tracks
+  r.Main_OnCommand(40939, 0)             -- select track 01
 end
 
 function remove_track_groups()
-  r.Main_OnCommand(40296,0) -- select all tracks
+  r.Main_OnCommand(40296, 0) -- select all tracks
   local remove_grouping = r.NamedCommandLookup("_S&M_REMOVE_TR_GRP")
-  r.Main_OnCommand(remove_grouping,0)
-  r.Main_OnCommand(40297,0) -- unselect all tracks
-end  
+  r.Main_OnCommand(remove_grouping, 0)
+  r.Main_OnCommand(40297, 0) -- unselect all tracks
+end
 
 function add_track_groups()
   local select_all_folders = r.NamedCommandLookup("_SWS_SELALLPARENTS")
@@ -279,10 +279,23 @@ function add_track_groups()
       j = j + 1
     end
     local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
-    r.Main_OnCommand(next_folder, 0) --select next folder
+    r.Main_OnCommand(next_folder, 0)     -- select next folder
     r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    local ret = folder_size_check(folder_tracks)
+    if not ret then
+      remove_track_groups()
+      media_razor_group()
+      r.ShowMessageBox("Error: The script can only be run on folders with identical track counts!", "Sync Routing, Grouping and FX", 0)
+      return false
+    end
     i = i + 1
   end
-end  
+  return true
+end
+
+function folder_size_check(folder_tracks)
+  return r.CountSelectedTracks(0) == folder_tracks
+end
 
 Main()
+
