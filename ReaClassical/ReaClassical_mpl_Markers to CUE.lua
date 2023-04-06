@@ -26,6 +26,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local pattern_match, ext_mod, get_proj_path, save_file
 local count_markers, create_filename, create_string, get_data
+local save_metadata
 ----------------------------------------------------------
 function Main()
   local ret, num_of_markers = count_markers() if not ret then return end
@@ -60,9 +61,17 @@ end
 function get_data(filename)
   local this_year = os.date("%Y")
 
-  local ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
-    'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-    'Classical,' .. this_year .. ',Performer,My Classical Album,' .. filename .. '.wav')
+  local _, metadata_saved = GetProjExtState(0, "Markers to CUE", "Metadata")
+  local ret, user_inputs, metadata_table
+  if metadata_saved ~= "" then
+    ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+      'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
+      metadata_saved)
+  else  
+    ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+      'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
+      'Classical,' .. this_year .. ',Performer,My Classical Album,' .. filename .. '.wav')
+  end
   if not ret then return end
   local fields = {}
   for word in user_inputs:gmatch('[^%,]+') do fields[#fields + 1] = word end
@@ -75,6 +84,7 @@ function get_data(filename)
     ShowMessageBox('Please enter filename with an extension', "Create CUE file", 0)
     return false
   end
+  save_metadata(user_inputs)
   return true, fields, extension:upper()
 end
 
@@ -169,5 +179,10 @@ end
 
 ----------------------------------------------------------
 
+function save_metadata(user_inputs)
+  SetProjExtState(0, "Markers to CUE", "Metadata", user_inputs)
+end
+
 Main()
+
 
