@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local create_destination_group, create_source_groups, folder_check, mixer, solo, sync_routing_and_fx
-local media_razor_group, bus_check
+local media_razor_group, bus_check, remove_track_groups, add_track_groups
 
 function Main()
 
@@ -37,13 +37,18 @@ function Main()
     end
     if folder_check() == 1 then
       create_source_groups()
+      add_track_groups()
       media_razor_group()
     end
   elseif folder_check() > 1 then
     sync_routing_and_fx()
+    remove_track_groups()
+    add_track_groups()
     media_razor_group()
   elseif folder_check() == 1 then
+    remove_track_groups()
     create_source_groups()
+    add_track_groups()
     media_razor_group()
   else
     r.ShowMessageBox("In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx", "Create Source Groups", 0)
@@ -182,24 +187,6 @@ function sync_routing_and_fx()
 end
 
 function create_source_groups()
-  local total_tracks = r.CountTracks(0)
-  local i = 0
-  while i < total_tracks do
-    local track = r.GetTrack(0, i)
-    if not bus_check(track) then
-      r.GetSetTrackGroupMembership(track, "VOLUME_LEAD", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "VOLUME_FOLLOW", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "PAN_LEAD", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "PAN_FOLLOW", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "POLARITY_LEAD", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "POLARITY_FOLLOW", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "AUTOMODE_LEAD", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "AUTOMODE_FOLLOW", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "MUTE_LEAD", 2 ^ i, 2 ^ i)
-      r.GetSetTrackGroupMembership(track, "MUTE_FOLLOW", 2 ^ i, 2 ^ i)
-    end
-    i = i + 1
-  end
   local first_track = r.GetTrack(0, 0)
   r.SetOnlyTrackSelected(first_track)
   i = 0
@@ -255,5 +242,47 @@ function media_razor_group()
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
   r.Main_OnCommand(40939, 0) -- select track 01
 end
+
+function remove_track_groups()
+  r.Main_OnCommand(40296,0) -- select all tracks
+  local remove_grouping = r.NamedCommandLookup("_S&M_REMOVE_TR_GRP")
+  r.Main_OnCommand(remove_grouping,0)
+  r.Main_OnCommand(40297,0) -- unselect all tracks
+end  
+
+function add_track_groups()
+  local select_all_folders = r.NamedCommandLookup("_SWS_SELALLPARENTS")
+  r.Main_OnCommand(select_all_folders, 0) -- select all folders
+  local num_of_folders = r.CountSelectedTracks(0)
+  local first_track = r.GetTrack(0, 0)
+  r.SetOnlyTrackSelected(first_track)
+  local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+  r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+  local folder_tracks = r.CountSelectedTracks(0)
+  local i = 0
+  while i < num_of_folders do
+    local j = 0
+    while j < folder_tracks do
+      local track = r.GetSelectedTrack(0, j)
+      if not bus_check(track) then
+        r.GetSetTrackGroupMembership(track, "VOLUME_LEAD", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "VOLUME_FOLLOW", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "PAN_LEAD", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "PAN_FOLLOW", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "POLARITY_LEAD", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "POLARITY_FOLLOW", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "AUTOMODE_LEAD", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "AUTOMODE_FOLLOW", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "MUTE_LEAD", 2 ^ j, 2 ^ j)
+        r.GetSetTrackGroupMembership(track, "MUTE_FOLLOW", 2 ^ j, 2 ^ j)
+      end
+      j = j + 1
+    end
+    local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
+    r.Main_OnCommand(next_folder, 0) --select next folder
+    r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    i = i + 1
+  end
+end  
 
 Main()
