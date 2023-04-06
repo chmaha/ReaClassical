@@ -120,7 +120,8 @@ function sync_routing_and_fx()
 
   if ans == 6 then
     remove_track_groups()
-    add_track_groups()
+    local ret = add_track_groups()
+    if not ret then return end
 
     local first_track = r.GetTrack(0, 0)
     r.SetOnlyTrackSelected(first_track)
@@ -298,4 +299,5 @@ function folder_size_check(folder_tracks)
 end
 
 Main()
+
 

@@ -4,6 +4,7 @@
 @changelog
   Create Source Groups: Show error if folders don't have the same number of tracks
   Create Source Groups: More refactoring
+  Create Source Groups: Use return from add_track_group() function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
