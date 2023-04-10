@@ -21,12 +21,12 @@ out_pin:right output
 inputSampleL = spl0;
 inputSampleR = spl1;
 
-(inputSampleL > 2.8274333882308) ? inputSampleL = 2.8274333882308;
-(inputSampleL < -2.8274333882308) ? inputSampleL = -2.8274333882308;
+(inputSampleL > 2.8) ? inputSampleL = 2.8;
+(inputSampleL < -2.8) ? inputSampleL = -2.8;
 (inputSampleL > 0.0) ? inputSampleL = (inputSampleL*2.0)/(2.8274333882308-inputSampleL)
 : inputSampleL = -(inputSampleL*-2.0)/(2.8274333882308+inputSampleL);
-(inputSampleR > 2.8274333882308) ? inputSampleR = 2.8274333882308;
-(inputSampleR < -2.8274333882308) ? inputSampleR = -2.8274333882308;
+(inputSampleR > 2.8) ? inputSampleR = 2.8;
+(inputSampleR < -2.8) ? inputSampleR = -2.8;
 (inputSampleR > 0.0) ? inputSampleR = (inputSampleR*2.0)/(2.8274333882308-inputSampleR)
 : inputSampleR = -(inputSampleR*-2.0)/(2.8274333882308+inputSampleR);
 
