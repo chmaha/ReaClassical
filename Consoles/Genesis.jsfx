@@ -1,9 +1,8 @@
 @description Genesis Console (chmaha)
 @author chmaha
-@version 1.1
+@version 1.2
 @changelog
-  Add Genesis templates A and B
-  Add noindex and author info
+  Add airwindows changes to Console0BussProc.cpp
 @metapackage
 @provides
   GenesisBus.jsfx
