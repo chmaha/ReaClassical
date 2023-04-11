@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.19pre29
+@version 23.19rc1
 @changelog
-  Create Source Groups: Show error if folders don't have the same number of tracks
-  Create Source Groups: More refactoring
-  Create Source Groups: Use return from add_track_group() function
+  PDF Guide: Switch to sans serif font and add typsetting info on first page
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
