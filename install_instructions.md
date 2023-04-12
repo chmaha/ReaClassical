@@ -1,6 +1,6 @@
 ### Instructions for installing ReaClassical
 
-To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc, install both ReaPack (https://reapack.com/)and latest bleeding edge SWS Extensions (https://www.sws-extension.org/download/pre-release/), import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
+To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc, install both ReaPack (https://reapack.com/) and latest bleeding edge SWS Extensions (https://www.sws-extension.org/download/pre-release/), import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
 
 For the complete and recommended experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
 
