@@ -7,7 +7,7 @@ For the complete and recommended experience on Linux, MacOS and Windows you can 
 #### Quick Full Portable Install on Linux, MacOS & Windows
 
 Download the script for your system and run where you want to download a portable install of ReaClassical:
-##### Linux
+##### Linux (including Raspberry Pi)
 ```
 wget https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh
 sh ReaClassical_Linux.sh
