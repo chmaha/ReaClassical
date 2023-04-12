@@ -51,24 +51,5 @@ To just use the scripts and jsfx plugins without any customization of keymaps, t
 
 On MacOS, due to security settings, you might need to right-click on the binaries in the UserPlugins subfolder and click open. Then you need to approve. Once you click yes on all three, you can then start REAPER.
 
-##### Scripts and executables
-
-- [ReaClassical_Linux.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) (both x86_64 and aarch64)
-- [ReaClassical_macOS.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh) (all architectures and OS versions compatible with REAPER)
-- [ReaClassical_Win.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1) (64-bit)
-- [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit)
-
-##### Resource Folder archive
-
-- [Resource_Folder_Base.zip](https://github.com/chmaha/ReaClassical/blob/main/Resource%20Folders/Resource_Folder_Base.zip) (compatible with all systems)
-
-##### UserPlugins archives
-
-- [UP_Linux-x86_64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Linux-x86_64.zip)
-- [UP_Linux-aarch64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Linux-aarch64.zip) (Raspberry Pi)
-- [UP_Windows-x64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Windows-x64.zip)
-- [UP_MacOS-x86_64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-x86_64.zip) (64-bit Intel)
-- [UP_MacOS-arm64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-arm64.zip) (M1 chip)
-
 
 
