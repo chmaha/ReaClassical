@@ -7,7 +7,7 @@ For the complete and recommended experience on Linux, MacOS and Windows you can 
 #### Quick Full Portable Install on Linux, MacOS & Windows
 
 Download the script for your system and run where you want to download a portable install of ReaClassical:
-##### Linux
+##### Linux (including Raspberry Pi)
 ```
 wget https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh
 sh ReaClassical_Linux.sh
@@ -72,8 +72,6 @@ or...
 ### Notes
 
 On MacOS, due to security settings, you might need to right-click on the binaries in the UserPlugins subfolder and click open. Then you need to approve. Once you click yes on all three, you can then start REAPER.
-
-The Raspberry Pi (and anything else that uses an 64-bit ARM chip) should run my tools perfectly. The only thing missing is juliansader's JS Reascript API plugin that doesn't currently have an arm64 binary. However, that's only there in the other zips in case you wanted to use an included MPL script for making CUE files from markers. My own tools are unaffected by the omission.
 
 
 
