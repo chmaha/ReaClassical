@@ -30,6 +30,7 @@
   PDF Guide: Switch to sans serif font and add typesetting info on first page
   Update copyright year to 2023
   PDF Guide: Tidy up install/update procedures and add reference to release notes
+  ReaClassical theme: Restore
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -61,7 +62,7 @@
   [main] ReaClassical_Reposition_Album_Tracks.lua
   [main] ReaClassical_mpl_Markers to CUE.lua
   [rpp] ReaClassical.RPP
-  [theme] ../Manual_install_files/ReaClassical.ReaperThemeZip > ReaClassical.ReaperThemeZip
+  [theme] ReaClassical.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
