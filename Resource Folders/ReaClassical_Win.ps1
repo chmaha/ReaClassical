@@ -28,7 +28,7 @@ Invoke-WebRequest -Uri https://www.reaper.fm/files/$first.x/reaper$($first + $se
 Write-Host "Extracting REAPER from .exe to ReaClassical_$rcver folder..."
 sleep 2
 
-.\7zip\7z.exe x .\reaper$($first + $second)_x64-install.exe -oReaClassical_$rcver | Out-Null
+.\7zip\7z.exe x .\reaper$($first + $second)_x64-install.exe -oReaClassical_23Q2 | Out-Null
 
 Write-Host "Downloading ReaClassical files from Github..."
 sleep 2
