@@ -1,6 +1,6 @@
 ### Instructions for installing ReaClassical
 
-To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc, import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). Search for "ReaClassical" and install the main ReaClassical package along with the PDF Guide and any jsfx plugin collections. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
+To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc, install both ReaPack and latest SWS Extensions, import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
 
 For the complete and recommended experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
 
@@ -40,13 +40,6 @@ NOTE: Change the **`pkgver=`** line to download a different version of REAPER.
 - [ReaClassical_Win.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1) (64-bit)
 - [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit)
 
-#### Manual Method 1: Portable Install
-* __Windows__: Download REAPER and check the "Portable Install" box when installing. Download the Resource_Folder_Base.zip into the top level of the portable install directory e.g. C:/REAPER and unzip contents. Download UP_Windows-x64.zip and unzip into the newly created UserPlugins subfolder.
-* __MacOS__: Create a REAPER folder ("ReaClassical" or whatever name you like), download the Resource_Folder_Base.zip into it and unzip contents. Download the appropriate userplugins zip (starting with "UP_MacOS-") for your system and unzip into the newly created UserPlugins subfolder, mount the DMG and drag REAPER64.APP into the same folder.
-* __Linux__: Download and extract REAPER. Download the resource folder into the REAPER subdirectory and and unzip contents. Download the appropriate userplugins zip (starting with "UP_Linux-") for your system and unzip into the UserPlugins subfolder.
-
-Start REAPER and Sync ReaPack (to get latest ReaClassical scripts)
-
 ##### Resource Folder archive
 
 - [Resource_Folder_Base.zip](https://github.com/chmaha/ReaClassical/blob/main/Resource%20Folders/Resource_Folder_Base.zip) (compatible with all systems)
@@ -60,14 +53,10 @@ Start REAPER and Sync ReaPack (to get latest ReaClassical scripts)
 - [UP_MacOS-arm64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-arm64.zip) (M1 chip)
 
 
+#### For updating an existing install of ReaClassical:
 
-or...
-
-#### Manual Method 2: Overwrite your existing install (caution!)
-1. Rename/backup the contents of your existing resource folder (important!).
-2. Create a replacement REAPER resource folder, download the resource folder archive to this location and unzip.
-3. Start REAPER
-4. Sync ReaPack (to get latest ReaClassical scripts)
+1. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
+2. Copy across any desired files/settings including the latest SWS Extensions from UserPlugins, custom toolbar etc.
 
 ### Notes
 
