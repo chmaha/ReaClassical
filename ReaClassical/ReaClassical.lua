@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 23.19rc1
+@version 23.19
 @changelog
   Whole Project View: Switch back to original vertical zoom function for updated SWS
   Aux and submix: Allow for creation of aux and submix (@ track prefix) that stay visible
@@ -27,7 +27,7 @@
   Create CD Markers: Create pregap markers by prefixing take name with "!"
   Markers to CUE: Match CUE file name with audio filename given in dialog
   Markers to CUE: Save user-inputted metadata and recall on next run
-  PDF Guide: Switch to sans serif font and add typsetting info on first page
+  PDF Guide: Switch to sans serif font and add typesetting info on first page
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
