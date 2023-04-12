@@ -6,6 +6,7 @@
 
 ##############
 $pkgver="6.78"
+$rcver="23Q2"
 ##############
 
 Write-Host "Welcome to ReaClassical installer..."
@@ -24,10 +25,10 @@ $first=$pkgver.split('.')[0]
 $second=$pkgver.split('.')[1]
 Invoke-WebRequest -Uri https://www.reaper.fm/files/$first.x/reaper$($first + $second)_x64-install.exe -OutFile reaper$($first + $second)_x64-install.exe
 
-Write-Host "Extracting REAPER from .exe to ReaClassical folder..."
+Write-Host "Extracting REAPER from .exe to ReaClassical_$rcver folder..."
 sleep 2
 
-.\7zip\7z.exe x .\reaper$($first + $second)_x64-install.exe -oReaClassical | Out-Null
+.\7zip\7z.exe x .\reaper$($first + $second)_x64-install.exe -oReaClassical_$rcver | Out-Null
 
 Write-Host "Downloading ReaClassical files from Github..."
 sleep 2
@@ -38,8 +39,8 @@ Invoke-WebRequest -Uri https://github.com/chmaha/ReaClassical/raw/main/Resource%
 Write-Host "Extracting ReaClassical files to ReaClassical folder"
 sleep 2
 
-Expand-Archive -LiteralPath .\Resource_Folder_Base.zip -DestinationPath ReaClassical
-Expand-Archive -LiteralPath .\UP_Windows-x64.zip -DestinationPath .\ReaClassical\UserPlugins
+Expand-Archive -LiteralPath .\Resource_Folder_Base.zip -DestinationPath ReaClassical_$rcver
+Expand-Archive -LiteralPath .\UP_Windows-x64.zip -DestinationPath .\ReaClassical_$rcver\UserPlugins
 
 Write-Host "Removing temporary files..."
 sleep 2

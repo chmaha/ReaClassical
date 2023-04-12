@@ -7,6 +7,7 @@
 
 ###########
 pkgver=6.78
+rcver=23Q2
 ###########
 
 echo "Welcome to ReaClassical installer..."
@@ -33,13 +34,13 @@ echo "Downloading ReaClassical resource folder base and userplugins for MacOS"
 sleep 2
 curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip -L
 curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-$arch.zip -L
-echo "Extracting files into ReaClassical folder..."
+echo "Extracting files into ReaClassical_$rcver folder..."
 sleep 2
-unzip -q Resource_Folder_Base.zip -d ReaClassical/
-unzip -q UP_MacOS-$arch.zip -d ReaClassical/UserPlugins/
+unzip -q Resource_Folder_Base.zip -d ReaClassical_$rcver/
+unzip -q UP_MacOS-$arch.zip -d ReaClassical_$rcver/UserPlugins/
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
-cp -R reaper_temp/REAPER.app ReaClassical/
+cp -R reaper_temp/REAPER.app ReaClassical_$rcver/
 echo "Unmounting image and deleting temporary files..."
 sleep 2
 hdiutil detach reaper_temp
