@@ -45,7 +45,7 @@ To just use the scripts and jsfx plugins without any customization of keymaps, t
 ## For updating an existing install of ReaClassical:
 
 1. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
-2. Copy across any desired files/settings to your previous install including the latest SWS Extensions from UserPlugins, custom toolbar from MenuSets, contents of Data/Toolbar_icons, a ReaClassical keymap from KeyMaps (back up your existing shortcuts first!) etc.
+2. Copy across any desired files/settings to your previous install including the latest SWS Extensions from UserPlugins, custom toolbar from MenuSets, contents of Data/Toolbar_icons, import either the "ReaClassical" or "Full_Classical_DAW" keymap from KeyMaps (if you like the ReaClassical defaults) etc.
 
 ### Notes
 
