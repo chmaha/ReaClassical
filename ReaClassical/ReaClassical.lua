@@ -28,6 +28,7 @@
   Markers to CUE: Match CUE file name with audio filename given in dialog
   Markers to CUE: Save user-inputted metadata and recall on next run
   PDF Guide: Switch to sans serif font and add typesetting info on first page
+  Update copyright year to 2023
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
