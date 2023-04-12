@@ -1,10 +1,8 @@
-### Instructions for installing ReaClassical
-
-To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc, install both ReaPack (https://reapack.com/) and latest bleeding edge SWS Extensions (https://www.sws-extension.org/download/pre-release/), import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
+# Instructions for installing ReaClassical
 
 For the complete and recommended experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
 
-#### Quick Full Portable Install on Linux, MacOS & Windows
+## Quick Full Portable Install on Linux, MacOS & Windows
 
 Download the script for your system and run where you want to download a portable install of ReaClassical:
 ##### Linux (including Raspberry Pi)
@@ -33,6 +31,25 @@ The executable or script will pull the REAPER binary archive, resource folder ba
 
 NOTE: Change the **`pkgver=`** line to download a different version of REAPER.
 
+For those who only want access to the scripts and jsfx plugins:
+
+## Basic Manual Install Inside Your Existing REAPER Install
+
+To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc:
+1. Install both ReaPack (https://reapack.com/) and latest bleeding edge SWS Extensions (https://www.sws-extension.org/download/pre-release/) if you haven't already
+2. Import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). 
+3. Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins (my "RCPlugs" are highly recommended for classical work). 
+4. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
+
+## For updating an existing install of ReaClassical:
+
+1. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
+2. Copy across any desired files/settings to your previous install including the latest SWS Extensions from UserPlugins, custom toolbar from MenuSets, contents of Data/Toolbar_icons, a ReaClassical keymap from KeyMaps (back up your existing shortcuts first!) etc.
+
+### Notes
+
+On MacOS, due to security settings, you might need to right-click on the binaries in the UserPlugins subfolder and click open. Then you need to approve. Once you click yes on all three, you can then start REAPER.
+
 ##### Scripts and executables
 
 - [ReaClassical_Linux.sh](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh) (both x86_64 and aarch64)
@@ -51,16 +68,6 @@ NOTE: Change the **`pkgver=`** line to download a different version of REAPER.
 - [UP_Windows-x64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Windows-x64.zip)
 - [UP_MacOS-x86_64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-x86_64.zip) (64-bit Intel)
 - [UP_MacOS-arm64.zip](https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-arm64.zip) (M1 chip)
-
-
-#### For updating an existing install of ReaClassical:
-
-1. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
-2. Copy across any desired files/settings including the latest SWS Extensions from UserPlugins, custom toolbar etc.
-
-### Notes
-
-On MacOS, due to security settings, you might need to right-click on the binaries in the UserPlugins subfolder and click open. Then you need to approve. Once you click yes on all three, you can then start REAPER.
 
 
 
