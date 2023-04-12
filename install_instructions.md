@@ -40,6 +40,7 @@ To just use the scripts and jsfx plugins without any customization of keymaps, t
 2. Import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). 
 3. Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins (my "RCPlugs" are highly recommended for classical work). 
 4. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
+5. Set up keyboard shortcuts in the actions list (? shortcut) as desired.
 
 ## For updating an existing install of ReaClassical:
 
