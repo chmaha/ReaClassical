@@ -46,7 +46,7 @@ To just use the scripts and jsfx plugins without any customization of keymaps, t
 
 1. Sync ReaPack to get the latest version of ReaClassical scripts.
 2. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
-3. Copy across any updated files/settings to your previous install as described in the release notes on the [forum thread](https://forum.cockos.com/showthread.php?t=265145).
+3. Copy across any updated files/settings to your previous install's resource path as described in the release notes on the [forum thread](https://forum.cockos.com/showthread.php?t=265145).
 4. Restart REAPER.
 
 ### Notes
