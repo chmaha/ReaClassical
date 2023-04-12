@@ -18,7 +18,7 @@ sh ReaClassical_macOS.sh
 ```
 or
 ##### Windows
-Download [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) where you want to install ReaClassical and double-click.
+Download [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) where you want to install ReaClassical and double-click. It *might* require Win10 or higher.
 
 or...
 
