@@ -21,7 +21,9 @@ echo "Extracting files from REAPER archive to ReaClassical_$rcver folder"
 tar -xf reaper${pkgver//.}_linux_$arch.tar.xz
 mv reaper_linux_$arch/ ReaClassical_$rcver/
 rm reaper${pkgver//.}_linux_$arch.tar.xz
-cd ReaClassical_$rcver/REAPER
+cd ReaClassical_$rcver
+mv REAPER/* .
+rmdir REAPER
 echo "Downloading ReaClassical files from Github..."
 sleep 2
 wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip
