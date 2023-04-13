@@ -31,6 +31,7 @@
   Update copyright year to 2023
   PDF Guide: Tidy up install/update procedures and add reference to release notes
   ReaClassical theme: Restore
+  PDF Guide: Add new info about airwindows ports repo
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
