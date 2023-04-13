@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="29b03f599dc2ef0746bde7ac96afb2a91eb67bd7">
+<index version="1" name="chmaha Scripts" commit="825757a84eb84f4284002cbf171fb8f2cb585a71">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1364,7 +1364,7 @@ ReaClassical theme: Restore]]></changelog>
         <source>https://github.com/chmaha/ReaClassical/raw/29b03f599dc2ef0746bde7ac96afb2a91eb67bd7/Reverbs/NW8BPlateReverb.jsfx</source>
       </version>
     </reapack>
-    <reapack name="NW8PlateReverb.jsfx" type="effect" desc="NW8 Plate Reverb (chmaha)">
+    <reapack name="NW8PlateReverb.jsfx" type="effect" desc="NW8 &quot;A&quot; Plate Reverb (chmaha)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1376,6 +1376,9 @@ ReaClassical theme: Restore]]></changelog>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-04-04T07:37:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/a1af9b8cf1ccda2c22b3856fede710df32856b29/Reverbs/NW8PlateReverb.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-04-13T17:16:04Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/825757a84eb84f4284002cbf171fb8f2cb585a71/Reverbs/NW8PlateReverb.jsfx</source>
       </version>
     </reapack>
     <reapack name="PhiVerb.jsfx" type="effect" desc="PhiVerb Reverb (chmaha)">
