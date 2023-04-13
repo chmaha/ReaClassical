@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="7d3e1e8a9abb656ef9ba57fede75e1afcab34818">
+<index version="1" name="chmaha Scripts" commit="103541425f4e6ecf7f879b3a6c9e833eb5d2a51d">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1348,6 +1348,20 @@ ReaClassical theme: Restore]]></changelog>
       </version>
       <version name="1.2" author="chmaha" time="2023-02-20T12:29:08Z">
         <source>https://github.com/chmaha/ReaClassical/raw/ab29c7915c10494b619bc23424d98019703f8bd4/Reverbs/Interstellar.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="NW8BPlateReverb.jsfx" type="effect" desc="NW8 &quot;B&quot; Plate Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "kPlateB" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kPlateB (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T16:59:12Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/103541425f4e6ecf7f879b3a6c9e833eb5d2a51d/Reverbs/NW8BPlateReverb.jsfx</source>
       </version>
     </reapack>
     <reapack name="NW8PlateReverb.jsfx" type="effect" desc="NW8 Plate Reverb (chmaha)">
