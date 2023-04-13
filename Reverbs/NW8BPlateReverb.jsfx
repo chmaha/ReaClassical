@@ -19,8 +19,8 @@ out_pin:right output
 
 @init
 
-earlyA = 61; earlyB = 499; earlyC = 107; earlyD = 127; earlyE = 607; earlyF = 313; earlyG = 563; earlyH = 47; earlyI = 409; predelay = 24010;
-delayA = 631; delayB = 281; delayC = 97; delayD = 709; delayE = 307; delayF = 149; delayG = 313; delayH = 37; delayI = 659; delayJ = 701; delayK = 13; delayL = 733; delayM = 773; delayN = 23; delayO = 61; delayP = 787; delayQ = 83; delayR = 691; delayS = 5; delayT = 587; delayU = 829; delayV = 449; delayW = 53; delayX = 503; delayY = 181;
+earlyA = 97; earlyB = 1123; earlyC = 379; earlyD = 619; earlyE = 1187; earlyF = 757; earlyG = 1151; earlyH = 13; earlyI = 1093; predelay = 24010;
+delayA = 631; delayB = 251; delayC = 137; delayD = 673; delayE = 293; delayF = 163; delayG = 389; delayH = 37; delayI = 641; delayJ = 661; delayK = 17; delayL = 719; delayM = 787; delayN = 31; delayO = 83; delayP = 823; delayQ = 127; delayR = 653; delayS = 3; delayT = 613; delayU = 857; delayV = 431; delayW = 53; delayX = 607; delayY = 193;
 
 freemem = 0;
 
