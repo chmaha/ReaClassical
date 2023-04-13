@@ -1,5 +1,5 @@
 #!/bin/bash
-# by chmaha (Jan 2023)
+# by chmaha (April 2023)
 
 # Script to install ReaClassical on MacOS
 # Works for all architectures and OS versions that are compatible with REAPER.
