@@ -1,5 +1,5 @@
 ﻿# Powershell script to install ReaClassical on Windows-x64
-# by chmaha (Jan 2023)
+# by chmaha (April 2023)
 
 # Instructions: Run script in the location you would like ReaClassical installed.
 # Change the pkgver number below to download an alternative version of REAPER.
