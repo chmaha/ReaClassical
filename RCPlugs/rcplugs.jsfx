@@ -1,0 +1,17 @@
+@description RCPlugs(chmaha)
+@author chmaha
+@version 1.0
+@changelog
+  Initial commit: Create metapackage of RCPlugs
+@metapackage
+@provides
+  RCComp.jsfx
+  RCDeEss.jsfx
+  RCDeEss_Advanced.jsfx
+  RCDither.jsfx
+  RCEQ.jsfx
+  RCGain.jsfx
+  RCLimiter.jsfx
+  RCParallelK.jsfx
+@about
+  These plugins are suitable for classical music mixing and mastering.
