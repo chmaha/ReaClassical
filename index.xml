@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="103541425f4e6ecf7f879b3a6c9e833eb5d2a51d">
+<index version="1" name="chmaha Scripts" commit="29b03f599dc2ef0746bde7ac96afb2a91eb67bd7">
   <category name="Consoles">
     <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
       <metadata>
@@ -1361,7 +1361,7 @@ ReaClassical theme: Restore]]></changelog>
 ]]></description>
       </metadata>
       <version name="1.0" author="chmaha" time="2023-04-13T16:59:12Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/103541425f4e6ecf7f879b3a6c9e833eb5d2a51d/Reverbs/NW8BPlateReverb.jsfx</source>
+        <source>https://github.com/chmaha/ReaClassical/raw/29b03f599dc2ef0746bde7ac96afb2a91eb67bd7/Reverbs/NW8BPlateReverb.jsfx</source>
       </version>
     </reapack>
     <reapack name="NW8PlateReverb.jsfx" type="effect" desc="NW8 Plate Reverb (chmaha)">
