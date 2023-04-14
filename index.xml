@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="552f3d0b6114aadca3478fa22a12a0aa405ec93a">
+<index version="1" name="chmaha Scripts" commit="9d7168455efcdcb6999a6d3624f0059ea0c81ef2">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -21,6 +21,18 @@
         <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/6a51269f3fd17836f64acbe9f7e333fea39eb286/RCPlugs/RCGain.jsfx</source>
         <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/6a51269f3fd17836f64acbe9f7e333fea39eb286/RCPlugs/RCLimiter.jsfx</source>
         <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/6a51269f3fd17836f64acbe9f7e333fea39eb286/RCPlugs/RCParallelK.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2023-04-14T11:46:52Z">
+        <changelog><![CDATA[Remove superfluous UINT32_MAX line
+Replace M_PI with $pi]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCDeEss_Advanced.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCDither.jsfx</source>
+        <source file="RCEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/9d7168455efcdcb6999a6d3624f0059ea0c81ef2/RCPlugs/RCParallelK.jsfx</source>
       </version>
     </reapack>
   </category>
