@@ -44,8 +44,6 @@ bynR[9] = 46.0;
 bynR[10] = 1000.0;
 noiseShapingR = 0.0;
 
-UINT32_MAX = 4294967295;
-
 A = 0.0;
 
 @slider

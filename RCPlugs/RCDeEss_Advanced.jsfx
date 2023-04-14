@@ -26,9 +26,6 @@ sR = freemem; freemem +=41;
 mR = freemem; freemem +=41;
 cR = freemem; freemem +=41;
 
-UINT32_MAX = 4294967295;
-M_PI = 3.1415926535897932384626433;
-
 ratioAL = ratioBL = 1.0;
 ratioAR = ratioBR = 1.0;
 flip = 0;  
