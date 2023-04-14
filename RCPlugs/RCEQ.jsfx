@@ -32,8 +32,6 @@ B = 0.5;
 C = 0.5;
 CONST1 = 1.18*10^-23;
 CONST2 = 1.18*10^-17;
-M_PI = 3.1415926535897932384626433;
-UINT32_MAX = 4294967295;
 x = 0; loop(9,
   trebleAL[x] = 0.0;
   trebleBL[x] = 0.0;
@@ -161,7 +159,7 @@ trebleAL[1] = trebleBL[1] = trebleAR[1] = trebleBR[1] = 0.4;
 bassAL[1] = bassBL[1] = bassAR[1] = bassBR[1] = 0.2;
 // output = pow(10.0,((C*30.0)-15.0)/20.0);
 
-K = tan(M_PI * trebleAL[0]);
+K = tan($pi * trebleAL[0]);
 norm = 1.0 / (1.0 + K / trebleAL[1] + K * K);
 trebleBL[2] = trebleAL[2] = trebleBR[2] = trebleAR[2] = K * K * norm;
 trebleBL[3] = trebleAL[3] = trebleBR[3] = trebleAR[3] = 2.0 * trebleAL[2];
@@ -169,7 +167,7 @@ trebleBL[4] = trebleAL[4] = trebleBR[4] = trebleAR[4] = trebleAL[2];
 trebleBL[5] = trebleAL[5] = trebleBR[5] = trebleAR[5] = 2.0 * (K * K - 1.0) * norm;
 trebleBL[6] = trebleAL[6] = trebleBR[6] = trebleAR[6] = (1.0 - K / trebleAL[1] + K * K) * norm;
 
-K = tan(M_PI * bassAL[0]);
+K = tan($pi * bassAL[0]);
 norm = 1.0 / (1.0 + K / bassAL[1] + K * K);
 bassBL[2] = bassAL[2] = bassBR[2] = bassAR[2] = K * K * norm;
 bassBL[3] = bassAL[3] = bassBR[3] = bassAR[3] = 2.0 * bassAL[2];

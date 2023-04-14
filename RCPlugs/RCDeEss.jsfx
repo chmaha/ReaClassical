@@ -16,7 +16,7 @@ out_pin:left output
 out_pin:right output
 
 @init
-UINT32_MAX = 4294967295;
+
 A = 0.0;
 B = 0.5;
 C = 0.5;
