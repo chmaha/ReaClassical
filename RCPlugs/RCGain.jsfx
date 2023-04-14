@@ -14,9 +14,6 @@ out_pin:left output
 out_pin:right output
 
 @init
-UINT32_MAX = 4294967295;
-
-
 
 @slider
 
@@ -28,8 +25,6 @@ inputSampleL = spl0;
 inputSampleR = spl1;
 
 outputgain = pow(10.0,slider1/20.0);
-
-
 
 (outputgain != 1.0) ?
 (
