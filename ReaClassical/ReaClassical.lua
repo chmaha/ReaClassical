@@ -32,6 +32,7 @@
   PDF Guide: Tidy up install/update procedures and add reference to release notes
   ReaClassical theme: Restore
   PDF Guide: Add new info about airwindows ports repo
+  PDF Guide: Add new N = SWS Notes shortcut info
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
