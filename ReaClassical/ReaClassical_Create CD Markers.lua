@@ -87,10 +87,10 @@ function cd_markers()
     local added_marker = create_marker(current_start, marker_count, take_name, code_table)
     if added_marker then
       if take_name:match("^!") and marker_count > 0 then
-        r.AddProjectMarker(0, false, frame_check(current_start) - 3, 0, "!", marker_count)
+        r.AddProjectMarker(0, false, frame_check(current_start) - 3.2, 0, "!", marker_count)
       end
       if marker_count > 0 then
-        r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(current_start), previous_takename:match("^[!]*(.+)"),
+        r.AddProjectMarker(0, true, frame_check(previous_start) - 0.2, frame_check(current_start) - 0.2, previous_takename:match("^[!]*(.+)"),
           marker_count)
       end
       previous_start = current_start
@@ -102,7 +102,7 @@ function cd_markers()
     r.ShowMessageBox('Please add take names to all items that you want to be CD tracks (Select item then press F2)', "No track markers created", 0)
     return
   end
-  r.AddProjectMarker(0, true, frame_check(previous_start), frame_check(final_end) + 7, previous_takename, marker_count)
+  r.AddProjectMarker(0, true, frame_check(previous_start) - 0.2, frame_check(final_end) + 7, previous_takename, marker_count)
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info()
     if #metadata_table == 4 then save_metadata(user_inputs) end
@@ -124,7 +124,7 @@ function create_marker(current_start, marker_count, take_name, code_table)
   local added_marker = false
   local track_title
   if take_name ~= "" then
-    local corrected_current_start = frame_check(current_start)
+    local corrected_current_start = frame_check(current_start) - 0.2
     if #code_table == 5 then
       track_title = "#" .. take_name:match("^[!]*(.+)") .. "|ISRC=" .. code_table[2] .. code_table[3] .. code_table[4] .. string.format("%05d", code_table[5] + marker_count)
     else
@@ -256,3 +256,4 @@ function empty_items_check()
 end
 
 Main()
+
