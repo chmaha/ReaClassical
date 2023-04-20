@@ -37,7 +37,7 @@ For those who only want access to the scripts and jsfx plugins:
 
 To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc:
 1. Install both ReaPack (https://reapack.com/) and latest bleeding edge SWS Extensions (https://www.sws-extension.org/download/pre-release/) if you haven't already
-2. Import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). 
+2. Import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). If you need help with importing see https://reapack.com/user-guide#import-repositories.
 3. Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins (my "RCPlugs" are highly recommended for classical work). 
 4. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
 5. Set up keyboard shortcuts in the actions list (? shortcut) as desired.
