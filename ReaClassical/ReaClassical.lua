@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre1
+@version 23.20pre2
 @changelog
-  Create CD Markers: Default to 200ms offset for both track and pregap markers
+  PDF Guide: Reference 35ms crossfades in manual set-up and editing sections
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
