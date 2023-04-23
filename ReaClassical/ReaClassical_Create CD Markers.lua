@@ -21,6 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 local r = reaper
 local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
 local get_info, save_metadata, find_project_end, add_codes, save_codes, delete_markers, empty_items_check
+local return_custom_lengths
 local first_track = r.GetTrack(0, 0)
 if first_track then NUM_OF_ITEMS = r.CountTrackMediaItems(first_track) end
 
@@ -40,7 +41,10 @@ function Main()
     "Create CD/DDP markers", 4)
   if choice == 6 then
     r.SetProjExtState(0, "Create CD Markers", "Run?", "yes")
-    cd_markers()
+    redbook_errors = cd_markers()
+    if redbook_errors > 0 then
+    r.ShowMessageBox('This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.', "Warning", 0)
+    end
   end
   r.Undo_EndBlock("Create CD/DDP Markers", -1)
 end
@@ -77,20 +81,25 @@ function cd_markers()
   if code_input ~= "" then
     save_codes(code_input)
   end
-
+  local pregap_len,offset = return_custom_length()
+  if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end()
   local previous_start
+  local redbook_errors = 0
   local previous_takename
   local marker_count = 0
   for i = 0, NUM_OF_ITEMS - 1, 1 do
     local current_start, take_name = find_current_start(i)
-    local added_marker = create_marker(current_start, marker_count, take_name, code_table)
+    local added_marker = create_marker(current_start, marker_count, take_name, code_table, offset)
     if added_marker then
       if take_name:match("^!") and marker_count > 0 then
-        r.AddProjectMarker(0, false, frame_check(current_start) - 3.2, 0, "!", marker_count)
+        r.AddProjectMarker(0, false, frame_check(current_start - (pregap_len + offset)), 0, "!", marker_count)
       end
       if marker_count > 0 then
-        r.AddProjectMarker(0, true, frame_check(previous_start) - 0.2, frame_check(current_start) - 0.2, previous_takename:match("^[!]*(.+)"),
+        if current_start - previous_start < 4 then 
+          redbook_errors = redbook_errors + 1
+        end
+        r.AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(current_start - offset), previous_takename:match("^[!]*(.+)"),
           marker_count)
       end
       previous_start = current_start
@@ -102,7 +111,7 @@ function cd_markers()
     r.ShowMessageBox('Please add take names to all items that you want to be CD tracks (Select item then press F2)', "No track markers created", 0)
     return
   end
-  r.AddProjectMarker(0, true, frame_check(previous_start) - 0.2, frame_check(final_end) + 7, previous_takename, marker_count)
+  r.AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + 7, previous_takename, marker_count)
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info()
     if #metadata_table == 4 then save_metadata(user_inputs) end
@@ -111,6 +120,7 @@ function cd_markers()
     add_pregap()
   end
   r.Main_OnCommand(40753, 0) -- Snapping: Disable snap
+  return redbook_errors
 end
 
 function find_current_start(i)
@@ -120,11 +130,11 @@ function find_current_start(i)
   return r.GetMediaItemInfo_Value(current_item, "D_POSITION"), take_name
 end
 
-function create_marker(current_start, marker_count, take_name, code_table)
+function create_marker(current_start, marker_count, take_name, code_table,offset)
   local added_marker = false
   local track_title
   if take_name ~= "" then
-    local corrected_current_start = frame_check(current_start) - 0.2
+    local corrected_current_start = frame_check(current_start - offset)
     if #code_table == 5 then
       track_title = "#" .. take_name:match("^[!]*(.+)") .. "|ISRC=" .. code_table[2] .. code_table[3] .. code_table[4] .. string.format("%05d", code_table[5] + marker_count)
     else
@@ -253,6 +263,20 @@ function empty_items_check()
     end 
   end
   return count
+end
+
+function return_custom_length()
+  local pregap_len = 3
+  local offset = 0.2
+  local bool = r.HasExtState("ReaClassical", "Preferences")
+  if bool then 
+    input = r.GetExtState("ReaClassical", "Preferences")
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    offset = table[2]/1000
+    pregap_len = table[3]
+  end
+  return pregap_len,offset
 end
 
 Main()

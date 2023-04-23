@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 local r = reaper
 local select_matching_folder, lock_items, unlock_items, source_markers, ripple_lock_mode
+local return_xfade_length, xfade
 
 function Main()
   r.PreventUIRefresh(1)
@@ -47,15 +48,14 @@ function Main()
     r.Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
     r.Main_OnCommand(40630, 0) -- Go to start of time selection
     unlock_items()
-    local fade_right = r.NamedCommandLookup("_SWS_MOVECURFADERIGHT")
-    r.Main_OnCommand(fade_right, 0)
+    local xfade_len = return_xfade_length()
+    r.MoveEditCursor(xfade_len, false)
     local select_under = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     r.Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
-
-    local fade_left = r.NamedCommandLookup("_SWS_MOVECURFADELEFT")
-    r.Main_OnCommand(fade_left, 0) -- SWS_MOVECURFADELEFT
-    r.Main_OnCommand(fade_left, 0) -- SWS_MOVECURFADELEFT
+    r.MoveEditCursor(-xfade_len*2, false)
     r.Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
+    r.Main_OnCommand(40630, 0) -- Go to start of time selection
+    xfade(xfade_len)
     r.Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     r.DeleteProjectMarker(NULL, 998, false)
     r.DeleteProjectMarker(NULL, 999, false)
@@ -127,6 +127,34 @@ function ripple_lock_mode()
   if original_ripple_lock_mode ~= 2 then
     reaper.SNM_SetIntConfigVar("ripplelockmode", 2)
   end
+end
+
+
+function return_xfade_length()
+  local xfade_len = 0.035
+  local bool = r.HasExtState("ReaClassical", "Preferences")
+  if bool then 
+    input = r.GetExtState("ReaClassical", "Preferences")
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    xfade_len = table[1]/1000
+  end
+  return xfade_len
+end
+
+function xfade(xfade_len)
+  local select_items = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+  r.Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+  --r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+  r.MoveEditCursor(-xfade_len, false)
+  r.Main_OnCommand(40625, 0) -- Time selection: Set start point
+  r.MoveEditCursor(xfade_len, false)
+  r.Main_OnCommand(40626, 0) -- Time selection: Set end point
+  r.Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
+  r.Main_OnCommand(40635, 0) -- Time selection: Remove time selection
+  r.MoveEditCursor(0.001, false)
+  r.Main_OnCommand(select_items, 0)
+  r.MoveEditCursor(-0.001, false)
 end
 
 Main()

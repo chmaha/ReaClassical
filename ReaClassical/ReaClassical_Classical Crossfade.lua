@@ -19,20 +19,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
+local return_xfade_length
 r.PreventUIRefresh(1)
 r.Undo_BeginBlock()
 
 function Main()
+    local xfade_len = return_xfade_length()
     local fade_editor_toggle = r.NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local state = r.GetToggleCommandState(fade_editor_toggle)
     local select_items = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     r.Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-    local fade_left = r.NamedCommandLookup("_SWS_MOVECURFADELEFT")
-    r.Main_OnCommand(fade_left, 0) -- SWS: Move cursor left by default fade length
+    --local fade_left = r.NamedCommandLookup("_SWS_MOVECURFADELEFT")
+    --r.Main_OnCommand(fade_left, 0) -- SWS: Move cursor left by default fade length
+    r.MoveEditCursor(-xfade_len, false)
     r.Main_OnCommand(40625, 0) -- Time selection: Set start point
-    local fade_right = r.NamedCommandLookup("_SWS_MOVECURFADERIGHT")
-    r.Main_OnCommand(fade_right, 0) -- SWS: Move cursor right by default fade length
+    --local fade_right = r.NamedCommandLookup("_SWS_MOVECURFADERIGHT")
+    --r.Main_OnCommand(fade_right, 0) -- SWS: Move cursor right by default fade length
+    r.MoveEditCursor(xfade_len, false)
     r.Main_OnCommand(40626, 0) -- Time selection: Set end point
     r.Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
     r.Main_OnCommand(40635, 0) -- Time selection: Remove time selection
@@ -48,6 +52,18 @@ function Main()
     r.PreventUIRefresh(-1)
     r.UpdateArrange()
     r.UpdateTimeline()
+end
+
+function return_xfade_length()
+  local xfade_len = 0.035
+  local bool = r.HasExtState("ReaClassical", "Preferences")
+  if bool then 
+    input = r.GetExtState("ReaClassical", "Preferences")
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    xfade_len = table[1]/1000
+  end
+  return xfade_len
 end
 
 Main()
