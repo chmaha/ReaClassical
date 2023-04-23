@@ -7,6 +7,7 @@
   Create CD Markers: Better CD frame snapping to account for decimal values
   Create CD Markers: Warning if any CD audio tracks are less than 4 seconds in length
   Create CD Markers: Enforce 1-second minimum for INDEX0 before a # track
+  S-D Edit: Fix 3-point RH crossfading
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
