@@ -160,12 +160,13 @@ function create_crossfades(dest_out)
   r.MoveEditCursor(-0.001, false)
   local cur_pos = (r.GetPlayState() == 0) and r.GetCursorPosition() or r.GetPlayPosition()
   local new_cur_pos = (r.GetPlayState() == 0) and r.GetCursorPosition() or r.GetPlayPosition()
-  if (new_cur_pos - cur_pos < 0.000001) and dest_out == 1 then
+  --if (new_cur_pos - cur_pos < 0.000001) and dest_out == 1 then
     r.MoveEditCursor(-xfade_len, false)
     r.Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
     r.MoveEditCursor(xfade_len, false)
+    r.MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
-  end
+  --end
   r.Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF) 
   r.Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
   return cur_pos
