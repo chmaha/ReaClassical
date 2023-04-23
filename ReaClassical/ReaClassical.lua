@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre2
+@version 23.20pre3
 @changelog
-  PDF Guide: Reference 35ms crossfades in manual set-up and editing sections
+  New: ReaClassical Preferences
+  S-D edits: All S-D editing scripts use xfade value from RC Preferences
+  Create CD Markers: Better CD frame snapping to account for decimal values
+  Create CD Markers: Warning if any CD audio tracks are less than 4 seconds in length
+  Create CD Markers: Enforce 1-second minimum for INDEX0 before a # track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -33,6 +37,7 @@
   [main] ReaClassical_Add Aux or Submix.lua
   [main] ReaClassical_Reposition_Album_Tracks.lua
   [main] ReaClassical_mpl_Markers to CUE.lua
+  [main] ReaClassical_Preferences.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf

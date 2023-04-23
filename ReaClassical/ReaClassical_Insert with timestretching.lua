@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local SDmarkers, select_matching_folder
+local SDmarkers, select_matching_folder, return_xfade_length, xfade
 
 function Main()
   r.PreventUIRefresh(1)
@@ -65,12 +65,23 @@ function Main()
     r.Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
 
     r.Main_OnCommand(41173, 0) -- Item navigation: Move cursor to start of items
-    local fade_left = r.NamedCommandLookup("_SWS_MOVECURFADELEFT")
-    r.Main_OnCommand(fade_left, 0) -- SWS_MOVECURFADELEFT
+    local xfade_len = return_xfade_length()
+    r.MoveEditCursor(-xfade_len, false)
     r.Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
-    r.Main_OnCommand(40417, 0) -- Item Navigation: Select and move to next item
-    r.Main_OnCommand(fade_left, 0) -- SWS_MOVECURFADELEFT
+    r.MoveEditCursor(xfade_len, false)
+    r.MoveEditCursor(-0.0001, false)
+    xfade(xfade_len)
+    r.GoToMarker(0, 997, false)
+    r.MoveEditCursor(xfade_len, false)
+    r.Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
+    r.MoveEditCursor(0.001, false)
+    r.Main_OnCommand(select_under, 0)
+    r.MoveEditCursor(-0.001, false)
+    r.MoveEditCursor(-xfade_len, false)
+    r.MoveEditCursor(-xfade_len, false)
     r.Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
+    r.MoveEditCursor(xfade_len, false)
+    xfade(xfade_len)
     r.Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF) 
     r.Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     r.DeleteProjectMarker(NULL, 996, false)
@@ -113,6 +124,33 @@ function select_matching_folder()
       break
     end
   end
+end
+
+function return_xfade_length()
+  local xfade_len = 0.035
+  local bool = r.HasExtState("ReaClassical", "Preferences")
+  if bool then 
+    input = r.GetExtState("ReaClassical", "Preferences")
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    xfade_len = table[1]/1000
+  end
+  return xfade_len
+end
+
+function xfade(xfade_len)
+  local select_items = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+  r.Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+  --r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+  r.MoveEditCursor(-xfade_len, false)
+  r.Main_OnCommand(40625, 0) -- Time selection: Set start point
+  r.MoveEditCursor(xfade_len, false)
+  r.Main_OnCommand(40626, 0) -- Time selection: Set end point
+  r.Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
+  r.Main_OnCommand(40635, 0) -- Time selection: Remove time selection
+  r.MoveEditCursor(0.001, false)
+  r.Main_OnCommand(select_items, 0)
+  r.MoveEditCursor(-0.001, false)
 end
 
 Main()
