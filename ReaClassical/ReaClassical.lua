@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre4
+@version 23.20pre5
 @changelog
-  Create CD Markers: Add space at start of project if not enough room for chosen offset
+  Create CD Markers: Refine adding space at start of project for offset
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
