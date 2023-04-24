@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre3
+@version 23.20pre4
 @changelog
-  New: ReaClassical Preferences
-  S-D edits: All S-D editing scripts use xfade value from RC Preferences
-  Create CD Markers: Better CD frame snapping to account for decimal values
-  Create CD Markers: Warning if any CD audio tracks are less than 4 seconds in length
-  Create CD Markers: Enforce 1-second minimum for INDEX0 before a # track
-  S-D Edit: Fix 3-point RH crossfading
-  S-D Edit: Code clean-up
+  Create CD Markers: Add space at start of project if not enough room for chosen offset
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
