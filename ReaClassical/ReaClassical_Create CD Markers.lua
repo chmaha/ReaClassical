@@ -286,7 +286,7 @@ function start_check(offset)
   local first_item = r.GetTrackMediaItem(first_track, 0)
   local position = r.GetMediaItemInfo_Value(first_item, "D_POSITION")
   if position < offset then
-    r.GetSet_LoopTimeRange(true, false, 0, offset, false)
+    r.GetSet_LoopTimeRange(true, false, 0, offset-position, false)
     r.Main_OnCommand(40200,0) -- insert time at time selection
     r.Main_OnCommand(40635,0) -- remove time selection
   end
