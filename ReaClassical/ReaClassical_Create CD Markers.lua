@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 local r = reaper
 local cd_markers, find_current_start, create_marker, renumber_markers, add_pregap, end_marker, frame_check
 local get_info, save_metadata, find_project_end, add_codes, save_codes, delete_markers, empty_items_check
-local return_custom_lengths
+local return_custom_lengths, start_check
 local first_track = r.GetTrack(0, 0)
 if first_track then NUM_OF_ITEMS = r.CountTrackMediaItems(first_track) end
 
@@ -82,6 +82,9 @@ function cd_markers()
     save_codes(code_input)
   end
   local pregap_len,offset = return_custom_length()
+
+  start_check(offset) -- move items to right if not enough room for first offset
+
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end()
   local previous_start
@@ -277,6 +280,16 @@ function return_custom_length()
     pregap_len = table[3]
   end
   return pregap_len,offset
+end
+
+function start_check(offset)
+  local first_item = r.GetTrackMediaItem(first_track, 0)
+  local position = r.GetMediaItemInfo_Value(first_item, "D_POSITION")
+  if position < offset then
+    r.GetSet_LoopTimeRange(true, false, 0, offset, false)
+    r.Main_OnCommand(40200,0) -- insert time at time selection
+    r.Main_OnCommand(40635,0) -- remove time selection
+  end
 end
 
 Main()
