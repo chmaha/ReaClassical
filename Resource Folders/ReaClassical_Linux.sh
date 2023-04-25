@@ -36,12 +36,5 @@ unzip -q UP_Linux-${arch}.zip -d ./UserPlugins/
 rm UP_Linux-${arch}.zip
 
 echo "Portable ReaClassical Installation complete!"
-sleep 2
-read -p "Would you like to run REAPER now? (y/n)" yn
-case $yn in
-    [yY]) echo ok, starting REAPER...
-            ./reaper;;
-    *) echo exiting...;;
-esac
 
 
