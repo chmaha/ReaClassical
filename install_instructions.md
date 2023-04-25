@@ -8,6 +8,8 @@ Download the script for your system and run where you want to download a portabl
 ##### Linux (including Raspberry Pi)
 ```
 curl -s https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh | sh
+# or using wget
+wget -qO- https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh | sh
 ```
 or
 ##### MacOS
