@@ -50,7 +50,7 @@ To just use the scripts and jsfx plugins without any customization of keymaps, t
 
 ### Notes
 
-On MacOS, due to security settings, you might need to right-click on the binaries in the UserPlugins subfolder and click open. Then you need to approve. Once you click yes on all three, you can then start REAPER.
+On MacOS, due to security settings, you might need to right-click on the binaries in the UserPlugins subfolder and click open. Then you need to approve. Once you click yes on both, you can then start REAPER.
 
 
 
