@@ -30,8 +30,6 @@ powershell -executionpolicy bypass -File .\ReaClassical_Win.ps1
 
 The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic.
 
-NOTE: Change the **`pkgver=`** line to download a different version of REAPER.
-
 For those who only want access to the scripts and jsfx plugins:
 
 ## Basic Manual Install Inside Your Existing REAPER Install
