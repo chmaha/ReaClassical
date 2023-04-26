@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre5
+@version 23.20pre6
 @changelog
-  Create CD Markers: Refine adding space at start of project for offset
+  ReaClassical Preferences: Make project-based
+  S-D editing scripts: Use project extstate for S-D edit length
+  Create CD Markers: Use project extstate for custom lengths
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

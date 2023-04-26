@@ -30,33 +30,31 @@ function Main()
 end
 -----------------------------------------------------------------------
 function display_prefs()
-  local saved
-  local bool = r.HasExtState("ReaClassical", "Preferences")
-  if bool then saved = load_prefs() end
+  local _, saved = load_prefs()
   local ret, input
-  if saved then
-    ret, input = r.GetUserInputs('ReaClassical Preferences', 3,
-     'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1)',saved)
+  if saved ~= "" then
+    ret, input = r.GetUserInputs('ReaClassical Project Preferences', 4,
+     'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)',saved)
   else
-    ret, input = r.GetUserInputs('ReaClassical Preferences', 3,
-     'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1)','35,200,3')
+    ret, input = r.GetUserInputs('ReaClassical Project Preferences', 4,
+     'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)','35,200,3,7')
   end
   return ret, input
 end
 -----------------------------------------------------------------------
 function load_prefs()
-  return r.GetExtState("ReaClassical", "Preferences")
+  return r.GetProjExtState(0,"ReaClassical", "Preferences")
 end
 -----------------------------------------------------------------------
 function save_prefs(input)
-  r.SetExtState("ReaClassical", "Preferences", input, true)
+  r.SetProjExtState(0,"ReaClassical", "Preferences", input)
 end
 -----------------------------------------------------------------------
 function pref_check(input)
   local pass = 1
   local table = {}
   for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-  if #table ~= 3 then
+  if #table ~= 4 then
     r.ShowMessageBox('Empty preferences not allowed. Using previously saved values or defaults', "Warning", 0)
     pass = 0
   end

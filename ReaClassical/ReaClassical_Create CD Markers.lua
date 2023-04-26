@@ -81,7 +81,7 @@ function cd_markers()
   if code_input ~= "" then
     save_codes(code_input)
   end
-  local pregap_len,offset = return_custom_length()
+  local pregap_len,offset,postgap = return_custom_length()
 
   start_check(offset) -- move items to right if not enough room for first offset
 
@@ -114,11 +114,11 @@ function cd_markers()
     r.ShowMessageBox('Please add take names to all items that you want to be CD tracks (Select item then press F2)', "No track markers created", 0)
     return
   end
-  r.AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + 7, previous_takename, marker_count)
+  r.AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap, previous_takename, marker_count)
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info()
     if #metadata_table == 4 then save_metadata(user_inputs) end
-    end_marker(metadata_table, code_table)
+    end_marker(metadata_table, code_table,postgap)
     renumber_markers()
     add_pregap()
   end
@@ -181,7 +181,7 @@ function find_project_end()
   return final_start + final_length
 end
 
-function end_marker(metadata_table, code_table)
+function end_marker(metadata_table, code_table, postgap)
   local final_item = r.GetTrackMediaItem(first_track, NUM_OF_ITEMS - 1)
   local final_start = r.GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = r.GetMediaItemInfo_Value(final_item, "D_LENGTH")
@@ -191,14 +191,14 @@ function end_marker(metadata_table, code_table)
         metadata_table[1] ..
         "|CATALOG=" .. code_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
         "|GENRE=" .. metadata_table[4]
-    r.AddProjectMarker(0, false, frame_check(final_end) + 1, 0, album_info, 0)
+    r.AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
   elseif #metadata_table == 4 then
     local album_info = "@" ..
         metadata_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
         "|GENRE=" .. metadata_table[4]
-    r.AddProjectMarker(0, false, frame_check(final_end) + 1, 0, album_info, 0)
+    r.AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
   end
-  r.AddProjectMarker(0, false, frame_check(final_end) + 7, 0, "=END", 0)
+  r.AddProjectMarker(0, false, frame_check(final_end) + postgap, 0, "=END", 0)
 end
 
 function frame_check(pos)
@@ -271,15 +271,16 @@ end
 function return_custom_length()
   local pregap_len = 3
   local offset = 0.2
-  local bool = r.HasExtState("ReaClassical", "Preferences")
-  if bool then 
-    input = r.GetExtState("ReaClassical", "Preferences")
+  local postgap = 7
+  local _, input = r.GetProjExtState(0,"ReaClassical", "Preferences")
+  if input ~= "" then 
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
     offset = table[2]/1000
     pregap_len = table[3]
+    postgap = table[4]
   end
-  return pregap_len,offset
+  return pregap_len,offset,postgap
 end
 
 function start_check(offset)
