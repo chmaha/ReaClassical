@@ -216,9 +216,8 @@ end
 
 function return_xfade_length()
   local xfade_len = 0.035
-  local bool = r.HasExtState("ReaClassical", "Preferences")
-  if bool then 
-    input = r.GetExtState("ReaClassical", "Preferences")
+  local _, input = r.GetProjExtState(0, "ReaClassical", "Preferences")
+  if input ~= "" then 
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
     xfade_len = table[1]/1000
