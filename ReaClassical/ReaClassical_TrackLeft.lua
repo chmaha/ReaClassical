@@ -23,8 +23,8 @@ local takename_check, check_position, get_track_info, select_CD_track_items, cal
 function Main()
     r.Undo_BeginBlock()
 
-    local ret, selected_item = takename_check()
-    if ret then
+    local take_name, selected_item = takename_check()
+    if take_name == -1 or take_name == "" then
         r.ShowMessageBox('Please select an item that starts a CD track', "Select CD track start", 0)
         return
     end
@@ -68,9 +68,13 @@ end
 ---------------------------------------------------------------------------------------
 function takename_check()
     local item = r.GetSelectedMediaItem(0, 0)
-    local take = r.GetActiveTake(item)
-    local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-    return take_name == "", item
+    if item then
+      local take = r.GetActiveTake(item) 
+      local _, take_name = r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+      return take_name, item
+    else
+      return -1
+    end
 end
 
 ---------------------------------------------------------------------------------------
