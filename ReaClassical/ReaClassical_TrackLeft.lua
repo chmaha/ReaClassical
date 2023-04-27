@@ -38,15 +38,17 @@ function Main()
     local first_track, num_of_items = get_track_info()
 
     local count = select_CD_track_items(item_number, num_of_items, first_track)
-
+    
+    
     local new_track_item, postgap = calc_postgap(count, num_of_items, first_track, selected_item)
+    
+    select_and_cut()
 
     -- shift all future tracks back length of selected track postgap
-    if item_number ~= num_of_items - 1 then
+    if item_number + count ~= num_of_items - 1 then
         shift(first_track, new_track_item, postgap, 0, "left")
     end
 
-    select_and_cut()
 
     go_to_previous(item_number, first_track)
 
@@ -117,12 +119,20 @@ function shift(track, item, shift_amount, items_in_track, direction)
         item_number = item_number + items_in_track + 1
         shift_amount = -shift_amount
     end
+    r.Main_OnCommand(40289, 0) -- unselect all items
     for i = item_number, num_of_items - 1, 1 do
-        items_to_move[#items_to_move + 1] = r.GetTrackMediaItem(track, i)
+        local item = r.GetTrackMediaItem(track, i)
+        r.SetMediaItemSelected(item, true)
+        r.Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     end
+    local selected_item_count = r.CountSelectedMediaItems(0)
+    for i = 0, selected_item_count - 1 do
+         items_to_move[#items_to_move + 1] = r.GetSelectedMediaItem(0, i)
+    end
+    r.Main_OnCommand(40289, 0) -- unselect all items
     for _, v in pairs(items_to_move) do
-        local later_item_pos = r.GetMediaItemInfo_Value(v, "D_POSITION")
-        r.SetMediaItemInfo_Value(v, "D_POSITION", later_item_pos - shift_amount)
+         local item_pos = r.GetMediaItemInfo_Value(v, "D_POSITION")
+         r.SetMediaItemInfo_Value(v, "D_POSITION", item_pos - shift_amount)
     end
 end
 
