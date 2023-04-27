@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre6
+@version 23.20pre7
 @changelog
-  ReaClassical Preferences: Make project-based
-  S-D editing scripts: Use project extstate for S-D edit length
-  Create CD Markers: Use project extstate for custom lengths
+  Shift CD tracks left and right (single track functionality for now)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -36,6 +34,8 @@
   [main] ReaClassical_Reposition_Album_Tracks.lua
   [main] ReaClassical_mpl_Markers to CUE.lua
   [main] ReaClassical_Preferences.lua
+  [main] ReaClassical_TrackLeft.lua
+  [main] ReaClassical_TrackRight.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
