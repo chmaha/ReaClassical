@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre7
+@version 23.20pre8
 @changelog
-  Shift CD tracks left and right (single track functionality for now)
+  Shift CD tracks left and right now working for destination folder group
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
