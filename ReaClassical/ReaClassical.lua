@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre8
+@version 23.20pre9
 @changelog
-  Shift CD tracks left and right now working for destination folder group
+  Rearrange CD Tracks: Add guard clause for no selected item
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
