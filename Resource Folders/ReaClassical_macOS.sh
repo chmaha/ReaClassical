@@ -38,6 +38,11 @@ echo "Extracting files into ReaClassical_$rcver folder..."
 sleep 2
 unzip -q Resource_Folder_Base.zip -d ReaClassical_$rcver/
 unzip -q UP_MacOS-$arch.zip -d ReaClassical_$rcver/UserPlugins/
+echo "Adding ReaClassical splash screen reference to reaper.ini"
+sleep 2
+abspath=`pwd ReaClassical_$rcver`
+sed -i'.original' -e "s,reaclassical-splash.png,${abspath}/ReaClassical_$rcver/reaclassical-splash.png," ReaClassical_$rcver/reaper.ini
+rm ReaClassical_$rcver/*.original
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
 cp -R reaper_temp/REAPER.app ReaClassical_$rcver/
