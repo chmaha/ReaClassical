@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre9
+@version 23.20pre10
 @changelog
-  Rearrange CD Tracks: Add guard clause for no selected item
+  New Themes: Sequoia Blue, Sequoia Green and Pyramix
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -38,6 +38,9 @@
   [main] ReaClassical_TrackRight.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
+  [theme] Pyramix.ReaperThemeZip
+  [theme] Sequoia_Blue.ReaperThemeZip
+  [theme] Sequoia_Green.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
