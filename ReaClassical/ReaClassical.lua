@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre10
+@version 23.20pre11
 @changelog
-  New Themes: Sequoia Blue, Sequoia Green and Pyramix
+  Themes: Small tweak to selected color
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
