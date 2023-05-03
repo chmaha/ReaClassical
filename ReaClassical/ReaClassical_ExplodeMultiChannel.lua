@@ -23,17 +23,23 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 function Main()
   Undo_BeginBlock()
   if CountSelectedMediaItems(0) == 0 then
-    ShowMessageBox("Please select one media item before running the script.", "Error", 0)
-    return
-  elseif CountSelectedMediaItems(0) > 1 then
-    ShowMessageBox("Please select a single media item before running the script.", "Error", 0)
+    ShowMessageBox("Please select one or more multi-channel media items before running the script.", "Error", 0)
     return
   end
   
-  local item = GetSelectedMediaItem(0, 0)
+  local num = reaper.CountSelectedMediaItems(0,0)
+  
+  takes = {}
+  items = {}
+  local track_number
+  for i = 0, num-1 do
+  
+  local item = GetSelectedMediaItem(0, i)
+  items[#items + 1] = item
   local item_track = GetMediaItemTrack(item)
-  local track_number = GetMediaTrackInfo_Value(item_track, 'IP_TRACKNUMBER')
+  track_number = GetMediaTrackInfo_Value(item_track, 'IP_TRACKNUMBER')
   local take = GetActiveTake(item)
+  takes[#takes + 1] = take
   local source = GetMediaItemTake_Source(take)
   local num_channels = GetMediaSourceNumChannels(source)
     
@@ -47,18 +53,24 @@ function Main()
     SetMediaItemTakeInfo_Value(new_take, "I_CHANMODE", 3)
     SetMediaItemTakeInfo_Value(new_take, "I_CHANMODE", 3 + i)
   end
+  end
   
   local int = ShowMessageBox("Do you want to treat the first two iso tracks as interleaved stereo?", "Multi-channel Explode", 4)
   if int == 6 then
-    SetMediaItemTakeInfo_Value(take, "I_CHANMODE", 67)
     local second_track = GetTrack(0, track_number)
     DeleteTrack(second_track)
+    for _,v in pairs(takes) do
+      SetMediaItemTakeInfo_Value(v, "I_CHANMODE", 67)
+    end
   else
     InsertTrackAtIndex(track_number, true)
     local second_track = GetTrack(0, track_number)
-    MoveMediaItemToTrack(item, second_track)
-    SetMediaItemTakeInfo_Value(take, "I_CHANMODE", 3)
-    
+    for _,v in pairs(items) do
+    MoveMediaItemToTrack(v, second_track)
+    end
+    for _,v in pairs(takes) do
+    SetMediaItemTakeInfo_Value(v, "I_CHANMODE", 3)
+    end
   end
   Undo_EndBlock("Explode multi-channel audio",0)
 end
