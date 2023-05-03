@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre14
+@version 23.20pre15
 @changelog
-  Explode multi-channel item: Allow for selection of multiple items
-  Explode multi-channel item: Unselect all items at the end of the function
+  SaDiE theme: tweak background color and make peak edge black
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
