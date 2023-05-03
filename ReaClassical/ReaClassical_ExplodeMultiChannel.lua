@@ -72,6 +72,7 @@ function Main()
     SetMediaItemTakeInfo_Value(v, "I_CHANMODE", 3)
     end
   end
+  Main_OnCommand(40769,0) -- unslect all items
   Undo_EndBlock("Explode multi-channel audio",0)
 end
 
