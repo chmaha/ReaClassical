@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre12
+@version 23.20pre13
 @changelog
-  New Theme: SaDiE
+  New: Explode Multi-channel item function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -36,6 +36,7 @@
   [main] ReaClassical_Preferences.lua
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
+  [main] ReaClassical_ExplodeMultiChannel.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] Pyramix.ReaperThemeZip
