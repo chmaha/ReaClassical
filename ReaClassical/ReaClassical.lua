@@ -3,6 +3,7 @@
 @version 23.20pre14
 @changelog
   Explode multi-channel item: Allow for selection of multiple items
+  Explode multi-channel item: Unselect all items at the end of the function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
