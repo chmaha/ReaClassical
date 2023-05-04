@@ -2,7 +2,7 @@
 @author chmaha
 @version 23.20pre17
 @changelog
-  New function: Colorize (give item and all in same group a random color)
+  New function: Colorize (give item and all in same group a custom color)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

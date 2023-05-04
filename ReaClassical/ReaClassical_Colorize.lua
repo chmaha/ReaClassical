@@ -22,7 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 function Main()
   Main_OnCommand(40034,0) -- select all in group
-  Main_OnCommand(40706,0) -- set to random color
+  Main_OnCommand(40704,0) -- set to custom color
 end
 
 Main()
