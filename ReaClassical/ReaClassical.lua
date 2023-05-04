@@ -3,6 +3,7 @@
 @version 23.20pre17
 @changelog
   New function: Colorize (give item and all in same group a custom color)
+  Colorize: Unselect item(s) at the end of the function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
