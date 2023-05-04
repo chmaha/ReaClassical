@@ -23,6 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 function Main()
   Main_OnCommand(40034,0) -- select all in group
   Main_OnCommand(40704,0) -- set to custom color
+  Main_OnCommand(40769,0) -- unselect all items
 end
 
 Main()
