@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre16
+@version 23.20pre17
 @changelog
-  New theme: Sonic Solutions
+  New function: Colorize (give item and all in same group a random color)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -37,6 +37,7 @@
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
   [main] ReaClassical_ExplodeMultiChannel.lua
+  [main] ReaClassical_Colorize.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] Pyramix.ReaperThemeZip
