@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre15
+@version 23.20pre16
 @changelog
-  SaDiE theme: tweak background color and make peak edge black
+  New theme: Sonic Solutions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -40,9 +40,9 @@
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] Pyramix.ReaperThemeZip
-  [theme] Sequoia_Blue.ReaperThemeZip
-  [theme] Sequoia_Green.ReaperThemeZip
+  [theme] Sequoia.ReaperThemeZip
   [theme] SaDiE.ReaperThemeZip
+  [theme] Sonic Solutions.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
