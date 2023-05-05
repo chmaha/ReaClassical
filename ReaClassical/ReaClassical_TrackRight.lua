@@ -32,6 +32,8 @@ function Main()
     local first_track, num_of_items, item_number, count = last_pos_check(selected_item)
 
     if item_number + count == num_of_items - 1 then
+        r.Main_OnCommand(40769,0) -- unselect all
+        r.SetMediaItemSelected(selected_item, true)
         r.ShowMessageBox('The selected track is already in last position', "Select CD track start", 0)
         return
     end
