@@ -21,9 +21,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 function Main()
+  Undo_BeginBlock()
   Main_OnCommand(40034,0) -- select all in group
   Main_OnCommand(40704,0) -- set to custom color
   Main_OnCommand(40769,0) -- unselect all items
+  Undo_EndBlock("ReaClassical Colorize",0)
 end
 
 Main()
