@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre18
+@version 23.20pre19
 @changelog
-  Colorize: Add undo block
+  Move Track Right: Select only first item of the track before dialog appears
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
