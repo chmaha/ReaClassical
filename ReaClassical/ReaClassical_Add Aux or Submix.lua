@@ -36,6 +36,8 @@ function main()
   r.GetSetMediaTrackInfo_String(track, "P_NAME", "@", true) -- Add @ as track name
   r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
   r.Main_OnCommand(40297,0)
+  local home = r.NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
+  r.Main_OnCommand(home,0)
   r.Undo_EndBlock("Add Aux/Submix track",0)
 end
 

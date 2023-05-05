@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre19
+@version 23.20pre20
 @changelog
-  Move Track Right: Select only first item of the track before dialog appears
-  PDF Guide: Fix pagination for shortcuts
+  Add Aux/Submix: Scroll to top of project at the end of the function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
