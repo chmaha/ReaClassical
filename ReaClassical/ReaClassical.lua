@@ -3,6 +3,7 @@
 @version 23.20pre19
 @changelog
   Move Track Right: Select only first item of the track before dialog appears
+  PDF Guide: Fix pagination for shortcuts
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
