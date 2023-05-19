@@ -48,6 +48,8 @@ function Main()
     r.DeleteProjectMarker(NULL, 1000, false)
     local item_one = r.GetSelectedMediaItem(0, 0)
     local item_two = r.GetSelectedMediaItem(0, 1)
+    local item_one_muted = r.GetMediaItemInfo_Value(item_one, "B_MUTE")
+    local item_two_muted = r.GetMediaItemInfo_Value(item_two, "B_MUTE")
     if item_one == nil or item_two == nil then
       r.ShowMessageBox("Please select both items involved in the crossfade", "Crossfade Audition", 0)
       return
@@ -68,7 +70,9 @@ function Main()
       local item_length = r.GetMediaItemInfo_Value(item_one, "D_LENGTH")
       r.SetMediaItemSelected(item_hover, true)
       r.Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-      r.Main_OnCommand(41559, 0) -- Item properties: Solo
+      if item_one_muted == 0 then
+        r.Main_OnCommand(41559, 0) -- Item properties: Solo
+      end
       r.AddProjectMarker2(0, false, one_pos + item_length, 0, "!1016", 1000, r.ColorToNative(10, 10, 10) | 0x1000000)
       r.SetEditCurPos(mouse_pos, false, false)
       r.OnPlayButton() -- play until end of item_hover (one_pos + item_length)
@@ -76,7 +80,9 @@ function Main()
       local item_pos = r.GetMediaItemInfo_Value(item_two, "D_POSITION")
       r.SetMediaItemSelected(item_hover, true)
       r.Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-      r.Main_OnCommand(41559, 0) -- Item properties: Solo
+      if item_two_muted == 0 then
+        r.Main_OnCommand(41559, 0) -- Item properties: Solo
+      end
       r.SetEditCurPos(two_pos, false, false)
       r.AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000, r.ColorToNative(10, 10, 10) | 0x1000000)
       r.OnPlayButton() -- play until mouse cursor

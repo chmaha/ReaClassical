@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre20
+@version 23.20pre21
 @changelog
-  Add Aux/Submix: Scroll to top of project at the end of the function
+  Retain muted guide tracks during fade editor auditioning
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
