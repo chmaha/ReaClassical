@@ -19,8 +19,6 @@ local r = reaper
 local folder_check
 
 function Main()
-  r.PreventUIRefresh(1)
-  r.Undo_BeginBlock()
   r.Main_OnCommand(40296, 0) -- Track: Select all tracks
   folders = folder_check()
   if folders > 1 then
@@ -30,11 +28,6 @@ function Main()
   local zoom = r.NamedCommandLookup("_SWS_VZOOMFIT")
   r.Main_OnCommand(zoom, 0) -- SWS: Vertical zoom to selected tracks
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  
-  r.Undo_EndBlock('Whole Project View', 0)
-  r.PreventUIRefresh(-1)
-  r.UpdateArrange()
-  r.UpdateTimeline()
 end
 
 function folder_check()
