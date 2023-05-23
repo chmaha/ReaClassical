@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre21
+@version 23.20pre22
 @changelog
-  Retain muted guide tracks during fade editor auditioning
+  Split Whole Project View function into separate horizontal and vertical zoom functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -17,7 +17,8 @@
   [main] ReaClassical_Edit Classical Crossfade.lua
   [main] ReaClassical_Prepare Takes.lua
   [main] ReaClassical_S-D Edit.lua
-  [main] ReaClassical_Whole Project View.lua
+  [main] ReaClassical_Whole Project View Horizontal.lua
+  [main] ReaClassical_Whole Project View Vertical.lua
   [main] ReaClassical_Create source groups (vertical).lua
   [main] ReaClassical_Audition.lua
   [main] ReaClassical_3-point edit replace.lua
