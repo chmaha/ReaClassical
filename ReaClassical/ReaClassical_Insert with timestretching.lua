@@ -30,7 +30,7 @@ function Main()
   ripple_lock_mode()
   if SDmarkers() == 4 then
     lock_items()
-    copy_source()
+    local first_track_items = copy_source()
     split_at_dest_in()
     r.Main_OnCommand(40625, 0) -- Time Selection: Set start point
     r.GoToMarker(0, 997, false)
@@ -67,7 +67,11 @@ function Main()
     for _,v in pairs(selected_items) do
       r.SetMediaItemSelected(v, true)
     end
-    r.Main_OnCommand(40362,0) -- glue items
+    if first_track_items == 1 then
+      r.Main_OnCommand(41206,0) -- Item: Move and stretch items to fit time selection
+    else
+      r.Main_OnCommand(40362,0) -- glue items
+    end
     r.Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
     state = r.GetToggleCommandState(1156)
     if state == 0 then
@@ -135,10 +139,11 @@ function copy_source()
   local start_time, end_time = r.GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
   local sel_length = end_time - start_time
   r.Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+  local first_track_items = r.CountSelectedMediaItems()
   r.Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
   r.Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
   r.Main_OnCommand(40289, 0) -- Item: Unselect all items
-  return sel_length
+  return first_track_items
 end
 
 function split_at_dest_in()
