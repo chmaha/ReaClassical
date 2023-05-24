@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre22
+@version 23.20pre23
 @changelog
-  Split Whole Project View function into separate horizontal and vertical zoom functions
-  Whole Project View functions: Remove superfluous undo blocks etc
+  S-D Edit function: Respect existing edits contained within the source markers
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
