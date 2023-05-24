@@ -3,6 +3,7 @@
 @version 23.20pre24
 @changelog
   Insert with time-stretching: Respect existing edits contained within the source markers by gluing
+  Insert with time-stretching: Remove superfluous functions and variables
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
