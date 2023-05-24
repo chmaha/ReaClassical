@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 local r = reaper
 local copy_source, create_crossfades, clean_up, lock_items
 local markers, select_matching_folder, split_at_dest_in, unlock_items, ripple_lock_mode
-local create_dest_in, return_xfade_length, xfade
+local create_dest_in, return_xfade_length, xfade, get_first_last_item
 
 function Main()
   r.PreventUIRefresh(1)
@@ -146,14 +146,21 @@ function split_at_dest_in()
 end
 
 function create_crossfades(dest_out)
+  local first_sel_item, last_sel_item = get_first_last_items()
+  r.Main_OnCommand(40289, 0) -- Item: Unselect all items
+  r.SetMediaItemSelected(first_sel_item, true)
   r.Main_OnCommand(41173, 0) -- Item navigation: Move cursor to start of items
+  r.Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
   local xfade_len = return_xfade_length()
   r.MoveEditCursor(-xfade_len, false)
   r.Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
   r.MoveEditCursor(xfade_len, false)
   r.MoveEditCursor(-0.0001, false)
   xfade(xfade_len)
+  r.Main_OnCommand(40289, 0) -- Item: Unselect all items
+  r.SetMediaItemSelected(last_sel_item, true)
   r.Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
+  r.Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
   local cur_pos = (r.GetPlayState() == 0) and r.GetCursorPosition() or r.GetPlayPosition()
   r.MoveEditCursor(0.001, false)
   local select_under = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
@@ -228,7 +235,6 @@ end
 function xfade(xfade_len)
   local select_items = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
   r.Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
-  --r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
   r.MoveEditCursor(-xfade_len, false)
   r.Main_OnCommand(40625, 0) -- Time selection: Set start point
   r.MoveEditCursor(xfade_len, false)
@@ -238,6 +244,13 @@ function xfade(xfade_len)
   r.MoveEditCursor(0.001, false)
   r.Main_OnCommand(select_items, 0)
   r.MoveEditCursor(-0.001, false)
+end
+
+function get_first_last_items()
+  local num_of_items = r.CountSelectedMediaItems()
+  first_sel_item = r.GetSelectedMediaItem(0,0)
+  last_sel_item = r.GetSelectedMediaItem(0,num_of_items-1)
+  return first_sel_item, last_sel_item
 end
 
 Main()
