@@ -6,7 +6,7 @@
 
 ##############
 $pkgver="6.78"
-$rcver="23Q2"
+$rcver="23Q2A"
 ##############
 
 Write-Host "Welcome to ReaClassical installer..."
