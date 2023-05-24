@@ -27,7 +27,6 @@ function Main()
   r.PreventUIRefresh(1)
   r.Undo_BeginBlock()
   local replace_toggle = r.NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
-  local dest_in, dest_out, source_count = markers()
   ripple_lock_mode()
   if SDmarkers() == 4 then
     lock_items()
@@ -81,7 +80,6 @@ function Main()
     clean_up()
     r.Main_OnCommand(40289, 0) -- Item: Unselect all items
     r.Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
-    create_dest_in(dest_out, cur_pos)
   else
    r.ShowMessageBox("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT", "Insert with timestretching", 0)
   end
@@ -223,13 +221,6 @@ function ripple_lock_mode()
   original_ripple_lock_mode = tonumber(original_ripple_lock_mode)
   if original_ripple_lock_mode ~= 2 then
     reaper.SNM_SetIntConfigVar("ripplelockmode", 2)
-  end
-end
-
-function create_dest_in(dest_out, cur_pos)
-  r.SetEditCurPos(cur_pos, false, false)
-  if dest_out == 0 then
-    r.AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, r.ColorToNative(22, 141, 195) | 0x1000000)
   end
 end
 
