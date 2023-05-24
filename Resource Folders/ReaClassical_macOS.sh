@@ -6,7 +6,7 @@
 # Change the pkgver number below to download an alternative REAPER version.
 
 ###########
-pkgver=6.78
+pkgver=6.79
 rcver=23Q2A
 ###########
 
