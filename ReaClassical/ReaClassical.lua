@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.20pre23
+@version 23.20pre24
 @changelog
-  S-D Edit function: Respect existing edits contained within the source markers
+  Insert with time-stretching: Respect existing edits contained within the source markers by gluing
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
