@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre1
+@version 23.21pre2
 @changelog
-  PDF Guide: Various tweaks
+  Create Folder: Add track grouping
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
