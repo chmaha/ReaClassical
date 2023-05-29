@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre2
+@version 23.21pre3
 @changelog
-  Create Folder: Add track grouping
+  Classical Take Record: Allow for pausing and then returning to original start position for next recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
