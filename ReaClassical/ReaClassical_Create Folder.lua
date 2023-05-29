@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local track_check, media_razor_group
+local track_check, media_razor_group, add_track_groups
 
 function Main()
   r.Undo_BeginBlock()
@@ -41,6 +41,7 @@ function Main()
         r.SetTrackSelected(track, 0)
       end
       media_razor_group()
+      add_track_groups()
     else
     r.ShowMessageBox("You can't have zero tracks in a folder!", "Create Folder", 0)
     end
@@ -64,6 +65,29 @@ function media_razor_group()
   r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
   r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
   r.Main_OnCommand(40939, 0) -- Track: Select track 01
+end
+
+function add_track_groups()
+  local first_track = r.GetTrack(0, 0)
+  r.SetOnlyTrackSelected(first_track)
+  local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+  r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+  local folder_tracks = r.CountSelectedTracks(0)
+  local i = 0
+  while i < folder_tracks do
+    local track = r.GetSelectedTrack(0, i)
+    r.GetSetTrackGroupMembership(track, "VOLUME_LEAD", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "VOLUME_FOLLOW", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "PAN_LEAD", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "PAN_FOLLOW", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "POLARITY_LEAD", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "POLARITY_FOLLOW", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "AUTOMODE_LEAD", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "AUTOMODE_FOLLOW", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "MUTE_LEAD", 2 ^ i, 2 ^ i)
+    r.GetSetTrackGroupMembership(track, "MUTE_FOLLOW", 2 ^ i, 2 ^ i)
+    i = i + 1
+  end
 end
 
 Main()
