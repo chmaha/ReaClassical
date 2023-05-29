@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 local r = reaper
-local mixer, solo, track_check, bus_check
+local mixer, solo, track_check, bus_check, load_prefs, save_prefs
 
 function Main()
   if track_check() == 0 then
@@ -43,6 +43,8 @@ function Main()
     r.Main_OnCommand(40491, 0) -- Track: Unarm all tracks for recording
     local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
     r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
+    local cursor_pos = r.GetCursorPosition()
+    save_prefs(cursor_pos)
     r.Main_OnCommand(1013, 0) -- Transport: Record
 
     r.Undo_EndBlock('Classical Take Record', 0)
@@ -52,6 +54,10 @@ function Main()
     r.SetToggleCommandState(1, take_record_toggle, 0)
     r.RefreshToolbar2(1, take_record_toggle)
     r.Main_OnCommand(40667, 0) -- Transport: Stop (save all recorded media)
+    local ret, cursor_pos = load_prefs()
+    if ret then
+      r.SetEditCurPos(cursor_pos, true, false)
+    end
     local unarm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECUNARMED")
     r.Main_OnCommand(unarm, 0) -- Xenakios/SWS: Set selected tracks record unarmed
     local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
@@ -124,5 +130,15 @@ end
 function track_check()
   return r.CountTracks(0)
 end
+
+
+function load_prefs()
+  return r.GetProjExtState(0,"ReaClassical", "Classical Take Record Cursor Position")
+end
+
+function save_prefs(input)
+  r.SetProjExtState(0,"ReaClassical", "Classical Take Record Cursor Position", input)
+end
+-----------------------------------------------------------------------
 
 Main()
