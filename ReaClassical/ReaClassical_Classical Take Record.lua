@@ -43,25 +43,25 @@ function Main()
     r.Main_OnCommand(40491, 0) -- Track: Unarm all tracks for recording
     local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
     r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
+    local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
+    r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
     local cursor_pos = r.GetCursorPosition()
     save_prefs(cursor_pos)
     r.Main_OnCommand(1013, 0) -- Transport: Record
-
     r.Undo_EndBlock('Classical Take Record', 0)
-    r.UpdateArrange()
-    r.UpdateTimeline()
   else
     r.SetToggleCommandState(1, take_record_toggle, 0)
     r.RefreshToolbar2(1, take_record_toggle)
     r.Main_OnCommand(40667, 0) -- Transport: Stop (save all recorded media)
+    local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+    r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    r.Main_OnCommand(40289,0) -- Unselect all items
     local ret, cursor_pos = load_prefs()
     if ret then
       r.SetEditCurPos(cursor_pos, true, false)
     end
     local unarm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECUNARMED")
     r.Main_OnCommand(unarm, 0) -- Xenakios/SWS: Set selected tracks record unarmed
-    local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
-    r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
     
     local num_tracks = r.CountTracks(0)
     local selected_track = r.GetSelectedTrack(0,0)
@@ -72,21 +72,33 @@ function Main()
       if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
         r.Main_OnCommand(40297,0) -- deselect all tracks
         r.SetTrackSelected(track, true)
+        local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
+        r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+        solo()
+        local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
+        r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
+        mixer()
+        local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
+        r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
         r.Main_OnCommand(40913,0) -- adjust scroll to selected tracks
         bool = true
+        r.TrackList_AdjustWindows(false)
         break
       end
     end
     if bool == false then
       local duplicate = reaper.NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
       r.Main_OnCommand(duplicate,0)
+      local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
+      r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
+      local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
+      r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
       r.Main_OnCommand(40913,0) -- adjust scroll to selected tracks
     end
-    
     r.Undo_EndBlock('Classical Take Record Stop', 0)
-    r.UpdateArrange()
-    r.UpdateTimeline()
   end
+  r.UpdateArrange()
+  r.UpdateTimeline()
 end
 
 function solo()
@@ -139,6 +151,7 @@ end
 function save_prefs(input)
   r.SetProjExtState(0,"ReaClassical", "Classical Take Record Cursor Position", input)
 end
+
 -----------------------------------------------------------------------
 
 Main()
