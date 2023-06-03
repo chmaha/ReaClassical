@@ -4,6 +4,7 @@
 @changelog
   Classical Take Record: Keep next folder group rec-armed for continued monitoring
   Classical Take Record: Show only folder track as selected
+  Classical Take Record: Always show next rec-armed folder group in mixer
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
