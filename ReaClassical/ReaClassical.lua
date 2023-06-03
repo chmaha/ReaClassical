@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre3
+@version 23.21pre4
 @changelog
-  Classical Take Record: Allow for pausing and then returning to original start position for next recording
+  Classical Take Record: Keep next folder group rec-armed for continued monitoring
+  Classical Take Record: Show only folder track as selected
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
