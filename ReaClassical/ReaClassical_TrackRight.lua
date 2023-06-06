@@ -81,14 +81,18 @@ end
 
 function select_CD_track_items(item_number, num_of_items, track)
     local count = 0
-    local added_item
     if item_number ~= num_of_items - 1 then
         for i = item_number + 1, num_of_items - 1, 1 do
-            added_item = GetTrackMediaItem(track, i)
-            local take = GetActiveTake(added_item)
+            local item = GetTrackMediaItem(track, i)
+            local prev_item = GetTrackMediaItem(track, i-1)
+            local take = GetActiveTake(item)
             local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-            if take_name == "" then
-                SetMediaItemSelected(added_item, true)
+            local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
+            local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
+            local prev_end = prev_pos + prev_len
+            local added_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if take_name == "" or added_pos < prev_end then
+                SetMediaItemSelected(item, true)
                 count = count + 1
             else
                 break
