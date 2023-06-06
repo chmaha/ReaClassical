@@ -18,38 +18,45 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local folder_check, get_track_number
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
-  local cur_pos = (r.GetPlayState() == 0) and r.GetCursorPosition() or r.GetPlayPosition()
+---------------------------------------------------------------------
+
+function main()
+  local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
   local track_number = math.floor(get_track_number())
-  r.DeleteProjectMarker(NULL, 998, false)
-  r.AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, r.ColorToNative(23, 223, 143) | 0x1000000)
+  DeleteProjectMarker(NULL, 998, false)
+  AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, ColorToNative(23, 223, 143) | 0x1000000)
 end
+
+---------------------------------------------------------------------
 
 function folder_check()
   local folders = 0
-  local total_tracks = r.CountTracks(0)
+  local total_tracks = CountTracks(0)
   for i = 0, total_tracks - 1, 1 do
-    local track = r.GetTrack(0, i)
-    if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+    local track = GetTrack(0, i)
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
       folders = folders + 1
     end
   end
   return folders
 end
 
+---------------------------------------------------------------------
+
 function get_track_number()
-  local selected = r.GetSelectedTrack(0, 0)
+  local selected = GetSelectedTrack(0, 0)
   if folder_check() == 0 or selected == nil then
     return 1
-  elseif r.GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
-    return r.GetMediaTrackInfo_Value(selected, "IP_TRACKNUMBER")
+  elseif GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
+    return GetMediaTrackInfo_Value(selected, "IP_TRACKNUMBER")
   else
-    local folder = r.GetParentTrack(selected)
-    return r.GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
+    local folder = GetParentTrack(selected)
+    return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
   end
 end
 
-Main()
+---------------------------------------------------------------------
+
+main()

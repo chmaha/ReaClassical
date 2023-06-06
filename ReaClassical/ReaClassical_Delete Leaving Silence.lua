@@ -18,50 +18,51 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local select_matching_folder, source_markers
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
-  r.PreventUIRefresh(1)
-  r.Undo_BeginBlock()
+---------------------------------------------------------------------
+
+function main()
+  PreventUIRefresh(1)
+  Undo_BeginBlock()
 
   if source_markers() == 2 then
-    local focus = r.NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
-    r.Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
-    r.Main_OnCommand(40310, 0) -- Set ripple per-track
-    r.Main_OnCommand(40289, 0) -- Item: Unselect all items
-    r.GoToMarker(0, 998, false)
+    local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
+    Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
+    Main_OnCommand(40310, 0) -- Set ripple per-track
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    GoToMarker(0, 998, false)
     select_matching_folder()
-    r.Main_OnCommand(40625, 0) -- Time Selection: Set start point
-    r.GoToMarker(0, 999, false)
-    r.Main_OnCommand(40626, 0) -- Time Selection: Set end point
-    r.Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
-    r.Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-    r.Main_OnCommand(41990, 0) -- Toggle ripple per-track (off)
-    local delete = r.NamedCommandLookup("_XENAKIOS_TSADEL")
-    r.Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
-    r.Main_OnCommand(40630, 0) -- Go to start of time selection
-    r.Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
-    r.DeleteProjectMarker(NULL, 998, false)
-    r.DeleteProjectMarker(NULL, 999, false)
-    r.Main_OnCommand(40289, 0) -- Item: Unselect all items
-    r.Main_OnCommand(41990, 0) -- Toggle ripple per-track (off)
+    Main_OnCommand(40625, 0)  -- Time Selection: Set start point
+    GoToMarker(0, 999, false)
+    Main_OnCommand(40626, 0)  -- Time Selection: Set end point
+    Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
+    Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
+    Main_OnCommand(41990, 0)  -- Toggle ripple per-track (off)
+    local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
+    Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
+    Main_OnCommand(40630, 0)  -- Go to start of time selection
+    Main_OnCommand(40020, 0)  -- Time Selection: Remove time selection and loop point selection
+    DeleteProjectMarker(NULL, 998, false)
+    DeleteProjectMarker(NULL, 999, false)
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    Main_OnCommand(41990, 0) -- Toggle ripple per-track (off)
   else
-    r.ShowMessageBox("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
+    ShowMessageBox("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
   end
-
-  r.Undo_EndBlock('Cut and Ripple', 0)
-  r.PreventUIRefresh(-1)
-  r.UpdateArrange()
-  r.UpdateTimeline()
-
+  Undo_EndBlock('Cut and Ripple', 0)
+  PreventUIRefresh(-1)
+  UpdateArrange()
+  UpdateTimeline()
 end
 
+---------------------------------------------------------------------
+
 function source_markers()
-  local retval, num_markers, num_regions = r.CountProjectMarkers(0)
+  local retval, num_markers, num_regions = CountProjectMarkers(0)
   local exists = 0
   for i = 0, num_markers + num_regions - 1, 1 do
-    local retval, isrgn, pos, rgnend, label, markrgnindexnumber = r.EnumProjectMarkers(i)
+    local retval, isrgn, pos, rgnend, label, markrgnindexnumber = EnumProjectMarkers(i)
     if string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
       exists = exists + 1
     end
@@ -69,18 +70,22 @@ function source_markers()
   return exists
 end
 
+---------------------------------------------------------------------
+
 function select_matching_folder()
-  local cursor = r.GetCursorPosition()
-  local marker_id, _ = r.GetLastMarkerAndCurRegion(0, cursor)
-  local _, _, _, _, label, _, _ = r.EnumProjectMarkers3(0, marker_id)
+  local cursor = GetCursorPosition()
+  local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
+  local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
   local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
-  for i = 0, r.CountTracks(0) - 1, 1 do
-    local track = r.GetTrack(0, i)
-    if r.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
-      r.SetOnlyTrackSelected(track)
+  for i = 0, CountTracks(0) - 1, 1 do
+    local track = GetTrack(0, i)
+    if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
+      SetOnlyTrackSelected(track)
       break
     end
   end
 end
 
-Main()
+---------------------------------------------------------------------
+
+main()

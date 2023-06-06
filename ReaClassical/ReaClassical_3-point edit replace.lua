@@ -18,14 +18,22 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local replace_toggle = r.NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
-local state = r.GetToggleCommandState(replace_toggle)
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-if state == 0 or state == -1 then
-  r.SetToggleCommandState(1, replace_toggle, 1)
-  r.RefreshToolbar2(1, replace_toggle)
-else
-  r.SetToggleCommandState(1, replace_toggle, 0)
-  r.RefreshToolbar2(1, replace_toggle)
+---------------------------------------------------------------------
+
+function main()
+  local replace_toggle = NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
+  local state = GetToggleCommandState(replace_toggle)
+  if state == 0 or state == -1 then
+    SetToggleCommandState(1, replace_toggle, 1)
+    RefreshToolbar2(1, replace_toggle)
+  else
+    SetToggleCommandState(1, replace_toggle, 0)
+    RefreshToolbar2(1, replace_toggle)
+  end
 end
+
+---------------------------------------------------------------------
+
+main()
