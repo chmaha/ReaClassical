@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre7
+@version 23.21pre8
 @changelog
-  NO-OP: Code beautification part 3
+  Move CD Track Left/Right: Treat crossfaded CD track starts as part of same group
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
