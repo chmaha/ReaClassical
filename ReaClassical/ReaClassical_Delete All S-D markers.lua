@@ -18,8 +18,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-r.DeleteProjectMarker(NULL, 996, false)
-r.DeleteProjectMarker(NULL, 997, false)
-r.DeleteProjectMarker(NULL, 998, false)
-r.DeleteProjectMarker(NULL, 999, false)
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+---------------------------------------------------------------------
+
+function main()
+    DeleteProjectMarker(NULL, 996, false)
+    DeleteProjectMarker(NULL, 997, false)
+    DeleteProjectMarker(NULL, 998, false)
+    DeleteProjectMarker(NULL, 999, false)
+end
+
+---------------------------------------------------------------------
+
+main()

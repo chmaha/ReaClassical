@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre4
+@version 23.21pre5
 @changelog
-  Classical Take Record: Keep next folder group rec-armed for continued monitoring
-  Classical Take Record: Show only folder track as selected
-  Classical Take Record: Always show next rec-armed folder group in mixer
+  S-D functions: NO-OP code beautification
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
