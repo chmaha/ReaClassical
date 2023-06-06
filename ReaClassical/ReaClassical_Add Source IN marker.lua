@@ -23,38 +23,38 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 ---------------------------------------------------------------------
 
 function main()
-  local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
-  local track_number = math.floor(get_track_number())
-  DeleteProjectMarker(NULL, 998, false)
-  AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, ColorToNative(23, 223, 143) | 0x1000000)
+    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+    local track_number = math.floor(get_track_number())
+    DeleteProjectMarker(NULL, 998, false)
+    AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, ColorToNative(23, 223, 143) | 0x1000000)
 end
 
 ---------------------------------------------------------------------
 
 function folder_check()
-  local folders = 0
-  local total_tracks = CountTracks(0)
-  for i = 0, total_tracks - 1, 1 do
-    local track = GetTrack(0, i)
-    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-      folders = folders + 1
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
     end
-  end
-  return folders
+    return folders
 end
 
 ---------------------------------------------------------------------
 
 function get_track_number()
-  local selected = GetSelectedTrack(0, 0)
-  if folder_check() == 0 or selected == nil then
-    return 1
-  elseif GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
-    return GetMediaTrackInfo_Value(selected, "IP_TRACKNUMBER")
-  else
-    local folder = GetParentTrack(selected)
-    return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
-  end
+    local selected = GetSelectedTrack(0, 0)
+    if folder_check() == 0 or selected == nil then
+        return 1
+    elseif GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
+        return GetMediaTrackInfo_Value(selected, "IP_TRACKNUMBER")
+    else
+        local folder = GetParentTrack(selected)
+        return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
+    end
 end
 
 ---------------------------------------------------------------------
