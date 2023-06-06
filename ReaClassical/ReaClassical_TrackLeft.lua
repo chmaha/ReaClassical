@@ -38,7 +38,19 @@ function main()
     end
 
     local first_track, num_of_items = get_track_info()
+
+    local item_start_crossfaded = is_item_start_crossfaded(first_track, item_number)
+    if item_start_crossfaded then
+        Main_OnCommand(40769, 0) -- unselect all
+        SetMediaItemSelected(selected_item, true)
+        ShowMessageBox('The selected track start is crossfaded and therefore cannot be moved', "Select CD track start", 0)
+        return
+    end
+
     local count = select_CD_track_items(item_number, num_of_items, first_track)
+
+
+
     local new_track_item, postgap = calc_postgap(count, num_of_items, first_track, selected_item)
 
     select_and_cut()
@@ -219,6 +231,23 @@ function get_grouped_items(item)
         Selected_items[i] = GetSelectedMediaItem(0, i)
     end
     return Selected_items
+end
+
+---------------------------------------------------------------------
+
+function is_item_start_crossfaded(first_track, item_number)
+    local item = GetTrackMediaItem(first_track, item_number)
+    local next_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local prev_item = GetTrackMediaItem(first_track, item_number - 1)
+    if prev_item then
+        local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
+        local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
+        local prev_end = prev_pos + prev_len
+        if prev_end > next_pos then
+            return true
+        end
+    end
+    return false
 end
 
 ---------------------------------------------------------------------
