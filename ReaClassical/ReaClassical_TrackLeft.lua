@@ -106,13 +106,26 @@ end
 
 function go_to_previous(item_number, track)
     for i = item_number - 1, 0, -1 do
-        local prev_item = GetTrackMediaItem(track, i)
-        local take = GetActiveTake(prev_item)
+        local first_prev_item = GetTrackMediaItem(track, i)
+        local take = GetActiveTake(first_prev_item)
         local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-        if take_name ~= "" then
-            local prev_item_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
-            SetEditCurPos(prev_item_pos, false, false)
-            break
+        local first_prev_pos = GetMediaItemInfo_Value(first_prev_item, "D_POSITION")
+        local second_prev_item = GetTrackMediaItem(track, i - 1)
+        if second_prev_item then
+            local second_prev_pos = GetMediaItemInfo_Value(second_prev_item, "D_POSITION")
+            local second_prev_len = GetMediaItemInfo_Value(second_prev_item, "D_LENGTH")
+            local second_prev_end = second_prev_pos + second_prev_len
+            if take_name ~= "" and first_prev_pos > second_prev_end then
+                local prev_item_pos = GetMediaItemInfo_Value(first_prev_item, "D_POSITION")
+                SetEditCurPos(prev_item_pos, false, false)
+                break
+            end
+        else
+            if take_name ~= "" then
+                local prev_item_pos = GetMediaItemInfo_Value(first_prev_item, "D_POSITION")
+                SetEditCurPos(prev_item_pos, false, false)
+                break
+            end
         end
     end
 end
@@ -148,14 +161,18 @@ end
 
 function select_CD_track_items(item_number, num_of_items, track)
     local count = 0
-    local added_item
     if item_number ~= num_of_items - 1 then
         for i = item_number + 1, num_of_items - 1, 1 do
-            added_item = GetTrackMediaItem(track, i)
-            local take = GetActiveTake(added_item)
+            local item = GetTrackMediaItem(track, i)
+            local first_prev_item = GetTrackMediaItem(track, i - 1)
+            local take = GetActiveTake(item)
             local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-            if take_name == "" then
-                SetMediaItemSelected(added_item, true)
+            local prev_pos = GetMediaItemInfo_Value(first_prev_item, "D_POSITION")
+            local prev_len = GetMediaItemInfo_Value(first_prev_item, "D_LENGTH")
+            local prev_end = prev_pos + prev_len
+            local added_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if take_name == "" or added_pos < prev_end then
+                SetMediaItemSelected(item, true)
                 count = count + 1
             else
                 break
