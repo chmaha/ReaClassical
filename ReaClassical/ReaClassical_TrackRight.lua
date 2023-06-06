@@ -90,8 +90,8 @@ function select_CD_track_items(item_number, num_of_items, track)
             local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
             local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
             local prev_end = prev_pos + prev_len
-            local added_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            if take_name == "" or added_pos < prev_end then
+            local next_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if take_name == "" or next_pos < prev_end then
                 SetMediaItemSelected(item, true)
                 count = count + 1
             else
