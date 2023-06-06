@@ -18,48 +18,58 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local load_prefs, display_prefs, save_prefs, pref_check
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+---------------------------------------------------------------------
+
+function main()
+    local pass
+    local ret, input = display_prefs()
+    if ret then pass = pref_check(input) end
+    if pass == 1 then save_prefs(input) end
+end
 
 -----------------------------------------------------------------------
-function Main()
-  local pass
-  local ret, input = display_prefs()
-  if ret then pass = pref_check(input) end
-  if pass == 1 then save_prefs(input) end
-end
------------------------------------------------------------------------
+
 function display_prefs()
-  local _, saved = load_prefs()
-  local ret, input
-  if saved ~= "" then
-    ret, input = r.GetUserInputs('ReaClassical Project Preferences', 4,
-     'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)',saved)
-  else
-    ret, input = r.GetUserInputs('ReaClassical Project Preferences', 4,
-     'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)','35,200,3,7')
-  end
-  return ret, input
+    local _, saved = load_prefs()
+    local ret, input
+    if saved ~= "" then
+        ret, input = GetUserInputs('ReaClassical Project Preferences', 4,
+            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)', saved)
+    else
+        ret, input = GetUserInputs('ReaClassical Project Preferences', 4,
+            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)',
+            '35,200,3,7')
+    end
+    return ret, input
 end
------------------------------------------------------------------------
-function load_prefs()
-  return r.GetProjExtState(0,"ReaClassical", "Preferences")
-end
------------------------------------------------------------------------
-function save_prefs(input)
-  r.SetProjExtState(0,"ReaClassical", "Preferences", input)
-end
------------------------------------------------------------------------
-function pref_check(input)
-  local pass = 1
-  local table = {}
-  for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-  if #table ~= 4 then
-    r.ShowMessageBox('Empty preferences not allowed. Using previously saved values or defaults', "Warning", 0)
-    pass = 0
-  end
-  return pass
-end
+
 -----------------------------------------------------------------------
 
-Main()
+function load_prefs()
+    return GetProjExtState(0, "ReaClassical", "Preferences")
+end
+
+-----------------------------------------------------------------------
+
+function save_prefs(input)
+    SetProjExtState(0, "ReaClassical", "Preferences", input)
+end
+
+-----------------------------------------------------------------------
+
+function pref_check(input)
+    local pass = 1
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if #table ~= 4 then
+        ShowMessageBox('Empty preferences not allowed. Using previously saved values or defaults', "Warning", 0)
+        pass = 0
+    end
+    return pass
+end
+
+-----------------------------------------------------------------------
+
+main()
