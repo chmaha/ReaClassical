@@ -23,15 +23,15 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 ---------------------------------------------------------------------
 
 function main()
-  local replace_toggle = NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
-  local state = GetToggleCommandState(replace_toggle)
-  if state == 0 or state == -1 then
-    SetToggleCommandState(1, replace_toggle, 1)
-    RefreshToolbar2(1, replace_toggle)
-  else
-    SetToggleCommandState(1, replace_toggle, 0)
-    RefreshToolbar2(1, replace_toggle)
-  end
+    local replace_toggle = NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
+    local state = GetToggleCommandState(replace_toggle)
+    if state == 0 or state == -1 then
+        SetToggleCommandState(1, replace_toggle, 1)
+        RefreshToolbar2(1, replace_toggle)
+    else
+        SetToggleCommandState(1, replace_toggle, 0)
+        RefreshToolbar2(1, replace_toggle)
+    end
 end
 
 ---------------------------------------------------------------------

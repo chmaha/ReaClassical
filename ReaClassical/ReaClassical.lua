@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre5
+@version 23.21pre6
 @changelog
-  S-D functions: NO-OP code beautification
+  NO-OP: Code beautification part 2
+  NO-OP: Revise previous commit to use 4-space indentation
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
