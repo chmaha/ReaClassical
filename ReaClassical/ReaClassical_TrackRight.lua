@@ -31,7 +31,14 @@ function main()
         return
     end
 
-    local first_track, num_of_items, item_number, count = last_pos_check(selected_item)
+    local item_start_crossfaded, first_track, num_of_items, item_number, count = pos_check(selected_item)
+
+    if item_start_crossfaded then
+        Main_OnCommand(40769, 0) -- unselect all
+        SetMediaItemSelected(selected_item, true)
+        ShowMessageBox('The selected track start is crossfaded and therefore cannot be moved', "Select CD track start", 0)
+        return
+    end
 
     if item_number + count == num_of_items - 1 then
         Main_OnCommand(40769, 0) -- unselect all
@@ -39,6 +46,8 @@ function main()
         ShowMessageBox('The selected track is already in last position', "Select CD track start", 0)
         return
     end
+
+
 
     next_track(first_track, item_number, count)
 
@@ -84,7 +93,7 @@ function select_CD_track_items(item_number, num_of_items, track)
     if item_number ~= num_of_items - 1 then
         for i = item_number + 1, num_of_items - 1, 1 do
             local item = GetTrackMediaItem(track, i)
-            local prev_item = GetTrackMediaItem(track, i-1)
+            local prev_item = GetTrackMediaItem(track, i - 1)
             local take = GetActiveTake(item)
             local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
             local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
@@ -119,11 +128,31 @@ end
 
 ---------------------------------------------------------------------
 
-function last_pos_check(item)
+function pos_check(selected_item)
     local first_track, num_of_items = get_track_info()
-    local item_number = check_position(item)
+    local item_number = check_position(selected_item)
+    local item_start_crossfaded = is_item_start_crossfaded(first_track, item_number)
     local count = select_CD_track_items(item_number, num_of_items, first_track)
-    return first_track, num_of_items, item_number, count
+    Main_OnCommand(40769, 0) -- unselect all
+    SetMediaItemSelected(selected_item, true)
+    return item_start_crossfaded, first_track, num_of_items, item_number, count
+end
+
+---------------------------------------------------------------------
+
+function is_item_start_crossfaded(first_track, item_number)
+    local item = GetTrackMediaItem(first_track, item_number)
+    local next_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local prev_item = GetTrackMediaItem(first_track, item_number - 1)
+    if prev_item then
+        local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
+        local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
+        local prev_end = prev_pos + prev_len
+        if prev_end > next_pos then
+            return true
+        end
+    end
+    return false
 end
 
 ---------------------------------------------------------------------

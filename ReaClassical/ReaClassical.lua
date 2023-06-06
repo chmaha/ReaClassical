@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre8
+@version 23.21pre9
 @changelog
-  Move CD Track Left/Right: Treat crossfaded CD track starts as part of same group
-  Move CD Track Left/Right: Use better variable names for current item position
+  Shift CD Track Left/Right: Don't allow moving CD tracks whose start overlaps with previous item
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
