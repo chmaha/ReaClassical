@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre9
+@version 23.21pre10
 @changelog
-  Shift CD Track Left/Right: Don't allow moving CD tracks whose start overlaps with previous item
+  Whole Project View Vertical: Respect child track visibility
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
