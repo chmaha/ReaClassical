@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre14
+@version 23.21pre15
 @changelog
-  Whole Project View (Horizontal): Move edit cursor to start of project to make sure zoom works as expected
+  Various: Replace any reaper prefixes with r
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
