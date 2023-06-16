@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre10
+@version 23.21pre11
 @changelog
-  Whole Project View Vertical: Respect child track visibility
+  S-D Edit: Prematurely end function by cleaning up if there are no source media items to select
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

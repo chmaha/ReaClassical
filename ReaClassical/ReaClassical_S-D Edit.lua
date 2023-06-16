@@ -30,7 +30,11 @@ function main()
     ripple_lock_mode()
     if GetToggleCommandState(replace_toggle) == 1 and dest_in == 1 and dest_out == 0 and source_count == 2 then
         lock_items()
-        local sel_length = copy_source()
+        local sel_length, is_selected = copy_source()
+        if is_selected == false then
+            clean_up(is_selected)
+            return
+        end
         split_at_dest_in()
         MoveEditCursor(sel_length, true)
         Main_OnCommand(40309, 0) -- Toggle ripple editing per-track
@@ -43,12 +47,16 @@ function main()
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         unlock_items()
         local cur_pos = create_crossfades(dest_out)
-        clean_up()
+        clean_up(is_selected)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         create_dest_in(dest_out, cur_pos)
     elseif dest_in == 1 and source_count == 2 then
         lock_items()
-        copy_source()
+        local _, is_selected = copy_source()
+        if is_selected == false then
+            clean_up(is_selected)
+            return
+        end
         split_at_dest_in()
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
@@ -62,7 +70,7 @@ function main()
         Main_OnCommand(paste, 0) -- SWS_AWPASTE
         unlock_items()
         local cur_pos = create_crossfades(dest_out)
-        clean_up()
+        clean_up(is_selected)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         create_dest_in(dest_out, cur_pos)
@@ -118,6 +126,7 @@ end
 ---------------------------------------------------------------------
 
 function copy_source()
+    local is_selected = true
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
@@ -130,10 +139,13 @@ function copy_source()
     local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
     local sel_length = end_time - start_time
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+    if CountSelectedMediaItems(0) == 0 then
+        is_selected = false
+    end
     Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
     Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
-    return sel_length
+    return sel_length, is_selected
 end
 
 ---------------------------------------------------------------------
@@ -182,18 +194,22 @@ function create_crossfades(dest_out)
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
-    Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     return cur_pos
 end
 
 ---------------------------------------------------------------------
 
-function clean_up()
-    DeleteProjectMarker(NULL, 996, false)
-    DeleteProjectMarker(NULL, 997, false)
-    DeleteProjectMarker(NULL, 998, false)
-    DeleteProjectMarker(NULL, 999, false)
+function clean_up(is_selected)
     Main_OnCommand(42395, 0) -- Clear tempo envelope
+    Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
+    if is_selected then
+        DeleteProjectMarker(NULL, 996, false)
+        DeleteProjectMarker(NULL, 997, false)
+        DeleteProjectMarker(NULL, 998, false)
+        DeleteProjectMarker(NULL, 999, false)
+    else
+        ShowMessageBox("Please make sure there is material to copy between your source markers...", "Source-Destination Edit", 0)
+    end
 end
 
 ---------------------------------------------------------------------
