@@ -27,7 +27,7 @@ function Main()
     return
   end
   
-  local num = reaper.CountSelectedMediaItems(0,0)
+  local num = r.CountSelectedMediaItems(0,0)
   
   takes = {}
   items = {}

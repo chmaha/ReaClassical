@@ -87,7 +87,7 @@ function Main()
       end
     end
     if bool == false then
-      local duplicate = reaper.NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
+      local duplicate = r.NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
       r.Main_OnCommand(duplicate,0)
       local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
       r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed

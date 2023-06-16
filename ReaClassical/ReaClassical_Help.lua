@@ -18,30 +18,34 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local file_exists, retrieve
-local resource_path = r.GetResourcePath()
-local relative_path = "Scripts/chmaha Scripts/ReaClassical/ReaClassical_PDF_Guide.pdf"
-local pdf = resource_path .. "/" .. relative_path
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+---------------------------------------------------------------------
 
 function main()
-  local bool = file_exists(pdf)
-  if bool == true then
-    reaper.CF_ShellExecute(pdf)
-  else
-    r.ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!", "ReaClassical PDF Guide not found!", 0)
-  end
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/ReaClassical_PDF_Guide.pdf"
+    local pdf = resource_path .. "/" .. relative_path
+    local bool = file_exists(pdf)
+    if bool == true then
+        CF_ShellExecute(pdf)
+    else
+        ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!", "ReaClassical PDF Guide not found!", 0)
+    end
 end
+
+---------------------------------------------------------------------
 
 function file_exists(name)
-   local exists = false
-   local file=io.open(name,"r")
-   if file ~= nil then 
-    io.close(file)
-    exists = true
-   end
-   return exists
+    local exists = false
+    local file = io.open(name, "r")
+    if file ~= nil then
+        io.close(file)
+        exists = true
+    end
+    return exists
 end
 
+---------------------------------------------------------------------
+
 main()
- 
