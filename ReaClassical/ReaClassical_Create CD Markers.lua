@@ -20,19 +20,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local first_track = GetTrack(0, 0)
-
 ---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
-    
+    local first_track = GetTrack(0, 0)
     if first_track then NUM_OF_ITEMS = CountTrackMediaItems(first_track) end
     if not first_track or NUM_OF_ITEMS == 0 then
         ShowMessageBox("Error: No media items found.", "Create CD Markers", 0)
         return
     end
-    local empty_count = empty_items_check()
+    local empty_count = empty_items_check(first_track)
     if empty_count > 0 then
         ShowMessageBox("Error: Empty items found on first track. Delete them to continue.", "Create CD Markers", 0)
         return
@@ -43,7 +41,7 @@ function main()
         "Create CD/DDP markers", 4)
     if choice == 6 then
         SetProjExtState(0, "Create CD Markers", "Run?", "yes")
-        local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers()
+        local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(first_track)
         if redbook_track_length_errors > 0 then
             ShowMessageBox(
                 'This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.',
@@ -87,7 +85,7 @@ end
 
 ---------------------------------------------------------------------
 
-function cd_markers()
+function cd_markers(first_track)
     delete_markers()
 
     SNM_SetIntConfigVar('projfrbase', 75)
@@ -99,7 +97,7 @@ function cd_markers()
     end
     local pregap_len, offset, postgap = return_custom_length()
 
-    start_check(offset) -- move items to right if not enough room for first offset
+    start_check(first_track, offset) -- move items to right if not enough room for first offset
 
     if tonumber(pregap_len) < 1 then pregap_len = 1 end
     local final_end = find_project_end()
@@ -109,7 +107,7 @@ function cd_markers()
     local previous_takename
     local marker_count = 0
     for i = 0, NUM_OF_ITEMS - 1, 1 do
-        local current_start, take_name = find_current_start(i)
+        local current_start, take_name = find_current_start(first_track, i)
         local added_marker = create_marker(current_start, marker_count, take_name, code_table, offset)
         if added_marker then
             if take_name:match("^!") and marker_count > 0 then
@@ -142,7 +140,7 @@ function cd_markers()
     if marker_count ~= 0 then
         local user_inputs, metadata_table = get_info()
         if #metadata_table == 4 then save_metadata(user_inputs) end
-        redbook_project_length = end_marker(metadata_table, code_table, postgap)
+        redbook_project_length = end_marker(first_track, metadata_table, code_table, postgap)
         renumber_markers()
         add_pregap()
     end
@@ -152,7 +150,7 @@ end
 
 ---------------------------------------------------------------------
 
-function find_current_start(i)
+function find_current_start(first_track, i)
     local current_item = GetTrackMediaItem(first_track, i)
     local take = GetActiveTake(current_item)
     local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
@@ -212,7 +210,7 @@ end
 
 ---------------------------------------------------------------------
 
-function find_project_end()
+function find_project_end(first_track)
     local final_item = GetTrackMediaItem(first_track, NUM_OF_ITEMS - 1)
     local final_start = GetMediaItemInfo_Value(final_item, "D_POSITION")
     local final_length = GetMediaItemInfo_Value(final_item, "D_LENGTH")
@@ -221,7 +219,7 @@ end
 
 ---------------------------------------------------------------------
 
-function end_marker(metadata_table, code_table, postgap)
+function end_marker(first_track, metadata_table, code_table, postgap)
     local final_item = GetTrackMediaItem(first_track, NUM_OF_ITEMS - 1)
     local final_start = GetMediaItemInfo_Value(final_item, "D_POSITION")
     local final_length = GetMediaItemInfo_Value(final_item, "D_LENGTH")
@@ -309,7 +307,7 @@ end
 
 ---------------------------------------------------------------------
 
-function empty_items_check()
+function empty_items_check(first_track)
     local count = 0
     for i = 0, NUM_OF_ITEMS - 1, 1 do
         local current_item = GetTrackMediaItem(first_track, i)
@@ -340,7 +338,7 @@ end
 
 ---------------------------------------------------------------------
 
-function start_check(offset)
+function start_check(first_track, offset)
     local first_item = GetTrackMediaItem(first_track, 0)
     local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
     if position < offset then

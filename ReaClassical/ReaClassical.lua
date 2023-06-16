@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre17
+@version 23.21pre18
 @changelog
-  Bugfix: Fade editor, Reposition CD Tracks & Create CD Markers
+  Various: Move local variable creation inside of main function (again!) and pass to other functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
