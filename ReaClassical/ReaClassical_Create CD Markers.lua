@@ -190,12 +190,12 @@ function end_marker(metadata_table, code_table, postgap)
     local album_info = "@" ..
         metadata_table[1] ..
         "|CATALOG=" .. code_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
-        "|GENRE=" .. metadata_table[4]
+        "|GENRE=" .. metadata_table[4] .. "|MESSAGE=Created with ReaClassical"
     r.AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
   elseif #metadata_table == 4 then
     local album_info = "@" ..
         metadata_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
-        "|GENRE=" .. metadata_table[4]
+        "|GENRE=" .. metadata_table[4] .. "|MESSAGE=Created with ReaClassical"
     r.AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
   end
   r.AddProjectMarker(0, false, frame_check(final_end) + postgap, 0, "=END", 0)
