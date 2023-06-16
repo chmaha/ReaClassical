@@ -31,26 +31,26 @@ function main()
         lock_items()
         local first_track_items = copy_source()
         split_at_dest_in()
-        Main_OnCommand(40625, 0) -- Time Selection: Set start point
+        Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 997, false)
-        Main_OnCommand(40626, 0) -- Time Selection: Set end point
-        Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-        Main_OnCommand(40630, 0) -- Go to start of time selection
-        Main_OnCommand(40309, 0) -- ripple off
+        Main_OnCommand(40626, 0)  -- Time Selection: Set end point
+        Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
+        Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
+        Main_OnCommand(40630, 0)  -- Go to start of time selection
+        Main_OnCommand(40309, 0)  -- ripple off
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- Adaptive Delete
-        Main_OnCommand(40289, 0) -- Item: Unselect all items
+        Main_OnCommand(40289, 0)  -- Item: Unselect all items
 
         local state = GetToggleCommandState(1156)
         if state == 1 then
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
         end
-        Main_OnCommand(42398, 0) -- Item: Paste items/tracks
+        Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
         local xfade_len = return_xfade_length()
         GoToMarker(0, 996, false)
         MoveEditCursor(-xfade_len, false) -- move cursor back xfade length
-        Main_OnCommand(40625, 0)      -- Time Selection: Set start point
+        Main_OnCommand(40625, 0)          -- Time Selection: Set start point
         local selected_items = {}
         local num_of_items = CountSelectedMediaItems()
         for i = 0, num_of_items - 1, 1 do
@@ -59,9 +59,9 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         local first_item = selected_items[0]
         SetMediaItemSelected(first_item, true)
-        Main_OnCommand(40034, 0)     -- Item grouping: Select all items in groups
-        Main_OnCommand(41305, 0)     -- Item edit: Trim left edge of item to edit cursor
-        Main_OnCommand(40289, 0)     -- Item: Unselect all items
+        Main_OnCommand(40034, 0)         -- Item grouping: Select all items in groups
+        Main_OnCommand(41305, 0)         -- Item edit: Trim left edge of item to edit cursor
+        Main_OnCommand(40289, 0)         -- Item: Unselect all items
         MoveEditCursor(xfade_len, false) -- move cursor forward xfade length
         for _, v in pairs(selected_items) do
             SetMediaItemSelected(v, true)
@@ -71,7 +71,7 @@ function main()
         else
             Main_OnCommand(40362, 0) -- glue items
         end
-        Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
+        Main_OnCommand(41206, 0)     -- Item: Move and stretch items to fit time selection
         state = GetToggleCommandState(1156)
         if state == 0 then
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
@@ -160,13 +160,13 @@ function split_at_dest_in()
     GoToMarker(0, 996, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
-    Main_OnCommand(40034, 0)      -- Item grouping: Select all items in groups
+    Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
     local selected_items = CountSelectedMediaItems(0)
-    Main_OnCommand(40912, 0)      -- Options: Toggle auto-crossfade on split (OFF)
+    Main_OnCommand(40912, 0)        -- Options: Toggle auto-crossfade on split (OFF)
     if selected_items > 0 then
-        Main_OnCommand(40186, 0)  -- Item: Split items at edit or play cursor (ignoring grouping)
+        Main_OnCommand(40186, 0)    -- Item: Split items at edit or play cursor (ignoring grouping)
     end
-    Main_OnCommand(40289, 0)      -- Item: Unselect all items
+    Main_OnCommand(40289, 0)        -- Item: Unselect all items
 end
 
 ---------------------------------------------------------------------
@@ -214,12 +214,12 @@ end
 ---------------------------------------------------------------------
 
 function lock_items()
-    Main_OnCommand(40182, 0)         -- select all items
-    Main_OnCommand(40939, 0)         -- select track 01
+    Main_OnCommand(40182, 0)           -- select all items
+    Main_OnCommand(40939, 0)           -- select track 01
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- select children of track 1
     local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
-    Main_OnCommand(unselect_items, 0) -- unselect items in first folder
+    Main_OnCommand(unselect_items, 0)  -- unselect items in first folder
     local total_items = CountSelectedMediaItems(0)
     for i = 0, total_items - 1, 1 do
         local item = GetSelectedMediaItem(0, i)
@@ -266,11 +266,11 @@ function xfade(xfade_len)
     local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     MoveEditCursor(-xfade_len, false)
-    Main_OnCommand(40625, 0)      -- Time selection: Set start point
+    Main_OnCommand(40625, 0)        -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
-    Main_OnCommand(40626, 0)      -- Time selection: Set end point
-    Main_OnCommand(40916, 0)      -- Item: Crossfade items within time selection
-    Main_OnCommand(40635, 0)      -- Time selection: Remove time selection
+    Main_OnCommand(40626, 0)        -- Time selection: Set end point
+    Main_OnCommand(40916, 0)        -- Item: Crossfade items within time selection
+    Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
     MoveEditCursor(0.001, false)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)

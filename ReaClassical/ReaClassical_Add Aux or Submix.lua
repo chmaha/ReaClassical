@@ -18,39 +18,45 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local track_count = r.CountTracks(0)
-local folder_check
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+---------------------------------------------------------------------
 
 function main()
-  folders = folder_check()
-  if folders == 0 then
-    r.ShowMessageBox("Please use either the 'Create folder' or 'Create Source Groups' script first!","Add Aux/Submix track",0)
-    return
-  end
-  r.Undo_BeginBlock()
-  r.Main_OnCommand(40702,0) -- Add track to end of tracklist
-  track = r.GetSelectedTrack(0, 0)
-  native_color = r.ColorToNative(76,145,101)
-  r.SetTrackColor(track, native_color)
-  r.GetSetMediaTrackInfo_String(track, "P_NAME", "@", true) -- Add @ as track name
-  r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-  r.Main_OnCommand(40297,0)
-  local home = r.NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
-  r.Main_OnCommand(home,0)
-  r.Undo_EndBlock("Add Aux/Submix track",0)
+    local track_count = CountTracks(0)
+    folders = folder_check()
+    if folders == 0 then
+        ShowMessageBox("Please use either the 'Create folder' or 'Create Source Groups' script first!",
+            "Add Aux/Submix track", 0)
+        return
+    end
+    Undo_BeginBlock()
+    Main_OnCommand(40702, 0) -- Add track to end of tracklist
+    track = GetSelectedTrack(0, 0)
+    native_color = ColorToNative(76, 145, 101)
+    SetTrackColor(track, native_color)
+    GetSetMediaTrackInfo_String(track, "P_NAME", "@", true) -- Add @ as track name
+    SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+    Main_OnCommand(40297, 0)
+    local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
+    Main_OnCommand(home, 0)
+    Undo_EndBlock("Add Aux/Submix track", 0)
 end
 
+---------------------------------------------------------------------
+
 function folder_check()
-  local folders = 0
-  local total_tracks = r.CountTracks(0)
-  for i = 0, total_tracks - 1, 1 do
-    local track = r.GetTrack(0, i)
-    if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-      folders = folders + 1
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
     end
-  end
-  return folders
+    return folders
 end
+
+---------------------------------------------------------------------
 
 main()
