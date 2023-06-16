@@ -100,7 +100,7 @@ function cd_markers(first_track)
     start_check(first_track, offset) -- move items to right if not enough room for first offset
 
     if tonumber(pregap_len) < 1 then pregap_len = 1 end
-    local final_end = find_project_end()
+    local final_end = find_project_end(first_track)
     local previous_start
     local redbook_track_length_errors = 0
     local redbook_total_tracks_error = false
@@ -142,7 +142,7 @@ function cd_markers(first_track)
         if #metadata_table == 4 then save_metadata(user_inputs) end
         redbook_project_length = end_marker(first_track, metadata_table, code_table, postgap)
         renumber_markers()
-        add_pregap()
+        add_pregap(first_track)
     end
     Main_OnCommand(40753, 0) -- Snapping: Disable snap
     return redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
@@ -186,8 +186,8 @@ end
 
 ---------------------------------------------------------------------
 
-function add_pregap()
-    local first_item_start, _ = find_current_start(0)
+function add_pregap(first_track)
+    local first_item_start, _ = find_current_start(first_track, 0)
     local _, _, first_marker, _, _, _ = EnumProjectMarkers(0)
     local first_pregap
     if first_marker - first_item_start < 2 then
