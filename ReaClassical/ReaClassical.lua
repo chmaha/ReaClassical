@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre11
+@version 23.21pre12
 @changelog
-  S-D Edit: Prematurely end function by cleaning up if there are no source media items to select
+  Classical Crossfade Editor: Only enter mode if user selects an item on track 1
+  Create CD Markers: Add ReaClassical metadata via MESSAGE key
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
