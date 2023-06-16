@@ -153,9 +153,9 @@ end
 
 function zoom()
   local cur_pos = (r.GetPlayState() == 0) and r.GetCursorPosition() or r.GetPlayPosition()
-  reaper.SetEditCurPos(cur_pos - 3, false, false)
+  r.SetEditCurPos(cur_pos - 3, false, false)
   r.Main_OnCommand(40625, 0) -- Time selection: Set start point
-  reaper.SetEditCurPos(cur_pos + 3, false, false)
+  r.SetEditCurPos(cur_pos + 3, false, false)
   r.Main_OnCommand(40626, 0) -- Time selection: Set end point
   local zoom = r.NamedCommandLookup("_SWS_ZOOMSIT")
   r.Main_OnCommand(zoom, 0) -- SWS: Zoom to selected items or time selection
