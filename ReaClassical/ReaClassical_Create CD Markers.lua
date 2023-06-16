@@ -41,9 +41,15 @@ function Main()
     "Create CD/DDP markers", 4)
   if choice == 6 then
     r.SetProjExtState(0, "Create CD Markers", "Run?", "yes")
-    redbook_errors = cd_markers()
-    if redbook_errors > 0 then
+    local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers()
+    if redbook_track_length_errors > 0 then
     r.ShowMessageBox('This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.', "Warning", 0)
+    end
+    if redbook_total_tracks_error == true then
+        r.ShowMessageBox('This album does not meet the Red Book standard as it contains more than 99 tracks.', "Warning", 0) 
+    end
+    if redbook_project_length > 79.57 then
+        r.ShowMessageBox('This album does not meet the Red Book standard as it is longer than 79.57 minutes.', "Warning", 0) 
     end
   end
   r.Undo_EndBlock("Create CD/DDP Markers", -1)
@@ -88,7 +94,8 @@ function cd_markers()
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end()
   local previous_start
-  local redbook_errors = 0
+  local redbook_track_length_errors = 0
+  local redbook_total_tracks_error = false
   local previous_takename
   local marker_count = 0
   for i = 0, NUM_OF_ITEMS - 1, 1 do
@@ -100,7 +107,7 @@ function cd_markers()
       end
       if marker_count > 0 then
         if current_start - previous_start < 4 then 
-          redbook_errors = redbook_errors + 1
+          redbook_track_length_errors = redbook_track_length_errors + 1
         end
         r.AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(current_start - offset), previous_takename:match("^[!]*(.+)"),
           marker_count)
@@ -114,16 +121,20 @@ function cd_markers()
     r.ShowMessageBox('Please add take names to all items that you want to be CD tracks (Select item then press F2)', "No track markers created", 0)
     return
   end
+  if marker_count > 99 then
+    redbook_total_tracks_error = true
+  end
   r.AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap, previous_takename, marker_count)
+  local redbook_project_length
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info()
     if #metadata_table == 4 then save_metadata(user_inputs) end
-    end_marker(metadata_table, code_table,postgap)
+    redbook_project_length = end_marker(metadata_table, code_table,postgap)
     renumber_markers()
     add_pregap()
   end
   r.Main_OnCommand(40753, 0) -- Snapping: Disable snap
-  return redbook_errors
+  return redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
 end
 
 function find_current_start(i)
@@ -199,6 +210,7 @@ function end_marker(metadata_table, code_table, postgap)
     r.AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
   end
   r.AddProjectMarker(0, false, frame_check(final_end) + postgap, 0, "=END", 0)
+  return (frame_check(final_end) + postgap)/60
 end
 
 function frame_check(pos)
