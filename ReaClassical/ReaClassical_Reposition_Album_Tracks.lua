@@ -20,11 +20,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local first_track = GetTrack(0, 0)
+
 ---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
-    local first_track = GetTrack(0, 0)
+    
     if first_track then NUM_OF_ITEMS = CountTrackMediaItems(first_track) end
     if not first_track or NUM_OF_ITEMS == 0 then
         ShowMessageBox("Error: No media items found.", "Reposition Album Tracks", 0)
