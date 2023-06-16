@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 local r = reaper
 
 function Main()
+  r.SetEditCurPos(0, true, false)
   r.Main_OnCommand(40296, 0) -- Track: Select all tracks
   r.Main_OnCommand(40295, 0) -- View: Zoom out project
   r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks

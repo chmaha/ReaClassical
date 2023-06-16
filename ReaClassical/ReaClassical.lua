@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre13
+@version 23.21pre14
 @changelog
-  Create CD Markers: Add Redbook standard checks for number of tracks (<= 99) and length of CD (< 79.57 minutes)
+  Whole Project View (Horizontal): Move edit cursor to start of project to make sure zoom works as expected
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
