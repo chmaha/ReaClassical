@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre18
+@version 23.21pre19
 @changelog
-  Various: Move local variable creation inside of main function (again!) and pass to other functions
-  Various: Add missing arguments and parameters
+  RoomTone: Prepare existing functions for RoomTone function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
