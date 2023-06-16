@@ -44,7 +44,8 @@ function main()
     end
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local response = ShowMessageBox("Would you like to remove item take names?", "Prepare Takes", 4)
+    local response = ShowMessageBox("Would you like to remove item take names?", "Prepare Takes", 3)
+    if response == 2 then return end
     if response == 6 then clean_take_names(num_of_project_items) end
     Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
     local total_tracks = CountTracks(0)
