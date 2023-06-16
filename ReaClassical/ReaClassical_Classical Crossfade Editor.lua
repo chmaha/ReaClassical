@@ -20,14 +20,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-local state = GetToggleCommandState(fade_editor_toggle)
-
 ---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
-
+    local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
+    local state = GetToggleCommandState(fade_editor_toggle)
     if state == -1 or state == 0 then
         local check = select_check()
         if check == -1 then
@@ -36,9 +34,9 @@ function main()
             return
         end
         lock_previous_items(check)
-        fadeStart()
+        fadeStart(fade_editor_toggle)
     else
-        fadeEnd()
+        fadeEnd(fade_editor_toggle)
     end
     Undo_EndBlock('Classical Crossfade Editor', 0)
     UpdateArrange()
@@ -90,7 +88,7 @@ end
 
 ---------------------------------------------------------------------
 
-function fadeStart()
+function fadeStart(fade_editor_toggle)
     SetToggleCommandState(1, fade_editor_toggle, 1)
     item1 = GetSelectedMediaItem(0, 0)
     save_color("1", item1)
@@ -105,7 +103,7 @@ function fadeStart()
     local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
     Main_OnCommand(select_1, 0)
     Main_OnCommand(40319, 0)                         -- move edit cursor to end of item
-    view()
+    view(fade_editor_toggle)
     zoom()
     SetMediaItemSelected(item1, true)
     local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection (across tracks)
@@ -117,7 +115,7 @@ end
 
 ---------------------------------------------------------------------
 
-function fadeEnd()
+function fadeEnd(fade_editor_toggle)
     local item = exit_check()
     if item == -1 then
         ShowMessageBox(
@@ -144,7 +142,7 @@ function fadeEnd()
     move_cur_to_mid(item)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(item, 1)
-    view()
+    view(fade_editor_toggle)
     local _, start_time = GetProjExtState(0, "Classical Crossfade Editor", "start_time")
     local _, end_time = GetProjExtState(0, "Classical Crossfade Editor", "end_time")
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
@@ -168,7 +166,7 @@ end
 
 ---------------------------------------------------------------------
 
-function view()
+function view(fade_editor_toggle)
     local track1 = NamedCommandLookup("_SWS_SEL1")
     local tog_state = GetToggleCommandState(fade_editor_toggle)
     local win_state = GetToggleCommandState(41827)
