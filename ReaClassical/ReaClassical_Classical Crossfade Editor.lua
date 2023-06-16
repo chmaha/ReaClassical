@@ -29,7 +29,7 @@ function Main()
   if state == -1 or state == 0 then
     local check = select_check()
     if check == -1 then
-      r.ShowMessageBox("Please select—and place your cursor on—the left item of a crossfade pair", "Crossfade Editor", 0)
+      r.ShowMessageBox("Please select—and place your cursor on—the left item of a crossfade pair on track 1", "Crossfade Editor", 0)
       return
     end
     lock_previous_items(check)
@@ -44,13 +44,16 @@ end
 
 function select_check()
   local item = r.GetSelectedMediaItem(0, 0)
+  local item_position, item_length, item_end, track_num
   if item ~= nil then
+    local track = r.GetMediaItemTrack(item)
+    track_num = r.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
     item_position = r.GetMediaItemInfo_Value(item, "D_POSITION")
     item_length = r.GetMediaItemInfo_Value(item, "D_LENGTH")
     item_end = item_position + item_length
   end
   local cursor_position = r.GetCursorPosition()
-  if item == nil or (cursor_position <= item_position or cursor_position >= item_end) then
+  if item == nil or track_num ~= 1 or (cursor_position <= item_position or cursor_position >= item_end) then
     return -1
   else
     return item
