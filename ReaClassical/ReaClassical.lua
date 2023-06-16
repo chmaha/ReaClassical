@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre19
+@version 23.21pre20
 @changelog
-  RoomTone: Prepare existing functions for RoomTone function
+  Prepare Takes: Provide cancel option on initial dialog
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
