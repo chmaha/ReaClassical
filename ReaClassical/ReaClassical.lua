@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre12
+@version 23.21pre13
 @changelog
-  Classical Crossfade Editor: Only enter mode if user selects an item on track 1
-  Create CD Markers: Add ReaClassical metadata via MESSAGE key
+  Create CD Markers: Add Redbook standard checks for number of tracks (<= 99) and length of CD (< 79.57 minutes)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
