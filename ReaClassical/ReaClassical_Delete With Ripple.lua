@@ -46,17 +46,17 @@ function main()
         end
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
-        Main_OnCommand(40630, 0) -- Go to start of time selection
+        Main_OnCommand(40630, 0)  -- Go to start of time selection
         unlock_items()
         local xfade_len = return_xfade_length()
         MoveEditCursor(xfade_len, false)
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
         MoveEditCursor(-xfade_len * 2, false)
-        Main_OnCommand(41305, 0)    -- Item edit: Trim left edge of item to edit cursor
-        Main_OnCommand(40630, 0)    -- Go to start of time selection
+        Main_OnCommand(41305, 0)        -- Item edit: Trim left edge of item to edit cursor
+        Main_OnCommand(40630, 0)        -- Go to start of time selection
         xfade(xfade_len)
-        Main_OnCommand(40020, 0)    -- Time Selection: Remove time selection and loop point selection
+        Main_OnCommand(40020, 0)        -- Time Selection: Remove time selection and loop point selection
         DeleteProjectMarker(NULL, 998, false)
         DeleteProjectMarker(NULL, 999, false)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -104,11 +104,11 @@ end
 
 function lock_items()
     select_matching_folder()
-    Main_OnCommand(40182, 0)           -- select all items
+    Main_OnCommand(40182, 0)             -- select all items
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- select children of folder
+    Main_OnCommand(select_children, 0)   -- select children of folder
     local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
-    Main_OnCommand(unselect_items, 0)  -- unselect items in folder
+    Main_OnCommand(unselect_items, 0)    -- unselect items in folder
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- unselect children of folder
     local total_items = CountSelectedMediaItems(0)
@@ -156,7 +156,6 @@ end
 function xfade(xfade_len)
     local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
-    --Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(40625, 0) -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)

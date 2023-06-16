@@ -18,140 +18,152 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local mixer, solo, track_check, bus_check, load_prefs, save_prefs
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
-  if track_check() == 0 then
-    r.ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
-    return
-  end
-  local take_record_toggle = r.NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
-  r.Undo_BeginBlock()
-  if r.GetPlayState() == 0 then
-    r.SetToggleCommandState(1, take_record_toggle, 1)
-    r.RefreshToolbar2(1, take_record_toggle)
-    local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-    r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-    mixer()
-    local selected = solo()
-    if not selected then
-      r.ShowMessageBox("Please select a folder or track before running", "Classical Take Record", 0)
-      r.SetToggleCommandState(1, take_record_toggle, 0)
-      return
+---------------------------------------------------------------------
+
+function main()
+    if track_check() == 0 then
+        ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
+        return
     end
-    r.Main_OnCommand(40491, 0) -- Track: Unarm all tracks for recording
-    local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-    r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
-    local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
-    r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-    local cursor_pos = r.GetCursorPosition()
-    save_prefs(cursor_pos)
-    r.Main_OnCommand(1013, 0) -- Transport: Record
-    r.Undo_EndBlock('Classical Take Record', 0)
-  else
-    r.SetToggleCommandState(1, take_record_toggle, 0)
-    r.RefreshToolbar2(1, take_record_toggle)
-    r.Main_OnCommand(40667, 0) -- Transport: Stop (save all recorded media)
-    local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-    r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-    r.Main_OnCommand(40289,0) -- Unselect all items
-    local ret, cursor_pos = load_prefs()
-    if ret then
-      r.SetEditCurPos(cursor_pos, true, false)
-    end
-    local unarm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECUNARMED")
-    r.Main_OnCommand(unarm, 0) -- Xenakios/SWS: Set selected tracks record unarmed
-    
-    local num_tracks = r.CountTracks(0)
-    local selected_track = r.GetSelectedTrack(0,0)
-    local current_num = r.GetMediaTrackInfo_Value(selected_track, 'IP_TRACKNUMBER')
-    local bool = false
-    for i=current_num,num_tracks-1,1 do
-      local track = r.GetTrack(0, i)
-      if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-        r.Main_OnCommand(40297,0) -- deselect all tracks
-        r.SetTrackSelected(track, true)
-        local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-        r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-        solo()
-        local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-        r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
+    local take_record_toggle = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+    Undo_BeginBlock()
+    if GetPlayState() == 0 then
+        SetToggleCommandState(1, take_record_toggle, 1)
+        RefreshToolbar2(1, take_record_toggle)
+        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+        Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
         mixer()
-        local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
-        r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-        r.Main_OnCommand(40913,0) -- adjust scroll to selected tracks
-        bool = true
-        r.TrackList_AdjustWindows(false)
-        break
-      end
+        local selected = solo()
+        if not selected then
+            ShowMessageBox("Please select a folder or track before running", "Classical Take Record", 0)
+            SetToggleCommandState(1, take_record_toggle, 0)
+            return
+        end
+        Main_OnCommand(40491, 0)         -- Track: Unarm all tracks for recording
+        local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
+        Main_OnCommand(arm, 0)           -- Xenakios/SWS: Set selected tracks record armed
+        local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
+        Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+        local cursor_pos = GetCursorPosition()
+        save_prefs(cursor_pos)
+        Main_OnCommand(1013, 0) -- Transport: Record
+        Undo_EndBlock('Classical Take Record', 0)
+    else
+        SetToggleCommandState(1, take_record_toggle, 0)
+        RefreshToolbar2(1, take_record_toggle)
+        Main_OnCommand(40667, 0)       -- Transport: Stop (save all recorded media)
+        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+        Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+        Main_OnCommand(40289, 0)       -- Unselect all items
+        local ret, cursor_pos = load_prefs()
+        if ret then
+            SetEditCurPos(cursor_pos, true, false)
+        end
+        local unarm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECUNARMED")
+        Main_OnCommand(unarm, 0) -- Xenakios/SWS: Set selected tracks record unarmed
+
+        local num_tracks = CountTracks(0)
+        local selected_track = GetSelectedTrack(0, 0)
+        local current_num = GetMediaTrackInfo_Value(selected_track, 'IP_TRACKNUMBER')
+        local bool = false
+        for i = current_num, num_tracks - 1, 1 do
+            local track = GetTrack(0, i)
+            if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                Main_OnCommand(40297, 0) -- deselect all tracks
+                SetTrackSelected(track, true)
+                local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+                Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+                solo()
+                local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
+                Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
+                mixer()
+                local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
+                Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+                Main_OnCommand(40913, 0)     -- adjust scroll to selected tracks
+                bool = true
+                TrackList_AdjustWindows(false)
+                break
+            end
+        end
+        if bool == false then
+            local duplicate = NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
+            Main_OnCommand(duplicate, 0)
+            local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
+            Main_OnCommand(arm, 0)         -- Xenakios/SWS: Set selected tracks record armed
+            local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
+            Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+            Main_OnCommand(40913, 0)       -- adjust scroll to selected tracks
+        end
+        Undo_EndBlock('Classical Take Record Stop', 0)
     end
-    if bool == false then
-      local duplicate = r.NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
-      r.Main_OnCommand(duplicate,0)
-      local arm = r.NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-      r.Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
-      local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
-      r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-      r.Main_OnCommand(40913,0) -- adjust scroll to selected tracks
-    end
-    r.Undo_EndBlock('Classical Take Record Stop', 0)
-  end
-  r.UpdateArrange()
-  r.UpdateTimeline()
+    UpdateArrange()
+    UpdateTimeline()
 end
+
+---------------------------------------------------------------------
 
 function solo()
-  local track = r.GetSelectedTrack(0, 0)
-  if not track then
-    return false
-  end
-  r.SetMediaTrackInfo_Value(track, "I_SOLO", 2)
-
-  for i = 0, r.CountTracks(0) - 1, 1 do
-    track = r.GetTrack(0, i)
-    if r.IsTrackSelected(track) == false then
-      r.SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-      i = i + 1
+    local track = GetSelectedTrack(0, 0)
+    if not track then
+        return false
     end
-  end
-  return true
+    SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+
+    for i = 0, CountTracks(0) - 1, 1 do
+        track = GetTrack(0, i)
+        if IsTrackSelected(track) == false then
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            i = i + 1
+        end
+    end
+    return true
 end
+
+---------------------------------------------------------------------
 
 function bus_check(track)
-  _, trackname = r.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-  return string.find(trackname, "^@")
+    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(trackname, "^@")
 end
+
+---------------------------------------------------------------------
 
 function mixer()
-  for i = 0, r.CountTracks(0) - 1, 1 do
-    local track = r.GetTrack(0, i)
-    if bus_check(track) then
-      native_color = r.ColorToNative(76,145,101)
-      r.SetTrackColor(track, native_color)
-      r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+    for i = 0, CountTracks(0) - 1, 1 do
+        local track = GetTrack(0, i)
+        if bus_check(track) then
+            native_color = ColorToNative(76, 145, 101)
+            SetTrackColor(track, native_color)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if IsTrackSelected(track) or bus_check(track) then
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
+        else
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
+        end
     end
-    if r.IsTrackSelected(track) or bus_check(track) then
-      r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
-    else
-      r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
-    end
-  end
 end
+
+---------------------------------------------------------------------
 
 function track_check()
-  return r.CountTracks(0)
+    return CountTracks(0)
 end
 
+---------------------------------------------------------------------
 
 function load_prefs()
-  return r.GetProjExtState(0,"ReaClassical", "Classical Take Record Cursor Position")
+    return GetProjExtState(0, "ReaClassical", "Classical Take Record Cursor Position")
 end
 
+---------------------------------------------------------------------
+
 function save_prefs(input)
-  r.SetProjExtState(0,"ReaClassical", "Classical Take Record Cursor Position", input)
+    SetProjExtState(0, "ReaClassical", "Classical Take Record Cursor Position", input)
 end
 
 -----------------------------------------------------------------------
 
-Main()
+main()

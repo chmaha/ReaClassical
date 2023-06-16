@@ -18,55 +18,61 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local lock_toggle = r.NamedCommandLookup("_RS63db9a9d1dae64f15f6ca0b179bb5ea0bc4d06f6")
-local state = r.GetToggleCommandState(lock_toggle)
-local lock_items, unlock_items
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
-  r.PreventUIRefresh(1)
-  r.Undo_BeginBlock()
-  local focus = r.NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
-  r.Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
-  if state == 0 or state == -1 then
-    r.SetToggleCommandState(1, lock_toggle, 1)
-    r.Main_OnCommand(40311, 0) -- Set ripple editing all tracks
-    lock_items()
-  else
-    r.SetToggleCommandState(1, lock_toggle, 0)
-    unlock_items()
-    r.Main_OnCommand(40310, 0) -- Set ripple editing per-track
-  end
+---------------------------------------------------------------------
 
-  r.Undo_EndBlock('Lock Toggle', 0)
-  r.PreventUIRefresh(-1)
-  -- r.UpdateArrange()
-  r.UpdateTimeline()
+function main()
+    PreventUIRefresh(1)
+    Undo_BeginBlock()
+    local lock_toggle = NamedCommandLookup("_RS63db9a9d1dae64f15f6ca0b179bb5ea0bc4d06f6")
+    local state = GetToggleCommandState(lock_toggle)
+    local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
+    Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
+    if state == 0 or state == -1 then
+        SetToggleCommandState(1, lock_toggle, 1)
+        Main_OnCommand(40311, 0) -- Set ripple editing all tracks
+        lock_items()
+    else
+        SetToggleCommandState(1, lock_toggle, 0)
+        unlock_items()
+        Main_OnCommand(40310, 0) -- Set ripple editing per-track
+    end
+
+    Undo_EndBlock('Lock Toggle', 0)
+    PreventUIRefresh(-1)
+    UpdateTimeline()
 end
+
+---------------------------------------------------------------------
 
 function lock_items()
-  r.Main_OnCommand(40182, 0) -- select all items
-  r.Main_OnCommand(40939, 0) -- select track 01
-  local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-  r.Main_OnCommand(select_children, 0) -- select children of track 1
-  local unselect_items = r.NamedCommandLookup("_SWS_UNSELONTRACKS")
-  r.Main_OnCommand(unselect_items, 0) -- unselect items in first folder
-  local total_items = r.CountSelectedMediaItems(0)
-  for i = 0, total_items - 1, 1 do
-    local item = r.GetSelectedMediaItem(0, i)
-    r.SetMediaItemInfo_Value(item, "C_LOCK", 1)
-  end
-  r.Main_OnCommand(40289, 0) -- Item: Unselect all items
+    Main_OnCommand(40182, 0)           -- select all items
+    Main_OnCommand(40939, 0)           -- select track 01
+    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+    Main_OnCommand(select_children, 0) -- select children of track 1
+    local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
+    Main_OnCommand(unselect_items, 0)  -- unselect items in first folder
+    local total_items = CountSelectedMediaItems(0)
+    for i = 0, total_items - 1, 1 do
+        local item = GetSelectedMediaItem(0, i)
+        SetMediaItemInfo_Value(item, "C_LOCK", 1)
+    end
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
 end
+
+---------------------------------------------------------------------
 
 function unlock_items()
-  local total_items = r.CountMediaItems(0)
-  for i = 0, total_items - 1, 1 do
-    local item = r.GetMediaItem(0, i)
-    r.SetMediaItemInfo_Value(item, "C_LOCK", 0)
-  end
-  r.Main_OnCommand(40289, 0) -- Item: Unselect all items
-  r.UpdateArrange()
+    local total_items = CountMediaItems(0)
+    for i = 0, total_items - 1, 1 do
+        local item = GetMediaItem(0, i)
+        SetMediaItemInfo_Value(item, "C_LOCK", 0)
+    end
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    UpdateArrange()
 end
 
-Main()
+---------------------------------------------------------------------
+
+main()

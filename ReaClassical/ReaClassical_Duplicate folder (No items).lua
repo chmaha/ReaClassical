@@ -18,91 +18,104 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local mixer, solo, track_check, media_razor_group, bus_check
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
-  if track_check() == 0 then
-    r.ShowMessageBox("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)
-    return
-  end
-  r.PreventUIRefresh(1)
-  r.Undo_BeginBlock()
+---------------------------------------------------------------------
 
-  r.Main_OnCommand(40340, 0)
-  local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-  r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-  local copy = r.NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
-  r.Main_OnCommand(copy, 0)
-  local paste = r.NamedCommandLookup("_SWS_AWPASTE")
-  r.Main_OnCommand(paste, 0) -- SWS_AWPASTE
-  r.Main_OnCommand(40421, 0) -- Item: Select all items in track
-  local delete_items = r.NamedCommandLookup("_SWS_DELALLITEMS")
-  r.Main_OnCommand(delete_items, 0)
-  mixer()
-  local unselect_children = r.NamedCommandLookup("_SWS_UNSELCHILDREN")
-  r.Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-  solo()
-  media_razor_group()
-  r.Undo_EndBlock('Duplicate folder (No items)', 0)
-  r.PreventUIRefresh(-1)
-  r.UpdateArrange()
-  r.UpdateTimeline()
-  r.TrackList_AdjustWindows(false)
+function main()
+    if track_check() == 0 then
+        ShowMessageBox("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)
+        return
+    end
+    PreventUIRefresh(1)
+    Undo_BeginBlock()
+
+    Main_OnCommand(40340, 0)
+    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+    Main_OnCommand(select_children, 0)                -- SWS_SELCHILDREN2
+    local copy = NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
+    Main_OnCommand(copy, 0)
+    local paste = NamedCommandLookup("_SWS_AWPASTE")
+    Main_OnCommand(paste, 0) -- SWS_AWPASTE
+    Main_OnCommand(40421, 0) -- Item: Select all items in track
+    local delete_items = NamedCommandLookup("_SWS_DELALLITEMS")
+    Main_OnCommand(delete_items, 0)
+    mixer()
+    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
+    Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+    solo()
+    media_razor_group()
+    Undo_EndBlock('Duplicate folder (No items)', 0)
+    PreventUIRefresh(-1)
+    UpdateArrange()
+    UpdateTimeline()
+    TrackList_AdjustWindows(false)
 end
+
+---------------------------------------------------------------------
 
 function solo()
-  local track = r.GetSelectedTrack(0, 0)
-  r.SetMediaTrackInfo_Value(track, "I_SOLO", 2)
-  for i = 0, r.CountTracks(0) - 1, 1 do
-    track = r.GetTrack(0, i)
-    if r.IsTrackSelected(track) == false then
-      r.SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-      i = i + 1
+    local track = GetSelectedTrack(0, 0)
+    SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+    for i = 0, CountTracks(0) - 1, 1 do
+        track = GetTrack(0, i)
+        if IsTrackSelected(track) == false then
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            i = i + 1
+        end
     end
-  end
 end
+
+---------------------------------------------------------------------
 
 function bus_check(track)
-  _, trackname = r.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-  return string.find(trackname, "^@")
+    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(trackname, "^@")
 end
+
+---------------------------------------------------------------------
 
 function mixer()
-  for i = 0, r.CountTracks(0) - 1, 1 do
-    local track = r.GetTrack(0, i)
-    if bus_check(track) then
-      native_color = r.ColorToNative(76,145,101)
-      r.SetTrackColor(track, native_color)
-      r.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+    for i = 0, CountTracks(0) - 1, 1 do
+        local track = GetTrack(0, i)
+        if bus_check(track) then
+            native_color = ColorToNative(76, 145, 101)
+            SetTrackColor(track, native_color)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if IsTrackSelected(track) or bus_check(track) then
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
+        else
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
+        end
     end
-    if r.IsTrackSelected(track) or bus_check(track) then
-      r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
-    else
-      r.SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
-    end
-  end
 end
+
+---------------------------------------------------------------------
 
 function track_check()
-  return r.CountTracks(0)
+    return CountTracks(0)
 end
+
+---------------------------------------------------------------------
 
 function media_razor_group()
-  r.Main_OnCommand(40296, 0) -- Select all tracks
-  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
-  local select_all_folders = r.NamedCommandLookup("_SWS_SELALLPARENTS")
-  r.Main_OnCommand(select_all_folders, 0) -- select all folders
-  local num_of_folders = r.CountSelectedTracks(0)
-  local first_track = r.GetTrack(0, 0)
-  r.SetOnlyTrackSelected(first_track)
-  for i = 1, num_of_folders, 1 do
-    local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-    r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-    r.Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
-    local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
-    r.Main_OnCommand(next_folder, 0) -- select next folder
-  end
+    Main_OnCommand(40296, 0)            -- Select all tracks
+    Main_OnCommand(42579, 0)            -- Track: Remove selected tracks from all track media/razor editing groups
+    local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
+    Main_OnCommand(select_all_folders, 0) -- select all folders
+    local num_of_folders = CountSelectedTracks(0)
+    local first_track = GetTrack(0, 0)
+    SetOnlyTrackSelected(first_track)
+    for i = 1, num_of_folders, 1 do
+        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+        Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+        Main_OnCommand(42578, 0)       -- Track: Create new track media/razor editing group from selected tracks
+        local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
+        Main_OnCommand(next_folder, 0) -- select next folder
+    end
 end
 
-Main()
+---------------------------------------------------------------------
+
+main()

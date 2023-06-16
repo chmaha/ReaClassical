@@ -18,51 +18,54 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local return_xfade_length
-r.PreventUIRefresh(1)
-r.Undo_BeginBlock()
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
+---------------------------------------------------------------------
+
+function main()
+    PreventUIRefresh(1)
+    Undo_BeginBlock()
     local xfade_len = return_xfade_length()
-    local fade_editor_toggle = r.NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-    local state = r.GetToggleCommandState(fade_editor_toggle)
-    local select_items = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    r.Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
-    r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-    --local fade_left = r.NamedCommandLookup("_SWS_MOVECURFADELEFT")
-    --r.Main_OnCommand(fade_left, 0) -- SWS: Move cursor left by default fade length
-    r.MoveEditCursor(-xfade_len, false)
-    r.Main_OnCommand(40625, 0) -- Time selection: Set start point
-    --local fade_right = r.NamedCommandLookup("_SWS_MOVECURFADERIGHT")
-    --r.Main_OnCommand(fade_right, 0) -- SWS: Move cursor right by default fade length
-    r.MoveEditCursor(xfade_len, false)
-    r.Main_OnCommand(40626, 0) -- Time selection: Set end point
-    r.Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
-    r.Main_OnCommand(40635, 0) -- Time selection: Remove time selection
+    local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
+    local state = GetToggleCommandState(fade_editor_toggle)
+    local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+    Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    Main_OnCommand(40297, 0)        -- Track: Unselect (clear selection of) all tracks
 
-    local selected_items = r.CountSelectedMediaItems(0)
+    MoveEditCursor(-xfade_len, false)
+    Main_OnCommand(40625, 0) -- Time selection: Set start point
+
+    MoveEditCursor(xfade_len, false)
+    Main_OnCommand(40626, 0) -- Time selection: Set end point
+    Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
+    Main_OnCommand(40635, 0) -- Time selection: Remove time selection
+
+    local selected_items = CountSelectedMediaItems(0)
     if selected_items > 0 and (state == -1 or state == 0) then
-        local item = r.GetSelectedMediaItem(0, 0)
-        r.Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
-        r.SetMediaItemSelected(item, 1)
+        local item = GetSelectedMediaItem(0, 0)
+        Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
+        SetMediaItemSelected(item, 1)
     end
 
-    r.Undo_EndBlock('Classical Crossfade', 0)
-    r.PreventUIRefresh(-1)
-    r.UpdateArrange()
-    r.UpdateTimeline()
+    Undo_EndBlock('Classical Crossfade', 0)
+    PreventUIRefresh(-1)
+    UpdateArrange()
+    UpdateTimeline()
 end
+
+---------------------------------------------------------------------
 
 function return_xfade_length()
-  local xfade_len = 0.035
-  local _, input = r.GetProjExtState(0, "ReaClassical", "Preferences")
-  if input ~= "" then 
-    local table = {}
-    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    xfade_len = table[1]/1000
-  end
-  return xfade_len
+    local xfade_len = 0.035
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        xfade_len = table[1] / 1000
+    end
+    return xfade_len
 end
 
-Main()
+---------------------------------------------------------------------
+
+main()

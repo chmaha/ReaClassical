@@ -18,237 +18,266 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
-local horizontal, horizontal_color, horizontal_group, shift, vertical, vertical_color_razor, vertical_group
-local copy_track_items, tracks_per_folder, clean_take_names, xfade_check, empty_items_check
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
-  local num_of_project_items = r.CountMediaItems(0)
-  if num_of_project_items == 0 then
-    r.ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
-    return  
-  end
-  local empty_count = empty_items_check(num_of_project_items)
-  if empty_count > 0 then
-    r.ShowMessageBox("Error: Empty items found. Delete them to continue.", "Prepare Takes", 0)
-    return  
-  end
-  if xfade_check() == true then
-    local response = r.ShowMessageBox("Prepare Takes coloring and grouping is disabled \ngiven there are existing overlaps and/or fades. \n\nWould you like to remove item take names?", "Prepare Takes", 4)
-    if response == 6 then
-      clean_take_names(num_of_project_items)
+---------------------------------------------------------------------
+
+function main()
+    local num_of_project_items = CountMediaItems(0)
+    if num_of_project_items == 0 then
+        ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
+        return
     end
-    return  
-  end
-  r.PreventUIRefresh(1)
-  r.Undo_BeginBlock()
-  local response = r.ShowMessageBox("Would you like to remove item take names?","Prepare Takes",4)
-  if response == 6 then clean_take_names(num_of_project_items) end
-  r.Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
-  local total_tracks = r.CountTracks(0)
-  local folders = 0
-  local empty = false
-  for i = 0, total_tracks - 1, 1 do
-    local track = r.GetTrack(0, i)
-    if r.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1.0 then
-      folders = folders + 1
-      local items = r.CountTrackMediaItems(track)
-      if items == 0 then
-        empty = true
-      end
+    local empty_count = empty_items_check(num_of_project_items)
+    if empty_count > 0 then
+        ShowMessageBox("Error: Empty items found. Delete them to continue.", "Prepare Takes", 0)
+        return
     end
-  end
+    if xfade_check() == true then
+        local response = ShowMessageBox(
+            "Prepare Takes coloring and grouping is disabled \ngiven there are existing overlaps and/or fades. \n\nWould you like to remove item take names?",
+            "Prepare Takes", 4)
+        if response == 6 then
+            clean_take_names(num_of_project_items)
+        end
+        return
+    end
+    PreventUIRefresh(1)
+    Undo_BeginBlock()
+    local response = ShowMessageBox("Would you like to remove item take names?", "Prepare Takes", 4)
+    if response == 6 then clean_take_names(num_of_project_items) end
+    Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
+    local total_tracks = CountTracks(0)
+    local folders = 0
+    local empty = false
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1.0 then
+            folders = folders + 1
+            local items = CountTrackMediaItems(track)
+            if items == 0 then
+                empty = true
+            end
+        end
+    end
 
-  local first_item = r.GetMediaItem(0, 0)
-  local position = r.GetMediaItemInfo_Value(first_item, "D_POSITION")
-  if position == 0.0 then
-    shift()
-  end
+    local first_item = GetMediaItem(0, 0)
+    local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
+    if position == 0.0 then
+        shift()
+    end
 
-  if empty then
-    local folder_size = tracks_per_folder()
-    copy_track_items(folder_size, total_tracks)
-  end
+    if empty then
+        local folder_size = tracks_per_folder()
+        copy_track_items(folder_size, total_tracks)
+    end
 
-  if folders == 0 or folders == 1 then
-    horizontal()
-  else
-    vertical()
-  end
-  r.Main_OnCommand(40042, 0) -- go to start of project
-  r.Main_OnCommand(40939, 0) -- select track 01
-  if empty then
-    r.ShowMessageBox("Some folder tracks are empty. If the folders are not completely empty, items from first child tracks were copied to folder tracks and muted to act as guide tracks."
-      , "Guide Tracks Created", 0)
-  end
-  r.Undo_EndBlock('Prepare Takes', 0)
-  r.PreventUIRefresh(-1)
-  r.UpdateArrange()
-  r.UpdateTimeline()
+    if folders == 0 or folders == 1 then
+        horizontal()
+    else
+        vertical()
+    end
+    Main_OnCommand(40042, 0) -- go to start of project
+    Main_OnCommand(40939, 0) -- select track 01
+    if empty then
+        ShowMessageBox(
+            "Some folder tracks are empty. If the folders are not completely empty, items from first child tracks were copied to folder tracks and muted to act as guide tracks."
+            , "Guide Tracks Created", 0)
+    end
+    Undo_EndBlock('Prepare Takes', 0)
+    PreventUIRefresh(-1)
+    UpdateArrange()
+    UpdateTimeline()
 end
+
+---------------------------------------------------------------------
 
 function shift()
-  r.Main_OnCommand(40182, 0) -- select all items
-  local nudge_right = r.NamedCommandLookup("_SWS_NUDGESAMPLERIGHT")
-  r.Main_OnCommand(nudge_right, 0) -- shift items by 1 sample to the right
-  r.Main_OnCommand(40289, 0) -- unselect all items
+    Main_OnCommand(40182, 0)       -- select all items
+    local nudge_right = NamedCommandLookup("_SWS_NUDGESAMPLERIGHT")
+    Main_OnCommand(nudge_right, 0) -- shift items by 1 sample to the right
+    Main_OnCommand(40289, 0)       -- unselect all items
 end
+
+---------------------------------------------------------------------
 
 function horizontal_color()
-  r.Main_OnCommand(40706, 0)
+    Main_OnCommand(40706, 0)
 end
+
+---------------------------------------------------------------------
 
 function vertical_color_razor()
-  r.Main_OnCommand(40042, 0) -- Transport: Go to start of project
-  local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-  r.Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
-  r.Main_OnCommand(42578,0) -- Track: Create new track media/razor editing group from selected tracks
-  r.Main_OnCommand(40421, 0) -- Item: Select all items in track
-  r.Main_OnCommand(40706, 0) -- Item: Set to one random color
+    Main_OnCommand(40042, 0)           -- Transport: Go to start of project
+    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+    Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+    Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
+    Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
+    Main_OnCommand(40421, 0)           -- Item: Select all items in track
+    Main_OnCommand(40706, 0)           -- Item: Set to one random color
 end
+
+---------------------------------------------------------------------
 
 function horizontal_group()
-  r.Main_OnCommand(40296, 0) -- Track: Select all tracks
-  r.Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-  local select_under = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-  r.Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
-  r.Main_OnCommand(40032, 0) -- Item grouping: Group items
+    Main_OnCommand(40296, 0)        -- Track: Select all tracks
+    Main_OnCommand(40417, 0)        -- Item navigation: Select and move to next item
+    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+    Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
+    Main_OnCommand(40032, 0)        -- Item grouping: Group items
 end
+
+---------------------------------------------------------------------
 
 function vertical_group(length)
-  local track = r.GetSelectedTrack(0, 0)
-  local item = r.AddMediaItemToTrack(track)
-  r.SetMediaItemPosition(item, length + 1, false)
+    local track = GetSelectedTrack(0, 0)
+    local item = AddMediaItemToTrack(track)
+    SetMediaItemPosition(item, length + 1, false)
 
-  while r.IsMediaItemSelected(item) == false do
-    r.Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    local select_under = r.NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    r.Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
-    r.Main_OnCommand(40032, 0) -- Item grouping: Group items
-  end
-  r.DeleteTrackMediaItem(track, item)
+    while IsMediaItemSelected(item) == false do
+        Main_OnCommand(40417, 0)        -- Item navigation: Select and move to next item
+        local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+        Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
+        Main_OnCommand(40032, 0)        -- Item grouping: Group items
+    end
+    DeleteTrackMediaItem(track, item)
 end
+
+---------------------------------------------------------------------
 
 function horizontal()
-  local length = r.GetProjectLength(0)
-  local num_of_tracks = r.CountTracks(0)
-  local last_track = r.GetTrack(0, num_of_tracks - 1)
-  local new_item = r.AddMediaItemToTrack(last_track)
-  r.SetMediaItemPosition(new_item, length + 1, false)
-  local num_of_items = r.CountMediaItems(0)
-  local last_item = r.GetMediaItem(0, num_of_items - 1)
-  r.SetEditCurPos(0, false, false)
+    local length = GetProjectLength(0)
+    local num_of_tracks = CountTracks(0)
+    local last_track = GetTrack(0, num_of_tracks - 1)
+    local new_item = AddMediaItemToTrack(last_track)
+    SetMediaItemPosition(new_item, length + 1, false)
+    local num_of_items = CountMediaItems(0)
+    local last_item = GetMediaItem(0, num_of_items - 1)
+    SetEditCurPos(0, false, false)
 
-  while r.IsMediaItemSelected(last_item) == false do
-    horizontal_group()
-    horizontal_color()
-  end
+    while IsMediaItemSelected(last_item) == false do
+        horizontal_group()
+        horizontal_color()
+    end
 
-  r.DeleteTrackMediaItem(last_track, last_item)
-  r.SelectAllMediaItems(0, false)
-  r.Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
-  r.Main_OnCommand(42578,0) -- Track: Create new track media/razor editing group from selected tracks
-  r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  r.SetEditCurPos(0, false, false)
+    DeleteTrackMediaItem(last_track, last_item)
+    SelectAllMediaItems(0, false)
+    Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
+    Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
+    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+    SetEditCurPos(0, false, false)
 end
+
+---------------------------------------------------------------------
 
 function vertical()
-  r.Undo_BeginBlock()
-  local select_all_folders = r.NamedCommandLookup("_SWS_SELALLPARENTS")
-  r.Main_OnCommand(select_all_folders, 0) -- select all folders
-  local num_of_folders = r.CountSelectedTracks(0)
-  local length = r.GetProjectLength(0)
-  local first_track = r.GetTrack(0, 0)
-  r.SetOnlyTrackSelected(first_track)
-  for i = 1, num_of_folders, 1 do
-    vertical_color_razor()
-    vertical_group(length)
-    local next_folder = r.NamedCommandLookup("_SWS_SELNEXTFOLDER")
-    r.Main_OnCommand(next_folder, 0) -- select next folder
-  end
-  r.SelectAllMediaItems(0, false)
-  r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  r.SetEditCurPos(0, false, false)
+    Undo_BeginBlock()
+    local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
+    Main_OnCommand(select_all_folders, 0) -- select all folders
+    local num_of_folders = CountSelectedTracks(0)
+    local length = GetProjectLength(0)
+    local first_track = GetTrack(0, 0)
+    SetOnlyTrackSelected(first_track)
+    for i = 1, num_of_folders, 1 do
+        vertical_color_razor()
+        vertical_group(length)
+        local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
+        Main_OnCommand(next_folder, 0) -- select next folder
+    end
+    SelectAllMediaItems(0, false)
+    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+    SetEditCurPos(0, false, false)
 end
+
+---------------------------------------------------------------------
 
 function copy_track_items(folder_size, total_tracks)
-  local pos = 0;
-  for i = 1, total_tracks - 1, folder_size do
-    local track = r.GetTrack(0, i)
-    local previous_track = r.GetTrack(0, i - 1)
-    local count_items = r.CountTrackMediaItems(previous_track)
-    if count_items > 0 then goto continue end -- guard clause for populated folder
-    r.SetOnlyTrackSelected(track)
-    local num_of_items = r.CountTrackMediaItems(track)
-    if num_of_items == 0 then goto continue end -- guard clause for empty first child
-    for j = 0, num_of_items - 1 do
-      local item = r.GetTrackMediaItem(track, j)
-      if j == 0 then
-        pos = r.GetMediaItemInfo_Value(item, "D_POSITION")
-      end
-      r.SetMediaItemSelected(item, 1)
+    local pos = 0;
+    for i = 1, total_tracks - 1, folder_size do
+        local track = GetTrack(0, i)
+        local previous_track = GetTrack(0, i - 1)
+        local count_items = CountTrackMediaItems(previous_track)
+        if count_items > 0 then goto continue end -- guard clause for populated folder
+        SetOnlyTrackSelected(track)
+        local num_of_items = CountTrackMediaItems(track)
+        if num_of_items == 0 then goto continue end -- guard clause for empty first child
+        for j = 0, num_of_items - 1 do
+            local item = GetTrackMediaItem(track, j)
+            if j == 0 then
+                pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            end
+            SetMediaItemSelected(item, 1)
+        end
+        Main_OnCommand(40698, 0) -- Edit: Copy items
+        local previous_track = GetTrack(0, i - 1)
+        SetOnlyTrackSelected(previous_track)
+        SetEditCurPos(pos, false, false)
+        Main_OnCommand(42398, 0) -- Item: Paste items/tracks
+        Main_OnCommand(40719, 0) -- Item properties: Mute
+        Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
+        ::continue::
     end
-    r.Main_OnCommand(40698, 0) -- Edit: Copy items
-    local previous_track = r.GetTrack(0, i - 1)
-    r.SetOnlyTrackSelected(previous_track)
-    r.SetEditCurPos(pos, false, false)
-    r.Main_OnCommand(42398, 0) -- Item: Paste items/tracks
-    r.Main_OnCommand(40719, 0) -- Item properties: Mute
-    r.Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
-    ::continue::
-  end
 end
+
+---------------------------------------------------------------------
 
 function tracks_per_folder()
-  local first_track = r.GetTrack(0, 0)
-  r.SetOnlyTrackSelected(first_track)
-  local select_children = r.NamedCommandLookup("_SWS_SELCHILDREN2")
-  r.Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-  local selected_tracks = r.CountSelectedTracks(0)
-  r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-  return selected_tracks
+    local first_track = GetTrack(0, 0)
+    SetOnlyTrackSelected(first_track)
+    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    local selected_tracks = CountSelectedTracks(0)
+    Main_OnCommand(40297, 0)           -- Track: Unselect (clear selection of) all tracks
+    return selected_tracks
 end
+
+---------------------------------------------------------------------
 
 function clean_take_names(num_of_project_items)
-  for i = 0, num_of_project_items - 1 do
-    local item = r.GetMediaItem(0, i)
-    local take = r.GetActiveTake(item)
-    if take then 
-      r.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true) 
+    for i = 0, num_of_project_items - 1 do
+        local item = GetMediaItem(0, i)
+        local take = GetActiveTake(item)
+        if take then
+            GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
+        end
     end
-  end
 end
+
+---------------------------------------------------------------------
 
 function xfade_check()
-  local first_track = r.GetTrack(0,0)
-  local num_of_items = r.CountTrackMediaItems(first_track)
-  local xfade = false
-  for i=0,num_of_items-2 do
-    local item1 = r.GetTrackMediaItem(first_track, i)
-    local item2 = r.GetTrackMediaItem(first_track, i+1)
-    local pos1 = r.GetMediaItemInfo_Value(item1, "D_POSITION")
-    local pos2 = r.GetMediaItemInfo_Value(item2, "D_POSITION")
-    local len1 = r.GetMediaItemInfo_Value(item1, "D_LENGTH")
-    local end1 = pos1 + len1
-    if end1 > pos2 then
-      xfade = true
-      break
+    local first_track = GetTrack(0, 0)
+    local num_of_items = CountTrackMediaItems(first_track)
+    local xfade = false
+    for i = 0, num_of_items - 2 do
+        local item1 = GetTrackMediaItem(first_track, i)
+        local item2 = GetTrackMediaItem(first_track, i + 1)
+        local pos1 = GetMediaItemInfo_Value(item1, "D_POSITION")
+        local pos2 = GetMediaItemInfo_Value(item2, "D_POSITION")
+        local len1 = GetMediaItemInfo_Value(item1, "D_LENGTH")
+        local end1 = pos1 + len1
+        if end1 > pos2 then
+            xfade = true
+            break
+        end
     end
-  end
-  return xfade
+    return xfade
 end
+
+---------------------------------------------------------------------
 
 function empty_items_check(num_of_items)
-  local count = 0
-  for i = 0, num_of_items - 1, 1 do
-    local current_item = r.GetMediaItem(0, i)
-    local take = r.GetActiveTake(current_item)
-    if not take then 
-      count = count + 1 
-    end 
-  end
-  return count
+    local count = 0
+    for i = 0, num_of_items - 1, 1 do
+        local current_item = GetMediaItem(0, i)
+        local take = GetActiveTake(current_item)
+        if not take then
+            count = count + 1
+        end
+    end
+    return count
 end
 
-Main()
+---------------------------------------------------------------------
+
+main()
