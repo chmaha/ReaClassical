@@ -20,12 +20,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
+local state = GetToggleCommandState(fade_editor_toggle)
+
 ---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
-    local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-    local state = GetToggleCommandState(fade_editor_toggle)
+
     if state == -1 or state == 0 then
         local check = select_check()
         if check == -1 then
