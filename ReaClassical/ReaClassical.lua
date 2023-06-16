@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre15
+@version 23.21pre16
 @changelog
-  Various: Replace any reaper prefixes with r
+  Various: Use for key in pairs(reaper) do _G[key] = reaper[key] end
+  Various: Remove commented out code
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

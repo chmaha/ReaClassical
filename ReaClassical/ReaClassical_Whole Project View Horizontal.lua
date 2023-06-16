@@ -15,13 +15,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local r = reaper
+for key in pairs(reaper) do _G[key] = reaper[key] end
 
-function Main()
-  r.SetEditCurPos(0, true, false)
-  r.Main_OnCommand(40296, 0) -- Track: Select all tracks
-  r.Main_OnCommand(40295, 0) -- View: Zoom out project
-  r.Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+---------------------------------------------------------------------
+
+function main()
+    SetEditCurPos(0, true, false)
+    Main_OnCommand(40296, 0) -- Track: Select all tracks
+    Main_OnCommand(40295, 0) -- View: Zoom out project
+    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
 end
 
-Main()
+---------------------------------------------------------------------
+
+main()
