@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre21
+@version 23.21pre22
 @changelog
-  Edit Classical Crossfade: Add return line when function is tried outside of fade editor mode
+  Duplicate Folder: Force user to select a parent track
+  Duplicate Folder: Fix selection of track after function has completed
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
