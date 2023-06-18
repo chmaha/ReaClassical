@@ -27,6 +27,12 @@ function main()
         ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
         return
     end
+    local selected = GetSelectedTrack(0,0)
+    is_parent = GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH")
+    if is_parent ~= 1 then
+        ShowMessageBox("Please select a parent track before running", "Classical Take Record", 0)
+        return
+    end
     local take_record_toggle = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
     Undo_BeginBlock()
     if GetPlayState() == 0 then
