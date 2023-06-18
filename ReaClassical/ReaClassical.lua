@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre22
+@version 23.21pre23
 @changelog
-  Duplicate Folder: Force user to select a parent track
-  Duplicate Folder: Fix selection of track after function has completed
+  Classical Take Record: Force user to select parent track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
