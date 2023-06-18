@@ -29,22 +29,25 @@ function main()
     end
     PreventUIRefresh(1)
     Undo_BeginBlock()
-
+    local selected = GetSelectedTrack(0,0)
+    is_parent = GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH")
+    if is_parent ~= 1 then
+        ShowMessageBox("Please select a parent track before running", "Duplicate folder (no items)", 0)
+        return
+    end
     Main_OnCommand(40340, 0)
+    Main_OnCommand(40062, 0)           -- Duplicate track
+    local duplicated = GetSelectedTrack(0,0)
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0)                -- SWS_SELCHILDREN2
-    local copy = NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
-    Main_OnCommand(copy, 0)
-    local paste = NamedCommandLookup("_SWS_AWPASTE")
-    Main_OnCommand(paste, 0) -- SWS_AWPASTE
-    Main_OnCommand(40421, 0) -- Item: Select all items in track
+    Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+    Main_OnCommand(40421, 0)           -- Item: Select all items in track
     local delete_items = NamedCommandLookup("_SWS_DELALLITEMS")
     Main_OnCommand(delete_items, 0)
-    mixer()
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
     solo()
-    media_razor_group()
+    mixer()
+    media_razor_group(duplicated)
     Undo_EndBlock('Duplicate folder (No items)', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -111,9 +114,9 @@ end
 
 ---------------------------------------------------------------------
 
-function media_razor_group()
-    Main_OnCommand(40296, 0)            -- Select all tracks
-    Main_OnCommand(42579, 0)            -- Track: Remove selected tracks from all track media/razor editing groups
+function media_razor_group(track)
+    Main_OnCommand(40296, 0)              -- Select all tracks
+    Main_OnCommand(42579, 0)              -- Track: Remove selected tracks from all track media/razor editing groups
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
     local num_of_folders = CountSelectedTracks(0)
@@ -122,10 +125,12 @@ function media_razor_group()
     for i = 1, num_of_folders, 1 do
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-        Main_OnCommand(42578, 0)       -- Track: Create new track media/razor editing group from selected tracks
+        Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
         local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-        Main_OnCommand(next_folder, 0) -- select next folder
+        Main_OnCommand(next_folder, 0)     -- select next folder
     end
+    Main_OnCommand(40297, 0) -- unselect all tracks
+    SetTrackSelected(track, true)
 end
 
 ---------------------------------------------------------------------
