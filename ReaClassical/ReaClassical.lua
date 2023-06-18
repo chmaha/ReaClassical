@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre20
+@version 23.21pre21
 @changelog
-  Prepare Takes: Provide cancel option on initial dialog
+  Edit Classical Crossfade: Add return line when function is tried outside of fade editor mode
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

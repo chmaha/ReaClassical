@@ -29,6 +29,7 @@ function main()
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
         ShowMessageBox('This ReaClassical script only works while in the fade editor (F)', "Edit Classical Crossfade", 0)
+        return
     end
     local item_one, item_two, color, prev_item, next_item, curpos, diff
 
