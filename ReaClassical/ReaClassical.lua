@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21pre24
+@version 23.21pre25
 @changelog
-  Help: Switch to Jekyll-based manual (currently just a skeleton)
-  Remove PDF Guide from metapackage
+  Room Tone: Add rudimentary dedicated room tone track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -40,6 +39,7 @@
   [main] ReaClassical_TrackRight.lua
   [main] ReaClassical_ExplodeMultiChannel.lua
   [main] ReaClassical_Colorize.lua
+  [main] ReaClassical_Add RoomTone Track.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] Pyramix.ReaperThemeZip
