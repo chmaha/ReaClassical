@@ -23,8 +23,27 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 ---------------------------------------------------------------------
 
 function main()
-    guide = "https://chmaha.github.io/ReaClassical-Manual"
-    CF_ShellExecute(guide)
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/ReaClassical_PDF_Guide.pdf"
+    local pdf = resource_path .. "/" .. relative_path
+    local bool = file_exists(pdf)
+    if bool == true then
+        CF_ShellExecute(pdf)
+    else
+        ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!", "ReaClassical PDF Guide not found!", 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function file_exists(name)
+    local exists = false
+    local file = io.open(name, "r")
+    if file ~= nil then
+        io.close(file)
+        exists = true
+    end
+    return exists
 end
 
 ---------------------------------------------------------------------
