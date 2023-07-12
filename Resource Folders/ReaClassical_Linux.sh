@@ -17,7 +17,7 @@ arch=`uname -m`
 
 echo "Downloading REAPER ${major}.${minor} from reaper.fm..."
 sleep 2
-wget -q --show-progress --progress=bar:force https://reaper.fm/files/$major.x/reaper${major}${minor}_linux_${arch}.tar.xz
+wget -q --show-progress --progress=bar:force https://reaper.fm/files/${major}.x/reaper${major}${minor}_linux_${arch}.tar.xz
 echo "Extracting files from REAPER archive to ReaClassical_${rcver} folder"
 tar -xf reaper${major}${minor}_linux_${arch}.tar.xz
 mv reaper_linux_${arch}/ ReaClassical_${rcver}/
