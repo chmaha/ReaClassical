@@ -6,7 +6,8 @@
 # Change the pkgver number below to download an alternative version of REAPER.
 
 ###########
-pkgver=6.81
+major=6
+minor=81
 rcver=23Q3
 ###########
 
@@ -14,14 +15,14 @@ echo "Welcome to ReaClassical installer..."
 sleep 2
 arch=`uname -m`
 
-echo "Downloading REAPER $pkgver from reaper.fm..."
+echo "Downloading REAPER ${major}.${minor} from reaper.fm..."
 sleep 2
-wget -q --show-progress --progress=bar:force https://reaper.fm/files/${pkgver::1}.x/reaper${pkgver//.}_linux_$arch.tar.xz
-echo "Extracting files from REAPER archive to ReaClassical_$rcver folder"
-tar -xf reaper${pkgver//.}_linux_$arch.tar.xz
-mv reaper_linux_$arch/ ReaClassical_$rcver/
-rm reaper${pkgver//.}_linux_$arch.tar.xz
-cd ReaClassical_$rcver
+wget -q --show-progress --progress=bar:force https://reaper.fm/files/$major.x/reaper${major}${minor}_linux_${arch}.tar.xz
+echo "Extracting files from REAPER archive to ReaClassical_${rcver} folder"
+tar -xf reaper${major}${minor}_linux_${arch}.tar.xz
+mv reaper_linux_${arch}/ ReaClassical_${rcver}/
+rm reaper${major}${minor}_linux_${arch}.tar.xz
+cd ReaClassical_${rcver}
 mv REAPER/* .
 rmdir REAPER
 echo "Downloading ReaClassical files from Github..."
