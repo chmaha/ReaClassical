@@ -1,13 +1,14 @@
-#!/bin/bash
-# by chmaha (April 2023)
+#!/bin/sh
+# by chmaha (July 2023)
 
 # Script to install ReaClassical on Linux
 # Works for both x86_64 and aarch64 architectures
 # Change the pkgver number below to download an alternative version of REAPER.
 
 ###########
-major=6
-minor=81
+ver=6.81
+major=$(echo $ver | awk -F. '{print $1}')
+minor=$(echo $ver | awk -F. '{print $2}')
 rcver=23Q3
 ###########
 
