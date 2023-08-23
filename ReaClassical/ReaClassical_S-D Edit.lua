@@ -200,7 +200,7 @@ end
 ---------------------------------------------------------------------
 
 function clean_up(is_selected)
-    Main_OnCommand(42395, 0) -- Clear tempo envelope
+    --Main_OnCommand(42395, 0) -- Clear tempo envelope
     Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     if is_selected then
         DeleteProjectMarker(NULL, 996, false)

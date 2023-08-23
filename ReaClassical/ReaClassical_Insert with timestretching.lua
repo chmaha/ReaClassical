@@ -208,7 +208,7 @@ function clean_up()
     DeleteProjectMarker(NULL, 997, false)
     DeleteProjectMarker(NULL, 998, false)
     DeleteProjectMarker(NULL, 999, false)
-    Main_OnCommand(42395, 0) -- Clear tempo envelope
+    --Main_OnCommand(42395, 0) -- Clear tempo envelope
 end
 
 ---------------------------------------------------------------------

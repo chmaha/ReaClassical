@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.22pre1
+@version 23.22pre2
 @changelog
-  Tested with REAPER 6.82
+  Revert time sig/tempo removal due to REAPER fix
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
