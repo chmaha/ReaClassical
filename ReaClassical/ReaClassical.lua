@@ -1,39 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.21
+@version 23.22pre1
 @changelog
-  Room Tone: Add rudimentary dedicated room tone track
-  Classical Take Record: Force user to select parent track
-  Duplicate Folder: Force user to select a parent track
-  Duplicate Folder: Fix selection of track after function has completed
-  Edit Classical Crossfade: Add return line when function is tried outside of fade editor mode
-  Prepare Takes: Provide cancel option on initial dialog
-  RoomTone: Prepare existing functions for RoomTone function
-  Various: Move local variable creation inside of main function (again!) and pass to other functions
-  Various: Add missing arguments and parameters
-  Bugfix: Fade editor, Reposition CD Tracks & Create CD Markers
-  Various: Use for key in pairs(reaper) do _G[key] = reaper[key] end
-  Various: Remove commented out code
-  Various: Replace any reaper prefixes with r
-  Whole Project View (Horizontal): Move edit cursor to start of project to make sure zoom works as expected
-  Create CD Markers: Add Redbook standard checks for number of tracks (<= 99) and length of CD (< 79.57 minutes)
-  Classical Crossfade Editor: Only enter mode if user selects an item on track 1
-  Create CD Markers: Add ReaClassical metadata via MESSAGE key
-  S-D Edit: Prematurely end function by cleaning up if there are no source media items to select
-  Whole Project View Vertical: Respect child track visibility
-  Shift CD Track Left/Right: Don't allow moving CD tracks whose start overlaps with previous item
-  Move CD Track Left/Right: Treat crossfaded CD track starts as part of same group
-  Move CD Track Left/Right: Use better variable names for current item position
-  NO-OP: Code beautification part 3
-  NO-OP: Code beautification part 2
-  NO-OP: Revise previous commit to use 4-space indentation
-  S-D functions: NO-OP code beautification
-  Classical Take Record: Keep next folder group rec-armed for continued monitoring
-  Classical Take Record: Show only folder track as selected
-  Classical Take Record: Always show next rec-armed folder group in mixer
-  Classical Take Record: Allow for pausing and then returning to original start position for next recording
-  Create Folder: Add track grouping
-  PDF Guide: Various tweaks
+  Tested with REAPER 6.82
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
