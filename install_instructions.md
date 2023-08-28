@@ -1,6 +1,6 @@
 # Instructions for installing ReaClassical
 
-For the complete and recommended experience on Linux, MacOS and Windows you can download and run a single install script that does everything for you...
+For the complete and recommended experience on Linux, MacOS and Windows you can run a single install script that does everything for you...
 
 ## Quick Full Portable Install on Linux, MacOS & Windows
 
