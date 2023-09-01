@@ -70,8 +70,8 @@ function main()
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         else
             Main_OnCommand(40362, 0) -- glue items
+            Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         end
-        Main_OnCommand(41206, 0)     -- Item: Move and stretch items to fit time selection
         state = GetToggleCommandState(1156)
         if state == 0 then
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
