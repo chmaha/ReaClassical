@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.22pre2
+@version 23.22pre3
 @changelog
-  Revert time sig/tempo removal due to REAPER fix
+  Use 32-bit float for recording, glue, freeze etc.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
