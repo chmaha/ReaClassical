@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.22pre3
+@version 23.22pre4
 @changelog
-  Use 32-bit float for recording, glue, freeze etc.
+  Remove stretch duplication in code logic
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
