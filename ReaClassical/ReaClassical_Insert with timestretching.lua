@@ -65,19 +65,19 @@ function main()
         MoveEditCursor(xfade_len, false) -- move cursor forward xfade length
         for _, v in pairs(selected_items) do
             SetMediaItemSelected(v, true)
+            SetMediaItemInfo_Value(v, "C_LOCK", 0)
         end
         if first_track_items == 1 then
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         else
             Main_OnCommand(40362, 0) -- glue items
-            Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         end
+        Main_OnCommand(41206, 0)     -- Item: Move and stretch items to fit time selection
         state = GetToggleCommandState(1156)
         if state == 0 then
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
         end
         unlock_items()
-
         Main_OnCommand(40626, 0) -- Time Selection: Set end point
         local cur_pos = create_crossfades()
         clean_up()
