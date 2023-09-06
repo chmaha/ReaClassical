@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.22pre4
+@version 23.22pre5
 @changelog
-  Remove stretch duplication in code logic
+  Fix time-stretching by unlocking pasted items before the main operation.
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
