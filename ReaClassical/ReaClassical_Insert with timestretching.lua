@@ -58,6 +58,10 @@ function main()
         end
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         local first_item = selected_items[0]
+
+        local item_color = GetMediaItemInfo_Value(first_item, "I_CUSTOMCOLOR")
+
+
         SetMediaItemSelected(first_item, true)
         Main_OnCommand(40034, 0)         -- Item grouping: Select all items in groups
         Main_OnCommand(41305, 0)         -- Item edit: Trim left edge of item to edit cursor
@@ -73,6 +77,13 @@ function main()
             Main_OnCommand(40362, 0) -- glue items
         end
         Main_OnCommand(41206, 0)     -- Item: Move and stretch items to fit time selection
+        
+        local num_of_items = CountSelectedMediaItems()
+        for i = 0, num_of_items -1, 1 do
+            local item = GetSelectedMediaItem(0, i)
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", item_color)
+        end
+        
         state = GetToggleCommandState(1156)
         if state == 0 then
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
