@@ -6,10 +6,10 @@
 # Change the pkgver number below to download an alternative version of REAPER.
 
 ###########
-ver=6.81
+ver=6.83
 major=$(echo $ver | awk -F. '{print $1}')
 minor=$(echo $ver | awk -F. '{print $2}')
-rcver=23Q3
+rcver=23Q4
 ###########
 
 echo "Welcome to ReaClassical installer..."
