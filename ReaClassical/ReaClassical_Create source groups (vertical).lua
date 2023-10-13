@@ -147,6 +147,7 @@ function sync_routing_and_fx()
         remove_track_groups()
         local ret = add_track_groups()
         if not ret then return end
+      
 
         local first_track = GetTrack(0, 0)
         SetOnlyTrackSelected(first_track)
@@ -157,7 +158,7 @@ function sync_routing_and_fx()
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0)            --SWS_SELCHILDREN2
             local copy_folder_routing = NamedCommandLookup("_S&M_COPYSNDRCV2")
-            Main_OnCommand(copy_folder_routing, 0)        -- copy folder track routing
+            Main_OnCommand(copy_folder_routing, 0)        -- copy folder track routinga
             Main_OnCommand(42579, 0)                      -- Track: Remove selected tracks from all track media/razor editing groups
             local copy = NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
             Main_OnCommand(copy, 0)

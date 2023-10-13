@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 23.22pre5
+@version 23.22
 @changelog
-  Fix time-stretching by unlocking pasted items before the main operation.
+  Revert time sig/tempo removal due to REAPER fix
+  Fix time-stretching by unlocking pasted items before the main operation
+  Use color of original items when using time-stretch glue
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
