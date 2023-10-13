@@ -5,8 +5,8 @@
 # Change the pkgver number below to download an alternative version of REAPER.
 
 ##############
-$pkgver="6.81"
-$rcver="23Q3"
+$pkgver="6.83"
+$rcver="23Q4"
 ##############
 
 Write-Host "Welcome to ReaClassical installer..."
