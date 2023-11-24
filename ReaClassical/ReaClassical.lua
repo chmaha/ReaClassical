@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 23.22
+@version 24.1pre1
 @changelog
-  Revert time sig/tempo removal due to REAPER fix
-  Fix time-stretching by unlocking pasted items before the main operation
-  Use color of original items when using time-stretch glue
+  Add album length comment to CUE file to prepare the way for creation of automated ReaClassical album report	
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

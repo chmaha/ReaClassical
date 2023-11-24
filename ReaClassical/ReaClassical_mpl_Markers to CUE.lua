@@ -97,36 +97,32 @@ end
 
 function create_string(fields, num_of_markers, extension)
     local format = ext_mod(extension)
+    
+    local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, num_of_markers - 1)
+    album_length = format_time(raw_pos_out)
 
     local out_str =
-        ' REM GENRE ' .. fields[1] ..
-        '\n REM DATE ' .. fields[2] ..
-        '\n PERFORMER ' .. fields[3] ..
-        '\n TITLE ' .. fields[4] ..
-        '\n FILE ' .. fields[5] .. ' ' .. format .. '\n'
+        'REM GENRE ' .. fields[1] ..
+        '\nREM DATE ' .. fields[2] ..
+        '\nREM ALBUM_LENGTH ' .. album_length ..
+        '\nPERFORMER ' .. fields[3] ..
+        '\nTITLE ' .. fields[4] ..
+        '\nFILE ' .. fields[5] .. ' ' .. format .. '\n'
 
     local ind3 = '   '
     local ind5 = '     '
 
     local marker_id = 1
     for i = 0, num_of_markers - 1 do
-        local _, _, pos_out, _, name_out = EnumProjectMarkers2(0, i)
+        local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, i)
         if pattern_match(name_out) ~= '#'
         then
             goto skip_to_next
         end
         name_out = name_out:match('#(.*)')
-        pos_out = format_timestr_pos(pos_out, '', 5)
-
-        local time = {}
-        for num in pos_out:gmatch('[%d]+') do
-            if tonumber(num) > 10 then num = tonumber(num) end
-            time[#time + 1] = num
-        end
-        if tonumber(time[1]) > 0 then time[2] = tonumber(time[2]) + tonumber(time[1]) * 60 end
-
+        formatted_pos_out = format_time(raw_pos_out)
+        
         local perf = fields[3]
-        pos_out = table.concat(time, ':', 2)
 
         local id = ("%02d"):format(marker_id)
         marker_id = marker_id + 1
@@ -134,9 +130,10 @@ function create_string(fields, num_of_markers, extension)
         out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
             ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
             ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
-            ind5 .. 'INDEX 01 ' .. pos_out .. '\n'
+            ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
         ::skip_to_next::
     end
+    
     return out_str
 end
 
@@ -191,5 +188,20 @@ end
 function save_metadata(user_inputs)
     SetProjExtState(0, "Markers to CUE", "Metadata", user_inputs)
 end
+
+----------------------------------------------------------
+
+function format_time(pos_out)
+    pos_out = format_timestr_pos(pos_out, '', 5)
+    local time = {}
+    for num in pos_out:gmatch('[%d]+') do
+        if tonumber(num) > 10 then num = tonumber(num) end
+        time[#time + 1] = num
+    end
+    if tonumber(time[1]) > 0 then time[2] = tonumber(time[2]) + tonumber(time[1]) * 60 end
+    return table.concat(time, ':', 2)
+end
+
+----------------------------------------------------------
 
 main()
