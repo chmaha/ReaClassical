@@ -119,18 +119,34 @@ function create_string(fields, num_of_markers, extension)
         then
             goto skip_to_next
         end
-        name_out = name_out:match('#(.*)')
+        local has_isrc_code = name_out:find("ISRC")
+        local isrc_code = name_out:match('ISRC=([%w%d]+)') or ""
+        if has_isrc_code then 
+          name_out = name_out:match(('#(.*)|'))
+        else
+          name_out = name_out:match(('#(.*)'))
+        end
         formatted_pos_out = format_time(raw_pos_out)
         
         local perf = fields[3]
+        
 
         local id = ("%02d"):format(marker_id)
         marker_id = marker_id + 1
-        if name_out == nil or name_out == '' then local nameOut1 = 'Untitled ' .. id end
+        if name_out == nil or name_out == '' then name_out = 'Untitled' end
+        
+        if isrc_code ~= "" then
+        out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
+            ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
+            ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
+            ind5 .. 'ISRC ' .. isrc_code .. '\n' ..
+            ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+        else
         out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
             ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
             ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
             ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+        end
         ::skip_to_next::
     end
     

@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre1
+@version 24.1pre2
 @changelog
-  Add album length comment to CUE file to prepare the way for creation of automated ReaClassical album report	
+  Add ISRC to CUE file when present	
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
