@@ -105,9 +105,9 @@ function create_string(fields, num_of_markers, extension)
         'REM GENRE ' .. fields[1] ..
         '\nREM DATE ' .. fields[2] ..
         '\nREM ALBUM_LENGTH ' .. album_length ..
-        '\nPERFORMER ' .. fields[3] ..
-        '\nTITLE ' .. fields[4] ..
-        '\nFILE ' .. fields[5] .. ' ' .. format .. '\n'
+        '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
+        '\nTITLE ' .. '"' .. fields[4] .. '"' ..
+        '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
 
     local ind3 = '   '
     local ind5 = '     '
