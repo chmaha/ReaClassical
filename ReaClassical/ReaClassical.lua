@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre2
+@version 24.1pre3
 @changelog
-  Add ISRC to CUE file when present	
+  CUE generation: Ensure album metadata	is surrounded by quotation marks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
