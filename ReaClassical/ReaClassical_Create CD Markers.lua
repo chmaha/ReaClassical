@@ -134,7 +134,7 @@ function cd_markers(first_track)
     if marker_count > 99 then
         redbook_total_tracks_error = true
     end
-    AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap, previous_takename,
+    AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap, previous_takename:match("^[!]*(.+)"),
         marker_count)
     local redbook_project_length
     if marker_count ~= 0 then

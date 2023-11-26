@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre3
+@version 24.1pre4
 @changelog
-  CUE generation: Ensure album metadata	is surrounded by quotation marks
+  Ensure that the final region doesn't include a "!" in the name if a pregap exists before it
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
