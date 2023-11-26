@@ -21,6 +21,13 @@ chmaha 05.04.23 changelog:
   Simplify main() with separate functions
   Remove superfluous code
   Add pairs(reaper) code
+
+chmaha 24Q1pre changelog:
+  Add ISRC to CUE file when present
+  Ensure album metadata is surrounded by quotation marks
+  Add CATALOG to top of CUE file if present in the album metadata @ marker
+  Generate album reports in plaintext and html
+
 ]]
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
@@ -34,8 +41,17 @@ function main()
     if not ret then return end
     local ret, fields, extension = get_data(filename)
     if not ret then return end
-    local string = create_string(fields, num_of_markers, extension)
-    save_file(fields, string)
+    local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
+    path, slash, cue_file = save_file(fields, string)
+
+    local txtOutputPath = path .. slash .. 'album_report.txt'
+    local HTMLOutputPath = path .. slash .. 'album_report.html'
+    local albumTitle, albumPerformer, tracks = parseCueFile(cue_file, album_length)
+    if albumTitle and albumPerformer and #tracks > 0 then 
+        createPlainTextReport(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number)
+        createHTMLReport(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number)
+	end
+    ShowMessageBox("Album report generated in the root project folder. CUE file written to " .. cue_file, "Create CUE file", 0)
 end
 
 ----------------------------------------------------------
@@ -164,7 +180,7 @@ function create_string(fields, num_of_markers, extension)
         ::skip_to_next::
     end
     
-    return out_str
+    return out_str, catalog_number, album_length
 end
 
 ----------------------------------------------------------
@@ -204,13 +220,13 @@ function save_file(fields, out_str)
     if f then
         f:write(out_str)
         f:close()
-        ShowMessageBox("CUE file written to " .. file, "Create CUE file", 0)
     else
         ShowMessageBox(
             "There was an error creating the file. Copy and paste the contents of the following console window to a new .cue file.",
             "Create CUE file", 0)
         ShowConsoleMsg(out_str)
     end
+    return path, slash, file
 end
 
 ----------------------------------------------------------
@@ -232,6 +248,184 @@ function format_time(pos_out)
     return table.concat(time, ':', 2)
 end
 
-----------------------------------------------------------
+-----------------------------------------------------------------
+
+function parseCueFile(cueFilePath, albumLength)
+    local file = io.open(cueFilePath, "r")
+
+    if not file then
+        return
+    end
+
+    local albumTitle, albumPerformer
+    local tracks = {}
+
+    local currentTrack = {}  -- Track being processed
+
+    for line in file:lines() do
+        if line:find("^TITLE") then
+            albumTitle = line:match('"([^"]+)"')
+        elseif line:find("^PERFORMER") then
+            albumPerformer = line:match('"([^"]+)"')
+        elseif line:find("^%s+TRACK") then
+            currentTrack = {
+                number = tonumber(line:match("(%d+)")),
+                --performer = albumPerformer,  -- Added this line to include performer information
+            }
+        elseif line:find("^%s+PERFORMER") then
+        	currentTrack.performer = line:match('"([^"]+)"')
+        elseif line:find("^%s+TITLE") then
+            currentTrack.title = line:match('"([^"]+)"')
+        elseif line:find("^%s+ISRC") then
+            currentTrack.isrc = line:match("ISRC%s+(%S+)")
+        elseif line:find("^%s+INDEX 01") then
+            local mm, ss, ff = line:match("(%d+):(%d+):(%d+)")
+        	currentTrack.mm = tonumber(mm)
+           	currentTrack.ss = tonumber(ss)
+           	currentTrack.ff = tonumber(ff)
+        	table.insert(tracks, currentTrack)
+        end
+    end
+
+    file:close()
+    
+    for i = 2, #tracks do
+    	local secondTimeString = string.format("%02d:%02d:%02d", tracks[i].mm, tracks[i].ss, tracks[i].ff)
+        local firstTimeString = string.format("%02d:%02d:%02d", tracks[i - 1].mm, tracks[i - 1].ss, tracks[i - 1].ff)
+        tracks[i-1].length = subtractTimeStrings(secondTimeString, firstTimeString)
+    end
+    
+    -- Deal with final track length based on album length
+    local firstTimeString = string.format("%02d:%02d:%02d", tracks[#tracks-1].mm, tracks[#tracks-1].ss, tracks[#tracks-1].ff)
+    tracks[#tracks].length = subtractTimeStrings(albumLength, firstTimeString)  
+	
+    return albumTitle, albumPerformer, tracks
+end
+
+-----------------------------------------------------------------
+
+function createPlainTextReport(albumTitle, albumPerformer, tracks, txtOutputPath, albumLength, catalog_number)
+    local file = io.open(txtOutputPath, "w")
+
+    if not file then
+        return
+    end
+
+    -- Write album information
+    local formattedDate = os.date("%d/%m/%Y %I:%M%p")
+    file:write("Generated by ReaClassical (" .. formattedDate .. ")\n\n")
+    file:write("Album: ", (albumTitle or "") .. "\n")
+    file:write("Album Performer: ", (albumPerformer or "") .. "\n")
+    
+    if catalog_number ~= "" then
+        file:write("UPC/EAN: ", (catalog_number or "") .. "\n\n")
+    else
+        file:write("\n")
+    end
+    
+    file:write("-----------------------------\n")
+    file:write("Total Running Time: " .. albumLength .. "\n")
+    file:write("-----------------------------\n\n")
+    -- Write track information
+    for _, track in ipairs(tracks or {}) do
+    	local isrcSeparator = track.isrc and " | " or ""
+    	--local perfSeparator = track.performer and " | " or ""
+        file:write(string.format("%02d | %02d:%02d:%02d | %s | %s%s%s \n",
+            track.number or 0, track.mm or 0, track.ss or 0, track.ff or 0, track.length, track.title or "", isrcSeparator, track.isrc or "" ))
+    end
+
+    file:close()
+end
+
+-----------------------------------------------------------------
+
+function createHTMLReport(albumTitle, albumPerformer, tracks, htmlOutputPath, albumLength, catalog_number)
+    local file = io.open(htmlOutputPath, "w")
+
+    if not file then
+        return
+    end
+
+    -- Write HTML header
+    file:write("<html>\n<head>\n<style>\n")
+    file:write("table {\n  font-family: Arial, sans-serif;\n  border-collapse: collapse;\n  width: auto;\n}\n")
+    file:write("th, td {\n  border: 1px solid #dddddd;\n  text-align: left;\n  padding: 8px;\n}\n")
+    file:write("th {\n  background-color: #f2f2f2;\n}\n</style>\n</head>\n<body>\n")
+
+    -- Write album information
+    local formattedDate = os.date("%d/%m/%Y %I:%M%p")
+    file:write("<h2>Generated by ReaClassical (" .. formattedDate .. ")</h2>\n\n")
+    file:write("<h3>Album: ", (albumTitle or ""), "</h3>")
+    file:write("<h3>Album Performer: ", (albumPerformer or ""), "</h3>\n")
+    
+    if catalog_number ~= "" then
+        file:write("<h3>UPC/EAN: ", catalog_number, "</h3>\n")
+    end
+    
+    file:write("<h3>Total Running Time: " .. albumLength .. "</h3>\n\n")
+
+    -- Write track information as HTML table
+    file:write("<table>\n<tr>\n<th>Track</th>\n<th>Start</th>\n<th>Length</th>\n<th>Title</th>")
+    if anyISRCPresent(tracks) then
+        file:write("<th>ISRC</th>")
+    end
+    file:write("</tr>\n")
+
+    for _, track in ipairs(tracks or {}) do
+        local isrcSeparator = track.isrc and " | " or ""
+        file:write(string.format("<tr>\n<td>%02d</td>\n<td>%02d:%02d:%02d</td>\n<td>%s</td>\n<td>%s</td>\n",
+            track.number or 0, track.mm or 0, track.ss or 0, track.ff or 0, track.length or "", track.title or ""))
+        if anyISRCPresent(tracks) then
+            file:write(string.format("<td>%s</td>\n", track.isrc or ""))
+        end
+        file:write("</tr>\n")
+    end
+
+    file:write("</table>\n</body>\n</html>")
+
+    file:close()
+end
+
+-----------------------------------------------------------------
+
+function anyISRCPresent(tracks)
+    for _, track in ipairs(tracks or {}) do
+        if track.isrc then
+            return true
+        end
+    end
+    return false
+end
+
+-----------------------------------------------------------------
+
+function timeToMinutesSecondsFrames(timeString)
+    local minutes, seconds, frames = timeString:match("(%d+):(%d+):(%d+)")
+    return tonumber(minutes), tonumber(seconds), tonumber(frames)
+end
+
+-----------------------------------------------------------------
+
+function subtractTimeStrings(timeString1, timeString2)
+    local minutes1, seconds1, frames1 = timeToMinutesSecondsFrames(timeString1)
+    local minutes2, seconds2, frames2 = timeToMinutesSecondsFrames(timeString2)
+
+    local totalFrames1 = frames1 + seconds1 * 75 + minutes1 * 60 * 75
+    local totalFrames2 = frames2 + seconds2 * 75 + minutes2 * 60 * 75
+
+    local differenceFrames = totalFrames1 - totalFrames2
+
+    local minutesResult = math.floor(differenceFrames / 75 / 60)
+    local secondsResult = math.floor(differenceFrames / 75) % 60
+    local framesResult = differenceFrames % 75
+
+    local paddedMinutes = string.format("%02d", minutesResult)
+    local paddedSeconds = string.format("%02d", secondsResult)
+    local paddedFrames = string.format("%02d", framesResult)
+
+    return paddedMinutes .. ":" .. paddedSeconds .. ":" .. paddedFrames
+end
+
+-----------------------------------------------------------------
 
 main()
