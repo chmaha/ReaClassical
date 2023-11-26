@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre5
+@version 24.1pre6
 @changelog
-  CUE generation: Add CATALOG to top of CUE file if present in the album metadata @ marker
+  Create plaintext and HTML album reports when creating a CUE file
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
