@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre4
+@version 24.1pre5
 @changelog
-  Ensure that the final region doesn't include a "!" in the name if a pregap exists before it
+  CUE generation: Add CATALOG to top of CUE file if present in the album metadata @ marker
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

@@ -100,15 +100,29 @@ function create_string(fields, num_of_markers, extension)
     
     local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, num_of_markers - 1)
     album_length = format_time(raw_pos_out)
-
-    local out_str =
-        'REM GENRE ' .. fields[1] ..
-        '\nREM DATE ' .. fields[2] ..
-        '\nREM ALBUM_LENGTH ' .. album_length ..
-        '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
-        '\nTITLE ' .. '"' .. fields[4] .. '"' ..
-        '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
-
+    local _, _, _, _, album_meta = EnumProjectMarkers2(0, num_of_markers - 2)
+    catalog_number = album_meta:match('CATALOG=([%w%d]+)') or ""
+    local out_str = ""
+    
+    if catalog_number ~= "" then
+        out_str =
+          'REM GENRE ' .. fields[1] ..
+          '\nREM DATE ' .. fields[2] ..
+          '\nREM ALBUM_LENGTH ' .. album_length ..
+          '\nCATALOG ' .. catalog_number ..
+          '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
+          '\nTITLE ' .. '"' .. fields[4] .. '"' ..
+          '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
+    else
+       out_str =
+         'REM GENRE ' .. fields[1] ..
+         '\nREM DATE ' .. fields[2] ..
+         '\nREM ALBUM_LENGTH ' .. album_length ..
+         '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
+         '\nTITLE ' .. '"' .. fields[4] .. '"' ..
+         '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
+    end
+    
     local ind3 = '   '
     local ind5 = '     '
 
