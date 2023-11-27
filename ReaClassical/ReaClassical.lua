@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre6
+@version 24.1pre7
 @changelog
-  Create plaintext and HTML album reports when creating a CUE file
+  Use snake case for all function names
+  Add pregap lines to album reports
+  Correct calculation of final track duration when preceeded by a pregap
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
