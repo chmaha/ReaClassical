@@ -34,6 +34,8 @@ chmaha 24Q1pre changelog:
   Use DDP @ album metadata if available
   Use saved year if available
   Add REM line about ReaClassical
+  Add INDEX 00 lines if present in project
+  Remove pattern match function and use :find() inline
 ]]
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
@@ -108,11 +110,16 @@ function get_data(filename)
 
             ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-                ddp_metadata_table[4] .. ',' .. saved_metadata_table[2] .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
+                ddp_metadata_table[4] ..
+                ',' ..
+                saved_metadata_table[2] ..
+                ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
         else
             ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-                ddp_metadata_table[4] .. ',' .. this_year .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.wav')
+                ddp_metadata_table[4] ..
+                ',' ..
+                this_year .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.wav')
         end
 
         local ret, user_inputs
@@ -180,50 +187,54 @@ function create_string(fields, num_of_markers, extension)
     local ind5 = '     '
 
     local marker_id = 1
+    local is_pregap = false
+    local pregap_start = ""
     for i = 0, num_of_markers - 1 do
         local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, i)
-        if pattern_match(name_out) ~= '#'
-        then
-            goto skip_to_next
+        if name_out:find("^#") then
+            local has_isrc_code = name_out:find("ISRC")
+            local isrc_code = name_out:match('ISRC=([%w%d]+)') or ""
+            if has_isrc_code then
+                name_out = name_out:match(('#(.*)|'))
+            else
+                name_out = name_out:match(('#(.*)'))
+            end
+            local formatted_pos_out = format_time(raw_pos_out)
+
+            local perf = fields[3]
+
+            local id = ("%02d"):format(marker_id)
+            marker_id = marker_id + 1
+            if name_out == nil or name_out == '' then name_out = 'Untitled' end
+
+            if isrc_code ~= "" then
+                out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
+                    ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
+                    ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
+                    ind5 .. 'ISRC ' .. isrc_code .. '\n'
+                    if is_pregap then
+                        out_str = out_str .. ind5 .. 'INDEX 00 ' .. pregap_start .. '\n'
+                        is_pregap = false
+                    end
+                    out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+            else
+                out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
+                    ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
+                    ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n'
+                    if is_pregap then
+                        out_str = out_str .. ind5 .. 'INDEX 00 ' .. pregap_start .. '\n'
+                        is_pregap = false
+                    end
+                    out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+            end
+        elseif name_out:find("^!") then
+            name_out = ''
+            is_pregap = true
+            pregap_start = format_time(raw_pos_out)
         end
-        local has_isrc_code = name_out:find("ISRC")
-        local isrc_code = name_out:match('ISRC=([%w%d]+)') or ""
-        if has_isrc_code then
-            name_out = name_out:match(('#(.*)|'))
-        else
-            name_out = name_out:match(('#(.*)'))
-        end
-        formatted_pos_out = format_time(raw_pos_out)
-
-        local perf = fields[3]
-
-
-        local id = ("%02d"):format(marker_id)
-        marker_id = marker_id + 1
-        if name_out == nil or name_out == '' then name_out = 'Untitled' end
-
-        if isrc_code ~= "" then
-            out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
-                ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
-                ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
-                ind5 .. 'ISRC ' .. isrc_code .. '\n' ..
-                ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
-        else
-            out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
-                ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
-                ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
-                ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
-        end
-        ::skip_to_next::
     end
 
     return out_str, catalog_number, album_length
-end
-
-----------------------------------------------------------
-
-function pattern_match(name_out)
-    return name_out:gsub('%s', ''):sub(0, 1)
 end
 
 ----------------------------------------------------------

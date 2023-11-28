@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre11
+@version 24.1pre12
 @changelog
-  CUE generation Bugfix: Use WAVE vs WAV as file type for WAV, FLAC and WavPack
+  CUE generation: Add INDEX 00 lines if pre-gaps present in project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
