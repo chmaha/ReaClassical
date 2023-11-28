@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre9
+@version 24.1pre10
 @changelog
-  CUE and report generation: Always use saved year if available
+  CUE generation: Add REM line about ReaClassical
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
