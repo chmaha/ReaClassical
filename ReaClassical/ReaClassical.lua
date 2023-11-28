@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre7
+@version 24.1pre8
 @changelog
-  Use snake case for all function names
-  Add pregap lines to album reports
-  Correct calculation of final track duration when preceeded by a pregap
+  CUE and report generation: Use DDP @ album metadata if available
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

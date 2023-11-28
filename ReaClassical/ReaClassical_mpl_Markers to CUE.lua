@@ -31,6 +31,7 @@ chmaha 24Q1pre changelog:
   Add quotation marks around generated filename on successful message to user
   Add pregap information
   Correct calculation of final track duration when preceeded by a pregap
+  Use DDP @ album metadata if available
 ]]
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
@@ -50,11 +51,13 @@ function main()
     local txtOutputPath = path .. slash .. 'album_report.txt'
     local HTMLOutputPath = path .. slash .. 'album_report.html'
     local albumTitle, albumPerformer, tracks = parse_cue_file(cue_file, album_length, num_of_markers)
-    if albumTitle and albumPerformer and #tracks > 0 then 
+    if albumTitle and albumPerformer and #tracks > 0 then
         create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number)
         create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number)
-	end
-    ShowMessageBox("Album reports have been generated in the root project folder.\nCUE file written to \"" .. cue_file .. "\"", "Create CUE file", 0)
+    end
+    ShowMessageBox(
+        "Album reports have been generated in the root project folder.\nCUE file written to \"" .. cue_file .. "\"",
+        "Create CUE file", 0)
 end
 
 ----------------------------------------------------------
@@ -85,18 +88,45 @@ end
 function get_data(filename)
     local this_year = os.date("%Y")
 
+    local _, ddp_metadata = GetProjExtState(0, "Create CD Markers", "Album Metadata")
     local _, metadata_saved = GetProjExtState(0, "Markers to CUE", "Metadata")
-    local ret, user_inputs, metadata_table
-    if metadata_saved ~= "" then
-        ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
-            'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-            metadata_saved)
+
+
+    if ddp_metadata ~= "" then
+        local ddp_metadata_table = {}
+        for value in ddp_metadata:gmatch("[^,]+") do
+            table.insert(ddp_metadata_table, value)
+        end
+
+        if metadata_saved ~= "" then
+            local saved_metadata_table = {}
+            for value in metadata_saved:gmatch("[^,]+") do
+                table.insert(saved_metadata_table, value)
+            end
+
+            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+                'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
+                ddp_metadata_table[4] .. ',' .. this_year .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
+        else
+            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+                'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
+                ddp_metadata_table[4] .. ',' .. this_year .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.wav')
+        end
+
+        local ret, user_inputs
     else
-        ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
-            'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-            'Classical,' .. this_year .. ',Performer,My Classical Album,' .. filename .. '.wav')
+        if metadata_saved ~= "" then
+            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+                'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
+                metadata_saved)
+        else
+            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+                'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
+                'Classical,' .. this_year .. ',Performer,My Classical Album,' .. filename .. '.wav')
+        end
+        if not ret then return end
     end
-    if not ret then return end
+
     local fields = {}
     for word in user_inputs:gmatch('[^%,]+') do fields[#fields + 1] = word end
     if #fields ~= 5 then
@@ -116,32 +146,32 @@ end
 
 function create_string(fields, num_of_markers, extension)
     local format = ext_mod(extension)
-    
+
     local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, num_of_markers - 1)
     album_length = format_time(raw_pos_out)
     local _, _, _, _, album_meta = EnumProjectMarkers2(0, num_of_markers - 2)
     catalog_number = album_meta:match('CATALOG=([%w%d]+)') or ""
     local out_str = ""
-    
+
     if catalog_number ~= "" then
         out_str =
-          'REM GENRE ' .. fields[1] ..
-          '\nREM DATE ' .. fields[2] ..
-          '\nREM ALBUM_LENGTH ' .. album_length ..
-          '\nCATALOG ' .. catalog_number ..
-          '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
-          '\nTITLE ' .. '"' .. fields[4] .. '"' ..
-          '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
+            'REM GENRE ' .. fields[1] ..
+            '\nREM DATE ' .. fields[2] ..
+            '\nREM ALBUM_LENGTH ' .. album_length ..
+            '\nCATALOG ' .. catalog_number ..
+            '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
+            '\nTITLE ' .. '"' .. fields[4] .. '"' ..
+            '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
     else
-       out_str =
-         'REM GENRE ' .. fields[1] ..
-         '\nREM DATE ' .. fields[2] ..
-         '\nREM ALBUM_LENGTH ' .. album_length ..
-         '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
-         '\nTITLE ' .. '"' .. fields[4] .. '"' ..
-         '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
+        out_str =
+            'REM GENRE ' .. fields[1] ..
+            '\nREM DATE ' .. fields[2] ..
+            '\nREM ALBUM_LENGTH ' .. album_length ..
+            '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
+            '\nTITLE ' .. '"' .. fields[4] .. '"' ..
+            '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
     end
-    
+
     local ind3 = '   '
     local ind5 = '     '
 
@@ -154,35 +184,35 @@ function create_string(fields, num_of_markers, extension)
         end
         local has_isrc_code = name_out:find("ISRC")
         local isrc_code = name_out:match('ISRC=([%w%d]+)') or ""
-        if has_isrc_code then 
-          name_out = name_out:match(('#(.*)|'))
+        if has_isrc_code then
+            name_out = name_out:match(('#(.*)|'))
         else
-          name_out = name_out:match(('#(.*)'))
+            name_out = name_out:match(('#(.*)'))
         end
         formatted_pos_out = format_time(raw_pos_out)
-        
+
         local perf = fields[3]
-        
+
 
         local id = ("%02d"):format(marker_id)
         marker_id = marker_id + 1
         if name_out == nil or name_out == '' then name_out = 'Untitled' end
-        
+
         if isrc_code ~= "" then
-        out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
-            ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
-            ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
-            ind5 .. 'ISRC ' .. isrc_code .. '\n' ..
-            ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+            out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
+                ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
+                ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
+                ind5 .. 'ISRC ' .. isrc_code .. '\n' ..
+                ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
         else
-        out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
-            ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
-            ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
-            ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+            out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
+                ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
+                ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
+                ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
         end
         ::skip_to_next::
     end
-    
+
     return out_str, catalog_number, album_length
 end
 
@@ -275,17 +305,17 @@ function parse_cue_file(cueFilePath, albumLength, num_of_markers)
                 number = tonumber(line:match("(%d+)")),
             }
         elseif line:find("^%s+PERFORMER") then
-        	currentTrack.performer = line:match('"([^"]+)"')
+            currentTrack.performer = line:match('"([^"]+)"')
         elseif line:find("^%s+TITLE") then
             currentTrack.title = line:match('"([^"]+)"')
         elseif line:find("^%s+ISRC") then
             currentTrack.isrc = line:match("ISRC%s+(%S+)")
         elseif line:find("^%s+INDEX 01") then
             local mm, ss, ff = line:match("(%d+):(%d+):(%d+)")
-        	currentTrack.mm = tonumber(mm)
-           	currentTrack.ss = tonumber(ss)
-           	currentTrack.ff = tonumber(ff)
-        	table.insert(tracks, currentTrack)
+            currentTrack.mm = tonumber(mm)
+            currentTrack.ss = tonumber(ss)
+            currentTrack.ff = tonumber(ff)
+            table.insert(tracks, currentTrack)
         end
     end
 
@@ -297,24 +327,23 @@ function parse_cue_file(cueFilePath, albumLength, num_of_markers)
         return (a.mm * 60 + a.ss + a.ff / 75) < (b.mm * 60 + b.ss + b.ff / 75)
     end)
 
-    
+
     for i = 2, #tracks do
-    	local secondTimeString = string.format("%02d:%02d:%02d", tracks[i].mm, tracks[i].ss, tracks[i].ff)
+        local secondTimeString = string.format("%02d:%02d:%02d", tracks[i].mm, tracks[i].ss, tracks[i].ff)
         local firstTimeString = string.format("%02d:%02d:%02d", tracks[i - 1].mm, tracks[i - 1].ss, tracks[i - 1].ff)
-        tracks[i-1].length = subtract_time_strings(secondTimeString, firstTimeString)
+        tracks[i - 1].length = subtract_time_strings(secondTimeString, firstTimeString)
     end
-    
+
     -- Deal with final track length based on album length
     local firstTimeString = string.format("%02d:%02d:%02d", tracks[#tracks].mm, tracks[#tracks].ss, tracks[#tracks].ff)
-    tracks[#tracks].length = subtract_time_strings(albumLength, firstTimeString)  
-	
+    tracks[#tracks].length = subtract_time_strings(albumLength, firstTimeString)
+
     return albumTitle, albumPerformer, tracks
 end
 
 -----------------------------------------------------------------
 
 function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, albumLength, catalog_number)
-    
     local file = io.open(txtOutputPath, "w")
 
     if not file then
@@ -325,19 +354,19 @@ function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPa
     file:write("Generated by ReaClassical (" .. formattedDate .. ")\n\n")
     file:write("Album: ", (albumTitle or "") .. "\n")
     file:write("Album Performer: ", (albumPerformer or "") .. "\n")
-    
+
     if catalog_number ~= "" then
         file:write("UPC/EAN: ", (catalog_number or "") .. "\n\n")
     else
         file:write("\n")
     end
-    
+
     file:write("-----------------------------\n")
     file:write("Total Running Time: " .. albumLength .. "\n")
     file:write("-----------------------------\n\n")
 
     for _, track in ipairs(tracks or {}) do
-    	local isrcSeparator = track.isrc and " | " or ""
+        local isrcSeparator = track.isrc and " | " or ""
 
         track.number = track.title == "pregap" and "p" or string.format("%02d", track.number or 0)
         track.title = track.title == "pregap" and "" or track.title
@@ -347,7 +376,8 @@ function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPa
                 track.number or "", track.mm or 0, track.ss or 0, track.ff or 0, track.length))
         else
             file:write(string.format("%-2s | %02d:%02d:%02d | %-8s | %s%s%s \n",
-                track.number or "", track.mm or 0, track.ss or 0, track.ff or 0, track.length or "", track.title or "", isrcSeparator, track.isrc or ""))
+                track.number or "", track.mm or 0, track.ss or 0, track.ff or 0, track.length or "", track.title or "",
+                isrcSeparator, track.isrc or ""))
         end
     end
 
@@ -372,11 +402,11 @@ function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, 
     file:write("<h2>Generated by ReaClassical (" .. formattedDate .. ")</h2>\n\n")
     file:write("<h3>Album: ", (albumTitle or ""), "</h3>")
     file:write("<h3>Album Performer: ", (albumPerformer or ""), "</h3>\n")
-    
+
     if catalog_number ~= "" then
         file:write("<h3>UPC/EAN: ", catalog_number, "</h3>\n")
     end
-    
+
     file:write("<h3>Total Running Time: " .. albumLength .. "</h3>\n\n")
 
     file:write("<table>\n<tr>\n<th>Track</th>\n<th>Start</th>\n<th>Length</th>\n<th>Title</th>")
