@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre8
+@version 24.1pre9
 @changelog
-  CUE and report generation: Use DDP @ album metadata if available
+  CUE and report generation: Always use saved year if available
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

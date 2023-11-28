@@ -106,7 +106,7 @@ function get_data(filename)
 
             ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-                ddp_metadata_table[4] .. ',' .. this_year .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
+                ddp_metadata_table[4] .. ',' .. saved_metadata_table[2] .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
         else
             ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
