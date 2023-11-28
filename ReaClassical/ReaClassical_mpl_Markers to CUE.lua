@@ -235,7 +235,7 @@ function ext_mod(extension)
             return extension
         end
     end
-    return "WAV"
+    return "WAVE"
 end
 
 ----------------------------------------------------------
