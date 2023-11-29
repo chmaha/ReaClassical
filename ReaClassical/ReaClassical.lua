@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre12
+@version 24.1pre13
 @changelog
-  CUE generation: Add INDEX 00 lines if pre-gaps present in project
+  Beautify HTML album report
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
