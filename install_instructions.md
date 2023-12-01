@@ -19,14 +19,7 @@ sh ReaClassical_macOS.sh
 ```
 or
 ##### Windows
-Download [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) where you want to install ReaClassical and double-click. It *might* require Win10 or higher.
-
-or...
-
-```
-curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.ps1
-powershell -executionpolicy bypass -File .\ReaClassical_Win.ps1
-```
+Download [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) where you want to install ReaClassical and double-click. The source code for the installer is  [here](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders/ReaClassical-Windows-Go-Installer).
 
 The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic.
 
