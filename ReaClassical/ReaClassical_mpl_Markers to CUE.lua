@@ -36,6 +36,7 @@ chmaha 24Q1pre changelog:
   Add REM line about ReaClassical
   Add INDEX 00 lines if present in project
   Remove pattern match function and use :find() inline
+  Fix slash path match
 ]]
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
@@ -252,9 +253,9 @@ end
 ----------------------------------------------------------
 
 function save_file(fields, out_str)
-    local _, path = EnumProjects(-1, "")
+    local _, path = EnumProjects(-1)
     if path == "" then
-        path = GetProjectPath("")
+        path = GetProjectPath()
     else
         path = path:match("(.+)[/\\].+[.]RPP")
     end
