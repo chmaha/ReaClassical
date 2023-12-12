@@ -37,6 +37,8 @@ chmaha 24Q1pre changelog:
   Add INDEX 00 lines if present in project
   Remove pattern match function and use :find() inline
   Fix slash path match
+  Remove superfluous quotes
+  Allow for RPP and rpp as the extension (REAPER on Windows is lowercase)
 ]]
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
@@ -257,7 +259,7 @@ function save_file(fields, out_str)
     if path == "" then
         path = GetProjectPath()
     else
-        path = path:match("(.+)[/\\].+[.]RPP")
+        path = path:match("(.+)[/\\].+[.][Rr][Pp][Pp]")
     end
     local os = GetOS()
     local slash = "/"
