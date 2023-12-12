@@ -256,7 +256,7 @@ function save_file(fields, out_str)
     if path == "" then
         path = GetProjectPath("")
     else
-        path = path:match("(.+)/.+[.]RPP")
+        path = path:match("(.+)[/\\].+[.]RPP")
     end
     local os = GetOS()
     local slash = "/"

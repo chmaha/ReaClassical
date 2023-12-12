@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre13
+@version 24.1pre14
 @changelog
-  Beautify HTML album report
+  Fix path slash match
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
