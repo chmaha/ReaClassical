@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre15
+@version 24.1pre16
 @changelog
-  Generate CUE: A few no-op code changes
+  Generate CUE: Allow for both RPP and rpp extensions (default depends on OS)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
