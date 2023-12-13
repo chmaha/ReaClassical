@@ -1,7 +1,24 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre16
+@version 23.23
 @changelog
+  Add album length comment to CUE file to prepare the way for creation of automated ReaClassical album report
+  Add ISRC to CUE file when present
+  CUE generation: Ensure album metadata is surrounded by quotation marks
+  Ensure that the final region doesn't include a "!" in the name if a pregap exists before it
+  CUE generation: Add CATALOG to top of CUE file if present in the album metadata @ marker
+  Create plaintext and HTML album reports when creating a CUE file
+  Use snake case for all function names
+  Add pregap lines to album reports
+  Correct calculation of final track duration when preceeded by a pregap
+  CUE and report generation: Use DDP @ album metadata if available
+  CUE and report generation: Always use saved year if available
+  CUE generation: Add REM line about ReaClassical
+  CUE generation Bugfix: Use WAVE vs WAV as file type for WAV, FLAC and WavPack
+  CUE generation: Add INDEX 00 lines if pre-gaps present in project
+  CUE generation: Beautify HTML album report
+  Generate CUE: Fix path slash match
+  Generate CUE: A few no-op code changes
   Generate CUE: Allow for both RPP and rpp extensions (default depends on OS)
 @metapackage
 @provides
