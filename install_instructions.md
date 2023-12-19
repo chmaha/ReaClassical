@@ -22,6 +22,13 @@ Download [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClas
 
 The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic.
 
+## For updating an existing portable install of ReaClassical:
+
+1. Sync ReaPack to get the latest version of ReaClassical scripts.
+2. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
+3. Copy across any updated files/settings to your previous install's resource path as described in the [release notes](https://raw.githubusercontent.com/chmaha/ReaClassical/main/release_notes.pdf).
+4. Restart REAPER.
+
 For those who only want access to the scripts and jsfx plugins:
 
 ## Basic Manual Install Inside Your Existing REAPER Install
@@ -32,13 +39,6 @@ To just use the scripts and jsfx plugins without any customization of keymaps, t
 3. Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins (my "RCPlugs" are highly recommended for classical work). 
 4. Use the ReaClassical project template for your new projects (you can set this in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
 5. Set up keyboard shortcuts in the actions list (? shortcut) as desired.
-
-## For updating an existing install of ReaClassical:
-
-1. Sync ReaPack to get the latest version of ReaClassical scripts.
-2. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
-3. Copy across any updated files/settings to your previous install's resource path as described in the [release notes](https://raw.githubusercontent.com/chmaha/ReaClassical/main/release_notes.pdf).
-4. Restart REAPER.
 
 ### Notes
 
