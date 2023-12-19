@@ -9,7 +9,7 @@ Open a terminal, navigate to the folder where you want to download ReaClassical 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh | sh
 # or using wget
-wget -qO- https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh | sh
+wget --secure-protocol=auto --https-only --secure-protocol=auto --https-only -O - https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Linux.sh | sh
 ```
 or
 ##### MacOS
