@@ -14,8 +14,7 @@ wget -qO- https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20
 or
 ##### MacOS
 ``` 
-curl -O https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh
-sh ReaClassical_macOS.sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_macOS.sh | sh
 ```
 or
 ##### Windows
