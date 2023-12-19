@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre17
+@version 24.1pre18
 @changelog
-  Add new logo to PDF Guide
+  PDF Guide: Rework install section and move manual installation instructions to an appendix
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
