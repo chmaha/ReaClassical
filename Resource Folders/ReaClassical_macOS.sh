@@ -12,6 +12,7 @@ rcver=23Q4
 
 echo "Welcome to ReaClassical installer..."
 sleep 2
+rcfolder="ReaClassical_${rcver}"
 arch=`uname -m`
 osver=`sw_vers -productVersion`
 major=$(echo "$osver" | cut -d. -f1)
@@ -35,18 +36,28 @@ echo "Downloading ReaClassical resource folder base and userplugins for MacOS"
 sleep 2
 curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip -L
 curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-$arch.zip -L
-echo "Extracting files into ReaClassical_$rcver folder..."
+
+# Check if a ReaClassical folder already exists
+if [ -d "ReaClassical_${rcver}" ]; then
+    # If it exists, create a folder with a date suffix
+    date_suffix=$(date +%s | md5sum | cut -c1-5)
+    rcfolder="ReaClassical_${rcver}_${date_suffix}"
+    sleep 2
+    echo "Folder ReaClassical_${rcver} already exists. Adding unique identifier as suffix."
+fi
 sleep 2
-unzip -q Resource_Folder_Base.zip -d ReaClassical_$rcver/
-unzip -q UP_MacOS-$arch.zip -d ReaClassical_$rcver/UserPlugins/
+echo "Extracting files into $rcfolder folder..."
+sleep 2
+unzip -q Resource_Folder_Base.zip -d $rcfolder/
+unzip -q UP_MacOS-$arch.zip -d $rcfolder/UserPlugins/
 echo "Adding ReaClassical splash screen reference to reaper.ini"
 sleep 2
-abspath=`pwd ReaClassical_$rcver`
-sed -i'.original' -e "s,reaclassical-splash.png,${abspath}/ReaClassical_$rcver/reaclassical-splash.png," ReaClassical_$rcver/reaper.ini
-rm ReaClassical_$rcver/*.original
+abspath=`pwd $rcfolder`
+sed -i'.original' -e "s,reaclassical-splash.png,${abspath}/$rcfolder/reaclassical-splash.png," ReaClassical_$rcver/reaper.ini
+rm $rcfolder/*.original
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
-cp -R reaper_temp/REAPER.app ReaClassical_$rcver/
+cp -R reaper_temp/REAPER.app $rcfolder/
 echo "Unmounting image and deleting temporary files..."
 sleep 2
 hdiutil detach reaper_temp

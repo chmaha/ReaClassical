@@ -2,6 +2,8 @@ package main
 
 import (
 	"archive/zip"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,9 +19,23 @@ const (
 	rcver  = "23Q4"
 )
 
+var (
+	rcfolder = fmt.Sprintf("ReaClassical_%s", rcver)
+)
+
 func main() {
 	fmt.Println("Welcome to ReaClassical installer...")
 	time.Sleep(2 * time.Second)
+
+	// Create a unique hash-based date suffix
+	dateSuffix := getHashedDateSuffix()
+
+	// Check if the folder ReaClassical_${rcver} exists
+	if _, err := os.Stat(rcfolder); err == nil {
+		// If it exists, append the hash-based date suffix
+		rcfolder = fmt.Sprintf("%s_%s", rcver, dateSuffix)
+		fmt.Printf("Folder %s already exists. Adding unique identifier as suffix.\n", rcfolder)
+	}
 
 	// Download and extract portable 7-zip
 	fmt.Println("Downloading and extracting portable 7-zip...")
@@ -35,9 +51,9 @@ func main() {
 	downloadFile(reaperURL, fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")))
 
 	// Extract REAPER
-	fmt.Printf("Extracting REAPER from .exe to ReaClassical_%s folder...\n", rcver)
+	fmt.Printf("Extracting REAPER from .exe to %s folder...\n", rcfolder)
 	time.Sleep(2 * time.Second)
-	runCommand("./7zip/7z.exe", "x", fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")), "-oReaClassical_"+rcver)
+	runCommand("./7zip/7z.exe", "x", fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")), "-o"+rcver)
 
 	// Download ReaClassical files from GitHub
 	fmt.Println("Downloading ReaClassical files from GitHub...")
@@ -64,6 +80,24 @@ func main() {
 	// Wait for user input before exiting
 	fmt.Print("Press Enter to exit...")
 	fmt.Scanln()
+}
+
+func getHashedDateSuffix() string {
+	// Get the current epoch time in seconds
+	epochTime := time.Now().Unix()
+
+	// Convert epoch time to string
+	epochTimeString := fmt.Sprintf("%d", epochTime)
+
+	// Calculate SHA-256 hash
+	hash := sha256.New()
+	hash.Write([]byte(epochTimeString))
+	hashInBytes := hash.Sum(nil)
+
+	// Convert hash to a 4-character string
+	hashString := hex.EncodeToString(hashInBytes)[:4]
+
+	return hashString
 }
 
 func downloadFile(url, destination string) {
