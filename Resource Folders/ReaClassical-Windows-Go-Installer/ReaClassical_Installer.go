@@ -33,8 +33,8 @@ func main() {
 	// Check if the folder ReaClassical_${rcver} exists
 	if _, err := os.Stat(rcfolder); err == nil {
 		// If it exists, append the hash-based date suffix
-		rcfolder = fmt.Sprintf("%s_%s", rcver, dateSuffix)
-		fmt.Printf("Folder %s already exists. Adding unique identifier as suffix.\n", rcfolder)
+		rcfolder = fmt.Sprintf("ReaClassical_%s_%s", rcver, dateSuffix)
+		fmt.Printf("Folder ReaClassical_%s already exists. Adding unique identifier as suffix.\n", rcver)
 	}
 
 	// Download and extract portable 7-zip
@@ -53,7 +53,7 @@ func main() {
 	// Extract REAPER
 	fmt.Printf("Extracting REAPER from .exe to %s folder...\n", rcfolder)
 	time.Sleep(2 * time.Second)
-	runCommand("./7zip/7z.exe", "x", fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")), "-o"+rcver)
+	runCommand("./7zip/7z.exe", "x", fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")), "-o"+rcfolder)
 
 	// Download ReaClassical files from GitHub
 	fmt.Println("Downloading ReaClassical files from GitHub...")
@@ -64,8 +64,8 @@ func main() {
 	// Extract ReaClassical files
 	fmt.Println("Extracting ReaClassical files to ReaClassical folder...")
 	time.Sleep(2 * time.Second)
-	extractArchive("Resource_Folder_Base.zip", fmt.Sprintf("ReaClassical_%s", rcver))
-	extractArchive("UP_Windows-x64.zip", fmt.Sprintf("ReaClassical_%s/UserPlugins", rcver))
+	extractArchive("Resource_Folder_Base.zip", fmt.Sprintf("%s", rcfolder))
+	extractArchive("UP_Windows-x64.zip", fmt.Sprintf("%s/UserPlugins", rcfolder))
 
 	// Remove temporary files
 	fmt.Println("Removing temporary files...")
