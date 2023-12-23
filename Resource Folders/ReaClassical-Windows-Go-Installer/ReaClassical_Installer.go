@@ -99,7 +99,7 @@ func getHashedDateSuffix() string {
 	hashInBytes := hash.Sum(nil)
 
 	// Convert hash to a 4-character string
-	hashString := hex.EncodeToString(hashInBytes)[:4]
+	hashString := hex.EncodeToString(hashInBytes)[:5]
 
 	return hashString
 }
