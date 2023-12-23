@@ -97,7 +97,7 @@ Generate CUE: Allow for both RPP and rpp extensions (default depends on OS)]]></
         <source type="theme" file="Sonic Solutions.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/b0a68c070e90557cb3ea2596a7984d9670f09636/ReaClassical/Sonic%20Solutions.ReaperThemeZip</source>
         <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/b0a68c070e90557cb3ea2596a7984d9670f09636/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
       </version>
-      <version name="24.1pre17" author="chmaha" time="2023-12-16T16:12:43Z">
+      <version name="24.0pre17" author="chmaha" time="2023-12-16T16:12:43Z">
         <changelog><![CDATA[Add new logo to PDF Guide]]></changelog>
         <source main="main" file="ReaClassical_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/e528a912654c9072b2282eb3ad569b549a4d4be8/ReaClassical/ReaClassical_Add%20Destination%20IN%20marker.lua</source>
         <source main="main" file="ReaClassical_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/e528a912654c9072b2282eb3ad569b549a4d4be8/ReaClassical/ReaClassical_Add%20Destination%20OUT%20Marker.lua</source>
@@ -142,7 +142,7 @@ Generate CUE: Allow for both RPP and rpp extensions (default depends on OS)]]></
         <source type="theme" file="Sonic Solutions.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/e528a912654c9072b2282eb3ad569b549a4d4be8/ReaClassical/Sonic%20Solutions.ReaperThemeZip</source>
         <source file="ReaClassical_PDF_Guide.pdf">https://github.com/chmaha/ReaClassical/raw/e528a912654c9072b2282eb3ad569b549a4d4be8/PDF_Guide/ReaClassical%20User%20Guide.pdf</source>
       </version>
-      <version name="24.1pre18" author="chmaha" time="2023-12-19T12:27:07Z">
+      <version name="24.0pre18" author="chmaha" time="2023-12-19T12:27:07Z">
         <changelog><![CDATA[PDF Guide: Rework install section and move manual installation instructions to an appendix]]></changelog>
         <source main="main" file="ReaClassical_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/02a607464446aefe2ffb5c72a72be012007ef1d8/ReaClassical/ReaClassical_Add%20Destination%20IN%20marker.lua</source>
         <source main="main" file="ReaClassical_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/02a607464446aefe2ffb5c72a72be012007ef1d8/ReaClassical/ReaClassical_Add%20Destination%20OUT%20Marker.lua</source>
