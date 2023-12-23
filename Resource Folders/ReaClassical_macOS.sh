@@ -53,7 +53,9 @@ unzip -q UP_MacOS-$arch.zip -d $rcfolder/UserPlugins/
 echo "Adding ReaClassical splash screen and theme references to reaper.ini"
 sleep 2
 abspath=`pwd $rcfolder`
-sed -i'' -e "/^\[REAPER\]/a lastthemefn5=${abspath}/$rcfolder/ColorThemes/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
+
+sed -i'' -e "/^\[REAPER\]/a\\
+lastthemefn5=${abspath}\/$rcfolder\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
 sed -i'' -e "s,reaclassical-splash.png,${abspath}/$rcfolder/reaclassical-splash.png," $rcfolder/reaper.ini
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
