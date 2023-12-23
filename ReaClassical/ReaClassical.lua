@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1pre18
+@version 24.0rc1
 @changelog
-  PDF Guide: Rework install section and move manual installation instructions to an appendix
+  New default ReaClassical theme for REAPER 7.x
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
