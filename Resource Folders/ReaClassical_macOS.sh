@@ -53,7 +53,7 @@ unzip -q UP_MacOS-$arch.zip -d $rcfolder/UserPlugins/
 echo "Adding ReaClassical splash screen reference to reaper.ini"
 sleep 2
 abspath=`pwd $rcfolder`
-sed -i'.original' -e "s,reaclassical-splash.png,${abspath}/$rcfolder/reaclassical-splash.png," ReaClassical_$rcver/reaper.ini
+sed -i'.original' -e "s,reaclassical-splash.png,${abspath}/$rcfolder/reaclassical-splash.png," $rcfolder/reaper.ini
 rm $rcfolder/*.original
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
