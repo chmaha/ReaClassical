@@ -40,7 +40,7 @@ curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserP
 # Check if a ReaClassical folder already exists
 if [ -d "ReaClassical_${rcver}" ]; then
     # If it exists, create a folder with a date suffix
-    date_suffix=$(date +%s | md5 | cut -c1-5)
+    date_suffix=$(date +%s | shasum -a 256 | cut -c1-5)
     rcfolder="ReaClassical_${rcver}_${date_suffix}"
     sleep 2
     echo "Folder ReaClassical_${rcver} already exists. Adding unique identifier as suffix."
