@@ -64,8 +64,12 @@ func main() {
 	// Extract ReaClassical files
 	fmt.Println("Extracting ReaClassical files to ReaClassical folder...")
 	time.Sleep(2 * time.Second)
-	extractArchive("Resource_Folder_Base.zip", fmt.Sprintf("%s", rcfolder))
+	extractArchive("Resource_Folder_Base.zip", rcfolder)
 	extractArchive("UP_Windows-x64.zip", fmt.Sprintf("%s/UserPlugins", rcfolder))
+
+	// Add the line to reaper.ini under the [REAPER] section
+	fmt.Println("Adding theme line to reaper.ini under [REAPER] section")
+	addLineToReaperIni(rcfolder)
 
 	// Remove temporary files
 	fmt.Println("Removing temporary files...")
@@ -95,7 +99,7 @@ func getHashedDateSuffix() string {
 	hashInBytes := hash.Sum(nil)
 
 	// Convert hash to a 4-character string
-	hashString := hex.EncodeToString(hashInBytes)[:4]
+	hashString := hex.EncodeToString(hashInBytes)[:5]
 
 	return hashString
 }
@@ -209,4 +213,42 @@ func runCommand(command string, args ...string) {
 		fmt.Printf("Error running command %s: %s\n", command, err)
 		os.Exit(1)
 	}
+}
+
+func addLineToReaperIni(rcfolder string) {
+	// Calculate absolute path
+	abspath, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting current working directory: %s\n", err)
+		os.Exit(1)
+	}
+
+	// Read the content of reaper.ini
+	reaperIniPath := filepath.Join(abspath, rcfolder, "reaper.ini")
+	content, err := os.ReadFile(reaperIniPath)
+	if err != nil {
+		fmt.Printf("Error reading reaper.ini: %s\n", err)
+		os.Exit(1)
+	}
+
+	// Find the index where [REAPER] section starts
+	reaperSectionIndex := strings.Index(string(content), "[REAPER]")
+	if reaperSectionIndex == -1 {
+		fmt.Println("[REAPER] section not found in reaper.ini")
+		os.Exit(1)
+	}
+
+	// Calculate the position to insert the new line after [REAPER] section
+	insertPosition := reaperSectionIndex + len("[REAPER]")
+
+	// Modify the content by inserting the new line
+	newContent := string(content[:insertPosition]) + fmt.Sprintf("\nlastthemefn5=%s\\%s\\ColorThemes\\ReaClassical.ReaperTheme\n", abspath, rcfolder) + string(content[insertPosition:])
+
+	// Write the modified content back to reaper.ini
+	err = os.WriteFile(reaperIniPath, []byte(newContent), os.ModePerm)
+	if err != nil {
+		fmt.Printf("Error writing to reaper.ini: %s\n", err)
+		os.Exit(1)
+	}
+
 }

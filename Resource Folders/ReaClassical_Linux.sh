@@ -35,20 +35,27 @@ echo "Extracting files from REAPER archive to ${rcfolder} folder"
 tar -xf reaper${major}${minor}_linux_${arch}.tar.xz
 mv reaper_linux_${arch}/ "${rcfolder}/"
 rm reaper${major}${minor}_linux_${arch}.tar.xz
-cd "${rcfolder}/"
-mv REAPER/* .
-rmdir REAPER
+mv "${rcfolder}/REAPER/"* "${rcfolder}/"
+rmdir "${rcfolder}/REAPER"
+
 echo "Downloading ReaClassical files from Github..."
 sleep 2
 wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip
 wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Linux-${arch}.zip
 echo "Extracting files from archives..."
 sleep 2
-unzip -q Resource_Folder_Base.zip
+unzip -q Resource_Folder_Base.zip -d "${rcfolder}/"
 rm Resource_Folder_Base.zip
-unzip -q UP_Linux-${arch}.zip -d ./UserPlugins/
+unzip -q UP_Linux-${arch}.zip -d "${rcfolder}/UserPlugins/"
 rm UP_Linux-${arch}.zip
 
+# Get the realpath of $rcfolder
+rcfolder_path=$(realpath "${rcfolder}")
+sleep 2
+# Add the line to reaper.ini under the [REAPER] section
+echo "Adding the ReaClassical theme reference to reaper.ini"
+sed -i "/^\[REAPER\]/a lastthemefn5=${rcfolder_path}/ColorThemes/ReaClassical.ReaperTheme" "${rcfolder}/reaper.ini"
+sleep 2
 echo "Portable ReaClassical Installation complete!"
 
 
