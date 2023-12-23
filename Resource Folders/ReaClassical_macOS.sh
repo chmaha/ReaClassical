@@ -50,11 +50,13 @@ echo "Extracting files into $rcfolder folder..."
 sleep 2
 unzip -q Resource_Folder_Base.zip -d $rcfolder/
 unzip -q UP_MacOS-$arch.zip -d $rcfolder/UserPlugins/
-echo "Adding ReaClassical splash screen reference to reaper.ini"
+echo "Adding ReaClassical splash screen and theme references to reaper.ini"
 sleep 2
 abspath=`pwd $rcfolder`
-sed -i'.original' -e "s,reaclassical-splash.png,${abspath}/$rcfolder/reaclassical-splash.png," $rcfolder/reaper.ini
-rm $rcfolder/*.original
+
+sed -i'.bak' -e "/^\[REAPER\]/a\\
+lastthemefn5=${abspath}\/$rcfolder\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
+sed -i'.bak' -e "s,reaclassical-splash.png,${abspath}/$rcfolder/reaclassical-splash.png," $rcfolder/reaper.ini
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
 cp -R reaper_temp/REAPER.app $rcfolder/
