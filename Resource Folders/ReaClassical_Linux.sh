@@ -6,8 +6,8 @@
 # Change the pkgver number below to download an alternative version of REAPER.
 
 ###########
-ver=6.83
-rcver=23Q4
+ver=7.07
+rcver=24
 ###########
 
 echo "Welcome to ReaClassical installer..."
@@ -55,6 +55,9 @@ sleep 2
 # Add the line to reaper.ini under the [REAPER] section
 echo "Adding the ReaClassical theme reference to reaper.ini"
 sed -i "/^\[REAPER\]/a lastthemefn5=${rcfolder_path}/ColorThemes/ReaClassical.ReaperTheme" "${rcfolder}/reaper.ini"
+sleep 2
+echo "Adding the ReaClassical splash to reaper.ini"
+sed -i "/^\[REAPER\]/a splashimage=${rcfolder_path}/Scripts/chmaha Scripts/ReaClassical/reaclassical-splash.png" "${rcfolder}/reaper.ini"
 sleep 2
 echo "Portable ReaClassical Installation complete!"
 

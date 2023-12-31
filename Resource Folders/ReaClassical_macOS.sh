@@ -6,8 +6,8 @@
 # Change the pkgver number below to download an alternative REAPER version.
 
 ###########
-pkgver=6.83
-rcver=23Q4
+pkgver=7.07
+rcver=24
 ###########
 
 echo "Welcome to ReaClassical installer..."
@@ -56,7 +56,8 @@ abspath=`pwd $rcfolder`
 
 sed -i'.bak' -e "/^\[REAPER\]/a\\
 lastthemefn5=${abspath}\/$rcfolder\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
-sed -i'.bak' -e "s,reaclassical-splash.png,${abspath}/$rcfolder/reaclassical-splash.png," $rcfolder/reaper.ini
+sed -i'.bak' -e "/^\[REAPER\]/a\\
+splashimage=${abspath}\/$rcfolder\/Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-splash.png," $rcfolder/reaper.ini
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
 cp -R reaper_temp/REAPER.app $rcfolder/
