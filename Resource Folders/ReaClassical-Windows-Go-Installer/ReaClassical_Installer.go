@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	pkgver = "6.83"
-	rcver  = "23Q4"
+	pkgver = "7.07"
+	rcver  = "24"
 )
 
 var (
@@ -241,8 +241,12 @@ func addLineToReaperIni(rcfolder string) {
 	// Calculate the position to insert the new line after [REAPER] section
 	insertPosition := reaperSectionIndex + len("[REAPER]")
 
+	// Define the new lines to be added
+	newLines := fmt.Sprintf("\nlastthemefn5=%s\\%s\\ColorThemes\\ReaClassical.ReaperTheme\n", abspath, rcfolder) +
+		fmt.Sprintf("splashimage=%s\\%s\\Scripts\\chmaha Scripts\\ReaClassical\\reaclassical-splash.png\n", abspath, rcfolder)
+
 	// Modify the content by inserting the new line
-	newContent := string(content[:insertPosition]) + fmt.Sprintf("\nlastthemefn5=%s\\%s\\ColorThemes\\ReaClassical.ReaperTheme\n", abspath, rcfolder) + string(content[insertPosition:])
+	newContent := string(content[:insertPosition]) + newLines + string(content[insertPosition:])
 
 	// Write the modified content back to reaper.ini
 	err = os.WriteFile(reaperIniPath, []byte(newContent), os.ModePerm)
