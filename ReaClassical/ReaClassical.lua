@@ -4,7 +4,7 @@
 @changelog
   New default ReaClassical theme for REAPER 7.x
   PDF Guide: Rework install section and move manual installation instructions to an appendix
-  Custom Splash: Add to metapackage
+  Custom Splash: Add reaclassical-splash.png to metapackage
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -49,6 +49,7 @@
   [theme] SaDiE.ReaperThemeZip
   [theme] Sonic Solutions.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
+  reaclassical-splash.png > reaclassical-splash.png
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
