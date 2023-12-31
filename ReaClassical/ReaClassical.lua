@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 24.0rc2
+@version 24.0
 @changelog
   New default ReaClassical theme for REAPER 7.x
   PDF Guide: Rework install section and move manual installation instructions to an appendix
