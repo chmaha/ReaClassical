@@ -57,7 +57,7 @@ abspath=`pwd $rcfolder`
 sed -i'.bak' -e "/^\[REAPER\]/a\\
 lastthemefn5=${abspath}\/$rcfolder\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
 sed -i'.bak' -e "/^\[REAPER\]/a\\
-splashimage=Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-splash.png," $rcfolder/reaper.ini
+splashimage=${abspath}\/$rcfolder\/Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-splash.png," $rcfolder/reaper.ini
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
 cp -R reaper_temp/REAPER.app $rcfolder/
