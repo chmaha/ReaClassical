@@ -25,7 +25,7 @@ The executable or script will pull the REAPER binary archive, resource folder ba
 ## For updating an existing portable install of ReaClassical:
 
 1. Sync ReaPack to get the latest version of ReaClassical scripts.
-2. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a year + quarter suffix e.g. "ReaClassical_23Q2").
+2. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a short year suffix e.g. "ReaClassical_24").
 3. Copy across any updated files/settings to your previous install's resource path as described in the [release notes](https://raw.githubusercontent.com/chmaha/ReaClassical/main/release_notes.pdf).
 4. Restart REAPER.
 
