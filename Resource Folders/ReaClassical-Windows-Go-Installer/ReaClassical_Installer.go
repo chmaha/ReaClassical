@@ -243,7 +243,7 @@ func addLineToReaperIni(rcfolder string) {
 
 	// Define the new lines to be added
 	newLines := fmt.Sprintf("\nlastthemefn5=%s\\%s\\ColorThemes\\ReaClassical.ReaperTheme\n", abspath, rcfolder) +
-		fmt.Sprintf("splashimage=%s\\%s\\Scripts\\chmaha Scripts\\ReaClassical\\reaclassical-splash.png\n", abspath, rcfolder)
+		fmt.Sprintf("splashimage=\\Scripts\\chmaha Scripts\\ReaClassical\\reaclassical-splash.png\n")
 
 	// Modify the content by inserting the new line
 	newContent := string(content[:insertPosition]) + newLines + string(content[insertPosition:])
