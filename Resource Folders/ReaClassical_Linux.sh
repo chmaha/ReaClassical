@@ -57,7 +57,7 @@ echo "Adding the ReaClassical theme reference to reaper.ini"
 sed -i "/^\[REAPER\]/a lastthemefn5=${rcfolder_path}/ColorThemes/ReaClassical.ReaperTheme" "${rcfolder}/reaper.ini"
 sleep 2
 echo "Adding the ReaClassical splash to reaper.ini"
-sed -i "/^\[REAPER\]/a splashimage=${rcfolder_path}/Scripts/chmaha Scripts/ReaClassical/reaclassical-splash.png" "${rcfolder}/reaper.ini"
+sed -i "/^\[REAPER\]/a splashimage=Scripts/chmaha Scripts/ReaClassical/reaclassical-splash.png" "${rcfolder}/reaper.ini"
 sleep 2
 echo "Portable ReaClassical Installation complete!"
 
