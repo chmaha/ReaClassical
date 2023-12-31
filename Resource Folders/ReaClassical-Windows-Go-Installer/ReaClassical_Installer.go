@@ -68,7 +68,7 @@ func main() {
 	extractArchive("UP_Windows-x64.zip", fmt.Sprintf("%s/UserPlugins", rcfolder))
 
 	// Add the line to reaper.ini under the [REAPER] section
-	fmt.Println("Adding theme line to reaper.ini under [REAPER] section")
+	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")
 	addLineToReaperIni(rcfolder)
 
 	// Remove temporary files
