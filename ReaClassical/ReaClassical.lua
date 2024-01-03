@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.0
+@version 24.0.1
 @changelog
-  New default ReaClassical theme for REAPER 7.x
-  PDF Guide: Rework install section and move manual installation instructions to an appendix
-  Custom Splash: Add reaclassical-splash.png to metapackage
+  Update copyright info
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
