@@ -1,5 +1,5 @@
 #!/bin/sh
-# by chmaha (December 2023)
+# by chmaha (January 2024)
 
 # Script to install ReaClassical on Linux
 # Works for both x86_64 and aarch64 architectures
