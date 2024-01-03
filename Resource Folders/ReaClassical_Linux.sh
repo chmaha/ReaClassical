@@ -1,5 +1,5 @@
 #!/bin/sh
-# by chmaha (December 2023)
+# by chmaha (January 2024)
 
 # Script to install ReaClassical on Linux
 # Works for both x86_64 and aarch64 architectures
@@ -20,7 +20,7 @@ arch=$(uname -m)
 
 echo "Downloading REAPER ${major}.${minor} from reaper.fm..."
 sleep 2
-wget -q --show-progress --progress=bar:force https://reaper.fm/files/${major}.x/reaper${major}${minor}_linux_${arch}.tar.xz
+curl -L -O --progress-bar https://reaper.fm/files/${major}.x/reaper${major}${minor}_linux_${arch}.tar.xz
 
 # Check if a ReaClassical folder already exists
 if [ -d "ReaClassical_${rcver}" ]; then
@@ -40,8 +40,8 @@ rmdir "${rcfolder}/REAPER"
 
 echo "Downloading ReaClassical files from Github..."
 sleep 2
-wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip
-wget -q --show-progress --progress=bar:force https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Linux-${arch}.zip
+curl -L -O --progress-bar https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip
+curl -L -O --progress-bar https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Linux-${arch}.zip
 echo "Extracting files from archives..."
 sleep 2
 unzip -q Resource_Folder_Base.zip -d "${rcfolder}/"
@@ -60,5 +60,3 @@ echo "Adding the ReaClassical splash to reaper.ini"
 sed -i "/^\[REAPER\]/a splashimage=Scripts/chmaha Scripts/ReaClassical/reaclassical-splash.png" "${rcfolder}/reaper.ini"
 sleep 2
 echo "Portable ReaClassical Installation complete!"
-
-
