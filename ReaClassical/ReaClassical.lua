@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.0.1
+@version 24.0.2
 @changelog
-  Update copyright info
+  Update PDF with front and back covers, table of contents, square size
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
