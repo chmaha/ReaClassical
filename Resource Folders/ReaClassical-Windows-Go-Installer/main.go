@@ -10,8 +10,8 @@ func main() {
 	}
 }
 
+// Logic to determine if it's a 64-bit system.
 func is64Bit() bool {
-	// Your logic to determine if it's a 64-bit system.
 	return runtime.GOARCH == "amd64"
 
 }
