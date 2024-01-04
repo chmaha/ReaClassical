@@ -3,6 +3,7 @@
 @version 24.0.2
 @changelog
   Update PDF with front and back covers, table of contents, square size
+  Update splash
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
