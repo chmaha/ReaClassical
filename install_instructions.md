@@ -18,7 +18,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/Re
 ```
 or
 ##### Windows
-Download [ReaClassical_Win64.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) or [ReaClassical_Win32.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win32.exe) (32-bit) where you want to install ReaClassical and double-click. The source code for the installer is  [here](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders/ReaClassical-Windows-Go-Installer).
+Download [ReaClassical_Win64.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win64.exe) (64-bit) or [ReaClassical_Win32.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win32.exe) (32-bit) where you want to install ReaClassical and double-click. The source code for the installer is  [here](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders/ReaClassical-Windows-Go-Installer).
 
 The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic.
 
