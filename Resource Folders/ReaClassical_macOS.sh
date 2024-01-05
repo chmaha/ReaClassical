@@ -18,7 +18,11 @@ osver=`sw_vers -productVersion`
 major=$(echo "$osver" | cut -d. -f1)
 minor=$(echo "$osver" | cut -d. -f2)
 dmgtype="universal"
-if [ "$major" -lt 10 ] || ([ "$major" -eq 10 ] && [ "$minor" -lt 15 ]); then
+
+if [ "$arch" = "i386" ]; then
+    dmgtype="i386"
+    echo "Using i386 dmg file..."
+elif [ "$major" -lt 10 ] || ([ "$major" -eq 10 ] && [ "$minor" -lt 15 ]); then
     dmgtype="x86_64"
     echo "Using x86_64 dmg file..."
 else
