@@ -18,7 +18,7 @@ or
 ##### Windows
 Download [ReaClassical_Win64.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win64.exe) (64-bit) or [ReaClassical_Win32.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win32.exe) (32-bit) where you want to install ReaClassical and double-click. The source code for the installer is  [here](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders/ReaClassical-Windows-Go-Installer).
 
-The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic. On first run, go to *extensions > ReaPack > Synchronize Packages...* to get the latest and greatest versions of the functions themselves.
+The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic. On first run, go to *Extensions > ReaPack > Synchronize Packages* to get the latest and greatest versions of the functions themselves.
 
 ## For updating an existing portable install of ReaClassical:
 
