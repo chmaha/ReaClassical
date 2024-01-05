@@ -1,1 +1,0 @@
-GOOS=windows GOARCH=amd64 go build -o ../ReaClassical_Win.exe ReaClassical_Installer.go
