@@ -2,7 +2,7 @@
 
 For the complete and recommended experience on Linux, MacOS and Windows you can run a single install script that does everything for you...
 
-## Quick Full Portable Install on Linux, MacOS & Windows
+## Quick Full Portable Install on Linux, MacOS & Windows (for all nine architectures supported by REAPER)
 
 Open a terminal, navigate to the folder where you want to download ReaClassical and paste the following according to your operating system:
 ##### Linux (including Raspberry Pi)
@@ -18,7 +18,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/Re
 ```
 or
 ##### Windows
-Download [ReaClassical_Win.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) where you want to install ReaClassical and double-click. The source code for the installer is  [here](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders/ReaClassical-Windows-Go-Installer).
+Download [ReaClassical_Win64.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win.exe) (64-bit) or [ReaClassical_Win32.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Resource%20Folders/ReaClassical_Win32.exe) (32-bit) where you want to install ReaClassical and double-click. The source code for the installer is  [here](https://github.com/chmaha/ReaClassical/tree/main/Resource%20Folders/ReaClassical-Windows-Go-Installer).
 
 The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic.
 
