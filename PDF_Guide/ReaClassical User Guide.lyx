@@ -211,7 +211,15 @@ help
 ) shortcut.
  The benefit of the offline version is that it is always in sync with the
  version of the tools you are using.
- 
+ The structure of the guide is designed to take the user through preliminary
+ remarks, install and update procedures for both ReaClassical and REAPER
+ then a detailed look at workflows from creating a project through to final
+ render.
+ Then follows appendices (descriptions of all the ReaClassical functions,
+ keyboard shortcut guide, recommended free mastering-grade plugins, system
+ tweaks for all three major OSes, and, finally, a manual install guide mainly
+ for academic purposes.
+ The guide closes with some thanks and closing remarks.
 \end_layout
 
 \begin_layout Section
@@ -606,32 +614,16 @@ Creating & Setting Up a Project
 Audio Settings
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 ReaClassical Preferences
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Horizontal Workflow
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Vertical Workflow
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -642,40 +634,20 @@ Navigating a Project
 Whole Project
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Items & Markers
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Parents & Children
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Peaks Display
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 ReaClassical Toolbar
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -686,32 +658,16 @@ Recording
 Setting Inputs
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Headroom
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Classical Recording
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 General Recording
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -722,16 +678,8 @@ Importing
 Importing Media
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Multi-Channel Audio Import
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -742,88 +690,44 @@ Editing
 Introduction to Editing Workflows
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Marking Edits on your Scores
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Preparing Takes
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Auditioning Takes
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Source-Destination Editing
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Other SD Functions
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Horizontal Editing
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Vertical Editing
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Razor Editing
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Crossfade Editor
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Other Editing Tips
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -834,24 +738,12 @@ Mixing
 FX Plugins
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Aux & Submix
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Roomtone
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -862,48 +754,24 @@ Mastering
 Repositioning Tracks in an Album
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Loudness
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Metadata
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Creating DDP filesets
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Creating CUE Files
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Album Reports
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -914,40 +782,20 @@ Rendering
 Presets
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Format
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
 Samplerate
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Dither
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Loudness & Limiting
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Section
@@ -958,24 +806,12 @@ Project Management
 Typing Notes
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Folder Structure
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Cleaning
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Subsection
