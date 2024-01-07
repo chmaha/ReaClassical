@@ -362,6 +362,74 @@ literal "false"
 \end_layout
 
 \begin_layout Section
+Tools and Languages
+\end_layout
+
+\begin_layout Standard
+ReaClassical functions are coded using 
+\begin_inset CommandInset href
+LatexCommand href
+name "Lua"
+target "https://www.lua.org/"
+literal "false"
+
+\end_inset
+
+.
+ The installers for MacOS and Linux are shell scripts.
+ The Windows installers are coded in 
+\begin_inset CommandInset href
+LatexCommand href
+name "Go"
+target "https://go.dev/"
+literal "false"
+
+\end_inset
+
+.
+ The ReaClassical website uses 
+\begin_inset CommandInset href
+LatexCommand href
+name "Skeleton"
+target "http://getskeleton.com/"
+literal "false"
+
+\end_inset
+
+.
+ All coding is done either in REAPER's ReaScript Development Environment,
+ vscode or gedit on Linux.
+ The manual is written in \SpecialChar LyX
+ with the covers designed in LibreOffice Draw.
+ The ReaClassical splashscreen and banner are created in GIMP.
+\end_layout
+
+\begin_layout Section
+Versioning Style
+\end_layout
+
+\begin_layout Standard
+ReaClassical currently uses YY.MINOR.MICRO versioning (e.g.
+ 24.2.1) which is a sort of hybrid between SemVer and CalVer styles.
+ The short year acts as the major version with minor numbers increasing
+ for new features and the micro number increasing for smaller changes such
+ as bugfixes.
+ At the very least the short year gives a sense of how recent the ReaClassical
+ version is.
+ Another popular piece of software that uses the same versioning style is
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "pip"
+target "https://pip.pypa.io/en/stable/news/"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
 Changelog
 \end_layout
 
@@ -3349,10 +3417,11 @@ Closing Thoughts
 \begin_layout Standard
 \noindent
 \align left
-I hope you enjoy the ability to do serious classical editing on REAPER and
- that my efforts go some way to making things better, easier and more efficient.
- If you find any oddities with the scripts, please add your thoughts to
- the 
+I hope you enjoy the ability to do serious classical editing with ReaClassical
+ on REAPER and that my efforts go some way to making things better, easier
+ and more efficient.
+ Remember that if you find any oddities with the scripts or have a bright
+ idea for something new and shiny, please add your thoughts to the 
 \begin_inset CommandInset href
 LatexCommand href
 name "dedicated thread"
@@ -3370,7 +3439,7 @@ target "https://github.com/chmaha/ReaClassical"
 \end_inset
 
 .
- I’m very happy to hear about potential improvements/additions.
+ 
 \end_layout
 
 \begin_layout Standard
