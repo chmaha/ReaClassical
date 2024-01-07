@@ -366,6 +366,35 @@ Changelog
 \end_layout
 
 \begin_layout Standard
+The changelog for ReaClassical functions can be found by double-clicking
+ on the ReaClassical package in ReaPack and navigating to the 
+\begin_inset Quotes bld
+\end_inset
+
+History
+\begin_inset Quotes brd
+\end_inset
+
+ tab.
+ Whenever you sync ReaPack via 
+\emph on
+Extensions > ReaPack > Synchronize packages
+\emph default
+ this information should also appear automatically.
+ For all updates including those not related to the functions themselves,
+ information can be found on the ReaClassical Github 
+\begin_inset CommandInset href
+LatexCommand href
+name "releases"
+target "https://github.com/chmaha/ReaClassical/releases"
+literal "false"
+
+\end_inset
+
+ page.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -2509,12 +2538,135 @@ System Tweaks
 Windows
 \end_layout
 
+\begin_layout Standard
+For a modern Windows 10/11 setup, required tweaks are minimal.
+ Ensure that you are using 
+\begin_inset Quotes bld
+\end_inset
+
+High Performance
+\begin_inset Quotes brd
+\end_inset
+
+ or ideally 
+\begin_inset Quotes bld
+\end_inset
+
+Ultimate Performance
+\begin_inset Quotes brd
+\end_inset
+
+.
+ which, if not available, can be activated by opening a command prompt and
+ typing: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+You can then select it from the usual power plan dialog.
+ For best device performance, remember to use the ASIO drivers that were
+ included with your audio interface.
+ Consider disabling your network card during mission-critical recording.
+ For further tips see Focusrite's 
+\begin_inset CommandInset href
+LatexCommand href
+name "optimisation page"
+target "https://support.focusrite.com/hc/en-gb/sections/360004958539-Optimisation"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Subsection
 MacOS
 \end_layout
 
+\begin_layout Standard
+Performance should be excellent out of the box.
+ Remember to disable energy saving (
+\emph on
+System Preferences > Energy Saver
+\emph default
+) so that sessions are not interrupted.
+ Consider disabling your network card during mission-critical recording.
+ If you are experiencing any audio issues while in your DAW, for tips see
+ Focusrite's 
+\begin_inset CommandInset href
+LatexCommand href
+name "optimisation page"
+target "https://support.focusrite.com/hc/en-gb/sections/360004958539-Optimisation"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Subsection
 GNU/Linux
+\end_layout
+
+\begin_layout Standard
+Debian-based distro users should read my 
+\begin_inset CommandInset href
+LatexCommand href
+name "Debian Pro Audio Guide"
+target "https://github.com/chmaha/DebianProAudio"
+literal "false"
+
+\end_inset
+
+.
+ Those on Arch-based should visit my 
+\begin_inset CommandInset href
+LatexCommand href
+name "Arch Pro Audio Guide"
+target "https://github.com/chmaha/ArchProAudio"
+literal "false"
+
+\end_inset
+
+.
+ Performance out of the box on Linux is getting better with every kernel
+ release and is on par or better than Windows.
+ As a starting point, ensure that your username is set up for realtime privilege
+s (step 3 in both guides) and that you set several kernel parameters to
+ ensure you are running the performance governor, threadirqs and dynamic
+ preempt (step 4).
+ To make things even easier, consider using a dedicated audio/video distro
+ like AVLinux or Ubuntu Studio where everything is already set up for you.
+ 
+\emph on
+Rea
+\emph default
+ClassicalOS is also in the pipeline.
+\end_layout
+
+\begin_layout Subsection
+Cross-platform
+\end_layout
+
+\begin_layout Standard
+The good news is that REAPER and ReaClassical run on nine different architecture
+s.
+ You should always be able to open up a project on another machine even
+ if it is running a different OS.
+ Plus, ReaClassical includes various mastering-grade plugins in JSFX format
+ that run on all architectures.
+ 
 \end_layout
 
 \begin_layout Standard
