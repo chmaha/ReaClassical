@@ -1,0 +1,219 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language british
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "tgheros" "default"
+\font_typewriter "tgcursor" "default"
+\font_math "auto" "auto"
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command bibtex
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style british
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\bullet 0 0 6 -1
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+\begin_inset Graphics
+	filename PDF_Guide/user_guide_images/reaclassical_os.png
+	lyxscale 50
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+
+\series bold
+v24.0
+\end_layout
+
+\begin_layout Date
+Tested on REAPER v7.07
+\end_layout
+
+\begin_layout Date
+Release Notes
+\end_layout
+
+\begin_layout Paragraph*
+Changelog since v23.23:
+\end_layout
+
+\begin_layout Itemize
+New default ReaClassical theme for REAPER 7.x
+\end_layout
+
+\begin_layout Paragraph*
+Instructions for a new install:
+\end_layout
+
+\begin_layout Enumerate
+\noindent
+Download the latest portable install as per the 
+\begin_inset CommandInset href
+LatexCommand href
+name "installation guide"
+target "https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md"
+literal "false"
+
+\end_inset
+
+ (it will create a new ReaClassical folder with a short year + quarter suffix
+ e.g.
+ "ReaClassical_24").
+ Run the REAPER binary inside the folder!
+\end_layout
+
+\begin_layout Paragraph*
+Instructions to update from ReaClassical 23.23:
+\end_layout
+
+\begin_layout Quote
+A reminder that ReaClassical versions 23.19 and onwards require SWS Extensions
+ v2.13.2.0 from (https://www.sws-extension.org/download/pre-release/) for the
+ "Whole Project View" functions to work as expected.
+\end_layout
+
+\begin_layout Enumerate
+\noindent
+Sync ReaPack to get the latest version of the ReaClassical scripts.
+\end_layout
+
+\begin_layout Enumerate
+\noindent
+Download the latest portable install as noted above for a new install.
+\end_layout
+
+\begin_layout Enumerate
+\noindent
+Copy across any updated files/settings to your previous install according
+ to the notes below:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Shadowbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Paragraph*
+\noindent
+Updated config files to be copied to your existing resource path 
+\begin_inset Newline newline
+\end_inset
+
+(Options > Show REAPER resource path…):
+\end_layout
+
+\begin_layout Itemize
+\noindent
+
+\emph on
+n/a
+\end_layout
+
+\begin_layout Plain Layout
+Delete the downloaded new portable install and restart REAPER.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
