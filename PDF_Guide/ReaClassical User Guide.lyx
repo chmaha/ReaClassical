@@ -189,8 +189,7 @@ int editing), crossfade editing and more are available at no extra cost
  about to share with you covers all my recording, editing and mastering
  needs.
  Your mileage may vary and I’d love to hear from you if there are functions
- you feel are missing.
- There's an easy install option below as well a step-by-step manual approach.
+ that you feel might be missing.
  
 \end_layout
 
@@ -199,7 +198,20 @@ This Guide
 \end_layout
 
 \begin_layout Standard
+This guide serves as the official manual for ReaClassical.
+ The latest version is always available directly online or offline from
+ within ReaClassical by using the H (for 
+\begin_inset Quotes bld
+\end_inset
 
+help
+\begin_inset Quotes brd
+\end_inset
+
+) shortcut.
+ The benefit of the offline version is that it is always in sync with the
+ version of the tools you are using.
+ 
 \end_layout
 
 \begin_layout Section
@@ -207,7 +219,28 @@ Website
 \end_layout
 
 \begin_layout Standard
+The website 
+\begin_inset CommandInset href
+LatexCommand href
+name "reaclassical.org"
+target "http://reaclassical.org"
+literal "false"
 
+\end_inset
+
+ or directly at 
+\begin_inset CommandInset href
+LatexCommand href
+name "github.io/chmaha/reaclassical"
+target "https://github.io/chmaha/reaclassical"
+literal "false"
+
+\end_inset
+
+ serves as the entry point for new users.
+ From here you can read about key features, donate to the cause, read this
+ PDF manual, installation instructions, navigate to the ReaClassical community
+ thread and more.
 \end_layout
 
 \begin_layout Section
@@ -215,7 +248,22 @@ REAPER Community
 \end_layout
 
 \begin_layout Standard
+The 
+\begin_inset CommandInset href
+LatexCommand href
+name "community thread"
+target "https://forum.cockos.com/showthread.php?t=265145"
+literal "false"
 
+\end_inset
+
+ plays an important role in the development of ReaClassical.
+ Not only is it a place for users to suggest feature requests and point
+ out bugs but also discuss more general classical music recording, mixing
+ and mastering techniques.
+ It also serves as something of a development blog as I not only announce
+ the regular releases but also document the under-the-surface details for
+ those that are interested.
 \end_layout
 
 \begin_layout Section
@@ -223,11 +271,86 @@ Ways to Contribute
 \end_layout
 
 \begin_layout Standard
+The most important way users can contribute to the development of ReaClassical
+ is to actually use the tools! I makes me happy to know that engineers can
+ make whole professional-sounding and technically accurate masters from
+ ReaClassical.
+ Another is to suggest features or let me know about bugs.
+ You can either do this on the 
+\begin_inset CommandInset href
+LatexCommand href
+name "thread"
+target "https://forum.cockos.com/showthread.php?t=265145"
+literal "false"
 
+\end_inset
+
+ or via the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Issues"
+target "https://github.com/chmaha/ReaClassical/issues"
+literal "false"
+
+\end_inset
+
+ page on the ReaClassical github.
+ Finally, I'd be glad of any monetary donations.
+ You can use 
+\begin_inset CommandInset href
+LatexCommand href
+name "PayPal"
+target "https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Liberapay"
+target "https://liberapay.com/reaclassical/"
+literal "false"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset href
+LatexCommand href
+name "Stripe"
+target "https://donate.stripe.com/00g5mydzCftQdpeaEE"
+literal "false"
+
+\end_inset
+
+ to do so.
+ 
 \end_layout
 
 \begin_layout Section
 Source Code
+\end_layout
+
+\begin_layout Standard
+The source code for ReaClassical, the mastering grade 
+\begin_inset Quotes bld
+\end_inset
+
+RC
+\begin_inset Quotes brd
+\end_inset
+
+ plugins, this manual and the website can be found 
+\begin_inset CommandInset href
+LatexCommand href
+name "here"
+target "https://github.com/chmaha/ReaClassical"
+literal "false"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Section
@@ -275,7 +398,11 @@ Start REAPER.
 \end_layout
 
 \begin_layout Enumerate
-Sync ReaPack to get the very latest ReaClassical scripts.
+Sync ReaPack via 
+\emph on
+extensions > ReaPack > Synchronize packages
+\emph default
+ to get the very latest ReaClassical scripts.
 \end_layout
 
 \begin_layout Standard
@@ -389,7 +516,7 @@ Sync ReaPack to get the latest version of the ReaClassical metapackage.
 \begin_layout Enumerate
 Download the latest portable install as per the instructions above (it will
  create a new ReaClassical folder with a short year + quarter suffix e.g.
- "ReaClassical_23Q2").
+ "ReaClassical_24").
  
 \end_layout
 
@@ -409,6 +536,53 @@ literal "false"
 
 \begin_layout Subsection
 Updating REAPER
+\end_layout
+
+\begin_layout Standard
+Simply use the shortcut Ctrl+U to open the REAPER update utility.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename user_guide_images/reaper_update_utility.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+REAPER Update Utility
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Either click on the main or pre-release version you are interested in or
+ click on one of the clock icons to select from previous releases.
 \end_layout
 
 \begin_layout Standard
@@ -2814,8 +2988,7 @@ status open
 \noindent
 \align center
 \begin_inset Graphics
-	filename user_guide_images/reaper default toolbar.png
-	width 100line%
+	filename user_guide_images/reaper_default_toolbar.png
 
 \end_inset
 
