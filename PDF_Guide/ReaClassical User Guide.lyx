@@ -358,7 +358,65 @@ literal "false"
 \end_inset
 
 .
+ ReaClassical is 
+\begin_inset CommandInset href
+LatexCommand href
+name "GPL-3.0"
+target "https://www.gnu.org/licenses/gpl-3.0.html"
+literal "false"
+
+\end_inset
+
+ licensed.
+\end_layout
+
+\begin_layout Section
+Development Style
+\end_layout
+
+\begin_layout Standard
+Due to working on github and releasing the functions via ReaPack, I have
+ the ability to push bugfixes and new features very quickly into an existing
+ ReaClassical install.
+ Often bugfixes happen within minutes or hours of receiving the report.
+ When I dream up new features, the development often happens in rapid fashion
+ over the course of a few days.
+ However, now that ReaClassical has what I consider a mature feature set,
+ I foresee maintenance and occasional bugfixes becoming more central to
+ the process.
+ This will give me more opportunity to work on this documentation, a complete
+ video tutorial series etc.
+ Part of development is also ensuring that ReaClassical continues to operate
+ as expected with the latest REAPER versions.
+ That's not to say there won't be new features appearing! As the REAPER
+ devs add more new features, I will always check to see what might be useful
+ for ReaClassical.
  
+\end_layout
+
+\begin_layout Section
+Versioning Style
+\end_layout
+
+\begin_layout Standard
+ReaClassical currently uses YY.MINOR.MICRO versioning (e.g.
+ 24.2.1) which is a sort of hybrid between SemVer and CalVer styles.
+ The short year acts as the major version with minor numbers increasing
+ for new features and the micro number increasing for smaller changes such
+ as bugfixes.
+ At the very least the short year gives a sense of how recent the ReaClassical
+ version is.
+ Another popular piece of software that uses the same versioning style is
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "pip"
+target "https://pip.pypa.io/en/stable/news/"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
@@ -402,31 +460,6 @@ literal "false"
  The manual is written in \SpecialChar LyX
  with the covers designed in LibreOffice Draw.
  The ReaClassical splashscreen and banner are created in GIMP.
-\end_layout
-
-\begin_layout Section
-Versioning Style
-\end_layout
-
-\begin_layout Standard
-ReaClassical currently uses YY.MINOR.MICRO versioning (e.g.
- 24.2.1) which is a sort of hybrid between SemVer and CalVer styles.
- The short year acts as the major version with minor numbers increasing
- for new features and the micro number increasing for smaller changes such
- as bugfixes.
- At the very least the short year gives a sense of how recent the ReaClassical
- version is.
- Another popular piece of software that uses the same versioning style is
- 
-\begin_inset CommandInset href
-LatexCommand href
-name "pip"
-target "https://pip.pypa.io/en/stable/news/"
-literal "false"
-
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Section
