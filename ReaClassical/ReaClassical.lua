@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.0.2
+@version 24.0.3
 @changelog
-  Update PDF with light cream front and back covers, table of contents, square size
-  Update splash
+  Add super-collapsed value of 0 to REAPER 7.x ReaClassical theme 
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
