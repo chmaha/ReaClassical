@@ -2,7 +2,7 @@
 @author chmaha
 @version 24.0.3
 @changelog
-  Add super-collapsed value of 0 to REAPER 7.x ReaClassical theme 
+  Fix: Add super-collapsed value of 0 to REAPER 7.x ReaClassical theme 
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
