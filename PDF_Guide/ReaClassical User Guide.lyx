@@ -456,10 +456,55 @@ literal "false"
 
 .
  All coding is done either in REAPER's ReaScript Development Environment,
- vscode or gedit on Linux.
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "vscode"
+target "https://code.visualstudio.com/"
+literal "false"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset href
+LatexCommand href
+name "gedit"
+target "https://gedit-technology.github.io/apps/gedit/"
+literal "false"
+
+\end_inset
+
+ on Linux.
  The manual is written in \SpecialChar LyX
- with the covers designed in LibreOffice Draw.
- The ReaClassical splashscreen and banner are created in GIMP.
+ (
+\begin_inset CommandInset href
+LatexCommand href
+name "lyx.org"
+target "https://www.lyx.org/"
+literal "false"
+
+\end_inset
+
+)with the covers designed in 
+\begin_inset CommandInset href
+LatexCommand href
+name "LibreOffice"
+target "https://www.libreoffice.org/"
+literal "false"
+
+\end_inset
+
+ Draw.
+ The ReaClassical splashscreen and banner are created in 
+\begin_inset CommandInset href
+LatexCommand href
+name "GIMP"
+target "https://www.gimp.org/"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
@@ -1173,7 +1218,7 @@ Peaks Display
 \end_layout
 
 \begin_layout Standard
-To adjust the visual zoom or wave peaks, use Ctrl+Up arrow and Ctrl+Down
+To adjust the visual zoom of wave peaks, use Ctrl+Up arrow and Ctrl+Down
  arrow.
  This is purely visual and allows for easier editing of quieter sections.
 \end_layout
@@ -1901,6 +1946,61 @@ Archiving
 
 \begin_layout Standard
 There are various ways to archive classical music projects.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+End Matter
+\end_layout
+
+\begin_layout Section
+Thanks
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align left
+I am appreciative of the collective contributions of the REAPER community
+ with regards the early source-destination actions (Pelleke, in particular),
+ MPL, X-Raym, BirdBird, RCJacH, Sai'ke, Meo-Ada Mespotine, cfillion and
+ many more.
+ Finally, many thanks to Justin and Schwa for such an amazingly versatile
+ DAW.
+\end_layout
+
+\begin_layout Section
+Closing Thoughts
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align left
+I hope you enjoy the ability to do serious classical editing with ReaClassical
+ on REAPER and that my efforts go some way to making things better, easier
+ and more efficient.
+ Remember that if you find any oddities with the scripts or have a bright
+ idea for something new and shiny, please add your thoughts to the 
+\begin_inset CommandInset href
+LatexCommand href
+name "dedicated thread"
+target "https://forum.cockos.com/showthread.php?t=265145"
+literal "false"
+
+\end_inset
+
+ on the forums and/or create an issue or start a discussion on my Github
+ repository located at 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/chmaha/ReaClassical"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1911,6 +2011,7 @@ There are various ways to archive classical music projects.
 \end_layout
 
 \begin_layout Part
+\start_of_appendix
 Appendices
 \end_layout
 
@@ -4327,10 +4428,30 @@ noprefix "false"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Itemize
+Set the super-collapsed value to 0 in rtconfig.txt.
+ See figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Super-collapsed-value-is"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align left
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
@@ -4368,66 +4489,52 @@ Setting mute overlay mode
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename user_guide_images/super-collapsed.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Super-collapsed-value-is"
+
+\end_inset
+
+Super-collapsed value is set to 0 in rtconfig.txt
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \noindent
 \align left
 At this point it might be a good idea to Save as default project settings
  as well as make a classical template (if you didn't download mine) so that
- you don’t have to do this setup more than once.
-\begin_inset Newpage pagebreak
-\end_inset
-
-
-\end_layout
-
-\begin_layout Part
-End Matter
-\end_layout
-
-\begin_layout Section
-Thanks
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align left
-I am appreciative of the collective contributions of the REAPER community
- with regards the early source-destination actions (Pelleke, in particular),
- MPL, X-Raym, BirdBird, RCJacH, Sai'ke, Meo-Ada Mespotine, cfillion and
- many more.
- Finally, many thanks to Justin and Schwa for such an amazingly versatile
- DAW.
-\end_layout
-
-\begin_layout Section
-Closing Thoughts
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align left
-I hope you enjoy the ability to do serious classical editing with ReaClassical
- on REAPER and that my efforts go some way to making things better, easier
- and more efficient.
- Remember that if you find any oddities with the scripts or have a bright
- idea for something new and shiny, please add your thoughts to the 
-\begin_inset CommandInset href
-LatexCommand href
-name "dedicated thread"
-target "https://forum.cockos.com/showthread.php?t=265145"
-literal "false"
-
-\end_inset
-
- on the forums and/or create an issue or start a discussion on my Github
- repository located at 
-\begin_inset CommandInset href
-LatexCommand href
-target "https://github.com/chmaha/ReaClassical"
-
-\end_inset
-
-.
- 
+ you don’t have to do this setup more than once
 \end_layout
 
 \begin_layout Standard
