@@ -740,76 +740,453 @@ ReaClassical Workflows
 Creating & Setting Up a Project
 \end_layout
 
+\begin_layout Standard
+When you start REAPER/ReaClassical from a default portable install, you'll
+ see an empty project with ReaClassical project defaults.
+\end_layout
+
+\begin_layout Subsection
+Project Settings
+\end_layout
+
+\begin_layout Standard
+You shouldn't need to change any settings here.
+ By default, render resampling is set to the highest quality using r8brain
+ free.
+ Media is saved to a 
+\begin_inset Quotes bld
+\end_inset
+
+media
+\begin_inset Quotes brd
+\end_inset
+
+ subfolder.
+ The default recording format is 32-bit float wave files.
+ Video frame rate is set to 75 to align with the number of frames per second
+ for an audio CD.
+ You can, of course, fill in the 
+\begin_inset Quotes bld
+\end_inset
+
+notes
+\begin_inset Quotes brd
+\end_inset
+
+ section with a title, author and notes as desired.
+\end_layout
+
 \begin_layout Subsection
 Audio Settings
+\end_layout
+
+\begin_layout Standard
+These settings are operating system dependent.
+ Choice of blocksize etc is also dependent on need and how modern and/or
+ optimised your system is.
+ For general microphone setup, device and recording settings specifically
+ for classical music etc I recommend referring to one or more of the following:
+ 
+\emph on
+Classical Recording: A Practical Guide in the Decca Tradition
+\emph default
+\noun on
+ 
+\noun default
+by Haigh, Dunkerley & Rogers, 
+\emph on
+Recording Orchestra and Other Classical Music Ensembles
+\emph default
+ by Richard King or 
+\emph on
+Recording Classical Music
+\emph default
+ by Robert Toft.
+ For a more detailed look at mastering (for any genre of music), I highly
+ recommend 
+\emph on
+Mastering Audio: The Art and the Science
+\emph default
+ by Bob Katz.
+ 
 \end_layout
 
 \begin_layout Subsection
 ReaClassical Preferences
 \end_layout
 
-\begin_layout Subsection
-Horizontal Workflow
+\begin_layout Standard
+Pressing F5 brings up the ReaClassical Preferences dialog.
+ The first line sets the crossfade length in milliseconds for all source-destina
+tion editing.
+ The three remaining lines are for 
+\begin_inset CommandInset href
+LatexCommand href
+name "DDP"
+target "https://en.wikipedia.org/wiki/Disc_Description_Protocol"
+literal "false"
+
+\end_inset
+
+ creation.
+ The defaults are for a 200ms track offset (to account for older CD players
+ that couldn't play audio immediately after a track search), the INDEX0
+ length in seconds for when to start a CD player 
+\begin_inset Quotes bld
+\end_inset
+
+countdown
+\begin_inset Quotes brd
+\end_inset
+
+ display to the next track (a fun visual trick that is, of course, completely
+ irrelevant for purely digital releases) and, finally, the album lead-out
+ time in seconds (essentially the time on a car CD player before the disc
+ returns to the beginning again).
+ There will be more on these settings in subsequent sections of the manual.
+ If you are unfamiliar with these concepts, I recommend a quick internet
+ search! If in doubt, leave everything as defaults.
 \end_layout
 
 \begin_layout Subsection
+Choice of Workflow
+\end_layout
+
+\begin_layout Standard
+The choice between what I refer to as 
+\begin_inset Quotes bld
+\end_inset
+
+vertical
+\begin_inset Quotes brd
+\end_inset
+
+ or 
+\begin_inset Quotes bld
+\end_inset
+
+horizontal
+\begin_inset Quotes brd
+\end_inset
+
+ workflows will depend somewhat on the complexity of the project.
+ For a quick editing session of, say, a choral piece or short self-standing
+ orchestral piece, a horizontal approach will suffice.
+ For everything else, I recommend using the vertical approach.
+\end_layout
+
+\begin_layout Subsubsection
 Vertical Workflow
 \end_layout
 
-\begin_layout Section
-Navigating a Project
+\begin_layout Standard
+In this approach, the source and destination track groups are aligned vertically
+ so that the user doesn't have to shuttle back and forth along the timeline
+ for placing source-destination markers.
+ 
 \end_layout
 
-\begin_layout Subsection
-Whole Project
+\begin_layout Standard
+
+\series bold
+When Recording material:
+\series default
+ To begin with a vertical workflow, press F7 to set up a destination track
+ group.
+ Whether recording or importing, simply type in the total number of stereo
+ and mono microphone inputs you need.
+ I highly recommend using the first track for the main stereo pair.
+ 
 \end_layout
 
-\begin_layout Subsection
-Items & Markers
+\begin_layout Standard
+
+\series bold
+When importing material:
+\series default
+ To begin with a vertical workflow, press F8 to set up a destination track
+ group and six source groups (don't worry, it's easy to add more if you
+ need them!).
+ Simply type in the number of tracks you need.
+ I highly recommend using the first track for the main stereo pair.
+ 
 \end_layout
 
-\begin_layout Subsection
-Parents & Children
+\begin_layout Standard
+The F8 function creates six source groups based off the destination track
+ group, links the volume, panning, polarity, mute, automation trim and hides
+ everything in the mixer save for the first folder group.
+ In other words, you can simultaneously control volume, panning, polarity
+ and automation across all takes.
+ It also sets up media item and razor editing grouped by folder.
+ If you need more than the six source groups, simply create them on the
+ fly with the 
+\backslash
+ shortcut.
+ but note that using F9 (Classical Take Record) creates a new source group
+ as needed after ending recording.
 \end_layout
 
-\begin_layout Subsection
-Peaks Display
+\begin_layout Standard
+A typical scenario: You have vertically recorded, or vertically prepared,
+ multiple takes of a concerto movement with 10 channels.
+ You realise halfway through editing that you want the soloist’s microphone
+ to be brought up in volume a little and also panned slightly more to the
+ right to match the position in the main stereo pair.
+ Under normal circumstances moving one pan knob or fader would only affect
+ that one group's channel.
+ The ideal situation would be that changing a value on one channel would
+ affect every other take in the same way, making comparing source material
+ uniform in volume and panning.
+ With the ReaClassical vertical workflow approach, this becomes a reality
+ automatically!
 \end_layout
 
-\begin_layout Subsection
-ReaClassical Toolbar
+\begin_layout Subsubsection
+Horizontal Workflow
+\end_layout
+
+\begin_layout Standard
+In this approach, there is a single track or single group of tracks with
+ the source and destination material laid out from left to right.
+ As mentioned above, for shorter pieces of music this is often a perfectly
+ acceptable approach.
+ 
+\end_layout
+
+\begin_layout Standard
+To begin a horizontal workflow, press F7 to set up a track group.
+ Whether recording or importing, simply type in the number of tracks or
+ microphone inputs you need.
+ I highly recommend using the first track for the main stereo pair.
+ 
+\end_layout
+
+\begin_layout Standard
+If you wish to convert to a vertical workflow, simply press F8 to create
+ six linked destination groups.
 \end_layout
 
 \begin_layout Section
 Recording
 \end_layout
 
+\begin_layout Standard
+Now that you have decided on a workflow, we can set up the tracks for recording.
+\end_layout
+
 \begin_layout Subsection
 Setting Inputs
+\end_layout
+
+\begin_layout Standard
+There are multiple ways to set recording inputs on REAPER.
+ First is to click on the input at the top of the mixer channel.
+ Second, you can left-click on the meter part of the track panel.
+ Third, you can press Alt+R to open the routing matrix.
+ Once you have set the inputs for the source group, simply press F8 to sync
+ these settings to all destination groups.
 \end_layout
 
 \begin_layout Subsection
 Headroom
 \end_layout
 
+\begin_layout Standard
+Again, I refer you to the books on classical music production but in general
+ I suggest aiming for around -12dB peaks on the meters.
+ 24-bit recording allows for a lot of headroom so there's no need to push
+ close to 0dB.
+\end_layout
+
 \begin_layout Subsection
 Classical Recording
+\end_layout
+
+\begin_layout Standard
+F9 begins 
+\begin_inset Quotes bld
+\end_inset
+
+classical
+\begin_inset Quotes brd
+\end_inset
+
+ recording mode for whatever parent track is selected.
+ You'll notice that the mixer intelligently selects the affected tracks
+ and all tracks in the group are armed begin recording.
+ To stop, press F9 again.
+ This also automatically moves to, solos and arms the next available group.
+ ReaClassical will automatically create new groups as required.
+ To manually add more destination groups when not recording, press 
+\backslash
+ (backslash).
 \end_layout
 
 \begin_layout Subsection
 General Recording
 \end_layout
 
+\begin_layout Standard
+To record for a horizontal workflow or more generally (say a separate single
+ mono narration track or similar), use the built-in REAPER record function
+ arm the track(s) and then either press Ctrl+R or use the red record button.
+\end_layout
+
 \begin_layout Section
 Importing
+\end_layout
+
+\begin_layout Standard
+If you acting solely as editor and have the audio ready to import into ReaClassi
+cal.
+ 
 \end_layout
 
 \begin_layout Subsection
 Importing Media
 \end_layout
 
+\begin_layout Standard
+Set up the horizontal or vertical workflow as desired.
+ Then either drag the audio into the REAPER window or select 
+\emph on
+Insert > Media file...
+\end_layout
+
+\begin_layout Standard
+For classical music purposes, you can then choose whether to insert in the
+ same time position on separate tracks or sequentially on a single track.
+ For recordings with multiple takes using separate files, I recommend inserting/
+dragged one take at a time onto separate tracks on either the source group
+ or first destination group.
+ Once everything is imported you can then drag sets of tracks to the destination
+ groups as desired.
+\end_layout
+
 \begin_layout Subsection
 Multi-Channel Audio Import
+\end_layout
+
+\begin_layout Standard
+If you use a portable recorder such as a MixPre, you might have a multi-channel
+ combined file.
+ ReaClassical includes a special function for converting these into a stereo
+ pair + mono track set.
+ Simply select one or more multi-channel sets and press F10.
+ Answer yes to the prompt that appears if the first two channels should
+ be treated as stereo interleaved (i.e.
+ they represent your main pair).
+ Depending on the choice made, the number of tracks in the folder will adjust
+ accordingly.
+ If the user selects ‘no’ to keep all tracks mono, the folder track is left
+ empty so that the Prepare Takes (T) script is able to create a muted guide
+ track (more on this later!).
+ It's important to note is that to use the Explode multi-channel item script
+ you should import your multi-channel items into one folder track lined
+ up horizontally before running the script.
+ You can then drag to source groups afterwards.
+\end_layout
+
+\begin_layout Section
+Navigating a Project
+\end_layout
+
+\begin_layout Standard
+In addition to built-in REAPER functions, ReaClassical uses a series of
+ shortcuts to help you easily navigate your classical project.
+ Important: I always make some dedicated time post-recording to get a lay
+ of the land, tidy up the digital notes I took during the session and perform
+ a backup on an external drive as soon as possible.
+\end_layout
+
+\begin_layout Subsection
+Whole Project
+\end_layout
+
+\begin_layout Standard
+Use ` (backtick) to see the whole project horizontally and/or Ctrl+` to
+ see everything vertically.
+ I chose to separate these functions because one of the axes (often the
+ vertical) is set exactly how you need for editing and it would be a pain
+ to have the axis reset.
+ You can also go to the start and end of the project by pressing the Home
+ or End key.
+ 
+\end_layout
+
+\begin_layout Subsection
+Items & Markers
+\end_layout
+
+\begin_layout Standard
+You can easily shuffle back and forth between items and markers by using
+ the Q and W keys.
+ You can move between markers by using the , and .
+ keys.
+ The TAB key moves to a selected item's highest peak value.
+\end_layout
+
+\begin_layout Subsection
+Parents & Children
+\end_layout
+
+\begin_layout Standard
+ReaClassical can hide or show children of track groups.
+ This means that editing multi-track classical music can be as easy as editing
+ a stereo track.
+ When takes have been prepared (see below), all edits are synchronised.
+ To show hidden children select the parent track and press D (for 
+\begin_inset Quotes bld
+\end_inset
+
+display
+\begin_inset Quotes brd
+\end_inset
+
+).
+ To hide, select the parent track and press E (for 
+\begin_inset Quotes bld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "ensconce"
+target "https://www.merriam-webster.com/dictionary/ensconce"
+literal "false"
+
+\end_inset
+
+
+\begin_inset Quotes brd
+\end_inset
+
+).
+ The other benefit is that a whole set of takes can be displayed vertically
+ in the main editing window without too much effort.
+ 
+\end_layout
+
+\begin_layout Subsection
+Peaks Display
+\end_layout
+
+\begin_layout Standard
+To adjust the visual zoom or wave peaks, use Ctrl+Up arrow and Ctrl+Down
+ arrow.
+ This is purely visual and allows for easier editing of quieter sections.
+\end_layout
+
+\begin_layout Subsection
+ReaClassical Toolbar
+\end_layout
+
+\begin_layout Standard
+While I designed ReaClassical to be used efficiently with keyboard shortcuts,
+ there is a custom toolbar for those that prefer it.
+ However I do highly recommend learning the key strokes as you will find
+ your editing speeds improve dramatically.
 \end_layout
 
 \begin_layout Section
@@ -820,44 +1197,405 @@ Editing
 Introduction to Editing Workflows
 \end_layout
 
+\begin_layout Standard
+Once you have recorded or imported your classical music audio, you are ready
+ to start editing the raw material! Here we talk about the meat and potatoes
+ of the classical editing workflows.
+ Workflows—plural—because I have included different approaches to suit as
+ many tastes as possible within the confines of the REAPER application.
+ I will explain each in detail after this brief introduction.
+ As described previously, you have multiple ways of proceeding.
+ First you can have all your takes lined up in a row horizontally and you
+ place your source in and out markers, destination in and out markers then
+ press a keyboard shortcut to achieve your 3 or 4-point edit.
+ The second way is to set up your takes vertically and then either use the
+ same marker system to make your edits or use razor edits (my preferred
+ method when working vertically).
+ Whichever option you choose, you will then end up in the crossfade editor
+ view which uses a custom two-lane view with classical crossfade script
+ to make precise edits really easy in REAPER.
+ I don’t often use the fade editor dialog that comes with REAPER even though
+ I make it appear as part of the script.
+\end_layout
+
 \begin_layout Subsection
 Marking Edits on your Scores
+\end_layout
+
+\begin_layout Standard
+This is best done using a physical, photocopied score by the conductor or
+ lead musician.
+ I advocate for a “T” system where a large T is inserted into the score
+ at the intended edit point.
+ Either side of the T stem, and under the crossbar, the outgoing and incoming
+ take numbers are written.
+ A wavy crossbar indicates some leeway for where the edit point can be placed.
+ Further notes can be attached underneath the T such as directions for tightenin
+g the gap etc.
 \end_layout
 
 \begin_layout Subsection
 Preparing Takes
 \end_layout
 
+\begin_layout Standard
+Whether working horizontally or vertically, you can use the Prepare Takes
+ function.
+ It is intelligent enough to figure out which workflow you are using.
+ Just press the shortcut T (for 
+\begin_inset Quotes bld
+\end_inset
+
+Takes
+\begin_inset Quotes brd
+\end_inset
+
+).
+ Super simple! Every set of items comprising a take has changed colour,
+ is now grouped.
+ In addition, source and destination groups are linked or (re-linked) for
+ various types of editing and imported/recorded take names removed if desired.
+ 
+\end_layout
+
+\begin_layout Standard
+For horizontally laid-out takes, each complete take is coloured with a different
+ random colour.
+ For vertically laid-out takes, each folder’s items are given a different
+ random colour.
+ This way, however you work, it’s easy to see where edits have come from.
+ If you imported or recorded all your files in child tracks, the script
+ will additionally copy all items from each first child track into the folder
+ track and mute them to act as a visual guide track.
+ You will receive a pop-up message if this is the case.
+ Note that if there are existing item overlaps and/or fades in the first
+ track, Prepare Takes will be mainly disabled and only allow you to remove
+ take names (in preparation for creation of CD markers).
+ This is a safety feature given grouping already crossfaded items can lead
+ to unexpected editing results.
+\end_layout
+
 \begin_layout Subsection
 Auditioning Takes
+\end_layout
+
+\begin_layout Standard
+For horizontal editing, you can use the usual transport shortcuts (spacebar
+ to start and stop playback, for example).
+ For vertical (and horizontal) editing, it is highly recommended to use
+ the Audition (A) script to quickly solo only the folder (or track) you
+ are interested in hearing.
+ Note that similar to the *Classical Take Record* function, the tracks shown
+ in the mixer are filtered based on what is being auditioned.
 \end_layout
 
 \begin_layout Subsection
 Source-Destination Editing
 \end_layout
 
+\begin_layout Standard
+You set your in-out points using special coloured labelled markers I created
+ with shortcuts 1 and 2 (Destination) and 3 and 4 (Source).
+ Simply press the shortcut 5 to make the 3 or 4-point edit.
+ You’ll also notice that because you prepared the various takes with colours
+ (and grouping), it is really easy to see which takes compose your final
+ edited tracks.
+ It’s worth pointing out that my S/D and classical crossfade scripts place
+ the crossfade immediately before the entry and exit points of the pasted
+ audio.
+ The crossfade length and other values can be set on a per-project basis
+ via ReaClassical Preferences (F5).
+ In practice this means that if you visually set a marker (or edit cursor
+ in the case of the classical crossfade function) immediately before a transient
+, said transient will sound post-crossfade which is what we generally desire.
+ Often, given this important detail, I don’t even need to visit the crossfade
+ editor view.
+\end_layout
+
+\begin_layout Standard
+When using a vertical workflow, make sure you have the source folder selected
+ before you create the source IN and OUT markers.
+ You can do so by clicking on the track panel or on the item itself.
+ This adds the folder number as a prefix to the source marker labels.
+ The various functions will then use this label to know which folder to
+ copy from.
+ This is really useful if you undo the edit in order to tweak the markers
+ by dragging them.
+ It doesn’t matter if you then select other folders/tracks.
+ In the event you use two different folders for the source IN and OUT markers,
+ the functions will prefer the source IN label.
+\end_layout
+
+\begin_layout Standard
+You can complete 3-point editing either using “insert” or “replace” methods
+ with just the destination IN marker set (and both source markers!).
+ “Insert” 3-point edits ripple pastes the source material at the destination
+ IN marker and “Replace” 3-point edits replaces the destination material
+ with the length of the material between the two source markers.
+ As usual, short equal-power crossfades are created at all edit points.
+\end_layout
+
+\begin_layout Standard
+To choose between “insert” or “replace” 3-point edits, toggle the ReaClassical_3
+-point edit replace.lua script to ON for “replace” and OFF “insert”.
+ Even better: use the custom classical toolbar as described above or F3
+ shortcut.
+\end_layout
+
+\begin_layout Standard
+The downside to this workflow when using a vertical approach is that the
+ source and destination markers can get in each other’s way visually if
+ the takes aren’t somewhat staggered however the process still works as
+ expected.
+ See below for a razor editing alternative.
+\end_layout
+
 \begin_layout Subsection
 Other SD Functions
 \end_layout
 
-\begin_layout Subsection
-Horizontal Editing
+\begin_layout Standard
+Using the *ReaClassical_Insert with timestretching* script (F4), you can
+ complete a 4-point edit where the material between the source markers is
+ timestretched to fit the length of time between the destination markers.
+ This is really useful when the source material has to fit the destination
+ span exactly, for example when working with visual cues.
+ The timestretch algorithm used will be the one set in REAPER project settings.
+ When there are multiple items in between the source markers, the function
+ will glue the items together before time-stretching.
 \end_layout
 
-\begin_layout Subsection
-Vertical Editing
+\begin_layout Standard
+Sometimes you don’t necessarily have a best overall take and it is desirable
+ to build the perfect performance linearly, section by section, measure
+ by measure.
+ In this case, use a 3-point edit (most likely you want it set to “insert”
+ mode).
+ A standard 3-point insert edit will happen and the destination IN marker
+ will jump to the end of the pasted item, ready for the next edit.
+ This means that in order to compile further sections, you now only need
+ set the source markers.
+\end_layout
+
+\begin_layout Standard
+While perhaps not used as often as 3- and 4-point edits, I have created
+ two scripts for deletion of material.
+ Delete & Ripple (Backspace) will delete the material between source IN
+ and OUT markers and ripple material to the right backwards with a short
+ crossfade.
+ Delete Silence (Ctrl+Backspace) will also delete but maintain the silence
+ without rippling backwards.
 \end_layout
 
 \begin_layout Subsection
 Razor Editing
 \end_layout
 
+\begin_layout Standard
+Because of the potential for visual overlap of markers, I much prefer the
+ REAPER razor edit functionality for vertical take work.
+ It works a lot like the process shown in this Pyramix 
+\begin_inset CommandInset href
+LatexCommand href
+name "video"
+target "https://www.youtube.com/watch?v=wQXwnvITQCQ"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+While Pyramix also has additional source-destination marker workflows, I
+ couldn’t help but feel that for professional ensembles that manage a high
+ degree of tempo regularity between takes, this method can be extremely
+ efficient.
+ This isn’t the document to introduce REAPER razor edits as there are plenty
+ of resources online if you do a simple search but here we are only concerning
+ ourselves with creation of the razor area across all our pairs and spot
+ mics (REAPER’s default shortcut is the rather uninspiring Alt+Right drag)
+ but thankfully it can become the default editing mode by running either
+ running the I shortcut or selecting the Razor edit mode on the main toolbar.
+ 
+\end_layout
+
 \begin_layout Subsection
 Crossfade Editor
 \end_layout
 
+\begin_layout Standard
+Now that you’ve made your precise edits using S/D workflow or razor editing
+ (no worries if it’s a bit rough!), it’s time to check things through with
+ a good listen and the help of the crossfade editor view.
+\end_layout
+
+\begin_layout Standard
+While REAPER includes an excellent crossfade editor, it does not reach the
+ same levels as the ones in specialist classical DAWs such as Sequoia and
+ Pyramix.
+ This is mainly due to the inability to see the continued waveforms of the
+ items beyond the crossfade they enter and likewise the previous waveforms
+ of the items that exit the crossfade.
+ The ability to visually align transients and then position the crossfade
+ just before it is absolutely critical (and fun when you have the tools
+ to do it!).
+ So, beyond the standard REAPER crossfade editor what have I provided? Select
+ the left-hand item of a fade, Press F and you are moved into crossfade
+ editor mode.
+ Here, the first track is given full vertical zoom, the two-lanes for overlappin
+g items is enabled, colored red and green, and the fade editor toolbox appears
+ (I personally position it to hover over the middle of my mixer.
+ Note also that you are automatically centred on the crossfade and can use
+ the mouse wheel to zoom in and out.
+ Press F again and you exit that mode.
+ If for some reason you accidentally close just the fade toolbox, either
+ open again using action in the action list or, better still, simply close
+ and re-open the fade editor using the F shortcut.
+\end_layout
+
+\begin_layout Standard
+So, now you are in the crossfade editor mode, ensuring one or both items
+ are selected, hover your mouse over a blank area and press Z to automatically
+ mirror extend the waveform view of each item.
+ Essentially, it increases the overlap so you can spot and align the transient
+ you want.
+ My own preferred method of getting the perfect crossfade is to locate the
+ transient I want on the red left item, place the edit cursor just before
+ it, then drag my green right item so that the two transients align.
+ Then I press X (classical crossfade) and I’m done! The crossfade happens
+ at the location of the edit cursor (well, just before it as explained above).
+ 
+\end_layout
+
+\begin_layout Standard
+I love this method so much that I don’t miss Sequoia or Pyramix any more.
+ Here it is in ordered list form:
+\end_layout
+
+\begin_layout Enumerate
+Increase overlap (by hovering mouse in blank area and pressing Z shortcut)
+\end_layout
+
+\begin_layout Enumerate
+Find transient in red left item that you want be edit point
+\end_layout
+
+\begin_layout Enumerate
+Place edit cursor just before it
+\end_layout
+
+\begin_layout Enumerate
+Drag green right item to align transients (this automatically ripples all
+ items, markers and regions)
+\end_layout
+
+\begin_layout Enumerate
+Press X (classical crossfade)
+\end_layout
+
+\begin_layout Standard
+In reality, this process can be just a few seconds to achieve the perfect
+ edit.
+ In the unlikely event you need to undo, either use the standard Ctrl+Z
+ combination or simply extend the overlapping item edges again then create
+ a new classical crossfade.
+\end_layout
+
+\begin_layout Standard
+While you could use the auditioning tools in the dialog, I have created
+ something I find quicker and more useful.
+ While the two items involved in the crossfade are selected, try the following:
+\end_layout
+
+\begin_layout Enumerate
+Hover over left item / press A to solo audition the left item from mouse
+ cursor to end of item
+\end_layout
+
+\begin_layout Enumerate
+Hover over right item / press A to solo audition the right item from start
+ of item to mouse cursor
+\end_layout
+
+\begin_layout Enumerate
+Hover in blank space on left item side / press A to solo audition the crossfade
+ from mouse cursor to mirrored position on the other side of the crossfade
+\end_layout
+
+\begin_layout Enumerate
+Hover in blank space on right item side / press A to solo audition the crossfade
+ from mirrored position other side to the mouse cursor.
+\end_layout
+
+\begin_layout Standard
+As you’ll see, the playback stops using a special marker with *!1016* as
+ the label which is executed as a stop command.
+ It is deleted automatically after playback ends.
+ If you try to run the script another time before it has finished, just
+ select new instance if you get a pop-up box.
+ You can stack instances and on completion of the latest run, all instances
+ are removed.
+ Better to experience than describe but it works really well.
+ You’ll also see that the edit cursor returns to the middle of the crossfade
+ to aid in mouse scroll zooming keeping the crossfade centred.
+ The mirrored position takes into consideration the overlap of the items
+ so you can have a complicated set of fades and still get an exact mirrored
+ stopping point.
+\end_layout
+
+\begin_layout Standard
+You can shuttle between crossfades using the Q and W shortcuts.
+ Do 
+\series bold
+NOT
+\series default
+ use the built-in Previous Next buttons on the standard fade dialog box!
+ However, there is still a benefit of having the fade editor dialog in view.
+ You can also tweak the fade using the knobs if you prefer.
+ Center, Start, End and Length knobs are particularly useful here to maintain
+ symmetry.
+ Be aware that the Contents knobs will not ripple markers (but with the
+ introduction of the Create CD Markers, I highly recommend not bothering
+ to create any markers at this point).
+\end_layout
+
 \begin_layout Subsection
 Other Editing Tips
+\end_layout
+
+\begin_layout Standard
+In my key map, I include all sorts of useful shortcuts to use during editing.
+ As mentioned above, in vertical editing workflows, the Audition (via shortcut
+ A) is brilliant for listening to various takes before applying a razor
+ or S/D edit.
+ I can shuttle between items with Q and W (the same keys perform a more
+ advanced role when in crossfade editor mode), shuttle between markers with
+ , and .
+ (the same keys with 
+\backslash
+< and 
+\backslash
+> on them on my UK keyboard), S for splitting a long recorded session into
+ takes, ‘ (back tick) and Ctrl+‘ for zooming out to the whole project both
+ horizontally and vertically etc.
+ There are plenty more for the mastering end of things so I encourage you
+ to explore.
+\end_layout
+
+\begin_layout Standard
+It is worth noting that all regular markers and regions are ripple edited
+ appropriately when using my source-destination editing functions and crossfade
+ editor.
+ I also introduced the *ReaClassical_Lock Toggle* script (K) which temporarily
+ locks all source groups and engages ripple-all-tracks mode to enable you
+ to drag destination items and simultaneously ripple markers and regions
+ in the regular arrange view.
+ This allows vertical source groups to retain their independence yet still
+ give ripple-all-tracks behaviour which is useful for destination album
+ track spacing etc.
+ However, I consider this script deprecated given I strongly feel that the
+ Create CD Markers script is now the ultimate way to deal with CD tracks/markers.
 \end_layout
 
 \begin_layout Section
@@ -868,16 +1606,85 @@ Mixing
 FX Plugins
 \end_layout
 
+\begin_layout Standard
+ReaClassical is shipped with various mastering-grade JSFX plugins to cover
+ typical needs although obviously REAPER allows for any 3rd party plugins.
+ For a list of recommended free plugins see the Appendix.
+ For the purposes of the ReaClassical manual, you should add plugins to
+ the destination group tracks and then press F8 to sync across all source
+ groups.
+ Most often my editing is done with no plugins enabled so that I can hear
+ all the detail clearly.
+ In my case, plugins are not generally added until the 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ stage.
+ 
+\end_layout
+
 \begin_layout Subsection
 Aux & Submix
+\end_layout
+
+\begin_layout Standard
+As of ReaClassical v23.19, users have the ability to create aux and submix
+ tracks that stay visible (and stay after the source groups).
+ To set up, simply create a single folder (F7) and/or Create Source Groups
+ (F8) then create as many aux/submix tracks after the source groups as you
+ like via the *Add Aux or submix* script.
+ If adding manually, be sure to prefix the track which an ampersand (@).
+ When using any of the scripts that use intelligent mixer view (Audition,
+ Create Source Groups (creating source groups from a single folder or syncing
+ fx and routing), Classical Take Record, Duplicate Folder) these tracks
+ will stay visible.
+ Plus, any routing from the destination parent or child tracks to these
+ tracks will be honored when syncing the fx and routing!
 \end_layout
 
 \begin_layout Subsection
 Roomtone
 \end_layout
 
+\begin_layout Standard
+Description coming soon...
+\end_layout
+
 \begin_layout Section
 Mastering
+\end_layout
+
+\begin_layout Standard
+This has the potential to be a long section but I don’t want it to detract
+ from the main event: the S/D or razor editing workflows.
+ A few pointers are in order though.
+ In order to have CD markers that snap to CD frames, now is a great time
+ to enable snapping (to frame) if adding them manually.
+ 
+\end_layout
+
+\begin_layout Standard
+And then, of course, you can now quickly generate separate files via rendering
+ all project regions or selected regions using a wildcard formula such as
+ *$regionnumber - $region*.
+ I include various useful presets in the render dialog.
+ For those who insist on the absolute best resampling the world has to offer,
+ export your WAV+CUE at highest resolution at 32-bit float and use a program
+ like Saracon or FinalCD to get down to 44.1k/16-bit before generating the
+ rest of your files in EZ CD Audio Converter (Windows), Fre:ac (all platforms)
+ or similar[^8].
+ Alternatively, you can bring a long converted 44.1/32-bit float WAV back
+ into a cloned project not forgetting to change the sample rate of the project
+ to match.
+ A lot of engineers use standard TPDF dither but you can always bring your
+ favourite 3rd-party plugin to the party (as long as it is the final plugin
+ on your master chain and your master fader remains at unity).
+ I include a large number of world-class airwindows dither options in my
+ other large jsfx collection available via my [airwindows JSFX ports]
 \end_layout
 
 \begin_layout Subsection
@@ -888,6 +1695,16 @@ Repositioning Tracks in an Album
 Loudness
 \end_layout
 
+\begin_layout Standard
+In terms of loudness, I personally aim for about -18 LUFS Integrated for
+ my classical albums though it can be as high as -16 LUFS and as low as
+ -20 LUFS.
+ The new loudness JSFX meter in REAPER along with the normalization of loudness
+ and true-peak limiting in the render dialog are priceless.
+ It’s another reason I couldn’t go back to the big classical DAWs at this
+ point.
+\end_layout
+
 \begin_layout Subsection
 Metadata
 \end_layout
@@ -896,12 +1713,66 @@ Metadata
 Creating DDP filesets
 \end_layout
 
+\begin_layout Standard
+I have introduced a workflow to automatically add the CD/DDP markers and
+ regions via Y shortcut (track and region names are pulled from item take
+ names, markers/regions auto-snap to CD frames, initial 2-second pre-gap,
+ silent roll out and album metadata also added!) .
+ It is ‘smart’ in the sense that if there’s no take name, no marker or region
+ will be created.
+ In other words, press F2 with an item selected to enter track names where
+ markers/regions need to be created.
+ It’s perfect for classical releases where a crossfaded item is likely an
+ internal source-destination edit versus a new track.
+ Preferences such as CD marker offset, pregap and album lead-out can be
+ set via ReaClassical Project Preferences (F5).
+ So it’s now very quick to export a DDP set! 
+\end_layout
+
 \begin_layout Subsection
 Creating CUE Files
 \end_layout
 
+\begin_layout Standard
+A CUE file can be generated via the shortcut C (to need create a time selection).
+ The high-resolution audio portion can be generated separately in the render
+ dialog via the preset.
+ 
+\end_layout
+
+\begin_layout Subsection
+BIN+CUE set
+\end_layout
+
+\begin_layout Standard
+Create a BIN/CUE pair (either select 
+\begin_inset Quotes bld
+\end_inset
+
+regions define tracks’ and render the whole project or select 
+\begin_inset Quotes bld
+\end_inset
+
+use only # markers
+\begin_inset Quotes brd
+\end_inset
+
+ and render by time selection if you don’t want the first pregap as actual
+ silence at the start of track 1).
+ 
+\end_layout
+
 \begin_layout Subsection
 Album Reports
+\end_layout
+
+\begin_layout Standard
+When using the C shortcut, ReaClassical also generates both a plaintext
+ and HTML album report in the project folder including details such as pre-gaps,
+ track title, start time, track length, UPC/EAN and ISRC (if present), total
+ running time etc.
+ This is a fantastic and automatic way to send information to clients or
+ a duplication/replication factory.
 \end_layout
 
 \begin_layout Section
@@ -912,20 +1783,77 @@ Rendering
 Presets
 \end_layout
 
+\begin_layout Standard
+Coming soon...
+\end_layout
+
 \begin_layout Subsection
 Format
+\end_layout
+
+\begin_layout Standard
+Coming soon...
 \end_layout
 
 \begin_layout Subsection
 Samplerate
 \end_layout
 
+\begin_layout Standard
+Now that r8brain free has been introduced as the best quality resampler
+ available in REAPER (I highly recommend double-checking that it is selected
+ when resampling at render time) I feel I can do everything, including DDP[^9]
+ creation, without leaving my favourite DAW.
+ However, the Marker to CUE function (C) is still useful for all sorts of
+ things and I often create FLAC + CUE for album playback in my media player
+ or WAV + CUE to easily burn a CD at home.
+\end_layout
+
 \begin_layout Subsection
 Dither
 \end_layout
 
+\begin_layout Standard
+Use either the built-in REAPER dither options or RCDither as the last plugin
+ on the master chain (being sure to keep the master fader at unity and disable
+ all REAPER dither checkboxes).
+\end_layout
+
 \begin_layout Subsection
 Loudness & Limiting
+\end_layout
+
+\begin_layout Standard
+REAPER has a fantastic rendering feature...
+\end_layout
+
+\begin_layout Subsection
+Other Rendering Tips
+\end_layout
+
+\begin_layout Standard
+Not necessarily obvious to new REAPER users are the special =START and =END
+ markers (make your markers in the usual way and label them accordingly)
+ that constrain the length of the project.
+ Rather than rely on extended silence at the end of items or time selections,
+ the =END marker is a great way to ensure you have the exact amount of lead-out
+ you want at the end of the disc.
+ Positioning both special markers is great way to generate files for multi-disc
+ releases without having to rely on multiple projects.
+\end_layout
+
+\begin_layout Standard
+You will hopefully notice I have included various shortcuts for manually
+ creating regions (single or multiple) from items and time selection (great
+ for quickly generating demo snippets).
+ Also worth noting is that you can still do some (or all!) of your source-destin
+ation editing with your track markers in place as the S/D markers have IDs
+ far higher than any classical CD would have and are automatically deleted
+ after a successful edit.
+ As long as you have your ripple-per-track mode engaged, all your existing
+ marker placements and carefully crafted edits will remain intact.
+ But, again, don’t manually create CD markers at this point as I include
+ a very powerful tool to make light work of that side of mastering.
 \end_layout
 
 \begin_layout Section
@@ -936,16 +1864,43 @@ Project Management
 Typing Notes
 \end_layout
 
+\begin_layout Standard
+Document your takes either using the built-in REAPER project notes or SWS
+ Notes (N) which can be attached to items, tracks, markers etc.
+ I personally prefer item notes on the main microphone pair.
+ It’s a very useful tool to have docked at the bottom of the screen.
+\end_layout
+
 \begin_layout Subsection
 Folder Structure
+\end_layout
+
+\begin_layout Standard
+ReaClassical defaults to the following folder structure.
+\end_layout
+
+\begin_layout Subsection
+Automatic Backups
+\end_layout
+
+\begin_layout Standard
+REAPER allows for powerful and complex backup routines.
 \end_layout
 
 \begin_layout Subsection
 Cleaning
 \end_layout
 
+\begin_layout Standard
+If in doubt, keep everything.
+\end_layout
+
 \begin_layout Subsection
 Archiving
+\end_layout
+
+\begin_layout Standard
+There are various ways to archive classical music projects.
 \end_layout
 
 \begin_layout Standard
