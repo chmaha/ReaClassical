@@ -217,6 +217,19 @@ help
  finally, a manual install guide mainly for academic purposes).
 \end_layout
 
+\begin_layout Standard
+I highly recommend doing a complete read of the guide and becoming very
+ familiar with appendices A and B.
+\end_layout
+
+\begin_layout Section
+Video Tutorials
+\end_layout
+
+\begin_layout Standard
+Coming soon...
+\end_layout
+
 \begin_layout Section
 Website
 \end_layout
@@ -754,13 +767,14 @@ Simply use the shortcut Ctrl+U to open the REAPER update utility.
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
 \align center
 \begin_inset Graphics
 	filename user_guide_images/reaper_update_utility.png
+	scale 50
 
 \end_inset
 
@@ -824,7 +838,15 @@ Project Settings
 \end_layout
 
 \begin_layout Standard
-You shouldn't need to change any settings here.
+You can open the project settings by pressing the P shortcut (P for 
+\begin_inset Quotes bld
+\end_inset
+
+Project Settings
+\begin_inset Quotes brd
+\end_inset
+
+) You shouldn't need to change any settings here.
  By default, render resampling is set to the highest quality using r8brain
  free.
  Media is saved to a 
@@ -861,22 +883,37 @@ These settings are operating system dependent.
  For general microphone setup, device and recording settings specifically
  for classical music etc I recommend referring to one or more of the following:
  
+\end_layout
+
+\begin_layout Itemize
+
 \emph on
 Classical Recording: A Practical Guide in the Decca Tradition
 \emph default
 \noun on
  
 \noun default
-by Haigh, Dunkerley & Rogers, 
+by Haigh, Dunkerley & Rogers
+\end_layout
+
+\begin_layout Itemize
+
 \emph on
 Recording Orchestra and Other Classical Music Ensembles
 \emph default
- by Richard King or 
+ by Richard King
+\end_layout
+
+\begin_layout Itemize
+
 \emph on
 Recording Classical Music
 \emph default
- by Robert Toft.
- For a more detailed look at mastering (for any genre of music), I highly
+ by Robert Toft
+\end_layout
+
+\begin_layout Itemize
+For a more detailed look at mastering (for any genre of music), I highly
  recommend 
 \emph on
 Mastering Audio: The Art and the Science
@@ -1119,8 +1156,9 @@ Importing
 \end_layout
 
 \begin_layout Standard
-If you acting solely as editor and have the audio ready to import into ReaClassi
-cal.
+Read this section if you recorded using a different DAW, portable recorder
+ or are acting solely as editor and have the audio ready to import into
+ ReaClassical.
  
 \end_layout
 
@@ -1141,8 +1179,10 @@ For classical music purposes, you can then choose whether to insert in the
  For recordings with multiple takes using separate files, I recommend inserting/
 dragged one take at a time onto separate tracks on either the source group
  or first destination group.
- Once everything is imported you can then drag sets of tracks to the destination
- groups as desired.
+ Once everything is imported you can then drag sets of tracks to the different
+ source groups as desired.
+ If you have a best take that will be the basis of the final edit, place
+ this on the top destination group tracks.
 \end_layout
 
 \begin_layout Subsection
@@ -1190,7 +1230,7 @@ Use ` (backtick) to see the whole project horizontally and/or Ctrl+` to
  see everything vertically.
  I chose to separate these functions because one of the axes (often the
  vertical) is set exactly how you need for editing and it would be a pain
- to have the axis reset.
+ to have the axis reset each time.
  You can also go to the start and end of the project by pressing the Home
  or End key.
  
@@ -1204,8 +1244,18 @@ Items & Markers
 You can easily shuffle back and forth between items and markers by using
  the Q and W keys.
  You can move between markers by using the , and .
- keys.
- The TAB key moves to a selected item's highest peak value.
+ keys (on my keyboard the same keys that have < and >).
+ The TAB key moves to a selected item's highest peak value which can be
+ useful when applying volume automation as a quick way to transparently
+ 
+\begin_inset Quotes bld
+\end_inset
+
+limit
+\begin_inset Quotes brd
+\end_inset
+
+ a stray peak.
 \end_layout
 
 \begin_layout Subsection
@@ -1216,7 +1266,10 @@ Parents & Children
 ReaClassical can hide or show children of track groups.
  This means that editing multi-track classical music can be as easy as editing
  a stereo track.
- When takes have been prepared (see below), all edits are synchronised.
+ When takes have been prepared (see below), all edits are automatically
+ synchronised.
+ Making an edit to the parent track automatically makes the same one to
+ all the children too.
  To show hidden children select the parent track and press D (for 
 \begin_inset Quotes bld
 \end_inset
@@ -1247,6 +1300,80 @@ literal "false"
  The other benefit is that a whole set of takes can be displayed vertically
  in the main editing window without too much effort.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/vertical-uncollapsed.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Uncollapsed Track Groups
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/vertical-collapsed.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Collapsed Track Groups
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1315,6 +1442,44 @@ This is best done using a physical, photocopied score by the conductor or
 g the gap etc.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename user_guide_images/score-edits.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Marking edits on a physical score
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Preparing Takes
 \end_layout
@@ -1337,6 +1502,80 @@ Takes
  In addition, source and destination groups are linked or (re-linked) for
  various types of editing and imported/recorded take names removed if desired.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/prepare-takes-horizontal.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Horizontally Prepared Takes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/prepare-takes-vertical.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Vertically Prepared Takes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1431,8 +1670,16 @@ The downside to this workflow when using a vertical approach is that the
  See below for a razor editing alternative.
 \end_layout
 
+\begin_layout Standard
+To delete all Source-Destination markers you can press ctrl+Delete.
+\end_layout
+
 \begin_layout Subsection
 Other SD Functions
+\end_layout
+
+\begin_layout Subsubsection
+Insert with Time-Stretching
 \end_layout
 
 \begin_layout Standard
@@ -1446,6 +1693,10 @@ Using the ReaClassical_Insert with timestretching function (F4), you can
  will glue the items together before time-stretching.
 \end_layout
 
+\begin_layout Subsubsection
+Assembly Line Editing
+\end_layout
+
 \begin_layout Standard
 Sometimes you don’t necessarily have a best overall take and it is desirable
  to build the perfect performance linearly, section by section, measure
@@ -1456,6 +1707,10 @@ Sometimes you don’t necessarily have a best overall take and it is desirable
  will jump to the end of the pasted item, ready for the next edit.
  This means that in order to compile further sections, you now only need
  set the source markers.
+\end_layout
+
+\begin_layout Subsubsection
+Delete / Delete with Ripple
 \end_layout
 
 \begin_layout Standard
@@ -1496,9 +1751,47 @@ While Pyramix also has additional source-destination marker workflows, I
  of resources online if you do a simple search but here we are only concerning
  ourselves with creation of the razor area across all our pairs and spot
  mics (REAPER’s default shortcut is the rather uninspiring Alt+Right drag)
- but thankfully it can become the default editing mode by running either
- running the I shortcut or selecting the Razor edit mode on the main toolbar.
+ but thankfully it can become the default editing mode by either using the
+ I shortcut and right dragging or selecting the Razor edit mode on the main
+ toolbar and left dragging.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/razor.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Razor Editing
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1576,6 +1869,43 @@ Press X (classical crossfade)
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/fadeeditor.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Crossfade Editor View
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 In reality, this process can be just a few seconds to achieve the perfect
  edit.
  In the unlikely event you need to undo, either use the standard Ctrl+Z
@@ -1607,6 +1937,43 @@ Hover in blank space on left item side / press A to solo audition the crossfade
 \begin_layout Enumerate
 Hover in blank space on right item side / press A to solo audition the crossfade
  from mirrored position other side to the mouse cursor.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/audition crossfade.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Crossfade Auditioning Tools
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1691,7 +2058,7 @@ FX Plugins
 \begin_layout Standard
 ReaClassical is shipped with various mastering-grade JSFX plugins to cover
  typical needs although obviously REAPER allows for any 3rd party plugins.
- For a list of recommended free plugins see the Appendix.
+ For a list of recommended free plugins see Appendix C.
  For the purposes of the ReaClassical manual, you should add plugins to
  the destination group tracks and then press F8 to sync across all source
  groups.
@@ -1718,8 +2085,8 @@ As of ReaClassical v23.19, users have the ability to create aux and submix
  tracks that stay visible (and stay after the source groups).
  To set up, simply create a single folder (F7) and/or Create Source Groups
  (F8) then create as many aux/submix tracks after the source groups as you
- like via the Add Aux or submix function.
- If adding manually, be sure to prefix the track which an ampersand (@).
+ like via the Add Aux or submix function (@ - ampersand).
+ If adding manually, be sure to prefix the track with an ampersand.
  When using any of the functions that use intelligent mixer view (Audition,
  Create Source Groups (creating source groups from a single folder or syncing
  fx and routing), Classical Take Record, Duplicate Folder) these tracks
@@ -1733,7 +2100,7 @@ Roomtone
 \end_layout
 
 \begin_layout Standard
-Description coming soon...
+Information to be added soon...
 \end_layout
 
 \begin_layout Section
@@ -1758,7 +2125,7 @@ And then, of course, you can now quickly generate separate files via rendering
  export your WAV+CUE at highest resolution at 32-bit float and use a program
  like Saracon or FinalCD to get down to 44.1k/16-bit before generating the
  rest of your files in EZ CD Audio Converter (Windows), Fre:ac (all platforms)
- or similar[^8].
+ or similar.
  Alternatively, you can bring a long converted 44.1/32-bit float WAV back
  into a cloned project not forgetting to change the sample rate of the project
  to match.
@@ -1766,11 +2133,29 @@ And then, of course, you can now quickly generate separate files via rendering
  favourite 3rd-party plugin to the party (as long as it is the final plugin
  on your master chain and your master fader remains at unity).
  I include a large number of world-class airwindows dither options in my
- other large jsfx collection available via my [airwindows JSFX ports]
+ other large jsfx collection available in the ReaClassical portable install.
 \end_layout
 
 \begin_layout Subsection
 Repositioning Tracks in an Album
+\end_layout
+
+\begin_layout Standard
+There are two functions which help with reordering or repositioning tracks.
+ First, and perhaps most useful for producing a classical album, is if you
+ decide that you need to reorder one or tracks.
+ Simply select the track you want to move and press either Ctrl+Left or
+ Ctrl+Right to switch with the track immediately to the left or right.
+ Note that gaps are preserved too.
+ 
+\end_layout
+
+\begin_layout Standard
+The other situation is when you want to start with uniform gaps between
+ a series of short separate pieces.
+ Use the Ctrl+Y shortcut and enter a value in seconds.
+ Your pieces are then automatically spaced and items crossfaded are left
+ intact.
 \end_layout
 
 \begin_layout Subsection
@@ -1791,6 +2176,57 @@ In terms of loudness, I personally aim for about -18 LUFS Integrated for
 Metadata
 \end_layout
 
+\begin_layout Standard
+Track titles are added to the individual items on the first destination
+ track by double-clicking on the item or selecting and pressing F2.
+ Note that only items that start tracks should be named.
+ The rest of the metadata is then added via the Create CD Markers function
+ (Y).
+ You can add UPC/EAN and ISRC numbers as desired followed by album title,
+ performer, composer and genre.
+ The Markers to CUE function (C) will take as much information as it can
+ from the saved DDP metadata but the user is free to change as desired.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename user_guide_images/takename.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Adding Track names
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Creating DDP filesets
 \end_layout
@@ -1806,9 +2242,27 @@ I have introduced a workflow to automatically add the CD/DDP markers and
  markers/regions need to be created.
  It’s perfect for classical releases where a crossfaded item is likely an
  internal source-destination edit versus a new track.
- Preferences such as CD marker offset, pregap and album lead-out can be
- set via ReaClassical Project Preferences (F5).
+ For CD tracks that you want to have a visual CD player countdown, simply
+ start the item name with an exclamation (!).
+ Preferences such as CD marker offset, pregap length and album lead-out
+ can be set via ReaClassical Project Preferences (F5).
  So it’s now very quick to export a DDP set! 
+\end_layout
+
+\begin_layout Standard
+Further, you can add audio to the initial pregap (an 
+\begin_inset Quotes bld
+\end_inset
+
+easter egg
+\begin_inset Quotes brd
+\end_inset
+
+ track) by not giving the first item (or crossfaded items) a take name.
+ The function will assume that this is supposed to be hidden and generate
+ the initial pregap length accordingly.
+ For more information read the description of the DDP function in appendix
+ A.
 \end_layout
 
 \begin_layout Subsection
@@ -1857,6 +2311,43 @@ When using the C shortcut, ReaClassical also generates both a plaintext
  a duplication/replication factory.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/html_album_report.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+An example of an automatically generated HTML album report
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Rendering
 \end_layout
@@ -1866,15 +2357,65 @@ Presets
 \end_layout
 
 \begin_layout Standard
-Coming soon...
-\end_layout
+ReaClassical includes various rendering presets to make rendering extremely
+ quick and easy.
+ In the Render dialog (R), click on the presets button then 
+\begin_inset Quotes bld
+\end_inset
 
-\begin_layout Subsection
-Format
+All Settings
+\begin_inset Quotes brd
+\end_inset
+
+.
+ The preset names are self-explanatory.
+ The first four entries are for exporting a whole album as a single audio
+ file.
+ The remaining use the automatically created regions after using the Create
+ CD Markers function (Y) to create automatically named folders of audio
+ files, one per CD track.
+ After selecting a preset, you should feel free to change any render settings
+ and perhaps save as a new preset for future use.
+ By default, the presets use the built-in REAPER standard triangular dither.
 \end_layout
 
 \begin_layout Standard
-Coming soon...
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename user_guide_images/render_presets.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+ReaClassical Render Presets
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1884,7 +2425,7 @@ Samplerate
 \begin_layout Standard
 Now that r8brain free has been introduced as the best quality resampler
  available in REAPER (I highly recommend double-checking that it is selected
- when resampling at render time) I feel I can do everything, including DDP[^9]
+ when resampling at render time) I feel I can do everything, including DDP
  creation, without leaving my favourite DAW.
  However, the Marker to CUE function (C) is still useful for all sorts of
  things and I often create FLAC + CUE for album playback in my media player
@@ -1897,8 +2438,9 @@ Dither
 
 \begin_layout Standard
 Use either the built-in REAPER dither options or RCDither as the last plugin
- on the master chain (being sure to keep the master fader at unity and disable
- all REAPER dither checkboxes).
+ on the master chain.
+ If using RCDither or any other 3rd-party dither be sure to keep the master
+ fader at unity and disable all REAPER dither checkboxes.
 \end_layout
 
 \begin_layout Subsection
@@ -1906,7 +2448,25 @@ Loudness & Limiting
 \end_layout
 
 \begin_layout Standard
-REAPER has a fantastic rendering feature...
+REAPER has a fantastic rendering feature which allows the user to set a
+ desired loudness and peak / true peak setting.
+ For quick exports that need to meet certain targets (i.e.
+ streaming) this makes things extremely efficient and is very transparent
+ when not set to extreme values.
+\end_layout
+
+\begin_layout Subsection
+Dry-run Rendering
+\end_layout
+
+\begin_layout Standard
+Another REAPER feature that is outstanding is the dry-run render function
+ which allows for very quick offline loudness and peak checks and much faster
+ than using REAPER's included realtime loudness meter.
+ It is therefore extremely easy to set up compressors, limiters etc in the
+ project and make small adjustments based on the dry-run values and maintain
+ complete control over the process.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -1948,7 +2508,15 @@ Typing Notes
 
 \begin_layout Standard
 Document your takes either using the built-in REAPER project notes or SWS
- Notes (N) which can be attached to items, tracks, markers etc.
+ Notes (N for 
+\begin_inset Quotes bld
+\end_inset
+
+Notes
+\begin_inset Quotes brd
+\end_inset
+
+) which can be attached to items, tracks, markers etc.
  I personally prefer item notes on the main microphone pair.
  It’s a very useful tool to have docked at the bottom of the screen.
 \end_layout
@@ -1958,7 +2526,20 @@ Folder Structure
 \end_layout
 
 \begin_layout Standard
-ReaClassical defaults to the following folder structure.
+ReaClassical defaults to placing media and exports into appropriately subfolders
+ making project file navigation easier.
+ Also, ReaClassical defaults to separate folders for automatic backups and
+ autosaves.
+ These settings are subject to change and can be modified by going to the
+ REAPER preferences (O for 
+\begin_inset Quotes bld
+\end_inset
+
+Options
+\begin_inset Quotes brd
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Subsection
@@ -1967,6 +2548,10 @@ Automatic Backups
 
 \begin_layout Standard
 REAPER allows for powerful and complex backup routines.
+ As referenced above, ReaClassical defaults to 10 time-stamped backups and
+ 10 auto-saves every 15 minutes when not recording.
+ Feel free to modify for your own way of working including switching to
+ backups and autosaves for a number of unique days.
 \end_layout
 
 \begin_layout Subsection
@@ -1974,7 +2559,11 @@ Cleaning
 \end_layout
 
 \begin_layout Standard
-If in doubt, keep everything.
+If in doubt, keep everything! Otherwise, the 
+\emph on
+File > Clean current project directory
+\emph default
+ is an excellent way to reduce the size of your projects.
 \end_layout
 
 \begin_layout Subsection
@@ -1983,6 +2572,34 @@ Archiving
 
 \begin_layout Standard
 There are various ways to archive classical music projects.
+ First, you can access the Project Bay by ctrl+B shortcut.
+ You can then ensure that all media used in the project is contained within
+ the project folder itself.
+ If not, you can select as many as necessary, right click and move/copy
+ into the project folder.
+ After this, you can simply compress the folder as a zip and store on an
+ external drive.
+ A further step to guaranteeing ability to open in the future is to freeze
+ tracks so that plugin effects are baked in (with ability to unfreeze later
+ if possible).
+ Alternatively you can save a copy of the project via 
+\emph on
+File > Save project as...
+
+\emph default
+ converting to a format like FLAC and trimming the media as you wish.
+ Finally, one to look out for in the future is 
+\begin_inset CommandInset href
+LatexCommand href
+name "Project Archiver"
+target "https://forum.cockos.com/showthread.php?t=280150"
+literal "false"
+
+\end_inset
+
+.
+ However, I don't believe it is quite ready for primetime yet and recommend
+ using one of the other methods for now.
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -3605,6 +4222,66 @@ literal "false"
  Note that the Liquidsonics offerings no longer require a physical iLok
  so can also be used on Linux via yabridge and iLok Cloud activation if
  you are feeling brave.
+\end_layout
+
+\begin_layout Standard
+Final mastering magic:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\begin_inset Quotes bld
+\end_inset
+
+Sonnox Inflator
+\begin_inset Quotes brd
+\end_inset
+
+-style waveshaping:
+\series default
+ Try RCInflator (a clone of the Sonnox product) or MagicFairyDust on the
+ final stereo bus.
+ Both effects are included in the portable install.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename user_guide_images/RCinflator.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+RCInflator
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
