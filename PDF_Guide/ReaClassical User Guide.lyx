@@ -142,12 +142,7 @@ Copyright © 2022–2024 chmaha
 Typeset in \SpecialChar LyX
  using \SpecialChar TeX
  Gyre Schola font
-\end_layout
-
-\begin_layout Part*
-\noindent
-\align left
-\begin_inset Newpage newpage
+\begin_inset Newpage pagebreak
 \end_inset
 
 
@@ -179,15 +174,16 @@ Introduction
 \begin_layout Standard
 \noindent
 \align left
-First up, it is important to note that if you already own REAPER then the
- world of classical editing including source-destination editing (aka 3-and-4-po
-int editing), crossfade editing and more are available at no extra cost
- to you via the freely available ReaClassical system.
+It is important to note that if you already own REAPER then the world of
+ classical editing including source-destination editing (aka 3-and-4-point
+ editing), crossfade editing and more are available at no extra cost to
+ you via the freely available ReaClassical system.
  There’s no need to spend any of your hard-earned money on Sequoia, Pyramix
  or SaDiE in order to make editing precise and efficient.
  As a classical engineer myself, I can say with certainty that what I am
  about to share with you covers all my recording, editing and mastering
  needs.
+ Indeed, I couldn't return to the old way of working at this point.
  Your mileage may vary and I’d love to hear from you if there are functions
  that you feel might be missing.
  
@@ -198,7 +194,7 @@ This Guide
 \end_layout
 
 \begin_layout Standard
-This guide serves as the official manual for ReaClassical.
+This PDF guide serves as the official manual for ReaClassical.
  The latest version is always available directly online or offline from
  within ReaClassical by using the H (for 
 \begin_inset Quotes bld
@@ -215,11 +211,10 @@ help
  remarks, install and update procedures for both ReaClassical and REAPER
  then a detailed look at workflows from creating a project through to final
  render.
- Then follows appendices (descriptions of all the ReaClassical functions,
- keyboard shortcut guide, recommended free mastering-grade plugins, system
- tweaks for all three major OSes, and, finally, a manual install guide mainly
- for academic purposes.
- The guide closes with some thanks and closing remarks.
+ After some brief closing remarks, there follows the appendices (descriptions
+ of all the ReaClassical functions, keyboard shortcut guide, recommended
+ free mastering-grade plugins, system tweaks for all three major OSes, and,
+ finally, a manual install guide mainly for academic purposes).
 \end_layout
 
 \begin_layout Section
@@ -348,7 +343,7 @@ RC
 \begin_inset Quotes brd
 \end_inset
 
- plugins, this manual and the website can be found 
+ plugins, this manual and the website can all be found 
 \begin_inset CommandInset href
 LatexCommand href
 name "here"
@@ -424,7 +419,35 @@ Tools and Languages
 \end_layout
 
 \begin_layout Standard
-ReaClassical functions are coded using 
+ReaClassical works on top of 
+\begin_inset CommandInset href
+LatexCommand href
+name "REAPER"
+target "https://www.reaper.fm/"
+literal "false"
+
+\end_inset
+
+, the digital audio workstation and utilises 
+\begin_inset CommandInset href
+LatexCommand href
+name "ReaPack"
+target "https://reapack.com/"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "SWS Extensions"
+target "https://www.sws-extension.org/index.php"
+literal "false"
+
+\end_inset
+
+.
+ ReaClassical functions are coded using 
 \begin_inset CommandInset href
 LatexCommand href
 name "Lua"
@@ -583,13 +606,14 @@ Start REAPER.
 \begin_layout Enumerate
 Sync ReaPack via 
 \emph on
-extensions > ReaPack > Synchronize packages
+Extensions > ReaPack > Synchronize packages
 \emph default
- to get the very latest ReaClassical scripts.
+ to get the very latest ReaClassical functions.
 \end_layout
 
 \begin_layout Standard
-Skip to reading about classical workflows...
+Note that if the ReaClassical folder already exists, the installer will
+ automatically add a unique suffix to ensure nothing is overwritten.
 \end_layout
 
 \begin_layout Subsection
@@ -661,14 +685,15 @@ RCPlugs
 not
 \emph default
  give you the full benefits of ReaClassical which include keyboard shortcuts,
- custom toolbar etc.
+ custom toolbar etc but does include ReaClassical themes and a project template
+ which you should use whether doing classical editing.
  However, it's an easy way to start if you are already familiar with ReaPack
  and SWS and want to check out source-destination editing etc.
  Note that you 
 \emph on
 do
 \emph default
- need SWS installed for the scripts to work as expected.
+ need SWS installed for the functions to work as expected.
 \end_layout
 
 \begin_layout Subsection
@@ -680,7 +705,7 @@ Manual Installation & Tweaks
 \noindent
 For a manual installation (ideally for educational value only or if you
  already have a heavily-customized REAPER setup and wish to add all or just
- parts of ReaClassical) see Appendix D.
+ parts of ReaClassical) see Appendix E.
 \end_layout
 
 \begin_layout Section
@@ -766,6 +791,10 @@ REAPER Update Utility
 \begin_layout Standard
 Either click on the main or pre-release version you are interested in or
  click on one of the clock icons to select from previous releases.
+ Despite the REAPER developers having a track record of excellent compatibility
+ across even major versions, I recommend sticking with the tested version
+ of REAPER shown at the top of this manual to minimize any issues of compatibili
+ty.
 \end_layout
 
 \begin_layout Standard
@@ -890,7 +919,8 @@ countdown
  returns to the beginning again).
  There will be more on these settings in subsequent sections of the manual.
  If you are unfamiliar with these concepts, I recommend a quick internet
- search! If in doubt, leave everything as defaults.
+ search! If in doubt, just use the default values.
+ It is worth noting that these preferences are set per project.
 \end_layout
 
 \begin_layout Subsection
@@ -1004,12 +1034,14 @@ To begin a horizontal workflow, press F7 to set up a track group.
  Whether recording or importing, simply type in the number of tracks or
  microphone inputs you need.
  I highly recommend using the first track for the main stereo pair.
- 
+ In the event you are making a simple stereo recording, I would still recommend
+ creating a track group consisting of two tracks and simply leave the child
+ track empty and hidden.
 \end_layout
 
 \begin_layout Standard
 If you wish to convert to a vertical workflow, simply press F8 to create
- six linked destination groups.
+ six linked source groups.
 \end_layout
 
 \begin_layout Section
@@ -1029,8 +1061,8 @@ There are multiple ways to set recording inputs on REAPER.
  First is to click on the input at the top of the mixer channel.
  Second, you can left-click on the meter part of the track panel.
  Third, you can press Alt+R to open the routing matrix.
- Once you have set the inputs for the source group, simply press F8 to sync
- these settings to all destination groups.
+ Once you have set the inputs for the source group, and you chose a vertical
+ approach, simply press F8 to sync these settings to all source groups.
 \end_layout
 
 \begin_layout Subsection
@@ -1042,6 +1074,10 @@ Again, I refer you to the books on classical music production but in general
  I suggest aiming for around -12dB peaks on the meters.
  24-bit recording allows for a lot of headroom so there's no need to push
  close to 0dB.
+ Adjust the individual faders to balance.
+ Note that in a vertical workflow moving a fader will automatically move
+ the corresponding fader in the other groups too making same-volume auditioning
+ of different takes extremely easy.
 \end_layout
 
 \begin_layout Subsection
@@ -1125,11 +1161,11 @@ If you use a portable recorder such as a MixPre, you might have a multi-channel
  Depending on the choice made, the number of tracks in the folder will adjust
  accordingly.
  If the user selects ‘no’ to keep all tracks mono, the folder track is left
- empty so that the Prepare Takes (T) script is able to create a muted guide
- track (more on this later!).
- It's important to note is that to use the Explode multi-channel item script
+ empty so that the Prepare Takes (T) function is able to create a muted
+ guide track (more on this later!).
+ It's important to note is that to use the Explode multi-channel item function
  you should import your multi-channel items into one folder track lined
- up horizontally before running the script.
+ up horizontally before running the function.
  You can then drag to source groups afterwards.
 \end_layout
 
@@ -1257,10 +1293,10 @@ Once you have recorded or imported your classical music audio, you are ready
  same marker system to make your edits or use razor edits (my preferred
  method when working vertically).
  Whichever option you choose, you will then end up in the crossfade editor
- view which uses a custom two-lane view with classical crossfade script
+ view which uses a custom two-lane view with classical crossfade function
  to make precise edits really easy in REAPER.
  I don’t often use the fade editor dialog that comes with REAPER even though
- I make it appear as part of the script.
+ I make it appear as part of the function.
 \end_layout
 
 \begin_layout Subsection
@@ -1309,7 +1345,7 @@ For horizontally laid-out takes, each complete take is coloured with a different
  For vertically laid-out takes, each folder’s items are given a different
  random colour.
  This way, however you work, it’s easy to see where edits have come from.
- If you imported or recorded all your files in child tracks, the script
+ If you imported or recorded all your files in child tracks, the function
  will additionally copy all items from each first child track into the folder
  track and mute them to act as a visual guide track.
  You will receive a pop-up message if this is the case.
@@ -1328,9 +1364,9 @@ Auditioning Takes
 For horizontal editing, you can use the usual transport shortcuts (spacebar
  to start and stop playback, for example).
  For vertical (and horizontal) editing, it is highly recommended to use
- the Audition (A) script to quickly solo only the folder (or track) you
+ the Audition (A) function to quickly solo only the folder (or track) you
  are interested in hearing.
- Note that similar to the *Classical Take Record* function, the tracks shown
+ Note that similar to the Classical Take Record function, the tracks shown
  in the mixer are filtered based on what is being auditioned.
 \end_layout
 
@@ -1345,7 +1381,7 @@ You set your in-out points using special coloured labelled markers I created
  You’ll also notice that because you prepared the various takes with colours
  (and grouping), it is really easy to see which takes compose your final
  edited tracks.
- It’s worth pointing out that my S/D and classical crossfade scripts place
+ It’s worth pointing out that my S/D and classical crossfade functions place
  the crossfade immediately before the entry and exit points of the pasted
  audio.
  The crossfade length and other values can be set on a per-project basis
@@ -1382,7 +1418,7 @@ You can complete 3-point editing either using “insert” or “replace” meth
 
 \begin_layout Standard
 To choose between “insert” or “replace” 3-point edits, toggle the ReaClassical_3
--point edit replace.lua script to ON for “replace” and OFF “insert”.
+-point edit replace.lua function to ON for “replace” and OFF “insert”.
  Even better: use the custom classical toolbar as described above or F3
  shortcut.
 \end_layout
@@ -1400,7 +1436,7 @@ Other SD Functions
 \end_layout
 
 \begin_layout Standard
-Using the *ReaClassical_Insert with timestretching* script (F4), you can
+Using the ReaClassical_Insert with timestretching function (F4), you can
  complete a 4-point edit where the material between the source markers is
  timestretched to fit the length of time between the destination markers.
  This is really useful when the source material has to fit the destination
@@ -1424,7 +1460,7 @@ Sometimes you don’t necessarily have a best overall take and it is desirable
 
 \begin_layout Standard
 While perhaps not used as often as 3- and 4-point edits, I have created
- two scripts for deletion of material.
+ two functions for deletion of material.
  Delete & Ripple (Backspace) will delete the material between source IN
  and OUT markers and ripple material to the right backwards with a short
  crossfade.
@@ -1577,7 +1613,7 @@ Hover in blank space on right item side / press A to solo audition the crossfade
 As you’ll see, the playback stops using a special marker with *!1016* as
  the label which is executed as a stop command.
  It is deleted automatically after playback ends.
- If you try to run the script another time before it has finished, just
+ If you try to run the function another time before it has finished, just
  select new instance if you get a pop-up box.
  You can stack instances and on completion of the latest run, all instances
  are removed.
@@ -1632,15 +1668,16 @@ In my key map, I include all sorts of useful shortcuts to use during editing.
 It is worth noting that all regular markers and regions are ripple edited
  appropriately when using my source-destination editing functions and crossfade
  editor.
- I also introduced the *ReaClassical_Lock Toggle* script (K) which temporarily
+ I also introduced the ReaClassical_Lock Toggle function (K) which temporarily
  locks all source groups and engages ripple-all-tracks mode to enable you
  to drag destination items and simultaneously ripple markers and regions
  in the regular arrange view.
  This allows vertical source groups to retain their independence yet still
  give ripple-all-tracks behaviour which is useful for destination album
  track spacing etc.
- However, I consider this script deprecated given I strongly feel that the
- Create CD Markers script is now the ultimate way to deal with CD tracks/markers.
+ However, I consider this function deprecated given I strongly feel that
+ the Create CD Markers function is now the ultimate way to deal with CD
+ tracks/markers.
 \end_layout
 
 \begin_layout Section
@@ -1681,9 +1718,9 @@ As of ReaClassical v23.19, users have the ability to create aux and submix
  tracks that stay visible (and stay after the source groups).
  To set up, simply create a single folder (F7) and/or Create Source Groups
  (F8) then create as many aux/submix tracks after the source groups as you
- like via the *Add Aux or submix* script.
+ like via the Add Aux or submix function.
  If adding manually, be sure to prefix the track which an ampersand (@).
- When using any of the scripts that use intelligent mixer view (Audition,
+ When using any of the functions that use intelligent mixer view (Audition,
  Create Source Groups (creating source groups from a single folder or syncing
  fx and routing), Classical Take Record, Duplicate Folder) these tracks
  will stay visible.
@@ -1981,7 +2018,7 @@ Closing Thoughts
 I hope you enjoy the ability to do serious classical editing with ReaClassical
  on REAPER and that my efforts go some way to making things better, easier
  and more efficient.
- Remember that if you find any oddities with the scripts or have a bright
+ Remember that if you find any oddities with the functions or have a bright
  idea for something new and shiny, please add your thoughts to the 
 \begin_inset CommandInset href
 LatexCommand href
@@ -2056,7 +2093,7 @@ Use on a completely empty project.
 tination editing (i.e.
  the various takes are laid out from left to right) or if you want a quick
  way to set up a mixing/mastering track set with a single take.
- The script automatically sets up the tracks for group media and razor-editing.
+ The function automatically sets up the tracks for group media and razor-editing.
 \end_layout
 
 \begin_layout Standard
@@ -2070,9 +2107,9 @@ Create Source Groups (vertical) (F8)
 \emph on
 Description: 
 \emph default
-A multi-use script to 1) set up destination and source groups with as many
- tracks as you need, 2) to create source groups from an existing destination
- folder group (for example, created with F7 shortcut) and, for in the middle
+A multi-use function to 1) set up destination and source groups with as
+ many tracks as you need, 2) to create source groups from an existing destinatio
+n folder group (for example, created with F7 shortcut) and, for in the middle
  of editing, 3) to (re)create track grouping and to sync routing/fx between
  destination (the top folder and its children) and source groups.
  Note that for 3), all folders must contain the same number of tracks.
@@ -2091,9 +2128,9 @@ Whether you start with an empty project or use an existing folder group
  movement.
  This is essential for being able to audition different source groups with
  the same settings.
- Note also that running the script engages an intelligent mixer view where
+ Note also that running the function engages an intelligent mixer view where
  only the soloed group is shown in the mixer.
- You can see this in action by using the Audition (A) script which auditions
+ You can see this in action by using the Audition (A) function which auditions
  audio at the mouse cursor.
  Watch as the mixer view changes which tracks are visible.
 \end_layout
@@ -2121,7 +2158,7 @@ Notes:
  First create a folder (F7) or multiple folders (F8) and import the multi-channe
 l item(s) onto the same folder track (important!).
  Select one or more items of the same channel count.
- Run the script and then choose 
+ Run the function and then choose 
 \begin_inset Quotes bld
 \end_inset
 
@@ -2170,7 +2207,7 @@ nt mixer.
 \emph on
 Create Source Groups
 \emph default
- script (F8).
+ function (F8).
 \end_layout
 
 \begin_layout Standard
@@ -2223,8 +2260,8 @@ Notes:
  To immediately start a new take, simply press F9 again.
  Note that the next folder is selected and that the cursor returns to the
  original position for easy lining up of takes.
- If you run out of source groups, the script will automatically create a
- new one.
+ If you run out of source groups, the function will automatically create
+ a new one.
 \end_layout
 
 \begin_layout Standard
@@ -2250,19 +2287,19 @@ Notes:
 With a single folder group (or individual tracks), the shortcut will auto-color
  and group takes from left to right.
  With a vertical workflow consisting of a destination group and multiple
- source groups, the script will auto-color top to bottom and group folder
+ source groups, the function will auto-color top to bottom and group folder
  items left to right.
  Essentially in either setup, takes are given different colors and all items
  associated with a take grouped for editing.
- If you don't like the colors, run the script again until you are happy!
- The script also allows for takes that don't start or end exactly at the
+ If you don't like the colors, run the function again until you are happy!
+ The function also allows for takes that don't start or end exactly at the
  same time (this can happen if you receive pre-edited materials).
  The end result is if you drag one item of a take group, every other item
  will move in sync.
- NOTE: After you have started making S-D edits, the script will no longer
+ NOTE: After you have started making S-D edits, the function will no longer
  offer to group or colour items due to potentially unexpected editing behaviour.
- The script was designed for use after initial recording or importing of
- media only.
+ The function was designed for use after initial recording or importing
+ of media only.
  It will still offer to delete any existing take names after a user-friendly
  message.
  A reminder that the new REAPER native grouping (when set up via Create
@@ -2294,7 +2331,7 @@ Create a duplicate without media items of the highlighted folder.
 Notes: 
 \emph default
 Now that Classical Take Record (F9) automatically creates new folders if
- needed, this script does not need to be used when recording material.
+ needed, this function does not need to be used when recording material.
  However, if importing pre-recorded takes and you need more source groups
  to accommodate the material, this is still very useful.
 \end_layout
@@ -2347,7 +2384,7 @@ Simply hover the mouse over an area of the project and press A to begin
  a folder for listening to individual instrument or sections.
  Again, it is good to note that when auditioning begins, the mixer updates
  intelligently, decluttering the view for ease of meter monitoring etc.
- Note that the script honors any aux or submix tracks (@) and keeps them
+ Note that the function honors any aux or submix tracks (@) and keeps them
  in the mixer view.
 \end_layout
 
@@ -2373,8 +2410,8 @@ Notes:
 \emph default
 Very useful for a birdseye view of your project so you can navigate to another
  section.
- If there are multiple folders, the script collapses them.
- If fewer than two folders, the script respects the current folder view.
+ If there are multiple folders, the function collapses them.
+ If fewer than two folders, the function respects the current folder view.
 \end_layout
 
 \begin_layout Standard
@@ -2431,8 +2468,8 @@ These values are saved on a per-project basis.
 \emph on
 Create CD Markers
 \emph default
- script will ignore and use a value of 1 second as this is the lowest that
- makes any sense for displaying the countdown to the next track.
+ function will ignore and use a value of 1 second as this is the lowest
+ that makes any sense for displaying the countdown to the next track.
 \end_layout
 
 \begin_layout Standard
@@ -2646,7 +2683,7 @@ Useful if you want to abandon a S-D edit, however, there's also no problem
 \emph on
 Create CD Markers
 \emph default
- script all markers are deleted in any case.
+ function all markers are deleted in any case.
 \end_layout
 
 \begin_layout Standard
@@ -2678,7 +2715,7 @@ To enter the crossfade view, select the lefthand item of a crossfaded item
  fade.
  To immediately audition, use the A shortcut in one of four areas.
  Hover the mouse in either of the blank areas (no media item) in the top
- left or bottom right of the view to audition the script from that location
+ left or bottom right of the view to audition the function from that location
  to the mirrored location on the other side of the edit.
  Note how easy it is to quickly set an audition length! Or, hover the mouse
  on the first item and press A to just audition the material into the fade.
@@ -2773,7 +2810,7 @@ Notes:
 While in the project view, drag an item (or grouped items) over another,
  move the edit cursor where you want the edit to happen and press X.
  Given the availability of S-D edit functionality and group razor-editing,
- this script is less useful in this context.
+ this function is less useful in this context.
  However, it is essential in the crossfade editor mode for making the edit.
  Crossfade length is set via ReaClassical Project Preferences (F5).
 \end_layout
@@ -2801,8 +2838,8 @@ Using the same system as
 \emph on
 Create CD Markers
 \emph default
- below, this script works intelligently based on whether items have a take
- name.
+ below, this function works intelligently based on whether items have a
+ take name.
  If the take name is present, the desired silent gap is created.
  If not, the crossfade (or gap) is respected by shifting the item by the
  same amount as the previous one.
@@ -2865,10 +2902,10 @@ Auto-generation of CD/DDP markers and UPC/ISRC codes for efficient DDP,
 \emph on
 Notes: 
 \emph default
-This might be the biggest time-saving script in the ReaClassical system.
+This might be the biggest time-saving function in the ReaClassical system.
  It works as follows: 1) Edit gaps between items until you are happy 2)
  Add take names only to items that will become CD track starts 3) Run the
- script via shortcut Y and you will be asked to enter various information
+ function via shortcut Y and you will be asked to enter various information
  including UPC/ISRC (optional) and CD metadata.
  Done! Note that ISRC codes are auto-generated per track based on the numbers
  you enter.
@@ -2877,7 +2914,7 @@ This might be the biggest time-saving script in the ReaClassical system.
 \begin_layout Standard
 You can add audio to the initial pregap (easter egg track) by not giving
  the first item (or crossfaded items) a take name.
- The script will assume that this is supposed to be hidden and generate
+ The function will assume that this is supposed to be hidden and generate
  the initial pregap length accordingly.
  All album metadata is placed towards the end of the album inside a default
  7-second silent lead-out (so that CD players in cars don't immediately
@@ -2896,16 +2933,16 @@ You can add audio to the initial pregap (easter egg track) by not giving
 \end_inset
 
 ).
- Then after running the script adjust the position as desired (it defaults
+ Then after running the function adjust the position as desired (it defaults
  to 3 seconds in length but this can easily be set in ReaClassical Preferences).
  It is worth repeating at this point that you should only give names to
  items that are track starts.
- If you skip an item, the script rightly assumes it is part of the previous
+ If you skip an item, the function rightly assumes it is part of the previous
  track.
  Note that the markers snap to exact CD frames and if the media item start
- is in between CD frames, the script will always place the marker on the
+ is in between CD frames, the function will always place the marker on the
  earlier of the two.
- By default, the script uses a 200ms offset for placement of the markers
+ By default, the function uses a 200ms offset for placement of the markers
  (as in, markers appear 200ms to the left of the media item start) but,
  again, this value can be set via ReaClassical Preferences.
 \end_layout
@@ -2916,7 +2953,7 @@ I feel that once you try this CD/DDP marker generation workflow, it is difficult
  The key thing to think about is that the markers are trivially easy to
  recreate if you change a gap between items or even rearrange the order
  of tracks.
- Just run the script again.
+ Just run the function again.
  The key is the workflow: all marker generation is automatically based on
  item positioning and naming.
  Plus, all metadata and ISRC is saved into the project file so once entered
@@ -2943,10 +2980,10 @@ Description:
 \emph default
 Once you have used the 
 \emph on
-Create CD Markers script
+Create CD Markers 
 \emph default
-, it is now extremely easy to generate a CUE file and album reports using
- partly auto-generated metadata.
+function, it is now extremely easy to generate a CUE file and album reports
+ using partly auto-generated metadata.
 \end_layout
 
 \begin_layout Standard
@@ -2962,9 +2999,9 @@ The genre defaults to classical, the year listed is the current year and
  The CUE file (matching the given filename) is generated in the root of
  the project path along with an album report suitable for including when
  sending off to a CD factory or client.
- Any data entered is stored and recalled the next time you use the script.
- Before or after using the script, generate a whole project render in WAV,
- MP3, AIFF or FLAC using the included render preset.
+ Any data entered is stored and recalled the next time you use the function.
+ Before or after using the function, generate a whole project render in
+ WAV, MP3, AIFF or FLAC using the included render preset.
  Then drag the CUE file into the same folder.
 \end_layout
 
@@ -2988,15 +3025,15 @@ Lock every source group (leaving the destination group free for editing
 \emph on
 Notes:
 \emph default
- This script is now deprecated but I will leave in place for now.
+ This function is now deprecated but I will leave in place for now.
  It was useful before the new 
 \emph on
 Create CD Markers
 \emph default
- script came into being as a way to engage ripple-all mode without disturbing
+ function came into being as a way to engage ripple-all mode without disturbing
  source group items, thereby allowing moving of destination material along
  with CD markers in the final stages of the mastering process.
- There is no doubt that I much prefer working with the newer script.
+ There is no doubt that I much prefer working with the newer function.
  The lock toggle icon on the custom toolbar has now been replaced by a mug
  to represent the 
 \emph on
@@ -3973,7 +4010,7 @@ ReaClassical
 \begin_inset Quotes brd
 \end_inset
 
- for a partial keymap covering the scripts or 
+ for a partial keymap covering the functions or 
 \begin_inset Quotes bld
 \end_inset
 
@@ -4174,7 +4211,7 @@ Preferences
 \begin_layout Standard
 \noindent
 \align left
-Some of these options are essential for the scripts to work as expected.
+Some of these options are essential for the functions to work as expected.
  Others are just recommended.
  
 \end_layout
@@ -4255,13 +4292,13 @@ Appearance > Track Control Panels
 \align left
 
 \noun on
-Change
+Ensure
 \noun default
- Folder collapse button cycles track heights to 
+ Folder collapse button cycles track heights is set to 
 \begin_inset Quotes bld
 \end_inset
 
-Normal, hidden`.
+Normal, small, collapsed`.
  
 \end_layout
 
