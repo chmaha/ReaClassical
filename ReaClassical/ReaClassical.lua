@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.0.3
+@version 24.1
 @changelog
-  Fix: Add super-collapsed value of 0 to REAPER 7.x ReaClassical theme 
+  Add restructured and largely rewritten PDF Guide
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
