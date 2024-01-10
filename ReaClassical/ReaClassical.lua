@@ -3,6 +3,7 @@
 @version 24.1
 @changelog
   Add restructured and largely rewritten PDF Guide
+  Update splash version number
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
