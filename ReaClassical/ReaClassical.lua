@@ -3,6 +3,7 @@
 @version 24.1.1
 @changelog
   Add new covers to PDF guide
+  Add attribution for cover photo
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

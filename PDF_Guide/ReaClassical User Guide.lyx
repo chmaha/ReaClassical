@@ -139,6 +139,23 @@ Copyright © 2022–2024 chmaha
 \begin_layout Standard
 \noindent
 \align center
+Cover photography by Providence Doucet
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+target "https://unsplash.com/@providence"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
 Typeset in \SpecialChar LyX
  using \SpecialChar TeX
  Gyre Schola font
