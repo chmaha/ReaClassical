@@ -106,7 +106,7 @@
 \begin_layout Title
 
 \series bold
-v24.1
+v24.1.1
 \end_layout
 
 \begin_layout Date
@@ -831,6 +831,7 @@ Creating & Setting Up a Project
 \begin_layout Standard
 When you start REAPER/ReaClassical from a default portable install, you'll
  see an empty project with ReaClassical project defaults.
+ The first thing you should do is save it via ctrl+S.
 \end_layout
 
 \begin_layout Subsection

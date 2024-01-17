@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1
+@version 24.1.1
 @changelog
-  Add restructured and largely rewritten PDF Guide
-  Update splash version number
+  Add new covers to PDF guide
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
