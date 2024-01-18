@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1.1
+@version 24.1.2
 @changelog
-  Add new covers to PDF guide
-  Add attribution for cover photo
+  Add back ReaClassical theme for REAPER 6.x
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -43,6 +42,7 @@
   [main] ReaClassical_Add RoomTone Track.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
+  [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
   [theme] Pyramix.ReaperThemeZip
   [theme] Sequoia.ReaperThemeZip
   [theme] SaDiE.ReaperThemeZip
