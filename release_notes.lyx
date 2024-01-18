@@ -105,11 +105,13 @@
 \begin_layout Author
 
 \series bold
-v24.0
-\end_layout
+v24.1.2 
+\begin_inset Newline newline
+\end_inset
 
-\begin_layout Date
-Tested on REAPER v7.07
+(
+\series default
+Tested on REAPER v7.07)
 \end_layout
 
 \begin_layout Date
@@ -117,11 +119,14 @@ Release Notes
 \end_layout
 
 \begin_layout Paragraph*
-Changelog since v23.23:
-\end_layout
+Changelog since v24.0: 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/chmaha/ReaClassical/compare/24.0...main"
 
-\begin_layout Itemize
-New default ReaClassical theme for REAPER 7.x
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph*
@@ -130,7 +135,7 @@ Instructions for a new install:
 
 \begin_layout Enumerate
 \noindent
-Download the latest portable install as per the 
+Run the latest portable install as per the 
 \begin_inset CommandInset href
 LatexCommand href
 name "installation guide"
@@ -145,30 +150,59 @@ literal "false"
  Run the REAPER binary inside the folder!
 \end_layout
 
+\begin_layout Enumerate
+\noindent
+Sync ReaPack to get the latest version of the ReaClassical functions.
+\end_layout
+
 \begin_layout Paragraph*
-Instructions to update from ReaClassical 23.23:
+Instructions to update from ReaClassical 24.0+:
+\end_layout
+
+\begin_layout Enumerate
+\noindent
+Sync ReaPack to get the latest version of the ReaClassical functions.
+\end_layout
+
+\begin_layout Enumerate
+Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version
+ of REAPER noted above.
+\end_layout
+
+\begin_layout Paragraph*
+Instructions to update from ReaClassical 23.x:
 \end_layout
 
 \begin_layout Quote
-A reminder that ReaClassical versions 23.19 and onwards require SWS Extensions
- v2.13.2.0 from (https://www.sws-extension.org/download/pre-release/) for the
- "Whole Project View" functions to work as expected.
+My recommendation is to simply use a new portable install for each new major
+ version.
+ However, if you have a highly modified install, use REAPER for other things
+ besides ReaClassical etc, feel free to follow these instructions.
+ 
 \end_layout
 
 \begin_layout Enumerate
 \noindent
-Sync ReaPack to get the latest version of the ReaClassical scripts.
+Sync ReaPack to get the latest version of the ReaClassical functions.
+ If possible, please update REAPER to 7.x via the Ctrl+U shortcut.
+ While everything should work OK, I no longer support REAPER 6.x (however,
+ I do include a ReaClassical theme for use with REAPER 6.x for those whose
+ license doesn't cover 7.x).
 \end_layout
 
 \begin_layout Enumerate
 \noindent
-Download the latest portable install as noted above for a new install.
+Run the latest portable installer as noted above.
 \end_layout
 
 \begin_layout Enumerate
 \noindent
 Copy across any updated files/settings to your previous install according
- to the notes below:
+ to the box below.
+\end_layout
+
+\begin_layout Enumerate
+Delete the downloaded new portable install and restart REAPER.
 \end_layout
 
 \begin_layout Standard
@@ -203,11 +237,19 @@ Updated config files to be copied to your existing resource path
 \noindent
 
 \emph on
-n/a
+Copy across contents of UserPlugins if you don't have SWS Extensions v2.13.2.0+
+ installed 
+\begin_inset Newline newline
+\end_inset
+
+(Check in REAPER via Extensions > About SWS Extension)
 \end_layout
 
-\begin_layout Plain Layout
-Delete the downloaded new portable install and restart REAPER.
+\begin_layout Itemize
+
+\emph on
+ReaClassical Keymap (just keyboard shortcuts for ReaClassical functions)
+ or Full_Classical_DAW KeyMap from KeyMaps
 \end_layout
 
 \end_inset
