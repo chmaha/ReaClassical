@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.3
+@version 1.4
 @changelog
-  NO-OP: Fix desc gaps
+  Add RCMasteringEQ
 @metapackage
 @provides
   RCComp.jsfx
@@ -13,5 +13,6 @@
   RCGain.jsfx
   RCLimiter.jsfx
   RCParallelK.jsfx
+  RCMasteringEQ.jsfx
 @about
   These plugins are suitable for classical music mixing and mastering.
