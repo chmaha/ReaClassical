@@ -106,7 +106,7 @@
 \begin_layout Title
 
 \series bold
-v24.1.2
+v24.1.3
 \end_layout
 
 \begin_layout Date
@@ -4105,6 +4105,56 @@ Baxandall
 \begin_layout Itemize
 
 \series bold
+RCMasteringEQ
+\series default
+ (ReaClassical Mastering EQ, available in ReaPack via my 
+\begin_inset CommandInset href
+LatexCommand href
+name "repository"
+target "https://github.com/chmaha/ReaClassical/raw/main/index.xml"
+literal "false"
+
+\end_inset
+
+).
+ Uses DSP from airwindows 
+\begin_inset Quotes bld
+\end_inset
+
+Hull2
+\begin_inset Quotes brd
+\end_inset
+
+ with added 
+\begin_inset Quotes bld
+\end_inset
+
+Range
+\begin_inset Quotes brd
+\end_inset
+
+ dropdown (
+\begin_inset Quotes bld
+\end_inset
+
+Classical
+\begin_inset Quotes brd
+\end_inset
+
+ or 
+\begin_inset Quotes bld
+\end_inset
+
+Full
+\begin_inset Quotes brd
+\end_inset
+
+) for transparent, musical, broad-strokes EQing.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
 ReEQ 
 \series default
 
@@ -5266,7 +5316,7 @@ Super-collapsed value is set to 0 in rtconfig.txt
 \align left
 At this point it might be a good idea to Save as default project settings
  as well as make a classical template (if you didn't download mine) so that
- you don’t have to do this setup more than once
+ you don’t have to do this setup more than once.
 \end_layout
 
 \begin_layout Standard

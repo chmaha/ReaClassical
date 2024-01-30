@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.1.2
+@version 24.1.3
 @changelog
-  Add back ReaClassical theme for REAPER 6.x
+  Allow extending item edges in crossfade editor when hovering on blank space or on item
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
