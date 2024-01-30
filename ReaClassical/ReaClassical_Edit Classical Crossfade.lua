@@ -54,16 +54,20 @@ function main()
     local one_pos = GetMediaItemInfo_Value(item_one, "D_POSITION")
     local one_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
     local two_pos = GetMediaItemInfo_Value(item_two, "D_POSITION")
-    Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
     BR_GetMouseCursorContext()
     local mouse_pos = BR_GetMouseCursorContext_Position()
     local item_hover = BR_GetMouseCursorContext_Item()
+    BR_GetMouseCursorContext()
+    local mouse_pos = BR_GetMouseCursorContext_Position()
+    local item_hover = BR_GetMouseCursorContext_Item()
+    
+    Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
     local end_of_one = one_pos + one_length
     local overlap = end_of_one - two_pos
     local mouse_to_item_two = two_pos - mouse_pos
     local total_time = 2 * mouse_to_item_two + overlap
 
-    if not item_hover and mouse_pos < two_pos then
+    if mouse_pos < two_pos then
         SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
         SetEditCurPos(mouse_pos, false, false)
         curpos = GetCursorPosition()
@@ -77,7 +81,7 @@ function main()
         Main_OnCommand(41311, 0)                      -- extend item right
         Main_OnCommand(41991, 0)                      -- toggle ripple-all ON
         SetMediaItemInfo_Value(item_one, "C_LOCK", 1) --lock item 1
-    elseif not item_hover and mouse_pos > two_pos then
+    elseif mouse_pos > two_pos then
         SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
         SetEditCurPos(mouse_pos, false, false)
         curpos = GetCursorPosition()
