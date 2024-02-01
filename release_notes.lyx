@@ -191,7 +191,7 @@ noprefix "false"
 placement H
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
@@ -229,6 +229,68 @@ Shortcuts for new move/zoom to S-D marker functions
 \end_inset
 
 
+\end_layout
+
+\begin_layout Paragraph
+Basic Manual Install Inside Your Existing REAPER Install:
+\end_layout
+
+\begin_layout Enumerate
+Install both ReaPack (
+\begin_inset CommandInset href
+LatexCommand href
+target "https://reapack.com/"
+
+\end_inset
+
+) and latest bleeding edge SWS Extensions (
+\begin_inset CommandInset href
+LatexCommand href
+target "https://www.sws-extension.org/download/pre-release/"
+
+\end_inset
+
+) if you haven't already.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Import my repository into ReaPack by copying and pasting 
+\begin_inset CommandInset href
+LatexCommand href
+name "this link"
+target "https://github.com/chmaha/ReaClassical/raw/main/index.xml"
+literal "false"
+
+\end_inset
+
+.
+ If you need help with importing see 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://reapack.com/user-guide#import-repositories"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Search for "ReaClassical" and install the main ReaClassical package and
+ any jsfx plugins (my "RCPlugs" are highly recommended for classical work).
+ 
+\end_layout
+
+\begin_layout Enumerate
+Use the ReaClassical project template for relevant projects (you can set
+ this as default in the REAPER preferences) and change to the ReaClassical
+ theme (Options > Themes).
+ 
+\end_layout
+
+\begin_layout Enumerate
+Set up keyboard shortcuts in the actions list (? shortcut) as desired.
 \end_layout
 
 \end_body
