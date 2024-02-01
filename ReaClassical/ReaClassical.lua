@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.1.3
+@version 24.2
 @changelog
-  Allow extending item edges in crossfade editor when hovering on blank space or on item
+  Add Move to S-D marker functions
+  Add Zoom to S-D marker functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -40,6 +41,14 @@
   [main] ReaClassical_ExplodeMultiChannel.lua
   [main] ReaClassical_Colorize.lua
   [main] ReaClassical_Add RoomTone Track.lua
+  [main] ReaClassical_Move to Destination IN marker.lua
+  [main] ReaClassical_Move to Destination OUT marker.lua
+  [main] ReaClassical_Move to Source IN marker.lua
+  [main] ReaClassical_Move to Source OUT marker.lua
+  [main] ReaClassical_Zoom to Destination IN marker.lua
+  [main] ReaClassical_Zoom to Destination OUT marker.lua
+  [main] ReaClassical_Zoom to Source IN marker.lua
+  [main] ReaClassical_Zoom to Source OUT marker.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
