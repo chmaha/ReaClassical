@@ -1,12 +1,12 @@
 #!/bin/sh
-# by chmaha (December 2023)
+# by chmaha (February 2024)
 
 # Script to install ReaClassical on MacOS
 # Works for all architectures and OS versions that are compatible with REAPER.
 # Change the pkgver number below to download an alternative REAPER version.
 
 ###########
-pkgver=7.07
+pkgver=7.09
 rcver=24
 ###########
 
@@ -38,8 +38,8 @@ hdiutil convert -quiet reaper.dmg -format UDTO -o reaper_temp
 hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint ./reaper_temp  reaper_temp.cdr
 echo "Downloading ReaClassical resource folder base and userplugins for MacOS"
 sleep 2
-curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip -L
-curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_MacOS-$arch.zip -L
+curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip -L
+curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_MacOS-$arch.zip -L
 
 # Check if a ReaClassical folder already exists
 if [ -d "ReaClassical_${rcver}" ]; then

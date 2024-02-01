@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func Install32bit() {
-	fmt.Println("Welcome to the ReaClassical 32-bit installer...")
+func Install64bit() {
+	fmt.Println("Welcome to the ReaClassical 64-bit installer...")
 	time.Sleep(2 * time.Second)
 
 	// Create a unique hash-based date suffix
@@ -24,32 +24,32 @@ func Install32bit() {
 	// Download and extract portable 7-zip
 	fmt.Println("Downloading and extracting portable 7-zip...")
 	time.Sleep(2 * time.Second)
-	downloadFile("https://github.com/chmaha/7-zip/raw/main/7zip32.zip", "7zip32.zip")
-	extractArchive("7zip32.zip", "7zip")
-	os.Remove("7zip32.zip")
+	downloadFile("https://github.com/chmaha/7-zip/raw/main/7zip.zip", "7zip.zip")
+	extractArchive("7zip.zip", "7zip")
+	os.Remove("7zip.zip")
 
 	// Download REAPER
 	fmt.Printf("Downloading REAPER %s from reaper.fm\n", pkgver)
 	time.Sleep(2 * time.Second)
-	reaperURL := fmt.Sprintf("https://www.reaper.fm/files/%s.x/reaper%s-install.exe", strings.Split(pkgver, ".")[0], strings.ReplaceAll(pkgver, ".", ""))
-	downloadFile(reaperURL, fmt.Sprintf("reaper%s-install.exe", strings.ReplaceAll(pkgver, ".", "")))
+	reaperURL := fmt.Sprintf("https://www.reaper.fm/files/%s.x/reaper%s_x64-install.exe", strings.Split(pkgver, ".")[0], strings.ReplaceAll(pkgver, ".", ""))
+	downloadFile(reaperURL, fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")))
 
 	// Extract REAPER
 	fmt.Printf("Extracting REAPER from .exe to %s folder...\n", rcfolder)
 	time.Sleep(2 * time.Second)
-	runCommand("./7zip/7z.exe", "x", fmt.Sprintf("reaper%s-install.exe", strings.ReplaceAll(pkgver, ".", "")), "-o"+rcfolder)
+	runCommand("./7zip/7z.exe", "x", fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")), "-o"+rcfolder)
 
 	// Download ReaClassical files from GitHub
 	fmt.Println("Downloading ReaClassical files from GitHub...")
 	time.Sleep(2 * time.Second)
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/Resource_Folder_Base.zip", "Resource_Folder_Base.zip")
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folders/UserPlugins/UP_Windows-x86.zip", "UP_Windows-x86.zip")
+	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip", "Resource_Folder_Base.zip")
+	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-x64.zip", "UP_Windows-x64.zip")
 
 	// Extract ReaClassical files
 	fmt.Println("Extracting ReaClassical files to ReaClassical folder...")
 	time.Sleep(2 * time.Second)
 	extractArchive("Resource_Folder_Base.zip", rcfolder)
-	extractArchive("UP_Windows-x86.zip", fmt.Sprintf("%s/UserPlugins", rcfolder))
+	extractArchive("UP_Windows-x64.zip", fmt.Sprintf("%s/UserPlugins", rcfolder))
 
 	// Add the line to reaper.ini under the [REAPER] section
 	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")
@@ -59,8 +59,8 @@ func Install32bit() {
 	fmt.Println("Removing temporary files...")
 	time.Sleep(2 * time.Second)
 	os.Remove("Resource_Folder_Base.zip")
-	os.Remove("UP_Windows-x86.zip")
-	os.Remove(fmt.Sprintf("reaper%s-install.exe", strings.ReplaceAll(pkgver, ".", "")))
+	os.Remove("UP_Windows-x64.zip")
+	os.Remove(fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")))
 	os.RemoveAll("7zip")
 
 	fmt.Println("Done!")
