@@ -188,6 +188,7 @@ noprefix "false"
 
 \begin_layout Standard
 \begin_inset Float figure
+placement H
 wide false
 sideways false
 status open
@@ -223,94 +224,6 @@ Shortcuts for new move/zoom to S-D marker functions
 
 \begin_layout Plain Layout
 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph*
-Instructions to update from ReaClassical 23.x:
-\end_layout
-
-\begin_layout Quote
-My recommendation is to simply use a new portable install for each new major
- version.
- However, if you have a highly modified install, use REAPER for other things
- besides ReaClassical etc, feel free to follow these instructions.
- 
-\end_layout
-
-\begin_layout Enumerate
-\noindent
-Sync ReaPack to get the latest version of the ReaClassical functions.
- If possible, please update REAPER to 7.x via the Ctrl+U shortcut.
- While everything should work OK, I no longer support REAPER 6.x (however,
- I do include a ReaClassical theme for use with REAPER 6.x for those whose
- license doesn't cover 7.x).
-\end_layout
-
-\begin_layout Enumerate
-\noindent
-Run the latest portable installer as noted above.
-\end_layout
-
-\begin_layout Enumerate
-\noindent
-Copy across any updated files/settings to your previous install according
- to the box below.
-\end_layout
-
-\begin_layout Enumerate
-Delete the downloaded new portable install and restart REAPER.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Box Shadowbox
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "100col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Paragraph*
-\noindent
-Updated config files to be copied to your existing resource path 
-\begin_inset Newline newline
-\end_inset
-
-(Options > Show REAPER resource path…):
-\end_layout
-
-\begin_layout Itemize
-\noindent
-
-\emph on
-Copy across contents of UserPlugins if you don't have SWS Extensions v2.13.2.0+
- installed 
-\begin_inset Newline newline
-\end_inset
-
-(Check in REAPER via Extensions > About SWS Extension)
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-ReaClassical Keymap (just keyboard shortcuts for ReaClassical functions)
- or Full_Classical_DAW KeyMap from KeyMaps
 \end_layout
 
 \end_inset
