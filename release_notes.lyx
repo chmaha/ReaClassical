@@ -105,13 +105,13 @@
 \begin_layout Author
 
 \series bold
-v24.1.3 
+v24.2
 \begin_inset Newline newline
 \end_inset
 
 (
 \series default
-Tested on REAPER v7.07)
+Tested on REAPER v7.09)
 \end_layout
 
 \begin_layout Date
@@ -167,6 +167,67 @@ Sync ReaPack to get the latest version of the ReaClassical functions.
 \begin_layout Enumerate
 Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version
  of REAPER noted above.
+\end_layout
+
+\begin_layout Enumerate
+Add new key shortcuts for the move/zoom to S-D marker functions via the
+ actions menu (? shortcut).
+ The default is Ctrl+1,2,3,4 for moving and Alt+1,2,3,4 for zooming.
+ See figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Shortcuts-for-new"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename /home/cmh/Desktop/2024-02-01_09-38.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Shortcuts-for-new"
+
+\end_inset
+
+Shortcuts for new move/zoom to S-D marker functions
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph*
