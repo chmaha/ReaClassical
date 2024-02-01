@@ -106,11 +106,11 @@
 \begin_layout Title
 
 \series bold
-v24.1.3
+v24.2
 \end_layout
 
 \begin_layout Date
-Tested on REAPER v7.07
+Tested on REAPER v7.09
 \end_layout
 
 \begin_layout Standard
@@ -1274,6 +1274,7 @@ limit
 \end_inset
 
  a stray peak.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -1635,7 +1636,13 @@ Source-Destination Editing
 You set your in-out points using special coloured labelled markers I created
  with shortcuts 1 and 2 (Destination) and 3 and 4 (Source).
  Simply press the shortcut 5 to make the 3 or 4-point edit.
- You’ll also notice that because you prepared the various takes with colours
+ To move to any existing S-D markers use Ctrl + 1, 2, 3 or 4.
+ To zoom to any of the S-D markers for more fine-grained placement, use
+ Alt + 1, 2, 3 or 4.
+\end_layout
+
+\begin_layout Standard
+You’ll also notice that because you prepared the various takes with colours
  (and grouping), it is really easy to see which takes compose your final
  edited tracks.
  It’s worth pointing out that my S/D and classical crossfade functions place
@@ -1690,6 +1697,7 @@ The downside to this workflow when using a vertical approach is that the
 
 \begin_layout Standard
 To delete all Source-Destination markers you can press ctrl+Delete.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -3913,6 +3921,46 @@ S-D Editing
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
 5 Make S/D Edit 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Ctrl+1 Move to Destination IN marker
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Ctrl+2 Move to Destination OUT marker
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Ctrl+3 Move to Source IN marker
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Ctrl+4 Move to Source OUT marker
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Alt+1 Zoom to Destination IN marker
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Alt+2 Zoom to Destination OUT marker
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Alt+3 Zoom to Source IN marker
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Alt+4 Zoom to Source OUT marker
 \end_layout
 
 \begin_layout Labeling
