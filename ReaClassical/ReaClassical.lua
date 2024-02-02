@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3rc1
+@version 24.3rc2
 @changelog
-  Move 3-point insert edit to own function (F3)
-  Add all possible 2- and 3-point replace cuts to S-D edit function
+  Simplify 3-point insert function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
