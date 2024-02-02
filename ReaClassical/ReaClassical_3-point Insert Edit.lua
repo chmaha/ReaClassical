@@ -25,7 +25,6 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local replace_toggle = NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
     local dest_in, dest_out, source_count = markers()
     ripple_lock_mode()
     if dest_in == 1 and source_count == 2 then
