@@ -25,32 +25,46 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local replace_toggle = NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
-    local dest_in, dest_out, source_count = markers()
+    local dest_in, dest_out, dest_count, source_in, source_out, source_count, pos_table, track_number = markers()
     ripple_lock_mode()
-    if GetToggleCommandState(replace_toggle) == 1 and dest_in == 1 and dest_out == 0 and source_count == 2 then
-        lock_items()
-        local sel_length, is_selected = copy_source()
-        if is_selected == false then
-            clean_up(is_selected)
-            return
+    if dest_count + source_count == 3 then -- add one extra marker for 3-point editing
+        local distance
+        local pos
+        if dest_in == 0 then
+          pos = pos_table[2]
+          distance = pos_table[4]- pos_table[3]
+          AddProjectMarker2(0, false, pos - distance, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+        elseif dest_out == 0 then
+          pos = pos_table[1]
+          distance = pos_table[4]- pos_table[3]
+          AddProjectMarker2(0, false,  pos + distance, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
+        elseif source_in == 0 then
+          pos = pos_table[4]
+          distance = pos_table[1]- pos_table[2]
+          add_source_marker(pos, distance, track_number, "SOURCE-IN", 998)
+        elseif source_out == 0 then
+          pos = pos_table[3]
+          distance = pos_table[2]- pos_table[1]
+          add_source_marker(pos, distance, track_number, "SOURCE-OUT", 999)
         end
-        split_at_dest_in()
-        MoveEditCursor(sel_length, true)
-        Main_OnCommand(40309, 0)  -- Toggle ripple editing per-track
-        Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
-        Main_OnCommand(40630, 0)  -- Go to start of time selection
-        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- Adaptive Delete
-        Main_OnCommand(42398, 0)  -- Item: Paste items/tracks
-        Main_OnCommand(40310, 0)  -- Toggle ripple editing per-track
-        unlock_items()
-        local cur_pos = create_crossfades(dest_out)
-        clean_up(is_selected)
-        Main_OnCommand(40289, 0) -- Item: Unselect all items
-        create_dest_in(dest_out, cur_pos)
-    elseif dest_in == 1 and source_count == 2 then
+    elseif dest_count == 1 and source_count == 1 then -- add two extra markers 2-point editing
+        if dest_in == 1 and source_in == 1 then
+          local source_end = GetTrackLength(track_number)
+          add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
+          local dest_end = GetProjectLength(0)
+          AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
+        elseif dest_out == 1 and source_out == 1 then
+          add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
+          AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+        elseif source_in == 1 and dest_out == 1 then
+          local source_end = GetTrackLength(track_number)
+          add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
+          AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+        end
+    end
+    
+    local _, _, dest_count, _, _, source_count, _ = markers() 
+    if dest_count + source_count == 4 then -- final check we actually have 4 S-D markers
         lock_items()
         local _, is_selected = copy_source()
         if is_selected == false then
@@ -60,28 +74,29 @@ function main()
         split_at_dest_in()
         Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 997, false)
+        Main_OnCommand(40289,0)
         Main_OnCommand(40626, 0)  -- Time Selection: Set end point
         Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
         Main_OnCommand(40630, 0)  -- Go to start of time selection
+   
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- Adaptive Delete
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0)  -- SWS_AWPASTE
         unlock_items()
-        local cur_pos = create_crossfades(dest_out)
+        create_crossfades(dest_out)
         clean_up(is_selected)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
-        create_dest_in(dest_out, cur_pos)
     else
         ShowMessageBox(
-            "Please add at least 3 valid source-destination markers: \n 3-point edit: DEST-IN, SOURCE-IN and SOURCE-OUT \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
+            "Please add at least 2 valid source-destination markers: \n 2-point edit: 1 DEST and 1 SOURCE marker (any combination) \n 3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
             , "Source-Destination Edit", 0)
         return
     end
 
-    Undo_EndBlock('VERTICAL One-Window S-D Editing', 0)
+    Undo_EndBlock('S-D Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
@@ -91,20 +106,86 @@ end
 
 function markers()
     local retval, num_markers, num_regions = CountProjectMarkers(0)
-    local source_count = 0
-    local dest_in = 0
-    local dest_out = 0
+    local dest_in, dest_out, source_in, source_out = 0, 0, 0, 0
+    local pos_table = {}
+    local track_number
     for i = 0, num_markers + num_regions - 1, 1 do
-        local retval, isrgn, pos, rgnend, label, markrgnindexnumber = EnumProjectMarkers(i)
+        local _, _, pos, _, label, _ = EnumProjectMarkers(i)
         if label == "DEST-IN" then
             dest_in = 1
+            pos_table[1] = pos
         elseif label == "DEST-OUT" then
             dest_out = 1
-        elseif label == string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
-            source_count = source_count + 1
+            pos_table[2] = pos
+        elseif string.match(label, "%d+:SOURCE[-]IN") then
+            track_number = string.match(label, "(%d+):.+")
+            source_in = 1
+            pos_table[3] = pos
+        elseif string.match(label, "%d+:SOURCE[-]OUT") then
+            track_number = string.match(label, "(%d+):.+")
+            source_out = 1
+            pos_table[4] = pos
         end
     end
-    return dest_in, dest_out, source_count
+    local source_count = source_in + source_out
+    local dest_count = dest_in + dest_out
+    return dest_in, dest_out, dest_count, source_in, source_out, source_count, pos_table, track_number
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
+function add_source_marker(pos, distance, track_number, label, num)
+    DeleteProjectMarker(NULL, num, false)
+    AddProjectMarker2(0, false,  pos + distance, 0, track_number .. ":" .. label, num, ColorToNative(23, 223, 143) | 0x1000000)
+end
+
+---------------------------------------------------------------------
+
+function remove_dest_material()
+    AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+    Main_OnCommand(40310, 0) -- Set ripple per-track
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    GoToMarker(0, 996, false)
+    Main_OnCommand(40625, 0)  -- Time Selection: Set start point
+    GoToMarker(0, 997, false)
+    Main_OnCommand(40626, 0)  -- Time Selection: Set end point
+    Main_OnCommand(40939, 0)  -- select track 01
+    Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
+    Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
+    Main_OnCommand(41990, 0)  -- Toggle ripple per-track (off)
+    local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
+    Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
+    Main_OnCommand(40630, 0)  -- Go to start of time selection
+    Main_OnCommand(40020, 0)  -- Time Selection: Remove time selection and loop point selection
+    DeleteProjectMarker(NULL, 996, false)
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    Main_OnCommand(41990, 0) -- Toggle ripple per-track (on)
+end
+
+---------------------------------------------------------------------
+
+function GetTrackLength(track_number)
+  local track = GetTrack(0, track_number)
+  local numitems = reaper.GetTrackNumMediaItems(track)
+  local item = reaper.GetTrackMediaItem(track,numitems-1)
+  local item_pos = reaper.GetMediaItemInfo_Value(item,"D_POSITION")
+  local item_length = reaper.GetMediaItemInfo_Value(item,"D_LENGTH")
+  local end_of_track = item_pos + item_length
+  return end_of_track
 end
 
 ---------------------------------------------------------------------
@@ -129,7 +210,6 @@ function copy_source()
     local is_selected = true
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
-    Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
     select_matching_folder()
@@ -151,6 +231,7 @@ end
 ---------------------------------------------------------------------
 
 function split_at_dest_in()
+    Main_OnCommand(40769, 0) -- unselect all items/tracks etc
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
     GoToMarker(0, 996, false)
@@ -187,6 +268,7 @@ function create_crossfades(dest_out)
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)
+    if reaper.CountSelectedMediaItems(0) == 0 then return end
     MoveEditCursor(-0.001, false)
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
@@ -194,13 +276,11 @@ function create_crossfades(dest_out)
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
-    return cur_pos
 end
 
 ---------------------------------------------------------------------
 
 function clean_up(is_selected)
-    --Main_OnCommand(42395, 0) -- Clear tempo envelope
     Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     if is_selected then
         DeleteProjectMarker(NULL, 996, false)
@@ -275,7 +355,9 @@ end
 
 function xfade(xfade_len)
     local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+    local number_of_items = CountSelectedMediaItems(0)
     Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    local number_of_items = CountSelectedMediaItems(0)
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(40625, 0)        -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
