@@ -3,6 +3,7 @@
 @version 24.3rc2
 @changelog
   Simplify 3-point insert function
+  Remove superfluous parameter from create_crossfades function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

@@ -85,7 +85,7 @@ function main()
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0)  -- SWS_AWPASTE
         unlock_items()
-        create_crossfades(dest_out)
+        create_crossfades()
         clean_up(is_selected)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
@@ -248,7 +248,7 @@ end
 
 ---------------------------------------------------------------------
 
-function create_crossfades(dest_out)
+function create_crossfades()
     local first_sel_item, last_sel_item = get_first_last_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(first_sel_item, true)
