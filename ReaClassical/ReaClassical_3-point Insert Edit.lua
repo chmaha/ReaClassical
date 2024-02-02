@@ -36,17 +36,10 @@ function main()
             return
         end
         split_at_dest_in()
-        Main_OnCommand(40625, 0)  -- Time Selection: Set start point
-        Main_OnCommand(40626, 0)  -- Time Selection: Set end point
-        Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
-        Main_OnCommand(40630, 0)  -- Go to start of time selection
-        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- Adaptive Delete
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0)  -- SWS_AWPASTE
         unlock_items()
-        local cur_pos = create_crossfades(dest_out)
+        local cur_pos = create_crossfades()
         clean_up(is_selected)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
@@ -144,7 +137,7 @@ end
 
 ---------------------------------------------------------------------
 
-function create_crossfades(dest_out)
+function create_crossfades()
     local first_sel_item, last_sel_item = get_first_last_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(first_sel_item, true)
