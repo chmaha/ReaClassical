@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3rc2
+@version 24.3rc3
 @changelog
-  Simplify 3-point insert function
-  Remove superfluous parameter from create_crossfades function
+  Add final 2-point edit combination (SOURCE-OUT + DEST-IN)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

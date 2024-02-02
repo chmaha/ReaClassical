@@ -60,6 +60,10 @@ function main()
           local source_end = GetTrackLength(track_number)
           add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
           AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+        elseif source_out == 1 and dest_in == 1 then
+          add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
+          local dest_end = GetProjectLength(0)
+          AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
         end
     end
     
