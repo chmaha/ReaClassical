@@ -25,7 +25,6 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local replace_toggle = NamedCommandLookup("_RSfb9968dc637180b9e9d1627a5be31048ae2034e9")
     ripple_lock_mode()
     if SDmarkers() == 4 then
         lock_items()
