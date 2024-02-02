@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.2
+@version 24.3rc1
 @changelog
-  Add Move to S-D marker functions
-  Add Zoom to S-D marker functions
+  Move 3-point insert edit to own function (F3)
+  Add all possible 2- and 3-point replace cuts to S-D edit function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -49,6 +49,7 @@
   [main] ReaClassical_Zoom to Destination OUT marker.lua
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
+  [main] ReaClassical_3-point Insert Edit.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
