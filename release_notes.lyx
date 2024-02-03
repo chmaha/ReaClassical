@@ -175,6 +175,7 @@ Add new key shortcuts for the move/zoom to S-D marker functions via the
  actions menu (? shortcut).
  The default is Ctrl+1,2,3,4 for moving and Alt+1,2,3,4 for zooming.
  Add new key shortcut for 3-point insert function (F3 is the default).
+ Set "Toolbar: Open/close toolbar 1" to F6 shortcut.
  See figure 
 \begin_inset CommandInset ref
 LatexCommand ref
