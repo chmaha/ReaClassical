@@ -106,7 +106,7 @@
 \begin_layout Title
 
 \series bold
-v24.2
+v24.3
 \end_layout
 
 \begin_layout Date
@@ -192,7 +192,7 @@ Introduction
 \noindent
 \align left
 It is important to note that if you already own REAPER then the world of
- classical editing including source-destination editing (aka 3-and-4-point
+ classical editing including source-destination editing (aka 2-, 3-, and-4-point
  editing), crossfade editing and more are available at no extra cost to
  you via the freely available ReaClassical system.
  There’s no need to spend any of your hard-earned money on Sequoia, Pyramix
@@ -1434,7 +1434,7 @@ Once you have recorded or imported your classical music audio, you are ready
  As described previously, you have multiple ways of proceeding.
  First you can have all your takes lined up in a row horizontally and you
  place your source in and out markers, destination in and out markers then
- press a keyboard shortcut to achieve your 3 or 4-point edit.
+ press a keyboard shortcut to achieve your 2-, 3- or 4-point edit.
  The second way is to set up your takes vertically and then either use the
  same marker system to make your edits or use razor edits (my preferred
  method when working vertically).
@@ -1633,12 +1633,10 @@ Source-Destination Editing
 \end_layout
 
 \begin_layout Standard
-You set your in-out points using special coloured labelled markers I created
- with shortcuts 1 and 2 (Destination) and 3 and 4 (Source).
- Simply press the shortcut 5 to make the 3 or 4-point edit.
- To move to any existing S-D markers use Ctrl + 1, 2, 3 or 4.
- To zoom to any of the S-D markers for more fine-grained placement, use
- Alt + 1, 2, 3 or 4.
+You set your in and out points using special coloured labelled markers via
+ shortcuts 1 and 2 (Destination) and 3 and 4 (Source).
+ Simply press the shortcut 5 to make the 2-, 3- or 4-point edit.
+ depending on how many markers you set.
 \end_layout
 
 \begin_layout Standard
@@ -1672,22 +1670,6 @@ When using a vertical workflow, make sure you have the source folder selected
 \end_layout
 
 \begin_layout Standard
-You can complete 3-point editing either using “insert” or “replace” methods
- with just the destination IN marker set (and both source markers!).
- “Insert” 3-point edits ripple pastes the source material at the destination
- IN marker and “Replace” 3-point edits replaces the destination material
- with the length of the material between the two source markers.
- As usual, short equal-power crossfades are created at all edit points.
-\end_layout
-
-\begin_layout Standard
-To choose between “insert” or “replace” 3-point edits, toggle the ReaClassical_3
--point edit replace.lua function to ON for “replace” and OFF “insert”.
- Even better: use the custom classical toolbar as described above or F3
- shortcut.
-\end_layout
-
-\begin_layout Standard
 The downside to this workflow when using a vertical approach is that the
  source and destination markers can get in each other’s way visually if
  the takes aren’t somewhat staggered however the process still works as
@@ -1695,9 +1677,35 @@ The downside to this workflow when using a vertical approach is that the
  See below for a razor editing alternative.
 \end_layout
 
+\begin_layout Subsubsection
+4-Point Editing
+\end_layout
+
 \begin_layout Standard
-To delete all Source-Destination markers you can press ctrl+Delete.
+For this operation, set all four markers.
+ This is the most useful edit when dealing with classical music or other
+ acoustic music performed without a metronome.
+\end_layout
+
+\begin_layout Subsubsection
+3-Point Editing
+\end_layout
+
+\begin_layout Standard
+For this operation, set any combination of three markers.
+ The missing marker is placed according to the distance set by the existing
+ complete pair.
  
+\end_layout
+
+\begin_layout Subsubsection
+2-Point Editing
+\end_layout
+
+\begin_layout Standard
+For this operation, set one source marker and one destination marker.
+ Any missing IN markers are set to the beginning of the timeline and any
+ missing OUT markers are set to the end of the source or destination material.
 \end_layout
 
 \begin_layout Subsection
@@ -1727,10 +1735,10 @@ Assembly Line Editing
 Sometimes you don’t necessarily have a best overall take and it is desirable
  to build the perfect performance linearly, section by section, measure
  by measure.
- In this case, use a 3-point edit (most likely you want it set to “insert”
- mode).
- A standard 3-point insert edit will happen and the destination IN marker
- will jump to the end of the pasted item, ready for the next edit.
+ In this case, set both source markers and the destination IN marker.
+ Press the F3 shortcut.
+ A 3-point insert operation will occur and the destination IN marker will
+ jump to the end of the pasted item, ready for the next edit.
  This means that in order to compile further sections, you now only need
  set the source markers.
 \end_layout
@@ -1747,6 +1755,24 @@ While perhaps not used as often as 3- and 4-point edits, I have created
  crossfade.
  Delete Silence (Ctrl+Backspace) will also delete but maintain the silence
  without rippling backwards.
+\end_layout
+
+\begin_layout Subsubsection
+Move / Zoom to S-D markers
+\end_layout
+
+\begin_layout Standard
+To move to any existing S-D markers use Ctrl + 1, 2, 3 or 4.
+ To zoom to any of the S-D markers for more fine-grained placement, use
+ Alt + 1, 2, 3 or 4.
+\end_layout
+
+\begin_layout Subsubsection
+Delete S-D markers
+\end_layout
+
+\begin_layout Standard
+To delete all S-D markers, press Ctrl+Delete.
 \end_layout
 
 \begin_layout Subsection
@@ -1874,7 +1900,8 @@ I love this method so much that I don’t miss Sequoia or Pyramix any more.
 \end_layout
 
 \begin_layout Enumerate
-Increase overlap (by hovering mouse in blank area and pressing Z shortcut)
+Increase overlap (by hovering mouse either in a blank area or over one of
+ the items and pressing Z shortcut to mirror extend the item edges)
 \end_layout
 
 \begin_layout Enumerate
@@ -3138,7 +3165,7 @@ Notes:
  Inbetween the destination markers is where the edit will actually happen.
  Inbetween the source markers is where the material is taken from.
  Use all four markers for 4-point editing.
- Use destination IN and both source markers for 3-point editing.
+ Use any combination of 3 markers for 3-point editing.
  Very important and useful to note is that the source marker labels reflect
  which source group was highlighted when the markers were placed.
  In other words, to create source markers, first select the item in the
@@ -3159,7 +3186,7 @@ S-D Edit (5)
 \emph on
 Description:
 \emph default
- Make the source-destination edit (3- and 4-point editing)
+ Make the source-destination edit (2-, 3- and 4-point editing)
 \end_layout
 
 \begin_layout Standard
@@ -3167,32 +3194,34 @@ Description:
 \emph on
 Notes: 
 \emph default
-Once you have placed your S-D markers (either all 4 or just destination
- IN and both source markers) press shortcut 5 to make the edit.
+Once you have placed your S-D markers (any combination of 2, 3 or 4 markers)
+ press shortcut 5 to make the edit.
  Whatever the number of markers you used, the edit will be crossfaded using
  a short equal power fade (you can change this in REAPER options under 
 \emph on
 Media Item Defaults
 \emph default
 ) and when using 4 markers, the S-D markers removed ready for the next edit.
- When using 3 markers, the destination IN marker is retained and moved to
- the end of the edit so you can do assembly-style editing with ease (with
- 3-point mode set to 
-\emph on
-Insert
-\emph default
-).
  The edits are perfectly crossfaded and the user only needs to focus on
  the selection of source material.
  For any S-D edit you can, of course, undo the action and return to the
  previous state.
- Crossfade length is set via ReaClassical Project Preferences (F5).
+ The desired crossfade length is set via ReaClassical Project Preferences
+ (F5).
 \end_layout
 
 \begin_layout Standard
 
 \series bold
-3-point insert/replace (F3)
+3-point 
+\begin_inset Quotes bld
+\end_inset
+
+Assembly Line
+\begin_inset Quotes brd
+\end_inset
+
+ Edit (F3)
 \end_layout
 
 \begin_layout Standard
@@ -3200,15 +3229,8 @@ Insert
 \emph on
 Description:
 \emph default
- Toggle between 
-\emph on
-insert
-\emph default
- and 
-\emph on
-replace
-\emph default
- modes for 3-point editing.
+ Uses both source markers and destination-IN marker to compile edits from
+ start to finish.
 \end_layout
 
 \begin_layout Standard
@@ -3216,10 +3238,20 @@ replace
 \emph on
 Notes: 
 \emph default
-When using a destination IN marker and both source markers the material
- between the source markers is either inserted (rippling all material to
- the right of the edit point) or replaced (no rippling).
- To make any source-destination edit (3- or 4-point) use shortcut 5.
+The destination-IN marker is retained and placed at the end of the edit
+ so that for subsequent operations the user only has to set the source markers.
+ Worth repeating from the S-D edit notes: 
+\end_layout
+
+\begin_layout Quote
+
+\emph on
+…the source marker labels reflect which source group was highlighted when
+ the markers were placed.
+ In other words, to create source markers, first select the item in the
+ chosen folder track and then use the 3 & 4 shortcuts.
+ This means that when the actual edit is made (using shortcut 5) it doesn't
+ matter what is highlighted at the time.
 \end_layout
 
 \begin_layout Standard
@@ -3905,7 +3937,7 @@ S-D Editing
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-2 Add Destination OUT marker (without does 3-point edit) 
+2 Add Destination OUT marker 
 \end_layout
 
 \begin_layout Labeling
@@ -3920,7 +3952,35 @@ S-D Editing
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-5 Make S/D Edit 
+5 Make S/D Edit (2-, 3-, or 4-point cut)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+F3 3-point 
+\begin_inset Quotes bld
+\end_inset
+
+Assembly Line
+\begin_inset Quotes brd
+\end_inset
+
+ edit
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+F4 Insert with time-stretching (All 4 S-D markers)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+bksp Delete with ripple (between 2 source markers) 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+ctrl+bksp Delete Leaving Silence (between 2 source markers) 
 \end_layout
 
 \begin_layout Labeling
@@ -3966,26 +4026,6 @@ Alt+4 Zoom to Source OUT marker
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
 ctrl+Del Delete all S-D Markers 
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-bksp Delete with ripple (between 2 source markers) 
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-ctrl+bksp Delete Leaving Silence (between 2 source markers) 
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-F3 3-point Insert/Replace toggle 
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-F4 Insert with time-stretching (All 4 S-D markers)
 \end_layout
 
 \begin_layout Standard
@@ -4125,11 +4165,9 @@ EQ:
 \begin_layout Itemize
 
 \series bold
-\noun on
-RCEQ
+RCChannelEQ
 \series default
-\noun default
- (ReaClassical EQ, available in ReaPack via my 
+ (ReaClassical Channel EQ, available in ReaPack via my 
 \begin_inset CommandInset href
 LatexCommand href
 name "repository"
@@ -4893,11 +4931,19 @@ From left to right, we have: Whole project view Horizontal (`), Create (or
  Sync) Source Groups (F8), Classical Take Record Toggle (F9), Duplicate
  Folder (
 \backslash
-), Prepare Takes (T), Toggle for choosing 3-point edit behaviour (F3), Destinati
-on IN and OUT markers (1, 2), Source IN and OUT markers (3, 4), Delete S-D
- markers (Ctrl+Delete), S-D Edit (5), Delete With Ripple (Backspace), Delete
- Leaving Silence (Ctrl+Backspace), the Fade Editor View (F), Reposition
- Album Tracks (Ctrl+Y), and, finally, Create CD Markers (Y).
+), Prepare Takes (T), 3-point 
+\begin_inset Quotes bld
+\end_inset
+
+Assembly Line
+\begin_inset Quotes brd
+\end_inset
+
+ Edit (F3), Destination IN and OUT markers (1, 2), Source IN and OUT markers
+ (3, 4), Delete S-D markers (Ctrl+Delete), S-D Edit (5), Delete With Ripple
+ (Backspace), Delete Leaving Silence (Ctrl+Backspace), the Fade Editor View
+ (F), Reposition Album Tracks (Ctrl+Y), and, finally, Create CD Markers
+ (Y).
 \end_layout
 
 \begin_layout Subsection

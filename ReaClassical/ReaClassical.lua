@@ -1,8 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 24.3rc3
+@version 24.3
 @changelog
+  Move 3-point insert edit to own function (F3)
+  Add all possible 2- and 3-point replace cuts to S-D edit function
+  Simplify 3-point insert function
+  Remove superfluous parameter from create_crossfades function
   Add final 2-point edit combination (SOURCE-OUT + DEST-IN)
+  Remove insert/replace toggle function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -21,7 +26,6 @@
   [main] ReaClassical_Whole Project View Vertical.lua
   [main] ReaClassical_Create source groups (vertical).lua
   [main] ReaClassical_Audition.lua
-  [main] ReaClassical_3-point edit replace.lua
   [main] ReaClassical_Delete Leaving Silence.lua
   [main] ReaClassical_Delete With Ripple.lua
   [main] ReaClassical_Insert with timestretching.lua

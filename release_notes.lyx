@@ -105,7 +105,7 @@
 \begin_layout Author
 
 \series bold
-v24.2
+v24.3
 \begin_inset Newline newline
 \end_inset
 
@@ -119,10 +119,11 @@ Release Notes
 \end_layout
 
 \begin_layout Paragraph*
-Changelog since v24.0: 
+Changelog since v24.2: 
 \begin_inset CommandInset href
 LatexCommand href
-target "https://github.com/chmaha/ReaClassical/compare/24.0...main"
+target "https://github.com/chmaha/ReaClassical/compare/24.2...main"
+literal "false"
 
 \end_inset
 
@@ -173,6 +174,7 @@ Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version
 Add new key shortcuts for the move/zoom to S-D marker functions via the
  actions menu (? shortcut).
  The default is Ctrl+1,2,3,4 for moving and Alt+1,2,3,4 for zooming.
+ Add new key shortcut for 3-point insert function (F3 is the default).
  See figure 
 \begin_inset CommandInset ref
 LatexCommand ref
