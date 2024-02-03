@@ -8,6 +8,7 @@
   Remove superfluous parameter from create_crossfades function
   Add final 2-point edit combination (SOURCE-OUT + DEST-IN)
   Remove insert/replace toggle function
+  Add reference to toolbar shortcut in PDF guide
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

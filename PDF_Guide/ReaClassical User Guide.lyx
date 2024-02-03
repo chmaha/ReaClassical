@@ -1414,6 +1414,8 @@ While I designed ReaClassical to be used efficiently with keyboard shortcuts,
  there is a custom toolbar for those that prefer it.
  However I do highly recommend learning the key strokes as you will find
  your editing speeds improve dramatically.
+ The floating toolbar is visible by default on a new portable install.
+ To open or close, use the F6 shortcut.
 \end_layout
 
 \begin_layout Section
@@ -4109,6 +4111,11 @@ Miscellaneous
 \labelwidthstring 00.00.0000
 F5 ReaClassical Preferences (set crossfade length, CD track offset, INDEX0
  pre-gap length, Album lead-out time)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+F6 Open/Close ReaClassical custom toolbar
 \end_layout
 
 \begin_layout Labeling
