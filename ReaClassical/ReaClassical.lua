@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3
+@version 24.3.1
 @changelog
-  Move 3-point insert edit to own function (F3)
-  Add all possible 2- and 3-point replace cuts to S-D edit function
-  Simplify 3-point insert function
-  Remove superfluous parameter from create_crossfades function
-  Add final 2-point edit combination (SOURCE-OUT + DEST-IN)
-  Remove insert/replace toggle function
-  Add reference to toolbar shortcut in PDF guide
+  Add update helper function for toolbar and keymap
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -54,6 +48,7 @@
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [main] ReaClassical_3-point Insert Edit.lua
+  [main] ReaClassical_Updater.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
@@ -63,6 +58,8 @@
   [theme] Sonic Solutions.ReaperThemeZip
   ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
   reaclassical-splash.png > reaclassical-splash.png
+  ReaClassical-menu.ini > ReaClassical-menu.ini
+  ReaClassical-kb.ini > ReaClassical-kb.ini
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
