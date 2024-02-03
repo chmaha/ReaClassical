@@ -46,8 +46,13 @@ function main()
         else
             ShowMessageBox("You can't have zero tracks in a folder!", "Create Folder", 0)
         end
+    elseif folder_check() == 1 then
+        remove_track_groups()
+        media_razor_group()
+        add_track_groups()
+        ShowMessageBox("Tracks re-linked and re-grouped for media and razor editing", "Create Folder", 0)
     else
-        ShowMessageBox("Please use this function with an empty project", "Create Folder", 0)
+        ShowMessageBox("This function can be used on an empty project to create a folder group\nor on a single folder to re-group for media/razor editing", "Create Folder", 0)
     end
     Undo_EndBlock("Create Folder", -1)
 end
@@ -56,6 +61,29 @@ end
 
 function track_check()
     return CountTracks(0)
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
+function remove_track_groups()
+    Main_OnCommand(40296, 0) -- select all tracks
+    local remove_grouping = NamedCommandLookup("_S&M_REMOVE_TR_GRP")
+    Main_OnCommand(remove_grouping, 0)
+    Main_OnCommand(40297, 0) -- unselect all tracks
 end
 
 ---------------------------------------------------------------------
@@ -95,6 +123,7 @@ function add_track_groups()
         GetSetTrackGroupMembership(track, "MUTE_FOLLOW", 2 ^ i, 2 ^ i)
         i = i + 1
     end
+    SetOnlyTrackSelected(first_track)
 end
 
 ---------------------------------------------------------------------

@@ -106,7 +106,7 @@
 \begin_layout Title
 
 \series bold
-v24.3.2
+v24.3.3
 \end_layout
 
 \begin_layout Date
@@ -1082,6 +1082,12 @@ To begin a horizontal workflow, press F7 to set up a track group.
  In the event you are making a simple stereo recording, I would still recommend
  creating a track group consisting of two tracks and simply leave the child
  track empty and hidden.
+\end_layout
+
+\begin_layout Standard
+If you need to add another child track after you have started importing
+ material, you can press F7 again to re-link and re-group for media/razor
+ editing.
 \end_layout
 
 \begin_layout Standard
@@ -2742,7 +2748,8 @@ Create Folder (F7)
 Description: 
 \emph default
 A quick way to create a folder group with as many tracks as you need.
- 
+ It can also be used on a single existing folder group to re-group tracks
+ for media item and razor editing.
 \end_layout
 
 \begin_layout Standard
