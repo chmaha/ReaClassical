@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.4
+@version 1.5
 @changelog
-  Add RCMasteringEQ
+  Rename RCEQ to RCChannelEQ
 @metapackage
 @provides
   RCComp.jsfx
