@@ -166,77 +166,18 @@ Sync ReaPack to get the latest version of the ReaClassical functions.
 \end_layout
 
 \begin_layout Enumerate
+Run the ReaClassical_Updater function.
+ This will offer to overwrite your toolbars and keymaps with ReaClassical
+ portable install defaults.
+ 
+\series bold
+DON'T do this if you have your own custom toolbars or keyboard shortcuts
+ as they will be overwritten! 
+\end_layout
+
+\begin_layout Enumerate
 Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version
  of REAPER noted above.
-\end_layout
-
-\begin_layout Enumerate
-Add new key shortcuts for the move/zoom to S-D marker functions via the
- actions menu (? shortcut).
- The default is Ctrl+1,2,3,4 for moving and Alt+1,2,3,4 for zooming.
- Add new key shortcut for 3-point insert function (F3 is the default).
- Set "Toolbar: Open/close toolbar 1" to F6 shortcut.
- See figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Shortcuts-for-new"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Enumerate
-Retrieve the new ReaClassical.ReaperMenu file from a new portable install
- (under MenuSets folder).
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename /home/cmh/Desktop/2024-02-01_09-38.png
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Shortcuts-for-new"
-
-\end_inset
-
-Shortcuts for new move/zoom to S-D marker functions
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Paragraph
