@@ -105,7 +105,7 @@
 \begin_layout Author
 
 \series bold
-v24.3.2
+v24.3.3
 \begin_inset Newline newline
 \end_inset
 
@@ -166,7 +166,11 @@ If Sync ReaPack to get the latest version of the ReaClassical functions.
 \end_layout
 
 \begin_layout Enumerate
-Run the ReaClassical_Updater function.
+For updating from a version < 24.3,
+\emph on
+ 
+\emph default
+run the ReaClassical_Updater function.
  This will offer to overwrite your toolbars and keymaps with ReaClassical
  portable install defaults.
  
