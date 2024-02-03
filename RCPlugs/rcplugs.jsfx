@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.5
+@version 1.6
 @changelog
-  Rename RCEQ to RCChannelEQ
+  Add RCflator Ultimate
 @metapackage
 @provides
   RCComp.jsfx
@@ -14,5 +14,6 @@
   RCLimiter.jsfx
   RCParallelK.jsfx
   RCMasteringEQ.jsfx
+  RCInflator.jsfx
 @about
   These plugins are suitable for classical music mixing and mastering.
