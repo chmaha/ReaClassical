@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3.2
+@version 24.3.3
 @changelog
-  Update PDF guide to include new updater function
+  Allow Create Folder function to media/razor/re-link if used with one folder in the project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
