@@ -4,6 +4,7 @@ author: chmaha
 about:
   Uses DSP from airwindows "Baxandall" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License)
+  JSFX version released under GPLv3 license
 
 slider1:20<0,1000,10>HPF
 slider2:20000<1000,22000,100>LPF
