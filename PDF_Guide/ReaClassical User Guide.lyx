@@ -106,7 +106,7 @@
 \begin_layout Title
 
 \series bold
-v24.3
+v24.3.2
 \end_layout
 
 \begin_layout Date
@@ -752,24 +752,14 @@ Sync ReaPack to get the latest version of the ReaClassical metapackage.
 \end_layout
 
 \begin_layout Enumerate
-Download the latest portable install as per the instructions above (it will
- create a new ReaClassical folder with a short year + quarter suffix e.g.
- "ReaClassical_24").
+If specified in the release notes, run the ReaClassical_Updater function
+ then restart REAPER.
+ This will offer to overwrite your toolbars and keymaps with ReaClassical
+ portable install defaults.
  
-\end_layout
-
-\begin_layout Enumerate
-Copy across any updated files/settings to your previous install according
- to the 
-\begin_inset CommandInset href
-LatexCommand href
-name "release notes"
-target "https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf"
-literal "false"
-
-\end_inset
-
-.
+\series bold
+DON'T do this if you have your own custom toolbars or keyboard shortcuts
+ as they will be overwritten! 
 \end_layout
 
 \begin_layout Subsection

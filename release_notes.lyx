@@ -105,7 +105,7 @@
 \begin_layout Author
 
 \series bold
-v24.3
+v24.3.2
 \begin_inset Newline newline
 \end_inset
 
@@ -162,7 +162,7 @@ Instructions to update from ReaClassical 24.0+:
 
 \begin_layout Enumerate
 \noindent
-Sync ReaPack to get the latest version of the ReaClassical functions.
+If Sync ReaPack to get the latest version of the ReaClassical functions.
 \end_layout
 
 \begin_layout Enumerate

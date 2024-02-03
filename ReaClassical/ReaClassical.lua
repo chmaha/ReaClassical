@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3.1
+@version 24.3.2
 @changelog
-  Add update helper function for toolbar and keymap
+  Update PDF guide to include new updater function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
