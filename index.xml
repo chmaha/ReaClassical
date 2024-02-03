@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="58466335fea08725ed4cbd7f6ac75f389a701501">
+<index version="1" name="chmaha Scripts" commit="2a1c82501b2e6885cfbae382543d611a01791854">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -33,6 +33,18 @@
         <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/f051e4defa4d6540fc0ff42d0aee602503d5571c/RCPlugs/RCLimiter.jsfx</source>
         <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/f051e4defa4d6540fc0ff42d0aee602503d5571c/RCPlugs/RCParallelK.jsfx</source>
         <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/f051e4defa4d6540fc0ff42d0aee602503d5571c/RCPlugs/RCMasteringEQ.jsfx</source>
+      </version>
+      <version name="1.5" author="chmaha" time="2024-02-03T11:52:23Z">
+        <changelog><![CDATA[Rename RCEQ to RCChannelEQ]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCDeEss_Advanced.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCDither.jsfx</source>
+        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCChannelEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/2a1c82501b2e6885cfbae382543d611a01791854/RCPlugs/RCMasteringEQ.jsfx</source>
       </version>
     </reapack>
   </category>
