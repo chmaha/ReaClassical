@@ -23,9 +23,8 @@ The executable or script will pull the REAPER binary archive, resource folder ba
 ## For updating an existing portable install of ReaClassical:
 
 1. Sync ReaPack to get the latest version of ReaClassical scripts.
-2. Download the latest portable install as per the instructions above (it will create a new ReaClassical folder with a short year suffix e.g. "ReaClassical_24").
-3. Copy across any updated files/settings to your previous install's resource path as described in the [release notes](https://raw.githubusercontent.com/chmaha/ReaClassical/main/release_notes.pdf).
-4. Restart REAPER.
+2. Run the ReaClassical_Updater function. This will offer to overwrite your toolbars and keymaps with ReaClassical portable install defaults. **DON'T do this if you have your own custom toolbars or keyboard shortcuts as they will be overwritten!** 
+3. Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version of REAPER noted above.
 
 For those who only want access to the scripts and jsfx plugins:
 
