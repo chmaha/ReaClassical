@@ -188,6 +188,11 @@ noprefix "false"
 .
 \end_layout
 
+\begin_layout Enumerate
+Retrieve the new ReaClassical.ReaperMenu file from a new portable install
+ (under MenuSets folder).
+\end_layout
+
 \begin_layout Standard
 \begin_inset Float figure
 placement H
