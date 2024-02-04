@@ -29,15 +29,24 @@ local dest_shortcuts_path = resource_path .. "/reaper-kb.ini"
 ---------------------------------------------------------------------
 
 function main()
-    local response1 = ShowMessageBox("This part will overwrite your custom toolbars.\nAre you sure you want to continue?", "ReaClassical Updater",4)
+    local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
+    Main_OnCommand(sync_reapack,0)
+    ShowMessageBox("1) Syncing ReaPack repos", "ReaClassical Updater",0)
+    
+    local response1 = ShowMessageBox("2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?", "ReaClassical Updater",4)
     if response1 == 6 then
       copy_file(source_file_path,destination_file_path)
     end
-
-    local response2 = ShowMessageBox("This part will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater",4)
+    
+    local response2 = ShowMessageBox("3) This section will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater",4)
     if response2 == 6 then 
       copy_file(source_shortcuts_path,dest_shortcuts_path)
-     end
+    end
+    
+    if response1 == 6 or response2 == 6 then
+      ShowMessageBox("4) REAPER/ReaClassical will now close.", "ReaClassical Updater",0)
+      reaper.Main_OnCommand(40004, 0) -- Save dirty projects and close REAPER
+    end
 end
 
 ---------------------------------------------------------------------
