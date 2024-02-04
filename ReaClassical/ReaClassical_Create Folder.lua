@@ -42,14 +42,14 @@ function main()
                 SetTrackSelected(track, 0)
             end
             media_razor_group()
-            add_track_groups()
+            link_controls()
         else
             ShowMessageBox("You can't have zero tracks in a folder!", "Create Folder", 0)
         end
     elseif folder_check() == 1 then
         remove_track_groups()
         media_razor_group()
-        add_track_groups()
+        link_controls()
         ShowMessageBox("Tracks re-linked and re-grouped for media and razor editing", "Create Folder", 0)
     else
         ShowMessageBox("This function can be used on an empty project to create a folder group\nor on a single folder to re-group for media/razor editing", "Create Folder", 0)
@@ -102,7 +102,7 @@ end
 
 ---------------------------------------------------------------------
 
-function add_track_groups()
+function link_controls()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")

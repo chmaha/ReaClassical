@@ -145,7 +145,7 @@ function sync_routing_and_fx()
 
     if ans == 6 then
         remove_track_groups()
-        local ret = add_track_groups()
+        local ret = link_controls()
         if not ret then return end
       
 
@@ -230,7 +230,7 @@ function create_source_groups()
         Main_OnCommand(delete_items, 0)
         i = i + 1
     end
-    add_track_groups()
+    link_controls()
     media_razor_group()
 end
 
@@ -283,7 +283,7 @@ end
 
 ---------------------------------------------------------------------
 
-function add_track_groups()
+function link_controls()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
     local num_of_folders = CountSelectedTracks(0)
