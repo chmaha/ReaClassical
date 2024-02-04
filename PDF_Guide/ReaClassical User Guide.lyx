@@ -650,8 +650,18 @@ Start REAPER.
 \end_layout
 
 \begin_layout Enumerate
-Follow the update instructions to get the latest and greatest versions of
- the ReaClassical functions, toolbar and keymap.
+Follow the update instructions 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "subsec:Updating"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ to get the latest and greatest versions of the ReaClassical functions,
+ toolbar and keymap.
 \end_layout
 
 \begin_layout Standard
@@ -757,10 +767,16 @@ Update
 
 \begin_layout Subsection
 \noindent
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Updating"
+
+\end_inset
+
 Updating an Existing ReaClassical Portable Install
 \end_layout
 
-\begin_layout Enumerate
+\begin_layout Standard
 Run the ReaClassical_Updater function found in the actions menu (shortcut
  ?).
  This will sync ReaPack to get the latest ReaClassical functions then offer
