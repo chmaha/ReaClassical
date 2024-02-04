@@ -106,12 +106,6 @@
 
 \series bold
 24.x series
-\begin_inset Newline newline
-\end_inset
-
-(
-\series default
-Tested on REAPER v7.09)
 \end_layout
 
 \begin_layout Date
@@ -174,7 +168,16 @@ DON'T answer yes to either of these questions if you have your own custom
 
 \begin_layout Enumerate
 Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version
- of REAPER noted above.
+ of REAPER as noted 
+\begin_inset CommandInset href
+LatexCommand href
+name "here"
+target "https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Paragraph
