@@ -1,6 +1,6 @@
 ![logo](https://github.com/chmaha/ReaClassical/raw/main/docs/images/reaclassical_os.png)
 
-Everything you need to do professional classical music editing in REAPER for free. Please begin by visiting the [website](https://chmaha.github.io/ReaClassical/), reading the [PDF guide](https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf) and latest [release notes](https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf).
+Everything you need to do professional classical music editing in REAPER for free. Please begin by visiting the [website](https://chmaha.github.io/ReaClassical/), reading the [PDF manual](https://github.com/chmaha/ReaClassical/raw/main/PDF_Guide/ReaClassical%20User%20Guide.pdf) and latest [release notes](https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf).
 
 For a full ReaClassical experience read the [Installation guide](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md).
 
