@@ -18,13 +18,12 @@ or
 ##### Windows
 Download [ReaClassical_Win64.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win64.exe) (64-bit) or [ReaClassical_Win32.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win32.exe) (32-bit) where you want to install ReaClassical and double-click. The source code for the installer is  [here](https://github.com/chmaha/ReaClassical/tree/main/Installers/ReaClassical-Windows-Go-Installer).
 
-The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic. On first run, go to *Extensions > ReaPack > Synchronize Packages* to get the latest and greatest versions of the functions themselves.
+The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic. On first run, follow the update instructions below to get the latest and greatest ReaClassical functions, toolbar and keymap.
 
 ## For updating an existing portable install of ReaClassical:
 
-1. Sync ReaPack to get the latest version of ReaClassical scripts.
-2. If specified in the release notes, run the ReaClassical_Updater function. This will offer to overwrite your toolbars and keymaps with ReaClassical portable install defaults. **DON'T do this if you have your own custom toolbars or keyboard shortcuts as they will be overwritten!** 
-3. Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version of REAPER noted above.
+1. Run the ReaClassical_Updater function found in the actions dialog (shortcut ?). This will sync ReaPack to get the latest ReaClassical functions then offer to overwrite your toolbars and keymaps with the latest ReaClassical portable install defaults. **DON'T answer yes to either of these questions if you have your own custom toolbars or keyboard shortcuts as they will be overwritten!**
+2. Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version of REAPER noted above.
 
 For those who only want access to the scripts and jsfx plugins:
 

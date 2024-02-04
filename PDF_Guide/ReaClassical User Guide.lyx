@@ -106,7 +106,7 @@
 \begin_layout Title
 
 \series bold
-v24.3.3
+v24.3
 \end_layout
 
 \begin_layout Date
@@ -634,11 +634,8 @@ Start REAPER.
 \end_layout
 
 \begin_layout Enumerate
-Sync ReaPack via 
-\emph on
-Extensions > ReaPack > Synchronize packages
-\emph default
- to get the very latest ReaClassical functions.
+Follow the update instructions to get the latest and greatest versions of
+ the ReaClassical functions, toolbar and keymap.
 \end_layout
 
 \begin_layout Standard
@@ -748,14 +745,11 @@ Updating an Existing ReaClassical Portable Install
 \end_layout
 
 \begin_layout Enumerate
-Sync ReaPack to get the latest version of the ReaClassical metapackage.
-\end_layout
-
-\begin_layout Enumerate
-If specified in the release notes, run the ReaClassical_Updater function
- then restart REAPER.
- This will offer to overwrite your toolbars and keymaps with ReaClassical
- portable install defaults.
+Run the ReaClassical_Updater function found in the actions menu (shortcut
+ ?).
+ This will sync ReaPack to get the latest ReaClassical functions then offer
+ to overwrite your toolbars and keymaps with ReaClassical portable install
+ defaults.
  
 \series bold
 DON'T do this if you have your own custom toolbars or keyboard shortcuts
