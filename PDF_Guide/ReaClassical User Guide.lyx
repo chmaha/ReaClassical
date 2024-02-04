@@ -5,6 +5,9 @@
 \save_transient_properties true
 \origin unavailable
 \textclass article
+\begin_preamble
+\usepackage{datetime2}
+\end_preamble
 \use_default_options true
 \maintain_unincluded_children false
 \language british
@@ -106,17 +109,30 @@
 \begin_layout Title
 
 \series bold
-v24.3
+The ReaClassical Manual
 \end_layout
 
 \begin_layout Date
-Updated 2024-02-04
+Updated 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+today
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \noindent
 \align center
-This guide is released under the GNU Free Documentation License v1.3 
+This manual is released under the GNU Free Documentation License v1.3 
 \begin_inset Newline newline
 \end_inset
 
@@ -207,11 +223,11 @@ It is important to note that if you already own REAPER then the world of
 \end_layout
 
 \begin_layout Section
-This Guide
+This Manual
 \end_layout
 
 \begin_layout Standard
-This PDF guide serves as the official manual for ReaClassical.
+This PDF manual serves as the official manual for ReaClassical.
  The latest version is always available directly online or offline from
  within ReaClassical by using the H (for 
 \begin_inset Quotes bld
@@ -224,7 +240,7 @@ help
 ) shortcut.
  The benefit of the offline version is that it is always in sync with the
  version of the tools you are using.
- The structure of the guide is designed to take the user through preliminary
+ The structure of the manual is designed to take the user through preliminary
  remarks, install and update procedures for both ReaClassical and REAPER
  then a detailed look at workflows from creating a project through to final
  render.
@@ -235,7 +251,7 @@ help
 \end_layout
 
 \begin_layout Standard
-I highly recommend doing a complete read of the guide and becoming very
+I highly recommend doing a complete read of the manual and becoming very
  familiar with appendices A and B.
 \end_layout
 
@@ -4119,7 +4135,7 @@ F6 Open/Close ReaClassical custom toolbar
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-H Open ReaClassical help system (currently the PDF guide)
+H Open ReaClassical help system (currently the PDF manual)
 \end_layout
 
 \begin_layout Labeling
@@ -4739,7 +4755,7 @@ ReaPack
 \noindent
 \align left
 ReaClassical metapackage (includes ReaClassical default project template,
- custom themes and PDF guide)
+ custom themes and PDF manual)
 \end_layout
 
 \begin_layout Itemize
