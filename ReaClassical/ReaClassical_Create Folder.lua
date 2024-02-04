@@ -42,7 +42,7 @@ function main()
                 SetTrackSelected(track, 0)
             end
             media_razor_group()
-            link_controls()
+            --link_controls()
         else
             ShowMessageBox("You can't have zero tracks in a folder!", "Create Folder", 0)
         end
