@@ -7,6 +7,8 @@
   Various: Rename internal function to link_controls()
   Remove linking controls function when creating a single folder
   Update ReaClassical splash to match PDF guide
+  Update PDF guide to reflect latest update method
+  PDF guide: point to tested_reaper_ver.txt
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

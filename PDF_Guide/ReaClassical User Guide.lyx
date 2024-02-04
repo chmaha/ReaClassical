@@ -110,7 +110,7 @@ v24.3
 \end_layout
 
 \begin_layout Date
-Tested on REAPER v7.09
+Updated 2024-02-04
 \end_layout
 
 \begin_layout Standard
@@ -808,8 +808,16 @@ Either click on the main or pre-release version you are interested in or
  click on one of the clock icons to select from previous releases.
  Despite the REAPER developers having a track record of excellent compatibility
  across even major versions, I recommend sticking with the tested version
- of REAPER shown at the top of this manual to minimize any issues of compatibili
-ty.
+ of REAPER noted 
+\begin_inset CommandInset href
+LatexCommand href
+name "here"
+target "https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+literal "false"
+
+\end_inset
+
+ to minimize any issues of compatibility.
 \end_layout
 
 \begin_layout Standard
