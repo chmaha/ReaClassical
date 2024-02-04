@@ -105,7 +105,7 @@
 \begin_layout Author
 
 \series bold
-v24.3.3
+24.x series
 \begin_inset Newline newline
 \end_inset
 
@@ -119,10 +119,10 @@ Release Notes
 \end_layout
 
 \begin_layout Paragraph*
-Changelog since v24.2: 
+Ongoing Changelog for 24.x: 
 \begin_inset CommandInset href
 LatexCommand href
-target "https://github.com/chmaha/ReaClassical/compare/24.2...main"
+target "https://github.com/chmaha/ReaClassical/compare/24.0...main"
 literal "false"
 
 \end_inset
@@ -131,7 +131,7 @@ literal "false"
 \end_layout
 
 \begin_layout Paragraph*
-Instructions for a new install:
+Instructions for a new portable install:
 \end_layout
 
 \begin_layout Enumerate
@@ -148,35 +148,28 @@ literal "false"
  (it will create a new ReaClassical folder with a short year + quarter suffix
  e.g.
  "ReaClassical_24").
- Run the REAPER binary inside the folder!
+ Double-click on the REAPER binary inside the folder!
 \end_layout
 
 \begin_layout Enumerate
-\noindent
-Sync ReaPack to get the latest version of the ReaClassical functions.
+Follow the update instructions below to get the latest and greatest ReaClassical
+ functions, toolbar and keymap.
 \end_layout
 
 \begin_layout Paragraph*
-Instructions to update from ReaClassical 24.0+:
+Instructions to update a ReaClassical portable install:
 \end_layout
 
 \begin_layout Enumerate
-\noindent
-If Sync ReaPack to get the latest version of the ReaClassical functions.
-\end_layout
-
-\begin_layout Enumerate
-For updating from a version < 24.3,
-\emph on
- 
-\emph default
-run the ReaClassical_Updater function.
- This will offer to overwrite your toolbars and keymaps with ReaClassical
- portable install defaults.
+Run the ReaClassical_Updater function found in the actions dialog (shortcut
+ ?).
+ This will sync ReaPack to get the latest ReaClassical functions then offer
+ to overwrite your toolbars and keymaps with the latest ReaClassical portable
+ install defaults.
  
 \series bold
-DON'T do this if you have your own custom toolbars or keyboard shortcuts
- as they will be overwritten! 
+DON'T answer yes to either of these questions if you have your own custom
+ toolbars or keyboard shortcuts as they will be overwritten! 
 \end_layout
 
 \begin_layout Enumerate
