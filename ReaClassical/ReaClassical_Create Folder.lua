@@ -49,8 +49,8 @@ function main()
     elseif folder_check() == 1 then
         remove_track_groups()
         media_razor_group()
-        link_controls()
-        ShowMessageBox("Tracks re-linked and re-grouped for media and razor editing", "Create Folder", 0)
+        --link_controls()
+        ShowMessageBox("Tracks re-grouped for media and razor editing", "Create Folder", 0)
     else
         ShowMessageBox("This function can be used on an empty project to create a folder group\nor on a single folder to re-group for media/razor editing", "Create Folder", 0)
     end
