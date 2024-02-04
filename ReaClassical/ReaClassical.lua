@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 24.3.3
+@version 24.3.4
 @changelog
-  Allow Create Folder function to media/razor/re-link if used with one folder in the project
+  Sync ReaPack as part of Updater function
+  Force restart after running Updater function
+  Various: Rename internal function to link_controls()
+  Remove linking controls function when creating a single folder
+  Update ReaClassical splash to match PDF guide
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
