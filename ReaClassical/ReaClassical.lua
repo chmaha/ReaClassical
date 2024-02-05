@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3.5
+@version 24.3.6
 @changelog
-  Rename PDF guide to manual and update all links, metapackage and H shortcut
+  Use menukeys package to stylize every keyboard shortcut in the PDF manual
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
