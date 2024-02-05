@@ -231,7 +231,7 @@ This Manual
 \begin_layout Standard
 This PDF manual serves as the official manual for ReaClassical.
  The latest version is always available directly online or offline from
- within ReaClassical by using 
+ within ReaClassical by pressing 
 \begin_inset ERT
 status open
 
@@ -252,7 +252,7 @@ help
 \begin_inset Quotes brd
 \end_inset
 
-) shortcut.
+).
  The benefit of the offline version is that it is always in sync with the
  version of the tools you are using.
  The structure of the manual is designed to take the user through preliminary
@@ -999,7 +999,42 @@ Audio Settings
 \end_layout
 
 \begin_layout Standard
-These settings are operating system dependent.
+Click on the audio information in the top right of the window or via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{O}
+\end_layout
+
+\end_inset
+
+ (for 
+\begin_inset Quotes bld
+\end_inset
+
+options
+\begin_inset Quotes brd
+\end_inset
+
+) navigating to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+menu{Audio > Device}
+\end_layout
+
+\end_inset
+
+.
+ These settings are operating system dependent.
  Choice of blocksize etc is also dependent on need and how modern and/or
  optimised your system is.
  For general microphone setup, device and recording settings specifically
@@ -1233,7 +1268,7 @@ keys{F9}
 
 \end_inset
 
- (Classical Take Record) creates a new source group as needed after ending
+ (Classical Take Record) creates a new source group as needed after each
  recording.
 \end_layout
 
@@ -1289,7 +1324,22 @@ keys{F7}
 
 \begin_layout Standard
 If you need to add another child track after you have started importing
- material, you can press 
+ material, press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+T}
+\end_layout
+
+\end_inset
+
+ to add the track and then 
 \begin_inset ERT
 status open
 
@@ -1302,7 +1352,7 @@ keys{F7}
 
 \end_inset
 
- again to re-link and re-group for media/razor editing.
+ again to re-group for media/razor editing.
 \end_layout
 
 \begin_layout Standard
@@ -1547,7 +1597,7 @@ keys{F10}
  Depending on the choice made, the number of tracks in the folder will adjust
  accordingly.
  If the user selects ‘no’ to keep all tracks mono, the folder track is left
- empty so that the Prepare Takes (
+ empty so that the Prepare Takes 
 \begin_inset ERT
 status open
 
@@ -1560,7 +1610,7 @@ keys{T}
 
 \end_inset
 
-) function is able to create a muted guide track (more on this later!).
+ function is able to create a muted guide track (more on this later!).
  It's important to note is that to use the Explode multi-channel item function
  you should import your multi-channel items into one folder track lined
  up horizontally before running the function.
@@ -1616,7 +1666,7 @@ ctrl+`}
  I chose to separate these functions because one of the axes (often the
  vertical) is set exactly how you need for editing and it would be a pain
  to have the axis reset each time.
- You can also go to the start and end of the project by pressing the 
+ You can also go to the start or end of the project by pressing the 
 \begin_inset ERT
 status open
 
@@ -1642,7 +1692,7 @@ keys{End}
 
 \end_inset
 
- key.
+ key respectively.
  
 \end_layout
 
@@ -1705,7 +1755,7 @@ keys{.}
 
 \end_inset
 
- keys (on my keyboard the same keys that have 
+ keys (by design given on my keyboard they are the same keys that have 
 \begin_inset ERT
 status open
 
@@ -2194,8 +2244,8 @@ For horizontal editing, you can use the usual transport shortcuts (spacebar
  For vertical (and horizontal) editing, it is highly recommended to use
  the Audition function to quickly solo only the folder (or track) you are
  interested in hearing.
- Just hover the mouse over the parent (or child) you want to hear and press
- 
+ Just hover the mouse over the parent for the full mix or a child to solo
+ a spot microphone you want to hear and press 
 \begin_inset ERT
 status open
 
@@ -2345,7 +2395,73 @@ The downside to this workflow when using a vertical approach is that the
 \end_layout
 
 \begin_layout Standard
-For this operation, set all four markers.
+For this operation, set all four markers using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+ , 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+ , 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+ .
+ Make the edit with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+ .
  This is the most useful edit when dealing with classical music or other
  acoustic music performed without a metronome.
 \end_layout
@@ -2356,6 +2472,20 @@ For this operation, set all four markers.
 
 \begin_layout Standard
 For this operation, set any combination of three markers.
+ Again, make the edit with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+ .
  The missing marker is placed according to the distance set by the existing
  complete pair.
  
@@ -2367,6 +2497,20 @@ For this operation, set any combination of three markers.
 
 \begin_layout Standard
 For this operation, set one source marker and one destination marker.
+ Again, make the edit with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+ .
  Any missing IN markers are set to the beginning of the timeline and any
  missing OUT markers are set to the end of the source or destination material.
 \end_layout
@@ -2380,7 +2524,7 @@ Insert with Time-Stretching
 \end_layout
 
 \begin_layout Standard
-Using the ReaClassical_Insert with timestretching function (
+Using the ReaClassical_Insert with timestretching function 
 \begin_inset ERT
 status open
 
@@ -2393,7 +2537,7 @@ keys{F4}
 
 \end_inset
 
-), you can complete a 4-point edit where the material between the source
+ , you can complete a 4-point edit where the material between the source
  markers is timestretched to fit the length of time between the destination
  markers.
  This is really useful when the source material has to fit the destination
@@ -2411,7 +2555,46 @@ Assembly Line Editing
 Sometimes you don’t necessarily have a best overall take and it is desirable
  to build the perfect performance linearly, section by section, measure
  by measure.
- In this case, set both source markers and the destination IN marker.
+ In this case, set the destination IN marker with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+ and set both source markers using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+.
  Press the 
 \begin_inset ERT
 status open
@@ -2439,7 +2622,7 @@ Delete / Delete with Ripple
 \begin_layout Standard
 While perhaps not used as often as 3- and 4-point edits, I have created
  two functions for deletion of material.
- Delete & Ripple (
+ Delete & Ripple 
 \begin_inset ERT
 status open
 
@@ -2454,9 +2637,9 @@ backspace}
 
 \end_inset
 
- (backspace)) will delete the material between source IN and OUT markers
+ (backspace) will delete the material between source IN and OUT markers
  and ripple material to the right backwards with a short crossfade.
- Delete Silence (
+ Delete Silence 
 \begin_inset ERT
 status open
 
@@ -2473,7 +2656,7 @@ backspace}
 
 \end_inset
 
-) will also delete but maintain the silence without rippling backwards.
+ will also delete but maintain the silence without rippling backwards.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3090,7 +3273,7 @@ Other Editing Tips
 
 \begin_layout Standard
 In my key map, I include all sorts of useful shortcuts to use during editing.
- As mentioned above, in vertical editing workflows, the Audition (
+ As mentioned above, in vertical editing workflows, the Audition 
 \begin_inset ERT
 status open
 
@@ -3103,7 +3286,7 @@ keys{A}
 
 \end_inset
 
-) is brilliant for listening to various takes before applying a razor or
+ is brilliant for listening to various takes before applying a razor or
  S/D edit.
  I can shuttle between items with 
 \begin_inset ERT
@@ -3234,7 +3417,7 @@ ctrl+`}
 It is worth noting that all regular markers and regions are ripple edited
  appropriately when using my source-destination editing functions and crossfade
  editor.
- I also introduced the ReaClassical_Lock Toggle function (
+ I also introduced the ReaClassical_Lock Toggle function 
 \begin_inset ERT
 status open
 
@@ -3247,7 +3430,7 @@ keys{K}
 
 \end_inset
 
-) which temporarily locks all source groups and engages ripple-all-tracks
+ which temporarily locks all source groups and engages ripple-all-tracks
  mode to enable you to drag destination items and simultaneously ripple
  markers and regions in the regular arrange view.
  This allows vertical source groups to retain their independence yet still
@@ -3306,7 +3489,7 @@ Aux & Submix
 \begin_layout Standard
 As of ReaClassical v23.19, users have the ability to create aux and submix
  tracks that stay visible (and stay after the source groups).
- To set up, simply create a single folder (
+ To set up, simply create a single folder 
 \begin_inset ERT
 status open
 
@@ -3319,7 +3502,7 @@ keys{F7}
 
 \end_inset
 
-) and/or Create Source Groups (
+ and/or Create Source Groups 
 \begin_inset ERT
 status open
 
@@ -3332,8 +3515,8 @@ keys{F8}
 
 \end_inset
 
-) then create as many aux/submix tracks after the source groups as you like
- via the Add Aux or submix function (
+ then create as many aux/submix tracks after the source groups as you like
+ via the Add Aux or submix function 
 \begin_inset ERT
 status open
 
@@ -3346,7 +3529,7 @@ keys{@}
 
 \end_inset
 
-).
+ .
  If adding manually, be sure to prefix the track with an ampersand.
  When using any of the functions that use intelligent mixer view (Audition,
  Create Source Groups (creating source groups from a single folder or syncing
@@ -3503,7 +3686,7 @@ keys{F2}
 .
  Note that only items that start tracks should be named.
  The rest of the metadata is then added via the Create CD Markers function
- (
+ 
 \begin_inset ERT
 status open
 
@@ -3516,10 +3699,10 @@ keys{Y}
 
 \end_inset
 
-).
+.
  You can add UPC/EAN and ISRC numbers as desired followed by album title,
  performer, composer and genre.
- The Markers to CUE function (
+ The Markers to CUE function 
 \begin_inset ERT
 status open
 
@@ -3532,7 +3715,7 @@ keys{C}
 
 \end_inset
 
-) will take as much information as it can from the saved DDP metadata but
+ will take as much information as it can from the saved DDP metadata but
  the user is free to change as desired.
 \end_layout
 
@@ -3619,7 +3802,7 @@ keys{F2}
  For CD tracks that you want to have a visual CD player countdown, simply
  start the item name with an exclamation (!).
  Preferences such as CD marker offset, pregap length and album lead-out
- can be set via ReaClassical Project Preferences (
+ can be set via ReaClassical Project Preferences 
 \begin_inset ERT
 status open
 
@@ -3632,7 +3815,7 @@ keys{F5}
 
 \end_inset
 
-).
+ .
  So it’s now very quick to export a DDP set! 
 \end_layout
 
@@ -3772,7 +3955,7 @@ Presets
 \begin_layout Standard
 ReaClassical includes various rendering presets to make rendering extremely
  quick and easy.
- In the Render dialog (
+ In the Render dialog 
 \begin_inset ERT
 status open
 
@@ -3785,7 +3968,7 @@ keys{R}
 
 \end_inset
 
-), click on the presets button then 
+, click on the presets button then 
 \begin_inset Quotes bld
 \end_inset
 
@@ -3798,7 +3981,7 @@ All Settings
  The first four entries are for exporting a whole album as a single audio
  file.
  The remaining use the automatically created regions after using the Create
- CD Markers function (
+ CD Markers function 
 \begin_inset ERT
 status open
 
@@ -3811,7 +3994,7 @@ keys{Y}
 
 \end_inset
 
-) to create automatically named folders of audio files, one per CD track.
+ to create automatically named folders of audio files, one per CD track.
  After selecting a preset, you should feel free to change any render settings
  and perhaps save as a new preset for future use.
  By default, the presets use the built-in REAPER standard triangular dither.
@@ -3865,7 +4048,7 @@ Now that r8brain free has been introduced as the best quality resampler
  available in REAPER (I highly recommend double-checking that it is selected
  when resampling at render time) I feel I can do everything, including DDP
  creation, without leaving my favourite DAW.
- However, the Marker to CUE function (
+ However, the Marker to CUE function 
 \begin_inset ERT
 status open
 
@@ -3878,9 +4061,8 @@ keys{C}
 
 \end_inset
 
-) is still useful for all sorts of things and I often create FLAC + CUE
- for album playback in my media player or WAV + CUE to easily burn a CD
- at home.
+ is still useful for all sorts of things and I often create FLAC + CUE for
+ album playback in my media player or WAV + CUE to easily burn a CD at home.
 \end_layout
 
 \begin_layout Subsection
@@ -3959,7 +4141,7 @@ Typing Notes
 
 \begin_layout Standard
 Document your takes either using the built-in REAPER project notes or SWS
- Notes (
+ Notes 
 \begin_inset ERT
 status open
 
@@ -3972,7 +4154,7 @@ keys{N}
 
 \end_inset
 
- for 
+ (for 
 \begin_inset Quotes bld
 \end_inset
 
@@ -3995,7 +4177,7 @@ ReaClassical defaults to placing media and exports into appropriately subfolders
  Also, ReaClassical defaults to separate folders for automatic backups and
  autosaves.
  These settings are subject to change and can be modified by going to the
- REAPER preferences (
+ REAPER preferences 
 \begin_inset ERT
 status open
 
@@ -4008,7 +4190,7 @@ keys{O}
 
 \end_inset
 
- for 
+ (for 
 \begin_inset Quotes bld
 \end_inset
 
@@ -4098,8 +4280,7 @@ menu{File > Save project as...}
 
  
 \emph on
-.
-
+,
 \emph default
  converting to a format like FLAC and trimming the media as you wish.
  Finally, one to look out for in the future is 
@@ -4271,9 +4452,22 @@ Description:
 \emph default
 A multi-use function to 1) set up destination and source groups with as
  many tracks as you need, 2) to create source groups from an existing destinatio
-n folder group (for example, created with F7 shortcut) and, for in the middle
- of editing, 3) to (re)create track grouping and to sync routing/fx between
- destination (the top folder and its children) and source groups.
+n folder group (for example, created with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ shortcut) and, for in the middle of editing, 3) to (re)create track grouping
+ and to sync routing/fx between destination (the top folder and its children)
+ and source groups.
  Note that for 3), all folders must contain the same number of tracks.
 \end_layout
 
@@ -4292,8 +4486,20 @@ Whether you start with an empty project or use an existing folder group
  the same settings.
  Note also that running the function engages an intelligent mixer view where
  only the soloed group is shown in the mixer.
- You can see this in action by using the Audition (A) function which auditions
- audio at the mouse cursor.
+ You can see this in action by using the Audition function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ which auditions audio at the mouse cursor.
  Watch as the mixer view changes which tracks are visible.
 \end_layout
 
@@ -4332,8 +4538,33 @@ Description:
 \emph on
 Notes:
 \emph default
- First create a folder (F7) or multiple folders (F8) and import the multi-channe
-l item(s) onto the same folder track (important!).
+ First create a folder 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or multiple folders 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ and import the multi-channel item(s) onto the same folder track (important!).
  Select one or more items of the same channel count.
  Run the function and then choose 
 \begin_inset Quotes bld
@@ -4354,7 +4585,20 @@ no
  to leave as mono.
  Depending on the choice, the number of tracks in the folder will be increased
  or decreased with the all-mono option leaving the folder track itself empty
- ready to run prepare takes (T) to create a muted guide track.
+ ready to run prepare takes 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{T}
+\end_layout
+
+\end_inset
+
+ to create a muted guide track.
 \end_layout
 
 \begin_layout Standard
@@ -4399,7 +4643,20 @@ nt mixer.
 \emph on
 Create Source Groups
 \emph default
- function (F8).
+ function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Standard
@@ -4450,7 +4707,33 @@ Hide child tracks to save screen estate and for working with multi-channel
 \emph on
 Notes: 
 \emph default
-Select a folder track and press D to hide the children or E to show them.
+Select a folder track and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{D}
+\end_layout
+
+\end_inset
+
+ to hide the children or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{E}
+\end_layout
+
+\end_inset
+
+ to show them.
  All S-D and razor editing functions work perfectly while folder groups
  are collapsed.
  This recreates a popular way of working with classical music takes in Pyramix.
@@ -4490,9 +4773,35 @@ Description:
 \emph on
 Notes:
 \emph default
- To use, highlight a folder, position the edit cursor and press F9.
+ To use, highlight a folder, position the edit cursor and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ .
  Press again to stop the recording.
- To immediately start a new take, simply press F9 again.
+ To immediately start a new take, simply press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ again.
  Note that the next folder is selected and that the cursor returns to the
  original position for easy lining up of takes.
  If you run out of source groups, the function will automatically create
@@ -4595,8 +4904,21 @@ Create a duplicate without media items of the highlighted folder.
 \emph on
 Notes: 
 \emph default
-Now that Classical Take Record (F9) automatically creates new folders if
- needed, this function does not need to be used when recording material.
+Now that Classical Take Record 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ automatically creates new folders if needed, this function does not need
+ to be used when recording material.
  However, if importing pre-recorded takes and you need more source groups
  to accommodate the material, this is still very useful.
 \end_layout
@@ -4673,8 +4995,20 @@ Description:
 \emph on
 Notes: 
 \emph default
-Simply hover the mouse over an area of the project and press A to begin
- auditioning the audio.
+Simply hover the mouse over an area of the project and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ to begin auditioning the audio.
  Hover over a folder track to hear the complete mix or a single track within
  a folder for listening to individual instrument or sections.
  Again, it is good to note that when auditioning begins, the mixer updates
@@ -4810,6 +5144,19 @@ These values are saved on a per-project basis.
 \emph on
 Create CD Markers
 \emph default
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Y}
+\end_layout
+
+\end_inset
+
  function will ignore and use a value of 1 second as this is the lowest
  that makes any sense for displaying the countdown to the next track.
 \end_layout
@@ -4887,7 +5234,59 @@ Description:
 \emph on
 Notes: 
 \emph default
-1,2 = destination IN/OUT; 3,4 = Source IN/OUT.
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+ , 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+ = destination IN/OUT; 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ , 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+ = Source IN/OUT.
  Inbetween the destination markers is where the edit will actually happen.
  Inbetween the source markers is where the material is taken from.
  Use all four markers for 4-point editing.
@@ -4895,9 +5294,47 @@ Notes:
  Very important and useful to note is that the source marker labels reflect
  which source group was highlighted when the markers were placed.
  In other words, to create source markers, first select the item in the
- chosen folder track and then use the 3 & 4 shortcuts.
- This means that when the actual edit is made (using shortcut 5) it doesn't
- matter what is highlighted at the time.
+ chosen folder track and then use the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ & 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+ shortcuts.
+ This means that when the actual edit is made (using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+) it doesn't matter what is highlighted at the time.
  Obviously this is only useful if using a vertical take system approach.
 \end_layout
 
@@ -4935,8 +5372,20 @@ Description:
 \emph on
 Notes: 
 \emph default
-Once you have placed your S-D markers (any combination of 2, 3 or 4 markers)
- press shortcut 5 to make the edit.
+Once you have placed your S-D markers press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+ to make the edit.
  Whatever the number of markers you used, the edit will be crossfaded using
  a short equal power fade (you can change this in REAPER options under 
 \emph on
@@ -4948,7 +5397,20 @@ Media Item Defaults
  For any S-D edit you can, of course, undo the action and return to the
  previous state.
  The desired crossfade length is set via ReaClassical Project Preferences
- (F5).
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Standard
@@ -5005,9 +5467,59 @@ The destination-IN marker is retained and placed at the end of the edit
 …the source marker labels reflect which source group was highlighted when
  the markers were placed.
  In other words, to create source markers, first select the item in the
- chosen folder track and then use the 3 & 4 shortcuts.
- This means that when the actual edit is made (using shortcut 5) it doesn't
- matter what is highlighted at the time.
+ chosen folder track and then use the 
+\emph default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+
+\emph on
+ & 
+\emph default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+
+\emph on
+ shortcuts.
+ This means that when the actual edit is made (using 
+\emph default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+ 
+\emph on
+) it doesn't matter what is highlighted at the time.
 \end_layout
 
 \begin_layout Standard
@@ -5049,7 +5561,20 @@ Notes:
  This is less useful for classical music editing but perhaps very useful
  for video work where replacement material has to fit exactly into the time
  used by the original.
- Crossfade length is set via ReaClassical Project Preferences (F5).
+ Crossfade length is set via ReaClassical Project Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Standard
@@ -5091,7 +5616,20 @@ Notes:
  This only affects the folder group that was highlighted when the source
  markers were placed which will almost always be the destination group (the
  top folder in the project).
- Crossfade length is set via ReaClassical Project Preferences (F5).
+ Crossfade length is set via ReaClassical Project Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Standard
@@ -5178,8 +5716,59 @@ Deletes source and destination markers.
 Notes: 
 \emph default
 Useful if you want to abandon a S-D edit, however, there's also no problem
- leaving the markers for another time given that shortcuts 1-4 replace any
- existing version of the marker.
+ leaving the markers for another time given that shortcuts 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+ ,
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+ ,
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+ replace any existing version of the marker.
  Also when running 
 \emph on
 Create CD Markers
@@ -5234,30 +5823,146 @@ To enter the crossfade view, select the lefthand item of a crossfaded item
  left or bottom right of the view to audition the function from that location
  to the mirrored location on the other side of the edit.
  Note how easy it is to quickly set an audition length! Or, hover the mouse
- on the first item and press A to just audition the material into the fade.
- Hover and press A on the outgoing item to only hear the material out of
- the fade.
+ on the first item and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ to just audition the material into the fade.
+ Hover and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ on the outgoing item to only hear the material out of the fade.
  Note that auditioning in the arrange window or in fade editor mode maintains
  muted items on the folder track (for example, in the case of a muted guide
- track created by Prepare Takes (T) for mono-channel polywav import.
+ track created by Prepare Takes 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{T}
+\end_layout
+
+\end_inset
+
+ for mono-channel polywav import.
 \end_layout
 
 \begin_layout Standard
 NEW: To actually finesse the edit, ensure at least one of the crossfaded
  items is selected.
  Then hover your mouse in a blank area (similar to the above fade editor
- audition tool process) and press Z.
+ audition tool process) and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Z}
+\end_layout
+
+\end_inset
+
+.
  You'll notice that the waves mirror extend to the mouse position to allow
  for easy lining up of the material.
  Place the edit cursor at an appropriate edit point on the left red item
  (i.e.
  just before a transient) then simply move the right green item to align
- and then press X.
- Audition again, Z to expand again.
+ and then press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{X}
+\end_layout
+
+\end_inset
+
+.
+ Audition again, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Z}
+\end_layout
+
+\end_inset
+
+ to expand again.
  You can quickly move to the previous or next item (with all coloring and
- locking automatically happening behind the scenes) by pressing Q or W.
- Or, simply press F to exit the fade view (it goes without saying that the
- original colors of the project items are restored).
+ locking automatically happening behind the scenes) by pressing 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Q}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{W}
+\end_layout
+
+\end_inset
+
+.
+ Or, simply press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F}
+\end_layout
+
+\end_inset
+
+ to exit the fade view (it goes without saying that the original colors
+ of the project items are restored).
 \end_layout
 
 \begin_layout Standard
@@ -5303,11 +6008,37 @@ Notes:
  If you attempt to use it in other situations, you will receive a helpful
  message.
  As described above, when either one or both items are highlighted, hover
- your mouse in a blank area and press Z .
+ your mouse in a blank area and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Z}
+\end_layout
+
+\end_inset
+
+ .
  You'll notice that the waveforms are mirror extended to allow for easy
  lining up of the material.
  Simply put the edit cursor just before a transient on the red item, move
- the green right item to align, and then press X.
+ the green right item to align, and then press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{X}
+\end_layout
+
+\end_inset
+
+.
  
 \end_layout
 
@@ -5354,11 +6085,37 @@ classical
 Notes: 
 \emph default
 While in the project view, drag an item (or grouped items) over another,
- move the edit cursor where you want the edit to happen and press X.
+ move the edit cursor where you want the edit to happen and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{X}
+\end_layout
+
+\end_inset
+
+.
  Given the availability of S-D edit functionality and group razor-editing,
  this function is less useful in this context.
  However, it is essential in the crossfade editor mode for making the edit.
- Crossfade length is set via ReaClassical Project Preferences (F5).
+ Crossfade length is set via ReaClassical Project Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Standard
@@ -5519,8 +6276,21 @@ Notes:
 This might be the biggest time-saving function in the ReaClassical system.
  It works as follows: 1) Edit gaps between items until you are happy 2)
  Add take names only to items that will become CD track starts 3) Run the
- function via shortcut Y and you will be asked to enter various information
- including UPC/ISRC (optional) and CD metadata.
+ function via shortcut 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Y}
+\end_layout
+
+\end_inset
+
+ and you will be asked to enter various information including UPC/ISRC (optional
+) and CD metadata.
  Done! Note that ISRC codes are auto-generated per track based on the numbers
  you enter.
 \end_layout
@@ -5533,7 +6303,20 @@ You can add audio to the initial pregap (easter egg track) by not giving
  All album metadata is placed towards the end of the album inside a default
  7-second silent lead-out (so that CD players in cars don't immediately
  cycle back to the first track without a little breathing room).
- This value can be changed via the ReaClassical Project Preferences (F5).
+ This value can be changed via the ReaClassical Project Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ .
  In addition to markers, regions are also generated for easy exporting of
  individual tracks.
  If you need a countdown into a track, simply add a ! at the start of the
@@ -5687,58 +6470,201 @@ Navigation
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Home Project Start 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Home}
+\end_layout
+
+\end_inset
+
+ Project Start 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-End Project End 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{End}
+\end_layout
+
+\end_inset
+
+ Project End 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-` Whole Project View (Horizontal)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{`}
+\end_layout
+
+\end_inset
+
+ Whole Project View (Horizontal)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+` Whole Project View (Vertical)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+`}
+\end_layout
+
+\end_inset
+
+ Whole Project View (Vertical)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+Up Increase peaks display zoom for project
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+arrowkeyup}
+\end_layout
+
+\end_inset
+
+ Increase peaks display zoom for project
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+Down Decrease peaks display zoom for project
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+arrowkeydown}
+\end_layout
+
+\end_inset
+
+ Decrease peaks display zoom for project
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Q Previous Item / previous crossfade (when in crossfade editor view)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Q}
+\end_layout
+
+\end_inset
+
+ Previous Item / previous crossfade (when in crossfade editor view)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-W Next Item / next crossfade (when in crossfade editor view)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{W}
+\end_layout
+
+\end_inset
+
+ Next Item / next crossfade (when in crossfade editor view)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-, Previous Marker 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{,}
+\end_layout
+
+\end_inset
+
+ Previous Marker 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{.}
+\end_layout
+
+\end_inset
+
  Next Marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-TAB Move to item peak value (SWS)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+tab}
+\end_layout
+
+\end_inset
+
+ Move to item peak value (SWS)
 \end_layout
 
 \begin_layout Standard
@@ -5749,30 +6675,90 @@ Folder & Source Group Preparation
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-F7 Create Folder (prompts for number of tracks) 
-\end_layout
+\begin_inset ERT
+status open
 
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-F8 Create Source Groups (vertical)(from scratch or from existing folder)
- / Sync Routing/FX 
-\end_layout
+\begin_layout Plain Layout
 
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-F10 Explode multi-channel items (polywavs)
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
 
 \backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ Create Folder (prompts for number of tracks) 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ Create Source Groups (vertical)(from scratch or from existing folder) /
+ Sync Routing/FX 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F10}
+\end_layout
+
+\end_inset
+
+ Explode multi-channel items (polywavs)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+textbackslash}
+\end_layout
+
+\end_inset
+
  Duplicate Folder (no items)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-@ Add Aux or Submix track to end of mixer
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{@}
+\end_layout
+
+\end_inset
+
+ Add Aux or Submix track to end of mixer
 \end_layout
 
 \begin_layout Standard
@@ -5783,17 +6769,53 @@ Recording & Take Management
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-F9 Classical Take Record
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ Classical Take Record
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-T Prepare Takes
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{T}
+\end_layout
+
+\end_inset
+
+ Prepare Takes
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-K Colorize (add custom color to item group)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{K}
+\end_layout
+
+\end_inset
+
+ Colorize (add custom color to item group)
 \end_layout
 
 \begin_layout Standard
@@ -5804,78 +6826,206 @@ Editing
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-A Audition (folder or track) at mouse position
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ Audition (folder or track) at mouse position
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-D Display child tracks
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{D}
+\end_layout
+
+\end_inset
+
+ Display child tracks
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-E Ensconce (hide) child tracks
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{E}
+\end_layout
+
+\end_inset
+
+ Ensconce (hide) child tracks
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+up Increase waveform display
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{S}
+\end_layout
+
+\end_inset
+
+ Split item
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+down Decrease waveform display
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{J}
+\end_layout
+
+\end_inset
+
+ Join (glue) item
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-S Split item
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{G}
+\end_layout
+
+\end_inset
+
+ Group items 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-J Join (glue) item
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{U}
+\end_layout
+
+\end_inset
+
+ Ungroup items
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-G Group items 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{I}
+\end_layout
+
+\end_inset
+
+ Swap marquee and razor edit modifiers 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-U Ungroup items
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F}
+\end_layout
+
+\end_inset
+
+ Open ReaClassical Fade Editor
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-I Swap marquee and razor edit modifiers 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{X}
+\end_layout
+
+\end_inset
+
+ Create a classical crossfade 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-F Open ReaClassical Fade Editor
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Z}
+\end_layout
+
+\end_inset
+
+ Extent crossfaded items for editing (when in ReaClassical Fade Editor view)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-X Create a classical crossfade 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{V}
 \end_layout
 
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-Z Extent crossfaded items for editing (when in ReaClassical Fade Editor
- view)
-\end_layout
+\end_inset
 
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-K Lock Toggle
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-V Toggle per-track ripple editing
+ Toggle per-track ripple editing
 \end_layout
 
 \begin_layout Standard
@@ -5886,32 +7036,104 @@ S-D Editing
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-1 Add Destination IN marker 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+ Add Destination IN marker 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-2 Add Destination OUT marker 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+ Add Destination OUT marker 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-3 Add Source IN marker 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ Add Source IN marker 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-4 Add Source OUT marker 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+ Add Source OUT marker 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-5 Make S/D Edit (2-, 3-, or 4-point cut)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+ Make S/D Edit (2-, 3-, or 4-point cut)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-F3 3-point 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F3}
+\end_layout
+
+\end_inset
+
+ 3-point 
 \begin_inset Quotes bld
 \end_inset
 
@@ -5924,62 +7146,232 @@ Assembly Line
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-F4 Insert with time-stretching (All 4 S-D markers)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F4}
+\end_layout
+
+\end_inset
+
+ Insert with time-stretching (All 4 S-D markers)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-bksp Delete with ripple (between 2 source markers) 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+backspace}
+\end_layout
+
+\end_inset
+
+ Delete with ripple (between 2 source markers) 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-ctrl+bksp Delete Leaving Silence (between 2 source markers) 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+backspace}
+\end_layout
+
+\end_inset
+
+ Delete Leaving Silence (between 2 source markers) 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+1 Move to Destination IN marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+1}
+\end_layout
+
+\end_inset
+
+ Move to Destination IN marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+2 Move to Destination OUT marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+2}
+\end_layout
+
+\end_inset
+
+ Move to Destination OUT marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+3 Move to Source IN marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+3}
+\end_layout
+
+\end_inset
+
+ Move to Source IN marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+4 Move to Source OUT marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+4}
+\end_layout
+
+\end_inset
+
+ Move to Source OUT marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Alt+1 Zoom to Destination IN marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+Alt+1}
+\end_layout
+
+\end_inset
+
+ Zoom to Destination IN marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Alt+2 Zoom to Destination OUT marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+Alt+2}
+\end_layout
+
+\end_inset
+
+ Zoom to Destination OUT marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Alt+3 Zoom to Source IN marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+Alt+3}
+\end_layout
+
+\end_inset
+
+ Zoom to Source IN marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Alt+4 Zoom to Source OUT marker
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+Alt+4}
+\end_layout
+
+\end_inset
+
+ Zoom to Source OUT marker
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-ctrl+Del Delete all S-D Markers 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+ Delete all S-D Markers 
 \end_layout
 
 \begin_layout Standard
@@ -5990,67 +7382,235 @@ Mastering
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Y Automatically generate DDP markers from items
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Y}
+\end_layout
+
+\end_inset
+
+ Automatically generate DDP markers from items
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+Y Reposition CD tracks
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+Y}
+\end_layout
+
+\end_inset
+
+ Reposition CD tracks
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+Left Shift CD track one track to the left
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+arrowkeyleft}
+\end_layout
+
+\end_inset
+
+ Shift CD track one track to the left
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+Right Shift CD track one track to the right
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+arrowkeyright}
+\end_layout
+
+\end_inset
+
+ Shift CD track one track to the right
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-M Add Marker 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{M}
+\end_layout
+
+\end_inset
+
+ Add Marker 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-N Open/Close SWS Notes
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{N}
+\end_layout
+
+\end_inset
+
+ Open/Close SWS Notes
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-L Marker List (SWS) 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{L}
+\end_layout
+
+\end_inset
+
+ Marker List (SWS) 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-; Regions from items (SWS) 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{;}
+\end_layout
+
+\end_inset
+
+ Regions from items (SWS) 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-' Region from items 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{'}
+\end_layout
+
+\end_inset
+
+ Region from items 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-# Region from selection 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+#}
+\end_layout
+
+\end_inset
+
+ Region from selection 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-/ Selection to item(s)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{/}
+\end_layout
+
+\end_inset
+
+ Selection to item(s)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-C Generate CUE file and album reports from project CD markers 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{C}
+\end_layout
+
+\end_inset
+
+ Generate CUE file and album reports from project CD markers 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-R Render 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{R}
+\end_layout
+
+\end_inset
+
+ Render 
 \end_layout
 
 \begin_layout Standard
@@ -6061,38 +7621,124 @@ Miscellaneous
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-F5 ReaClassical Preferences (set crossfade length, CD track offset, INDEX0
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ ReaClassical Preferences (set crossfade length, CD track offset, INDEX0
  pre-gap length, Album lead-out time)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-F6 Open/Close ReaClassical custom toolbar
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F6}
+\end_layout
+
+\end_inset
+
+ Open/Close ReaClassical custom toolbar
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-H Open ReaClassical help system (currently the PDF manual)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{H}
+\end_layout
+
+\end_inset
+
+ Open ReaClassical help system (currently the PDF manual)
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-O Options (Preferences) 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{O}
+\end_layout
+
+\end_inset
+
+ Options (Preferences) 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-P Project Settings 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{P}
+\end_layout
+
+\end_inset
+
+ Project Settings 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-B Batch file converter 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{B}
+\end_layout
+
+\end_inset
+
+ Batch file converter 
 \end_layout
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
-Ctrl+U Check for REAPER updates (using REAPER update utility lua)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+U}
+\end_layout
+
+\end_inset
+
+ Check for REAPER updates (using REAPER update utility lua)
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -6353,8 +7999,8 @@ Sonnox Inflator
 
 -style waveshaping:
 \series default
- Try RCInflator (a clone of the Sonnox product) or MagicFairyDust on the
- final stereo bus.
+ Try RCInflator Ultimate (a clone of the Sonnox product) or MagicFairyDust
+ on the final stereo bus.
  Both effects are included in the portable install.
 \end_layout
 
