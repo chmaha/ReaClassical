@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3.4
+@version 24.3.5
 @changelog
-  Sync ReaPack as part of Updater function
-  Force restart after running Updater function
-  Various: Rename internal function to link_controls()
-  Remove linking controls function when creating a single folder
-  Update ReaClassical splash to match PDF guide
-  Update PDF guide to reflect latest update method
-  PDF guide: point to tested_reaper_ver.txt
+  Rename PDF guide to manual and update all links, metapackage and H shortcut
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -62,7 +56,7 @@
   [theme] Sequoia.ReaperThemeZip
   [theme] SaDiE.ReaperThemeZip
   [theme] Sonic Solutions.ReaperThemeZip
-  ../PDF_Guide/ReaClassical User Guide.pdf > ReaClassical_PDF_Guide.pdf
+  ../PDF-Manual/ReaClassical-Manual.pdf > ReaClassical-Manual.pdf
   reaclassical-splash.png > reaclassical-splash.png
   ReaClassical-menu.ini > ReaClassical-menu.ini
   ReaClassical-kb.ini > ReaClassical-kb.ini
