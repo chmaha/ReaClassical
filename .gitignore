@@ -1,4 +1,4 @@
-*.lyx*
+*.lyx~
 cleanrf.sh
 cover*.pdf
 release_plan
