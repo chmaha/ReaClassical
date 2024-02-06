@@ -99,7 +99,7 @@ function main()
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
         ShowMessageBox(
-            "Please add at least 2 valid source-destination markers: \n 2-point edit: 1 DEST and 1 SOURCE marker (any combination) \n 3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
+            "Please add at least 2 valid source-destination markers: \n 2-point edit: Either 1 DEST and 1 SOURCE marker (any combination) or both SOURCE markers\n 3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
             , "Source-Destination Edit", 0)
         return
     end
