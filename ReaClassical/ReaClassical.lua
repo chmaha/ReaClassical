@@ -2,7 +2,7 @@
 @author chmaha
 @version 24.4
 @changelog
-  Add "Insert at source position" function
+  Add "Insert at source position" functionality to S-D edit
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
