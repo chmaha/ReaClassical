@@ -65,7 +65,11 @@ function main()
           local dest_end = GetProjectLength(0)
           AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
         end
+    elseif source_count == 2 and dest_count == 0 then
+        AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+        AddProjectMarker2(0, false,  pos_table[4], 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
     end
+    
     
     local _, _, dest_count, _, _, source_count, _ = markers() 
     if dest_count + source_count == 4 then -- final check we actually have 4 S-D markers
