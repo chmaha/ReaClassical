@@ -177,6 +177,89 @@ target "https://unsplash.com/@providence"
 Typeset in \SpecialChar LyX
  using \SpecialChar TeX
  Gyre Schola font
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\end_inset
+
+81 10 26
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+10 07 22
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+16 04 20
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+500 300 100 10
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+22 473
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+100 16
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+36.5 250
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -2496,8 +2579,9 @@ keys{5}
 \end_layout
 
 \begin_layout Standard
-For this operation, set one source marker and one destination marker.
- Again, make the edit with 
+For this operation, there are two possibilities: 1) Set one source marker
+ and one destination marker.
+ Make the edit with 
 \begin_inset ERT
 status open
 
@@ -2513,6 +2597,30 @@ keys{5}
  .
  Any missing IN markers are set to the beginning of the timeline and any
  missing OUT markers are set to the end of the source or destination material.
+ 2) Set both source markers and no destination markers.
+ Make the edit with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+ .
+ Here, the destination markers are set at the exact same positions on the
+ timeline as the source markers.
+ Obviously this operation is only useful in a vertical editing workflow
+ when you can select source material from a different track group.
+ The usefulness of this second option is further reduced if the takes are
+ not vertically aligned and not virtually identical in tempo.
+ On the other hand, it could be an incredibly quick method for editing takes
+ of a hybrid classical piece that is performed to a click track or other
+ recorded steady beat.
 \end_layout
 
 \begin_layout Subsection
