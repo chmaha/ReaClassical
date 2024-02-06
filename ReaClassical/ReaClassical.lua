@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.3.6
+@version 24.4
 @changelog
-  Use menukeys package to stylize every keyboard shortcut in the PDF manual
+  Add "Insert at source position" function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
