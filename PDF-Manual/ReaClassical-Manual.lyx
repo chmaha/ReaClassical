@@ -5399,6 +5399,8 @@ keys{4}
  Inbetween the source markers is where the material is taken from.
  Use all four markers for 4-point editing.
  Use any combination of 3 markers for 3-point editing.
+ Use either 1 source and 1 destination (more useful) or just the source
+ markers for 2-point editing (less useful).
  Very important and useful to note is that the source marker labels reflect
  which source group was highlighted when the markers were placed.
  In other words, to create source markers, first select the item in the
