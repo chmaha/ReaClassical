@@ -841,20 +841,33 @@ RCPlugs
 \end_inset
 
  for the classical jsfx plugins.
- Note that this does 
+ Note that out of the box this does 
 \emph on
 not
 \emph default
  give you the full benefits of ReaClassical which include keyboard shortcuts,
  custom toolbar etc but does include ReaClassical themes and a project template
  which you should use whether doing classical editing.
- However, it's an easy way to start if you are already familiar with ReaPack
- and SWS and want to check out source-destination editing etc.
+ It's an easy way to start if you are already familiar with ReaPack and
+ SWS and want to check out source-destination editing etc.
  Note that you 
 \emph on
 do
 \emph default
  need SWS installed for the functions to work as expected.
+ You can follow the update instructions 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "subsec:Updating"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ to grab the custom toolbar and keymap but please heed the warning about
+ using the ReaClassical_Updater function as answering 'yes' to either of
+ the questions will overwrite configuration files.
 \end_layout
 
 \begin_layout Subsection
@@ -885,7 +898,23 @@ Updating an Existing ReaClassical Portable Install
 \end_layout
 
 \begin_layout Standard
-Run the ReaClassical_Updater function found in the actions menu via 
+To update just the functions, use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+menu{Extensions > ReaPack > Synchronize packages}
+\end_layout
+
+\end_inset
+
+.
+ To update the functions and also update/reset the custom toolbar and keymaps
+ to be in line with a standard ReaClassical portable install, run the handy
+ ReaClassical_Updater function found in the actions menu via 
 \begin_inset ERT
 status open
 
