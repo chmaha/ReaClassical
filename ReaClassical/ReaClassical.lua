@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.4
+@version 24.4.1
 @changelog
-  Add "Insert at source position" functionality to S-D edit
+  PDF Manual: Add extra information to the update section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
