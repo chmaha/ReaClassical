@@ -28,7 +28,7 @@ function main()
         local boolean, num = GetUserInputs("Create Folder", 1, "How many tracks?", 10)
         num = tonumber(num)
         if boolean == true and num > 0 then
-            for i = 1, tonumber(num), 1 do
+            for _ = 1, tonumber(num), 1 do
                 InsertTrackAtIndex(0, true)
             end
             for i = 0, tonumber(num) - 1, 1 do
@@ -42,14 +42,12 @@ function main()
                 SetTrackSelected(track, 0)
             end
             media_razor_group()
-            --link_controls()
         else
             ShowMessageBox("You can't have zero tracks in a folder!", "Create Folder", 0)
         end
     elseif folder_check() == 1 then
         remove_track_groups()
         media_razor_group()
-        --link_controls()
         ShowMessageBox("Tracks re-grouped for media and razor editing", "Create Folder", 0)
     else
         ShowMessageBox("This function can be used on an empty project to create a folder group\nor on a single folder to re-group for media/razor editing", "Create Folder", 0)
@@ -91,7 +89,6 @@ end
 function media_razor_group()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
-    local num_of_folders = CountSelectedTracks(0)
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")

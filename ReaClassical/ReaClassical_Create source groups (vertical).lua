@@ -27,7 +27,7 @@ function main()
     Undo_BeginBlock()
 
     if CountTracks(0) == 0 then
-        boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
+        local boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
         num = tonumber(num)
         if boolean == true and num > 1 then
             create_destination_group()
@@ -55,7 +55,7 @@ end
 ---------------------------------------------------------------------
 
 function create_destination_group()
-    for i = 1, num, 1 do
+    for _ = 1, num, 1 do
         InsertTrackAtIndex(0, true)
     end
     for i = 0, num - 1, 1 do
@@ -80,7 +80,6 @@ function solo()
         track = GetTrack(0, i)
         if IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            i = i + 1
         end
     end
 end
@@ -154,7 +153,7 @@ function sync_routing_and_fx()
         local collapse = NamedCommandLookup("_SWS_COLLAPSE")
         Main_OnCommand(collapse, 0) -- collapse folder
 
-        for i = 1, folder_check() - 1, 1 do
+        for _ = 1, folder_check() - 1, 1 do
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0)            --SWS_SELCHILDREN2
             local copy_folder_routing = NamedCommandLookup("_S&M_COPYSNDRCV2")
@@ -216,7 +215,7 @@ function create_source_groups()
     remove_track_groups()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
-    i = 0
+    local i = 0
     while i < 6 do
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0)              -- SWS: Select children of selected folder track(s)

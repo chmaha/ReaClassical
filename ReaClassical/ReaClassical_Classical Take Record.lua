@@ -121,7 +121,6 @@ function solo()
         track = GetTrack(0, i)
         if IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            i = i + 1
         end
     end
     return true
@@ -130,14 +129,14 @@ end
 ---------------------------------------------------------------------
 
 function bus_check(track)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, "^@")
 end
 
 ---------------------------------------------------------------------
 
 function rt_check(track)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, "^RoomTone")
 end
 
@@ -147,12 +146,12 @@ function mixer()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if bus_check(track) then
-            native_color = ColorToNative(76, 145, 101)
+            local native_color = ColorToNative(76, 145, 101)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if rt_check(track) then
-            native_color = ColorToNative(20, 120, 230)
+            local native_color = ColorToNative(20, 120, 230)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
