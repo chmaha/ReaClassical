@@ -4,6 +4,7 @@
 @changelog
   Fix duplicate folder mixer view
   Fix classical take record mixer view and arm children for record during transport stop
+  Fix commit number issue
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
