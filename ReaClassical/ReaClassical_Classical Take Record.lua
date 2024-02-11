@@ -96,6 +96,8 @@ function main()
         if bool == false then
             local duplicate = NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
             Main_OnCommand(duplicate, 0)
+            local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+            Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
             local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
             Main_OnCommand(arm, 0)         -- Xenakios/SWS: Set selected tracks record armed
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
