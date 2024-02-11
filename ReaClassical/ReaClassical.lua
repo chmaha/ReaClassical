@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.4.1
+@version 24.4.2
 @changelog
-  PDF Manual: Add extra information to the update section
+  Remove unused variables
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
