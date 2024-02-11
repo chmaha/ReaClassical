@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.4.2
+@version 24.4.3
 @changelog
-  Remove unused variables
-  Add num variable as parameter given switch to local
+  Fix duplicate folder mixer view
+  Fix classical take record mixer view and arm children for record during transport stop
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
