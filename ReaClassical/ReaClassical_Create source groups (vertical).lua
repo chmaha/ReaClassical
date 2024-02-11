@@ -30,7 +30,7 @@ function main()
         local boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
         num = tonumber(num)
         if boolean == true and num > 1 then
-            create_destination_group()
+            create_destination_group(num)
         elseif boolean == true and num < 2 then
             ShowMessageBox("You need 2 or more tracks to make a source group!", "Create Source Groups", 0)
         end
@@ -54,7 +54,7 @@ end
 
 ---------------------------------------------------------------------
 
-function create_destination_group()
+function create_destination_group(num)
     for _ = 1, num, 1 do
         InsertTrackAtIndex(0, true)
     end
