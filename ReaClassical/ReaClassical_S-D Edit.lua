@@ -27,7 +27,7 @@ function main()
     Undo_BeginBlock()
     local dest_in, dest_out, dest_count, source_in, source_out, source_count, pos_table, track_number = markers()
     ripple_lock_mode()
-    if dest_count + source_count == 3 then -- add one extra marker for 3-point editing
+    if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
         local distance
         local pos
         if dest_in == 0 then
@@ -65,7 +65,7 @@ function main()
           local dest_end = GetProjectLength(0)
           AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
         end
-    elseif source_count == 2 and dest_count == 0 then
+    elseif source_count == 2 and dest_count == 0 and pos_table ~= nil then
         AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
         AddProjectMarker2(0, false,  pos_table[4], 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
     end
@@ -116,7 +116,7 @@ function markers()
     local retval, num_markers, num_regions = CountProjectMarkers(0)
     local dest_in, dest_out, source_in, source_out = 0, 0, 0, 0
     local pos_table = {}
-    local track_number
+    local track_number = 1
     for i = 0, num_markers + num_regions - 1, 1 do
         local _, _, pos, _, label, _ = EnumProjectMarkers(i)
         if label == "DEST-IN" then
