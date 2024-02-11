@@ -73,10 +73,10 @@ end
 ---------------------------------------------------------------------
 
 function source_markers()
-    local retval, num_markers, num_regions = CountProjectMarkers(0)
+    local _, num_markers, num_regions = CountProjectMarkers(0)
     local exists = 0
     for i = 0, num_markers + num_regions - 1, 1 do
-        local retval, isrgn, pos, rgnend, label, markrgnindexnumber = EnumProjectMarkers(i)
+        local _, _, _, _, label, _ = EnumProjectMarkers(i)
         if string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
             exists = exists + 1
         end

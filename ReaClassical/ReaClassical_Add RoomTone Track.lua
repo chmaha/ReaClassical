@@ -23,8 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 ---------------------------------------------------------------------
 
 function main()
-    local track_count = CountTracks(0)
-    folders = folder_check()
+    local folders = folder_check()
     if folders == 0 then
         ShowMessageBox("Please use either the 'Create folder' or 'Create Source Groups' script first!",
             "Add Roomtone track", 0)

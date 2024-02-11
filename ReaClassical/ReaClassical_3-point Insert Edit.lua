@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local dest_in, dest_out, source_count = markers()
+    local dest_in, source_count = markers()
     ripple_lock_mode()
     if dest_in == 1 and source_count == 2 then
         lock_items()
@@ -59,21 +59,18 @@ end
 ---------------------------------------------------------------------
 
 function markers()
-    local retval, num_markers, num_regions = CountProjectMarkers(0)
+    local _, num_markers, num_regions = CountProjectMarkers(0)
     local source_count = 0
     local dest_in = 0
-    local dest_out = 0
     for i = 0, num_markers + num_regions - 1, 1 do
-        local retval, isrgn, pos, rgnend, label, markrgnindexnumber = EnumProjectMarkers(i)
+        local _, _, _, _, label, _ = EnumProjectMarkers(i)
         if label == "DEST-IN" then
             dest_in = 1
-        elseif label == "DEST-OUT" then
-            dest_out = 1
         elseif label == string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
             source_count = source_count + 1
         end
     end
-    return dest_in, dest_out, source_count
+    return dest_in, source_count
 end
 
 ---------------------------------------------------------------------

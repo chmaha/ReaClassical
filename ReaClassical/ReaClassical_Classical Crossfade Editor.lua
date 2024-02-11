@@ -68,7 +68,6 @@ end
 function exit_check()
     local item = GetSelectedMediaItem(0, 0)
     if item then
-        color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
         return item
     else
         return -1

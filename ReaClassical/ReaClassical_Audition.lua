@@ -28,7 +28,7 @@ function main()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
-        local track, context, pos = BR_TrackAtMouseCursor()
+        local track, _, pos = BR_TrackAtMouseCursor()
         if track then
             SetOnlyTrackSelected(track)
             solo()
@@ -67,7 +67,6 @@ function main()
         local mouse_to_item_two = two_pos - mouse_pos
         local total_time = 2 * mouse_to_item_two + overlap
         if item_hover == item_one then
-            local item_pos = GetMediaItemInfo_Value(item_one, "D_POSITION")
             local item_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
             SetMediaItemSelected(item_hover, true)
             Main_OnCommand(40034, 0)     -- Item Grouping: Select all items in group(s)
@@ -78,7 +77,6 @@ function main()
             SetEditCurPos(mouse_pos, false, false)
             OnPlayButton() -- play until end of item_hover (one_pos + item_length)
         elseif item_hover == item_two then
-            local item_pos = GetMediaItemInfo_Value(item_two, "D_POSITION")
             SetMediaItemSelected(item_hover, true)
             Main_OnCommand(40034, 0)     -- Item Grouping: Select all items in group(s)
             if item_two_muted == 0 then
@@ -125,7 +123,6 @@ function solo()
         track = GetTrack(0, i)
         if IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            i = i + 1
         end
         if rt_check(track) then
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
@@ -136,14 +133,14 @@ end
 ---------------------------------------------------------------------
 
 function bus_check(track)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, "^@")
 end
 
 ---------------------------------------------------------------------
 
 function rt_check(track)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, "^RoomTone")
 end
 
@@ -153,12 +150,12 @@ function mixer()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if bus_check(track) then
-            native_color = ColorToNative(76, 145, 101)
+            local native_color = ColorToNative(76, 145, 101)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if rt_check(track) then
-            native_color = ColorToNative(20, 120, 230)
+            local native_color = ColorToNative(20, 120, 230)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
