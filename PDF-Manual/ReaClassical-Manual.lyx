@@ -8477,7 +8477,7 @@ REAPER (obviously)
 \begin_layout Itemize
 \noindent
 \align left
-SWS Extension
+SWS/S&M Extension
 \end_layout
 
 \begin_layout Itemize
@@ -8525,15 +8525,6 @@ literal "false"
  Next, install 
 \begin_inset CommandInset href
 LatexCommand href
-name "SWS Extension (bleeding edge)"
-target "https://www.sws-extension.org/download/pre-release/"
-literal "false"
-
-\end_inset
-
- and 
-\begin_inset CommandInset href
-LatexCommand href
 name "ReaPack"
 target "https://reapack.com/"
 literal "false"
@@ -8541,6 +8532,17 @@ literal "false"
 \end_inset
 
  into the UserPlugins subfolder inside the REAPER resource path.
+ Then install SWS/S&M Extension either via ReaPack or by downloading the
+ appropriate installer at 
+\begin_inset CommandInset href
+LatexCommand href
+name "SWS/S&M Extension (bleeding edge)"
+target "https://www.sws-extension.org/download/pre-release/"
+literal "false"
+
+\end_inset
+
+.
  Once that’s done, start/restart REAPER.
  You’ll then want to download the following from inside of ReaPack:
 \end_layout
