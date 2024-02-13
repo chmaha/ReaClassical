@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.5
+@version 24.4.3
 @changelog
-  Create Source Groups: Add track spacer after destination group
-  Prepare for multi-tab S-D editing
+  Fix duplicate folder mixer view
+  Fix classical take record mixer view and arm children for record during transport stop
+  Fix commit number issue
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -50,8 +51,6 @@
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [main] ReaClassical_3-point Insert Edit.lua
   [main] ReaClassical_Updater.lua
-  [main] ReaClassical_Delete Source Project Marker.lua
-  [main] ReaClassical_Set Source Project.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
