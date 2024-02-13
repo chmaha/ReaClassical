@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.4.3
+@version 24.4.4
 @changelog
-  Fix duplicate folder mixer view
-  Fix classical take record mixer view and arm children for record during transport stop
-  Fix commit number issue
+  Add spacer after destination group
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
