@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.4.4
+@version 24.4.5
 @changelog
-  Add spacer after destination group
+  Add spacer when duplicating destination group using \ shortcut and Classical Take Record (F9)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
