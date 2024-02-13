@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-
+    
     if CountTracks(0) == 0 then
         local boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
         num = tonumber(num)
@@ -197,7 +197,8 @@ function sync_routing_and_fx()
             DeleteTrackMediaItem(dup_tr, last_item)
             Main_OnCommand(40289, 0) -- Unselect all items
         end
-        media_razor_group()
+        tracks_per_group = media_razor_group()
+        add_spacer(tracks_per_group)
         local first_track = GetTrack(0, 0)
         SetOnlyTrackSelected(first_track)
         solo()
@@ -230,8 +231,11 @@ function create_source_groups()
         i = i + 1
     end
     link_controls()
-    media_razor_group()
+    tracks_per_group = media_razor_group()
+    add_spacer(tracks_per_group)
 end
+
+---------------------------------------------------------------------
 
 function media_razor_group()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
@@ -263,12 +267,14 @@ function media_razor_group()
     solo()
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    local tracks_per_group = CountSelectedTracks(0)
     mixer()
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
 
     Main_OnCommand(40297, 0)           -- Track: Unselect (clear selection of) all tracks
     Main_OnCommand(40939, 0)           -- select track 01
+    return tracks_per_group
 end
 
 ---------------------------------------------------------------------
@@ -330,6 +336,13 @@ end
 
 function folder_size_check(folder_tracks)
     return CountSelectedTracks(0) == folder_tracks
+end
+
+---------------------------------------------------------------------
+
+function add_spacer(num)
+    local track = GetTrack(0, num)
+    SetMediaTrackInfo_Value(track, "I_SPACER", 1)
 end
 
 ---------------------------------------------------------------------
