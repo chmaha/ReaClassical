@@ -40,6 +40,7 @@ function main()
     local duplicated = GetSelectedTrack(0,0)
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+    Main_OnCommand(42670,0) -- Remove spacer (if present)
     Main_OnCommand(40421, 0)           -- Item: Select all items in track
     local delete_items = NamedCommandLookup("_SWS_DELALLITEMS")
     Main_OnCommand(delete_items, 0)
@@ -49,7 +50,8 @@ function main()
     Main_OnCommand(select_children, 0)
     mixer()
     Main_OnCommand(unselect_children, 0)
-    media_razor_group(duplicated)
+    local tracks_per_group = media_razor_group(duplicated)
+    add_spacer(tracks_per_group)
     Undo_EndBlock('Duplicate folder (No items)', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -124,15 +126,25 @@ function media_razor_group(track)
     local num_of_folders = CountSelectedTracks(0)
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
+    local tracks_per_group
     for i = 1, num_of_folders, 1 do
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+        tracks_per_group = CountSelectedTracks(0)
         Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
         local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
         Main_OnCommand(next_folder, 0)     -- select next folder
     end
     Main_OnCommand(40297, 0) -- unselect all tracks
     SetTrackSelected(track, true)
+    return tracks_per_group
+end
+
+---------------------------------------------------------------------
+
+function add_spacer(num)
+    local track = GetTrack(0, num)
+    SetMediaTrackInfo_Value(track, "I_SPACER", 1)
 end
 
 ---------------------------------------------------------------------
