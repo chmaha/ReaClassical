@@ -20,6 +20,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, takename_check, check_position, get_track_info
+local select_CD_track_items, next_track, switch_highlight
+local is_item_start_crossfaded, pos_check
+
 ---------------------------------------------------------------------
 
 function main()

@@ -98,7 +98,7 @@ function get_data(filename)
     local _, ddp_metadata = GetProjExtState(0, "Create CD Markers", "Album Metadata")
     local _, metadata_saved = GetProjExtState(0, "Markers to CUE", "Metadata")
 
-
+    local ret, user_inputs
     if ddp_metadata ~= "" then
         local ddp_metadata_table = {}
         for value in ddp_metadata:gmatch("[^,]+") do
@@ -111,21 +111,19 @@ function get_data(filename)
                 table.insert(saved_metadata_table, value)
             end
 
-            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+            _, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
                 ddp_metadata_table[4] ..
                 ',' ..
                 saved_metadata_table[2] ..
                 ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
         else
-            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+            _, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
                 ddp_metadata_table[4] ..
                 ',' ..
                 this_year .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.wav')
         end
-
-        local ret, user_inputs
     else
         if metadata_saved ~= "" then
             ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
@@ -159,11 +157,11 @@ end
 function create_string(fields, num_of_markers, extension)
     local format = ext_mod(extension)
 
-    local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, num_of_markers - 1)
-    album_length = format_time(raw_pos_out)
+    local _, _, raw_pos_out, _, _ = EnumProjectMarkers2(0, num_of_markers - 1)
+    local album_length = format_time(raw_pos_out)
     local _, _, _, _, album_meta = EnumProjectMarkers2(0, num_of_markers - 2)
-    catalog_number = album_meta:match('CATALOG=([%w%d]+)') or ""
-    local out_str = ""
+    local catalog_number = album_meta:match('CATALOG=([%w%d]+)') or ""
+    local out_str
 
     if catalog_number ~= "" then
         out_str =
@@ -231,7 +229,6 @@ function create_string(fields, num_of_markers, extension)
                     out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
             end
         elseif name_out:find("^!") then
-            name_out = ''
             is_pregap = true
             pregap_start = format_time(raw_pos_out)
         end
@@ -460,8 +457,6 @@ function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, 
     file:write("    <tbody>\n")
 
     for _, track in ipairs(tracks or {}) do
-        local isrcSeparator = track.isrc and " | " or ""
-
         track.number = track.title == "pregap" and "p" or tostring(track.number or "")
         track.title = track.title == "pregap" and "" or track.title
 
@@ -528,7 +523,7 @@ end
 -----------------------------------------------------------------
 
 function add_pregaps_to_table(tracks, num_of_markers)
-    local pregap = {}
+    local pregap
     for i = 0, num_of_markers - 1 do
         local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, i)
         if string.sub(name_out, 1, 1) == "!" then

@@ -20,6 +20,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, shift, horizontal_color, vertical_color_razor, horizontal_group
+local vertical_group, horizontal, vertical, copy_track_items
+local tracks_per_folder, clean_take_names, xfade_check, empty_items_check
+
 ---------------------------------------------------------------------
 
 function main()
@@ -179,7 +183,7 @@ function vertical()
     local length = GetProjectLength(0)
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
-    for i = 1, num_of_folders, 1 do
+    for _ = 1, num_of_folders, 1 do
         vertical_color_razor()
         vertical_group(length)
         local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")

@@ -20,6 +20,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, markers, add_source_marker
+local GetTrackLength, select_matching_folder, copy_source, split_at_dest_in
+local create_crossfades, clean_up, lock_items, unlock_items
+local ripple_lock_mode, return_xfade_length, xfade
+local get_first_last_items
+
 ---------------------------------------------------------------------
 
 function main()
@@ -70,7 +76,6 @@ function main()
         AddProjectMarker2(0, false,  pos_table[4], 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
     end
     
-    
     local _, _, dest_count, _, _, source_count, _ = markers() 
     if dest_count + source_count == 4 then -- final check we actually have 4 S-D markers
         lock_items()
@@ -113,7 +118,7 @@ end
 ---------------------------------------------------------------------
 
 function markers()
-    local retval, num_markers, num_regions = CountProjectMarkers(0)
+    local _, num_markers, num_regions = CountProjectMarkers(0)
     local dest_in, dest_out, source_in, source_out = 0, 0, 0, 0
     local pos_table = {}
     local track_number = 1
@@ -142,46 +147,9 @@ end
 
 ---------------------------------------------------------------------
 
-function folder_check()
-    local folders = 0
-    local total_tracks = CountTracks(0)
-    for i = 0, total_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-            folders = folders + 1
-        end
-    end
-    return folders
-end
-
----------------------------------------------------------------------
-
 function add_source_marker(pos, distance, track_number, label, num)
     DeleteProjectMarker(NULL, num, false)
     AddProjectMarker2(0, false,  pos + distance, 0, track_number .. ":" .. label, num, ColorToNative(23, 223, 143) | 0x1000000)
-end
-
----------------------------------------------------------------------
-
-function remove_dest_material()
-    AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
-    Main_OnCommand(40310, 0) -- Set ripple per-track
-    Main_OnCommand(40289, 0) -- Item: Unselect all items
-    GoToMarker(0, 996, false)
-    Main_OnCommand(40625, 0)  -- Time Selection: Set start point
-    GoToMarker(0, 997, false)
-    Main_OnCommand(40626, 0)  -- Time Selection: Set end point
-    Main_OnCommand(40939, 0)  -- select track 01
-    Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
-    Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
-    Main_OnCommand(41990, 0)  -- Toggle ripple per-track (off)
-    local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-    Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
-    Main_OnCommand(40630, 0)  -- Go to start of time selection
-    Main_OnCommand(40020, 0)  -- Time Selection: Remove time selection and loop point selection
-    DeleteProjectMarker(NULL, 996, false)
-    Main_OnCommand(40289, 0) -- Item: Unselect all items
-    Main_OnCommand(41990, 0) -- Toggle ripple per-track (on)
 end
 
 ---------------------------------------------------------------------
@@ -272,7 +240,6 @@ function create_crossfades()
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)
@@ -334,15 +301,6 @@ function ripple_lock_mode()
     original_ripple_lock_mode = tonumber(original_ripple_lock_mode)
     if original_ripple_lock_mode ~= 2 then
         SNM_SetIntConfigVar("ripplelockmode", 2)
-    end
-end
-
----------------------------------------------------------------------
-
-function create_dest_in(dest_out, cur_pos)
-    SetEditCurPos(cur_pos, false, false)
-    if dest_out == 0 then
-        AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
     end
 end
 

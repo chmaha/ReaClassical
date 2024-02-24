@@ -20,6 +20,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, source_markers, select_matching_folder, lock_items
+local unlock_items, ripple_lock_mode, return_xfade_length, xfade
+
 ---------------------------------------------------------------------
 
 function main()

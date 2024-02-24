@@ -20,6 +20,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, create_destination_group, solo, bus_check, rt_check
+local mixer, folder_check, sync_routing_and_fx, create_source_groups
+local media_razor_group, remove_track_groups, link_controls
+local folder_size_check, add_spacer
+
 ---------------------------------------------------------------------
 
 function main()
@@ -185,7 +190,7 @@ function sync_routing_and_fx()
             Main_OnCommand(40421, 0)     --select all items on track
 
             local selected_tracks = CountSelectedTracks(0)
-            for i = 1, selected_tracks, 1 do
+            for _ = 1, selected_tracks, 1 do
                 Main_OnCommand(40117, 0) -- Move items up to previous folder
             end
             Main_OnCommand(40005, 0) --delete selected tracks

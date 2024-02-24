@@ -20,11 +20,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, move_to_item, deselect, select_check, exit_check
+local lock_previous_items, fadeStart, fadeEnd, zoom, view
+local lock_items, unlock_items, save_color, paint, load_color
+local move_cur_to_mid
+
 ---------------------------------------------------------------------
 
 function main()
-    local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-    local xfade_state = GetToggleCommandState(fade_editor_toggle)
     local win_state = GetToggleCommandState(41827)
 
     if win_state ~= 1 then
@@ -68,7 +71,6 @@ function select_check()
         item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
         item_end = item_position + item_length
     end
-    local cursor_position = GetCursorPosition()
     return item
 end
 

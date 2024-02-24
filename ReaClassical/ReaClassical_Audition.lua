@@ -20,6 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, solo, bus_check, rt_check, mixer, on_stop
+
 ---------------------------------------------------------------------
 
 function main()

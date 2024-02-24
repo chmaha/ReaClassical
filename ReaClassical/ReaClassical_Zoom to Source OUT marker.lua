@@ -20,6 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, zoom
+
 ---------------------------------------------------------------------
 function main()
   GoToMarker(0, 999, false)
