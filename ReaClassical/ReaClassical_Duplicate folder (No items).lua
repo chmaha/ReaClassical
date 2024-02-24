@@ -20,6 +20,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, solo, bus_check, rt_check, mixer, track_check
+local media_razor_group, add_spacer
+
 ---------------------------------------------------------------------
 
 function main()
@@ -68,7 +71,6 @@ function solo()
         track = GetTrack(0, i)
         if IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            i = i + 1
         end
     end
 end
@@ -127,7 +129,7 @@ function media_razor_group(track)
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
     local tracks_per_group
-    for i = 1, num_of_folders, 1 do
+    for _ = 1, num_of_folders, 1 do
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
         tracks_per_group = CountSelectedTracks(0)

@@ -3,6 +3,8 @@
 @version 24.4.6
 @changelog
   Clean up index file etc
+  Add local section at start of each file
+  Mass clean-up of unused functions and variables
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

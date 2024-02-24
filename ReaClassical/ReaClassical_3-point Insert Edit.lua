@@ -19,6 +19,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
+local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
+local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
+local get_first_last_items
 
 ---------------------------------------------------------------------
 

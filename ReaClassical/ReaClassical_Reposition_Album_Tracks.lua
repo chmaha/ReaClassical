@@ -20,6 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, get_grouped_items, copy_shift, empty_items_check
+
 ---------------------------------------------------------------------
 
 function main()
@@ -61,7 +63,7 @@ function main()
             local current_item_start = GetMediaItemInfo_Value(current_item, "D_POSITION")
             local take = GetActiveTake(current_item)
             local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-            local new_pos = 0
+            local new_pos
             local grouped_items = get_grouped_items(current_item)
             if take_name ~= "" and (current_item_start + shift > prev_end) then
                 new_pos = prev_end + gap

@@ -20,6 +20,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, track_check, folder_check, remove_track_groups
+local media_razor_group
+
 ---------------------------------------------------------------------
 
 function main()
@@ -95,32 +98,6 @@ function media_razor_group()
     Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
     Main_OnCommand(42578, 0)         -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40939, 0)         -- Track: Select track 01
-end
-
----------------------------------------------------------------------
-
-function link_controls()
-    local first_track = GetTrack(0, 0)
-    SetOnlyTrackSelected(first_track)
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-    local folder_tracks = CountSelectedTracks(0)
-    local i = 0
-    while i < folder_tracks do
-        local track = GetSelectedTrack(0, i)
-        GetSetTrackGroupMembership(track, "VOLUME_LEAD", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "VOLUME_FOLLOW", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "PAN_LEAD", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "PAN_FOLLOW", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "POLARITY_LEAD", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "POLARITY_FOLLOW", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "AUTOMODE_LEAD", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "AUTOMODE_FOLLOW", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "MUTE_LEAD", 2 ^ i, 2 ^ i)
-        GetSetTrackGroupMembership(track, "MUTE_FOLLOW", 2 ^ i, 2 ^ i)
-        i = i + 1
-    end
-    SetOnlyTrackSelected(first_track)
 end
 
 ---------------------------------------------------------------------

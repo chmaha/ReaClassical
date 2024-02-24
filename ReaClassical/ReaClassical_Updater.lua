@@ -26,6 +26,8 @@ local destination_file_path = resource_path .. "/reaper-menu.ini"
 local source_shortcuts_path = resource_path .. "/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
 local dest_shortcuts_path = resource_path .. "/reaper-kb.ini"
 
+local main, copy_file
+
 ---------------------------------------------------------------------
 
 function main()

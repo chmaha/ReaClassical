@@ -20,6 +20,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, takename_check, check_position, get_track_info, paste
+local select_and_cut, go_to_previous, shift, select_CD_track_items
+local calc_postgap, is_item_start_crossfaded
+
 ---------------------------------------------------------------------
 
 function main()
@@ -214,23 +218,6 @@ function calc_postgap(count, num_of_items, track, selected_item)
         postgap = 4
     end
     return new_track_item, postgap
-end
-
----------------------------------------------------------------------
-
-function get_grouped_items(item)
-    Main_OnCommand(40289, 0) -- unselect all items
-    SetMediaItemSelected(item, true)
-    Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-
-    Selected_item_count = CountSelectedMediaItems(0)
-
-    Selected_items = {}
-
-    for i = 1, Selected_item_count - 1 do
-        Selected_items[i] = GetSelectedMediaItem(0, i)
-    end
-    return Selected_items
 end
 
 ---------------------------------------------------------------------

@@ -20,6 +20,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, select_matching_folder, copy_source, split_at_dest_in
+local create_crossfades, clean_up, lock_items, unlock_items, ripple_lock_mode
+local return_xfade_length, xfade, get_first_last_items, SDmarkers
+
 ---------------------------------------------------------------------
 
 function main()
@@ -89,7 +93,7 @@ function main()
         end
         unlock_items()
         Main_OnCommand(40626, 0) -- Time Selection: Set end point
-        local cur_pos = create_crossfades()
+        create_crossfades()
         clean_up()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
@@ -102,26 +106,6 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
-end
-
----------------------------------------------------------------------
-
-function markers()
-    local retval, num_markers, num_regions = CountProjectMarkers(0)
-    local source_count = 0
-    local dest_in = 0
-    local dest_out = 0
-    for i = 0, num_markers + num_regions - 1, 1 do
-        local retval, isrgn, pos, rgnend, label, markrgnindexnumber = EnumProjectMarkers(i)
-        if label == "DEST-IN" then
-            dest_in = 1
-        elseif label == "DEST-OUT" then
-            dest_out = 1
-        elseif label == string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
-            source_count = source_count + 1
-        end
-    end
-    return dest_in, dest_out, source_count
 end
 
 ---------------------------------------------------------------------
@@ -152,8 +136,6 @@ function copy_source()
     Main_OnCommand(40625, 0) -- Time Selection: Set start point
     GoToMarker(0, 999, false)
     Main_OnCommand(40626, 0) -- Time Selection: Set end point
-    local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
-    local sel_length = end_time - start_time
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
     local first_track_items = CountSelectedMediaItems()
     Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)

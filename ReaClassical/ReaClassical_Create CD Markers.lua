@@ -20,6 +20,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, get_info, cd_markers, find_current_start, create_marker
+local renumber_markers, add_pregap, find_project_end, end_marker
+local frame_check, save_metadata, save_codes, add_codes, delete_markers
+local empty_items_check, return_custom_length, start_check
+
 ---------------------------------------------------------------------
 
 function main()

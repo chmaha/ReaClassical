@@ -20,6 +20,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, select_check, exit_check, lock_previous_items, fadeStart
+local fadeEnd, zoom, view, lock_items, unlock_items, save_color
+local paint, load_color, move_cur_to_mid
+
 ---------------------------------------------------------------------
 
 function main()

@@ -20,6 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main
+
 ---------------------------------------------------------------------
 
 function main()
@@ -56,16 +58,9 @@ function main()
     local two_pos = GetMediaItemInfo_Value(item_two, "D_POSITION")
     BR_GetMouseCursorContext()
     local mouse_pos = BR_GetMouseCursorContext_Position()
-    local item_hover = BR_GetMouseCursorContext_Item()
-    BR_GetMouseCursorContext()
-    local mouse_pos = BR_GetMouseCursorContext_Position()
-    local item_hover = BR_GetMouseCursorContext_Item()
     
     Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
     local end_of_one = one_pos + one_length
-    local overlap = end_of_one - two_pos
-    local mouse_to_item_two = two_pos - mouse_pos
-    local total_time = 2 * mouse_to_item_two + overlap
 
     if mouse_pos < two_pos then
         SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
@@ -84,7 +79,6 @@ function main()
     elseif mouse_pos > two_pos then
         SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
         SetEditCurPos(mouse_pos, false, false)
-        curpos = GetCursorPosition()
         SetMediaItemSelected(item_one, true)
         Main_OnCommand(41991, 0)                      -- toggle ripple-all OFF
         Main_OnCommand(41311, 0)                      -- extend item right
