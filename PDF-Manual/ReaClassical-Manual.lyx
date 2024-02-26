@@ -2372,8 +2372,8 @@ Auditioning Takes
 For horizontal editing, you can use the usual transport shortcuts (spacebar
  to start and stop playback, for example).
  For vertical (and horizontal) editing, it is highly recommended to use
- the Audition function to quickly solo only the folder (or track) you are
- interested in hearing.
+ the Audition or Exclusive Audition functions to quickly solo only the folder
+ (or track) you are interested in hearing.
  Just hover the mouse over the parent for the full mix or a child to solo
  a spot microphone you want to hear and press 
 \begin_inset ERT
@@ -2389,8 +2389,28 @@ keys{A}
 \end_inset
 
  .
+ This includes any @ aux track routing in the signal path.
+ To hear a single track (e.g.
+ the main microphone pair on the parent track without any children) without
+ any other routing press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+ .
  Note that similar to the Classical Take Record function, the tracks shown
  in the mixer are filtered based on what is being auditioned.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -3441,7 +3461,22 @@ keys{A}
 
 \end_inset
 
- is brilliant for listening to various takes before applying a razor or
+ or Exclusive Audition 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+ are brilliant for listening to various takes before applying a razor or
  S/D edit.
  I can shuttle between items with 
 \begin_inset ERT
@@ -4654,7 +4689,22 @@ keys{A}
 
 \end_inset
 
- which auditions audio at the mouse cursor.
+ and Exclusive Audition function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+ which audition audio at the mouse cursor.
  Watch as the mixer view changes which tracks are visible.
 \end_layout
 
@@ -5118,7 +5168,7 @@ Useful if you need to re-record a section of music after editing has started.
 \begin_layout Standard
 
 \series bold
-Audition 
+Audition & Exclusive Audition 
 \series default
 
 \begin_inset ERT
@@ -5129,6 +5179,21 @@ status open
 
 \backslash
 keys{A}
+\end_layout
+
+\end_inset
+
+ / 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
 \end_layout
 
 \end_inset
@@ -5163,13 +5228,74 @@ keys{A}
 
 \end_inset
 
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
  to begin auditioning the audio.
- Hover over a folder track to hear the complete mix or a single track within
+ With 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+, hover over a folder track to hear the complete mix or a single track within
  a folder for listening to individual instrument or sections.
  Again, it is good to note that when auditioning begins, the mixer updates
  intelligently, decluttering the view for ease of meter monitoring etc.
- Note that the function honors any aux or submix tracks (@) and keeps them
- in the mixer view.
+ Note that the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ function honors any aux or submix tracks (@) and keeps them in the mixer
+ view.
+ With 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+, hover over any track including the parent track to 
+\emph on
+only 
+\emph default
+hear that track without any further routing.
 \end_layout
 
 \begin_layout Standard
@@ -6995,7 +7121,27 @@ keys{A}
 
 \end_inset
 
- Audition (folder or track) at mouse position
+ Audition (full mix or child track) at mouse position (includes any @ aux
+ track connections)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+ Exclusive Audition (parent track or child track) at mouse position
 \end_layout
 
 \begin_layout Labeling
