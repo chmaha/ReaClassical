@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
+local main, folder_check
 
 ---------------------------------------------------------------------
 
@@ -31,53 +31,84 @@ function main()
         return
     end
 
+    if folder_check() > 0 then
+        ShowMessageBox("You can either import your media on one regular track for horizontal editing \z
+                        or on multiple regular tracks for a vertical workflow.\n\z
+                        The function will automatically create the required folder group(s).\z
+                    \nTo explode multi-channel after editing has started, \z
+                    please use on an empty project tab and copy across.", "Error: Folders detected!", 0)
+        return
+    end
+
     local num = CountSelectedMediaItems(0, 0)
 
-    takes = {}
-    items = {}
-    local track_number
+    local takes = {}
+    local items = {}
+    --local track_number
     for i = 0, num - 1 do
         local item = GetSelectedMediaItem(0, i)
         items[#items + 1] = item
-        local item_track = GetMediaItemTrack(item)
-        track_number = GetMediaTrackInfo_Value(item_track, 'IP_TRACKNUMBER')
         local take = GetActiveTake(item)
         takes[#takes + 1] = take
-        local source = GetMediaItemTake_Source(take)
-        local num_channels = GetMediaSourceNumChannels(source)
-
-        for i = 1, num_channels - 1 do
-            local track = GetTrack(0, track_number - 1 + i)
-            new_item = AddMediaItemToTrack(track)
-            SetMediaItemInfo_Value(new_item, "D_POSITION", GetMediaItemInfo_Value(item, "D_POSITION"))
-            SetMediaItemInfo_Value(new_item, "D_LENGTH", GetMediaItemInfo_Value(item, "D_LENGTH"))
-            local new_take = AddTakeToMediaItem(new_item)
-            SetMediaItemTake_Source(new_take, source)
-            SetMediaItemTakeInfo_Value(new_take, "I_CHANMODE", 3)
-            SetMediaItemTakeInfo_Value(new_take, "I_CHANMODE", 3 + i)
-        end
     end
+
+    -- Item: Explode multichannel audio or MIDI to new one-channel items
+    Main_OnCommand(40894, 0)
 
     local int = ShowMessageBox("Do you want to treat the first two iso tracks as interleaved stereo?",
         "Multi-channel Explode", 4)
     if int == 6 then
-        local second_track = GetTrack(0, track_number)
-        DeleteTrack(second_track)
-        for _, v in pairs(takes) do
-            SetMediaItemTakeInfo_Value(v, "I_CHANMODE", 67)
+        local prev_track_number
+        for _, item in pairs(items) do
+            local item_track = GetMediaItem_Track(item)
+            local track_number = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER")
+            if track_number == prev_track_number then goto continue end
+            second_track = GetTrack(0, track_number)
+            third_track = GetTrack(0, track_number+1)
+            DeleteTrack(second_track)
+            DeleteTrack(third_track)
+            prev_track_number = track_number
+            ::continue::
+        end
+
+        for _, take in pairs(takes) do
+            SetMediaItemTakeInfo_Value(take, "I_CHANMODE", 67)
+        end
+
+        for _, item in pairs(items) do
+            SetMediaItemInfo_Value(item, "B_MUTE_ACTUAL", 0)
         end
     else
-        InsertTrackAtIndex(track_number, true)
-        local second_track = GetTrack(0, track_number)
-        for _, v in pairs(items) do
-            MoveMediaItemToTrack(v, second_track)
-        end
-        for _, v in pairs(takes) do
-            SetMediaItemTakeInfo_Value(v, "I_CHANMODE", 3)
+        for _, item in pairs(items) do
+            local item_track = GetMediaItemTrack(item)
+            DeleteTrackMediaItem(item_track, item)
         end
     end
-    Main_OnCommand(40769, 0) -- unslect all items
+    Main_OnCommand(40769, 0) -- unselect all items
+
+    if folder_check() == 1 then -- run F7
+        group = NamedCommandLookup("_RSfc11d994a7848e13d22db277971a3afd01ba1cea")
+        Main_OnCommand(group, 0)
+    else -- run F8
+        sync = NamedCommandLookup("_RSd7bf4eb95ac7700edb48a275153ad1fc1ce3aff6")
+        Main_OnCommand(sync, 0)
+    end
+
     Undo_EndBlock("Explode multi-channel audio", 0)
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
 end
 
 ---------------------------------------------------------------------
