@@ -34,8 +34,8 @@ function main()
         if track then
             SetOnlyTrackSelected(track)
             solo()
-            local select_children = NamedCommandLookup("_SWS_SELCHILDREN2") -- SWS: Select children of selected folder track(s)
-            Main_OnCommand(select_children, 0)
+            -- local select_children = NamedCommandLookup("_SWS_SELCHILDREN2") -- SWS: Select children of selected folder track(s)
+            -- Main_OnCommand(select_children, 0)
             mixer()
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
@@ -124,31 +124,14 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if IsTrackSelected(track) == true then
-            SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        elseif IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         else
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        end
-
-        if bus_check(track) then
-            local receives = GetTrackNumSends(track, -1)
-            for i=0,receives-1, 1 do -- loop through receives
-            local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
-                if origin == selected_track or parent == 1 then
-                    SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-                    SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-                    break
-                end
-            end
-        end
-
-        if rt_check(track) and parent == 1 then
-            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
         end
     end
 
@@ -187,7 +170,7 @@ function mixer()
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
+        if IsTrackSelected(track) then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
