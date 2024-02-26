@@ -118,17 +118,42 @@ end
 ---------------------------------------------------------------------
 
 function solo()
-    local track = GetSelectedTrack(0, 0)
-    SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+    local selected_track = GetSelectedTrack(0, 0)
+    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
     for i = 0, CountTracks(0) - 1, 1 do
-        track = GetTrack(0, i)
-        if IsTrackSelected(track) == false then
+        local track = GetTrack(0, i)
+        if IsTrackSelected(track) == true then
+            SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        elseif IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        else
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
-        if rt_check(track) then
-            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+
+        if bus_check(track) then
+            local receives = GetTrackNumSends(track, -1)
+            for i=0,receives-1, 1 do -- loop through receives
+            local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
+                if origin == selected_track or parent == 1 then
+                    SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                    SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+                    break
+                end
+            end
         end
+
+        if rt_check(track) then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        end
+    end
+
+    if parent ~= 1 then
+        local parent_track = GetParentTrack(selected_track)
+        SetMediaTrackInfo_Value(parent_track, "B_MUTE", 0)
     end
 end
 
