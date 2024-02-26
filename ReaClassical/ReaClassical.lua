@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.4.6
+@version 24.4.7
 @changelog
-  Clean up index file etc
-  Add local section at start of each file
-  Mass clean-up of unused functions and variables
+  Explode multi-channel: Create new source media
+  Explode multi-channel: Allow for use on single track or multiple
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
