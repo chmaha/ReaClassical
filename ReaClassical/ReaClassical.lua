@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.4.8
+@version 24.5
 @changelog
-  Audition: Improve performance by muting non-soloed tracks
+  Audition: Ensure RoomTone plays for full mix
+  Exclusive Audition: Exclusive solo track that mouse is hovering off
+  Exclusive Audition: Add new keyboard shortcut (Shift+A)
+  ReaClassical Updater: Add new keyboard shortcut (Shift+U)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -49,6 +52,7 @@
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [main] ReaClassical_3-point Insert Edit.lua
   [main] ReaClassical_Updater.lua
+  [main] ReaClassical_Exclusive Audition.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
