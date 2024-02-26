@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	pkgver = "7.07"
+	pkgver = "7.11"
 	rcver  = "24"
 )
 
