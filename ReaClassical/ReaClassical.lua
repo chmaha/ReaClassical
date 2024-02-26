@@ -5,6 +5,7 @@
   Audition: Ensure RoomTone plays for full mix
   Exclusive Audition: Exclusive solo track that mouse is hovering off
   Exclusive Audition: Add new keyboard shortcut (Shift+A)
+  ReaClassical Updater: Add new keyboard shortcut (Shift+U)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
