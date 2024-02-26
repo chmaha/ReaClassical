@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.4.7
+@version 24.4.8
 @changelog
-  Explode multi-channel: Create new source media
-  Explode multi-channel: Allow for use on single track or multiple
+  Audition: Improve performance by muting non-soloed tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
