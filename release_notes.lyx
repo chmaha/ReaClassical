@@ -113,10 +113,10 @@ Release Notes
 \end_layout
 
 \begin_layout Paragraph*
-Ongoing Changelog for 24.x: 
+Ongoing Changelog: 
 \begin_inset CommandInset href
 LatexCommand href
-target "https://github.com/chmaha/ReaClassical/compare/24.0...main"
+target "https://github.com/chmaha/ReaClassical/commits/main/"
 literal "false"
 
 \end_inset
