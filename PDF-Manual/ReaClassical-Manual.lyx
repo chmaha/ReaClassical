@@ -2389,10 +2389,11 @@ keys{A}
 \end_inset
 
  .
- This includes any @ aux track routing in the signal path.
+ This includes any @ aux track routing in the signal path if the bus is
+ unmuted.
  To hear a single track (e.g.
- the main microphone pair on the parent track without any children) without
- any other routing press 
+ the main microphone pair on the parent track without any children) and
+ without any other routing press 
 \begin_inset ERT
 status open
 
@@ -5296,6 +5297,7 @@ shift+A}
 only 
 \emph default
 hear that track without any further routing.
+ Both functions respect muted @ aux and roomtone tracks.
 \end_layout
 
 \begin_layout Standard
@@ -7121,8 +7123,8 @@ keys{A}
 
 \end_inset
 
- Audition (full mix or child track) at mouse position (includes any @ aux
- track connections)
+ Audition (full mix or child track) at mouse position (includes any unmuted
+ @ aux track connections)
 \end_layout
 
 \begin_layout Labeling
