@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.5.1
+@version 24.5.2
 @changelog
-  PDF Manual: Update information about auditioning
+  Auditioning: Respect mutes on @ aux tracks and roomtone tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
