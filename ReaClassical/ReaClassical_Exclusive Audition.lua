@@ -34,8 +34,6 @@ function main()
         if track then
             SetOnlyTrackSelected(track)
             solo()
-            -- local select_children = NamedCommandLookup("_SWS_SELCHILDREN2") -- SWS: Select children of selected folder track(s)
-            -- Main_OnCommand(select_children, 0)
             mixer()
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
@@ -126,11 +124,14 @@ function solo()
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif IsTrackSelected(track) == false then
+        elseif not (bus_check(track) or rt_check(track)) and IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        else
-            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        end
+
+        local solo = GetMediaTrackInfo_Value(track, "I_SOLO")
+    
+        if rt_check(track) and solo > 0 then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
     end
@@ -170,7 +171,7 @@ function mixer()
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if IsTrackSelected(track) then
+        if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

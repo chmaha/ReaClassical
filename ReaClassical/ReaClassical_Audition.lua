@@ -126,15 +126,17 @@ function solo()
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        elseif not (bus_check(track) or rt_check(track)) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        else
+        elseif not (bus_check(track) or rt_check(track)) then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
 
-        if bus_check(track) then
+        local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
+        
+        if bus_check(track) and muted == 0 then
             local receives = GetTrackNumSends(track, -1)
             for i=0,receives-1, 1 do -- loop through receives
             local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
@@ -146,12 +148,13 @@ function solo()
             end
         end
 
-        if rt_check(track) and parent == 1 then
+        if rt_check(track) and muted == 0 then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
         end
     end
 
+    -- unmute parent so child track audio can come through
     if parent ~= 1 and not rt_check(selected_track) then
         local parent_track = GetParentTrack(selected_track)
         SetMediaTrackInfo_Value(parent_track, "B_MUTE", 0)
