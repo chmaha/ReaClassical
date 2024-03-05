@@ -37,17 +37,10 @@ function main()
         ShowMessageBox("Error: Empty items found. Delete them to continue.", "Prepare Takes", 0)
         return
     end
-    if xfade_check() == true then
-        local response = ShowMessageBox(
-            "Prepare Takes coloring and grouping is disabled \ngiven there are existing overlaps and/or fades. \n\nWould you like to remove item take names?",
-            "Prepare Takes", 4)
-        if response == 6 then
-            clean_take_names(num_of_project_items)
-        end
-        return
-    end
+
     PreventUIRefresh(1)
     Undo_BeginBlock()
+
     local response = ShowMessageBox("Would you like to remove item take names?", "Prepare Takes", 3)
     if response == 2 then return end
     if response == 6 then clean_take_names(num_of_project_items) end
@@ -127,6 +120,10 @@ end
 function horizontal_group()
     Main_OnCommand(40296, 0)        -- Track: Select all tracks
     Main_OnCommand(40417, 0)        -- Item navigation: Select and move to next item
+    local selected = GetSelectedMediaItem(0, 0)
+    local start = GetMediaItemInfo_Value(selected, "D_POSITION")
+    local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
+    SetEditCurPos(start+(length/2), false, false) -- move to middle of item
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
     Main_OnCommand(40032, 0)        -- Item grouping: Group items
@@ -141,6 +138,10 @@ function vertical_group(length)
 
     while IsMediaItemSelected(item) == false do
         Main_OnCommand(40417, 0)        -- Item navigation: Select and move to next item
+        local selected = GetSelectedMediaItem(0, 0)
+        local start = GetMediaItemInfo_Value(selected, "D_POSITION")
+        local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
+        SetEditCurPos(start+(length/2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
         Main_OnCommand(40032, 0)        -- Item grouping: Group items
@@ -152,20 +153,17 @@ end
 
 function horizontal()
     local length = GetProjectLength(0)
-    local num_of_tracks = CountTracks(0)
-    local last_track = GetTrack(0, num_of_tracks - 1)
-    local new_item = AddMediaItemToTrack(last_track)
+    local first_track = GetTrack(0, 0)
+    local new_item = AddMediaItemToTrack(first_track)
     SetMediaItemPosition(new_item, length + 1, false)
-    local num_of_items = CountMediaItems(0)
-    local last_item = GetMediaItem(0, num_of_items - 1)
     SetEditCurPos(0, false, false)
 
-    while IsMediaItemSelected(last_item) == false do
+    while IsMediaItemSelected(new_item) == false do
         horizontal_group()
         horizontal_color()
     end
 
-    DeleteTrackMediaItem(last_track, last_item)
+    DeleteTrackMediaItem(first_track, new_item)
     SelectAllMediaItems(0, false)
     Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
