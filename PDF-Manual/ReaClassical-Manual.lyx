@@ -2357,11 +2357,7 @@ For horizontally laid-out takes, each complete take is coloured with a different
  will additionally copy all items from each first child track into the folder
  track and mute them to act as a visual guide track.
  You will receive a pop-up message if this is the case.
- Note that if there are existing item overlaps and/or fades in the first
- track, Prepare Takes will be mainly disabled and only allow you to remove
- take names (in preparation for creation of CD markers).
- This is a safety feature given grouping already crossfaded items can lead
- to unexpected editing results.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -5061,12 +5057,9 @@ With a single folder group (or individual tracks), the shortcut will auto-color
  same time (this can happen if you receive pre-edited materials).
  The end result is if you drag one item of a take group, every other item
  will move in sync.
- NOTE: After you have started making S-D edits, the function will no longer
- offer to group or colour items due to potentially unexpected editing behaviour.
- The function was designed for use after initial recording or importing
- of media only.
- It will still offer to delete any existing take names after a user-friendly
- message.
+ NOTE: The function was designed for use after initial recording or importing
+ of media but as of 24.5.3 should work at any point during editing (for example
+ to import a patch recording).
  A reminder that the new REAPER native grouping (when set up via Create
  Folder or Create Source Groups sripts) works for 99% of situations without
  Prepare Takes but for takes that don't start or end at quite the same point
