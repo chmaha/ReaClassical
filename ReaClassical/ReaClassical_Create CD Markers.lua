@@ -47,6 +47,7 @@ function main()
     if choice == 6 then
         SetProjExtState(0, "Create CD Markers", "Run?", "yes")
         local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(first_track)
+        if redbook_track_length_errors == -1 then return end
         if redbook_track_length_errors > 0 then
             ShowMessageBox(
                 'This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.',
@@ -134,7 +135,7 @@ function cd_markers(first_track)
     if marker_count == 0 then
         ShowMessageBox('Please add take names to all items that you want to be CD tracks (Select item then press F2)',
             "No track markers created", 0)
-        return
+        return -1
     end
     if marker_count > 99 then
         redbook_total_tracks_error = true
