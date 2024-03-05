@@ -24,12 +24,13 @@ local main, move_to_item, deselect, select_check, exit_check
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
 local move_cur_to_mid
+local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 
 ---------------------------------------------------------------------
 
 function main()
     local win_state = GetToggleCommandState(41827)
-
+    
     if win_state ~= 1 then
         move_to_item()
         deselect()
