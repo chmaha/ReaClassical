@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.5.4
+@version 24.5.5
 @changelog
-  Prepare Takes: If edits/overlaps exist, use alternating colors on destination group
+  Prepare Takes: Fix dest coloring when no edits
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
