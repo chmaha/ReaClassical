@@ -24,6 +24,9 @@ local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, copy_track_items
 local tracks_per_folder, clean_take_names, xfade_check, empty_items_check
 
+local color_one = ColorToNative(18, 121, 177)|0x1000000
+local color_two = ColorToNative(99, 180, 220)|0x1000000
+
 ---------------------------------------------------------------------
 
 function main()
@@ -75,8 +78,10 @@ function main()
     else
         vertical()
     end
+
     Main_OnCommand(40042, 0) -- go to start of project
     Main_OnCommand(40939, 0) -- select track 01
+
     if empty then
         ShowMessageBox(
             "Some folder tracks are empty. If the folders are not completely empty, items from first child tracks were copied to folder tracks and muted to act as guide tracks."
@@ -99,8 +104,23 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_color()
-    Main_OnCommand(40706, 0)
+function horizontal_color(flip)
+    local color
+    if flip then 
+        color = color_two
+    else 
+        color = color_one
+    end
+    if xfade_check() then
+        local num_of_items = CountSelectedMediaItems(0)
+        for i=0, num_of_items-1, 1 do
+            local item = GetSelectedMediaItem(0,i)
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
+        end
+    else
+        Main_OnCommand(40706, 0)
+    end
+
 end
 
 ---------------------------------------------------------------------
@@ -108,17 +128,23 @@ end
 function vertical_color_razor()
     Main_OnCommand(40042, 0)           -- Transport: Go to start of project
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
+    Main_OnCommand(select_children, 0) -- Select child tracks
     Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40421, 0)           -- Item: Select all items in track
     Main_OnCommand(40706, 0)           -- Item: Set to one random color
-end
+    end
 
 ---------------------------------------------------------------------
 
-function horizontal_group()
-    Main_OnCommand(40296, 0)        -- Track: Select all tracks
+function horizontal_group(string)
+    if string == "horizontal" then
+        Main_OnCommand(40296, 0)        -- Track: Select all tracks
+    else
+        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
+        Main_OnCommand(select_children, 0) -- Select child tracks
+    end
+
     Main_OnCommand(40417, 0)        -- Item navigation: Select and move to next item
     local selected = GetSelectedMediaItem(0, 0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
@@ -158,9 +184,12 @@ function horizontal()
     SetMediaItemPosition(new_item, length + 1, false)
     SetEditCurPos(0, false, false)
 
+    local flip = false
+    local workflow = "horizontal"
     while IsMediaItemSelected(new_item) == false do
-        horizontal_group()
-        horizontal_color()
+        horizontal_group(workflow)
+        horizontal_color(flip)
+        flip = not flip
     end
 
     DeleteTrackMediaItem(first_track, new_item)
@@ -174,17 +203,36 @@ end
 ---------------------------------------------------------------------
 
 function vertical()
-    Undo_BeginBlock()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
     local num_of_folders = CountSelectedTracks(0)
     local length = GetProjectLength(0)
     local first_track = GetTrack(0, 0)
+
+    local new_item = AddMediaItemToTrack(first_track)
+    SetMediaItemPosition(new_item, length + 1, false)
+
     SetOnlyTrackSelected(first_track)
-    for _ = 1, num_of_folders, 1 do
+
+
+    -- color destination items the same as horizontal workflow
+    SetEditCurPos(0, false, false)
+    local workflow = "vertical"
+    local flip = false
+    while IsMediaItemSelected(new_item) == false do
+        horizontal_group(workflow)
+        horizontal_color(flip)
+        flip = not flip
+    end
+
+    local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
+    DeleteTrackMediaItem(first_track, new_item)
+
+    Main_OnCommand(next_folder, 0) -- select next folder
+    
+    for _ = 2, num_of_folders, 1 do
         vertical_color_razor()
         vertical_group(length)
-        local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
         Main_OnCommand(next_folder, 0) -- select next folder
     end
     SelectAllMediaItems(0, false)
