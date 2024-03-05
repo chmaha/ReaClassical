@@ -181,7 +181,7 @@ function mixer()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if bus_check(track) then
-            local native_color = ColorToNative(127,65,124)
+            local native_color = ColorToNative(127, 88, 85)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
