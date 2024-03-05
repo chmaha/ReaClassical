@@ -34,7 +34,7 @@ function main()
     Undo_BeginBlock()
     Main_OnCommand(40702, 0) -- Add track to end of tracklist
     track = GetSelectedTrack(0, 0)
-    native_color = ColorToNative(127,65,124)
+    native_color = ColorToNative(127, 88, 85)
     SetTrackColor(track, native_color)
     GetSetMediaTrackInfo_String(track, "P_NAME", "@", true) -- Add @ as track name
     SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
