@@ -2357,7 +2357,9 @@ For horizontally laid-out takes, each complete take is coloured with a different
  will additionally copy all items from each first child track into the folder
  track and mute them to act as a visual guide track.
  You will receive a pop-up message if this is the case.
- 
+ In the cases where you might use the function after editing has begun,
+ the destination group will switch to using alternating colors for items
+ so that you can easily tell where you have made edits.
 \end_layout
 
 \begin_layout Subsection
@@ -5060,6 +5062,8 @@ With a single folder group (or individual tracks), the shortcut will auto-color
  NOTE: The function was designed for use after initial recording or importing
  of media but as of 24.5.3 should work at any point during editing (for example
  to import a patch recording).
+ In this case, the destination group items will switch to using alternating
+ colors so that you can easily see where your edits are on the timeline.
  A reminder that the new REAPER native grouping (when set up via Create
  Folder or Create Source Groups sripts) works for 99% of situations without
  Prepare Takes but for takes that don't start or end at quite the same point
