@@ -34,7 +34,7 @@ function main()
     Undo_BeginBlock()
     Main_OnCommand(40702, 0) -- Add track to end of tracklist
     track = GetSelectedTrack(0, 0)
-    native_color = ColorToNative(20, 120, 230)
+    native_color = ColorToNative(127, 99, 65)
     SetTrackColor(track, native_color)
     GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", true) -- Add RoomTone as track name
     --SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
