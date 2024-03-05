@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.5.2
+@version 24.5.3
 @changelog
-  Auditioning: Respect mutes on @ aux tracks and roomtone tracks
-  PDF Manual: Add mute information to auditioning sections
+  Prepare Takes: Allow unrestricted use at any time
+  Next/Previous Fade: Fix fadetoggle reference
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
