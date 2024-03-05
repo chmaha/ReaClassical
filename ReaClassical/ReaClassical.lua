@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.5.3
+@version 24.5.4
 @changelog
-  Prepare Takes: Allow unrestricted use at any time
-  Next/Previous Fade: Fix fadetoggle reference
+  Prepare Takes: If edits/overlaps exist, use alternating colors on destination group
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
