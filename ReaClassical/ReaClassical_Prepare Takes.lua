@@ -30,6 +30,7 @@ local color_two = ColorToNative(99, 180, 220)|0x1000000
 ---------------------------------------------------------------------
 
 function main()
+
     local num_of_project_items = CountMediaItems(0)
     if num_of_project_items == 0 then
         ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
@@ -104,21 +105,25 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_color(flip)
+function horizontal_color(flip, edits)
     local color
     if flip then 
         color = color_two
     else 
         color = color_one
     end
-    if xfade_check() then
-        local num_of_items = CountSelectedMediaItems(0)
+
+    local num_of_items = CountSelectedMediaItems(0)
+    if edits then
         for i=0, num_of_items-1, 1 do
             local item = GetSelectedMediaItem(0,i)
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
         end
     else
-        Main_OnCommand(40706, 0)
+        for i=0, num_of_items-1, 1 do
+            local item = GetSelectedMediaItem(0,i)
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_one)
+        end
     end
 
 end
@@ -178,6 +183,7 @@ end
 ---------------------------------------------------------------------
 
 function horizontal()
+    local edits = xfade_check()
     local length = GetProjectLength(0)
     local first_track = GetTrack(0, 0)
     local new_item = AddMediaItemToTrack(first_track)
@@ -188,7 +194,7 @@ function horizontal()
     local workflow = "horizontal"
     while IsMediaItemSelected(new_item) == false do
         horizontal_group(workflow)
-        horizontal_color(flip)
+        horizontal_color(flip, edits)
         flip = not flip
     end
 
@@ -203,6 +209,7 @@ end
 ---------------------------------------------------------------------
 
 function vertical()
+    local edits = xfade_check()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
     local num_of_folders = CountSelectedTracks(0)
@@ -221,7 +228,7 @@ function vertical()
     local flip = false
     while IsMediaItemSelected(new_item) == false do
         horizontal_group(workflow)
-        horizontal_color(flip)
+        horizontal_color(flip, edits)
         flip = not flip
     end
 
