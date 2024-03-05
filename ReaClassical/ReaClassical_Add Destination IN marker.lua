@@ -27,7 +27,7 @@ local main
 function main()
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     DeleteProjectMarker(NULL, 996, false)
-    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
 end
 
 ---------------------------------------------------------------------
