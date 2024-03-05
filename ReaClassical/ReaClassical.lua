@@ -3,6 +3,7 @@
 @version 24.5.6
 @changelog
   Various: Change colors for source, aux and roomtone tracks
+  Classical Take Record: Add aux and roomtone coloring
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
