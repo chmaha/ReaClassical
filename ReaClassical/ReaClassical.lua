@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.5.5
+@version 24.5.6
 @changelog
-  Prepare Takes: Fix dest coloring when no edits
+  Various: Change colors for source, aux and roomtone tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
