@@ -23,15 +23,17 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, create_destination_group, solo, bus_check, rt_check
 local mixer, folder_check, sync_routing_and_fx, create_source_groups
 local media_razor_group, remove_track_groups, link_controls
-local folder_size_check, add_spacer
+local folder_size_check, remove_spacers, add_spacer
 
 ---------------------------------------------------------------------
 
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+
+    local num_of_tracks = CountTracks(0)
     
-    if CountTracks(0) == 0 then
+    if num_of_tracks == 0 then
         local boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
         num = tonumber(num)
         if boolean == true and num > 1 then
@@ -40,12 +42,12 @@ function main()
             ShowMessageBox("You need 2 or more tracks to make a source group!", "Create Source Groups", 0)
         end
         if folder_check() == 1 then
-            create_source_groups()
+            create_source_groups(num_of_tracks)
         end
     elseif folder_check() > 1 then
-        sync_routing_and_fx()
+        sync_routing_and_fx(num_of_tracks)
     elseif folder_check() == 1 then
-        create_source_groups()
+        create_source_groups(num_of_tracks)
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
@@ -109,12 +111,12 @@ function mixer()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if bus_check(track) then
-            native_color = ColorToNative(76, 145, 101)
+            native_color = ColorToNative(127,65,124)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if rt_check(track) then
-            native_color = ColorToNative(20, 120, 230)
+            native_color = ColorToNative(127, 99, 65)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
@@ -142,7 +144,7 @@ end
 
 ---------------------------------------------------------------------
 
-function sync_routing_and_fx()
+function sync_routing_and_fx(num_of_tracks)
     local ans = ShowMessageBox(
         "This will (re)create track groups and sync your source group routing and fx \nto match that of the destination group. Continue?",
         "Sync Source & Destination", 4)
@@ -151,7 +153,8 @@ function sync_routing_and_fx()
         remove_track_groups()
         local ret = link_controls()
         if not ret then return end
-      
+
+        remove_spacers(num_of_tracks)
 
         local first_track = GetTrack(0, 0)
         SetOnlyTrackSelected(first_track)
@@ -217,7 +220,7 @@ end
 
 ---------------------------------------------------------------------
 
-function create_source_groups()
+function create_source_groups(num_of_tracks)
     remove_track_groups()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
@@ -237,6 +240,7 @@ function create_source_groups()
     end
     link_controls()
     tracks_per_group = media_razor_group()
+    remove_spacers(num_of_tracks)
     add_spacer(tracks_per_group)
 end
 
@@ -348,6 +352,15 @@ end
 function add_spacer(num)
     local track = GetTrack(0, num)
     SetMediaTrackInfo_Value(track, "I_SPACER", 1)
+end
+
+---------------------------------------------------------------------
+
+function remove_spacers(num_of_tracks)
+    for i = 0, num_of_tracks -1, 1 do
+        local track = GetTrack(0,i)
+        SetMediaTrackInfo_Value(track, "I_SPACER", 0)
+    end
 end
 
 ---------------------------------------------------------------------

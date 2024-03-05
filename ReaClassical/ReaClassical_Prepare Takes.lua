@@ -26,6 +26,7 @@ local tracks_per_folder, clean_take_names, xfade_check, empty_items_check
 
 local color_one = ColorToNative(18, 121, 177)|0x1000000
 local color_two = ColorToNative(99, 180, 220)|0x1000000
+local green = ColorToNative(65, 127, 99)|0x1000000
 
 ---------------------------------------------------------------------
 
@@ -125,7 +126,6 @@ function horizontal_color(flip, edits)
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_one)
         end
     end
-
 end
 
 ---------------------------------------------------------------------
@@ -137,7 +137,12 @@ function vertical_color_razor()
     Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40421, 0)           -- Item: Select all items in track
-    Main_OnCommand(40706, 0)           -- Item: Set to one random color
+    --Main_OnCommand(40706, 0)           -- Item: Set to one random color
+    local selected_items = CountSelectedMediaItems(0)
+    for i=0, selected_items-1, 1 do
+        local item = GetSelectedMediaItem(0,i)
+        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", green)
+    end
     end
 
 ---------------------------------------------------------------------
@@ -236,7 +241,7 @@ function vertical()
     DeleteTrackMediaItem(first_track, new_item)
 
     Main_OnCommand(next_folder, 0) -- select next folder
-    
+
     for _ = 2, num_of_folders, 1 do
         vertical_color_razor()
         vertical_group(length)

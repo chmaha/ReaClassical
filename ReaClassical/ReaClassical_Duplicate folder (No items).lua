@@ -32,10 +32,12 @@ function main()
     end
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local is_parent
     local selected = GetSelectedTrack(0,0)
-    is_parent = GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH")
-    if is_parent ~= 1 then
-        ShowMessageBox("Please select a parent track before running", "Duplicate folder (no items)", 0)
+    if selected then is_parent = GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") end
+    local selected_count = CountSelectedTracks(0)
+    if is_parent ~= 1 or selected_count ~= 1 then
+        ShowMessageBox("Please select one parent track before running", "Duplicate folder (no items)", 0)
         return
     end
     Main_OnCommand(40340, 0)
@@ -95,12 +97,12 @@ function mixer()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if bus_check(track) then
-            native_color = ColorToNative(76, 145, 101)
+            native_color = ColorToNative(127,65,124)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if rt_check(track) then
-            native_color = ColorToNative(20, 120, 230)
+            native_color = ColorToNative(127, 99, 65)
             SetTrackColor(track, native_color)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
