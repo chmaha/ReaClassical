@@ -2,7 +2,8 @@
 @author chmaha
 @version 24.6.2
 @changelog
-  Cue generation & album reports: Use package.config:sub(1,1) to get OS-dependent slash 
+  Cue generation & album reports: Use package.config:sub(1,1) to get OS-dependent slash
+  ReaClassical Updater: Use get_path() and package.config:sub(1,1) 
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
