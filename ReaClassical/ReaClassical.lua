@@ -1,11 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.5.6
+@version 24.6
 @changelog
-  Various: Change colors for source, aux and roomtone tracks
-  Classical Take Record: Add aux and roomtone coloring
-  Destination markers: Lighter blue
-  Add aux track: Fix color
+  3-point edit: Fix DEST-IN marker color
+  Create CD Markers: Fix generic error message if no item names exist
+  Create Source Groups: Add/sync auto S-D prefixes to parent tracks
+  Duplicate Folder: Add/sync auto S-D prefixes to parent tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
