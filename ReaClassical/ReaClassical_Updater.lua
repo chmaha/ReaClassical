@@ -20,34 +20,37 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local resource_path = GetResourcePath()
-local source_file_path = resource_path .. "/Scripts/chmaha Scripts/ReaClassical/ReaClassical-menu.ini"
-local destination_file_path = resource_path .. "/reaper-menu.ini"
-local source_shortcuts_path = resource_path .. "/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
-local dest_shortcuts_path = resource_path .. "/reaper-kb.ini"
-
-local main, copy_file
+local main, copy_file, get_path
 
 ---------------------------------------------------------------------
 
 function main()
+    local separator = package.config:sub(1,1)
+    local resource_path = GetResourcePath()
+    local menu_relative_path = get_path("","Scripts","chmaha Scripts","ReaClassical","ReaClassical-menu.ini")
+    local source_file_path = resource_path .. menu_relative_path
+    local destination_file_path = resource_path .. separator .. "reaper-menu.ini"
+    local kb_relative_path = get_path("","Scripts","chmaha Scripts","ReaClassical","ReaClassical-kb.ini")
+    local source_shortcuts_path = resource_path .. kb_relative_path
+    local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
+
     local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
     Main_OnCommand(sync_reapack,0)
     ShowMessageBox("1) Syncing ReaPack repos", "ReaClassical Updater",0)
-    
+
     local response1 = ShowMessageBox("2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?", "ReaClassical Updater",4)
     if response1 == 6 then
-      copy_file(source_file_path,destination_file_path)
+    copy_file(source_file_path,destination_file_path)
     end
-    
+
     local response2 = ShowMessageBox("3) This section will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater",4)
     if response2 == 6 then 
-      copy_file(source_shortcuts_path,dest_shortcuts_path)
+    copy_file(source_shortcuts_path,dest_shortcuts_path)
     end
-    
+
     if response1 == 6 or response2 == 6 then
-      ShowMessageBox("4) REAPER/ReaClassical will now close.", "ReaClassical Updater",0)
-      reaper.Main_OnCommand(40004, 0) -- Save dirty projects and close REAPER
+    ShowMessageBox("4) REAPER/ReaClassical will now close.", "ReaClassical Updater",0)
+    reaper.Main_OnCommand(40004, 0) -- Save dirty projects and close REAPER
     end
 end
 
@@ -74,6 +77,14 @@ function copy_file(source, destination)
     destination_file:close()
 
     print("File copied successfully.")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+  local pathseparator = package.config:sub(1,1);
+  local elements = {...}
+  return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
