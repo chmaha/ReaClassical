@@ -24,7 +24,7 @@ local main, markers, add_source_marker
 local GetTrackLength, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, lock_items, unlock_items
 local ripple_lock_mode, return_xfade_length, xfade
-local get_first_last_items, get_color_table
+local get_first_last_items, get_color_table, get_path
 
 ---------------------------------------------------------------------
 
@@ -350,9 +350,17 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
-    package.path = package.path .. ";" .. resource_path .. "/" .. relative_path .. "?.lua;"
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1,1);
+    local elements = {...}
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

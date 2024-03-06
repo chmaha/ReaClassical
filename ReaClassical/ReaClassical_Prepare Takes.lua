@@ -22,7 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, copy_track_items, get_color_table
-local tracks_per_folder, clean_take_names, xfade_check, empty_items_check
+local tracks_per_folder, clean_take_names, xfade_check, empty_items_check, get_path
 
 ---------------------------------------------------------------------
 
@@ -343,9 +343,17 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
-    package.path = package.path .. ";" .. resource_path .. "/" .. relative_path .. "?.lua;"
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1,1);
+    local elements = {...}
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
