@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, bus_check, rt_check, mixer, track_check
-local media_razor_group, add_spacer, create_prefixes, get_color_table
+local media_razor_group, add_spacer, create_prefixes, get_color_table, get_path
 
 ---------------------------------------------------------------------
 
@@ -195,9 +195,17 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
-    package.path = package.path .. ";" .. resource_path .. "/" .. relative_path .. "?.lua;"
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1,1);
+    local elements = {...}
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

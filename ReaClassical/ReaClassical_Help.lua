@@ -20,14 +20,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, file_exists
+local main, file_exists, get_path
 
 ---------------------------------------------------------------------
 
 function main()
     local resource_path = GetResourcePath()
-    local relative_path = "Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
-    local pdf = resource_path .. "/" .. relative_path
+    local relative_path = get_path("", "Scripts","chmaha Scripts","ReaClassical","ReaClassical-Manual.pdf")
+    local pdf = resource_path .. relative_path
     local bool = file_exists(pdf)
     if bool == true then
         CF_ShellExecute(pdf)
@@ -46,6 +46,14 @@ function file_exists(name)
         exists = true
     end
     return exists
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1,1);
+    local elements = {...}
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
