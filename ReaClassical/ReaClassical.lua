@@ -4,6 +4,7 @@
 @changelog
   Get all colors from single lua file
   Use package.config for building OS-dependent file locations involving slashes
+  Fix wrong color file reference
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
