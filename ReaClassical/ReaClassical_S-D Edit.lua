@@ -24,7 +24,7 @@ local main, markers, add_source_marker
 local GetTrackLength, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, lock_items, unlock_items
 local ripple_lock_mode, return_xfade_length, xfade
-local get_first_last_items
+local get_first_last_items, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -33,17 +33,18 @@ function main()
     Undo_BeginBlock()
     local dest_in, dest_out, dest_count, source_in, source_out, source_count, pos_table, track_number = markers()
     ripple_lock_mode()
+    local colors = get_color_table()
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
         local distance
         local pos
         if dest_in == 0 then
           pos = pos_table[2]
           distance = pos_table[4]- pos_table[3]
-          AddProjectMarker2(0, false, pos - distance, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+          AddProjectMarker2(0, false, pos - distance, 0, "DEST-IN", 996, colors.dest_marker)
         elseif dest_out == 0 then
           pos = pos_table[1]
           distance = pos_table[4]- pos_table[3]
-          AddProjectMarker2(0, false,  pos + distance, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
+          AddProjectMarker2(0, false,  pos + distance, 0, "DEST-OUT", 997, colors.dest_marker)
         elseif source_in == 0 then
           pos = pos_table[4]
           distance = pos_table[1]- pos_table[2]
@@ -58,22 +59,22 @@ function main()
           local source_end = GetTrackLength(track_number)
           add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
           local dest_end = GetProjectLength(0)
-          AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
+          AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, colors.dest_marker)
         elseif dest_out == 1 and source_out == 1 then
           add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
-          AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+          AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, colors.dest_marker)
         elseif source_in == 1 and dest_out == 1 then
           local source_end = GetTrackLength(track_number)
           add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
-          AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
+          AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, colors.dest_marker)
         elseif source_out == 1 and dest_in == 1 then
           add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
           local dest_end = GetProjectLength(0)
-          AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
+          AddProjectMarker2(0, false,  dest_end, 0, "DEST-OUT", 997, colors.dest_marker)
         end
     elseif source_count == 2 and dest_count == 0 and pos_table ~= nil then
-        AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, ColorToNative(22, 141, 195) | 0x1000000)
-        AddProjectMarker2(0, false,  pos_table[4], 0, "DEST-OUT", 997, ColorToNative(22, 141, 195) | 0x1000000)
+        AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, colors.dest_marker)
+        AddProjectMarker2(0, false,  pos_table[4], 0, "DEST-OUT", 997, colors.dest_marker)
     end
     
     local _, _, dest_count, _, _, source_count, _ = markers() 
@@ -148,8 +149,9 @@ end
 ---------------------------------------------------------------------
 
 function add_source_marker(pos, distance, track_number, label, num)
+    local colors = get_color_table()
     DeleteProjectMarker(NULL, num, false)
-    AddProjectMarker2(0, false,  pos + distance, 0, track_number .. ":" .. label, num, ColorToNative(23, 223, 143) | 0x1000000)
+    AddProjectMarker2(0, false,  pos + distance, 0, track_number .. ":" .. label, num, colors.source_marker)
 end
 
 ---------------------------------------------------------------------
@@ -342,6 +344,14 @@ function get_first_last_items()
     first_sel_item = GetSelectedMediaItem(0, 0)
     last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
     return first_sel_item, last_sel_item
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
 end
 
 ---------------------------------------------------------------------

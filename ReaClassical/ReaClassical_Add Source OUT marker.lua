@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number
+local main, folder_check, get_track_number, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -29,7 +29,8 @@ function main()
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     local track_number = math.floor(get_track_number())
     DeleteProjectMarker(NULL, 999, false)
-    AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, ColorToNative(23, 223, 143) | 0x1000000)
+    local colors = get_color_table()
+    AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
 end
 
 ---------------------------------------------------------------------
@@ -58,6 +59,14 @@ function get_track_number()
         local folder = GetParentTrack(selected)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
 end
 
 ---------------------------------------------------------------------

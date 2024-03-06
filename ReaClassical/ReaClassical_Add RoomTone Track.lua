@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check
+local main, folder_check, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -33,11 +33,10 @@ function main()
     end
     Undo_BeginBlock()
     Main_OnCommand(40702, 0) -- Add track to end of tracklist
-    track = GetSelectedTrack(0, 0)
-    native_color = ColorToNative(127, 99, 65)
-    SetTrackColor(track, native_color)
+    local track = GetSelectedTrack(0, 0)
+    local colors = get_color_table()
+    SetTrackColor(track, colors.roomtone)
     GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", true) -- Add RoomTone as track name
-    --SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
     Main_OnCommand(40297, 0)
     local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(home, 0)
@@ -56,6 +55,14 @@ function folder_check()
         end
     end
     return folders
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
 end
 
 ---------------------------------------------------------------------

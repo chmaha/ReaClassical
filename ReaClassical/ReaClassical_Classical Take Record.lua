@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, bus_check, rt_check, mixer, track_check
-local load_prefs, save_prefs
+local load_prefs, save_prefs, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -148,16 +148,15 @@ end
 ---------------------------------------------------------------------
 
 function mixer()
+    local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if bus_check(track) then
-            local native_color = ColorToNative(127, 88, 85)
-            SetTrackColor(track, native_color)
+            SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if rt_check(track) then
-            local native_color = ColorToNative(127, 99, 65)
-            SetTrackColor(track, native_color)
+            SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
         if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
@@ -187,5 +186,13 @@ function save_prefs(input)
 end
 
 -----------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
+end
+
+---------------------------------------------------------------------
 
 main()
