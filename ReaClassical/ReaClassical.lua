@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.6.1
+@version 24.6.2
 @changelog
-  Get all colors from single lua file
-  Use package.config for building OS-dependent file locations involving slashes
-  Fix wrong color file reference
+  Cue generation & album reports: Use package.config:sub(1,1) to get OS-dependent slash 
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
