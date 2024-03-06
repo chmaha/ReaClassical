@@ -253,15 +253,12 @@ end
 
 function save_file(fields, out_str)
     local _, path = EnumProjects(-1)
+    local slash = package.config:sub(1, 1)
     if path == "" then
         path = GetProjectPath()
     else
-        path = path:match("(.+)[/\\].+[.][Rr][Pp][Pp]")
-    end
-    local os = GetOS()
-    local slash = "/"
-    if os:match("Win.+") then
-        slash = "\\"
+        local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
+        path = path:match(pattern)
     end
     local file = path .. slash .. fields[5]:match('^(.+)[.].+') .. '.cue'
     local f = io.open(file, 'w')
