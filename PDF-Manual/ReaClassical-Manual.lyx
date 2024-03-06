@@ -1760,6 +1760,87 @@ In addition to built-in REAPER functions, ReaClassical uses a series of
 \end_layout
 
 \begin_layout Subsection
+Naming Tracks
+\end_layout
+
+\begin_layout Standard
+ReaClassical automatically adds Source and Destination prefixes to your
+ chosen track names and are auto-renumbered whenever functions affecting
+ the number of source folders are run (Create Source Groups 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+, Duplicate Folder 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+textbackslash}
+\end_layout
+
+\end_inset
+
+, and Classical Take Record 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+).
+ You only need to add track names to the destination group (for example
+ after using the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ shortcut) and then, for example, pressing 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ will also populate the source groups.
+ Tip: Avoid using any colons in your track names and the auto prefixing
+ will work as expected.
+\end_layout
+
+\begin_layout Subsection
 Whole Project
 \end_layout
 
