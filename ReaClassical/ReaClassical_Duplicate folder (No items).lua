@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, bus_check, rt_check, mixer, track_check
-local media_razor_group, add_spacer
+local media_razor_group, add_spacer, create_prefixes
 
 ---------------------------------------------------------------------
 
@@ -33,10 +33,19 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
     local is_parent
-    local selected = GetSelectedTrack(0,0)
-    if selected then is_parent = GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") end
-    local selected_count = CountSelectedTracks(0)
-    if is_parent ~= 1 or selected_count ~= 1 then
+    local count = 0
+    local num_of_selected = CountSelectedTracks(0)
+    for i = 0, num_of_selected - 1, 1 do
+        local track = GetSelectedTrack(0,i)
+        if track then
+            is_parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if is_parent == 1 then
+                count = count + 1
+            end
+        end
+    end
+    
+    if count ~= 1 then
         ShowMessageBox("Please select one parent track before running", "Duplicate folder (no items)", 0)
         return
     end
@@ -57,6 +66,7 @@ function main()
     Main_OnCommand(unselect_children, 0)
     local tracks_per_group = media_razor_group(duplicated)
     add_spacer(tracks_per_group)
+    create_prefixes()
     Undo_EndBlock('Duplicate folder (No items)', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -149,6 +159,37 @@ end
 function add_spacer(num)
     local track = GetTrack(0, num)
     SetMediaTrackInfo_Value(track, "I_SPACER", 1)
+end
+
+---------------------------------------------------------------------
+
+function create_prefixes()
+    -- get table of parent tracks by iterating through and checking status
+    local parents = {}
+    local num_of_tracks = CountTracks(0)
+    local j = 1
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0,i)
+        local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if parent == 1 then
+            parents[j] = track
+            j = j + 1
+        end
+    end
+
+    -- for 1st prefix D: (removing anything existing before & including ":")
+    local _, name = GetSetMediaTrackInfo_String(parents[1], "P_NAME", "", 0)
+    local mod_name = string.match(name, ":(.*)")
+    if mod_name == nil then mod_name = name end
+    GetSetMediaTrackInfo_String(parents[1], "P_NAME", "D:" .. mod_name, 1)
+
+    -- for rest, prefix "Si:" where i = number starting at 1
+    for i = 2, #parents, 1 do
+        local _, name = GetSetMediaTrackInfo_String(parents[i], "P_NAME", "", 0)
+        local mod_name = string.match(name, ":(.*)")
+        if mod_name == nil then mod_name = name end
+        GetSetMediaTrackInfo_String(parents[i], "P_NAME", "S" .. i-1 .. ":" .. mod_name, 1)
+    end
 end
 
 ---------------------------------------------------------------------
