@@ -6,6 +6,7 @@
   Create CD Markers: Fix generic error message if no item names exist
   Create Source Groups: Add/sync auto S-D prefixes to parent tracks
   Duplicate Folder: Add/sync auto S-D prefixes to parent tracks
+  PDF Manual: Add track naming section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
