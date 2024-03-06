@@ -1,12 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.6
+@version 24.6.1
 @changelog
-  3-point edit: Fix DEST-IN marker color
-  Create CD Markers: Fix generic error message if no item names exist
-  Create Source Groups: Add/sync auto S-D prefixes to parent tracks
-  Duplicate Folder: Add/sync auto S-D prefixes to parent tracks
-  PDF Manual: Add track naming section
+  Get all colors from single lua file
+  Use package.config for building OS-dependent file locations involving slashes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -61,6 +58,7 @@
   [theme] Sequoia.ReaperThemeZip
   [theme] SaDiE.ReaperThemeZip
   [theme] Sonic Solutions.ReaperThemeZip
+  ReaClassical_Colors_Table.lua > ReaClassical_Colors_Table.lua
   ../PDF-Manual/ReaClassical-Manual.pdf > ReaClassical-Manual.pdf
   reaclassical-splash.png > reaclassical-splash.png
   ReaClassical-menu.ini > ReaClassical-menu.ini
