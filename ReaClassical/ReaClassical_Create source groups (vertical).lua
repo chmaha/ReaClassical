@@ -23,7 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, create_destination_group, solo, bus_check, rt_check
 local mixer, folder_check, sync_routing_and_fx, create_source_groups
 local media_razor_group, remove_track_groups, link_controls
-local folder_size_check, remove_spacers, add_spacer
+local folder_size_check, remove_spacers, add_spacer, create_prefixes
 
 ---------------------------------------------------------------------
 
@@ -43,11 +43,14 @@ function main()
         end
         if folder_check() == 1 then
             create_source_groups(num_of_tracks)
+            create_prefixes()
         end
     elseif folder_check() > 1 then
         sync_routing_and_fx(num_of_tracks)
+        create_prefixes()
     elseif folder_check() == 1 then
         create_source_groups(num_of_tracks)
+        create_prefixes()
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
@@ -360,6 +363,35 @@ function remove_spacers(num_of_tracks)
     for i = 0, num_of_tracks -1, 1 do
         local track = GetTrack(0,i)
         SetMediaTrackInfo_Value(track, "I_SPACER", 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function create_prefixes()
+    -- get table of parent tracks by iterating through and checking status
+    local parents = {}
+    local num_of_tracks = CountTracks(0)
+    local j = 1
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0,i)
+        local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if parent == 1 then
+            parents[j] = track
+            j = j + 1
+        end
+    end
+    -- for 1st prefix D: (remove anything existing before & including :)
+    local _, name = GetSetMediaTrackInfo_String(parents[1], "P_NAME", "", 0)
+    local mod_name = string.match(name, ":(.*)")
+    if mod_name == nil then mod_name = name end
+    GetSetMediaTrackInfo_String(parents[1], "P_NAME", "D:" .. mod_name, 1)
+    -- for rest, prefix Si: where i = number starting at 1
+    for i = 2, #parents, 1 do
+        local _, name = GetSetMediaTrackInfo_String(parents[i], "P_NAME", "", 0)
+        local mod_name = string.match(name, ":(.*)")
+        if mod_name == nil then mod_name = name end
+        GetSetMediaTrackInfo_String(parents[i], "P_NAME", "S" .. i-1 .. ":" .. mod_name, 1)
     end
 end
 
