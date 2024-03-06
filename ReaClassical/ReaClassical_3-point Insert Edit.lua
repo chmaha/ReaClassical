@@ -269,7 +269,7 @@ function get_color_table()
     local resource_path = GetResourcePath()
     local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors")
+    return require("ReaClassical_Colors_Table")
 end
 
 ---------------------------------------------------------------------
