@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, solo, bus_check, rt_check, mixer, on_stop
+local main, solo, bus_check, rt_check, mixer, on_stop, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -68,6 +68,7 @@ function main()
         local overlap = end_of_one - two_pos
         local mouse_to_item_two = two_pos - mouse_pos
         local total_time = 2 * mouse_to_item_two + overlap
+        local colors = get_color_table()
         if item_hover == item_one then
             local item_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
             SetMediaItemSelected(item_hover, true)
@@ -75,7 +76,7 @@ function main()
             if item_one_muted == 0 then
                 Main_OnCommand(41559, 0) -- Item properties: Solo
             end
-            AddProjectMarker2(0, false, one_pos + item_length, 0, "!1016", 1000, ColorToNative(10, 10, 10) | 0x1000000)
+            AddProjectMarker2(0, false, one_pos + item_length, 0, "!1016", 1000, colors.audition)
             SetEditCurPos(mouse_pos, false, false)
             OnPlayButton() -- play until end of item_hover (one_pos + item_length)
         elseif item_hover == item_two then
@@ -85,20 +86,20 @@ function main()
                 Main_OnCommand(41559, 0) -- Item properties: Solo
             end
             SetEditCurPos(two_pos, false, false)
-            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000, ColorToNative(10, 10, 10) | 0x1000000)
+            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000, colors.audition)
             OnPlayButton() -- play until mouse cursor
         elseif not item_hover and mouse_pos < two_pos then
             AddProjectMarker2(0, false, mouse_pos + total_time, 0, "!1016", 1000,
-                ColorToNative(10, 10, 10) | 0x1000000)
+                colors.audition)
             SetEditCurPos(mouse_pos, false, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
         else
             local mouse_to_item_one = mouse_pos - end_of_one
             local total_time = 2 * mouse_to_item_one + overlap
             AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000,
-                ColorToNative(10, 10, 10) | 0x1000000)
+                colors.audition)
             AddProjectMarker2(0, false, mouse_pos - total_time, 0, "START", 1001,
-                ColorToNative(10, 10, 10) | 0x1000000)
+                colors.audition)
             GoToMarker(0, 1001, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
             DeleteProjectMarker(NULL, 1001, false)
@@ -178,16 +179,15 @@ end
 ---------------------------------------------------------------------
 
 function mixer()
+    local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if bus_check(track) then
-            local native_color = ColorToNative(127, 88, 85)
-            SetTrackColor(track, native_color)
+            SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if rt_check(track) then
-            local native_color = ColorToNative(127, 99, 65)
-            SetTrackColor(track, native_color)
+            SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
         if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
@@ -208,6 +208,14 @@ function on_stop()
     else
         defer(on_stop)
     end
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
 end
 
 ---------------------------------------------------------------------

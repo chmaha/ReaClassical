@@ -21,12 +21,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, shift, horizontal_color, vertical_color_razor, horizontal_group
-local vertical_group, horizontal, vertical, copy_track_items
+local vertical_group, horizontal, vertical, copy_track_items, get_color_table
 local tracks_per_folder, clean_take_names, xfade_check, empty_items_check
-
-local color_one = ColorToNative(18, 121, 177)|0x1000000
-local color_two = ColorToNative(99, 180, 220)|0x1000000
-local green = ColorToNative(65, 127, 99)|0x1000000
 
 ---------------------------------------------------------------------
 
@@ -107,11 +103,12 @@ end
 ---------------------------------------------------------------------
 
 function horizontal_color(flip, edits)
+    local colors = get_color_table()
     local color
     if flip then 
-        color = color_two
+        color = colors.dest_items_two
     else 
-        color = color_one
+        color = colors.dest_items_one
     end
 
     local num_of_items = CountSelectedMediaItems(0)
@@ -123,7 +120,7 @@ function horizontal_color(flip, edits)
     else
         for i=0, num_of_items-1, 1 do
             local item = GetSelectedMediaItem(0,i)
-            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_one)
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
         end
     end
 end
@@ -131,6 +128,7 @@ end
 ---------------------------------------------------------------------
 
 function vertical_color_razor()
+    local colors = get_color_table()
     Main_OnCommand(40042, 0)           -- Transport: Go to start of project
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- Select child tracks
@@ -141,7 +139,7 @@ function vertical_color_razor()
     local selected_items = CountSelectedMediaItems(0)
     for i=0, selected_items-1, 1 do
         local item = GetSelectedMediaItem(0,i)
-        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", green)
+        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
     end
     end
 
@@ -339,6 +337,14 @@ function empty_items_check(num_of_items)
         end
     end
     return count
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
 end
 
 ---------------------------------------------------------------------

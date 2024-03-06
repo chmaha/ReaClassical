@@ -20,14 +20,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
+local main, get_color_table
 
 ---------------------------------------------------------------------
 
 function main()
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     DeleteProjectMarker(NULL, 996, false)
-    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
+    local colors = get_color_table()
+    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
 end
 
 ---------------------------------------------------------------------

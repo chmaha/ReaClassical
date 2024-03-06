@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
 local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
-local get_first_last_items
+local get_first_last_items, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -221,7 +221,8 @@ end
 
 function create_dest_in(cur_pos)
     SetEditCurPos(cur_pos, false, false)
-    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
+    local colors = get_color_table()
+    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
 end
 
 ---------------------------------------------------------------------
@@ -260,6 +261,14 @@ function get_first_last_items()
     first_sel_item = GetSelectedMediaItem(0, 0)
     last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
     return first_sel_item, last_sel_item
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = "Scripts/chmaha Scripts/ReaClassical/"
+    return dofile(resource_path .. "/" .. relative_path .. "ReaClassical_Colors.lua")
 end
 
 ---------------------------------------------------------------------
