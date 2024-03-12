@@ -1,9 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.6.2
+@version 24.6.3
 @changelog
-  Cue generation & album reports: Use package.config:sub(1,1) to get OS-dependent slash
-  ReaClassical Updater: Use get_path() and package.config:sub(1,1) 
+  Duplicate Folder: Add spacer after final source group
+  Create Source Groups: Add spacer after final source group
+  Updater: Tell user to wait until ReaPack has finished updating before pressing OK
+  PDF Manual: Add some background info for room tone track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
