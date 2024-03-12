@@ -3840,8 +3840,8 @@ keys{?}
  Once added, you can add clean recorded noise captured before or after the
  concert or generate endless roomtone the length of your project from a
  very small portion of clean silence from the concert itself (hint: try
- sending white noise through a convolver such as ReaVerb that uses a few
- seconds of clean room tone as the impulse!).
+ using a white noise generator into a convolver such as ReaVerb that uses
+ a few seconds of clean room tone as the impulse!).
  In a future version of ReaClassical, seamlessly fading in and out of room
  tone will be automatic!
 \end_layout
