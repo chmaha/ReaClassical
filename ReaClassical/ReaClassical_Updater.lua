@@ -36,7 +36,7 @@ function main()
 
     local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
     Main_OnCommand(sync_reapack,0)
-    ShowMessageBox("1) Syncing ReaPack repos", "ReaClassical Updater",0)
+    ShowMessageBox("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.", "ReaClassical Updater",0)
 
     local response1 = ShowMessageBox("2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?", "ReaClassical Updater",4)
     if response1 == 6 then
