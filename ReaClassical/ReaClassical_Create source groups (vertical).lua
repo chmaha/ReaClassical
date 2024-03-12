@@ -163,7 +163,8 @@ function sync_routing_and_fx(num_of_tracks)
         local collapse = NamedCommandLookup("_SWS_COLLAPSE")
         Main_OnCommand(collapse, 0) -- collapse folder
 
-        for _ = 1, folder_check() - 1, 1 do
+        local num_of_folders = folder_check()
+        for _ = 1, num_of_folders - 1, 1 do
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0)            --SWS_SELCHILDREN2
             local copy_folder_routing = NamedCommandLookup("_S&M_COPYSNDRCV2")
@@ -209,6 +210,7 @@ function sync_routing_and_fx(num_of_tracks)
         end
         tracks_per_group = media_razor_group()
         add_spacer(tracks_per_group)
+        add_spacer(num_of_folders*tracks_per_group)
         local first_track = GetTrack(0, 0)
         SetOnlyTrackSelected(first_track)
         solo()
