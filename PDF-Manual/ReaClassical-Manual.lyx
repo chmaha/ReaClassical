@@ -3814,7 +3814,36 @@ Roomtone
 \end_layout
 
 \begin_layout Standard
-Information to be added soon...
+In a live concert recording that contains audience noise in between movements
+ and applause at the end of a complete piece, it is often desirable to give
+ the impression of a clean recording with no audience present.
+ Recorded or generated room tone then becomes very important as an alternative
+ to audio fading to complete digital silence which destroys the illusion
+ of listening back to a live concert.
+ ReaClassical includes a dedicated room tone track for this purpose.
+ This way, the auditioning tool will keep the track displayed in both track
+ and mixer panels.
+ For now you can find the function via the Actions dialog 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{?}
+\end_layout
+
+\end_inset
+
+ .
+ Once added, you can add clean recorded noise captured before or after the
+ concert or generate endless roomtone the length of your project from a
+ very small portion of clean silence from the concert itself (hint: try
+ sending white noise through a convolver such as ReaVerb that uses a few
+ seconds of clean room tone as the impulse!).
+ In a future version of ReaClassical, seamlessly fading in and out of room
+ tone will be automatic!
 \end_layout
 
 \begin_layout Section
