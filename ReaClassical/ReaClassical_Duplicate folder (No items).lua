@@ -21,12 +21,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, bus_check, rt_check, mixer, track_check
-local media_razor_group, add_spacer, create_prefixes, get_color_table, get_path
+local media_razor_group, add_spacer, remove_spacers, create_prefixes
+local folder_check, get_color_table, get_path
 
 ---------------------------------------------------------------------
 
 function main()
-    if track_check() == 0 then
+    local num_of_tracks = track_check()
+    if num_of_tracks == 0 then
         ShowMessageBox("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)
         return
     end
@@ -49,12 +51,13 @@ function main()
         ShowMessageBox("Please select one parent track before running", "Duplicate folder (no items)", 0)
         return
     end
+
     Main_OnCommand(40340, 0)
     Main_OnCommand(40062, 0)           -- Duplicate track
     local duplicated = GetSelectedTrack(0,0)
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-    Main_OnCommand(42670,0) -- Remove spacer (if present)
+    remove_spacers(num_of_tracks)
     Main_OnCommand(40421, 0)           -- Item: Select all items in track
     local delete_items = NamedCommandLookup("_SWS_DELALLITEMS")
     Main_OnCommand(delete_items, 0)
@@ -65,7 +68,9 @@ function main()
     mixer()
     Main_OnCommand(unselect_children, 0)
     local tracks_per_group = media_razor_group(duplicated)
+    local num_of_folders = folder_check()
     add_spacer(tracks_per_group)
+    add_spacer(num_of_folders*tracks_per_group)
     create_prefixes()
     Undo_EndBlock('Duplicate folder (No items)', 0)
     PreventUIRefresh(-1)
@@ -209,5 +214,29 @@ function get_path(...)
 end
 
 ---------------------------------------------------------------------
+
+function remove_spacers(num_of_tracks)
+    for i = 0, num_of_tracks -1, 1 do
+        local track = GetTrack(0,i)
+        SetMediaTrackInfo_Value(track, "I_SPACER", 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
 
 main()
