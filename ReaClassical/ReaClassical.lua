@@ -1,11 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.6.3
+@version 24.6.4
 @changelog
-  Duplicate Folder: Add spacer after final source group
-  Create Source Groups: Add spacer after final source group
-  Updater: Tell user to wait until ReaPack has finished updating before pressing OK
-  PDF Manual: Add some background info for room tone track
+  Do not try to add spacer after final source track if no aux or roomtone tracks exist
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
