@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.6.5
+@version 24.6.6
 @changelog
-  Add S-D prefixes to all tracks
-  Ensure @aux and roomtone tracks are not added to table
+  Aux and roomtone track additions now deal with spacers
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
