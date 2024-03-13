@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.6.4
+@version 24.6.5
 @changelog
-  Do not try to add spacer after final source track if no aux or roomtone tracks exist
+  Add S-D prefixes to all tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
