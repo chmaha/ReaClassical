@@ -21,11 +21,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_color_table, get_path
+local add_spacer, remove_spacers
 
 ---------------------------------------------------------------------
 
 function main()
-    local folders = folder_check()
+    local folders, tracks_per_group, total_tracks = folder_check()
     if folders == 0 then
         ShowMessageBox("Please use either the 'Create folder' or 'Create Source Groups' script first!",
             "Add Roomtone track", 0)
@@ -37,6 +38,9 @@ function main()
     local colors = get_color_table()
     SetTrackColor(track, colors.roomtone)
     GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", true) -- Add RoomTone as track name
+    remove_spacers(total_tracks)
+    add_spacer(tracks_per_group)
+    add_spacer(folders*tracks_per_group)
     Main_OnCommand(40297, 0)
     local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(home, 0)
@@ -47,14 +51,17 @@ end
 
 function folder_check()
     local folders = 0
+    local tracks_per_group = 1
     local total_tracks = CountTracks(0)
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1
+        elseif folders == 1 then
+            tracks_per_group = tracks_per_group + 1
         end
     end
-    return folders
+    return folders, tracks_per_group, total_tracks
 end
 
 ---------------------------------------------------------------------
@@ -72,6 +79,24 @@ function get_path(...)
     local pathseparator = package.config:sub(1,1);
     local elements = {...}
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function add_spacer(num)
+    local track = GetTrack(0, num)
+    if track then
+        SetMediaTrackInfo_Value(track, "I_SPACER", 1)
+    end
+end
+
+---------------------------------------------------------------------
+
+function remove_spacers(num_of_tracks)
+    for i = 0, num_of_tracks -1, 1 do
+        local track = GetTrack(0,i)
+        SetMediaTrackInfo_Value(track, "I_SPACER", 0)
+    end
 end
 
 ---------------------------------------------------------------------
