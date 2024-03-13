@@ -162,7 +162,9 @@ end
 
 function add_spacer(num)
     local track = GetTrack(0, num)
-    SetMediaTrackInfo_Value(track, "I_SPACER", 1)
+    if track then
+        SetMediaTrackInfo_Value(track, "I_SPACER", 1)
+    end
 end
 
 ---------------------------------------------------------------------
