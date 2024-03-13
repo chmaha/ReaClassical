@@ -373,28 +373,38 @@ end
 
 function create_prefixes()
     -- get table of parent tracks by iterating through and checking status
-    local parents = {}
+    local table = {}
     local num_of_tracks = CountTracks(0)
-    local j = 1
+    local j = 0
+    local k = 1
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0,i)
         local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
         if parent == 1 then
-            parents[j] = track
             j = j + 1
+            k = 1
+            table[j] = {}
+            table[j]["parent"] = track
+        else
+            table[j][k] = track
+            k = k + 1
         end
     end
     -- for 1st prefix D: (remove anything existing before & including :)
-    local _, name = GetSetMediaTrackInfo_String(parents[1], "P_NAME", "", 0)
-    local mod_name = string.match(name, ":(.*)")
-    if mod_name == nil then mod_name = name end
-    GetSetMediaTrackInfo_String(parents[1], "P_NAME", "D:" .. mod_name, 1)
-    -- for rest, prefix Si: where i = number starting at 1
-    for i = 2, #parents, 1 do
-        local _, name = GetSetMediaTrackInfo_String(parents[i], "P_NAME", "", 0)
+    for _,v in pairs(table[1]) do
+        local _, name = GetSetMediaTrackInfo_String(v, "P_NAME", "", 0)
         local mod_name = string.match(name, ":(.*)")
         if mod_name == nil then mod_name = name end
-        GetSetMediaTrackInfo_String(parents[i], "P_NAME", "S" .. i-1 .. ":" .. mod_name, 1)
+        GetSetMediaTrackInfo_String(v, "P_NAME", "D:" .. mod_name, 1)
+    end
+    -- for rest, prefix Si: where i = number starting at 1
+    for i = 2, #table, 1 do
+        for _,v in pairs(table[i]) do
+            local _, name = GetSetMediaTrackInfo_String(v, "P_NAME", "", 0)
+            local mod_name = string.match(name, ":(.*)")
+            if mod_name == nil then mod_name = name end
+            GetSetMediaTrackInfo_String(v, "P_NAME", "S" .. i-1 .. ":" .. mod_name, 1)
+        end
     end
 end
 
