@@ -184,8 +184,10 @@ function create_prefixes()
             table[j] = {}
             table[j]["parent"] = track
         else
-            table[j][k] = track
-            k = k + 1
+            if not bus_check(track) and not rt_check(track) then
+                table[j][k] = track
+                k = k + 1
+            end
         end
     end
     -- for 1st prefix D: (remove anything existing before & including :)
