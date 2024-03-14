@@ -41,6 +41,8 @@ function main()
             found = true
             local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
             SetEditCurPos(item_start, 1, 0)
+            local center = NamedCommandLookup("_SWS_HSCROLL50")
+            Main_OnCommand(center,0)
             break
         end
     end
