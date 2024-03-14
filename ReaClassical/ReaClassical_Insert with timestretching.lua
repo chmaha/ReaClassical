@@ -23,6 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, lock_items, unlock_items, ripple_lock_mode
 local return_xfade_length, xfade, get_first_last_items, SDmarkers
+local mark_as_edit
 
 ---------------------------------------------------------------------
 
@@ -78,9 +79,9 @@ function main()
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         else
             Main_OnCommand(40362, 0) -- glue items
+            Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         end
-        Main_OnCommand(41206, 0)     -- Item: Move and stretch items to fit time selection
-        
+        mark_as_edit()
         local num_of_items = CountSelectedMediaItems()
         for i = 0, num_of_items -1, 1 do
             local item = GetSelectedMediaItem(0, i)
@@ -290,6 +291,16 @@ function SDmarkers()
         end
     end
     return exists
+end
+
+---------------------------------------------------------------------
+
+function mark_as_edit()
+    local selected_items = CountSelectedMediaItems(0)
+    for i = 0, selected_items - 1, 1 do
+        local item = GetSelectedMediaItem(0, i)
+        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", 1)
+    end
 end
 
 ---------------------------------------------------------------------

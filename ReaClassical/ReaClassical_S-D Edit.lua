@@ -24,7 +24,7 @@ local main, markers, add_source_marker
 local GetTrackLength, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, lock_items, unlock_items
 local ripple_lock_mode, return_xfade_length, xfade
-local get_first_last_items, get_color_table, get_path
+local get_first_last_items, get_color_table, get_path, mark_as_edit
 
 ---------------------------------------------------------------------
 
@@ -98,6 +98,7 @@ function main()
         Main_OnCommand(delete, 0) -- Adaptive Delete
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0)  -- SWS_AWPASTE
+        mark_as_edit()
         unlock_items()
         create_crossfades()
         clean_up(is_selected)
@@ -361,6 +362,16 @@ function get_path(...)
     local pathseparator = package.config:sub(1,1);
     local elements = {...}
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function mark_as_edit()
+    local selected_items = CountSelectedMediaItems(0)
+    for i = 0, selected_items - 1, 1 do
+        local item = GetSelectedMediaItem(0, i)
+        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", 1)
+    end
 end
 
 ---------------------------------------------------------------------
