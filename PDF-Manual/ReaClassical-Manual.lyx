@@ -1908,6 +1908,52 @@ keys{End}
 \end_layout
 
 \begin_layout Subsection
+Finding Takes
+\end_layout
+
+\begin_layout Standard
+Use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+return}
+\end_layout
+
+\end_inset
+
+ (enter/return) on the main keyboard or numpad if you have one to quickly
+ search for a take based on the underlying filename of the media item.
+ This will work for any filenaming system that uses numbers before the file
+ extension such as 
+\begin_inset Quotes bld
+\end_inset
+
+main_pair-T04.wav
+\begin_inset Quotes brd
+\end_inset
+
+ or 
+\begin_inset Quotes bld
+\end_inset
+
+cello-spot-take_23.flac
+\begin_inset Quotes brd
+\end_inset
+
+.
+ Note that if the imported or recorded files have zero-padding that is not
+ a problem.
+ If you have used an item to create an S-D edit, searching for a take will
+ ignore these items and move directly to the original sources.
+\end_layout
+
+\begin_layout Subsection
 Items & Markers
 \end_layout
 
@@ -2491,6 +2537,26 @@ shift+A}
  Note that similar to the Classical Take Record function, the tracks shown
  in the mixer are filtered based on what is being auditioned.
  
+\end_layout
+
+\begin_layout Standard
+Don't forget that you can quickly jump to your various source takes using
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+return}
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -5554,6 +5620,70 @@ keys{Y}
 \begin_layout Standard
 
 \series bold
+Find Takes (based on filename) 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+return}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description: 
+\emph default
+Enter a take number based on the numerical suffixes at the end of filenames
+ to quickly jump to that media item.
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes: 
+\emph default
+If the function can't find a media item with that take number, it will let
+ you know and offer to try again with a different number.
+ This will work for any filenaming system that uses numbers before the file
+ extension such as 
+\begin_inset Quotes bld
+\end_inset
+
+main_pair-T04.wav
+\begin_inset Quotes brd
+\end_inset
+
+ or 
+\begin_inset Quotes bld
+\end_inset
+
+cello-spot-take_23.flac
+\begin_inset Quotes brd
+\end_inset
+
+.
+ Note that if the imported or recorded files have zero-padding that is not
+ a problem as the function strips these away.
+ If you have used an item to create an S-D edit, searching for a take will
+ ignore these items and move directly to the original sources.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
 Source-Destination Markers 
 \series default
 
@@ -6928,6 +7058,25 @@ ctrl+`}
 \end_inset
 
  Whole Project View (Vertical)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+return}
+\end_layout
+
+\end_inset
+
+ Find Takes (based on filename)
 \end_layout
 
 \begin_layout Labeling
