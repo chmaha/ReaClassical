@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.6.6
+@version 24.7
 @changelog
-  Aux and roomtone track additions now deal with spacers
+  Add function to search for take based on filename
+  All S-D edit functions add P_EXT to item to identify as an edit
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -50,6 +51,7 @@
   [main] ReaClassical_3-point Insert Edit.lua
   [main] ReaClassical_Updater.lua
   [main] ReaClassical_Exclusive Audition.lua
+  [main] ReaClassical_Find Take.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
