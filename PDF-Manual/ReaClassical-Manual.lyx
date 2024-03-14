@@ -1633,6 +1633,26 @@ ctrl+R}
 \end_inset
 
  or use the red record button.
+ During this mode you can use the Takes Counter window 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+enter}
+\end_layout
+
+\end_inset
+
+ to track the upcoming take number (in green) and take number during recording
+ (in red with recording circle).
+ Please read the description of the function in Appendix A for best practices.
 \end_layout
 
 \begin_layout Section
@@ -5188,6 +5208,53 @@ keys{E}
 \begin_layout Standard
 
 \series bold
+Take Counter Window
+\series default
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+enter}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Track take numbers during recording sessions.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+\emph default
+ As the function currently stands, it is extremely important to save your
+ project and name your tracks before starting to record.
+ This ensures that the recorded files have unique names so take numbers
+ increment correctly.
+ Also note that it is important not delete any false takes otherwise the
+ counter will momentarily display a wrong value (it will correct itself
+ after recording another take).
+\end_layout
+
+\begin_layout Standard
+
+\series bold
 Classical Take Record 
 \series default
 
@@ -7408,6 +7475,27 @@ keys{F9}
 \end_inset
 
  Classical Take Record
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+enter}
+\end_layout
+
+\end_inset
+
+ Open Take Counter
 \end_layout
 
 \begin_layout Labeling
