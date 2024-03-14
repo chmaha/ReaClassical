@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.7
+@version 24.7.1
 @changelog
-  Add function to search for take based on filename
-  All S-D edit functions add P_EXT to item to identify as an edit
-  Add shortcuts for Find Take and Room Tone track
+  Find Take: Center edit cursor where possible
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
