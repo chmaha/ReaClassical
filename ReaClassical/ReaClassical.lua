@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.7.1
+@version 24.8
 @changelog
-  Find Take: Center edit cursor where possible
+  Add Take Counter function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -51,6 +51,7 @@
   [main] ReaClassical_Updater.lua
   [main] ReaClassical_Exclusive Audition.lua
   [main] ReaClassical_Find Take.lua
+  [main] ReaClassical_Take Counter.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
