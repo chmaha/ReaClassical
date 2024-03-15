@@ -23,19 +23,17 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 ---------------------------------------------------------------------
 
 function main()
-    local i = 0
+    local i = 0;
     while true do
-        local project, _ = EnumProjects(i)
-        if project == nil then
-          break
-        else
-            DeleteProjectMarker(project, 996, false)
-            DeleteProjectMarker(project, 997, false)
-            DeleteProjectMarker(project, 998, false)
-            DeleteProjectMarker(project, 999, false)
-        end
-        i = i + 1
+      local project, _ = EnumProjects(i)
+      if project == nil then
+        break
+      else
+        DeleteProjectMarker(project, 1000, false)
+        DeleteProjectMarker(project, 1001, false)
       end
+      i = i + 1
+    end
 end
 
 ---------------------------------------------------------------------
