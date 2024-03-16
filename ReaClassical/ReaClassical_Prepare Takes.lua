@@ -70,11 +70,19 @@ function main()
         local folder_size = tracks_per_folder()
         copy_track_items(folder_size, total_tracks)
     end
+    
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local colors = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        colors = tonumber(table[5])
+    end
 
     if folders == 0 or folders == 1 then
-        horizontal()
+        horizontal(colors)
     else
-        vertical()
+        vertical(colors)
     end
 
     Main_OnCommand(40042, 0) -- go to start of project
@@ -102,46 +110,53 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_color(flip, edits)
-    local colors = get_color_table()
-    local color
-    if flip then 
-        color = colors.dest_items_two
-    else 
-        color = colors.dest_items_one
-    end
-
-    local num_of_items = CountSelectedMediaItems(0)
-    if edits then
-        for i=0, num_of_items-1, 1 do
-            local item = GetSelectedMediaItem(0,i)
-            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
-        end
+function horizontal_color(flip, edits, colors)
+    if colors == 1 then
+      Main_OnCommand(40706, 0)     -- Item: Set to one random color
     else
-        for i=0, num_of_items-1, 1 do
-            local item = GetSelectedMediaItem(0,i)
-            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
-        end
+      colors = get_color_table()
+      local color
+      if flip then 
+          color = colors.dest_items_two
+      else 
+          color = colors.dest_items_one
+      end
+  
+      local num_of_items = CountSelectedMediaItems(0)
+      if edits then
+          for i=0, num_of_items-1, 1 do
+              local item = GetSelectedMediaItem(0,i)
+              SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
+          end
+      else
+          for i=0, num_of_items-1, 1 do
+              local item = GetSelectedMediaItem(0,i)
+              SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
+          end
+      end
     end
 end
 
 ---------------------------------------------------------------------
 
-function vertical_color_razor()
-    local colors = get_color_table()
+function vertical_color_razor(colors)
     Main_OnCommand(40042, 0)           -- Transport: Go to start of project
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- Select child tracks
     Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40421, 0)           -- Item: Select all items in track
-    --Main_OnCommand(40706, 0)           -- Item: Set to one random color
-    local selected_items = CountSelectedMediaItems(0)
-    for i=0, selected_items-1, 1 do
-        local item = GetSelectedMediaItem(0,i)
-        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
+    if colors == 1 then
+      Main_OnCommand(40706, 0)     -- Item: Set to one random color
+    else
+      local colors = get_color_table()
+      local selected_items = CountSelectedMediaItems(0)
+      for i=0, selected_items-1, 1 do
+          local item = GetSelectedMediaItem(0,i)
+          SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
+      end
     end
-    end
+end
 
 ---------------------------------------------------------------------
 
@@ -185,7 +200,7 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal()
+function horizontal(colors)
     local edits = xfade_check()
     local length = GetProjectLength(0)
     local first_track = GetTrack(0, 0)
@@ -197,7 +212,7 @@ function horizontal()
     local workflow = "horizontal"
     while IsMediaItemSelected(new_item) == false do
         horizontal_group(workflow)
-        horizontal_color(flip, edits)
+        horizontal_color(flip, edits, colors)
         flip = not flip
     end
 
@@ -211,7 +226,7 @@ end
 
 ---------------------------------------------------------------------
 
-function vertical()
+function vertical(colors)
     local edits = xfade_check()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
@@ -223,25 +238,28 @@ function vertical()
     SetMediaItemPosition(new_item, length + 1, false)
 
     SetOnlyTrackSelected(first_track)
-
-
-    -- color destination items the same as horizontal workflow
-    SetEditCurPos(0, false, false)
-    local workflow = "vertical"
-    local flip = false
-    while IsMediaItemSelected(new_item) == false do
+    if colors == 0 then
+      -- color destination items the same as horizontal workflow
+      SetEditCurPos(0, false, false)
+      local workflow = "vertical"
+      local flip = false
+      while IsMediaItemSelected(new_item) == false do
         horizontal_group(workflow)
-        horizontal_color(flip, edits)
+        horizontal_color(flip, edits, colors)
         flip = not flip
+      end
     end
 
-    local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
     DeleteTrackMediaItem(first_track, new_item)
+    local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
 
-    Main_OnCommand(next_folder, 0) -- select next folder
-
-    for _ = 2, num_of_folders, 1 do
-        vertical_color_razor()
+    local start = 1
+    if colors == 0 then 
+      start = 2 
+      Main_OnCommand(next_folder, 0) -- select next folder    
+    end
+    for _ = start, num_of_folders, 1 do
+        vertical_color_razor(colors)
         vertical_group(length)
         Main_OnCommand(next_folder, 0) -- select next folder
     end
