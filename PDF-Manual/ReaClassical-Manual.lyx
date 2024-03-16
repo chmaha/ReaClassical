@@ -1617,7 +1617,23 @@ General Recording
 \begin_layout Standard
 To record for a horizontal workflow or more generally (say a separate single
  mono narration track or similar), use the built-in REAPER record function
- arm the track(s) and then either press 
+ arm the folder (either manually by press-holding on the first record button
+ and sliding the mouse down through the tracks or via the handy 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+R}
+\end_layout
+
+\end_inset
+
+ shortcut) and then either press 
 \begin_inset ERT
 status open
 
@@ -5299,6 +5315,49 @@ Notes:
  path so as to avoid any file-naming conflicts.
 \end_layout
 
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\series bold
+Record-Arm Folder
+\series default
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+R}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Record-Arm a folder and child tracks
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+\emph default
+ This is designed for horizontal workflows.
+ Simply select the folder parent and press the shortcut to record-arm all
+ tracks in the folder.
+ 
+\end_layout
+
 \begin_layout Standard
 
 \series bold
@@ -7568,6 +7627,25 @@ keys{F9}
 \end_inset
 
  Classical Take Record
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+R}
+\end_layout
+
+\end_inset
+
+ Record-Arm Folder
 \end_layout
 
 \begin_layout Labeling
