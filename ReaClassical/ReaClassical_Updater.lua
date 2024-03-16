@@ -25,27 +25,30 @@ local main, copy_file, get_path
 ---------------------------------------------------------------------
 
 function main()
-    local separator = package.config:sub(1,1)
+    local separator = package.config:sub(1, 1)
     local resource_path = GetResourcePath()
-    local menu_relative_path = get_path("","Scripts","chmaha Scripts","ReaClassical","ReaClassical-menu.ini")
+    local menu_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-menu.ini")
     local source_file_path = resource_path .. menu_relative_path
     local destination_file_path = resource_path .. separator .. "reaper-menu.ini"
-    local kb_relative_path = get_path("","Scripts","chmaha Scripts","ReaClassical","ReaClassical-kb.ini")
+    local kb_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-kb.ini")
     local source_shortcuts_path = resource_path .. kb_relative_path
     local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
 
     local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
-    Main_OnCommand(sync_reapack,0)
-    ShowMessageBox("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.", "ReaClassical Updater",0)
+    Main_OnCommand(sync_reapack, 0)
+    ShowMessageBox("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.",
+        "ReaClassical Updater", 0)
 
-    local response1 = ShowMessageBox("2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?", "ReaClassical Updater",4)
+    local response1 = ShowMessageBox(
+    "2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?", "ReaClassical Updater", 4)
     if response1 == 6 then
-    copy_file(source_file_path,destination_file_path)
+        copy_file(source_file_path, destination_file_path)
     end
 
-    local response2 = ShowMessageBox("3) This section will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater",4)
-    if response2 == 6 then 
-    copy_file(source_shortcuts_path,dest_shortcuts_path)
+    local response2 = ShowMessageBox(
+    "3) This section will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater", 4)
+    if response2 == 6 then
+        copy_file(source_shortcuts_path, dest_shortcuts_path)
     end
 
     if response1 == 6 or response2 == 6 then
@@ -57,12 +60,27 @@ end
 ---------------------------------------------------------------------
 
 function copy_file(source, destination)
+    -- Check if destination file exists
+    local destination_file_exists = io.open(destination, "rb")
+    if destination_file_exists then
+        destination_file_exists:close()
+        -- Backup existing destination file
+        local backup_destination = destination .. ".backup"
+        local success, err = os.rename(destination, backup_destination)
+        if not success then
+            ShowMessageBox("Error creating backup: " .. err, "ReaClassical Updater", 0)
+            return
+        end
+    end
+
+    -- Open source file
     local source_file = io.open(source, "rb")
     if not source_file then
         ShowMessageBox("Error opening source file: " .. source, "ReaClassical Updater", 0)
         return
     end
 
+    -- Open destination file
     local destination_file = io.open(destination, "wb")
     if not destination_file then
         source_file:close()
@@ -70,21 +88,21 @@ function copy_file(source, destination)
         return
     end
 
+    -- Read content from source and write to destination
     local content = source_file:read("*a")
     destination_file:write(content)
 
+    --Close files
     source_file:close()
     destination_file:close()
-
-    print("File copied successfully.")
 end
 
 ---------------------------------------------------------------------
 
 function get_path(...)
-  local pathseparator = package.config:sub(1,1);
-  local elements = {...}
-  return table.concat(elements, pathseparator)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
