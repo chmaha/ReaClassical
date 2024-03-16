@@ -41,7 +41,7 @@ function display_prefs()
             'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s),Prepare Takes: Random colors', saved)
     else
         ret, input = GetUserInputs('ReaClassical Project Preferences', 5,
-            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s),Prepare Takes:: Random colors',
+            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s),Prepare Takes: Random colors',
             '35,200,3,7,0')
     end
     return ret, input
