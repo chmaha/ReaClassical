@@ -47,6 +47,18 @@ function main()
       text = take_count + 1
     end
 
+    if gfx.mouse_cap & 1 == 1 then
+      -- text = get_take_count() + 1
+      -- rec_name_set = false
+    elseif gfx.mouse_cap & 2 == 2 then
+      local _, take_choice = GetUserInputs('ReaClassical Take Counter', 1,'Set Take Number:','')
+      if take_choice ~= "" then
+        take_count = tonumber(take_choice) - 1
+        text = tonumber(take_choice)
+        rec_name_set = false
+      end
+    end
+
     if not rec_name_set then
       SNM_SetStringConfigVar("recfile_wildcards", "$project-$track-T_" .. text)
       rec_name_set = true
