@@ -4,6 +4,7 @@
 @changelog
   Take Counter: Allow for left-click recalculate and use project media path for take count
   ReaClassical Project Prefs: Add entry for item coloring
+  ReaClassical Project Prefs: Remove extra colon
   Prepare Takes: Take colors value from ReaClassical Project Prefs
 @metapackage
 @provides
