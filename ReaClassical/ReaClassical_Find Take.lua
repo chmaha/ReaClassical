@@ -35,7 +35,7 @@ function main()
         local take = reaper.GetActiveTake(item)
         local src = reaper.GetMediaItemTake_Source(take)
         local filename = reaper.GetMediaSourceFileName(src, "")
-        local take_capture = tonumber(filename:match(".*[^%d](%d+)%.%a+$"))
+        local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
         local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", 0)
         if take_capture == tonumber(take_choice) and not edit then
             found = true
