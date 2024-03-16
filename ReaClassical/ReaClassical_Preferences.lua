@@ -37,12 +37,12 @@ function display_prefs()
     local _, saved = load_prefs()
     local ret, input
     if saved ~= "" then
-        ret, input = GetUserInputs('ReaClassical Project Preferences', 4,
-            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)', saved)
+        ret, input = GetUserInputs('ReaClassical Project Preferences', 5,
+            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s),Prepare Takes: Random colors', saved)
     else
-        ret, input = GetUserInputs('ReaClassical Project Preferences', 4,
-            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s)',
-            '35,200,3,7')
+        ret, input = GetUserInputs('ReaClassical Project Preferences', 5,
+            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s),Prepare Takes:: Random colors',
+            '35,200,3,7,0')
     end
     return ret, input
 end
@@ -65,7 +65,7 @@ function pref_check(input)
     local pass = 1
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if #table ~= 4 then
+    if #table ~= 5 then
         ShowMessageBox('Empty preferences not allowed. Using previously saved values or defaults', "Warning", 0)
         pass = 0
     end
