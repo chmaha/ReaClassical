@@ -20,15 +20,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, folder_check
+
 ---------------------------------------------------------------------
 
 function main()
   Undo_BeginBlock()
-  local selected = GetSelectedTrack(0,0)
-  if not selected then
-    ShowMessageBox("Please select a folder or track before running", "Classical Take Record", 0)
-    return
+  local is_parent
+  local count = 0
+  local num_of_selected = CountSelectedTracks(0)
+  for i = 0, num_of_selected - 1, 1 do
+      local track = GetSelectedTrack(0,i)
+      if track then
+          is_parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+          if is_parent == 1 then
+              count = count + 1
+          end
+      end
   end
+  
+  if count ~= 1 then
+      ShowMessageBox("Please select one parent track before running", "Record-Arm Folder", 0)
+      return
+  end
+  
   local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
   Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
   
@@ -37,9 +52,9 @@ function main()
   Main_OnCommand(arm, 0)           -- Xenakios/SWS: Set selected tracks record armed
   local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
   Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-  Undo_EndBlock('Record-Arm Group', 0)
+  Undo_EndBlock('Record-Arm Folder', 0)
 end
 
----------------------------------------------------------------------
+
 
 main()
