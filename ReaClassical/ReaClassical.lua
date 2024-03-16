@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.8.4
+@version 24.8.5
 @changelog
-  Take Counter: Allow for right-click set new upcoming take number
+  Take Counter: Allow for left-click recalculate and use project media path for take count
+  ReaClassical Project Prefs: Add entry for item coloring
+  Prepare Takes: Take colors value from ReaClassical Project Prefs
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
