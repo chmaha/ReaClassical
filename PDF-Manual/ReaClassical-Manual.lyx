@@ -1652,6 +1652,11 @@ enter}
 
  to track the upcoming take number (in green) and take number during recording
  (in red with recording circle).
+ You can right-click on the window to set a take number to increment from
+ and left-click to recalculate the track count if you have removed some
+ unused files from the project path.
+ The calculated upcoming take number factors in unused files in the project
+ path so as to avoid any filenaming conflicts.
  Please read the description of the function in Appendix A for best practices.
 \end_layout
 
@@ -2495,12 +2500,52 @@ Vertically Prepared Takes
 \end_layout
 
 \begin_layout Standard
-For horizontally laid-out takes, each complete take is coloured with a different
- random colour.
+If Prepare the 
+\begin_inset Quotes bld
+\end_inset
+
+Prepare Takes: Random colors
+\begin_inset Quotes brd
+\end_inset
+
+ value is set to 0 in ReaClassical Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ (the default), for horizontal workflows, two shades of blue are used which
+ also helps show the user where edits happen.
+ For vertical workflows, the destination group again uses two shades of
+ blue and the source groups are colored green.
+ In this way they match the colors of the associated S-D markers.
+ If 
+\begin_inset Quotes bld
+\end_inset
+
+Prepare Takes: Random colors
+\begin_inset Quotes brd
+\end_inset
+
+ value is set to 1, for horizontally laid-out takes, each complete take
+ is coloured with a different random colour.
  For vertically laid-out takes, each folder’s items are given a different
  random colour.
  This way, however you work, it’s easy to see where edits have come from.
- If you imported or recorded all your files in child tracks, the function
+ Prepare Takes can be re-run at any point to re-sync colors, especially
+ useful when using the default color scheme.
+ 
+\end_layout
+
+\begin_layout Standard
+If you imported or recorded all your files in child tracks, the function
  will additionally copy all items from each first child track into the folder
  track and mute them to act as a visual guide track.
  You will receive a pop-up message if this is the case.
@@ -5243,13 +5288,15 @@ Description:
 \emph on
 Notes:
 \emph default
- As the function currently stands, it is extremely important to save your
- project and name your tracks before starting to record.
+ It is extremely important to save your project and name your tracks before
+ starting to record.
  This ensures that the recorded files have unique names so take numbers
- increment correctly.
- Also note that it is important not delete any false takes otherwise the
- counter will momentarily display a wrong value (it will correct itself
- after recording another take).
+ increment correctly as a group.
+ You can right-click on the window to set a take number to increment from
+ and left-click to recalculate the track count if you have removed some
+ unused files from the project path.
+ The calculated upcoming take number factors in unused files in the project
+ path so as to avoid any filenaming conflicts.
 \end_layout
 
 \begin_layout Standard
@@ -5349,6 +5396,20 @@ Description:
 \emph default
  Intelligently prepares recorded or imported takes for source-destination
  editing.
+ Coloring scheme is set in ReaClassical Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Standard
@@ -5373,6 +5434,16 @@ With a single folder group (or individual tracks), the shortcut will auto-color
  to import a patch recording).
  In this case, the destination group items will switch to using alternating
  colors so that you can easily see where your edits are on the timeline.
+ And, as of 24.8.5, the function uses the 
+\begin_inset Quotes bld
+\end_inset
+
+Prepare Takes: Random colors
+\begin_inset Quotes brd
+\end_inset
+
+ value from ReaClassical Preferences to use either the new color scheme
+ (default, set to 0) or the old random color method (set to 1).
  A reminder that the new REAPER native grouping (when set up via Create
  Folder or Create Source Groups sripts) works for 99% of situations without
  Prepare Takes but for takes that don't start or end at quite the same point
@@ -5718,7 +5789,7 @@ keys{F5}
 Description: 
 \emph default
 Set S-D crossfade length, CD track offset and INDEX0 pre-gap length, album
- lead-out time.
+ lead-out time, Prepare Takes colors.
  
 \end_layout
 
@@ -5748,6 +5819,28 @@ keys{Y}
 
  function will ignore and use a value of 1 second as this is the lowest
  that makes any sense for displaying the countdown to the next track.
+ Prepare Takes by default uses the new color scheme for items (
+\begin_inset Quotes bld
+\end_inset
+
+Prepare Takes: Random colors
+\begin_inset Quotes brd
+\end_inset
+
+ set to 0) which is two shades of blue for horizontal workflows and blues
+ and greens for vertical workflows thereby aligning closely with the colors
+ of the S-D markers.
+ The old coloring method (
+\begin_inset Quotes bld
+\end_inset
+
+Prepare Takes: Random colors
+\begin_inset Quotes brd
+\end_inset
+
+ set to 1) uses random colors per item group.
+ This can help see where edits have come from but because of the randomness
+ may require several iterations until you avoid clashes or eye-sores!
 \end_layout
 
 \begin_layout Standard
