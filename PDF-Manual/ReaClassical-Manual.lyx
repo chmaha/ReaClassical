@@ -1656,7 +1656,7 @@ enter}
  and left-click to recalculate the track count if you have removed some
  unused files from the project path.
  The calculated upcoming take number factors in unused files in the project
- path so as to avoid any filenaming conflicts.
+ path so as to avoid any file-naming conflicts.
  Please read the description of the function in Appendix A for best practices.
 \end_layout
 
@@ -5296,7 +5296,7 @@ Notes:
  and left-click to recalculate the track count if you have removed some
  unused files from the project path.
  The calculated upcoming take number factors in unused files in the project
- path so as to avoid any filenaming conflicts.
+ path so as to avoid any file-naming conflicts.
 \end_layout
 
 \begin_layout Standard
