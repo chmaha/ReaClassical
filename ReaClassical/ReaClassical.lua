@@ -1,11 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.8.5
+@version 24.8.6
 @changelog
-  Take Counter: Allow for left-click recalculate and use project media path for take count
-  ReaClassical Project Prefs: Add entry for item coloring
-  ReaClassical Project Prefs: Remove extra colon
-  Prepare Takes: Take colors value from ReaClassical Project Prefs
+  Add record-arm folder function
+  Trial new meter colors
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -55,6 +53,7 @@
   [main] ReaClassical_Exclusive Audition.lua
   [main] ReaClassical_Find Take.lua
   [main] ReaClassical_Take Counter.lua
+  [main] ReaClassical_Record-Arm Folder.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
