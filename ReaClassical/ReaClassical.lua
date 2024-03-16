@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.8.3
+@version 24.8.4
 @changelog
-  Take Counter: Use take counter number for naming of files
+  Take Counter: Allow for right-click set new upcoming take number
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
