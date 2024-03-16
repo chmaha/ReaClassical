@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.8.6
+@version 24.8.7
 @changelog
-  Add record-arm folder function
-  Trial new meter colors
+  ReaClassical Updater: Backup up reaper-menu.ini and reaper-kb.ini
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
