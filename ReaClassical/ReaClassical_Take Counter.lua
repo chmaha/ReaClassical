@@ -20,19 +20,32 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_rec_number
+local main, get_take_count
 
+gfx.init("Take Number", 300, 100, 0, 0, 0)
+
+local iterated_filenames = false
+local take_count
+local added_take_number = false
+local text
 ---------------------------------------------------------------------
 
 function main()
-
   local playstate = GetPlayState()
   gfx.setfont(1, "Arial", 90, 98)
+
   if playstate == 0 or playstate == 1 then -- stopped or playing
+    added_take_number = false
     gfx.x = 0
     gfx.y = 0
     gfx.set(0.5, 0.8, 0.5, 1)
-    local text = get_rec_number() + 1
+
+    if not iterated_filenames then
+      text = get_take_count() + 1
+    else
+      text = take_count + 1
+    end
+
     local text_width, text_height = gfx.measurestr(text)
     gfx.x = ((300 - text_width) / 2)
     gfx.y = ((100 - text_height) / 2)
@@ -42,37 +55,47 @@ function main()
     gfx.y = 0
     gfx.set(1, 0.5, 0.5, 1)
     gfx.circle(50, 50, 20, 40)
-    text = get_rec_number() + 1
-    local text = get_rec_number() + 1
+
+    if not iterated_filenames then
+      text = get_take_count() + 1
+    end
+
     local text_width, text_height = gfx.measurestr(text)
     gfx.x = ((300 - text_width) / 2)
     gfx.y = ((100 - text_height) / 2)
     gfx.drawstr(text)
+
+    if not added_take_number then
+      take_count = take_count + 1
+      text = take_count
+      added_take_number = true
+    end
   end
+
 
   local key = gfx.getchar()
   if key ~= -1 then defer(main) end
-
 end
 
 ---------------------------------------------------------------------
 
-function get_rec_number()
-  
-  local max_recpass = 0
-  for i = 0, CountMediaItems(0) - 1 do
+function get_take_count()
+  take_count = 0
+  local num_of_items = CountMediaItems(0)
+  for i = 0, num_of_items - 1 do
     local item = GetMediaItem(0, i)
-    local _, statechunk = GetItemStateChunk(item, "", false)
-    local num = tonumber(statechunk:match("RECPASS%s*(%d+)"))
-    if num and num > max_recpass then max_recpass = num end
+    local take = reaper.GetActiveTake(item)
+    local src = reaper.GetMediaItemTake_Source(take)
+    local filename = reaper.GetMediaSourceFileName(src, "")
+    local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
+    if take_capture and take_capture > take_count then take_count = take_capture end
+    iterated_filenames = true
   end
 
-  return max_recpass
+  return take_count
 
 end
 
 ---------------------------------------------------------------------
-
-gfx.init("Take Number", 300, 100, 0, 0, 0)
 
 main()
