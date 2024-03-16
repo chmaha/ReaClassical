@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.8
+@version 24.8.1
 @changelog
-  Add Take Counter function
+  Allow Find Take Function to locate filenames with takes within ()
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
