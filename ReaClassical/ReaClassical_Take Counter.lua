@@ -20,14 +20,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_take_count
-
-gfx.init("Take Number", 300, 100, 0, 0, 0)
+local main, get_take_count, clean_up
 
 local iterated_filenames = false
-local take_count
 local added_take_number = false
+local rec_name_set = false
+local take_count
 local text
+local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
+
 ---------------------------------------------------------------------
 
 function main()
@@ -44,6 +45,11 @@ function main()
       text = get_take_count() + 1
     else
       text = take_count + 1
+    end
+
+    if not rec_name_set then
+      SNM_SetStringConfigVar("recfile_wildcards", "$project-$track-T_" .. text)
+      rec_name_set = true
     end
 
     local text_width, text_height = gfx.measurestr(text)
@@ -69,13 +75,19 @@ function main()
       take_count = take_count + 1
       text = take_count
       added_take_number = true
+      rec_name_set = false
     end
+
   end
 
-
   local key = gfx.getchar()
-  if key ~= -1 then defer(main) end
+  if key ~= -1 then defer(main)
+  else
+    atexit(clean_up())
+  end
 end
+
+
 
 ---------------------------------------------------------------------
 
@@ -97,5 +109,13 @@ function get_take_count()
 end
 
 ---------------------------------------------------------------------
+
+function clean_up()
+  SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
+end
+
+---------------------------------------------------------------------
+
+gfx.init("Take Number", 300, 100, 0, 0, 0)
 
 main()
