@@ -48,13 +48,23 @@ function main()
     end
 
     if gfx.mouse_cap & 1 == 1 then
-      -- text = get_take_count() + 1
-      -- rec_name_set = false
+      local choice = ShowMessageBox("Recalculate take count?", "ReaClassical Take Counter", 4)
+      if choice == 6 then
+        text = get_take_count() + 1
+        rec_name_set = false
+      end
     elseif gfx.mouse_cap & 2 == 2 then
-      local _, take_choice = GetUserInputs('ReaClassical Take Counter', 1,'Set Take Number:','')
-      if take_choice ~= "" then
-        take_count = tonumber(take_choice) - 1
-        text = tonumber(take_choice)
+      local _, take_choice = GetUserInputs('ReaClassical Take Counter', 1, 'Set Take Number:', '')
+      take_choice = tonumber(take_choice)
+      if take_choice ~= nil and take_choice > take_count then
+        take_count = take_choice - 1
+        text = take_choice
+        rec_name_set = false
+      else
+        ShowMessageBox("You cannot set a take number lower than the highest found "
+          .. "in the project path."
+          .. "\nRecalculating take count...", "ReaClassical Take Counter", 0)
+        text = get_take_count() + 1
         rec_name_set = false
       end
     end
@@ -89,35 +99,41 @@ function main()
       added_take_number = true
       rec_name_set = false
     end
-
   end
 
   local key = gfx.getchar()
-  if key ~= -1 then defer(main)
+  if key ~= -1 then
+    defer(main)
   else
     atexit(clean_up())
   end
 end
 
-
-
 ---------------------------------------------------------------------
 
 function get_take_count()
   take_count = 0
-  local num_of_items = CountMediaItems(0)
-  for i = 0, num_of_items - 1 do
-    local item = GetMediaItem(0, i)
-    local take = reaper.GetActiveTake(item)
-    local src = reaper.GetMediaItemTake_Source(take)
-    local filename = reaper.GetMediaSourceFileName(src, "")
+
+  local media_path = GetProjectPath(0)
+  local audioFiles = {}
+  local command = ""
+  if string.lower(package.config:sub(1, 1)) == '\\' then -- Windows
+    command = 'dir "' .. media_path .. '" /b /a:-d'
+  else                                                   -- Unix-like
+    command = 'ls -p "' .. media_path .. '" | grep -v /'
+  end
+
+  local handle = io.popen(command)
+  local result = handle:read("*a")
+  handle:close()
+  local i = 1
+  for filename in result:gmatch("[^\r\n]+") do
     local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
     if take_capture and take_capture > take_count then take_count = take_capture end
     iterated_filenames = true
   end
 
   return take_count
-
 end
 
 ---------------------------------------------------------------------
