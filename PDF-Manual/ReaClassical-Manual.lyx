@@ -935,6 +935,15 @@ keys{?}
 \series bold
 DON'T do this if you have your own custom toolbars or keyboard shortcuts
  as they will be overwritten! 
+\series default
+However, as of 24.8.7 any files will first be backed up (e.g.
+ 
+\emph on
+reaper-kb.ini.backup
+\emph default
+).
+ Obviously if you run the updater twice before recovering them you will
+ lose your original files.
 \end_layout
 
 \begin_layout Subsection
