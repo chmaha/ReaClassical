@@ -20,19 +20,27 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, copy_file, get_path
+local main, copy_file, get_path, portable_check
 
 ---------------------------------------------------------------------
 
 function main()
     local separator = package.config:sub(1, 1)
     local resource_path = GetResourcePath()
+
     local menu_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-menu.ini")
     local source_file_path = resource_path .. menu_relative_path
     local destination_file_path = resource_path .. separator .. "reaper-menu.ini"
     local kb_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-kb.ini")
     local source_shortcuts_path = resource_path .. kb_relative_path
     local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
+
+    local exist = portable_check(resource_path)
+    if not exist then
+        ShowMessageBox("The ReaClassical Updater can only be run on a ReaClassical Portable Install!"
+            .. "\nTo update just the functions in a regular REAPER install, please sync ReaPack.", "ReaClassical Updater", 0)
+        return
+    end
 
     local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
     Main_OnCommand(sync_reapack, 0)
@@ -103,6 +111,20 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function portable_check(resource_path)
+    local status = false
+    local portable = resource_path .. get_path("", "rc_portable")
+    local destination_file_exists = io.open(portable, "rb")
+    if destination_file_exists then
+        destination_file_exists:close()
+        status = true
+    end
+
+    return status
 end
 
 ---------------------------------------------------------------------
