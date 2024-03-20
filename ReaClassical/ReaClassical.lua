@@ -1,9 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.8.7+dev0320
+@version 24.9+dev0320
 @changelog
   Take Counter: Allow adding session type to right-click
   Various: Switch to using rcmaster bus for routing
+  Color Table: Add rcmaster color (25,75,25)
+  Various: Fix rcmaster color references
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

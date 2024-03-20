@@ -114,7 +114,7 @@ function mixer()
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
         if trackname_check(track, "^RCMASTER") then
-            SetTrackColor(track, colors.roomtone)
+            SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
