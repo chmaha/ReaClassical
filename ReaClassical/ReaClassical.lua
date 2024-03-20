@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.8.7
+@version 24.8.7+dev0320
 @changelog
-  ReaClassical Updater: Backup up reaper-menu.ini and reaper-kb.ini
+  Take Counter: Allow adding session type to right-click
+  Various: Switch to using rcmaster bus for routing
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

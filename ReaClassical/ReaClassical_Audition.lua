@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, solo, bus_check, rt_check, mixer, on_stop, get_color_table, get_path
+local main, solo, trackname_check, mixer, on_stop, get_color_table, get_path
 
 ---------------------------------------------------------------------
 
@@ -124,23 +124,32 @@ function solo()
 
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
+
+        if (trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
+            local num_of_sends = GetTrackNumSends(track, 0)
+            for j = 0, num_of_sends - 1, 1 do
+                SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
+            end
+        end
+
+
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (bus_check(track) or rt_check(track)) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        elseif not (trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        elseif not (bus_check(track) or rt_check(track)) then
+        elseif not (trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
 
         local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
-        
-        if bus_check(track) and muted == 0 then
+
+        if (trackname_check(track, "^@") or trackname_check(track, "^RCMASTER")) and muted == 0 then
             local receives = GetTrackNumSends(track, -1)
-            for i=0,receives-1, 1 do -- loop through receives
-            local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
+            for i = 0, receives - 1, 1 do -- loop through receives
+                local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
                 if origin == selected_track or parent == 1 then
                     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                     SetMediaTrackInfo_Value(track, "I_SOLO", 0)
@@ -149,31 +158,18 @@ function solo()
             end
         end
 
-        if rt_check(track) and muted == 0 then
+        if trackname_check(track, "^RoomTone") and muted == 0 then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
         end
     end
-
-    -- unmute parent so child track audio can come through
-    if parent ~= 1 and not rt_check(selected_track) then
-        local parent_track = GetParentTrack(selected_track)
-        SetMediaTrackInfo_Value(parent_track, "B_MUTE", 0)
-    end
 end
 
 ---------------------------------------------------------------------
 
-function bus_check(track)
+function trackname_check(track, string)
     local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^@")
-end
-
----------------------------------------------------------------------
-
-function rt_check(track)
-    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^RoomTone")
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
@@ -182,15 +178,19 @@ function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        if bus_check(track) then
+        if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if rt_check(track) then
+        if trackname_check(track, "^RoomTone") then
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
+        if trackname_check(track, "^RCMASTER") then
+            SetTrackColor(track, colors.roomtone)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -214,7 +214,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -222,8 +222,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 

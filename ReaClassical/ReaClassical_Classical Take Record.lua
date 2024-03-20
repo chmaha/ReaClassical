@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, solo, bus_check, rt_check, mixer, track_check
+local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
 
 ---------------------------------------------------------------------
@@ -38,6 +38,9 @@ function main()
     end
     local take_record_toggle = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
     Undo_BeginBlock()
+
+    Main_OnCommand(40339,0) --unmute all tracks
+
     if GetPlayState() == 0 then
         SetToggleCommandState(1, take_record_toggle, 1)
         RefreshToolbar2(1, take_record_toggle)
@@ -124,7 +127,7 @@ function solo()
 
     for i = 0, CountTracks(0) - 1, 1 do
         track = GetTrack(0, i)
-        if IsTrackSelected(track) == false then
+        if IsTrackSelected(track) == false and not trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
     end
@@ -133,16 +136,9 @@ end
 
 ---------------------------------------------------------------------
 
-function bus_check(track)
+function trackname_check(track, string)
     local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^@")
-end
-
----------------------------------------------------------------------
-
-function rt_check(track)
-    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^RoomTone")
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
@@ -151,15 +147,19 @@ function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        if bus_check(track) then
+        if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if rt_check(track) then
+        if trackname_check(track, "^RoomTone") then
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
+        if trackname_check(track, "^RCMASTER") then
+            SetTrackColor(track, colors.roomtone)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

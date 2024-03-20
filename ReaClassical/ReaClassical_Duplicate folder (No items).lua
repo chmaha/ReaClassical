@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, solo, bus_check, rt_check, mixer, track_check
+local main, solo, trackname_check, mixer, track_check
 local media_razor_group, add_spacer, remove_spacers, create_prefixes
 local folder_check, get_color_table, get_path
 
@@ -94,16 +94,9 @@ end
 
 ---------------------------------------------------------------------
 
-function bus_check(track)
+function trackname_check(track, string)
     _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^@")
-end
-
----------------------------------------------------------------------
-
-function rt_check(track)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^RoomTone")
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
@@ -112,15 +105,19 @@ function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        if bus_check(track) then
+        if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if rt_check(track) then
+        if trackname_check(track, "^RoomTone") then
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
+        if trackname_check(track, "^RCMASTER") then
+            SetTrackColor(track, colors.roomtone)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -184,7 +181,7 @@ function create_prefixes()
             table[j] = {}
             table[j]["parent"] = track
         else
-            if not bus_check(track) and not rt_check(track) then
+            if not trackname_check(track, "^@") and not trackname_check(track, "^RCMASTER") and not trackname_check(track, "^RoomTone") then
                 table[j][k] = track
                 k = k + 1
             end

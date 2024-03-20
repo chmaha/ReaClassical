@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_color_table, get_path
-local add_spacer, remove_spacers
+local add_spacer, remove_spacers, route_to_track, trackname_check
 
 ---------------------------------------------------------------------
 
@@ -32,16 +32,40 @@ function main()
             "Add Aux/Submix track", 0)
         return
     end
+
     Undo_BeginBlock()
-    Main_OnCommand(40702, 0) -- Add track to end of tracklist
-    track = GetSelectedTrack(0, 0)
+
+    local rcmaster
+    local rcmaster_index
+    local num_of_tracks = CountTracks(0)
+
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if trackname_check(track, "^RCMASTER") then
+            rcmaster = track
+            rcmaster_index = i
+            break
+        end
+    end
+
+    if rcmaster == nil then
+        ShowMessageBox("Sorry, can't find RCMASTER", "Error!", 0)
+        return
+    end
+
+    InsertTrackAtIndex(rcmaster_index, true) -- Add track just before RCMASTER
+    local bus = GetTrack(0, rcmaster_index)
+    SetMediaTrackInfo_Value(bus, "I_FOLDERDEPTH", 0)
+
+    route_to_track(bus, rcmaster)
     local colors = get_color_table()
-    SetTrackColor(track, colors.aux)
-    GetSetMediaTrackInfo_String(track, "P_NAME", "@", true) -- Add @ as track name
-    SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-    remove_spacers(total_tracks)
+    SetTrackColor(bus, colors.aux)
+    GetSetMediaTrackInfo_String(bus, "P_NAME", "@", true) -- Add @ as track name
+    SetMediaTrackInfo_Value(bus, "B_SHOWINTCP", 0)
+    remove_spacers(total_tracks + 1)
     add_spacer(tracks_per_group)
-    add_spacer(folders*tracks_per_group)
+    add_spacer(folders * tracks_per_group)
+    add_spacer(rcmaster_index + 1)
     Main_OnCommand(40297, 0)
     local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(home, 0)
@@ -56,9 +80,12 @@ function folder_check()
     local total_tracks = CountTracks(0)
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
+        local rcm = trackname_check(track, "^RCMASTER")
+        local bus = trackname_check(track, "^@")
+        local rt = trackname_check(track, "^RoomTone")
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1
-        elseif folders == 1 then
+        elseif folders == 1 and not (rcm or bus or rt) then
             tracks_per_group = tracks_per_group + 1
         end
     end
@@ -69,7 +96,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -77,8 +104,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
@@ -94,10 +121,24 @@ end
 ---------------------------------------------------------------------
 
 function remove_spacers(num_of_tracks)
-    for i = 0, num_of_tracks -1, 1 do
-        local track = GetTrack(0,i)
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0, i)
         SetMediaTrackInfo_Value(track, "I_SPACER", 0)
     end
+end
+
+---------------------------------------------------------------------
+
+function route_to_track(track, rcmaster)
+    SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
+    CreateTrackSend(track, rcmaster)
+end
+
+---------------------------------------------------------------------
+
+function trackname_check(track, string)
+    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
