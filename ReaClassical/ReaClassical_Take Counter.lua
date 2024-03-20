@@ -26,9 +26,14 @@ local iterated_filenames = false
 local added_take_number = false
 local rec_name_set = false
 local take_count
-local text
+local take_text
 local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
+local take_choice, session_choice
+local session = ""
+local separator = package.config:sub(1, 1);
 
+local X = 300
+local Y = 125
 ---------------------------------------------------------------------
 
 function main()
@@ -42,42 +47,65 @@ function main()
     gfx.set(0.5, 0.8, 0.5, 1)
 
     if not iterated_filenames then
-      text = get_take_count() + 1
+      take_text = get_take_count() + 1
     else
-      text = take_count + 1
+      take_text = take_count + 1
     end
 
     if gfx.mouse_cap & 1 == 1 then
       local choice = ShowMessageBox("Recalculate take count?", "ReaClassical Take Counter", 4)
       if choice == 6 then
-        text = get_take_count() + 1
+        take_text = get_take_count() + 1
         rec_name_set = false
       end
     elseif gfx.mouse_cap & 2 == 2 then
-      local _, take_choice = GetUserInputs('ReaClassical Take Counter', 1, 'Set Take Number:', '')
-      take_choice = tonumber(take_choice)
-      if take_choice ~= nil and take_choice > take_count then
+      local session_text = session:gsub(separator .. "$", "")
+      local ret, choices = GetUserInputs('ReaClassical Take Counter', 2, 'Set Take Number:,Session Name:',
+        take_text .. ',' .. session_text)
+      take_choice, session_choice = string.match(choices, "(%d*),?(.*)")
+      if take_choice ~= nil and take_choice ~= "" then
+        take_choice = tonumber(take_choice)
+      else
+        take_choice = take_text
+      end
+      if session_choice ~= nil and session_choice ~= "" then
+        session = session_choice .. separator
+      elseif ret ~= false then
+        session = ""
+      end
+      if take_choice ~= nil and take_choice >= take_count then
         take_count = take_choice - 1
-        text = take_choice
+        take_text = take_choice
         rec_name_set = false
       else
         ShowMessageBox("You cannot set a take number lower than the highest found "
           .. "in the project path."
           .. "\nRecalculating take count...", "ReaClassical Take Counter", 0)
-        text = get_take_count() + 1
+        take_text = get_take_count() + 1
         rec_name_set = false
       end
     end
 
     if not rec_name_set then
-      SNM_SetStringConfigVar("recfile_wildcards", "$project-$track-T_" .. text)
+      SNM_SetStringConfigVar("recfile_wildcards", session .. "$tracknumber_$track-T_" .. take_text)
       rec_name_set = true
     end
 
-    local text_width, text_height = gfx.measurestr(text)
-    gfx.x = ((300 - text_width) / 2)
-    gfx.y = ((100 - text_height) / 2)
-    gfx.drawstr(text)
+    local take_width, take_height = gfx.measurestr(take_text)
+    gfx.x = ((X - take_width) / 2)
+    -- gfx.y = ((Y - take_height) / 2)
+    gfx.drawstr(take_text)
+    gfx.setfont(1, "Arial", 25, 98)
+    local session_text = session:gsub(separator .. "$", "")
+    if session_text == "" and take_text == 1 then
+      gfx.setfont(1, "Arial", 15, 98)
+      session_text = "Right-click to set session name"
+    end
+    local session_width, session_height = gfx.measurestr(session_text)
+    gfx.x = ((X - session_width) / 2)
+    gfx.y = ((Y - session_height + take_height / 3) / 2)
+    gfx.set(0.8, 0.8, 0.9, 1)
+    gfx.drawstr("\n" .. session_text)
   else -- recording
     gfx.x = 0
     gfx.y = 0
@@ -85,17 +113,24 @@ function main()
     gfx.circle(50, 50, 20, 40)
 
     if not iterated_filenames then
-      text = get_take_count() + 1
+      take_text = get_take_count() + 1
     end
 
-    local text_width, text_height = gfx.measurestr(text)
-    gfx.x = ((300 - text_width) / 2)
-    gfx.y = ((100 - text_height) / 2)
-    gfx.drawstr(text)
+    local take_width, take_height = gfx.measurestr(take_text)
+    gfx.x = ((X - take_width) / 2)
+    --gfx.y = ((Y - take_height) / 2)
+    gfx.drawstr(take_text)
+
+    local session_text = session:gsub(separator .. "$", "")
+    gfx.setfont(1, "Arial", 25, 98)
+    local session_width, session_height = gfx.measurestr(session_text)
+    gfx.x = ((X - session_width) / 2)
+    gfx.y = ((Y - session_height + take_height / 3) / 2)
+    gfx.drawstr("\n" .. session_text)
 
     if not added_take_number then
       take_count = take_count + 1
-      text = take_count
+      take_text = take_count
       added_take_number = true
       rec_name_set = false
     end
@@ -114,13 +149,12 @@ end
 function get_take_count()
   take_count = 0
 
-  local media_path = GetProjectPath(0)
-  local audioFiles = {}
-  local command = ""
+  local media_path = GetProjectPath(0)                   -- .. separator .. session
+  local command
   if string.lower(package.config:sub(1, 1)) == '\\' then -- Windows
-    command = 'dir "' .. media_path .. '" /b /a:-d'
+    command = 'dir "' .. media_path .. '" /b /s /a:-d'
   else                                                   -- Unix-like
-    command = 'ls -p "' .. media_path .. '" | grep -v /'
+    command = 'ls -pR "' .. media_path .. '" | grep -v /$'
   end
 
   local handle = io.popen(command)
@@ -144,6 +178,6 @@ end
 
 ---------------------------------------------------------------------
 
-gfx.init("Take Number", 300, 100, 0, 0, 0)
+gfx.init("Take Number", X, Y, 0, 0, 0)
 
 main()
