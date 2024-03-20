@@ -20,10 +20,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, create_destination_group, solo, bus_check, rt_check
+local main, create_destination_group, solo, trackname_check
 local mixer, folder_check, sync_routing_and_fx, create_source_groups
 local media_razor_group, remove_track_groups, link_controls, get_color_table
 local folder_size_check, remove_spacers, add_spacer, create_prefixes, get_path
+local add_rcmaster, route_to_track, rcmaster_check, remove_rcmaster_connections
 
 ---------------------------------------------------------------------
 
@@ -32,7 +33,8 @@ function main()
     Undo_BeginBlock()
 
     local num_of_tracks = CountTracks(0)
-    
+    local new_project = false
+
     if num_of_tracks == 0 then
         local boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
         num = tonumber(num)
@@ -42,14 +44,45 @@ function main()
             ShowMessageBox("You need 2 or more tracks to make a source group!", "Create Source Groups", 0)
         end
         if folder_check() == 1 then
+            new_project = true
             create_source_groups(num_of_tracks)
+            sync_routing_and_fx(num_of_tracks, new_project)
             create_prefixes()
         end
     elseif folder_check() > 1 then
-        sync_routing_and_fx(num_of_tracks)
+        local new, _, _ = rcmaster_check()
+        if not new then
+            add_rcmaster(num_of_tracks)
+            num_of_tracks = num_of_tracks + 1
+        end
+        local rcmaster = GetTrack(0, num_of_tracks-1)
+        remove_rcmaster_connections(rcmaster)
+
+        for i = 0, num_of_tracks - 1, 1 do
+            local track = GetTrack(0,i)
+            route_to_track(track, rcmaster)
+        end
+
+        sync_routing_and_fx(num_of_tracks, new_project)
         create_prefixes()
+        
     elseif folder_check() == 1 then
+        local new, _, _ = rcmaster_check()
+        if not new then
+            add_rcmaster(num_of_tracks)
+            num_of_tracks = num_of_tracks + 1
+        end
+        local rcmaster = GetTrack(0, num_of_tracks-1)
+        remove_rcmaster_connections(rcmaster)
+
+        for i = 0, num_of_tracks - 1, 1 do
+            local track = GetTrack(0,i)
+            route_to_track(track, rcmaster)
+        end
+
+        new_project = true
         create_source_groups(num_of_tracks)
+        sync_routing_and_fx(num_of_tracks, new_project)
         create_prefixes()
     else
         ShowMessageBox(
@@ -68,9 +101,13 @@ function create_destination_group(num)
     for _ = 1, num, 1 do
         InsertTrackAtIndex(0, true)
     end
+
+    local rcmaster = add_rcmaster(num)
+
     for i = 0, num - 1, 1 do
         local track = GetTrack(0, i)
         SetTrackSelected(track, 1)
+        route_to_track(track, rcmaster)
     end
     local make_folder = NamedCommandLookup("_SWS_MAKEFOLDER")
     Main_OnCommand(make_folder, 0) -- make folder from tracks
@@ -96,16 +133,9 @@ end
 
 ---------------------------------------------------------------------
 
-function bus_check(track)
+function trackname_check(track, string)
     _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^@")
-end
-
----------------------------------------------------------------------
-
-function rt_check(track)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, "^RoomTone")
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
@@ -114,15 +144,19 @@ function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        if bus_check(track) then
+        if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if rt_check(track) then
+        if trackname_check(track, "^RoomTone") then
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if IsTrackSelected(track) or bus_check(track) or rt_check(track) then
+        if trackname_check(track, "^RCMASTER") then
+            SetTrackColor(track, colors.rcmaster)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -146,12 +180,17 @@ end
 
 ---------------------------------------------------------------------
 
-function sync_routing_and_fx(num_of_tracks)
-    local ans = ShowMessageBox(
-        "This will (re)create track groups and sync your source group routing and fx \nto match that of the destination group. Continue?",
-        "Sync Source & Destination", 4)
+function sync_routing_and_fx(num_of_tracks, new_project)
+    
+    local ans
+    
+    if not new_project then
+        ans = ShowMessageBox(
+            "This will (re)create track groups and sync your source group routing and fx \nto match that of the destination group. Continue?",
+            "Sync Source & Destination", 4)
+    end
 
-    if ans == 6 then
+    if ans == 6 or new_project then
         remove_track_groups()
         local ret = link_controls()
         if not ret then return end
@@ -315,7 +354,7 @@ function link_controls()
         local j = 0
         while j < folder_tracks do
             local track = GetSelectedTrack(0, j)
-            if not bus_check(track) then
+            if not trackname_check(track, "^@") then
                 GetSetTrackGroupMembership(track, "VOLUME_LEAD", 2 ^ j, 2 ^ j)
                 GetSetTrackGroupMembership(track, "VOLUME_FOLLOW", 2 ^ j, 2 ^ j)
                 GetSetTrackGroupMembership(track, "PAN_LEAD", 2 ^ j, 2 ^ j)
@@ -375,6 +414,7 @@ function create_prefixes()
     -- get table of parent tracks by iterating through and checking status
     local table = {}
     local num_of_tracks = CountTracks(0)
+    local rcmaster_index
     local j = 0
     local k = 1
     for i = 0, num_of_tracks - 1, 1 do
@@ -385,13 +425,18 @@ function create_prefixes()
             k = 1
             table[j] = {}
             table[j]["parent"] = track
+        elseif trackname_check(track, "^RCMASTER") then
+            rcmaster_index = i
         else
-            if not bus_check(track) and not rt_check(track) then
+            if not trackname_check(track, "^@") and not trackname_check(track, "^RCMASTER") and not trackname_check(track, "^RoomTone") then
                 table[j][k] = track
                 k = k + 1
             end
         end
     end
+
+    add_spacer(rcmaster_index)
+
     -- for 1st prefix D: (remove anything existing before & including :)
     for _,v in pairs(table[1]) do
         local _, name = GetSetMediaTrackInfo_String(v, "P_NAME", "", 0)
@@ -425,6 +470,57 @@ function get_path(...)
     local pathseparator = package.config:sub(1,1);
     local elements = {...}
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function add_rcmaster(num)
+    InsertTrackAtIndex(num, true) -- add RCMASTER
+    local rcmaster = GetTrack(0,num)
+    GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "RCMASTER", 1)
+    SetMediaTrackInfo_Value(rcmaster, "I_SPACER", 1)
+    local colors = get_color_table()
+    SetTrackColor(rcmaster, colors.roomtone)
+    SetMediaTrackInfo_Value(rcmaster, "B_SHOWINTCP", 0)
+
+    return rcmaster
+end
+
+---------------------------------------------------------------------
+
+function route_to_track(track, rcmaster)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+    if name ~= "RCMASTER" then
+        SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
+        CreateTrackSend(track, rcmaster)
+    end
+end
+
+---------------------------------------------------------------------
+
+function rcmaster_check()
+    local bool = false
+    local track
+    local num_of_tracks = CountTracks(0)
+    for i = 0, num_of_tracks - 1, 1 do
+        track = GetTrack(0, i)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+        if name == "RCMASTER" then
+            bool = true
+            break
+        end
+    end
+
+    return bool, num_of_tracks, track
+end
+
+---------------------------------------------------------------------
+
+function remove_rcmaster_connections(rcmaster)
+    local num_of_receives = GetTrackNumSends(rcmaster, -1)
+    for i = 0, num_of_receives - 1, 1 do
+        RemoveTrackSend(rcmaster, -1, 0)
+    end
 end
 
 ---------------------------------------------------------------------
