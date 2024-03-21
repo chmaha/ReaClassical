@@ -63,6 +63,11 @@ function main()
                 local track = GetTrack(0, i)
                 route_to_track(track, rcmaster)
             end
+            ShowMessageBox("Your Project has been upgraded"
+                .. " to use RCMASTER bus. All audio is now routed though it.\n"
+                .. "You can now move the parent fader without affecting the volume of child tracks.\n"
+                .. "If you delete by accident, simply run F7 again."
+                , "Create Folder", 0)
         else
             remove_rcmaster_connections(rcmaster)
             for i = 0, num_of_tracks - 1, 1 do

@@ -33,64 +33,75 @@ function main()
     Undo_BeginBlock()
 
     local num_of_tracks = CountTracks(0)
-    local new_project = false
+    local show_message = false
+    local rcmaster_exists = false
 
     if num_of_tracks == 0 then
         local boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
         num = tonumber(num)
         if boolean == true and num > 1 then
             create_destination_group(num)
+            rcmaster_exists = true
         elseif boolean == true and num < 2 then
             ShowMessageBox("You need 2 or more tracks to make a source group!", "Create Source Groups", 0)
         end
         if folder_check() == 1 then
-            new_project = true
+            show_message = true
             create_source_groups(num_of_tracks)
-            sync_routing_and_fx(num_of_tracks, new_project)
+            sync_routing_and_fx(num_of_tracks, show_message)
             create_prefixes()
         end
     elseif folder_check() > 1 then
-        local new, _, _ = rcmaster_check()
-        if not new then
+        rcmaster_exists, _, _ = rcmaster_check()
+        if not rcmaster_exists then
             add_rcmaster(num_of_tracks)
             num_of_tracks = num_of_tracks + 1
         end
-        local rcmaster = GetTrack(0, num_of_tracks-1)
+        local rcmaster = GetTrack(0, num_of_tracks - 1)
         remove_rcmaster_connections(rcmaster)
 
         for i = 0, num_of_tracks - 1, 1 do
-            local track = GetTrack(0,i)
+            local track = GetTrack(0, i)
             route_to_track(track, rcmaster)
         end
 
-        sync_routing_and_fx(num_of_tracks, new_project)
+        sync_routing_and_fx(num_of_tracks, show_message)
         create_prefixes()
-        
     elseif folder_check() == 1 then
-        local new, _, _ = rcmaster_check()
-        if not new then
+        rcmaster_exists, _, _ = rcmaster_check()
+        if not rcmaster_exists then
             add_rcmaster(num_of_tracks)
             num_of_tracks = num_of_tracks + 1
         end
-        local rcmaster = GetTrack(0, num_of_tracks-1)
+        local rcmaster = GetTrack(0, num_of_tracks - 1)
         remove_rcmaster_connections(rcmaster)
 
         for i = 0, num_of_tracks - 1, 1 do
-            local track = GetTrack(0,i)
+            local track = GetTrack(0, i)
             route_to_track(track, rcmaster)
         end
 
-        new_project = true
+        show_message = true
         create_source_groups(num_of_tracks)
-        sync_routing_and_fx(num_of_tracks, new_project)
+        sync_routing_and_fx(num_of_tracks, show_message)
         create_prefixes()
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
             "Create Source Groups", 0)
     end
-    Undo_EndBlock('Create Source Groups', 0)
+    
     PreventUIRefresh(-1)
+
+    if not rcmaster_exists then
+        ShowMessageBox("Your Project has been upgraded"
+        .. " to use RCMASTER bus. All audio is now routed though it.\n"
+        .. "You can now move the parent fader without affecting the volume of child tracks.\n"
+        .. "If you delete by accident, simply run F8 again."
+        , "Create Folder", 0)
+    end
+
+    Undo_EndBlock('Create Source Groups', 0)
     UpdateArrange()
     UpdateTimeline()
 end
@@ -180,17 +191,16 @@ end
 
 ---------------------------------------------------------------------
 
-function sync_routing_and_fx(num_of_tracks, new_project)
-    
+function sync_routing_and_fx(num_of_tracks, show_message)
     local ans
-    
-    if not new_project then
+
+    if not show_message then
         ans = ShowMessageBox(
             "This will (re)create track groups and sync your source group routing and fx \nto match that of the destination group. Continue?",
             "Sync Source & Destination", 4)
     end
 
-    if ans == 6 or new_project then
+    if ans == 6 or show_message then
         remove_track_groups()
         local ret = link_controls()
         if not ret then return end
@@ -205,10 +215,10 @@ function sync_routing_and_fx(num_of_tracks, new_project)
         local num_of_folders = folder_check()
         for _ = 1, num_of_folders - 1, 1 do
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-            Main_OnCommand(select_children, 0)            --SWS_SELCHILDREN2
+            Main_OnCommand(select_children, 0)                  --SWS_SELCHILDREN2
             local copy_folder_routing = NamedCommandLookup("_S&M_COPYSNDRCV2")
-            Main_OnCommand(copy_folder_routing, 0)        -- copy folder track routinga
-            Main_OnCommand(42579, 0)                      -- Track: Remove selected tracks from all track media/razor editing groups
+            Main_OnCommand(copy_folder_routing, 0)              -- copy folder track routinga
+            Main_OnCommand(42579, 0)                            -- Track: Remove selected tracks from all track media/razor editing groups
             local copy = NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
             Main_OnCommand(copy, 0)
             local paste = NamedCommandLookup("_SWS_AWPASTE")
@@ -219,10 +229,10 @@ function sync_routing_and_fx(num_of_tracks, new_project)
             local paste_folder_routing = NamedCommandLookup("_S&M_PASTSNDRCV2")
             Main_OnCommand(paste_folder_routing, 0) -- paste folder track routing
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-            Main_OnCommand(unselect_children, 0) -- unselect children
-            Main_OnCommand(40042, 0)          --move edit cursor to start
+            Main_OnCommand(unselect_children, 0)    -- unselect children
+            Main_OnCommand(40042, 0)                --move edit cursor to start
             local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-            Main_OnCommand(next_folder, 0)    --select next folder
+            Main_OnCommand(next_folder, 0)          --select next folder
 
             --Account for empty folders
             local length = GetProjectLength(0)
@@ -232,13 +242,13 @@ function sync_routing_and_fx(num_of_tracks, new_project)
 
             select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0) --SWS_SELCHILDREN2
-            Main_OnCommand(40421, 0)     --select all items on track
+            Main_OnCommand(40421, 0)           --select all items on track
 
             local selected_tracks = CountSelectedTracks(0)
             for _ = 1, selected_tracks, 1 do
-                Main_OnCommand(40117, 0) -- Move items up to previous folder
+                Main_OnCommand(40117, 0)   -- Move items up to previous folder
             end
-            Main_OnCommand(40005, 0) --delete selected tracks
+            Main_OnCommand(40005, 0)       --delete selected tracks
             local select_only = NamedCommandLookup("_SWS_SELTRKWITEM")
             Main_OnCommand(select_only, 0) --SWS: Select only track(s) with selected item(s)
             local dup_tr = GetSelectedTrack(0, 0)
@@ -249,7 +259,7 @@ function sync_routing_and_fx(num_of_tracks, new_project)
         end
         tracks_per_group = media_razor_group()
         add_spacer(tracks_per_group)
-        add_spacer(num_of_folders*tracks_per_group)
+        add_spacer(num_of_folders * tracks_per_group)
         local first_track = GetTrack(0, 0)
         SetOnlyTrackSelected(first_track)
         solo()
@@ -270,8 +280,8 @@ function create_source_groups(num_of_tracks)
     local i = 0
     while i < 6 do
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-        Main_OnCommand(select_children, 0)              -- SWS: Select children of selected folder track(s)
-        Main_OnCommand(42579, 0)                        -- Track: Remove selected tracks from all track media/razor editing groups
+        Main_OnCommand(select_children, 0)                  -- SWS: Select children of selected folder track(s)
+        Main_OnCommand(42579, 0)                            -- Track: Remove selected tracks from all track media/razor editing groups
         local copy = NamedCommandLookup("_S&M_COPYSNDRCV1") -- SWS/S&M: Copy selected tracks (with routing)
         Main_OnCommand(copy, 0)
         local paste = NamedCommandLookup("_SWS_AWPASTE")
@@ -299,22 +309,22 @@ function media_razor_group()
         for i = 1, num_of_folders, 1 do
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-            Main_OnCommand(42578, 0)     -- Track: Create new track media/razor editing group from selected tracks
+            Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
             local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-            Main_OnCommand(next_folder, 0) -- select next folder
+            Main_OnCommand(next_folder, 0)     -- select next folder
         end
     else
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-        Main_OnCommand(42578, 0)       -- Track: Create new track media/razor editing group from selected tracks
+        Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
     end
-    Main_OnCommand(40296, 0)           -- Track: Select all tracks
+    Main_OnCommand(40296, 0)               -- Track: Select all tracks
     local collapse = NamedCommandLookup("_SWS_COLLAPSE")
-    Main_OnCommand(collapse, 0)        -- collapse folder
-    Main_OnCommand(40297, 0)           -- Track: Unselect (clear selection of) all tracks
-    Main_OnCommand(40939, 0)           -- Track: Select track 01
+    Main_OnCommand(collapse, 0)            -- collapse folder
+    Main_OnCommand(40297, 0)               -- Track: Unselect (clear selection of) all tracks
+    Main_OnCommand(40939, 0)               -- Track: Select track 01
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    Main_OnCommand(select_children, 0)     -- SWS: Select children of selected folder track(s)
 
     solo()
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
@@ -324,8 +334,8 @@ function media_razor_group()
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
 
-    Main_OnCommand(40297, 0)           -- Track: Unselect (clear selection of) all tracks
-    Main_OnCommand(40939, 0)           -- select track 01
+    Main_OnCommand(40297, 0)             -- Track: Unselect (clear selection of) all tracks
+    Main_OnCommand(40939, 0)             -- select track 01
     return tracks_per_group
 end
 
@@ -369,7 +379,7 @@ function link_controls()
             j = j + 1
         end
         local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-        Main_OnCommand(next_folder, 0) -- select next folder
+        Main_OnCommand(next_folder, 0)     -- select next folder
         Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
         local ret = folder_size_check(folder_tracks)
         if not ret then
@@ -402,8 +412,8 @@ end
 ---------------------------------------------------------------------
 
 function remove_spacers(num_of_tracks)
-    for i = 0, num_of_tracks -1, 1 do
-        local track = GetTrack(0,i)
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0, i)
         SetMediaTrackInfo_Value(track, "I_SPACER", 0)
     end
 end
@@ -418,7 +428,7 @@ function create_prefixes()
     local j = 0
     local k = 1
     for i = 0, num_of_tracks - 1, 1 do
-        local track = GetTrack(0,i)
+        local track = GetTrack(0, i)
         local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
         if parent == 1 then
             j = j + 1
@@ -438,7 +448,7 @@ function create_prefixes()
     add_spacer(rcmaster_index)
 
     -- for 1st prefix D: (remove anything existing before & including :)
-    for _,v in pairs(table[1]) do
+    for _, v in pairs(table[1]) do
         local _, name = GetSetMediaTrackInfo_String(v, "P_NAME", "", 0)
         local mod_name = string.match(name, ":(.*)")
         if mod_name == nil then mod_name = name end
@@ -446,11 +456,11 @@ function create_prefixes()
     end
     -- for rest, prefix Si: where i = number starting at 1
     for i = 2, #table, 1 do
-        for _,v in pairs(table[i]) do
+        for _, v in pairs(table[i]) do
             local _, name = GetSetMediaTrackInfo_String(v, "P_NAME", "", 0)
             local mod_name = string.match(name, ":(.*)")
             if mod_name == nil then mod_name = name end
-            GetSetMediaTrackInfo_String(v, "P_NAME", "S" .. i-1 .. ":" .. mod_name, 1)
+            GetSetMediaTrackInfo_String(v, "P_NAME", "S" .. i - 1 .. ":" .. mod_name, 1)
         end
     end
 end
@@ -459,7 +469,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -467,8 +477,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
@@ -476,11 +486,11 @@ end
 
 function add_rcmaster(num)
     InsertTrackAtIndex(num, true) -- add RCMASTER
-    local rcmaster = GetTrack(0,num)
+    local rcmaster = GetTrack(0, num)
     GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "RCMASTER", 1)
     SetMediaTrackInfo_Value(rcmaster, "I_SPACER", 1)
     local colors = get_color_table()
-    SetTrackColor(rcmaster, colors.roomtone)
+    SetTrackColor(rcmaster, colors.rcmaster)
     SetMediaTrackInfo_Value(rcmaster, "B_SHOWINTCP", 0)
 
     return rcmaster
