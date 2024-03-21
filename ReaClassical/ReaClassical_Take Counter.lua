@@ -25,15 +25,21 @@ local main, get_take_count, clean_up
 local iterated_filenames = false
 local added_take_number = false
 local rec_name_set = false
-local take_count
-local take_text
+local take_count, take_text, take_choice
 local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
-local take_choice, session_choice
-local session = ""
 local separator = package.config:sub(1, 1);
 
 local X = 300
 local Y = 125
+
+local _, session = GetProjExtState(0, "ReaClassical Take Counter", "Session")
+
+if session ~= nil and session ~= "" then
+  session = session .. separator
+else
+  session = ""
+end
+
 ---------------------------------------------------------------------
 
 function main()
@@ -140,7 +146,8 @@ function main()
   if key ~= -1 then
     defer(main)
   else
-    atexit(clean_up())
+    session = session:gsub(separator .. "$", "")
+    atexit(clean_up(session))
   end
 end
 
@@ -172,7 +179,8 @@ end
 
 ---------------------------------------------------------------------
 
-function clean_up()
+function clean_up(string)
+  SetProjExtState(0, "ReaClassical Take Counter", "Session", string)
   SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
 end
 
