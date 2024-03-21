@@ -29,8 +29,28 @@ local take_count, take_text, take_choice
 local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
 local separator = package.config:sub(1, 1);
 
-local X = 300
-local Y = 125
+local _, pos_string = GetProjExtState(0, "ReaClassical Take Counter", "Position")
+local win
+local values = {}
+
+if pos_string ~= "" then
+  for value in pos_string:gmatch("[^" .. "," .. "]+") do
+    table.insert(values, value)
+  end
+  win = {
+    width = 300,
+    height = 125,
+    xpos = values[1],
+    ypos = values[2]
+  }
+else
+  win = {
+    width = 300,
+    height = 125,
+    xpos = 0,
+    ypos = 0
+  }
+end
 
 local _, session = GetProjExtState(0, "ReaClassical Take Counter", "Session")
 
@@ -98,8 +118,7 @@ function main()
     end
 
     local take_width, take_height = gfx.measurestr(take_text)
-    gfx.x = ((X - take_width) / 2)
-    -- gfx.y = ((Y - take_height) / 2)
+    gfx.x = ((win.width - take_width) / 2)
     gfx.drawstr(take_text)
     gfx.setfont(1, "Arial", 25, 98)
     local session_text = session:gsub(separator .. "$", "")
@@ -108,8 +127,8 @@ function main()
       session_text = "Right-click to set session name"
     end
     local session_width, session_height = gfx.measurestr(session_text)
-    gfx.x = ((X - session_width) / 2)
-    gfx.y = ((Y - session_height + take_height / 3) / 2)
+    gfx.x = ((win.width - session_width) / 2)
+    gfx.y = ((win.height - session_height + take_height / 3) / 2)
     gfx.set(0.8, 0.8, 0.9, 1)
     gfx.drawstr("\n" .. session_text)
   else -- recording
@@ -123,15 +142,14 @@ function main()
     end
 
     local take_width, take_height = gfx.measurestr(take_text)
-    gfx.x = ((X - take_width) / 2)
-    --gfx.y = ((Y - take_height) / 2)
+    gfx.x = ((win.width - take_width) / 2)
     gfx.drawstr(take_text)
 
     local session_text = session:gsub(separator .. "$", "")
     gfx.setfont(1, "Arial", 25, 98)
     local session_width, session_height = gfx.measurestr(session_text)
-    gfx.x = ((X - session_width) / 2)
-    gfx.y = ((Y - session_height + take_height / 3) / 2)
+    gfx.x = ((win.width - session_width) / 2)
+    gfx.y = ((win.height - session_height + take_height / 3) / 2)
     gfx.drawstr("\n" .. session_text)
 
     if not added_take_number then
@@ -179,13 +197,18 @@ end
 
 ---------------------------------------------------------------------
 
-function clean_up(string)
-  SetProjExtState(0, "ReaClassical Take Counter", "Session", string)
+function clean_up(sess_string)
+  SetProjExtState(0, "ReaClassical Take Counter", "Session", sess_string)
+
+  local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
+  local pos = x .. "," .. y
+  SetProjExtState(0, "ReaClassical Take Counter", "Position", pos)
+
   SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
 end
 
 ---------------------------------------------------------------------
 
-gfx.init("Take Number", X, Y, 0, 0, 0)
+gfx.init("Take Number", win.width, win.height, 0, win.xpos, win.ypos)
 
 main()
