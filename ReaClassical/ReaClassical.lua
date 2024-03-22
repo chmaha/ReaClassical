@@ -1,15 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.9
+@version 24.9.1
 @changelog
-  Take Counter: Allow adding session type to right-click
-  Take Counter: Remember session name after closing
-  Take Counter: Remember window position after closing
-  Various: Switch to using rcmaster bus for routing
-  Color Table: Add rcmaster color (25,75,25)
-  Various: Fix rcmaster color references
-  Add Track to All Groups: New function
-  Add Track to All Groups: Do not run if zero folders
+  PDF Manual: Add guidance for disabling tracks during a session
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
