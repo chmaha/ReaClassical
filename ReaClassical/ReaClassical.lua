@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 24.9+dev0321
+@version 24.9+dev0322
 @changelog
   Take Counter: Allow adding session type to right-click
   Take Counter: Remember session name after closing
