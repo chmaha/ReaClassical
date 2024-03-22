@@ -215,14 +215,14 @@ function media_razor_group()
     for i = 1, num_of_folders, 1 do
       local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
       Main_OnCommand(select_children, 0)     -- SWS_SELCHILDREN2
-      Main_OnCommand(42578, 0)               -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
+      Main_OnCommand(42578, 0)               -- Track: Create track media/razor editing group from selected tracks
       local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
       Main_OnCommand(next_folder, 0)         -- select next folder
     end
   else
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0)   -- SWS_SELCHILDREN2
-    Main_OnCommand(42578, 0)             -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
+    Main_OnCommand(42578, 0)             -- Track: Create rack media/razor editing group from selected tracks
   end
   Main_OnCommand(40296, 0)               -- Track: Select all tracks
   -- local collapse = NamedCommandLookup("_SWS_COLLAPSE")
@@ -351,7 +351,7 @@ function create_prefixes()
     end
   end
 
-  add_spacer(rcmaster_index)
+  if rcmaster_index then add_spacer(rcmaster_index) end
 
   -- for 1st prefix D: (remove anything existing before & including :)
   for _, v in pairs(table[1]) do
