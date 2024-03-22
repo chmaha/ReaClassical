@@ -1861,6 +1861,37 @@ shift+T}
  the end of each group.
 \end_layout
 
+\begin_layout Subsection
+Disabling Channels During a Recording Session
+\end_layout
+
+\begin_layout Standard
+In a typical recording session, the musicians with the least to record are
+ often allowed to leave the session early once their work is completed.
+ If they were individually recorded using a spot microphone, it wouldn't
+ make sense to continue recording on that channel.
+ In ReaClassical there are two main ways to disable a channel.
+ In a horizontal workflow using a single folder, it is no hassle to simply
+ un-arm the desired track(s).
+ For a vertical workflow with multiple folders, the task could end up being
+ time-consuming with potential for error.
+ So, the recommended ReaClassical way, both easy and visually obvious, is
+ to select the desired tracks in the destination group, right click and
+ choose 
+\begin_inset Quotes bld
+\end_inset
+
+lock track controls
+\begin_inset Quotes brd
+\end_inset
+
+.
+ The tracks are then greyed out.
+ Then sync using F8 and the same tracks are locked in every group.
+ Whether or not the tracks were previously record-armed, those tracks will
+ no longer be involved in the recording.
+\end_layout
+
 \begin_layout Section
 Importing
 \end_layout
