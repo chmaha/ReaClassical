@@ -354,14 +354,6 @@ I highly recommend doing a complete read of the manual and becoming very
 \end_layout
 
 \begin_layout Section
-Video Tutorials
-\end_layout
-
-\begin_layout Standard
-Coming soon...
-\end_layout
-
-\begin_layout Section
 Website
 \end_layout
 
@@ -1221,7 +1213,7 @@ keys{F5}
  brings up the ReaClassical Preferences dialog.
  The first line sets the crossfade length in milliseconds for all source-destina
 tion editing.
- The three remaining lines are for 
+ The next three lines are for 
 \begin_inset CommandInset href
 LatexCommand href
 name "DDP"
@@ -1245,6 +1237,9 @@ countdown
  irrelevant for purely digital releases) and, finally, the album lead-out
  time in seconds (essentially the time on a car CD player before the disc
  returns to the beginning again).
+ Finally there is a setting for the Prepare Takes function to either use
+ the old random coloring method or the newer color scheme that uses blues
+ for destination material and greens for source material.
  There will be more on these settings in subsequent sections of the manual.
  If you are unfamiliar with these concepts, I recommend a quick internet
  search! If in doubt, just use the default values.
@@ -1275,7 +1270,44 @@ horizontal
  workflows will depend somewhat on the complexity of the project.
  For a quick editing session of, say, a choral piece or short self-standing
  orchestral piece, a horizontal approach will suffice.
- For everything else, I recommend using the vertical approach.
+ For a well-drilled ensemble recording session, I can recommend using the
+ vertical approach.
+ Many classical engineers enjoy using a horizontal approach for recording
+ (potentially the least disruptive and making use of the Take Counter window
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{Ctrl + 
+\backslash
+return}
+\end_layout
+
+\end_inset
+
+) and then either sticking with that for editing (also making use of the
+ extremely useful Find Takes function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+return}
+\end_layout
+
+\end_inset
+
+ ) or, depending on the number of takes, converting to a vertical workflow.
+ Frankly, there are benefits to both routes, and in the end, it simply comes
+ down to personal preference.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1417,7 +1449,8 @@ In this approach, there is a single track or single group of tracks with
  the source and destination material laid out from left to right.
  As mentioned above, for shorter pieces of music this is often a perfectly
  acceptable approach.
- 
+ With the introduction of the Find Takes function and Take Counter, many
+ will now prefer this workflow.
 \end_layout
 
 \begin_layout Standard
@@ -1491,6 +1524,94 @@ keys{F8}
 \end_inset
 
  to create six linked source groups.
+\end_layout
+
+\begin_layout Subsubsection
+The 
+\begin_inset Quotes bld
+\end_inset
+
+RCMASTER
+\begin_inset Quotes brd
+\end_inset
+
+ bus
+\end_layout
+
+\begin_layout Standard
+Whatever your workflow preference, as of 24.9, all audio is routed through
+ a special dedicated RCMASTER bus.
+ This allows for independent volume adjustments on the parent track which
+ is generally used for the main microphone pair.
+ Converting your projects made with an earlier version of ReaClassical is
+ easy.
+ Simply run 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ for horizontal workflows or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ for vertical workflows.
+ The new bus will be created and all routing taken care of.
+ The basic rule is to not delete this bus.
+ But, if you do by accident, don't worry.
+ Simply run 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ again! It is also worth noting that aux and roomtone tracks now automatically
+ route through RCMASTER on creation and are also automatically updated when
+ older projects are 
+\begin_inset Quotes bld
+\end_inset
+
+upgraded
+\begin_inset Quotes brd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
@@ -1617,6 +1738,33 @@ textbackslash}
 \end_inset
 
 .
+ During this mode you should use the Takes Counter window 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+enter}
+\end_layout
+
+\end_inset
+
+ to track the upcoming take number (in green) and take number during recording
+ (in red with recording circle).
+ You can right-click on the window to set a take number to increment from
+ and set a session name to act as media subfolder (which is automatically
+ recalled when the window is reopened).
+ You can left-click to recalculate the track count if you have removed some
+ unused files from the project path.
+ The calculated upcoming take number factors in unused files in the project
+ path so as to avoid any file-naming conflicts.
+ Please read the description of the function in Appendix A for best practices.
 \end_layout
 
 \begin_layout Subsection
@@ -1658,7 +1806,7 @@ ctrl+R}
 \end_inset
 
  or use the red record button.
- During this mode you can use the Takes Counter window 
+ During this mode you should use the Takes Counter window 
 \begin_inset ERT
 status open
 
@@ -1678,11 +1826,39 @@ enter}
  to track the upcoming take number (in green) and take number during recording
  (in red with recording circle).
  You can right-click on the window to set a take number to increment from
- and left-click to recalculate the track count if you have removed some
+ and set a session name to act as media subfolder (which is automatically
+ recalled when the window is reopened).
+ You can left-click to recalculate the track count if you have removed some
  unused files from the project path.
  The calculated upcoming take number factors in unused files in the project
  path so as to avoid any file-naming conflicts.
  Please read the description of the function in Appendix A for best practices.
+\end_layout
+
+\begin_layout Subsection
+Adding a New Microphone Mid-Recording Session
+\end_layout
+
+\begin_layout Standard
+As of ReaClassical 24.9 you can add a track to all folders in the project
+ at once by using the shortcut 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+T}
+\end_layout
+
+\end_inset
+
+.
+ It will prompt you for a name and then add a new track with that name to
+ the end of each group.
 \end_layout
 
 \begin_layout Section
@@ -1988,7 +2164,7 @@ main_pair-T04.wav
 \begin_inset Quotes brd
 \end_inset
 
- or 
+, 
 \begin_inset Quotes bld
 \end_inset
 
@@ -1996,7 +2172,11 @@ cello-spot-take_23.flac
 \begin_inset Quotes brd
 \end_inset
 
-.
+ or even 
+\begin_inset Quotes bld
+\end_inset
+
+ortf_pair(04).wav such as created by Presonus Studio One.
  Note that if the imported or recorded files have zero-padding that is not
  a problem.
  If you have used an item to create an S-D edit, searching for a take will
@@ -3958,9 +4138,9 @@ keys{@}
  .
  If adding manually, be sure to prefix the track with an ampersand.
  When using any of the functions that use intelligent mixer view (Audition,
- Create Source Groups (creating source groups from a single folder or syncing
- fx and routing), Classical Take Record, Duplicate Folder) these tracks
- will stay visible.
+ Exclusive Audition, Create Source Groups (creating source groups from a
+ single folder or syncing fx and routing), Classical Take Record, Duplicate
+ Folder) these tracks will stay visible.
  Plus, any routing from the destination parent or child tracks to these
  tracks will be honored when syncing the fx and routing!
 \end_layout
@@ -4689,6 +4869,14 @@ menu{File > Clean current project directory}
 \end_inset
 
  is an excellent way to reduce the size of your projects.
+ Note that when assigning a session name via the Take Counter Window, currently
+ the above REAPER menu item doesn't search recursively.
+ In a way, this reduces the chances of accidentally deleting precious takes.
+ You can always manually delete but, from experience, it is 
+\emph on
+much
+\emph default
+ better to simply keep everything.
 \end_layout
 
 \begin_layout Subsection
@@ -5313,15 +5501,17 @@ Description:
 \emph on
 Notes:
 \emph default
- It is extremely important to save your project and name your tracks before
- starting to record.
- This ensures that the recorded files have unique names so take numbers
- increment correctly as a group.
+ It is advised to save your project and name your tracks before starting
+ to record.
+ This ensures that the recorded files have usefully unique names.
  You can right-click on the window to set a take number to increment from
- and left-click to recalculate the track count if you have removed some
+ and also set a session name to act as media subfolder.
+ You can left-click to recalculate the track count if you have removed some
  unused files from the project path.
  The calculated upcoming take number factors in unused files in the project
  path so as to avoid any file-naming conflicts.
+ You should find this to be an extremely robust take system that rivals
+ Pyramix, Sequoia etc.
 \end_layout
 
 \begin_layout Labeling
@@ -5434,6 +5624,46 @@ keys{F9}
  original position for easy lining up of takes.
  If you run out of source groups, the function will automatically create
  a new one.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Add Track To All Groups 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+T}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Add a new microphone to all folders mid-recording session.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+\emph default
+ The function will prompt for a track name and then a new track will appear
+ at the end of every folder.
 \end_layout
 
 \begin_layout Standard
@@ -7370,7 +7600,7 @@ return}
 
 \end_inset
 
- Find Takes (based on filename)
+ Find Takes (based on number found at the end of a filename)
 \end_layout
 
 \begin_layout Labeling
@@ -7577,6 +7807,25 @@ textbackslash}
 \end_inset
 
  Duplicate Folder (no items)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+T}
+\end_layout
+
+\end_inset
+
+ Add Track To All Groups
 \end_layout
 
 \begin_layout Labeling
