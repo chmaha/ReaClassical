@@ -40,6 +40,11 @@ function main()
     end
   end
 
+  if folder_count == 0 then
+    ShowMessageBox("Add one or more folders before running.","Add Track To All Groups",0)
+    return
+  end
+
   local ret, name = GetUserInputs("Track name?", 1, "Track name:", "")
   if not ret then return end
 
