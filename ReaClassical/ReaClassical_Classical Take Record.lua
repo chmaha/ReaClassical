@@ -30,16 +30,17 @@ function main()
         ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
         return
     end
-    local selected = GetSelectedTrack(0,0)
-    is_parent = GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH")
+    local first_selected = GetSelectedTrack(0, 0)
+    is_parent = GetMediaTrackInfo_Value(first_selected, "I_FOLDERDEPTH")
     if is_parent ~= 1 then
         ShowMessageBox("Please select a parent track before running", "Classical Take Record", 0)
         return
     end
+    local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
     local take_record_toggle = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
     Undo_BeginBlock()
 
-    Main_OnCommand(40339,0) --unmute all tracks
+    Main_OnCommand(40339, 0) --unmute all tracks
 
     if GetPlayState() == 0 then
         SetToggleCommandState(1, take_record_toggle, 1)
@@ -53,22 +54,25 @@ function main()
             SetToggleCommandState(1, take_record_toggle, 0)
             return
         end
-        Main_OnCommand(40491, 0)         -- Track: Unarm all tracks for recording
+        ClearAllRecArmed()
         local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-        Main_OnCommand(arm, 0)           -- Xenakios/SWS: Set selected tracks record armed
+        Main_OnCommand(arm, 0)               -- Xenakios/SWS: Set selected tracks record armed
         local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
         Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+        
+        if rec_arm ~= 1 then return end
+        
         local cursor_pos = GetCursorPosition()
         save_prefs(cursor_pos)
-        Main_OnCommand(1013, 0) -- Transport: Record
+        Main_OnCommand(1013, 0)     -- Transport: Record
         Undo_EndBlock('Classical Take Record', 0)
     else
         SetToggleCommandState(1, take_record_toggle, 0)
         RefreshToolbar2(1, take_record_toggle)
-        Main_OnCommand(40667, 0)       -- Transport: Stop (save all recorded media)
+        Main_OnCommand(40667, 0)           -- Transport: Stop (save all recorded media)
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-        Main_OnCommand(40289, 0)       -- Unselect all items
+        Main_OnCommand(40289, 0)           -- Unselect all items
         local ret, cursor_pos = load_prefs()
         if ret then
             SetEditCurPos(cursor_pos, true, false)
@@ -93,7 +97,7 @@ function main()
                 mixer()
                 local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
                 Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-                Main_OnCommand(40913, 0)     -- adjust scroll to selected tracks
+                Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
                 bool = true
                 TrackList_AdjustWindows(false)
                 break
@@ -103,12 +107,12 @@ function main()
             local duplicate = NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
             Main_OnCommand(duplicate, 0)
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-            Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+            Main_OnCommand(select_children, 0)   -- SWS: Select children of selected folder track(s)
             local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-            Main_OnCommand(arm, 0)         -- Xenakios/SWS: Set selected tracks record armed
+            Main_OnCommand(arm, 0)               -- Xenakios/SWS: Set selected tracks record armed
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-            Main_OnCommand(40913, 0)       -- adjust scroll to selected tracks
+            Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
         end
         Undo_EndBlock('Classical Take Record Stop', 0)
     end
@@ -189,7 +193,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -197,8 +201,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
