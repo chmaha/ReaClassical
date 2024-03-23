@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.9.2
+@version 24.9.3
 @changelog
-  Classical Take Record: Do not start recording if parent not already rec-armed
+  Classical Take Record: Set rec-armed tracks visible in mixer even if returning early
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
