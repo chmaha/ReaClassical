@@ -36,15 +36,13 @@ function main()
         ShowMessageBox("Please select a parent track before running", "Classical Take Record", 0)
         return
     end
-    local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
-    local take_record_toggle = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
     Undo_BeginBlock()
-
+    local take_record_toggle = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+    local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
+    
     Main_OnCommand(40339, 0) --unmute all tracks
-
+    
     if GetPlayState() == 0 then
-        SetToggleCommandState(1, take_record_toggle, 1)
-        RefreshToolbar2(1, take_record_toggle)
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
         mixer()
@@ -64,6 +62,8 @@ function main()
         
         local cursor_pos = GetCursorPosition()
         save_prefs(cursor_pos)
+        SetToggleCommandState(1, take_record_toggle, 1)
+        RefreshToolbar2(1, take_record_toggle)
         Main_OnCommand(1013, 0)     -- Transport: Record
         Undo_EndBlock('Classical Take Record', 0)
     else
