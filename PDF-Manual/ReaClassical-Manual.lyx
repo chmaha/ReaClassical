@@ -1704,9 +1704,24 @@ classical
 \end_inset
 
  recording mode for whatever parent track is selected.
- You'll notice that the mixer intelligently selects the affected tracks
- and all tracks in the group are armed begin recording.
- To stop, press 
+ If the parent isn't record-armed (probably the case before you start your
+ first recording of the session), the function will first simply record-arm
+ the group so you can usefully monitor incoming signal.
+ On a subsequent press of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ recording begins.
+ To stop recording, press 
 \begin_inset ERT
 status open
 
@@ -1720,7 +1735,8 @@ keys{F9}
 \end_inset
 
  again.
- This also automatically moves to, solos and arms the next available group.
+ This key press also automatically moves to, solos and arms the next available
+ group so that recording can begin immediately on the next button press.
  ReaClassical will automatically create new groups as required.
  To manually add more destination groups when not recording, press 
 \begin_inset ERT
@@ -5622,7 +5638,8 @@ Description:
 \emph on
 Notes:
 \emph default
- To use, highlight a folder, position the edit cursor and press 
+ To use, select a folder track, position the edit cursor if necessary and
+ press 
 \begin_inset ERT
 status open
 
@@ -5636,6 +5653,23 @@ keys{F9}
 \end_inset
 
  .
+ If the parent isn't already record-armed (probably the case before you
+ start your first recording of the session), the function will first simply
+ record-arm the group so you can usefully monitor incoming signal.
+ On a subsequent press of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ recording begins.
  Press again to stop the recording.
  To immediately start a new take, simply press 
 \begin_inset ERT
@@ -5651,8 +5685,8 @@ keys{F9}
 \end_inset
 
  again.
- Note that the next folder is selected and that the cursor returns to the
- original position for easy lining up of takes.
+ Note that the next folder has already been selected, record-armed and that
+ the cursor returns to the original position for easy lining up of takes.
  If you run out of source groups, the function will automatically create
  a new one.
 \end_layout
