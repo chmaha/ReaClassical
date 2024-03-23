@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.9.1
+@version 24.9.2
 @changelog
-  PDF Manual: Add guidance for disabling tracks during a session
+  Classical Take Record: Do not start recording if parent not already rec-armed
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
