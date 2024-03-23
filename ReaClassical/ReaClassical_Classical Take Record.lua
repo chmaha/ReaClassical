@@ -58,7 +58,7 @@ function main()
         local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
         Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
         
-        if rec_arm ~= 1 then return end
+        if rec_arm ~= 1 then TrackList_AdjustWindows(false) return end
         
         local cursor_pos = GetCursorPosition()
         save_prefs(cursor_pos)
