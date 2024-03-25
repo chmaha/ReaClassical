@@ -342,8 +342,8 @@ end
 
 function get_first_last_items()
     local num_of_items = CountSelectedMediaItems()
-    first_sel_item = GetSelectedMediaItem(0, 0)
-    last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
+    local first_sel_item = GetSelectedMediaItem(0, 0)
+    local last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
     return first_sel_item, last_sel_item
 end
 

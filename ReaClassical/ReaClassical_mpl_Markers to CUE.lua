@@ -43,6 +43,12 @@ chmaha 24Q1pre changelog:
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, count_markers, create_filename, get_data, create_string
+local ext_mod, save_file, save_metadata, format_time, parse_cue_file
+local create_plaintext_report, create_html_report, any_isrc_present
+local time_to_mmssff, subtract_time_strings, add_pregaps_to_table
+local formatted_pos_out
+
 ----------------------------------------------------------
 
 function main()
@@ -53,7 +59,7 @@ function main()
     local ret, fields, extension = get_data(filename)
     if not ret then return end
     local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
-    path, slash, cue_file = save_file(fields, string)
+    local path, slash, cue_file = save_file(fields, string)
 
     local txtOutputPath = path .. slash .. 'album_report.txt'
     local HTMLOutputPath = path .. slash .. 'album_report.html'

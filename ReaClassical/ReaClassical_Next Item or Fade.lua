@@ -68,9 +68,9 @@ end
 function select_check()
     local item = GetSelectedMediaItem(0, 0)
     if item ~= nil then
-        item_position = GetMediaItemInfo_Value(item, "D_POSITION")
-        item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
-        item_end = item_position + item_length
+        local item_position = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local item_end = item_position + item_length
     end
     return item
 end
@@ -80,7 +80,7 @@ end
 function exit_check()
     local item = GetSelectedMediaItem(0, 0)
     if item then
-        color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+        local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
         return item
     else
         return -1
@@ -102,7 +102,7 @@ end
 
 function fadeStart()
     SetToggleCommandState(1, fade_editor_toggle, 1)
-    item1 = GetSelectedMediaItem(0, 0)
+    local item1 = GetSelectedMediaItem(0, 0)
     save_color("1", item1)
     paint(item1, 32648759)
     Main_OnCommand(40311, 0) -- Set ripple editing all tracks
@@ -120,7 +120,7 @@ function fadeStart()
     SetMediaItemSelected(item1, true)
     local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection (across tracks)
     Main_OnCommand(select_next, 0)
-    item2 = GetSelectedMediaItem(0, 1)
+    local item2 = GetSelectedMediaItem(0, 1)
     save_color("2", item2)
     paint(item2, 20967993)
 end
@@ -144,8 +144,8 @@ function fadeEnd()
     paint(item, first_color)
     local select_next_item = NamedCommandLookup("_SWS_SELNEXTITEM2")
     Main_OnCommand(select_next_item, 0)
-    item2 = GetSelectedMediaItem(0, 1)
-    second_color = load_color("2", item2)
+    local item2 = GetSelectedMediaItem(0, 1)
+    local second_color = load_color("2", item2)
     paint(item2, second_color)
     SetToggleCommandState(1, fade_editor_toggle, 0)
     RefreshToolbar2(1, fade_editor_toggle)
@@ -226,7 +226,7 @@ end
 ---------------------------------------------------------------------
 
 function save_color(num, item)
-    color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+    local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
     SetProjExtState(0, "Classical Crossfade Editor", "item" .. " " .. num .. " color", color) -- save to project file
 end
 
@@ -239,7 +239,7 @@ end
 ---------------------------------------------------------------------
 
 function load_color(num, item)
-    _, color = GetProjExtState(0, "Classical Crossfade Editor", "item" .. " " .. num .. " color")
+    local _, color = GetProjExtState(0, "Classical Crossfade Editor", "item" .. " " .. num .. " color")
     return color
 end
 

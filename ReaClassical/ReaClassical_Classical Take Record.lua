@@ -22,6 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
+local folder_check
 
 ---------------------------------------------------------------------
 
@@ -30,8 +31,13 @@ function main()
         ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
         return
     end
+    local num_of_folders = folder_check()
+    if num_of_folders < 2 then
+        ShowMessageBox("This function only operates with a vertical workflow (two or more folders)", "Classical Take Record", 0)
+        return
+    end
     local first_selected = GetSelectedTrack(0, 0)
-    is_parent = GetMediaTrackInfo_Value(first_selected, "I_FOLDERDEPTH")
+    local is_parent = GetMediaTrackInfo_Value(first_selected, "I_FOLDERDEPTH")
     if is_parent ~= 1 then
         ShowMessageBox("Please select a parent track before running", "Classical Take Record", 0)
         return
@@ -45,7 +51,7 @@ function main()
     if GetPlayState() == 0 then
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-        mixer()
+        mixer(num_of_folders)
         local selected = solo()
         if not selected then
             ShowMessageBox("Please select a folder or track before running", "Classical Take Record", 0)
@@ -147,10 +153,14 @@ end
 
 ---------------------------------------------------------------------
 
-function mixer()
+function mixer(num_of_folders)
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
+        if trackname_check(track, "^M:") then
+            SetTrackColor(track, colors.mixer)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
         if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
@@ -163,10 +173,14 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
-            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
+            if num_of_folders > 1 then
+                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
+            else
+                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
+            end
         end
     end
 end
@@ -204,6 +218,20 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
 end
 
 ---------------------------------------------------------------------

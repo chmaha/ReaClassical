@@ -17,30 +17,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check
+local main
 
 ---------------------------------------------------------------------
 
 function main()
     Main_OnCommand(40296, 0) -- Track: Select all tracks
-    folders = folder_check()
     local zoom = NamedCommandLookup("_SWS_VZOOMFIT")
     Main_OnCommand(zoom, 0) -- SWS: Vertical zoom to selected tracks
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-end
-
----------------------------------------------------------------------
-
-function folder_check()
-    local folders = 0
-    local total_tracks = CountTracks(0)
-    for i = 0, total_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-            folders = folders + 1
-        end
-    end
-    return folders
 end
 
 ---------------------------------------------------------------------

@@ -20,13 +20,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, solo, trackname_check, mixer, on_stop, get_color_table, get_path
+local main, solo, trackname_check, mixer, on_stop
+local get_color_table, get_path, folder_check
 
 ---------------------------------------------------------------------
 
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local num_of_folders = folder_check()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
@@ -36,7 +38,7 @@ function main()
             solo()
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2") -- SWS: Select children of selected folder track(s)
             Main_OnCommand(select_children, 0)
-            mixer()
+            mixer(num_of_folders)
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
             SetEditCurPos(pos, 0, 0)
@@ -49,14 +51,33 @@ function main()
         end
     else
         DeleteProjectMarker(NULL, 1000, false)
+        BR_GetMouseCursorContext()
+        local hover_item = BR_GetMouseCursorContext_Item()
+        if hover_item ~= nil then
+            SetMediaItemSelected(hover_item, 1)
+            reaper.UpdateArrange()
+        end
         local item_one = GetSelectedMediaItem(0, 0)
         local item_two = GetSelectedMediaItem(0, 1)
+        if not item_one and not item_two then
+            ShowMessageBox("Please select at least one of the items involved in the crossfade", "Audition", 0)
+            return
+        elseif item_one and not item_two then
+            local color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
+            if color == 20967993 then
+                item_two = item_one
+                local prev_item = NamedCommandLookup("_SWS_SELPREVITEM")
+                Main_OnCommand(prev_item, 0)
+                item_one = GetSelectedMediaItem(0, 0)
+            else
+                local next_item = NamedCommandLookup("_SWS_SELNEXTITEM")
+                Main_OnCommand(next_item, 0)
+                item_two = GetSelectedMediaItem(0, 0)
+            end
+        end
         local item_one_muted = GetMediaItemInfo_Value(item_one, "B_MUTE")
         local item_two_muted = GetMediaItemInfo_Value(item_two, "B_MUTE")
-        if item_one == nil or item_two == nil then
-            ShowMessageBox("Please select both items involved in the crossfade", "Crossfade Audition", 0)
-            return
-        end
+
         local one_pos = GetMediaItemInfo_Value(item_one, "D_POSITION")
         local one_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
         local two_pos = GetMediaItemInfo_Value(item_two, "D_POSITION")
@@ -125,7 +146,7 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        if (trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -136,17 +157,17 @@ function solo()
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        elseif not (trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
 
         local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
 
-        if (trackname_check(track, "^@") or trackname_check(track, "^RCMASTER")) and muted == 0 then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER")) and muted == 0 then
             local receives = GetTrackNumSends(track, -1)
             for i = 0, receives - 1, 1 do -- loop through receives
                 local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
@@ -174,10 +195,14 @@ end
 
 ---------------------------------------------------------------------
 
-function mixer()
+function mixer(num_of_folders)
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
+        if trackname_check(track, "^M:") then
+            SetTrackColor(track, colors.mixer)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
         if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
@@ -190,10 +215,14 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
-            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
+            if num_of_folders > 1 then
+                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
+            else
+                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
+            end
         end
     end
 end
@@ -225,6 +254,20 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
 end
 
 ---------------------------------------------------------------------

@@ -29,6 +29,7 @@ return {
         aux = ColorToNative(127, 88, 85),
         roomtone = ColorToNative(127, 99, 65),
         rcmaster = ColorToNative(25, 75, 25),
+        mixer = ColorToNative(200, 200, 250),
         dest_items_one = ColorToNative(18, 121, 177)|0x1000000,
         dest_items_two = ColorToNative(99, 180, 220)|0x1000000,
         source_items = ColorToNative(65, 127, 99)|0x1000000,

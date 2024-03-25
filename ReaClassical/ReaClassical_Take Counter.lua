@@ -25,7 +25,7 @@ local main, get_take_count, clean_up
 local iterated_filenames = false
 local added_take_number = false
 local rec_name_set = false
-local take_count, take_text, take_choice
+local take_count, take_text
 local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
 local separator = package.config:sub(1, 1);
 
@@ -88,7 +88,7 @@ function main()
       local session_text = session:gsub(separator .. "$", "")
       local ret, choices = GetUserInputs('ReaClassical Take Counter', 2, 'Set Take Number:,Session Name:',
         take_text .. ',' .. session_text)
-      take_choice, session_choice = string.match(choices, "(%d*),?(.*)")
+      local take_choice, session_choice = string.match(choices, "(%d*),?(.*)")
       if take_choice ~= nil and take_choice ~= "" then
         take_choice = tonumber(take_choice)
       else
