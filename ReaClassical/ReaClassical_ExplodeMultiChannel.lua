@@ -63,8 +63,8 @@ function main()
             local item_track = GetMediaItem_Track(item)
             local track_number = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER")
             if track_number == prev_track_number then goto continue end
-            second_track = GetTrack(0, track_number)
-            third_track = GetTrack(0, track_number+1)
+            local second_track = GetTrack(0, track_number)
+            local third_track = GetTrack(0, track_number+1)
             DeleteTrack(second_track)
             DeleteTrack(third_track)
             prev_track_number = track_number
@@ -87,10 +87,10 @@ function main()
     Main_OnCommand(40769, 0) -- unselect all items
 
     if folder_check() == 1 then -- run F7
-        group = NamedCommandLookup("_RSfc11d994a7848e13d22db277971a3afd01ba1cea")
+        local group = NamedCommandLookup("_RSfc11d994a7848e13d22db277971a3afd01ba1cea")
         Main_OnCommand(group, 0)
     else -- run F8
-        sync = NamedCommandLookup("_RSd7bf4eb95ac7700edb48a275153ad1fc1ce3aff6")
+        local sync = NamedCommandLookup("_RSd7bf4eb95ac7700edb48a275153ad1fc1ce3aff6")
         Main_OnCommand(sync, 0)
     end
 

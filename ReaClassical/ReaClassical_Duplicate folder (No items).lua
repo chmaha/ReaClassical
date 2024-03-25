@@ -21,8 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check, mixer, track_check
-local media_razor_group, add_spacer, remove_spacers, create_prefixes
-local folder_check, get_color_table, get_path
+local media_razor_group, get_color_table, get_path
 
 ---------------------------------------------------------------------
 
@@ -46,7 +45,7 @@ function main()
             end
         end
     end
-    
+
     if count ~= 1 then
         ShowMessageBox("Please select one parent track before running", "Duplicate folder (no items)", 0)
         return
@@ -57,7 +56,7 @@ function main()
     local duplicated = GetSelectedTrack(0,0)
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-    remove_spacers(num_of_tracks)
+
     Main_OnCommand(40421, 0)           -- Item: Select all items in track
     local delete_items = NamedCommandLookup("_SWS_DELALLITEMS")
     Main_OnCommand(delete_items, 0)
@@ -67,11 +66,9 @@ function main()
     Main_OnCommand(select_children, 0)
     mixer()
     Main_OnCommand(unselect_children, 0)
-    local tracks_per_group = media_razor_group(duplicated)
-    local num_of_folders = folder_check()
-    add_spacer(tracks_per_group)
-    add_spacer(num_of_folders*tracks_per_group)
-    create_prefixes()
+    media_razor_group(duplicated)
+    local sync = NamedCommandLookup("_RSd7bf4eb95ac7700edb48a275153ad1fc1ce3aff6")
+    Main_OnCommand(sync,0)
     Undo_EndBlock('Duplicate folder (No items)', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -95,7 +92,7 @@ end
 ---------------------------------------------------------------------
 
 function trackname_check(track, string)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, string)
 end
 
@@ -105,6 +102,10 @@ function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
+        if trackname_check(track, "^M:") then
+            SetTrackColor(track, colors.mixer)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
         if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
@@ -117,7 +118,7 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if IsTrackSelected(track) or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -157,56 +158,6 @@ end
 
 ---------------------------------------------------------------------
 
-function add_spacer(num)
-    local track = GetTrack(0, num)
-    if track then
-        SetMediaTrackInfo_Value(track, "I_SPACER", 1)
-    end
-end
-
----------------------------------------------------------------------
-
-function create_prefixes()
-    -- get table of parent tracks by iterating through and checking status
-    local table = {}
-    local num_of_tracks = CountTracks(0)
-    local j = 0
-    local k = 1
-    for i = 0, num_of_tracks - 1, 1 do
-        local track = GetTrack(0,i)
-        local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-        if parent == 1 then
-            j = j + 1
-            k = 1
-            table[j] = {}
-            table[j]["parent"] = track
-        else
-            if not trackname_check(track, "^@") and not trackname_check(track, "^RCMASTER") and not trackname_check(track, "^RoomTone") then
-                table[j][k] = track
-                k = k + 1
-            end
-        end
-    end
-    -- for 1st prefix D: (remove anything existing before & including :)
-    for _,v in pairs(table[1]) do
-        local _, name = GetSetMediaTrackInfo_String(v, "P_NAME", "", 0)
-        local mod_name = string.match(name, ":(.*)")
-        if mod_name == nil then mod_name = name end
-        GetSetMediaTrackInfo_String(v, "P_NAME", "D:" .. mod_name, 1)
-    end
-    -- for rest, prefix Si: where i = number starting at 1
-    for i = 2, #table, 1 do
-        for _,v in pairs(table[i]) do
-            local _, name = GetSetMediaTrackInfo_String(v, "P_NAME", "", 0)
-            local mod_name = string.match(name, ":(.*)")
-            if mod_name == nil then mod_name = name end
-            GetSetMediaTrackInfo_String(v, "P_NAME", "S" .. i-1 .. ":" .. mod_name, 1)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
 function get_color_table()
     local resource_path = GetResourcePath()
     local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
@@ -220,15 +171,6 @@ function get_path(...)
     local pathseparator = package.config:sub(1,1);
     local elements = {...}
     return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
-function remove_spacers(num_of_tracks)
-    for i = 0, num_of_tracks -1, 1 do
-        local track = GetTrack(0,i)
-        SetMediaTrackInfo_Value(track, "I_SPACER", 0)
-    end
 end
 
 ---------------------------------------------------------------------

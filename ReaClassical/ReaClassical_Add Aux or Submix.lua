@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_color_table, get_path
-local add_spacer, remove_spacers, route_to_track, trackname_check
+local add_spacer, route_to_track, trackname_check
 
 ---------------------------------------------------------------------
 
@@ -54,6 +54,7 @@ function main()
     end
 
     InsertTrackAtIndex(rcmaster_index, true) -- Add track just before RCMASTER
+    add_spacer(rcmaster_index)
     local bus = GetTrack(0, rcmaster_index)
     SetMediaTrackInfo_Value(bus, "I_FOLDERDEPTH", 0)
 
@@ -62,10 +63,6 @@ function main()
     SetTrackColor(bus, colors.aux)
     GetSetMediaTrackInfo_String(bus, "P_NAME", "@", true) -- Add @ as track name
     SetMediaTrackInfo_Value(bus, "B_SHOWINTCP", 0)
-    remove_spacers(total_tracks + 1)
-    add_spacer(tracks_per_group)
-    add_spacer(folders * tracks_per_group)
-    add_spacer(rcmaster_index + 1)
     Main_OnCommand(40297, 0)
     local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(home, 0)
@@ -120,15 +117,6 @@ end
 
 ---------------------------------------------------------------------
 
-function remove_spacers(num_of_tracks)
-    for i = 0, num_of_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        SetMediaTrackInfo_Value(track, "I_SPACER", 0)
-    end
-end
-
----------------------------------------------------------------------
-
 function route_to_track(track, rcmaster)
     SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
     CreateTrackSend(track, rcmaster)
@@ -137,7 +125,7 @@ end
 ---------------------------------------------------------------------
 
 function trackname_check(track, string)
-    _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, string)
 end
 

@@ -22,7 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
 local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
-
+local copy_source
 ---------------------------------------------------------------------
 
 function main()
@@ -259,8 +259,8 @@ end
 
 function get_first_last_items()
     local num_of_items = CountSelectedMediaItems()
-    first_sel_item = GetSelectedMediaItem(0, 0)
-    last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
+    local first_sel_item = GetSelectedMediaItem(0, 0)
+    local last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
     return first_sel_item, last_sel_item
 end
 
