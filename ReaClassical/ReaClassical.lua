@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.9.3
+@version 24.10pre0325
 @changelog
-  Classical Take Record: Set rec-armed tracks visible in mixer even if returning early
+  Various: Use single mixer
+  Various: no-op changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
