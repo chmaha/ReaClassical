@@ -49,7 +49,7 @@ function main()
 
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
-        local boolean, num = GetUserInputs("Create Folder", 1, "How many tracks?", 10)
+        local boolean, num = GetUserInputs("Create/Sync Horizontal Workflow", 1, "How many tracks?", 10)
         num = tonumber(num)
         local rcmaster
         if boolean == true and num > 1 then
@@ -67,7 +67,7 @@ function main()
             reset_spacers(num, tracks_per_group, rcmaster_index)
         end
     elseif folder_check() > 1 then
-        ShowMessageBox("This function only runs on projects with a single folder", "Create/Sync Folder", 0)
+        ShowMessageBox("This function only runs on projects with a single folder", "Create/Sync Horizontal Workflow", 0)
         rcmaster_exists = true
     elseif folder_check() == 1 then
         Main_OnCommand(focus, 0)
@@ -88,7 +88,7 @@ function main()
             -- reset track settings for all dest/source folders
             reset_track_settings(tracks_per_group)
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table()
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end

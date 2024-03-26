@@ -72,13 +72,18 @@ function main()
             reset_spacers(num * 7, tracks_per_group, rcmaster_index)
         end
     elseif folder_check() > 1 then
+
         rcmaster_exists = special_check()
 
         if not rcmaster_exists then
             add_rcmaster(num_of_tracks)
         end
 
-        local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+        local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table()
+        if not groups_equal then
+            ShowMessageBox("Please ensure that all folders have the same number of tracks before running.", "Create Source Groups", 0)
+            return 
+        end
         local rcmaster = GetTrack(0, rcmaster_index)
         local end_of_sources = tracks_per_group * folder_count
         local track_names = copy_track_names(table, mixer_tracks)
@@ -89,7 +94,7 @@ function main()
             -- reset track settings for all dest/source folders
             reset_track_settings(end_of_sources)
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table()
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
@@ -99,7 +104,7 @@ function main()
                 DeleteTrack(track)
             end
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, _ = create_track_table()
         end
 
         route_tracks(rcmaster, table, end_of_sources)
@@ -125,7 +130,7 @@ function main()
             -- reset track settings for all dest/source folders
             reset_track_settings(end_of_sources)
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table()
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
@@ -135,7 +140,7 @@ function main()
                 DeleteTrack(track)
             end
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, _ = create_track_table()
         end
         local rcmaster = GetTrack(0, rcmaster_index)
         route_tracks(rcmaster, table, end_of_sources)
@@ -145,7 +150,7 @@ function main()
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
-            "Create Source Groups", 0)
+            "Create/Sync Vertical Workflow", 0)
     end
 
     PreventUIRefresh(-1)
@@ -159,7 +164,7 @@ function main()
 
     if sync_tracks then
         ShowMessageBox(
-            "Track names, record inputs and lock states synchronized","Vertical Workflow", 0)
+            "Track names, record inputs and lock states synchronized. Routing rebuilt if necessary.","Create/Sync Vertical Workflow", 0)
     end
 
     if not rcmaster_exists then
@@ -169,10 +174,10 @@ function main()
             .. "All groups are routed to the single mixer set visible in the mixer panel "
             .. "and all volume, panning, fx etc should be controlled there.\n"
             .. "If you delete any of these special busses by accident, simply run F8 again."
-            , "Sync Vertical Workflow", 0)
+            , "Create/Sync Vertical Workflow", 0)
     end
 
-    Undo_EndBlock('Create Source Groups', 0)
+    Undo_EndBlock('Create/Sync Vertical Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
 end
@@ -550,13 +555,19 @@ function create_track_table()
     local rcmaster_index
     local j = 0
     local k = 1
+    local prev_k = 1
+    local groups_equal = true
     local mixer_tracks = {}
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
 
         if parent == 1 then
+            if j > 1 and k ~= prev_k then
+                groups_equal = false
+            end
             j = j + 1
+            prev_k = k
             k = 1
             track_table[j] = { parent = track, tracks = {} }
         elseif trackname_check(track, "^M:") then
@@ -568,8 +579,12 @@ function create_track_table()
             k = k + 1
         end
     end
+    -- extra test for final group without further parent logic
+    if j > 1 and k ~= prev_k then
+        groups_equal = false
+    end
 
-    return track_table, rcmaster_index, k, j, mixer_tracks
+    return track_table, rcmaster_index, k, j, mixer_tracks, groups_equal
 end
 
 ---------------------------------------------------------------------
@@ -723,5 +738,7 @@ function sync(tracks_per_group, end_of_sources)
         j = j + 1
     end
 end
+
+---------------------------------------------------------------------
 
 main()
