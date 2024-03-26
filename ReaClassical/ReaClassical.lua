@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.10pre0325
+@version 24.10rc1
 @changelog
-  Various: Use single mixer
-  Various: no-op changes
+  Various: Use Pyramix-style single mixer
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
