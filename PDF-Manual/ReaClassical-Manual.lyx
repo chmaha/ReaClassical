@@ -1386,11 +1386,10 @@ keys{F8}
 \end_inset
 
  function creates six source groups based off the destination track group,
- links the volume, panning, polarity, mute, automation trim and hides everything
- in the mixer save for the first folder group.
- In other words, you can simultaneously control volume, panning, polarity
- and automation across all takes.
- It also sets up media item and razor editing grouped by folder.
+ and creates a single set of mixer tracks that are shared by the groups.
+ Use these to control volume, panning, polarity, sends and FX across all
+ takes.
+ The function also sets up media item and razor editing grouped by folder.
  If you need more than the six source groups, simply create them on the
  fly with the 
 \begin_inset ERT
@@ -1431,13 +1430,7 @@ A typical scenario: You have vertically recorded, or vertically prepared,
  You realise halfway through editing that you want the soloist’s microphone
  to be brought up in volume a little and also panned slightly more to the
  right to match the position in the main stereo pair.
- Under normal circumstances moving one pan knob or fader would only affect
- that one group's channel.
- The ideal situation would be that changing a value on one channel would
- affect every other take in the same way, making comparing source material
- uniform in volume and panning.
- With the ReaClassical vertical workflow approach, this becomes a reality
- automatically!
+ Simply make the change once on the equivalent mixer track!
 \end_layout
 
 \begin_layout Subsubsection
@@ -1467,46 +1460,14 @@ keys{F7}
 
 \end_inset
 
- to set up a track group.
+ to set up a track group also with mixer tracks (for making changes to volume,
+ pan, polarity, sends and FX).
  Whether recording or importing, simply type in the number of tracks or
  microphone inputs you need.
  I highly recommend using the first track for the main stereo pair.
  In the event you are making a simple stereo recording, I would still recommend
  creating a track group consisting of two tracks and simply leave the child
  track empty and hidden.
-\end_layout
-
-\begin_layout Standard
-If you need to add another child track after you have started importing
- material, press 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-ctrl+T}
-\end_layout
-
-\end_inset
-
- to add the track and then 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F7}
-\end_layout
-
-\end_inset
-
- again to re-group for media/razor editing.
 \end_layout
 
 \begin_layout Standard
@@ -1523,11 +1484,11 @@ keys{F8}
 
 \end_inset
 
- to create six linked source groups.
+ to create six new source groups.
 \end_layout
 
 \begin_layout Subsubsection
-The 
+The Single Mixer & 
 \begin_inset Quotes bld
 \end_inset
 
@@ -1539,8 +1500,8 @@ RCMASTER
 \end_layout
 
 \begin_layout Standard
-Whatever your workflow preference, as of 24.9, all audio is routed through
- a special dedicated RCMASTER bus.
+Whatever your workflow preference, as of 24.10, all audio is routed through
+ a special dedicated mixer tracks leading to an RCMASTER bus.
  This allows for independent volume adjustments on the parent track which
  is generally used for the main microphone pair.
  Converting your projects made with an earlier version of ReaClassical is
@@ -1572,8 +1533,60 @@ keys{F8}
 \end_inset
 
  for vertical workflows.
- The new bus will be created and all routing taken care of.
- The basic rule is to not delete this bus.
+ The new mixer tracks and bus will be created and all routing taken care
+ of.
+ Any existing track panel settings (including sends and FX) from the first
+ group are automatically transferred to the mixer tracks.
+\end_layout
+
+\begin_layout Standard
+Any and all track setting changes (volume, pan, phase, FX, sends to @aux
+ tracks etc) happen in the mixer tracks.
+ This is identical to the way that Pyramix works with a single mixer being
+ fed by all the source groups.
+ The mixer tracks are always visible in the mixer panel and identified by
+ track names that start with 
+\begin_inset Quotes bld
+\end_inset
+
+M:
+\begin_inset Quotes brd
+\end_inset
+
+.
+ Running 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ will synchronize the track names from the first folder across the whole
+ project.
+ 
+\end_layout
+
+\begin_layout Standard
+The basic rule is to not delete these special tracks.
  But, if you do by accident, don't worry.
  Simply run 
 \begin_inset ERT
@@ -1875,6 +1888,7 @@ shift+T}
 .
  It will prompt you for a name and then add a new track with that name to
  the end of each group.
+ This also works for a single folder while working in a horizontal workflow.
 \end_layout
 
 \begin_layout Subsection
@@ -2108,7 +2122,7 @@ keys{F8}
 
 \end_inset
 
- will also populate the source groups.
+ will also populate the source groups and mixer tracks.
  Tip: Avoid using any colons in your track names and the auto prefixing
  will work as expected.
 \end_layout
@@ -2851,9 +2865,6 @@ shift+A}
 \end_inset
 
  .
- Note that similar to the Classical Take Record function, the tracks shown
- in the mixer are filtered based on what is being auditioned.
- 
 \end_layout
 
 \begin_layout Standard
@@ -4106,32 +4117,7 @@ FX Plugins
 ReaClassical is shipped with various mastering-grade JSFX plugins to cover
  typical needs although obviously REAPER allows for any 3rd party plugins.
  For a list of recommended free plugins see Appendix C.
- For the purposes of the ReaClassical manual, you should add plugins to
- the destination group tracks and then press 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F8}
-\end_layout
-
-\end_inset
-
- to sync across all source groups.
- Most often my editing is done with no plugins enabled so that I can hear
- all the detail clearly.
- In my case, plugins are not generally added until the 
-\begin_inset Quotes bld
-\end_inset
-
-mastering
-\begin_inset Quotes brd
-\end_inset
-
- stage.
+ In ReaClassical, you should add plugins to the dedicated mixer tracks.
  
 \end_layout
 
@@ -4141,7 +4127,7 @@ Aux & Submix
 
 \begin_layout Standard
 As of ReaClassical v23.19, users have the ability to create aux and submix
- tracks that stay visible (and stay after the source groups).
+ tracks that stay visible (and stay after the mixer tracks).
  To set up, simply create a single folder 
 \begin_inset ERT
 status open
@@ -4168,7 +4154,7 @@ keys{F8}
 
 \end_inset
 
- then create as many aux/submix tracks after the source groups as you like
+ then create as many aux/submix tracks after the mixer tracks as you like
  via the Add Aux or submix function 
 \begin_inset ERT
 status open
@@ -4183,13 +4169,8 @@ keys{@}
 \end_inset
 
  .
- If adding manually, be sure to prefix the track with an ampersand.
- When using any of the functions that use intelligent mixer view (Audition,
- Exclusive Audition, Create Source Groups (creating source groups from a
- single folder or syncing fx and routing), Classical Take Record, Duplicate
- Folder) these tracks will stay visible.
- Plus, any routing from the destination parent or child tracks to these
- tracks will be honored when syncing the fx and routing!
+ When using any of the ReaClassical functions such as auditioning, these
+ tracks will remain visible.
 \end_layout
 
 \begin_layout Subsection
@@ -5075,7 +5056,7 @@ These proceed in a quasi-workflow order.
 \begin_layout Standard
 
 \series bold
-Create Folder 
+Create Folder (aka Create/Sync Horizontal Workflow) 
 \series default
 
 \begin_inset ERT
@@ -5099,8 +5080,8 @@ keys{F7}
 Description: 
 \emph default
 A quick way to create a folder group with as many tracks as you need.
- It can also be used on a single existing folder group to re-group tracks
- for media item and razor editing.
+ It can also be used on a single existing folder group to re-sync track
+ names and re-build project routing.
 \end_layout
 
 \begin_layout Standard
@@ -5113,13 +5094,14 @@ Use on a completely empty project.
 tination editing (i.e.
  the various takes are laid out from left to right) or if you want a quick
  way to set up a mixing/mastering track set with a single take.
- The function automatically sets up the tracks for group media and razor-editing.
+ The function automatically sets up the tracks for group media and razor-editing
+ along with dedicated mixer tracks.
 \end_layout
 
 \begin_layout Standard
 
 \series bold
-Create Source Groups (vertical) 
+Create Source Groups (aka Create/Sync Vertical Workflow) 
 \series default
 
 \begin_inset ERT
@@ -5157,10 +5139,9 @@ keys{F7}
 
 \end_inset
 
- shortcut) and, for in the middle of editing, 3) to (re)create track grouping
- and to sync routing/fx between destination (the top folder and its children)
- and source groups.
- Note that for 3), all folders must contain the same number of tracks.
+ shortcut) and, for in the middle of editing, 3) to (re)create project routing
+ and sync track-naming, record inputs and lock states.
+ Note that for 3), all folders should contain the same number of tracks.
 \end_layout
 
 \begin_layout Standard
@@ -5168,46 +5149,8 @@ keys{F7}
 \emph on
 Notes: 
 \emph default
-Whether you start with an empty project or use an existing folder group
- or groups, the end result will be the same.
- Folders and tracks will be grouped according to pan, mute, editing, phase,
- trim and fader.
- So, for example, the second track of each group will all respond to a fader
- movement.
- This is essential for being able to audition different source groups with
- the same settings.
- Note also that running the function engages an intelligent mixer view where
- only the soloed group is shown in the mixer.
- You can see this in action by using the Audition function 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{A}
-\end_layout
-
-\end_inset
-
- and Exclusive Audition function 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-shift+A}
-\end_layout
-
-\end_inset
-
- which audition audio at the mouse cursor.
- Watch as the mixer view changes which tracks are visible.
+For all track settings (volume, pan, polarity, sends and FX) you should
+ use the dedicated mixer tracks.
 \end_layout
 
 \begin_layout Standard
@@ -5719,7 +5662,8 @@ shift+T}
 \emph on
 Description:
 \emph default
- Add a new microphone to all folders mid-recording session.
+ Add a new microphone to all folders (or a single folder) mid-recording
+ session.
 \end_layout
 
 \begin_layout Standard
@@ -5947,8 +5891,7 @@ shift+A}
 \emph on
 Description:
 \emph default
- Mouse-driven auditioning of folders or individual tracks that uses intelligent
- mixer views.
+ Mouse-driven auditioning of folders or individual tracks.
 \end_layout
 
 \begin_layout Standard
@@ -6000,8 +5943,6 @@ keys{A}
 
 , hover over a folder track to hear the complete mix or a single track within
  a folder for listening to individual instrument or sections.
- Again, it is good to note that when auditioning begins, the mixer updates
- intelligently, decluttering the view for ease of meter monitoring etc.
  Note that the 
 \begin_inset ERT
 status open
@@ -7817,7 +7758,7 @@ keys{F7}
 
 \end_inset
 
- Create Folder (prompts for number of tracks) 
+ Create Folder (prompts for number of tracks) / Re-build routing etc
 \end_layout
 
 \begin_layout Labeling
@@ -7834,8 +7775,8 @@ keys{F8}
 
 \end_inset
 
- Create Source Groups (vertical)(from scratch or from existing folder) /
- Sync Routing/FX 
+ Create Source Groups (vertical)(from scratch or from single existing folder)
+ / Re-build routing etc
 \end_layout
 
 \begin_layout Labeling
@@ -9775,9 +9716,9 @@ ReaClassical custom toolbar
 \end_layout
 
 \begin_layout Standard
-From left to right, we have: Whole project view Horizontal (`), Create (or
- Sync) Source Groups (F8), Classical Take Record Toggle (F9), Duplicate
- Folder (
+From left to right, we have: Whole project view Horizontal (`), Horizontal
+ Workflow (F7), Create (or re-build) Vertical Workflow (F8), Add @Aux track
+ (@), Classical Take Record Toggle (F9), Duplicate Folder (
 \backslash
 ), Prepare Takes (T), 3-point 
 \begin_inset Quotes bld
