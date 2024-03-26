@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.10rc2
+@version 24.10
 @changelog
   Various: Use Pyramix-style single mixer
-  Sync inputs and lock states via F8
+  F7/F8: Auto-upgrade of old projects to single mixer paradigm
+  F8: Sync record inputs, track lock states
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
