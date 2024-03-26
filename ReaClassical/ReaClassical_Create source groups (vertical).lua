@@ -27,6 +27,7 @@ local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
 local process_dest, reset_spacers
+local save_track_settings, reset_track_settings, write_to_mixer
 
 ---------------------------------------------------------------------
 
@@ -62,7 +63,7 @@ function main()
         end
         if folder_check() == 1 then
             create_source_groups()
-            create_single_mixer(num, num * 7, track_names)
+            create_single_mixer(num, num * 7)
             local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table()
             copy_track_names(table, mixer_table)
             route_tracks(rcmaster, table, num)
@@ -80,6 +81,17 @@ function main()
         local rcmaster = GetTrack(0, rcmaster_index)
         local end_of_sources = tracks_per_group * folder_count
         local track_names = copy_track_names(table, mixer_tracks)
+
+        if #mixer_tracks == 0 then
+            -- build table of track settings, sends & FX for dest folder
+            local controls, sends = save_track_settings(tracks_per_group)
+            -- reset track settings for all dest/source folders
+            reset_track_settings(end_of_sources)
+            create_single_mixer(tracks_per_group, end_of_sources, track_names)
+            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+            -- write settings to mixer tracks
+            write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
+        end
 
         if #mixer_tracks ~= tracks_per_group then
             for _, track in pairs(mixer_tracks) do
@@ -103,6 +115,19 @@ function main()
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
         local end_of_sources = tracks_per_group * folder_count
         local track_names = copy_track_names(table, mixer_tracks)
+
+        if #mixer_tracks == 0 then
+            -- ShowMessageBox("It looks like you are upgrading an old project to a single mixer structure",
+            --     "Create/Sync Horizontal Workflow", 0)
+            -- build table of track settings, sends & FX for dest folder
+            local controls, sends = save_track_settings(tracks_per_group)
+            -- reset track settings for all dest/source folders
+            reset_track_settings(end_of_sources)
+            create_single_mixer(tracks_per_group, end_of_sources, track_names)
+            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+            -- write settings to mixer tracks
+            write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
+        end
 
         if #mixer_tracks ~= tracks_per_group then
             for _, track in pairs(mixer_tracks) do
@@ -557,6 +582,100 @@ function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)
+end
+
+---------------------------------------------------------------------
+
+function save_track_settings(tracks_per_group)
+    local controls = {}
+    local sends = {}
+    local parmnames = { "B_PHASE", "D_VOL", "D_PAN" }
+    for i = 0, tracks_per_group - 1 do
+        local track = GetTrack(0, i)
+
+        --controls
+        local values = {}
+        for _, parmname in ipairs(parmnames) do
+            local val = GetMediaTrackInfo_Value(track, parmname)
+            values[parmname] = val
+        end
+        table.insert(controls, { track = track, values = values })
+
+        -- sends
+        local num_of_sends = GetTrackNumSends(track, 0)
+        local track_sends = {}
+        for j = 0, num_of_sends - 1 do
+            local dest = GetTrackSendInfo_Value(track, 0, j, "P_DESTTRACK")
+            local _, name = GetSetMediaTrackInfo_String(dest, "P_NAME", "", 0)
+            if name == name:match("^@") then
+                table.insert(track_sends, dest)
+            end
+        end
+        table.insert(sends, track_sends)
+    end
+
+    return controls, sends
+end
+
+---------------------------------------------------------------------
+
+function reset_track_settings(end_of_sources)
+    for i = 0, end_of_sources - 1, 1 do
+        local track = GetTrack(0, i)
+        SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        SetMediaTrackInfo_Value(track, "B_PHASE", 0)
+        SetMediaTrackInfo_Value(track, "D_VOL", 1)
+        SetMediaTrackInfo_Value(track, "D_PAN", 0)
+
+        local num_of_sends = GetTrackNumSends(track, 0)
+        for j = 0, num_of_sends - 1 do
+            RemoveTrackSend(track, 0, j)
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
+    local end_of_mixers = end_of_sources + tracks_per_group - 1
+    local j = 1
+    local k = 1
+    
+    for i = end_of_sources, end_of_mixers do
+        local track = GetTrack(0, i)
+
+        --controls
+        SetMediaTrackInfo_Value(track, "B_PHASE", controls[j].values["B_PHASE"])
+        SetMediaTrackInfo_Value(track, "D_VOL", controls[j].values["D_VOL"])
+        SetMediaTrackInfo_Value(track, "D_PAN", controls[j].values["D_PAN"])
+        j = j + 1
+
+        -- sends
+        for _, dest_track in ipairs(sends[k]) do
+            CreateTrackSend(track, dest_track)
+        end
+        k = k + 1
+    end
+
+    -- move fx from first group to mixer tracks
+    for i = 0, tracks_per_group - 1 do
+        local src_track = GetTrack(0, i)
+        local dest_index = end_of_sources + i
+        local dest_track = GetTrack(0, dest_index)
+        local num_of_fx = TrackFX_GetCount(src_track)
+        for j = 0, num_of_fx - 1 do
+            TrackFX_CopyToTrack(src_track, 0, dest_track, j, true)
+        end
+    end
+
+    -- delele from all sources
+    for i = 0, end_of_sources - 1 do
+        local src_track = GetTrack(0, i)
+        local num_of_fx = TrackFX_GetCount(src_track)
+        for j = 0, num_of_fx - 1 do
+            TrackFX_Delete(src_track, 0)
+        end
+    end
 end
 
 ---------------------------------------------------------------------
