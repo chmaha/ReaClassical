@@ -117,8 +117,6 @@ function main()
         local track_names = copy_track_names(table, mixer_tracks)
 
         if #mixer_tracks == 0 then
-            -- ShowMessageBox("It looks like you are upgrading an old project to a single mixer structure",
-            --     "Create/Sync Horizontal Workflow", 0)
             -- build table of track settings, sends & FX for dest folder
             local controls, sends = save_track_settings(tracks_per_group)
             -- reset track settings for all dest/source folders
