@@ -104,6 +104,7 @@ function main()
         route_tracks(rcmaster, table, end_of_sources)
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+        ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.", "Create/Sync Horizontal Workflow", 0)
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
