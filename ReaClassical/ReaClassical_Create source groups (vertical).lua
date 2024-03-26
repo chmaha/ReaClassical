@@ -45,6 +45,7 @@ function main()
 
     local num_of_tracks = CountTracks(0)
     local rcmaster_exists = false
+    local sync_tracks = false
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0)
     remove_track_groups()
@@ -105,6 +106,7 @@ function main()
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
+        sync_tracks = true
     elseif folder_check() == 1 then
         rcmaster_exists = special_check()
 
@@ -153,6 +155,11 @@ function main()
         for _, track in ipairs(pre_selected) do
             SetTrackSelected(track, 1)
         end
+    end
+
+    if sync_tracks then
+        ShowMessageBox(
+            "Track names, record inputs and lock states synchronized","Vertical Workflow", 0)
     end
 
     if not rcmaster_exists then
@@ -690,7 +697,7 @@ function sync(tracks_per_group, end_of_sources)
 
         -- inputs
         local track_rec_input = GetMediaTrackInfo_Value(track, "I_RECINPUT")
-        rec_inputs[i+1] = track_rec_input
+        rec_inputs[i + 1] = track_rec_input
 
         -- lock state
         local _, locked = GetTrackStateChunk(track, "", 0)
@@ -701,10 +708,18 @@ function sync(tracks_per_group, end_of_sources)
     -- set inputs and locks
     local j = 1
     for i = 0, end_of_sources - 1 do
-        local track = GetTrack(0,i)
+        local track = GetTrack(0, i)
         j = j % tracks_per_group
         if j == 0 then j = tracks_per_group end
         SetMediaTrackInfo_Value(track, "I_RECINPUT", rec_inputs[j])
+        local _, locked = GetTrackStateChunk(track, "", 0)
+        local str
+        if locks[j] then
+            str = locked:gsub("<TRACK", "<TRACK\nLOCK 1")
+        else
+            str = locked:gsub("\nLOCK 1", "")
+        end
+        SetTrackStateChunk(track, str, 0)
         j = j + 1
     end
 end
