@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.10rc1
+@version 24.10rc2
 @changelog
   Various: Use Pyramix-style single mixer
+  Sync inputs and lock states via F8
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
