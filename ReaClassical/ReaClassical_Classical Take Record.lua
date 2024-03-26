@@ -31,11 +31,7 @@ function main()
         ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
         return
     end
-    local num_of_folders = folder_check()
-    if num_of_folders < 2 then
-        ShowMessageBox("This function only operates with a vertical workflow (two or more folders)", "Classical Take Record", 0)
-        return
-    end
+    
     local first_selected = GetSelectedTrack(0, 0)
     local is_parent = GetMediaTrackInfo_Value(first_selected, "I_FOLDERDEPTH")
     if is_parent ~= 1 then
@@ -45,13 +41,13 @@ function main()
     Undo_BeginBlock()
     local take_record_toggle = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
     local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
-    
+
     Main_OnCommand(40339, 0) --unmute all tracks
-    
+
     if GetPlayState() == 0 then
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-        mixer(num_of_folders)
+        mixer()
         local selected = solo()
         if not selected then
             ShowMessageBox("Please select a folder or track before running", "Classical Take Record", 0)
@@ -63,14 +59,17 @@ function main()
         Main_OnCommand(arm, 0)               -- Xenakios/SWS: Set selected tracks record armed
         local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
         Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-        
-        if rec_arm ~= 1 then TrackList_AdjustWindows(false) return end
-        
+
+        if rec_arm ~= 1 then
+            TrackList_AdjustWindows(false)
+            return
+        end
+
         local cursor_pos = GetCursorPosition()
         save_prefs(cursor_pos)
         SetToggleCommandState(1, take_record_toggle, 1)
         RefreshToolbar2(1, take_record_toggle)
-        Main_OnCommand(1013, 0)     -- Transport: Record
+        Main_OnCommand(1013, 0) -- Transport: Record
         Undo_EndBlock('Classical Take Record', 0)
     else
         SetToggleCommandState(1, take_record_toggle, 0)
@@ -153,7 +152,7 @@ end
 
 ---------------------------------------------------------------------
 
-function mixer(num_of_folders)
+function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
@@ -176,11 +175,7 @@ function mixer(num_of_folders)
         if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
-            if num_of_folders > 1 then
-                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
-            else
-                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
-            end
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
     end
 end
