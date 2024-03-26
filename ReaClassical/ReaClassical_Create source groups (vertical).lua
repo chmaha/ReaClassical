@@ -26,7 +26,7 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_dest, reset_spacers
+local process_dest, reset_spacers, sync
 local save_track_settings, reset_track_settings, write_to_mixer
 
 ---------------------------------------------------------------------
@@ -104,6 +104,7 @@ function main()
         route_tracks(rcmaster, table, end_of_sources)
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+        sync(tracks_per_group, end_of_sources)
     elseif folder_check() == 1 then
         rcmaster_exists = special_check()
 
@@ -138,6 +139,7 @@ function main()
         route_tracks(rcmaster, table, end_of_sources)
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+        sync(tracks_per_group, end_of_sources)
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
@@ -320,10 +322,10 @@ function media_razor_group()
         Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
     end
     Main_OnCommand(40296, 0)               -- Track: Select all tracks
-    Main_OnCommand(40297, 0)           -- Track: Unselect (clear selection of) all tracks
-    Main_OnCommand(40939, 0)           -- Track: Select track 01
+    Main_OnCommand(40297, 0)               -- Track: Unselect (clear selection of) all tracks
+    Main_OnCommand(40939, 0)               -- Track: Select track 01
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    Main_OnCommand(select_children, 0)     -- SWS: Select children of selected folder track(s)
 
     solo()
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
@@ -638,7 +640,7 @@ function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
     local end_of_mixers = end_of_sources + tracks_per_group - 1
     local j = 1
     local k = 1
-    
+
     for i = end_of_sources, end_of_mixers do
         local track = GetTrack(0, i)
 
@@ -677,5 +679,34 @@ function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
 end
 
 ---------------------------------------------------------------------
+
+function sync(tracks_per_group, end_of_sources)
+    local rec_inputs = {}
+    local locks = {}
+
+    -- get inputs and locks
+    for i = 0, tracks_per_group - 1 do
+        local track = GetTrack(0, i)
+
+        -- inputs
+        local track_rec_input = GetMediaTrackInfo_Value(track, "I_RECINPUT")
+        rec_inputs[i+1] = track_rec_input
+
+        -- lock state
+        local _, locked = GetTrackStateChunk(track, "", 0)
+        local is_locked = string.match(locked, "%s*LOCK%s+1")
+        locks[i + 1] = is_locked
+    end
+
+    -- set inputs and locks
+    local j = 1
+    for i = 0, end_of_sources - 1 do
+        local track = GetTrack(0,i)
+        j = j % tracks_per_group
+        if j == 0 then j = tracks_per_group end
+        SetMediaTrackInfo_Value(track, "I_RECINPUT", rec_inputs[j])
+        j = j + 1
+    end
+end
 
 main()
