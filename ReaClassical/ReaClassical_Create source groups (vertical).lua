@@ -166,11 +166,11 @@ function main()
         end
     end
 
-    if sync_tracks then
-        ShowMessageBox(
-            "Track names, record inputs and lock states synchronized. Routing rebuilt if necessary.",
-            "Create/Sync Vertical Workflow", 0)
-    end
+    -- if sync_tracks then
+    --     ShowMessageBox(
+    --         "Track names, record inputs and lock states synchronized. Routing rebuilt if necessary.",
+    --         "Create/Sync Vertical Workflow", 0)
+    -- end
 
     if not rcmaster_exists then
         ShowMessageBox("Your Project has been upgraded"
@@ -280,7 +280,7 @@ end
 function groupings_mcp()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
-    local tracks_per_group = media_razor_group()
+    media_razor_group()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
     solo()
@@ -326,7 +326,7 @@ function media_razor_group()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
     if num_of_folders > 1 then
-        for i = 1, num_of_folders, 1 do
+        for _ = 1, num_of_folders, 1 do
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
             Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
