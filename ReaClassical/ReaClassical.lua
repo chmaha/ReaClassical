@@ -1,10 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.10
+@version 24.10.1
 @changelog
-  Various: Use Pyramix-style single mixer
-  F7/F8: Auto-upgrade of old projects to single mixer paradigm
-  F8: Sync record inputs, track lock states
+  Prevent RCMASTER conversion message if messagebox is cancelled
+  Test if first track is a parent before allowing to add child track to table
+  Route regular tracks to mixer tracks when running F8 from empty project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
