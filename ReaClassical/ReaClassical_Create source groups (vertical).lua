@@ -67,15 +67,15 @@ function main()
         end
         if folder_check() == 1 then
             create_source_groups()
-            create_single_mixer(num, num * 7)
+            local end_of_sources = num * 7
+            create_single_mixer(num, end_of_sources)
             local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table()
             copy_track_names(table, mixer_table)
-            route_tracks(rcmaster, table, num)
+            route_tracks(rcmaster, table, end_of_sources)
             groupings_mcp()
-            reset_spacers(num * 7, tracks_per_group, rcmaster_index)
+            reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         end
     elseif folder_check() > 1 then
-
         rcmaster_exists = special_check()
 
         if not rcmaster_exists then
@@ -84,8 +84,9 @@ function main()
 
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table()
         if not groups_equal then
-            ShowMessageBox("Please ensure that all folders have the same number of tracks before running.", "Create Source Groups", 0)
-            return 
+            ShowMessageBox("Please ensure that all folders have the same number of tracks before running.",
+                "Create Source Groups", 0)
+            return
         end
         local rcmaster = GetTrack(0, rcmaster_index)
         local end_of_sources = tracks_per_group * folder_count
@@ -167,7 +168,8 @@ function main()
 
     if sync_tracks then
         ShowMessageBox(
-            "Track names, record inputs and lock states synchronized. Routing rebuilt if necessary.","Create/Sync Vertical Workflow", 0)
+            "Track names, record inputs and lock states synchronized. Routing rebuilt if necessary.",
+            "Create/Sync Vertical Workflow", 0)
     end
 
     if not rcmaster_exists then
@@ -578,7 +580,11 @@ function create_track_table()
         elseif trackname_check(track, "^RCMASTER") then
             rcmaster_index = i
         elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
-            table.insert(track_table[j].tracks, track)
+            if j > 0 then
+                table.insert(track_table[j].tracks, track)
+            else
+                groups_equal = false
+            end
             k = k + 1
         end
     end
@@ -638,7 +644,6 @@ function save_track_settings(tracks_per_group)
         end
 
         table.insert(sends, track_sends)
-
     end
 
     return controls, sends
