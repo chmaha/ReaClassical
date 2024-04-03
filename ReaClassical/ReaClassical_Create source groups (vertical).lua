@@ -72,8 +72,9 @@ function main()
             local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table()
             copy_track_names(table, mixer_table)
             route_tracks(rcmaster, table, end_of_sources)
-            groupings_mcp()
+            media_razor_group()
             reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+            Main_OnCommand(40939, 0) -- select track 01
             solo()
             mixer()
         end
@@ -114,11 +115,10 @@ function main()
         end
 
         route_tracks(rcmaster, table, end_of_sources)
-        groupings_mcp()
+        media_razor_group()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
         sync_tracks = true
-        -- solo()
         mixer()
     elseif folder_check() == 1 then
         rcmaster_exists = special_check()
@@ -152,9 +152,10 @@ function main()
         end
         local rcmaster = GetTrack(0, rcmaster_index)
         route_tracks(rcmaster, table, end_of_sources)
-        groupings_mcp()
+        media_razor_group()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
+        Main_OnCommand(40939, 0) -- select track 01
         solo()
         mixer()
     else
@@ -318,20 +319,6 @@ end
 
 ---------------------------------------------------------------------
 
-function groupings_mcp()
-    local first_track = GetTrack(0, 0)
-    SetOnlyTrackSelected(first_track)
-    media_razor_group()
-    local first_track = GetTrack(0, 0)
-    SetOnlyTrackSelected(first_track)
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0)   -- SWS: Select children of selected folder track(s)
-    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-    Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-end
-
----------------------------------------------------------------------
-
 function create_source_groups()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
@@ -369,29 +356,16 @@ function media_razor_group()
         for _ = 1, num_of_folders, 1 do
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-            Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
+            Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
             local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
             Main_OnCommand(next_folder, 0)     -- select next folder
         end
     else
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-        Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group from selected tracks
+        Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     end
-    Main_OnCommand(40296, 0)               -- Track: Select all tracks
     Main_OnCommand(40297, 0)               -- Track: Unselect (clear selection of) all tracks
-    Main_OnCommand(40939, 0)               -- Track: Select track 01
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0)     -- SWS: Select children of selected folder track(s)
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-    local tracks_per_group = CountSelectedTracks(0)
-    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-    Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
-
-    Main_OnCommand(40297, 0)             -- Track: Unselect (clear selection of) all tracks
-    Main_OnCommand(40939, 0)             -- select track 01
-    return tracks_per_group
 end
 
 ---------------------------------------------------------------------
