@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.10.2
+@version 24.10.3
 @changelog
-  Simplify Duplicate Folder function
-  Remove message when synchronizing via F8
+  Classical Take Record: Mute non-selected tracks
+  Auditioning: Fix mixer view for horizontal workflow
+  Vertical: Tweak use of solo depending on situation
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
