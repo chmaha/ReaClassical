@@ -115,6 +115,7 @@ function main()
             Main_OnCommand(select_children, 0)   -- SWS: Select children of selected folder track(s)
             local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
             Main_OnCommand(arm, 0)               -- Xenakios/SWS: Set selected tracks record armed
+            solo()
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
             Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
@@ -136,8 +137,9 @@ function solo()
 
     for i = 0, CountTracks(0) - 1, 1 do
         track = GetTrack(0, i)
-        if IsTrackSelected(track) == false and not trackname_check(track, "^RCMASTER") then
+        if IsTrackSelected(track) == false and not trackname_check(track, "^M:") and not trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
     end
     return true
