@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.10.1
+@version 24.10.2
 @changelog
-  Prevent RCMASTER conversion message if messagebox is cancelled
-  Test if first track is a parent before allowing to add child track to table
-  Route regular tracks to mixer tracks when running F8 from empty project
+  Simplify Duplicate Folder function
+  Remove message when synchronizing via F8
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
