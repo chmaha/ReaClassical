@@ -137,7 +137,7 @@ function solo()
 
     for i = 0, CountTracks(0) - 1, 1 do
         track = GetTrack(0, i)
-        if IsTrackSelected(track) == false and not trackname_check(track, "^M:") and not trackname_check(track, "^RCMASTER") then
+        if IsTrackSelected(track) == false and not trackname_check(track, "^M:") and not trackname_check(track, "^@") and not trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
