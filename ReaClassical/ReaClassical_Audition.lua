@@ -218,11 +218,7 @@ function mixer(num_of_folders)
         if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
-            if num_of_folders > 1 then
-                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
-            else
-                SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
-            end
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
     end
 end

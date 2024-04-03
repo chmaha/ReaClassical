@@ -74,6 +74,8 @@ function main()
             route_tracks(rcmaster, table, end_of_sources)
             groupings_mcp()
             reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+            solo()
+            mixer()
         end
     elseif folder_check() > 1 then
         rcmaster_exists = special_check()
@@ -116,6 +118,8 @@ function main()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
         sync_tracks = true
+        -- solo()
+        mixer()
     elseif folder_check() == 1 then
         rcmaster_exists = special_check()
 
@@ -151,6 +155,8 @@ function main()
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
+        solo()
+        mixer()
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
@@ -213,13 +219,48 @@ end
 ---------------------------------------------------------------------
 
 function solo()
-    local track = GetSelectedTrack(0, 0)
-    SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+    local selected_track = GetSelectedTrack(0, 0)
+    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
     for i = 0, CountTracks(0) - 1, 1 do
-        track = GetTrack(0, i)
-        if IsTrackSelected(track) == false then
+        local track = GetTrack(0, i)
+
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
+            local num_of_sends = GetTrackNumSends(track, 0)
+            for j = 0, num_of_sends - 1, 1 do
+                SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
+            end
+        end
+
+
+        if IsTrackSelected(track) == true then
+            SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        end
+
+        local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
+
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER")) and muted == 0 then
+            local receives = GetTrackNumSends(track, -1)
+            for i = 0, receives - 1, 1 do -- loop through receives
+                local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
+                if origin == selected_track or parent == 1 then
+                    SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                    SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+                    break
+                end
+            end
+        end
+
+        if trackname_check(track, "^RoomTone") and muted == 0 then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
         end
     end
 end
@@ -283,7 +324,6 @@ function groupings_mcp()
     media_razor_group()
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
-    solo()
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0)   -- SWS: Select children of selected folder track(s)
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
@@ -343,12 +383,9 @@ function media_razor_group()
     Main_OnCommand(40939, 0)               -- Track: Select track 01
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0)     -- SWS: Select children of selected folder track(s)
-
-    solo()
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
     local tracks_per_group = CountSelectedTracks(0)
-    mixer()
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
 
