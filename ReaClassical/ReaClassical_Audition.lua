@@ -140,6 +140,7 @@ end
 ---------------------------------------------------------------------
 
 function solo()
+    Main_OnCommand(40491,0) -- un-arm all tracks for recording
     local selected_track = GetSelectedTrack(0, 0)
     local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 

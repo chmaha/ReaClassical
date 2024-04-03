@@ -138,6 +138,7 @@ end
 ---------------------------------------------------------------------
 
 function solo()
+    Main_OnCommand(40491,0) -- un-arm all tracks for recording
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if IsTrackSelected(track) == true then
