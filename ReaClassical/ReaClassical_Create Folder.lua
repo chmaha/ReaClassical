@@ -57,6 +57,9 @@ function main()
             rcmaster_exists = true
         elseif boolean == true and num < 2 then
             ShowMessageBox("You need 2 or more tracks to make a folder!", "Create/Sync Horizontal Workflow", 0)
+            return
+        else
+            return
         end
         if folder_check() == 1 then
             create_single_mixer(num, num)
@@ -69,6 +72,7 @@ function main()
     elseif folder_check() > 1 then
         ShowMessageBox("This function only runs on projects with a single folder", "Create/Sync Horizontal Workflow", 0)
         rcmaster_exists = true
+        return
     elseif folder_check() == 1 then
         Main_OnCommand(focus, 0)
         remove_track_groups()

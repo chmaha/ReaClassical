@@ -61,6 +61,9 @@ function main()
             rcmaster_exists = true
         elseif boolean == true and num < 2 then
             ShowMessageBox("You need 2 or more tracks to make a source group!", "Create Source Groups", 0)
+            return
+        else
+            return
         end
         if folder_check() == 1 then
             create_source_groups()
@@ -633,7 +636,9 @@ function save_track_settings(tracks_per_group)
                 table.insert(track_sends, dest)
             end
         end
+
         table.insert(sends, track_sends)
+
     end
 
     return controls, sends
