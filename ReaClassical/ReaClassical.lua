@@ -3,7 +3,9 @@
 @version 24.10.3
 @changelog
   Classical Take Record: Mute non-selected tracks
+  Classical Take Record: Do not mute @ aux tracks
   Auditioning: Fix mixer view for horizontal workflow
+  Auditioning: Track: Unarm all tracks for recording
   Vertical: Tweak use of solo depending on situation
 @metapackage
 @provides
