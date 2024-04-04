@@ -1659,7 +1659,7 @@ Alt+R}
 \end_inset
 
  to open the routing matrix.
- Once you have set the inputs for the source group, and you chose a vertical
+ Once you have set the inputs for the first group, and you chose a vertical
  approach, simply press 
 \begin_inset ERT
 status open
@@ -2095,8 +2095,8 @@ keys{F9}
 \end_inset
 
 ).
- You only need to add track names to the destination group (for example
- after using the 
+ You only need to add track names to the destination group in the arrange
+ window (for example after using the 
 \begin_inset ERT
 status open
 
@@ -2569,6 +2569,104 @@ keys{F6}
 \end_inset
 
  shortcut.
+\end_layout
+
+\begin_layout Subsection
+Summary of Track Types in ReaClassical
+\end_layout
+
+\begin_layout Standard
+While some of these will be covered later in the manual, it is useful to
+ give a summary of track types you can currently use in ReaClassical.
+ First, we have the 
+\begin_inset Quotes bld
+\end_inset
+
+regular
+\begin_inset Quotes brd
+\end_inset
+
+ group or groups of tracks shown in the arrange window.
+ These are where you record or import takes.
+ You can record-arm tracks and select inputs here (a reminder that names,
+ recording inputs and locked tracks need only be set on the first group
+ and then 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ can be pressed to sync across all groups.
+ Second, we have the mixer tracks designated via 
+\begin_inset Quotes bld
+\end_inset
+
+M:
+\begin_inset Quotes brd
+\end_inset
+
+ prefix.
+ These tracks shown only in the mixer are where you adjust the usual track
+ controls such as pan, volume, phase etc.
+ and also add FX.
+ Third, we have aux busses designated via 
+\begin_inset Quotes bld
+\end_inset
+
+@
+\begin_inset Quotes brd
+\end_inset
+
+ prefix.
+ You can route mixer tracks to these to use as a reverb bus etc.
+ Fourth, we have the 
+\begin_inset Quotes bld
+\end_inset
+
+RCMASTER
+\begin_inset Quotes brd
+\end_inset
+
+ bus which leads directly to the master REAPER bus.
+ Here you can gain stage into the master bus, add FX etc.
+ Finally, the master bus itself where again you can set final levels, add
+ FX etc.
+ As mentioned elsewhere, try not to delete the mixer tracks or RCMASTER.
+ But, even if you do by accident, simply run 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ to recreate them depending on your chosen workflow.
+ 
 \end_layout
 
 \begin_layout Section
@@ -4126,8 +4224,8 @@ Aux & Submix
 \end_layout
 
 \begin_layout Standard
-As of ReaClassical v23.19, users have the ability to create aux and submix
- tracks that stay visible (and stay after the mixer tracks).
+As of ReaClassical v23.19, users have the ability to create aux tracks that
+ stay visible (and stay after the mixer tracks).
  To set up, simply create a single folder 
 \begin_inset ERT
 status open
@@ -4169,6 +4267,19 @@ keys{@}
 \end_inset
 
  .
+ It is important to keep the @ at the beginning of the track but you can
+ add any name you'd like e.g.
+ 
+\begin_inset Quotes bld
+\end_inset
+
+@hall-verb
+\begin_inset Quotes brd
+\end_inset
+
+.
+ To route, click-drag from a mixer track's routing stripes to the desired
+ @ track.
  When using any of the ReaClassical functions such as auditioning, these
  tracks will remain visible.
 \end_layout
@@ -4210,6 +4321,93 @@ textasciitilde}
  a few seconds of clean room tone as the impulse!).
  In a future version of ReaClassical, seamlessly fading in and out of room
  tone will be automatic!
+\end_layout
+
+\begin_layout Subsection
+Automation
+\end_layout
+
+\begin_layout Standard
+Given ReaClassical is built on top of REAPER, it allows for same high-quality
+ automation workflow.
+ It is recommended to read the appropriate section of the REAPER manual
+ or an official tutorial video to get a good sense of how to use it.
+ To start general automation, select the desired track(s) in the first group
+ and go to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+menu{View > Envelope Manager}
+\end_layout
+
+\end_inset
+
+ or click on the envelope button on a mixer track or RCMASTER.
+ It makes most sense to leave any automation work until the destination
+ group editing is largely complete.
+ It may be useful to temporarily show the mixer tracks and/or RCMASTER bus
+ in the arrange window via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+menu{View > Track Manager}
+\end_layout
+
+\end_inset
+
+ if you enjoy drawing in overarching volume automation.
+ A reminder to only use spacebar for playback during such work given the
+ mixer-based tracks are automatically hidden when using the audition functions.
+\end_layout
+
+\begin_layout Standard
+In addition, there are also take envelopes that you can access via right-clickin
+g on an item and going to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+menu{Take > Take Volume Envelope}
+\end_layout
+
+\end_inset
+
+.
+ This is incredibly useful for transparently reducing very short stray peaks
+ versus using a limiter.
+ Simply create a selection over the problematic area by left-click-dragging
+ and then 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+shift}
+\end_layout
+
+\end_inset
+
+ and drag up or down to just affect that portion of the envelope without
+ needing to add in individual points.
+ It's such a time-saver! The benefit here is that you can also see how the
+ item waveform is affected in realtime.
 \end_layout
 
 \begin_layout Section
