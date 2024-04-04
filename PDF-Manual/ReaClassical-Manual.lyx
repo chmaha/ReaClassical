@@ -4224,8 +4224,8 @@ Aux & Submix
 \end_layout
 
 \begin_layout Standard
-As of ReaClassical v23.19, users have the ability to create aux tracks that
- stay visible (and stay after the mixer tracks).
+Users have the ability to create aux and/or submix tracks that stay visible
+ (and stay after the mixer tracks).
  To set up, simply create a single folder 
 \begin_inset ERT
 status open
@@ -4282,6 +4282,77 @@ keys{@}
  @ track.
  When using any of the ReaClassical functions such as auditioning, these
  tracks will remain visible.
+\end_layout
+
+\begin_layout Standard
+To have @ tracks act as submix tracks, simply add a hyphen (-) at the end
+ of desired track names in the first folder and sync via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+.
+ Now those related mixer tracks will not route directly to RCMASTER.
+ As an example, say tracks 3-6 are all string section microphones and you'd
+ like to sum them all to a string submix track called 
+\begin_inset Quotes bld
+\end_inset
+
+@strings
+\begin_inset Quotes brd
+\end_inset
+
+.
+ Just add a hyphen to the end of the names for tracks 3-6, sync and then
+ create the routing to @strings via click-dragging from the routing stripes.
+ This routing is maintained during 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ syncs.
 \end_layout
 
 \begin_layout Subsection
@@ -5569,6 +5640,74 @@ keys{F8}
 \end_inset
 
  .
+ To have @ tracks act as submix tracks, simply add a hyphen (-) at the end
+ of desired track names in the first folder and sync via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+.
+ Now those related mixer tracks will not route directly to RCMASTER.
+ As an example, say tracks 3-6 are all string section microphones and you'd
+ like to first sum them all to a string submix track called 
+\begin_inset Quotes bld
+\end_inset
+
+@strings
+\begin_inset Quotes brd
+\end_inset
+
+.
+ Just add a hyphen to the end of the names for tracks 3-6, sync and then
+ create the routing to @strings via click-dragging from the routing stripes.
+ This routing is maintained during 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ syncs.
 \end_layout
 
 \begin_layout Standard
