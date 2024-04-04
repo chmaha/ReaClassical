@@ -108,7 +108,8 @@ function main()
         route_tracks(rcmaster, table, end_of_sources)
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
-        ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.", "Create/Sync Horizontal Workflow", 0)
+        ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.",
+            "Create/Sync Horizontal Workflow", 0)
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
@@ -441,8 +442,10 @@ function route_tracks(rcmaster, track_table, end_of_sources)
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
-        if name:match("^@") or name:match("^RoomTone") or name:match("^M:") then
-            route_to_track(track, rcmaster)
+        if name:sub(-1) ~= '-' then
+            if name:match("^@") or name:match("^RoomTone") or name:match("^M:") then
+                route_to_track(track, rcmaster)
+            end
         end
     end
 
@@ -568,7 +571,7 @@ function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
     local end_of_mixers = end_of_sources + tracks_per_group - 1
     local j = 1
     local k = 1
-    
+
     for i = end_of_sources, end_of_mixers do
         local track = GetTrack(0, i)
 

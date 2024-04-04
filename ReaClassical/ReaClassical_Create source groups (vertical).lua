@@ -541,8 +541,10 @@ function route_tracks(rcmaster, track_table, end_of_sources)
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
-        if name:match("^@") or name:match("^RoomTone") or name:match("^M:") then
-            route_to_track(track, rcmaster)
+        if name:sub(-1) ~= '-' then
+            if name:match("^@") or name:match("^RoomTone") or name:match("^M:") then
+                route_to_track(track, rcmaster)
+            end
         end
     end
 
