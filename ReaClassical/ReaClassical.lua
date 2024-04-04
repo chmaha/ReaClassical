@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.10.4
+@version 24.11
 @changelog
-  Vertical Workflow: Stop jumping to top of project when running sync
-  Vertical Workflow: Remove unnecessary code
-  Duplicate Folder: Scroll to new folder
+  Theme: Remove rec input on mixer
+  Various: Allow for not routing directly to RCMASTER
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
