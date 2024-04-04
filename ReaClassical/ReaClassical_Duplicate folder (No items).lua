@@ -63,6 +63,7 @@ function main()
     Main_OnCommand(sync,0)
     Undo_EndBlock('Duplicate folder (No items)', 0)
     PreventUIRefresh(-1)
+    Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
     UpdateArrange()
     UpdateTimeline()
     TrackList_AdjustWindows(false)
