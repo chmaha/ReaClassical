@@ -1,12 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.10.3
+@version 24.10.4
 @changelog
-  Classical Take Record: Mute non-selected tracks
-  Classical Take Record: Do not mute @ aux tracks
-  Auditioning: Fix mixer view for horizontal workflow
-  Auditioning: Track: Unarm all tracks for recording
-  Vertical: Tweak use of solo depending on situation
+  Vertical Workflow: Stop jumping to top of project when running sync
+  Vertical Workflow: Remove unnecessary code
+  Duplicate Folder: Scroll to new folder
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
