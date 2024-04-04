@@ -46,7 +46,7 @@ function main()
     local num_of_tracks = CountTracks(0)
     local rcmaster_exists = false
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
-
+    local sync = false
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
         local boolean, num = GetUserInputs("Create/Sync Horizontal Workflow", 1, "How many tracks?", 10)
@@ -108,8 +108,7 @@ function main()
         route_tracks(rcmaster, table, end_of_sources)
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
-        ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.",
-            "Create/Sync Horizontal Workflow", 0)
+        sync = true
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
@@ -123,6 +122,11 @@ function main()
         for _, track in ipairs(pre_selected) do
             SetTrackSelected(track, 1)
         end
+    end
+
+    if sync == true then
+        ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.",
+            "Create/Sync Horizontal Workflow", 0)
     end
 
     if not rcmaster_exists then
