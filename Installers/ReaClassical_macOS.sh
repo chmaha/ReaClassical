@@ -1,17 +1,23 @@
 #!/bin/sh
-# by chmaha (February 2024)
+# by chmaha (April 2024)
 
 # Script to install ReaClassical on MacOS
-# Works for all architectures and OS versions that are compatible with REAPER.
-# Change the pkgver number below to download an alternative REAPER version.
+# Works for all architectures and OS versions that are compatible with REAPER
 
-###########
-pkgver=7.11
-rcver=24
-###########
+ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
-echo "Welcome to ReaClassical installer..."
+rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua"
+rcver=$(curl -sS "$rcver_txt" | awk '/@version/{split($2, version, "."); print version[1]}')
+
+echo "Welcome to the ReaClassical installer...\n"
 sleep 2
+echo "Versions:"
+echo "========="
+echo "REAPER $ver"
+echo "ReaClassical $rcver\n"
+sleep 2
+
 rcfolder="ReaClassical_${rcver}"
 arch=`uname -m`
 osver=`sw_vers -productVersion`
@@ -29,9 +35,9 @@ else
     echo "Using universal dmg file..."
 fi
 
-echo "Downloading REAPER $pkgver from reaper.fm"
+echo "Downloading REAPER $ver from reaper.fm"
 sleep 2
-curl https://reaper.fm/files/${pkgver::1}.x/reaper${pkgver//.}_$dmgtype.dmg -L -o reaper.dmg
+curl https://reaper.fm/files/${ver::1}.x/reaper${ver//.}_$dmgtype.dmg -L -o reaper.dmg
 echo "Converting and mounting DMG..."
 sleep 2
 hdiutil convert -quiet reaper.dmg -format UDTO -o reaper_temp

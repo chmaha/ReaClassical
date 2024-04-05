@@ -1,16 +1,22 @@
 #!/bin/sh
-# by chmaha (February 2024)
+# by chmaha (April 2024)
 
 # Script to install ReaClassical on Linux
-# Works for both x86_64 and aarch64 architectures
-# Change the pkgver number below to download an alternative version of REAPER.
+# Works for all architectures that are compatible with REAPER
 
-###########
-ver=7.11
-rcver=24
-###########
+ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
-echo "Welcome to ReaClassical installer..."
+rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua"
+rcver=$(curl -sS "$rcver_txt" | awk '/@version/{split($2, version, "."); print version[1]}')
+
+
+echo -e "Welcome to the ReaClassical installer...\n"
+sleep 2
+echo "Versions:"
+echo "========="
+echo "REAPER $ver"
+echo -e "ReaClassical $rcver\n"
 sleep 2
 
 major=$(echo $ver | awk -F. '{print $1}')

@@ -10,17 +10,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
-)
-
-const (
-	pkgver = "7.11"
-	rcver  = "24"
-)
-
-var (
-	rcfolder = fmt.Sprintf("ReaClassical_%s", rcver)
 )
 
 func getHashedDateSuffix() string {
@@ -192,4 +184,64 @@ func addLineToReaperIni(rcfolder string) {
 		os.Exit(1)
 	}
 
+}
+
+func getReaperVersion() (string, error) {
+	// Fetch the content of the online file
+	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Read the body of the response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Define a regular expression pattern to extract the version number
+	pattern := `====\s*(\d+\.\d+)\s*====`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(pattern)
+
+	// Find the version number in the content
+	matches := re.FindStringSubmatch(string(body))
+	if len(matches) < 2 {
+		return "", fmt.Errorf("version number not found")
+	}
+
+	// Return the version number
+	return matches[1], nil
+}
+
+func getReaClassicalMajorVersion() (string, error) {
+	// Fetch the content of the online file
+	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Read the body of the response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Define a regular expression pattern to extract the major version number
+	pattern := `@version\s*(\d+)\.\d+`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(pattern)
+
+	// Find the major version number in the content
+	matches := re.FindStringSubmatch(string(body))
+	if len(matches) < 2 {
+		return "", fmt.Errorf("major version number not found")
+	}
+
+	// Return the major version number
+	return matches[1], nil
 }

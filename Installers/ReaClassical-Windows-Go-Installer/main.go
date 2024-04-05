@@ -1,12 +1,42 @@
 package main
 
-import "runtime"
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
 
 func main() {
+
+	pkgver, err := getReaperVersion()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	rcver, err := getReaClassicalMajorVersion()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	var (
+		rcfolder = fmt.Sprintf("ReaClassical_%s", rcver)
+	)
+
+	fmt.Println("Welcome to the ReaClassical installer...")
+	time.Sleep(2 * time.Second)
+	fmt.Println()
+	fmt.Println("Versions:")
+	fmt.Println("=========")
+	fmt.Printf("REAPER %s\n", pkgver)
+	fmt.Printf("ReaClassical %s\n\n", rcver)
+	time.Sleep(2 * time.Second)
+
 	if is64Bit() {
-		Install64bit()
+		Install64bit(rcfolder, pkgver, rcver)
 	} else {
-		Install32bit()
+		Install32bit(rcfolder, pkgver, rcver)
 	}
 }
 

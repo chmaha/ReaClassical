@@ -7,9 +7,7 @@ import (
 	"time"
 )
 
-func Install64bit() {
-	fmt.Println("Welcome to the ReaClassical 64-bit installer...")
-	time.Sleep(2 * time.Second)
+func Install64bit(rcfolder string, pkgver string, rcver string) {
 
 	// Create a unique hash-based date suffix
 	dateSuffix := getHashedDateSuffix()
