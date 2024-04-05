@@ -28,7 +28,7 @@ local folder_check
 
 function main()
     if track_check() == 0 then
-        ShowMessageBox("Please add at least one track or folder before running", "Classical Take Record", 0)
+        ShowMessageBox("Please add at least one folder before running", "Classical Take Record", 0)
         return
     end
     
