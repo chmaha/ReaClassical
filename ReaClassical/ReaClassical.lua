@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.11
+@version 24.11.1
 @changelog
-  Theme: Remove rec input on mixer
-  Various: Allow for not routing directly to RCMASTER
+  Workflows: Do not show RCMASTER upgrade message if function cannot run
+  Classical Take Record: Slight change to message when attempted to run on empty project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
