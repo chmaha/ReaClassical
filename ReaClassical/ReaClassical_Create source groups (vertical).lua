@@ -162,6 +162,7 @@ function main()
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
             "Create/Sync Vertical Workflow", 0)
+        return
     end
 
     PreventUIRefresh(-1)

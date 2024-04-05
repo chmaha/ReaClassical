@@ -113,6 +113,7 @@ function main()
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
             "Create/Sync Horizontal Workflow", 0)
+        return
     end
 
     PreventUIRefresh(-1)
