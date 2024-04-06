@@ -227,7 +227,7 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")) then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -238,17 +238,17 @@ function solo()
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
 
         local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER")) and muted == 0 then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER")) and muted == 0 then
             local receives = GetTrackNumSends(track, -1)
             for i = 0, receives - 1, 1 do -- loop through receives
                 local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
@@ -284,7 +284,7 @@ function mixer()
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^@") then
+        if trackname_check(track, "^@") or trackname_check(track, "^#") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
@@ -300,7 +300,7 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -547,7 +547,7 @@ function route_tracks(rcmaster, track_table, end_of_sources)
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
         if name:sub(-1) ~= '-' then
-            if name:match("^@") or name:match("^RoomTone") or name:match("^M:") then
+            if name:match("^@") or name:match("^#") or name:match("^RoomTone") or name:match("^M:") then
                 route_to_track(track, rcmaster)
             end
         end
@@ -597,7 +597,7 @@ function create_track_table()
             table.insert(mixer_tracks, track)
         elseif trackname_check(track, "^RCMASTER") then
             rcmaster_index = i
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")) then
             if j > 0 then
                 table.insert(track_table[j].tracks, track)
             else
@@ -656,7 +656,7 @@ function save_track_settings(tracks_per_group)
         for j = 0, num_of_sends - 1 do
             local dest = GetTrackSendInfo_Value(track, 0, j, "P_DESTTRACK")
             local _, name = GetSetMediaTrackInfo_String(dest, "P_NAME", "", 0)
-            if name == name:match("^@") then
+            if name == name:match("^@") or name == name:match("^#") then
                 table.insert(track_sends, dest)
             end
         end

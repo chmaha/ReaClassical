@@ -61,7 +61,7 @@ function main()
     route_to_track(bus, rcmaster)
     local colors = get_color_table()
     SetTrackColor(bus, colors.aux)
-    GetSetMediaTrackInfo_String(bus, "P_NAME", "@", true) -- Add @ as track name
+    GetSetMediaTrackInfo_String(bus, "P_NAME", "#", true) -- Add @ as track name
     SetMediaTrackInfo_Value(bus, "B_SHOWINTCP", 0)
     Main_OnCommand(40297, 0)
     local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
@@ -78,11 +78,12 @@ function folder_check()
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local rcm = trackname_check(track, "^RCMASTER")
-        local bus = trackname_check(track, "^@")
+        local send = trackname_check(track, "^@")
+        local bus = trackname_check(track, "^#")
         local rt = trackname_check(track, "^RoomTone")
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1
-        elseif folders == 1 and not (rcm or bus or rt) then
+        elseif folders == 1 and not (rcm or send or bus or rt) then
             tracks_per_group = tracks_per_group + 1
         end
     end

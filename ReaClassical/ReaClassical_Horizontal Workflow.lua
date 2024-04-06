@@ -199,7 +199,7 @@ function mixer()
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^@") then
+        if trackname_check(track, "^@") or trackname_check(track, "^#") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
@@ -215,7 +215,7 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -452,7 +452,7 @@ function route_tracks(rcmaster, track_table, end_of_sources)
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
         if name:sub(-1) ~= '-' then
-            if name:match("^@") or name:match("^RoomTone") or name:match("^M:") then
+            if name:match("^@") or name:match("^#") or name:match("^RoomTone") or name:match("^M:") then
                 route_to_track(track, rcmaster)
             end
         end
@@ -496,7 +496,7 @@ function create_track_table()
             table.insert(mixer_tracks, track)
         elseif trackname_check(track, "^RCMASTER") then
             rcmaster_index = i
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone")) then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")) then
             table.insert(track_table[j].tracks, track)
             k = k + 1
         end
@@ -547,7 +547,7 @@ function save_track_settings(tracks_per_group)
         for j = 0, num_of_sends - 1 do
             local dest = GetTrackSendInfo_Value(track, 0, j, "P_DESTTRACK")
             local _, name = GetSetMediaTrackInfo_String(dest, "P_NAME", "", 0)
-            if name == name:match("^@") then
+            if name == name:match("^@") or name == name:match("^#") then
                 table.insert(track_sends, dest)
             end
         end

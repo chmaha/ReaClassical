@@ -137,7 +137,7 @@ function solo()
 
     for i = 0, CountTracks(0) - 1, 1 do
         track = GetTrack(0, i)
-        if IsTrackSelected(track) == false and not trackname_check(track, "^M:") and not trackname_check(track, "^@") and not trackname_check(track, "^RCMASTER") then
+        if IsTrackSelected(track) == false and not trackname_check(track, "^M:") and not trackname_check(track, "^@") and not trackname_check(track, "^#") and not trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
@@ -162,7 +162,7 @@ function mixer()
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^@") then
+        if trackname_check(track, "^@") or trackname_check(track, "^#") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
@@ -178,7 +178,7 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

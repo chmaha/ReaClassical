@@ -36,7 +36,7 @@ function main()
         if track then
             SetOnlyTrackSelected(track)
             solo()
-            mixer(num_of_folders)
+            mixer()
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
             SetEditCurPos(pos, 0, 0)
@@ -138,33 +138,41 @@ end
 ---------------------------------------------------------------------
 
 function solo()
-    Main_OnCommand(40491,0) -- un-arm all tracks for recording
+    Main_OnCommand(40491, 0) -- un-arm all tracks for recording
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        elseif trackname_check(track, "^#") then
+            local num_of_sends = GetTrackNumSends(track, 0)
+            for j = 0, num_of_sends - 1, 1 do
+                local send = GetTrackSendInfo_Value(track, 0, j, "P_DESTTRACK")
+                if trackname_check(send, "^@") then
+                    SetTrackSendInfo_Value(send, 0, j, "B_MUTE", 1)
+                end
+            end
         end
-    
+
         if trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
             local receives = GetTrackNumSends(track, -1)
-            for i=0,receives-1, 1 do -- loop through receives
-            local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
+            for k = 0, receives - 1, 1 do -- loop through receives
+                local origin = GetTrackSendInfo_Value(track, -1, k, "P_SRCTRACK")
                 if trackname_check(origin, "^@") or trackname_check(origin, "^RoomTone") then
                     local num_of_sends = GetTrackNumSends(origin, 0)
-                    for j = 0, num_of_sends - 1, 1 do
-                        SetTrackSendInfo_Value(origin, 0, j, "B_MUTE", 1)
+                    for l = 0, num_of_sends - 1, 1 do
+                        SetTrackSendInfo_Value(origin, 0, l, "B_MUTE", 1)
                     end
                 end
             end
         end
 
-        if trackname_check(track, "^RoomTone") or trackname_check(track, "^@") or trackname_check(track, "^M:") then
+        if trackname_check(track, "^RoomTone") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^M:") then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
     end
@@ -179,7 +187,7 @@ end
 
 ---------------------------------------------------------------------
 
-function mixer(num_of_folders)
+function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
@@ -187,7 +195,7 @@ function mixer(num_of_folders)
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^@") then
+        if trackname_check(track, "^@") or trackname_check(track, "^#") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
@@ -203,7 +211,7 @@ function mixer(num_of_folders)
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -227,7 +235,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -235,8 +243,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
