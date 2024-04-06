@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.2
+@version 24.11.3
 @changelog
-  New: Add plus sign to RCMASTER name to show in TCP
-  Various: Adapt mixer() to deal with RCMASTER+
-  PDF Manual: Update automation information
+  New: Add submix function
+  Various: Tweak solo() and mixer() functions to allow for submix
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -21,18 +20,19 @@
   [main] ReaClassical_S-D Edit.lua
   [main] ReaClassical_Whole Project View Horizontal.lua
   [main] ReaClassical_Whole Project View Vertical.lua
-  [main] ReaClassical_Create source groups (vertical).lua
+  [main] ReaClassical_Vertical Workflow.lua
   [main] ReaClassical_Audition.lua
   [main] ReaClassical_Delete Leaving Silence.lua
   [main] ReaClassical_Delete With Ripple.lua
   [main] ReaClassical_Insert with timestretching.lua
-  [main] ReaClassical_Create Folder.lua
+  [main] ReaClassical_Horizontal Workflow.lua
   [main] ReaClassical_Lock_toggle.lua
   [main] ReaClassical_Create CD Markers.lua
   [main] ReaClassical_Help.lua
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Previous Item or Fade.lua
-  [main] ReaClassical_Add Aux or Submix.lua
+  [main] ReaClassical_Add Aux.lua
+  [main] ReaClassical_Add Submix.lua
   [main] ReaClassical_Reposition_Album_Tracks.lua
   [main] ReaClassical_mpl_Markers to CUE.lua
   [main] ReaClassical_Preferences.lua
