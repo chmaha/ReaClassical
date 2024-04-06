@@ -4,6 +4,15 @@
 # Script to install ReaClassical on MacOS
 # Works for all architectures and OS versions that are compatible with REAPER
 
+cleanup() {
+    if [ -n "$temp_dir" ] && [ -d "$temp_dir" ]; then
+        rm -rf "$temp_dir"
+    fi
+}
+
+# Trap exit signals to ensure cleanup
+trap cleanup EXIT
+
 ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
 ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
@@ -35,22 +44,37 @@ else
     echo "Using universal dmg file..."
 fi
 
+date_suffix=$(date +%s | shasum -a 256 | cut -c1-5)
+
+# Try to create a temporary directory using mktemp
+temp_dir=$(mktemp -d 2>/dev/null)
+# Check if mktemp was successful
+if [ -z "$temp_dir" ]; then
+    # Fallback option: use /tmp as temporary directory
+    temp_dir="/tmp/ReaClassical_${date_suffix}"
+    mkdir -p "$temp_dir"
+fi
+
 echo "Downloading REAPER $ver from reaper.fm"
 sleep 2
-curl https://reaper.fm/files/${ver::1}.x/reaper${ver//.}_$dmgtype.dmg -L -o reaper.dmg
+reaper_url="https://reaper.fm/files/${ver::1}.x/reaper${ver//.}_$dmgtype.dmg"
+curl -L -o "$temp_dir/reaper.dmg" "$reaper_url"
 echo "Converting and mounting DMG..."
 sleep 2
-hdiutil convert -quiet reaper.dmg -format UDTO -o reaper_temp
-hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint ./reaper_temp  reaper_temp.cdr
+hdiutil convert -quiet "$temp_dir/reaper.dmg" -format UDTO -o "$temp_dir/reaper_temp"
+hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint "$temp_dir/reaper_temp" "$temp_dir/reaper_temp.cdr"
 echo "Downloading ReaClassical resource folder base and userplugins for MacOS"
 sleep 2
-curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip -L
-curl -O https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_MacOS-$arch.zip -L
+res_output="$temp_dir/Resource_Folder_Base.zip"
+res_url="https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip"
+curl -L -o "$res_output" "$res_url"
+up_output="$temp_dir/UP_MacOS-$arch.zip"
+up_url="https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_MacOS-$arch.zip"
+curl -L -o "$up_output" "$up_url"
 
 # Check if a ReaClassical folder already exists
 if [ -d "ReaClassical_${rcver}" ]; then
     # If it exists, create a folder with a date suffix
-    date_suffix=$(date +%s | shasum -a 256 | cut -c1-5)
     rcfolder="ReaClassical_${rcver}_${date_suffix}"
     sleep 2
     echo "Folder ReaClassical_${rcver} already exists. Adding unique identifier as suffix."
@@ -58,8 +82,8 @@ fi
 sleep 2
 echo "Extracting files into $rcfolder folder..."
 sleep 2
-unzip -q Resource_Folder_Base.zip -d $rcfolder/
-unzip -q UP_MacOS-$arch.zip -d $rcfolder/UserPlugins/
+unzip -q "$res_output" -d $rcfolder/
+unzip -q "$up_output" -d $rcfolder/UserPlugins/
 echo "Adding ReaClassical splash screen and theme references to reaper.ini"
 sleep 2
 abspath=`pwd $rcfolder`
@@ -70,9 +94,10 @@ sed -i'.bak' -e "/^\[REAPER\]/a\\
 splashimage=${abspath}\/$rcfolder\/Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-splash.png" $rcfolder/reaper.ini
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
-cp -R reaper_temp/REAPER.app $rcfolder/
+cp -R "$temp_dir/reaper_temp/REAPER.app" "$rcfolder/"
 echo "Unmounting image and deleting temporary files..."
 sleep 2
-hdiutil detach reaper_temp
-rm reaper.dmg reaper_temp.cdr Resource_Folder_Base.zip UP_MacOS-$arch.zip
+hdiutil detach "$temp_dir/reaper_temp"
 echo "Portable ReaClassical Installation complete!"
+
+cleanup

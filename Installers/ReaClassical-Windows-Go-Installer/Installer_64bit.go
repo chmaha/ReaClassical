@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -11,7 +12,13 @@ func Install64bit(rcfolder string, pkgver string, rcver string) {
 
 	// Create a unique hash-based date suffix
 	dateSuffix := getHashedDateSuffix()
+	tempDir := os.TempDir()
+	tempFilePath := filepath.Join(tempDir, "ReaClassical_"+dateSuffix)
 
+	if err := os.Mkdir(tempFilePath, os.ModePerm); err != nil {
+		fmt.Println("Error creating temporary directory:", err)
+		return
+	}
 	// Check if the folder ReaClassical_${rcver} exists
 	if _, err := os.Stat(rcfolder); err == nil {
 		// If it exists, append the hash-based date suffix
@@ -19,35 +26,39 @@ func Install64bit(rcfolder string, pkgver string, rcver string) {
 		fmt.Printf("Folder ReaClassical_%s already exists. Adding unique identifier as suffix.\n", rcver)
 	}
 
+	// Use filepath.Join to create paths within the temporary directory for downloaded files
+	sevenZipDir := filepath.Join(tempFilePath, "7zip")
+	reaperExePath := filepath.Join(tempFilePath, fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")))
+
 	// Download and extract portable 7-zip
 	fmt.Println("Downloading and extracting portable 7-zip...")
 	time.Sleep(2 * time.Second)
-	downloadFile("https://github.com/chmaha/7-zip/raw/main/7zip.zip", "7zip.zip")
-	extractArchive("7zip.zip", "7zip")
-	os.Remove("7zip.zip")
+	downloadFile("https://github.com/chmaha/7-zip/raw/main/7zip.zip", filepath.Join(tempFilePath, "7zip.zip"))
+	extractArchive(filepath.Join(tempFilePath, "7zip.zip"), sevenZipDir)
+	os.Remove(filepath.Join(tempFilePath, "7zip.zip"))
 
 	// Download REAPER
 	fmt.Printf("Downloading REAPER %s from reaper.fm\n", pkgver)
 	time.Sleep(2 * time.Second)
 	reaperURL := fmt.Sprintf("https://www.reaper.fm/files/%s.x/reaper%s_x64-install.exe", strings.Split(pkgver, ".")[0], strings.ReplaceAll(pkgver, ".", ""))
-	downloadFile(reaperURL, fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")))
+	downloadFile(reaperURL, reaperExePath)
 
 	// Extract REAPER
 	fmt.Printf("Extracting REAPER from .exe to %s folder...\n", rcfolder)
 	time.Sleep(2 * time.Second)
-	runCommand("./7zip/7z.exe", "x", fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")), "-o"+rcfolder)
+	runCommand(filepath.Join(sevenZipDir, "7z.exe"), "x", reaperExePath, "-o"+rcfolder)
 
 	// Download ReaClassical files from GitHub
 	fmt.Println("Downloading ReaClassical files from GitHub...")
 	time.Sleep(2 * time.Second)
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip", "Resource_Folder_Base.zip")
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-x64.zip", "UP_Windows-x64.zip")
+	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip", filepath.Join(tempFilePath, "Resource_Folder_Base.zip"))
+	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-x64.zip", filepath.Join(tempFilePath, "UP_Windows-x64.zip"))
 
 	// Extract ReaClassical files
 	fmt.Println("Extracting ReaClassical files to ReaClassical folder...")
 	time.Sleep(2 * time.Second)
-	extractArchive("Resource_Folder_Base.zip", rcfolder)
-	extractArchive("UP_Windows-x64.zip", fmt.Sprintf("%s/UserPlugins", rcfolder))
+	extractArchive(filepath.Join(tempFilePath, "Resource_Folder_Base.zip"), rcfolder)
+	extractArchive(filepath.Join(tempFilePath, "UP_Windows-x64.zip"), filepath.Join(rcfolder, "UserPlugins"))
 
 	// Add the line to reaper.ini under the [REAPER] section
 	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")
@@ -56,10 +67,7 @@ func Install64bit(rcfolder string, pkgver string, rcver string) {
 	// Remove temporary files
 	fmt.Println("Removing temporary files...")
 	time.Sleep(2 * time.Second)
-	os.Remove("Resource_Folder_Base.zip")
-	os.Remove("UP_Windows-x64.zip")
-	os.Remove(fmt.Sprintf("reaper%s_x64-install.exe", strings.ReplaceAll(pkgver, ".", "")))
-	os.RemoveAll("7zip")
+	os.RemoveAll(tempFilePath)
 
 	fmt.Println("Done!")
 
