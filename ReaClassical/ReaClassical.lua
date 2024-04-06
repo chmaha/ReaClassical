@@ -4,6 +4,7 @@
 @changelog
   New: Add submix function
   Various: Tweak solo() and mixer() functions to allow for submix
+  New Keyboard Shortcuts for new and renamed functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
