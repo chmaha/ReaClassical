@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.3
+@version 24.11.4
 @changelog
-  New: Add submix function
-  Various: Tweak solo() and mixer() functions to allow for submix
-  New Keyboard Shortcuts for new and renamed functions
+  Aux/Submix/RoomTone: Change message to reflect new naming
+  Horizontal/Vertical: Ensure messagebox titles are in line with new naming
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
