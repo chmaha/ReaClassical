@@ -4417,26 +4417,13 @@ menu{View > Envelope Manager}
 
 \end_inset
 
- or click on the envelope button on a mixer track or RCMASTER.
+ or click on the envelope button on the RCMASTER bus.
  It makes most sense to leave any automation work until the destination
  group editing is largely complete.
- It may be useful to temporarily show the mixer tracks and/or RCMASTER bus
- in the arrange window via 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-menu{View > Track Manager}
-\end_layout
-
-\end_inset
-
- if you enjoy drawing in overarching volume automation.
- A reminder to only use spacebar for playback during such work given the
- mixer-based tracks are automatically hidden when using the audition functions.
+ It may be useful to temporarily show the RCMASTER bus in the arrange window
+ via if you enjoy drawing in overarching volume automation.
+ To do so, simply add a plus sign (+) to the end of the RCMASTER track name
+ and sync (or use audition etc).
 \end_layout
 
 \begin_layout Standard

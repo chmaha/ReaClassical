@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.1
+@version 24.11.2
 @changelog
-  Workflows: Do not show RCMASTER upgrade message if function cannot run
-  Classical Take Record: Slight change to message when attempted to run on empty project
+  New: Add plus sign to RCMASTER name to show in TCP
+  Various: Adapt mixer() to deal with RCMASTER+
+  PDF Manual: Update automation information
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
