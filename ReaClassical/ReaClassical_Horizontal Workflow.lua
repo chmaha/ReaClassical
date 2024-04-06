@@ -49,14 +49,14 @@ function main()
     local sync = false
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
-        local boolean, num = GetUserInputs("Create/Sync Horizontal Workflow", 1, "How many tracks?", 10)
+        local boolean, num = GetUserInputs("Horizontal Workflow", 1, "How many tracks?", 10)
         num = tonumber(num)
         local rcmaster
         if boolean == true and num > 1 then
             rcmaster = create_destination_group(num)
             rcmaster_exists = true
         elseif boolean == true and num < 2 then
-            ShowMessageBox("You need 2 or more tracks to make a folder!", "Create/Sync Horizontal Workflow", 0)
+            ShowMessageBox("You need 2 or more tracks to make a folder!", "Horizontal Workflow", 0)
             return
         else
             return
@@ -70,7 +70,7 @@ function main()
             reset_spacers(num, tracks_per_group, rcmaster_index)
         end
     elseif folder_check() > 1 then
-        ShowMessageBox("This function only runs on projects with a single folder", "Create/Sync Horizontal Workflow", 0)
+        ShowMessageBox("This function only runs on projects with a single folder", "Horizontal Workflow", 0)
         rcmaster_exists = true
         return
     elseif folder_check() == 1 then
@@ -112,7 +112,7 @@ function main()
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
-            "Create/Sync Horizontal Workflow", 0)
+            "Horizontal Workflow", 0)
         return
     end
 
@@ -127,7 +127,7 @@ function main()
 
     if sync == true then
         ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.",
-            "Create/Sync Horizontal Workflow", 0)
+            "Horizontal Workflow", 0)
     end
 
     if not rcmaster_exists then
@@ -137,10 +137,10 @@ function main()
             .. "All groups are routed to the single mixer set visible in the mixer panel "
             .. "and all volume, panning, fx etc should be controlled there.\n"
             .. "If you delete any of these special busses by accident, simply run F8 again."
-            , "Create/Sync Horizontal Workflow", 0)
+            , "Horizontal Workflow", 0)
     end
 
-    Undo_EndBlock('Create/Sync Horizontal Workflow', 0)
+    Undo_EndBlock('Horizontal Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
 end

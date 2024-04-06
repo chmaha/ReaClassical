@@ -28,8 +28,8 @@ local add_spacer, route_to_track, trackname_check
 function main()
     local folders, _, _ = folder_check()
     if folders == 0 then
-        ShowMessageBox("Please use either the 'Create folder' or 'Create Source Groups' script first!",
-            "Add Aux/Submix track", 0)
+        ShowMessageBox("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
+            "Add RoomTone Track", 0)
         return
     end
 

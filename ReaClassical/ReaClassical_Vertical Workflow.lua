@@ -53,14 +53,14 @@ function main()
 
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
-        local boolean, num = GetUserInputs("Create Destination & Source Groups", 1, "How many tracks per group?", 10)
+        local boolean, num = GetUserInputs("Vertical Workflow", 1, "How many tracks per group?", 10)
         num = tonumber(num)
         local rcmaster
         if boolean == true and num > 1 then
             rcmaster = create_destination_group(num)
             rcmaster_exists = true
         elseif boolean == true and num < 2 then
-            ShowMessageBox("You need 2 or more tracks to make a source group!", "Create Source Groups", 0)
+            ShowMessageBox("You need 2 or more tracks to make a source group!", "Vertical Workflow", 0)
             return
         else
             return
@@ -88,7 +88,7 @@ function main()
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table()
         if not groups_equal then
             ShowMessageBox("Please ensure that all folders have the same number of tracks before running.",
-                "Create Source Groups", 0)
+                "Vertical Workflow", 0)
             return
         end
         local rcmaster = GetTrack(0, rcmaster_index)
@@ -161,7 +161,7 @@ function main()
     else
         ShowMessageBox(
             "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
-            "Create/Sync Vertical Workflow", 0)
+            "Vertical Workflow", 0)
         return
     end
 
@@ -187,10 +187,10 @@ function main()
             .. "All groups are routed to the single mixer set visible in the mixer panel "
             .. "and all volume, panning, fx etc should be controlled there.\n"
             .. "If you delete any of these special busses by accident, simply run F8 again."
-            , "Create/Sync Vertical Workflow", 0)
+            , "Vertical Workflow", 0)
     end
 
-    Undo_EndBlock('Create/Sync Vertical Workflow', 0)
+    Undo_EndBlock('Vertical Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
 end

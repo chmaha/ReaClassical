@@ -28,8 +28,8 @@ local add_spacer, route_to_track, trackname_check
 function main()
     local folders, tracks_per_group, total_tracks = folder_check()
     if folders == 0 then
-        ShowMessageBox("Please use either the 'Create folder' or 'Create Source Groups' script first!",
-            "Add Aux/Submix track", 0)
+        ShowMessageBox("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
+            "Add Aux", 0)
         return
     end
 
@@ -66,7 +66,7 @@ function main()
     Main_OnCommand(40297, 0)
     local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(home, 0)
-    Undo_EndBlock("Add Aux/Submix track", 0)
+    Undo_EndBlock("Add Aux", 0)
 end
 
 ---------------------------------------------------------------------
