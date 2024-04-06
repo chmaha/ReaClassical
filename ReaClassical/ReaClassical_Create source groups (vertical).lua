@@ -292,9 +292,13 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "^RCMASTER") then
+        if trackname_check(track, "RCMASTER") then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if trackname_check(track, "RCMASTER%+") then
+            SetTrackColor(track, colors.rcmaster)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
         if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
@@ -476,7 +480,7 @@ end
 
 function route_to_track(track, destination)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
-    if name ~= "RCMASTER" then
+    if not name:match("^RCMASTER") then
         SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
         CreateTrackSend(track, destination)
     end
@@ -490,7 +494,7 @@ function special_check()
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
-        if name == "RCMASTER" then
+        if name:match("^RCMASTER") then
             bool = true
             break
         end
