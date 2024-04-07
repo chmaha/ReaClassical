@@ -4,7 +4,7 @@
 @changelog
   Various: Change NamedCommandLookup to reflect F7/F8 name change
   PDF Manual: Add new submix info, change function names where needed
-  Submix and various: Change to teal color
+  Submix and various: Use teal color
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
