@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.5
+@version 24.11.6
 @changelog
-  Various: Change NamedCommandLookup to reflect F7/F8 name change
-  PDF Manual: Add new submix info, change function names where needed
-  Submix and various: Use teal color
+  Various: Sync after adding @,# and ~ for auto spacing
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
