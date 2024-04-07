@@ -1541,7 +1541,7 @@ keys{F8}
 
 \begin_layout Standard
 Any and all track setting changes (volume, pan, phase, FX, sends to @aux
- tracks etc) happen in the mixer tracks.
+ tracks, routing to #submixes etc) happen in the mixer tracks.
  This is identical to the way that Pyramix works with a single mixer being
  fed by all the source groups.
  The mixer tracks are always visible in the mixer panel and identified by
@@ -2053,7 +2053,7 @@ Naming Tracks
 \begin_layout Standard
 ReaClassical automatically adds Source and Destination prefixes to your
  chosen track names and are auto-renumbered whenever functions affecting
- the number of source folders are run (Create Source Groups 
+ the number of source folders are run (Vertical Workflow 
 \begin_inset ERT
 status open
 
@@ -2626,7 +2626,18 @@ M:
 
  prefix.
  You can route mixer tracks to these to use as a reverb bus etc.
- Fourth, we have the 
+ Fourth, we have submix busses designated via 
+\begin_inset Quotes bld
+\end_inset
+
+#
+\begin_inset Quotes brd
+\end_inset
+
+ prefix.
+ You can route mixer tracks to these as a way to collect together microphones
+ from the same orchestral section etc.
+ Fifth, we have the 
 \begin_inset Quotes bld
 \end_inset
 
@@ -2943,8 +2954,8 @@ keys{A}
 \end_inset
 
  .
- This includes any @ aux track routing in the signal path if the bus is
- unmuted.
+ This includes any @ aux or # submix track routing in the signal path if
+ the bus is unmuted.
  To hear a single track (e.g.
  the main microphone pair on the parent track without any children) and
  without any other routing press 
@@ -4226,7 +4237,7 @@ Aux & Submix
 \begin_layout Standard
 Users have the ability to create aux and/or submix tracks that stay visible
  (and stay after the mixer tracks).
- To set up, simply create a single folder 
+ To set up, simply create a single folder via Horizontal Workflow 
 \begin_inset ERT
 status open
 
@@ -4239,7 +4250,7 @@ keys{F7}
 
 \end_inset
 
- and/or Create Source Groups 
+ and/or Vertical Workflow 
 \begin_inset ERT
 status open
 
@@ -4253,7 +4264,7 @@ keys{F8}
 \end_inset
 
  then create as many aux/submix tracks after the mixer tracks as you like
- via the Add Aux or submix function 
+ via the Add Aux 
 \begin_inset ERT
 status open
 
@@ -4266,9 +4277,24 @@ keys{@}
 
 \end_inset
 
+ or Add Submix functions 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+#}
+\end_layout
+
+\end_inset
+
  .
- It is important to keep the @ at the beginning of the track but you can
- add any name you'd like e.g.
+ It is important to keep the @ or # at the beginning of the track but you
+ can add any name you'd like e.g.
  
 \begin_inset Quotes bld
 \end_inset
@@ -4277,16 +4303,24 @@ keys{@}
 \begin_inset Quotes brd
 \end_inset
 
+, 
+\begin_inset Quotes bld
+\end_inset
+
+#strings
+\begin_inset Quotes brd
+\end_inset
+
 .
  To route, click-drag from a mixer track's routing stripes to the desired
- @ track.
+ @ or # track.
  When using any of the ReaClassical functions such as auditioning, these
  tracks will remain visible.
 \end_layout
 
 \begin_layout Standard
-To have @ tracks act as submix tracks, simply add a hyphen (-) at the end
- of desired track names in the first folder and sync via 
+For # submix tracks, simply add a hyphen (-) at the end of desired track
+ names in the first folder and sync via 
 \begin_inset ERT
 status open
 
@@ -4319,13 +4353,13 @@ keys{F8}
 \begin_inset Quotes bld
 \end_inset
 
-@strings
+#strings
 \begin_inset Quotes brd
 \end_inset
 
 .
  Just add a hyphen to the end of the names for tracks 3-6, sync and then
- create the routing to @strings via click-dragging from the routing stripes.
+ create the routing to #strings via click-dragging from the routing stripes.
  This routing is maintained during 
 \begin_inset ERT
 status open
@@ -5312,7 +5346,7 @@ These proceed in a quasi-workflow order.
 \begin_layout Standard
 
 \series bold
-Create Folder (aka Create/Sync Horizontal Workflow) 
+Create/Sync Horizontal Workflow 
 \series default
 
 \begin_inset ERT
@@ -5357,7 +5391,7 @@ tination editing (i.e.
 \begin_layout Standard
 
 \series bold
-Create Source Groups (aka Create/Sync Vertical Workflow) 
+Create/Sync Vertical Workflow 
 \series default
 
 \begin_inset ERT
@@ -5574,7 +5608,7 @@ keys{A}
 \begin_layout Standard
 
 \series bold
-Add Aux/Submix track to end of tracklist 
+Add Aux send track to end of tracklist 
 \series default
 
 \begin_inset ERT
@@ -5597,8 +5631,8 @@ keys{@}
 \emph on
 Description: 
 \emph default
-Add a rosewood colored aux/submix track prefixed with an ampersand (@) to
- the end of the tracklist but is only visible in the mixer.
+Add a rosewood colored aux track prefixed with an ampersand (@) to the end
+ of the tracklist but is only visible in the mixer.
 \end_layout
 
 \begin_layout Standard
@@ -5606,13 +5640,94 @@ Add a rosewood colored aux/submix track prefixed with an ampersand (@) to
 \emph on
 Notes: 
 \emph default
-This allows the user to keep assigned aux/submix tracks visible in the intellige
-nt mixer.
- Create any connections to the aux/submix in the destination group (including
- child tracks) and then push to the source groups via the 
+This allows the user to keep assigned aux tracks visible in the intelligent
+ mixer.
+ Create any connections to the aux in the destination group (including child
+ tracks) and then push to the source groups via the Vertical Workflow function
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ .
+ This routing is maintained during subsequent 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ syncs.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Add Submix track to end of tracklist 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+#}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
 \emph on
-Create Source Groups
+Description: 
 \emph default
+Add a rosewood colored aux track prefixed with an hash (#) to the end of
+ the tracklist but is only visible in the mixer.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes: 
+\emph default
+This allows the user to keep assigned submix tracks visible in the intelligent
+ mixer.
+ Create any connections to the submix in the destination group (including
+ child tracks) and then push to the source groups via the Vertical Workflow
  function 
 \begin_inset ERT
 status open
@@ -5627,8 +5742,8 @@ keys{F8}
 \end_inset
 
  .
- To have @ tracks act as submix tracks, simply add a hyphen (-) at the end
- of desired track names in the first folder and sync via 
+ For correct routing to a submix (versus a send), simply add a hyphen (-)
+ at the end of desired track names in the first folder and sync via 
 \begin_inset ERT
 status open
 
@@ -5661,14 +5776,14 @@ keys{F8}
 \begin_inset Quotes bld
 \end_inset
 
-@strings
+#strings
 \begin_inset Quotes brd
 \end_inset
 
 .
  Just add a hyphen to the end of the names for tracks 3-6, sync and then
- create the routing to @strings via click-dragging from the routing stripes.
- This routing is maintained during 
+ create the routing to #strings via click-dragging from the routing stripes.
+ This routing is maintained during subsequent 
 \begin_inset ERT
 status open
 
@@ -6075,10 +6190,10 @@ Prepare Takes: Random colors
 
  value from ReaClassical Preferences to use either the new color scheme
  (default, set to 0) or the old random color method (set to 1).
- A reminder that the new REAPER native grouping (when set up via Create
- Folder or Create Source Groups sripts) works for 99% of situations without
- Prepare Takes but for takes that don't start or end at quite the same point
- it is a must.
+ A reminder that the new REAPER native grouping (when set up via Horizontal
+ or Vertical Workflow functions) works for 99% of situations without Prepare
+ Takes but for takes that don't start or end at quite the same point it
+ is a must.
  
 \end_layout
 
@@ -6280,8 +6395,7 @@ keys{A}
 
 \end_inset
 
- function honors any aux or submix tracks (@) and keeps them in the mixer
- view.
+ function honors any aux or submix track routing.
  With 
 \begin_inset ERT
 status open
@@ -6301,8 +6415,8 @@ shift+A}
 \emph on
 only 
 \emph default
-hear that track without any further routing.
- Both functions respect muted @ aux and roomtone tracks.
+hear that track (routed through any optional submix tracks to RCMASTER).
+ Both functions respect muted @ aux, # submix and roomtone tracks.
 \end_layout
 
 \begin_layout Standard
@@ -8082,7 +8196,8 @@ keys{F7}
 
 \end_inset
 
- Create Folder (prompts for number of tracks) / Re-build routing etc
+ Create/Sync Horizontal Workflow (prompts for number of tracks) / Re-build
+ routing etc
 \end_layout
 
 \begin_layout Labeling
@@ -8099,7 +8214,7 @@ keys{F8}
 
 \end_inset
 
- Create Source Groups (vertical)(from scratch or from single existing folder)
+ Create/Sync Vertical Workflow (from scratch or from single existing folder)
  / Re-build routing etc
 \end_layout
 
@@ -8191,7 +8306,26 @@ keys{@}
 
 \end_inset
 
- Add Aux or Submix track to end of mixer
+ Add Aux track to end of mixer
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+#}
+\end_layout
+
+\end_inset
+
+ Add Submix track to end of mixer
 \end_layout
 
 \begin_layout Standard
@@ -8312,7 +8446,7 @@ keys{A}
 \end_inset
 
  Audition (full mix or child track) at mouse position (includes any unmuted
- @ aux track connections)
+ @ aux or # submix connections)
 \end_layout
 
 \begin_layout Labeling
@@ -8331,7 +8465,8 @@ shift+A}
 
 \end_inset
 
- Exclusive Audition (parent track or child track) at mouse position
+ Exclusive Audition (parent track or child track) at mouse position (only
+ routing to RCMASTER via any # submix connections)
 \end_layout
 
 \begin_layout Labeling
