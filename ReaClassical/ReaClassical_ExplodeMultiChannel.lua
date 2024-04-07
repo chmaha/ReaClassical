@@ -87,10 +87,10 @@ function main()
     Main_OnCommand(40769, 0) -- unselect all items
 
     if folder_check() == 1 then -- run F7
-        local group = NamedCommandLookup("_RSfc11d994a7848e13d22db277971a3afd01ba1cea")
+        local group = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
         Main_OnCommand(group, 0)
     else -- run F8
-        local sync = NamedCommandLookup("_RSd7bf4eb95ac7700edb48a275153ad1fc1ce3aff6")
+        local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
         Main_OnCommand(sync, 0)
     end
 

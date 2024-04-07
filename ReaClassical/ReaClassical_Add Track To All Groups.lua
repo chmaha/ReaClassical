@@ -74,10 +74,10 @@ function main()
   end
 
   if folder_count > 1 then
-    local F8_sync = NamedCommandLookup("_RSd7bf4eb95ac7700edb48a275153ad1fc1ce3aff6")
+    local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
     Main_OnCommand(F8_sync, 0)
   else
-    local F7_sync = NamedCommandLookup("_RSfc11d994a7848e13d22db277971a3afd01ba1cea")
+    local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
     Main_OnCommand(F7_sync, 0)
   end
   Undo_EndBlock("Add Track to Folder", -1)

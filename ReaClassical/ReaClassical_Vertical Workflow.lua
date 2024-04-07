@@ -177,7 +177,7 @@ function main()
     -- if sync_tracks then
     --     ShowMessageBox(
     --         "Track names, record inputs and lock states synchronized. Routing rebuilt if necessary.",
-    --         "Create/Sync Vertical Workflow", 0)
+    --         "Vertical Workflow", 0)
     -- end
 
     if not rcmaster_exists then
