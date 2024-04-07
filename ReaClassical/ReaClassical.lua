@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.6
+@version 24.11.7
 @changelog
-  Various: Sync after adding @,# and ~ for auto spacing
+  Auditioning: Simplify solo() logic
+  Audition: Remove solo from RCMASTER after using exclusive audition
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
