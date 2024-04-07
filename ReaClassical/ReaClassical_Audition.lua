@@ -185,6 +185,11 @@ function solo()
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
         end
+
+        if trackname_check(track, "^RCMASTER") then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        end
     end
 end
 
