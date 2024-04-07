@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.4
+@version 24.11.5
 @changelog
-  Aux/Submix/RoomTone: Change message to reflect new naming
-  Horizontal/Vertical: Ensure messagebox titles are in line with new naming
+  Various: Change NamedCommandLookup to reflect F7/F8 name change
+  PDF Manual: Add new submix info, change function names where needed
+  Submix and various: Change to teal color
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
