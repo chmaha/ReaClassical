@@ -5569,7 +5569,7 @@ textasciitilde}
 \emph on
 Description: 
 \emph default
-Add a burnt sienna colored aux/submix track labelled 
+Add a burnt sienna-colored aux/submix track labelled 
 \begin_inset Quotes bld
 \end_inset
 
@@ -5631,7 +5631,7 @@ keys{@}
 \emph on
 Description: 
 \emph default
-Add a rosewood colored aux track prefixed with an ampersand (@) to the end
+Add a rosewood-colored aux track prefixed with an ampersand (@) to the end
  of the tracklist but is only visible in the mixer.
 \end_layout
 
@@ -5715,8 +5715,8 @@ keys{
 \emph on
 Description: 
 \emph default
-Add a rosewood colored aux track prefixed with an hash (#) to the end of
- the tracklist but is only visible in the mixer.
+Add a teal-colored aux track prefixed with an hash (#) to the end of the
+ tracklist but is only visible in the mixer.
 \end_layout
 
 \begin_layout Standard
