@@ -21,14 +21,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check, mixer, on_stop
-local get_color_table, get_path, folder_check
+local get_color_table, get_path
 
 ---------------------------------------------------------------------
 
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local num_of_folders = folder_check()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
@@ -142,7 +141,7 @@ end
 function solo()
     Main_OnCommand(40491,0) -- un-arm all tracks for recording
     local selected_track = GetSelectedTrack(0, 0)
-    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+    -- local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
@@ -155,24 +154,26 @@ function solo()
         end
 
 
-        if IsTrackSelected(track) == true then
+        if IsTrackSelected(track) then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
-            SetMediaTrackInfo_Value(track, "B_MUTE", 1)
-            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
-            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            if IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+                SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            end
         end
 
         local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^RCMASTER")) and muted == 0 then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER")) and muted == 0 then
             local receives = GetTrackNumSends(track, -1)
             for i = 0, receives - 1, 1 do -- loop through receives
                 local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
-                if origin == selected_track or parent == 1 then
+                if origin == selected_track then
                     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                     SetMediaTrackInfo_Value(track, "I_SOLO", 0)
                     break
@@ -259,20 +260,6 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
-function folder_check()
-    local folders = 0
-    local total_tracks = CountTracks(0)
-    for i = 0, total_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-            folders = folders + 1
-        end
-    end
-    return folders
 end
 
 ---------------------------------------------------------------------
