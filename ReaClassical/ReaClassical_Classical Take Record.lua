@@ -162,8 +162,12 @@ function mixer()
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^@") or trackname_check(track, "^#") then
+        if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+        if trackname_check(track, "^#") then
+            SetTrackColor(track, colors.submix)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if trackname_check(track, "^RoomTone") then

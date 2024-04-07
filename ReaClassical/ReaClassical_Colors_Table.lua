@@ -27,6 +27,7 @@ return {
         dest_marker = ColorToNative(23,203,223) | 0x1000000,
         source_marker = ColorToNative(23, 223, 143) | 0x1000000,
         aux = ColorToNative(127, 88, 85),
+        submix = ColorToNative(85,124,127),
         roomtone = ColorToNative(127, 99, 65),
         rcmaster = ColorToNative(25, 75, 25),
         mixer = ColorToNative(200, 200, 250),

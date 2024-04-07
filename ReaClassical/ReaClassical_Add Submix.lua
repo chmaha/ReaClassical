@@ -60,7 +60,7 @@ function main()
 
     route_to_track(bus, rcmaster)
     local colors = get_color_table()
-    SetTrackColor(bus, colors.aux)
+    SetTrackColor(bus, colors.submix)
     GetSetMediaTrackInfo_String(bus, "P_NAME", "#", true) -- Add @ as track name
     SetMediaTrackInfo_Value(bus, "B_SHOWINTCP", 0)
     Main_OnCommand(40297, 0)
