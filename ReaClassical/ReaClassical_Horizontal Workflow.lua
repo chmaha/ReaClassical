@@ -125,10 +125,10 @@ function main()
         end
     end
 
-    if sync == true then
-        ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.",
-            "Horizontal Workflow", 0)
-    end
+    -- if sync == true then
+    --     ShowMessageBox("Track names synchronized with mixer and routing rebuilt if necessary.",
+    --         "Horizontal Workflow", 0)
+    -- end
 
     if not rcmaster_exists then
         ShowMessageBox("Your Project has been upgraded"
@@ -522,7 +522,7 @@ end
 ---------------------------------------------------------------------
 
 function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
-    remove_spacers(end_of_sources)
+    remove_spacers(rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)

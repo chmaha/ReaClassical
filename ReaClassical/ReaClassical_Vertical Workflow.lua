@@ -631,7 +631,7 @@ end
 ---------------------------------------------------------------------
 
 function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
-    remove_spacers(end_of_sources)
+    remove_spacers(rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)

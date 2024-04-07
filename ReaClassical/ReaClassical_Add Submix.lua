@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_color_table, get_path
-local add_spacer, route_to_track, trackname_check
+local route_to_track, trackname_check
 
 ---------------------------------------------------------------------
 
@@ -54,7 +54,6 @@ function main()
     end
 
     InsertTrackAtIndex(rcmaster_index, true) -- Add track just before RCMASTER
-    add_spacer(rcmaster_index)
     local bus = GetTrack(0, rcmaster_index)
     SetMediaTrackInfo_Value(bus, "I_FOLDERDEPTH", 0)
 
@@ -66,6 +65,15 @@ function main()
     Main_OnCommand(40297, 0)
     local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(home, 0)
+
+    if folders > 1 then
+        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+        Main_OnCommand(F8_sync, 0)
+    else
+        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+        Main_OnCommand(F7_sync, 0)
+    end
+    
     Undo_EndBlock("Add Submix", 0)
 end
 
@@ -105,15 +113,6 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
-function add_spacer(num)
-    local track = GetTrack(0, num)
-    if track then
-        SetMediaTrackInfo_Value(track, "I_SPACER", 1)
-    end
 end
 
 ---------------------------------------------------------------------
