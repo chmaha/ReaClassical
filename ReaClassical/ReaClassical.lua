@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.7
+@version 24.11.8
 @changelog
-  Auditioning: Simplify solo() logic
-  Audition: Remove solo from RCMASTER after using exclusive audition
+  Fix auditioning of RoomTone track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
