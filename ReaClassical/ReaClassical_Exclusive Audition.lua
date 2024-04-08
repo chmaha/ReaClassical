@@ -140,6 +140,14 @@ function solo()
     Main_OnCommand(40491, 0) -- un-arm all tracks for recording
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
+
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")) then
+            local num_of_sends = GetTrackNumSends(track, 0)
+            for j = 0, num_of_sends - 1, 1 do
+                SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
+            end
+        end
+        
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
