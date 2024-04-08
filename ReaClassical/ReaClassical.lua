@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.8
+@version 24.11.9
 @changelog
-  Fix auditioning of RoomTone track
+  Actually fix auditioning of RoomTone track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
