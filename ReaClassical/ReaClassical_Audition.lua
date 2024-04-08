@@ -139,7 +139,7 @@ end
 ---------------------------------------------------------------------
 
 function solo()
-    Main_OnCommand(40491,0) -- un-arm all tracks for recording
+    Main_OnCommand(40491, 0) -- un-arm all tracks for recording
     local selected_track = GetSelectedTrack(0, 0)
     -- local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
@@ -181,9 +181,14 @@ function solo()
             end
         end
 
-        if trackname_check(track, "^RoomTone") and muted == 0 then
-            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+        if trackname_check(track, "^RoomTone") then
+            if IsTrackSelected(track) then
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            elseif muted == 0 then
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+            end
         end
 
         if trackname_check(track, "^RCMASTER") then

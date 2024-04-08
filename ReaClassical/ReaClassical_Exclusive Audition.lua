@@ -147,7 +147,7 @@ function solo()
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
-        
+
         if trackname_check(track, "^#") then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
@@ -162,11 +162,13 @@ function solo()
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
             local receives = GetTrackNumSends(track, -1)
-            for k = 0, receives - 1, 1 do -- loop through receives
+            for k = 0, receives - 1 do
                 local origin = GetTrackSendInfo_Value(track, -1, k, "P_SRCTRACK")
-                if trackname_check(origin, "^@") or trackname_check(origin, "^RoomTone") then
-                    local num_of_sends = GetTrackNumSends(origin, 0)
-                    for l = 0, num_of_sends - 1, 1 do
+                local num_of_sends = GetTrackNumSends(origin, 0)
+                for l = 0, num_of_sends - 1 do
+                    if trackname_check(origin, "^@") then
+                        SetTrackSendInfo_Value(origin, 0, l, "B_MUTE", 1)
+                    elseif trackname_check(origin, "^RoomTone") and not IsTrackSelected(origin) then
                         SetTrackSendInfo_Value(origin, 0, l, "B_MUTE", 1)
                     end
                 end
