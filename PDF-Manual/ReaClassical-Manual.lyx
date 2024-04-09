@@ -2637,7 +2637,9 @@ M:
  prefix.
  You can route mixer tracks to these as a way to collect together microphones
  from the same orchestral section etc.
- Fifth, we have the 
+ Fifth, we have a dedicated room tone track where you can place recorded
+ or generated room tone (more on this in the mastering section).
+ Sixth, we have the 
 \begin_inset Quotes bld
 \end_inset
 
@@ -4424,8 +4426,9 @@ textasciitilde}
  very small portion of clean silence from the concert itself (hint: try
  using a white noise generator into a convolver such as ReaVerb that uses
  a few seconds of clean room tone as the impulse!).
- In a future version of ReaClassical, seamlessly fading in and out of room
- tone will be automatic!
+ As of ReaClassical 24.12, the Create CD Markers function automatically generates
+ precise volume automation at the track level to seamlessly fade in and
+ out of room tone! See the mastering section for more details.
 \end_layout
 
 \begin_layout Subsection
@@ -4437,7 +4440,67 @@ Given ReaClassical is built on top of REAPER, it allows for same high-quality
  automation workflow.
  It is recommended to read the appropriate section of the REAPER manual
  or an official tutorial video to get a good sense of how to use it.
- To start general automation, select the desired track(s) in the first group
+ It makes most sense to leave any automation work until the destination
+ group editing is largely complete.
+ Once ready, turn on 
+\begin_inset Quotes bld
+\end_inset
+
+Mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode to 
+\begin_inset Quotes bld
+\end_inset
+
+1
+\begin_inset Quotes brd
+\end_inset
+
+ via ReaClassical Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+.
+ Sync via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ and the project arrange window will now show only the first group plus
+ # and @ busses, RoomTone and RCMASTER.
+ To start general automation, select the desired mixer track, bus or RCMASTER
  and go to 
 \begin_inset ERT
 status open
@@ -4451,13 +4514,9 @@ menu{View > Envelope Manager}
 
 \end_inset
 
- or click on the envelope button on the RCMASTER bus.
- It makes most sense to leave any automation work until the destination
- group editing is largely complete.
- It may be useful to temporarily show the RCMASTER bus in the arrange window
- via if you enjoy drawing in overarching volume automation.
- To do so, simply add a plus sign (+) to the end of the RCMASTER track name
- and sync (or use audition etc).
+ or click on the envelope button in the mixer panel.
+ You now have the ability to ride the faders or draw in various types of
+ automation.
 \end_layout
 
 \begin_layout Standard
@@ -4533,6 +4592,34 @@ And then, of course, you can now quickly generate separate files via rendering
  on your master chain and your master fader remains at unity).
  I include a large number of world-class airwindows dither options in my
  other large jsfx collection available in the ReaClassical portable install.
+\end_layout
+
+\begin_layout Subsection
+Mastering Mode
+\end_layout
+
+\begin_layout Standard
+As described in the automation section, you can turn on 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode via ReaClassical preferences.
+ In addition to making the mixer tracks, busses and RCMASTER available in
+ the arrange window for drawing in automation, it also serves to declutter
+ by hiding any source group audio.
+ Look out for more 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode features in the future.
 \end_layout
 
 \begin_layout Subsection
@@ -4718,8 +4805,8 @@ Creating DDP filesets
 \end_layout
 
 \begin_layout Standard
-I have introduced a workflow to automatically add the CD/DDP markers and
- regions via 
+I have introduced a workflow to automatically add the CD/DDP markers,regions
+ and room tone automation via 
 \begin_inset ERT
 status open
 
@@ -4786,7 +4873,20 @@ easter egg
  track) by not giving the first item (or crossfaded items) a take name.
  The function will assume that this is supposed to be hidden and generate
  the initial pregap length accordingly.
- For more information read the description of the DDP function in appendix
+ 
+\end_layout
+
+\begin_layout Standard
+If a room tone track is present in the project, the function will also generate
+ precise track-level volume automation that creates perfectly-matching fades
+ at points where items fade into and out of silence on the first destination
+ track.
+ In other words, slicing and dicing room tone audio to fill in digital silence
+ is no longer necessary in ReaClassical!
+\end_layout
+
+\begin_layout Standard
+For more information read the description of the DDP function in appendix
  A.
 \end_layout
 
@@ -7751,8 +7851,8 @@ keys{Y}
 \emph on
 Description: 
 \emph default
-Auto-generation of CD/DDP markers and UPC/ISRC codes for efficient DDP,
- bin/cue and individual file exporting.
+Auto-generation of CD/DDP markers, UPC/ISRC codes, and room tone automation,
+ for efficient DDP, bin/cue and individual file exporting.
  Checks against Redbook standards and returns warning messages if there
  are 1) more than 99 tracks, or 2) There are tracks shorter than 4 seconds,
  or 3) the total length of the project is greater than 79.57 minutes.
@@ -7835,17 +7935,30 @@ keys{F5}
 \end_layout
 
 \begin_layout Standard
+If a room tone track exists in the project, the function will also generate
+ volume automation to create perfect crossfades with the items on the first
+ destination track.
+ Slicing and dicing room tone audio to fill in digital silence is now a
+ thing of the past.
+ Simply add a long recorded or convolution-generated room tone audio item
+ before running the function.
+ The ReaClassical way of dealing with room tone is non-destructive and instant!
+ 
+\end_layout
+
+\begin_layout Standard
 I feel that once you try this CD/DDP marker generation workflow, it is difficult
  to ever go back to other ways of working.
- The key thing to think about is that the markers are trivially easy to
- recreate if you change a gap between items or even rearrange the order
- of tracks.
+ The key thing to think about is that the markers and room tone fade-ins
+ and outs are trivially easy to recreate if you change a gap between items
+ or even rearrange the order of tracks.
  Just run the function again.
  The key is the workflow: all marker generation is automatically based on
  item positioning and naming.
  Plus, all metadata and ISRC is saved into the project file so once entered
  you don't have to ever type it in again unless you need to make changes.
- 
+ Room tone volume changes are made via auto-generated volume envelope points
+ that precisely map REAPER's built-in fade curves.
 \end_layout
 
 \begin_layout Standard
@@ -9022,7 +9135,7 @@ keys{Y}
 
 \end_inset
 
- Automatically generate DDP markers from items
+ Automatically generate a DDP set from items
 \end_layout
 
 \begin_layout Labeling
