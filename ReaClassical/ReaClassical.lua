@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.11.9
+@version 24.12
 @changelog
-  Actually fix auditioning of RoomTone track
+  New: Mastering Mode via ReaClassical Preferences (F5)
+  Create CD Markers: Add automatic RoomTone volume envelope function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
