@@ -199,6 +199,14 @@ end
 ---------------------------------------------------------------------
 
 function mixer()
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local mastering
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        mastering = tonumber(table[6])
+    end
+
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
@@ -222,14 +230,17 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "RCMASTER%+") then
-            SetTrackColor(track, colors.rcmaster)
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
-        end
         if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
+        end
+
+        if trackname_check(track, "^S%d+:") then
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
+        end
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") then
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
         end
     end
 end
