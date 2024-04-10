@@ -4431,18 +4431,148 @@ textasciitilde}
  out of room tone! See the mastering section for more details.
 \end_layout
 
+\begin_layout Section
+Mastering
+\end_layout
+
+\begin_layout Standard
+Mastering in ReaClassical is game-changing.
+ Many features described here are not available in any other classical DAW.
+ I hope that the 
+\begin_inset Quotes bld
+\end_inset
+
+ReaClassical
+\begin_inset Quotes brd
+\end_inset
+
+ way saves you much time and helps you look forward to the mastering phase
+ of the project.
+ While automatic DDP generation, automatic room tone function, and professional
+ album reports are the main features here, you will probably find the revolution
+ary automation mode is an extremely efficient way to add static mixer scenes
+ across your production as well enjoying the ability to quickly reorder
+ album tracks via a simple keyboard shortcuts.
+\end_layout
+
+\begin_layout Subsection
+Mastering Mode
+\end_layout
+
+\begin_layout Standard
+Change 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode to 
+\begin_inset Quotes bld
+\end_inset
+
+1
+\begin_inset Quotes brd
+\end_inset
+
+ in ReaClassical preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+ and sync via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+.
+ In addition to making the mixer tracks, busses and RCMASTER available in
+ the arrange window for setting static mixer scenes via envelope points,
+ it also serves to declutter by hiding any source group audio.
+ The hide and show child tracks shortcuts still work on the destination
+ folder but in mastering mode also works on automation lanes.
+ Simply select the relevant track connected to the lane and use the usual
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{E}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{D}
+\end_layout
+
+\end_inset
+
+ keys to hide and show automation lanes.
+ Look out for more 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode features in the future.
+\end_layout
+
 \begin_layout Subsection
 Automation
 \end_layout
 
 \begin_layout Standard
 Given ReaClassical is built on top of REAPER, it allows for same high-quality
- automation workflow.
- It is recommended to read the appropriate section of the REAPER manual
- or an official tutorial video to get a good sense of how to use it.
+ automation workflow with a ReaClassical twist.
+ Beyond the following workflow descriptions, it is recommended to read the
+ relevant REAPER manual section as there are far more features than can
+ be described here.
  It makes most sense to leave any automation work until the destination
  group editing is largely complete.
- Once ready, turn on 
+ As described above, turn on 
 \begin_inset Quotes bld
 \end_inset
 
@@ -4500,8 +4630,24 @@ keys{F8}
 
  and the project arrange window will now show only the first group plus
  # and @ busses, RoomTone and RCMASTER.
- To start general automation, select the desired mixer track, bus or RCMASTER
- and go to 
+ To add static mixer and FX 
+\begin_inset Quotes bld
+\end_inset
+
+scenes
+\begin_inset Quotes brd
+\end_inset
+
+ to automation lanes (very useful for quickly setting up different settings
+ for the various pieces on an album) , first enter 
+\begin_inset Quotes bld
+\end_inset
+
+automation
+\begin_inset Quotes brd
+\end_inset
+
+ mode via 
 \begin_inset ERT
 status open
 
@@ -4509,14 +4655,85 @@ status open
 
 
 \backslash
-menu{View > Envelope Manager}
+keys{
+\backslash
+ctrl+I}
 \end_layout
 
 \end_inset
 
- or click on the envelope button in the mixer panel.
- You now have the ability to ride the faders or draw in various types of
- automation.
+.
+ All the envelope buttons will turn blue (
+\begin_inset Quotes bld
+\end_inset
+
+latched preview
+\begin_inset Quotes brd
+\end_inset
+
+) and you will see a message box with instructions.
+ Simply set any desired mixer controls or parameters in an open FX window)
+ on one or more tracks and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{I}
+\end_layout
+
+\end_inset
+
+ to enter the values as points on the automation lanes at the edit cursor
+ position or, if one exists, within the time selection.
+ Continue to add, edit or audition and once completed, exit 
+\begin_inset Quotes bld
+\end_inset
+
+automation
+\begin_inset Quotes brd
+\end_inset
+
+ mode via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+I}
+\end_layout
+
+\end_inset
+
+.
+ The envelope buttons will then turn green (
+\begin_inset Quotes bld
+\end_inset
+
+read
+\begin_inset Quotes brd
+\end_inset
+
+ mode).
+ Hopefully this 
+\begin_inset Quotes bld
+\end_inset
+
+ReaClassical
+\begin_inset Quotes brd
+\end_inset
+
+ way can make things faster and easier at the same time.
+ Once multiple static mixes have been set up, you can then, of course, use
+ more detailed automation via the pencil tool or riding the fader to, for
+ example, temporarily bring up spot microphones.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -4559,67 +4776,6 @@ shift}
  needing to add in individual points.
  It's such a time-saver! The benefit here is that you can also see how the
  item waveform is affected in realtime.
-\end_layout
-
-\begin_layout Section
-Mastering
-\end_layout
-
-\begin_layout Standard
-This has the potential to be a long section but I don’t want it to detract
- from the main event: the S/D or razor editing workflows.
- A few pointers are in order though.
- In order to have CD markers that snap to CD frames, now is a great time
- to enable snapping (to frame) if adding them manually.
- 
-\end_layout
-
-\begin_layout Standard
-And then, of course, you can now quickly generate separate files via rendering
- all project regions or selected regions using a wildcard formula such as
- *$regionnumber - $region*.
- I include various useful presets in the render dialog.
- For those who insist on the absolute best resampling the world has to offer,
- export your WAV+CUE at highest resolution at 32-bit float and use a program
- like Saracon or FinalCD to get down to 44.1k/16-bit before generating the
- rest of your files in EZ CD Audio Converter (Windows), Fre:ac (all platforms)
- or similar.
- Alternatively, you can bring a long converted 44.1/32-bit float WAV back
- into a cloned project not forgetting to change the sample rate of the project
- to match.
- A lot of engineers use standard TPDF dither but you can always bring your
- favourite 3rd-party plugin to the party (as long as it is the final plugin
- on your master chain and your master fader remains at unity).
- I include a large number of world-class airwindows dither options in my
- other large jsfx collection available in the ReaClassical portable install.
-\end_layout
-
-\begin_layout Subsection
-Mastering Mode
-\end_layout
-
-\begin_layout Standard
-As described in the automation section, you can turn on 
-\begin_inset Quotes bld
-\end_inset
-
-mastering
-\begin_inset Quotes brd
-\end_inset
-
- mode via ReaClassical preferences.
- In addition to making the mixer tracks, busses and RCMASTER available in
- the arrange window for drawing in automation, it also serves to declutter
- by hiding any source group audio.
- Look out for more 
-\begin_inset Quotes bld
-\end_inset
-
-mastering
-\begin_inset Quotes brd
-\end_inset
-
- mode features in the future.
 \end_layout
 
 \begin_layout Subsection
@@ -5915,7 +6071,7 @@ keys{F8}
 \begin_layout Standard
 
 \series bold
-Hide and Show child tracks 
+Hide and Show child tracks / automation lanes 
 \series default
 
 \begin_inset ERT
@@ -5925,7 +6081,7 @@ status open
 
 
 \backslash
-keys{D}
+keys{E}
 \end_layout
 
 \end_inset
@@ -5938,7 +6094,7 @@ status open
 
 
 \backslash
-keys{E}
+keys{D}
 \end_layout
 
 \end_inset
@@ -5953,6 +6109,15 @@ Description:
 \emph default
 Hide child tracks to save screen estate and for working with multi-channel
  takes as if working with just stereo.
+ In 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode, the shortcuts also work for hiding and showing automation lanes.
 \end_layout
 
 \begin_layout Standard
@@ -5968,7 +6133,7 @@ status open
 
 
 \backslash
-keys{D}
+keys{E}
 \end_layout
 
 \end_inset
@@ -5981,7 +6146,7 @@ status open
 
 
 \backslash
-keys{E}
+keys{D}
 \end_layout
 
 \end_inset
@@ -5990,6 +6155,41 @@ keys{E}
  All S-D and razor editing functions work perfectly while folder groups
  are collapsed.
  This recreates a popular way of working with classical music takes in Pyramix.
+ In 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode, select a track containing automation lanes and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{E}
+\end_layout
+
+\end_inset
+
+ to hide the automation lanes or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{D}
+\end_layout
+
+\end_inset
+
+ to show them.
 \end_layout
 
 \begin_layout Standard
@@ -7711,6 +7911,171 @@ keys{F5}
 \begin_layout Standard
 
 \series bold
+Automation Mode 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+I}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description: 
+\emph default
+Coupled with 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode, allows for adding mixer and FX parameter values as envelope points
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes: 
+\emph default
+Enter 
+\begin_inset Quotes bld
+\end_inset
+
+automation
+\begin_inset Quotes brd
+\end_inset
+
+ mode via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+I}
+\end_layout
+
+\end_inset
+
+.
+ All the envelope buttons will turn blue (
+\begin_inset Quotes bld
+\end_inset
+
+latched preview
+\begin_inset Quotes brd
+\end_inset
+
+) and you will see a message box with instructions.
+ You can then use the function below.
+ Exit 
+\begin_inset Quotes bld
+\end_inset
+
+automation
+\begin_inset Quotes brd
+\end_inset
+
+ mode again via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+I}
+\end_layout
+
+\end_inset
+
+.
+ The envelope buttons will then turn green (
+\begin_inset Quotes bld
+\end_inset
+
+read
+\begin_inset Quotes brd
+\end_inset
+
+ mode).
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Insert Automation 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{I}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description: 
+\emph default
+Insert mixer and FX values as envelope points into automation lanes
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes: 
+\emph default
+Simply set any desired mixer controls or parameters in an open FX window)
+ on one or more tracks and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{I}
+\end_layout
+
+\end_inset
+
+ to enter the values as points on the automation lanes at the edit cursor
+ position or, if one exists, within the time selection.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
 Reposition CD Tracks 
 \series default
 
@@ -8596,7 +8961,15 @@ keys{D}
 
 \end_inset
 
- Display child tracks
+ Display child tracks (plus display automation lanes in 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode)
 \end_layout
 
 \begin_layout Labeling
@@ -8613,7 +8986,15 @@ keys{E}
 
 \end_inset
 
- Ensconce (hide) child tracks
+ Ensconce (hide) child tracks (plus hide automation lanes in 
+\begin_inset Quotes bld
+\end_inset
+
+mastering
+\begin_inset Quotes brd
+\end_inset
+
+ mode)
 \end_layout
 
 \begin_layout Labeling
@@ -8682,23 +9063,6 @@ keys{U}
 \end_inset
 
  Ungroup items
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{I}
-\end_layout
-
-\end_inset
-
- Swap marquee and razor edit modifiers 
 \end_layout
 
 \begin_layout Labeling
@@ -9130,6 +9494,42 @@ status open
 
 
 \backslash
+keys{
+\backslash
+ctrl+I}
+\end_layout
+
+\end_inset
+
+ Enter Automation Mode
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{I}
+\end_layout
+
+\end_inset
+
+ Insert Automation (mixer controls and FX parameters to envelope points)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
 keys{Y}
 \end_layout
 
@@ -9293,9 +9693,7 @@ status open
 
 
 \backslash
-keys{
-\backslash
-#}
+keys{:}
 \end_layout
 
 \end_inset

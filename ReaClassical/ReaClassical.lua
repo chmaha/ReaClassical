@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.12.2pre0410
+@version 24.13.5
 @changelog
-  New: Automation mode (Ctrl+I)
-  New: Insert mixer envelope points (I)
+  Re-arm when showing previously hidden envelopes
+  Actually add hide/show functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -56,6 +56,10 @@
   [main] ReaClassical_Take Counter.lua
   [main] ReaClassical_Record-Arm Folder.lua
   [main] ReaClassical_Add Track To All Groups.lua
+  [main] ReaClassical_Hide Children.lua
+  [main] ReaClassical_Show Children.lua
+  [main] ReaClassical_Automation Mode.lua
+  [main] ReaClassical_Insert Automation.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
