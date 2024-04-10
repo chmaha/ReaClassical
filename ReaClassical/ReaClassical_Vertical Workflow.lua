@@ -320,6 +320,12 @@ function mixer()
         if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
         end
+        if mastering == 1 and i == 0 then
+            Main_OnCommand(40727,0) -- minimize all tracks
+            SetTrackSelected(track, 1)
+            Main_OnCommand(40723,0) -- expand and minimize others
+            SetTrackSelected(track, 0)
+        end
     end
 end
 
