@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.12.1
+@version 24.12.2pre0410
 @changelog
-  Minimize mixer tracks etc in mastering mode
+  New: Automation mode (Ctrl+I)
+  New: Insert mixer envelope points (I)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
