@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.12
+@version 24.12.1
 @changelog
-  New: Mastering Mode via ReaClassical Preferences (F5)
-  Create CD Markers: Add automatic RoomTone volume envelope function
+  Minimize mixer tracks etc in mastering mode
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
