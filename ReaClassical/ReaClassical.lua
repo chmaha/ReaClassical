@@ -2,8 +2,13 @@
 @author chmaha
 @version 24.13.5
 @changelog
-  Re-arm when showing previously hidden envelopes
-  Actually add hide/show functions
+  New: Automation mode (Ctrl+I)
+  New: Insert mixer envelope points (I)
+  Automation Mode: Display correct keyboard shortcut in messagebox
+  New: Multi-purpose hide/show folder/automation lanes functions
+  Add new automation-related keyboard shortcuts
+  Re-arm lanes when showing previously hidden envelopes
+  Actually add new functions to meta-package (ugh!)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
