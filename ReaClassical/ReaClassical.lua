@@ -3,6 +3,7 @@
 @version 24.14
 @changelog
   Add multi-tab S-D editing
+  Add multi-tab S-D keyb shortcuts
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
