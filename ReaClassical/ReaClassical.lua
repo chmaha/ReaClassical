@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.14
+@version 24.14.1
 @changelog
-  Add multi-tab S-D editing
-  Add multi-tab S-D keyb shortcuts
+  Add new functions to metapackage
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -60,6 +59,9 @@
   [main] ReaClassical_Show Children.lua
   [main] ReaClassical_Automation Mode.lua
   [main] ReaClassical_Insert Automation.lua
+  [main] ReaClassical_Set Dest Project Marker.lua
+  [main] ReaClassical_Set Source Project Marker.lua
+
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
