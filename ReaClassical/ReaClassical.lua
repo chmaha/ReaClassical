@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.13.5
+@version 24.14
 @changelog
-  New: Automation mode (Ctrl+I)
-  New: Insert mixer envelope points (I)
-  Automation Mode: Display correct keyboard shortcut in messagebox
-  New: Multi-purpose hide/show folder/automation lanes functions
-  Add new automation-related keyboard shortcuts
-  Re-arm lanes when showing previously hidden envelopes
-  Actually add new functions to meta-package (ugh!)
+  Add multi-tab S-D editing
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
