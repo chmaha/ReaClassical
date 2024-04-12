@@ -22,28 +22,45 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
 local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
-local copy_source
+local copy_source, move_to_project_tab
 ---------------------------------------------------------------------
 
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local dest_in, source_count = markers()
+    local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, _ = markers()
+
+    if proj_marker_count == 1 then
+        ShowMessageBox("Only one S-D project marker was found."
+            .. "\nUse zero for regular single project S-D editing"
+        .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
+        return
+    end
+
+    if proj_marker_count == -1 then
+        ShowMessageBox("Source or destination markers should be paired with the corresponding source or destination project marker.", "Multi-tab Source-Destination Edit", 0)
+        return
+    end
+
     ripple_lock_mode()
-    if dest_in == 1 and source_count == 2 then
+    if dest_count == 1 and source_count == 2 then
+        move_to_project_tab(dest_proj)
         lock_items()
+        move_to_project_tab(source_proj)
         local _, is_selected = copy_source()
         if is_selected == false then
-            clean_up(is_selected)
+            clean_up(is_selected, proj_marker_count)
             return
         end
+        Main_OnCommand(40020, 0) -- Remove time selection
+        move_to_project_tab(dest_proj)
         split_at_dest_in()
         local paste = NamedCommandLookup("_SWS_AWPASTE")
-        Main_OnCommand(paste, 0)  -- SWS_AWPASTE
+        Main_OnCommand(paste, 0) -- SWS_AWPASTE
         mark_as_edit()
         unlock_items()
         local cur_pos = create_crossfades()
-        clean_up(is_selected)
+        clean_up(is_selected, proj_marker_count)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         create_dest_in(cur_pos)
@@ -63,18 +80,91 @@ end
 ---------------------------------------------------------------------
 
 function markers()
-    local _, num_markers, num_regions = CountProjectMarkers(0)
-    local source_count = 0
-    local dest_in = 0
-    for i = 0, num_markers + num_regions - 1, 1 do
-        local _, _, _, _, label, _ = EnumProjectMarkers(i)
-        if label == "DEST-IN" then
-            dest_in = 1
-        elseif label == string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
-            source_count = source_count + 1
+    local marker_labels = { "DEST-IN", "DEST-OUT", "SOURCE-IN", "SOURCE-OUT" }
+    local sd_markers = {}
+    for _, label in ipairs(marker_labels) do
+        sd_markers[label] = { count = 0, proj = nil }
+    end
+
+    local num = 0
+    local source_proj, dest_proj
+    local proj_marker_count = 0
+    local pos_table = {}
+    local active_proj = EnumProjects(-1)
+    local track_number = 1
+    while true do
+        local proj = EnumProjects(num)
+        if proj == nil then
+            break
+        end
+        local _, num_markers, num_regions = CountProjectMarkers(proj)
+        for i = 0, num_markers + num_regions - 1, 1 do
+            local _, _, pos, _, raw_label, _ = EnumProjectMarkers2(proj, i)
+            local number = string.match(raw_label, "(%d+):.+")
+            local label = string.match(raw_label, "%d*:?(.+)") or ""
+
+            if label == "DEST-IN" then
+                sd_markers[label].count = 1
+                sd_markers[label].proj = proj
+                pos_table[1] = pos
+            elseif label == "DEST-OUT" then
+                sd_markers[label].count = 1
+                sd_markers[label].proj = proj
+                pos_table[2] = pos
+            elseif label == "SOURCE-IN" then
+                track_number = number
+                sd_markers[label].count = 1
+                sd_markers[label].proj = proj
+                pos_table[3] = pos
+            elseif label == "SOURCE-OUT" then
+                track_number = number
+                sd_markers[label].count = 1
+                sd_markers[label].proj = proj
+                pos_table[4] = pos
+            elseif string.match(label, "SOURCE PROJECT") then
+                source_proj = proj
+                proj_marker_count = proj_marker_count + 1
+            elseif string.match(label, "DEST PROJECT") then
+                dest_proj = proj
+                proj_marker_count = proj_marker_count + 1
+            end
+        end
+        num = num + 1
+    end
+
+    if proj_marker_count == 0 then
+        for _, marker in pairs(sd_markers) do
+            if marker.proj ~= active_proj then
+                marker.count = 0
+            end
         end
     end
-    return dest_in, source_count
+
+    local source_in = sd_markers["SOURCE-IN"].count
+    local source_out = sd_markers["SOURCE-OUT"].count
+    local dest_in = sd_markers["DEST-IN"].count
+    local dest_out = sd_markers["DEST-OUT"].count
+
+    local sin = sd_markers["SOURCE-IN"].proj
+    local sout = sd_markers["SOURCE-OUT"].proj
+    local din = sd_markers["DEST-IN"].proj
+    local dout = sd_markers["DEST-OUT"].proj
+
+
+    local source_count = source_in + source_out
+    local dest_count = dest_in + dest_out
+
+    if (source_count == 2 and sin ~= sout) or (dest_count == 2 and din ~= dout) then proj_marker_count = -1 end
+
+    if source_proj and ((sin and sin ~= source_proj) or (sout and sout ~= source_proj)) then
+        proj_marker_count = -1
+    end
+    if dest_proj and ((din and din ~= dest_proj) or (dout and dout ~= dest_proj)) then
+        proj_marker_count = -1
+    end
+
+    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in, source_out, source_count,
+        pos_table, track_number
 end
 
 ---------------------------------------------------------------------
@@ -169,13 +259,25 @@ end
 
 ---------------------------------------------------------------------
 
-function clean_up(is_selected)
+function clean_up(is_selected, proj_marker_count)
     Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     if is_selected then
-        DeleteProjectMarker(NULL, 996, false)
-        DeleteProjectMarker(NULL, 997, false)
-        DeleteProjectMarker(NULL, 998, false)
-        DeleteProjectMarker(NULL, 999, false)
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then
+                break
+            end
+
+            if proj_marker_count ~= 2 then
+                DeleteProjectMarker(project, 998, false)
+                DeleteProjectMarker(project, 999, false)
+            end
+            DeleteProjectMarker(project, 996, false)
+            DeleteProjectMarker(project, 997, false)
+
+            i = i + 1
+        end
     else
         ShowMessageBox("Please make sure there is material to copy between your source markers...",
             "Source-Destination Edit", 0)
@@ -268,7 +370,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -276,8 +378,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
@@ -293,5 +395,10 @@ end
 
 ---------------------------------------------------------------------
 
-main()
+function move_to_project_tab(proj_type)
+    SelectProjectInstance(proj_type)
+end
 
+---------------------------------------------------------------------
+
+main()

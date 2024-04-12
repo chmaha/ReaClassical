@@ -25,19 +25,19 @@ local main
 ---------------------------------------------------------------------
 
 function main()
-    local i = 0
-    while true do
-        local project, _ = EnumProjects(i)
-        if project == nil then
-          break
-        else
-            DeleteProjectMarker(project, 996, false)
-            DeleteProjectMarker(project, 997, false)
-            DeleteProjectMarker(project, 998, false)
-            DeleteProjectMarker(project, 999, false)
-        end
-        i = i + 1
-      end
+  local i = 0
+  while true do
+    local project, _ = EnumProjects(i)
+    if project == nil then
+      break
+    else
+      DeleteProjectMarker(project, 996, false)
+      DeleteProjectMarker(project, 997, false)
+      DeleteProjectMarker(project, 998, false)
+      DeleteProjectMarker(project, 999, false)
+    end
+    i = i + 1
+  end
 end
 
 ---------------------------------------------------------------------

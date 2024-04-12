@@ -3126,6 +3126,140 @@ The downside to this workflow when using a vertical approach is that the
 \end_layout
 
 \begin_layout Subsubsection
+Multi-Project Tab S-D Editing
+\end_layout
+
+\begin_layout Standard
+If you'd like to S-D edit between various open project tabs you can set
+ both the source and destination 
+\begin_inset Quotes bld
+\end_inset
+
+project
+\begin_inset Quotes brd
+\end_inset
+
+ markers via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+1}
+\end_layout
+
+\end_inset
+
+ (or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+2}
+\end_layout
+
+\end_inset
+
+) for destination and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+3}
+\end_layout
+
+\end_inset
+
+ (or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+4}
+\end_layout
+
+\end_inset
+
+) for source (essentially the same numbers associated with regular S-D markers).
+ The markers can exist anywhere on the tab's timeline but perhaps the very
+ beginning or end would be good to keep out of the way.
+ The S-D editing itself then works just as for a single tab other than any
+ source markers that are set are not deleted to aid quickly undoing in the
+ destination tab and being ready to reapply the edit.
+ The only rule when using S-D project markers is to ensure that source or
+ destination markers should be paired with the corresponding source or destinati
+on project marker.
+ This workflow would, for example, allow you to have multiple project tabs
+ (perhaps one for each symphony movement plus a final 
+\begin_inset Quotes bld
+\end_inset
+
+destination
+\begin_inset Quotes brd
+\end_inset
+
+ tab), allowing for both internal editing per tab but after setting the
+ S-D project markers compiling the final edit in the 
+\begin_inset Quotes bld
+\end_inset
+
+destination
+\begin_inset Quotes brd
+\end_inset
+
+ tab.
+ To delete all the S-D project markers press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+.
+ Also, in multi-tab S-D editing, when regular markers are placed, any other
+ existing versions in other tabs are automatically deleted to ensure that
+ only one version of the marker exists at a time across all open project
+ tabs.
+\end_layout
+
+\begin_layout Subsubsection
 4-Point Editing
 \end_layout
 
@@ -3305,6 +3439,8 @@ keys{F4}
  The timestretch algorithm used will be the one set in REAPER project settings.
  When there are multiple items in between the source markers, the function
  will glue the items together before time-stretching.
+ Note that this function can also be used in multi-tab S-D editing mode
+ (see above).
 \end_layout
 
 \begin_layout Subsubsection
@@ -3373,6 +3509,8 @@ keys{F3}
  jump to the end of the pasted item, ready for the next edit.
  This means that in order to compile further sections, you now only need
  set the source markers.
+ Note that this function can also be used in multi-tab S-D editing mode
+ (see above).
 \end_layout
 
 \begin_layout Subsubsection
@@ -3542,7 +3680,7 @@ Delete S-D markers
 \end_layout
 
 \begin_layout Standard
-To delete all S-D markers, press 
+To delete all regular S-D markers, press 
 \begin_inset ERT
 status open
 
@@ -7201,6 +7339,8 @@ keys{F5}
 \end_inset
 
  .
+ Note that this function can be used in multi-tab S-D editing mode (see
+ below).
 \end_layout
 
 \begin_layout Standard
@@ -7313,6 +7453,11 @@ keys{5}
 \end_layout
 
 \begin_layout Standard
+Note that this function can also be used in multi-tab S-D editing mode (see
+ below).
+\end_layout
+
+\begin_layout Standard
 
 \series bold
 Insert with Timestretching 
@@ -7365,6 +7510,8 @@ keys{F5}
 \end_inset
 
  .
+ Note that this function can also be used in multi-tab S-D editing mode
+ (see below).
 \end_layout
 
 \begin_layout Standard
@@ -7470,6 +7617,162 @@ Delete with Ripple
 \begin_layout Standard
 
 \series bold
+Add Source Project Marker 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+3}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+4}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Enables multi-tab editing
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes: 
+\emph default
+To work in multi-tab S-D edit mode, the user is required to use the S-D
+ project markers as a pair, one in the 
+\begin_inset Quotes bld
+\end_inset
+
+destination
+\begin_inset Quotes brd
+\end_inset
+
+ tab and the other in the 
+\begin_inset Quotes bld
+\end_inset
+
+source
+\begin_inset Quotes brd
+\end_inset
+
+ tab.
+ In multi-tab S-D edit mode, any source makers placed by the user are not
+ deleted in order to aid a quick undo in the destination tab ready to reapply
+ a tweaked edit.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Add Destination Project Marker 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+1}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+2}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Enables multi-tab editing
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes: 
+\emph default
+To work in multi-tab S-D edit mode, the user is required to use the S-D
+ project markers as a pair, one in the 
+\begin_inset Quotes bld
+\end_inset
+
+destination
+\begin_inset Quotes brd
+\end_inset
+
+ tab and the other in the 
+\begin_inset Quotes bld
+\end_inset
+
+source
+\begin_inset Quotes brd
+\end_inset
+
+ tab.
+ In multi-tab S-D edit mode, any source makers placed by the user are not
+ deleted in order to aid a quick undo in the destination tab ready to reapply
+ a tweaked edit.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
 Delete all S-D Markers 
 \series default
 
@@ -7564,6 +7867,49 @@ keys{4}
 Create CD Markers
 \emph default
  function all markers are deleted in any case.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Delete all S-D Project Markers 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Deletes both source and destination project markers
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes: 
+\emph default
+In order to switch back to regular single-tab S-D editing, it is important
+ to run this command otherwise the S-D edit functions will continue to attempt
+ to find markers elsewhere.
 \end_layout
 
 \begin_layout Standard
@@ -9317,6 +9663,48 @@ status open
 \backslash
 keys{
 \backslash
+ctrl+
+\backslash
+Alt+1}
+\end_layout
+
+\end_inset
+
+ Add Destination Project Marker (multi-tab S-D editing)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+3}
+\end_layout
+
+\end_inset
+
+ Add Source Project Marker (multi-tab S-D editing)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
 ctrl+1}
 \end_layout
 
@@ -9477,6 +9865,27 @@ del}
 \end_inset
 
  Delete all S-D Markers 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+ Delete all S-D Project Markers 
 \end_layout
 
 \begin_layout Standard

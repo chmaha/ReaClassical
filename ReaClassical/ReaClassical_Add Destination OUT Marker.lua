@@ -25,6 +25,18 @@ local main, get_color_table, get_path
 ---------------------------------------------------------------------
 
 function main()
+
+    local i = 0
+    while true do
+        local project, _ = EnumProjects(i)
+        if project == nil then
+            break
+        else
+            DeleteProjectMarker(project, 997, false)
+        end
+        i = i + 1
+    end
+
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     DeleteProjectMarker(NULL, 997, false)
     local colors = get_color_table()

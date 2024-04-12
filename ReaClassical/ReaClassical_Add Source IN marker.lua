@@ -25,6 +25,17 @@ local main, folder_check, get_track_number, get_color_table, get_path
 ---------------------------------------------------------------------
 
 function main()
+    local i = 0
+    while true do
+        local project, _ = EnumProjects(i)
+        if project == nil then
+            break
+        else
+            DeleteProjectMarker(project, 998, false)
+        end
+        i = i + 1
+    end
+
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     local track_number = math.floor(get_track_number())
     DeleteProjectMarker(NULL, 998, false)
@@ -64,7 +75,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -72,8 +83,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 

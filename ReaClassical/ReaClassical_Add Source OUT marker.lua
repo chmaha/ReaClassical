@@ -26,6 +26,18 @@ local main, folder_check, get_track_number, get_color_table, get_path
 ---------------------------------------------------------------------
 
 function main()
+
+    local i = 0
+    while true do
+        local project, _ = EnumProjects(i)
+        if project == nil then
+            break
+        else
+            DeleteProjectMarker(project, 999, false)
+        end
+        i = i + 1
+    end
+
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     local track_number = math.floor(get_track_number())
     DeleteProjectMarker(NULL, 999, false)
