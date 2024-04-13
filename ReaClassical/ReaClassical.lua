@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.14.1
+@version 24.14.2
 @changelog
-  Add new functions to metapackage
+  Custom Toolbar(F6): Switch to S-D editing + help
+  Add toolbar info to PDF manual
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

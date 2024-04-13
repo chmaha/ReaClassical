@@ -2551,7 +2551,7 @@ ReaClassical Toolbar
 
 \begin_layout Standard
 While I designed ReaClassical to be used efficiently with keyboard shortcuts,
- there is a custom toolbar for those that prefer it.
+ there is a custom S-D editing toolbar for those that prefer it.
  However I do highly recommend learning the key strokes as you will find
  your editing speeds improve dramatically.
  The floating toolbar is visible by default on a new portable install.
@@ -2569,6 +2569,67 @@ keys{F6}
 \end_inset
 
  shortcut.
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align left
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename user_guide_images/classical toolbar.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "classical-toolbar-1"
+
+\end_inset
+
+ReaClassical custom toolbar
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From left to right, we have: Destination IN and OUT markers (1, 2), Source
+ IN and OUT markers (3, 4), Delete S-D markers (Ctrl+Delete), S-D Edit (5),
+ 3-point 
+\begin_inset Quotes bld
+\end_inset
+
+Assembly Line
+\begin_inset Quotes brd
+\end_inset
+
+ Edit (F3), Insert with Time-stretching (F4), Delete With Ripple (Backspace),
+ Delete Leaving Silence (Ctrl+Backspace), Set Destination Tab Project Marker
+ (ctrl+alt+1/2), Set Source Tab Project Marker (ctrl+alt+3/4), Delete S-D
+ Project Markers (shift+del), and finally ReaClassical Help (H).
 \end_layout
 
 \begin_layout Subsection
@@ -11042,76 +11103,7 @@ In REAPER, right-click on an empty part of the main toolbar and select toolbar
  1 (either open or float it).
  Select Import/Export in the top right corner and select the ReaClassical.ReaperM
 enu file.
- You should then see menu items and associated icons! See figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "classical-toolbar"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\noindent
-\align center
-\begin_inset Graphics
-	filename user_guide_images/classical toolbar.png
-	width 100line%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "classical-toolbar"
-
-\end_inset
-
-ReaClassical custom toolbar
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-From left to right, we have: Whole project view Horizontal (`), Horizontal
- Workflow (F7), Create (or re-build) Vertical Workflow (F8), Add @Aux track
- (@), Classical Take Record Toggle (F9), Duplicate Folder (
-\backslash
-), Prepare Takes (T), 3-point 
-\begin_inset Quotes bld
-\end_inset
-
-Assembly Line
-\begin_inset Quotes brd
-\end_inset
-
- Edit (F3), Destination IN and OUT markers (1, 2), Source IN and OUT markers
- (3, 4), Delete S-D markers (Ctrl+Delete), S-D Edit (5), Delete With Ripple
- (Backspace), Delete Leaving Silence (Ctrl+Backspace), the Fade Editor View
- (F), Reposition Album Tracks (Ctrl+Y), and, finally, Create CD Markers
- (Y).
+ You should then see menu items and associated icons!
 \end_layout
 
 \begin_layout Subsection
