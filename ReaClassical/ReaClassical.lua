@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.14.2
+@version 24.14.3
 @changelog
-  Custom Toolbar(F6): Switch to S-D editing + help
-  Add toolbar info to PDF manual
+  Prevent marker number clash when auditioning in xfade view
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
