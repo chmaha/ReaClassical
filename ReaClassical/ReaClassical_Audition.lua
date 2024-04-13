@@ -49,7 +49,7 @@ function main()
             TrackList_AdjustWindows(false)
         end
     else
-        DeleteProjectMarker(NULL, 1000, false)
+        DeleteProjectMarker(NULL, 1016, false)
         BR_GetMouseCursorContext()
         local hover_item = BR_GetMouseCursorContext_Item()
         if hover_item ~= nil then
@@ -96,7 +96,7 @@ function main()
             if item_one_muted == 0 then
                 Main_OnCommand(41559, 0) -- Item properties: Solo
             end
-            AddProjectMarker2(0, false, one_pos + item_length, 0, "!1016", 1000, colors.audition)
+            AddProjectMarker2(0, false, one_pos + item_length, 0, "!1016", 1016, colors.audition)
             SetEditCurPos(mouse_pos, false, false)
             OnPlayButton() -- play until end of item_hover (one_pos + item_length)
         elseif item_hover == item_two then
@@ -106,23 +106,23 @@ function main()
                 Main_OnCommand(41559, 0) -- Item properties: Solo
             end
             SetEditCurPos(two_pos, false, false)
-            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000, colors.audition)
+            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1016, colors.audition)
             OnPlayButton() -- play until mouse cursor
         elseif not item_hover and mouse_pos < two_pos then
-            AddProjectMarker2(0, false, mouse_pos + total_time, 0, "!1016", 1000,
+            AddProjectMarker2(0, false, mouse_pos + total_time, 0, "!1016", 1016,
                 colors.audition)
             SetEditCurPos(mouse_pos, false, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
         else
             local mouse_to_item_one = mouse_pos - end_of_one
             local total_time = 2 * mouse_to_item_one + overlap
-            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000,
+            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1016,
                 colors.audition)
-            AddProjectMarker2(0, false, mouse_pos - total_time, 0, "START", 1001,
+            AddProjectMarker2(0, false, mouse_pos - total_time, 0, "START", 1111,
                 colors.audition)
-            GoToMarker(0, 1001, false)
+            GoToMarker(0, 1111, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
-            DeleteProjectMarker(NULL, 1001, false)
+            DeleteProjectMarker(NULL, 1111, false)
         end
         SetMediaItemSelected(item_one, true)
         SetMediaItemSelected(item_two, true)
@@ -264,7 +264,7 @@ end
 
 function on_stop()
     if GetPlayState() == 0 then
-        DeleteProjectMarker(NULL, 1000, false)
+        DeleteProjectMarker(NULL, 1016, false)
         Main_OnCommand(41185, 0) -- Item properties: Unsolo all
         return
     else
