@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.14.3
+@version 24.14.4
 @changelog
-  Prevent marker number clash when auditioning in xfade view
+  Album Reports: Remove zero padding on hour
+  Add ext_state to special tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
