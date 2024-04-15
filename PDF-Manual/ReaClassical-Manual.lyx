@@ -2677,6 +2677,15 @@ M:
  These tracks shown only in the mixer are where you adjust the usual track
  controls such as pan, volume, phase etc.
  and also add FX.
+ Their names are populated from those set in the first group of 
+\begin_inset Quotes bld
+\end_inset
+
+regular
+\begin_inset Quotes brd
+\end_inset
+
+ tracks in the arrange window.
  Third, we have aux busses designated via 
 \begin_inset Quotes bld
 \end_inset
@@ -2740,6 +2749,40 @@ keys{F8}
 \end_inset
 
  to recreate them depending on your chosen workflow.
+\end_layout
+
+\begin_layout Standard
+It's important to maintain the prefixes for the special tracks (@, # and
+ M:) and to retain the RoomTone and RCMASTER track names for audio routing
+ and mixer visibility.
+ However, if you accidentally make improper changes, simply re-sync via
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ to automatically add back missing prefixes and correct naming.
  
 \end_layout
 
