@@ -26,7 +26,7 @@ local route_to_track, trackname_check
 ---------------------------------------------------------------------
 
 function main()
-    local folders, tracks_per_group, total_tracks = folder_check()
+    local folders = folder_check()
     if folders == 0 then
         ShowMessageBox("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
             "Add Submix", 0)
@@ -55,6 +55,7 @@ function main()
 
     InsertTrackAtIndex(rcmaster_index, true) -- Add track just before RCMASTER
     local bus = GetTrack(0, rcmaster_index)
+    GetSetMediaTrackInfo_String(bus, "P_EXT:submix", "y", 1)
     SetMediaTrackInfo_Value(bus, "I_FOLDERDEPTH", 0)
 
     route_to_track(bus, rcmaster)

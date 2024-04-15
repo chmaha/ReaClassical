@@ -44,8 +44,7 @@ function main()
     end
 
     local num_of_tracks = CountTracks(0)
-    local rcmaster_exists = false
-    local sync_tracks = false
+    local rcmaster_exists
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0)
     remove_track_groups()
@@ -118,7 +117,6 @@ function main()
         media_razor_group()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
-        sync_tracks = true
         mixer()
     elseif folder_check() == 1 then
         rcmaster_exists = special_check()
@@ -170,15 +168,9 @@ function main()
     if num_pre_selected > 0 then
         Main_OnCommand(40297, 0) --unselect_all
         for _, track in ipairs(pre_selected) do
-            SetTrackSelected(track, 1)
+            if pcall (IsTrackSelected,track) then SetTrackSelected(track, 1) end
         end
     end
-
-    -- if sync_tracks then
-    --     ShowMessageBox(
-    --         "Track names, record inputs and lock states synchronized. Routing rebuilt if necessary.",
-    --         "Vertical Workflow", 0)
-    -- end
 
     if not rcmaster_exists then
         ShowMessageBox("Your Project has been upgraded"
@@ -292,6 +284,7 @@ function mixer()
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
+
         if trackname_check(track, "^@") then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
@@ -304,10 +297,12 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
+
         if trackname_check(track, "RCMASTER") then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
+
         if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
@@ -321,9 +316,9 @@ function mixer()
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
         end
         if mastering == 1 and i == 0 then
-            Main_OnCommand(40727,0) -- minimize all tracks
+            Main_OnCommand(40727, 0) -- minimize all tracks
             SetTrackSelected(track, 1)
-            Main_OnCommand(40723,0) -- expand and minimize others
+            Main_OnCommand(40723, 0) -- expand and minimize others
             SetTrackSelected(track, 0)
         end
     end
@@ -488,6 +483,7 @@ end
 function add_rcmaster(num)
     InsertTrackAtIndex(num, true) -- add RCMASTER
     local rcmaster = GetTrack(0, num)
+    GetSetMediaTrackInfo_String(rcmaster, "P_EXT:rcmaster", "y", 1)
     GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "RCMASTER", 1)
     SetMediaTrackInfo_Value(rcmaster, "I_SPACER", 1)
     local colors = get_color_table()
@@ -510,23 +506,31 @@ end
 ---------------------------------------------------------------------
 
 function special_check()
-    local bool = false
+    local rcmaster_exists = false
     local num_of_tracks = CountTracks(0)
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
         if name:match("^RCMASTER") then
-            bool = true
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "y", 1)
+            rcmaster_exists = true
+            break
+        end
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        if rcmaster_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_NAME", "RCMASTER", 1)
+            rcmaster_exists = true
             break
         end
     end
 
-    return bool
+    return rcmaster_exists
 end
 
 ---------------------------------------------------------------------
 
 function remove_connections(track)
+    SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
     local num_of_receives = GetTrackNumSends(track, -1)
     for i = 0, num_of_receives - 1, 1 do
         RemoveTrackSend(track, -1, 0)
@@ -542,6 +546,7 @@ function create_single_mixer(tracks_per_group, end_of_sources, track_names)
     local j = 1
     for i = end_of_sources, end_of_sources + tracks_per_group - 1, 1 do
         local track = GetTrack(0, i)
+        GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
         if track_names then
             GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[j], 1)
         else
@@ -574,6 +579,9 @@ function route_tracks(rcmaster, track_table, end_of_sources)
         end
     end
 
+    --rcmaster to master
+    SetMediaTrackInfo_Value(rcmaster, "B_MAINSEND", 1)
+
     -- parents to first mixer track
     for _, entry in ipairs(track_table) do
         local parent = entry.parent
@@ -605,7 +613,12 @@ function create_track_table()
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
         if parent == 1 then
             if j > 1 and k ~= prev_k then
                 groups_equal = false
@@ -614,11 +627,23 @@ function create_track_table()
             prev_k = k
             k = 1
             track_table[j] = { parent = track, tracks = {} }
-        elseif trackname_check(track, "^M:") then
+        elseif trackname_check(track, "^M:") or mixer_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
             table.insert(mixer_tracks, track)
-        elseif trackname_check(track, "^RCMASTER") then
+        elseif trackname_check(track, "^@") or aux_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:aux", "y", 1)
+            local mod_name = string.match(name, "@?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "@" .. mod_name, 1)
+        elseif trackname_check(track, "^#") or submix_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:submix", "y", 1)
+            local mod_name = string.match(name, "#?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "#" .. mod_name, 1)
+        elseif trackname_check(track, "^RoomTone") or rt_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", 1)
+        elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")) then
+        else
             if j > 0 then
                 table.insert(track_table[j].tracks, track)
             else
