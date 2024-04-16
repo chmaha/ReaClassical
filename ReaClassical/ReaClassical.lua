@@ -1,13 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.15
+@version 24.15.1
 @changelog
-  New: Move Tracks Up/Down in All Groups
-  RoomTone: Fix naming in ext_state command
-  Add Track to All Groups: Add mixer track to avoid rebuilding entire mixer
-  Add missing submix to folder_check()
-  Move Tracks: Change correction to dialog box titles
-  Add new keyboard shortcuts
+  Move Tracks: Further refine message boxes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
