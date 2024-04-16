@@ -1,9 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 24.14.4
+@version 24.15
 @changelog
-  Album Reports: Remove zero padding on hour
-  Add ext_state to special tracks
+  New: Move Tracks Up/Down in All Groups
+  RoomTone: Fix naming in ext_state command
+  Add Track to All Groups: Add mixer track to avoid rebuilding entire mixer
+  Add missing submix to folder_check()
+  Add new keyboard shortcuts
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -62,7 +65,8 @@
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Set Dest Project Marker.lua
   [main] ReaClassical_Set Source Project Marker.lua
-
+  [main] ReaClassical_Move Track Down in All Groups.lua
+  [main] ReaClassical_Move Track Up in All Groups.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
