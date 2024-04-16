@@ -57,8 +57,8 @@ function main()
 
   local tracks_per_group = child_count + 1
 
-  if folder_count == 0 then
-    ShowMessageBox("Add one or more folders before running.", "Move Track Down in All Groups", 0)
+  if folder_count == 0 or folder_count == 1 then
+    ShowMessageBox("This function can only be used on a project with multiple folders", "Move Track Down in All Groups", 0)
     return
   end
 

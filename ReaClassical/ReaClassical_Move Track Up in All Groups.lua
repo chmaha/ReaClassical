@@ -57,8 +57,8 @@ function main()
 
   local tracks_per_group = child_count + 1
 
-  if folder_count == 0 then
-    ShowMessageBox("Add one or more folders before running.", "Move Track Up in All Groups", 0)
+  if folder_count == 0 or folder_count == 1 then
+    ShowMessageBox("This function can only be used on a project with multiple folders", "Move Track Down in All Groups", 0)
     return
   end
 
@@ -70,11 +70,11 @@ function main()
   if earlier_track then
     track_idx = GetMediaTrackInfo_Value(earlier_track, "IP_TRACKNUMBER") - 1
   else
-    ShowMessageBox("Please select a child track in the folder", "Move Track Down in All Groups", 0)
+    ShowMessageBox("Please select a child track in the folder", "Move Track Up in All Groups", 0)
     return
   end
   if track_idx == 0 then
-    ShowMessageBox("The track is already the first child in the folder", "Move Track Down in All Groups", 0)
+    ShowMessageBox("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
     return
   end
 
