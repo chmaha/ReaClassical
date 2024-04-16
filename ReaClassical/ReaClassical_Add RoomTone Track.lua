@@ -55,7 +55,7 @@ function main()
 
     InsertTrackAtIndex(rcmaster_index, true) -- Add track just before RCMASTER
     local rt_track = GetTrack(0, rcmaster_index)
-    GetSetMediaTrackInfo_String(bus, "P_EXT:roomtone", "y", 1)
+    GetSetMediaTrackInfo_String(rt_track, "P_EXT:roomtone", "y", 1)
     SetMediaTrackInfo_Value(rt_track, "I_FOLDERDEPTH", 0)
 
     route_to_track(rt_track, rcmaster)
