@@ -3,6 +3,7 @@
 @version 24.15.1
 @changelog
   Move Tracks: Further refine message boxes
+  Move Tracks: One last message title fix
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
