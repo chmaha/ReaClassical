@@ -6,6 +6,7 @@
   RoomTone: Fix naming in ext_state command
   Add Track to All Groups: Add mixer track to avoid rebuilding entire mixer
   Add missing submix to folder_check()
+  Move Tracks: Change correction to dialog box titles
   Add new keyboard shortcuts
 @metapackage
 @provides
