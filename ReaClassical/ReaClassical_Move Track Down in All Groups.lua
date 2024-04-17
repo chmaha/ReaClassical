@@ -57,8 +57,8 @@ function main()
 
   local tracks_per_group = child_count + 1
 
-  if folder_count == 0 or folder_count == 1 then
-    ShowMessageBox("This function can only be used on a project with multiple folders", "Move Track Down in All Groups", 0)
+  if folder_count == 0 then
+    ShowMessageBox("This function can only be used on a project with one or more folders", "Move Track Down in All Groups", 0)
     return
   end
 
@@ -82,7 +82,7 @@ function main()
   if next_depth == -1 then
     SetOnlyTrackSelected(next_track)
     local similar_tracks = {}
-    for i = track_idx + 1, folder_count * tracks_per_group - 1, tracks_per_group do
+    for i = track_idx + 1, folder_count * tracks_per_group + tracks_per_group - 1, tracks_per_group do
       table.insert(similar_tracks, i)
     end
     for _, idx in pairs(similar_tracks) do
@@ -93,7 +93,7 @@ function main()
     SetOnlyTrackSelected(track)
   else
     local similar_tracks = {}
-    for i = track_idx, folder_count * tracks_per_group - 1, tracks_per_group do
+    for i = track_idx, folder_count * tracks_per_group + tracks_per_group - 1, tracks_per_group do
       table.insert(similar_tracks, i)
     end
     for _, idx in pairs(similar_tracks) do

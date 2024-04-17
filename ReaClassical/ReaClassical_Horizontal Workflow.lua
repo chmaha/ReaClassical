@@ -164,7 +164,9 @@ end
 
 function solo()
     local track = GetSelectedTrack(0, 0)
-    SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+    if track then
+        SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+    end
 
     for i = 0, CountTracks(0) - 1, 1 do
         track = GetTrack(0, i)
