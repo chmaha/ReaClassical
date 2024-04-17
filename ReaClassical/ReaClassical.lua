@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16
+@version 24.16.1
 @changelog
-  New: Delete Track From All Groups
+  Move/Delete Track Within All Groups: Open up for horizontal workflow
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
