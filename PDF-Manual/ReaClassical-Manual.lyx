@@ -667,6 +667,16 @@ literal "false"
 \end_layout
 
 \begin_layout Section
+Keyboard Shortcuts
+\end_layout
+
+\begin_layout Standard
+When providing keyboard shortcuts, this manual assumes Windows/Linux as
+ the operating system when modifier keys are used.
+ MacOS users should use the typical standard substitutions.
+\end_layout
+
+\begin_layout Section
 Changelog
 \end_layout
 
