@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.1
+@version 24.16.2
 @changelog
-  Move/Delete Track Within All Groups: Open up for horizontal workflow
+  PDF Manual: Add short placeholder in preliminaries about keyb shortcuts and OS
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
