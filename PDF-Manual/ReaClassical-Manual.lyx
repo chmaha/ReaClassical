@@ -1892,6 +1892,81 @@ shift+T}
 \end_layout
 
 \begin_layout Subsection
+Re-ordering tracks
+\end_layout
+
+\begin_layout Standard
+In both horizontal and vertical workflows, you can use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+
+\backslash
+arrowkeyup}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+
+\backslash
+arrowkeydown}
+\end_layout
+
+\end_inset
+
+ on a selected child track in the first group to quickly re-order all the
+ groups at once including the mixer tracks.
+\end_layout
+
+\begin_layout Subsection
+Deleting tracks
+\end_layout
+
+\begin_layout Standard
+In both horizontal and vertical workflows, you can use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+shift+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+ on a selected child track in the first group to quickly delete in all the
+ groups at once including the mixer tracks.
+\end_layout
+
+\begin_layout Subsection
 Disabling Channels During a Recording Session
 \end_layout
 
@@ -6653,7 +6728,117 @@ Description:
 Notes:
 \emph default
  The function will prompt for a track name and then a new track will appear
- at the end of every folder.
+ at the end of every folder and mixer track set.
+ You could follow up by moving the track using the function below.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Move Track Up/Down In All Groups 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+
+\backslash
+arrowkeyup}
+\end_layout
+
+\end_inset
+
+ / 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+
+\backslash
+arrowkeydown}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Moves the selected child track up and down within the group.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+\emph default
+ Available for both horizontal and vertical workflows, the function only
+ works on child tracks presently.
+ Note that the mixer track order automatically updates too.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Delete Track From All Groups 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+shift+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+\emph default
+ Delete the selected child track from all groups in the project.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+\emph default
+ Available for both horizontal and vertical workflows, simply select a single
+ child track and press the shortcut.
+ Note that the mixer tracks automatically update too.
 \end_layout
 
 \begin_layout Standard
@@ -9199,6 +9384,75 @@ shift+T}
 \end_inset
 
  Add Track To All Groups
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+shift+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+ Delete Track From All Groups
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+
+\backslash
+arrowkeyup}
+\end_layout
+
+\end_inset
+
+ Move Track Up In All Groups
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+Alt+
+\backslash
+arrowkeydown}
+\end_layout
+
+\end_inset
+
+ Move Track Down In All Groups
 \end_layout
 
 \begin_layout Labeling
