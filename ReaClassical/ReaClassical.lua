@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.2
+@version 24.16.3
 @changelog
-  PDF Manual: Add short placeholder in preliminaries about keyb shortcuts and OS
+  Move/Delete Track: Show message if multiple tracks are selected
+  Move/Delete Track: Add logic to prevent moving source tracks directly
+  Delete Track: Prevent function from acting on a folder of two tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
