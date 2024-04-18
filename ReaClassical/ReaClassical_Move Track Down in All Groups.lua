@@ -29,6 +29,7 @@ function main()
 
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 then
+    ShowMessageBox("Please select a single child track","Move Track Down in All Groups", 0)
     return
   end
 
