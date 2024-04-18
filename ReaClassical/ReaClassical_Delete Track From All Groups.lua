@@ -28,7 +28,7 @@ function main()
   Undo_BeginBlock()
 
   local selected_tracks = CountSelectedTracks(0)
-  if selected_tracks > 1 then
+  if selected_tracks > 1 or selected_tracks == 0 then
     ShowMessageBox("Please select a single child track","Delete Track From All Groups", 0)
     return
   end
@@ -71,12 +71,19 @@ function main()
     return
   end
 
+  if tracks_per_group == 2 then
+    ShowMessageBox("You are already at the minimum number of tracks to form a folder", "Delete Track From All Groups", 0)
+    return
+  end
+
   if track_idx == child_count then
     local move_up = NamedCommandLookup("_RSaa782166e9bad06e1e776c2daa81b51d7f25220e")
     reaper.Main_OnCommand(move_up, 0)
     track = GetSelectedTrack(0, 0)
     track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
   end
+
+  
 
   local similar_tracks = {}
   for i = track_idx + (folder_count - 1) * tracks_per_group, track_idx, -tracks_per_group do
@@ -85,6 +92,10 @@ function main()
   for _, idx in pairs(similar_tracks) do
     local source_track = GetTrack(0, idx)
     DeleteTrack(source_track)
+    -- if track_idx == 0 then
+    --   local next = GetTrack(0,idx)
+    --   SetMediaTrackInfo_Value(next, "I_FOLDERDEPTH", 1)
+    -- end
   end
 
   --delete mixer track

@@ -28,8 +28,8 @@ function main()
   Undo_BeginBlock()
 
   local selected_tracks = CountSelectedTracks(0)
-  if selected_tracks > 1 then
-    ShowMessageBox("Please select a single child track","Move Track Down in All Groups", 0)
+  if selected_tracks > 1 or selected_tracks == 0 then
+    ShowMessageBox("Please select a single child track from the first group","Move Track Down in All Groups", 0)
     return
   end
 
@@ -66,8 +66,8 @@ function main()
   local track = GetSelectedTrack(0, 0)
   local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
 
-  if track_idx == 0 then
-    ShowMessageBox("Please select a child track in the folder", "Move Track Down in All Groups", 0)
+  if track_idx == 0 or track_idx >= tracks_per_group then
+    ShowMessageBox("Please select a child track in the first folder", "Move Track Down in All Groups", 0)
     return
   end
 

@@ -28,8 +28,8 @@ function main()
   Undo_BeginBlock()
 
   local selected_tracks = CountSelectedTracks(0)
-  if selected_tracks > 1 then
-    ShowMessageBox("Please select a single child track","Move Track Up in All Groups", 0)
+  if selected_tracks > 1 or selected_tracks == 0 then
+    ShowMessageBox("Please select a single child track from the first group","Move Track Up in All Groups", 0)
     return
   end
 
@@ -74,8 +74,12 @@ function main()
     ShowMessageBox("Please select a child track in the folder", "Move Track Up in All Groups", 0)
     return
   end
+  
   if track_idx == 0 then
     ShowMessageBox("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
+    return
+  elseif track_idx >= tracks_per_group - 1 then
+    ShowMessageBox("Please select a child track in the first folder", "Move Track Up in All Groups", 0)
     return
   end
 
