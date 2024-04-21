@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.6
+@version 1.7
 @changelog
-  Add RCflator Ultimate
+  Add RCPhaseAlign
 @metapackage
 @provides
   RCComp.jsfx
@@ -15,5 +15,6 @@
   RCParallelK.jsfx
   RCMasteringEQ.jsfx
   RCInflator.jsfx
+  RCPhaseAlign.jsfx
 @about
   These plugins are suitable for classical music mixing and mastering.
