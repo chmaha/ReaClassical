@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.3
+@version 24.16.4
 @changelog
-  Move/Delete Track: Show message if multiple tracks are selected
-  Move/Delete Track: Add logic to prevent moving source tracks directly
-  Delete Track: Prevent function from acting on a folder of two tracks
+  PDF Manual: Tweak free plugins section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
