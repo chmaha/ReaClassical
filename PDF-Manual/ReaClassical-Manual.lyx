@@ -10688,7 +10688,8 @@ EQ:
 \series bold
 RCChannelEQ
 \series default
- (ReaClassical Channel EQ, available in ReaPack via my 
+ (ReaClassical Channel EQ, included in the ReaClassical portable install
+ and available in ReaPack via my 
 \begin_inset CommandInset href
 LatexCommand href
 name "repository"
@@ -10714,7 +10715,8 @@ Baxandall
 \series bold
 RCMasteringEQ
 \series default
- (ReaClassical Mastering EQ, available in ReaPack via my 
+ (ReaClassical Mastering EQ, included in the ReaClassical portable install
+ and available in ReaPack via my 
 \begin_inset CommandInset href
 LatexCommand href
 name "repository"
@@ -10774,6 +10776,7 @@ target "https://forum.cockos.com/showthread.php?t=213501"
 .
  An amazing Fabfilter Pro-Q clone for detailed EQ work.
  Also comes with ReSpectrum which is an excellent analyzer.
+ Both are included with the ReaClassical install.
 \end_layout
 
 \begin_layout Standard
@@ -10785,7 +10788,8 @@ Compression:
 \series bold
 RCCompressor
 \series default
- (ReaClassical compressor, available in my repository).
+ (ReaClassical compressor, included in the ReaClassical portable install
+ and available in my repository).
  Uses DSP from Express Bus Compressor by Stillwell.
  Default settings and ranges tuned to classical music with auto release.
  Use as an insert.
@@ -10804,7 +10808,8 @@ Katz
 \begin_inset Quotes brd
 \end_inset
 
- compressor, available in my repository).
+ compressor, included in the ReaClassical portable install and available
+ in my repository).
  Also uses DSP from Express Bus Compressor by Stillwell to recreate the
  Bob Katz 
 \begin_inset Quotes bld
@@ -10831,7 +10836,8 @@ Limiter:
 \series bold
 RCLimiter
 \series default
- (ReaClassical limiter, available in my repository).
+ (ReaClassical limiter, included in the ReaClassical portable install and
+ available in my repository).
  Uses DSP from Smooth Limiter by Geraint Luff to which I added 4x oversampling
  code.
  Defaults are tuned to classical music with true-peak and lookahead functionalit
@@ -10917,7 +10923,7 @@ Sonnox Inflator
 \series default
  Try RCInflator Ultimate (a clone of the Sonnox product) or MagicFairyDust
  on the final stereo bus.
- Both effects are included in the portable install.
+ Both effects are included in the ReaClassical portable install.
 \end_layout
 
 \begin_layout Standard
@@ -10993,7 +10999,8 @@ Denoiser Pro
 \series bold
 RCDeEss Standard 
 \series default
-(ReaClassical de-esser, available in my repository).
+(ReaClassical de-esser, included in the ReaClassical portable install and
+ available in my repository).
  Uses DSP from airwindows DeEss.
 \end_layout
 
@@ -11002,7 +11009,8 @@ RCDeEss Standard
 \series bold
 RCDeEss Advanced
 \series default
- (ReaClassical advanced de-esser, available in my repository).
+ (ReaClassical advanced de-esser, included in the ReaClassical portable
+ install and available in my repository).
  Uses DSP from airwindows DeBess.
  
 \end_layout
@@ -11016,7 +11024,8 @@ Utilities:
 \series bold
 RCGain
 \series default
- (ReaClassical gain plugin, available in my repository).
+ (ReaClassical gain plugin, included in the ReaClassical portable install
+ and available in my repository).
  Uses DSP from airwindows PurestGain.
  Useful before or after plugins in lieu of a native channel trim knob.
 \end_layout
@@ -11033,9 +11042,23 @@ JS Loudness Meter Peak/RMS/LUFS
 \begin_layout Itemize
 
 \series bold
+RCTime&PhaseTool
+\series default
+ (ReaClassical timing and phase tool, included in the ReaClassical portable
+ install and available in my repository).
+ Add to a spot microphone channel.
+ Achieves something similar to Merging's PanNoir to correctly align spot
+ microphone channels with the main pair based on a fundamental Euclidean
+ geometric relation to create a more impactful stereo image.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
 RCDither
 \series default
- (ReaClassical dither plugin, available in my repository).
+ (ReaClassical dither plugin, included in the ReaClassical portable install
+ and available in my repository).
  Uses DSP from airwindows Not-Just-Another-Dither (Monitoring version) here
  called 
 \emph on
@@ -11048,7 +11071,7 @@ Avant-garde
 \end_layout
 
 \begin_layout Standard
-For descriptions of the other 70+ jsfx airwindows ports (covering dithers,
+For descriptions of the other 100+ jsfx airwindows ports (covering dithers,
  compressors, console emulations, saturation/distortion, delays, bass-specific,
  brightness, hard and soft clippers, reverbs, tape/vinyl emulations, exciters,
  stereo wideners, monitoring utilities and more, please see the 
@@ -11069,7 +11092,7 @@ literal "false"
 
 \end_inset
 
- repo into ReaPack.
+ repository into ReaPack.
 \begin_inset Newpage pagebreak
 \end_inset
 
