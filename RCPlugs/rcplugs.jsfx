@@ -2,7 +2,7 @@
 @author chmaha
 @version 1.7
 @changelog
-  Add RCPhaseAlign
+  Add RCTimePhaseTool
 @metapackage
 @provides
   RCComp.jsfx
@@ -15,6 +15,6 @@
   RCParallelK.jsfx
   RCMasteringEQ.jsfx
   RCInflator.jsfx
-  RCPhaseAlign.jsfx
+  RCTimePhase.jsfx
 @about
   These plugins are suitable for classical music mixing and mastering.
