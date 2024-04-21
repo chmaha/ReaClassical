@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="2a19a86e5d4d3f347f9ab32bf34d308fe20be270">
+<index version="1" name="chmaha Scripts" commit="6214a09bbc2ff867441b5d7cfe57588d45189496">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -94,18 +94,18 @@ Replace M_PI with $pi]]></changelog>
         <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/c6f02435842c51326ae92d1e7c83197607521a90/RCPlugs/RCMasteringEQ.jsfx</source>
       </version>
       <version name="1.7" author="chmaha" time="2024-04-21T10:21:15Z">
-        <changelog><![CDATA[Add RCPhaseAlign]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCDeEss_Advanced.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCDither.jsfx</source>
-        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCChannelEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCParallelK.jsfx</source>
-        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCMasteringEQ.jsfx</source>
-        <source file="RCInflator.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCInflator.jsfx</source>
-        <source file="RCPhaseAlign.jsfx">https://github.com/chmaha/ReaClassical/raw/2a19a86e5d4d3f347f9ab32bf34d308fe20be270/RCPlugs/RCPhaseAlign.jsfx</source>
+        <changelog><![CDATA[Add RCTimePhaseTool]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCDeEss_Advanced.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCDither.jsfx</source>
+        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCChannelEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCMasteringEQ.jsfx</source>
+        <source file="RCInflator.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCInflator.jsfx</source>
+        <source file="RCTimePhase.jsfx">https://github.com/chmaha/ReaClassical/raw/6214a09bbc2ff867441b5d7cfe57588d45189496/RCPlugs/RCTimePhase.jsfx</source>
       </version>
     </reapack>
   </category>
