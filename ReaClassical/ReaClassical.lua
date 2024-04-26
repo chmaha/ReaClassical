@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.4
+@version 24.16.5
 @changelog
-  PDF Manual: Tweak free plugins section
+  Project S-D Markers:Fix marker numbers when deleting
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
