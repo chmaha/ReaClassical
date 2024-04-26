@@ -32,7 +32,7 @@ function main()
       if project == nil then
         break
       else
-        DeleteProjectMarker(project, 1000, false)
+        DeleteProjectMarker(project, 1001, false)
       end
       i = i + 1
     end
