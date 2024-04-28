@@ -1,0 +1,186 @@
+NoIndex: true
+desc:RCConsoleBus (chmaha)
+author: chmaha
+about:
+  Uses DSP from "Non-Linear Processor" by Lubomir I. Ivanov (GPL license)
+  https://raw.githubusercontent.com/chmaha/Non-linear-processor/main/nonlinear.jsfx
+  JSFX version released under GPLv3 license
+
+slider1:25<0,100,0.01>Drive (%)
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+B = 50;
+C = 24;
+D = 0;
+E = 1;
+
+//set limits
+n = 100000;
+n2 = 2*n;
+n3 = 3*n;
+n4 = 4*n;
+
+//push ar0
+i = 0;
+loop(n,
+m[i] = (rand(2)-1);
+i += 1;
+);
+
+//push ar1
+i = n;
+loop(n,
+m[i] = (rand(2)-1);
+i += 1;
+);
+
+//push ar2
+i = 2*n;
+loop(n,
+m[i] = (rand(2)-1);
+i += 1;
+);
+
+//push ar3
+i = 3*n;
+loop(n,
+m[i] = (rand(2)-1);
+i += 1;
+);
+
+//sys vars
+pi = 3.1415926535897932384626433832795;
+sr = srate;
+
+//lp coeff
+lpk0 = 0.121;
+lpk1 = -0.56;
+
+//hp coeff
+// - at 30Hz
+hpk1 = exp(-188.49555921538759430775860299677/sr);
+hpk0 = 1 - hpk1;
+
+//nf coeff
+// - at 2000Hz
+nfk1 = exp(-12566.370614359172953850573533118/sr);
+nfk0 = 1 - nfk1;
+
+//ls coeff
+// - at 300Hz
+lsk0 = exp(-1884.9555921538759430775860299677/sr);
+lsk1 = 1 - lsk0;
+
+//begin
+pdc_delay = 2;
+pdc_bot_ch = 0;
+pdc_top_ch = 2;
+i = 0;
+
+@slider
+
+A = slider1;
+
+//drive
+drv = A/200+0.001;
+pidrv = pi*drv;
+sinpidrv = 1/sin(pidrv);
+
+//ranges
+r1 = B/300;
+r2 = 1/2^C;
+
+//outgain
+outgain = 10^(D/20);
+E == 1 ? outgain = -outgain;
+
+
+@block
+
+//average amplitude
+avs = (s0+s1)/2;
+
+//interpolate ar2 values
+tgt_min2 = avs*m[i+2*n]*r1;
+d_min2 = (tgt_min2-src_min2)/samplesblock;
+min2 = src_min2;
+src_min2 = tgt_min2;
+
+//interpolate ar3 values
+tgt_min3 = avs*m[i+3*n]*r1;
+d_min3 = (tgt_min3-src_min3)/samplesblock;
+min3 = src_min3;
+src_min3 = tgt_min3;
+
+//average for gfx
+min_av = (tgt_min2+tgt_min3)/2;
+
+
+@sample
+
+s0 = spl0;
+s1 = spl1;
+
+//seeds
+min0 = m[i]*r2;
+min1 = m[i+n]*r2;
+min2 += d_min2;
+min3 += d_min3;
+min2s = min2*0.05;
+min3s = min3*0.05;
+min2h = min2*0.005;
+min3h = min3*0.005;
+min2d = min2*5;
+min3d = min3*5;
+
+//floor reduction & waveshaper
+(s0 && s1) == 0 ? (
+  wsoutl = s0;
+  wsoutr = s1;
+) : (
+  //fr
+  nfout0 = nfk0*min0 + nfk1*nfout0;
+  nfout1 = nfk0*min1 + nfk1*nfout1;
+  inl = spl0 + nfout0;
+  inr = spl1 + nfout1;
+
+  //waveshaper
+  wsoutl = sin(pidrv*inl)*(sinpidrv+min2d);
+  wsoutr = sin(pidrv*inr)*(sinpidrv+min3d);
+);
+
+//lp
+fs2l = fs1l;
+fs1l = fs0l;
+fs0l = wsoutl;
+lpoutl = (lpk0-min2)*fs0l + (lpk1+min3)*(fs1l+fs2l);
+fs2r = fs1r;
+fs1r = fs0r;
+fs0r = wsoutr;
+lpoutr = (lpk0-min3)*fs0r + (lpk1+min2)*(fs1r+fs2r);
+
+//ls
+ls0l = (lsk1-min2s)*lpoutl + (lsk0+min3s)*ls0l;
+ls0r = (lsk1-min3s)*lpoutr + (lsk0+min2s)*ls0r;
+lsoutl = lpoutl + ls0l*0.25;
+lsoutr = lpoutr + ls0r*0.25;
+
+//hp
+hptmpl = (hpk0+min2h)*lsoutl + (hpk1-min3h)*hptmpl;
+hptmpr = (hpk0+min3h)*lsoutr + (hpk1-min2h)*hptmpr;
+fxoutl = lsoutl - hptmpl;
+fxoutr = lsoutr - hptmpr;
+
+//counter
+i += 1;
+i > n ? i = 0;
+
+//output
+spl0 = fxoutl*outgain;
+spl1 = fxoutr*outgain;

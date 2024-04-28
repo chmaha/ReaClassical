@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.7
+@version 1.8
 @changelog
-  Add RCTimePhaseTool
+  Add 3 RCConsole Plugins
 @metapackage
 @provides
   RCComp.jsfx
@@ -16,5 +16,8 @@
   RCMasteringEQ.jsfx
   RCInflator.jsfx
   RCTimePhase.jsfx
+  RCConsoleBus.jsfx
+  RCConsoleChannel.jsfx
+  RCConsoleFinalizer.jsfx
 @about
   These plugins are suitable for classical music mixing and mastering.
