@@ -19,18 +19,16 @@ ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua"
 rcver=$(curl -sS "$rcver_txt" | awk '/@version/{split($2, version, "."); print version[1]}')
 
-echo -e "Welcome to the ReaClassical installer...\n"
-sleep 2
-echo "Versions:"
-echo "========="
-echo "REAPER $ver"
-echo -e "ReaClassical $rcver\n"
-sleep 2
-
 major=$(echo $ver | awk -F. '{print $1}')
 minor=$(echo $ver | awk -F. '{print $2}')
 rcfolder="ReaClassical_${rcver}"
 arch=$(uname -m)
+
+printf "Welcome to the ReaClassical installer...\n\n"
+sleep 2
+printf "Versions: REAPER $ver ($arch), ReaClassical $rcver\n\n"
+sleep 2
+
 
 date_suffix=$(date +%s | sha256sum | cut -c1-5)
 
@@ -43,7 +41,7 @@ if [ -z "$temp_dir" ]; then
     mkdir -p "$temp_dir"
 fi
 
-echo "Downloading REAPER ${major}.${minor} from reaper.fm..."
+echo "Downloading REAPER from reaper.fm..."
 sleep 2
 reaper_output="$temp_dir/reaper${major}${minor}_linux_${arch}.tar.xz"
 reaper_url="https://reaper.fm/files/${major}.x/reaper${major}${minor}_linux_${arch}.tar.xz"

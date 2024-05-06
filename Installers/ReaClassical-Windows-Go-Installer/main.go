@@ -24,16 +24,20 @@ func main() {
 		rcfolder = fmt.Sprintf("ReaClassical_%s", rcver)
 	)
 
+	bool := false
+	arch := "32-bit"
+	if is64Bit() {
+		bool = true
+		arch = "64-bit"
+	}
+
 	fmt.Println("Welcome to the ReaClassical installer...")
-	time.Sleep(2 * time.Second)
 	fmt.Println()
-	fmt.Println("Versions:")
-	fmt.Println("=========")
-	fmt.Printf("REAPER %s\n", pkgver)
-	fmt.Printf("ReaClassical %s\n\n", rcver)
+	time.Sleep(2 * time.Second)
+	fmt.Printf("Versions: REAPER %s (%s), ReaClassical %s\n\n", pkgver, arch, rcver)
 	time.Sleep(2 * time.Second)
 
-	if is64Bit() {
+	if bool {
 		Install64bit(rcfolder, pkgver, rcver)
 	} else {
 		Install32bit(rcfolder, pkgver, rcver)
