@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.5
+@version 24.16.6
 @changelog
-  Project S-D Markers:Fix marker numbers when deleting
+  Update metering for additional themes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
