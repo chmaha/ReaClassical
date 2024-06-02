@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.6
+@version 24.16.7
 @changelog
-  Update metering for additional themes
+  Remove previous backup files before creating new ones
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
