@@ -66,6 +66,7 @@ function copy_file(source, destination)
         destination_file_exists:close()
         -- Backup existing destination file
         local backup_destination = destination .. ".backup"
+        os.remove(backup_destination)
         local success, err = os.rename(destination, backup_destination)
         if not success then
             ShowMessageBox("Error creating backup: " .. err, "ReaClassical Updater", 0)
