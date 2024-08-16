@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.8
+@version 24.16.9
 @changelog
-  Add ReaClassical dialog when trying to run F4 with no media items
+  Limit to one RoomTone track per project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
