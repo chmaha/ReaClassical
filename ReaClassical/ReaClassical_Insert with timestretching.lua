@@ -46,6 +46,16 @@ function main()
     end
 
     if dest_count + source_count == 4 then
+
+        local selected_items = {}
+        local num_of_items = CountSelectedMediaItems()
+        
+        if num_of_items == 0 then
+            Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
+            ShowMessageBox("Please add media items before running.", "Insert with timestretching", 0)
+            return
+        end
+
         move_to_project_tab(dest_proj)
         lock_items()
         move_to_project_tab(source_proj)
@@ -73,8 +83,7 @@ function main()
         GoToMarker(0, 996, false)
         MoveEditCursor(-xfade_len, false) -- move cursor back xfade length
         Main_OnCommand(40625, 0)          -- Time Selection: Set start point
-        local selected_items = {}
-        local num_of_items = CountSelectedMediaItems()
+
         for i = 0, num_of_items - 1, 1 do
             selected_items[i] = GetSelectedMediaItem(0, i)
         end
