@@ -26,9 +26,15 @@ local route_to_track, trackname_check
 ---------------------------------------------------------------------
 
 function main()
-    local folders, _, _ = folder_check()
+    local folders, _, _, rt_count = folder_check()
     if folders == 0 then
         ShowMessageBox("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
+            "Add RoomTone Track", 0)
+        return
+    end
+
+    if rt_count > 0 then
+        ShowMessageBox("Only one RoomTone track is allowed per project.",
             "Add RoomTone Track", 0)
         return
     end
@@ -84,6 +90,7 @@ function folder_check()
     local folders = 0
     local tracks_per_group = 1
     local total_tracks = CountTracks(0)
+    local rt_count = 0
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local rcm = trackname_check(track, "^RCMASTER")
@@ -94,9 +101,11 @@ function folder_check()
             folders = folders + 1
         elseif folders == 1 and not (rcm or send or bus or rt) then
             tracks_per_group = tracks_per_group + 1
+        elseif rt then
+            rt_count = rt_count + 1
         end
     end
-    return folders, tracks_per_group, total_tracks
+    return folders, tracks_per_group, total_tracks, rt_count
 end
 
 ---------------------------------------------------------------------
