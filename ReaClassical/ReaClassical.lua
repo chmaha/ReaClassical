@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.7
+@version 24.16.8
 @changelog
-  Remove previous backup files before creating new ones
+  Add ReaClassical dialog when trying to run F4 with no media items
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
