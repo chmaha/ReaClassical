@@ -213,11 +213,15 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
+        if trackname_check(track, "^REF") then
+            SetTrackColor(track, colors.ref)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+        end
         if trackname_check(track, "RCMASTER") then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -521,6 +525,7 @@ function create_track_table()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
         if parent == 1 then
@@ -545,6 +550,9 @@ function create_track_table()
         elseif trackname_check(track, "^RoomTone") or rt_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", 1)
             GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", 1)
+        elseif trackname_check(track, "^REF") or ref_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "REF", 1)
         elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else
@@ -581,6 +589,7 @@ function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)
+    add_spacer(rcmaster_index+1)
 end
 
 ---------------------------------------------------------------------

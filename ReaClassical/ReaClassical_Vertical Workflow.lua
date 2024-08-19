@@ -219,7 +219,7 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")) then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF")) then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -230,10 +230,10 @@ function solo()
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
@@ -297,13 +297,16 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-
+        if trackname_check(track, "^REF") then
+            SetTrackColor(track, colors.ref)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+        end
         if trackname_check(track, "RCMASTER") then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
 
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -641,6 +644,9 @@ function create_track_table()
         elseif trackname_check(track, "^RoomTone") or rt_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", 1)
             GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", 1)
+        elseif trackname_check(track, "^REF") or ref_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "REF", 1)
         elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else
@@ -677,6 +683,7 @@ function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)
+    add_spacer(rcmaster_index+1)
 end
 
 ---------------------------------------------------------------------

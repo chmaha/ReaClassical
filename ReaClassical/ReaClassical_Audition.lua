@@ -146,7 +146,7 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")) then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF")) then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -157,7 +157,7 @@ function solo()
         if IsTrackSelected(track) then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^RCMASTER")) then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
             if IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 1)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
@@ -188,6 +188,17 @@ function solo()
             elseif muted == 0 then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+            end
+        end
+
+        if trackname_check(track, "^REF") then
+            if IsTrackSelected(track) then
+                Main_OnCommand(40340,0) -- unsolo all tracks
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+            else
+                SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             end
         end
 
@@ -235,11 +246,15 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
+        if trackname_check(track, "^REF") then
+            SetTrackColor(track, colors.ref)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+        end
         if trackname_check(track, "RCMASTER") then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF")  then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

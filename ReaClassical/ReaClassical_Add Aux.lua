@@ -90,9 +90,10 @@ function folder_check()
         local send = trackname_check(track, "^@")
         local bus = trackname_check(track, "^#")
         local rt = trackname_check(track, "^RoomTone")
+        local ref = trackname_check(track, "^REF")
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1
-        elseif folders == 1 and not (rcm or send or bus or rt) then
+        elseif folders == 1 and not (rcm or send or bus or rt or ref) then
             tracks_per_group = tracks_per_group + 1
         end
     end

@@ -41,7 +41,7 @@ function main()
     local track = GetTrack(0, i)
     local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    local patterns = { "^M:", "^@", "^#", "^RCMASTER", "^RoomTone" }
+    local patterns = { "^M:", "^@", "^#", "^RCMASTER", "^RoomTone", "^REF" }
     local bus = false
     for _, pattern in ipairs(patterns) do
       if string.match(name, pattern) then
