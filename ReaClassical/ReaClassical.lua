@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.16.9
+@version 24.17
 @changelog
-  Limit to one RoomTone track per project
+  Add Reference Track function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -64,6 +64,7 @@
   [main] ReaClassical_Move Track Down in All Groups.lua
   [main] ReaClassical_Move Track Up in All Groups.lua
   [main] ReaClassical_Delete Track From All Groups.lua
+  [main] ReaClassical_Add Ref Track.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
