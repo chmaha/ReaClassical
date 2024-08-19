@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.17
+@version 24.17.1
 @changelog
-  Add Reference Track function
+  Fix RoomTone automation
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
