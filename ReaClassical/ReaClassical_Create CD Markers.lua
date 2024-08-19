@@ -606,6 +606,10 @@ function room_tone()
     SetMediaItemSelected(item, 1)
   end
 
+  -- hacky way to activate item volume envelopes for function
+  Main_OnCommand(40693, 0) -- setvolume envelope active
+  Main_OnCommand(40693, 0) -- setvolume envelope inactive
+
   for i = 0, num_of_first_track_items - 1 do
     local item = GetTrackMediaItem(first_track, i)
     convert_fades_to_env(item)
