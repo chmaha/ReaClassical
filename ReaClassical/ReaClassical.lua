@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.17.1
+@version 24.17.2
 @changelog
-  Fix RoomTone automation
+  Audition: Do not use solo for full mix playback
+  Audition: Remove superfluous code
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
