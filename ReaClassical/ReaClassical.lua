@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.17.2
+@version 24.17.3
 @changelog
-  Audition: Do not use solo for full mix playback
-  Audition: Remove superfluous code
+  Item navigation (Q/W): navigate to nearest edge not just start
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
