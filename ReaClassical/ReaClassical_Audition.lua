@@ -169,27 +169,10 @@ function solo()
             end
         end
 
-        local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
-
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER")) and muted == 0 then
-            local receives = GetTrackNumSends(track, -1)
-            for i = 0, receives - 1, 1 do -- loop through receives
-                local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
-                if origin == selected_track then
-                    SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-                    SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-                    break
-                end
-            end
-        end
-
         if trackname_check(track, "^RoomTone") then
             if IsTrackSelected(track) then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            -- elseif muted == 0 then
-            --     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-            --     SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             end
         end
 
