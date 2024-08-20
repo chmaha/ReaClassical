@@ -141,7 +141,7 @@ end
 function solo()
     Main_OnCommand(40491, 0) -- un-arm all tracks for recording
     local selected_track = GetSelectedTrack(0, 0)
-    -- local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
@@ -153,12 +153,14 @@ function solo()
             end
         end
 
-
-        if IsTrackSelected(track) then
-            SetMediaTrackInfo_Value(track, "I_SOLO", 2)
-            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
-            if IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        if not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
+            if IsTrackSelected(track) and parent ~= 1 then
+                SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            elseif IsTrackSelected(track) then
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            elseif IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 1)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             else
@@ -185,9 +187,9 @@ function solo()
             if IsTrackSelected(track) then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            elseif muted == 0 then
-                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-                SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+            -- elseif muted == 0 then
+            --     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            --     SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             end
         end
 
