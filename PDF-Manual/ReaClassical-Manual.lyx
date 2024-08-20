@@ -2327,7 +2327,7 @@ Items & Markers
 \end_layout
 
 \begin_layout Standard
-You can easily shuffle back and forth between items and markers by using the 
+You can easily shuffle back and forth between item edges by using the 
 \begin_inset ERT
 status open
 
@@ -9338,7 +9338,7 @@ keys{Q}
 
 \end_inset
 
- Previous Item / previous crossfade (when in crossfade editor view)
+ Previous Item edge / previous crossfade (when in crossfade editor view)
 \end_layout
 
 \begin_layout Labeling
@@ -9355,7 +9355,7 @@ keys{W}
 
 \end_inset
 
- Next Item / next crossfade (when in crossfade editor view)
+ Next Item edge / next crossfade (when in crossfade editor view)
 \end_layout
 
 \begin_layout Labeling
