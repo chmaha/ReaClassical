@@ -9719,6 +9719,25 @@ status open
 
 
 \backslash
+keys{
+\backslash
+Alt+C}
+\end_layout
+
+\end_inset
+
+ Open Big Clock
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
 keys{T}
 \end_layout
 
