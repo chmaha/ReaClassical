@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.17.3
+@version 24.18
 @changelog
-  Item navigation (Q/W): navigate to nearest edge not just start
+  S-D DEST markers: Add edge/xfade check
+  Assembly line: Require destination IN marker specifically
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
