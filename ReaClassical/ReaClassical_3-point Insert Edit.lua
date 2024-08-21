@@ -28,7 +28,7 @@ local copy_source, move_to_project_tab
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, _ = markers()
+    local proj_marker_count, source_proj, dest_proj, dest_in, _, _, _, _, source_count, pos_table, _ = markers()
 
     if proj_marker_count == 1 then
         ShowMessageBox("Only one S-D project marker was found."
@@ -43,7 +43,7 @@ function main()
     end
 
     ripple_lock_mode()
-    if dest_count == 1 and source_count == 2 then
+    if dest_in == 1 and source_count == 2 then
         move_to_project_tab(dest_proj)
         lock_items()
         move_to_project_tab(source_proj)
