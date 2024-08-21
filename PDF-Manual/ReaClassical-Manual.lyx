@@ -3280,6 +3280,18 @@ keys{5}
  to make the 2-,
  3- or 4-point edit.
  depending on how many markers you set.
+ If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a xfade or item edge,
+ the function will alert you (pressing OK places the marker anyway).
+ This helps avoid awkward 
+\begin_inset Quotes bld
+\end_inset
+
+sliver
+\begin_inset Quotes brd
+\end_inset
+
+ edits that can happen especially if you are zoomed out and placing markers by ear.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -7659,6 +7671,21 @@ keys{5}
 
 ) it doesn't matter what is highlighted at the time.
  Obviously this is only useful if using a vertical take system approach.
+\end_layout
+
+\begin_layout Standard
+If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a xfade or item edge,
+ the function will alert you (pressing OK places the marker anyway).
+ This helps avoid awkward 
+\begin_inset Quotes bld
+\end_inset
+
+sliver
+\begin_inset Quotes brd
+\end_inset
+
+ edits that can happen especially if you are zoomed out and placing markers by ear.
+ 
 \end_layout
 
 \begin_layout Standard
