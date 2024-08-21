@@ -3167,9 +3167,26 @@ keys{A}
 \end_inset
 
  .
- This includes any @ aux or # submix track routing in the signal path if the bus is unmuted.
- To hear a single track (e.g.
- the main microphone pair on the parent track without any children) and without any other routing press 
+ This includes any @ aux or # submix track routing in the signal path.
+ You can easily and quickly create your own custom audition mix by engaging solo or mute buttons on the mixer,
+ aux and submix tracks (either with transport stopped or on the fly) and using hover + 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ on the parent track.
+ You can therefore listen to anything from the full mix down to examining just the woodwinds submix or a single reverb bus.
+ Alternatively,
+ to quickly hear a single track direct (e.g.
+ the solo violin microphone) and without any other routing press 
 \begin_inset ERT
 status open
 
@@ -3334,6 +3351,77 @@ When using a vertical workflow,
 \begin_layout Standard
 The downside to this workflow when using a vertical approach is that the source and destination markers can get in each other’s way visually if the takes aren’t somewhat staggered however the process still works as expected.
  See below for a razor editing alternative.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Optional:
+ If you are worried about accidentally moving markers and items during precise S-D or assembly editing,
+ engage the padlock icon in the topleft of the ReaClassical window.
+ By default with the latest ReaClassical project template,
+ it should prevent manual left/right item movement and marker dragging (while still allowing for S-D editing with ripple).
+ Even though you can't move S-D markers by dragging with this lock mode engaged,
+ you can still use the shortcuts 
+\emph default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+,
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+,
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+
+\emph on
+ to change marker location.
+ Just remember to disengage lock mode when you enter the fade editor or else you won't be able to move the right green item of the crossfade!
 \end_layout
 
 \begin_layout Subsubsection
@@ -7229,6 +7317,10 @@ keys{A}
 \end_inset
 
  function honors any aux or submix track routing.
+ The main function respects soloed or muted @ aux,
+ # submix and roomtone tracks so you can easily and quickly set up a custom audition mix including a full mix,
+ just the string submix,
+ a single reverb bus and anything else you can imagine!
  With 
 \begin_inset ERT
 status open
@@ -7250,8 +7342,7 @@ shift+A}
 only 
 \emph default
 hear that track (routed through any optional submix tracks to RCMASTER).
- Both functions respect muted @ aux,
- # submix and roomtone tracks.
+ 
 \end_layout
 
 \begin_layout Standard
