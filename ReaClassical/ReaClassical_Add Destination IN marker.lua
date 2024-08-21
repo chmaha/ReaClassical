@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_color_table, get_path
+local main, get_color_table, get_path, edge_check
 
 ---------------------------------------------------------------------
 
@@ -38,7 +38,11 @@ function main()
     end
 
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
-    DeleteProjectMarker(NULL, 996, false)
+    if edge_check(cur_pos) == true then
+        local response = ShowMessageBox("The marker you are trying to add would either be on or close to an item edge or existing crossfade. Continue?", "Add Dest-IN Marker", 4)
+        if response ~= 6 then return end
+    end
+    --DeleteProjectMarker(NULL, 996, false)
     local colors = get_color_table()
     AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
 end
@@ -58,6 +62,35 @@ function get_path(...)
     local pathseparator = package.config:sub(1,1);
     local elements = {...}
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function edge_check(cur_pos)
+    local first_track = GetTrack(0,0)
+    local num_of_items = CountTrackMediaItems(first_track)
+    local new_pos = 0
+    local clash = false
+    for i = 0, num_of_items - 1 do
+        local item = GetTrackMediaItem(first_track, i)
+        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_fadein_len = GetMediaItemInfo_Value(item, "D_FADEINLEN")
+        local item_fadein_end = item_start + item_fadein_len
+        if cur_pos > item_start and cur_pos < item_fadein_end + 0.5 then 
+            clash = true
+            break 
+        end
+        local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local item_end = item_start + item_length
+        local item_fadeout_len = GetMediaItemInfo_Value(item, "D_FADEOUTLEN")
+        local item_fadeout_start = item_end - item_fadeout_len
+        if cur_pos > item_fadeout_start - 0.5 and cur_pos < item_end then
+            clash = true
+            break 
+        end
+    end
+
+    return clash
 end
 
 ---------------------------------------------------------------------
