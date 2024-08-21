@@ -1,9 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 24.18
+@version 24.18.1
 @changelog
-  S-D DEST markers: Add edge/xfade check
-  Assembly line: Require destination IN marker specifically
+  Add reference track shortcut to keymap
+  PDF Manual: Add edge/xfade check info
+  PDF Manual: Add big clock info
+  PDF Manual: Add auditioning info
+  PDF Manual: Add lock mode info
+  ReaClassical default template: Set up item L/R + marker locking
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
