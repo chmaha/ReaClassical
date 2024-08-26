@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.18.2
+@version 24.18.3
 @changelog
-  Allow user to set edge/xfade check range via F5
-  PDF Manual: Add check range info 
+  ReaClassical Preferences: Add checks for invalid entries
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
