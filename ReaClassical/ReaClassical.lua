@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.19
+@version 24.19.1
 @changelog
-  New: Add Source Markers to edge of item(s)
+  Make move to & zoom to source/destination markers multi-tab S-D editing aware
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
