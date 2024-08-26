@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_color_table, get_path, edge_check
+local main, get_color_table, get_path, edge_check, return_check_length
 
 ---------------------------------------------------------------------
 
@@ -67,6 +67,7 @@ end
 ---------------------------------------------------------------------
 
 function edge_check(cur_pos)
+    local check_length = return_check_length()
     local first_track = GetTrack(0,0)
     local num_of_items = CountTrackMediaItems(first_track)
     local new_pos = 0
@@ -76,7 +77,7 @@ function edge_check(cur_pos)
         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_fadein_len = GetMediaItemInfo_Value(item, "D_FADEINLEN")
         local item_fadein_end = item_start + item_fadein_len
-        if cur_pos > item_start and cur_pos < item_fadein_end + 0.5 then 
+        if cur_pos > item_start and cur_pos < item_fadein_end + check_length then 
             clash = true
             break 
         end
@@ -84,13 +85,26 @@ function edge_check(cur_pos)
         local item_end = item_start + item_length
         local item_fadeout_len = GetMediaItemInfo_Value(item, "D_FADEOUTLEN")
         local item_fadeout_start = item_end - item_fadeout_len
-        if cur_pos > item_fadeout_start - 0.5 and cur_pos < item_end then
+        if cur_pos > item_fadeout_start - check_length and cur_pos < item_end then
             clash = true
             break 
         end
     end
 
     return clash
+end
+
+---------------------------------------------------------------------
+
+function return_check_length()
+    local check_length = 0.5
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[7] then check_length = table[7]/1000 end
+    end
+    return check_length
 end
 
 ---------------------------------------------------------------------
