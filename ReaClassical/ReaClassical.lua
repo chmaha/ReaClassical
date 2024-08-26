@@ -1,13 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.18.1
+@version 24.18.2
 @changelog
-  Add reference track shortcut to keymap
-  PDF Manual: Add edge/xfade check info
-  PDF Manual: Add big clock info
-  PDF Manual: Add auditioning info
-  PDF Manual: Add lock mode info
-  ReaClassical default template: Set up item L/R + marker locking
+  Allow user to set edge/xfade check range via F5
+  PDF Manual: Add check range info 
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
