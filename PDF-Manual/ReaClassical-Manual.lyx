@@ -3308,7 +3308,28 @@ sliver
 \end_inset
 
  edits that can happen especially if you are zoomed out and placing markers by ear.
- 
+ You can customize the check range via ReaClassical Preferences (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+).
+ The check range (in milliseconds) is the distance beyond an item edge,
+ fade or crossfade.
+ For example,
+ setting to 0 would only check for placement 
+\emph on
+inside 
+\emph default
+a fade or crossfade.
 \end_layout
 
 \begin_layout Standard
@@ -7460,10 +7481,11 @@ Description:
  
 \emph default
 Set S-D crossfade length,
- CD track offset and INDEX0 pre-gap length,
+ CD track offset and INDEX0 pre-gap length (CD player countdown into next track),
  album lead-out time,
- Prepare Takes colors.
- 
+ Prepare Takes colors,
+ Mastering Mode,
+ S-D Destination Marker Check Range (ms)
 \end_layout
 
 \begin_layout Standard
@@ -7513,6 +7535,13 @@ Prepare Takes:
 
  set to 1) uses random colors per item group.
  This can help see where edits have come from but because of the randomness may require several iterations until you avoid clashes or eye-sores!
+ Mastering mode should be set to either 0 (disabled) or 1 (enabled).
+ The user can change the checking range (distance beyond an item edge/fade or crossfade) when placing destination IN and OUT markers.
+ Setting to 0 would just check if the marker would be placed 
+\emph on
+inside
+\emph default
+ a item fade or crossfade.
 \end_layout
 
 \begin_layout Standard
@@ -7776,7 +7805,28 @@ sliver
 \end_inset
 
  edits that can happen especially if you are zoomed out and placing markers by ear.
- 
+ You can set the check range via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+.
+ The check range (in milliseconds) is the distance beyond an item edge,
+ fade or crossfade.
+ For example,
+ setting to 0 would only check for placement 
+\emph on
+inside 
+\emph default
+a fade or crossfade.
 \end_layout
 
 \begin_layout Standard
