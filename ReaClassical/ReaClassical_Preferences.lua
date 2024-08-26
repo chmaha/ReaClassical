@@ -28,7 +28,7 @@ function main()
     local pass
     local ret, input = display_prefs()
     if ret then pass = pref_check(input) end
-    if pass == 1 then save_prefs(input) end
+    if pass == true then save_prefs(input) end
 end
 
 -----------------------------------------------------------------------
@@ -62,12 +62,20 @@ end
 -----------------------------------------------------------------------
 
 function pref_check(input)
-    local pass = 1
+    local pass = true
+    local valid_numbers = true
     local table = {}
-    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if #table ~= 7 then
-        ShowMessageBox('Empty preferences not allowed. Using previously saved values or defaults', "Warning", 0)
-        pass = 0
+    for entry in input:gmatch('([^,]+)') do
+        if tonumber(entry) == nil or tonumber(entry) < 0 then valid_numbers = false end
+        table[#table + 1] = entry 
+    end
+
+    -- separate check for binary options
+    if tonumber(table[5]) > 1 or tonumber(table[6]) > 1 then valid_numbers = false end
+
+    if #table ~= 7 or valid_numbers == false then
+        ShowMessageBox('Invalid or empty preferences are not allowed. Using previously saved values or defaults', "Warning", 0)
+        pass = false
     end
     return pass
 end
