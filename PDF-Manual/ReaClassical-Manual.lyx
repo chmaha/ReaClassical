@@ -3870,6 +3870,39 @@ backspace}
 \end_layout
 
 \begin_layout Subsubsection
+Add Source Markers to Edges of Item(s)
+\end_layout
+
+\begin_layout Standard
+Used in combination with Delete / Delete with Ripple,
+ you can quickly set both source markers to the edges of one or more selected items on a parent track via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F12}
+\end_layout
+
+\end_inset
+
+.
+ This is a time-saver when dealing with potential 
+\begin_inset Quotes bld
+\end_inset
+
+sliver
+\begin_inset Quotes brd
+\end_inset
+
+ edits i.e.
+ small unneeded leftover edits as a result of multiple rounds of zoomed-out S-D editing.
+ Note that the built-in checks when manually placing destination markers should go some way to alleviating this issue which can easily go unnoticed in other classical music DAWs.
+\end_layout
+
+\begin_layout Subsubsection
 Move / Zoom to S-D markers
 \end_layout
 
@@ -10374,6 +10407,23 @@ Alt+3}
 \end_inset
 
  Add Source Project Marker (multi-tab S-D editing)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F12}
+\end_layout
+
+\end_inset
+
+ Add Source Markers to edges or selected item(s).
 \end_layout
 
 \begin_layout Labeling
