@@ -286,7 +286,7 @@ function return_xfade_length()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        xfade_len = table[1] / 1000
+        if table[1] then xfade_len = table[1] / 1000 end
     end
     return xfade_len
 end

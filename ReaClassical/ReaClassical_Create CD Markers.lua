@@ -342,9 +342,9 @@ function return_custom_length()
   if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    offset = table[2] / 1000
-    pregap_len = table[3]
-    postgap = table[4]
+    if table[2] then offset = table[2] / 1000 end
+    if table[3] then pregap_len = table[3] end
+    if table[4] then postgap = table[4] end
   end
   return pregap_len, offset, postgap
 end

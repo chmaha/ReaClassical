@@ -76,7 +76,7 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        colors = tonumber(table[5])
+        if table[5] then colors = tonumber(table[5]) end
     end
 
     if folders == 0 or folders == 1 then

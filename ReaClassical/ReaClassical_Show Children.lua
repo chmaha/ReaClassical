@@ -25,11 +25,11 @@ local main
 
 function main()
   local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-  local mastering
+  local mastering = 0
   if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    mastering = tonumber(table[6])
+    if table[6] then mastering = tonumber(table[6]) end
   end
 
   local selected_tracks = CountSelectedTracks(0)

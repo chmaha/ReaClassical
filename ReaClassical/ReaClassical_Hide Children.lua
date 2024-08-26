@@ -25,11 +25,11 @@ local main
 
 function main()
   local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-  local mastering
+  local mastering = 0
   if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    mastering = tonumber(table[6])
+    if table[6] then mastering = tonumber(table[6]) end
   end
 
 
@@ -39,7 +39,7 @@ function main()
     local track = GetSelectedTrack(0, i)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local special = string.match(name, "^M:") or string.match(name, "^#") or string.match(name, "^@") or
-    string.match(name, "^RoomTone") or string.match(name, "^RCMASTER")
+    string.match(name, "^RoomTone") or string.match(name, "^REF") or string.match(name, "^RCMASTER")
     if mastering == 1 and special then
       Main_OnCommand(40889, 0) -- Envelope: Hide all envelopes for tracks
     else
