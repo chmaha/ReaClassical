@@ -108,7 +108,7 @@ function main()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     else
         ShowMessageBox(
-            "In order to use this script either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
+            "In order to use this function either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
             "Horizontal Workflow", 0)
         return
     end

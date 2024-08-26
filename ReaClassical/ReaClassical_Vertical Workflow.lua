@@ -158,7 +158,7 @@ function main()
         mixer()
     else
         ShowMessageBox(
-            "In order to use this script either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
+            "In order to use this function either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
             "Vertical Workflow", 0)
         return
     end
