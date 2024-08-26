@@ -3446,6 +3446,12 @@ keys{4}
 \end_layout
 
 \begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Multi-Project-Tab-S-D"
+
+\end_inset
+
 Multi-Project Tab S-D Editing
 \end_layout
 
@@ -4022,6 +4028,20 @@ keys{4}
 \end_inset
 
 .
+ If you have multi-tab S-D editing set up (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Multi-Project-Tab-S-D"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+),
+ these shortcuts will also automatically move focus to the correct project tab.
+ 
 \end_layout
 
 \begin_layout Subsubsection
