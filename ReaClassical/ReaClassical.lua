@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.18.3
+@version 24.19
 @changelog
-  ReaClassical Preferences: Add checks for invalid entries
+  New: Add Source Markers to edge of item(s)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -65,6 +65,7 @@
   [main] ReaClassical_Move Track Up in All Groups.lua
   [main] ReaClassical_Delete Track From All Groups.lua
   [main] ReaClassical_Add Ref Track.lua
+  [main] ReaClassical_Source Markers to Item Edge.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
