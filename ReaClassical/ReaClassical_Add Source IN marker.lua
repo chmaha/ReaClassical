@@ -38,7 +38,7 @@ function main()
 
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     local track_number = math.floor(get_track_number())
-    DeleteProjectMarker(NULL, 998, false)
+    --DeleteProjectMarker(NULL, 998, false)
     local colors = get_color_table()
     AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
 end
