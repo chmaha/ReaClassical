@@ -15,6 +15,22 @@ import (
 	"time"
 )
 
+const urlToTest = "https://www.google.com"
+
+func checkInternet() bool {
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	resp, err := client.Get(urlToTest)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	return resp.StatusCode == http.StatusOK
+}
+
 func getHashedDateSuffix() string {
 	// Get the current epoch time in seconds
 	epochTime := time.Now().Unix()
