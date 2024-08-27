@@ -23,7 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, move_to_item, deselect, select_check, exit_check
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
-local move_cur_to_mid
+local move_cur_to_mid, move_to_edge
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 
 ---------------------------------------------------------------------
@@ -32,8 +32,8 @@ function main()
     local win_state = GetToggleCommandState(41827)
     
     if win_state ~= 1 then
-        move_to_item()
-        deselect()
+        move_to_edge()
+        --deselect()
     else
         local sel = fadeEnd()
         if sel == -1 then
@@ -51,10 +51,14 @@ end
 
 ---------------------------------------------------------------------
 
+function move_to_edge()
+    Main_OnCommand(41168, 0) -- Select and move to next item edge
+end
+
+---------------------------------------------------------------------
+
 function move_to_item()
     Main_OnCommand(40417, 0) -- Select and move to next item
-    local item = GetSelectedMediaItem(0, 0)
-    return item
 end
 
 ---------------------------------------------------------------------
