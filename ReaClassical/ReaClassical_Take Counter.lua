@@ -185,13 +185,13 @@ function get_take_count()
   local handle = io.popen(command)
   local result = handle:read("*a")
   handle:close()
-  local i = 1
+
   for filename in result:gmatch("[^\r\n]+") do
     local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
     if take_capture and take_capture > take_count then take_count = take_capture end
-    iterated_filenames = true
   end
 
+  iterated_filenames = true
   return take_count
 end
 
