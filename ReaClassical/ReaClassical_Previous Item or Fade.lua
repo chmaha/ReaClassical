@@ -34,7 +34,6 @@ function main()
 
     if win_state ~= 1 then
         move_to_edge()
-        --deselect()
     else
         local sel = fadeEnd()
         if sel == -1 then
@@ -54,7 +53,7 @@ end
 ---------------------------------------------------------------------
 
 function move_to_edge()
-    Main_OnCommand(41167, 0) -- Select and move to prev item edge
+    Main_OnCommand(41167, 0) -- Move to prev item edge
 end
 
 ---------------------------------------------------------------------
