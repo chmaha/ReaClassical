@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.1
+@version 24.19.2
 @changelog
-  Make move to & zoom to source/destination markers multi-tab S-D editing aware
+  Take Counter: Fix logic in get_take_count()
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
