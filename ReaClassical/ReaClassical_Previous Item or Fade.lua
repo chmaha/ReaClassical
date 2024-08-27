@@ -54,7 +54,7 @@ end
 ---------------------------------------------------------------------
 
 function move_to_item()
-    Main_OnCommand(41167, 0) -- Move cursor left to nearest item edge
+    Main_OnCommand(40416, 0) -- Select and move to prev item
     local item = GetSelectedMediaItem(0, 0)
     return item
 end
