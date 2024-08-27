@@ -12,8 +12,9 @@ func main() {
 		fmt.Println()
 		fmt.Println("Error: The ReaClassical installer requires an internet connection.")
 		fmt.Println("Enable the connection if possible or transfer the portable install from an online machine.")
-		fmt.Println("Exiting...")
 		fmt.Println()
+		fmt.Print("Press Enter to exit...")
+		fmt.Scanln()
 		return
 	}
 
