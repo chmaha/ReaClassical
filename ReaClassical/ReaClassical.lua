@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.3
+@version 24.19.4
 @changelog
-  Add F12 shortcut for source markers to item edges
+  Revert "Switch to both item edges for navigation"
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
