@@ -8,6 +8,9 @@ import (
 
 func main() {
 
+	fmt.Println("Welcome to the ReaClassical installer...")
+	fmt.Println()
+
 	if !checkInternet() {
 		fmt.Println()
 		fmt.Println("Error: The ReaClassical installer requires an internet connection.")
@@ -41,8 +44,6 @@ func main() {
 		arch = "64-bit"
 	}
 
-	fmt.Println("Welcome to the ReaClassical installer...")
-	fmt.Println()
 	time.Sleep(2 * time.Second)
 	fmt.Printf("Versions: REAPER %s (%s), ReaClassical %s\n\n", pkgver, arch, rcver)
 	time.Sleep(2 * time.Second)
