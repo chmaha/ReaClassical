@@ -10,8 +10,19 @@ cleanup() {
     fi
 }
 
+check_internet() {
+    if ! ping -c 1 -W 5000 8.8.8.8 >/dev/null 2>&1; then
+        printf "\nError: The ReaClassical installer requires an internet connection.\n"
+        printf "Enable the connection if possible or transfer the portable install from an online machine.\n"
+        printf "Exiting...\n\n"
+        exit 1
+    fi
+}
+
 # Trap exit signals to ensure cleanup
 trap cleanup EXIT
+
+check_internet
 
 ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
 ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
