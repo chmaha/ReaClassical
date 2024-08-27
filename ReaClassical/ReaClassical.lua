@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.4
+@version 24.19.5
 @changelog
-  Revert "Switch to both item edges for navigation"
+  Fix Q/W behavior in arrange and xfade views
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
