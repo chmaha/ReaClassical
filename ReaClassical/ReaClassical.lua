@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.2
+@version 24.19.3
 @changelog
-  Take Counter: Fix logic in get_take_count()
+  Add F12 shortcut for source markers to item edges
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
