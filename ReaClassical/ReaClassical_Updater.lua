@@ -38,8 +38,10 @@ function main()
     local splash_abs_path = resource_path .. splash_relative_path
     local reaper_ini = resource_path .. separator .. "reaper.ini"
 
-    -- re-apply splash reference
-    update_reaper_ini(reaper_ini, "splashimage", splash_abs_path)
+    -- re-apply absolute splash reference on MacOS
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+        update_reaper_ini(reaper_ini, "splashimage", splash_abs_path)
+    end
 
     local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
     Main_OnCommand(sync_reapack, 0)
