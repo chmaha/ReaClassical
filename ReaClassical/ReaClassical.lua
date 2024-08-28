@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.5
+@version 24.19.6
 @changelog
-  Fix Q/W behavior in arrange and xfade views
+  Updater: Re-apply custom splash absolute reference if MacOS detected
+  Updater: Re-apply ctrl+backtick shortcut if Windows detected
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
