@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -260,4 +261,57 @@ func getReaClassicalMajorVersion() (string, error) {
 
 	// Return the major version number
 	return matches[1], nil
+}
+
+func replaceKeyInFile(filePath string) error {
+	// Open the file for reading
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Create a temporary file to store the modified content
+	tempFilePath := filePath + ".tmp"
+	tempFile, err := os.Create(tempFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %v", err)
+	}
+	defer tempFile.Close()
+
+	// Scanner to read the file line by line
+	scanner := bufio.NewScanner(file)
+	writer := bufio.NewWriter(tempFile)
+
+	// Find and replace the line starting with "KEY 8 96"
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "KEY 8 96") {
+			// Replace with "KEY 9 223"
+			line = strings.Replace(line, "KEY 8 96", "KEY 9 223", 1)
+		}
+		_, err := writer.WriteString(line + "\n")
+		if err != nil {
+			return fmt.Errorf("failed to write to temp file: %v", err)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error reading file: %v", err)
+	}
+
+	// Flush the writer buffer to ensure all content is written to the temp file
+	if err := writer.Flush(); err != nil {
+		return fmt.Errorf("failed to flush writer: %v", err)
+	}
+
+	// Close the original file and replace it with the temporary file
+	file.Close()
+	tempFile.Close()
+
+	if err := os.Rename(tempFilePath, filePath); err != nil {
+		return fmt.Errorf("failed to replace original file with temp file: %v", err)
+	}
+
+	return nil
 }

@@ -65,6 +65,14 @@ func Install32bit(rcfolder string, pkgver string, rcver string) {
 	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")
 	addLineToReaperIni(rcfolder)
 
+	// Fix Ctrl+backtick shortcut
+	fmt.Println("Fixing Ctrl+backtick reference in reaper-kb.ini")
+	filePath := filepath.Join(rcfolder, "reaper-kb.ini")
+	err := replaceKeyInFile(filePath)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+
 	// Remove temporary files and directories
 	fmt.Println("Removing temporary files...")
 	time.Sleep(2 * time.Second)

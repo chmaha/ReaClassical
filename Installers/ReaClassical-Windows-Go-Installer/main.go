@@ -53,6 +53,7 @@ func main() {
 	} else {
 		Install32bit(rcfolder, pkgver, rcver)
 	}
+
 }
 
 // Logic to determine if it's a 64-bit system.
