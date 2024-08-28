@@ -20,11 +20,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, copy_file, get_path
+local main, copy_file, get_path, update_reaper_ini, update_keyb_ini
 
 ---------------------------------------------------------------------
 
 function main()
+    local system = GetOS()
     local separator = package.config:sub(1, 1)
     local resource_path = GetResourcePath()
     local menu_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-menu.ini")
@@ -33,6 +34,12 @@ function main()
     local kb_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-kb.ini")
     local source_shortcuts_path = resource_path .. kb_relative_path
     local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
+    local splash_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
+    local splash_abs_path = resource_path .. splash_relative_path
+    local reaper_ini = resource_path .. separator .. "reaper.ini"
+
+    -- re-apply splash reference
+    update_reaper_ini(reaper_ini, "splashimage", splash_abs_path)
 
     local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
     Main_OnCommand(sync_reapack, 0)
@@ -40,20 +47,26 @@ function main()
         "ReaClassical Updater", 0)
 
     local response1 = ShowMessageBox(
-    "2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?", "ReaClassical Updater", 4)
+        "2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?",
+        "ReaClassical Updater", 4)
     if response1 == 6 then
         copy_file(source_file_path, destination_file_path)
     end
 
     local response2 = ShowMessageBox(
-    "3) This section will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater", 4)
+        "3) This section will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater",
+        4)
     if response2 == 6 then
         copy_file(source_shortcuts_path, dest_shortcuts_path)
+        if string.find(system, "^Win") then
+            update_keyb_ini(dest_shortcuts_path, "KEY 8 96 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0"
+            , "KEY 9 223 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0")
+        end
     end
 
     if response1 == 6 or response2 == 6 then
-    ShowMessageBox("4) REAPER/ReaClassical will now close.", "ReaClassical Updater",0)
-    reaper.Main_OnCommand(40004, 0) -- Save dirty projects and close REAPER
+        ShowMessageBox("4) REAPER/ReaClassical will now close.", "ReaClassical Updater", 0)
+        Main_OnCommand(40004, 0) -- Save dirty projects and close REAPER
     end
 end
 
@@ -104,6 +117,74 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function update_reaper_ini(ini_file, key, value)
+    local file = io.open(ini_file, "r")
+    if not file then return false end
+
+    local lines = {}
+    local updated = false
+    local section_found = false
+
+    for line in file:lines() do
+        if line:match("^%[REAPER%]") then
+            section_found = true
+        end
+
+        if section_found and line:match("^" .. key .. "=") then
+            line = key .. "=" .. value
+            updated = true
+        end
+
+        table.insert(lines, line)
+    end
+    file:close()
+
+    if not updated and section_found then
+        table.insert(lines, key .. "=" .. value)
+    end
+
+    file = io.open(ini_file, "w")
+    if not file then return false end
+
+    for _, line in ipairs(lines) do
+        file:write(line .. "\n")
+    end
+    file:close()
+
+    return true
+end
+
+---------------------------------------------------------------------
+
+function update_keyb_ini(file_path, old_text, new_text)
+    local file = io.open(file_path, "r")
+    if not file then return false end
+
+    local lines = {}
+    local updated = false
+
+    for line in file:lines() do
+        local new_line = line:gsub(old_text, new_text)
+        if new_line ~= line then
+            updated = true
+        end
+        table.insert(lines, new_line)
+    end
+    file:close()
+
+    file = io.open(file_path, "w")
+    if not file then return false end
+
+    for _, line in ipairs(lines) do
+        file:write(line .. "\n")
+    end
+    file:close()
+
+    return updated
 end
 
 ---------------------------------------------------------------------
