@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.6
+@version 24.19.7
 @changelog
-  Updater: Re-apply custom splash absolute reference if MacOS detected
-  Updater: Re-apply ctrl+backtick shortcut if Windows detected
+  Find Take: Select item if found
+  PDF Manual: Various additions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
