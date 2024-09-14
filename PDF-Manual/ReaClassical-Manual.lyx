@@ -320,6 +320,16 @@ It is important to note that if you already own REAPER then the world of classic
 \end_layout
 
 \begin_layout Section
+Compatibility
+\end_layout
+
+\begin_layout Standard
+ReaClassical runs on any system that is compatible with REAPER (nine architectures!).
+ This includes 64-bit and 32-bit versions of Windows,
+ MacOS and Linux (including Raspberry Pi).
+\end_layout
+
+\begin_layout Section
 This Manual
 \end_layout
 
@@ -11295,8 +11305,38 @@ Sonnox Inflator
 -style waveshaping:
 
 \series default
- Try RCInflator Ultimate (a clone of the Sonnox product) or MagicFairyDust on the final stereo bus.
+ Try 
+\series bold
+RCInflator Ultimate
+\series default
+ (a clone of the Sonnox product) or 
+\series bold
+MagicFairyDust
+\series default
+ on the final stereo bus.
  Both effects are included in the ReaClassical portable install.
+\end_layout
+
+\begin_layout Itemize
+Or,
+ for an easy complete console vibe,
+ use the 
+\series bold
+RCConsoleChannel
+\series default
+,
+ 
+\series bold
+RCConsoleBus
+\series default
+,
+ and 
+\series bold
+RCConsoleFinalizer
+\series default
+ at the end of regular tracks,
+ busses and final 2-bus respectively.
+ Note that RCConsoleChannel does not have any controls.
 \end_layout
 
 \begin_layout Standard
@@ -11529,24 +11569,33 @@ powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
 \end_layout
 
 \begin_layout Standard
-You 
-\end_layout
-
-\begin_layout Standard
-can then select it from the usual power plan dialog.
+You can then select it from the usual power plan dialog.
  For best device performance,
  remember to use the ASIO drivers that were included with your audio interface.
  Consider disabling your network card during mission-critical recording.
- For further tips see Focusrite's 
+ For further tips see Microsoft's 
 \begin_inset CommandInset href
 LatexCommand href
-name "optimisation page"
-target "https://support.focusrite.com/hc/en-gb/sections/360004958539-Optimisation"
+name "Unofficial Windows 10 and 11 Audio Workstation build and tweak guide"
+target "https://devblogs.microsoft.com/windows-music-dev/unofficial-windows-10-audio-workstation-build-and-tweak-guide-part-2/"
 literal "false"
 
 \end_inset
 
 .
+ Of particular interest is Part 3 which discusses what 
+\emph on
+not
+\emph default
+ to do (including not setting your processor scheduling to 
+\begin_inset Quotes bld
+\end_inset
+
+background services
+\begin_inset Quotes brd
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Subsection
