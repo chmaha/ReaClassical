@@ -76,6 +76,7 @@ function main()
             Main_OnCommand(40939, 0) -- select track 01
             solo()
             mixer()
+            SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
         end
     elseif folder_check() > 1 then
         rcmaster_exists = special_check()
@@ -118,6 +119,7 @@ function main()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
         mixer()
+        SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     elseif folder_check() == 1 then
         rcmaster_exists = special_check()
 
@@ -156,6 +158,7 @@ function main()
         Main_OnCommand(40939, 0) -- select track 01
         solo()
         mixer()
+        SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     else
         ShowMessageBox(
             "In order to use this function either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",

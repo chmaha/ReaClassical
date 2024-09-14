@@ -67,6 +67,7 @@ function main()
             route_tracks(rcmaster, table, num)
             groupings_mcp()
             reset_spacers(num, tracks_per_group, rcmaster_index)
+            SetProjExtState(0, "ReaClassical", "Workflow", "Horizontal")
         end
     elseif folder_check() > 1 then
         ShowMessageBox("This function only runs on projects with a single folder", "Horizontal Workflow", 0)
@@ -106,6 +107,7 @@ function main()
         route_tracks(rcmaster, table, end_of_sources)
         groupings_mcp()
         reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+        SetProjExtState(0, "ReaClassical", "Workflow", "Horizontal")
     else
         ShowMessageBox(
             "In order to use this function either:\n1. Run on an empty project\n2. Run on the existing folder to sync routing/fx",
