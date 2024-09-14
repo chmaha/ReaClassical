@@ -43,6 +43,8 @@ function main()
             SetEditCurPos(item_start, 1, 0)
             local center = NamedCommandLookup("_SWS_HSCROLL50")
             Main_OnCommand(center,0)
+            Main_OnCommand(40769,0) -- unselect all items
+            SetMediaItemSelected(item, true)
             break
         end
     end
