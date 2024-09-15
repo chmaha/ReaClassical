@@ -1,9 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.7
+@version 24.19.8
 @changelog
-  Find Take: Select item if found
-  PDF Manual: Various additions
+  Themes: Match default ReaClassical theme for visible controls
+  Themes: Remove ReaClassical for REAPER 6.x theme
+  PDF Manual: Move and polish track-naming section
+  PDF Manual: Add note about 32-bit float devices
+  Workflows: Mark projects as horizontal or vertical
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -69,11 +72,10 @@
   [main] ReaClassical_Source Markers to Item Edge.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
-  [theme] ReaClassical for REAPER v6.x.ReaperThemeZip
-  [theme] Pyramix.ReaperThemeZip
-  [theme] Sequoia.ReaperThemeZip
-  [theme] SaDiE.ReaperThemeZip
-  [theme] Sonic Solutions.ReaperThemeZip
+  [theme] RCPyramix.ReaperThemeZip
+  [theme] RCSequoia.ReaperThemeZip
+  [theme] RCSaDiE.ReaperThemeZip
+  [theme] RCSonicSolutions.ReaperThemeZip
   ReaClassical_Colors_Table.lua > ReaClassical_Colors_Table.lua
   ../PDF-Manual/ReaClassical-Manual.pdf > ReaClassical-Manual.pdf
   reaclassical-splash.png > reaclassical-splash.png
