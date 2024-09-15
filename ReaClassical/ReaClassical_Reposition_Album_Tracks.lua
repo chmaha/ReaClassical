@@ -82,7 +82,7 @@ function main()
         end
     end
     local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
-    local _, run = GetProjExtState(0, "Create CD Markers", "Run?")
+    local _, run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
     if run == "yes" then Main_OnCommand(create_cd_markers, 0) end
     Undo_EndBlock("Reposition Tracks", 0)
 end

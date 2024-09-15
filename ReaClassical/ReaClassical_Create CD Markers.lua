@@ -50,7 +50,7 @@ function main()
     ,
     "Create CD/DDP markers", 4)
   if choice == 6 then
-    SetProjExtState(0, "Create CD Markers", "Run?", "yes")
+    SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
     local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(first_track)
     if redbook_track_length_errors == -1 then return end
     if redbook_track_length_errors > 0 then
@@ -74,7 +74,7 @@ end
 ---------------------------------------------------------------------
 
 function get_info()
-  local _, metadata_saved = GetProjExtState(0, "Create CD Markers", "Album Metadata")
+  local _, metadata_saved = GetProjExtState(0, "ReaClassical", "AlbumMetadata")
   local ret, user_inputs, metadata_table
   if metadata_saved ~= "" then
     ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
@@ -266,19 +266,19 @@ end
 ---------------------------------------------------------------------
 
 function save_metadata(user_inputs)
-  SetProjExtState(0, "Create CD Markers", "Album Metadata", user_inputs)
+  SetProjExtState(0, "ReaClassical", "AlbumMetadata", user_inputs)
 end
 
 ---------------------------------------------------------------------
 
 function save_codes(code_input)
-  SetProjExtState(0, "Create CD Markers", "Codes", code_input)
+  SetProjExtState(0, "ReaClassical", "Codes", code_input)
 end
 
 ---------------------------------------------------------------------
 
 function add_codes()
-  local _, code_saved = GetProjExtState(0, "Create CD Markers", "Codes")
+  local _, code_saved = GetProjExtState(0, "ReaClassical", "Codes")
   local codes_response = ShowMessageBox("Add UPC/ISRC codes?", "CD codes", 4)
   local ret2
   local code_input = ""

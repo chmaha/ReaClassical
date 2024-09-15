@@ -101,8 +101,8 @@ end
 function get_data(filename)
     local this_year = os.date("%Y")
 
-    local _, ddp_metadata = GetProjExtState(0, "Create CD Markers", "Album Metadata")
-    local _, metadata_saved = GetProjExtState(0, "Markers to CUE", "Metadata")
+    local _, ddp_metadata = GetProjExtState(0, "ReaClassical", "AlbumMetadata")
+    local _, metadata_saved = GetProjExtState(0, "ReaClassical", "CUEMetadata")
 
     local ret, user_inputs
     if ddp_metadata ~= "" then
@@ -117,14 +117,14 @@ function get_data(filename)
                 table.insert(saved_metadata_table, value)
             end
 
-            _, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
                 ddp_metadata_table[4] ..
                 ',' ..
                 saved_metadata_table[2] ..
                 ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
         else
-            _, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
+            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
                 ddp_metadata_table[4] ..
                 ',' ..
@@ -140,9 +140,10 @@ function get_data(filename)
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
                 'Classical,' .. this_year .. ',Performer,My Classical Album,' .. filename .. '.wav')
         end
-        if not ret then return end
     end
-
+    
+    if not ret then return end
+    
     local fields = {}
     for word in user_inputs:gmatch('[^%,]+') do fields[#fields + 1] = word end
     if #fields ~= 5 then
@@ -283,7 +284,7 @@ end
 ----------------------------------------------------------
 
 function save_metadata(user_inputs)
-    SetProjExtState(0, "Markers to CUE", "Metadata", user_inputs)
+    SetProjExtState(0, "ReaClassical", "CUEMetadata", user_inputs)
 end
 
 ----------------------------------------------------------

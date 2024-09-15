@@ -26,16 +26,16 @@ local main
 function main()
   Main_OnCommand(42022, 0) -- Global automation override: All automation in latch preview mode
   local message
-  local _, val = GetProjExtState(0, "Automation Mode", "Set")
+  local _, val = GetProjExtState(0, "ReaClassical", "AutomationModeSet")
   if val ~= "1" then
     message = "You are now in \"latch preview\" automation mode (blue button)."
         .. "\n1. Set mixer controls (volume, pan, any FX parameters)"
         .. "\n2. Press I to place envelope points at the edit cursor location or inside a time selection if present."
         .. "\n3. Re-run this function to return to global read mode (green button)."
-    SetProjExtState(0, "Automation Mode", "Set", "1")
+    SetProjExtState(0, "ReaClassical", "AutomationModeSet", "1")
     ShowMessageBox(message, "Automation Mode", 0)
   else
-    SetProjExtState(0, "Automation Mode", "Set", "0")
+    SetProjExtState(0, "ReaClassical", "AutomationModeSet", "0")
     Main_OnCommand(40879, 0) -- Global automation override: All automation in latch preview mode
   end
 end

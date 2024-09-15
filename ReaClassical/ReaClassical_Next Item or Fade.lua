@@ -113,8 +113,8 @@ function fadeStart()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     RefreshToolbar2(1, fade_editor_toggle)
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
-    SetProjExtState(0, "Classical Crossfade Editor", "start_time", start_time)
-    SetProjExtState(0, "Classical Crossfade Editor", "end_time", end_time)
+    SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)
+    SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
     Main_OnCommand(select_1, 0)
     Main_OnCommand(40319, 0)                         -- move edit cursor to end of item
@@ -157,8 +157,8 @@ function fadeEnd()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(item, 1)
     view()
-    local _, start_time = GetProjExtState(0, "Classical Crossfade Editor", "start_time")
-    local _, end_time = GetProjExtState(0, "Classical Crossfade Editor", "end_time")
+    local _, start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
+    local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     Main_OnCommand(40310, 0) -- Set ripple editing per-track
     return 1
@@ -230,7 +230,7 @@ end
 
 function save_color(num, item)
     local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-    SetProjExtState(0, "Classical Crossfade Editor", "item" .. " " .. num .. " color", color) -- save to project file
+    SetProjExtState(0, "ReaClassical", "item" .. num .. "color", color) -- save to project file
 end
 
 ---------------------------------------------------------------------
@@ -242,7 +242,7 @@ end
 ---------------------------------------------------------------------
 
 function load_color(num, item)
-    local _, color = GetProjExtState(0, "Classical Crossfade Editor", "item" .. " " .. num .. " color")
+    local _, color = GetProjExtState(0, "ReaClassical", "item" .. num .. "color")
     return color
 end
 

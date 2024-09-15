@@ -29,7 +29,7 @@ local take_count, take_text
 local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
 local separator = package.config:sub(1, 1);
 
-local _, pos_string = GetProjExtState(0, "ReaClassical Take Counter", "Position")
+local _, pos_string = GetProjExtState(0, "ReaClassical", "TakeCounterPosition")
 local win
 local values = {}
 
@@ -52,7 +52,7 @@ else
   }
 end
 
-local _, session = GetProjExtState(0, "ReaClassical Take Counter", "Session")
+local _, session = GetProjExtState(0, "ReaClassical", "TakeSessionName")
 
 if session ~= nil and session ~= "" then
   session = session .. separator
@@ -198,11 +198,11 @@ end
 ---------------------------------------------------------------------
 
 function clean_up(sess_string)
-  SetProjExtState(0, "ReaClassical Take Counter", "Session", sess_string)
+  SetProjExtState(0, "ReaClassical", "TakeSessionName", sess_string)
 
   local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
   local pos = x .. "," .. y
-  SetProjExtState(0, "ReaClassical Take Counter", "Position", pos)
+  SetProjExtState(0, "ReaClassical", "TakeCounterPosition", pos)
 
   SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
 end

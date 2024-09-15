@@ -81,6 +81,7 @@ function main()
         local ret, cursor_pos = load_prefs()
         if ret then
             SetEditCurPos(cursor_pos, true, false)
+            SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", "")
         end
         local unarm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECUNARMED")
         Main_OnCommand(unarm, 0) -- Xenakios/SWS: Set selected tracks record unarmed
@@ -220,13 +221,13 @@ end
 ---------------------------------------------------------------------
 
 function load_prefs()
-    return GetProjExtState(0, "ReaClassical", "Classical Take Record Cursor Position")
+    return GetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos")
 end
 
 ---------------------------------------------------------------------
 
 function save_prefs(input)
-    SetProjExtState(0, "ReaClassical", "Classical Take Record Cursor Position", input)
+    SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", input)
 end
 
 -----------------------------------------------------------------------
