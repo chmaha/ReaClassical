@@ -1395,7 +1395,7 @@ keys{F8}
 
  to set up a destination track group and six source groups (don't worry,
  it's easy to add more if you need them!).
- Simply type in the number of tracks you need.
+ Simply type in the number of stereo and mono microphone inputs you need.
  I highly recommend using the first track for the main stereo pair.
  
 \end_layout
@@ -1518,6 +1518,88 @@ keys{F8}
 \end_inset
 
  to create six new source groups.
+\end_layout
+
+\begin_layout Subsubsection
+Naming Tracks
+\end_layout
+
+\begin_layout Standard
+After selecting a workflow,
+ you only need to add track names to the destination group in the arrange window and then pressing 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ will auto-populate the same names to the source groups and mixer tracks.
+ ReaClassical automatically adds Source and Destination prefixes to your chosen track names and are auto-renumbered whenever functions affecting the number of source folders are run (Vertical Workflow 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+,
+ Duplicate Folder 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+textbackslash}
+\end_layout
+
+\end_inset
+
+,
+ and Classical Take Record 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+).
+ Tip:
+ Avoid using any colons in your track names and the auto prefixing will work as expected.
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -1723,10 +1805,14 @@ Again,
  24-bit recording allows for a lot of headroom so there's no need to push close to 0dB.
  Adjust the individual faders to balance.
  Note that in a vertical workflow moving a fader will automatically move the corresponding fader in the other groups too making same-volume auditioning of different takes extremely easy.
+ When using a 32-bit float device with dual AD convertors as an interface (such as the Zoom F-series),
+ ensure that the recording file format remains on the default 32-bit float setting.
+ The recorded levels might seem too low or too high during recording,
+ but they can be easily adjusted afterward in ReaClassical without introducing any extra noise or distortion.
 \end_layout
 
 \begin_layout Subsection
-Classical Recording
+Classical Take Recording
 \end_layout
 
 \begin_layout Standard
@@ -1750,7 +1836,7 @@ classical
 \begin_inset Quotes brd
 \end_inset
 
- recording mode for whatever parent track is selected.
+ take recording mode for whatever parent track is selected.
  If the parent isn't record-armed (probably the case before you start your first recording of the session),
  the function will first simply record-arm the group so you can usefully monitor incoming signal.
  On a subsequent press of 
@@ -2135,88 +2221,6 @@ In addition to built-in REAPER functions,
  Important:
  I always make some dedicated time post-recording to get a lay of the land,
  tidy up the digital notes I took during the session and perform a backup on an external drive as soon as possible.
-\end_layout
-
-\begin_layout Subsection
-Naming Tracks
-\end_layout
-
-\begin_layout Standard
-ReaClassical automatically adds Source and Destination prefixes to your chosen track names and are auto-renumbered whenever functions affecting the number of source folders are run (Vertical Workflow 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F8}
-\end_layout
-
-\end_inset
-
-,
- Duplicate Folder 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-textbackslash}
-\end_layout
-
-\end_inset
-
-,
- and Classical Take Record 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F9}
-\end_layout
-
-\end_inset
-
-).
- You only need to add track names to the destination group in the arrange window (for example after using the 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F7}
-\end_layout
-
-\end_inset
-
- shortcut) and then,
- for example,
- pressing 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F8}
-\end_layout
-
-\end_inset
-
- will also populate the source groups and mixer tracks.
- Tip:
- Avoid using any colons in your track names and the auto prefixing will work as expected.
 \end_layout
 
 \begin_layout Subsection
