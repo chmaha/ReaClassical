@@ -48,7 +48,7 @@ function main()
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0)
     remove_track_groups()
-
+    local show = NamedCommandLookup("_SWS_FOLDSMALL")
 
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
@@ -76,8 +76,7 @@ function main()
             Main_OnCommand(40939, 0) -- select track 01
             solo()
             mixer()
-            local show = NamedCommandLookup("_SWS_FOLDSMALL")
-            Main_OnCommand(show,0)
+            Main_OnCommand(show,0) -- show children of destination
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
         end
     elseif folder_check() > 1 then
@@ -160,8 +159,7 @@ function main()
         Main_OnCommand(40939, 0) -- select track 01
         solo()
         mixer()
-        local show = NamedCommandLookup("_SWS_FOLDSMALL")
-        Main_OnCommand(show,0)
+        Main_OnCommand(show,0) -- show children of destination
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     else
         ShowMessageBox(
