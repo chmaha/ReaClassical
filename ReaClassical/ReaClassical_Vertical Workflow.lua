@@ -76,6 +76,8 @@ function main()
             Main_OnCommand(40939, 0) -- select track 01
             solo()
             mixer()
+            local show = NamedCommandLookup("_SWS_FOLDSMALL")
+            Main_OnCommand(show,0)
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
         end
     elseif folder_check() > 1 then
@@ -158,6 +160,8 @@ function main()
         Main_OnCommand(40939, 0) -- select track 01
         solo()
         mixer()
+        local show = NamedCommandLookup("_SWS_FOLDSMALL")
+        Main_OnCommand(show,0)
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     else
         ShowMessageBox(
