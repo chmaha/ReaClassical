@@ -76,13 +76,14 @@ function main()
         local take_number = extract_take_number(rec_wildcards)
         if take_number then
             --for each selected item rename take
+            local padded_number = string.format("%03d", take_number)
             local num_of_selected_items = CountSelectedMediaItems(0)
             for i = 0, num_of_selected_items - 1 do
                 local item = GetSelectedMediaItem(0, i)
                 local track = GetMediaItem_Track(item)
                 local _, trackname = GetTrackName(track)
                 local take = GetActiveTake(item)
-                GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. trackname .. "_T" .. take_number, true)
+                GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. trackname .. "_T" .. padded_number, true)
             end
         end
 
