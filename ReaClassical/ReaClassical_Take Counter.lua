@@ -30,6 +30,7 @@ local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
 local separator = package.config:sub(1, 1);
 
 local _, pos_string = GetProjExtState(0, "ReaClassical", "TakeCounterPosition")
+local _, reset = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
 local win
 local values = {}
 
@@ -52,10 +53,15 @@ else
   }
 end
 
+if reset == "" then reset = 0 end
+
+local session_dir = ""
+local session_suffix = ""
 local _, session = GetProjExtState(0, "ReaClassical", "TakeSessionName")
 
 if session ~= nil and session ~= "" then
-  session = session .. separator
+  session_dir = session .. separator
+  session_suffix = session .. "_"
 else
   session = ""
 end
@@ -73,7 +79,7 @@ function main()
     gfx.set(0.5, 0.8, 0.5, 1)
 
     if not iterated_filenames then
-      take_text = get_take_count() + 1
+      take_text = get_take_count(session) + 1
     else
       take_text = take_count + 1
     end
@@ -81,23 +87,32 @@ function main()
     if gfx.mouse_cap & 1 == 1 then
       local choice = ShowMessageBox("Recalculate take count?", "ReaClassical Take Counter", 4)
       if choice == 6 then
-        take_text = get_take_count() + 1
+        take_text = get_take_count(session) + 1
         rec_name_set = false
       end
     elseif gfx.mouse_cap & 2 == 2 then
-      local session_text = session:gsub(separator .. "$", "")
-      local ret, choices = GetUserInputs('ReaClassical Take Counter', 2, 'Set Take Number:,Session Name:',
-        take_text .. ',' .. session_text)
-      local take_choice, session_choice = string.match(choices, "(%d*),?(.*)")
+      local session_text = session
+      local ret, choices = GetUserInputs('ReaClassical Take Counter', 3,
+        'Set Take Number:,Session Name:,Allow Take Number Override?:',
+        take_text .. ',' .. session_text .. ',' .. reset)
+      local take_choice, session_choice, reset_choice = string.match(choices, "(%d*),([^,]*),(%d*)")
       if take_choice ~= nil and take_choice ~= "" then
         take_choice = tonumber(take_choice)
       else
         take_choice = take_text
       end
       if session_choice ~= nil and session_choice ~= "" then
-        session = session_choice .. separator
+        session = session_choice
+        session_dir = session_choice .. separator
+        session_suffix = session_choice .. "_"
       elseif ret ~= false then
+        session_dir = ""
+        session_suffix = ""
         session = ""
+      end
+      local reset_choice_num = tonumber(reset_choice)
+      if reset_choice ~= nil and (reset_choice_num == 0 or reset_choice_num == 1) then
+        reset = reset_choice_num
       end
       if take_choice ~= nil and take_choice >= take_count then
         take_count = take_choice - 1
@@ -107,13 +122,19 @@ function main()
         ShowMessageBox("You cannot set a take number lower than the highest found "
           .. "in the project path."
           .. "\nRecalculating take count...", "ReaClassical Take Counter", 0)
-        take_text = get_take_count() + 1
+        take_text = get_take_count(session) + 1
+        rec_name_set = false
+      end
+      SetProjExtState(0, "ReaClassical", "TakeSessionName", session)
+      SetProjExtState(0, "ReaClassical", "TakeCounterOverride", reset)
+      if reset == 0 then
+        take_text = get_take_count(session) + 1
         rec_name_set = false
       end
     end
 
     if not rec_name_set then
-      SNM_SetStringConfigVar("recfile_wildcards", session .. "$tracknumber_$track-T_" .. take_text)
+      SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix .. "$track-T_" .. take_text)
       rec_name_set = true
     end
 
@@ -121,7 +142,7 @@ function main()
     gfx.x = ((win.width - take_width) / 2)
     gfx.drawstr(take_text)
     gfx.setfont(1, "Arial", 25, 98)
-    local session_text = session:gsub(separator .. "$", "")
+    local session_text = session
     if session_text == "" and take_text == 1 then
       gfx.setfont(1, "Arial", 15, 98)
       session_text = "Right-click to set session name"
@@ -138,14 +159,14 @@ function main()
     gfx.circle(50, 50, 20, 40)
 
     if not iterated_filenames then
-      take_text = get_take_count() + 1
+      take_text = get_take_count(session) + 1
     end
 
     local take_width, take_height = gfx.measurestr(take_text)
     gfx.x = ((win.width - take_width) / 2)
     gfx.drawstr(take_text)
 
-    local session_text = session:gsub(separator .. "$", "")
+    local session_text = session
     gfx.setfont(1, "Arial", 25, 98)
     local session_width, session_height = gfx.measurestr(session_text)
     gfx.x = ((win.width - session_width) / 2)
@@ -164,22 +185,21 @@ function main()
   if key ~= -1 then
     defer(main)
   else
-    session = session:gsub(separator .. "$", "")
-    atexit(clean_up(session))
+    atexit(clean_up())
   end
 end
 
 ---------------------------------------------------------------------
 
-function get_take_count()
+function get_take_count(session)
   take_count = 0
 
   local media_path = GetProjectPath(0)                   -- .. separator .. session
   local command
   if string.lower(package.config:sub(1, 1)) == '\\' then -- Windows
-    command = 'dir "' .. media_path .. '" /b /s /a:-d'
+    command = 'dir "' .. media_path .. "\\" .. session .. '" /b /a:-d'
   else                                                   -- Unix-like
-    command = 'ls -pR "' .. media_path .. '" | grep -v /$'
+    command = 'ls -p "' .. media_path .. "/" .. session .. '" | grep -v /$'
   end
 
   local handle = io.popen(command)
@@ -197,9 +217,7 @@ end
 
 ---------------------------------------------------------------------
 
-function clean_up(sess_string)
-  SetProjExtState(0, "ReaClassical", "TakeSessionName", sess_string)
-
+function clean_up()
   local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
   local pos = x .. "," .. y
   SetProjExtState(0, "ReaClassical", "TakeCounterPosition", pos)
