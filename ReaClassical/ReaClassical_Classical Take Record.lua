@@ -22,6 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
+local extract_take_number
 
 ---------------------------------------------------------------------
 
@@ -30,6 +31,8 @@ function main()
         ShowMessageBox("Please add at least one folder before running", "Classical Take Record", 0)
         return
     end
+
+    local _, rec_wildcards = get_config_var_string("recfile_wildcards")
 
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
@@ -68,6 +71,21 @@ function main()
         Undo_EndBlock('Classical Take Record', 0)
     else
         Main_OnCommand(40667, 0) -- Transport: Stop (save all recorded media)
+        local _, session_name = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        session_name = (session_name ~= "" and session_name .. "_") or ""
+        local take_number = extract_take_number(rec_wildcards)
+        if take_number then
+            --for each selected item rename take
+            local num_of_selected_items = CountSelectedMediaItems(0)
+            for i = 0, num_of_selected_items - 1 do
+                local item = GetSelectedMediaItem(0, i)
+                local track = GetMediaItem_Track(item)
+                local _, trackname = GetTrackName(track)
+                local take = GetActiveTake(item)
+                GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. trackname .. "_T_" .. take_number, true)
+            end
+        end
+
         Main_OnCommand(40289, 0) -- Unselect all items
 
         if workflow == "Vertical" then
@@ -251,6 +269,13 @@ function check_parent_track(track)
         return false
     end
     return true
+end
+
+---------------------------------------------------------------------
+
+function extract_take_number(rec_wildcards)
+    local number = rec_wildcards:match("T_(%d+)$")
+    return number and tonumber(number) or nil
 end
 
 ---------------------------------------------------------------------
