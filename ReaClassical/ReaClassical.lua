@@ -1,12 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.8
+@version 24.19.9
 @changelog
-  Themes: Match default ReaClassical theme for visible controls
-  Themes: Remove ReaClassical for REAPER 6.x theme
-  PDF Manual: Move and polish track-naming section
-  PDF Manual: Add note about 32-bit float devices
-  Workflows: Mark projects as horizontal or vertical
+  All project ext state under the one REACLASSICAL roof
+  Keep destination folder open on first run of F8
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
