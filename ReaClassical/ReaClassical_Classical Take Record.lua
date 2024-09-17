@@ -82,7 +82,7 @@ function main()
                 local track = GetMediaItem_Track(item)
                 local _, trackname = GetTrackName(track)
                 local take = GetActiveTake(item)
-                GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. trackname .. "_T_" .. take_number, true)
+                GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. trackname .. "_T" .. take_number, true)
             end
         end
 
@@ -274,7 +274,7 @@ end
 ---------------------------------------------------------------------
 
 function extract_take_number(rec_wildcards)
-    local number = rec_wildcards:match("T_(%d+)$")
+    local number = rec_wildcards:match("T(%d+)$")
     return number and tonumber(number) or nil
 end
 
