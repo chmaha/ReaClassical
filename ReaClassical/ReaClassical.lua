@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.20
+@version 24.20.1
 @changelog
-  Classical Take Record: Enable use in Horizontal workflow
-  Classical Take Record: Rename take if take counter window is open
-  Take Counter Window: Add session name to filename
-  Take Counter Window: Allow user to override automatic take numbers
-  Take Counter Window: By default take number resets to 1 with new session name
-  Find Take: Add input for optional session name
-  PDF Manual: Various changes
+  PDF Manual: Move to https for reaclassical.org
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
