@@ -1,9 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 24.19.9
+@version 24.20
 @changelog
-  All project ext state under the one REACLASSICAL roof
-  Keep destination folder open on first run of F8
+  Classical Take Record: Enable use in Horizontal workflow
+  Classical Take Record: Rename take if take counter window is open
+  Take Counter Window: Add session name to filename
+  Take Counter Window: Allow user to override automatic take numbers
+  Take Counter Window: By default take number resets to 1 with new session name
+  Find Take: Add input for optional session name
+  PDF Manual: Various changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
