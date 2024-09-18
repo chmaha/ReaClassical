@@ -1518,6 +1518,65 @@ keys{F8}
 \end_inset
 
  to create six new source groups.
+ If you accidently switch to a vertical workflow via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+,
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+textbackslash}
+\end_layout
+
+\end_inset
+
+ (duplicate folder) or similar,
+ simply undo via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+Z}
+\end_layout
+
+\end_inset
+
+ and press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ to set the project to horizontal workflow again.
 \end_layout
 
 \begin_layout Subsubsection
