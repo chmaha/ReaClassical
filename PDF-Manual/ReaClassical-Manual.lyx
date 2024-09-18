@@ -1868,7 +1868,10 @@ keys{F9}
 \end_inset
 
  again.
- This key press also automatically moves to,
+ In horizontal workflow,
+ the key press will maintain record arming and will begin recording on a subsequent press.
+ In vertical workflow,
+ this key press also automatically moves to,
  solos and arms the next available group so that recording can begin immediately on the next button press.
  ReaClassical will automatically create new groups as required.
  To manually add more destination groups when not recording,
@@ -1906,9 +1909,11 @@ enter}
 \end_inset
 
  to track the upcoming take number (in green) and take number during recording (in red with recording circle).
- You can right-click on the window to set a take number to increment from and set a session name to act as media subfolder (which is automatically recalled when the window is reopened).
+ You can right-click on the window to optionally override the automatic numbering and set a take number to increment from in addition to optionally setting a session name to act as media subfolder (which is automatically recalled when the window is reopened).
  You can left-click to recalculate the track count if you have removed some unused files from the project path.
  The calculated upcoming take number factors in unused files in the project path so as to avoid any file-naming conflicts.
+ With manual override off (=0),
+ switching back to an existing session will also automatically set the correct incoming take number.
  Please read the description of the function in Appendix A for best practices.
 \end_layout
 
@@ -1917,7 +1922,7 @@ General Recording
 \end_layout
 
 \begin_layout Standard
-To record for a horizontal workflow or more generally (say a separate single mono narration track or similar),
+To record more generally (say a separate single mono narration track or similar),
  use the built-in REAPER record function arm the folder (either manually by press-holding on the first record button and sliding the mouse down through the tracks or via the handy 
 \begin_inset ERT
 status open
@@ -1949,7 +1954,7 @@ ctrl+R}
 \end_inset
 
  or use the red record button.
- During this mode you should use the Takes Counter window 
+ During this mode you should still use the Takes Counter window 
 \begin_inset ERT
 status open
 
@@ -1967,10 +1972,7 @@ enter}
 \end_inset
 
  to track the upcoming take number (in green) and take number during recording (in red with recording circle).
- You can right-click on the window to set a take number to increment from and set a session name to act as media subfolder (which is automatically recalled when the window is reopened).
- You can left-click to recalculate the track count if you have removed some unused files from the project path.
- The calculated upcoming take number factors in unused files in the project path so as to avoid any file-naming conflicts.
- Please read the description of the function in Appendix A for best practices.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -3163,9 +3165,10 @@ Auditioning Takes
 
 \begin_layout Standard
 For horizontal editing,
- you can use the usual transport shortcuts (spacebar to start and stop playback,
+ you could use the usual transport shortcuts (spacebar to start and stop playback,
  for example).
- For vertical (and horizontal) editing,
+ However,
+ for both horizontal and vertical editing,
  it is highly recommended to use the Audition or Exclusive Audition functions to quickly solo only the folder (or track) you are interested in hearing.
  Just hover the mouse over the parent for the full mix or a child to solo a spot microphone you want to hear and press 
 \begin_inset ERT
@@ -6810,7 +6813,7 @@ enter}
 Description:
 
 \emph default
- Track take numbers during recording sessions.
+ Track take numbers and session name during recording sessions.
 \end_layout
 
 \begin_layout Standard
@@ -6821,7 +6824,9 @@ Notes:
 \emph default
  It is advised to save your project and name your tracks before starting to record.
  This ensures that the recorded files have usefully unique names.
- You can right-click on the window to set a take number to increment from and also set a session name to act as media subfolder.
+ You can right-click on the window to override automatic take numbering (0 = off (recommended),
+ 1 = override),
+ set a take number to increment from and optionally set a session name to act as media subfolder.
  You can left-click to recalculate the track count if you have removed some unused files from the project path.
  The calculated upcoming take number factors in unused files in the project path so as to avoid any file-naming conflicts.
  You should find this to be an extremely robust take system that rivals Pyramix,
@@ -6956,7 +6961,8 @@ keys{F9}
 \end_inset
 
  again.
- Note that the next folder has already been selected,
+ Note that in a vertical workflow,
+ the next folder has already been selected,
  record-armed and that the cursor returns to the original position for easy lining up of takes.
  If you run out of source groups,
  the function will automatically create a new one.
@@ -7237,7 +7243,8 @@ Create a duplicate without media items of the highlighted folder.
 Notes:
  
 \emph default
-Now that Classical Take Record 
+Note that in a vertical workflow,
+ Classical Take Record 
 \begin_inset ERT
 status open
 
@@ -7640,7 +7647,7 @@ return}
 Description:
  
 \emph default
-Enter a take number based on the numerical suffixes at the end of filenames to quickly jump to that media item.
+Enter a take number based on the numerical suffixes at the end of filenames and optional session name to quickly jump to that media item.
  
 \end_layout
 
@@ -7650,13 +7657,13 @@ Enter a take number based on the numerical suffixes at the end of filenames to q
 Notes:
  
 \emph default
-If the function can't find a media item with that take number,
- it will let you know and offer to try again with a different number.
+If the function can't find a media item with that take number and optional session name,
+ it will let you know and offer to try again with a different number or session name.
  This will work for any filenaming system that uses numbers before the file extension such as 
 \begin_inset Quotes bld
 \end_inset
 
-main_pair-T04.wav
+mvt1_main_pair-T04.wav
 \begin_inset Quotes brd
 \end_inset
 
@@ -7664,12 +7671,13 @@ main_pair-T04.wav
 \begin_inset Quotes bld
 \end_inset
 
-cello-spot-take_23.flac
+beethoven_cello-take_23.flac
 \begin_inset Quotes brd
 \end_inset
 
 .
  Note that if the imported or recorded files have zero-padding that is not a problem as the function strips these away.
+ The session name search can be used to find any text in the filename and allows for partial searches.
  If you have used an item to create an S-D edit,
  searching for a take will ignore these items and move directly to the original sources.
 \end_layout
@@ -9514,7 +9522,7 @@ return}
 
 \end_inset
 
- Find Takes (based on number found at the end of a filename)
+ Find Takes (based on number found at the end of a filename and optional session name)
 \end_layout
 
 \begin_layout Labeling
