@@ -383,16 +383,7 @@ The website
 \begin_inset CommandInset href
 LatexCommand href
 name "reaclassical.org"
-target "http://reaclassical.org"
-literal "false"
-
-\end_inset
-
- or directly at 
-\begin_inset CommandInset href
-LatexCommand href
-name "github.io/chmaha/reaclassical"
-target "https://github.io/chmaha/reaclassical"
+target "https://reaclassical.org"
 literal "false"
 
 \end_inset
