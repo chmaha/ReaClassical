@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.21
+@version 24.21.1
 @changelog
-  NEW: Jump within project or item time
-  PDF Manual: Various changes
+  Actually remove record-arm function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -54,7 +53,6 @@
   [main] ReaClassical_Exclusive Audition.lua
   [main] ReaClassical_Find Take.lua
   [main] ReaClassical_Take Counter.lua
-  [main] ReaClassical_Record-Arm Folder.lua
   [main] ReaClassical_Add Track To All Groups.lua
   [main] ReaClassical_Hide Children.lua
   [main] ReaClassical_Show Children.lua
