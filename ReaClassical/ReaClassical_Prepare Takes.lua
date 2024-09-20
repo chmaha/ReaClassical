@@ -22,7 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, copy_track_items, get_color_table
-local tracks_per_folder, clean_take_names, xfade_check, empty_items_check, get_path
+local tracks_per_folder, xfade_check, empty_items_check, get_path
 
 ---------------------------------------------------------------------
 
@@ -42,9 +42,6 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
-    local response = ShowMessageBox("Would you like to remove item take names?", "Prepare Takes", 3)
-    if response == 2 then return end
-    if response == 6 then clean_take_names(num_of_project_items) end
     Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
     local total_tracks = CountTracks(0)
     local folders = 0
@@ -308,18 +305,6 @@ function tracks_per_folder()
     local selected_tracks = CountSelectedTracks(0)
     Main_OnCommand(40297, 0)           -- Track: Unselect (clear selection of) all tracks
     return selected_tracks
-end
-
----------------------------------------------------------------------
-
-function clean_take_names(num_of_project_items)
-    for i = 0, num_of_project_items - 1 do
-        local item = GetMediaItem(0, i)
-        local take = GetActiveTake(item)
-        if take then
-            GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
-        end
-    end
 end
 
 ---------------------------------------------------------------------
