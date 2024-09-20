@@ -192,86 +192,6 @@ Typeset in \SpecialChar LyX
 \end_layout
 
 \begin_layout Standard
-\noindent
-\align center
-\begin_inset Newpage pagebreak
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align center
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-vspace*{
-\backslash
-fill}
-\end_layout
-
-\end_inset
-
-81 10 26
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align center
-10 07 22
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align center
-16 04 20
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align center
-500 300 100 10
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align center
-22 473
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align center
-100 16
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align center
-36.5 250
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-vspace*{
-\backslash
-fill}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -3068,7 +2988,7 @@ Takes
  Every set of items comprising a take has changed colour,
  is now grouped.
  In addition,
- source and destination groups are linked or (re-linked) for various types of editing and imported/recorded take names removed if desired.
+ source and destination groups are linked or (re-linked) for various types of editing.
  
 \end_layout
 
@@ -5447,7 +5367,43 @@ Metadata
 \end_layout
 
 \begin_layout Standard
-Track titles are added to the individual items on the first destination track by double-clicking on the item or selecting and pressing 
+At this stage,
+ the only items present in the destination folder should be those comprising the final album.
+ If working in horizontal workflow mode up to this point,
+ drag any source material to new group by first creating an empty duplicate folder via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+textbackslash}
+\end_layout
+
+\end_inset
+
+.
+ To quickly remove all the take names on the destination parent track,
+ run 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+T}
+\end_layout
+
+\end_inset
+
+.
+ Track titles are then added to the individual items on the destination parent track by double-clicking on the item or selecting and pressing 
 \begin_inset ERT
 status open
 
@@ -5462,7 +5418,11 @@ keys{F2}
 
 .
  Note that only items that start tracks should be named.
- The rest of the metadata is then added via the Create CD Markers function 
+ 
+\end_layout
+
+\begin_layout Standard
+The rest of the metadata is then added via the Create CD Markers function 
 \begin_inset ERT
 status open
 
@@ -9250,6 +9210,67 @@ Create CD Markers
 \begin_layout Standard
 
 \series bold
+Remove Take Names from Destination Parent 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+T}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+ 
+\emph default
+Run after source-destination editing is complete to remove recorded/imported take names from destination parent items in preparation for using the Create CD Markers function.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+ 
+\emph default
+At this stage,
+ the only items present in the destination folder should be those comprising the final album.
+ If working in horizontal workflow mode up to this point,
+ drag any source material to new group by first creating an empty duplicate folder via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+textbackslash}
+\end_layout
+
+\end_inset
+
+.
+ As mentioned below,
+ add take names only to destination parent items that are to become CD track starts.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
 Create CD Markers 
 \series default
 
@@ -10037,6 +10058,25 @@ keys{T}
 \end_inset
 
  Prepare Takes
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+textbackslash}
+\end_layout
+
+\end_inset
+
+ Remove Take Names From Destination Parent Track
 \end_layout
 
 \begin_layout Labeling
