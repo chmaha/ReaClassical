@@ -2,7 +2,8 @@
 @author chmaha
 @version 24.21.1
 @changelog
-  Actually remove record-arm function
+  Actually remove record-arm function from reaclassical.lua
+  Keymap: delete record-arm shortcut
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
