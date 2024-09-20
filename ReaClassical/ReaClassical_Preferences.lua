@@ -25,10 +25,19 @@ local main, display_prefs, load_prefs, save_prefs, pref_check
 ---------------------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local pass
     local ret, input = display_prefs()
     if ret then pass = pref_check(input) end
     if pass == true then save_prefs(input) end
+
+    if workflow == "Vertical" then
+        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+        Main_OnCommand(F8_sync, 0)
+    elseif workflow == "Horizontal" then
+        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+        Main_OnCommand(F7_sync, 0)
+    end
 end
 
 -----------------------------------------------------------------------
