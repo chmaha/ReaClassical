@@ -53,7 +53,7 @@ function main()
             if i > 1 then
                 local prev_end_position = last_end_position
                 if item_start > prev_end_position then
-                    ShowMessageBox("Selected items must be crossfaded.", "Error", 0)
+                    ShowMessageBox("Selected items must be crossfaded.", "Move Within Items", 0)
                     return
                 end
             end
@@ -68,7 +68,7 @@ function main()
         combined_length = GetProjectLength()
     end
 
-    local dialog_title = count == 1 and "Move Within Item" or "Move Within Project"
+    local dialog_title = count > 0 and "Move Within Item(s)" or "Move Within Project"
     local retval, time_str = GetUserInputs(dialog_title, 1, "Enter time (mm:ss)", "")
 
     if retval then
