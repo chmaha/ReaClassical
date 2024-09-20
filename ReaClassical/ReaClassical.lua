@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.20.1
+@version 24.20.2
 @changelog
-  PDF Manual: Move to https for reaclassical.org
+  Run F7/F8 sync after ReaClassical Preferences if workflow defined
+  New function: Remove take names from first destination track
+  Prepare Takes: Move take name removal to separate function
+  PDF Manual: Add info for function to remove destination parent take names
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -66,6 +69,7 @@
   [main] ReaClassical_Delete Track From All Groups.lua
   [main] ReaClassical_Add Ref Track.lua
   [main] ReaClassical_Source Markers to Item Edge.lua
+  [main] ReaClassical_Remove Take Names.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] RCPyramix.ReaperThemeZip
