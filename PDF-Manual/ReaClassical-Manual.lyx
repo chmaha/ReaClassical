@@ -1908,23 +1908,8 @@ General Recording
 \end_layout
 
 \begin_layout Standard
-To record more generally (say a separate single mono narration track or similar),
- use the built-in REAPER record function arm the folder (either manually by press-holding on the first record button and sliding the mouse down through the tracks or via the handy 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-shift+R}
-\end_layout
-
-\end_inset
-
- shortcut) and then either press 
+To record additional material after the fact (say a separate single mono narration track or an organ part in a church after the main recording session in a concert hall),
+ use the built-in REAPER record function by arming the required inputs (clicking on a single track record button or however many you need) and then either press 
 \begin_inset ERT
 status open
 
@@ -1958,7 +1943,7 @@ enter}
 \end_inset
 
  to track the upcoming take number (in green) and take number during recording (in red with recording circle).
- 
+ Existing audio material in the folder can easily be monitored during recording as desired.
 \end_layout
 
 \begin_layout Subsection
