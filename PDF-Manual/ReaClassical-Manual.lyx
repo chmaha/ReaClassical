@@ -1223,7 +1223,7 @@ return}
 
 \end_inset
 
-) and then either sticking with that for editing (also making use of the extremely useful Find Takes function 
+) and then either sticking with that for editing (also taking advantage of the extremely useful Find Take 
 \begin_inset ERT
 status open
 
@@ -1238,7 +1238,22 @@ return}
 
 \end_inset
 
- ) or,
+ and Jump to Time 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+tab}
+\end_layout
+
+\end_inset
+
+ functions) or,
  depending on the number of takes,
  converting to a vertical workflow.
  Frankly,
@@ -1383,8 +1398,9 @@ In this approach,
  there is a single track or single group of tracks with the source and destination material laid out from left to right.
  As mentioned above,
  for shorter pieces of music this is often a perfectly acceptable approach.
- With the introduction of the Find Takes function and Take Counter,
- many will now prefer this workflow.
+ With the introduction of the Find Take,
+ Jump to Time and Take Counter functions,
+ many might now prefer this workflow.
 \end_layout
 
 \begin_layout Standard
@@ -3207,7 +3223,22 @@ return}
 
 \end_inset
 
-.
+ and jump to a time within a selected item or crossfaded items using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+tab}
+\end_layout
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Subsection
@@ -6843,50 +6874,6 @@ Notes:
  Sequoia etc.
 \end_layout
 
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-
-\series bold
-Record-Arm Folder
-\series default
- 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-shift+R}
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Description:
-
-\emph default
- Record-Arm a folder and child tracks
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Notes:
-
-\emph default
- This is designed for horizontal workflows.
- Simply select the folder parent and press the shortcut to record-arm all tracks in the folder.
- 
-\end_layout
-
 \begin_layout Standard
 
 \series bold
@@ -7631,7 +7618,7 @@ inside
 \begin_layout Standard
 
 \series bold
-Find Takes (based on filename) 
+Find Take (based on filename) 
 \series default
 
 \begin_inset ERT
@@ -7690,6 +7677,48 @@ beethoven_cello-take_23.flac
  The session name search can be used to find any text in the filename and allows for partial searches.
  If you have used an item to create an S-D edit,
  searching for a take will ignore these items and move directly to the original sources.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Jump To Time (Selected Item(s) or Project) 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+tab}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+ 
+\emph default
+Jumps to the specified time (mm:ss) in the project or internal time within a selected item or set of consecutive crossfaded items.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+ 
+\emph default
+Various usecases include 1) a musician or producer giving you an exact time in draft exported audio of a heavily-edited symphony movement where they identified extraneous noise or a noticeable edit,
+ 2) building S-D edits from a list or score which includes take number and times.
 \end_layout
 
 \begin_layout Standard
@@ -9593,7 +9622,26 @@ return}
 
 \end_inset
 
- Find Takes (based on number found at the end of a filename and optional session name)
+ Find Take (based on number found at the end of a filename and optional session name)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+tab}
+\end_layout
+
+\end_inset
+
+ Jump to Time (within selected item(s) or project)
 \end_layout
 
 \begin_layout Labeling
@@ -9704,25 +9752,6 @@ keys{.}
 \end_inset
 
  Next Marker
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-tab}
-\end_layout
-
-\end_inset
-
- Move to item peak value (SWS)
 \end_layout
 
 \begin_layout Standard
@@ -9982,25 +10011,6 @@ keys{F9}
 \end_inset
 
  Classical Take Record
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-shift+R}
-\end_layout
-
-\end_inset
-
- Record-Arm Folder
 \end_layout
 
 \begin_layout Labeling
