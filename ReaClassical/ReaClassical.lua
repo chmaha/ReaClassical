@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.21.2
+@version 24.21.3
 @changelog
-  Check for SWS/S&M existence where necessary
+  Add Dest Marker: Remove generic error if no track present
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
