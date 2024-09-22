@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.21.3
+@version 24.21.4
 @changelog
-  Add Dest Marker: Remove generic error if no track present
+  S-D edits: Unlock items if no source material found
+  Insert With Time-Stretching: Apply function to child tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
