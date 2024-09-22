@@ -287,6 +287,7 @@ function clean_up(is_selected, proj_marker_count)
             i = i + 1
         end
     else
+        unlock_items()
         ShowMessageBox("Please make sure there is material to copy between your source markers...",
             "Source-Destination Edit", 0)
     end
