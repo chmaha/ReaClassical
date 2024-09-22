@@ -24,6 +24,12 @@ local main, track_check
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    return
+end
+
 function main()
     local num_of_tracks = track_check()
     if num_of_tracks == 0 then

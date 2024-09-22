@@ -26,6 +26,12 @@ local tracks_per_folder, xfade_check, empty_items_check, get_path
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    return
+end
+
 function main()
 
     local num_of_project_items = CountMediaItems(0)

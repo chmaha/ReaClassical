@@ -23,6 +23,13 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, move_to_project_tab, zoom
 
 ---------------------------------------------------------------------
+
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    return
+end
+
 function main()
   local _, source_proj = markers()
 

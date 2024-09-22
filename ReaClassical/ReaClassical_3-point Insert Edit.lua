@@ -25,6 +25,12 @@ local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    return
+end
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -33,12 +39,14 @@ function main()
     if proj_marker_count == 1 then
         ShowMessageBox("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
-        .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
+            .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
         return
     end
 
     if proj_marker_count == -1 then
-        ShowMessageBox("Source or destination markers should be paired with the corresponding source or destination project marker.", "Multi-tab Source-Destination Edit", 0)
+        ShowMessageBox(
+        "Source or destination markers should be paired with the corresponding source or destination project marker.",
+        "Multi-tab Source-Destination Edit", 0)
         return
     end
 

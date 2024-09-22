@@ -21,6 +21,12 @@ local main
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    return
+end
+
 function main()
     Main_OnCommand(40296, 0) -- Track: Select all tracks
     local zoom = NamedCommandLookup("_SWS_VZOOMFIT")

@@ -26,6 +26,12 @@ local extract_take_number
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    return
+end
+
 function main()
     if track_check() == 0 then
         ShowMessageBox("Please add at least one folder before running", "Classical Take Record", 0)

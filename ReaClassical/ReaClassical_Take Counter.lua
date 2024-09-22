@@ -22,6 +22,12 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_count, clean_up
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    return
+end
+
 local iterated_filenames = false
 local added_take_number = false
 local rec_name_set = false
