@@ -54,18 +54,17 @@ function main()
     if dest_count + source_count == 4 then
 
         local selected_items = {}
-        local num_of_items = CountSelectedMediaItems()
-        
-        if num_of_items == 0 then
-            Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
-            ShowMessageBox("Please add media items before running.", "Insert with timestretching", 0)
-            return
-        end
 
         move_to_project_tab(dest_proj)
         lock_items()
         move_to_project_tab(source_proj)
-        local first_track_items = copy_source()
+        local source_items = copy_source()
+        if source_items == 0 then
+            Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
+            unlock_items()
+            ShowMessageBox("Please make sure there is material to copy between your source markers.", "Insert with timestretching", 0)
+            return
+        end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
         split_at_dest_in()
@@ -90,7 +89,7 @@ function main()
         MoveEditCursor(-xfade_len, false) -- move cursor back xfade length
         Main_OnCommand(40625, 0)          -- Time Selection: Set start point
 
-        for i = 0, num_of_items - 1, 1 do
+        for i = 0, source_items - 1, 1 do
             selected_items[i] = GetSelectedMediaItem(0, i)
         end
         Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -108,15 +107,15 @@ function main()
             SetMediaItemSelected(v, true)
             SetMediaItemInfo_Value(v, "C_LOCK", 0)
         end
-        if first_track_items == 1 then
+        if source_items == 1 then
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         else
             Main_OnCommand(40362, 0) -- glue items
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         end
         mark_as_edit()
-        local num_of_items = CountSelectedMediaItems()
-        for i = 0, num_of_items - 1, 1 do
+        local source_items = CountSelectedMediaItems()
+        for i = 0, source_items - 1, 1 do
             local item = GetSelectedMediaItem(0, i)
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", item_color)
         end
@@ -171,11 +170,11 @@ function copy_source()
     GoToMarker(0, 999, false)
     Main_OnCommand(40626, 0) -- Time Selection: Set end point
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
-    local first_track_items = CountSelectedMediaItems()
     Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
+    local source_items = CountSelectedMediaItems()
     Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
-    return first_track_items
+    return source_items
 end
 
 ---------------------------------------------------------------------
@@ -316,9 +315,9 @@ end
 ---------------------------------------------------------------------
 
 function get_first_last_items()
-    local num_of_items = CountSelectedMediaItems()
+    local source_items = CountSelectedMediaItems()
     local first_sel_item = GetSelectedMediaItem(0, 0)
-    local last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
+    local last_sel_item = GetSelectedMediaItem(0, source_items - 1)
     return first_sel_item, last_sel_item
 end
 
