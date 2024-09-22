@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.21.1
+@version 24.21.2
 @changelog
-  Actually remove record-arm function from reaclassical.lua
-  Keymap: delete record-arm shortcut
+  Check for SWS/S&M existence where necessary
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
