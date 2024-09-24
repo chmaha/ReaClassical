@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.21.4
+@version 24.21.5
 @changelog
-  S-D edits: Unlock items if no source material found
-  Insert With Time-Stretching: Apply function to child tracks
+  Use REF track as overdub guide if set in ReaClassical Prefs
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
