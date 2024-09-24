@@ -1903,6 +1903,24 @@ enter}
  Please read the description of the function in Appendix A for best practices.
 \end_layout
 
+\begin_layout Standard
+Once recording is complete,
+ you can briefly use the audition function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{A}
+\end_layout
+
+\end_inset
+
+ which will instantly remove all record-arming from tracks.
+\end_layout
+
 \begin_layout Subsection
 Overdub Recording
 \end_layout
