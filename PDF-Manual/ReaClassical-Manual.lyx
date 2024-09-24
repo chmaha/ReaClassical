@@ -1904,12 +1904,14 @@ enter}
 \end_layout
 
 \begin_layout Subsection
-General Recording
+Overdub Recording
 \end_layout
 
 \begin_layout Standard
-To record additional material after the fact (say a separate single mono narration track or an organ part in a church after the main recording session in a concert hall),
- use the built-in REAPER record function by arming the required inputs (clicking on a single track record button or however many you need) and then either press 
+To record additional material after the fact (say a separate narration track or an organ part in a church after the main recording session in a concert hall),
+ edit the orchestral material as usual and use a mixdown as a guide track in a new project (or new project tab).
+ To achieve this,
+ use a vertical worflow via 
 \begin_inset ERT
 status open
 
@@ -1917,15 +1919,71 @@ status open
 
 
 \backslash
-keys{
-\backslash
-ctrl+R}
+keys{F8}
 \end_layout
 
 \end_inset
 
- or use the red record button.
- During this mode you should still use the Takes Counter window 
+,
+ add a REF track 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{'}
+\end_layout
+
+\end_inset
+
+ and set the ReaClassical Preferences option 
+\begin_inset Quotes bld
+\end_inset
+
+REF = Overdub Guide
+\begin_inset Quotes brd
+\end_inset
+
+ to 
+\begin_inset Quotes bld
+\end_inset
+
+1
+\begin_inset Quotes brd
+\end_inset
+
+ (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+).
+ With this setting,
+ audio on the guide track will be audible during take recording and auditioning of folders.
+ Use Classical Take Recording 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ and Take Counter window 
 \begin_inset ERT
 status open
 
@@ -1942,8 +2000,25 @@ enter}
 
 \end_inset
 
- to track the upcoming take number (in green) and take number during recording (in red with recording circle).
- Existing audio material in the folder can easily be monitored during recording as desired.
+ as normal.
+ You can then S-D edit and mix the overdub material to fit with the orchestral mixdown or,
+ if further mixing and mastering work is required on the original multi-track material,
+ bring the organ part into that project as a new track in the destination folder 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+T}
+\end_layout
+
+\end_inset
+
+ (see below).
 \end_layout
 
 \begin_layout Subsection
@@ -7541,7 +7616,8 @@ Set S-D crossfade length,
  album lead-out time,
  Prepare Takes colors,
  Mastering Mode,
- S-D Destination Marker Check Range (ms)
+ S-D Destination Marker Check Range (ms),
+ REF = Overdub Guide
 \end_layout
 
 \begin_layout Standard
@@ -7598,6 +7674,9 @@ Prepare Takes:
 inside
 \emph default
  a item fade or crossfade.
+ Finally,
+ if the reference track is set as overdub guide,
+ it will be audible during classical take recording and auditioning which is extremely useful for overdub recording of material after the main session such as a symphonic organ part or narration.
 \end_layout
 
 \begin_layout Standard
