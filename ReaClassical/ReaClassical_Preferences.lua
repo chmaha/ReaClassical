@@ -22,14 +22,23 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 
+local NUM_OF_ENTRIES = 8
+local default_values = '35,200,3,7,0,0,500,0'
+
 ---------------------------------------------------------------------
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local pass
-    local ret, input = display_prefs()
-    if ret then pass = pref_check(input) end
-    if pass == true then save_prefs(input) end
+    local input 
+    repeat
+        local ret
+        ret, input = display_prefs()
+        if not ret then return end
+        if ret then pass = pref_check(input) end
+    until pass
+
+    save_prefs(input)
 
     if workflow == "Vertical" then
         local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
@@ -43,23 +52,38 @@ end
 -----------------------------------------------------------------------
 
 function display_prefs()
-    local _, saved = load_prefs()
-    local ret, input
-    if saved ~= "" then
-        ret, input = GetUserInputs('ReaClassical Project Preferences', 7,
-            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s),Prepare Takes: Random colors,Mastering Mode,S-D Marker Check (ms)', saved)
-    else
-        ret, input = GetUserInputs('ReaClassical Project Preferences', 7,
-            'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s)  (>= 1),Album lead-out time (s),Prepare Takes: Random colors,Mastering Mode,S-D Marker Check (ms)',
-            '35,200,3,7,0,0,500')
-    end
+    local saved = load_prefs(NUM_OF_ENTRIES)
+    local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES,
+        'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s) (>= 1),Album lead-out time (s),Prepare Takes: Random colors,Mastering Mode,S-D Marker Check (ms),REF = Overdub Guide',
+        saved)
     return ret, input
 end
 
 -----------------------------------------------------------------------
 
 function load_prefs()
-    return GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
+    if saved == "" then return default_values end
+
+    local saved_entries = {}
+
+    for entry in saved:gmatch('([^,]+)') do
+        saved_entries[#saved_entries + 1] = entry
+    end
+
+    if #saved_entries < NUM_OF_ENTRIES then
+        local i = 1
+        for entry in default_values:gmatch("([^,]+)") do
+            if i == #saved_entries + 1 then
+                saved_entries[i] = entry
+            end
+            i = i + 1
+        end
+    end
+
+    saved = table.concat(saved_entries, ',')
+
+    return saved
 end
 
 -----------------------------------------------------------------------
@@ -72,20 +96,31 @@ end
 
 function pref_check(input)
     local pass = true
-    local valid_numbers = true
     local table = {}
-    for entry in input:gmatch('([^,]+)') do
-        if tonumber(entry) == nil or tonumber(entry) < 0 then valid_numbers = false end
-        table[#table + 1] = entry 
+    local invalid_msg = ""
+    for entry in input:gmatch('([^,]*)') do
+        table[#table + 1] = entry
+        if entry == "" or tonumber(entry) == nil or tonumber(entry) < 0 then
+            pass = false
+            invalid_msg = "Entries should not be strings or left empty."
+        end
     end
 
+    local binary_error_msg = ""
     -- separate check for binary options
-    if tonumber(table[5]) > 1 or tonumber(table[6]) > 1 then valid_numbers = false end
-
-    if #table ~= 7 or valid_numbers == false then
-        ShowMessageBox('Invalid or empty preferences are not allowed. Using previously saved values or defaults', "Warning", 0)
-        pass = false
+    if #table == NUM_OF_ENTRIES then
+        if tonumber(table[5]) > 1 or tonumber(table[6]) > 1 or tonumber(table[8]) > 1 then
+            binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
+            pass = false
+        end
     end
+
+    local error_msg = binary_error_msg .. invalid_msg
+
+    if not pass then
+        ShowMessageBox(error_msg, "Error", 0)
+    end
+
     return pass
 end
 
