@@ -27,8 +27,18 @@ local get_color_table, get_path
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
+end
+
+local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+local mastering = 0
+local ref_is_guide = 0
+if input ~= "" then
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[6] then mastering = tonumber(table[6]) end
+    if table[8] then ref_is_guide = tonumber(table[8]) end
 end
 
 function main()
@@ -159,13 +169,13 @@ function solo()
             end
         end
 
-        if not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
+        if not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
             if IsTrackSelected(track) and parent ~= 1 then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 2)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             elseif IsTrackSelected(track) then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             elseif IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 1)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
@@ -183,14 +193,21 @@ function solo()
         end
 
         if trackname_check(track, "^REF") then
-            if IsTrackSelected(track) then
-                Main_OnCommand(40340,0) -- unsolo all tracks
-                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-                SetMediaTrackInfo_Value(track, "I_SOLO", 1)
-            else
-                SetMediaTrackInfo_Value(track, "B_MUTE", 1)
-                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            local is_selected = IsTrackSelected(track)
+            local mute = 1
+            local solo = 0
+
+            if is_selected then
+                Main_OnCommand(40340, 0) -- unsolo all tracks
+                mute = 0
+                solo = 1
+            elseif ref_is_guide == 1 then
+                mute = 0
+                solo = 0
             end
+
+            SetMediaTrackInfo_Value(track, "B_MUTE", mute)
+            SetMediaTrackInfo_Value(track, "I_SOLO", solo)
         end
 
         if trackname_check(track, "^RCMASTER") then
@@ -210,14 +227,6 @@ end
 ---------------------------------------------------------------------
 
 function mixer()
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local mastering = 0
-    if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[6] then mastering = tonumber(table[6]) end
-    end
-
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
@@ -245,7 +254,7 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF")  then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -258,9 +267,9 @@ function mixer()
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
         end
         if mastering == 1 and i == 0 then
-            Main_OnCommand(40727,0) -- minimize all tracks
+            Main_OnCommand(40727, 0) -- minimize all tracks
             SetTrackSelected(track, 1)
-            Main_OnCommand(40723,0) -- expand and minimize others
+            Main_OnCommand(40723, 0) -- expand and minimize others
             SetTrackSelected(track, 0)
         end
     end

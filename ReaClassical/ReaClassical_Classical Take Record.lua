@@ -32,6 +32,16 @@ if not SWS_exists then
     return
 end
 
+local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+local mastering = 0
+local ref_is_guide = 0
+if input ~= "" then
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[6] then mastering = tonumber(table[6]) end
+    if table[8] then ref_is_guide = tonumber(table[8]) end
+end
+
 function main()
     if track_check() == 0 then
         ShowMessageBox("Please add at least one folder before running", "Classical Take Record", 0)
@@ -163,6 +173,10 @@ function solo()
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
+        if trackname_check(track, "^REF") and ref_is_guide == 1 then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+        end
     end
     return true
 end
@@ -177,14 +191,6 @@ end
 ---------------------------------------------------------------------
 
 function mixer()
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local mastering = 0
-    if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[6] then mastering = tonumber(table[6]) end
-    end
-
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
