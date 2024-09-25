@@ -3538,7 +3538,7 @@ keys{4}
 
 \emph on
  to change marker location.
- Just remember to disengage lock mode when you enter the fade editor or else you won't be able to move the right green item of the crossfade!
+ Just remember to disengage lock mode when you enter the fade editor or else you won't be able to move the items of the crossfade!
 \end_layout
 
 \begin_layout Subsubsection
@@ -8725,7 +8725,49 @@ To enter the crossfade view,
  Red is always the left item,
  green the right.
  For safety reasons,
- all items from the left red item to the beginning of the project are locked to avoid inadvertently messing with an existing fade.
+ all items in the first folder before the left red item are locked to avoid inadvertently messing with an existing fade.
+ Further,
+ ReaClassical uses a feature similar to 
+\begin_inset Quotes bld
+\end_inset
+
+Classical Mode
+\begin_inset Quotes brd
+\end_inset
+
+ in Sequoia's fade editor.
+ Essentially,
+ the user is free to move the left item but on running Classical Crossfade 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{X}
+\end_layout
+
+\end_inset
+
+ or exiting using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F}
+\end_layout
+
+\end_inset
+
+ (after,
+ for example,
+ setting a more complex fade by hand),
+ the red item snaps back to its original position (all future items are also relatively shifted),
+ thereby perfectly preserving the previous fade.
  To immediately audition,
  use the A shortcut in one of four areas.
  Hover the mouse in either of the blank areas (no media item) in the top left or bottom right of the view to audition the function from that location to the mirrored location on the other side of the edit.
@@ -8777,8 +8819,7 @@ keys{T}
 \end_layout
 
 \begin_layout Standard
-NEW:
- To actually finesse the edit,
+To actually finesse the edit,
  ensure at least one of the crossfaded items is selected.
  Then hover your mouse in a blank area (similar to the above fade editor audition tool process) and press 
 \begin_inset ERT
