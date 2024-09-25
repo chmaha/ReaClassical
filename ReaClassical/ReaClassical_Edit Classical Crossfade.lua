@@ -69,7 +69,6 @@ function main()
     local end_of_one = one_pos + one_length
 
     if mouse_pos < two_pos then
-        SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
         SetEditCurPos(mouse_pos, false, false)
         curpos = GetCursorPosition()
         SetMediaItemSelected(item_two, true)
@@ -81,15 +80,12 @@ function main()
         Main_OnCommand(41991, 0)                      -- toggle ripple-all OFF
         Main_OnCommand(41311, 0)                      -- extend item right
         Main_OnCommand(41991, 0)                      -- toggle ripple-all ON
-        SetMediaItemInfo_Value(item_one, "C_LOCK", 1) --lock item 1
     elseif mouse_pos > two_pos then
-        SetMediaItemInfo_Value(item_one, "C_LOCK", 0) --unlock item 1
         SetEditCurPos(mouse_pos, false, false)
         SetMediaItemSelected(item_one, true)
         Main_OnCommand(41991, 0)                      -- toggle ripple-all OFF
         Main_OnCommand(41311, 0)                      -- extend item right
         SetMediaItemSelected(item_one, false)
-        SetMediaItemInfo_Value(item_one, "C_LOCK", 1) --lock item 1
         SetMediaItemSelected(item_two, true)
         one_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
         end_of_one = one_pos + one_length

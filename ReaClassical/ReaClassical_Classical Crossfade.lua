@@ -49,6 +49,27 @@ function main()
         SetMediaItemSelected(item, 1)
     end
 
+    if state == 1 then
+        local _, item1_orig_pos = GetProjExtState(0, "ReaClassical", "FirstItemPos")
+        if item1_orig_pos ~= "" then
+            local item1 = GetSelectedMediaItem(0,0)
+            local item1_new_pos = GetMediaItemInfo_Value(item1, "D_POSITION")
+            local move_amount = item1_new_pos - item1_orig_pos
+            local item_count = CountMediaItems(0)
+            for i = 0, item_count - 1 do
+                local item = GetMediaItem(0, i)
+                local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_locked = GetMediaItemInfo_Value(item, "C_LOCK") -- Get the lock state
+    
+                if item_locked == 0 then
+                    local corrected_pos = item_start_pos - move_amount
+                    SetMediaItemInfo_Value(item, "D_POSITION", corrected_pos)
+                end
+            end
+            MoveEditCursor(-move_amount, false)
+        end
+    end
+
     Undo_EndBlock('Classical Crossfade', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
