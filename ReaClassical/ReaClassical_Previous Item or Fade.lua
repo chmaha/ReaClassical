@@ -125,6 +125,9 @@ function fadeStart()
     local item1 = GetSelectedMediaItem(0, 0)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     SetProjExtState(0, "ReaClassical", "FirstItemPos", item1_start)
+    local item1_take = GetActiveTake(item1)
+    local item1_take_offset = GetMediaItemTakeInfo_Value(item1_take, "D_STARTOFFS")
+    SetProjExtState(0, "ReaClassical", "FirstItemOffset", item1_take_offset)
     save_color("1", item1)
     paint(item1, 32648759)
     Main_OnCommand(40311, 0) -- Set ripple editing all tracks
@@ -183,6 +186,7 @@ function fadeEnd()
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     Main_OnCommand(40310, 0) -- Set ripple editing per-track
     SetProjExtState(0, "ReaClassical", "FirstItemPos", "")
+    SetProjExtState(0, "ReaClassical", "FirstItemOffset", "")
     SetProjExtState(0, "ReaClassical", "arrangestarttime", "")
     SetProjExtState(0, "ReaClassical", "arrangeendtime", "")
     SetProjExtState(0, "ReaClassical", "item1" .. "color", "")
@@ -300,15 +304,16 @@ end
 
 function correct_item_positions()
     local _, item1_orig_pos = GetProjExtState(0, "ReaClassical", "FirstItemPos")
+    local _, item1_orig_offset = GetProjExtState(0, "ReaClassical", "FirstItemOffset")
+    local item1 = GetSelectedMediaItem(0, 0)
     if item1_orig_pos ~= "" then
-        local item1 = GetSelectedMediaItem(0, 0)
         local item1_new_pos = GetMediaItemInfo_Value(item1, "D_POSITION")
         local move_amount = item1_new_pos - item1_orig_pos
         local item_count = CountMediaItems(0)
         for i = 0, item_count - 1 do
             local item = GetMediaItem(0, i)
             local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            local item_locked = GetMediaItemInfo_Value(item, "C_LOCK")     -- Get the lock state
+            local item_locked = GetMediaItemInfo_Value(item, "C_LOCK") -- Get the lock state
 
             if item_locked == 0 then
                 local corrected_pos = item_start_pos - move_amount
@@ -316,6 +321,10 @@ function correct_item_positions()
             end
         end
         MoveEditCursor(-move_amount, false)
+    end
+    if item1_offset ~= "" then
+        local take = GetActiveTake(item1)
+        SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item1_orig_offset)
     end
 end
 

@@ -51,8 +51,8 @@ function main()
 
     if state == 1 then
         local _, item1_orig_pos = GetProjExtState(0, "ReaClassical", "FirstItemPos")
+        local item1 = GetSelectedMediaItem(0, 0)
         if item1_orig_pos ~= "" then
-            local item1 = GetSelectedMediaItem(0,0)
             local item1_new_pos = GetMediaItemInfo_Value(item1, "D_POSITION")
             local move_amount = item1_new_pos - item1_orig_pos
             local item_count = CountMediaItems(0)
@@ -60,13 +60,18 @@ function main()
                 local item = GetMediaItem(0, i)
                 local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 local item_locked = GetMediaItemInfo_Value(item, "C_LOCK") -- Get the lock state
-    
+
                 if item_locked == 0 then
                     local corrected_pos = item_start_pos - move_amount
                     SetMediaItemInfo_Value(item, "D_POSITION", corrected_pos)
                 end
             end
             MoveEditCursor(-move_amount, false)
+        end
+        local _, item1_orig_offset = GetProjExtState(0, "ReaClassical", "FirstItemOffset")
+        if item1_offset ~= "" then
+            local take = GetActiveTake(item1)
+            SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item1_orig_offset)
         end
     end
 
