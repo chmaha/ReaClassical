@@ -20,10 +20,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, move_to_item, deselect, select_check, exit_check
+local main, move_to_item, select_check, exit_check
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
-local move_cur_to_mid, move_to_edge
+local move_cur_to_mid, move_to_edge, correct_item_positions, folder_check
+
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 
 ---------------------------------------------------------------------
@@ -68,12 +69,6 @@ end
 
 ---------------------------------------------------------------------
 
-function deselect()
-    Main_OnCommand(40289, 0) -- deselect all items
-end
-
----------------------------------------------------------------------
-
 function select_check()
     local item = GetSelectedMediaItem(0, 0)
     if item ~= nil then
@@ -99,11 +94,26 @@ end
 ---------------------------------------------------------------------
 
 function lock_previous_items(item)
+    local tracks_per_group = folder_check()
     local num = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
+    local first_item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
     local first_track = GetTrack(0, 0)
-    for i = 0, num do
-        item = GetTrackMediaItem(first_track, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 1)
+    for t = 0, tracks_per_group - 1 do
+        local track = GetTrack(0, t)                       -- Get the track
+        if track then
+            local item_count = CountTrackMediaItems(track) -- Get the number of items in the track
+            -- Iterate through the items in the current track
+            for i = 0, item_count - 1 do
+                local track_item = GetTrackMediaItem(track, i)
+                if track_item then
+                    local track_item_pos = GetMediaItemInfo_Value(track_item, "D_POSITION")
+                    -- Lock the item if it starts before the first item's position
+                    if track_item_pos < first_item_pos then
+                        SetMediaItemInfo_Value(track_item, "C_LOCK", 1)
+                    end
+                end
+            end
+        end
     end
 end
 
@@ -112,6 +122,8 @@ end
 function fadeStart()
     SetToggleCommandState(1, fade_editor_toggle, 1)
     local item1 = GetSelectedMediaItem(0, 0)
+    local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
+    SetProjExtState(0, "ReaClassical", "FirstItemPos", item1_start)
     save_color("1", item1)
     paint(item1, 32648759)
     Main_OnCommand(40311, 0) -- Set ripple editing all tracks
@@ -123,8 +135,8 @@ function fadeStart()
     SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
     Main_OnCommand(select_1, 0)
-    Main_OnCommand(40319, 0)                         -- move edit cursor to end of item
-    view()
+    Main_OnCommand(40417, 0)                         -- move edit cursor to next item
+    view(fade_editor_toggle)
     zoom()
     SetMediaItemSelected(item1, true)
     local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection (across tracks)
@@ -139,12 +151,14 @@ end
 function fadeEnd()
     local item = exit_check()
     if item == -1 then
-        ShowMessageBox("Please select the left or right item of the crossfade pair to move to another crossfade",
+        ShowMessageBox(
+            "Please select—and place your cursor on—the left or right item of the crossfade pair to exit the fade editor",
             "Crossfade Editor", 0)
-        return -1
+        return
     end
+    correct_item_positions()
     local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-    if color == 20967993 then -- if green
+    if color == 20967993 then
         local prev_item = NamedCommandLookup("_SWS_SELPREVITEM2")
         Main_OnCommand(prev_item, 0)
         item = GetSelectedMediaItem(0, 0)
@@ -162,12 +176,16 @@ function fadeEnd()
     move_cur_to_mid(item)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(item, 1)
-    view()
+    view(fade_editor_toggle)
     local _, start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
     local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     Main_OnCommand(40310, 0) -- Set ripple editing per-track
-    return 1
+    SetProjExtState(0, "ReaClassical", "FirstItemPos", "")
+    SetProjExtState(0, "ReaClassical", "arrangestarttime", "")
+    SetProjExtState(0, "ReaClassical", "arrangeendtime", "")
+    SetProjExtState(0, "ReaClassical", "item1" .. "color", "")
+    SetProjExtState(0, "ReaClassical", "item2" .. "color", "")
 end
 
 ---------------------------------------------------------------------
@@ -258,6 +276,46 @@ function move_cur_to_mid(item)
     local pos = GetMediaItemInfo_Value(item, "D_POSITION")
     local len = GetMediaItemInfo_Value(item, "D_LENGTH")
     SetEditCurPos(pos + len / 2, false, false)
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local tracks_per_group = 1
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        elseif folders == 1 and not (rcm or send or bus or rt or ref) then
+            tracks_per_group = tracks_per_group + 1
+        end
+    end
+    return tracks_per_group
+end
+
+---------------------------------------------------------------------
+
+function correct_item_positions()
+    local _, item1_orig_pos = GetProjExtState(0, "ReaClassical", "FirstItemPos")
+    if item1_orig_pos ~= "" then
+        local item1 = GetSelectedMediaItem(0, 0)
+        local item1_new_pos = GetMediaItemInfo_Value(item1, "D_POSITION")
+        local move_amount = item1_new_pos - item1_orig_pos
+        local item_count = CountMediaItems(0)
+        for i = 0, item_count - 1 do
+            local item = GetMediaItem(0, i)
+            local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_locked = GetMediaItemInfo_Value(item, "C_LOCK")     -- Get the lock state
+
+            if item_locked == 0 then
+                local corrected_pos = item_start_pos - move_amount
+                SetMediaItemInfo_Value(item, "D_POSITION", corrected_pos)
+            end
+        end
+        MoveEditCursor(-move_amount, false)
+    end
 end
 
 ---------------------------------------------------------------------

@@ -128,7 +128,7 @@ function fadeStart(fade_editor_toggle)
     SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
     Main_OnCommand(select_1, 0)
-    Main_OnCommand(40319, 0)                         -- move edit cursor to end of item
+    Main_OnCommand(40417, 0)                         -- move edit cursor to end of item
     view(fade_editor_toggle)
     zoom()
     SetMediaItemSelected(item1, true)
