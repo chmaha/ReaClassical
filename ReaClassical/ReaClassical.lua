@@ -1,8 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 24.21.5
+@version 24.22
 @changelog
-  Use REF track as overdub guide if set in ReaClassical Prefs
+  Add ReaClassical Updater shortcut
+  Add quasi classical mode to fade editor
+  Add quasi classical mode fade editor info
+  Use better command to move cursor to start of next item
+  Return to left item original offset
+  PDF Manual: Various Updates
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
