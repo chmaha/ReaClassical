@@ -1,16 +1,21 @@
-#LyX 2.3 created this file. For more info see http://www.lyx.org/
-\lyxformat 544
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
 \begin_document
 \begin_header
 \save_transient_properties true
 \origin unavailable
 \textclass article
+\begin_preamble
+% Added by lyx2lyx
+\setlength{\parskip}{\medskipamount}
+\setlength{\parindent}{0pt}
+\end_preamble
 \use_default_options true
-\maintain_unincluded_children false
+\maintain_unincluded_children no
 \language british
 \language_package default
-\inputencoding auto
-\fontencoding global
+\inputencoding auto-legacy
+\fontencoding auto
 \font_roman "default" "default"
 \font_sans "tgheros" "default"
 \font_typewriter "tgcursor" "default"
@@ -18,7 +23,9 @@
 \font_default_family sfdefault
 \use_non_tex_fonts false
 \font_sc false
-\font_osf false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
 \font_sf_scale 100 100
 \font_tt_scale 100 100
 \use_microtype false
@@ -40,7 +47,7 @@
 \pdf_colorlinks true
 \pdf_backref false
 \pdf_pdfusetitle true
-\papersize a4paper
+\papersize a4
 \use_geometry true
 \use_package amsmath 1
 \use_package amssymb 1
@@ -61,7 +68,9 @@
 \suppress_date false
 \justification true
 \use_refstyle 1
+\use_formatted_ref 0
 \use_minted 0
+\use_lineno 0
 \index Index
 \shortcut idx
 \color #008000
@@ -72,8 +81,8 @@
 \bottommargin 2cm
 \secnumdepth 3
 \tocdepth 3
-\paragraph_separation skip
-\defskip medskip
+\paragraph_separation indent
+\paragraph_indentation default
 \is_math_indent 0
 \math_numbering_side default
 \quotes_style british
@@ -81,12 +90,17 @@
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
+\tablestyle default
 \bullet 0 0 6 -1
 \tracking_changes false
 \output_changes false
+\change_bars false
+\postpone_fragile_content false
 \html_math_output 0
 \html_css_as_file 0
 \html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
 \end_header
 
 \begin_body
@@ -113,7 +127,8 @@ Release Notes
 \end_layout
 
 \begin_layout Paragraph*
-Ongoing Changelog: 
+Ongoing Changelog:
+ 
 \begin_inset CommandInset href
 LatexCommand href
 target "https://github.com/chmaha/ReaClassical/commits/main/"
@@ -139,15 +154,14 @@ literal "false"
 
 \end_inset
 
- (it will create a new ReaClassical folder with a short year + quarter suffix
- e.g.
+ (it will create a new ReaClassical folder with a short year + quarter suffix e.g.
  "ReaClassical_24").
  Double-click on the REAPER binary inside the folder!
 \end_layout
 
 \begin_layout Enumerate
-Follow the update instructions below to get the latest and greatest ReaClassical
- functions, toolbar and keymap.
+Follow the update instructions below to get the latest and greatest ReaClassical functions,
+ toolbar and keymap.
 \end_layout
 
 \begin_layout Paragraph*
@@ -155,20 +169,16 @@ Instructions to update a ReaClassical portable install:
 \end_layout
 
 \begin_layout Enumerate
-Run the ReaClassical_Updater function found in the actions dialog (shortcut
- ?).
- This will sync ReaPack to get the latest ReaClassical functions then offer
- to overwrite your toolbars and keymaps with the latest ReaClassical portable
- install defaults.
+Run the ReaClassical_Updater function found in the actions dialog (or use the shortcut shift+U).
+ This will sync ReaPack to get the latest ReaClassical functions then offer to overwrite your toolbars and keymaps with the latest ReaClassical portable install defaults.
  
 \series bold
-DON'T answer yes to either of these questions if you have your own custom
- toolbars or keyboard shortcuts as they will be overwritten! 
+DON'T answer yes to either of these questions if you have your own custom toolbars or keyboard shortcuts as they will be overwritten!
+ 
 \end_layout
 
 \begin_layout Enumerate
-Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version
- of REAPER as noted 
+Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version of REAPER as noted 
 \begin_inset CommandInset href
 LatexCommand href
 name "here"
@@ -226,20 +236,18 @@ target "https://reapack.com/user-guide#import-repositories"
 \end_layout
 
 \begin_layout Enumerate
-Search for "ReaClassical" and install the main ReaClassical package and
- any jsfx plugins (my "RCPlugs" are highly recommended for classical work).
+Search for "ReaClassical" and install the main ReaClassical package and any jsfx plugins (my "RCPlugs" are highly recommended for classical work).
  
 \end_layout
 
 \begin_layout Enumerate
-Use the ReaClassical project template for relevant projects (you can set
- this as default in the REAPER preferences) and change to the ReaClassical
- theme (Options > Themes).
+Use the ReaClassical project template for relevant projects (you can set this as default in the REAPER preferences) and change to the ReaClassical theme (Options > Themes).
  
 \end_layout
 
 \begin_layout Enumerate
-Set up keyboard shortcuts in the actions list (? shortcut) as desired.
+Set up keyboard shortcuts in the actions list (?
+ shortcut) as desired.
 \end_layout
 
 \end_body
