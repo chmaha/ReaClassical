@@ -152,7 +152,6 @@ function fadeEnd(fade_editor_toggle)
             "Crossfade Editor", 0)
         return
     end
-    correct_item_positions()
     local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
     if color == 20967993 then
         local prev_item = NamedCommandLookup("_SWS_SELPREVITEM2")
@@ -168,6 +167,7 @@ function fadeEnd(fade_editor_toggle)
     paint(item2, second_color)
     SetToggleCommandState(1, fade_editor_toggle, 0)
     RefreshToolbar2(1, fade_editor_toggle)
+    correct_item_positions()
     unlock_items()
     move_cur_to_mid(item)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
