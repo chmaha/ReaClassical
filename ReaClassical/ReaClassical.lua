@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.3
+@version 24.22.4
 @changelog
-  Crossfade Editor: Store and retrieve item GUID rather than rely on item selection
+  Crossfade Editor: Start with final item and work backwards if move amount is negative
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
