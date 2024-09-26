@@ -551,9 +551,15 @@ function fade_equations()
     return curve < 0 and (1 + curve) * pos - curve * (1 - (1 - pos) ^ 4) or
         (1 - curve) * pos + curve * pos ^ 4
   end
-  fade_table.f4a = function(pos,curve) return (curve*pos^4)+(1-curve)*(1-(1-pos)^2*(2-math.pi/4-(1-math.pi/4)*(1-pos)^2)) end
-  fade_table.f4b = function(pos,curve) return (curve+1)*(1-pos^2*(2-math.pi/4-(1-math.pi/4)*(pos^2)))-curve*((1-pos)^4) end
-  fade_table.f4 = function(pos,curve) return curve <0 and (1-fade_table.f4b(pos,curve)^2)^.5 or fade_table.f4a(pos,curve) end
+  fade_table.f4a = function(pos, curve)
+    return (curve * pos ^ 4) + (1 - curve) * (1 - (1 - pos) ^ 2 * (2 - math.pi / 4 - (1 - math.pi / 4) * (1 - pos) ^ 2))
+  end
+  fade_table.f4b = function(pos, curve)
+    return (curve + 1) * (1 - pos ^ 2 * (2 - math.pi / 4 - (1 - math.pi / 4) * (pos ^ 2))) - curve * ((1 - pos) ^ 4)
+  end
+  fade_table.f4 = function(pos, curve)
+    return curve < 0 and (1 - fade_table.f4b(pos, curve) ^ 2) ^ .5 or fade_table.f4a(pos, curve)
+  end
   fade_table.warp1 = function(pos, time)
     return time == .5 and pos or
         ((pos * (1 - 2 * time) + time ^ 2) ^ .5 - time) / (1 - 2 * time)
