@@ -34,8 +34,8 @@ local points = {}
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
-    return
+  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+  return
 end
 
 function main()
@@ -107,7 +107,7 @@ function cd_markers(first_track)
   delete_markers()
 
   SNM_SetIntConfigVar('projfrbase', 75)
-  Main_OnCommand(40754, 0)   --enable snap to grid
+  Main_OnCommand(40754, 0) --enable snap to grid
 
   local code_input, code_table = add_codes()
   if code_input ~= "" then
@@ -115,7 +115,7 @@ function cd_markers(first_track)
   end
   local pregap_len, offset, postgap = return_custom_length()
 
-  start_check(first_track, offset)   -- move items to right if not enough room for first offset
+  start_check(first_track, offset) -- move items to right if not enough room for first offset
 
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end(first_track)
@@ -163,7 +163,7 @@ function cd_markers(first_track)
     renumber_markers()
     add_pregap(first_track)
   end
-  Main_OnCommand(40753, 0)   -- Snapping: Disable snap
+  Main_OnCommand(40753, 0) -- Snapping: Disable snap
   return redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
 end
 
@@ -211,16 +211,16 @@ function add_pregap(first_track)
   local first_pregap
   if first_marker - first_item_start < 2 then
     first_pregap = first_item_start - 2 +
-        (first_marker - first_item_start)     -- Ensure initial pre-gap is at least 2 seconds in length
+        (first_marker - first_item_start) -- Ensure initial pre-gap is at least 2 seconds in length
   else
     first_pregap = first_item_start
   end
   if first_pregap > 0 then
     GetSet_LoopTimeRange(true, false, 0, first_pregap, false)
-    Main_OnCommand(40201, 0)     -- Time selection: Remove contents of time selection (moving later items)
+    Main_OnCommand(40201, 0) -- Time selection: Remove contents of time selection (moving later items)
   elseif first_pregap < 0 then
     GetSet_LoopTimeRange(true, false, 0, 0 - first_pregap, false)
-    Main_OnCommand(40200, 0)     -- Time selection: Insert empty space at time selection (moving later items)
+    Main_OnCommand(40200, 0) -- Time selection: Insert empty space at time selection (moving later items)
     GetSet_LoopTimeRange(true, false, 0, 0, false)
   end
   AddProjectMarker(0, false, 0, 0, "!", 0)
@@ -319,9 +319,9 @@ function delete_markers()
   Main_OnCommand(delete_markers, 0)
   local delete_regions = NamedCommandLookup("_SWSMARKERLIST10")
   Main_OnCommand(delete_regions, 0)
-  Main_OnCommand(40182, 0)   -- select all items
-  Main_OnCommand(42387, 0)   -- Delete all take markers
-  Main_OnCommand(40289, 0)   -- Unselect all items
+  Main_OnCommand(40182, 0) -- select all items
+  Main_OnCommand(42387, 0) -- Delete all take markers
+  Main_OnCommand(40289, 0) -- Unselect all items
 end
 
 ---------------------------------------------------------------------
@@ -362,8 +362,8 @@ function start_check(first_track, offset)
   local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
   if position < offset then
     GetSet_LoopTimeRange(true, false, 0, offset - position, false)
-    Main_OnCommand(40200, 0)     -- insert time at time selection
-    Main_OnCommand(40635, 0)     -- remove time selection
+    Main_OnCommand(40200, 0) -- insert time at time selection
+    Main_OnCommand(40635, 0) -- remove time selection
   end
 end
 
@@ -528,6 +528,14 @@ function fade_equations()
     time = time < start_time and start_time or time > end_time and end_time or time
 
     local pos = (time - start_time) / (end_time - start_time)
+
+    local fade_func = fade_table.fadein[fade_type]
+
+    if not fade_func then
+      ShowConsoleMsg("Error: Invalid fade_type:" .. fade_type)
+      return 0 -- Or some default behavior
+    end
+
     return fade_table.fadein[fade_type](table.unpack(is_fade_in and { pos, curve } or { 1 - pos, -curve }))
   end
 
@@ -543,6 +551,9 @@ function fade_equations()
     return curve < 0 and (1 + curve) * pos - curve * (1 - (1 - pos) ^ 4) or
         (1 - curve) * pos + curve * pos ^ 4
   end
+  fade_table.f4a = function(pos,curve) return (curve*pos^4)+(1-curve)*(1-(1-pos)^2*(2-math.pi/4-(1-math.pi/4)*(1-pos)^2)) end
+  fade_table.f4b = function(pos,curve) return (curve+1)*(1-pos^2*(2-math.pi/4-(1-math.pi/4)*(pos^2)))-curve*((1-pos)^4) end
+  fade_table.f4 = function(pos,curve) return curve <0 and (1-fade_table.f4b(pos,curve)^2)^.5 or fade_table.f4a(pos,curve) end
   fade_table.warp1 = function(pos, time)
     return time == .5 and pos or
         ((pos * (1 - 2 * time) + time ^ 2) ^ .5 - time) / (1 - 2 * time)
@@ -581,6 +592,10 @@ function fade_equations()
       curve = curve or 0
       local x = fade_table.warp2(pos, (5 * curve + 8) / 16)
       return x <= .5 and 8 * x ^ 4 or 1 - 8 * (1 - x) ^ 4
+    end,
+    function(pos, curve)
+      curve = curve or 0
+      return fade_table.f4(pos, curve)
     end,
   }
 
