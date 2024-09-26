@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.1
+@version 24.22.2
 @changelog
-  Crossfade Editor: Fix offset for all child items
+  Crossfade Editor: Call correction function a little later
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
