@@ -36,7 +36,7 @@ if not SWS_exists then
 end
 
 function main()
-    local win_state = GetToggleCommandState(41827)
+    local win_state = GetToggleCommandState(fade_editor_toggle)
 
     if win_state ~= 1 then
         move_to_edge()
