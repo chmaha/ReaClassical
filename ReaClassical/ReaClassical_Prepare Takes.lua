@@ -28,7 +28,7 @@ local tracks_per_folder, xfade_check, empty_items_check, get_path
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -76,7 +76,7 @@ function main()
         local folder_size = tracks_per_folder()
         copy_track_items(folder_size, total_tracks)
     end
-    
+
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local colors = 0
     if input ~= "" then
@@ -95,6 +95,9 @@ function main()
     local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     SetEditCurPos(cur_pos, 0, 0)
+
+    local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
+    Main_OnCommand(scroll_up, 0)
 
     SetProjExtState(0, "ReaClassical", "arrangestarttime", "")
     SetProjExtState(0, "ReaClassical", "arrangeendtime", "")
@@ -123,28 +126,28 @@ end
 
 function horizontal_color(flip, edits, colors)
     if colors == 1 then
-      Main_OnCommand(40706, 0)     -- Item: Set to one random color
+        Main_OnCommand(40706, 0) -- Item: Set to one random color
     else
-      colors = get_color_table()
-      local color
-      if flip then 
-          color = colors.dest_items_two
-      else 
-          color = colors.dest_items_one
-      end
-  
-      local num_of_items = CountSelectedMediaItems(0)
-      if edits then
-          for i=0, num_of_items-1, 1 do
-              local item = GetSelectedMediaItem(0,i)
-              SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
-          end
-      else
-          for i=0, num_of_items-1, 1 do
-              local item = GetSelectedMediaItem(0,i)
-              SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
-          end
-      end
+        colors = get_color_table()
+        local color
+        if flip then
+            color = colors.dest_items_two
+        else
+            color = colors.dest_items_one
+        end
+
+        local num_of_items = CountSelectedMediaItems(0)
+        if edits then
+            for i = 0, num_of_items - 1, 1 do
+                local item = GetSelectedMediaItem(0, i)
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
+            end
+        else
+            for i = 0, num_of_items - 1, 1 do
+                local item = GetSelectedMediaItem(0, i)
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
+            end
+        end
     end
 end
 
@@ -158,14 +161,14 @@ function vertical_color_razor(colors)
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40421, 0)           -- Item: Select all items in track
     if colors == 1 then
-      Main_OnCommand(40706, 0)     -- Item: Set to one random color
+        Main_OnCommand(40706, 0)       -- Item: Set to one random color
     else
-      local colors = get_color_table()
-      local selected_items = CountSelectedMediaItems(0)
-      for i=0, selected_items-1, 1 do
-          local item = GetSelectedMediaItem(0,i)
-          SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
-      end
+        local colors = get_color_table()
+        local selected_items = CountSelectedMediaItems(0)
+        for i = 0, selected_items - 1, 1 do
+            local item = GetSelectedMediaItem(0, i)
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
+        end
     end
 end
 
@@ -173,20 +176,20 @@ end
 
 function horizontal_group(string)
     if string == "horizontal" then
-        Main_OnCommand(40296, 0)        -- Track: Select all tracks
+        Main_OnCommand(40296, 0) -- Track: Select all tracks
     else
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- Select child tracks
     end
 
-    Main_OnCommand(40417, 0)        -- Item navigation: Select and move to next item
+    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     local selected = GetSelectedMediaItem(0, 0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
-    SetEditCurPos(start+(length/2), false, false) -- move to middle of item
+    SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
-    Main_OnCommand(40032, 0)        -- Item grouping: Group items
+    Main_OnCommand(select_under, 0)               -- XENAKIOS_SELITEMSUNDEDCURSELTX
+    Main_OnCommand(40032, 0)                      -- Item grouping: Group items
 end
 
 ---------------------------------------------------------------------
@@ -197,14 +200,14 @@ function vertical_group(length)
     SetMediaItemPosition(item, length + 1, false)
 
     while IsMediaItemSelected(item) == false do
-        Main_OnCommand(40417, 0)        -- Item navigation: Select and move to next item
+        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
         local selected = GetSelectedMediaItem(0, 0)
         local start = GetMediaItemInfo_Value(selected, "D_POSITION")
         local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
-        SetEditCurPos(start+(length/2), false, false) -- move to middle of item
+        SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-        Main_OnCommand(select_under, 0) -- XENAKIOS_SELITEMSUNDEDCURSELTX
-        Main_OnCommand(40032, 0)        -- Item grouping: Group items
+        Main_OnCommand(select_under, 0)               -- XENAKIOS_SELITEMSUNDEDCURSELTX
+        Main_OnCommand(40032, 0)                      -- Item grouping: Group items
     end
     DeleteTrackMediaItem(track, item)
 end
@@ -250,24 +253,24 @@ function vertical(colors)
 
     SetOnlyTrackSelected(first_track)
     if colors == 0 then
-      -- color destination items the same as horizontal workflow
-      SetEditCurPos(0, false, false)
-      local workflow = "vertical"
-      local flip = false
-      while IsMediaItemSelected(new_item) == false do
-        horizontal_group(workflow)
-        horizontal_color(flip, edits, colors)
-        flip = not flip
-      end
+        -- color destination items the same as horizontal workflow
+        SetEditCurPos(0, false, false)
+        local workflow = "vertical"
+        local flip = false
+        while IsMediaItemSelected(new_item) == false do
+            horizontal_group(workflow)
+            horizontal_color(flip, edits, colors)
+            flip = not flip
+        end
     end
 
     DeleteTrackMediaItem(first_track, new_item)
     local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
 
     local start = 1
-    if colors == 0 then 
-      start = 2 
-      Main_OnCommand(next_folder, 0) -- select next folder    
+    if colors == 0 then
+        start = 2
+        Main_OnCommand(next_folder, 0) -- select next folder
     end
     for _ = start, num_of_folders, 1 do
         vertical_color_razor(colors)
@@ -360,7 +363,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -368,8 +371,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
