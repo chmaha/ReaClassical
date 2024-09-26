@@ -275,6 +275,9 @@ end
 function correct_item_positions(item1)
     local _, item1_orig_pos = GetProjExtState(0, "ReaClassical", "FirstItemPos")
     local _, item1_orig_offset = GetProjExtState(0, "ReaClassical", "FirstItemOffset")
+    local item1_take = GetActiveTake(item1)
+    local item1_new_offset = GetMediaItemTakeInfo_Value(item1_take, "D_STARTOFFS")
+    local offset_amount = item1_new_offset - item1_orig_offset
     if item1_orig_pos ~= "" then
         local item1_new_pos = GetMediaItemInfo_Value(item1, "D_POSITION")
         local move_amount = item1_new_pos - item1_orig_pos
@@ -304,20 +307,27 @@ function correct_item_positions(item1)
         end
         MoveEditCursor(-move_amount, false)
     end
-    if item1_orig_offset ~= "" then
-        Main_OnCommand(40289, 0)                                                   -- unselect all items
+    if item1_orig_offset ~= "" and math.abs(offset_amount) > 1e-10 then
+        Main_OnCommand(40289, 0)                     -- unselect all items
         SetMediaItemSelected(item1, true)
-        Main_OnCommand(40034, 0)                                                   -- Item Grouping: Select all items in group(s)
-        local num_items = CountSelectedMediaItems(0)                               -- Get the number of selected items
+        Main_OnCommand(40034, 0)                     -- Item Grouping: Select all items in group(s)
+        local num_items = CountSelectedMediaItems(0) -- Get the number of selected items
         for i = 0, num_items - 1 do
-            local item = GetSelectedMediaItem(0, i)                                -- Get the selected media item
-            local take = GetActiveTake(item)                                       -- Get the active take of the item
+            local item = GetSelectedMediaItem(0, i)  -- Get the selected media item
+            local take = GetActiveTake(item)
             if take then
-                SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item1_orig_offset) -- Set the offset
+                local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take of the item
+                SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item_offset - offset_amount) -- Set the offset
             end
         end
         Main_OnCommand(40289, 0) -- unselect all items
         SetMediaItemSelected(item1, true)
+    end
+    if math.abs(offset_amount) > 1e-10 then
+        MB(
+            "WARNING: The left item of the crossfade was accidentally slip-edited.\
+The item's position and offset have been reset to original values but the current crossfade may need attention.",
+            "Crossfade Editor", 0)
     end
 end
 
