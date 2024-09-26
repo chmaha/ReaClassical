@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.6
+@version 24.22.7
 @changelog
-  Prev/Next Crossfade: Use ReaClassical Fade Editor toggle instead of built-in fade window check
-  Create CD Markers: Add missing fade_table entries
+  Crossfade Editor etc: Add logic if item2 doesn't exist
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
