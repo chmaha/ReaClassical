@@ -320,8 +320,19 @@ function correct_item_positions()
         MoveEditCursor(-move_amount, false)
     end
     if item1_offset ~= "" then
-        local take = GetActiveTake(item1)
-        SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item1_orig_offset)
+        Main_OnCommand(40289, 0)                                                   -- unselect all items
+        SetMediaItemSelected(item1, true)
+        Main_OnCommand(40034, 0)                                                   -- Item Grouping: Select all items in group(s)
+        local num_items = CountSelectedMediaItems(0)                               -- Get the number of selected items
+        for i = 0, num_items - 1 do
+            local item = GetSelectedMediaItem(0, i)                                -- Get the selected media item
+            local take = GetActiveTake(item)                                       -- Get the active take of the item
+            if take then
+                SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item1_orig_offset) -- Set the offset
+            end
+        end
+        Main_OnCommand(40289, 0)                                                   -- unselect all items
+        SetMediaItemSelected(item1, true)
     end
 end
 
