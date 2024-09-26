@@ -279,14 +279,27 @@ function correct_item_positions(item1)
         local item1_new_pos = GetMediaItemInfo_Value(item1, "D_POSITION")
         local move_amount = item1_new_pos - item1_orig_pos
         local item_count = CountMediaItems(0)
-        for i = 0, item_count - 1 do
-            local item = GetMediaItem(0, i)
-            local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            local item_locked = GetMediaItemInfo_Value(item, "C_LOCK") -- Get the lock state
+        if move_amount > 0 then
+            for i = 0, item_count - 1 do
+                local item = GetMediaItem(0, i)
+                local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_locked = GetMediaItemInfo_Value(item, "C_LOCK") -- Get the lock state
 
-            if item_locked == 0 then
-                local corrected_pos = item_start_pos - move_amount
-                SetMediaItemInfo_Value(item, "D_POSITION", corrected_pos)
+                if item_locked == 0 then
+                    local corrected_pos = item_start_pos - move_amount
+                    SetMediaItemInfo_Value(item, "D_POSITION", corrected_pos)
+                end
+            end
+        elseif move_amount < 0 then
+            for i = item_count - 1, 0, -1 do
+                local item = GetMediaItem(0, i)
+                local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_locked = GetMediaItemInfo_Value(item, "C_LOCK") -- Get the lock state
+
+                if item_locked == 0 then
+                    local corrected_pos = item_start_pos - move_amount
+                    SetMediaItemInfo_Value(item, "D_POSITION", corrected_pos)
+                end
             end
         end
         MoveEditCursor(-move_amount, false)
@@ -303,7 +316,7 @@ function correct_item_positions(item1)
                 SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item1_orig_offset) -- Set the offset
             end
         end
-        Main_OnCommand(40289, 0)                                                   -- unselect all items
+        Main_OnCommand(40289, 0) -- unselect all items
         SetMediaItemSelected(item1, true)
     end
 end
