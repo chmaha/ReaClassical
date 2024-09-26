@@ -31,7 +31,7 @@ local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -39,7 +39,7 @@ function main()
     local win_state = GetToggleCommandState(fade_editor_toggle)
 
     if win_state ~= 1 then
-        move_to_edge()
+        move_to_item()
     else
         local sel = fadeEnd()
         if sel == -1 then
@@ -123,8 +123,10 @@ function fadeStart()
     local item2 = GetSelectedMediaItem(0, 1)
     local item2_guid = BR_GetMediaItemGUID(item2)
     SetProjExtState(0, "ReaClassical", "SecondItemGUID", item2_guid)
-    save_color("2", item2)
-    paint(item2, 20967993)
+    if item2 then
+        save_color("2", item2)
+        paint(item2, 20967993)
+    end
 end
 
 ---------------------------------------------------------------------
@@ -136,11 +138,13 @@ function fadeEnd()
     local _, item2_guid = GetProjExtState(0, "ReaClassical", "SecondItemGUID")
     local item1 = BR_GetMediaItemByGUID(0, item1_guid)
     local item2 = BR_GetMediaItemByGUID(0, item2_guid)
-    
+
     local first_color = load_color("1", item1)
     paint(item1, first_color)
-    local second_color = load_color("2", item2)
-    paint(item2, second_color)
+    if item2 then
+        local second_color = load_color("2", item2)
+        paint(item2, second_color)
+    end
 
     correct_item_positions(item1)
     unlock_items()
@@ -152,7 +156,7 @@ function fadeEnd()
     local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     Main_OnCommand(40310, 0) -- Set ripple editing per-track
-    
+
     SetProjExtState(0, "ReaClassical", "FirstItemPos", "")
     SetProjExtState(0, "ReaClassical", "FirstItemOffset", "")
     SetProjExtState(0, "ReaClassical", "arrangestarttime", "")

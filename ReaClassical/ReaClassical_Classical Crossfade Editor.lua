@@ -129,8 +129,10 @@ function fadeStart()
     local item2 = GetSelectedMediaItem(0, 1)
     local item2_guid = BR_GetMediaItemGUID(item2)
     SetProjExtState(0, "ReaClassical", "SecondItemGUID", item2_guid)
-    save_color("2", item2)
-    paint(item2, 20967993)
+    if item2 then
+        save_color("2", item2)
+        paint(item2, 20967993)
+    end
 end
 
 ---------------------------------------------------------------------
@@ -145,8 +147,10 @@ function fadeEnd()
 
     local first_color = load_color("1", item1)
     paint(item1, first_color)
-    local second_color = load_color("2", item2)
-    paint(item2, second_color)
+    if item2 then
+        local second_color = load_color("2", item2)
+        paint(item2, second_color)
+    end
 
     correct_item_positions(item1)
     unlock_items()
