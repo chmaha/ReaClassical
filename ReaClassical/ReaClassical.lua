@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.5
+@version 24.22.6
 @changelog
-  Crossfade Editor: Use offset diff, account for float errors, and give warning message if appropriate
+  Prev/Next Crossfade: Use ReaClassical Fade Editor toggle instead of built-in fade window check
+  Create CD Markers: Add missing fade_table entries
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
