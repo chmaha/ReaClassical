@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.2
+@version 24.22.3
 @changelog
-  Crossfade Editor: Call correction function a little later
+  Crossfade Editor: Store and retrieve item GUID rather than rely on item selection
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
