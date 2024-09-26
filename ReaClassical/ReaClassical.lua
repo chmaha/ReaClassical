@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.4
+@version 24.22.5
 @changelog
-  Crossfade Editor: Start with final item and work backwards if move amount is negative
+  Crossfade Editor: Use offset diff, account for float errors, and give warning message if appropriate
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
