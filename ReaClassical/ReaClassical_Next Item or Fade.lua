@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, move_to_item, select_check, exit_check
+local main, move_to_item
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
 local move_cur_to_mid, move_to_edge, correct_item_positions, folder_check
@@ -46,9 +46,6 @@ function main()
             return
         end
         move_to_item()
-        local check = select_check()
-        move_cur_to_mid(check)
-        lock_previous_items(check)
         fadeStart()
         UpdateArrange()
         UpdateTimeline()
@@ -69,35 +66,9 @@ end
 
 ---------------------------------------------------------------------
 
-function select_check()
-    local item = GetSelectedMediaItem(0, 0)
-    if item ~= nil then
-        local item_position = GetMediaItemInfo_Value(item, "D_POSITION")
-        local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
-        local item_end = item_position + item_length
-    end
-    return item
-end
-
----------------------------------------------------------------------
-
-function exit_check()
-    local item = GetSelectedMediaItem(0, 0)
-    if item then
-        local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-        return item
-    else
-        return -1
-    end
-end
-
----------------------------------------------------------------------
-
 function lock_previous_items(item)
     local tracks_per_group = folder_check()
-    local num = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
     local first_item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local first_track = GetTrack(0, 0)
     for t = 0, tracks_per_group - 1 do
         local track = GetTrack(0, t)                       -- Get the track
         if track then
@@ -122,29 +93,34 @@ end
 function fadeStart()
     SetToggleCommandState(1, fade_editor_toggle, 1)
     local item1 = GetSelectedMediaItem(0, 0)
+    lock_previous_items(item1)
+    move_cur_to_mid(item1)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     SetProjExtState(0, "ReaClassical", "FirstItemPos", item1_start)
     local item1_take = GetActiveTake(item1)
     local item1_take_offset = GetMediaItemTakeInfo_Value(item1_take, "D_STARTOFFS")
     SetProjExtState(0, "ReaClassical", "FirstItemOffset", item1_take_offset)
+    local item1_guid = BR_GetMediaItemGUID(item1)
+    SetProjExtState(0, "ReaClassical", "FirstItemGUID", item1_guid)
     save_color("1", item1)
     paint(item1, 32648759)
     Main_OnCommand(40311, 0) -- Set ripple editing all tracks
     lock_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
-    RefreshToolbar2(1, fade_editor_toggle)
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
     SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)
     SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
     Main_OnCommand(select_1, 0)
     Main_OnCommand(40417, 0)                         -- move edit cursor to next item
-    view(fade_editor_toggle)
+    view()
     zoom()
     SetMediaItemSelected(item1, true)
     local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection (across tracks)
     Main_OnCommand(select_next, 0)
     local item2 = GetSelectedMediaItem(0, 1)
+    local item2_guid = BR_GetMediaItemGUID(item2)
+    SetProjExtState(0, "ReaClassical", "SecondItemGUID", item2_guid)
     save_color("2", item2)
     paint(item2, 20967993)
 end
@@ -152,44 +128,37 @@ end
 ---------------------------------------------------------------------
 
 function fadeEnd()
-    local item = exit_check()
-    if item == -1 then
-        ShowMessageBox(
-            "Please select—and place your cursor on—the left or right item of the crossfade pair to exit the fade editor",
-            "Crossfade Editor", 0)
-        return
-    end
-    local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-    if color == 20967993 then
-        local prev_item = NamedCommandLookup("_SWS_SELPREVITEM2")
-        Main_OnCommand(prev_item, 0)
-        item = GetSelectedMediaItem(0, 0)
-    end
-    local first_color = load_color("1", item)
-    paint(item, first_color)
-    local select_next_item = NamedCommandLookup("_SWS_SELNEXTITEM2")
-    Main_OnCommand(select_next_item, 0)
-    local item2 = GetSelectedMediaItem(0, 1)
+    SetToggleCommandState(1, fade_editor_toggle, 0)
+
+    local _, item1_guid = GetProjExtState(0, "ReaClassical", "FirstItemGUID")
+    local _, item2_guid = GetProjExtState(0, "ReaClassical", "SecondItemGUID")
+    local item1 = BR_GetMediaItemByGUID(0, item1_guid)
+    local item2 = BR_GetMediaItemByGUID(0, item2_guid)
+    
+    local first_color = load_color("1", item1)
+    paint(item1, first_color)
     local second_color = load_color("2", item2)
     paint(item2, second_color)
-    SetToggleCommandState(1, fade_editor_toggle, 0)
-    RefreshToolbar2(1, fade_editor_toggle)
-    correct_item_positions()
+
+    correct_item_positions(item1)
     unlock_items()
-    move_cur_to_mid(item)
+    move_cur_to_mid(item1)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
-    SetMediaItemSelected(item, 1)
-    view(fade_editor_toggle)
+    SetMediaItemSelected(item1, 1)
+    view()
     local _, start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
     local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     Main_OnCommand(40310, 0) -- Set ripple editing per-track
+    
     SetProjExtState(0, "ReaClassical", "FirstItemPos", "")
     SetProjExtState(0, "ReaClassical", "FirstItemOffset", "")
     SetProjExtState(0, "ReaClassical", "arrangestarttime", "")
     SetProjExtState(0, "ReaClassical", "arrangeendtime", "")
     SetProjExtState(0, "ReaClassical", "item1" .. "color", "")
     SetProjExtState(0, "ReaClassical", "item2" .. "color", "")
+    SetProjExtState(0, "ReaClassical", "FirstItemGUID", "")
+    SetProjExtState(0, "ReaClassical", "SecondItemGUID", "")
 end
 
 ---------------------------------------------------------------------
@@ -301,10 +270,9 @@ end
 
 ---------------------------------------------------------------------
 
-function correct_item_positions()
+function correct_item_positions(item1)
     local _, item1_orig_pos = GetProjExtState(0, "ReaClassical", "FirstItemPos")
     local _, item1_orig_offset = GetProjExtState(0, "ReaClassical", "FirstItemOffset")
-    local item1 = GetSelectedMediaItem(0, 0)
     if item1_orig_pos ~= "" then
         local item1_new_pos = GetMediaItemInfo_Value(item1, "D_POSITION")
         local move_amount = item1_new_pos - item1_orig_pos
@@ -321,7 +289,7 @@ function correct_item_positions()
         end
         MoveEditCursor(-move_amount, false)
     end
-    if item1_offset ~= "" then
+    if item1_orig_offset ~= "" then
         Main_OnCommand(40289, 0)                                                   -- unselect all items
         SetMediaItemSelected(item1, true)
         Main_OnCommand(40034, 0)                                                   -- Item Grouping: Select all items in group(s)

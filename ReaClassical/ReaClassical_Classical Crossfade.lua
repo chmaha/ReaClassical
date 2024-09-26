@@ -69,7 +69,7 @@ function main()
             MoveEditCursor(-move_amount, false)
         end
         local _, item1_orig_offset = GetProjExtState(0, "ReaClassical", "FirstItemOffset")
-        if item1_offset ~= "" then
+        if item1_orig_offset ~= "" then
             Main_OnCommand(40289, 0)                                                   -- unselect all items
             SetMediaItemSelected(item1, true)
             Main_OnCommand(40034, 0)                                                   -- Item Grouping: Select all items in group(s)
