@@ -33,7 +33,10 @@ if not SWS_exists then
 end
 
 function main()
-
+    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+    local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
+    SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)
+    SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local num_of_project_items = CountMediaItems(0)
     if num_of_project_items == 0 then
         ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
@@ -88,8 +91,13 @@ function main()
         vertical(colors)
     end
 
-    Main_OnCommand(40042, 0) -- go to start of project
-    Main_OnCommand(40939, 0) -- select track 01
+    local _, start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
+    local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
+    GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
+    SetEditCurPos(cur_pos, 0, 0)
+
+    SetProjExtState(0, "ReaClassical", "arrangestarttime", "")
+    SetProjExtState(0, "ReaClassical", "arrangeendtime", "")
 
     if empty then
         ShowMessageBox(
