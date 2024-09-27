@@ -90,6 +90,8 @@ function main()
                 item_two = GetSelectedMediaItem(0, 0)
             end
         end
+        SetMediaItemInfo_Value(item_one, "B_MUTE", 0) -- reset mutes
+        SetMediaItemInfo_Value(item_two, "B_MUTE", 0)
         local item_one_muted = GetMediaItemInfo_Value(item_one, "B_MUTE")
         local item_two_muted = GetMediaItemInfo_Value(item_two, "B_MUTE")
 
