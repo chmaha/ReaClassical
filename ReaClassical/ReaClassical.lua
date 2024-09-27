@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.8
+@version 24.22.9
 @changelog
-  Prepare Takes: Scroll up after completion
-  Audition: In Crossfade Editor mode, reset mutes before auditioning begins
+  Audition: In Crossfade Editor mode, better fix by unsoloing all items before auditioning
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
