@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.7
+@version 24.22.8
 @changelog
-  Crossfade Editor etc: Add logic if item2 doesn't exist
+  Prepare Takes: Scroll up after completion
+  Audition: In Crossfade Editor mode, reset mutes before auditioning begins
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
