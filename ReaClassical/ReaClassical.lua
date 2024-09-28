@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.10
+@version 24.22.11
 @changelog
-  Assembly Line Edit: Add option to move to previous item edge if dest-in marker position changed since last edit
+  Crossfade Editor: Use different mechanism for moving cursor to end of red item
+  Crossfade Editor: Allow to enter crossfade editor based only on selected item
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
