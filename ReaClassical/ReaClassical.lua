@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.11
+@version 24.22.12
 @changelog
-  Crossfade Editor: Use different mechanism for moving cursor to end of red item
-  Crossfade Editor: Allow to enter crossfade editor based only on selected item
+  Crossfade Editor and Audition: Select only green item
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
