@@ -145,7 +145,7 @@ function main()
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
         Main_OnCommand(40630, 0) -- Go to start of time selection
-
+        Main_OnCommand(40311, 0) -- Ripple-all mode
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- Adaptive Delete
         local paste = NamedCommandLookup("_SWS_AWPASTE")
