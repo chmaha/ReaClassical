@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.12
+@version 24.22.13
 @changelog
-  Crossfade Editor and Audition: Select only green item
+  4-point edit: Ensure ripple-all is set before deleting material between dest markers
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
