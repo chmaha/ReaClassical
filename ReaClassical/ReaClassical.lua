@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.9
+@version 24.22.10
 @changelog
-  Audition: In Crossfade Editor mode, better fix by unsoloing all items before auditioning
+  Assembly Line Edit: Add option to move to previous item edge if dest-in marker position changed since last edit
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
