@@ -127,6 +127,7 @@ function fadeStart()
         save_color("2", item2)
         paint(item2, 20967993)
     end
+    SetMediaItemSelected(item1, false)
 end
 
 ---------------------------------------------------------------------

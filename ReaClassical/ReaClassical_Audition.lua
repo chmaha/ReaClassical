@@ -70,7 +70,7 @@ function main()
         local hover_item = BR_GetMouseCursorContext_Item()
         if hover_item ~= nil then
             SetMediaItemSelected(hover_item, 1)
-            reaper.UpdateArrange()
+            UpdateArrange()
         end
         local item_one = GetSelectedMediaItem(0, 0)
         local item_two = GetSelectedMediaItem(0, 1)
@@ -142,8 +142,10 @@ function main()
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
             DeleteProjectMarker(NULL, 1111, false)
         end
-        SetMediaItemSelected(item_one, true)
+        Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
+        SetMediaItemSelected(item_one, false)
         SetMediaItemSelected(item_two, true)
+
         SetEditCurPos(two_pos + (overlap / 2), false, false)
         on_stop()
         Undo_EndBlock('Audition', 0)
