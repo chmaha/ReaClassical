@@ -40,7 +40,7 @@ function main()
     if state == -1 or state == 0 then
         local check = select_check()
         if check == -1 then
-            ShowMessageBox("Please select—and place your cursor on—the left item of a crossfade pair on track 1",
+            ShowMessageBox("Please select the left item of a crossfade pair on track 1",
                 "Crossfade Editor", 0)
             return
         end
@@ -57,16 +57,12 @@ end
 
 function select_check()
     local item = GetSelectedMediaItem(0, 0)
-    local item_position, item_length, item_end, track_num
+    local track_num
     if item ~= nil then
         local track = GetMediaItemTrack(item)
         track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-        item_position = GetMediaItemInfo_Value(item, "D_POSITION")
-        item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
-        item_end = item_position + item_length
     end
-    local cursor_position = GetCursorPosition()
-    if item == nil or track_num ~= 1 or (cursor_position <= item_position or cursor_position >= item_end) then
+    if item == nil or track_num ~= 1 then
         return -1
     else
         return item
