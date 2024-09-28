@@ -22,12 +22,13 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
 local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
-local copy_source, move_to_project_tab
+local copy_source, move_to_project_tab, save_last_assembly_item
+local load_last_assembly_item
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -39,19 +40,37 @@ function main()
     if proj_marker_count == 1 then
         ShowMessageBox("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
-            .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
+            .. "\nor use two for multi-tab S-D editing.", "Assembly Line Edit", 0)
         return
     end
 
     if proj_marker_count == -1 then
         ShowMessageBox(
-        "Source or destination markers should be paired with the corresponding source or destination project marker.",
-        "Multi-tab Source-Destination Edit", 0)
+            "Source or destination markers should be paired with the corresponding source or destination project marker.",
+            "Multi-tab Assembly Line Edit", 0)
         return
     end
 
     ripple_lock_mode()
     if dest_in == 1 and source_count == 2 then
+        local last_saved_item = load_last_assembly_item()
+        if last_saved_item then
+            local item_start = GetMediaItemInfo_Value(last_saved_item, "D_POSITION")
+            local item_length = GetMediaItemInfo_Value(last_saved_item, "D_LENGTH")
+            local item_right_edge = item_start + item_length
+            local dest_in_pos = pos_table[1]
+            if item_right_edge ~= dest_in_pos then
+                local input = MB("The DEST-IN marker has been moved since the last assembly line edit.\nDo you want to start a new edit sequence?\
+                \nAnswering \"No\" will move the DEST-IN marker back to the previous item edge.", "Assembly Line Edit", 3)
+                if input == 2 then
+                    return
+                elseif input == 7 then
+                    DeleteProjectMarker(project, 996, false)
+                    local colors = get_color_table()
+                    AddProjectMarker2(0, false, item_right_edge, 0, "DEST-IN", 996, colors.dest_marker)
+                end
+            end
+        end
         move_to_project_tab(dest_proj)
         lock_items()
         move_to_project_tab(source_proj)
@@ -67,7 +86,8 @@ function main()
         Main_OnCommand(paste, 0) -- SWS_AWPASTE
         mark_as_edit()
         unlock_items()
-        local cur_pos = create_crossfades()
+        local cur_pos, new_last_item = create_crossfades()
+        save_last_assembly_item(new_last_item)
         clean_up(is_selected, proj_marker_count)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
@@ -75,7 +95,7 @@ function main()
     else
         ShowMessageBox(
             "Please add 3 valid source-destination markers: DEST-IN, SOURCE-IN and SOURCE-OUT"
-            , "3-Point Insert Edit", 0)
+            , "Assembly Line Edit", 0)
         return
     end
 
@@ -262,7 +282,7 @@ function create_crossfades()
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
-    return cur_pos
+    return cur_pos, last_sel_item
 end
 
 ---------------------------------------------------------------------
@@ -289,7 +309,7 @@ function clean_up(is_selected, proj_marker_count)
     else
         unlock_items()
         ShowMessageBox("Please make sure there is material to copy between your source markers...",
-            "Source-Destination Edit", 0)
+            "Assembly Line Edit", 0)
     end
 end
 
@@ -406,6 +426,21 @@ end
 
 function move_to_project_tab(proj_type)
     SelectProjectInstance(proj_type)
+end
+
+---------------------------------------------------------------------
+
+function save_last_assembly_item(item)
+    local item_guid = BR_GetMediaItemGUID(item)
+    SetProjExtState(0, "ReaClassical", "LastAssemblyItem", item_guid)
+end
+
+---------------------------------------------------------------------
+
+function load_last_assembly_item()
+    local _,item_guid = GetProjExtState(0, "ReaClassical", "LastAssemblyItem")
+    local item = BR_GetMediaItemByGUID(0, item_guid)
+    return item
 end
 
 ---------------------------------------------------------------------
