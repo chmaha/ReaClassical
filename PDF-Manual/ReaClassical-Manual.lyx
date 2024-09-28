@@ -3925,6 +3925,18 @@ keys{F3}
  ready for the next edit.
  This means that in order to compile further sections,
  you now only need set the source markers.
+ If you accidentally move the location of the destination IN marker in the middle of assembly line editing,
+ the function will let you know and offer to move the marker back to the right edge of the latest item in the edit.
+ This will even allow you to do some regular 3- or 4-point editing earlier in the sequence before continuing with the assembly line edits.
+ Just place the destination IN marker anywhere in the project and answer 
+\begin_inset Quotes bld
+\end_inset
+
+No
+\begin_inset Quotes brd
+\end_inset
+
+ when the message box appears.
  Note that this function can also be used in multi-tab S-D editing mode (see above).
 \end_layout
 
@@ -8215,7 +8227,19 @@ keys{5}
 \end_layout
 
 \begin_layout Standard
-Note that this function can also be used in multi-tab S-D editing mode (see below).
+If you accidentally move the location of the destination IN marker in the middle of assembly line editing,
+ the function will let you know and offer to move the marker back to the right edge of the latest item in the edit.
+ This will even allow you to do some regular 3- or 4-point editing earlier in the sequence before continuing with the assembly line edits.
+ Just place the destination IN marker anywhere in the project and answer 
+\begin_inset Quotes bld
+\end_inset
+
+No
+\begin_inset Quotes brd
+\end_inset
+
+ when the message box appears.
+ Note that this function can also be used in multi-tab S-D editing mode (see below).
 \end_layout
 
 \begin_layout Standard
