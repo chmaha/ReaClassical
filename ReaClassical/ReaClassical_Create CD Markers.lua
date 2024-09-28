@@ -145,7 +145,7 @@ function cd_markers(first_track)
     end
   end
   if marker_count == 0 then
-    ShowMessageBox('Please add take names to all items that you want to be CD tracks (Select item then press F2)',
+    ShowMessageBox('Please add take names to all items that you want to be CD track starts (Select item then press F2)',
       "No track markers created", 0)
     return -1
   end
