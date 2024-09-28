@@ -94,8 +94,10 @@ end
 function fadeStart()
     SetToggleCommandState(1, fade_editor_toggle, 1)
     local item1 = GetSelectedMediaItem(0, 0)
+    local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
+    local item1_length = GetMediaItemInfo_Value(item1, "D_LENGTH")
+    local item1_right_edge = item1_start + item1_length
     lock_previous_items(item1)
-    move_cur_to_mid(item1)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     SetProjExtState(0, "ReaClassical", "FirstItemPos", item1_start)
     local item1_take = GetActiveTake(item1)
@@ -108,13 +110,12 @@ function fadeStart()
     Main_OnCommand(40311, 0) -- Set ripple editing all tracks
     lock_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
-    --RefreshToolbar2(1, fade_editor_toggle)
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
     SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)
     SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
     Main_OnCommand(select_1, 0)
-    Main_OnCommand(40417, 0)                         -- move edit cursor to next item
+    SetEditCurPos(item1_right_edge, false, false)
     view()
     zoom()
     SetMediaItemSelected(item1, true)

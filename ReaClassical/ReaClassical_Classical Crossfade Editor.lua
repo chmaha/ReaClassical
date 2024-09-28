@@ -102,6 +102,9 @@ end
 function fadeStart()
     SetToggleCommandState(1, fade_editor_toggle, 1)
     local item1 = GetSelectedMediaItem(0, 0)
+    local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
+    local item1_length = GetMediaItemInfo_Value(item1, "D_LENGTH")
+    local item1_right_edge = item1_start + item1_length
     lock_previous_items(item1)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     SetProjExtState(0, "ReaClassical", "FirstItemPos", item1_start)
@@ -120,7 +123,7 @@ function fadeStart()
     SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
     Main_OnCommand(select_1, 0)
-    Main_OnCommand(40417, 0)                         -- move edit cursor to next item
+    SetEditCurPos(item1_right_edge, false, false)
     view()
     zoom()
     SetMediaItemSelected(item1, true)
