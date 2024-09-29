@@ -59,7 +59,8 @@ function main()
             local item_length = GetMediaItemInfo_Value(last_saved_item, "D_LENGTH")
             local item_right_edge = item_start + item_length
             local dest_in_pos = pos_table[1]
-            if item_right_edge ~= dest_in_pos then
+            local threshold = 0.0001
+            if math.abs(item_right_edge - dest_in_pos) > threshold then
                 local input = MB("The DEST-IN marker has been moved since the last assembly line edit.\nDo you want to start a new edit sequence?\
                 \nAnswering \"No\" will move the DEST-IN marker back to the previous item edge.", "Assembly Line Edit", 3)
                 if input == 2 then
