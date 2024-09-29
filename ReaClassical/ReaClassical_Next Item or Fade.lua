@@ -23,10 +23,11 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, move_to_item
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
-local move_cur_to_mid, move_to_edge, correct_item_positions, folder_check
+local move_cur_to_mid, correct_item_positions, folder_check
+local check_next_item_overlap
 
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-
+local win_state
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -36,15 +37,12 @@ if not SWS_exists then
 end
 
 function main()
-    local win_state = GetToggleCommandState(fade_editor_toggle)
+    win_state = GetToggleCommandState(fade_editor_toggle)
 
     if win_state ~= 1 then
         move_to_item()
     else
-        local sel = fadeEnd()
-        if sel == -1 then
-            return
-        end
+        fadeEnd()
         move_to_item()
         fadeStart()
         UpdateArrange()
@@ -54,14 +52,35 @@ end
 
 ---------------------------------------------------------------------
 
-function move_to_edge()
-    Main_OnCommand(41168, 0) -- Move to next item edge
-end
-
----------------------------------------------------------------------
-
 function move_to_item()
-    Main_OnCommand(40417, 0) -- Select and move to next item
+    if win_state == 0 then
+        Main_OnCommand(40417, 0) -- Select and move to next item
+    elseif win_state == 1 then
+        local item = GetSelectedMediaItem(0, 0)
+        if item == nil then
+            return
+        end
+        local track = GetMediaItemTrack(item)
+        local idx = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
+        while true do
+            local next_item = GetTrackMediaItem(track, idx + 1)
+            if not next_item then
+                break
+            end
+
+            local has_overlap = check_next_item_overlap(next_item)
+
+            if has_overlap == 1 then
+                SelectAllMediaItems(0, false)
+                SetMediaItemSelected(next_item, true)
+                break
+            elseif has_overlap == -1 then
+                break
+            else
+                idx = idx + 1
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------
@@ -334,6 +353,33 @@ function correct_item_positions(item1)
 The item's position and offset have been reset to original values but the current crossfade may need attention.",
             "Crossfade Editor", 0)
     end
+end
+
+---------------------------------------------------------------------
+
+function check_next_item_overlap(current_item)
+    local track = GetMediaItemTrack(current_item)
+    -- if not track then
+    --     return false
+    -- end
+    local current_item_index = GetMediaItemInfo_Value(current_item, "IP_ITEMNUMBER")
+
+    local next_item = GetTrackMediaItem(track, current_item_index + 1)
+
+    if not next_item then
+        return -1 -- no next item
+    end
+
+    local current_item_position = GetMediaItemInfo_Value(current_item, "D_POSITION")
+    local current_item_length = GetMediaItemInfo_Value(current_item, "D_LENGTH")
+    local current_item_end = current_item_position + current_item_length
+    local next_item_position = GetMediaItemInfo_Value(next_item, "D_POSITION")
+
+    if next_item_position >= current_item_end then
+        return 0 -- no overlap
+    end
+
+    return 1 -- overlap
 end
 
 ---------------------------------------------------------------------

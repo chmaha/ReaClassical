@@ -23,6 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, select_check, lock_previous_items, fadeStart
 local fadeEnd, zoom, view, lock_items, unlock_items, save_color
 local paint, load_color, move_cur_to_mid, folder_check, correct_item_positions
+local check_next_item_overlap
 
 ---------------------------------------------------------------------
 
@@ -38,13 +39,18 @@ local state = GetToggleCommandState(fade_editor_toggle)
 function main()
     Undo_BeginBlock()
     if state == -1 or state == 0 then
-        local check = select_check()
-        if check == -1 then
+        local item1 = select_check()
+        if item1 == false then
             ShowMessageBox("Please select the left item of a crossfade pair on track 1",
                 "Crossfade Editor", 0)
             return
         end
-        fadeStart()
+        local has_overlap = check_next_item_overlap(item1)
+        if has_overlap then
+            fadeStart()
+        else
+            MB("Please select the left item of a crossfaded pair", "Crossfade Editor", 0)
+        end
     else
         fadeEnd()
     end
@@ -63,7 +69,7 @@ function select_check()
         track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
     end
     if item == nil or track_num ~= 1 then
-        return -1
+        return false
     else
         return item
     end
@@ -344,6 +350,34 @@ function correct_item_positions(item1)
 The item's position and offset have been reset to original values but the current crossfade may need attention.",
             "Crossfade Editor", 0)
     end
+end
+
+---------------------------------------------------------------------
+
+function check_next_item_overlap(current_item)
+    local track = GetMediaItemTrack(current_item)
+    if not track then
+        return false
+    end
+    local current_item_index = GetMediaItemInfo_Value(current_item, "IP_ITEMNUMBER")
+
+    local next_item = GetTrackMediaItem(track, current_item_index + 1)
+
+    if not next_item then
+        return false
+    end
+
+    -- Get the positions and lengths of the items
+    local current_item_position = GetMediaItemInfo_Value(current_item, "D_POSITION")
+    local current_item_length = GetMediaItemInfo_Value(current_item, "D_LENGTH")
+    local current_item_end = current_item_position + current_item_length
+    local next_item_position = GetMediaItemInfo_Value(next_item, "D_POSITION")
+
+    -- Check for overlap: next item must start before the current item's end
+    if next_item_position >= current_item_end then
+        return false
+    end
+    return true
 end
 
 ---------------------------------------------------------------------
