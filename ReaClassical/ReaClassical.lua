@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.13
+@version 24.22.14
 @changelog
-  4-point edit: Ensure ripple-all is set before deleting material between dest markers
+  Assembly Line Edit: Add threshold for when dest-in marker is placed inside series of items
+  Q/W in arrange window: Q moves directly to previous item independent of cursor pos
+  Crossfade Editor and Q/W: Only open or move to crossfaded pairs
+  Create CD Markers: Add clarity to message when no item names
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
