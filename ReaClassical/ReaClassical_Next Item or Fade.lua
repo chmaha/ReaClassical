@@ -43,8 +43,11 @@ function main()
         move_to_item()
     else
         fadeEnd()
-        move_to_item()
+        local final_xfade = move_to_item()
         fadeStart()
+        if final_xfade then
+            MB("You've reached the final crossfade in the project.","Crossfade Editor",0)
+        end
         UpdateArrange()
         UpdateTimeline()
     end
@@ -58,7 +61,7 @@ function move_to_item()
     elseif win_state == 1 then
         local item = GetSelectedMediaItem(0, 0)
         if item == nil then
-            return
+            return false
         end
         local track = GetMediaItemTrack(item)
         local idx = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
@@ -75,12 +78,13 @@ function move_to_item()
                 SetMediaItemSelected(next_item, true)
                 break
             elseif has_overlap == -1 then
-                break
+                return true
             else
                 idx = idx + 1
             end
         end
     end
+    return false
 end
 
 ---------------------------------------------------------------------

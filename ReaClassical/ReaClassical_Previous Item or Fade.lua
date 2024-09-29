@@ -43,8 +43,11 @@ function main()
         move_to_item()
     else
         fadeEnd()
-        move_to_item()
+        local first_xfade = move_to_item()
         fadeStart()
+        if first_xfade then
+            MB("You've reached the first crossfade in the project.","Crossfade Editor",0)
+        end
         UpdateArrange()
         UpdateTimeline()
     end
@@ -73,10 +76,10 @@ function move_to_item()
         end
         local track = GetMediaItemTrack(item)
         local idx = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
-        while idx > 0 do
+        while idx >= 0 do
             local prev_item = GetTrackMediaItem(track, idx - 1)
             if not prev_item then
-                break
+                return true
             end
 
             local has_overlap = check_next_item_overlap(prev_item)
@@ -90,6 +93,7 @@ function move_to_item()
             idx = idx - 1
         end
     end
+    return false
 end
 
 ---------------------------------------------------------------------
