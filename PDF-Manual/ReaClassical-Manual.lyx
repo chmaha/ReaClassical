@@ -336,6 +336,24 @@ literal "false"
  It also serves as something of a development blog as I not only announce the regular releases but also document the under-the-surface details for those that are interested.
 \end_layout
 
+\begin_layout Standard
+Relatively new is the 
+\begin_inset CommandInset href
+LatexCommand href
+name "ReaClassical Discord server"
+target "https://discord.gg/Gu2m9ccHGS"
+literal "false"
+
+\end_inset
+
+.
+ This is a great place for live support,
+ general chat,
+ proposing feature requests,
+ workflow discussion,
+ and letting the community know about albums or individual pieces you have created with the help of ReaClassical.
+\end_layout
+
 \begin_layout Section
 Ways to Contribute
 \end_layout
@@ -8890,7 +8908,7 @@ keys{Z}
 \end_inset
 
  to expand again.
- You can quickly move to the previous or next item (with all coloring and locking automatically happening behind the scenes) by pressing 
+ You can quickly move to the previous or next crossfade pair (with all coloring and locking automatically happening behind the scenes) by pressing 
 \begin_inset ERT
 status open
 
