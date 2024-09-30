@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.15
+@version 24.22.16
 @changelog
-  Crossfade Editor: When using Q/W to cycle, show message if user reaches first or final xfade pair
+  Crossfade Editor: On exit, return to previous item selection and cursor position
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
