@@ -23,8 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, move_to_item
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
-local move_cur_to_mid, correct_item_positions, folder_check
-local check_next_item_overlap
+local correct_item_positions, folder_check, check_next_item_overlap
 
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local win_state
@@ -172,7 +171,6 @@ function fadeEnd()
 
     correct_item_positions(item1)
     unlock_items()
-    move_cur_to_mid(item1)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(item1, 1)
     view()
@@ -271,14 +269,6 @@ end
 function load_color(num, item)
     local _, color = GetProjExtState(0, "ReaClassical", "item" .. num .. "color")
     return color
-end
-
----------------------------------------------------------------------
-
-function move_cur_to_mid(item)
-    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-    SetEditCurPos(pos + len / 2, false, false)
 end
 
 ---------------------------------------------------------------------

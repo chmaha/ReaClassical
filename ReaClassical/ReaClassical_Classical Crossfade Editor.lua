@@ -22,7 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, select_check, lock_previous_items, fadeStart
 local fadeEnd, zoom, view, lock_items, unlock_items, save_color
-local paint, load_color, move_cur_to_mid, folder_check, correct_item_positions
+local paint, load_color, move_back_cursor, folder_check, correct_item_positions
 local check_next_item_overlap
 
 ---------------------------------------------------------------------
@@ -47,6 +47,8 @@ function main()
         end
         local has_overlap = check_next_item_overlap(item1)
         if has_overlap then
+            local orig_item_guid = BR_GetMediaItemGUID(item1)
+            SetProjExtState(0, "ReaClassical", "OrigSelectedItem", orig_item_guid)
             fadeStart()
         else
             MB("Please select the left item of a crossfaded pair", "Crossfade Editor", 0)
@@ -102,6 +104,8 @@ end
 ---------------------------------------------------------------------
 
 function fadeStart()
+    local cur_pos = GetCursorPosition()
+    SetProjExtState(0, "ReaClassical", "ArrangeCurPos", cur_pos)
     SetToggleCommandState(1, fade_editor_toggle, 1)
     local item1 = GetSelectedMediaItem(0, 0)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
@@ -160,9 +164,15 @@ function fadeEnd()
 
     correct_item_positions(item1)
     unlock_items()
-    move_cur_to_mid(item1)
+    move_back_cursor()
+
     Main_OnCommand(40289, 0) -- Item: Unselect all items
-    SetMediaItemSelected(item1, 1)
+    local _, orig_item_guid = GetProjExtState(0, "ReaClassical", "OrigSelectedItem")
+    local orig_selected_item = BR_GetMediaItemByGUID(0, orig_item_guid)
+    if orig_selected_item then
+        SetMediaItemSelected(orig_selected_item, true)
+    end
+   
     view()
     local _, start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
     local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
@@ -177,6 +187,8 @@ function fadeEnd()
     SetProjExtState(0, "ReaClassical", "item2" .. "color", "")
     SetProjExtState(0, "ReaClassical", "FirstItemGUID", "")
     SetProjExtState(0, "ReaClassical", "SecondItemGUID", "")
+    SetProjExtState(0, "ReaClassical", "ArrangeCurpos", "")
+    SetProjExtState(0, "ReaClassical", "OrigSelectedItem", "")
 end
 
 ---------------------------------------------------------------------
@@ -268,10 +280,9 @@ end
 
 ---------------------------------------------------------------------
 
-function move_cur_to_mid(item)
-    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-    SetEditCurPos(pos + len / 2, false, false)
+function move_back_cursor()
+    local _, cur_pos = GetProjExtState(0, "ReaClassical", "ArrangeCurPos")
+    SetEditCurPos(cur_pos, false, false)
 end
 
 ---------------------------------------------------------------------
