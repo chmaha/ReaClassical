@@ -23,7 +23,7 @@ local main, markers, select_matching_folder, split_at_dest_in, create_crossfades
 local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
-local load_last_assembly_item
+local load_last_assembly_item, find_second_folder_track
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -50,8 +50,9 @@ function main()
             "Multi-tab Assembly Line Edit", 0)
         return
     end
-
     ripple_lock_mode()
+    move_to_project_tab(dest_proj)
+
     if dest_in == 1 and source_count == 2 then
         local last_saved_item = load_last_assembly_item()
         if last_saved_item then
@@ -61,20 +62,36 @@ function main()
             local dest_in_pos = pos_table[1]
             local threshold = 0.0001
             if math.abs(item_right_edge - dest_in_pos) > threshold then
-                local input = MB("The DEST-IN marker has been moved since the last assembly line edit.\nDo you want to start a new edit sequence?\
+                local input = MB(
+                    "The DEST-IN marker has been moved since the last assembly line edit.\nDo you want to start a new edit sequence?\
                 \nAnswering \"No\" will move the DEST-IN marker back to the previous item edge.", "Assembly Line Edit", 3)
                 if input == 2 then
                     return
                 elseif input == 7 then
-                    DeleteProjectMarker(project, 996, false)
+                    local i = 0
+                    while true do
+                        local project, _ = EnumProjects(i)
+                        if project == nil then
+                            break
+                        else
+                            DeleteProjectMarker(project, 996, false)
+                        end
+                        i = i + 1
+                    end
                     local colors = get_color_table()
                     AddProjectMarker2(0, false, item_right_edge, 0, "DEST-IN", 996, colors.dest_marker)
                 end
             end
         end
-        move_to_project_tab(dest_proj)
+
         lock_items()
         move_to_project_tab(source_proj)
+
+        local stored_view = NamedCommandLookup("_SWS_SAVEVIEW")
+        Main_OnCommand(stored_view, 0)
+        local stored_curpos = NamedCommandLookup("_BR_SAVE_CURSOR_POS_SLOT_1")
+        Main_OnCommand(stored_curpos, 0)
+
         local _, is_selected = copy_source()
         if is_selected == false then
             clean_up(is_selected, proj_marker_count)
@@ -93,6 +110,12 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         create_dest_in(cur_pos)
+
+        move_to_project_tab(source_proj)
+        local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
+        Main_OnCommand(restore_view, 0)
+        local restore_curpos = NamedCommandLookup("_BR_RESTORE_CURSOR_POS_SLOT_1")
+        Main_OnCommand(restore_curpos, 0)
     else
         ShowMessageBox(
             "Please add 3 valid source-destination markers: DEST-IN, SOURCE-IN and SOURCE-OUT"
@@ -317,16 +340,23 @@ end
 ---------------------------------------------------------------------
 
 function lock_items()
-    Main_OnCommand(40182, 0)           -- select all items
-    Main_OnCommand(40939, 0)           -- select track 01
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- select children of track 1
-    local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
-    Main_OnCommand(unselect_items, 0)  -- unselect items in first folder
-    local total_items = CountSelectedMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetSelectedMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 1)
+    local second_folder_track = find_second_folder_track()
+
+    if second_folder_track == nil then
+        return
+    end
+
+    local total_tracks = CountTracks(0)
+
+    for track_idx = second_folder_track, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+
+        local num_items = CountTrackMediaItems(track)
+
+        for item_idx = 0, num_items - 1 do
+            local item = GetTrackMediaItem(track, item_idx)
+            SetMediaItemInfo_Value(item, "C_LOCK", 1)
+        end
     end
 end
 
@@ -439,9 +469,31 @@ end
 ---------------------------------------------------------------------
 
 function load_last_assembly_item()
-    local _,item_guid = GetProjExtState(0, "ReaClassical", "LastAssemblyItem")
+    local _, item_guid = GetProjExtState(0, "ReaClassical", "LastAssemblyItem")
     local item = BR_GetMediaItemByGUID(0, item_guid)
     return item
+end
+
+---------------------------------------------------------------------
+
+function find_second_folder_track()
+    local total_tracks = CountTracks(0)
+    local folder_count = 0
+
+    for track_idx = 0, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+        if folder_depth == 1 then
+            folder_count = folder_count + 1
+
+            if folder_count == 2 then
+                return track_idx
+            end
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
