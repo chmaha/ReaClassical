@@ -39,19 +39,13 @@ local state = GetToggleCommandState(fade_editor_toggle)
 function main()
     Undo_BeginBlock()
     if state == -1 or state == 0 then
-        local item1 = select_check()
-        if item1 == false then
-            ShowMessageBox("Please select the left item of a crossfade pair on track 1",
-                "Crossfade Editor", 0)
-            return
-        end
-        local has_overlap = check_next_item_overlap(item1)
-        if has_overlap then
-            local orig_item_guid = BR_GetMediaItemGUID(item1)
+        local selected_item, item1 = select_check()
+        if item1 and check_next_item_overlap(item1) then
+            local orig_item_guid = BR_GetMediaItemGUID(selected_item)
             SetProjExtState(0, "ReaClassical", "OrigSelectedItem", orig_item_guid)
-            fadeStart()
+            fadeStart(item1)
         else
-            MB("Please select the left item of a crossfaded pair", "Crossfade Editor", 0)
+            MB("Please select the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
         end
     else
         fadeEnd()
@@ -64,17 +58,23 @@ end
 ---------------------------------------------------------------------
 
 function select_check()
-    local item = GetSelectedMediaItem(0, 0)
-    local track_num
-    if item ~= nil then
-        local track = GetMediaItemTrack(item)
-        track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-    end
-    if item == nil or track_num ~= 1 then
+    local selected_item = GetSelectedMediaItem(0, 0)
+
+    if not selected_item then
         return false
-    else
-        return item
     end
+
+    local track = GetMediaItemTrack(selected_item)
+    local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+
+    if track_num ~= 1 then
+        return false
+    end
+
+    local current_item_index = GetMediaItemInfo_Value(selected_item, "IP_ITEMNUMBER")
+    local prev_item = GetTrackMediaItem(track, current_item_index - 1)
+
+    return prev_item and selected_item, prev_item or false
 end
 
 ---------------------------------------------------------------------
@@ -83,15 +83,15 @@ function lock_previous_items(item)
     local tracks_per_group = folder_check()
     local first_item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
     for t = 0, tracks_per_group - 1 do
-        local track = GetTrack(0, t)                       -- Get the track
+        local track = GetTrack(0, t)
         if track then
-            local item_count = CountTrackMediaItems(track) -- Get the number of items in the track
-            -- Iterate through the items in the current track
+            local item_count = CountTrackMediaItems(track)
+
             for i = 0, item_count - 1 do
                 local track_item = GetTrackMediaItem(track, i)
                 if track_item then
                     local track_item_pos = GetMediaItemInfo_Value(track_item, "D_POSITION")
-                    -- Lock the item if it starts before the first item's position
+
                     if track_item_pos < first_item_pos then
                         SetMediaItemInfo_Value(track_item, "C_LOCK", 1)
                     end
@@ -103,11 +103,10 @@ end
 
 ---------------------------------------------------------------------
 
-function fadeStart()
+function fadeStart(item1)
     local cur_pos = GetCursorPosition()
     SetProjExtState(0, "ReaClassical", "ArrangeCurPos", cur_pos)
     SetToggleCommandState(1, fade_editor_toggle, 1)
-    local item1 = GetSelectedMediaItem(0, 0)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     local item1_length = GetMediaItemInfo_Value(item1, "D_LENGTH")
     local item1_right_edge = item1_start + item1_length
@@ -172,7 +171,7 @@ function fadeEnd()
     if orig_selected_item then
         SetMediaItemSelected(orig_selected_item, true)
     end
-   
+
     view()
     local _, start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
     local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
