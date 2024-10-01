@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.16
+@version 24.22.17
 @changelog
-  Crossfade Editor: On exit, return to previous item selection and cursor position
+  Crossfade Editor: Use right-hand item to enter fade editor
+  Crossfade Editor: Lock items based on grouping with first track items
+  Assembly Line Edit: Update locking mechanism and restore view and cursor position
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
