@@ -100,18 +100,44 @@ end
 function lock_previous_items(item)
     local tracks_per_group = folder_check()
     local first_item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    for t = 0, tracks_per_group - 1 do
-        local track = GetTrack(0, t)                       -- Get the track
+
+    local track_1 = GetTrack(0, 0)
+    local item_count = CountTrackMediaItems(track_1)
+
+    local locked_group_ids = {} -- Store group IDs of locked items
+
+    -- Iterate through all items in track 1 and lock those before the specified item
+    for i = 0, item_count - 1 do
+        local track_1_item = GetTrackMediaItem(track_1, i)
+        if track_1_item then
+            local track_1_item_pos = GetMediaItemInfo_Value(track_1_item, "D_POSITION") -- Get the item's position
+
+            -- Lock the item and store its group ID if it's before the specified item
+            if track_1_item_pos < first_item_pos then
+                SetMediaItemInfo_Value(track_1_item, "C_LOCK", 1)
+                local item_group_id = GetMediaItemInfo_Value(track_1_item, "I_GROUPID")
+                table.insert(locked_group_ids, item_group_id)
+            end
+        end
+    end
+
+    -- Check items in lower tracks
+    for t = 1, tracks_per_group - 1 do
+        local track = GetTrack(0, t)
         if track then
-            local item_count = CountTrackMediaItems(track) -- Get the number of items in the track
-            -- Iterate through the items in the current track
+            local item_count = CountTrackMediaItems(track)
+
             for i = 0, item_count - 1 do
                 local track_item = GetTrackMediaItem(track, i)
                 if track_item then
-                    local track_item_pos = GetMediaItemInfo_Value(track_item, "D_POSITION")
-                    -- Lock the item if it starts before the first item's position
-                    if track_item_pos < first_item_pos then
-                        SetMediaItemInfo_Value(track_item, "C_LOCK", 1)
+                    local track_item_group_id = GetMediaItemInfo_Value(track_item, "I_GROUPID")
+
+                    -- Check for Group ID match
+                    for _, group_id in ipairs(locked_group_ids) do
+                        if track_item_group_id == group_id then
+                            SetMediaItemInfo_Value(track_item, "C_LOCK", 1)
+                            break
+                        end
                     end
                 end
             end
