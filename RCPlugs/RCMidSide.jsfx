@@ -1,0 +1,104 @@
+NoIndex: true
+desc:RCMidSide (chmaha)
+author: chmaha
+about:
+  Released under GPLv3 license
+
+slider1:0<0,2,1{Encode,Decode,Encode-Decode}>Mode
+slider2:0<-24,12,1>Mid Gain (dB)
+slider3:0<-24,12,1>Side Gain (dB)
+slider4:0<-1,1,0.01>Mid Pan
+slider5:0<-1,1,0.01>Side Pan
+slider6:0<0,1,1>Mid Mute
+slider7:0<0,1,1>Side Mute
+slider8:0<0,1,1>Channel Swap
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+mid_gain = 2^(slider2/6);
+side_gain = 2^(slider3/6); 
+
+mid_pan = slider4;
+side_pan = slider5;
+
+mid_mute = slider6 > 0.5;
+side_mute = slider7 > 0.5;
+
+channel_swap = slider8 > 0.5;
+
+@sample
+
+slider1 == 0 ? ( // No panning in encode mode
+
+left_in = spl0;
+right_in = spl1;
+
+channel_swap ? (tmp=right_in; right_in=left_in; left_in=tmp);
+
+mid = (left_in + right_in) * 0.5;
+side = (left_in - right_in) * 0.5;
+
+mid *= mid_gain;
+side *= side_gain;
+
+mid *= mid_mute ? 0 : 1;
+side *= side_mute ? 0 : 1;
+
+spl0 = mid;
+spl1 = side;
+
+) : slider1 == 1 ? (
+
+mid = spl0;
+side = spl1;
+
+channel_swap ? (tmp=side; side=mid; mid=tmp);
+
+mid *= mid_gain;
+side *= side_gain;
+
+mid *= (1.0 - mid_pan);
+side *= (1.0 + side_pan);
+
+mid *= mid_mute ? 0 : 1;
+side *= side_mute ? 0 : 1;
+
+left = mid+side;
+right = mid-side;
+
+spl0 = left;
+spl1 = right;
+
+) : slider1 == 2 ? (
+
+left_in = spl0;
+right_in = spl1;
+
+mid = (left_in + right_in) * 0.5;
+side = (left_in - right_in) * 0.5;
+
+mid *= mid_gain;
+side *= side_gain;
+
+mid *= (1.0 - mid_pan);
+side *= (1.0 + side_pan);
+
+mid *= mid_mute ? 0 : 1;
+side *= side_mute ? 0 : 1;
+
+left = mid+side;
+right = mid-side;
+
+channel_swap ? (tmp=right; right=left; left=tmp);
+
+spl0 = left;
+spl1 = right;
+
+);
+
