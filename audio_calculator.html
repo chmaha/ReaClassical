@@ -29,12 +29,16 @@
         .result {
             font-weight: bold;
         }
+        .logo {
+            width: 100%; /* Set the width to 100% of the container */
+            height: auto; /* Maintain aspect ratio */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>ReaClassical Audio Calculator</h2>
-        
+        <img src="reaclassical_logo.png" alt="ReaClassical Logo" class="logo">
+        <h2>Audio Calculator</h2>
         <label for="unitType">Select Unit Type:</label>
         <select id="unitType" onchange="handleUnitChange(); calculate();">
             <option value="GB">GB</option>
