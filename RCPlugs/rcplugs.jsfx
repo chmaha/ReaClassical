@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.10
+@version 1.11
 @changelog
-  Mid-Side: Use 20log10
+  Mid-Side: Hide pan controls for now
 @metapackage
 @provides
   RCComp.jsfx
