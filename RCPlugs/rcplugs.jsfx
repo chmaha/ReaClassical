@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.9
+@version 1.10
 @changelog
-  Add Mid-Side encoder-decoder
+  Mid-Side: Use 20log10
 @metapackage
 @provides
   RCComp.jsfx
