@@ -68,6 +68,7 @@
   [main] ReaClassical_Source Markers to Item Edge.lua
   [main] ReaClassical_Remove Take Names.lua
   [main] ReaClassical_Jump To Time.lua
+  [main] ReaClassical_Audio Calculator.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] RCPyramix.ReaperThemeZip
