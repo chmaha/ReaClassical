@@ -21,8 +21,8 @@ out_pin:right output
 @init
 
 @slider
-mid_gain = 2^(slider2/6);
-side_gain = 2^(slider3/6); 
+mid_gain = 10^(slider2 / 20);
+side_gain = 10^(slider3 / 20);
 
 mid_pan = slider4;
 side_pan = slider5;
