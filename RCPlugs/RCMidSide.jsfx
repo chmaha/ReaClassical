@@ -4,14 +4,14 @@ author: chmaha
 about:
   Released under GPLv3 license
 
-slider1:0<0,2,1{Encode,Decode,Encode-Decode}>Mode
+slider1:1<0,2,1{Encode,Decode,Encode-Decode}>Mode
 slider2:0<-24,12,1>Mid Gain (dB)
 slider3:0<-24,12,1>Side Gain (dB)
-slider4:0<-1,1,0.01>Mid Pan
-slider5:0<-1,1,0.01>Side Pan
-slider6:0<0,1,1>Mid Mute
-slider7:0<0,1,1>Side Mute
-slider8:0<0,1,1>Channel Swap
+//slider4:0<-1,1,0.01>Mid Pan
+//slider5:0<-1,1,0.01>Side Pan
+slider4:0<0,1,1>Mid Mute
+slider5:0<0,1,1>Side Mute
+slider6:0<0,1,1>Channel Swap
 
 in_pin:left input
 in_pin:right input
@@ -24,13 +24,13 @@ out_pin:right output
 mid_gain = 10^(slider2 / 20);
 side_gain = 10^(slider3 / 20);
 
-mid_pan = slider4;
-side_pan = slider5;
+//mid_pan = slider4;
+//side_pan = slider5;
 
-mid_mute = slider6 > 0.5;
-side_mute = slider7 > 0.5;
+mid_mute = slider4 > 0.5;
+side_mute = slider5 > 0.5;
 
-channel_swap = slider8 > 0.5;
+channel_swap = slider6 > 0.5;
 
 @sample
 
