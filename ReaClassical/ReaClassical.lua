@@ -2,7 +2,8 @@
 @author chmaha
 @version 24.23
 @changelog
-  NEW: Audio Calculator (Ctrl+H)
+  NEW: Audio Calculator
+  Keymap: Add audio calculator (Ctrl+H)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
