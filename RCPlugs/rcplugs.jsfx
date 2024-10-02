@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.8
+@version 1.9
 @changelog
-  Add 3 RCConsole Plugins
+  Add Mid-Side encoder-decoder
 @metapackage
 @provides
   RCComp.jsfx
@@ -19,5 +19,6 @@
   RCConsoleBus.jsfx
   RCConsoleChannel.jsfx
   RCConsoleFinalizer.jsfx
+  RCMidSide.jsfx
 @about
   These plugins are suitable for classical music mixing and mastering.
