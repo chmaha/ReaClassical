@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.22.17
+@version 24.23
 @changelog
-  Crossfade Editor: Use right-hand item to enter fade editor
-  Crossfade Editor: Lock items based on grouping with first track items
-  Assembly Line Edit: Update locking mechanism and restore view and cursor position
+  NEW: Audio Calculator (Ctrl+H)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -80,6 +78,8 @@
   reaclassical-splash.png > reaclassical-splash.png
   ReaClassical-menu.ini > ReaClassical-menu.ini
   ReaClassical-kb.ini > ReaClassical-kb.ini
+  ../audio_calculator.html > audio_calculator.html
+  ../docs/images/reaclassical_os.png > reaclassical_logo.png
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
