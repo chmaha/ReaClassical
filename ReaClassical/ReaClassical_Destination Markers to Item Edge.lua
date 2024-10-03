@@ -26,65 +26,67 @@ local main, get_color_table, get_path
 
 function main()
     Undo_BeginBlock()
+    local left_pos, right_pos, selected
+    local start_time, end_time = GetSet_LoopTimeRange(false, false, 0, 0, false)
+    if start_time ~= end_time then
+        left_pos = start_time
+        right_pos = end_time
+    else
+        local parent_track = GetTrack(0, 0)
+        selected = CountSelectedMediaItems(0)
 
-    -- Get the first folder parent track (track 1)
-    local parent_track = GetTrack(0, 0)
-    
-    -- Count the number of selected media items
-    local num = CountSelectedMediaItems(0)
-    
-    if num == 0 then
-        ShowMessageBox(
-        "Please select one or more consecutive media items in the first folder before running the function.",
-            "Destination Markers to Item Edge: Error", 0)
-        return
-    end
-
-    local folder_tracks = {}
-    local num_tracks = CountTracks(0)
-    local found_folder_end = false
-    
-    for i = 0, num_tracks - 1 do
-        local track = GetTrack(0, i)
-        if i == 0 or GetParentTrack(track) == parent_track then
-            table.insert(folder_tracks, track)
-        else
-            found_folder_end = true
-            break
+        if selected == 0 then
+            ShowMessageBox(
+                "Please select one or more consecutive media items in the first folder or make a time selection before running the function.",
+                "Destination Markers to Item Edge / Time Selection: Error", 0)
+            return
         end
-    end
-    
-    for i = 0, num - 1 do
-        local item = GetSelectedMediaItem(0, i)
-        local item_track = GetMediaItem_Track(item)
 
-        local found = false
-        for _, folder_track in ipairs(folder_tracks) do
-            if item_track == folder_track then
-                found = true
+        local folder_tracks = {}
+        local num_tracks = CountTracks(0)
+        local found_folder_end = false
+
+        for i = 0, num_tracks - 1 do
+            local track = GetTrack(0, i)
+            if i == 0 or GetParentTrack(track) == parent_track then
+                table.insert(folder_tracks, track)
+            else
+                found_folder_end = true
                 break
             end
         end
-        
-        if not found then
-            MB("Any selected items should be in the first folder.", "Error", 0)
-            return
+        for i = 0, selected - 1 do
+            local item = GetSelectedMediaItem(0, i)
+            local item_track = GetMediaItem_Track(item)
+    
+            local found = false
+            for _, folder_track in ipairs(folder_tracks) do
+                if item_track == folder_track then
+                    found = true
+                    break
+                end
+            end
+    
+            if not found then
+                MB("Any selected items should be in the first folder.", "Error", 0)
+                return
+            end
+        end
+        -- Set marker positions
+        local first_item = GetSelectedMediaItem(0, 0)
+        left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
+        local last_item
+        if selected > 1 then
+            last_item = GetSelectedMediaItem(0, selected - 1)
+            local start = GetMediaItemInfo_Value(last_item, "D_POSITION")
+            local length = GetMediaItemInfo_Value(last_item, "D_LENGTH")
+            right_pos = start + length
+        else
+            local length = GetMediaItemInfo_Value(first_item, "D_LENGTH")
+            right_pos = left_pos + length
         end
     end
 
-    -- Set marker positions
-    local first_item = GetSelectedMediaItem(0, 0)
-    local left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
-    local last_item, right_pos
-    if num > 1 then
-        last_item = GetSelectedMediaItem(0, num - 1)
-        local start = GetMediaItemInfo_Value(last_item, "D_POSITION")
-        local length = GetMediaItemInfo_Value(last_item, "D_LENGTH")
-        right_pos = start + length
-    else
-        local length = GetMediaItemInfo_Value(first_item, "D_LENGTH")
-        right_pos = left_pos + length
-    end
 
     -- Remove old markers
     local i = 0

@@ -26,23 +26,32 @@ local main, folder_check, get_track_number, get_color_table, get_path
 
 function main()
     Undo_BeginBlock()
-    local num = CountSelectedMediaItems(0)
-    if num == 0 then
-        ShowMessageBox("Please select one or more consecutive media items on a parent track before running the function.", "Source Markers to Item Edge: Error", 0)
-        return
-    end
-
-    local first_item = GetSelectedMediaItem(0, 0)
-    local left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
-    local last_item, right_pos
-    if num > 1 then 
-        last_item = GetSelectedMediaItem(0, num-1)
-        local start = GetMediaItemInfo_Value(last_item, "D_POSITION")
-        local length = GetMediaItemInfo_Value(last_item, "D_LENGTH")
-        right_pos = start + length
+    local left_pos, right_pos
+    local start_time, end_time = GetSet_LoopTimeRange(false, false, 0, 0, false)
+    if start_time ~= end_time then
+        left_pos = start_time
+        right_pos = end_time
     else
-        local length = GetMediaItemInfo_Value(first_item, "D_LENGTH")
-        right_pos = left_pos + length
+        local num = CountSelectedMediaItems(0)
+        if num == 0 then
+            ShowMessageBox(
+            "Please select one or more consecutive media items on a parent track or make a time selection before running the function.",
+                "Source Markers to Item Edge or Time Selection: Error", 0)
+            return
+        end
+
+        local first_item = GetSelectedMediaItem(0, 0)
+        left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
+        local last_item
+        if num > 1 then
+            last_item = GetSelectedMediaItem(0, num - 1)
+            local start = GetMediaItemInfo_Value(last_item, "D_POSITION")
+            local length = GetMediaItemInfo_Value(last_item, "D_LENGTH")
+            right_pos = start + length
+        else
+            local length = GetMediaItemInfo_Value(first_item, "D_LENGTH")
+            right_pos = left_pos + length
+        end
     end
 
     local i = 0
