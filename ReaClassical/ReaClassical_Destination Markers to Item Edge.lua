@@ -26,24 +26,53 @@ local main, get_color_table, get_path
 
 function main()
     Undo_BeginBlock()
-    local dest_track = GetTrack(0, 0)
+
+    -- Get the first folder parent track (track 1)
+    local parent_track = GetTrack(0, 0)
+    
+    -- Count the number of selected media items
     local num = CountSelectedMediaItems(0)
+    
     if num == 0 then
         ShowMessageBox(
-        "Please select one or more consecutive media items on the destination parent track before running the function.",
+        "Please select one or more consecutive media items in the first folder before running the function.",
             "Destination Markers to Item Edge: Error", 0)
         return
-    else
-        for i = 0, num - 1 do
-            local item = GetSelectedMediaItem(0, i)
+    end
 
-            if GetMediaItem_Track(item) ~= dest_track then
-                MB("Any selected items should be on the destination parent track.", "Error", 0)
-                return
+    local folder_tracks = {}
+    local num_tracks = CountTracks(0)
+    local found_folder_end = false
+    
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if i == 0 or GetParentTrack(track) == parent_track then
+            table.insert(folder_tracks, track)
+        else
+            found_folder_end = true
+            break
+        end
+    end
+    
+    for i = 0, num - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        local item_track = GetMediaItem_Track(item)
+
+        local found = false
+        for _, folder_track in ipairs(folder_tracks) do
+            if item_track == folder_track then
+                found = true
+                break
             end
+        end
+        
+        if not found then
+            MB("Any selected items should be in the first folder.", "Error", 0)
+            return
         end
     end
 
+    -- Set marker positions
     local first_item = GetSelectedMediaItem(0, 0)
     local left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
     local last_item, right_pos
@@ -57,6 +86,7 @@ function main()
         right_pos = left_pos + length
     end
 
+    -- Remove old markers
     local i = 0
     while true do
         local project, _ = EnumProjects(i)
@@ -69,6 +99,7 @@ function main()
         i = i + 1
     end
 
+    -- Get color table and add new markers
     local colors = get_color_table()
     AddProjectMarker2(0, false, left_pos, 0, "DEST-IN", 996, colors.dest_marker)
     AddProjectMarker2(0, false, right_pos, 0, "DEST-OUT", 997, colors.dest_marker)
