@@ -355,10 +355,11 @@ function create_crossfades()
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
+    Main_OnCommand(41311,0) -- Item edit: Trim right edge of item to edit cursor
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)
-    if reaper.CountSelectedMediaItems(0) == 0 then return end
+    if CountSelectedMediaItems(0) == 0 then return end
     MoveEditCursor(-0.001, false)
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
@@ -475,9 +476,23 @@ end
 ---------------------------------------------------------------------
 
 function get_first_last_items()
-    local num_of_items = CountSelectedMediaItems()
-    local first_sel_item = GetSelectedMediaItem(0, 0)
-    local last_sel_item = GetSelectedMediaItem(0, num_of_items - 1)
+    local num_of_items = CountSelectedMediaItems(0)
+    local first_sel_item
+    local last_sel_item
+
+    for i = 0, num_of_items - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        local track = GetMediaItem_Track(item)
+        local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+        
+        if track_num == 1 then
+            if not first_sel_item then
+                first_sel_item = item
+            end
+            last_sel_item = item
+        end
+    end
+
     return first_sel_item, last_sel_item
 end
 
