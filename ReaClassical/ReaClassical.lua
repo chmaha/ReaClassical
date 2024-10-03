@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.23.1
+@version 24.23.2
 @changelog
-  Keymap: Switch audio calc shortcut to shift+H
+  NEW: Add Destination markers to edge
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -65,6 +65,7 @@
   [main] ReaClassical_Delete Track From All Groups.lua
   [main] ReaClassical_Add Ref Track.lua
   [main] ReaClassical_Source Markers to Item Edge.lua
+  [main] ReaClassical_Destination Markers to Item Edge.lua
   [main] ReaClassical_Remove Take Names.lua
   [main] ReaClassical_Jump To Time.lua
   [main] ReaClassical_Audio Calculator.lua
