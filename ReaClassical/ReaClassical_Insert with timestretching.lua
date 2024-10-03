@@ -56,10 +56,9 @@ function main()
         local selected_items = {}
 
         move_to_project_tab(dest_proj)
-        lock_items()
         move_to_project_tab(source_proj)
-        local source_items = copy_source()
-        if source_items == 0 then
+        local total_selected, parent_selected = copy_source()
+        if total_selected == 0 then
             Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
             unlock_items()
             ShowMessageBox("Please make sure there is material to copy between your source markers.", "Insert with timestretching", 0)
@@ -67,6 +66,7 @@ function main()
         end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
+        lock_items()
         split_at_dest_in()
         Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 997, false)
@@ -89,7 +89,7 @@ function main()
         MoveEditCursor(-xfade_len, false) -- move cursor back xfade length
         Main_OnCommand(40625, 0)          -- Time Selection: Set start point
 
-        for i = 0, source_items - 1, 1 do
+        for i = 0, total_selected - 1, 1 do
             selected_items[i] = GetSelectedMediaItem(0, i)
         end
         Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -107,15 +107,16 @@ function main()
             SetMediaItemSelected(v, true)
             SetMediaItemInfo_Value(v, "C_LOCK", 0)
         end
-        if source_items == 1 then
+        if parent_selected == 1 then
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         else
             Main_OnCommand(40362, 0) -- glue items
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         end
+        Main_OnCommand(40032,0) -- group selected items
         mark_as_edit()
-        local source_items = CountSelectedMediaItems()
-        for i = 0, source_items - 1, 1 do
+        local total_selected = CountSelectedMediaItems()
+        for i = 0, total_selected - 1, 1 do
             local item = GetSelectedMediaItem(0, i)
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", item_color)
         end
@@ -125,7 +126,7 @@ function main()
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
         end
         unlock_items()
-        Main_OnCommand(40626, 0) -- Time Selection: Set end point
+        --Main_OnCommand(40626, 0) -- Time Selection: Set end point
         create_crossfades()
         clean_up(proj_marker_count)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -171,11 +172,31 @@ function copy_source()
     Main_OnCommand(40626, 0) -- Time Selection: Set end point
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
     Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-    local source_items = CountSelectedMediaItems()
+
+    local total_selected_items = CountSelectedMediaItems(0)
+
+    local parent_track_selected_items = 0
+    local first_track = GetSelectedTrack(0, 0)
+    
+    if first_track then
+        local folder_depth = GetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH")
+        if folder_depth == 1 then -- First track is a folder
+            for i = 0, total_selected_items - 1 do
+                local item = GetSelectedMediaItem(0, i)
+                local item_track = GetMediaItem_Track(item)
+                if item_track == first_track then
+                    parent_track_selected_items = parent_track_selected_items + 1
+                end
+            end
+        end
+    end
+
     Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
-    return source_items
+
+    return total_selected_items, parent_track_selected_items
 end
+
 
 ---------------------------------------------------------------------
 
@@ -203,14 +224,16 @@ function create_crossfades()
     Main_OnCommand(41173, 0) -- Item navigation: Move cursor to start of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     local xfade_len = return_xfade_length()
+    MoveEditCursor(-xfade_len, false)
+    Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
     MoveEditCursor(xfade_len, false)
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
-    --Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
+    Main_OnCommand(41311,0) -- Item edit: Trim right edge of item to edit cursor
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
@@ -222,7 +245,6 @@ function create_crossfades()
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
-    Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     return cur_pos
 end
 
@@ -315,9 +337,23 @@ end
 ---------------------------------------------------------------------
 
 function get_first_last_items()
-    local source_items = CountSelectedMediaItems()
-    local first_sel_item = GetSelectedMediaItem(0, 0)
-    local last_sel_item = GetSelectedMediaItem(0, source_items - 1)
+    local num_of_items = CountSelectedMediaItems(0)
+    local first_sel_item
+    local last_sel_item
+
+    for i = 0, num_of_items - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        local track = GetMediaItem_Track(item)
+        local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+        
+        if track_num == 1 then
+            if not first_sel_item then
+                first_sel_item = item
+            end
+            last_sel_item = item
+        end
+    end
+
     return first_sel_item, last_sel_item
 end
 
