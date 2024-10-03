@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.23
+@version 24.23.1
 @changelog
-  NEW: Audio Calculator
-  Keymap: Add audio calculator (Ctrl+H)
+  Keymap: Switch audio calc shortcut to shift+H
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
