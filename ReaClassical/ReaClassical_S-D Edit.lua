@@ -25,7 +25,7 @@ local get_track_length, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, lock_items, unlock_items
 local ripple_lock_mode, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
-local move_to_project_tab
+local move_to_project_tab, find_second_folder_track
 
 ---------------------------------------------------------------------
 
@@ -409,16 +409,23 @@ end
 ---------------------------------------------------------------------
 
 function lock_items()
-    Main_OnCommand(40182, 0)           -- select all items
-    Main_OnCommand(40939, 0)           -- select track 01
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- select children of track 1
-    local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
-    Main_OnCommand(unselect_items, 0)  -- unselect items in first folder
-    local total_items = CountSelectedMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetSelectedMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 1)
+    local second_folder_track = find_second_folder_track()
+
+    if second_folder_track == nil then
+        return
+    end
+
+    local total_tracks = CountTracks(0)
+
+    for track_idx = second_folder_track, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+
+        local num_items = CountTrackMediaItems(track)
+
+        for item_idx = 0, num_items - 1 do
+            local item = GetTrackMediaItem(track, item_idx)
+            SetMediaItemInfo_Value(item, "C_LOCK", 1)
+        end
     end
 end
 
@@ -527,6 +534,28 @@ end
 
 function move_to_project_tab(proj_type)
     SelectProjectInstance(proj_type)
+end
+
+---------------------------------------------------------------------
+
+function find_second_folder_track()
+    local total_tracks = CountTracks(0)
+    local folder_count = 0
+
+    for track_idx = 0, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+        if folder_depth == 1 then
+            folder_count = folder_count + 1
+
+            if folder_count == 2 then
+                return track_idx
+            end
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
