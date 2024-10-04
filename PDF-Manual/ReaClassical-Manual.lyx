@@ -2190,6 +2190,34 @@ lock track controls
  those tracks will no longer be involved in the recording.
 \end_layout
 
+\begin_layout Subsection
+Audio Calculator
+\end_layout
+
+\begin_layout Standard
+To figure out required disk space for a duration of audio or vice versa to figure out maximum duration of audio you can record based on available disk space,
+ use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+H}
+\end_layout
+
+\end_inset
+
+ to open a browser-based offline calculator.
+ You can set units,
+ channel count,
+ samplerate,
+ bit depth and format (WAV or MP3 at various bitrates).
+\end_layout
+
 \begin_layout Section
 Importing
 \end_layout
@@ -3474,7 +3502,7 @@ keys{F5}
 \begin_layout Standard
 When using a vertical workflow,
  make sure you have the source folder selected before you create the source IN and OUT markers.
- You can do so by clicking on the track panel or on the item itself.
+ You can do so by clicking on the item at the locations you want to set the markers.
  This adds the folder number as a prefix to the source marker labels.
  The various functions will then use this label to know which folder to copy from.
  This is really useful if you undo the edit in order to tweak the markers by dragging them.
@@ -3981,7 +4009,7 @@ backspace}
 \end_inset
 
  (backspace) will delete the material between source IN and OUT markers and ripple material to the right backwards with a short crossfade.
- Delete Silence 
+ Delete Leaving Silence 
 \begin_inset ERT
 status open
 
@@ -4002,12 +4030,44 @@ backspace}
 \end_layout
 
 \begin_layout Subsubsection
-Add Source Markers to Edges of Item(s)
+Add Destination and Source Markers to Edges of Item(s) or Time Selection
 \end_layout
 
 \begin_layout Standard
-Used in combination with Delete / Delete with Ripple,
- you can quickly set both source markers to the edges of one or more selected items on a parent track via 
+Used in combination with Delete / Delete with Ripple (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+backspace}
+\end_layout
+
+\end_inset
+
+ / 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+backspace}
+\end_layout
+
+\end_inset
+
+),
+ you can quickly set both source markers to the edges of one or more selected items on a parent track or time selection via 
 \begin_inset ERT
 status open
 
@@ -4032,6 +4092,54 @@ sliver
  edits i.e.
  small unneeded leftover edits as a result of multiple rounds of zoomed-out S-D editing.
  Note that the built-in checks when manually placing destination markers should go some way to alleviating this issue which can easily go unnoticed in other classical music DAWs.
+ Likewise you can use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+F12}
+\end_layout
+
+\end_inset
+
+ to set destination markers (selected items must be in the destination folder).
+ Note that if using time selection for placing source markers,
+ as for S-D marker placement via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+,
+ make sure you first have the desired source folder track selected before pressing the shortcut (a good way to do this is to first click on the item involved).
+ You may prefer to set both source and destination markers this way over the more traditional number key shortcuts acting as a sort of hybrid between S-D and razor editing.
+ Also note that if both selected items and a time selection exist,
+ the time selection takes precedence.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4278,7 +4386,7 @@ While REAPER includes an excellent crossfade editor,
  The ability to visually align transients and then position the crossfade just before it is absolutely critical (and fun when you have the tools to do it!).
  So,
  beyond the standard REAPER crossfade editor what have I provided?
- Select the left-hand item of a fade,
+ Select the right-hand item of a fade,
  Press 
 \begin_inset ERT
 status open
@@ -10725,12 +10833,29 @@ status open
 
 
 \backslash
+keys{ctrl+F12}
+\end_layout
+
+\end_inset
+
+ Add Destination Markers to edges of selected item(s) or time selection (time selection takes precedence)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
 keys{F12}
 \end_layout
 
 \end_inset
 
- Add Source Markers to edges or selected item(s).
+ Add Source Markers to edges of selected item(s) or time selection (time selection takes precedence)
 \end_layout
 
 \begin_layout Labeling
@@ -11252,6 +11377,25 @@ status open
 
 
 \backslash
+keys{
+\backslash
+shift+H}
+\end_layout
+
+\end_inset
+
+ Open ReaClassical audio calculator
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
 keys{O}
 \end_layout
 
@@ -11741,6 +11885,16 @@ RCTime&PhaseTool
  included in the ReaClassical portable install and available in my repository).
  Add to a spot microphone channel.
  Achieves something similar to Merging's PanNoir to correctly align spot microphone channels with the main pair based on a fundamental Euclidean geometric relation to create a more impactful stereo image.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+RCMidSide 
+\series default
+(ReaClassical mid-side encoder-decoder,
+ included in the ReaClassical portable install and available in my repository).
+ Use the default decoder mode if wanting to convert recorded mid-side to regular left-right stereo.
 \end_layout
 
 \begin_layout Itemize
