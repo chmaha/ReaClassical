@@ -39,21 +39,23 @@ function main()
     else
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end
-    
-    local i = 0
-    while true do
-        local project, _ = EnumProjects(i)
-        if project == nil then
-            break
-        else
-            DeleteProjectMarker(project, 998, false)
-        end
-        i = i + 1
-    end
 
-    local track_number = math.floor(get_track_number(track))
-    local colors = get_color_table()
-    AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
+    if cur_pos ~= -1 then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, 998, false)
+            end
+            i = i + 1
+        end
+
+        local track_number = math.floor(get_track_number(track))
+        local colors = get_color_table()
+        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
+    end
 end
 
 ---------------------------------------------------------------------

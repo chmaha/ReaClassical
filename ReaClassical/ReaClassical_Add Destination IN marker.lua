@@ -32,7 +32,7 @@ function main()
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
         if table[9] then sdmousehover = tonumber(table[9]) end
     end
-    
+
     local cur_pos
     if sdmousehover == 1 then
         _, _, cur_pos = BR_TrackAtMouseCursor()
@@ -40,31 +40,36 @@ function main()
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end
 
-    local i = 0
-    while true do
-        local project, _ = EnumProjects(i)
-        if project == nil then
-            break
-        else
-            DeleteProjectMarker(project, 996, false)
+    if cur_pos ~= -1 then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, 996, false)
+            end
+            i = i + 1
         end
-        i = i + 1
-    end
 
-    if edge_check(cur_pos) == true then
-        local response = ShowMessageBox("The marker you are trying to add would either be on or close to an item edge or existing crossfade. Continue?", "Add Dest-IN Marker", 4)
-        if response ~= 6 then return end
+
+        if edge_check(cur_pos) == true then
+            local response = ShowMessageBox(
+                "The marker you are trying to add would either be on or close to an item edge or existing crossfade. Continue?",
+                "Add Dest-IN Marker", 4)
+            if response ~= 6 then return end
+        end
+        --DeleteProjectMarker(NULL, 996, false)
+        local colors = get_color_table()
+        AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
     end
-    --DeleteProjectMarker(NULL, 996, false)
-    local colors = get_color_table()
-    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
 end
 
 ---------------------------------------------------------------------
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -72,8 +77,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
@@ -82,7 +87,7 @@ end
 function edge_check(cur_pos)
     local num_of_items = 0
     local check_length = return_check_length()
-    local first_track = GetTrack(0,0)
+    local first_track = GetTrack(0, 0)
     if first_track then num_of_items = CountTrackMediaItems(first_track) end
     local new_pos = 0
     local clash = false
@@ -91,9 +96,9 @@ function edge_check(cur_pos)
         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_fadein_len = GetMediaItemInfo_Value(item, "D_FADEINLEN")
         local item_fadein_end = item_start + item_fadein_len
-        if cur_pos > item_start and cur_pos < item_fadein_end + check_length then 
+        if cur_pos > item_start and cur_pos < item_fadein_end + check_length then
             clash = true
-            break 
+            break
         end
         local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
         local item_end = item_start + item_length
@@ -101,7 +106,7 @@ function edge_check(cur_pos)
         local item_fadeout_start = item_end - item_fadeout_len
         if cur_pos > item_fadeout_start - check_length and cur_pos < item_end then
             clash = true
-            break 
+            break
         end
     end
 
@@ -116,7 +121,7 @@ function return_check_length()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[7] then check_length = table[7]/1000 end
+        if table[7] then check_length = table[7] / 1000 end
     end
     return check_length
 end

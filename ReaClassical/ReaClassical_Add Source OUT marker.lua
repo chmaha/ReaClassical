@@ -41,21 +41,23 @@ function main()
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end
 
-    local i = 0
-    while true do
-        local project, _ = EnumProjects(i)
-        if project == nil then
-            break
-        else
-            DeleteProjectMarker(project, 999, false)
+    if cur_pos ~= -1 then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, 999, false)
+            end
+            i = i + 1
         end
-        i = i + 1
-    end
 
-    local track_number = math.floor(get_track_number(track))
-    --DeleteProjectMarker(NULL, 999, false)
-    local colors = get_color_table()
-    AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
+        local track_number = math.floor(get_track_number(track))
+        --DeleteProjectMarker(NULL, 999, false)
+        local colors = get_color_table()
+        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
+    end
 end
 
 ---------------------------------------------------------------------
@@ -90,7 +92,7 @@ end
 
 function get_color_table()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical","")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
     package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
@@ -98,8 +100,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 
