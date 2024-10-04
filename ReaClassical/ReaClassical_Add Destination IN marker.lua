@@ -25,6 +25,20 @@ local main, get_color_table, get_path, edge_check, return_check_length
 ---------------------------------------------------------------------
 
 function main()
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local sdmousehover = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[9] then sdmousehover = tonumber(table[9]) end
+    end
+    
+    local cur_pos
+    if sdmousehover == 1 then
+        _, _, cur_pos = BR_TrackAtMouseCursor()
+    else
+        cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+    end
 
     local i = 0
     while true do
@@ -37,7 +51,6 @@ function main()
         i = i + 1
     end
 
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     if edge_check(cur_pos) == true then
         local response = ShowMessageBox("The marker you are trying to add would either be on or close to an item edge or existing crossfade. Continue?", "Add Dest-IN Marker", 4)
         if response ~= 6 then return end

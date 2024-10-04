@@ -22,15 +22,15 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 
-local NUM_OF_ENTRIES = 8
-local default_values = '35,200,3,7,0,0,500,0'
+local NUM_OF_ENTRIES = 9
+local default_values = '35,200,3,7,0,0,500,0,0'
 
 ---------------------------------------------------------------------
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local pass
-    local input 
+    local input
     repeat
         local ret
         ret, input = display_prefs()
@@ -53,9 +53,19 @@ end
 
 function display_prefs()
     local saved = load_prefs(NUM_OF_ENTRIES)
-    local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES,
-        'S-D Crossfade length (ms),CD track offset (ms),INDEX0 length (s) (>= 1),Album lead-out time (s),Prepare Takes: Random colors,Mastering Mode,S-D Marker Check (ms),REF = Overdub Guide',
-        saved)
+    local labels = {
+        'S-D Crossfade length (ms)',
+        'CD track offset (ms)',
+        'INDEX0 length (s) (>= 1)',
+        'Album lead-out time (s)',
+        'Prepare Takes: Random colors',
+        'Mastering Mode',
+        'S-D Marker Check (ms)',
+        'REF = Overdub Guide',
+        'Add S-D Marker at Mouse Hover'
+    }
+    local input_labels = table.concat(labels, ',')
+    local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)
     return ret, input
 end
 
@@ -109,7 +119,7 @@ function pref_check(input)
     local binary_error_msg = ""
     -- separate check for binary options
     if #table == NUM_OF_ENTRIES then
-        if tonumber(table[5]) > 1 or tonumber(table[6]) > 1 or tonumber(table[8]) > 1 then
+        if tonumber(table[5]) > 1 or tonumber(table[6]) > 1 or tonumber(table[8]) > 1 or tonumber(table[9]) > 1 then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end

@@ -25,6 +25,21 @@ local main, folder_check, get_track_number, get_color_table, get_path
 ---------------------------------------------------------------------
 
 function main()
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local sdmousehover = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[9] then sdmousehover = tonumber(table[9]) end
+    end
+
+    local cur_pos, track
+    if sdmousehover == 1 then
+        track, _, cur_pos = BR_TrackAtMouseCursor()
+    else
+        cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+    end
+    
     local i = 0
     while true do
         local project, _ = EnumProjects(i)
@@ -36,9 +51,7 @@ function main()
         i = i + 1
     end
 
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
-    local track_number = math.floor(get_track_number())
-    --DeleteProjectMarker(NULL, 998, false)
+    local track_number = math.floor(get_track_number(track))
     local colors = get_color_table()
     AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
 end
@@ -59,14 +72,14 @@ end
 
 ---------------------------------------------------------------------
 
-function get_track_number()
-    local selected = GetSelectedTrack(0, 0)
-    if folder_check() == 0 or selected == nil then
+function get_track_number(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
         return 1
-    elseif GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
-        return GetMediaTrackInfo_Value(selected, "IP_TRACKNUMBER")
+    elseif GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        return GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
     else
-        local folder = GetParentTrack(selected)
+        local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
 end
