@@ -62,7 +62,7 @@ function display_prefs()
         'Mastering Mode',
         'S-D Marker Check (ms)',
         'REF = Overdub Guide',
-        'Add S-D Marker at Mouse Hover'
+        'Add S-D Markers at Mouse Hover'
     }
     local input_labels = table.concat(labels, ',')
     local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)
