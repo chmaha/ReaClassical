@@ -7773,7 +7773,8 @@ Set S-D crossfade length,
  Prepare Takes colors,
  Mastering Mode,
  S-D Destination Marker Check Range (ms),
- REF = Overdub Guide
+ REF = Overdub Guide,
+ Add S-D Markers at Mouse Hover.
 \end_layout
 
 \begin_layout Standard
@@ -7830,9 +7831,63 @@ Prepare Takes:
 inside
 \emph default
  a item fade or crossfade.
- Finally,
- if the reference track is set as overdub guide,
+ If the reference track is set as overdub guide,
  it will be audible during classical take recording and auditioning which is extremely useful for overdub recording of material after the main session such as a symphonic organ part or narration.
+ Finally,
+ you can set 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+,
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+,
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+,
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+ to add markers at the mouse hover position vs edit cursor.
 \end_layout
 
 \begin_layout Standard
@@ -8080,9 +8135,11 @@ keys{4}
  Use all four markers for 4-point editing.
  Use any combination of 3 markers for 3-point editing.
  Use either 1 source and 1 destination (more useful) or just the source markers for 2-point editing (less useful).
- Very important and useful to note is that the source marker labels reflect which source group was highlighted when the markers were placed.
+ By default,
+ the markers are added at the edit cursor location.
+ It is very important and useful to note is that the source marker labels reflect which source group was highlighted when the markers were placed.
  In other words,
- to create source markers,
+ to create source markers at the edit cursor,
  first select the item in the chosen folder track and then use the 
 \begin_inset ERT
 status open
@@ -8125,6 +8182,24 @@ keys{5}
 
 ) it doesn't matter what is highlighted at the time.
  Obviously this is only useful if using a vertical take system approach.
+ Additionally,
+ you can set the placement of S-D markers at mouse hover position via ReaClassical Preferences (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+).
+ The benefit,
+ other than speed,
+ is that you don't have to worry about making sure source tracks are selected by clicking on the item - simply hover over the desired item and add the source markers!
 \end_layout
 
 \begin_layout Standard
