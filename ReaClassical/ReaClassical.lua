@@ -1,12 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.23.3
+@version 24.23.4
 @changelog
-  Markers to Item Edge: Add ability to use time selection for adding S-D markers
-  Markers to Item Edge: Allow items in first folder vs first track
-  All S-D Editing Functions: Conform child items to parent edges before adding crossfades
-  Insert with Timestretching: Don't glue pasted items if only one parent source item
-  PDF Manual: Various updates
+  NEW: Place S-D Markers at mouse hover position
+  ReaClassical Preferences: Add option for S-D marker at mouse hover
+  S-D Editing: Use new lock_items() function
+  PDF Manual: Add S-D marker hover info
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
