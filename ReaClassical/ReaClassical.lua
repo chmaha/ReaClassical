@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 24.23.2
+@version 24.23.3
 @changelog
-  NEW: Add Destination markers to edge
+  Markers to Item Edge: Add ability to use time selection for adding S-D markers
+  Markers to Item Edge: Allow items in first folder vs first track
+  All S-D Editing Functions: Conform child items to parent edges before adding crossfades
+  Insert with Timestretching: Don't glue pasted items if only one parent source item
+  PDF Manual: Various updates
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
