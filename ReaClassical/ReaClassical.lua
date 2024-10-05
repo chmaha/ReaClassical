@@ -1,11 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.23.4
+@version 24.23.5
 @changelog
-  NEW: Place S-D Markers at mouse hover position
-  ReaClassical Preferences: Add option for S-D marker at mouse hover
-  S-D Editing: Use new lock_items() function
-  PDF Manual: Add S-D marker hover info
+  3 new ReaClassical themes: Light, WaveColors Dark, WaveColors Light
+  Remove RC themes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -74,10 +72,9 @@
   [main] ReaClassical_Audio Calculator.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
-  [theme] RCPyramix.ReaperThemeZip
-  [theme] RCSequoia.ReaperThemeZip
-  [theme] RCSaDiE.ReaperThemeZip
-  [theme] RCSonicSolutions.ReaperThemeZip
+  [theme] ReaClassical Light.ReaperThemeZip
+  [theme] ReaClassical WaveColors Dark.ReaperThemeZip
+  [theme] ReaClassical WaveColors Light.ReaperThemeZip
   ReaClassical_Colors_Table.lua > ReaClassical_Colors_Table.lua
   ../PDF-Manual/ReaClassical-Manual.pdf > ReaClassical-Manual.pdf
   reaclassical-splash.png > reaclassical-splash.png
