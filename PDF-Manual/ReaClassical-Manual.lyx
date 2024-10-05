@@ -1005,6 +1005,48 @@ ctrl+S}
 \end_layout
 
 \begin_layout Subsection
+Theme
+\end_layout
+
+\begin_layout Standard
+The ReaClassical theme is loaded by default.
+ It looks almost exactly like the default REAPER theme.
+ If you'd like to switch to one of several other custom themes,
+ you can do so via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+menu{Options > Themes}
+\end_layout
+
+\end_inset
+
+.
+ 
+\begin_inset Quotes bld
+\end_inset
+
+ReaClassical Light
+\begin_inset Quotes brd
+\end_inset
+
+ is similar to the default but uses lighter waveforms and peak edging.
+ The two 
+\begin_inset Quotes bld
+\end_inset
+
+WaveColors
+\begin_inset Quotes brd
+\end_inset
+
+ themes apply coloring only to the waveforms with option for dark or light item backgrounds.
+\end_layout
+
+\begin_layout Subsection
 Project Settings
 \end_layout
 
