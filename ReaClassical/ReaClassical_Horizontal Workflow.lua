@@ -54,6 +54,7 @@ function main()
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
+        SetProjExtState(0, "ReaClassical", "Workflow", "")
         local boolean, num = GetUserInputs("Horizontal Workflow", 1, "How many tracks?", 10)
         num = tonumber(num)
         local rcmaster
@@ -105,7 +106,7 @@ function main()
             local stripped_name = process_dest(track)
             GetSetMediaTrackInfo_String(track, "P_NAME", stripped_name, 1)
         end
-        
+
 
         if #mixer_tracks == 0 then
             -- build table of track settings, sends & FX for dest folder
@@ -703,39 +704,48 @@ end
 ---------------------------------------------------------------------
 
 function show_track_name_dialog(num_of_tracks)
-    local input_string = ""
+    local max_inputs_per_dialog = 8
+    local success = true
+    local track_names = {}
+
+    -- Loop to handle all tracks in chunks
+    for start_track = 1, num_of_tracks, max_inputs_per_dialog do
+        local end_track = math.min(start_track + max_inputs_per_dialog - 1, num_of_tracks)
+        local input_string = ""
+
+        for i = start_track, end_track do
+            input_string = input_string .. "Track " .. i .. " :,"
+        end
+
+        local ret, input = GetUserInputs("Enter Track Names " .. start_track .. "-" .. end_track,
+            end_track - start_track + 1,
+            input_string .. ",extrawidth=100", "")
+        if not ret then
+            return false
+        end
+
+        local inputs_table = {}
+        for input_value in string.gmatch(input, "[^,]+") do
+            table.insert(inputs_table, input_value:match("^%s*(.-)%s*$"))
+        end
+
+        for i = 1, #inputs_table do
+            track_names[start_track + i - 1] = inputs_table[i]
+        end
+    end
 
     for i = 1, num_of_tracks do
-        input_string = input_string .. "Track " .. i .. " :,"
-    end
-
-    local ret, input = GetUserInputs("Enter Track Names", num_of_tracks, input_string .. ",extrawidth=100", "")
-
-    if not ret then
-        return false
-    end
-    
-    local success = true
-
-    if ret then
-        local inputs_table = {}
-        for input in string.gmatch(input, "[^,]+") do
-            table.insert(inputs_table, input:match("^%s*(.-)%s*$"))
-        end
-
-        for i = 1, num_of_tracks do
-            local inputValue = inputs_table[i] or ""
-            local track = GetTrack(0, i - 1)
-            if track then
-                local ret = GetSetMediaTrackInfo_String(track, "P_NAME", inputValue, true)
-                if not ret then
-                    success = false
-                end
-            else
+        local track = GetTrack(0, i - 1)
+        if track then
+            local ret = GetSetMediaTrackInfo_String(track, "P_NAME", track_names[i] or "", true)
+            if not ret then
                 success = false
             end
+        else
+            success = false
         end
     end
+
     return success
 end
 
