@@ -31,10 +31,14 @@ local pair_words = {
 local MAX_INPUTS = GetNumAudioInputs() -- Retrieve hardware inputs
 
 function main()
-    local input_channel = 0
-    -- local num_tracks = CountTracks(0)
-    local track_index = 0
+    local num_tracks = CountTracks(0)
+    if num_tracks == 0 then
+        MB("Set up your ReaClassical project via F7 or F8 first!","Auto Set Recording Inputs", 0)
+        return
+    end
 
+    local input_channel = 0
+    local track_index = 0
     local tracks_per_group = folder_check()
 
     local no_input_tracks = {}
