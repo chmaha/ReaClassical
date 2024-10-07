@@ -26,14 +26,14 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_dest, reset_spacers
+local process_dest, reset_spacers, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -66,6 +66,11 @@ function main()
         else
             return
         end
+        local success = show_track_name_dialog(num)
+        if success then
+            local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
+            Main_OnCommand(auto_set, 0)
+        end
         if folder_check() == 1 then
             create_single_mixer(num, num)
             local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table()
@@ -90,6 +95,17 @@ function main()
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
         local end_of_sources = tracks_per_group * folder_count
         local track_names = copy_track_names(table, mixer_tracks)
+
+        -- remove "D:" if converting from Vertical Workflow
+        local parent = table[1].parent
+        local stripped_pname = process_dest(parent)
+        GetSetMediaTrackInfo_String(parent, "P_NAME", stripped_pname, 1)
+
+        for _, track in ipairs(table[1].tracks) do
+            local stripped_name = process_dest(track)
+            GetSetMediaTrackInfo_String(track, "P_NAME", stripped_name, 1)
+        end
+        
 
         if #mixer_tracks == 0 then
             -- build table of track settings, sends & FX for dest folder
@@ -586,7 +602,6 @@ function process_dest(track)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
     local mod_name = string.match(name, ":(.*)")
     if mod_name == nil then mod_name = name end
-    -- GetSetMediaTrackInfo_String(track, "P_NAME", mod_name, 1)
     return mod_name
 end
 
@@ -597,7 +612,7 @@ function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)
-    add_spacer(rcmaster_index+1)
+    add_spacer(rcmaster_index + 1)
 end
 
 ---------------------------------------------------------------------
@@ -683,6 +698,45 @@ function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
             TrackFX_CopyToTrack(src_track, 0, dest_track, j, true)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function show_track_name_dialog(num_of_tracks)
+    local input_string = ""
+
+    for i = 1, num_of_tracks do
+        input_string = input_string .. "Track " .. i .. " :,"
+    end
+
+    local ret, input = GetUserInputs("Enter Track Names", num_of_tracks, input_string .. ",extrawidth=100", "")
+
+    if not ret then
+        return false
+    end
+    
+    local success = true
+
+    if ret then
+        local inputs_table = {}
+        for input in string.gmatch(input, "[^,]+") do
+            table.insert(inputs_table, input:match("^%s*(.-)%s*$"))
+        end
+
+        for i = 1, num_of_tracks do
+            local inputValue = inputs_table[i] or ""
+            local track = GetTrack(0, i - 1)
+            if track then
+                local ret = GetSetMediaTrackInfo_String(track, "P_NAME", inputValue, true)
+                if not ret then
+                    success = false
+                end
+            else
+                success = false
+            end
+        end
+    end
+    return success
 end
 
 ---------------------------------------------------------------------

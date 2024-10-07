@@ -26,7 +26,7 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_dest, reset_spacers, sync
+local process_dest, reset_spacers, sync, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 
 ---------------------------------------------------------------------
@@ -69,6 +69,11 @@ function main()
             return
         else
             return
+        end
+        local success = show_track_name_dialog(num)
+        if success then
+            local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
+            Main_OnCommand(auto_set, 0)
         end
         if folder_check() == 1 then
             create_source_groups()
@@ -829,6 +834,45 @@ function sync(tracks_per_group, end_of_sources)
         SetTrackStateChunk(track, str, 0)
         j = j + 1
     end
+end
+
+---------------------------------------------------------------------
+
+function show_track_name_dialog(num_of_tracks)
+    local input_string = ""
+
+    for i = 1, num_of_tracks do
+        input_string = input_string .. "Track " .. i .. " :,"
+    end
+
+    local ret, input = GetUserInputs("Enter Track Names", num_of_tracks, input_string .. ",extrawidth=100", "")
+
+    if not ret then
+        return false
+    end
+    
+    local success = true
+
+    if ret then
+        local inputs_table = {}
+        for input in string.gmatch(input, "[^,]+") do
+            table.insert(inputs_table, input:match("^%s*(.-)%s*$"))
+        end
+
+        for i = 1, num_of_tracks do
+            local inputValue = inputs_table[i] or ""
+            local track = GetTrack(0, i - 1)
+            if track then
+                local ret = GetSetMediaTrackInfo_String(track, "P_NAME", inputValue, true)
+                if not ret then
+                    success = false
+                end
+            else
+                success = false
+            end
+        end
+    end
+    return success
 end
 
 ---------------------------------------------------------------------
