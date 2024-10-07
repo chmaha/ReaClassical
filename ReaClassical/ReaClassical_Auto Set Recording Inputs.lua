@@ -22,10 +22,14 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, trim_prefix, folder_check, trackname_check, assign_input
 
 local pair_words = {
-    "pair", "paire", "paar", "coppia", "par", "пара", "对", "ペア",
-    "쌍", "زوج", "pari", "пар", "πάρoς", "двойка", "קבוצה", "çift",
-    "pár", "pāris", "pora", "jozi", "जोड़ी", "คู่", "pasang", "cặp"
-}
+    "2ch", "pair", "paire", "paar", "coppia", "par", "пара", "对", "ペア",
+     "쌍", "زوج", "pari", "пар", "πάρoς", "двойка", "קבוצה", "çift",
+     "pár", "pāris", "pora", "jozi", "जोड़ी", "คู่", "pasang", "cặp",
+     "stereo", "stéréo", "estéreo", "立体声", "ステレオ", "스테레오", 
+     "ستيريو", "στερεοφωνικός", "סטריאו", "stereotipas", "स्टीरियो", 
+     "สเตอริโอ", "âm thanh nổi"
+ } 
+ 
 
 ---------------------------------------------------------------------
 local MAX_INPUTS = GetNumAudioInputs() -- Retrieve hardware inputs
