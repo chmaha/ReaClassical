@@ -33,12 +33,13 @@ local MAX_INPUTS = GetNumAudioInputs() -- Retrieve hardware inputs
 function main()
     local num_tracks = CountTracks(0)
     if num_tracks == 0 then
-        MB("Set up your ReaClassical project via F7 or F8 first!","Auto Set Recording Inputs", 0)
+        MB("Set up your ReaClassical project via F7 or F8 first!", "Auto Set Recording Inputs", 0)
         return
     end
 
     local input_channel = 0
     local track_index = 0
+
     local tracks_per_group = folder_check()
 
     local no_input_tracks = {}
@@ -71,8 +72,11 @@ function main()
             new_input_channel = assign_input(track, is_pair, input_channel)
             if new_input_channel then
                 input_channel = new_input_channel
-                assignments[#assignments + 1] = string.format("%s: %s",
-                    is_pair and string.format("%d/%d", input_channel - 1, input_channel) or input_channel, track_name)
+                local channel_info = is_pair and string.format("%d/%d", input_channel - 1, input_channel) or
+                    string.format("%d", input_channel)
+                local channel_type = is_pair and "(stereo)" or "(mono)"
+
+                assignments[#assignments + 1] = string.format("%s: %s %s", channel_info, track_name, channel_type)
             end
         else
             if input_channel < tracks_per_group then
