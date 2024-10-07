@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.23.5
+@version 24.23.5+dev1007
 @changelog
-  3 new ReaClassical themes: Light, WaveColors Dark, WaveColors Light
-  Remove RC themes
+  NEW: Auto set recording inputs
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -70,6 +69,7 @@
   [main] ReaClassical_Remove Take Names.lua
   [main] ReaClassical_Jump To Time.lua
   [main] ReaClassical_Audio Calculator.lua
+  [main] ReaClassical_Auto Set Recording Inputs.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
