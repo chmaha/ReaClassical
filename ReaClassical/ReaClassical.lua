@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.3
+@version 24.24.4
 @changelog
-  Various: Use P_EXT for determining track type
-  Remove Exclusive Audition function
-  PDF Manual: Remove references to Exclusive Audition
+  Auto Set Recording Inputs: Set first group input not mixer tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
