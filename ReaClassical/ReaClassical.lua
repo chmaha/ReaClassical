@@ -4,6 +4,7 @@
 @changelog
   Various: Use P_EXT for determining track type
   Remove Exclusive Audition function
+  PDF Manual: Remove references to Exclusive Audition
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
