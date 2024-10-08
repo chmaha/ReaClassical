@@ -19,8 +19,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, trim_prefix, folder_check, trackname_check, assign_input
-local create_track_table
+local main, trim_prefix, trackname_check, assign_input, create_track_table
 
 local pair_words = {
     "2ch", "pair", "paire", "paar", "coppia", "par", "пара", "对", "ペア",
@@ -126,31 +125,8 @@ end
 ---------------------------------------------------------------------
 
 function trim_prefix(track_name)
-    return (track_name:match("^%s*M:%s*(.*)%s*$") or track_name:match("^%s*(.-)%s*$"))
-end
-
----------------------------------------------------------------------
-
-function folder_check()
-    local folders = 0
-    local tracks_per_group = 1
-    local total_tracks = CountTracks(0)
-    for i = 0, total_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        local mix = trackname_check(track, "^M:")
-        local rcm = trackname_check(track, "^RCMASTER")
-        local send = trackname_check(track, "^@")
-        local bus = trackname_check(track, "^#")
-        local rt = trackname_check(track, "^RoomTone")
-        local ref = trackname_check(track, "^REF")
-        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-            folders = folders + 1
-        elseif folders == 1 and not (mix or rcm or send or bus or rt or ref) then
-            tracks_per_group = tracks_per_group + 1
-        end
+    return track_name:match("^%s*M?:?%s*(.-)%s*%-?$")
     end
-    return tracks_per_group
-end
 
 ---------------------------------------------------------------------
 
