@@ -59,34 +59,36 @@ function main()
     local assignments = {}
 
     while track_index <= #mixer_table do
-        local track = mixer_table[track_index]
-        local _, track_name = GetTrackName(track)
+        local mixer_track = mixer_table[track_index]
+        local _, mixer_trackname = GetTrackName(mixer_track)
 
-        track_name = trim_prefix(track_name)
+        mixer_trackname = trim_prefix(mixer_trackname)
 
         local is_pair = false
         for _, word in ipairs(pair_words) do
-            if track_name:lower():find(word) then
+            if mixer_trackname:lower():find(word) then
                 is_pair = true
                 break
             end
         end
 
+        local input_track = GetTrack(0,track_index-1)
+
         if input_channel < MAX_INPUTS then
-            local new_input_channel = assign_input(track, is_pair, input_channel)
+            local new_input_channel = assign_input(input_track, is_pair, input_channel)
             if new_input_channel then
                 input_channel = new_input_channel
                 local channel_info = is_pair and string.format("%d/%d", input_channel - 1, input_channel) or
                     string.format("%d", input_channel)
                 local channel_type = is_pair and "(stereo)" or "(mono)"
 
-                assignments[#assignments + 1] = string.format("%s: %s %s", channel_info, track_name, channel_type)
+                assignments[#assignments + 1] = string.format("%s: %s %s", channel_info, mixer_trackname, channel_type)
             end
         else
             if input_channel < #mixer_table then
                 -- Beyond max hardware inputs, set input to none
-                SetMediaTrackInfo_Value(track, "I_RECINPUT", -1)
-                no_input_tracks[#no_input_tracks + 1] = track_name
+                SetMediaTrackInfo_Value(input_track, "I_RECINPUT", -1)
+                no_input_tracks[#no_input_tracks + 1] = mixer_trackname
             end
         end
 
@@ -124,8 +126,8 @@ end
 
 ---------------------------------------------------------------------
 
-function trim_prefix(track_name)
-    return track_name:match("^%s*M?:?%s*(.-)%s*%-?$")
+function trim_prefix(mixer_trackname)
+    return mixer_trackname:match("^%s*M?:?%s*(.-)%s*%-?$")
     end
 
 ---------------------------------------------------------------------
