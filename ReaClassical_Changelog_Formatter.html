@@ -87,10 +87,11 @@
 
             let output = `[B][COLOR=${color}]NEW: ReaClassical ${version}[/COLOR][/B]\n[LIST]\n`;
 
-            // Split changelog
+            // Split changelog & trim whitespace from each line
             changelog.split('\n').forEach(line => {
-                if (line.trim()) { // Only add non-empty lines
-                    output += `[*][B]${line}[/B]\n`;
+                const trimmedLine = line.trim();
+                if (trimmedLine) {
+                    output += `[*][B]${trimmedLine}[/B]\n`;
                 }
             });
 
