@@ -64,7 +64,6 @@ function main()
     if depth == 1 then
       add_track_to_folder(i + child_count)
       local new_track = GetTrack(0, i + child_count)
-      GetSetMediaTrackInfo_String(new_track, "P_NAME", name, 1)
     end
     if depth == -1 then
       -- switch with last track in folder
@@ -78,7 +77,7 @@ function main()
   local index = (folder_count*tracks_per_folder)+tracks_per_folder-1
   add_track_to_folder(index)
   local new_track = GetTrack(0,index)
-  GetSetMediaTrackInfo_String(new_track, "P_NAME", "M:", 1)
+  GetSetMediaTrackInfo_String(new_track, "P_NAME", "M:" .. name, 1)
 
   if folder_count > 1 then
     local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
