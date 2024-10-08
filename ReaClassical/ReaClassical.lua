@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.4
+@version 24.24.5
 @changelog
-  Auto Set Recording Inputs: Set first group input not mixer tracks
+  Vertical Workflow: Add P_EXT ref_state lookup
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
