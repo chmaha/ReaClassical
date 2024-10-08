@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License along with thi
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, trim_prefix, folder_check, trackname_check, assign_input
+local create_track_table
 
 local pair_words = {
     "2ch", "pair", "paire", "paar", "coppia", "par", "пара", "对", "ペア",
@@ -44,22 +45,22 @@ function main()
     local input_channel = 0
     local track_index = 0
 
-    local tracks_per_group = folder_check()
+    local mixer_table = create_track_table()
 
     local no_input_tracks = {}
     local previous_inputs = {}
-    while track_index < tracks_per_group do
+    while track_index < #mixer_table do
         local track = GetTrack(0, track_index)
         local current_input = GetMediaTrackInfo_Value(track, "I_RECINPUT")
         previous_inputs[track_index + 1] = current_input
         track_index = track_index + 1
     end
 
-    track_index = 0
+    track_index = 1
     local assignments = {}
 
-    while track_index < tracks_per_group do
-        local track = GetTrack(0, track_index)
+    while track_index <= #mixer_table do
+        local track = mixer_table[track_index]
         local _, track_name = GetTrackName(track)
 
         track_name = trim_prefix(track_name)
@@ -73,7 +74,7 @@ function main()
         end
 
         if input_channel < MAX_INPUTS then
-            new_input_channel = assign_input(track, is_pair, input_channel)
+            local new_input_channel = assign_input(track, is_pair, input_channel)
             if new_input_channel then
                 input_channel = new_input_channel
                 local channel_info = is_pair and string.format("%d/%d", input_channel - 1, input_channel) or
@@ -83,7 +84,7 @@ function main()
                 assignments[#assignments + 1] = string.format("%s: %s %s", channel_info, track_name, channel_type)
             end
         else
-            if input_channel < tracks_per_group then
+            if input_channel < #mixer_table then
                 -- Beyond max hardware inputs, set input to none
                 SetMediaTrackInfo_Value(track, "I_RECINPUT", -1)
                 no_input_tracks[#no_input_tracks + 1] = track_name
@@ -125,7 +126,7 @@ end
 ---------------------------------------------------------------------
 
 function trim_prefix(track_name)
-    return (track_name:match("^%s*D:%s*(.*)%s*$") or track_name:match("^%s*(.-)%s*$"))
+    return (track_name:match("^%s*M:%s*(.*)%s*$") or track_name:match("^%s*(.-)%s*$"))
 end
 
 ---------------------------------------------------------------------
@@ -172,6 +173,73 @@ function assign_input(track, is_pair, input_channel)
         SetMediaTrackInfo_Value(track, "I_RECINPUT", input_channel)
         return input_channel + 1
     end
+end
+
+---------------------------------------------------------------------
+
+function create_track_table()
+    local track_table = {}
+    local num_of_tracks = CountTracks(0)
+    local rcmaster_index
+    local j = 0
+    local k = 1
+    local prev_k = 1
+    local groups_equal = true
+    local mixer_tracks = {}
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+        if parent == 1 then
+            if j > 1 and k ~= prev_k then
+                groups_equal = false
+            end
+            j = j + 1
+            prev_k = k
+            k = 1
+            track_table[j] = { parent = track, tracks = {} }
+        elseif trackname_check(track, "^M:") or mixer_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
+            local mod_name = string.match(name, "M?:?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, 1)
+            table.insert(mixer_tracks, track)
+        elseif trackname_check(track, "^@") or aux_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:aux", "y", 1)
+            local mod_name = string.match(name, "@?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "@" .. mod_name, 1)
+        elseif trackname_check(track, "^#") or submix_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:submix", "y", 1)
+            local mod_name = string.match(name, "#?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "#" .. mod_name, 1)
+        elseif trackname_check(track, "^RoomTone") or rt_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", 1)
+        elseif trackname_check(track, "^REF") or ref_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "REF", 1)
+        elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
+            rcmaster_index = i
+        else
+            if j > 0 then
+                table.insert(track_table[j].tracks, track)
+            else
+                groups_equal = false
+            end
+            k = k + 1
+        end
+    end
+    -- extra test for final group without further parent logic
+    if j > 1 and k ~= prev_k then
+        groups_equal = false
+    end
+
+    return mixer_tracks
 end
 
 ---------------------------------------------------------------------
