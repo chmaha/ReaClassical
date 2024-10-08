@@ -165,15 +165,21 @@ function solo()
 
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF")) then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
             end
         end
 
-        if not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
+        if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" or rcmaster_state == "y") then
             if IsTrackSelected(track) and parent ~= 1 then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 2)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
@@ -189,14 +195,14 @@ function solo()
             end
         end
 
-        if trackname_check(track, "^RoomTone") then
+        if rt_state == "y" then
             if IsTrackSelected(track) then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             end
         end
 
-        if trackname_check(track, "^REF") then
+        if ref_state == "y" then
             local is_selected = IsTrackSelected(track)
             local mute = 1
             local solo = 0
@@ -214,7 +220,7 @@ function solo()
             SetMediaTrackInfo_Value(track, "I_SOLO", solo)
         end
 
-        if trackname_check(track, "^RCMASTER") then
+        if rcmaster_state == "y" then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
@@ -234,31 +240,37 @@ function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        if trackname_check(track, "^M:") then
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        if mixer_state == "y" then
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^@") then
+        if aux_state == "y" then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^#") then
+        if submix_state == "y" then
             SetTrackColor(track, colors.submix)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^RoomTone") then
+        if rt_state == "y" then
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "^REF") then
+        if ref_state == "y" then
             SetTrackColor(track, colors.ref)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "RCMASTER") then
+        if rcmaster_state == "y" then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y" or rt_state == "y" or ref_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -267,7 +279,7 @@ function mixer()
         if trackname_check(track, "^S%d+:") then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y" then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
         end
         if mastering == 1 and i == 0 then
