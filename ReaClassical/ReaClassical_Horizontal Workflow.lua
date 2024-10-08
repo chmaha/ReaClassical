@@ -69,8 +69,11 @@ function main()
         end
         local success = show_track_name_dialog(num)
         if success then
-            local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
-            Main_OnCommand(auto_set, 0)
+            local response = MB("Would you like to automatically assign recording inputs based on track naming?","Horizontal Workflow",4)
+            if response == 6 then
+                local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
+                Main_OnCommand(auto_set, 0)
+            end
         end
         if folder_check() == 1 then
             create_single_mixer(num, num)
