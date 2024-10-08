@@ -3,6 +3,7 @@
 @version 24.24.1+dev1008
 @changelog
   Horizontal/Vertical Workflow: Use mixer panel for all naming
+  Auto Set Rec Input: Use mixer tracks for tracks per group and names
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
