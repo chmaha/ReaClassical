@@ -26,7 +26,7 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_dest, reset_spacers, sync, show_track_name_dialog
+local process_name, reset_spacers, sync, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 
 ---------------------------------------------------------------------
@@ -71,20 +71,11 @@ function main()
         else
             return
         end
-        local success = show_track_name_dialog(num)
-        if success then
-            local response = MB("Would you like to automatically assign recording inputs based on track naming?","Vertical Workflow",4)
-            if response == 6 then
-                local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
-                Main_OnCommand(auto_set, 0)
-            end
-        end
         if folder_check() == 1 then
             create_source_groups()
             local end_of_sources = num * 7
             create_single_mixer(num, end_of_sources)
             local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table()
-            copy_track_names(table, mixer_table)
             route_tracks(rcmaster, table, end_of_sources)
             media_razor_group()
             reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
@@ -93,6 +84,16 @@ function main()
             mixer()
             Main_OnCommand(show, 0) -- show children of destination
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
+            local success = show_track_name_dialog(mixer_table)
+            if success then
+                local response = MB("Would you like to automatically assign recording inputs based on track naming?",
+                    "Vertical Workflow", 4)
+                if response == 6 then
+                    local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
+                    Main_OnCommand(auto_set, 0)
+                end
+            end
+            copy_track_names(table, mixer_table)
         end
     elseif folder_check() > 1 then
         rcmaster_exists = special_check()
@@ -444,15 +445,28 @@ end
 function copy_track_names(track_table, mixer_table)
     local track_names = {}
 
-    -- for 1st prefix D: (remove anything existing before & including :)
-    local parent = track_table[1].parent
-    local mod_name = process_dest(parent)
-    table.insert(track_names, mod_name)
-
-    for _, track in ipairs(track_table[1].tracks) do
-        local mod_name = process_dest(track)
+    for _, track in ipairs(mixer_table) do
+        local mod_name = process_name(track)
         table.insert(track_names, mod_name)
     end
+
+    local parent = track_table[1].parent
+    GetSetMediaTrackInfo_String(parent, "P_NAME", "D:" .. track_names[1], 1)
+
+    for i = 1, #track_table[1].tracks do
+        local track = track_table[1].tracks[i]
+        GetSetMediaTrackInfo_String(track, "P_NAME", "D:" .. (track_names[i + 1] or ""), 1)
+    end
+
+    -- local i = 2
+    -- for _, track in ipairs(track_table[1].tracks) do
+    --     if track_names[i] ~= nil then
+    --         GetSetMediaTrackInfo_String(track, "P_NAME", track_names[i], 1)
+    --     else
+    --         GetSetMediaTrackInfo_String(track, "P_NAME", "", 1)
+    --     end
+    --     i = i + 1
+    -- end
 
     -- for rest, prefix Si: where i = number starting at 1
     for i = 2, #track_table, 1 do
@@ -471,15 +485,15 @@ function copy_track_names(track_table, mixer_table)
         end
     end
 
-    local i = 1
-    for _, track in ipairs(mixer_table) do
-        if track_names[i] ~= nil then
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[i], 1)
-        else
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:", 1)
-        end
-        i = i + 1
-    end
+    -- local i = 1
+    -- for _, track in ipairs(mixer_table) do
+    --     if track_names[i] ~= nil then
+    --         GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[i], 1)
+    --     else
+    --         GetSetMediaTrackInfo_String(track, "P_NAME", "M:", 1)
+    --     end
+    --     i = i + 1
+    -- end
 
     return track_names
 end
@@ -652,6 +666,8 @@ function create_track_table()
             track_table[j] = { parent = track, tracks = {} }
         elseif trackname_check(track, "^M:") or mixer_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
+            local mod_name = string.match(name, "M?:?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, 1)
             table.insert(mixer_tracks, track)
         elseif trackname_check(track, "^@") or aux_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:aux", "y", 1)
@@ -688,11 +704,11 @@ end
 
 ---------------------------------------------------------------------
 
-function process_dest(track)
+function process_name(track)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
     local mod_name = string.match(name, ":(.*)")
     if mod_name == nil then mod_name = name end
-    GetSetMediaTrackInfo_String(track, "P_NAME", "D:" .. mod_name, 1)
+    -- GetSetMediaTrackInfo_String(track, "P_NAME", "D:" .. mod_name, 1)
     return mod_name
 end
 
@@ -842,14 +858,14 @@ end
 
 ---------------------------------------------------------------------
 
-function show_track_name_dialog(num_of_tracks)
+function show_track_name_dialog(mixer_track_table)
     local max_inputs_per_dialog = 8
     local success = true
     local track_names = {}
 
     -- Loop to handle all tracks in chunks
-    for start_track = 1, num_of_tracks, max_inputs_per_dialog do
-        local end_track = math.min(start_track + max_inputs_per_dialog - 1, num_of_tracks)
+    for start_track = 1, #mixer_track_table, max_inputs_per_dialog do
+        local end_track = math.min(start_track + max_inputs_per_dialog - 1, #mixer_track_table)
         local input_string = ""
 
         for i = start_track, end_track do
@@ -863,20 +879,19 @@ function show_track_name_dialog(num_of_tracks)
             return false
         end
 
-        local inputs_table = {}
+        local inputs_track_table = {}
         for input_value in string.gmatch(input, "[^,]+") do
-            table.insert(inputs_table, input_value:match("^%s*(.-)%s*$"))
+            table.insert(inputs_track_table, input_value:match("^%s*(.-)%s*$"))
         end
 
-        for i = 1, #inputs_table do
-            track_names[start_track + i - 1] = inputs_table[i]
+        for i = 1, #inputs_track_table do
+            track_names[start_track + i - 1] = inputs_track_table[i]
         end
     end
 
-    for i = 1, num_of_tracks do
-        local track = GetTrack(0, i - 1)
+    for i, track in ipairs(mixer_track_table) do
         if track then
-            local ret = GetSetMediaTrackInfo_String(track, "P_NAME", track_names[i] or "", true)
+            local ret = GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. (track_names[i] or ""), true)
             if not ret then
                 success = false
             end
