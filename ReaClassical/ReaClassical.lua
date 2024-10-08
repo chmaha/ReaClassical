@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.23.5+dev1008
+@version 24.24
 @changelog
+  NEW: Auto set recording input based on track names
   Horizontal/Vertical: On empty project run sequence inc. track naming and auto rec set
+  Keymap: Add auto rec set (Ctrl+F9)
+  PDF Manual: Various changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
