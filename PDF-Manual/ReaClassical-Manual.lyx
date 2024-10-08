@@ -1720,7 +1720,7 @@ Manually Naming Tracks
 
 \begin_layout Standard
 If you didn't name tracks as part of the initial workflow setup,
- you only need to add track names to the destination (first) group in the arrange window and then pressing 
+ you only need to add track names to the mixer tracks in the mixer panel and then pressing 
 \begin_inset ERT
 status open
 
@@ -1746,7 +1746,18 @@ keys{F8}
 
 \end_inset
 
- will auto-populate the same names to the source groups and mixer tracks.
+ will auto-populate the same names to all regular track groups.
+ While re-naming don't worry about keeping the 
+\begin_inset Quotes bld
+\end_inset
+
+M:
+\begin_inset Quotes brd
+\end_inset
+
+ prefix.
+ On sync,
+ it will be restored.
  ReaClassical automatically adds Source and Destination prefixes to your chosen track names and are auto-renumbered whenever functions affecting the number of source folders are run (Vertical Workflow 
 \begin_inset ERT
 status open
@@ -1846,7 +1857,8 @@ keys{F8}
 \end_layout
 
 \begin_layout Standard
-Any and all track setting changes (volume,
+Any and all track setting changes (track naming,
+ volume,
  pan,
  phase,
  FX,
@@ -1888,7 +1900,7 @@ keys{F8}
 
 \end_inset
 
- will synchronize the track names from the first folder across the whole project.
+ will synchronize the track names from the mixer tracks across the whole project.
  
 \end_layout
 
@@ -1952,10 +1964,9 @@ Manually Setting Inputs
 \begin_layout Standard
 See above for the ReaClassical approach to auto setting recording inputs based on track names.
  There are also multiple ways to manually set recording inputs.
- First is to click on the input at the top of the mixer channel.
- Second,
+ First,
  you can left-click on the meter part of the track panel.
- Third,
+ Second,
  you can press 
 \begin_inset ERT
 status open
@@ -3057,8 +3068,22 @@ regular
 
  group or groups of tracks shown in the arrange window.
  These are where you record or import takes.
- You can record-arm tracks and select inputs here (a reminder that names,
- recording inputs and locked tracks need only be set on the first group and then 
+ You can record-arm tracks and manually select inputs (if you didn't set during initial setup or via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+F9}
+\end_layout
+
+\end_inset
+
+) here (a reminder that only locked tracks need only be set on the first group and then 
 \begin_inset ERT
 status open
 
@@ -3082,19 +3107,38 @@ M:
 \end_inset
 
  prefix.
- These tracks shown only in the mixer are where you adjust the usual track controls such as pan,
+ These tracks shown only in the mixer are where you adjust the usual track controls such as names,
+ pan,
  volume,
  phase etc.
  and also add FX.
- Their names are populated from those set in the first group of 
-\begin_inset Quotes bld
+ Their names are synced across the project via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
 \end_inset
 
-regular
-\begin_inset Quotes brd
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
 \end_inset
 
- tracks in the arrange window.
+.
  Third,
  we have aux busses designated via 
 \begin_inset Quotes bld
@@ -3199,7 +3243,7 @@ keys{F8}
 
 \end_inset
 
- to automatically add back missing prefixes and correct naming.
+ to automatically add back missing prefixes and correct naming where appropriate.
  
 \end_layout
 
@@ -5246,7 +5290,7 @@ keys{
 
 \begin_layout Standard
 For # submix tracks,
- simply add a hyphen (-) at the end of desired track names in the first folder and sync via 
+ simply add a hyphen (-) at the end of desired track names in the mixer tracks and sync via 
 \begin_inset ERT
 status open
 
@@ -5275,7 +5319,7 @@ keys{F8}
 .
  Now those related mixer tracks will not route directly to RCMASTER.
  As an example,
- say tracks 3-6 are all string section microphones and you'd like to sum them all to a string submix track called 
+ say mixer tracks 3-6 are all string section microphones and you'd like to sum them all to a string submix track called 
 \begin_inset Quotes bld
 \end_inset
 
@@ -5284,7 +5328,7 @@ keys{F8}
 \end_inset
 
 .
- Just add a hyphen to the end of the names for tracks 3-6,
+ Just add a hyphen to the end of the names for mixer tracks 3-6,
  sync and then create the routing to #strings via click-dragging from the routing stripes.
  This routing is maintained during 
 \begin_inset ERT
@@ -6598,7 +6642,7 @@ Description:
  
 \emph default
 A quick way to create a folder group with as many tracks as you need.
- It can also be used on a single existing folder group to re-sync track names and re-build project routing.
+ It can also be used with a single existing folder group to re-sync track names and re-build project routing.
 \end_layout
 
 \begin_layout Standard
@@ -6974,7 +7018,7 @@ keys{F8}
 
  .
  For correct routing to a submix (versus a send),
- simply add a hyphen (-) at the end of desired track names in the first folder and sync via 
+ simply add a hyphen (-) at the end of desired track names in the mixer tracks and sync via 
 \begin_inset ERT
 status open
 
