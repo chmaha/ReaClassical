@@ -26,14 +26,14 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_dest, reset_spacers
+local process_dest, reset_spacers, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -54,6 +54,7 @@ function main()
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
+        SetProjExtState(0, "ReaClassical", "Workflow", "")
         local boolean, num = GetUserInputs("Horizontal Workflow", 1, "How many tracks?", 10)
         num = tonumber(num)
         local rcmaster
@@ -65,6 +66,11 @@ function main()
             return
         else
             return
+        end
+        local success = show_track_name_dialog(num)
+        if success then
+            local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
+            Main_OnCommand(auto_set, 0)
         end
         if folder_check() == 1 then
             create_single_mixer(num, num)
@@ -90,6 +96,17 @@ function main()
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
         local end_of_sources = tracks_per_group * folder_count
         local track_names = copy_track_names(table, mixer_tracks)
+
+        -- remove "D:" if converting from Vertical Workflow
+        local parent = table[1].parent
+        local stripped_pname = process_dest(parent)
+        GetSetMediaTrackInfo_String(parent, "P_NAME", stripped_pname, 1)
+
+        for _, track in ipairs(table[1].tracks) do
+            local stripped_name = process_dest(track)
+            GetSetMediaTrackInfo_String(track, "P_NAME", stripped_name, 1)
+        end
+
 
         if #mixer_tracks == 0 then
             -- build table of track settings, sends & FX for dest folder
@@ -586,7 +603,6 @@ function process_dest(track)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
     local mod_name = string.match(name, ":(.*)")
     if mod_name == nil then mod_name = name end
-    -- GetSetMediaTrackInfo_String(track, "P_NAME", mod_name, 1)
     return mod_name
 end
 
@@ -597,7 +613,7 @@ function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)
-    add_spacer(rcmaster_index+1)
+    add_spacer(rcmaster_index + 1)
 end
 
 ---------------------------------------------------------------------
@@ -683,6 +699,54 @@ function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
             TrackFX_CopyToTrack(src_track, 0, dest_track, j, true)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function show_track_name_dialog(num_of_tracks)
+    local max_inputs_per_dialog = 8
+    local success = true
+    local track_names = {}
+
+    -- Loop to handle all tracks in chunks
+    for start_track = 1, num_of_tracks, max_inputs_per_dialog do
+        local end_track = math.min(start_track + max_inputs_per_dialog - 1, num_of_tracks)
+        local input_string = ""
+
+        for i = start_track, end_track do
+            input_string = input_string .. "Track " .. i .. " :,"
+        end
+
+        local ret, input = GetUserInputs("Enter Track Names " .. start_track .. "-" .. end_track,
+            end_track - start_track + 1,
+            input_string .. ",extrawidth=100", "")
+        if not ret then
+            return false
+        end
+
+        local inputs_table = {}
+        for input_value in string.gmatch(input, "[^,]+") do
+            table.insert(inputs_table, input_value:match("^%s*(.-)%s*$"))
+        end
+
+        for i = 1, #inputs_table do
+            track_names[start_track + i - 1] = inputs_table[i]
+        end
+    end
+
+    for i = 1, num_of_tracks do
+        local track = GetTrack(0, i - 1)
+        if track then
+            local ret = GetSetMediaTrackInfo_String(track, "P_NAME", track_names[i] or "", true)
+            if not ret then
+                success = false
+            end
+        else
+            success = false
+        end
+    end
+
+    return success
 end
 
 ---------------------------------------------------------------------

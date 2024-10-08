@@ -26,14 +26,14 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_dest, reset_spacers, sync
+local process_dest, reset_spacers, sync, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -58,6 +58,7 @@ function main()
 
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
+        SetProjExtState(0, "ReaClassical", "Workflow", "")
         local boolean, num = GetUserInputs("Vertical Workflow", 1, "How many tracks per group?", 10)
         num = tonumber(num)
         local rcmaster
@@ -69,6 +70,11 @@ function main()
             return
         else
             return
+        end
+        local success = show_track_name_dialog(num)
+        if success then
+            local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
+            Main_OnCommand(auto_set, 0)
         end
         if folder_check() == 1 then
             create_source_groups()
@@ -82,7 +88,7 @@ function main()
             Main_OnCommand(40939, 0) -- select track 01
             solo()
             mixer()
-            Main_OnCommand(show,0) -- show children of destination
+            Main_OnCommand(show, 0) -- show children of destination
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
         end
     elseif folder_check() > 1 then
@@ -165,7 +171,7 @@ function main()
         Main_OnCommand(40939, 0) -- select track 01
         solo()
         mixer()
-        Main_OnCommand(show,0) -- show children of destination
+        Main_OnCommand(show, 0) -- show children of destination
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     else
         ShowMessageBox(
@@ -179,7 +185,7 @@ function main()
     if num_pre_selected > 0 then
         Main_OnCommand(40297, 0) --unselect_all
         for _, track in ipairs(pre_selected) do
-            if pcall (IsTrackSelected,track) then SetTrackSelected(track, 1) end
+            if pcall(IsTrackSelected, track) then SetTrackSelected(track, 1) end
         end
     end
 
@@ -230,7 +236,7 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")  or trackname_check(track, "^REF")) then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF")) then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -694,7 +700,7 @@ function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     add_spacer(tracks_per_group)
     add_spacer(end_of_sources + tracks_per_group)
     add_spacer(rcmaster_index)
-    add_spacer(rcmaster_index+1)
+    add_spacer(rcmaster_index + 1)
 end
 
 ---------------------------------------------------------------------
@@ -829,6 +835,54 @@ function sync(tracks_per_group, end_of_sources)
         SetTrackStateChunk(track, str, 0)
         j = j + 1
     end
+end
+
+---------------------------------------------------------------------
+
+function show_track_name_dialog(num_of_tracks)
+    local max_inputs_per_dialog = 8
+    local success = true
+    local track_names = {}
+
+    -- Loop to handle all tracks in chunks
+    for start_track = 1, num_of_tracks, max_inputs_per_dialog do
+        local end_track = math.min(start_track + max_inputs_per_dialog - 1, num_of_tracks)
+        local input_string = ""
+
+        for i = start_track, end_track do
+            input_string = input_string .. "Track " .. i .. " :,"
+        end
+
+        local ret, input = GetUserInputs("Enter Track Names " .. start_track .. "-" .. end_track,
+            end_track - start_track + 1,
+            input_string .. ",extrawidth=100", "")
+        if not ret then
+            return false
+        end
+
+        local inputs_table = {}
+        for input_value in string.gmatch(input, "[^,]+") do
+            table.insert(inputs_table, input_value:match("^%s*(.-)%s*$"))
+        end
+
+        for i = 1, #inputs_table do
+            track_names[start_track + i - 1] = inputs_table[i]
+        end
+    end
+
+    for i = 1, num_of_tracks do
+        local track = GetTrack(0, i - 1)
+        if track then
+            local ret = GetSetMediaTrackInfo_String(track, "P_NAME", track_names[i] or "", true)
+            if not ret then
+                success = false
+            end
+        else
+            success = false
+        end
+    end
+
+    return success
 end
 
 ---------------------------------------------------------------------
