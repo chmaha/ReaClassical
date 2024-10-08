@@ -635,6 +635,7 @@ function create_track_table()
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
         if parent == 1 then
             if j > 1 and k ~= prev_k then
