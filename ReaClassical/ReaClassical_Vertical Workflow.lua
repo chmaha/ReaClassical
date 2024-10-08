@@ -458,16 +458,6 @@ function copy_track_names(track_table, mixer_table)
         GetSetMediaTrackInfo_String(track, "P_NAME", "D:" .. (track_names[i + 1] or ""), 1)
     end
 
-    -- local i = 2
-    -- for _, track in ipairs(track_table[1].tracks) do
-    --     if track_names[i] ~= nil then
-    --         GetSetMediaTrackInfo_String(track, "P_NAME", track_names[i], 1)
-    --     else
-    --         GetSetMediaTrackInfo_String(track, "P_NAME", "", 1)
-    --     end
-    --     i = i + 1
-    -- end
-
     -- for rest, prefix Si: where i = number starting at 1
     for i = 2, #track_table, 1 do
         local parent = track_table[i].parent
@@ -484,16 +474,6 @@ function copy_track_names(track_table, mixer_table)
             j = j + 1
         end
     end
-
-    -- local i = 1
-    -- for _, track in ipairs(mixer_table) do
-    --     if track_names[i] ~= nil then
-    --         GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[i], 1)
-    --     else
-    --         GetSetMediaTrackInfo_String(track, "P_NAME", "M:", 1)
-    --     end
-    --     i = i + 1
-    -- end
 
     return track_names
 end
@@ -706,9 +686,8 @@ end
 
 function process_name(track)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
-    local mod_name = string.match(name, ":(.*)")
+    local mod_name = name:match("^%s*M?:?%s*(.-)%s*%-?$")
     if mod_name == nil then mod_name = name end
-    -- GetSetMediaTrackInfo_String(track, "P_NAME", "D:" .. mod_name, 1)
     return mod_name
 end
 

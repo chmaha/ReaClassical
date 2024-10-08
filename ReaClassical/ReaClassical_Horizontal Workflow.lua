@@ -101,17 +101,6 @@ function main()
         local end_of_sources = tracks_per_group * folder_count
         local track_names = copy_track_names(track_table, mixer_tracks)
 
-        -- -- remove "D:" if converting from Vertical Workflow
-        -- local parent = track_table[1].parent
-        -- local stripped_pname = process_name(parent)
-        -- GetSetMediaTrackInfo_String(parent, "P_NAME", stripped_pname, 1)
-
-        -- for _, track in ipairs(track_table[1].tracks) do
-        --     local stripped_name = process_name(track)
-        --     GetSetMediaTrackInfo_String(track, "P_NAME", stripped_name, 1)
-        -- end
-
-
         if #mixer_tracks == 0 then
             -- build table of track settings, sends & FX for dest folder
             local controls, sends = save_track_settings(tracks_per_group)
@@ -605,7 +594,7 @@ end
 
 function process_name(track)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
-    local mod_name = string.match(name, ":(.*)")
+    local mod_name = name:match("^%s*M?:?%s*(.-)%s*%-?$")
     if mod_name == nil then mod_name = name end
     return mod_name
 end
