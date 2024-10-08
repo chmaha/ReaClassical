@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.1
+@version 24.24.1+dev1008
 @changelog
-  Vertical Workflow: Change auto set rec input message title
+  Horizontal/Vertical Workflow: Use mixer panel for all naming
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
