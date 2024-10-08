@@ -1,13 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.2
+@version 24.24.3
 @changelog
-  Horizontal/Vertical Workflows: Use mixer table for naming
-  Auto Set Rec Input: Use mixer table for tracks per group and naming
-  Auto Set Rec Input: Don't show hyphens in input list
-  Add Track to All Groups: Fix for new mixer track naming protocol
-  Tracks: Don't show hyphens in non-mixer tracks
-  PDF Manual: Various updates
+  Various: Use P_EXT for determining track type
+  Remove Exclusive Audition function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -55,7 +51,6 @@
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [main] ReaClassical_3-point Insert Edit.lua
   [main] ReaClassical_Updater.lua
-  [main] ReaClassical_Exclusive Audition.lua
   [main] ReaClassical_Find Take.lua
   [main] ReaClassical_Take Counter.lua
   [main] ReaClassical_Add Track To All Groups.lua
