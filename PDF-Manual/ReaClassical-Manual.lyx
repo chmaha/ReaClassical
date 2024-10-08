@@ -1328,7 +1328,7 @@ Vertical Workflow
 
 \begin_layout Standard
 In this approach,
- the source and destination track groups are aligned vertically so that the user doesn't have to shuttle back and forth along the timeline for placing source-destination markers.
+ the source and destination track groups are aligned vertically so that the user doesn't have to shuttle back and forth in the arrange window for placing source-destination markers.
  
 \end_layout
 
@@ -1339,7 +1339,7 @@ When Recording material:
 
 \series default
  To begin with a vertical workflow,
- press 
+ you could actually use a horizontal workflow approach 
 \begin_inset ERT
 status open
 
@@ -1352,9 +1352,58 @@ keys{F7}
 
 \end_inset
 
- to set up a destination track group.
- Whether recording or importing,
- simply type in the total number of stereo and mono microphone inputs you need.
+ to set up just a single group and record left to right.
+ After recording is complete,
+ and you are ready for editing,
+ you could convert to a vertical workflow via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+.
+ Alternatively,
+ you can press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ for project creation and start immediately with a vertical setup with one 
+\begin_inset Quotes bld
+\end_inset
+
+destination
+\begin_inset Quotes brd
+\end_inset
+
+ group and six 
+\begin_inset Quotes bld
+\end_inset
+
+source
+\begin_inset Quotes brd
+\end_inset
+
+ groups.
+ In either setup,
+ and whether recording or importing,
+ simply type in the total number of stereo and mono microphone inputs you need,
+ enter track names and optionally auto set recording inputs based on track names.
  I highly recommend using the first track for the main stereo pair.
  
 \end_layout
@@ -1381,13 +1430,23 @@ keys{F8}
 
  to set up a destination track group and six source groups (don't worry,
  it's easy to add more if you need them!).
- Simply type in the number of stereo and mono microphone inputs you need.
+ Simply type in the number of stereo and mono microphone inputs you need,
+ enter track names and then answer 
+\begin_inset Quotes bld
+\end_inset
+
+no
+\begin_inset Quotes brd
+\end_inset
+
+ to auto setting recording inputs.
  I highly recommend using the first track for the main stereo pair.
  
 \end_layout
 
 \begin_layout Standard
-The 
+As mentioned above,
+ the 
 \begin_inset ERT
 status open
 
@@ -1483,10 +1542,24 @@ keys{F7}
  polarity,
  sends and FX).
  Whether recording or importing,
- simply type in the number of tracks or microphone inputs you need.
+ simply type in the number of tracks or microphone inputs you need,
+ enter the track names then optionally auto set recording inputs based on track names.
  I highly recommend using the first track for the main stereo pair.
  In the event you are making a simple stereo recording,
- I would still recommend creating a track group consisting of two tracks and simply leave the child track empty and hidden.
+ just create a track group consisting of two tracks and leave the child track empty and hidden via pressing 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{E}
+\end_layout
+
+\end_inset
+
+ on the parent track.
 \end_layout
 
 \begin_layout Standard
@@ -1563,16 +1636,91 @@ keys{F7}
 
 \end_inset
 
- to set the project to horizontal workflow again.
+ to set the project to a horizontal workflow again.
 \end_layout
 
 \begin_layout Subsubsection
-Naming Tracks
+Auto Set Recording Inputs
 \end_layout
 
 \begin_layout Standard
-After selecting a workflow,
- you only need to add track names to the destination group in the arrange window and then pressing 
+As part of initial workflow setup,
+ you are asked if you'd like to auto set recording inputs based on track names.
+ Essentially,
+ if you'd like your track to have a stereo input use words like 
+\begin_inset Quotes bld
+\end_inset
+
+pair
+\begin_inset Quotes brd
+\end_inset
+
+ or 
+\begin_inset Quotes bld
+\end_inset
+
+stereo
+\begin_inset Quotes brd
+\end_inset
+
+ (in your own language if you wish!) as part of the name.
+ Otherwise,
+ it will be treated as a mono input.
+ For example,
+ 
+\begin_inset Quotes bld
+\end_inset
+
+ORTF Pair
+\begin_inset Quotes brd
+\end_inset
+
+,
+ 
+\begin_inset Quotes bld
+\end_inset
+
+Violin Spot 2ch
+\begin_inset Quotes brd
+\end_inset
+
+,
+ and 
+\begin_inset Quotes bld
+\end_inset
+
+Omni Outrigger Stereo
+\begin_inset Quotes brd
+\end_inset
+
+ will all be treated as needing a stereo input.
+ The function uses the maximum available hardware inputs after which it disables recording input.
+ You will see a report of assignments with the option to revert to previous settings.
+ You can run this as a standalone function at any time via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+F9}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Manually Naming Tracks 
+\end_layout
+
+\begin_layout Standard
+If you didn't name tracks as part of the initial workflow setup,
+ you only need to add track names to the destination (first) group in the arrange window and then pressing 
 \begin_inset ERT
 status open
 
@@ -1794,15 +1942,16 @@ Recording
 
 \begin_layout Standard
 Now that you have decided on a workflow,
- we can set up the tracks for recording.
+ we can start recording!
 \end_layout
 
 \begin_layout Subsection
-Setting Inputs
+Manually Setting Inputs
 \end_layout
 
 \begin_layout Standard
-There are multiple ways to set recording inputs on REAPER.
+See above for the ReaClassical approach to auto setting recording inputs based on track names.
+ There are also multiple ways to manually set recording inputs.
  First is to click on the input at the top of the mixer channel.
  Second,
  you can left-click on the meter part of the track panel.
@@ -10384,6 +10533,25 @@ keys{'}
 
 \series bold
 Recording & Take Management
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+F9}
+\end_layout
+
+\end_inset
+
+ Auto set recording inputs based on track names
 \end_layout
 
 \begin_layout Labeling
