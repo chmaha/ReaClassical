@@ -1,9 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.1+dev1008
+@version 24.24.2
 @changelog
-  Horizontal/Vertical Workflow: Use mixer panel for all naming
-  Auto Set Rec Input: Use mixer tracks for tracks per group and names
+  Horizontal/Vertical Workflows: Use mixer table for naming
+  Auto Set Rec Input: Use mixer table for tracks per group and naming
+  Auto Set Rec Input: Don't show hyphens in input list
+  Add Track to All Groups: Fix for new mixer track naming protocol
+  Tracks: Don't show hyphens in non-mixer tracks
+  PDF Manual: Various updates
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
