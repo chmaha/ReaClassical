@@ -54,7 +54,7 @@ function main()
     return
   end
 
-  local ret, name = GetUserInputs("Track name?", 1, "Track name:", "")
+  local ret, name = GetUserInputs("Add Track To All Groups", 1, "Track Name:", "")
   if not ret then return end
 
   -- add new track to penultimate position
