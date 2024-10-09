@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.5
+@version 24.24.6
 @changelog
-  Vertical Workflow: Add P_EXT ref_state lookup
+  Delete Track From All Groups: Use mixer track as basis for deletion
+  PDF Manual: Revise mentions of Delete Track From All Groups
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
