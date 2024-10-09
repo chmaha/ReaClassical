@@ -28,6 +28,7 @@ local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
 local process_name, reset_spacers, sync, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
+local check_mixer_order, rearrange_tracks, reset_mixer_order
 
 ---------------------------------------------------------------------
 
@@ -58,6 +59,7 @@ function main()
 
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
+        local is_empty = true
         SetProjExtState(0, "ReaClassical", "Workflow", "")
         local boolean, num = GetUserInputs("Vertical Workflow", 1, "How many tracks per group?", 10)
         num = tonumber(num)
@@ -75,7 +77,7 @@ function main()
             create_source_groups()
             local end_of_sources = num * 7
             create_single_mixer(num, end_of_sources)
-            local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table()
+            local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table(is_empty)
             route_tracks(rcmaster, table, end_of_sources)
             media_razor_group()
             reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
@@ -96,13 +98,15 @@ function main()
             copy_track_names(table, mixer_table)
         end
     elseif folder_check() > 1 then
+        local is_empty = false
         rcmaster_exists = special_check()
 
         if not rcmaster_exists then
             add_rcmaster(num_of_tracks)
         end
 
-        local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table()
+        local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table(
+            is_empty)
         if not groups_equal then
             ShowMessageBox("Please ensure that all folders have the same number of tracks before running.",
                 "Vertical Workflow", 0)
@@ -118,7 +122,7 @@ function main()
             -- reset track settings for all dest/source folders
             reset_track_settings(end_of_sources)
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
@@ -128,7 +132,23 @@ function main()
                 DeleteTrack(track)
             end
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, _ = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, _ = create_track_table(is_empty)
+        end
+
+        local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
+        if not success then
+            local response = ShowMessageBox(
+            "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
+            \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
+            a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
+                1)
+            if response == 1 then
+                reset_mixer_order(mixer_tracks)
+                create_track_table(true)
+            end
+        elseif not is_sequential then
+            rearrange_tracks(table, current_order)
+            reset_mixer_order(mixer_tracks)
         end
 
         route_tracks(rcmaster, table, end_of_sources)
@@ -138,6 +158,7 @@ function main()
         mixer()
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     elseif folder_check() == 1 then
+        local is_empty = true
         rcmaster_exists = special_check()
 
         if not rcmaster_exists then
@@ -145,7 +166,7 @@ function main()
         end
 
         create_source_groups()
-        local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table()
+        local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
         local end_of_sources = tracks_per_group * folder_count
         local track_names = copy_track_names(table, mixer_tracks)
 
@@ -155,7 +176,7 @@ function main()
             -- reset track settings for all dest/source folders
             reset_track_settings(end_of_sources)
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
@@ -165,8 +186,25 @@ function main()
                 DeleteTrack(track)
             end
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, _ = create_track_table()
+            table, rcmaster_index, tracks_per_group, _, _ = create_track_table(is_empty)
         end
+
+        local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
+        if not success then
+            local response = ShowMessageBox(
+           "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
+            \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
+            a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
+                1)
+            if response == 1 then
+                reset_mixer_order(mixer_tracks)
+                create_track_table(true)
+            end
+        elseif not is_sequential then
+            rearrange_tracks(table, current_order)
+            reset_mixer_order(mixer_tracks)
+        end
+
         local rcmaster = GetTrack(0, rcmaster_index)
         route_tracks(rcmaster, table, end_of_sources)
         media_razor_group()
@@ -502,7 +540,7 @@ function add_rcmaster(num)
     local rcmaster = GetTrack(0, num)
     GetSetMediaTrackInfo_String(rcmaster, "P_EXT:rcmaster", "y", 1)
     GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "RCMASTER", 1)
-    SetMediaTrackInfo_Value(rcmaster, "I_SPACER", 1)
+    -- SetMediaTrackInfo_Value(rcmaster, "I_SPACER", 1)
     local colors = get_color_table()
     SetTrackColor(rcmaster, colors.rcmaster)
     SetMediaTrackInfo_Value(rcmaster, "B_SHOWINTCP", 0)
@@ -564,6 +602,7 @@ function create_single_mixer(tracks_per_group, end_of_sources, track_names)
     for i = end_of_sources, end_of_sources + tracks_per_group - 1, 1 do
         local track = GetTrack(0, i)
         GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
+        GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", j, 1)
         if track_names then
             GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[j], 1)
         else
@@ -618,7 +657,7 @@ end
 
 ---------------------------------------------------------------------
 
-function create_track_table()
+function create_track_table(is_empty)
     local track_table = {}
     local num_of_tracks = CountTracks(0)
     local rcmaster_index
@@ -645,6 +684,7 @@ function create_track_table()
             prev_k = k
             k = 1
             track_table[j] = { parent = track, tracks = {} }
+            if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", k, 1) end
         elseif trackname_check(track, "^M:") or mixer_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
             local mod_name = string.match(name, "M?:?(.*)")
@@ -669,6 +709,7 @@ function create_track_table()
         else
             if j > 0 then
                 table.insert(track_table[j].tracks, track)
+                if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", k + 1, 1) end
             else
                 groups_equal = false
             end
@@ -697,9 +738,9 @@ end
 function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
     remove_spacers(rcmaster_index)
     add_spacer(tracks_per_group)
-    add_spacer(end_of_sources + tracks_per_group)
-    add_spacer(rcmaster_index)
-    add_spacer(rcmaster_index + 1)
+    -- add_spacer(end_of_sources + tracks_per_group)
+    -- add_spacer(rcmaster_index)
+    -- add_spacer(rcmaster_index + 1)
 end
 
 ---------------------------------------------------------------------
@@ -881,6 +922,97 @@ function show_track_name_dialog(mixer_track_table)
     end
 
     return success
+end
+
+---------------------------------------------------------------------
+
+function check_mixer_order(mixer_table)
+    local current_order = {}
+    local is_sequential = true
+    local success = true
+
+    for i, mixer_track in ipairs(mixer_table) do
+        local _, mix_order_str = GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", "", 0)
+        local mix_order = tonumber(mix_order_str)
+        if mix_order then
+            table.insert(current_order, mix_order)
+        else
+            success = false
+        end
+
+        if mix_order ~= i then
+            is_sequential = false
+        end
+    end
+
+    return success, is_sequential, current_order
+end
+
+---------------------------------------------------------------------
+
+function rearrange_tracks(track_table, current_order)
+    for i, group in ipairs(track_table) do
+        local parent_track = group.parent
+        local items_to_move = {}
+
+        items_to_move[parent_track] = {}
+        local parent_item_count = GetTrackNumMediaItems(parent_track)
+        for j = 0, parent_item_count - 1 do
+            local item = GetTrackMediaItem(parent_track, j)
+            local mix_order = 1
+            items_to_move[mix_order] = items_to_move[mix_order] or {}
+            table.insert(items_to_move[mix_order], item)
+        end
+
+        for _, child in ipairs(group.tracks) do
+            local _, mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", "", 0)
+            mix_order = tonumber(mix_order) or 1
+
+            items_to_move[child] = {}
+            local item_count = GetTrackNumMediaItems(child)
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(child, j)
+                items_to_move[mix_order] = items_to_move[mix_order] or {}
+                table.insert(items_to_move[mix_order], item)
+            end
+        end
+
+        local updated_group_tracks = {}
+        local is_empty = false
+        local updated_track_table = create_track_table(is_empty)
+
+        for j, updated_group in ipairs(updated_track_table) do
+            if j == i then
+                local _, mix_order = GetSetMediaTrackInfo_String(updated_group.parent, "P_EXT:mix_order",
+                    current_order[1], 1)
+                table.insert(updated_group_tracks, { track = updated_group.parent, order = tonumber(mix_order) or 1 })
+                for k, child in ipairs(updated_group.tracks) do
+                    local _, mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", current_order[k + 1], 1)
+                    table.insert(updated_group_tracks, { track = child, order = tonumber(mix_order) or 1 })
+                end
+                break
+            end
+        end
+
+        for _, revised_track_info in ipairs(updated_group_tracks) do
+            local revised_mix_order = revised_track_info.order
+            local items = items_to_move[revised_mix_order] or {}
+            for _, item in ipairs(items) do
+                MoveMediaItemToTrack(item, revised_track_info.track)
+            end
+        end
+        for i, track_info in ipairs(updated_group_tracks) do
+            GetSetMediaTrackInfo_String(track_info.track, "P_EXT:mix_order", tostring(i), 1)
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function reset_mixer_order(mixer_table)
+    for i, mixer_track in ipairs(mixer_table) do
+        GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", i, 1)
+    end
 end
 
 ---------------------------------------------------------------------
