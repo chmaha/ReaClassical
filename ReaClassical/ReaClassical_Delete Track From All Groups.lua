@@ -20,7 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
+local main, delete_mixer, delete_tracks, evaluate_project
+local get_regular_track, handle_invalid
 
 ---------------------------------------------------------------------
 
@@ -29,11 +30,104 @@ function main()
 
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 or selected_tracks == 0 then
-    ShowMessageBox("Please select a single child track","Delete Track From All Groups", 0)
+    ShowMessageBox("Please select a single mixer track", "Delete Track From All Groups", 0)
     return
   end
 
-  -- get folder and child count
+  -- get folder, tracks per group and child count
+  local folder_count, tracks_per_group, child_count = evaluate_project()
+
+  if folder_count == 0 then
+    ShowMessageBox("This function can only be used on a project with one of more folders", "Delete Track From All Groups",
+      0)
+    return
+  end
+
+  local track = GetSelectedTrack(0, 0)
+  local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+
+  local orig_selection
+  if mixer_state == "y" then
+    orig_selection = track
+    Main_OnCommand(40769, 0) -- unselect all items
+    track = get_regular_track(track, folder_count, tracks_per_group)
+    if track then
+      SetTrackSelected(track, true)
+    else
+      MB("The track is missing!", "Delete Track From All Groups", 0)
+      return
+    end
+  else
+    ShowMessageBox("Please select a single mixer track", "Delete Track From All Groups", 0)
+    return
+  end
+
+  local track_idx = delete_tracks(track, child_count, tracks_per_group, folder_count)
+
+  if track_idx > 0 then
+    delete_mixer(folder_count, tracks_per_group, track_idx)
+  else
+    local messages = {
+      [-1] = "Please select a mixer track not associated with the parent track",
+      [-2] = "You are already at the minimum number of tracks to form a folder"
+    }
+    if messages[track_idx] then
+      handle_invalid(messages[track_idx], orig_selection)
+    end
+  end
+
+  if folder_count > 1 then
+    local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+    Main_OnCommand(F8_sync, 0)
+  else
+    local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+    Main_OnCommand(F7_sync, 0)
+  end
+  Undo_EndBlock("Delete Track From All Groups", -1)
+end
+
+---------------------------------------------------------------------
+
+function delete_mixer(folder_count, tracks_per_group, track_idx)
+  local mixer_location = (folder_count * (tracks_per_group - 1)) + track_idx
+  local mixer = GetTrack(0, mixer_location)
+  DeleteTrack(mixer)
+end
+
+---------------------------------------------------------------------
+
+function delete_tracks(track, child_count, tracks_per_group, folder_count)
+  local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+
+  if track_idx == 0 or track_idx > child_count then
+    return -1
+  end
+
+  if tracks_per_group == 2 then
+    return -2
+  end
+
+  if track_idx == child_count then
+    local move_up = NamedCommandLookup("_RSaa782166e9bad06e1e776c2daa81b51d7f25220e")
+    Main_OnCommand(move_up, 0)
+    track = GetSelectedTrack(0, 0)
+    track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+  end
+
+  local similar_tracks = {}
+  for i = track_idx + (folder_count - 1) * tracks_per_group, track_idx, -tracks_per_group do
+    table.insert(similar_tracks, i)
+  end
+  for _, idx in pairs(similar_tracks) do
+    local source_track = GetTrack(0, idx)
+    DeleteTrack(source_track)
+  end
+  return track_idx
+end
+
+---------------------------------------------------------------------
+
+function evaluate_project()
   local num_of_tracks = CountTracks(0)
   local folder_count = 0
   local child_count = 0
@@ -57,60 +151,23 @@ function main()
   end
 
   local tracks_per_group = child_count + 1
+  return folder_count, tracks_per_group, child_count
+end
 
-  if folder_count == 0 then
-    ShowMessageBox("This function can only be used on a project with one of more folders", "Delete Track From All Groups", 0)
-    return
-  end
+---------------------------------------------------------------------
 
-  local track = GetSelectedTrack(0, 0)
-  local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+function get_regular_track(track, folder_count, tracks_per_group)
+  local mixer_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+  local track_idx = mixer_idx - (folder_count * tracks_per_group)
+  return GetTrack(0, track_idx)
+end
 
-  if track_idx == 0 or track_idx > child_count then
-    ShowMessageBox("Please select a child track from the first group", "Delete Track From All Groups", 0)
-    return
-  end
+---------------------------------------------------------------------
 
-  if tracks_per_group == 2 then
-    ShowMessageBox("You are already at the minimum number of tracks to form a folder", "Delete Track From All Groups", 0)
-    return
-  end
-
-  if track_idx == child_count then
-    local move_up = NamedCommandLookup("_RSaa782166e9bad06e1e776c2daa81b51d7f25220e")
-    reaper.Main_OnCommand(move_up, 0)
-    track = GetSelectedTrack(0, 0)
-    track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
-  end
-
-  
-
-  local similar_tracks = {}
-  for i = track_idx + (folder_count - 1) * tracks_per_group, track_idx, -tracks_per_group do
-    table.insert(similar_tracks, i)
-  end
-  for _, idx in pairs(similar_tracks) do
-    local source_track = GetTrack(0, idx)
-    DeleteTrack(source_track)
-    -- if track_idx == 0 then
-    --   local next = GetTrack(0,idx)
-    --   SetMediaTrackInfo_Value(next, "I_FOLDERDEPTH", 1)
-    -- end
-  end
-
-  --delete mixer track
-  local mixer_location = (folder_count * (tracks_per_group-1)) + track_idx
-  local mixer = GetTrack(0, mixer_location)
-  DeleteTrack(mixer)
-
-  if folder_count > 1 then
-    local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-    Main_OnCommand(F8_sync, 0)
-  else
-    local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-    Main_OnCommand(F7_sync, 0)
-  end
-  Undo_EndBlock("Delete Track From All Groups", -1)
+function handle_invalid(message, orig_selection)
+  ShowMessageBox(message, "Delete Track From All Groups", 0)
+  Main_OnCommand(40769, 0) -- Unselect all items
+  SetTrackSelected(orig_selection, true)
 end
 
 ---------------------------------------------------------------------
