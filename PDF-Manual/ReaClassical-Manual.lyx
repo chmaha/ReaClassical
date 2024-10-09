@@ -2356,7 +2356,7 @@ del}
 
 \end_inset
 
- on a selected child track in the first group to quickly delete in all the groups at once including the mixer tracks.
+ on a selected mixer track to quickly delete associated child tracks from all the groups of the project.
 \end_layout
 
 \begin_layout Subsection
@@ -7524,7 +7524,7 @@ del}
 Description:
 
 \emph default
- Delete the selected child track from all groups in the project.
+ Delete the selected mixer track and associated child tracks from all groups in the project.
 \end_layout
 
 \begin_layout Standard
@@ -7534,8 +7534,7 @@ Notes:
 
 \emph default
  Available for both horizontal and vertical workflows,
- simply select a single child track and press the shortcut.
- Note that the mixer tracks automatically update too.
+ simply select a single mixer track and press the shortcut.
 \end_layout
 
 \begin_layout Standard
