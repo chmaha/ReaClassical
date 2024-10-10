@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.6
+@version 24.24.7
 @changelog
-  Delete Track From All Groups: Use mixer track as basis for deletion
-  PDF Manual: Revise mentions of Delete Track From All Groups
+  Add new method for rearranging tracks in folders via mixer track dragging
+  Remove Track Up/Down in All Groups functions
+  PDF Manual: Various changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -60,8 +61,6 @@
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Set Dest Project Marker.lua
   [main] ReaClassical_Set Source Project Marker.lua
-  [main] ReaClassical_Move Track Down in All Groups.lua
-  [main] ReaClassical_Move Track Up in All Groups.lua
   [main] ReaClassical_Delete Track From All Groups.lua
   [main] ReaClassical_Add Ref Track.lua
   [main] ReaClassical_Source Markers to Item Edge.lua
