@@ -5,6 +5,7 @@
   Horizontal/Vertical Workflows: Fix what happens when wrong number of mixer tracks
   Horizontal/Vertical Workflows: Only allow on empty project or on existing ReaClassical project
   Explode Multi-Channel: Add RCProject status so F7/F8 can complete
+  PDF Manual: Various updates
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
