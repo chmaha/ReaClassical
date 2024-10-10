@@ -341,7 +341,7 @@ function mixer()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[6] then mastering = tonumber(table[6]) end
+        if table[6] then mastering = tonumber(table[6]) or 0 end
     end
 
     local colors = get_color_table()

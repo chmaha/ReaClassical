@@ -234,7 +234,7 @@ function mixer()
     if input ~= "" then
         local track_table = {}
         for entry in input:gmatch('([^,]+)') do track_table[#track_table + 1] = entry end
-        if track_table[6] then mastering = tonumber(track_table[6]) end
+        if track_table[6] then mastering = tonumber(track_table[6]) or 0 end
     end
 
     local colors = get_color_table()

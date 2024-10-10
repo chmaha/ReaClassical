@@ -24,8 +24,8 @@ local main, get_take_count, clean_up
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
-    return
+  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+  return
 end
 
 local iterated_filenames = false
@@ -210,12 +210,22 @@ function get_take_count(session)
   end
 
   local handle = io.popen(command)
-  local result = handle:read("*a")
-  handle:close()
+  if handle then
+    local result = handle:read("*a")
 
-  for filename in result:gmatch("[^\r\n]+") do
-    local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
-    if take_capture and take_capture > take_count then take_count = take_capture end
+    if result then
+      handle:close()
+
+      for filename in result:gmatch("[^\r\n]+") do
+        local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
+        
+        if take_capture and take_capture > take_count then
+          take_count = take_capture
+        end
+      end
+    else
+      handle:close()
+    end
   end
 
   iterated_filenames = true
