@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.7
+@version 24.24.8
 @changelog
-  Add new method for rearranging tracks in folders via mixer track dragging
-  Remove Track Up/Down in All Groups functions
-  PDF Manual: Various changes
+  Delete Track From All Groups: Add move_up() function for final mixer Track
+  Prepare Takes: Honor existing custom colors
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
