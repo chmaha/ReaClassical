@@ -26,11 +26,6 @@ local main, folder_check
 
 function main()
     Undo_BeginBlock()
-    if CountSelectedMediaItems(0) == 0 then
-        ShowMessageBox("Please select one or more multi-channel media items before running the script.", "Error", 0)
-        return
-    end
-
     if folder_check() > 0 then
         ShowMessageBox("You can either import your media on one regular track for horizontal editing \z
                         or on multiple regular tracks for a vertical workflow.\n\z
@@ -39,7 +34,12 @@ function main()
                     please use on an empty project tab and copy across.", "Error: Folders detected!", 0)
         return
     end
+    if CountSelectedMediaItems(0) == 0 then
+        ShowMessageBox("Please select one or more multi-channel media items before running the script.", "Error", 0)
+        return
+    end
 
+    SetProjExtState(0, "ReaClassical", "RCProject", "y")
     local num = CountSelectedMediaItems(0, 0)
 
     local takes = {}
