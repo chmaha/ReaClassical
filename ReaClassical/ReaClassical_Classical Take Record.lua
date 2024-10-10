@@ -22,7 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
-local extract_take_number
+local extract_take_number, check_parent_track
 
 ---------------------------------------------------------------------
 
