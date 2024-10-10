@@ -23,7 +23,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, select_check, lock_previous_items, fadeStart
 local fadeEnd, zoom, view, lock_items, unlock_items, save_color
 local paint, load_color, move_back_cursor, folder_check, correct_item_positions
-local check_next_item_overlap
+local check_next_item_overlap, trackname_check
 
 ---------------------------------------------------------------------
 
@@ -318,9 +318,15 @@ function folder_check()
     local total_tracks = CountTracks(0)
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
+        local mixer = trackname_check(track, "^M:")
+        local rcm = trackname_check(track, "^RCMASTER")
+        local send = trackname_check(track, "^@")
+        local bus = trackname_check(track, "^#")
+        local rt = trackname_check(track, "^RoomTone")
+        local ref = trackname_check(track, "^REF")
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1
-        elseif folders == 1 and not (rcm or send or bus or rt or ref) then
+        elseif folders == 1 and not (mixer or rcm or send or bus or rt or ref) then
             tracks_per_group = tracks_per_group + 1
         end
     end
@@ -414,6 +420,13 @@ function check_next_item_overlap(current_item)
         return false
     end
     return true
+end
+
+---------------------------------------------------------------------
+
+function trackname_check(track, string)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------

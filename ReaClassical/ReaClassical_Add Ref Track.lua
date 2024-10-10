@@ -93,15 +93,17 @@ function folder_check()
     local ref_count = 0
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
+        local mixer = trackname_check(track, "^M:")
         local rcm = trackname_check(track, "^RCMASTER")
         local send = trackname_check(track, "^@")
         local bus = trackname_check(track, "^#")
-        local rt = trackname_check(track, "^REF")
+        local rt = trackname_check(track, "^RoomTone")
+        local ref = trackname_check(track, "^REF")
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1
-        elseif folders == 1 and not (rcm or send or bus or rt) then
+        elseif folders == 1 and not (mixer or rcm or send or bus or rt or ref) then
             tracks_per_group = tracks_per_group + 1
-        elseif rt then
+        elseif ref then
             ref_count = ref_count + 1
         end
     end
