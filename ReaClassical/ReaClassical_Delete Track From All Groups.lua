@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, delete_mixer, delete_tracks, evaluate_project
-local get_regular_track, handle_invalid
+local get_regular_track, handle_invalid, move_up
 
 ---------------------------------------------------------------------
 
@@ -108,8 +108,7 @@ function delete_tracks(track, child_count, tracks_per_group, folder_count)
   end
 
   if track_idx == child_count then
-    local move_up = NamedCommandLookup("_RSaa782166e9bad06e1e776c2daa81b51d7f25220e")
-    Main_OnCommand(move_up, 0)
+    move_up(folder_count, tracks_per_group)
     track = GetSelectedTrack(0, 0)
     track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
   end
@@ -168,6 +167,42 @@ function handle_invalid(message, orig_selection)
   ShowMessageBox(message, "Delete Track From All Groups", 0)
   Main_OnCommand(40769, 0) -- Unselect all items
   SetTrackSelected(orig_selection, true)
+end
+
+---------------------------------------------------------------------
+
+function move_up(folder_count,tracks_per_group)
+  local track = GetSelectedTrack(0, 0)
+  local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+
+  local earlier_track = GetTrack(0, track_idx - 1)
+  if earlier_track then
+    track_idx = GetMediaTrackInfo_Value(earlier_track, "IP_TRACKNUMBER") - 1
+  else
+    ShowMessageBox("Please select a child track in the folder", "Move Track Up in All Groups", 0)
+    return
+  end
+
+  if track_idx == 0 then
+    ShowMessageBox("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
+    return
+  elseif track_idx >= tracks_per_group - 1 then
+    ShowMessageBox("Please select a child track in the first folder", "Move Track Up in All Groups", 0)
+    return
+  end
+
+  local next_track = GetTrack(0, track_idx + 1)
+  SetOnlyTrackSelected(next_track)
+  local similar_tracks = {}
+  for i = track_idx + 1, folder_count * tracks_per_group + tracks_per_group - 1, tracks_per_group do
+    table.insert(similar_tracks, i)
+  end
+  for _, idx in pairs(similar_tracks) do
+    local source_track = GetTrack(0, idx)
+    SetOnlyTrackSelected(source_track)
+    ReorderSelectedTracks(idx - 1, 0)
+  end
+  SetOnlyTrackSelected(track)
 end
 
 ---------------------------------------------------------------------
