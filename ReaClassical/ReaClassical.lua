@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.9
+@version 24.24.10
 @changelog
-  Prepare Takes: Change logic for deciding whether muted guide tracks are required
+  Keymap: Remove unused functions
+  Various: Add mixer track to folder_check()
+  Add Track To All Groups: Force reset of P_EXT mix_order sequence
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
