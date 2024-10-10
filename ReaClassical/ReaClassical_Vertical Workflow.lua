@@ -29,6 +29,7 @@ local create_single_mixer, route_tracks, create_track_table
 local process_name, reset_spacers, sync, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 local check_mixer_order, rearrange_tracks, reset_mixer_order
+local copy_track_names_from_dest, process_dest
 
 ---------------------------------------------------------------------
 
@@ -60,6 +61,7 @@ function main()
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
         local is_empty = true
+        SetProjExtState(0, "ReaClassical", "RCProject", "y")
         SetProjExtState(0, "ReaClassical", "Workflow", "")
         local boolean, num = GetUserInputs("Vertical Workflow", 1, "How many tracks per group?", 10)
         num = tonumber(num)
@@ -98,6 +100,11 @@ function main()
             copy_track_names(table, mixer_table)
         end
     elseif folder_check() > 1 then
+        local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
+        if RCProject ~= "y" then
+            MB("This function can only run on a ReaClassical project. Create a new empty project and press F7 or F8.","Vertical Workflow",0)
+            return
+        end
         local is_empty = false
         rcmaster_exists = special_check()
 
@@ -114,26 +121,24 @@ function main()
         end
         local rcmaster = GetTrack(0, rcmaster_index)
         local end_of_sources = tracks_per_group * folder_count
-        local track_names = copy_track_names(table, mixer_tracks)
-
-        if #mixer_tracks == 0 then
-            -- build table of track settings, sends & FX for dest folder
-            local controls, sends = save_track_settings(tracks_per_group)
-            -- reset track settings for all dest/source folders
-            reset_track_settings(end_of_sources)
-            create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
-            -- write settings to mixer tracks
-            write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
-        end
 
         if #mixer_tracks ~= tracks_per_group then
             for _, track in pairs(mixer_tracks) do
                 DeleteTrack(track)
             end
+            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
+            local track_names = copy_track_names_from_dest(table, mixer_tracks)
+            -- build table of track settings, sends & FX for dest folder
+            local controls, sends = save_track_settings(tracks_per_group)
+            -- reset track settings for all dest/source folders
+            reset_track_settings(tracks_per_group)
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, _ = create_track_table(is_empty)
+            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
+            -- write settings to mixer tracks
+            write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
+       
+        copy_track_names(table, mixer_tracks)
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
@@ -158,6 +163,11 @@ function main()
         mixer()
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     elseif folder_check() == 1 then
+        local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
+        if RCProject ~= "y" then
+            MB("This function can only run on a ReaClassical project. Create a new empty project and press F7 or F8.","Vertical Workflow",0)
+            return
+        end
         local is_empty = true
         rcmaster_exists = special_check()
 
@@ -168,26 +178,24 @@ function main()
         create_source_groups()
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
         local end_of_sources = tracks_per_group * folder_count
-        local track_names = copy_track_names(table, mixer_tracks)
-
-        if #mixer_tracks == 0 then
-            -- build table of track settings, sends & FX for dest folder
-            local controls, sends = save_track_settings(tracks_per_group)
-            -- reset track settings for all dest/source folders
-            reset_track_settings(end_of_sources)
-            create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
-            -- write settings to mixer tracks
-            write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
-        end
 
         if #mixer_tracks ~= tracks_per_group then
             for _, track in pairs(mixer_tracks) do
                 DeleteTrack(track)
             end
+            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
+            local track_names = copy_track_names_from_dest(table, mixer_tracks)
+            -- build table of track settings, sends & FX for dest folder
+            local controls, sends = save_track_settings(tracks_per_group)
+            -- reset track settings for all dest/source folders
+            reset_track_settings(tracks_per_group)
             create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            table, rcmaster_index, tracks_per_group, _, _ = create_track_table(is_empty)
+            table, rcmaster_index, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
+            -- write settings to mixer tracks
+            write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
+       
+        copy_track_names(table, mixer_tracks)
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
@@ -232,7 +240,7 @@ function main()
     end
 
     if not rcmaster_exists then
-        ShowMessageBox("Your Project has been upgraded"
+        ShowMessageBox("Your project has been upgraded"
             .. " to use a single mixer set routed to RCMASTER bus. "
             .. "You can now move the parent fader without affecting the volume of child tracks.\n"
             .. "All groups are routed to the single mixer set visible in the mixer panel "
@@ -1013,6 +1021,44 @@ function reset_mixer_order(mixer_table)
     for i, mixer_track in ipairs(mixer_table) do
         GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", i, 1)
     end
+end
+
+---------------------------------------------------------------------
+
+function copy_track_names_from_dest(track_table, mixer_table)
+    local track_names = {}
+
+    -- for 1st prefix D: (remove anything existing before & including :)
+    local parent = track_table[1].parent
+    local mod_name = process_dest(parent)
+    table.insert(track_names, mod_name)
+
+    for _, track in ipairs(track_table[1].tracks) do
+        local mod_name = process_dest(track)
+        table.insert(track_names, mod_name)
+    end
+
+    local i = 1
+    for _, track in ipairs(mixer_table) do
+        if track_names[i] ~= nil then
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[i], 1)
+        else
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:", 1)
+        end
+        i = i + 1
+    end
+
+    return track_names
+end
+
+---------------------------------------------------------------------
+
+function process_dest(track)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+    local mod_name = string.match(name, ":(.*)")
+    if mod_name == nil then mod_name = name end
+    -- GetSetMediaTrackInfo_String(track, "P_NAME", mod_name, 1)
+    return mod_name
 end
 
 ---------------------------------------------------------------------

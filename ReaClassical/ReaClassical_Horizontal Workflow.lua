@@ -28,7 +28,8 @@ local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
 local process_name, reset_spacers, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
-local rearrange_tracks, reset_mixer_order
+local rearrange_tracks, reset_mixer_order, copy_track_names_from_dest
+local process_dest
 
 ---------------------------------------------------------------------
 
@@ -56,6 +57,7 @@ function main()
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
         local is_empty = true
+        SetProjExtState(0, "ReaClassical", "RCProject", "y")
         SetProjExtState(0, "ReaClassical", "Workflow", "")
         local boolean, num = GetUserInputs("Horizontal Workflow", 1, "How many tracks?", 10)
         num = tonumber(num)
@@ -91,20 +93,29 @@ function main()
         ShowMessageBox("This function only runs on projects with a single folder", "Horizontal Workflow", 0)
         return
     elseif folder_check() == 1 then
+        local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
+        if RCProject ~= "y" then
+            MB("This function can only run on a ReaClassical project. Create a new empty project and press F7.","Horizontal Workflow",0)
+            return
+        end
         local is_empty = false
         Main_OnCommand(focus, 0)
         remove_track_groups()
-        rcmaster_exists = special_check()
 
+        rcmaster_exists = special_check()
         if not rcmaster_exists then
             add_rcmaster(num_of_tracks)
         end
 
         local track_table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
         local end_of_sources = tracks_per_group * folder_count
-        local track_names = copy_track_names(track_table, mixer_tracks)
 
-        if #mixer_tracks == 0 then
+        if #mixer_tracks ~= tracks_per_group then
+            for _, track in pairs(mixer_tracks) do
+                DeleteTrack(track)
+            end
+            track_table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
+            local track_names = copy_track_names_from_dest(track_table, mixer_tracks)
             -- build table of track settings, sends & FX for dest folder
             local controls, sends = save_track_settings(tracks_per_group)
             -- reset track settings for all dest/source folders
@@ -115,18 +126,12 @@ function main()
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
 
-        if #mixer_tracks ~= tracks_per_group then
-            for _, track in pairs(mixer_tracks) do
-                DeleteTrack(track)
-            end
-            create_single_mixer(tracks_per_group, end_of_sources, track_names)
-            track_table, rcmaster_index, tracks_per_group, _, _ = create_track_table(is_empty)
-        end
+        copy_track_names(track_table, mixer_tracks)
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
             local response = ShowMessageBox(
-            "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
+                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
             \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
             a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
                 1)
@@ -161,7 +166,7 @@ function main()
     end
 
     if not rcmaster_exists then
-        ShowMessageBox("Your Project has been upgraded"
+        ShowMessageBox("Your project has been upgraded"
             .. " to use a single mixer set routed to RCMASTER bus. "
             .. "You can now move the parent fader without affecting the volume of child tracks.\n"
             .. "All groups are routed to the single mixer set visible in the mixer panel "
@@ -855,6 +860,44 @@ function reset_mixer_order(mixer_table)
     for i, mixer_track in ipairs(mixer_table) do
         GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", i, 1)
     end
+end
+
+---------------------------------------------------------------------
+
+function copy_track_names_from_dest(track_table, mixer_table)
+    local track_names = {}
+
+    -- for 1st prefix D: (remove anything existing before & including :)
+    local parent = track_table[1].parent
+    local mod_name = process_dest(parent)
+    table.insert(track_names, mod_name)
+
+    for _, track in ipairs(track_table[1].tracks) do
+        local mod_name = process_dest(track)
+        table.insert(track_names, mod_name)
+    end
+
+    local i = 1
+    for _, track in ipairs(mixer_table) do
+        if track_names[i] ~= nil then
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[i], 1)
+        else
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:", 1)
+        end
+        i = i + 1
+    end
+
+    return track_names
+end
+
+---------------------------------------------------------------------
+
+function process_dest(track)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+    local mod_name = string.match(name, ":(.*)")
+    if mod_name == nil then mod_name = name end
+    -- GetSetMediaTrackInfo_String(track, "P_NAME", mod_name, 1)
+    return mod_name
 end
 
 ---------------------------------------------------------------------
