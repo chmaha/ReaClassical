@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.10
+@version 24.24.11
 @changelog
-  Keymap: Remove unused functions
-  Various: Add mixer track to folder_check()
-  Add Track To All Groups: Force reset of P_EXT mix_order sequence
+  Horizontal/Vertical Workflows: Fix what happens when wrong number of mixer tracks
+  Horizontal/Vertical Workflows: Only allow on empty project or on existing ReaClassical project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua

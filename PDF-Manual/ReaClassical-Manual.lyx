@@ -1968,7 +1968,24 @@ The basic rule is to not delete these special tracks.
  But,
  if you do by accident,
  don't worry.
- Simply run 
+ Try to undo via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+Z}
+\end_layout
+
+\end_inset
+
+.
+ In in the highly unlikely event that doesn't work,
+ simply run 
 \begin_inset ERT
 status open
 
@@ -1994,7 +2011,7 @@ keys{F8}
 
 \end_inset
 
- again!
+ again and the mixer tracks will be restored (although any custom routing and automation will be lost).
  It is also worth noting that aux,
  submix and roomtone tracks now automatically route through RCMASTER on creation and are also automatically updated when older projects are 
 \begin_inset Quotes bld
@@ -6656,8 +6673,8 @@ keys{F7}
 Description:
  
 \emph default
-A quick way to create a folder group with as many tracks as you need.
- It can also be used with a single existing folder group to re-sync track names and re-build project routing.
+The way to create a horizontal workflow with a single folder group with as many tracks as you need.
+ It can also be used with an single existing folder group to re-sync track names and re-build project routing.
 \end_layout
 
 \begin_layout Standard
@@ -6670,6 +6687,11 @@ Use on a completely empty project.
  I would use this if you are planning to use a horizontal approach to source-destination editing (i.e.
  the various takes are laid out from left to right) or if you want a quick way to set up a mixing/mastering track set with a single take.
  The function automatically sets up the tracks for group media and razor-editing along with dedicated mixer tracks.
+ These mixer tracks should be used for all track settings (names,
+ volume,
+ pan,
+ polarity,
+ sends and FX).
 \end_layout
 
 \begin_layout Standard
@@ -6699,7 +6721,7 @@ keys{F8}
 Description:
  
 \emph default
-A multi-use function to 1) set up destination and source groups with as many tracks as you need,
+A multi-use function to 1) set up a vertical workflow with destination and source groups with as many tracks as you need,
  2) to create source groups from an existing destination folder group (for example,
  created with 
 \begin_inset ERT
@@ -6728,7 +6750,8 @@ keys{F7}
 Notes:
  
 \emph default
-For all track settings (volume,
+For all track settings (names,
+ volume,
  pan,
  polarity,
  sends and FX) you should use the dedicated mixer tracks.
@@ -6770,7 +6793,9 @@ Description:
 Notes:
 
 \emph default
- First create a folder 
+ Import your multi-channel media using a single regular track (for a horizontal workflow) or multiple regular tracks (for a vertical workflow).
+ Then,
+ simply select all your multi-channel sets and press 
 \begin_inset ERT
 status open
 
@@ -6778,45 +6803,18 @@ status open
 
 
 \backslash
-keys{F7}
+keys{F10}
 \end_layout
 
 \end_inset
 
- or multiple folders 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F8}
-\end_layout
-
-\end_inset
-
- and import the multi-channel item(s) onto the same folder track (important!).
- Select one or more items of the same channel count.
- Run the function and then choose 
-\begin_inset Quotes bld
-\end_inset
-
-yes
-\begin_inset Quotes brd
-\end_inset
-
- to convert the first two iso tracks to stereo or 
-\begin_inset Quotes bld
-\end_inset
-
-no
-\begin_inset Quotes brd
-\end_inset
-
- to leave as mono.
- Depending on the choice,
- the number of tracks in the folder will be increased or decreased with the all-mono option leaving the folder track itself empty ready to run prepare takes 
+.
+ Answer yes to the prompt that appears if the first two channels should be treated as stereo interleaved (i.e.
+ they represent your main pair).
+ Depending on the choice made,
+ the number of tracks in the resulting folder(s) will adjust accordingly.
+ If the user selects ‘no’ to keep all tracks mono,
+ the folder track is left empty so that the Prepare Takes 
 \begin_inset ERT
 status open
 
@@ -6829,7 +6827,25 @@ keys{T}
 
 \end_inset
 
- to create a muted guide track.
+ function is able to create a muted guide track (more on this later!).
+ Obviously if you decide to move to a vertical workflow after exploding using a single track,
+ you can always use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ to create your source folders then drag the media to where you want them.
+ Note that it is important to select all the items you want to explode as the function can only be used once (prior to folders existing).
+ If you need to bring in new takes after editing has started,
+ simply use the function on an empty project tab then copy or cut them into the original project tab into the desired folder on the timeline.
 \end_layout
 
 \begin_layout Standard
