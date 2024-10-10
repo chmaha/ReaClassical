@@ -22,7 +22,8 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, copy_track_items, get_color_table
-local tracks_per_folder, xfade_check, empty_items_check, get_path
+local tracks_per_folder, xfade_check, empty_items_check, get_path, folder_check
+local trackname_check
 
 ---------------------------------------------------------------------
 
@@ -52,19 +53,19 @@ function main()
     Undo_BeginBlock()
 
     Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
-    local total_tracks = CountTracks(0)
-    local folders = 0
+    local folders, tracks_per_group = folder_check()
+    local total_tracks = folders * tracks_per_group
     local empty = false
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1.0 then
-            folders = folders + 1
             local items = CountTrackMediaItems(track)
             if items == 0 then
                 empty = true
             end
         end
     end
+
 
     local first_item = GetMediaItem(0, 0)
     local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
@@ -140,12 +141,18 @@ function horizontal_color(flip, edits, colors)
         if edits then
             for i = 0, num_of_items - 1, 1 do
                 local item = GetSelectedMediaItem(0, i)
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
+                local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+                if current_color == 0 then
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
+                end
             end
         else
             for i = 0, num_of_items - 1, 1 do
                 local item = GetSelectedMediaItem(0, i)
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
+                local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+                if current_color == 0 then
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
+                end
             end
         end
     end
@@ -167,7 +174,10 @@ function vertical_color_razor(colors)
         local selected_items = CountSelectedMediaItems(0)
         for i = 0, selected_items - 1, 1 do
             local item = GetSelectedMediaItem(0, i)
-            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
+            local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+            if current_color == 0 then
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
+            end
         end
     end
 end
@@ -188,8 +198,8 @@ function horizontal_group(string)
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
     SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0)               -- XENAKIOS_SELITEMSUNDEDCURSELTX
-    Main_OnCommand(40032, 0)                      -- Item grouping: Group items
+    Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
+    Main_OnCommand(40032, 0)                          -- Item grouping: Group items
 end
 
 ---------------------------------------------------------------------
@@ -206,8 +216,8 @@ function vertical_group(length)
         local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
         SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-        Main_OnCommand(select_under, 0)               -- XENAKIOS_SELITEMSUNDEDCURSELTX
-        Main_OnCommand(40032, 0)                      -- Item grouping: Group items
+        Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
+        Main_OnCommand(40032, 0)                          -- Item grouping: Group items
     end
     DeleteTrackMediaItem(track, item)
 end
@@ -374,6 +384,36 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local tracks_per_group = 1
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        local mixer = trackname_check(track, "^M:")
+        local rcm = trackname_check(track, "^RCMASTER")
+        local send = trackname_check(track, "^@")
+        local bus = trackname_check(track, "^#")
+        local rt = trackname_check(track, "^RoomTone")
+        local ref = trackname_check(track, "^REF")
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        elseif folders == 1 and not (mixer or rcm or send or bus or rt or ref) then
+            tracks_per_group = tracks_per_group + 1
+        end
+    end
+    return folders, tracks_per_group, total_tracks
+end
+
+---------------------------------------------------------------------
+
+function trackname_check(track, string)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
