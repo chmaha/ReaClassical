@@ -61,11 +61,17 @@ function main()
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1.0 then
             local items = CountTrackMediaItems(track)
             if items == 0 then
-                empty = true
+                for j = i + 1, i + 1 + tracks_per_group, 1 do
+                    local track = GetTrack(0, j)
+                    local child_items = CountTrackMediaItems(track)
+                    if child_items > 0 then
+                        empty = true
+                        break
+                    end
+                end
             end
         end
     end
-
 
     local first_item = GetMediaItem(0, 0)
     local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
