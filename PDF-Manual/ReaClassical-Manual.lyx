@@ -1807,6 +1807,65 @@ keys{F9}
  
 \end_layout
 
+\begin_layout Standard
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "default"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+As you will discover,
+ based on which workflow chosen,
+ you can use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F7}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F8}
+\end_layout
+
+\end_inset
+
+ at any point during project work to (re)create project routing,
+ propagate track-naming based on the mixer tracks,
+ sync record inputs and track lock states.
+ Various ReaClassical functions use the same syncronization under the hood.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 The Single Mixer & 
 \begin_inset Quotes bld
@@ -2290,7 +2349,7 @@ Re-ordering tracks
 
 \begin_layout Standard
 In both horizontal and vertical workflows,
- you can use 
+ you can re-order the mixer tracks by dragging followed by a 
 \begin_inset ERT
 status open
 
@@ -2298,18 +2357,12 @@ status open
 
 
 \backslash
-keys{
-\backslash
-ctrl+
-\backslash
-Alt+
-\backslash
-arrowkeyup}
+keys{F7}
 \end_layout
 
 \end_inset
 
- and 
+ or 
 \begin_inset ERT
 status open
 
@@ -2317,18 +2370,13 @@ status open
 
 
 \backslash
-keys{
-\backslash
-ctrl+
-\backslash
-Alt+
-\backslash
-arrowkeydown}
+keys{F8}
 \end_layout
 
 \end_inset
 
- on a selected child track in the first group to quickly re-order all the groups at once including the mixer tracks.
+ sync to quickly re-order all the associated tracks across groups at once.
+ This includes all audio.
 \end_layout
 
 \begin_layout Subsection
@@ -7428,72 +7476,6 @@ Notes:
 \begin_layout Standard
 
 \series bold
-Move Track Up/Down In All Groups 
-\series default
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-ctrl+
-\backslash
-Alt+
-\backslash
-arrowkeyup}
-\end_layout
-
-\end_inset
-
- / 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-ctrl+
-\backslash
-Alt+
-\backslash
-arrowkeydown}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Description:
-
-\emph default
- Moves the selected child track up and down within the group.
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Notes:
-
-\emph default
- Available for both horizontal and vertical workflows,
- the function only works on child tracks presently.
- Note that the mixer track order automatically updates too.
-\end_layout
-
-\begin_layout Standard
-
-\series bold
 Delete Track From All Groups 
 \series default
 
@@ -10367,52 +10349,6 @@ del}
 \end_inset
 
  Delete Track From All Groups
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-ctrl+
-\backslash
-Alt+
-\backslash
-arrowkeyup}
-\end_layout
-
-\end_inset
-
- Move Track Up In All Groups
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-ctrl+
-\backslash
-Alt+
-\backslash
-arrowkeydown}
-\end_layout
-
-\end_inset
-
- Move Track Down In All Groups
 \end_layout
 
 \begin_layout Labeling
