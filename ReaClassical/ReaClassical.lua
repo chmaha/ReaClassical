@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.8
+@version 24.24.9
 @changelog
-  Delete Track From All Groups: Add move_up() function for final mixer Track
-  Prepare Takes: Honor existing custom colors
+  Prepare Takes: Change logic for deciding whether muted guide tracks are required
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
