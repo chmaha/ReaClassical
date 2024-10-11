@@ -333,16 +333,15 @@ function media_razor_group()
     local num_of_folders = CountSelectedTracks(0)
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
+    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     if num_of_folders > 1 then
         for _ = 1, num_of_folders, 1 do
-            local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
             Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
             Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group
             local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
             Main_OnCommand(next_folder, 0)     -- select next folder
         end
     else
-        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
         Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group
     end
@@ -350,7 +349,6 @@ function media_razor_group()
 
     Main_OnCommand(40297, 0)               -- Track: Unselect (clear selection of) all tracks
     Main_OnCommand(40939, 0)               -- Track: Select track 01
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0)     -- SWS: Select children of selected folder track(s)
 
     solo()
