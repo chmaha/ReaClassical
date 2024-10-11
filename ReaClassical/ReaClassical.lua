@@ -4,6 +4,7 @@
 @changelog
   Various: Add nil checks
   Classical Take Record: Add local ref to check_parent_track() at the top
+  Horizontal/Vertical Workflow: Add mixer check for pre-RCProject projects
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
