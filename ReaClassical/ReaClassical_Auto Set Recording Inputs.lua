@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+-- luacheck: ignore 113
+
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, trim_prefix, assign_input, create_mixer_table
@@ -30,7 +32,6 @@ local pair_words = {
     "ستيريو", "στερεοφωνικός", "סטריאו", "stereotipas", "स्टीरियो",
     "สเตอริโอ", "âm thanh nổi"
 }
-
 
 ---------------------------------------------------------------------
 local MAX_INPUTS = GetNumAudioInputs() -- Retrieve hardware inputs

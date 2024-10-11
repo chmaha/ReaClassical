@@ -41,6 +41,8 @@ chmaha 24Q1pre changelog:
   Allow for RPP and rpp as the extension (REAPER on Windows is lowercase)
 ]]
 
+-- luacheck: ignore 113
+
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, count_markers, create_filename, get_data, create_string
