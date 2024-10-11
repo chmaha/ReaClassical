@@ -29,7 +29,7 @@ local main, folder_check
 function main()
     Undo_BeginBlock()
     if folder_check() > 0 then
-        ShowMessageBox("You can either import your media on one regular track for horizontal editing \z
+        MB("You can either import your media on one regular track for horizontal editing \z
                         or on multiple regular tracks for a vertical workflow.\n\z
                         The function will automatically create the required folder group(s).\z
                     \nTo explode multi-channel after editing has started, \z
@@ -37,7 +37,7 @@ function main()
         return
     end
     if CountSelectedMediaItems(0) == 0 then
-        ShowMessageBox("Please select one or more multi-channel media items before running the script.", "Error", 0)
+        MB("Please select one or more multi-channel media items before running the script.", "Error", 0)
         return
     end
 
@@ -57,7 +57,7 @@ function main()
     -- Item: Explode multichannel audio or MIDI to new one-channel items
     Main_OnCommand(40894, 0)
 
-    local int = ShowMessageBox("Do you want to treat the first two iso tracks as interleaved stereo?",
+    local int = MB("Do you want to treat the first two iso tracks as interleaved stereo?",
         "Multi-channel Explode", 4)
     if int == 6 then
         local prev_track_number

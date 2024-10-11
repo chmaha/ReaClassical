@@ -78,7 +78,7 @@ function main()
     end
 
     if not found and (take_choice or session_name ~= "") then
-        local response = ShowMessageBox("Take not found. Try again?", "Find Take", 4)
+        local response = MB("Take not found. Try again?", "Find Take", 4)
         if response == 6 then
             goto start
         end

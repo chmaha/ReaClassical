@@ -56,7 +56,7 @@ function main()
 
 
         if edge_check(cur_pos) == true then
-            local response = ShowMessageBox(
+            local response = MB(
                 "The marker you are trying to add would either be on or close " ..
                 "to an item edge or existing crossfade. Continue?",
                 "Add Dest-IN Marker", 4)

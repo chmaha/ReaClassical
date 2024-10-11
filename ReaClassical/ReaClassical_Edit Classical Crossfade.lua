@@ -38,7 +38,7 @@ function main()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
-        ShowMessageBox('This ReaClassical function only works while in the fade editor (F)',
+        MB('This ReaClassical function only works while in the fade editor (F)',
             "Edit Classical Crossfade",
             0)
         return
@@ -48,7 +48,7 @@ function main()
     item_one = GetSelectedMediaItem(0, 0)
     item_two = GetSelectedMediaItem(0, 1)
     if not item_one and not item_two then
-        ShowMessageBox("Please select at least one of the items involved in the crossfade",
+        MB("Please select at least one of the items involved in the crossfade",
             "Edit Classical Crossfade", 0)
         return
     elseif item_one and not item_two then

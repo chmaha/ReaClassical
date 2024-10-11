@@ -94,7 +94,7 @@ function main()
     end
 
     if gfx.mouse_cap & 1 == 1 then
-      local choice = ShowMessageBox("Recalculate take count?", "ReaClassical Take Counter", 4)
+      local choice = MB("Recalculate take count?", "ReaClassical Take Counter", 4)
       if choice == 6 then
         take_text = get_take_count(session) + 1
         rec_name_set = false
@@ -128,7 +128,7 @@ function main()
         take_text = take_choice
         rec_name_set = false
       else
-        ShowMessageBox("You cannot set a take number lower than the highest found "
+        MB("You cannot set a take number lower than the highest found "
           .. "in the project path."
           .. "\nRecalculating take count...", "ReaClassical Take Counter", 0)
         take_text = get_take_count(session) + 1

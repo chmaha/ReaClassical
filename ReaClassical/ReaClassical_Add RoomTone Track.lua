@@ -30,13 +30,13 @@ local route_to_track, trackname_check
 function main()
     local folders, _, _, rt_count = folder_check()
     if folders == 0 then
-        ShowMessageBox("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
+        MB("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
             "Add RoomTone Track", 0)
         return
     end
 
     if rt_count > 0 then
-        ShowMessageBox("Only one RoomTone track is allowed per project.",
+        MB("Only one RoomTone track is allowed per project.",
             "Add RoomTone Track", 0)
         return
     end
@@ -57,7 +57,7 @@ function main()
     end
 
     if rcmaster == nil then
-        ShowMessageBox("Sorry, can't find RCMASTER", "Error!", 0)
+        MB("Sorry, can't find RCMASTER", "Error!", 0)
         return
     end
 

@@ -73,7 +73,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Ripple per-track
     else
-        ShowMessageBox("Please use SOURCE-IN and SOURCE-OUT markers", "Delete With Ripple", 0)
+        MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete With Ripple", 0)
     end
     Undo_EndBlock('Cut and Ripple', 0)
     PreventUIRefresh(-1)

@@ -32,7 +32,7 @@ function main()
 
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 or selected_tracks == 0 then
-    ShowMessageBox("Please select a single mixer track", "Delete Track From All Groups", 0)
+    MB("Please select a single mixer track", "Delete Track From All Groups", 0)
     return
   end
 
@@ -40,7 +40,7 @@ function main()
   local folder_count, tracks_per_group, child_count = evaluate_project()
 
   if folder_count == 0 then
-    ShowMessageBox("This function can only be used on a project with one of more folders",
+    MB("This function can only be used on a project with one of more folders",
       "Delete Track From All Groups",
       0)
     return
@@ -61,7 +61,7 @@ function main()
       return
     end
   else
-    ShowMessageBox("Please select a single mixer track", "Delete Track From All Groups", 0)
+    MB("Please select a single mixer track", "Delete Track From All Groups", 0)
     return
   end
 
@@ -167,7 +167,7 @@ end
 ---------------------------------------------------------------------
 
 function handle_invalid(message, orig_selection)
-  ShowMessageBox(message, "Delete Track From All Groups", 0)
+  MB(message, "Delete Track From All Groups", 0)
   Main_OnCommand(40769, 0) -- Unselect all items
   SetTrackSelected(orig_selection, true)
 end
@@ -182,15 +182,15 @@ function move_up(folder_count, tracks_per_group)
   if earlier_track then
     track_idx = GetMediaTrackInfo_Value(earlier_track, "IP_TRACKNUMBER") - 1
   else
-    ShowMessageBox("Please select a child track in the folder", "Move Track Up in All Groups", 0)
+    MB("Please select a child track in the folder", "Move Track Up in All Groups", 0)
     return
   end
 
   if track_idx == 0 then
-    ShowMessageBox("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
+    MB("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
     return
   elseif track_idx >= tracks_per_group - 1 then
-    ShowMessageBox("Please select a child track in the first folder", "Move Track Up in All Groups", 0)
+    MB("Please select a child track in the first folder", "Move Track Up in All Groups", 0)
     return
   end
 

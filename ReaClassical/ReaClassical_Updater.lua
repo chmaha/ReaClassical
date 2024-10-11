@@ -47,17 +47,17 @@ function main()
 
     local sync_reapack = reaper.NamedCommandLookup("_REAPACK_SYNC")
     Main_OnCommand(sync_reapack, 0)
-    ShowMessageBox("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.",
+    MB("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.",
         "ReaClassical Updater", 0)
 
-    local response1 = ShowMessageBox(
+    local response1 = MB(
         "2) This section will overwrite your custom toolbars.\nAre you sure you want to continue?",
         "ReaClassical Updater", 4)
     if response1 == 6 then
         copy_file(source_file_path, destination_file_path)
     end
 
-    local response2 = ShowMessageBox(
+    local response2 = MB(
         "3) This section will overwrite your custom keymaps!\n" ..
         "Are you sure you want to continue?",
         "ReaClassical Updater",
@@ -72,7 +72,7 @@ function main()
     end
 
     if response1 == 6 or response2 == 6 then
-        ShowMessageBox("4) REAPER/ReaClassical will now close.", "ReaClassical Updater", 0)
+        MB("4) REAPER/ReaClassical will now close.", "ReaClassical Updater", 0)
         Main_OnCommand(40004, 0) -- Save dirty projects and close REAPER
     end
 end
@@ -89,7 +89,7 @@ function copy_file(source, destination)
         os.remove(backup_destination)
         local success, err = os.rename(destination, backup_destination)
         if not success then
-            ShowMessageBox("Error creating backup: " .. err, "ReaClassical Updater", 0)
+            MB("Error creating backup: " .. err, "ReaClassical Updater", 0)
             return
         end
     end
@@ -97,7 +97,7 @@ function copy_file(source, destination)
     -- Open source file
     local source_file = io.open(source, "rb")
     if not source_file then
-        ShowMessageBox("Error opening source file: " .. source, "ReaClassical Updater", 0)
+        MB("Error opening source file: " .. source, "ReaClassical Updater", 0)
         return
     end
 
@@ -105,7 +105,7 @@ function copy_file(source, destination)
     local destination_file = io.open(destination, "wb")
     if not destination_file then
         source_file:close()
-        ShowMessageBox("Error opening destination file: " .. destination, "ReaClassical Updater", 0)
+        MB("Error opening destination file: " .. destination, "ReaClassical Updater", 0)
         return
     end
 

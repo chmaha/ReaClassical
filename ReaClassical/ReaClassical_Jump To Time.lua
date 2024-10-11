@@ -56,7 +56,7 @@ function main()
             if i > 1 then
                 local prev_end_position = last_end_position
                 if item_start > prev_end_position then
-                    ShowMessageBox("Selected items must be crossfaded.", "Jump to Time Within Items", 0)
+                    MB("Selected items must be crossfaded.", "Jump to Time Within Items", 0)
                     return
                 end
             end
@@ -79,14 +79,14 @@ function main()
 
         if target_time then
             if target_time < 0 or target_time > combined_length then
-                ShowMessageBox("The specified time is outside the valid range.", "Error", 0)
+                MB("The specified time is outside the valid range.", "Error", 0)
                 return
             end
 
             local cursor_position = first_position + target_time
             SetEditCurPos(cursor_position, true, false)
         else
-            ShowMessageBox("Invalid time format. Please use mm:ss.", "Error", 0)
+            MB("Invalid time format. Please use mm:ss.", "Error", 0)
         end
     end
 end

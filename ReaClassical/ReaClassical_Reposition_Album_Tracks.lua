@@ -32,12 +32,12 @@ function main()
     local num_of_items = 0
     if first_track then num_of_items = CountTrackMediaItems(first_track) end
     if not first_track or num_of_items == 0 then
-        ShowMessageBox("Error: No media items found.", "Reposition Album Tracks", 0)
+        MB("Error: No media items found.", "Reposition Album Tracks", 0)
         return
     end
     local empty_count = empty_items_check(first_track, num_of_items)
     if empty_count > 0 then
-        ShowMessageBox("Error: Empty items found on first track. Delete them to continue.", "Reposition Tracks", 0)
+        MB("Error: Empty items found on first track. Delete them to continue.", "Reposition Tracks", 0)
         return
     end
 
@@ -46,7 +46,7 @@ function main()
     if not bool then
         return
     elseif gap == "" then
-        ShowMessageBox("Please enter a number!", "Reposition Album Tracks", 0)
+        MB("Please enter a number!", "Reposition Album Tracks", 0)
         return
     else
         local track = GetTrack(0, 0)
@@ -80,7 +80,7 @@ function main()
             copy_shift(grouped_items, shift)
         end
         if num_tracks == 0 then
-            ShowMessageBox("No item take names found.", "Reposition Album Tracks", 0)
+            MB("No item take names found.", "Reposition Album Tracks", 0)
             return
         end
     end

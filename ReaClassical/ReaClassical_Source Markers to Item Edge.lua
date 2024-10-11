@@ -36,7 +36,7 @@ function main()
     else
         local num = CountSelectedMediaItems(0)
         if num == 0 then
-            ShowMessageBox(
+            MB(
                 "Please select one or more consecutive media items on a parent track " ..
                 "or make a time selection before running the function.",
                 "Source Markers to Item Edge or Time Selection: Error", 0)

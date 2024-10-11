@@ -56,7 +56,7 @@ function main()
 
 
         if edge_check(cur_pos) == true then
-            local response = ShowMessageBox(
+            local response = MB(
                 "The marker you are trying to add would either be on or close to an item edge or crossfade. Continue?",
                 "Add Dest-OUT Marker", 4)
             if response ~= 6 then return end

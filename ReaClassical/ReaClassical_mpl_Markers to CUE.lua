@@ -11,7 +11,7 @@ chmaha 04.04.23 changelog:
   Automatically use project name as part of audio file and cue file naming
   Force saving of project before use (for project name usage)
   Use project path as default for saving .cue file
-  Use ShowMessageBox in case of file-writing error before showing console message for copy/paste
+  Use MB in case of file-writing error before showing console message for copy/paste
   Move file-saving to its own function
   General switch to snake_case where possible
   Switch to using local variables
@@ -70,7 +70,7 @@ function main()
         create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number)
         create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number)
     end
-    ShowMessageBox(
+    MB(
         "Album reports have been generated in the root project folder.\nCUE file written to \"" .. cue_file .. "\"",
         "Create CUE file", 0)
 end
@@ -80,7 +80,7 @@ end
 function count_markers()
     local num_of_markers = CountProjectMarkers(0)
     if num_of_markers == 0 then
-        ShowMessageBox('Please use "Create CD Markers script" first', "Create CUE file", 0)
+        MB('Please use "Create CD Markers script" first', "Create CUE file", 0)
         return false
     end
     return true, num_of_markers
@@ -91,7 +91,7 @@ end
 function create_filename()
     local full_project_name = GetProjectName(0)
     if full_project_name == "" then
-        ShowMessageBox("Please save your project first!", "Create CUE file", 0)
+        MB("Please save your project first!", "Create CUE file", 0)
         return false
     else
         return true, full_project_name:match("^(.+)[.].*$")
@@ -149,12 +149,12 @@ function get_data(filename)
     local fields = {}
     for word in user_inputs:gmatch('[^%,]+') do fields[#fields + 1] = word end
     if #fields ~= 5 then
-        ShowMessageBox('Sorry. Empty fields not supported.', "Create CUE file", 0)
+        MB('Sorry. Empty fields not supported.', "Create CUE file", 0)
         return false
     end
     local extension = fields[5]:match('%.([a-zA-Z0-9]+)$')
     if not extension then
-        ShowMessageBox('Please enter filename with an extension', "Create CUE file", 0)
+        MB('Please enter filename with an extension', "Create CUE file", 0)
         return false
     end
     save_metadata(user_inputs)
@@ -275,7 +275,7 @@ function save_file(fields, out_str)
         f:write(out_str)
         f:close()
     else
-        ShowMessageBox(
+        MB(
             "There was an error creating the file. " ..
             "Copy and paste the contents of the following console window to a new .cue file.",
             "Create CUE file", 0)

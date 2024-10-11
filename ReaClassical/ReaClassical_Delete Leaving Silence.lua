@@ -52,7 +52,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(41990, 0) -- Toggle ripple per-track (off)
     else
-        ShowMessageBox("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
+        MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
     end
     Undo_EndBlock('Cut and Ripple', 0)
     PreventUIRefresh(-1)

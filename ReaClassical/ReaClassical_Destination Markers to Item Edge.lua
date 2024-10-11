@@ -38,7 +38,7 @@ function main()
         selected = CountSelectedMediaItems(0)
 
         if selected == 0 then
-            ShowMessageBox(
+            MB(
                 "Please select one or more consecutive media items " ..
                 "in the first folder or make a time selection before running the function.",
                 "Destination Markers to Item Edge / Time Selection: Error", 0)

@@ -45,14 +45,14 @@ function main()
     source_out, source_count, pos_table, track_number = markers()
 
     if proj_marker_count == 1 then
-        ShowMessageBox("Only one S-D project marker was found."
+        MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
         return
     end
 
     if proj_marker_count == -1 or proj_marker_count == 1 then
-        ShowMessageBox(
+        MB(
             "Source or destination markers should be paired with " ..
             "the corresponding source or destination project marker.",
             "Multi-tab Source-Destination Edit", 0)
@@ -160,7 +160,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
-        ShowMessageBox(
+        MB(
             "Please add at least 2 valid source-destination markers: \n" ..
             "2-point edit: Either 1 DEST and 1 SOURCE marker (any combination) " ..
             "or both SOURCE markers (when not in multi-tab mode)\n" ..
@@ -407,7 +407,7 @@ function clean_up(is_selected, proj_marker_count, source_count, source_in, sourc
         end
     else
         unlock_items()
-        ShowMessageBox("Please make sure there is material to copy between your source markers...",
+        MB("Please make sure there is material to copy between your source markers...",
             "Source-Destination Edit", 0)
     end
 end

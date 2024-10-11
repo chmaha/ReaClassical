@@ -115,7 +115,7 @@ function main()
 
     assignment_message = "Number of Hardware Inputs: " .. MAX_INPUTS .. "\n\n" .. assignment_message
 
-    local user_response = ShowMessageBox(
+    local user_response = MB(
         assignment_message .. "\n\nKeep these settings?\n(Answering \"No\" will revert to previous assignments)",
         "Auto Set Recording Inputs", 4)
 

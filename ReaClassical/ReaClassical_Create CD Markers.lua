@@ -46,15 +46,15 @@ function main()
   local num_of_items = 0
   if first_track then num_of_items = CountTrackMediaItems(first_track) end
   if not first_track or num_of_items == 0 then
-    ShowMessageBox("Error: No media items found.", "Create CD Markers", 0)
+    MB("Error: No media items found.", "Create CD Markers", 0)
     return
   end
   local empty_count = empty_items_check(first_track, num_of_items)
   if empty_count > 0 then
-    ShowMessageBox("Error: Empty items found on first track. Delete them to continue.", "Create CD Markers", 0)
+    MB("Error: Empty items found on first track. Delete them to continue.", "Create CD Markers", 0)
     return
   end
-  local choice = ShowMessageBox(
+  local choice = MB(
     "WARNING: This will delete all existing markers, regions and item take markers. " ..
     "Track titles will be pulled from item take names. Continue?", "Create CD/DDP markers", 4)
   if choice == 6 then
@@ -63,16 +63,16 @@ function main()
       num_of_items)
     if redbook_track_length_errors == -1 then return end
     if redbook_track_length_errors > 0 then
-      ShowMessageBox(
+      MB(
         'This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.',
         "Warning", 0)
     end
     if redbook_total_tracks_error == true then
-      ShowMessageBox('This album does not meet the Red Book standard as it contains more than 99 tracks.',
+      MB('This album does not meet the Red Book standard as it contains more than 99 tracks.',
         "Warning", 0)
     end
     if redbook_project_length > 79.57 then
-      ShowMessageBox('This album does not meet the Red Book standard as it is longer than 79.57 minutes.',
+      MB('This album does not meet the Red Book standard as it is longer than 79.57 minutes.',
         "Warning", 0)
     end
   end
@@ -97,9 +97,9 @@ function get_info()
   metadata_table = {}
   for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
   if not ret then
-    ShowMessageBox('Only writing track metadata', "Cancelled", 0)
+    MB('Only writing track metadata', "Cancelled", 0)
   elseif #metadata_table ~= 4 then
-    ShowMessageBox('Empty metadata_table not supported: Not writing album metadata', "Warning", 0)
+    MB('Empty metadata_table not supported: Not writing album metadata', "Warning", 0)
   end
   return user_inputs, metadata_table
 end
@@ -148,7 +148,7 @@ function cd_markers(first_track, num_of_items)
     end
   end
   if marker_count == 0 then
-    ShowMessageBox('Please add take names to all items that you want to be CD track starts (Select item then press F2)',
+    MB('Please add take names to all items that you want to be CD track starts (Select item then press F2)',
       "No track markers created", 0)
     return -1
   end
@@ -288,7 +288,7 @@ end
 
 function add_codes()
   local _, code_saved = GetProjExtState(0, "ReaClassical", "Codes")
-  local codes_response = ShowMessageBox("Add UPC/ISRC codes?", "CD codes", 4)
+  local codes_response = MB("Add UPC/ISRC codes?", "CD codes", 4)
   local ret2
   local code_input = ""
   local code_table = {}
@@ -308,9 +308,9 @@ function add_codes()
     end
     for num in code_input:gmatch('([^,]+)') do code_table[#code_table + 1] = num end
     if not ret2 then
-      ShowMessageBox('Not writing UPC/EAN or ISRC codes', "Cancelled", 0)
+      MB('Not writing UPC/EAN or ISRC codes', "Cancelled", 0)
     elseif #code_table ~= 5 then
-      ShowMessageBox('Empty code metadata_table not supported: Not writing UPC/EAN or ISRC codes', "Warning",
+      MB('Empty code metadata_table not supported: Not writing UPC/EAN or ISRC codes', "Warning",
         0)
     end
   end

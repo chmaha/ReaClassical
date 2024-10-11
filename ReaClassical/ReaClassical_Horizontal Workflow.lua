@@ -68,7 +68,7 @@ function main()
             rcmaster = create_destination_group(num)
             rcmaster_exists = true
         elseif boolean == true and num < 2 then
-            ShowMessageBox("You need 2 or more tracks to make a folder!", "Horizontal Workflow", 0)
+            MB("You need 2 or more tracks to make a folder!", "Horizontal Workflow", 0)
             return
         else
             return
@@ -92,7 +92,7 @@ function main()
             copy_track_names(track_table, mixer_track_table)
         end
     elseif folder_check() > 1 then
-        ShowMessageBox("This function only runs on projects with a single folder", "Horizontal Workflow", 0)
+        MB("This function only runs on projects with a single folder", "Horizontal Workflow", 0)
         return
     elseif folder_check() == 1 then
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
@@ -138,7 +138,7 @@ function main()
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
-            local response = ShowMessageBox(
+            local response = MB(
                 "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\n" ..
                 "Are you ready to upgrade the project to enable this feature? " ..
                 "Press Cancel if you’ve recently dragged a mixer track " ..
@@ -159,7 +159,7 @@ function main()
         remove_spacers(rcmaster_index)
         SetProjExtState(0, "ReaClassical", "Workflow", "Horizontal")
     else
-        ShowMessageBox(
+        MB(
             "In order to use this function either:\n1. Run on an empty project\n" ..
             "2. Run on the existing folder to sync routing/fx",
             "Horizontal Workflow", 0)
@@ -176,7 +176,7 @@ function main()
     end
 
     if not rcmaster_exists then
-        ShowMessageBox("Your project has been upgraded"
+        MB("Your project has been upgraded"
             .. " to use a single mixer set routed to RCMASTER bus. "
             .. "You can now move the parent fader without affecting the volume of child tracks.\n"
             .. "All groups are routed to the single mixer set visible in the mixer panel "

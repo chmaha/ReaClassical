@@ -77,7 +77,7 @@ function main()
         local item_one = GetSelectedMediaItem(0, 0)
         local item_two = GetSelectedMediaItem(0, 1)
         if not item_one and not item_two then
-            ShowMessageBox("Please select at least one of the items involved in the crossfade", "Audition", 0)
+            MB("Please select at least one of the items involved in the crossfade", "Audition", 0)
             return
         elseif item_one and not item_two then
             local color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")

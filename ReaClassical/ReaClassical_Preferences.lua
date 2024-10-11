@@ -130,7 +130,7 @@ function pref_check(input)
     local error_msg = binary_error_msg .. invalid_msg
 
     if not pass then
-        ShowMessageBox(error_msg, "Error", 0)
+        MB(error_msg, "Error", 0)
     end
 
     return pass

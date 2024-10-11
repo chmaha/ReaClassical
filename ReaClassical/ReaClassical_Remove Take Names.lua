@@ -30,7 +30,7 @@ local main, clean_take_names
 function main()
     Undo_BeginBlock()
 
-    local response = ShowMessageBox(
+    local response = MB(
     "Are you sure you would like to remove item take names from the first destination track?", "Remove Take Names", 4)
     if response == 6 then clean_take_names() end
 
@@ -43,14 +43,14 @@ function clean_take_names()
     local first_dest_track = GetTrack(0, 0)
 
     if not first_dest_track then
-        ShowMessageBox("No tracks found! First set up a ReaClassical project via F7 or F8.", "Error", 0)
+        MB("No tracks found! First set up a ReaClassical project via F7 or F8.", "Error", 0)
         return
     end
 
     local num_of_items = CountTrackMediaItems(first_dest_track)
 
     if num_of_items == 0 then
-        ShowMessageBox("No items found on the first track", "Error", 0)
+        MB("No items found on the first track", "Error", 0)
         return
     end
 

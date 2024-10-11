@@ -42,14 +42,14 @@ function main()
     local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, _ = markers()
 
     if proj_marker_count == 1 then
-        ShowMessageBox("Only one S-D project marker was found."
+        MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
         return
     end
 
     if proj_marker_count == -1 then
-        ShowMessageBox(
+        MB(
             "Source or destination markers should be paired with the " ..
             "corresponding source or destination project marker.",
             "Multi-tab Source-Destination Edit", 0)
@@ -65,7 +65,7 @@ function main()
         if total_selected == 0 then
             Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
             unlock_items()
-            ShowMessageBox("Please make sure there is material to copy between your source markers.",
+            MB("Please make sure there is material to copy between your source markers.",
                 "Insert with timestretching", 0)
             return
         end
@@ -137,7 +137,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
-        ShowMessageBox("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT",
+        MB("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT",
             "Insert with timestretching",
             0)
     end

@@ -33,7 +33,7 @@ function main()
 
     local take_name, selected_item = takename_check()
     if take_name == -1 or take_name == "" then
-        ShowMessageBox('Please select an item that starts a CD track', "Select CD track start", 0)
+        MB('Please select an item that starts a CD track', "Select CD track start", 0)
         return
     end
 
@@ -42,7 +42,7 @@ function main()
     if item_start_crossfaded then
         Main_OnCommand(40769, 0) -- unselect all
         SetMediaItemSelected(selected_item, true)
-        ShowMessageBox('The selected track start is crossfaded' ..
+        MB('The selected track start is crossfaded' ..
             'and therefore cannot be moved', "Select CD track start", 0)
         return
     end
@@ -50,7 +50,7 @@ function main()
     if item_number + count == num_of_items - 1 then
         Main_OnCommand(40769, 0) -- unselect all
         SetMediaItemSelected(selected_item, true)
-        ShowMessageBox('The selected track is already in last position', "Select CD track start", 0)
+        MB('The selected track is already in last position', "Select CD track start", 0)
         return
     end
 

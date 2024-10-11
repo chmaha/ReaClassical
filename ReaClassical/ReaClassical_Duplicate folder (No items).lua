@@ -35,7 +35,7 @@ end
 function main()
     local num_of_tracks = track_check()
     if num_of_tracks == 0 then
-        ShowMessageBox("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)
+        MB("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)
         return
     end
     PreventUIRefresh(1)
@@ -54,7 +54,7 @@ function main()
     end
 
     if count ~= 1 then
-        ShowMessageBox("Please select one parent track before running", "Duplicate folder (no items)", 0)
+        MB("Please select one parent track before running", "Duplicate folder (no items)", 0)
         return
     end
 

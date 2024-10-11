@@ -29,13 +29,13 @@ local main, folder_check, get_color_table, get_path, trackname_check
 function main()
     local folders, _, _, ref_count = folder_check()
     if folders == 0 then
-        ShowMessageBox("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
+        MB("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
             "Add Referece Track", 0)
         return
     end
 
     if ref_count > 0 then
-        ShowMessageBox("Only one reference track is allowed per project.",
+        MB("Only one reference track is allowed per project.",
             "Add Reference Track", 0)
         return
     end
@@ -56,7 +56,7 @@ function main()
     end
 
     if rcmaster == nil then
-        ShowMessageBox("Sorry, can't find RCMASTER", "Error!", 0)
+        MB("Sorry, can't find RCMASTER", "Error!", 0)
         return
     end
 

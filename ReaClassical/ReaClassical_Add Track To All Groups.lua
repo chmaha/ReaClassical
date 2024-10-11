@@ -52,7 +52,7 @@ function main()
   end
 
   if folder_count == 0 then
-    ShowMessageBox("Add one or more folders before running.", "Add Track To All Groups", 0)
+    MB("Add one or more folders before running.", "Add Track To All Groups", 0)
     return
   end
 

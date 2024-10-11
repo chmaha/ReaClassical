@@ -34,7 +34,7 @@ function main()
     if bool == true then
         CF_ShellExecute(html)
     else
-        ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!",
+        MB("Re-install ReaClassical metapackage via ReaPack first!",
             "ReaClassical Audio Calculator not found!", 0)
     end
 end

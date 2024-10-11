@@ -40,14 +40,14 @@ function main()
     local proj_marker_count, source_proj, dest_proj, dest_in, _, _, _, _, source_count, pos_table, _ = markers()
 
     if proj_marker_count == 1 then
-        ShowMessageBox("Only one S-D project marker was found."
+        MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Assembly Line Edit", 0)
         return
     end
 
     if proj_marker_count == -1 then
-        ShowMessageBox(
+        MB(
             "Source or destination markers should be paired with the corresponding source " ..
             "or destination project marker.",
             "Multi-tab Assembly Line Edit", 0)
@@ -122,7 +122,7 @@ function main()
         local restore_curpos = NamedCommandLookup("_BR_RESTORE_CURSOR_POS_SLOT_1")
         Main_OnCommand(restore_curpos, 0)
     else
-        ShowMessageBox(
+        MB(
             "Please add 3 valid source-destination markers: DEST-IN, SOURCE-IN and SOURCE-OUT"
             , "Assembly Line Edit", 0)
         return
@@ -338,7 +338,7 @@ function clean_up(is_selected, proj_marker_count)
         end
     else
         unlock_items()
-        ShowMessageBox("Please make sure there is material to copy between your source markers...",
+        MB("Please make sure there is material to copy between your source markers...",
             "Assembly Line Edit", 0)
     end
 end

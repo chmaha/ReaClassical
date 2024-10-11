@@ -42,12 +42,12 @@ function main()
     SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local num_of_project_items = CountMediaItems(0)
     if num_of_project_items == 0 then
-        ShowMessageBox("Please add your takes before running...", "Prepare Takes", 0)
+        MB("Please add your takes before running...", "Prepare Takes", 0)
         return
     end
     local empty_count = empty_items_check(num_of_project_items)
     if empty_count > 0 then
-        ShowMessageBox("Error: Empty items found. Delete them to continue.", "Prepare Takes", 0)
+        MB("Error: Empty items found. Delete them to continue.", "Prepare Takes", 0)
         return
     end
 
@@ -112,7 +112,7 @@ function main()
     SetProjExtState(0, "ReaClassical", "arrangeendtime", "")
 
     if empty then
-        ShowMessageBox(
+        MB(
             "Some folder tracks are empty. If the folders are not completely empty, items " ..
             "from first child tracks were copied to folder tracks and muted to act as guide tracks."
             , "Guide Tracks Created", 0)

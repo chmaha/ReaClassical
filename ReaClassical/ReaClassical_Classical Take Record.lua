@@ -46,7 +46,7 @@ end
 
 function main()
     if track_check() == 0 then
-        ShowMessageBox("Please add at least one folder before running", "Classical Take Record", 0)
+        MB("Please add at least one folder before running", "Classical Take Record", 0)
         return
     end
 
@@ -68,7 +68,7 @@ function main()
         mixer()
         local selected = solo()
         if not selected then
-            ShowMessageBox("Please select a folder or track before running", "Classical Take Record", 0)
+            MB("Please select a folder or track before running", "Classical Take Record", 0)
             return
         end
         ClearAllRecArmed()
@@ -294,7 +294,7 @@ end
 
 function check_parent_track(track)
     if not track or GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") ~= 1 then
-        ShowMessageBox("Please select a parent track before running", "Classical Take Record", 0)
+        MB("Please select a parent track before running", "Classical Take Record", 0)
         return false
     end
     return true

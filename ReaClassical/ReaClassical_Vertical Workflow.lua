@@ -72,7 +72,7 @@ function main()
             rcmaster = create_destination_group(num)
             rcmaster_exists = true
         elseif boolean == true and num < 2 then
-            ShowMessageBox("You need 2 or more tracks to make a source group!", "Vertical Workflow", 0)
+            MB("You need 2 or more tracks to make a source group!", "Vertical Workflow", 0)
             return
         else
             return
@@ -123,7 +123,7 @@ function main()
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table(
             is_empty)
         if not groups_equal then
-            ShowMessageBox("Please ensure that all folders have the same number of tracks before running.",
+            MB("Please ensure that all folders have the same number of tracks before running.",
                 "Vertical Workflow", 0)
             return
         end
@@ -150,7 +150,7 @@ function main()
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
-            local upgrade_response = ShowMessageBox(
+            local upgrade_response = MB(
                 "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\n" ..
                 "Are you ready to upgrade the project to enable this feature? " ..
                 "Press Cancel if you’ve recently dragged a mixer track " ..
@@ -217,7 +217,7 @@ function main()
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
-            local upgrade_response = ShowMessageBox(
+            local upgrade_response = MB(
                 "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\n" ..
                 "Are you ready to upgrade the project to enable this feature? " ..
                 "Press Cancel if you’ve recently dragged a mixer track " ..
@@ -243,7 +243,7 @@ function main()
         Main_OnCommand(show, 0) -- show children of destination
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     else
-        ShowMessageBox(
+        MB(
             "In order to use this function either:\n" ..
             "1. Run on an empty project\n" ..
             "2. Run with one existing folder\n" ..
@@ -263,7 +263,7 @@ function main()
     end
 
     if not rcmaster_exists then
-        ShowMessageBox("Your project has been upgraded"
+        MB("Your project has been upgraded"
             .. " to use a single mixer set routed to RCMASTER bus. "
             .. "You can now move the parent fader without affecting the volume of child tracks.\n"
             .. "All groups are routed to the single mixer set visible in the mixer panel "
