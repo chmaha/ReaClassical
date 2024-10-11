@@ -23,21 +23,41 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, show_track_name_dialog, add_rcmaster
-local create_mixer_table
+local create_mixer_table, check_channel_count
 
 ---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
     local folders = folder_check()
-    if folders > 0 then
-        MB("You can either import your media on one regular track for horizontal editing \z
-                        or on multiple regular tracks for a vertical workflow.\n\z
-                        The function will automatically create the required folder group(s).\z
-                    \nTo explode multi-channel after editing has started, \z
-                    please use on an empty project tab and copy across.", "Error: Folders detected!", 0)
+    local num_of_items = CountMediaItems(0)
+
+    local error_message = "Error: You can either import your media on one regular track for horizontal editing " ..
+        "or on multiple regular tracks for a vertical workflow.\n" ..
+        "The function will automatically create the required folder group(s).\n" ..
+        "To explode multi-channel after editing has started, " ..
+        "please use on an empty project tab and copy across."
+
+    if folders > 0 or num_of_items == 0 then
+        MB(error_message, "Explode Multi-Channel", 0)
         return
     end
+
+    if num_of_items == 0 then
+        MB(error_message, "Explode Multi-Channel", 0)
+        return
+    end
+    if num_of_items == 0 then return false end
+
+    local return_code, channel_count = check_channel_count(num_of_items)
+    if return_code == -2 then
+        MB("Error! The item channel counts don't match!", "Explode Multi-Channel", 0)
+        return
+    elseif return_code == -1 then
+        MB("Error! The minimum channel count is 3 or more", "Explode Multi-Channel", 0)
+        return
+    end
+
     SetProjExtState(0, "ReaClassical", "RCProject", "y")
 
     for i = CountTracks(0) - 1, 0, -1 do
@@ -64,7 +84,7 @@ function main()
     Main_OnCommand(40894, 0)
 
     local int = MB("Do you want to treat the first two iso tracks as interleaved stereo?",
-        "Multi-channel Explode", 4)
+        "ExplodeMulti-channel", 4)
     if int == 6 then
         local prev_track_number
         for _, item in pairs(items) do
@@ -73,6 +93,13 @@ function main()
             if track_number == prev_track_number then goto continue end
             local second_track = GetTrack(0, track_number)
             local third_track = GetTrack(0, track_number + 1)
+            if channel_count == 2 then
+                if GetMediaTrackInfo_Value(item_track, "I_FOLDERDEPTH") == 1 then
+                    InsertTrackAtIndex(track_number + 2, true)
+                    local new_track = GetTrack(0, track_number + 2)
+                    SetMediaTrackInfo_Value(new_track, "I_FOLDERDEPTH", -1)
+                end
+            end
             DeleteTrack(second_track)
             DeleteTrack(third_track)
             prev_track_number = track_number
@@ -105,6 +132,12 @@ function main()
         Main_OnCommand(F8_sync, 0)
     end
 
+    if int == 6 and channel_count == 2 then
+        MB("The interleaved stereo has been placed on the folder track.\n" ..
+            "Leave the empty child track in place so that ReaClassical can function as intended.",
+            "Explode Multi-channel", 0)
+    end
+
     local mixer_tracks = create_mixer_table()
     show_track_name_dialog(mixer_tracks)
 
@@ -113,6 +146,7 @@ function main()
     else                         -- run F8
         Main_OnCommand(F8_sync, 0)
     end
+
 
     Undo_EndBlock("Explode multi-channel audio", 0)
 end
@@ -206,6 +240,24 @@ function create_mixer_table()
         end
     end
     return mixer_tracks
+end
+
+---------------------------------------------------------------------
+
+function check_channel_count(num_of_items)
+    local first_item = GetMediaItem(0, 0)
+    local first_take = GetMediaItemTake(first_item, 0)
+    local first_source = GetMediaItemTake_Source(first_take)
+    local first_channel_count = GetMediaSourceNumChannels(first_source)
+    if first_channel_count < 2 then return -1 end
+    for i = 1, num_of_items - 1, 1 do
+        local item = GetMediaItem(0, i)
+        local take = GetMediaItemTake(item, 0)
+        local source = GetMediaItemTake_Source(take)
+        local channel_count = GetMediaSourceNumChannels(source)
+        if channel_count ~= first_channel_count then return -2 end
+    end
+    return 0, first_channel_count
 end
 
 ---------------------------------------------------------------------
