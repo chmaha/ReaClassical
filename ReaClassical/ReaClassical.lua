@@ -4,6 +4,7 @@
 @changelog
   Explode Multi-Channel: Improve by auto-deleting empty tracks, selecting all polywavs and presenting track naming dialog
   Allow for multiple REF tracks
+  PDF Manual: Revise Explode Multi-Channel section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
