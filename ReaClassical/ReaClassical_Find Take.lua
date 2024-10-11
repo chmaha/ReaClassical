@@ -72,6 +72,7 @@ function main()
                 Main_OnCommand(center, 0)
                 Main_OnCommand(40769, 0) -- unselect all items
                 SetMediaItemSelected(item, true)
+                Main_OnCommand(40034, 0) -- select all in group
                 break
             end
         end
