@@ -1,5 +1,5 @@
 *.lyx~
 *.lyx#
-cleanrf.sh
+*.sh
 cover*.pdf
 release_plan
