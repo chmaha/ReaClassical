@@ -47,7 +47,7 @@ function main()
         local final_xfade = move_to_item()
         fadeStart()
         if final_xfade then
-            MB("You've reached the final crossfade in the project.","Crossfade Editor",0)
+            MB("You've reached the final crossfade in the project.", "Crossfade Editor", 0)
         end
         UpdateArrange()
         UpdateTimeline()
@@ -221,14 +221,14 @@ end
 function zoom()
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     SetEditCurPos(cur_pos - 3, false, false)
-    Main_OnCommand(40625, 0) -- Time selection: Set start point
+    Main_OnCommand(40625, 0)             -- Time selection: Set start point
     SetEditCurPos(cur_pos + 3, false, false)
-    Main_OnCommand(40626, 0) -- Time selection: Set end point
+    Main_OnCommand(40626, 0)             -- Time selection: Set end point
     local zoom_to_selection = NamedCommandLookup("_SWS_ZOOMSIT")
-    Main_OnCommand(zoom_to_selection, 0)  -- SWS: Zoom to selected items or time selection
+    Main_OnCommand(zoom_to_selection, 0) -- SWS: Zoom to selected items or time selection
     SetEditCurPos(cur_pos, false, false)
-    Main_OnCommand(1012, 0)  -- View: Zoom in horizontal
-    Main_OnCommand(40635, 0) -- Time selection: Remove (unselect) time selection
+    Main_OnCommand(1012, 0)              -- View: Zoom in horizontal
+    Main_OnCommand(40635, 0)             -- Time selection: Remove (unselect) time selection
 end
 
 ---------------------------------------------------------------------
@@ -376,8 +376,9 @@ function correct_item_positions(item1)
     end
     if math.abs(offset_amount) > 1e-10 then
         MB(
-            "WARNING: The left item of the crossfade was accidentally slip-edited.\
-The item's position and offset have been reset to original values but the current crossfade may need attention.",
+            "WARNING: The left item of the crossfade was accidentally slip-edited.\n" ..
+            "The item's position and offset have been reset to original values " ..
+            "but the current crossfade may need attention.",
             "Crossfade Editor", 0)
     end
 end

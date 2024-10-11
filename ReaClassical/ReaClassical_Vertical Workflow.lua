@@ -150,12 +150,13 @@ function main()
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
-            local response = ShowMessageBox(
-                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
-            \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
-            a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
-                1)
-            if response == 1 then
+            local upgrade_response = ShowMessageBox(
+                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\n" ..
+                "Are you ready to upgrade the project to enable this feature? " ..
+                "Press Cancel if you’ve recently dragged a mixer track " ..
+                "as you will need to reset its position before proceeding.",
+                "Vertical Workflow", 1)
+            if upgrade_response == 1 then
                 reset_mixer_order(mixer_tracks)
                 create_track_table(true)
             end
@@ -171,7 +172,8 @@ function main()
         mixer()
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     elseif folder_check() == 1 then
-        local convert_response = MB("Are you sure you'd like to convert to a vertical workflow?","Vertical Workflow",4)
+        local convert_response = MB("Are you sure you'd like to convert to a vertical workflow?",
+            "Vertical Workflow", 4)
         if convert_response ~= 6 then return end
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
         if RCProject ~= "y" then
@@ -216,10 +218,11 @@ function main()
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
             local upgrade_response = ShowMessageBox(
-                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
-            \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
-            a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
-                1)
+                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\n" ..
+                "Are you ready to upgrade the project to enable this feature? " ..
+                "Press Cancel if you’ve recently dragged a mixer track " ..
+                "as you will need to reset its position before proceeding.",
+                "Vertical Workflow", 1)
             if upgrade_response == 1 then
                 reset_mixer_order(mixer_tracks)
                 create_track_table(true)

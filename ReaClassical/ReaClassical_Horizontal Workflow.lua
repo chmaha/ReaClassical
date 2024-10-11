@@ -139,10 +139,11 @@ function main()
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
             local response = ShowMessageBox(
-                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
-            \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
-            a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
-                1)
+                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\n" ..
+                "Are you ready to upgrade the project to enable this feature? " ..
+                "Press Cancel if you’ve recently dragged a mixer track " ..
+                "as you will need to reset its position before proceeding.",
+                "Horizontal Workflow", 1)
             if response == 1 then
                 reset_mixer_order(track_table)
                 create_track_table(true)

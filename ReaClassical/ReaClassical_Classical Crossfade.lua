@@ -105,8 +105,9 @@ function main()
         end
         if math.abs(offset_amount) > 1e-10 then
             MB(
-                "WARNING: The left item of the crossfade was accidentally slip-edited.\
-    The item's position and offset have been reset to original values but the current crossfade may need attention.",
+                "WARNING: The left item of the crossfade was accidentally slip-edited.\n" ..
+                "The item's position and offset have been reset to original values but " ..
+                "the current crossfade may need attention.",
                 "Crossfade Editor", 0)
         end
     end
