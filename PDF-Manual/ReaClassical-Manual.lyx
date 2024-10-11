@@ -2537,7 +2537,7 @@ If you use a portable recorder such as a MixPre,
  ReaClassical includes a special function for converting these into a stereo pair + mono track set.
  Import your multi-channel media using a single regular track (for a horizontal workflow) or multiple regular tracks (for a vertical workflow).
  Then,
- simply select all your multi-channel sets and press 
+ simply press 
 \begin_inset ERT
 status open
 
@@ -2550,7 +2550,7 @@ keys{F10}
 
 \end_inset
 
-.
+ (no need to select the items).
  Answer yes to the prompt that appears if the first two channels should be treated as stereo interleaved (i.e.
  they represent your main pair).
  Depending on the choice made,
@@ -2570,6 +2570,7 @@ keys{T}
 \end_inset
 
  function is able to create a muted guide track (more on this later!).
+ Then you are given the opportunity to name your tracks.
  Obviously if you decide to move to a vertical workflow after exploding using a single track,
  you can always use 
 \begin_inset ERT
@@ -2585,7 +2586,6 @@ keys{F8}
 \end_inset
 
  to create your source folders then drag the media to where you want them.
- Note that it is important to select all the items you want to explode as the function can only be used once (prior to folders existing).
  If you need to bring in new takes after editing has started,
  simply use the function on an empty project tab then copy or cut them into the original project tab into the desired folder on the timeline.
 \end_layout
@@ -6795,7 +6795,7 @@ Notes:
 \emph default
  Import your multi-channel media using a single regular track (for a horizontal workflow) or multiple regular tracks (for a vertical workflow).
  Then,
- simply select all your multi-channel sets and press 
+ simply press 
 \begin_inset ERT
 status open
 
@@ -6808,7 +6808,7 @@ keys{F10}
 
 \end_inset
 
-.
+ (no need to select the items).
  Answer yes to the prompt that appears if the first two channels should be treated as stereo interleaved (i.e.
  they represent your main pair).
  Depending on the choice made,
@@ -6828,6 +6828,7 @@ keys{T}
 \end_inset
 
  function is able to create a muted guide track (more on this later!).
+ Then you are given the opportunity to name your tracks.
  Obviously if you decide to move to a vertical workflow after exploding using a single track,
  you can always use 
 \begin_inset ERT
@@ -6843,7 +6844,6 @@ keys{F8}
 \end_inset
 
  to create your source folders then drag the media to where you want them.
- Note that it is important to select all the items you want to explode as the function can only be used once (prior to folders existing).
  If you need to bring in new takes after editing has started,
  simply use the function on an empty project tab then copy or cut them into the original project tab into the desired folder on the timeline.
 \end_layout
@@ -7154,6 +7154,16 @@ REF
 \end_inset
 
  to the end of the tracklist that is visible in both the track and mixer panels.
+ If you rename,
+ a 
+\begin_inset Quotes bld
+\end_inset
+
+REF:
+\begin_inset Quotes brd
+\end_inset
+
+ is automatically added.
 \end_layout
 
 \begin_layout Standard
