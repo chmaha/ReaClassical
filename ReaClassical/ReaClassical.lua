@@ -1,11 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.11
+@version 24.24.12
 @changelog
-  Horizontal/Vertical Workflows: Fix what happens when wrong number of mixer tracks
-  Horizontal/Vertical Workflows: Only allow on empty project or on existing ReaClassical project
-  Explode Multi-Channel: Add RCProject status so F7/F8 can complete
-  PDF Manual: Various updates
+  Various: Add nil checks
+  Classical Take Record: Add local ref to check_parent_track() at the top
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
