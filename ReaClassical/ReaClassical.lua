@@ -1,13 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.13
+@version 24.24.14
 @changelog
-  Find Take: Select all grouped items on finding take
-  Various: Switch to MB vs ShowMessageBox
-  Various: Switch to string concatenation where necessary to stay within 120 character lines
-  Vertical Workflow: Ask if user really wants to convert to vertical workflow
-  All Functions: Add line for luacheck to ignore undefined globals
-  Various: satisfy luacheck linting
+  Explode Multi-Channel: Improve by auto-deleting empty tracks, selecting all polywavs and presenting track naming dialog
+  Allow for multiple REF tracks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
