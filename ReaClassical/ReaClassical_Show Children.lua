@@ -25,8 +25,8 @@ local main
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
-    return
+  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+  return
 end
 
 function main()
@@ -44,7 +44,7 @@ function main()
     local track = GetSelectedTrack(0, i)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local special = string.match(name, "^M:") or string.match(name, "^#") or string.match(name, "^@") or
-    string.match(name, "^RoomTone") or string.match(name, "^RCMASTER")
+        string.match(name, "^RoomTone") or string.match(name, "^RCMASTER")
     if mastering == 1 and special then
       Main_OnCommand(40888, 0) -- Envelope: Show all active envelopes for tracks
       local arm = NamedCommandLookup("_S&M_ARMALLENVS")

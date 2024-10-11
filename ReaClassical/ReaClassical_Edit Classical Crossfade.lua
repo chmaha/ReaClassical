@@ -26,7 +26,7 @@ local main
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -36,7 +36,9 @@ function main()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
-        ShowMessageBox('This ReaClassical function only works while in the fade editor (F)', "Edit Classical Crossfade", 0)
+        ShowMessageBox('This ReaClassical function only works while in the fade editor (F)',
+            "Edit Classical Crossfade",
+            0)
         return
     end
     local item_one, item_two, color, prev_item, next_item, curpos, diff
@@ -44,7 +46,8 @@ function main()
     item_one = GetSelectedMediaItem(0, 0)
     item_two = GetSelectedMediaItem(0, 1)
     if not item_one and not item_two then
-        ShowMessageBox("Please select at least one of the items involved in the crossfade", "Edit Classical Crossfade", 0)
+        ShowMessageBox("Please select at least one of the items involved in the crossfade",
+            "Edit Classical Crossfade", 0)
         return
     elseif item_one and not item_two then
         color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
@@ -64,7 +67,7 @@ function main()
     local two_pos = GetMediaItemInfo_Value(item_two, "D_POSITION")
     BR_GetMouseCursorContext()
     local mouse_pos = BR_GetMouseCursorContext_Position()
-    
+
     Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
     local end_of_one = one_pos + one_length
 
@@ -77,14 +80,14 @@ function main()
         SetMediaItemSelected(item_one, true)
         diff = end_of_one - curpos
         SetEditCurPos(end_of_one + diff, false, false)
-        Main_OnCommand(41991, 0)                      -- toggle ripple-all OFF
-        Main_OnCommand(41311, 0)                      -- extend item right
-        Main_OnCommand(41991, 0)                      -- toggle ripple-all ON
+        Main_OnCommand(41991, 0) -- toggle ripple-all OFF
+        Main_OnCommand(41311, 0) -- extend item right
+        Main_OnCommand(41991, 0) -- toggle ripple-all ON
     elseif mouse_pos > two_pos then
         SetEditCurPos(mouse_pos, false, false)
         SetMediaItemSelected(item_one, true)
-        Main_OnCommand(41991, 0)                      -- toggle ripple-all OFF
-        Main_OnCommand(41311, 0)                      -- extend item right
+        Main_OnCommand(41991, 0) -- toggle ripple-all OFF
+        Main_OnCommand(41311, 0) -- extend item right
         SetMediaItemSelected(item_one, false)
         SetMediaItemSelected(item_two, true)
         one_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")

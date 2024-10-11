@@ -34,7 +34,7 @@ function main()
         if table[9] then sdmousehover = tonumber(table[9]) or 0 end
     end
 
-    local cur_pos, track, track_number
+    local cur_pos, track
     if sdmousehover == 1 then
         track, _, cur_pos = BR_TrackAtMouseCursor()
     else

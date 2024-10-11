@@ -27,7 +27,7 @@ local unlock_items, ripple_lock_mode, return_xfade_length, xfade
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -166,11 +166,11 @@ function xfade(xfade_len)
     local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     MoveEditCursor(-xfade_len, false)
-    Main_OnCommand(40625, 0) -- Time selection: Set start point
+    Main_OnCommand(40625, 0)        -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
-    Main_OnCommand(40626, 0) -- Time selection: Set end point
-    Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
-    Main_OnCommand(40635, 0) -- Time selection: Remove time selection
+    Main_OnCommand(40626, 0)        -- Time selection: Set end point
+    Main_OnCommand(40916, 0)        -- Item: Crossfade items within time selection
+    Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
     MoveEditCursor(0.001, false)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)

@@ -32,7 +32,6 @@ function main()
     end
 
     GoToMarker(0, 996, false)
-
 end
 
 ---------------------------------------------------------------------
@@ -121,8 +120,8 @@ function markers()
         proj_marker_count = -1
     end
 
-    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in, source_out, source_count,
-        pos_table, track_number
+    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
+        source_in, source_out, source_count, pos_table, track_number
 end
 
 ---------------------------------------------------------------------
@@ -134,5 +133,3 @@ end
 ---------------------------------------------------------------------
 
 main()
-
-

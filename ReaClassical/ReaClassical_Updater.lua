@@ -56,8 +56,11 @@ function main()
     end
 
     local response2 = ShowMessageBox(
-        "3) This section will overwrite your custom keymaps!\nAre you sure you want to continue?", "ReaClassical Updater",
-        4)
+        "3) This section will overwrite your custom keymaps!\n" ..
+        "Are you sure you want to continue?",
+        "ReaClassical Updater",
+        4
+    )
     if response2 == 6 then
         copy_file(source_shortcuts_path, dest_shortcuts_path)
         if string.find(system, "^Win") then

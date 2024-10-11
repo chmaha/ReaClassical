@@ -75,6 +75,7 @@ end
 ---------------------------------------------------------------------
 
 function main()
+  local gfx = gfx
   local playstate = GetPlayState()
   gfx.setfont(1, "Arial", 90, 98)
 
@@ -198,15 +199,15 @@ end
 
 ---------------------------------------------------------------------
 
-function get_take_count(session)
+function get_take_count(session_name)
   take_count = 0
 
   local media_path = GetProjectPath(0)                   -- .. separator .. session
   local command
   if string.lower(package.config:sub(1, 1)) == '\\' then -- Windows
-    command = 'dir "' .. media_path .. "\\" .. session .. '" /b /a:-d'
+    command = 'dir "' .. media_path .. "\\" .. session_name .. '" /b /a:-d'
   else                                                   -- Unix-like
-    command = 'ls -p "' .. media_path .. "/" .. session .. '" | grep -v /$'
+    command = 'ls -p "' .. media_path .. "/" .. session_name .. '" | grep -v /$'
   end
 
   local handle = io.popen(command)
@@ -218,7 +219,7 @@ function get_take_count(session)
 
       for filename in result:gmatch("[^\r\n]+") do
         local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
-        
+
         if take_capture and take_capture > take_count then
           take_count = take_capture
         end

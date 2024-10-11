@@ -31,7 +31,7 @@ local move_to_project_tab, find_second_folder_track
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -39,8 +39,8 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
-    local proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in, source_out, source_count, pos_table, track_number =
-        markers()
+    local proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in,
+    source_out, source_count, pos_table, track_number = markers()
 
     if proj_marker_count == 1 then
         ShowMessageBox("Only one S-D project marker was found."
@@ -51,7 +51,8 @@ function main()
 
     if proj_marker_count == -1 or proj_marker_count == 1 then
         ShowMessageBox(
-            "Source or destination markers should be paired with the corresponding source or destination project marker.",
+            "Source or destination markers should be paired with " ..
+            "the corresponding source or destination project marker.",
             "Multi-tab Source-Destination Edit", 0)
         return
     end
@@ -141,11 +142,11 @@ function main()
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
         Main_OnCommand(40289, 0)
-        Main_OnCommand(40626, 0) -- Time Selection: Set end point
-        Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-        Main_OnCommand(40630, 0) -- Go to start of time selection
-        Main_OnCommand(40311, 0) -- Ripple-all mode
+        Main_OnCommand(40626, 0)  -- Time Selection: Set end point
+        Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
+        Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
+        Main_OnCommand(40630, 0)  -- Go to start of time selection
+        Main_OnCommand(40311, 0)  -- Ripple-all mode
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- Adaptive Delete
         local paste = NamedCommandLookup("_SWS_AWPASTE")
@@ -158,7 +159,10 @@ function main()
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
         ShowMessageBox(
-            "Please add at least 2 valid source-destination markers: \n 2-point edit: Either 1 DEST and 1 SOURCE marker (any combination) or both SOURCE markers (when not in multi-tab mode)\n 3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
+            "Please add at least 2 valid source-destination markers: \n" ..
+            "2-point edit: Either 1 DEST and 1 SOURCE marker (any combination) " ..
+            "or both SOURCE markers (when not in multi-tab mode)\n" ..
+            "3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
             , "Source-Destination Edit", 0)
         return
     end
@@ -255,8 +259,8 @@ function markers()
         proj_marker_count = -1
     end
 
-    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in, source_out, source_count,
-        pos_table, track_number
+    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
+        source_in, source_out, source_count, pos_table, track_number
 end
 
 ---------------------------------------------------------------------
@@ -314,7 +318,7 @@ function copy_source()
         is_selected = false
     end
     Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-    Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
+    Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     return sel_length, is_selected
 end
@@ -355,7 +359,7 @@ function create_crossfades()
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    Main_OnCommand(41311,0) -- Item edit: Trim right edge of item to edit cursor
+    Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)
@@ -466,15 +470,13 @@ end
 
 function xfade(xfade_len)
     local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    local number_of_items = CountSelectedMediaItems(0)
     Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
-    local number_of_items = CountSelectedMediaItems(0)
     MoveEditCursor(-xfade_len, false)
-    Main_OnCommand(40625, 0) -- Time selection: Set start point
+    Main_OnCommand(40625, 0)        -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
-    Main_OnCommand(40626, 0) -- Time selection: Set end point
-    Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
-    Main_OnCommand(40635, 0) -- Time selection: Remove time selection
+    Main_OnCommand(40626, 0)        -- Time selection: Set end point
+    Main_OnCommand(40916, 0)        -- Item: Crossfade items within time selection
+    Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
     MoveEditCursor(0.001, false)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)
@@ -491,7 +493,7 @@ function get_first_last_items()
         local item = GetSelectedMediaItem(0, i)
         local track = GetMediaItem_Track(item)
         local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-        
+
         if track_num == 1 then
             if not first_sel_item then
                 first_sel_item = item

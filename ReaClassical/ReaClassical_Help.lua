@@ -26,13 +26,14 @@ local main, file_exists, get_path
 
 function main()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts","chmaha Scripts","ReaClassical","ReaClassical-Manual.pdf")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-Manual.pdf")
     local pdf = resource_path .. relative_path
     local bool = file_exists(pdf)
     if bool == true then
         CF_ShellExecute(pdf)
     else
-        ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!", "ReaClassical PDF Manual not found!", 0)
+        ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!",
+            "ReaClassical PDF Manual not found!", 0)
     end
 end
 
@@ -51,8 +52,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 

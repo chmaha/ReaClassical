@@ -38,7 +38,8 @@ function main()
   local folder_count, tracks_per_group, child_count = evaluate_project()
 
   if folder_count == 0 then
-    ShowMessageBox("This function can only be used on a project with one of more folders", "Delete Track From All Groups",
+    ShowMessageBox("This function can only be used on a project with one of more folders",
+      "Delete Track From All Groups",
       0)
     return
   end
@@ -171,7 +172,7 @@ end
 
 ---------------------------------------------------------------------
 
-function move_up(folder_count,tracks_per_group)
+function move_up(folder_count, tracks_per_group)
   local track = GetSelectedTrack(0, 0)
   local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
 

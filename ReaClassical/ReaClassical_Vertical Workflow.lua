@@ -82,7 +82,7 @@ function main()
             local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table(is_empty)
             route_tracks(rcmaster, table, end_of_sources)
             media_razor_group()
-            reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+            reset_spacers(tracks_per_group, rcmaster_index)
             Main_OnCommand(40939, 0) -- select track 01
             solo()
             mixer()
@@ -132,7 +132,7 @@ function main()
             for _, track in pairs(mixer_tracks) do
                 DeleteTrack(track)
             end
-            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
+            table, _, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
             local track_names = copy_track_names_from_dest(table, mixer_tracks)
             -- build table of track settings, sends & FX for dest folder
             local controls, sends = save_track_settings(tracks_per_group)
@@ -164,7 +164,7 @@ function main()
 
         route_tracks(rcmaster, table, end_of_sources)
         media_razor_group()
-        reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+        reset_spacers(tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
         mixer()
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
@@ -195,7 +195,7 @@ function main()
             for _, track in pairs(mixer_tracks) do
                 DeleteTrack(track)
             end
-            table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks = create_track_table(is_empty)
+            table, _, tracks_per_group, _, mixer_tracks = create_track_table(is_empty)
             local track_names = copy_track_names_from_dest(table, mixer_tracks)
             -- build table of track settings, sends & FX for dest folder
             local controls, sends = save_track_settings(tracks_per_group)
@@ -228,7 +228,7 @@ function main()
         local rcmaster = GetTrack(0, rcmaster_index)
         route_tracks(rcmaster, table, end_of_sources)
         media_razor_group()
-        reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+        reset_spacers(tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
         Main_OnCommand(40939, 0) -- select track 01
         solo()
@@ -237,8 +237,12 @@ function main()
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     else
         ShowMessageBox(
-            "In order to use this function either:\n1. Run on an empty project\n2. Run with one existing folder\n3. Run on multiple existing folders to sync routing/fx",
-            "Vertical Workflow", 0)
+            "In order to use this function either:\n" ..
+            "1. Run on an empty project\n" ..
+            "2. Run with one existing folder\n" ..
+            "3. Run on multiple existing folders to sync routing/fx",
+            "Vertical Workflow", 0
+        )
         return
     end
 
@@ -298,7 +302,8 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF")) then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#")
+                or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF")) then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -309,20 +314,26 @@ function solo()
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or
+                trackname_check(track, "^RoomTone") or trackname_check(track, "^REF")
+                or trackname_check(track, "^RCMASTER"))
+            and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") or trackname_check(track, "^RCMASTER")) then
+        elseif not (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#")
+                or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF")
+                or trackname_check(track, "^RCMASTER")) then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
 
         local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
 
-        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER")) and muted == 0 then
+        if (trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#")
+                or trackname_check(track, "^RCMASTER")) and muted == 0 then
             local receives = GetTrackNumSends(track, -1)
-            for i = 0, receives - 1, 1 do -- loop through receives
-                local origin = GetTrackSendInfo_Value(track, -1, i, "P_SRCTRACK")
+            for j = 0, receives - 1, 1 do -- loop through receives
+                local origin = GetTrackSendInfo_Value(track, -1, j, "P_SRCTRACK")
                 if origin == selected_track or parent == 1 then
                     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                     SetMediaTrackInfo_Value(track, "I_SOLO", 0)
@@ -385,7 +396,9 @@ function mixer()
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
 
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone") or trackname_check(track, "^REF") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#")
+            or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone")
+            or trackname_check(track, "^REF") then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -394,7 +407,8 @@ function mixer()
         if trackname_check(track, "^S%d+:") then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER") then
+        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#")
+            or trackname_check(track, "^RCMASTER") then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
         end
         if mastering == 1 and i == 0 then
@@ -442,7 +456,6 @@ function create_source_groups()
         end
         local make_folder = NamedCommandLookup("_SWS_MAKEFOLDER")
         Main_OnCommand(make_folder, 0) -- make folder from tracks
-        local collapse = NamedCommandLookup("_SWS_COLLAPSE")
         Main_OnCommand(collapse, 0)    -- collapse folder
     end
 end
@@ -504,31 +517,31 @@ function copy_track_names(track_table, mixer_table)
     local track_names = {}
 
     for _, track in ipairs(mixer_table) do
-        local mod_name = process_name(track)
-        table.insert(track_names, mod_name)
+        local mixer_mod_name = process_name(track)
+        table.insert(track_names, mixer_mod_name)
     end
 
-    local parent = track_table[1].parent
-    GetSetMediaTrackInfo_String(parent, "P_NAME", "D:" .. track_names[1], 1)
+    local dest_parent = track_table[1].parent
+    GetSetMediaTrackInfo_String(dest_parent, "P_NAME", "D:" .. track_names[1], 1)
 
     for i = 1, #track_table[1].tracks do
-        local track = track_table[1].tracks[i]
-        GetSetMediaTrackInfo_String(track, "P_NAME", "D:" .. (track_names[i + 1] or ""), 1)
+        local dest_track = track_table[1].tracks[i]
+        GetSetMediaTrackInfo_String(dest_track, "P_NAME", "D:" .. (track_names[i + 1] or ""), 1)
     end
 
     -- for rest, prefix Si: where i = number starting at 1
     for i = 2, #track_table, 1 do
-        local parent = track_table[i].parent
-        local mod_name = track_names[1]
-        GetSetMediaTrackInfo_String(parent, "P_NAME", "S" .. i - 1 .. ":" .. mod_name, 1)
+        local source_parent = track_table[i].parent
+        local parent_mod_name = track_names[1]
+        GetSetMediaTrackInfo_String(source_parent, "P_NAME", "S" .. i - 1 .. ":" .. parent_mod_name, 1)
 
         local num_of_names = #track_names
         local j = 1
-        for _, track in ipairs(track_table[i].tracks) do
+        for _, source_track in ipairs(track_table[i].tracks) do
             local track_index = j % num_of_names + 1
             if track_index == 1 then track_index = 2 end
-            local mod_name = track_names[track_index]
-            GetSetMediaTrackInfo_String(track, "P_NAME", "S" .. (i - 1) .. ":" .. mod_name, 1)
+            local source_mod_name = track_names[track_index]
+            GetSetMediaTrackInfo_String(source_track, "P_NAME", "S" .. (i - 1) .. ":" .. source_mod_name, 1)
             j = j + 1
         end
     end
@@ -607,7 +620,7 @@ end
 function remove_connections(track)
     SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
     local num_of_receives = GetTrackNumSends(track, -1)
-    for i = 0, num_of_receives - 1, 1 do
+    for _ = 0, num_of_receives - 1, 1 do
         RemoveTrackSend(track, -1, 0)
     end
 end
@@ -755,7 +768,7 @@ end
 
 ---------------------------------------------------------------------
 
-function reset_spacers(end_of_sources, tracks_per_group, rcmaster_index)
+function reset_spacers(tracks_per_group, rcmaster_index)
     remove_spacers(rcmaster_index)
     add_spacer(tracks_per_group)
     -- add_spacer(end_of_sources + tracks_per_group)
@@ -843,8 +856,8 @@ function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         local dest_index = end_of_sources + i
         local dest_track = GetTrack(0, dest_index)
         local num_of_fx = TrackFX_GetCount(src_track)
-        for j = 0, num_of_fx - 1 do
-            TrackFX_CopyToTrack(src_track, 0, dest_track, j, true)
+        for n = 0, num_of_fx - 1 do
+            TrackFX_CopyToTrack(src_track, 0, dest_track, n, true)
         end
     end
 
@@ -852,7 +865,7 @@ function write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
     for i = 0, end_of_sources - 1 do
         local src_track = GetTrack(0, i)
         local num_of_fx = TrackFX_GetCount(src_track)
-        for j = 0, num_of_fx - 1 do
+        for _ = 0, num_of_fx - 1 do
             TrackFX_Delete(src_track, 0)
         end
     end
@@ -1003,12 +1016,14 @@ function rearrange_tracks(track_table, current_order)
 
         for j, updated_group in ipairs(updated_track_table) do
             if j == i then
-                local _, mix_order = GetSetMediaTrackInfo_String(updated_group.parent, "P_EXT:mix_order",
+                local _, parent_mix_order = GetSetMediaTrackInfo_String(updated_group.parent, "P_EXT:mix_order",
                     current_order[1], 1)
-                table.insert(updated_group_tracks, { track = updated_group.parent, order = tonumber(mix_order) or 1 })
+                table.insert(updated_group_tracks,
+                    { track = updated_group.parent, order = tonumber(parent_mix_order) or 1 })
                 for k, child in ipairs(updated_group.tracks) do
-                    local _, mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", current_order[k + 1], 1)
-                    table.insert(updated_group_tracks, { track = child, order = tonumber(mix_order) or 1 })
+                    local _, child_mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", current_order
+                        [k + 1], 1)
+                    table.insert(updated_group_tracks, { track = child, order = tonumber(child_mix_order) or 1 })
                 end
                 break
             end
@@ -1021,8 +1036,8 @@ function rearrange_tracks(track_table, current_order)
                 MoveMediaItemToTrack(item, revised_track_info.track)
             end
         end
-        for i, track_info in ipairs(updated_group_tracks) do
-            GetSetMediaTrackInfo_String(track_info.track, "P_EXT:mix_order", tostring(i), 1)
+        for j, track_info in ipairs(updated_group_tracks) do
+            GetSetMediaTrackInfo_String(track_info.track, "P_EXT:mix_order", tostring(j), 1)
         end
     end
 end
@@ -1042,12 +1057,12 @@ function copy_track_names_from_dest(track_table, mixer_table)
 
     -- for 1st prefix D: (remove anything existing before & including :)
     local parent = track_table[1].parent
-    local mod_name = process_dest(parent)
-    table.insert(track_names, mod_name)
+    local parent_mod_name = process_dest(parent)
+    table.insert(track_names, parent_mod_name)
 
     for _, track in ipairs(track_table[1].tracks) do
-        local mod_name = process_dest(track)
-        table.insert(track_names, mod_name)
+        local child_mod_name = process_dest(track)
+        table.insert(track_names, child_mod_name)
     end
 
     local i = 1

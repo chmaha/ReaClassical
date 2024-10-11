@@ -26,13 +26,14 @@ local main, file_exists, get_path
 
 function main()
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts","chmaha Scripts","ReaClassical","audio_calculator.html")
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "audio_calculator.html")
     local html = resource_path .. relative_path
     local bool = file_exists(html)
     if bool == true then
         CF_ShellExecute(html)
     else
-        ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!", "ReaClassical Audio Calculator not found!", 0)
+        ShowMessageBox("Re-install ReaClassical metapackage via ReaPack first!",
+            "ReaClassical Audio Calculator not found!", 0)
     end
 end
 
@@ -51,8 +52,8 @@ end
 ---------------------------------------------------------------------
 
 function get_path(...)
-    local pathseparator = package.config:sub(1,1);
-    local elements = {...}
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
     return table.concat(elements, pathseparator)
 end
 

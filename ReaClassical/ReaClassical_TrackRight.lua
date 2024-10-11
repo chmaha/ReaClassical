@@ -40,7 +40,8 @@ function main()
     if item_start_crossfaded then
         Main_OnCommand(40769, 0) -- unselect all
         SetMediaItemSelected(selected_item, true)
-        ShowMessageBox('The selected track start is crossfaded and therefore cannot be moved', "Select CD track start", 0)
+        ShowMessageBox('The selected track start is crossfaded' ..
+            'and therefore cannot be moved', "Select CD track start", 0)
         return
     end
 

@@ -55,7 +55,8 @@ function main()
 
         if edge_check(cur_pos) == true then
             local response = ShowMessageBox(
-                "The marker you are trying to add would either be on or close to an item edge or existing crossfade. Continue?",
+                "The marker you are trying to add would either be on or close " ..
+                "to an item edge or existing crossfade. Continue?",
                 "Add Dest-IN Marker", 4)
             if response ~= 6 then return end
         end
@@ -89,7 +90,6 @@ function edge_check(cur_pos)
     local check_length = return_check_length()
     local first_track = GetTrack(0, 0)
     if first_track then num_of_items = CountTrackMediaItems(first_track) end
-    local new_pos = 0
     local clash = false
     for i = 0, num_of_items - 1 do
         local item = GetTrackMediaItem(first_track, i)

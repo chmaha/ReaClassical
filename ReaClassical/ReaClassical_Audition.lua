@@ -51,7 +51,7 @@ function main()
         if track then
             SetOnlyTrackSelected(track)
             solo()
-            local select_children = NamedCommandLookup("_SWS_SELCHILDREN2") -- SWS: Select children of selected folder track(s)
+            local select_children = NamedCommandLookup("_SWS_SELCHILDREN2") -- SWS: Select children
             Main_OnCommand(select_children, 0)
             mixer()
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
@@ -105,7 +105,6 @@ function main()
         local end_of_one = one_pos + one_length
         local overlap = end_of_one - two_pos
         local mouse_to_item_two = two_pos - mouse_pos
-        local total_time = 2 * mouse_to_item_two + overlap
         local colors = get_color_table()
         if item_hover == item_one then
             local item_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
@@ -127,16 +126,17 @@ function main()
             AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1016, colors.audition)
             OnPlayButton() -- play until mouse cursor
         elseif not item_hover and mouse_pos < two_pos then
+            local total_time = 2 * mouse_to_item_two + overlap
             AddProjectMarker2(0, false, mouse_pos + total_time, 0, "!1016", 1016,
                 colors.audition)
             SetEditCurPos(mouse_pos, false, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
         else
             local mouse_to_item_one = mouse_pos - end_of_one
-            local total_time = 2 * mouse_to_item_one + overlap
+            local mirrored_total_time = 2 * mouse_to_item_one + overlap
             AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1016,
                 colors.audition)
-            AddProjectMarker2(0, false, mouse_pos - total_time, 0, "START", 1111,
+            AddProjectMarker2(0, false, mouse_pos - mirrored_total_time, 0, "START", 1111,
                 colors.audition)
             GoToMarker(0, 1111, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
@@ -179,7 +179,8 @@ function solo()
             end
         end
 
-        if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" or rcmaster_state == "y") then
+        if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
+                or ref_state == "y" or rcmaster_state == "y") then
             if IsTrackSelected(track) and parent ~= 1 then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 2)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
@@ -204,20 +205,20 @@ function solo()
 
         if ref_state == "y" then
             local is_selected = IsTrackSelected(track)
-            local mute = 1
-            local solo = 0
+            local mute_state = 1
+            local solo_state = 0
 
             if is_selected then
                 Main_OnCommand(40340, 0) -- unsolo all tracks
-                mute = 0
-                solo = 1
+                mute_state = 0
+                solo_state = 1
             elseif ref_is_guide == 1 then
-                mute = 0
-                solo = 0
+                mute_state = 0
+                solo_state = 0
             end
 
-            SetMediaTrackInfo_Value(track, "B_MUTE", mute)
-            SetMediaTrackInfo_Value(track, "I_SOLO", solo)
+            SetMediaTrackInfo_Value(track, "B_MUTE", mute_state)
+            SetMediaTrackInfo_Value(track, "I_SOLO", solo_state)
         end
 
         if rcmaster_state == "y" then
@@ -270,7 +271,8 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y" or rt_state == "y" or ref_state == "y" then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
+            or rt_state == "y" or ref_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

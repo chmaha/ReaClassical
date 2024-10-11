@@ -47,7 +47,8 @@ function main()
     if item_start_crossfaded then
         Main_OnCommand(40769, 0) -- unselect all
         SetMediaItemSelected(selected_item, true)
-        ShowMessageBox('The selected track start is crossfaded and therefore cannot be moved', "Select CD track start", 0)
+        ShowMessageBox('The selected track start is crossfaded and ' ..
+            'therefore cannot be moved', "Select CD track start", 0)
         return
     end
 
@@ -158,8 +159,8 @@ function shift(track, item, shift_amount, items_in_track, direction)
     end
     Main_OnCommand(40289, 0) -- unselect all items
     for i = item_number, num_of_items - 1, 1 do
-        local item = GetTrackMediaItem(track, i)
-        SetMediaItemSelected(item, true)
+        local track_item = GetTrackMediaItem(track, i)
+        SetMediaItemSelected(track_item, true)
         Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     end
     local selected_item_count = CountSelectedMediaItems(0)

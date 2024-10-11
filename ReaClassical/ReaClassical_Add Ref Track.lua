@@ -20,8 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_color_table, get_path
-local route_to_track, trackname_check
+local main, folder_check, get_color_table, get_path, trackname_check
 
 ---------------------------------------------------------------------
 
@@ -40,7 +39,7 @@ function main()
     end
 
     Undo_BeginBlock()
-    
+
     local rcmaster
     local rcmaster_index
     local num_of_tracks = CountTracks(0)
@@ -59,8 +58,8 @@ function main()
         return
     end
 
-    InsertTrackAtIndex(rcmaster_index+1, true) -- Add track just before RCMASTER
-    local ref_track = GetTrack(0, rcmaster_index+1)
+    InsertTrackAtIndex(rcmaster_index + 1, true) -- Add track just before RCMASTER
+    local ref_track = GetTrack(0, rcmaster_index + 1)
     GetSetMediaTrackInfo_String(ref_track, "P_EXT:rcref", "y", 1)
     SetMediaTrackInfo_Value(ref_track, "I_FOLDERDEPTH", 0)
 
@@ -80,7 +79,7 @@ function main()
         local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
         Main_OnCommand(F7_sync, 0)
     end
-    
+
     Undo_EndBlock("Add Reference track", 0)
 end
 
@@ -125,13 +124,6 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
-function route_to_track(track, rcmaster)
-    SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
-    CreateTrackSend(track, rcmaster)
 end
 
 ---------------------------------------------------------------------

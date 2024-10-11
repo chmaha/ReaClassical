@@ -5,7 +5,7 @@ mpl Generate CUE from project markers
 
 chmaha 04.04.23 changelog:
   Remove dependency on mpl_Various_functions.lua
-  CUE format correction: Use "WAV" for WavPack, FLAC etc (still allowing for MP3 and AIFF as alternative formats). See http://wiki.hydrogenaud.io/index.php?title=Cue_sheet#Cue_sheet_commands and http://github.com/libyal/libodraw/blob/main/documentation/CUE%20sheet%20format.asciidoc#271-file-types
+  CUE format correction: Use "WAV" for WavPack, FLAC etc (still allowing for MP3 and AIFF as alternative formats).
   Use current year in dialog box
   Extend width of dialog box for better visibility
   Automatically use project name as part of audio file and cue file naming
@@ -52,12 +52,12 @@ local formatted_pos_out
 ----------------------------------------------------------
 
 function main()
-    local ret, num_of_markers = count_markers()
-    if not ret then return end
-    local ret, filename = create_filename()
-    if not ret then return end
-    local ret, fields, extension = get_data(filename)
-    if not ret then return end
+    local ret1, num_of_markers = count_markers()
+    if not ret1 then return end
+    local ret2, filename = create_filename()
+    if not ret2 then return end
+    local ret3, fields, extension = get_data(filename)
+    if not ret3 then return end
     local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
     local path, slash, cue_file = save_file(fields, string)
 
@@ -141,9 +141,9 @@ function get_data(filename)
                 'Classical,' .. this_year .. ',Performer,My Classical Album,' .. filename .. '.wav')
         end
     end
-    
+
     if not ret then return end
-    
+
     local fields = {}
     for word in user_inputs:gmatch('[^%,]+') do fields[#fields + 1] = word end
     if #fields ~= 5 then
@@ -164,8 +164,8 @@ end
 function create_string(fields, num_of_markers, extension)
     local format = ext_mod(extension)
 
-    local _, _, raw_pos_out, _, _ = EnumProjectMarkers2(0, num_of_markers - 1)
-    local album_length = format_time(raw_pos_out)
+    local _, _, album_pos_out, _, _ = EnumProjectMarkers2(0, num_of_markers - 1)
+    local album_length = format_time(album_pos_out)
     local _, _, _, _, album_meta = EnumProjectMarkers2(0, num_of_markers - 2)
     local catalog_number = album_meta:match('CATALOG=([%w%d]+)') or ""
     local out_str
@@ -207,7 +207,7 @@ function create_string(fields, num_of_markers, extension)
             else
                 name_out = name_out:match(('#(.*)'))
             end
-            local formatted_pos_out = format_time(raw_pos_out)
+            local formatted_time = format_time(raw_pos_out)
 
             local perf = fields[3]
 
@@ -224,7 +224,7 @@ function create_string(fields, num_of_markers, extension)
                     out_str = out_str .. ind5 .. 'INDEX 00 ' .. pregap_start .. '\n'
                     is_pregap = false
                 end
-                out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+                out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_time .. '\n'
             else
                 out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
                     ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
@@ -233,7 +233,7 @@ function create_string(fields, num_of_markers, extension)
                     out_str = out_str .. ind5 .. 'INDEX 00 ' .. pregap_start .. '\n'
                     is_pregap = false
                 end
-                out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_pos_out .. '\n'
+                out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_time .. '\n'
             end
         elseif name_out:find("^!") then
             is_pregap = true
@@ -274,7 +274,8 @@ function save_file(fields, out_str)
         f:close()
     else
         ShowMessageBox(
-            "There was an error creating the file. Copy and paste the contents of the following console window to a new .cue file.",
+            "There was an error creating the file. " ..
+            "Copy and paste the contents of the following console window to a new .cue file.",
             "Create CUE file", 0)
         ShowConsoleMsg(out_str)
     end

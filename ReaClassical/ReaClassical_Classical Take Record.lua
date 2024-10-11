@@ -28,7 +28,7 @@ local extract_take_number, check_parent_track
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -123,9 +123,8 @@ function main()
             for i = current_num, num_tracks - 1, 1 do
                 local track = GetTrack(0, i)
                 if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                    Main_OnCommand(40297, 0) -- deselect all tracks
+                    Main_OnCommand(40297, 0)           -- deselect all tracks
                     SetTrackSelected(track, true)
-                    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
                     Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
                     solo()
                     local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
@@ -142,7 +141,6 @@ function main()
             if bool == false then
                 local duplicate = NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
                 Main_OnCommand(duplicate, 0)
-                local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
                 Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
                 local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
                 Main_OnCommand(arm, 0)             -- Xenakios/SWS: Set selected tracks record armed
@@ -176,7 +174,8 @@ function solo()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
 
-        if IsTrackSelected(track) == false and mixer_state ~= "y" and aux_state ~= "y" and submix_state ~= "y" and rcmaster_state ~= "y" then
+        if IsTrackSelected(track) == false and mixer_state ~= "y" and aux_state ~= "y" and submix_state ~= "y"
+            and rt_state ~= "y" and rcmaster_state ~= "y" then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
@@ -224,7 +223,7 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if ref_state == "y"then
+        if ref_state == "y" then
             SetTrackColor(track, colors.ref)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
@@ -232,7 +231,8 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y" or rt_state == "y" or ref_state == "y" then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
+            or rt_state == "y" or ref_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -267,8 +267,8 @@ end
 
 ---------------------------------------------------------------------
 
-function save_prefs(input)
-    SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", input)
+function save_prefs(cursor_position)
+    SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", cursor_position)
 end
 
 -----------------------------------------------------------------------

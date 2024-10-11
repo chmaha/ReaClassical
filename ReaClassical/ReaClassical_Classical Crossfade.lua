@@ -94,7 +94,7 @@ function main()
                 local item = GetSelectedMediaItem(0, i)  -- Get the selected media item
                 local take = GetActiveTake(item)
                 if take then
-                    local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take of the item
+                    local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take
                     SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item_offset - offset_amount) -- Set the offset
                 end
             end

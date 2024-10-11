@@ -26,7 +26,7 @@ local main, track_check
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -42,7 +42,7 @@ function main()
     local count = 0
     local num_of_selected = CountSelectedTracks(0)
     for i = 0, num_of_selected - 1, 1 do
-        local track = GetSelectedTrack(0,i)
+        local track = GetSelectedTrack(0, i)
         if track then
             is_parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
             if is_parent == 1 then
@@ -66,10 +66,10 @@ function main()
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
     local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-    Main_OnCommand(sync,0)
+    Main_OnCommand(sync, 0)
     Undo_EndBlock('Duplicate folder (No items)', 0)
     PreventUIRefresh(-1)
-    Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
+    Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
     UpdateArrange()
     UpdateTimeline()
     TrackList_AdjustWindows(false)

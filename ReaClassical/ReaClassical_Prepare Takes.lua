@@ -62,8 +62,8 @@ function main()
             local items = CountTrackMediaItems(track)
             if items == 0 then
                 for j = i + 1, i + 1 + tracks_per_group, 1 do
-                    local track = GetTrack(0, j)
-                    local child_items = CountTrackMediaItems(track)
+                    local child_track = GetTrack(0, j)
+                    local child_items = CountTrackMediaItems(child_track)
                     if child_items > 0 then
                         empty = true
                         break
@@ -98,9 +98,9 @@ function main()
         vertical(colors)
     end
 
-    local _, start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
-    local _, end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
-    GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
+    local _, prev_start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
+    local _, prev_end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
+    GetSet_ArrangeView2(0, true, 0, 0, prev_start_time, prev_end_time)
     SetEditCurPos(cur_pos, 0, 0)
 
     local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
@@ -111,7 +111,8 @@ function main()
 
     if empty then
         ShowMessageBox(
-            "Some folder tracks are empty. If the folders are not completely empty, items from first child tracks were copied to folder tracks and muted to act as guide tracks."
+            "Some folder tracks are empty. If the folders are not completely empty, items " ..
+            "from first child tracks were copied to folder tracks and muted to act as guide tracks."
             , "Guide Tracks Created", 0)
     end
     Undo_EndBlock('Prepare Takes', 0)
@@ -176,13 +177,13 @@ function vertical_color_razor(colors)
     if colors == 1 then
         Main_OnCommand(40706, 0)       -- Item: Set to one random color
     else
-        local colors = get_color_table()
+        local color_table = get_color_table()
         local selected_items = CountSelectedMediaItems(0)
         for i = 0, selected_items - 1, 1 do
             local item = GetSelectedMediaItem(0, i)
             local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
             if current_color == 0 then
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.source_items)
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_table.source_items)
             end
         end
     end
@@ -219,11 +220,11 @@ function vertical_group(length)
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
         local selected = GetSelectedMediaItem(0, 0)
         local start = GetMediaItemInfo_Value(selected, "D_POSITION")
-        local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
-        SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
+        local item_length = GetMediaItemInfo_Value(selected, "D_LENGTH")
+        SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-        Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
-        Main_OnCommand(40032, 0)                          -- Item grouping: Group items
+        Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
+        Main_OnCommand(40032, 0)                               -- Item grouping: Group items
     end
     DeleteTrackMediaItem(track, item)
 end
@@ -318,7 +319,6 @@ function copy_track_items(folder_size, total_tracks)
             SetMediaItemSelected(item, 1)
         end
         Main_OnCommand(40698, 0) -- Edit: Copy items
-        local previous_track = GetTrack(0, i - 1)
         SetOnlyTrackSelected(previous_track)
         SetEditCurPos(pos, false, false)
         Main_OnCommand(42398, 0) -- Item: Paste items/tracks

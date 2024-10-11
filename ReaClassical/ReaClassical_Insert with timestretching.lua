@@ -29,7 +29,7 @@ local mark_as_edit, move_to_project_tab, find_second_folder_track
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0) 
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
@@ -42,17 +42,19 @@ function main()
     if proj_marker_count == 1 then
         ShowMessageBox("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
-        .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
+            .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
         return
     end
 
     if proj_marker_count == -1 then
-        ShowMessageBox("Source or destination markers should be paired with the corresponding source or destination project marker.", "Multi-tab Source-Destination Edit", 0)
+        ShowMessageBox(
+            "Source or destination markers should be paired with the " ..
+            "corresponding source or destination project marker.",
+            "Multi-tab Source-Destination Edit", 0)
         return
     end
 
     if dest_count + source_count == 4 then
-
         local selected_items = {}
 
         move_to_project_tab(dest_proj)
@@ -61,7 +63,8 @@ function main()
         if total_selected == 0 then
             Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
             unlock_items()
-            ShowMessageBox("Please make sure there is material to copy between your source markers.", "Insert with timestretching", 0)
+            ShowMessageBox("Please make sure there is material to copy between your source markers.",
+                "Insert with timestretching", 0)
             return
         end
         Main_OnCommand(40020, 0) -- remove time selection
@@ -113,10 +116,10 @@ function main()
             Main_OnCommand(40362, 0) -- glue items
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         end
-        Main_OnCommand(40032,0) -- group selected items
+        Main_OnCommand(40032, 0)     -- group selected items
         mark_as_edit()
-        local total_selected = CountSelectedMediaItems()
-        for i = 0, total_selected - 1, 1 do
+        local num_of_selected = CountSelectedMediaItems()
+        for i = 0, num_of_selected - 1, 1 do
             local item = GetSelectedMediaItem(0, i)
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", item_color)
         end
@@ -132,7 +135,8 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
-        ShowMessageBox("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT", "Insert with timestretching",
+        ShowMessageBox("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT",
+            "Insert with timestretching",
             0)
     end
 
@@ -177,7 +181,7 @@ function copy_source()
 
     local parent_track_selected_items = 0
     local first_track = GetSelectedTrack(0, 0)
-    
+
     if first_track then
         local folder_depth = GetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH")
         if folder_depth == 1 then -- First track is a folder
@@ -191,12 +195,11 @@ function copy_source()
         end
     end
 
-    Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
+    Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection
     Main_OnCommand(40289, 0) -- Item: Unselect all items
 
     return total_selected_items, parent_track_selected_items
 end
-
 
 ---------------------------------------------------------------------
 
@@ -233,7 +236,7 @@ function create_crossfades()
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    Main_OnCommand(41311,0) -- Item edit: Trim right edge of item to edit cursor
+    Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
@@ -352,7 +355,7 @@ function get_first_last_items()
         local item = GetSelectedMediaItem(0, i)
         local track = GetMediaItem_Track(item)
         local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-        
+
         if track_num == 1 then
             if not first_sel_item then
                 first_sel_item = item
@@ -450,8 +453,8 @@ function markers()
         proj_marker_count = -1
     end
 
-    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in, source_out, source_count,
-        pos_table, track_number
+    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
+        source_in, source_out, source_count, pos_table, track_number
 end
 
 ---------------------------------------------------------------------

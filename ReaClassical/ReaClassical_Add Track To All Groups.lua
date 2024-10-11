@@ -63,7 +63,6 @@ function main()
     local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
     if depth == 1 then
       add_track_to_folder(i + child_count)
-      local new_track = GetTrack(0, i + child_count)
     end
     if depth == -1 then
       -- switch with last track in folder

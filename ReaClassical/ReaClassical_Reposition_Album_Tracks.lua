@@ -27,12 +27,13 @@ local main, get_grouped_items, copy_shift, empty_items_check
 function main()
     Undo_BeginBlock()
     local first_track = GetTrack(0, 0)
-    if first_track then NUM_OF_ITEMS = CountTrackMediaItems(first_track) end
-    if not first_track or NUM_OF_ITEMS == 0 then
+    local num_of_items = 0
+    if first_track then num_of_items = CountTrackMediaItems(first_track) end
+    if not first_track or num_of_items == 0 then
         ShowMessageBox("Error: No media items found.", "Reposition Album Tracks", 0)
         return
     end
-    local empty_count = empty_items_check(first_track)
+    local empty_count = empty_items_check(first_track, num_of_items)
     if empty_count > 0 then
         ShowMessageBox("Error: Empty items found on first track. Delete them to continue.", "Reposition Tracks", 0)
         return
@@ -94,14 +95,14 @@ function get_grouped_items(item)
     SetMediaItemSelected(item, true)
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
 
-    Selected_item_count = CountSelectedMediaItems(0)
+    local selected_item_count = CountSelectedMediaItems(0)
 
-    Selected_items = {}
+    local selected_items = {}
 
-    for i = 1, Selected_item_count - 1 do
-        Selected_items[i] = GetSelectedMediaItem(0, i)
+    for i = 1, selected_item_count - 1 do
+        selected_items[i] = GetSelectedMediaItem(0, i)
     end
-    return Selected_items
+    return selected_items
 end
 
 ---------------------------------------------------------------------
@@ -116,9 +117,9 @@ end
 
 ---------------------------------------------------------------------
 
-function empty_items_check(first_track)
+function empty_items_check(first_track, num_of_items)
     local count = 0
-    for i = 0, NUM_OF_ITEMS - 1, 1 do
+    for i = 0, num_of_items - 1, 1 do
         local current_item = GetTrackMediaItem(first_track, i)
         local take = GetActiveTake(current_item)
         if not take then

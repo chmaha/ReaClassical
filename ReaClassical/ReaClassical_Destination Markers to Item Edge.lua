@@ -37,28 +37,27 @@ function main()
 
         if selected == 0 then
             ShowMessageBox(
-                "Please select one or more consecutive media items in the first folder or make a time selection before running the function.",
+                "Please select one or more consecutive media items " ..
+                "in the first folder or make a time selection before running the function.",
                 "Destination Markers to Item Edge / Time Selection: Error", 0)
             return
         end
 
         local folder_tracks = {}
         local num_tracks = CountTracks(0)
-        local found_folder_end = false
 
         for i = 0, num_tracks - 1 do
             local track = GetTrack(0, i)
             if i == 0 or GetParentTrack(track) == parent_track then
                 table.insert(folder_tracks, track)
             else
-                found_folder_end = true
                 break
             end
         end
         for i = 0, selected - 1 do
             local item = GetSelectedMediaItem(0, i)
             local item_track = GetMediaItem_Track(item)
-    
+
             local found = false
             for _, folder_track in ipairs(folder_tracks) do
                 if item_track == folder_track then
@@ -66,7 +65,7 @@ function main()
                     break
                 end
             end
-    
+
             if not found then
                 MB("Any selected items should be in the first folder.", "Error", 0)
                 return

@@ -40,7 +40,7 @@ function main()
     end
 
     Undo_BeginBlock()
-    
+
     local rcmaster
     local rcmaster_index
     local num_of_tracks = CountTracks(0)
@@ -80,7 +80,7 @@ function main()
         local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
         Main_OnCommand(F7_sync, 0)
     end
-    
+
     Undo_EndBlock("Add RoomTone track", 0)
 end
 

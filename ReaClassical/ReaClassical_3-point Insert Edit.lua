@@ -46,7 +46,8 @@ function main()
 
     if proj_marker_count == -1 then
         ShowMessageBox(
-            "Source or destination markers should be paired with the corresponding source or destination project marker.",
+            "Source or destination markers should be paired with the corresponding source " ..
+            "or destination project marker.",
             "Multi-tab Assembly Line Edit", 0)
         return
     end
@@ -63,8 +64,10 @@ function main()
             local threshold = 0.0001
             if math.abs(item_right_edge - dest_in_pos) > threshold then
                 local input = MB(
-                    "The DEST-IN marker has been moved since the last assembly line edit.\nDo you want to start a new edit sequence?\
-                \nAnswering \"No\" will move the DEST-IN marker back to the previous item edge.", "Assembly Line Edit", 3)
+                    "The DEST-IN marker has been moved since the last assembly line edit.\n" ..
+                    "Do you want to start a new edit sequence?\n" ..
+                    "Answering \"No\" will move the DEST-IN marker back to the previous item edge.",
+                    "Assembly Line Edit", 3)
                 if input == 2 then
                     return
                 elseif input == 7 then
@@ -215,8 +218,8 @@ function markers()
         proj_marker_count = -1
     end
 
-    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in, source_out, source_count,
-        pos_table, track_number
+    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
+        source_in, source_out, source_count, pos_table, track_number
 end
 
 ---------------------------------------------------------------------
@@ -255,7 +258,7 @@ function copy_source()
         is_selected = false
     end
     Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-    Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
+    Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     return sel_length, is_selected
 end
@@ -295,7 +298,7 @@ function create_crossfades()
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    Main_OnCommand(41311,0) -- Item edit: Trim right edge of item to edit cursor
+    Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
@@ -429,7 +432,7 @@ function get_first_last_items()
         local item = GetSelectedMediaItem(0, i)
         local track = GetMediaItem_Track(item)
         local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-        
+
         if track_num == 1 then
             if not first_sel_item then
                 first_sel_item = item

@@ -74,7 +74,7 @@ function main()
         local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
         Main_OnCommand(F7_sync, 0)
     end
-    
+
     Undo_EndBlock("Add Submix", 0)
 end
 

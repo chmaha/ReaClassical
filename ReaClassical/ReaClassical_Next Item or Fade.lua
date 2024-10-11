@@ -93,12 +93,12 @@ function lock_previous_items(item)
     local first_item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
 
     local track_1 = GetTrack(0, 0)
-    local item_count = CountTrackMediaItems(track_1)
+    local top_item_count = CountTrackMediaItems(track_1)
 
     local locked_group_ids = {} -- Store group IDs of locked items
 
     -- Iterate through all items in track 1 and lock those before the specified item
-    for i = 0, item_count - 1 do
+    for i = 0, top_item_count - 1 do
         local track_1_item = GetTrackMediaItem(track_1, i)
         if track_1_item then
             local track_1_item_pos = GetMediaItemInfo_Value(track_1_item, "D_POSITION") -- Get the item's position
@@ -116,9 +116,9 @@ function lock_previous_items(item)
     for t = 1, tracks_per_group - 1 do
         local track = GetTrack(0, t)
         if track then
-            local item_count = CountTrackMediaItems(track)
+            local lower_item_count = CountTrackMediaItems(track)
 
-            for i = 0, item_count - 1 do
+            for i = 0, lower_item_count - 1 do
                 local track_item = GetTrackMediaItem(track, i)
                 if track_item then
                     local track_item_group_id = GetMediaItemInfo_Value(track_item, "I_GROUPID")
@@ -145,7 +145,6 @@ function fadeStart()
     local item1_length = GetMediaItemInfo_Value(item1, "D_LENGTH")
     local item1_right_edge = item1_start + item1_length
     lock_previous_items(item1)
-    local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     SetProjExtState(0, "ReaClassical", "FirstItemPos", item1_start)
     local item1_take = GetActiveTake(item1)
     local item1_take_offset = GetMediaItemTakeInfo_Value(item1_take, "D_STARTOFFS")
@@ -166,7 +165,7 @@ function fadeStart()
     view()
     zoom()
     SetMediaItemSelected(item1, true)
-    local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection (across tracks)
+    local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection
     Main_OnCommand(select_next, 0)
     local item2 = GetSelectedMediaItem(0, 1)
     local item2_guid = BR_GetMediaItemGUID(item2)
@@ -188,10 +187,10 @@ function fadeEnd()
     local item1 = BR_GetMediaItemByGUID(0, item1_guid)
     local item2 = BR_GetMediaItemByGUID(0, item2_guid)
 
-    local first_color = load_color("1", item1)
+    local first_color = load_color("1")
     paint(item1, first_color)
     if item2 then
-        local second_color = load_color("2", item2)
+        local second_color = load_color("2")
         paint(item2, second_color)
     end
 
@@ -223,8 +222,8 @@ function zoom()
     Main_OnCommand(40625, 0) -- Time selection: Set start point
     SetEditCurPos(cur_pos + 3, false, false)
     Main_OnCommand(40626, 0) -- Time selection: Set end point
-    local zoom = NamedCommandLookup("_SWS_ZOOMSIT")
-    Main_OnCommand(zoom, 0)  -- SWS: Zoom to selected items or time selection
+    local zoom_to_selection = NamedCommandLookup("_SWS_ZOOMSIT")
+    Main_OnCommand(zoom_to_selection, 0)  -- SWS: Zoom to selected items or time selection
     SetEditCurPos(cur_pos, false, false)
     Main_OnCommand(1012, 0)  -- View: Zoom in horizontal
     Main_OnCommand(40635, 0) -- Time selection: Remove (unselect) time selection
@@ -292,7 +291,7 @@ end
 
 ---------------------------------------------------------------------
 
-function load_color(num, item)
+function load_color(num)
     local _, color = GetProjExtState(0, "ReaClassical", "item" .. num .. "color")
     return color
 end
@@ -366,7 +365,7 @@ function correct_item_positions(item1)
             local item = GetSelectedMediaItem(0, i)  -- Get the selected media item
             local take = GetActiveTake(item)
             if take then
-                local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take of the item
+                local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take
                 SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", item_offset - offset_amount) -- Set the offset
             end
         end
