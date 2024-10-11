@@ -84,7 +84,7 @@ function main()
     Main_OnCommand(40894, 0)
 
     local int = MB("Do you want to treat the first two iso tracks as interleaved stereo?",
-        "ExplodeMulti-channel", 4)
+        "Explode Multi-channel", 4)
     if int == 6 then
         local prev_track_number
         for _, item in pairs(items) do
@@ -119,7 +119,15 @@ function main()
             DeleteTrackMediaItem(item_track, item)
         end
     end
-    Main_OnCommand(40769, 0) -- unselect all items
+
+    Main_OnCommand(40769, 0)   -- unselect all items
+    PreventUIRefresh(1)
+    Main_OnCommand(40296, 0)   -- select all tracks
+    local collapse = NamedCommandLookup("_SWS_COLLAPSE")
+    Main_OnCommand(collapse, 0) -- collapse all tracks
+    Main_OnCommand(40939, 0)   -- select track 1
+    local show = NamedCommandLookup("_SWS_FOLDSMALL")
+    Main_OnCommand(show, 0)    -- show child tracks
 
     add_rcmaster()
     local updated_folders = folder_check()
@@ -141,14 +149,21 @@ function main()
     local mixer_tracks = create_mixer_table()
     show_track_name_dialog(mixer_tracks)
 
-    if updated_folders == 1 then -- run F7
+    if updated_folders == 1 then -- run F7 again
         Main_OnCommand(F7_sync, 0)
-    else                         -- run F8
+    else                         -- run F8 again
         Main_OnCommand(F8_sync, 0)
     end
 
+    PreventUIRefresh(-1)
 
-    Undo_EndBlock("Explode multi-channel audio", 0)
+    local fit_project_vertically = NamedCommandLookup("_RS444f747139500db030a1c4e03b8a0805ac502dfe")
+    Main_OnCommand(fit_project_vertically, 0)
+
+    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    Main_OnCommand(prepare_takes, 0)
+
+    Undo_EndBlock("Explode Multi-channel", 0)
 end
 
 ---------------------------------------------------------------------
