@@ -27,16 +27,10 @@ local main, folder_check, get_color_table, get_path, trackname_check
 ---------------------------------------------------------------------
 
 function main()
-    local folders, _, _, ref_count = folder_check()
+    local folders, _, _, _ = folder_check()
     if folders == 0 then
         MB("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
             "Add Referece Track", 0)
-        return
-    end
-
-    if ref_count > 0 then
-        MB("Only one reference track is allowed per project.",
-            "Add Reference Track", 0)
         return
     end
 

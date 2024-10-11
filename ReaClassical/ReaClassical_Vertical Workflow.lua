@@ -743,7 +743,10 @@ function create_track_table(is_empty)
             GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", 1)
         elseif trackname_check(track, "^REF") or ref_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", 1)
-            GetSetMediaTrackInfo_String(track, "P_NAME", "REF", 1)
+            local mod_name = name:match("^REF:?(.*)") or name
+            if name ~= "REF" then
+                GetSetMediaTrackInfo_String(track, "P_NAME", "REF:" .. mod_name, 1)
+            end
         elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else
