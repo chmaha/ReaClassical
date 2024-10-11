@@ -95,8 +95,14 @@ function main()
     elseif folder_check() == 1 then
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
         if RCProject ~= "y" then
-            MB("This function can only run on a ReaClassical project. Create a new empty project and press F7.","Horizontal Workflow",0)
-            return
+            local _, _, _, _, mixer_tracks = create_track_table(is_empty)
+            if #mixer_tracks == 0 then
+                MB("This function can only run on a ReaClassical project. Create a new empty project and press F7.",
+                    "Horizontal Workflow", 0)
+                return
+            else
+                SetProjExtState(0, "ReaClassical", "RCProject", "y")
+            end
         end
         local is_empty = false
         Main_OnCommand(focus, 0)

@@ -102,8 +102,14 @@ function main()
     elseif folder_check() > 1 then
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
         if RCProject ~= "y" then
-            MB("This function can only run on a ReaClassical project. Create a new empty project and press F7 or F8.","Vertical Workflow",0)
-            return
+            local _, _, _, _, mixer_tracks = create_track_table(is_empty)
+            if #mixer_tracks == 0 then
+                MB("This function can only run on a ReaClassical project. Create a new empty project and press F7.",
+                    "Vertical Workflow", 0)
+                return
+            else
+                SetProjExtState(0, "ReaClassical", "RCProject", "y")
+            end
         end
         local is_empty = false
         rcmaster_exists = special_check()
@@ -137,13 +143,13 @@ function main()
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
-       
+
         copy_track_names(table, mixer_tracks)
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
             local response = ShowMessageBox(
-            "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
+                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
             \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
             a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
                 1)
@@ -165,8 +171,14 @@ function main()
     elseif folder_check() == 1 then
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
         if RCProject ~= "y" then
-            MB("This function can only run on a ReaClassical project. Create a new empty project and press F7 or F8.","Vertical Workflow",0)
-            return
+            local _, _, _, _, mixer_tracks = create_track_table(is_empty)
+            if #mixer_tracks == 0 then
+                MB("This function can only run on a ReaClassical project. Create a new empty project and press F7.",
+                    "Vertical Workflow", 0)
+                return
+            else
+                SetProjExtState(0, "ReaClassical", "RCProject", "y")
+            end
         end
         local is_empty = true
         rcmaster_exists = special_check()
@@ -194,13 +206,13 @@ function main()
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
-       
+
         copy_track_names(table, mixer_tracks)
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
         if not success then
             local response = ShowMessageBox(
-           "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
+                "You’re using a version of ReaClassical that supports track rearrangement through the mixer panel.\
             \nAre you ready to upgrade the project to enable this feature? Press Cancel if you’ve recently dragged\
             a mixer track as you will need to reset its position before proceeding.", "Vertical Workflow",
                 1)
