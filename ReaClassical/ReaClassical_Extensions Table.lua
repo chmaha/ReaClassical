@@ -45,9 +45,16 @@ return {
     unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN"),
     unselect_tracks = NamedCommandLookup("_SWS_UNSELONTRACKS"),
     v_zoom_fit = NamedCommandLookup("_SWS_VZOOMFIT"),
-    h_zoom_fit = NamedCommandLookup("_SWS_ZOOMSIT")
-    }
+    h_zoom_fit = NamedCommandLookup("_SWS_ZOOMSIT"),
+    delete_all_regions = NamedCommandLookup("_SWSMARKERLIST10"),
+    delete_all_markers = NamedCommandLookup("_SWSMARKERLIST9"),
+    arm_active_env = NamedCommandLookup("_S&M_ARMALLENVS"),
+    remove_track_grouping = NamedCommandLookup("_S&M_REMOVE_TR_GRP"),
+    select_under_edit_cur = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX"),
+    set_rec_armed = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED"),
+    set_rec_unarmed = NamedCommandLookup("_XENAKIOS_SELTRAX_RECUNARMED"),
+    adaptive_delete = NamedCommandLookup("_XENAKIOS_TSADEL"),
+    scroll_to_home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
+}
 
 ---------------------------------------------------------------------
-
-
