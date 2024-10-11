@@ -22,13 +22,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check
+local main, folder_check, show_track_name_dialog, add_rcmaster
+local create_mixer_table
 
 ---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
-    if folder_check() > 0 then
+    local folders = folder_check()
+    if folders > 0 then
         MB("You can either import your media on one regular track for horizontal editing \z
                         or on multiple regular tracks for a vertical workflow.\n\z
                         The function will automatically create the required folder group(s).\z
@@ -36,12 +38,16 @@ function main()
                     please use on an empty project tab and copy across.", "Error: Folders detected!", 0)
         return
     end
-    if CountSelectedMediaItems(0) == 0 then
-        MB("Please select one or more multi-channel media items before running the script.", "Error", 0)
-        return
+    SetProjExtState(0, "ReaClassical", "RCProject", "y")
+
+    for i = CountTracks(0) - 1, 0, -1 do
+        local track = GetTrack(0, i)
+        if CountTrackMediaItems(track) == 0 then
+            reaper.DeleteTrack(track)
+        end
     end
 
-    SetProjExtState(0, "ReaClassical", "RCProject", "y")
+    Main_OnCommand(40182, 0) -- select all items
     local num = CountSelectedMediaItems(0, 0)
 
     local takes = {}
@@ -66,7 +72,7 @@ function main()
             local track_number = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER")
             if track_number == prev_track_number then goto continue end
             local second_track = GetTrack(0, track_number)
-            local third_track = GetTrack(0, track_number+1)
+            local third_track = GetTrack(0, track_number + 1)
             DeleteTrack(second_track)
             DeleteTrack(third_track)
             prev_track_number = track_number
@@ -88,12 +94,24 @@ function main()
     end
     Main_OnCommand(40769, 0) -- unselect all items
 
-    if folder_check() == 1 then -- run F7
-        local group = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(group, 0)
-    else -- run F8
-        local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(sync, 0)
+    add_rcmaster()
+    local updated_folders = folder_check()
+    local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+    local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+
+    if updated_folders == 1 then -- run F7
+        Main_OnCommand(F7_sync, 0)
+    else                         -- run F8
+        Main_OnCommand(F8_sync, 0)
+    end
+
+    local mixer_tracks = create_mixer_table()
+    show_track_name_dialog(mixer_tracks)
+
+    if updated_folders == 1 then -- run F7
+        Main_OnCommand(F7_sync, 0)
+    else                         -- run F8
+        Main_OnCommand(F8_sync, 0)
     end
 
     Undo_EndBlock("Explode multi-channel audio", 0)
@@ -111,6 +129,83 @@ function folder_check()
         end
     end
     return folders
+end
+
+---------------------------------------------------------------------
+
+function show_track_name_dialog(mixer_tracks)
+    local max_inputs_per_dialog = 8
+    local success = true
+    local track_names = {}
+
+    -- Loop to handle all tracks in chunks
+    for start_track = 1, #mixer_tracks, max_inputs_per_dialog do
+        local end_track = math.min(start_track + max_inputs_per_dialog - 1, #mixer_tracks)
+        local input_string = ""
+
+        for i = start_track, end_track do
+            input_string = input_string .. "Track " .. i .. " :,"
+        end
+
+        local ret, input = GetUserInputs("Enter Track Names " .. start_track .. "-" .. end_track,
+            end_track - start_track + 1,
+            input_string .. ",extrawidth=100", "")
+        if not ret then
+            return false
+        end
+
+        local inputs_track_table = {}
+        for input_value in string.gmatch(input, "[^,]+") do
+            table.insert(inputs_track_table, input_value:match("^%s*(.-)%s*$"))
+        end
+
+        for i = 1, #inputs_track_table do
+            track_names[start_track + i - 1] = inputs_track_table[i]
+        end
+    end
+
+    for i, track in ipairs(mixer_tracks) do
+        if track then
+            local ret = GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. (track_names[i] or ""), true)
+            if not ret then
+                success = false
+            end
+        else
+            success = false
+        end
+    end
+
+    return success
+end
+
+---------------------------------------------------------------------
+
+function add_rcmaster()
+    local num_of_tracks = CountTracks(0)
+    InsertTrackAtIndex(num_of_tracks, true) -- add RCMASTER
+    local rcmaster = GetTrack(0, num_of_tracks)
+    GetSetMediaTrackInfo_String(rcmaster, "P_EXT:rcmaster", "y", 1)
+    GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "RCMASTER", 1)
+    return rcmaster
+end
+
+---------------------------------------------------------------------
+
+function create_mixer_table()
+    local num_of_tracks = CountTracks(0)
+    local mixer_tracks = {}
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+        if mixer_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
+            local mod_name = string.match(name, "M?:?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, 1)
+            table.insert(mixer_tracks, track)
+        end
+    end
+    return mixer_tracks
 end
 
 ---------------------------------------------------------------------
