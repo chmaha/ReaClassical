@@ -118,16 +118,27 @@ function main()
             local item_track = GetMediaItemTrack(item)
             DeleteTrackMediaItem(item_track, item)
         end
+
+        for i = CountTracks(0) - 1, 0, -1 do
+            local track = GetTrack(0, i)
+            if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                local second_track = GetTrack(0, i + 1)
+                if second_track then
+                    DeleteTrack(track)
+                    SetMediaTrackInfo_Value(second_track, "I_FOLDERDEPTH", 1)
+                end
+            end
+        end
     end
 
-    Main_OnCommand(40769, 0)   -- unselect all items
+    Main_OnCommand(40769, 0)    -- unselect all items
     PreventUIRefresh(1)
-    Main_OnCommand(40296, 0)   -- select all tracks
+    Main_OnCommand(40296, 0)    -- select all tracks
     local collapse = NamedCommandLookup("_SWS_COLLAPSE")
     Main_OnCommand(collapse, 0) -- collapse all tracks
-    Main_OnCommand(40939, 0)   -- select track 1
+    Main_OnCommand(40939, 0)    -- select track 1
     local show = NamedCommandLookup("_SWS_FOLDSMALL")
-    Main_OnCommand(show, 0)    -- show child tracks
+    Main_OnCommand(show, 0)     -- show child tracks
 
     add_rcmaster()
     local updated_folders = folder_check()
