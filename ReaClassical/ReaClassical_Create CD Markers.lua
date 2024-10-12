@@ -449,7 +449,7 @@ function generate_interpolated_fade(item_pos, env, start_time, end_time, shape, 
 
   -- interpolate fade curve with existing points
   if end_time > start_time then
-    for time = start_time, end_time, (length / steps) do
+    for time = start_time, end_time-1e-10, (length / steps) do
       local point_val = fade_table.fade_calc(shape, time, start_time, end_time, curvature, is_fade_in)
       local _, multiplier = Envelope_Evaluate(env, time, 44100, 128)
       multiplier = ScaleFromEnvelopeMode(is_scale, multiplier)
