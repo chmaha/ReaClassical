@@ -294,9 +294,9 @@ function mixer()
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
 
-        if trackname_check(track, "^S%d+:") then
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
-        end
+        -- if trackname_check(track, "^S%d+:") then
+        --     SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
+        -- end
 
         local states_for_mastering = mixer_state == "y" or aux_state == "y"
             or submix_state == "y" or rcmaster_state == "y"

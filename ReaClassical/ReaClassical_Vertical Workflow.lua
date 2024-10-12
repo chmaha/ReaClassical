@@ -436,7 +436,8 @@ function mixer()
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
 
-        if trackname_check(track, "^S%d+:") then
+        local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", 0)
+        if trackname_check(track, "^S%d+:") or source_track == "y" then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
         end
 
@@ -560,10 +561,12 @@ function copy_track_names(track_table, mixer_table)
 
     local dest_parent = track_table[1].parent
     GetSetMediaTrackInfo_String(dest_parent, "P_NAME", "D:" .. track_names[1], 1)
+    GetSetMediaTrackInfo_String(dest_parent, "P_EXT:Destination", "y", 1)
 
     for i = 1, #track_table[1].tracks do
         local dest_track = track_table[1].tracks[i]
         GetSetMediaTrackInfo_String(dest_track, "P_NAME", "D:" .. (track_names[i + 1] or ""), 1)
+        GetSetMediaTrackInfo_String(dest_track, "P_EXT:Destination", "y", 1)
     end
 
     -- for rest, prefix Si: where i = number starting at 1
@@ -571,6 +574,7 @@ function copy_track_names(track_table, mixer_table)
         local source_parent = track_table[i].parent
         local parent_mod_name = track_names[1]
         GetSetMediaTrackInfo_String(source_parent, "P_NAME", "S" .. i - 1 .. ":" .. parent_mod_name, 1)
+        GetSetMediaTrackInfo_String(source_parent, "P_EXT:Source", "y", 1)
 
         local num_of_names = #track_names
         local j = 1
@@ -579,6 +583,7 @@ function copy_track_names(track_table, mixer_table)
             if track_index == 1 then track_index = 2 end
             local source_mod_name = track_names[track_index]
             GetSetMediaTrackInfo_String(source_track, "P_NAME", "S" .. (i - 1) .. ":" .. source_mod_name, 1)
+            GetSetMediaTrackInfo_String(source_track, "P_EXT:Source", "y", 1)
             j = j + 1
         end
     end

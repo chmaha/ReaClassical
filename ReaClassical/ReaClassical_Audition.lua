@@ -280,7 +280,8 @@ function mixer()
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
 
-        if trackname_check(track, "^S%d+:") then
+        local _, source_track = GetSetMediaTrackInfo_String(source_track, "P_EXT:Source", "", 0)
+        if trackname_check(track, "^S%d+:") or source_track == "y" then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
         end
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y" then
