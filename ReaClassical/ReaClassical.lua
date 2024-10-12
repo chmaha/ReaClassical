@@ -1,10 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.14
+@version 24.24.15
 @changelog
-  Explode Multi-Channel: Improve by auto-deleting empty tracks, selecting all polywavs and presenting track naming dialog
-  Allow for multiple REF tracks
-  PDF Manual: Revise Explode Multi-Channel section
+  Vertical Workflow: Add P_EXT to dest and source tracks for id
+  Various: Check for P_EXT state in addition to name check
+  Explode Multi-Channel: Allow use of first track given single mixer paradigm
+  Vertical Workflow: When converting from horizontal workflow, move first group items down to first source group
+  Explode Multi-Channel: Add prepare takes etc
+  Explode Multi-Channel: Provide for edge case of importing mono or stereo files
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
