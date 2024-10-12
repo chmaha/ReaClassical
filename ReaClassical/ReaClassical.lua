@@ -1,13 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.15
+@version 24.24.16
 @changelog
-  Vertical Workflow: Add P_EXT to dest and source tracks for id
-  Various: Check for P_EXT state in addition to name check
-  Explode Multi-Channel: Allow use of first track given single mixer paradigm
-  Vertical Workflow: When converting from horizontal workflow, move first group items down to first source group
-  Explode Multi-Channel: Add prepare takes etc
-  Explode Multi-Channel: Provide for edge case of importing mono or stereo files
+  Create CD Markers: Fix automation curves for roomtone
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
