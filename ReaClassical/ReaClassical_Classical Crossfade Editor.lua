@@ -319,15 +319,22 @@ function folder_check()
     local total_tracks = CountTracks(0)
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
-        local mixer = trackname_check(track, "^M:")
-        local rcm = trackname_check(track, "^RCMASTER")
-        local send = trackname_check(track, "^@")
-        local bus = trackname_check(track, "^#")
-        local rt = trackname_check(track, "^RoomTone")
-        local ref = trackname_check(track, "^REF")
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+
+        local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
+            or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"
+        local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
+            or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
+            or trackname_check(track, "^REF")
+
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1
-        elseif folders == 1 and not (mixer or rcm or send or bus or rt or ref) then
+        elseif folders == 1 and not (special_states or special_names) then
             tracks_per_group = tracks_per_group + 1
         end
     end

@@ -250,33 +250,45 @@ function mixer()
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        if trackname_check(track, "^M:") then
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+
+        if trackname_check(track, "^M:") or mixer_state == "y" then
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^@") then
+        if trackname_check(track, "^@") or aux_state == "y" then
             SetTrackColor(track, colors.aux)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^#") then
+        if trackname_check(track, "^#") or submix_state == "y" then
             SetTrackColor(track, colors.submix)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^RoomTone") then
+        if trackname_check(track, "^RoomTone") or rt_state == "y" then
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "^REF") then
+        if trackname_check(track, "^REF") or ref_state == "y" then
             SetTrackColor(track, colors.ref)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
-        if trackname_check(track, "RCMASTER") then
+        if trackname_check(track, "RCMASTER") or rcmaster_state == "y" then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#")
-            or trackname_check(track, "^RCMASTER") or trackname_check(track, "^RoomTone")
-            or trackname_check(track, "^REF") then
+
+        local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
+            or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"
+        local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
+            or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
+            or trackname_check(track, "^REF")
+
+        if special_states or special_names then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -285,8 +297,12 @@ function mixer()
         if trackname_check(track, "^S%d+:") then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
         end
-        if trackname_check(track, "^M:") or trackname_check(track, "^@") or trackname_check(track, "^#")
-            or trackname_check(track, "^RCMASTER") then
+
+        local states_for_mastering = mixer_state == "y" or aux_state == "y"
+            or submix_state == "y" or rcmaster_state == "y"
+        local names_for_mastering = trackname_check(track, "^M:") or trackname_check(track, "^@")
+            or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER")
+        if states_for_mastering or names_for_mastering then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
         end
         if mastering == 1 and i == 0 then
