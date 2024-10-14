@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.17
+@version 24.24.18
 @changelog
-  Classical Crossfade Editor: Allow entry via mouse hover if preferences set for mouse hover S-D markers
-  PDF Manual: Various changes
+  Next/Previous Fade: Account for fade toggle being -1 on opening project
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
