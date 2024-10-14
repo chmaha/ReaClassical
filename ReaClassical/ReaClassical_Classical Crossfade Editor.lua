@@ -63,7 +63,11 @@ function main()
             SetProjExtState(0, "ReaClassical", "OrigSelectedItem", orig_item_guid)
             fadeStart(item1)
         else
-            MB("Please select the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
+            if sdmousehover == 1 then
+                MB("Please hover over the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
+            else
+                MB("Please select the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
+            end
         end
     else
         fadeEnd()
