@@ -4668,8 +4668,29 @@ While REAPER includes an excellent crossfade editor,
  The ability to visually align transients and then position the crossfade just before it is absolutely critical (and fun when you have the tools to do it!).
  So,
  beyond the standard REAPER crossfade editor what have I provided?
- Select the right-hand item of a fade,
- Press 
+ Select the right-hand item of a fade (or hover over the item if 
+\begin_inset Quotes bld
+\end_inset
+
+Add S-D Markers at Mouse Hover
+\begin_inset Quotes brd
+\end_inset
+
+ is set to 1 in ReaClassical Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+),
+ press 
 \begin_inset ERT
 status open
 
@@ -8045,6 +8066,21 @@ keys{4}
 \end_inset
 
  to add markers at the mouse hover position vs edit cursor.
+ In this mode,
+ you can also enter the fade editor by hovering of the right-hand items of a crossfaded pair and pressing 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F}
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -9102,7 +9138,28 @@ Notes:
  
 \emph default
 To enter the crossfade view,
- select the lefthand item of a crossfaded item pair.
+ select the right-hand item of a crossfaded item pair (or hover over the item if 
+\begin_inset Quotes bld
+\end_inset
+
+Add S-D Markers at Mouse Hover
+\begin_inset Quotes brd
+\end_inset
+
+ is set to 1 in ReaClassical Preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+).
  The user is then presented with a zoomed-in view of the edit.
  Red is always the left item,
  green the right.
@@ -10739,7 +10796,7 @@ keys{F}
 
 \end_inset
 
- Open ReaClassical Fade Editor
+ Open ReaClassical Crossfade Editor
 \end_layout
 
 \begin_layout Labeling
