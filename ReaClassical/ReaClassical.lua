@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.16
+@version 24.24.17
 @changelog
-  Create CD Markers: Fix automation curves for roomtone
+  Classical Crossfade Editor: Allow entry via mouse hover if preferences set for mouse hover S-D markers
+  PDF Manual: Various changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
