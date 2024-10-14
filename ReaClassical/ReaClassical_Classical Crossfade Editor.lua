@@ -35,12 +35,28 @@ if not SWS_exists then
     return
 end
 
+local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+local sdmousehover = 0
+if input ~= "" then
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[9] then sdmousehover = tonumber(table[9]) or 0 end
+end
+
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local state = GetToggleCommandState(fade_editor_toggle)
 
 function main()
     Undo_BeginBlock()
     if state == -1 or state == 0 then
+        if sdmousehover == 1 then
+        BR_GetMouseCursorContext()
+        local hover_item = BR_GetMouseCursorContext_Item()
+        if hover_item ~= nil then
+            Main_OnCommand(40289, 0) -- Item: Unselect all items
+            SetMediaItemSelected(hover_item, 1)
+        end
+    end
         local selected_item, item1 = select_check()
         if item1 and check_next_item_overlap(item1) then
             local orig_item_guid = BR_GetMediaItemGUID(selected_item)
