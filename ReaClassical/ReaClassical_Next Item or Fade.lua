@@ -57,7 +57,7 @@ end
 ---------------------------------------------------------------------
 
 function move_to_item()
-    if win_state == 0 then
+    if win_state == 0 or win_state == -1 then
         Main_OnCommand(40417, 0) -- Select and move to next item
     elseif win_state == 1 then
         local item = GetSelectedMediaItem(0, 0)
