@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.12
+@version 1.13
 @changelog
-  Mid-Side: Show pan controls
+  RCInflator: Correct typo in name
 @metapackage
 @provides
   RCComp.jsfx
