@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <!--   <meta http-equiv="Refresh" content="0; url='https://reaclassical.github.io'" /> -->
+  <meta charset="utf-8">
+  <title>ReaClassical Quick Start Guide</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/custom.css">
+
+  <!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+
+<body>
+  <div class="container">
+    <section class="header">
+      <div class="row">
+        <div class="twelve columns" style="margin-top: 5%">
+          <img class="rounded u-max-full-width" src="images/reaclassical_os.png" alt="ReaClassical Logo">
+        </div>
+      </div>
+      <h2 class="title">Quick Start Guide</h2>
+      <div class="navbar-spacer"></div>
+      <div class="container">
+        <select id="sectionSelect" onchange="showSection()">
+          <option value="">Select a Section</option>
+          <option value="install">Installation & Update</option>
+          <option value="workflows">Workflow Choice</option>
+          <option value="recording">Recording</option>
+          <option value="importing">Importing</option>
+          <option value="auditioning">Auditioning</option>
+          <option value="editing">Editing</option>
+          <option value="xfade">Crossfade Editor</option>
+          <option value="mixing">Mixing</option>
+          <option value="automation">Automation</option>
+          <option value="mastering">Mastering</option>
+          <option value="rendering">Rendering</option>
+          <option value="plugins">ReaClassical Plugins</option>
+        </select>
+      </div>
+    </section>
+
+    <div id="intro" class="row">
+      <div class="four columns" style="margin-top: 5%;">
+        <p>Welcome to the ReaClassical Quick Start Guide. Use the dropdown menu above to select a section and get
+          started
+          with installation, recording, editing, mixing, mastering and more! This guide will walk you through each step
+          with helpful instructions and images. For more detailed information and to get the most out of ReaClassical,
+          please read the <a
+            href="https://github.com/chmaha/ReaClassical/raw/main/PDF-Manual/ReaClassical-Manual.pdf">PDF
+            Manual</a>.
+        </p>
+      </div>
+      <div class="eight columns" style="margin-top: 5%;">
+        <img style="max-width:100%" src="images/intro.webp">
+      </div>
+    </div>
+
+    <!-- Section Contents -->
+    <div id="install" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Installation & Update</h6>
+      <div class="row">
+        <div class="four columns">
+          <h6 class="docs-header">Windows</h6>
+          <ol>
+            <li>Download <a
+                href="https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win64.exe">64-bit</a>
+              or <a
+                href="https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win32.exe">32-bit</a>
+              install binary where you'd like to place the ReaClassical folder</li>
+            <li>Double Click!</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <div class="row">
+        <div class="four columns">
+          <h6 class="docs-header">MacOS</h6>
+          <ol>
+            <li>Open a terminal and navigate to where you'd like the ReaClassical folder to be located.</li>
+            <li>
+              <span id="mac-command" style="cursor: pointer; color: blue; text-decoration: underline;"
+                onclick="copyToClipboard('mac')">Copy this command to the clipboard</span>
+              <span id="macCopyMessage" style="display:none; color: green; margin-left: 10px;">Command copied to
+                clipboard!</span>
+            </li>
+            <li>Paste into the terminal and press enter!</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <div class="row">
+        <div class="four columns">
+          <h6 class="docs-header">Linux</h6>
+          <ol>
+            <li>Open a terminal and navigate to where you'd like the ReaClassical folder to be located.</li>
+            <li>
+              <span id="linux-command" style="cursor: pointer; color: blue; text-decoration: underline;"
+                onclick="copyToClipboard('linux')">Copy this command to the clipboard</span>
+              <span id="linuxCopyMessage" style="display:none; color: green; margin-left: 10px;">Command copied to
+                clipboard!</span>
+            </li>
+            <li>Paste into the terminal and press enter!</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <div class="row">
+        <div class="four columns">
+          <h6 class="docs-header">Updating</h6>
+          <ol>
+            <li>Press Shift+U to update ReaClassical.</li>
+            <li>Wait for the ReaPack update process to complete then answer "Yes" to update the ReaClassical keymap and
+              toolbar as necessary.</li>
+            <li>Press Ctrl+U to update REAPER. Check <a
+                href="https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/tested_reaper_ver.txt"
+                target="_blank">here</a> for the latest tested version.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="workflows" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Horizontal Workflow</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Press F7 in an empty project.</li>
+            <li>Choose the number of tracks you need and name them.</li>
+            <li>If recording, auto set recording inputs based on track names ("pair", "stereo" etc).</li>
+            <li>Rename "M:" mixer tracks and press F7 to sync the names to regular tracks.</li>
+            <li>Convert to a vertical workflow at any point by pressing F8.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Vertical Workflow</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Press F8 in an empty project.</li>
+            <li>Choose the number of tracks you need and name them.</li>
+            <li>If recording, auto set recording inputs based on track names ("pair", "stereo" etc).</li>
+            <li>You now have one "destination" group and six "source" groups</li>
+            <li>Rename "M:" mixer tracks and press F8 to sync the names to all track folders.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="recording" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Recording</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Press F7 or F8.</li>
+            <li>Choose the number of tracks you need and name them.</li>
+            <li>Auto set recording inputs based on track names ("pair", "stereo" etc).</li>
+            <li>Press F9, and check recording levels.</li>
+            <li>Press F9 to start and stop recording until finished.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="importing" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Importing</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Press F7 or F8.</li>
+            <li>Choose number of tracks and name them.</li>
+            <li>Decline to auto set recording inputs based on track names.</li>
+            <li>Drag in files in groups, take by take</li>
+            <li>Press T to prepare takes for editing</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Polywavs</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>In an empty project double-click in the track panel to create one or more regular REAPER tracks.</li>
+            <li>Drag in one or more polywavs.</li>
+            <li>Press F10.</li>
+            <li>If the first two channels of your polywav are the main stereo pair, answer "yes" to the
+              stereo-interleaved question.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="auditioning" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Auditioning</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Hover over a parent track item and press A to hear the whole mix</li>
+            <li>Hover over a child track to just hear that track</li>
+            <li>Press spacebar to stop playback</li>
+            <li>Mute or solo mixer tracks to create a custom audition mix</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="editing" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">S-D Editing</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Add S-D markers via 1,2,3 & 4 shortcuts. To place source markers on lower source group material, click
+              on the item to place the edit cursor.</li>
+            <li>Press 5.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Assembly Line Edits</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Add one destination marker (1) and both source markers (3,4). To place source markers on lower source
+              group material, click
+              on the item to place the edit cursor.</li>
+            <li>Press F3.</li>
+            <li>The destination marker is moved to the end of the edit ready for the next edit.</li>
+            <li>If you accidentally move the destination marker, don't worry. The function will offer to place it back
+              in the correct position.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Insert with Time-stretch</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Add S-D markers via 1,2,3 & 4 shortcuts. To place source markers on lower source group material, click
+              on the item to place the edit cursor.</li>
+            <li>Press F4.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="xfade" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Crossfade Editor</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Select the right-hand item of a crossfade pair and press F.</li>
+            <li>Press Z to mirror extend the edges of both items.</li>
+            <li>Align green item transients with red's</li>
+            <li>Place edit cursor at desired position and press X.</li>
+            <li>Press F to leave the crossfade editor or press Q or W to go to previous or next crossfade.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Auditioning Inside the Crossfade Editor</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Hover the mouse and press A to audition a crossfade.</li>
+            <li>Hover and press A in empty space to set mirrored audition in/out points.</li>
+            <li>Hover and press A on the red item to only hear the left side of the fade.</li>
+            <li>Hover and press A on the green item to only hear the right side of the fade.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="mixing" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Mixing Basics</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>ReaClassical uses a single mixer paradiym like <i>Merging Pyramix</i>. All regular tracks feed into
+              mixer
+              tracks (with an "M:" prefix). All routing ends up at an "RCMASTER" bus.</li>
+            <li>Add a hyphen (-) suffix to any "M:" mixer track to disable direct connection to RCMASTER. This is very
+              useful for setting up mixbusses.Press F7 or F8 to set active.</li>
+
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Aux & Submixes</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Press @ to add an aux send (i.e. reverb) or # to add a submix track.</li>
+            <li>You can add hyphens (-) to aux or submix tracks too to create extremely customized routing. Press F7 or
+              F8 to set active.</li>
+            <li>Click-drag from stripes on "M:" mixer track to the special track you want to connect to.</li>
+            <li>Likewise, in the case of multiple layers of mixbusses, click-drag from one to another.</li>
+
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Room Tone & Reference Tracks</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Press ~ (tilde) to set up a roomtone track and drag in some generated room tone (see "mastering" section
+              for more details).</li>
+            <li>Press ' (single quote) to set up a reference track and drag in some audio. This is outside the RCMASTER
+              structure enabling
+              quick A/Bing of your material against others.</li>
+            <li>You have the ability to set the reference track to be an overdub guide (see PDF manual for details).
+            </li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="automation" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Automation</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Enter Mastering Mode by setting in ReaClassical Preferences (F5).</li>
+            <li>Engage Automation Mode by Ctrl+I</li>
+            <li>Change a fader or any other mixer control or FX parameter</li>
+            <li>Drag a time selection and press I to only affect that area.</li>
+            <li>Alternatively place the edit cursor and press I to affect everything to the right of the cursor.</li>
+            <li>Press Ctrl+I to exit automation mode.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="mastering" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Mastering an Album</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Press Ctrl+T to remove all names from items on the destination parent track.</li>
+            <li>Double-click on, or select and press F2, only items that should be treated as album track starts.</li>
+            <li>Press Y to start the CD/Album wizard.</li>
+            <li>Enter metadata, optionally ISRC etc.</li>
+            <li>To export an album report and CUE file, press C.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Room Tone</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>If you have some generated room tone the length of your album, pressing Y will also create seamless
+              automation fade in and outs to dovetail with audio.</li>
+            <li>To re-order tracks, select an item that starts a CD/album track and press Ctrl+left or right to move.
+            </li>
+            <li>To re-position all CD tracks to have the same gaps, press Ctrl+Y and enter a number in seconds.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+      <h6 class="docs-header" style="margin-top:5%">Re-ordering and Re-positioning Album Tracks</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>If you have some generated room tone the length of your album, pressing Y will also create seamless
+              automation fade in and outs to dovetail with audio.</li>
+            <li>To re-order tracks, select an item that starts a CD/album track and press Ctrl+left or right to move.
+            </li>
+            <li>To re-position all CD tracks to have the same gaps, press Ctrl+Y and enter a number in seconds.</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="rendering" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">Rendering</h6>
+      <div class="row">
+        <div class="four columns">
+          <ol>
+            <li>Once your album is ready to export, press R.</li>
+            <li>Select a ReaClassical preset from the dropdown menu under "All Settings".</li>
+            <li>Optionally add normalizing and/or limiting</li>
+            <li>Press "Dry Run" or "Render"</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+
+    <div id="plugins" class="section-content" style="display:none;">
+      <h6 class="docs-header" style="margin-top:5%">ReaClassical Plugins</h6>
+      <div class="row">
+        <div class="four columns">
+          <p>ReaClassical ships with a number of "mastering" grade plugins.
+            For more detail, please read the <a
+              href="https://github.com/chmaha/ReaClassical/raw/main/PDF-Manual/ReaClassical-Manual.pdf">PDF
+              Manual</a>.</p>
+          <ol>
+            <li>Two EQs: <i>RCChannelEQ</i>, <i>RCMasteringEQ</i></li>
+            <li>Two compressors: <i>RCCompressor</i> & <i>RCParallelK Compressor</i></li>
+            <li>A true peak limiter: <i>RCLimiter</i></li>
+            <li>Utilities: <i>RCGain</i>, <i>RCTime&PhaseTool</i> (for accurately timing spot microphones) and
+              <i>RCMidSide</i> (for encoding and decoding Mid-Side
+              signals)</li>
+            <li>24-bit and 16-bit Dither via <i>RCDither</i></li>
+            <li><i>RCDeEss</i> & <i>RCDeEss Advanced</i></li>
+            <li><i>RCConsole</i> Series for adding an analog touch</li>
+            <li>Final polish via <i>RCInflator Ultimate (Sonnox clone)</i> and <i>MagicFairyDust</i></li>
+            <li>Plus third-party offerings including <i>ReEQ</i> (a Pro-Q clone) and <i>ReaPlugs</i>, REAPER's own
+              fantastic plugin set</li>
+          </ol>
+        </div>
+        <div class="eight columns">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+          <img style="max-width:100%" src="https://placehold.co/1920x1080.png">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showSection() {
+      const sections = document.querySelectorAll('.section-content');
+      const intro = document.getElementById('intro');
+
+      // Hide all sections initially
+      sections.forEach(section => section.style.display = 'none');
+
+      // Get selected section value
+      const selectedSection = document.getElementById('sectionSelect').value;
+
+      // Show the selected section or intro text
+      if (selectedSection) {
+        intro.style.display = 'none';
+        document.getElementById(selectedSection).style.display = 'block';
+      } else {
+        intro.style.display = 'block';
+      }
+    }
+
+    function copyToClipboard(platform) {
+      let command;
+      let messageId;
+
+      if (platform === 'mac') {
+        command = "curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_macOS.sh | sh";
+        messageId = 'macCopyMessage';
+      } else if (platform === 'linux') {
+        command = "curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Linux.sh | sh";
+        messageId = 'linuxCopyMessage';
+      }
+
+      // Copy to clipboard
+      navigator.clipboard.writeText(command).then(() => {
+        // Hide all copy messages first
+        document.querySelectorAll('[id$="CopyMessage"]').forEach(msg => msg.style.display = 'none');
+
+        // Show the specific message for the selected platform
+        document.getElementById(messageId).style.display = 'inline';
+
+        // Hide message after a few seconds
+        setTimeout(() => {
+          document.getElementById(messageId).style.display = 'none';
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+
+</html>
