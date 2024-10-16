@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.18
+@version 24.24.19
 @changelog
-  Next/Previous Fade: Account for fade toggle being -1 on opening project
+  Take Counter: Open with F9 Classical Take Record if not already running
+  PDF Manual: Add updated info for classical take record + take counter window
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
