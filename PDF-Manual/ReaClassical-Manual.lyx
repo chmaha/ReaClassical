@@ -2815,15 +2815,7 @@ tab}
 
 \end_inset
 
- (tab) moves to a selected item's highest peak value which can be useful when applying volume automation as a quick way to transparently 
-\begin_inset Quotes bld
-\end_inset
-
-limit
-\begin_inset Quotes brd
-\end_inset
-
- a stray peak.
+ (tab) moves the edit cursor to a time within a selected item or items.
  
 \end_layout
 
@@ -7376,6 +7368,20 @@ Description:
 Notes:
 
 \emph default
+ The window will also open automatically with Classical Take Record (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+) if not already running.
  It is advised to save your project and name your tracks before starting to record.
  This ensures that the recorded files have usefully unique names.
  You can right-click on the window to override automatic take numbering (0 = off (recommended),
@@ -7440,7 +7446,7 @@ keys{F9}
 
  .
  If the parent isn't already record-armed (probably the case before you start your first recording of the session),
- the function will first simply record-arm the group so you can usefully monitor incoming signal.
+ the function will first simply record-arm the group so you can usefully monitor incoming signal in addition to opening the take counter window.
  On a subsequent press of 
 \begin_inset ERT
 status open
