@@ -74,6 +74,9 @@ else
   session = ""
 end
 
+local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
+SetToggleCommandState(1, take_counter, 1)
+
 ---------------------------------------------------------------------
 
 function main()
@@ -238,15 +241,14 @@ end
 ---------------------------------------------------------------------
 
 function clean_up()
+  SetToggleCommandState(1, take_counter, 0)
   local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
   local pos = x .. "," .. y
   SetProjExtState(0, "ReaClassical", "TakeCounterPosition", pos)
-
   SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
 end
 
 ---------------------------------------------------------------------
 
 gfx.init("Take Number", win.width, win.height, 0, win.xpos, win.ypos)
-
 main()

@@ -44,6 +44,8 @@ if input ~= "" then
     if table[8] then ref_is_guide = tonumber(table[8]) or 0 end
 end
 
+---------------------------------------------------------------------
+
 function main()
     if track_check() == 0 then
         MB("Please add at least one folder before running", "Classical Take Record", 0)
@@ -63,6 +65,11 @@ function main()
     Main_OnCommand(40339, 0) --unmute all tracks
 
     if GetPlayState() == 0 then
+        local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
+        local state = GetToggleCommandState(take_counter)
+        if state ~= 1 then
+            Main_OnCommand(take_counter,0)
+        end
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
         mixer()
