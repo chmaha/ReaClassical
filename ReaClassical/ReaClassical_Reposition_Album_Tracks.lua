@@ -68,7 +68,8 @@ function main()
             local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
             local new_pos
             local grouped_items = get_grouped_items(current_item)
-            if take_name ~= "" and (current_item_start + shift > prev_end) then
+            local epsilon = 1e-7
+            if take_name ~= "" and (current_item_start + shift > prev_end - epsilon) then
                 new_pos = prev_end + gap
                 SetMediaItemInfo_Value(current_item, "D_POSITION", new_pos)
                 num_tracks = num_tracks + 1
