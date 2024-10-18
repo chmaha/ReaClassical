@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.20
+@version 24.24.21
 @changelog
-  Reposition album tracks: Use small value to ensure that butted items are treated as separate entities
-  PDF Manual: Add quick start guide and merch info 
+  Prepare Takes: Allow coloring when items are REAPER default or ReaClassical destination/source colors
+  PDF Manual: Update coloring info
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
