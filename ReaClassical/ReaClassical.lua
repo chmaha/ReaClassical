@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.19
+@version 24.24.20
 @changelog
-  Take Counter: Open with F9 Classical Take Record if not already running
-  PDF Manual: Add updated info for classical take record + take counter window
+  Reposition album tracks: Use small value to ensure that butted items are treated as separate entities
+  PDF Manual: Add quick start guide and merch info 
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
