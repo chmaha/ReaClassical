@@ -250,6 +250,25 @@ ReaClassical runs on any system that is compatible with REAPER (nine architectur
 \end_layout
 
 \begin_layout Section
+Quick Start Guide
+\end_layout
+
+\begin_layout Standard
+For first-time users,
+ the 
+\begin_inset CommandInset href
+LatexCommand href
+name "quick start guide"
+target "https://reaclassical.org/quick_start_guide.html"
+literal "false"
+
+\end_inset
+
+ website is a great place to learn the basics about ReaClassical.
+ Each section covers major workflow areas and contains simple step-by-step instructions with an accompanying short YouTube video for demonstration (no audio).
+\end_layout
+
+\begin_layout Section
 This Manual
 \end_layout
 
@@ -360,7 +379,7 @@ Ways to Contribute
 
 \begin_layout Standard
 The most important way users can contribute to the development of ReaClassical is to actually use the tools!
- I makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical.
+ It makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical.
  Another is to suggest features or let me know about bugs.
  You can either do this on the 
 \begin_inset CommandInset href
@@ -416,6 +435,27 @@ literal "false"
 \end_layout
 
 \begin_layout Section
+Buy ReaClassical Merch
+\end_layout
+
+\begin_layout Standard
+Get print-on-demand ReaClassical merch like shirts,
+ mugs,
+ totes,
+ pins,
+ stickers and more through my 
+\begin_inset CommandInset href
+LatexCommand href
+name "TeePublic store"
+target "https://www.teepublic.com/user/reaclassical"
+literal "false"
+
+\end_inset
+
+!
+\end_layout
+
+\begin_layout Section
 Source Code
 \end_layout
 
@@ -454,6 +494,15 @@ literal "false"
 
 \begin_layout Section
 Development Style
+\begin_inset CommandInset href
+LatexCommand href
+name "TeePublic store"
+target "https://www.teepublic.com/user/reaclassical"
+literal "false"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
