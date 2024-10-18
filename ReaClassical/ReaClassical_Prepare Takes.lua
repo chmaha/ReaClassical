@@ -151,7 +151,8 @@ function horizontal_color(flip, edits, colors)
             for i = 0, num_of_items - 1, 1 do
                 local item = GetSelectedMediaItem(0, i)
                 local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-                if current_color == 0 then
+                if current_color == 0 or current_color == colors.dest_items_one
+                    or current_color == colors.dest_items_two or current_color == colors.source_items then
                     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
                 end
             end
@@ -159,7 +160,8 @@ function horizontal_color(flip, edits, colors)
             for i = 0, num_of_items - 1, 1 do
                 local item = GetSelectedMediaItem(0, i)
                 local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-                if current_color == 0 then
+                if current_color == 0 or current_color == colors.dest_items_one
+                    or current_color == colors.dest_items_two or current_color == colors.source_items then
                     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
                 end
             end
@@ -184,7 +186,8 @@ function vertical_color_razor(colors)
         for i = 0, selected_items - 1, 1 do
             local item = GetSelectedMediaItem(0, i)
             local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-            if current_color == 0 then
+            if current_color == 0 or current_color == color_table.dest_items_one
+                or current_color == color_table.dest_items_two or current_color == color_table.source_items then
                 SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_table.source_items)
             end
         end
