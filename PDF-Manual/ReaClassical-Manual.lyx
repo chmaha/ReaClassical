@@ -3597,9 +3597,20 @@ Prepare Takes:
  This way,
  however you work,
  it’s easy to see where edits have come from.
- Prepare Takes can be re-run at any point to re-sync colors,
- especially useful when using the default color scheme.
- 
+ Prepare Takes can be re-run at any point to re-sync colors and will preserve any custom colors set via the Colorize function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{K}
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -7677,8 +7688,6 @@ With a single folder group (or individual tracks),
  the function will auto-color top to bottom and group folder items left to right.
  Essentially in either setup,
  takes are given different colors and all items associated with a take grouped for editing.
- If you don't like the colors,
- run the function again until you are happy!
  The function also allows for takes that don't start or end exactly at the same time (this can happen if you receive pre-edited materials).
  The end result is if you drag one item of a take group,
  every other item will move in sync.
@@ -7700,7 +7709,20 @@ Prepare Takes:
  value from ReaClassical Preferences to use either the new color scheme (default,
  set to 0) or the old random color method (set to 1).
  A reminder that the new REAPER native grouping (when set up via Horizontal or Vertical Workflow functions) works for 99% of situations without Prepare Takes but for takes that don't start or end at quite the same point it is a must.
- 
+ Prepare Takes honors any custom colors set via the Colorize function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{K}
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -7798,7 +7820,7 @@ Add a identifying custom color to an item and those in the same group.
 Notes:
  
 \emph default
-Useful if you need to re-record a section of music after editing has started.
+Useful for identifying where a S-D edit originated.
 \end_layout
 
 \begin_layout Standard
