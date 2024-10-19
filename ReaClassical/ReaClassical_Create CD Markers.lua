@@ -27,7 +27,7 @@ local renumber_markers, add_pregap, find_project_end, end_marker
 local frame_check, save_metadata, save_codes, add_codes, delete_markers
 local empty_items_check, return_custom_length, start_check
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
-local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
+local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone, add_roomtone_fadeout
 
 local minimum_points = 15
 local points = {}
@@ -75,8 +75,8 @@ function main()
       MB('This album does not meet the Red Book standard as it is longer than 79.57 minutes.',
         "Warning", 0)
     end
+    room_tone(redbook_project_length * 60)
   end
-  room_tone()
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
 
@@ -541,7 +541,7 @@ function fade_equations()
     local fade_func = fade_table.fadein[fade_type]
 
     if not fade_func then
-      ShowConsoleMsg("Error: Invalid fade_type:" .. fade_type)
+      MB("Error: Invalid fade_type:" .. fade_type, "RoomTone Automation", 0)
       return 0 -- Or some default behavior
     end
 
@@ -619,7 +619,7 @@ end
 
 ---------------------------------------------------------------------
 
-function room_tone()
+function room_tone(project_length)
   local first_track = GetTrack(0, 0)
   local num_of_first_track_items = CountTrackMediaItems(first_track)
 
@@ -662,7 +662,35 @@ function room_tone()
     InsertEnvelopePoint(rt_vol, val.time, val.value, 0, 1, false, false)
   end
 
+  add_roomtone_fadeout(rt_track, project_length)
+
   Main_OnCommand(40769, 0) -- unselect all tracks, items etc
+end
+
+---------------------------------------------------------------------
+
+function add_roomtone_fadeout(rt_track, project_length)
+  local rt_vol = GetTrackEnvelopeByName(rt_track, "Volume")
+  if not rt_vol then
+    rt_vol = GetTrackEnvelope(rt_track, 0)
+  end
+
+  local max_value = 716.21785031261
+
+  local fade_start = project_length - 4.0  -- Start fade 4 seconds before =END marker
+  local fade_end = fade_start + 2.0        -- 2-second fade-out duration
+
+  local num_points = 10
+
+  -- S-curve fade-out
+  for i = 0, num_points do
+    local t = i / num_points
+    local time = fade_start + t * (fade_end - fade_start)
+    local value = max_value * (1 - (t^2 * (3 - 2 * t)))
+    InsertEnvelopePoint(rt_vol, time, value, 0, 1, false, false)
+  end
+
+  Envelope_SortPoints(rt_vol)
 end
 
 ---------------------------------------------------------------------
