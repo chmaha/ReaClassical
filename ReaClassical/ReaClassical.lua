@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.21
+@version 24.24.22
 @changelog
-  Prepare Takes: Allow coloring when items are REAPER default or ReaClassical destination/source colors
-  PDF Manual: Update coloring info
+  Create CD Markers: Add room tone album fade-out
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
