@@ -1,12 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25
+@version 24.25.1
 @changelog
-  NEW: Add mastering mode function
-  ReaClassical Prefs: remove mastering mode
-  Automation Mode: Engage mastering mode if not already enabled
-  Various: Change how mastering mode value is found
-  PDF Manual: Various changes
+  Mastering and automation modes: Add SWS and RCProject check
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
