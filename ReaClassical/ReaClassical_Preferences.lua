@@ -24,13 +24,13 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 
-local NUM_OF_ENTRIES = 9
-local default_values = '35,200,3,7,0,0,500,0,0'
+local default_values = '35,200,3,7,0,500,0,0'
+local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 
 ---------------------------------------------------------------------
 
 function main()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    -- local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local pass
     local input
     repeat
@@ -42,13 +42,13 @@ function main()
 
     save_prefs(input)
 
-    if workflow == "Vertical" then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
-    elseif workflow == "Horizontal" then
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
-    end
+    -- if workflow == "Vertical" then
+    --     local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+    --     Main_OnCommand(F8_sync, 0)
+    -- elseif workflow == "Horizontal" then
+    --     local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+    --     Main_OnCommand(F7_sync, 0)
+    -- end
 end
 
 -----------------------------------------------------------------------
@@ -61,7 +61,6 @@ function display_prefs()
         'INDEX0 length (s) (>= 1)',
         'Album lead-out time (s)',
         'Prepare Takes: Random colors',
-        'Mastering Mode',
         'S-D Marker Check (ms)',
         'REF = Overdub Guide',
         'Add S-D Markers at Mouse Hover'
@@ -90,6 +89,12 @@ function load_prefs()
                 saved_entries[i] = entry
             end
             i = i + 1
+        end
+    elseif #saved_entries > NUM_OF_ENTRIES then
+        local j = 1
+        for entry in default_values:gmatch("([^,]+)") do
+                saved_entries[j] = entry
+            j = j + 1
         end
     end
 
@@ -121,7 +126,7 @@ function pref_check(input)
     local binary_error_msg = ""
     -- separate check for binary options
     if #table == NUM_OF_ENTRIES then
-        if tonumber(table[5]) > 1 or tonumber(table[6]) > 1 or tonumber(table[8]) > 1 or tonumber(table[9]) > 1 then
+        if tonumber(table[5]) > 1 or tonumber(table[7]) > 1 or tonumber(table[8]) > 1 then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end

@@ -32,14 +32,8 @@ if not SWS_exists then
 end
 
 function main()
-  local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-  local mastering = 0
-  if input ~= "" then
-    local table = {}
-    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[6] then mastering = tonumber(table[6]) or 0 end
-  end
-
+  local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
+  mastering = (mastering ~= "" and tonumber(mastering)) or 0
 
   local selected_tracks = CountSelectedTracks(0)
 

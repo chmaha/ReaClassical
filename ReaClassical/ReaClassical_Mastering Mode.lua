@@ -21,47 +21,45 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, sync_based_on_workflow
+local main, change_mastering_mode, sync_based_on_workflow
 
 ---------------------------------------------------------------------
 
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-  Main_OnCommand(42022, 0) -- Global automation override: All automation in latch preview mode
   local message
-  local _, automation = GetProjExtState(0, "ReaClassical", "AutomationModeSet")
   local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
-  if automation ~= "1" then
-    if mastering ~= "1" then
-      local save_view = NamedCommandLookup("_SWS_SAVEVIEW")
-      Main_OnCommand(save_view, 0)
-      SetProjExtState(0, "ReaClassical", "MasteringModeSet", 1)
-      local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
-      Main_OnCommand(restore_mastering_view, 0)
-    end
+  if mastering ~= "1" then
+    local save_view = NamedCommandLookup("_SWS_SAVEVIEW")
+    Main_OnCommand(save_view, 0)
+    change_mastering_mode(1)
     sync_based_on_workflow(workflow)
-    message = "You are now in \"latch preview\" automation mode (blue button)."
-        .. "\n1. Set mixer controls (volume, pan, any FX parameters)"
-        .. "\n2. Press I to place envelope points at the edit cursor location or inside a time selection if present."
-        .. "\n3. Re-run this function to return to global read mode (green button)."
-    SetProjExtState(0, "ReaClassical", "AutomationModeSet", "1")
-    MB(message, "Automation Mode", 0)
+    local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
+    Main_OnCommand(restore_mastering_view, 0)
+    message = "You are now in \"Mastering\" Mode. To leave, press Ctrl+M again.\n" ..
+        "Any source groups are hidden and mixer tracks are now shown in the TCP for automation purposes.\n" ..
+        "Automation Mode can be engaged and disengaged via the Ctrl+I toggle."
+    SetProjExtState(0, "ReaClassical", "MasteringModeSet", "1")
+    MB(message, "Mastering Mode", 0)
   else
-    SetProjExtState(0, "ReaClassical", "AutomationModeSet", "0")
+    change_mastering_mode(0)
+    SetProjExtState(0, "ReaClassical", "AutomationModeSet", 0)
     Main_OnCommand(40879, 0) -- Global automation override: All automation in latch preview mode
-    local response = MB("Would you like to leave mastering mode?", "Automation Mode", 4)
-    if response == 6 then
-      local save_mastering_view = NamedCommandLookup("_WOL_SAVEVIEWS5")
-      Main_OnCommand(save_mastering_view, 0)
-      SetProjExtState(0, "ReaClassical", "MasteringModeSet", 0)
-      sync_based_on_workflow(workflow)
-      local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
-      Main_OnCommand(restore_view, 0)
-    end
+    local save_mastering_view = NamedCommandLookup("_WOL_SAVEVIEWS5")
+    Main_OnCommand(save_mastering_view, 0)
+    sync_based_on_workflow(workflow)
+    local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
+    Main_OnCommand(restore_view, 0)
   end
 end
 
 ---------------------------------------------------------------------
+
+function change_mastering_mode(new_value)
+  SetProjExtState(0, "ReaClassical", "MasteringModeSet", new_value)
+end
+
+-----------------------------------------------------------------------
 
 function sync_based_on_workflow(workflow)
   if workflow == "Vertical" then

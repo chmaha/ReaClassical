@@ -379,13 +379,8 @@ end
 ---------------------------------------------------------------------
 
 function mixer()
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local mastering = 0
-    if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[6] then mastering = tonumber(table[6]) or 0 end
-    end
+    local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
+    mastering = (mastering ~= "" and tonumber(mastering)) or 0
 
     local colors = get_color_table()
     for i = 0, CountTracks(0) - 1, 1 do
