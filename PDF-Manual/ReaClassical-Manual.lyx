@@ -1280,7 +1280,85 @@ countdown
  completely irrelevant for purely digital releases) and,
  finally,
  the album lead-out time in seconds (essentially the time on a car CD player before the disc returns to the beginning again).
- Finally there is a setting for the Prepare Takes function to either use the old random coloring method or the newer color scheme that uses blues for destination material and greens for source material.
+ There is a setting for the Prepare Takes function to either use the old random coloring method or the newer color scheme that uses blues for destination material and greens for source material.
+ The user can change the checking range (distance beyond an item edge/fade or crossfade) when placing destination IN and OUT markers.
+ Setting to 0 would just check if the marker would be placed 
+\emph on
+inside
+\emph default
+ a item fade or crossfade.
+ If the reference track is set as overdub guide,
+ it will be audible during classical take recording and auditioning which is extremely useful for overdub recording of material after the main session such as a symphonic organ part or narration.
+ Finally,
+ you can set 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+,
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+,
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+,
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+ to add markers at the mouse hover position vs edit cursor.
+ In this mode,
+ you can also enter the fade editor by hovering of the right-hand items of a crossfaded pair and pressing 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F}
+\end_layout
+
+\end_inset
+
+.
  There will be more on these settings in subsequent sections of the manual.
  If you are unfamiliar with these concepts,
  I recommend a quick internet search!
@@ -5551,23 +5629,7 @@ Mastering Mode
 \end_layout
 
 \begin_layout Standard
-Change 
-\begin_inset Quotes bld
-\end_inset
-
-mastering
-\begin_inset Quotes brd
-\end_inset
-
- mode to 
-\begin_inset Quotes bld
-\end_inset
-
-1
-\begin_inset Quotes brd
-\end_inset
-
- in ReaClassical preferences 
+Change to mastering mode via the shortcut 
 \begin_inset ERT
 status open
 
@@ -5575,33 +5637,9 @@ status open
 
 
 \backslash
-keys{F5}
-\end_layout
-
-\end_inset
-
- and sync via 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
+keys{
 \backslash
-keys{F7}
-\end_layout
-
-\end_inset
-
- or 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F8}
+ctrl+M}
 \end_layout
 
 \end_inset
@@ -5658,68 +5696,8 @@ Given ReaClassical is built on top of REAPER,
  it allows for same high-quality automation workflow with a ReaClassical twist.
  Beyond the following workflow descriptions,
  it is recommended to read the relevant REAPER manual section as there are far more features than can be described here.
- It makes most sense to leave any automation work until the destination group editing is largely complete.
- As described above,
- turn on 
-\begin_inset Quotes bld
-\end_inset
-
-Mastering
-\begin_inset Quotes brd
-\end_inset
-
- mode to 
-\begin_inset Quotes bld
-\end_inset
-
-1
-\begin_inset Quotes brd
-\end_inset
-
- via ReaClassical Preferences 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F5}
-\end_layout
-
-\end_inset
-
-.
- Sync via 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F7}
-\end_layout
-
-\end_inset
-
- or 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{F8}
-\end_layout
-
-\end_inset
-
- and the project arrange window will now show only the first group plus # and @ busses,
- RoomTone,
- Reference (if present) and RCMASTER.
- To add static mixer and FX 
+ For example,
+ you can add static mixer and FX 
 \begin_inset Quotes bld
 \end_inset
 
@@ -5727,16 +5705,9 @@ scenes
 \begin_inset Quotes brd
 \end_inset
 
- to automation lanes (very useful for quickly setting up different settings for the various pieces on an album) ,
- first enter 
-\begin_inset Quotes bld
-\end_inset
-
-automation
-\begin_inset Quotes brd
-\end_inset
-
- mode via 
+ to automation lanes (very useful for quickly setting up different settings for the various pieces on an album) .
+ It makes most sense to leave any automation work until the destination group editing is largely complete.
+ Start automation mode via 
 \begin_inset ERT
 status open
 
@@ -5752,6 +5723,7 @@ ctrl+I}
 \end_inset
 
 .
+ Mastering mode will be enabled automatically as needed.
  All the envelope buttons will turn blue (
 \begin_inset Quotes bld
 \end_inset
@@ -5867,6 +5839,26 @@ shift}
  and drag up or down to just affect that portion of the envelope without needing to add in individual points.
  It's such a time-saver!
  The benefit here is that you can also see how the item waveform is affected in realtime.
+\end_layout
+
+\begin_layout Standard
+If you want to exit both automation and mastering modes,
+ press 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+M}
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -8026,7 +8018,6 @@ Set S-D crossfade length,
  CD track offset and INDEX0 pre-gap length (CD player countdown into next track),
  album lead-out time,
  Prepare Takes colors,
- Mastering Mode,
  S-D Destination Marker Check Range (ms),
  REF = Overdub Guide,
  Add S-D Markers at Mouse Hover.
@@ -8079,7 +8070,6 @@ Prepare Takes:
 
  set to 1) uses random colors per item group.
  This can help see where edits have come from but because of the randomness may require several iterations until you avoid clashes or eye-sores!
- Mastering mode should be set to either 0 (disabled) or 1 (enabled).
  The user can change the checking range (distance beyond an item edge/fade or crossfade) when placing destination IN and OUT markers.
  Setting to 0 would just check if the marker would be placed 
 \emph on
@@ -9583,6 +9573,123 @@ keys{F5}
 \end_inset
 
  .
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Mastering Mode 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+M}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+
+\emph default
+ Allows for focussed work on the destination group.
+ Couple with 
+\begin_inset Quotes bld
+\end_inset
+
+automation
+\begin_inset Quotes brd
+\end_inset
+
+ mode,
+ to add mixer and FX parameter values as envelope points
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+ 
+\emph default
+Enter 
+\begin_inset Quotes bld
+\end_inset
+
+automation
+\begin_inset Quotes brd
+\end_inset
+
+ mode via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+I}
+\end_layout
+
+\end_inset
+
+.
+ All the envelope buttons will turn blue (
+\begin_inset Quotes bld
+\end_inset
+
+latched preview
+\begin_inset Quotes brd
+\end_inset
+
+) and you will see a message box with instructions.
+ You can then use the function below.
+ Exit 
+\begin_inset Quotes bld
+\end_inset
+
+automation
+\begin_inset Quotes brd
+\end_inset
+
+ mode again via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+I}
+\end_layout
+
+\end_inset
+
+.
+ The envelope buttons will then turn green (
+\begin_inset Quotes bld
+\end_inset
+
+read
+\begin_inset Quotes brd
+\end_inset
+
+ mode).
 \end_layout
 
 \begin_layout Standard
@@ -11376,6 +11483,25 @@ del}
 
 \series bold
 Mastering
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+M}
+\end_layout
+
+\end_inset
+
+ Enter Mastering Mode
 \end_layout
 
 \begin_layout Labeling
