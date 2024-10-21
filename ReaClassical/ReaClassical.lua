@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 24.24.22
+@version 24.25
 @changelog
-  Create CD Markers: Add room tone album fade-out
+  NEW: Add mastering mode function
+  ReaClassical Prefs: remove mastering mode
+  Automation Mode: Engage mastering mode if not already enabled
+  Various: Change how mastering mode value is found
+  PDF Manual: Various changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -67,6 +71,7 @@
   [main] ReaClassical_Jump To Time.lua
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Auto Set Recording Inputs.lua
+  [main] ReaClassical_Mastering Mode.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
