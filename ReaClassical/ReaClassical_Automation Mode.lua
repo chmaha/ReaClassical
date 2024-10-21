@@ -40,24 +40,16 @@ function main()
       Main_OnCommand(restore_mastering_view, 0)
     end
     sync_based_on_workflow(workflow)
-    message = "You are now in \"latch preview\" automation mode (blue button)."
+    message = "You are now in \"latch preview\" automation mode (\"blue button\" mode)."
         .. "\n1. Set mixer controls (volume, pan, any FX parameters)"
         .. "\n2. Press I to place envelope points at the edit cursor location or inside a time selection if present."
-        .. "\n3. Re-run this function to return to global read mode (green button)."
+        .. "\n3. Press Ctrl+I again to return to global read mode (\"green button\" mode)."
+        .. "\n\nTo exit both automation and mastering modes press Ctrl+M."
     SetProjExtState(0, "ReaClassical", "AutomationModeSet", "1")
     MB(message, "Automation Mode", 0)
   else
     SetProjExtState(0, "ReaClassical", "AutomationModeSet", "0")
     Main_OnCommand(40879, 0) -- Global automation override: All automation in latch preview mode
-    local response = MB("Would you like to leave mastering mode?", "Automation Mode", 4)
-    if response == 6 then
-      local save_mastering_view = NamedCommandLookup("_WOL_SAVEVIEWS5")
-      Main_OnCommand(save_mastering_view, 0)
-      SetProjExtState(0, "ReaClassical", "MasteringModeSet", 0)
-      sync_based_on_workflow(workflow)
-      local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
-      Main_OnCommand(restore_view, 0)
-    end
   end
 end
 
