@@ -25,6 +25,19 @@ local main, change_mastering_mode, sync_based_on_workflow
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
+local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
+if RCProject ~= "y" then
+  MB("This function can only run on a ReaClassical project. Create one in an empty project via F7 or F8.",
+    "ReaClassical", 0)
+  return
+end
+
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   local message
