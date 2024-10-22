@@ -112,10 +112,9 @@ function cd_markers(first_track, num_of_items)
   SNM_SetIntConfigVar('projfrbase', 75)
   Main_OnCommand(40754, 0) --enable snap to grid
 
-  local code_table = add_codes()
-  if #code_table == 5 then
-    save_codes(table.concat(code_table, ","))
-  end
+  local upc_ret, isrc_ret, upc_input, isrc_input, code_table = add_codes()
+  if upc_ret then save_codes("UPC", upc_input) end
+  if isrc_ret then save_codes("ISRC", isrc_input) end
   local pregap_len, offset, postgap = return_custom_length()
 
   start_check(first_track, offset) -- move items to right if not enough room for first offset
@@ -129,7 +128,7 @@ function cd_markers(first_track, num_of_items)
   local marker_count = 0
   for i = 0, num_of_items - 1, 1 do
     local current_start, take_name = find_current_start(first_track, i)
-    local added_marker = create_marker(current_start, marker_count, take_name, code_table, offset)
+    local added_marker = create_marker(current_start, marker_count, take_name, isrc_ret, code_table, offset)
     if added_marker then
       if take_name:match("^!") and marker_count > 0 then
         AddProjectMarker(0, false, frame_check(current_start - (pregap_len + offset)), 0, "!", marker_count)
@@ -162,7 +161,7 @@ function cd_markers(first_track, num_of_items)
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info()
     if #metadata_table == 4 then save_metadata(user_inputs) end
-    redbook_project_length = end_marker(first_track, metadata_table, code_table, postgap, num_of_items)
+    redbook_project_length = end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
     renumber_markers()
     add_pregap(first_track)
   end
@@ -181,12 +180,12 @@ end
 
 ---------------------------------------------------------------------
 
-function create_marker(current_start, marker_count, take_name, code_table, offset)
+function create_marker(current_start, marker_count, take_name, isrc_ret, code_table, offset)
   local added_marker = false
   local track_title
   if take_name ~= "" then
     local corrected_current_start = frame_check(current_start - offset)
-    if #code_table == 5 then
+    if #code_table == 5 and isrc_ret then
       track_title = "#" ..
           take_name:match("^[!]*(.+)") ..
           "|ISRC=" ..
@@ -241,15 +240,19 @@ end
 
 ---------------------------------------------------------------------
 
-function end_marker(first_track, metadata_table, code_table, postgap, num_of_items)
+function end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
   local final_item = GetTrackMediaItem(first_track, num_of_items - 1)
   local final_start = GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
-  if #metadata_table == 4 and #code_table == 5 then
+  local catalog = ""
+  if #metadata_table == 4 and upc_ret then
+    if code_table[1] ~= "" then
+      catalog = "|CATALOG=" .. code_table[1]
+    end
     local album_info = "@" ..
         metadata_table[1] ..
-        "|CATALOG=" .. code_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
+        catalog .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
         "|GENRE=" .. metadata_table[4] .. "|MESSAGE=Created with ReaClassical"
     AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
   elseif #metadata_table == 4 then
@@ -280,42 +283,102 @@ end
 
 ---------------------------------------------------------------------
 
-function save_codes(code_input)
-  SetProjExtState(0, "ReaClassical", "Codes", code_input)
+function save_codes(type, input)
+  SetProjExtState(0, "ReaClassical", type, input)
 end
 
 ---------------------------------------------------------------------
 
 function add_codes()
-  local _, code_saved = GetProjExtState(0, "ReaClassical", "Codes")
-  local codes_response = MB("Add UPC/ISRC codes?", "CD codes", 4)
-  local ret2
-  local code_input = ""
-  local code_table = {}
+  local _, upc_saved = GetProjExtState(0, "ReaClassical", "UPC")
+  local _, isrc_saved = GetProjExtState(0, "ReaClassical", "ISRC")
+  local upc_ret
+  local isrc_ret
+  local upc_input = ""
+  local isrc_input = ""
+  local code_table = { "", "", "", "", "" }
+  code_table[1] = upc_saved
+  local i = 2
+  for entry in isrc_saved:gmatch('([^,]+)') do
+    code_table[i] = entry
+    i = i + 1
+  end
 
-  if codes_response == 6 then
-    if code_saved ~= "" then
-      ret2, code_input = GetUserInputs('UPC/ISRC Codes', 5,
-        'UPC or EAN,ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-        'ISRC Designation Code,extrawidth=100'
-        ,
-        code_saved)
-    else
-      ret2, code_input = GetUserInputs('UPC/ISRC Codes', 5,
-        'UPC or EAN,ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-        'ISRC Designation Code,extrawidth=100'
-        ,
-        ',')
-    end
-    for num in code_input:gmatch('([^,]+)') do code_table[#code_table + 1] = num end
-    if not ret2 then
-      MB('Not writing UPC/EAN or ISRC codes', "Cancelled", 0)
+  local codes_response1 = MB("Add UPC?", "CD codes", 4)
+  if codes_response1 == 6 then
+    repeat
+      if upc_saved ~= "" then
+        upc_ret, upc_input = GetUserInputs('UPC', 1,
+          'UPC or EAN (Optional),extrawidth=100', upc_saved)
+      else
+        upc_ret, upc_input = GetUserInputs('UPC', 1,
+          'UPC or EAN (Optional),extrawidth=100', '')
+      end
+
+      if upc_input ~= "" then
+        if not upc_input:match('^%d+$') or (#upc_input ~= 12 and #upc_input ~= 13) then
+          MB('UPC must be a 12 or 13 digit number.', "Invalid UPC", 0)
+        end
+      end
+    until ((upc_input:match('^%d+$') and (#upc_input == 12 or #upc_input == 13))) or not upc_ret
+
+    if upc_ret then code_table[1] = upc_input end
+  end
+
+
+  local codes_response2 = MB("Add ISRC?", "CD codes", 4)
+  if codes_response2 == 6 then
+    repeat
+      if isrc_saved ~= "" then
+        isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
+          'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
+          'ISRC Designation Code,extrawidth=100', isrc_saved)
+      else
+        isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
+          'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
+          'ISRC Designation Code,extrawidth=100', '')
+      end
+
+      local isrc_entries = {}
+      for entry in isrc_input:gmatch('([^,]+)') do
+        isrc_entries[#isrc_entries + 1] = entry
+      end
+
+      if #isrc_entries == 4 then
+        local country_code = isrc_entries[1]
+        local registrant_code = isrc_entries[2]
+        local year = isrc_entries[3]
+        local designation_code = isrc_entries[4]
+
+        if not country_code:match('^[A-Z][A-Z]$') then
+          MB('ISRC Country Code must be 2 uppercase letters.', "Invalid ISRC", 0)
+        elseif not registrant_code:match('^[A-Z0-9][A-Z0-9][A-Z0-9]$') then
+          MB('ISRC Registrant Code must be 3 alphanumeric characters.', "Invalid ISRC", 0)
+        elseif not year:match('^%d%d$') then
+          MB('ISRC Year must be 2 digits.', "Invalid ISRC", 0)
+        elseif not (designation_code:match("^(%d+)$") and #designation_code <= 5) then
+          MB('ISRC Designation Code must be up to 5 digits.', "Invalid ISRC", 0)
+        else
+          break
+        end
+      else
+        MB('You must provide all 4 ISRC components.', "Invalid ISRC", 0)
+      end
+      isrc_input = ""
+    until not isrc_ret or #isrc_entries ~= 4
+
+    local j = 2
+    if isrc_ret then
+      for entry in isrc_input:gmatch('([^,]+)') do
+        code_table[j] = entry
+        j = j + 1
+      end
     elseif #code_table ~= 5 then
-      MB('Empty code metadata_table not supported: Not writing UPC/EAN or ISRC codes', "Warning",
+      MB('Empty code metadata_table not supported: Not ISRC codes', "Warning",
         0)
     end
   end
-  return code_table
+  return upc_ret, isrc_ret, upc_input, isrc_input, code_table
 end
 
 ---------------------------------------------------------------------
