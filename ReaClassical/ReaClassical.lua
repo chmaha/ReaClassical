@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.4
+@version 24.25.5
 @changelog
-  Create CD Markers: Add new renumber marker function and add end marker after pregap shift
+  Create CD Markers: Fix renumbering of markers
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
