@@ -76,6 +76,7 @@ function main()
         "Warning", 0)
     end
     room_tone(redbook_project_length * 60)
+    renumber_markers()
   end
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
@@ -98,7 +99,7 @@ function get_info()
     metadata_table = {}
     for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
     if #metadata_table ~= 4 and ret then
-      MB("Please complete all four metadata entries","Add Album Metadata",0)
+      MB("Please complete all four metadata entries", "Add Album Metadata", 0)
     end
   until not ret or (#metadata_table == 4)
 
@@ -164,7 +165,6 @@ function cd_markers(first_track, num_of_items)
     if #metadata_table == 4 then save_metadata(user_inputs) end
     add_pregap(first_track)
     redbook_project_length = end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
-    renumber_markers()
   end
   Main_OnCommand(40753, 0) -- Snapping: Disable snap
   return redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
@@ -204,15 +204,15 @@ end
 
 function renumber_markers()
   local num_markers, num_regions = CountProjectMarkers(0)
-    local marker_idx = 0
+  local marker_idx = 0
 
-    for i = 0, num_markers + num_regions - 1 do
-        local _, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
-        if not isrgn then
-            SetProjectMarkerByIndex(0, i, isrgn, pos, rgnend, markrgnindexnumber, name, 0)
-            marker_idx = marker_idx + 1
-        end
+  for i = 0, num_markers + num_regions - 1 do
+    local _, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+    if not isrgn then
+      SetProjectMarkerByIndex(0, i, isrgn, pos, rgnend, marker_idx, name, 0)
+      marker_idx = marker_idx + 1
     end
+  end
 end
 
 ---------------------------------------------------------------------
