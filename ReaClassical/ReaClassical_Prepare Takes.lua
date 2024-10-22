@@ -54,6 +54,14 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
+    for track_idx = 0, reaper.CountTracks(0) - 1 do
+        local track = reaper.GetTrack(0, track_idx)
+        for item_idx = 0, reaper.CountTrackMediaItems(track) - 1 do
+            local item = reaper.GetTrackMediaItem(track, item_idx)
+            reaper.SetMediaItemInfo_Value(item, "I_GROUPID", 0)
+        end
+    end
+
     Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
     local folders, tracks_per_group = folder_check()
     local total_tracks = folders * tracks_per_group
@@ -196,7 +204,7 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_group(string)
+function horizontal_group(string, group)
     if string == "horizontal" then
         Main_OnCommand(40296, 0) -- Track: Select all tracks
     else
@@ -204,34 +212,51 @@ function horizontal_group(string)
         Main_OnCommand(select_children, 0) -- Select child tracks
     end
 
-    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     local selected = GetSelectedMediaItem(0, 0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
     SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
-    Main_OnCommand(40032, 0)                          -- Item grouping: Group items
+
+    local num_selected_items = CountSelectedMediaItems(0)
+    for i = 0, num_selected_items - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        if item then
+            SetMediaItemInfo_Value(item, "I_GROUPID", group)
+        end
+    end
 end
 
 ---------------------------------------------------------------------
 
-function vertical_group(length)
+function vertical_group(length, group)
     local track = GetSelectedTrack(0, 0)
     local item = AddMediaItemToTrack(track)
     SetMediaItemPosition(item, length + 1, false)
 
-    while IsMediaItemSelected(item) == false do
-        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+    repeat
         local selected = GetSelectedMediaItem(0, 0)
         local start = GetMediaItemInfo_Value(selected, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(selected, "D_LENGTH")
         SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
-        Main_OnCommand(40032, 0)                               -- Item grouping: Group items
-    end
+        -- Main_OnCommand(40032, 0)                               -- Item grouping: Group items
+        local num_selected_items = reaper.CountSelectedMediaItems(0)
+        for i = 0, num_selected_items - 1 do
+            local selected_item = reaper.GetSelectedMediaItem(0, i)
+            if selected_item then
+                reaper.SetMediaItemInfo_Value(item, "I_GROUPID", group)
+            end
+        end
+        group = group + 1
+        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+    until IsMediaItemSelected(item) == true
+
     DeleteTrackMediaItem(track, item)
+    return group
 end
 
 ---------------------------------------------------------------------
@@ -242,15 +267,24 @@ function horizontal(colors)
     local first_track = GetTrack(0, 0)
     local new_item = AddMediaItemToTrack(first_track)
     SetMediaItemPosition(new_item, length + 1, false)
+
+    if first_track then
+        SetOnlyTrackSelected(first_track) -- Select only the first track
+    end
+
     SetEditCurPos(0, false, false)
 
     local flip = false
     local workflow = "horizontal"
-    while IsMediaItemSelected(new_item) == false do
-        horizontal_group(workflow)
+    local group = 1
+    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+    repeat
+        horizontal_group(workflow, group)
         horizontal_color(flip, edits, colors)
         flip = not flip
-    end
+        group = group + 1
+        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+    until IsMediaItemSelected(new_item) == true
 
     DeleteTrackMediaItem(first_track, new_item)
     SelectAllMediaItems(0, false)
@@ -272,32 +306,36 @@ function vertical(colors)
 
     local new_item = AddMediaItemToTrack(first_track)
     SetMediaItemPosition(new_item, length + 1, false)
-
+    local group = 1
     SetOnlyTrackSelected(first_track)
     if colors == 0 then
         -- color destination items the same as horizontal workflow
         SetEditCurPos(0, false, false)
         local workflow = "vertical"
         local flip = false
-        while IsMediaItemSelected(new_item) == false do
-            horizontal_group(workflow)
+        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+        repeat
+            horizontal_group(workflow, group)
             horizontal_color(flip, edits, colors)
             flip = not flip
-        end
+            group = group + 1
+            Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+        until IsMediaItemSelected(new_item) == true
     end
 
     DeleteTrackMediaItem(first_track, new_item)
     local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-
     local start = 1
     if colors == 0 then
         start = 2
         Main_OnCommand(next_folder, 0) -- select next folder
     end
+
     for _ = start, num_of_folders, 1 do
         vertical_color_razor(colors)
-        vertical_group(length)
+        local next_group = vertical_group(length, group)
         Main_OnCommand(next_folder, 0) -- select next folder
+        group = next_group
     end
     SelectAllMediaItems(0, false)
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
