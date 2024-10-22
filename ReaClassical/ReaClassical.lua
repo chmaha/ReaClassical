@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.2
+@version 24.25.3
 @changelog
-  Automation mode: Restore mastering view after sync
+  Create CD Markers: Split UPC/EAN and ISRC dialog boxes
+  Create CD Markers: Add validation for UPC/EAN/ISRC and metadata
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
