@@ -85,22 +85,23 @@ end
 function get_info()
   local _, metadata_saved = GetProjExtState(0, "ReaClassical", "AlbumMetadata")
   local ret, user_inputs, metadata_table
-  if metadata_saved ~= "" then
-    ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
-      'Album Title,Performer,Composer,Genre,extrawidth=100',
-      metadata_saved)
-  else
-    ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
-      'Album Title,Performer,Composer,Genre,extrawidth=100',
-      'My Classical Album,Performer,Composer,Classical')
-  end
-  metadata_table = {}
-  for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
-  if not ret then
-    MB('Only writing track metadata', "Cancelled", 0)
-  elseif #metadata_table ~= 4 then
-    MB('Empty metadata_table not supported: Not writing album metadata', "Warning", 0)
-  end
+  repeat
+    if metadata_saved ~= "" then
+      ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
+        'Album Title,Performer,Composer,Genre,extrawidth=100',
+        metadata_saved)
+    else
+      ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
+        'Album Title,Performer,Composer,Genre,extrawidth=100',
+        'My Classical Album,Performer,Composer,Classical')
+    end
+    metadata_table = {}
+    for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
+    if #metadata_table ~= 4 and ret then
+      MB("Please complete all four metadata entries","Add Album Metadata",0)
+    end
+  until not ret or (#metadata_table == 4)
+
   return user_inputs, metadata_table
 end
 
@@ -315,10 +316,8 @@ function add_codes()
           'UPC or EAN (Optional),extrawidth=100', '')
       end
 
-      if upc_input ~= "" then
-        if not upc_input:match('^%d+$') or (#upc_input ~= 12 and #upc_input ~= 13) then
-          MB('UPC must be a 12 or 13 digit number.', "Invalid UPC", 0)
-        end
+      if not upc_input:match('^%d+$') or (#upc_input ~= 12 and #upc_input ~= 13) then
+        MB('UPC must be a 12 or 13 digit number.', "Invalid UPC", 0)
       end
     until ((upc_input:match('^%d+$') and (#upc_input == 12 or #upc_input == 13))) or not upc_ret
 
