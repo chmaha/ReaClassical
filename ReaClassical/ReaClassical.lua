@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.1
+@version 24.25.2
 @changelog
-  Mastering and automation modes: Add SWS and RCProject check
+  Automation mode: Restore mastering view after sync
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
