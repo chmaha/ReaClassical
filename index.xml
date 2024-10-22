@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="f160f3d38ab7c91763b9eefa7289b7504f05dbfd">
+<index version="1" name="chmaha Scripts" commit="74e6741a0b4bf3f168b1f7c2616c822a47bb4576">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -61,85 +61,6 @@
 ]]></description>
       </metadata>
       
-      <version name="24.25.3" author="chmaha" time="2024-10-22T11:47:31Z">
-        <changelog><![CDATA[Create CD Markers: Split UPC/EAN and ISRC dialog boxes
-Create CD Markers: Add validation for UPC/EAN/ISRC and metadata]]></changelog>
-        <source main="main" file="ReaClassical_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Destination%20IN%20marker.lua</source>
-        <source main="main" file="ReaClassical_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Destination%20OUT%20Marker.lua</source>
-        <source main="main" file="ReaClassical_Add Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Source%20IN%20marker.lua</source>
-        <source main="main" file="ReaClassical_Add Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Source%20OUT%20marker.lua</source>
-        <source main="main" file="ReaClassical_Classical Crossfade Editor.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Classical%20Crossfade%20Editor.lua</source>
-        <source main="main" file="ReaClassical_Classical Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Classical%20Crossfade.lua</source>
-        <source main="main" file="ReaClassical_Classical Take Record.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Classical%20Take%20Record.lua</source>
-        <source main="main" file="ReaClassical_Delete All S-D markers.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Delete%20All%20S-D%20markers.lua</source>
-        <source main="main" file="ReaClassical_Duplicate folder (No items).lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Duplicate%20folder%20(No%20items).lua</source>
-        <source main="main" file="ReaClassical_Edit Classical Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Edit%20Classical%20Crossfade.lua</source>
-        <source main="main" file="ReaClassical_Prepare Takes.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Prepare%20Takes.lua</source>
-        <source main="main" file="ReaClassical_S-D Edit.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_S-D%20Edit.lua</source>
-        <source main="main" file="ReaClassical_Whole Project View Horizontal.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Whole%20Project%20View%20Horizontal.lua</source>
-        <source main="main" file="ReaClassical_Whole Project View Vertical.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Whole%20Project%20View%20Vertical.lua</source>
-        <source main="main" file="ReaClassical_Vertical Workflow.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Vertical%20Workflow.lua</source>
-        <source main="main" file="ReaClassical_Audition.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Audition.lua</source>
-        <source main="main" file="ReaClassical_Delete Leaving Silence.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Delete%20Leaving%20Silence.lua</source>
-        <source main="main" file="ReaClassical_Delete With Ripple.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Delete%20With%20Ripple.lua</source>
-        <source main="main" file="ReaClassical_Insert with timestretching.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Insert%20with%20timestretching.lua</source>
-        <source main="main" file="ReaClassical_Horizontal Workflow.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Horizontal%20Workflow.lua</source>
-        <source main="main" file="ReaClassical_Lock_toggle.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Lock_toggle.lua</source>
-        <source main="main" file="ReaClassical_Create CD Markers.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Create%20CD%20Markers.lua</source>
-        <source main="main" file="ReaClassical_Help.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Help.lua</source>
-        <source main="main" file="ReaClassical_Next Item or Fade.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Next%20Item%20or%20Fade.lua</source>
-        <source main="main" file="ReaClassical_Previous Item or Fade.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Previous%20Item%20or%20Fade.lua</source>
-        <source main="main" file="ReaClassical_Add Aux.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Aux.lua</source>
-        <source main="main" file="ReaClassical_Add Submix.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Submix.lua</source>
-        <source main="main" file="ReaClassical_Reposition_Album_Tracks.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Reposition_Album_Tracks.lua</source>
-        <source main="main" file="ReaClassical_mpl_Markers to CUE.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_mpl_Markers%20to%20CUE.lua</source>
-        <source main="main" file="ReaClassical_Preferences.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Preferences.lua</source>
-        <source main="main" file="ReaClassical_TrackLeft.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_TrackLeft.lua</source>
-        <source main="main" file="ReaClassical_TrackRight.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_TrackRight.lua</source>
-        <source main="main" file="ReaClassical_ExplodeMultiChannel.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_ExplodeMultiChannel.lua</source>
-        <source main="main" file="ReaClassical_Colorize.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Colorize.lua</source>
-        <source main="main" file="ReaClassical_Add RoomTone Track.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20RoomTone%20Track.lua</source>
-        <source main="main" file="ReaClassical_Move to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Move%20to%20Destination%20IN%20marker.lua</source>
-        <source main="main" file="ReaClassical_Move to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Move%20to%20Destination%20OUT%20marker.lua</source>
-        <source main="main" file="ReaClassical_Move to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Move%20to%20Source%20IN%20marker.lua</source>
-        <source main="main" file="ReaClassical_Move to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Move%20to%20Source%20OUT%20marker.lua</source>
-        <source main="main" file="ReaClassical_Zoom to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Zoom%20to%20Destination%20IN%20marker.lua</source>
-        <source main="main" file="ReaClassical_Zoom to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Zoom%20to%20Destination%20OUT%20marker.lua</source>
-        <source main="main" file="ReaClassical_Zoom to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Zoom%20to%20Source%20IN%20marker.lua</source>
-        <source main="main" file="ReaClassical_Zoom to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Zoom%20to%20Source%20OUT%20marker.lua</source>
-        <source main="main" file="ReaClassical_3-point Insert Edit.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_3-point%20Insert%20Edit.lua</source>
-        <source main="main" file="ReaClassical_Updater.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Updater.lua</source>
-        <source main="main" file="ReaClassical_Find Take.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Find%20Take.lua</source>
-        <source main="main" file="ReaClassical_Take Counter.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Take%20Counter.lua</source>
-        <source main="main" file="ReaClassical_Add Track To All Groups.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Track%20To%20All%20Groups.lua</source>
-        <source main="main" file="ReaClassical_Hide Children.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Hide%20Children.lua</source>
-        <source main="main" file="ReaClassical_Show Children.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Show%20Children.lua</source>
-        <source main="main" file="ReaClassical_Automation Mode.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Automation%20Mode.lua</source>
-        <source main="main" file="ReaClassical_Insert Automation.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Insert%20Automation.lua</source>
-        <source main="main" file="ReaClassical_Set Dest Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Set%20Dest%20Project%20Marker.lua</source>
-        <source main="main" file="ReaClassical_Set Source Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Set%20Source%20Project%20Marker.lua</source>
-        <source main="main" file="ReaClassical_Delete Track From All Groups.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Delete%20Track%20From%20All%20Groups.lua</source>
-        <source main="main" file="ReaClassical_Add Ref Track.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Add%20Ref%20Track.lua</source>
-        <source main="main" file="ReaClassical_Source Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Source%20Markers%20to%20Item%20Edge.lua</source>
-        <source main="main" file="ReaClassical_Destination Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Destination%20Markers%20to%20Item%20Edge.lua</source>
-        <source main="main" file="ReaClassical_Remove Take Names.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Remove%20Take%20Names.lua</source>
-        <source main="main" file="ReaClassical_Jump To Time.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Jump%20To%20Time.lua</source>
-        <source main="main" file="ReaClassical_Audio Calculator.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Audio%20Calculator.lua</source>
-        <source main="main" file="ReaClassical_Auto Set Recording Inputs.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Auto%20Set%20Recording%20Inputs.lua</source>
-        <source main="main" file="ReaClassical_Mastering Mode.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Mastering%20Mode.lua</source>
-        <source type="projecttpl" file="ReaClassical.RPP">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical.RPP</source>
-        <source type="theme" file="ReaClassical.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical.ReaperThemeZip</source>
-        <source type="theme" file="ReaClassical Light.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical%20Light.ReaperThemeZip</source>
-        <source type="theme" file="ReaClassical WaveColors Dark.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical%20WaveColors%20Dark.ReaperThemeZip</source>
-        <source type="theme" file="ReaClassical WaveColors Light.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical%20WaveColors%20Light.ReaperThemeZip</source>
-        <source file="ReaClassical_Colors_Table.lua">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical_Colors_Table.lua</source>
-        <source file="ReaClassical-Manual.pdf">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/PDF-Manual/ReaClassical-Manual.pdf</source>
-        <source file="reaclassical-splash.png">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/reaclassical-splash.png</source>
-        <source file="ReaClassical-menu.ini">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical-menu.ini</source>
-        <source file="ReaClassical-kb.ini">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/ReaClassical/ReaClassical-kb.ini</source>
-        <source file="audio_calculator.html">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/audio_calculator.html</source>
-        <source file="reaclassical_logo.png">https://github.com/chmaha/ReaClassical/raw/74fa452c57db4c0fd1c82d51667007c8b29defc0/docs/images/reaclassical_os.png</source>
-      </version>
       <version name="24.25.4" author="chmaha" time="2024-10-22T15:05:55Z">
         <changelog><![CDATA[Create CD Markers: Add new renumber marker function and add end marker after pregap shift]]></changelog>
         <source main="main" file="ReaClassical_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/f160f3d38ab7c91763b9eefa7289b7504f05dbfd/ReaClassical/ReaClassical_Add%20Destination%20IN%20marker.lua</source>
@@ -217,6 +138,84 @@ Create CD Markers: Add validation for UPC/EAN/ISRC and metadata]]></changelog>
         <source file="ReaClassical-kb.ini">https://github.com/chmaha/ReaClassical/raw/f160f3d38ab7c91763b9eefa7289b7504f05dbfd/ReaClassical/ReaClassical-kb.ini</source>
         <source file="audio_calculator.html">https://github.com/chmaha/ReaClassical/raw/f160f3d38ab7c91763b9eefa7289b7504f05dbfd/audio_calculator.html</source>
         <source file="reaclassical_logo.png">https://github.com/chmaha/ReaClassical/raw/f160f3d38ab7c91763b9eefa7289b7504f05dbfd/docs/images/reaclassical_os.png</source>
+      </version>
+      <version name="24.25.5" author="chmaha" time="2024-10-22T15:22:01Z">
+        <changelog><![CDATA[Create CD Markers: Fix renumbering of markers]]></changelog>
+        <source main="main" file="ReaClassical_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Destination%20OUT%20Marker.lua</source>
+        <source main="main" file="ReaClassical_Add Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Add Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaClassical_Classical Crossfade Editor.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Classical%20Crossfade%20Editor.lua</source>
+        <source main="main" file="ReaClassical_Classical Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Classical%20Crossfade.lua</source>
+        <source main="main" file="ReaClassical_Classical Take Record.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Classical%20Take%20Record.lua</source>
+        <source main="main" file="ReaClassical_Delete All S-D markers.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Delete%20All%20S-D%20markers.lua</source>
+        <source main="main" file="ReaClassical_Duplicate folder (No items).lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Duplicate%20folder%20(No%20items).lua</source>
+        <source main="main" file="ReaClassical_Edit Classical Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Edit%20Classical%20Crossfade.lua</source>
+        <source main="main" file="ReaClassical_Prepare Takes.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Prepare%20Takes.lua</source>
+        <source main="main" file="ReaClassical_S-D Edit.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_S-D%20Edit.lua</source>
+        <source main="main" file="ReaClassical_Whole Project View Horizontal.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Whole%20Project%20View%20Horizontal.lua</source>
+        <source main="main" file="ReaClassical_Whole Project View Vertical.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Whole%20Project%20View%20Vertical.lua</source>
+        <source main="main" file="ReaClassical_Vertical Workflow.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Vertical%20Workflow.lua</source>
+        <source main="main" file="ReaClassical_Audition.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Audition.lua</source>
+        <source main="main" file="ReaClassical_Delete Leaving Silence.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Delete%20Leaving%20Silence.lua</source>
+        <source main="main" file="ReaClassical_Delete With Ripple.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Delete%20With%20Ripple.lua</source>
+        <source main="main" file="ReaClassical_Insert with timestretching.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Insert%20with%20timestretching.lua</source>
+        <source main="main" file="ReaClassical_Horizontal Workflow.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Horizontal%20Workflow.lua</source>
+        <source main="main" file="ReaClassical_Lock_toggle.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Lock_toggle.lua</source>
+        <source main="main" file="ReaClassical_Create CD Markers.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Create%20CD%20Markers.lua</source>
+        <source main="main" file="ReaClassical_Help.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Help.lua</source>
+        <source main="main" file="ReaClassical_Next Item or Fade.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Next%20Item%20or%20Fade.lua</source>
+        <source main="main" file="ReaClassical_Previous Item or Fade.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Previous%20Item%20or%20Fade.lua</source>
+        <source main="main" file="ReaClassical_Add Aux.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Aux.lua</source>
+        <source main="main" file="ReaClassical_Add Submix.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Submix.lua</source>
+        <source main="main" file="ReaClassical_Reposition_Album_Tracks.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Reposition_Album_Tracks.lua</source>
+        <source main="main" file="ReaClassical_mpl_Markers to CUE.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_mpl_Markers%20to%20CUE.lua</source>
+        <source main="main" file="ReaClassical_Preferences.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Preferences.lua</source>
+        <source main="main" file="ReaClassical_TrackLeft.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_TrackLeft.lua</source>
+        <source main="main" file="ReaClassical_TrackRight.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_TrackRight.lua</source>
+        <source main="main" file="ReaClassical_ExplodeMultiChannel.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_ExplodeMultiChannel.lua</source>
+        <source main="main" file="ReaClassical_Colorize.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Colorize.lua</source>
+        <source main="main" file="ReaClassical_Add RoomTone Track.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20RoomTone%20Track.lua</source>
+        <source main="main" file="ReaClassical_Move to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Move%20to%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Move to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Move%20to%20Destination%20OUT%20marker.lua</source>
+        <source main="main" file="ReaClassical_Move to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Move%20to%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Move to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Move%20to%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaClassical_Zoom to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Zoom%20to%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Zoom to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Zoom%20to%20Destination%20OUT%20marker.lua</source>
+        <source main="main" file="ReaClassical_Zoom to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Zoom%20to%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaClassical_Zoom to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Zoom%20to%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaClassical_3-point Insert Edit.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_3-point%20Insert%20Edit.lua</source>
+        <source main="main" file="ReaClassical_Updater.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Updater.lua</source>
+        <source main="main" file="ReaClassical_Find Take.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Find%20Take.lua</source>
+        <source main="main" file="ReaClassical_Take Counter.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Take%20Counter.lua</source>
+        <source main="main" file="ReaClassical_Add Track To All Groups.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Track%20To%20All%20Groups.lua</source>
+        <source main="main" file="ReaClassical_Hide Children.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Hide%20Children.lua</source>
+        <source main="main" file="ReaClassical_Show Children.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Show%20Children.lua</source>
+        <source main="main" file="ReaClassical_Automation Mode.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Automation%20Mode.lua</source>
+        <source main="main" file="ReaClassical_Insert Automation.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Insert%20Automation.lua</source>
+        <source main="main" file="ReaClassical_Set Dest Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Set%20Dest%20Project%20Marker.lua</source>
+        <source main="main" file="ReaClassical_Set Source Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Set%20Source%20Project%20Marker.lua</source>
+        <source main="main" file="ReaClassical_Delete Track From All Groups.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Delete%20Track%20From%20All%20Groups.lua</source>
+        <source main="main" file="ReaClassical_Add Ref Track.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Add%20Ref%20Track.lua</source>
+        <source main="main" file="ReaClassical_Source Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Source%20Markers%20to%20Item%20Edge.lua</source>
+        <source main="main" file="ReaClassical_Destination Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Destination%20Markers%20to%20Item%20Edge.lua</source>
+        <source main="main" file="ReaClassical_Remove Take Names.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Remove%20Take%20Names.lua</source>
+        <source main="main" file="ReaClassical_Jump To Time.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Jump%20To%20Time.lua</source>
+        <source main="main" file="ReaClassical_Audio Calculator.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Audio%20Calculator.lua</source>
+        <source main="main" file="ReaClassical_Auto Set Recording Inputs.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Auto%20Set%20Recording%20Inputs.lua</source>
+        <source main="main" file="ReaClassical_Mastering Mode.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Mastering%20Mode.lua</source>
+        <source type="projecttpl" file="ReaClassical.RPP">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical.RPP</source>
+        <source type="theme" file="ReaClassical.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical.ReaperThemeZip</source>
+        <source type="theme" file="ReaClassical Light.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical%20Light.ReaperThemeZip</source>
+        <source type="theme" file="ReaClassical WaveColors Dark.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical%20WaveColors%20Dark.ReaperThemeZip</source>
+        <source type="theme" file="ReaClassical WaveColors Light.ReaperThemeZip">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical%20WaveColors%20Light.ReaperThemeZip</source>
+        <source file="ReaClassical_Colors_Table.lua">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical_Colors_Table.lua</source>
+        <source file="ReaClassical-Manual.pdf">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/PDF-Manual/ReaClassical-Manual.pdf</source>
+        <source file="reaclassical-splash.png">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/reaclassical-splash.png</source>
+        <source file="ReaClassical-menu.ini">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical-menu.ini</source>
+        <source file="ReaClassical-kb.ini">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/ReaClassical/ReaClassical-kb.ini</source>
+        <source file="audio_calculator.html">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/audio_calculator.html</source>
+        <source file="reaclassical_logo.png">https://github.com/chmaha/ReaClassical/raw/74e6741a0b4bf3f168b1f7c2616c822a47bb4576/docs/images/reaclassical_os.png</source>
       </version>
     </reapack>
   </category>
