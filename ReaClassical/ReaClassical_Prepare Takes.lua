@@ -243,12 +243,12 @@ function vertical_group(length, group)
         SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
-        -- Main_OnCommand(40032, 0)                               -- Item grouping: Group items
+
         local num_selected_items = reaper.CountSelectedMediaItems(0)
         for i = 0, num_selected_items - 1 do
             local selected_item = reaper.GetSelectedMediaItem(0, i)
             if selected_item then
-                reaper.SetMediaItemInfo_Value(item, "I_GROUPID", group)
+                reaper.SetMediaItemInfo_Value(selected_item, "I_GROUPID", group)
             end
         end
         group = group + 1
@@ -271,7 +271,6 @@ function horizontal(colors)
     if first_track then
         SetOnlyTrackSelected(first_track) -- Select only the first track
     end
-
     SetEditCurPos(0, false, false)
 
     local flip = false
