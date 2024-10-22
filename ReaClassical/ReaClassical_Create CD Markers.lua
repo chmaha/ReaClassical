@@ -162,9 +162,9 @@ function cd_markers(first_track, num_of_items)
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info()
     if #metadata_table == 4 then save_metadata(user_inputs) end
+    add_pregap(first_track)
     redbook_project_length = end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
     renumber_markers()
-    add_pregap(first_track)
   end
   Main_OnCommand(40753, 0) -- Snapping: Disable snap
   return redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
@@ -203,7 +203,16 @@ end
 ---------------------------------------------------------------------
 
 function renumber_markers()
-  Main_OnCommand(40898, 0)
+  local num_markers, num_regions = CountProjectMarkers(0)
+    local marker_idx = 0
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+        if not isrgn then
+            SetProjectMarkerByIndex(0, i, isrgn, pos, rgnend, markrgnindexnumber, name, 0)
+            marker_idx = marker_idx + 1
+        end
+    end
 end
 
 ---------------------------------------------------------------------
