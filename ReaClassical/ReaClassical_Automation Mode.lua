@@ -49,10 +49,15 @@ function main()
       local save_view = NamedCommandLookup("_SWS_SAVEVIEW")
       Main_OnCommand(save_view, 0)
       SetProjExtState(0, "ReaClassical", "MasteringModeSet", 1)
-      local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
-      Main_OnCommand(restore_mastering_view, 0)
     end
+
     sync_based_on_workflow(workflow)
+
+    if mastering ~= "1" then
+      local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
+      Main_OnCommand(restore_mastering_view, 0) -- Restore only if mastering ~= "1"
+    end
+
     message = "You are now in \"latch preview\" automation mode (\"blue button\" mode)."
         .. "\n1. Set mixer controls (volume, pan, any FX parameters)"
         .. "\n2. Press I to place envelope points at the edit cursor location or inside a time selection if present."

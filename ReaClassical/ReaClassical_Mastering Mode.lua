@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, change_mastering_mode, sync_based_on_workflow
+local main, sync_based_on_workflow
 
 ---------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ function main()
   if mastering ~= "1" then
     local save_view = NamedCommandLookup("_SWS_SAVEVIEW")
     Main_OnCommand(save_view, 0)
-    change_mastering_mode(1)
+    SetProjExtState(0, "ReaClassical", "MasteringModeSet", 1)
     sync_based_on_workflow(workflow)
     local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
     Main_OnCommand(restore_mastering_view, 0)
@@ -55,7 +55,7 @@ function main()
     SetProjExtState(0, "ReaClassical", "MasteringModeSet", "1")
     MB(message, "Mastering Mode", 0)
   else
-    change_mastering_mode(0)
+    SetProjExtState(0, "ReaClassical", "MasteringModeSet", 0)
     SetProjExtState(0, "ReaClassical", "AutomationModeSet", 0)
     Main_OnCommand(40879, 0) -- Global automation override: All automation in latch preview mode
     local save_mastering_view = NamedCommandLookup("_WOL_SAVEVIEWS5")
@@ -67,12 +67,6 @@ function main()
 end
 
 ---------------------------------------------------------------------
-
-function change_mastering_mode(new_value)
-  SetProjExtState(0, "ReaClassical", "MasteringModeSet", new_value)
-end
-
------------------------------------------------------------------------
 
 function sync_based_on_workflow(workflow)
   if workflow == "Vertical" then
