@@ -579,6 +579,9 @@ function convert_fades_to_env(item)
   local fade_out_shape = GetMediaItemInfo_Value(item, "C_FADEOUTSHAPE") + 1
   local take = GetActiveTake(item)
   local env = GetTakeEnvelopeByName(take, "Volume")
+  local brENV = BR_EnvAlloc(env,false)
+  BR_EnvSetProperties(brENV, false, false, false, false, 0, 0, true)
+  BR_EnvFree(brENV,true)
   local fade_in_start = 0
   local fade_out_start = item_length - fade_out_length
 
@@ -729,6 +732,9 @@ function room_tone(project_length)
   Main_OnCommand(40333, 0) -- delete all points
 
   local rt_vol = GetTrackEnvelopeByName(rt_track, "Volume")
+  local brRT = BR_EnvAlloc(rt_vol,false)
+  BR_EnvSetProperties(brRT, true, true, true, true, 0, 0, true)
+  BR_EnvFree(brRT,true)
 
   for _, val in pairs(points) do
     InsertEnvelopePoint(rt_vol, val.time, val.value, 0, 1, false, false)
