@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.3
+@version 24.25.4
 @changelog
-  Create CD Markers: Split UPC/EAN and ISRC dialog boxes
-  Create CD Markers: Add validation for UPC/EAN/ISRC and metadata
+  Create CD Markers: Add new renumber marker function and add end marker after pregap shift
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
