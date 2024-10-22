@@ -305,19 +305,19 @@ function add_codes()
     i = i + 1
   end
 
-  local codes_response1 = MB("Add UPC?", "CD codes", 4)
+  local codes_response1 = MB("Add UPC or EAN?", "CD codes", 4)
   if codes_response1 == 6 then
     repeat
       if upc_saved ~= "" then
-        upc_ret, upc_input = GetUserInputs('UPC', 1,
-          'UPC or EAN (Optional),extrawidth=100', upc_saved)
+        upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
+          'UPC or EAN,extrawidth=100', upc_saved)
       else
-        upc_ret, upc_input = GetUserInputs('UPC', 1,
-          'UPC or EAN (Optional),extrawidth=100', '')
+        upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
+          'UPC or EAN,extrawidth=100', '')
       end
 
       if not upc_input:match('^%d+$') or (#upc_input ~= 12 and #upc_input ~= 13) then
-        MB('UPC must be a 12 or 13 digit number.', "Invalid UPC", 0)
+        MB('UPC = 12-digit number; EAN = 13-digit number.', "Invalid UPC", 0)
       end
     until ((upc_input:match('^%d+$') and (#upc_input == 12 or #upc_input == 13))) or not upc_ret
 
