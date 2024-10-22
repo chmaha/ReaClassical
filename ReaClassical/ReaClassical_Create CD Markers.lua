@@ -112,9 +112,9 @@ function cd_markers(first_track, num_of_items)
   SNM_SetIntConfigVar('projfrbase', 75)
   Main_OnCommand(40754, 0) --enable snap to grid
 
-  local code_input, code_table = add_codes()
-  if code_input ~= "" then
-    save_codes(code_input)
+  local code_table = add_codes()
+  if #code_table == 5 then
+    save_codes(table.concat(code_table, ","))
   end
   local pregap_len, offset, postgap = return_custom_length()
 
@@ -292,17 +292,18 @@ function add_codes()
   local ret2
   local code_input = ""
   local code_table = {}
+
   if codes_response == 6 then
     if code_saved ~= "" then
       ret2, code_input = GetUserInputs('UPC/ISRC Codes', 5,
         'UPC or EAN,ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-        'ISRC Designation Code (5 digits),extrawidth=100'
+        'ISRC Designation Code,extrawidth=100'
         ,
         code_saved)
     else
       ret2, code_input = GetUserInputs('UPC/ISRC Codes', 5,
         'UPC or EAN,ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-        'ISRC Designation Code (5 digits),extrawidth=100'
+        'ISRC Designation Code,extrawidth=100'
         ,
         ',')
     end
@@ -314,7 +315,7 @@ function add_codes()
         0)
     end
   end
-  return code_input, code_table
+  return code_table
 end
 
 ---------------------------------------------------------------------
@@ -677,8 +678,8 @@ function add_roomtone_fadeout(rt_track, project_length)
 
   local max_value = 716.21785031261
 
-  local fade_start = project_length - 4.0  -- Start fade 4 seconds before =END marker
-  local fade_end = fade_start + 2.0        -- 2-second fade-out duration
+  local fade_start = project_length - 4.0 -- Start fade 4 seconds before =END marker
+  local fade_end = fade_start + 2.0       -- 2-second fade-out duration
 
   local num_points = 10
 
@@ -686,7 +687,7 @@ function add_roomtone_fadeout(rt_track, project_length)
   for i = 0, num_points do
     local t = i / num_points
     local time = fade_start + t * (fade_end - fade_start)
-    local value = max_value * (1 - (t^2 * (3 - 2 * t)))
+    local value = max_value * (1 - (t ^ 2 * (3 - 2 * t)))
     InsertEnvelopePoint(rt_vol, time, value, 0, 1, false, false)
   end
 
