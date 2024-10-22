@@ -365,7 +365,7 @@ function add_codes()
         MB('You must provide all 4 ISRC components.', "Invalid ISRC", 0)
       end
       isrc_input = ""
-    until not isrc_ret or #isrc_entries ~= 4
+    until not isrc_ret
 
     local j = 2
     if isrc_ret then
