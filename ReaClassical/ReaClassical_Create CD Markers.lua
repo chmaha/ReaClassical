@@ -207,7 +207,7 @@ function renumber_markers()
   local marker_idx = 0
 
   for i = 0, num_markers + num_regions - 1 do
-    local _, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+    local _, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
     if not isrgn then
       SetProjectMarkerByIndex(0, i, isrgn, pos, rgnend, marker_idx, name, 0)
       marker_idx = marker_idx + 1
