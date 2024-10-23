@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.6
+@version 24.25.7
 @changelog
-  Prepare Takes: Change grouping mechanism so that group numbers restart from 1 each time
+  Create CD Markers: Force fader scaling for destination and roomtone track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
