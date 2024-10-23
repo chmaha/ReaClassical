@@ -199,6 +199,119 @@ Typeset in \SpecialChar LyX
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hyphenpenalty=10000
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+I sincerely appreciate your interest in ReaClassical.
+ This project is a labor of passion,
+ driven by the desire to provide a robust and flexible tool for musicians,
+ composers,
+ and sound engineers in the classical music world.
+ Your support,
+ feedback,
+ and contributions are vital to making ReaClassical better with every update.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Thank you for being a part of this journey.
+ Whether you’re just starting with ReaClassical or have been using it from the beginning,
+ your trust in this tool inspires me to continue improving and innovating.
+ I hope ReaClassical enhances your classical music production workflow and empowers your creative vision.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hyphenpenalty=50
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align right
+\begin_inset Graphics
+	filename user_guide_images/chmaha.pdf
+	display false
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace*{
+\backslash
+fill}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
 
@@ -223,7 +336,6 @@ Introduction
 
 \begin_layout Standard
 \noindent
-\align left
 It is important to note that if you already own REAPER then the world of classical editing including source-destination editing (aka 2-,
  3-,
  and-4-point editing),
@@ -494,15 +606,6 @@ literal "false"
 
 \begin_layout Section
 Development Style
-\begin_inset CommandInset href
-LatexCommand href
-name "TeePublic store"
-target "https://www.teepublic.com/user/reaclassical"
-literal "false"
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -542,6 +645,11 @@ literal "false"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+For ReaClassical 25.x I will move to a YY.M.MICRO versioning (where M is a non-padded month) to more accurately reflect how current the software is.
+ I'll therefore plan to release monthly and add fixes as and when.
 \end_layout
 
 \begin_layout Section
@@ -599,7 +707,7 @@ literal "false"
 \end_inset
 
 .
- The ReaClassical website uses 
+ The ReaClassical and Quick Start Guide websites use 
 \begin_inset CommandInset href
 LatexCommand href
 name "Skeleton"
@@ -744,13 +852,30 @@ literal "false"
 
 \end_inset
 
+ or in the 
+\begin_inset Quotes bld
+\end_inset
+
+Installation & Update
+\begin_inset Quotes brd
+\end_inset
+
+ section of the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Quick Start Guide"
+target "https://reaclassical.org/quick_start_guide.html"
+literal "false"
+
+\end_inset
+
 .
  Simply run where you would like the ReaClassical folder to be created.
  
 \end_layout
 
 \begin_layout Enumerate
-Start REAPER.
+Start REAPER/ReaClassical.
 \end_layout
 
 \begin_layout Enumerate
@@ -1149,6 +1274,46 @@ notes
  author and notes as desired.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename user_guide_images/project prefs.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+REAPER Project Settings 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Audio Settings
 \end_layout
@@ -1367,6 +1532,42 @@ keys{F}
  It is worth noting that these preferences are set per project.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename user_guide_images/RC Prefs.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+ReaClassical Preferences
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Choice of Workflow
 \end_layout
@@ -1447,6 +1648,86 @@ tab}
  there are benefits to both routes,
  and in the end,
  it simply comes down to personal preference.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename user_guide_images/take counter.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Take Counter 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename user_guide_images/find take.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Find Take 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -2151,6 +2432,46 @@ upgraded
 .
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename user_guide_images/mixer panel.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A ReaClassical Mixer Panel
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Recording
 \end_layout
@@ -2612,6 +2933,46 @@ shift+H}
  bit depth and format (WAV or MP3 at various bitrates).
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename user_guide_images/audio calc.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Audio Calculator
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Importing
 \end_layout
@@ -3024,7 +3385,7 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename user_guide_images/vertical-uncollapsed.png
+	filename user_guide_images/uncollapsed.png
 	width 100line%
 
 \end_inset
@@ -3063,7 +3424,7 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename user_guide_images/vertical-collapsed.png
+	filename user_guide_images/collapsed.png
 	width 100line%
 
 \end_inset
@@ -3075,7 +3436,7 @@ status collapsed
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Collapsed Track Groups
+Collapsed Source Groups
 \end_layout
 
 \end_inset
@@ -3177,7 +3538,7 @@ status open
 \align center
 \begin_inset Graphics
 	filename user_guide_images/classical toolbar.png
-	width 100line%
+	width 75line%
 
 \end_inset
 
@@ -3561,7 +3922,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename user_guide_images/prepare-takes-horizontal.png
+	filename user_guide_images/prepared horizontal.png
 	width 100line%
 
 \end_inset
@@ -3600,7 +3961,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename user_guide_images/prepare-takes-vertical.png
+	filename user_guide_images/prepared vertical.png
 	width 100line%
 
 \end_inset
@@ -4132,6 +4493,46 @@ del}
  in multi-tab S-D editing,
  when regular markers are placed,
  any other existing versions in other tabs are automatically deleted to ensure that only one version of the marker exists at a time across all open project tabs.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename user_guide_images/S-D markers.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Source-Destination Markers
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -4977,7 +5378,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename user_guide_images/fadeeditor.png
+	filename user_guide_images/xfade window.png
 	width 100line%
 
 \end_inset
@@ -5113,7 +5514,7 @@ status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename user_guide_images/audition crossfade.png
+	filename user_guide_images/xfade auditioning.png
 	width 100line%
 
 \end_inset
@@ -5685,6 +6086,45 @@ mastering
 \end_inset
 
  mode features in the future.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename user_guide_images/mastering mode.png
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Mastering Mode
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -12218,8 +12658,8 @@ status open
 \noindent
 \align center
 \begin_inset Graphics
-	filename user_guide_images/RCinflator.png
-	scale 75
+	filename user_guide_images/RCInflator Ultimate.png
+	scale 50
 
 \end_inset
 
@@ -12230,7 +12670,7 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-RCInflator
+RCInflator Ultimate
 \end_layout
 
 \end_inset
@@ -12809,6 +13249,7 @@ status open
 \align center
 \begin_inset Graphics
 	filename user_guide_images/reaper_default_toolbar.png
+	scale 75
 
 \end_inset
 
