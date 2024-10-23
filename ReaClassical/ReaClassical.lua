@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.9
+@version 24.25.10
 @changelog
-  PDF Manual: Fix a few typos and convert entirely to US English
+  PDF Manual: More small tweaks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
