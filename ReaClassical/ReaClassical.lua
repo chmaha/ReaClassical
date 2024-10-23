@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.7
+@version 24.25.8
 @changelog
-  Create CD Markers: Force fader scaling for destination and roomtone track
+  PDF Manual: Update with latest images and add thanks page
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
