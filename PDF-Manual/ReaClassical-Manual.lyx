@@ -3230,7 +3230,7 @@ menu{Insert > Media file...}
 For classical music purposes,
  you can then choose whether to insert in the same time position on separate tracks or sequentially on a single track.
  For recordings with multiple takes using separate files,
- I recommend inserting/dragged one take at a time onto separate tracks on either the source group or first destination group.
+ I recommend inserting/dragging one take at a time onto separate tracks on either the source group or first destination group.
  Once everything is imported you can then drag sets of tracks to the different source groups as desired.
  If you have a best take that will be the basis of the final edit,
  place this on the top destination group tracks.
@@ -3307,7 +3307,7 @@ Navigating a Project
 In addition to built-in REAPER functions,
  ReaClassical uses a series of shortcuts to help you easily navigate your classical project.
  Important:
- I always make some dedicated time post-recording to get a lay of the land,
+ I always make some dedicated time post-recording to get an overview of the recorded material,
  tidy up the digital notes I took during the session and perform a backup on an external drive as soon as possible.
 \end_layout
 
@@ -3792,12 +3792,94 @@ ReaClassical custom toolbar
 \begin_layout Standard
 From left to right,
  we have:
- Destination IN and OUT markers (1,
- 2),
- Source IN and OUT markers (3,
- 4),
- Delete S-D markers (Ctrl+Delete),
- S-D Edit (5),
+ Destination IN and OUT markers (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{1}
+\end_layout
+
+\end_inset
+
+,
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{2}
+\end_layout
+
+\end_inset
+
+),
+ Source IN and OUT markers (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{3}
+\end_layout
+
+\end_inset
+
+,
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{4}
+\end_layout
+
+\end_inset
+
+),
+ Delete S-D markers (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+),
+ S-D Edit (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{5}
+\end_layout
+
+\end_inset
+
+),
  3-point 
 \begin_inset Quotes bld
 \end_inset
@@ -3806,14 +3888,160 @@ Assembly Line
 \begin_inset Quotes brd
 \end_inset
 
- Edit (F3),
- Insert with Time-stretching (F4),
- Delete With Ripple (Backspace),
- Delete Leaving Silence (Ctrl+Backspace),
- Set Destination Tab Project Marker (ctrl+alt+1/2),
- Set Source Tab Project Marker (ctrl+alt+3/4),
- Delete S-D Project Markers (shift+del),
- and finally ReaClassical Help (H).
+ Edit (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F3}
+\end_layout
+
+\end_inset
+
+),
+ Insert with Time-stretching (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F4}
+\end_layout
+
+\end_inset
+
+),
+ Delete With Ripple (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+backspace}
+\end_layout
+
+\end_inset
+
+),
+ Delete Leaving Silence (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+backspace}
+\end_layout
+
+\end_inset
+
+),
+ Set Destination Tab Project Marker (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+alt+1}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+alt+2}
+\end_layout
+
+\end_inset
+
+),
+ Set Source Tab Project Marker (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+alt+3}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+alt+4}
+\end_layout
+
+\end_inset
+
+),
+ Delete S-D Project Markers (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+del}
+\end_layout
+
+\end_inset
+
+),
+ and finally ReaClassical Help (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{H}
+\end_layout
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Subsection
@@ -13205,7 +13433,7 @@ menu{System Preferences > Energy Saver}
  for tips see Focusrite's 
 \begin_inset CommandInset href
 LatexCommand href
-name "optimisation page"
+name "optimization page"
 target "https://support.focusrite.com/hc/en-gb/sections/360004958539-Optimisation"
 literal "false"
 
