@@ -15,7 +15,7 @@
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children no
-\language british
+\language american
 \language_package default
 \inputencoding auto-legacy
 \fontencoding auto
@@ -38,6 +38,8 @@
 \output_sync 0
 \bibtex_command bibtex
 \index_command default
+\float_placement class
+\float_alignment class
 \paperfontsize 10
 \spacing single
 \use_hyperref false
@@ -78,6 +80,207 @@
 \shortcut idx
 \color #008000
 \end_index
+\spellchecker_ignore british Doucet
+\spellchecker_ignore british LyX
+\spellchecker_ignore british TeX
+\spellchecker_ignore british Gyre
+\spellchecker_ignore british Schola
+\spellchecker_ignore british ReaClassical
+\spellchecker_ignore british workflow
+\spellchecker_ignore british crossfade
+\spellchecker_ignore british Pyramix
+\spellchecker_ignore british SaDiE
+\spellchecker_ignore british MacOS
+\spellchecker_ignore british YouTube
+\spellchecker_ignore british PDF
+\spellchecker_ignore american chmaha
+\spellchecker_ignore american Doucet
+\spellchecker_ignore american Gyre
+\spellchecker_ignore american Schola
+\spellchecker_ignore american ReaClassical
+\spellchecker_ignore american crossfade
+\spellchecker_ignore american Pyramix
+\spellchecker_ignore american SaDiE
+\spellchecker_ignore american MacOS
+\spellchecker_ignore american ReaPack
+\spellchecker_ignore american bugfixes
+\spellchecker_ignore american YY
+\spellchecker_ignore american SemVer
+\spellchecker_ignore american CalVer
+\spellchecker_ignore american Changelog
+\spellchecker_ignore american changelog
+\spellchecker_ignore american keymap
+\spellchecker_ignore american metapackage
+\spellchecker_ignore american RCPlugs
+\spellchecker_ignore american jsfx
+\spellchecker_ignore american SWS
+\spellchecker_ignore american 'yes'
+\spellchecker_ignore american keymaps
+\spellchecker_ignore american ini
+\spellchecker_ignore american pre-release
+\spellchecker_ignore american waveforms
+\spellchecker_ignore american WaveColors
+\spellchecker_ignore american subfolder
+\spellchecker_ignore american blocksize
+\spellchecker_ignore american Haigh
+\spellchecker_ignore american Dunkerley
+\spellchecker_ignore american Toft
+\spellchecker_ignore american Katz
+\spellchecker_ignore american crossfaded
+\spellchecker_ignore american FX
+\spellchecker_ignore american ORTF
+\spellchecker_ignore american Omni
+\spellchecker_ignore american RCMASTER
+\spellchecker_ignore american submixes
+\spellchecker_ignore american submix
+\spellchecker_ignore american roomtone
+\spellchecker_ignore american faders
+\spellchecker_ignore american fader
+\spellchecker_ignore american mixdown
+\spellchecker_ignore american un-arm
+\spellchecker_ignore american WAV
+\spellchecker_ignore american bitrates
+\spellchecker_ignore american DAW
+\spellchecker_ignore american MixPre
+\spellchecker_ignore american backtick
+\spellchecker_ignore american numpad
+\spellchecker_ignore american wav
+\spellchecker_ignore american flac
+\spellchecker_ignore american ortf
+\spellchecker_ignore american Presonus
+\spellchecker_ignore american Uncollapsed
+\spellchecker_ignore american Ctrl
+\spellchecker_ignore american ctrl
+\spellchecker_ignore american del
+\spellchecker_ignore american RoomTone
+\spellchecker_ignore american spacebar
+\spellchecker_ignore american post-crossfade
+\spellchecker_ignore american doesn
+\spellchecker_ignore american aren
+\spellchecker_ignore american DAWs
+\spellchecker_ignore american couldn
+\spellchecker_ignore american isn
+\spellchecker_ignore american Crossfade
+\spellchecker_ignore american ve
+\spellchecker_ignore american crossfades
+\spellchecker_ignore american JSFX
+\spellchecker_ignore american Submix
+\spellchecker_ignore american -
+\spellchecker_ignore american Roomtone
+\spellchecker_ignore american convolver
+\spellchecker_ignore american ReaVerb
+\spellchecker_ignore american EQing
+\spellchecker_ignore american DDP
+\spellchecker_ignore american de-clutter
+\spellchecker_ignore american LUFS
+\spellchecker_ignore american EAN
+\spellchecker_ignore american ISRC
+\spellchecker_ignore american filesets
+\spellchecker_ignore american pre-gap
+\spellchecker_ignore american easter
+\spellchecker_ignore american pre-gaps
+\spellchecker_ignore american Samplerate
+\spellchecker_ignore american resampler
+\spellchecker_ignore american FLAC
+\spellchecker_ignore american RCDither
+\spellchecker_ignore american checkboxes
+\spellchecker_ignore american REAPER's
+\spellchecker_ignore american realtime
+\spellchecker_ignore american subfolders
+\spellchecker_ignore american Pelleke
+\spellchecker_ignore american MPL
+\spellchecker_ignore american X-Raym
+\spellchecker_ignore american BirdBird
+\spellchecker_ignore american RCJacH
+\spellchecker_ignore american Sai'ke
+\spellchecker_ignore american Meo-Ada
+\spellchecker_ignore american Mespotine
+\spellchecker_ignore american cfillion
+\spellchecker_ignore american pre-edited
+\spellchecker_ignore american pre-recorded
+\spellchecker_ignore american beethoven
+\spellchecker_ignore american ss
+\spellchecker_ignore american attacca
+\spellchecker_ignore american Redbook
+\spellchecker_ignore american AIFF
+\spellchecker_ignore american polywavs
+\spellchecker_ignore american unmuted
+\spellchecker_ignore american Ungroup
+\spellchecker_ignore american Reaplugs
+\spellchecker_ignore american ReaLimit
+\spellchecker_ignore american EQ
+\spellchecker_ignore american RCChannelEQ
+\spellchecker_ignore american DSP
+\spellchecker_ignore american airwindows
+\spellchecker_ignore american Baxandall
+\spellchecker_ignore american Stillwell's
+\spellchecker_ignore american RBJ
+\spellchecker_ignore american Highpass
+\spellchecker_ignore american Lowpass
+\spellchecker_ignore american RCMasteringEQ
+\spellchecker_ignore american ReEQ
+\spellchecker_ignore american Fabfilter
+\spellchecker_ignore american ReSpectrum
+\spellchecker_ignore american RCCompressor
+\spellchecker_ignore american Stillwell
+\spellchecker_ignore american RCParallelK
+\spellchecker_ignore american RCLimiter
+\spellchecker_ignore american Geraint
+\spellchecker_ignore american Convology
+\spellchecker_ignore american XT
+\spellchecker_ignore american yabridge
+\spellchecker_ignore american Samplicity
+\spellchecker_ignore american Bricasti
+\spellchecker_ignore american Liquidsonics
+\spellchecker_ignore american ValhallaDSP
+\spellchecker_ignore american Voxengo
+\spellchecker_ignore american Sobor
+\spellchecker_ignore american Acon
+\spellchecker_ignore american Verberate
+\spellchecker_ignore american Sonible
+\spellchecker_ignore american iLok
+\spellchecker_ignore american Sonnox
+\spellchecker_ignore american Inflator
+\spellchecker_ignore american RCInflator
+\spellchecker_ignore american MagicFairyDust
+\spellchecker_ignore american RCConsoleChannel
+\spellchecker_ignore american RCConsoleBus
+\spellchecker_ignore american RCConsoleFinalizer
+\spellchecker_ignore american Bertom
+\spellchecker_ignore american Denoiser
+\spellchecker_ignore american RCDeEss
+\spellchecker_ignore american de-esser
+\spellchecker_ignore american DeEss
+\spellchecker_ignore american DeBess
+\spellchecker_ignore american RCGain
+\spellchecker_ignore american PurestGain
+\spellchecker_ignore american JS
+\spellchecker_ignore american RMS
+\spellchecker_ignore american Cockos
+\spellchecker_ignore american RCTime
+\spellchecker_ignore american PhaseTool
+\spellchecker_ignore american Merging's
+\spellchecker_ignore american PanNoir
+\spellchecker_ignore american impactful
+\spellchecker_ignore american RCMidSide
+\spellchecker_ignore american Avant-garde
+\spellchecker_ignore american reverbs
+\spellchecker_ignore american ASIO
+\spellchecker_ignore american Focusrite's
+\spellchecker_ignore american distro
+\spellchecker_ignore american threadirqs
+\spellchecker_ignore american AVLinux
+\spellchecker_ignore american ReaClassicalOS
+\spellchecker_ignore american UserPlugins
+\spellchecker_ignore american KeyMap
+\spellchecker_ignore american ReaperMenu
+\spellchecker_ignore american MenuSets
+\spellchecker_ignore american Uncheck
+\spellchecker_ignore american Auto-crossfade
+\spellchecker_ignore american Waveforms
+\spellchecker_ignore american Crossfades
+\spellchecker_ignore american rtconfig
+\spellchecker_ignore american txt
 \paperwidth 178mm
 \paperheight 178mm
 \leftmargin 2cm
@@ -90,7 +293,7 @@
 \paragraph_indentation default
 \is_math_indent 0
 \math_numbering_side default
-\quotes_style british
+\quotes_style english
 \dynamic_quotes 0
 \papercolumns 1
 \papersides 1
@@ -511,7 +714,7 @@ literal "false"
 
 \end_inset
 
- page on the ReaClassical github.
+ page on the ReaClassical GitHub.
  Finally,
  I'd be glad of any monetary donations.
  You can use 
@@ -547,11 +750,17 @@ literal "false"
 \end_layout
 
 \begin_layout Section
-Buy ReaClassical Merch
+Buy ReaClassical 
+\nospellcheck on
+Merch
 \end_layout
 
 \begin_layout Standard
-Get print-on-demand ReaClassical merch like shirts,
+Get print-on-demand ReaClassical 
+\nospellcheck on
+merch
+\nospellcheck default
+ like shirts,
  mugs,
  totes,
  pins,
@@ -609,7 +818,7 @@ Development Style
 \end_layout
 
 \begin_layout Standard
-Due to working on github and releasing the functions via ReaPack,
+Due to working on GitHub and releasing the functions via ReaPack,
  I have the ability to push bugfixes and new features very quickly into an existing ReaClassical install.
  Often bugfixes happen within minutes or hours of receiving the report.
  When I dream up new features,
@@ -621,7 +830,7 @@ Due to working on github and releasing the functions via ReaPack,
  a complete video tutorial series etc.
  Part of development is also ensuring that ReaClassical continues to operate as expected with the latest REAPER versions.
  That's not to say there won't be new features appearing!
- As the REAPER devs add more new features,
+ As the REAPER developers add more new features,
  I will always check to see what might be useful for ReaClassical.
  
 \end_layout
@@ -667,7 +876,7 @@ literal "false"
 \end_inset
 
 ,
- the digital audio workstation and utilises 
+ the digital audio workstation and utilizes 
 \begin_inset CommandInset href
 LatexCommand href
 name "ReaPack"
@@ -717,7 +926,15 @@ literal "false"
 \end_inset
 
 .
- All coding is done either in REAPER's ReaScript Development Environment,
+ All coding is done either in 
+\nospellcheck on
+REAPER's
+\nospellcheck default
+ 
+\nospellcheck on
+ReaScript
+\nospellcheck default
+ Development Environment,
  
 \begin_inset CommandInset href
 LatexCommand href
@@ -747,7 +964,7 @@ literal "false"
 
 \end_inset
 
-)with the covers designed in 
+) with the covers designed in 
 \begin_inset CommandInset href
 LatexCommand href
 name "LibreOffice"
@@ -757,7 +974,7 @@ literal "false"
 \end_inset
 
  Draw.
- The ReaClassical splashscreen and banner are created in 
+ The ReaClassical splash screen and banner are created in 
 \begin_inset CommandInset href
 LatexCommand href
 name "GIMP"
@@ -1355,7 +1572,7 @@ menu{Audio > Device}
 
 .
  These settings are operating system dependent.
- Choice of blocksize etc is also dependent on need and how modern and/or optimised your system is.
+ Choice of blocksize etc is also dependent on need and how modern and/or optimized your system is.
  For general microphone setup,
  device and recording settings specifically for classical music etc I recommend referring to one or more of the following:
  
@@ -1912,7 +2129,7 @@ A typical scenario:
  You have vertically recorded,
  or vertically prepared,
  multiple takes of a concerto movement with 10 channels.
- You realise halfway through editing that you want the soloist’s microphone to be brought up in volume a little and also panned slightly more to the right to match the position in the main stereo pair.
+ You realize halfway through editing that you want the soloist’s microphone to be brought up in volume a little and also panned slightly more to the right to match the position in the main stereo pair.
  Simply make the change once on the equivalent mixer track!
 \end_layout
 
@@ -1986,7 +2203,7 @@ keys{F8}
 \end_inset
 
  to create six new source groups.
- If you accidently switch to a vertical workflow via 
+ If you accidentally switch to a vertical workflow via 
 \begin_inset ERT
 status open
 
@@ -2266,7 +2483,7 @@ keys{F8}
  at any point during project work to (re)create project routing,
  propagate track-naming based on the mixer tracks,
  sync record inputs and track lock states.
- Various ReaClassical functions use the same syncronization under the hood.
+ Various ReaClassical functions use the same synchronization under the hood.
 \end_layout
 
 \end_inset
@@ -2535,7 +2752,7 @@ Again,
  24-bit recording allows for a lot of headroom so there's no need to push close to 0dB.
  Adjust the individual faders to balance.
  Note that in a vertical workflow moving a fader will automatically move the corresponding fader in the other groups too making same-volume auditioning of different takes extremely easy.
- When using a 32-bit float device with dual AD convertors as an interface (such as the Zoom F-series),
+ When using a 32-bit float device with dual AD converters as an interface (such as the Zoom F-series),
  ensure that the recording file format remains on the default 32-bit float setting.
  The recorded levels might seem too low or too high during recording,
  but they can be easily adjusted afterward in ReaClassical without introducing any extra noise or distortion.
@@ -2673,7 +2890,7 @@ Overdub Recording
 To record additional material after the fact (say a separate narration track or an organ part in a church after the main recording session in a concert hall),
  edit the orchestral material as usual and use a mixdown as a guide track in a new project (or new project tab).
  To achieve this,
- use a vertical worflow via 
+ use a vertical workflow via 
 \begin_inset ERT
 status open
 
@@ -2899,7 +3116,7 @@ lock track controls
 \end_inset
 
 .
- The tracks are then greyed out.
+ The tracks are then grayed out.
  Then sync using F8 and the same tracks are locked in every group.
  Whether or not the tracks were previously record-armed,
  those tracks will no longer be involved in the recording.
@@ -2929,7 +3146,11 @@ shift+H}
  to open a browser-based offline calculator.
  You can set units,
  channel count,
- samplerate,
+ 
+\nospellcheck on
+samplerate
+\nospellcheck default
+,
  bit depth and format (WAV or MP3 at various bitrates).
 \end_layout
 
@@ -3176,7 +3397,7 @@ return}
 \end_inset
 
  (enter/return) on the main keyboard or numpad if you have one to quickly search for a take based on the underlying filename of the media item.
- This will work for any filenaming system that uses numbers before the file extension such as 
+ This will work for any file-naming system that uses numbers before the file extension such as 
 \begin_inset Quotes bld
 \end_inset
 
@@ -3315,7 +3536,7 @@ Parents & Children
 ReaClassical can hide or show children of track groups.
  This means that editing multi-track classical music can be as easy as editing a stereo track.
  When takes have been prepared (see below),
- all edits are automatically synchronised.
+ all edits are automatically synchronized.
  Making an edit to the parent track automatically makes the same one to all the children too.
  To show hidden children select the parent track and press 
 \begin_inset ERT
@@ -3905,7 +4126,7 @@ Takes
 
 ).
  Super simple!
- Every set of items comprising a take has changed colour,
+ Every set of items comprising a take has changed color,
  is now grouped.
  In addition,
  source and destination groups are linked or (re-linked) for various types of editing.
@@ -4030,9 +4251,9 @@ Prepare Takes:
 
  value is set to 1,
  for horizontally laid-out takes,
- each complete take is coloured with a different random colour.
+ each complete take is colored with a different random color.
  For vertically laid-out takes,
- each folder’s items are given a different random colour.
+ each folder’s items are given a different random color.
  This way,
  however you work,
  it’s easy to see where edits have come from.
@@ -4143,7 +4364,7 @@ Source-Destination Editing
 \end_layout
 
 \begin_layout Standard
-You set your in and out points using special coloured labelled markers via shortcuts 
+You set your in and out points using special colored labeled markers via shortcuts 
 \begin_inset ERT
 status open
 
@@ -4212,7 +4433,7 @@ keys{5}
  to make the 2-,
  3- or 4-point edit.
  depending on how many markers you set.
- If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a xfade or item edge,
+ If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a crossfade or item edge,
  the function will alert you (pressing OK places the marker anyway).
  This helps avoid awkward 
 \begin_inset Quotes bld
@@ -4248,7 +4469,7 @@ a fade or crossfade.
 \end_layout
 
 \begin_layout Standard
-You’ll also notice that because you prepared the various takes with colours (and grouping),
+You’ll also notice that because you prepared the various takes with colors (and grouping),
  it is really easy to see which takes compose your final edited tracks.
  It’s worth pointing out that my S/D and classical crossfade functions place the crossfade immediately before the entry and exit points of the pasted audio.
  The crossfade length and other values can be set on a per-project basis via ReaClassical Preferences (
@@ -4294,7 +4515,7 @@ The downside to this workflow when using a vertical approach is that the source 
 \emph on
 Optional:
  If you are worried about accidentally moving markers and items during precise S-D or assembly editing,
- engage the padlock icon in the topleft of the ReaClassical window.
+ engage the padlock icon in the top-left of the ReaClassical window.
  By default with the latest ReaClassical project template,
  it should prevent manual left/right item movement and marker dragging (while still allowing for S-D editing with ripple).
  Even though you can't move S-D markers by dragging with this lock mode engaged,
@@ -4694,7 +4915,7 @@ Insert with Time-Stretching
 \end_layout
 
 \begin_layout Standard
-Using the ReaClassical_Insert with timestretching function 
+Using the ReaClassical_Insert with time-stretching function 
 \begin_inset ERT
 status open
 
@@ -4708,10 +4929,10 @@ keys{F4}
 \end_inset
 
  ,
- you can complete a 4-point edit where the material between the source markers is timestretched to fit the length of time between the destination markers.
+ you can complete a 4-point edit where the material between the source markers is time-stretched to fit the length of time between the destination markers.
  This is really useful when the source material has to fit the destination span exactly,
  for example when working with visual cues.
- The timestretch algorithm used will be the one set in REAPER project settings.
+ The time-stretch algorithm used will be the one set in REAPER project settings.
  When there are multiple items in between the source markers,
  the function will glue the items together before time-stretching.
  Note that this function can also be used in multi-tab S-D editing mode (see above).
@@ -5240,7 +5461,7 @@ keys{F}
  the two-lanes for overlapping items is enabled,
  colored red and green,
  and the fade editor toolbox appears (I personally position it to hover over the middle of my mixer.
- Note also that you are automatically centred on the crossfade and can use the mouse wheel to zoom in and out.
+ Note also that you are automatically centered on the crossfade and can use the mouse wheel to zoom in and out.
  Press 
 \begin_inset ERT
 status open
@@ -5552,7 +5773,7 @@ As you’ll see,
  You can stack instances and on completion of the latest run,
  all instances are removed.
  Better to experience than describe but it works really well.
- You’ll also see that the edit cursor returns to the middle of the crossfade to aid in mouse scroll zooming keeping the crossfade centred.
+ You’ll also see that the edit cursor returns to the middle of the crossfade to aid in mouse scroll zooming keeping the crossfade centered.
  The mirrored position takes into consideration the overlap of the items so you can have a complicated set of fades and still get an exact mirrored stopping point.
 \end_layout
 
@@ -5764,7 +5985,7 @@ keys{K}
 \end_inset
 
  which temporarily locks all source groups and engages ripple-all-tracks mode to enable you to drag destination items and simultaneously ripple markers and regions in the regular arrange view.
- This allows vertical source groups to retain their independence yet still give ripple-all-tracks behaviour which is useful for destination album track spacing etc.
+ This allows vertical source groups to retain their independence yet still give ripple-all-tracks behavior which is useful for destination album track spacing etc.
  However,
  I consider this function deprecated given I strongly feel that the Create CD Markers function is now the ultimate way to deal with CD tracks/markers.
 \end_layout
@@ -6048,7 +6269,7 @@ ctrl+M}
 .
  In addition to making the mixer tracks,
  busses and RCMASTER available in the arrange window for setting static mixer scenes via envelope points,
- it also serves to declutter by hiding any source group audio.
+ it also serves to de-clutter by hiding any source group audio.
  The hide and show child tracks shortcuts still work on the destination folder but in mastering mode also works on automation lanes.
  Simply select the relevant track connected to the lane and use the usual 
 \begin_inset ERT
@@ -6278,7 +6499,7 @@ shift}
 
  and drag up or down to just affect that portion of the envelope without needing to add in individual points.
  It's such a time-saver!
- The benefit here is that you can also see how the item waveform is affected in realtime.
+ The benefit here is that you can also see how the item waveform is affected in real time.
 \end_layout
 
 \begin_layout Standard
@@ -6558,7 +6779,11 @@ keys{F2}
  For CD tracks that you want to have a visual CD player countdown,
  simply start the item name with an exclamation (!).
  Preferences such as CD marker offset,
- pregap length and album lead-out can be set via ReaClassical Project Preferences 
+ 
+\nospellcheck on
+pre-gap
+\nospellcheck default
+ length and album lead-out can be set via ReaClassical Project Preferences 
 \begin_inset ERT
 status open
 
@@ -6578,7 +6803,11 @@ keys{F5}
 
 \begin_layout Standard
 Further,
- you can add audio to the initial pregap (an 
+ you can add audio to the initial 
+\nospellcheck on
+pre-gap
+\nospellcheck default
+ (an 
 \begin_inset Quotes bld
 \end_inset
 
@@ -6587,7 +6816,11 @@ easter egg
 \end_inset
 
  track) by not giving the first item (or crossfaded items) a take name.
- The function will assume that this is supposed to be hidden and generate the initial pregap length accordingly.
+ The function will assume that this is supposed to be hidden and generate the initial 
+\nospellcheck on
+pre-gap
+\nospellcheck default
+ length accordingly.
  
 \end_layout
 
@@ -6642,7 +6875,11 @@ use only # markers
 \begin_inset Quotes brd
 \end_inset
 
- and render by time selection if you don’t want the first pregap as actual silence at the start of track 1).
+ and render by time selection if you don’t want the first 
+\nospellcheck on
+pre-gap
+\nospellcheck default
+ as actual silence at the start of track 1).
  
 \end_layout
 
@@ -6665,7 +6902,7 @@ keys{C}
 \end_inset
 
  shortcut,
- ReaClassical also generates both a plaintext and HTML album report in the project folder including details such as pre-gaps,
+ ReaClassical also generates both a plain text and HTML album report in the project folder including details such as pre-gaps,
  track title,
  start time,
  track length,
@@ -6817,7 +7054,7 @@ Samplerate
 \begin_layout Standard
 Now that r8brain free has been introduced as the best quality resampler available in REAPER (I highly recommend double-checking that it is selected when resampling at render time) I feel I can do everything,
  including DDP creation,
- without leaving my favourite DAW.
+ without leaving my favorite DAW.
  However,
  the Marker to CUE function 
 \begin_inset ERT
@@ -6930,7 +7167,7 @@ Folder Structure
 \begin_layout Standard
 ReaClassical defaults to placing media and exports into appropriately subfolders making project file navigation easier.
  Also,
- ReaClassical defaults to separate folders for automatic backups and autosaves.
+ ReaClassical defaults to separate folders for automatic backups and auto-saves.
  These settings are subject to change and can be modified by going to the REAPER preferences 
 \begin_inset ERT
 status open
@@ -6963,7 +7200,7 @@ Automatic Backups
 REAPER allows for powerful and complex backup routines.
  As referenced above,
  ReaClassical defaults to 10 time-stamped backups and 10 auto-saves every 15 minutes when not recording.
- Feel free to modify for your own way of working including switching to backups and autosaves for a number of unique days.
+ Feel free to modify for your own way of working including switching to backups and auto saves for a number of unique days.
 \end_layout
 
 \begin_layout Subsection
@@ -7062,7 +7299,7 @@ literal "false"
 
 .
  However,
- I don't believe it is quite ready for primetime yet and recommend using one of the other methods for now.
+ I don't believe it is quite ready for prime-time yet and recommend using one of the other methods for now.
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -7112,7 +7349,7 @@ literal "false"
 
 \end_inset
 
- on the forums and/or create an issue or start a discussion on my Github repository located at 
+ on the forums and/or create an issue or start a discussion on my GitHub repository located at 
 \begin_inset CommandInset href
 LatexCommand href
 target "https://github.com/chmaha/ReaClassical"
@@ -7382,7 +7619,7 @@ textasciitilde}
 Description:
  
 \emph default
-Add a burnt sienna-colored aux/submix track labelled 
+Add a burnt sienna-colored aux/submix track labeled 
 \begin_inset Quotes bld
 \end_inset
 
@@ -7390,7 +7627,7 @@ RoomTone
 \begin_inset Quotes brd
 \end_inset
 
- to the end of the tracklist that is visible in both the track and mixer panels.
+ to the end of the track list that is visible in both the track and mixer panels.
 \end_layout
 
 \begin_layout Standard
@@ -7447,7 +7684,7 @@ keys{@}
 Description:
  
 \emph default
-Add a rosewood-colored aux track prefixed with an ampersand (@) to the end of the tracklist but is only visible in the mixer.
+Add a rosewood-colored aux track prefixed with an ampersand (@) to the end of the track list but is only visible in the mixer.
 \end_layout
 
 \begin_layout Standard
@@ -7529,7 +7766,7 @@ keys{
 Description:
  
 \emph default
-Add a teal-colored aux track prefixed with an hash (#) to the end of the tracklist but is only visible in the mixer.
+Add a teal-colored aux track prefixed with an hash (#) to the end of the track list but is only visible in the mixer.
 \end_layout
 
 \begin_layout Standard
@@ -7650,7 +7887,7 @@ keys{'}
 Description:
  
 \emph default
-Add a reference track labelled 
+Add a reference track labeled 
 \begin_inset Quotes bld
 \end_inset
 
@@ -7658,7 +7895,7 @@ REF
 \begin_inset Quotes brd
 \end_inset
 
- to the end of the tracklist that is visible in both the track and mixer panels.
+ to the end of the track list that is visible in both the track and mixer panels.
  If you rename,
  a 
 \begin_inset Quotes bld
@@ -8377,7 +8614,7 @@ Zoom to show the whole project horizontally.
 Notes:
  
 \emph default
-Very useful for a birdseye view of your project so you can navigate to another section.
+Very useful for a birds-eye view of your project so you can navigate to another section.
  If there are multiple folders,
  the function collapses them.
  If fewer than two folders,
@@ -8423,7 +8660,7 @@ Zoom to show the whole project vertically.
 Notes:
  
 \emph default
-Very useful for a birdseye view of your project so you can see all vertical take folders.
+Very useful for a birds-eye view of your project so you can see all vertical take folders.
  The function respects current child track visibility to allow for a typical editing situation of viewing all of the destination group but only the folder tracks of source groups.
 \end_layout
 
@@ -8631,7 +8868,7 @@ Notes:
 \emph default
 If the function can't find a media item with that take number and optional session name,
  it will let you know and offer to try again with a different number or session name.
- This will work for any filenaming system that uses numbers before the file extension such as 
+ This will work for any file-naming system that uses numbers before the file extension such as 
 \begin_inset Quotes bld
 \end_inset
 
@@ -8692,7 +8929,7 @@ Jumps to the specified time (mm:ss) in the project or internal time within a sel
 Notes:
  
 \emph default
-Various usecases include 1) a musician or producer giving you an exact time in draft exported audio of a heavily-edited symphony movement where they identified extraneous noise or a noticeable edit,
+Various use-cases include 1) a musician or producer giving you an exact time in draft exported audio of a heavily-edited symphony movement where they identified extraneous noise or a noticeable edit,
  2) building S-D edits from a list or score which includes take number and times.
 \end_layout
 
@@ -8830,8 +9067,8 @@ keys{4}
 \end_inset
 
  = Source IN/OUT.
- Inbetween the destination markers is where the edit will actually happen.
- Inbetween the source markers is where the material is taken from.
+ In between the destination markers is where the edit will actually happen.
+ In between the source markers is where the material is taken from.
  Use all four markers for 4-point editing.
  Use any combination of 3 markers for 3-point editing.
  Use either 1 source and 1 destination (more useful) or just the source markers for 2-point editing (less useful).
@@ -8903,7 +9140,11 @@ keys{F5}
 \end_layout
 
 \begin_layout Standard
-If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a xfade or item edge,
+If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a 
+\nospellcheck on
+crossfade
+\nospellcheck default
+ or item edge,
  the function will alert you (pressing OK places the marker anyway).
  This helps avoid awkward 
 \begin_inset Quotes bld
@@ -9146,7 +9387,11 @@ No
 \begin_layout Standard
 
 \series bold
-Insert with Timestretching 
+Insert with 
+\nospellcheck on
+Timestretching
+\nospellcheck default
+ 
 \series default
 
 \begin_inset ERT
@@ -9761,7 +10006,11 @@ keys{T}
 
 \end_inset
 
- for mono-channel polywav import.
+ for mono-channel 
+\nospellcheck on
+polywav
+\nospellcheck default
+ import.
 \end_layout
 
 \begin_layout Standard
@@ -10044,7 +10293,7 @@ ctrl+M}
 Description:
 
 \emph default
- Allows for focussed work on the destination group.
+ Allows for focused work on the destination group.
  Couple with 
 \begin_inset Quotes bld
 \end_inset
@@ -10547,8 +10796,16 @@ keys{Y}
 \end_layout
 
 \begin_layout Standard
-You can add audio to the initial pregap (easter egg track) by not giving the first item (or crossfaded items) a take name.
- The function will assume that this is supposed to be hidden and generate the initial pregap length accordingly.
+You can add audio to the initial 
+\nospellcheck on
+pre-gap
+\nospellcheck default
+ (easter egg track) by not giving the first item (or crossfaded items) a take name.
+ The function will assume that this is supposed to be hidden and generate the initial 
+\nospellcheck on
+pre-gap
+\nospellcheck default
+ length accordingly.
  All album metadata is placed towards the end of the album inside a default 7-second silent lead-out (so that CD players in cars don't immediately cycle back to the first track without a little breathing room).
  This value can be changed via the ReaClassical Project Preferences 
 \begin_inset ERT
@@ -12340,7 +12597,7 @@ ctrl+U}
 
 \end_inset
 
- Check for REAPER updates (using REAPER update utility lua)
+ Check for REAPER updates (using REAPER update utility)
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -12431,7 +12688,7 @@ Range
 \begin_inset Quotes brd
 \end_inset
 
- dropdown (
+ drop-down (
 \begin_inset Quotes bld
 \end_inset
 
@@ -12531,7 +12788,7 @@ RCLimiter
  (ReaClassical limiter,
  included in the ReaClassical portable install and available in my repository).
  Uses DSP from Smooth Limiter by Geraint Luff to which I added 4x oversampling code.
- Defaults are tuned to classical music with true-peak and lookahead functionality.
+ Defaults are tuned to classical music with true-peak and look-ahead functionality.
  Adjust the release to taste.
 \end_layout
 
@@ -12591,8 +12848,16 @@ literal "false"
  ValhallaDSP Room and Vintage Verb,
  Fabfilter Pro-R,
  Voxengo Sobor,
- Acon Digital Verberate 2 and Sonible smart:reverb are all excellent non-ilok options for classical music and work seamlessly via yabridge on Linux.
- Note that the Liquidsonics offerings no longer require a physical iLok so can also be used on Linux via yabridge and iLok Cloud activation if you are feeling brave.
+ Acon Digital Verberate 2 and Sonible smart:reverb are all excellent 
+\nospellcheck on
+non-iLok
+\nospellcheck default
+ options for classical music and work seamlessly via yabridge on Linux.
+ Note that the Liquidsonics offerings no longer require a physical 
+\nospellcheck on
+iLok
+\nospellcheck default
+ so can also be used on Linux via yabridge and iLok Cloud activation if you are feeling brave.
 \end_layout
 
 \begin_layout Standard
@@ -12609,7 +12874,7 @@ Sonnox Inflator
 \begin_inset Quotes brd
 \end_inset
 
--style waveshaping:
+-style wave-shaping:
 
 \series default
  Try 
@@ -12796,7 +13061,7 @@ Avant-garde
 \emph default
 .
  This just might be the world's finest dither.
- There's a dropdown to select between 16-bit and 24-bit.
+ There's a drop-down to select between 16-bit and 24-bit.
  
 \end_layout
 
@@ -13124,7 +13389,7 @@ ReaClassical
 \end_layout
 
 \begin_layout Itemize
-Various ReaClassical JSFX plugins (after importing my repo,
+Various ReaClassical JSFX plugins (after importing my repository,
  search ReaPack for 
 \begin_inset Quotes bld
 \end_inset
@@ -13362,7 +13627,7 @@ Appearance > Fades/Crossfades
 Enable
 \noun default
  When editing crossfades with the mouse,
- use crossfade editor theme colours 
+ use crossfade editor theme colors 
 \end_layout
 
 \begin_layout Subparagraph
@@ -13434,7 +13699,7 @@ Check
 \end_layout
 
 \begin_layout Subparagraph
-Editing Behaviour
+Editing Behavior
 \end_layout
 
 \begin_layout Itemize
@@ -13442,7 +13707,7 @@ Editing Behaviour
 \noun on
 Set 
 \noun default
-Locked item ripple editing behaviour to 
+Locked item ripple editing behavior to 
 \begin_inset Quotes bld
 \end_inset
 
@@ -13464,7 +13729,7 @@ Technically not necessary as it is now checked and set at the start of ripple-ca
 \end_layout
 
 \begin_layout Subparagraph
-Editing Behaviour > Mouse Modifiers
+Editing Behavior > Mouse Modifiers
 \end_layout
 
 \begin_layout Itemize
