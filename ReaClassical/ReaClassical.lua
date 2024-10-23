@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.8
+@version 24.25.9
 @changelog
-  PDF Manual: Update with latest images and add thanks page
+  PDF Manual: Fix a few typos and convert entirely to US English
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
