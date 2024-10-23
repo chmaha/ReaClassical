@@ -4734,7 +4734,8 @@ When using a vertical workflow,
 \end_layout
 
 \begin_layout Standard
-The downside to this workflow when using a vertical approach is that the source and destination markers can get in each other’s way visually if the takes aren’t somewhat staggered however the process still works as expected.
+The downside to this workflow when using a vertical approach is that the source and destination markers can get in each other’s way visually if the takes aren’t somewhat staggered,
+ however the process still works as expected.
  See below for a razor editing alternative.
 \end_layout
 
@@ -4897,7 +4898,7 @@ Alt+4}
 \end_inset
 
 ) for source (essentially the same numbers associated with regular S-D markers).
- The markers can exist anywhere on the tab's timeline but perhaps the very beginning or end would be good to keep out of the way.
+ The markers can exist anywhere on the tab's timeline but perhaps the very beginning or end would be good to keep them out of the way.
  The S-D editing itself then works just as for a single tab other than any source markers that are set are not deleted to aid quickly undoing in the destination tab and being ready to reapply the edit.
  The only rule when using S-D project markers is to ensure that source or destination markers should be paired with the corresponding source or destination project marker.
  This workflow would,
@@ -5292,7 +5293,11 @@ backspace}
 \end_layout
 
 \begin_layout Subsubsection
-Add Destination and Source Markers to Edges of Item(s) or Time Selection
+Add Destination and Source Markers to Edges of Item(s) 
+\begin_inset Newline newline
+\end_inset
+
+or Time Selection
 \end_layout
 
 \begin_layout Standard
@@ -5589,7 +5594,10 @@ literal "false"
 While Pyramix also has additional source-destination marker workflows,
  I couldn’t help but feel that for professional ensembles that manage a high degree of tempo regularity between takes,
  this method can be extremely efficient.
- This isn’t the document to introduce REAPER razor edits as there are plenty of resources online if you do a simple search but here we are only concerning ourselves with creation of the razor area across all our pairs and spot mics (REAPER’s default shortcut is the rather uninspiring Alt+Right drag) but thankfully it can become the default editing mode by either using the I shortcut and right dragging or selecting the Razor edit mode on the main toolbar and left dragging.
+ This isn’t the document to introduce REAPER razor edits as there are plenty of resources online if you do a simple search.
+ Here we are only concerning ourselves with creation of the razor area across all our pairs and spot mics (REAPER’s default shortcut is the rather uninspiring Alt+Right drag).
+ Thankfully,
+ it can become the default editing mode by selecting the razor edit mode on the main toolbar and left-click dragging.
  
 \end_layout
 
@@ -5638,7 +5646,7 @@ Crossfade Editor
 
 \begin_layout Standard
 Now that you’ve made your precise edits using S/D workflow or razor editing (no worries if it’s a bit rough!),
- it’s time to check things through with a good listen and the help of the crossfade editor view.
+ it’s time to check things through with the help of the crossfade editor view.
 \end_layout
 
 \begin_layout Standard
@@ -6969,7 +6977,8 @@ Creating DDP filesets
 \end_layout
 
 \begin_layout Standard
-I have introduced a workflow to automatically add the CD/DDP markers,regions and room tone automation via 
+I have introduced a workflow to automatically add the CD/DDP markers,
+ regions and room tone automation via 
 \begin_inset ERT
 status open
 
@@ -10334,7 +10343,8 @@ keys{F}
 \end_layout
 
 \begin_layout Standard
-Note also that while in crossfade editor view any edits usefully only affect the destination group.
+Note also that while in crossfade editor view,
+ any edits only affect the destination group.
 \end_layout
 
 \begin_layout Standard
