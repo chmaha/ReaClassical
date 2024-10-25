@@ -800,29 +800,34 @@ end
 ---------------------------------------------------------------------
 
 function rearrange_tracks(track_table, current_order)
+    local items_to_move = {}
+
     for i, group in ipairs(track_table) do
         local parent_track = group.parent
-        local items_to_move = {}
+        local mix_order = 1
+        items_to_move[mix_order] = items_to_move[mix_order] or {}
 
-        items_to_move[parent_track] = {}
+        items_to_move[mix_order].rec_input = GetMediaTrackInfo_Value(parent_track, "I_RECINPUT")
+        items_to_move[mix_order].items = {}
+
         local parent_item_count = GetTrackNumMediaItems(parent_track)
         for j = 0, parent_item_count - 1 do
             local item = GetTrackMediaItem(parent_track, j)
-            local mix_order = 1
-            items_to_move[mix_order] = items_to_move[mix_order] or {}
-            table.insert(items_to_move[mix_order], item)
+            table.insert(items_to_move[mix_order].items, item)
         end
 
         for _, child in ipairs(group.tracks) do
-            local _, mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", "", 0)
-            mix_order = tonumber(mix_order) or 1
+            local _, child_mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", "", 0)
+            child_mix_order = tonumber(child_mix_order) or 1
 
-            items_to_move[child] = {}
+            items_to_move[child_mix_order] = items_to_move[child_mix_order] or {}
+            items_to_move[child_mix_order].rec_input = GetMediaTrackInfo_Value(child, "I_RECINPUT")
+            items_to_move[child_mix_order].items = {}
+
             local item_count = GetTrackNumMediaItems(child)
             for j = 0, item_count - 1 do
                 local item = GetTrackMediaItem(child, j)
-                items_to_move[mix_order] = items_to_move[mix_order] or {}
-                table.insert(items_to_move[mix_order], item)
+                table.insert(items_to_move[child_mix_order].items, item)
             end
         end
 
@@ -848,11 +853,17 @@ function rearrange_tracks(track_table, current_order)
         for _, revised_track_info in ipairs(updated_group_tracks) do
             local revised_mix_order = revised_track_info.order
 
-            local items = items_to_move[revised_mix_order] or {}
+            local track_data = items_to_move[revised_mix_order] or {}
+            local items = track_data.items or {}
+            local rec_input = track_data.rec_input or 0
+
             for _, item in ipairs(items) do
                 MoveMediaItemToTrack(item, revised_track_info.track)
             end
+
+            SetMediaTrackInfo_Value(revised_track_info.track, "I_RECINPUT", rec_input)
         end
+
         for j, track_info in ipairs(updated_group_tracks) do
             GetSetMediaTrackInfo_String(track_info.track, "P_EXT:mix_order", tostring(j), 1)
         end
