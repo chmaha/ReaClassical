@@ -122,7 +122,7 @@ function return_check_length()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[7] then check_length = table[7] / 1000 end
+        if table[6] then check_length = table[6] / 1000 end
     end
     return check_length
 end
