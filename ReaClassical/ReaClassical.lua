@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.11
+@version 24.25.12
 @changelog
-  Re-arrange "M:" tracks: On sync, also move recording inputs
+  ReaClassical Preferences: Fix numbering since removing one of the options
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
