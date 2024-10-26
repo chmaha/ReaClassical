@@ -2,7 +2,7 @@
 @author chmaha
 @version 24.25.13
 @changelog
-  Assembly Edit: Use correct numbered entry in RC Preferences
+  Add Dest IN and OUT: Use correct numbered entry in RC Preferences
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
