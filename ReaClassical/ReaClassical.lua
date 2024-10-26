@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.10
+@version 24.25.11
 @changelog
-  PDF Manual: More small tweaks
+  Re-arrange "M:" tracks: On sync, also move recording inputs
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
