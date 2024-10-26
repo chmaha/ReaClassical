@@ -32,7 +32,7 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[9] then sdmousehover = tonumber(table[9]) or 0 end
+        if table[8] then sdmousehover = tonumber(table[8]) or 0 end
     end
 
     local cur_pos
