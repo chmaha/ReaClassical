@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.12
+@version 24.25.13
 @changelog
-  ReaClassical Preferences: Fix numbering since removing one of the options
+  Assembly Edit: Use correct numbered entry in RC Preferences
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
