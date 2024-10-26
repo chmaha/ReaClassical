@@ -3169,7 +3169,7 @@ keys{F8}
 \end_inset
 
  sync to quickly re-order all the associated tracks across groups at once.
- This includes all audio.
+ This includes all audio and assigned recording inputs.
 \end_layout
 
 \begin_layout Subsection
