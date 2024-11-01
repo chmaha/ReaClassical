@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.13
+@version 24.25.14
 @changelog
-  Add Dest IN and OUT: Use correct numbered entry in RC Preferences
+  Colors Table: Add xfade_red and xfade_green RGB values
+  Various: Use xfade colors from ReaClassical_Colors_Table.lua
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
