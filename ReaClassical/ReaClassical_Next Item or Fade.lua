@@ -26,6 +26,7 @@ local main, move_to_item, trackname_check
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
 local correct_item_positions, folder_check, check_next_item_overlap
+local get_color_table, get_path
 
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local win_state
@@ -154,7 +155,8 @@ function fadeStart()
     local item1_guid = BR_GetMediaItemGUID(item1)
     SetProjExtState(0, "ReaClassical", "FirstItemGUID", item1_guid)
     save_color("1", item1)
-    paint(item1, 32648759)
+    local colors = get_color_table()
+    paint(item1, colors.xfade_red)
     Main_OnCommand(40311, 0) -- Set ripple editing all tracks
     lock_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -174,7 +176,7 @@ function fadeStart()
     SetProjExtState(0, "ReaClassical", "SecondItemGUID", item2_guid)
     if item2 then
         save_color("2", item2)
-        paint(item2, 20967993)
+        paint(item2, colors.xfade_green)
     end
     SetMediaItemSelected(item1, false)
 end
@@ -422,6 +424,23 @@ end
 function trackname_check(track, string)
     local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, string)
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

@@ -43,9 +43,11 @@ if input ~= "" then
     if table[7] then ref_is_guide = tonumber(table[7]) or 0 end
 end
 
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local colors = get_color_table()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
@@ -55,7 +57,7 @@ function main()
             solo()
             local select_children = NamedCommandLookup("_SWS_SELCHILDREN2") -- SWS: Select children
             Main_OnCommand(select_children, 0)
-            mixer()
+            mixer(colors)
             local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
             SetEditCurPos(pos, 0, 0)
@@ -81,7 +83,7 @@ function main()
             return
         elseif item_one and not item_two then
             local color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
-            if color == 20967993 then
+            if color == colors.xfade_green then
                 item_two = item_one
                 local prev_item = NamedCommandLookup("_SWS_SELPREVITEM")
                 Main_OnCommand(prev_item, 0)
@@ -107,7 +109,6 @@ function main()
         local end_of_one = one_pos + one_length
         local overlap = end_of_one - two_pos
         local mouse_to_item_two = two_pos - mouse_pos
-        local colors = get_color_table()
         if item_hover == item_one then
             local item_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
             SetMediaItemSelected(item_hover, true)
@@ -239,8 +240,7 @@ end
 
 ---------------------------------------------------------------------
 
-function mixer()
-    local colors = get_color_table()
+function mixer(colors)
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)

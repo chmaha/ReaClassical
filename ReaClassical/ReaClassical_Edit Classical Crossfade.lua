@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
+local main, get_color_table, get_path
 
 ---------------------------------------------------------------------
 
@@ -52,8 +52,9 @@ function main()
             "Edit Classical Crossfade", 0)
         return
     elseif item_one and not item_two then
+        local colors = get_color_table()
         color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
-        if color == 20967993 then
+        if color == colors.xfade_green then
             item_two = item_one
             prev_item = NamedCommandLookup("_SWS_SELPREVITEM")
             Main_OnCommand(prev_item, 0)
@@ -110,6 +111,23 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
