@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-func Install64bit(rcfolder string, pkgver string, rcver string) {
+func Install64bit(rcfolder string, pkgver string, rcver string, arch string) {
 
 	// Create a unique hash-based date suffix
 	dateSuffix := getHashedDateSuffix()
@@ -53,7 +53,13 @@ func Install64bit(rcfolder string, pkgver string, rcver string) {
 	// Download REAPER
 	fmt.Printf("Downloading REAPER %s from reaper.fm\n", pkgver)
 	time.Sleep(2 * time.Second)
-	reaperURL := fmt.Sprintf("https://www.reaper.fm/files/%s.x/reaper%s_x64-install.exe", strings.Split(pkgver, ".")[0], strings.ReplaceAll(pkgver, ".", ""))
+	var reaperURL string
+
+	if arch == "amd64" {
+		reaperURL = fmt.Sprintf("https://www.reaper.fm/files/%s.x/reaper%s_x64-install.exe", strings.Split(pkgver, ".")[0], strings.ReplaceAll(pkgver, ".", ""))
+	} else {
+		reaperURL = fmt.Sprintf("https://www.reaper.fm/files/%s.x/reaper%s_win11_arm64ec_beta-install.exe", strings.Split(pkgver, ".")[0], strings.ReplaceAll(pkgver, ".", ""))
+	}
 	downloadFile(reaperURL, reaperExePath)
 
 	// Extract REAPER
@@ -65,13 +71,16 @@ func Install64bit(rcfolder string, pkgver string, rcver string) {
 	fmt.Println("Downloading ReaClassical files from GitHub...")
 	time.Sleep(2 * time.Second)
 	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip", filepath.Join(tempFilePath, "Resource_Folder_Base.zip"))
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-x64.zip", filepath.Join(tempFilePath, "UP_Windows-x64.zip"))
-
+	if arch == "amd64" {
+		downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-x64.zip", filepath.Join(tempFilePath, "UP_Windows.zip"))
+	} else {
+		downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-arm64ec.zip", filepath.Join(tempFilePath, "UP_Windows.zip"))
+	}
 	// Extract ReaClassical files
 	fmt.Println("Extracting ReaClassical files to ReaClassical folder...")
 	time.Sleep(2 * time.Second)
 	extractArchive(filepath.Join(tempFilePath, "Resource_Folder_Base.zip"), rcfolder)
-	extractArchive(filepath.Join(tempFilePath, "UP_Windows-x64.zip"), filepath.Join(rcfolder, "UserPlugins"))
+	extractArchive(filepath.Join(tempFilePath, "UP_Windows.zip"), filepath.Join(rcfolder, "UserPlugins"))
 
 	// Add the line to reaper.ini under the [REAPER] section
 	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")
