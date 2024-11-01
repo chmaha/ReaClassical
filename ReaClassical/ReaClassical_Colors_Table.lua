@@ -37,7 +37,9 @@ return {
         dest_items_two = ColorToNative(99, 180, 220)|0x1000000,
         source_items = ColorToNative(65, 127, 99)|0x1000000,
         audition = ColorToNative(10, 10, 10) | 0x1000000,
-        ref = ColorToNative(100, 100, 100) | 0x1000000
+        ref = ColorToNative(100, 100, 100) | 0x1000000,
+        xfade_red = ColorToNative(242, 46, 55) | 0x1000000,
+        xfade_green = ColorToNative(63, 242, 57) | 0x1000000
     }
 
 ---------------------------------------------------------------------
