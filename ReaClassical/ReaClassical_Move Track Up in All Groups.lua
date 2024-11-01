@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+-- luacheck: ignore 113
+
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main
@@ -29,7 +31,7 @@ function main()
 
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 or selected_tracks == 0 then
-    ShowMessageBox("Please select a single child track from the first group","Move Track Up in All Groups", 0)
+    ShowMessageBox("Please select a single child track from the first group", "Move Track Up in All Groups", 0)
     return
   end
 
@@ -59,7 +61,8 @@ function main()
   local tracks_per_group = child_count + 1
 
   if folder_count == 0 then
-    ShowMessageBox("This function can only be used on a project with one or more folders", "Move Track Up in All Groups", 0)
+    ShowMessageBox("This function can only be used on a project with one or more folders",
+      "Move Track Up in All Groups", 0)
     return
   end
 
@@ -74,7 +77,7 @@ function main()
     ShowMessageBox("Please select a child track in the folder", "Move Track Up in All Groups", 0)
     return
   end
-  
+
   if track_idx == 0 then
     ShowMessageBox("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
     return

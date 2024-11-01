@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+-- luacheck: ignore 113
+
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check
@@ -91,7 +93,7 @@ function main()
         local end_of_one = one_pos + one_length
         local overlap = end_of_one - two_pos
         local mouse_to_item_two = two_pos - mouse_pos
-        local total_time = 2 * mouse_to_item_two + overlap
+        local total_time_from_left = 2 * mouse_to_item_two + overlap
         local colors = get_color_table()
         if item_hover == item_one then
             local item_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
@@ -113,16 +115,16 @@ function main()
             AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000, colors.audition)
             OnPlayButton() -- play until mouse cursor
         elseif not item_hover and mouse_pos < two_pos then
-            AddProjectMarker2(0, false, mouse_pos + total_time, 0, "!1016", 1000,
+            AddProjectMarker2(0, false, mouse_pos + total_time_from_left, 0, "!1016", 1000,
                 colors.audition)
             SetEditCurPos(mouse_pos, false, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
         else
             local mouse_to_item_one = mouse_pos - end_of_one
-            local total_time = 2 * mouse_to_item_one + overlap
+            local total_time_from_right = 2 * mouse_to_item_one + overlap
             AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1000,
                 colors.audition)
-            AddProjectMarker2(0, false, mouse_pos - total_time, 0, "START", 1001,
+            AddProjectMarker2(0, false, mouse_pos - total_time_from_right, 0, "START", 1001,
                 colors.audition)
             GoToMarker(0, 1001, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
@@ -154,7 +156,8 @@ function solo()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
 
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y"
+            or rt_state == "y" or ref_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -164,7 +167,8 @@ function solo()
         if IsTrackSelected(track) == true then
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        elseif not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" or rcmaster_state == "y") then
+        elseif not (mixer_state == "y" or aux_state == "y" or submix_state == "y"
+                or rt_state == "y" or ref_state == "y" or rcmaster_state == "y") then
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
@@ -256,7 +260,8 @@ function mixer()
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y" or rt_state == "y" or ref_state == "y" then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or
+            rcmaster_state == "y" or rt_state == "y" or ref_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
