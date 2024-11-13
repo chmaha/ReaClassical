@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.14
+@version 24.25.15
 @changelog
-  Colors Table: Add xfade_red and xfade_green RGB values
-  Various: Use xfade colors from ReaClassical_Colors_Table.lua
+  PDF Manual: Add sentence about pausing and unpausing during classical take recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
