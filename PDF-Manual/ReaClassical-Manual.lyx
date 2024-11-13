@@ -2926,6 +2926,25 @@ keys{F9}
 \end_inset
 
  again.
+ To pause and unpause a recording without starting a new take,
+ press the toggle the pause button in the transport or use the shortcut 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+space}
+\end_layout
+
+\end_inset
+
+ (spacebar).
  In horizontal workflow,
  the key press will maintain record arming and will begin recording on a subsequent press.
  In vertical workflow,
