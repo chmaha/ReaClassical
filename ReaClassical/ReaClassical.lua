@@ -2,7 +2,7 @@
 @author chmaha
 @version 24.25.15
 @changelog
-  PDF Manual: Add sentence about pausing and unpausing during classical take recording
+  PDF Manual: Add sentence about pausing and unpausing during F9 recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
