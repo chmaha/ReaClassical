@@ -165,11 +165,17 @@ function main()
     gfx.y = ((win.height - session_height + take_height / 3) / 2)
     gfx.set(0.8, 0.8, 0.9, 1)
     gfx.drawstr("\n" .. session_text)
-  else -- recording
+  elseif playstate == 5 or playstate == 6 then -- recording
     gfx.x = 0
     gfx.y = 0
-    gfx.set(1, 0.5, 0.5, 1)
-    gfx.circle(50, 50, 20, 40)
+    if playstate == 6 then
+      gfx.set(1, 1, 0.5, 1)
+      gfx.rect(30, 25, 15, 50)
+      gfx.rect(55, 25, 15, 50)
+    else
+      gfx.set(1, 0.5, 0.5, 1)
+      gfx.circle(50, 50, 20, 40)
+    end
 
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
