@@ -77,6 +77,11 @@ end
 local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
 SetToggleCommandState(1, take_counter, 1)
 
+local recpausestate = false
+local recstate = false
+local rec_color = ColorToNative(255, 0, 0) | 0x1000000
+local recpause_color = ColorToNative(255, 255, 127) | 0x1000000
+
 ---------------------------------------------------------------------
 
 function main()
@@ -85,6 +90,8 @@ function main()
   gfx.setfont(1, "Arial", 90, 98)
 
   if playstate == 0 or playstate == 1 then -- stopped or playing
+    recstate = false
+    recpausestate = false
     added_take_number = false
     gfx.x = 0
     gfx.y = 0
@@ -165,6 +172,10 @@ function main()
     gfx.y = ((win.height - session_height + take_height / 3) / 2)
     gfx.set(0.8, 0.8, 0.9, 1)
     gfx.drawstr("\n" .. session_text)
+    SetThemeColor("ts_lane_bg", -1)
+    SetThemeColor("marker_lane_bg", -1)
+    SetThemeColor("region_lane_bg", -1)
+    UpdateTimeline()
   elseif playstate == 5 or playstate == 6 then -- recording
     gfx.x = 0
     gfx.y = 0
@@ -172,10 +183,25 @@ function main()
       gfx.set(1, 1, 0.5, 1)
       gfx.rect(30, 25, 15, 50)
       gfx.rect(55, 25, 15, 50)
+      if recpausestate == false then
+        SetThemeColor("ts_lane_bg", recpause_color)
+        SetThemeColor("marker_lane_bg", recpause_color)
+        SetThemeColor("region_lane_bg", recpause_color)
+        recpausestate = true
+        recstate = false
+      end
     else
       gfx.set(1, 0.5, 0.5, 1)
       gfx.circle(50, 50, 20, 40)
+      if recstate == false then
+        SetThemeColor("ts_lane_bg", rec_color)
+        SetThemeColor("marker_lane_bg", rec_color)
+        SetThemeColor("region_lane_bg", rec_color)
+        recstate = true
+        recpausestate = false
+      end
     end
+    UpdateTimeline()
 
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
@@ -240,6 +266,10 @@ function get_take_count(session_name)
     end
   end
 
+  if (GetPlayState() == 5 or GetPlayState() == 6) and take_count > 1 then
+    take_count = take_count - 1
+  end
+
   iterated_filenames = true
   return take_count
 end
@@ -252,6 +282,10 @@ function clean_up()
   local pos = x .. "," .. y
   SetProjExtState(0, "ReaClassical", "TakeCounterPosition", pos)
   SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
+  SetThemeColor("ts_lane_bg", -1)
+  SetThemeColor("marker_lane_bg", -1)
+  SetThemeColor("region_lane_bg", -1)
+  UpdateTimeline()
 end
 
 ---------------------------------------------------------------------
