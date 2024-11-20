@@ -63,39 +63,45 @@ end
 
 if reset == "" then reset = 0 end
 
-local session_dir = ""
-local session_suffix = ""
-local _, session = GetProjExtState(0, "ReaClassical", "TakeSessionName")
-
-if session ~= nil and session ~= "" then
-  session_dir = session .. separator
-  session_suffix = session .. "_"
-else
-  session = ""
-end
-
 local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
 SetToggleCommandState(1, take_counter, 1)
+
+local session_dir = ""
+local session_suffix = ""
+local session
 
 local recpausestate = false
 local recstate = false
 local rec_color = ColorToNative(255, 0, 0) | 0x1000000
 local recpause_color = ColorToNative(255, 255, 127) | 0x1000000
 
+local laststate
+local project_userdata, project_name
+local gfx = gfx
+
 ---------------------------------------------------------------------
 
 function main()
-  local gfx = gfx
+  local retval, projfn = EnumProjects(-1)
+  if project_userdata ~= retval or project_name ~= projfn then
+    project_userdata = retval
+    project_name = projfn
+    _, session = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+    if session ~= nil and session ~= "" then
+      session_dir = session .. separator
+      session_suffix = session .. "_"
+    else
+      session = ""
+    end
+    iterated_filenames = false
+    laststate = nil
+    rec_name_set = false
+  end
   local playstate = GetPlayState()
-  gfx.setfont(1, "Arial", 90, 98)
-
   if playstate == 0 or playstate == 1 then -- stopped or playing
     recstate = false
     recpausestate = false
     added_take_number = false
-    gfx.x = 0
-    gfx.y = 0
-    gfx.set(0.5, 0.8, 0.5, 1)
 
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
@@ -104,12 +110,14 @@ function main()
     end
 
     if gfx.mouse_cap & 1 == 1 then
+      laststate = nil
       local choice = MB("Recalculate take count?", "ReaClassical Take Counter", 4)
       if choice == 6 then
         take_text = get_take_count(session) + 1
         rec_name_set = false
       end
     elseif gfx.mouse_cap & 2 == 2 then
+      laststate = nil
       local session_text = session
       local ret, choices = GetUserInputs('ReaClassical Take Counter', 3,
         'Set Take Number:,Session Name:,Allow Take Number Override?:',
@@ -154,75 +162,87 @@ function main()
 
     if not rec_name_set then
       local padded_take_text = string.format("%03d", tonumber(take_text))
-      SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix .. "$track_T" .. padded_take_text)
+      SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
+        .. "$track_T" .. padded_take_text)
       rec_name_set = true
     end
 
-    local take_width, take_height = gfx.measurestr(take_text)
-    gfx.x = ((win.width - take_width) / 2)
-    gfx.drawstr(take_text)
-    gfx.setfont(1, "Arial", 25, 98)
-    local session_text = session
-    if session_text == "" and take_text == 1 then
-      gfx.setfont(1, "Arial", 15, 98)
-      session_text = "Right-click to set session name"
+    if laststate ~= playstate then
+      laststate = playstate
+      gfx.setfont(1, "Arial", 90, 98)
+      gfx.x = 0
+      gfx.y = 0
+      gfx.set(0.5, 0.8, 0.5, 1)
+      local take_width, take_height = gfx.measurestr(take_text)
+      gfx.x = ((win.width - take_width) / 2)
+      gfx.drawstr(take_text)
+      gfx.setfont(1, "Arial", 25, 98)
+      local session_text = session
+      if session_text == "" and take_text == 1 then
+        gfx.setfont(1, "Arial", 15, 98)
+        session_text = "Right-click to set session name"
+      end
+      local session_width, session_height = gfx.measurestr(session_text)
+      gfx.x = ((win.width - session_width) / 2)
+      gfx.y = ((win.height - session_height + take_height / 3) / 2)
+      gfx.set(0.8, 0.8, 0.9, 1)
+      gfx.drawstr("\n" .. session_text)
+      SetThemeColor("ts_lane_bg", -1)
+      SetThemeColor("marker_lane_bg", -1)
+      SetThemeColor("region_lane_bg", -1)
+      UpdateTimeline()
     end
-    local session_width, session_height = gfx.measurestr(session_text)
-    gfx.x = ((win.width - session_width) / 2)
-    gfx.y = ((win.height - session_height + take_height / 3) / 2)
-    gfx.set(0.8, 0.8, 0.9, 1)
-    gfx.drawstr("\n" .. session_text)
-    SetThemeColor("ts_lane_bg", -1)
-    SetThemeColor("marker_lane_bg", -1)
-    SetThemeColor("region_lane_bg", -1)
-    UpdateTimeline()
   elseif playstate == 5 or playstate == 6 then -- recording
-    gfx.x = 0
-    gfx.y = 0
-    if playstate == 6 then
-      gfx.set(1, 1, 0.5, 1)
-      gfx.rect(30, 25, 15, 50)
-      gfx.rect(55, 25, 15, 50)
-      if recpausestate == false then
-        SetThemeColor("ts_lane_bg", recpause_color)
-        SetThemeColor("marker_lane_bg", recpause_color)
-        SetThemeColor("region_lane_bg", recpause_color)
-        recpausestate = true
-        recstate = false
-      end
-    else
-      gfx.set(1, 0.5, 0.5, 1)
-      gfx.circle(50, 50, 20, 40)
-      if recstate == false then
-        SetThemeColor("ts_lane_bg", rec_color)
-        SetThemeColor("marker_lane_bg", rec_color)
-        SetThemeColor("region_lane_bg", rec_color)
-        recstate = true
-        recpausestate = false
-      end
-    end
-    UpdateTimeline()
-
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
     end
 
-    local take_width, take_height = gfx.measurestr(take_text)
-    gfx.x = ((win.width - take_width) / 2)
-    gfx.drawstr(take_text)
+    if laststate ~= playstate then
+      laststate = playstate
+      if playstate == 6 then
+        gfx.set(1, 1, 0.5, 1)
+        gfx.rect(30, 25, 15, 50)
+        gfx.rect(55, 25, 15, 50)
+        if recpausestate == false then
+          SetThemeColor("ts_lane_bg", recpause_color)
+          SetThemeColor("marker_lane_bg", recpause_color)
+          SetThemeColor("region_lane_bg", recpause_color)
+          recpausestate = true
+          recstate = false
+        end
+      else
+        gfx.set(1, 0.5, 0.5, 1)
+        gfx.circle(50, 50, 20, 40)
+        if recstate == false then
+          SetThemeColor("ts_lane_bg", rec_color)
+          SetThemeColor("marker_lane_bg", rec_color)
+          SetThemeColor("region_lane_bg", rec_color)
+          recstate = true
+          recpausestate = false
+        end
+      end
+      UpdateTimeline()
 
-    local session_text = session
-    gfx.setfont(1, "Arial", 25, 98)
-    local session_width, session_height = gfx.measurestr(session_text)
-    gfx.x = ((win.width - session_width) / 2)
-    gfx.y = ((win.height - session_height + take_height / 3) / 2)
-    gfx.drawstr("\n" .. session_text)
+      gfx.setfont(1, "Arial", 90, 98)
+      gfx.x = 0
+      gfx.y = 0
+      local take_width, take_height = gfx.measurestr(take_text)
+      gfx.x = ((win.width - take_width) / 2)
+      gfx.drawstr(take_text)
 
-    if not added_take_number then
-      take_count = take_count + 1
-      take_text = take_count
-      added_take_number = true
-      rec_name_set = false
+      local session_text = session
+      gfx.setfont(1, "Arial", 25, 98)
+      local session_width, session_height = gfx.measurestr(session_text)
+      gfx.x = ((win.width - session_width) / 2)
+      gfx.y = ((win.height - session_height + take_height / 3) / 2)
+      gfx.drawstr("\n" .. session_text)
+
+      if not added_take_number then
+        take_count = take_count + 1
+        take_text = take_count
+        added_take_number = true
+        rec_name_set = false
+      end
     end
   end
 
