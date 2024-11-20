@@ -70,8 +70,6 @@ local session_dir = ""
 local session_suffix = ""
 local session
 
-local recpausestate = false
-local recstate = false
 local rec_color = ColorToNative(255, 0, 0) | 0x1000000
 local recpause_color = ColorToNative(255, 255, 127) | 0x1000000
 
@@ -99,8 +97,6 @@ function main()
   end
   local playstate = GetPlayState()
   if playstate == 0 or playstate == 1 then -- stopped or playing
-    recstate = false
-    recpausestate = false
     added_take_number = false
 
     if not iterated_filenames then
@@ -203,23 +199,15 @@ function main()
         gfx.set(1, 1, 0.5, 1)
         gfx.rect(30, 25, 15, 50)
         gfx.rect(55, 25, 15, 50)
-        if recpausestate == false then
           SetThemeColor("ts_lane_bg", recpause_color)
           SetThemeColor("marker_lane_bg", recpause_color)
           SetThemeColor("region_lane_bg", recpause_color)
-          recpausestate = true
-          recstate = false
-        end
       else
         gfx.set(1, 0.5, 0.5, 1)
         gfx.circle(50, 50, 20, 40)
-        if recstate == false then
           SetThemeColor("ts_lane_bg", rec_color)
           SetThemeColor("marker_lane_bg", rec_color)
           SetThemeColor("region_lane_bg", rec_color)
-          recstate = true
-          recpausestate = false
-        end
       end
       UpdateTimeline()
 
@@ -249,8 +237,6 @@ function main()
   local key = gfx.getchar()
   if key ~= -1 then
     defer(main)
-  else
-    atexit(clean_up())
   end
 end
 
@@ -311,4 +297,5 @@ end
 ---------------------------------------------------------------------
 
 gfx.init("Take Number", win.width, win.height, 0, win.xpos, win.ypos)
+atexit(clean_up)
 main()
