@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.15
+@version 24.25.16
 @changelog
-  PDF Manual: Add sentence about pausing and unpausing during F9 recording
+  Take Counter: Add yellow ruler and symbol when rec-paused
+  Take Counter: Massively improve efficiency by calling gfx only when necessary
+  Take Counter: Update display and underlying settings when switching projects
+  PDF Manual: Add further rec-pause info to Classical Take Record function in appendix A
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
