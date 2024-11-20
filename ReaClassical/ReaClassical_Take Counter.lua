@@ -199,15 +199,15 @@ function main()
         gfx.set(1, 1, 0.5, 1)
         gfx.rect(30, 25, 15, 50)
         gfx.rect(55, 25, 15, 50)
-          SetThemeColor("ts_lane_bg", recpause_color)
-          SetThemeColor("marker_lane_bg", recpause_color)
-          SetThemeColor("region_lane_bg", recpause_color)
+        SetThemeColor("ts_lane_bg", recpause_color)
+        SetThemeColor("marker_lane_bg", recpause_color)
+        SetThemeColor("region_lane_bg", recpause_color)
       else
         gfx.set(1, 0.5, 0.5, 1)
         gfx.circle(50, 50, 20, 40)
-          SetThemeColor("ts_lane_bg", rec_color)
-          SetThemeColor("marker_lane_bg", rec_color)
-          SetThemeColor("region_lane_bg", rec_color)
+        SetThemeColor("ts_lane_bg", rec_color)
+        SetThemeColor("marker_lane_bg", rec_color)
+        SetThemeColor("region_lane_bg", rec_color)
       end
       UpdateTimeline()
 
@@ -245,31 +245,21 @@ end
 function get_take_count(session_name)
   take_count = 0
 
-  local media_path = GetProjectPath(0)                   -- .. separator .. session
-  local command
-  if string.lower(package.config:sub(1, 1)) == '\\' then -- Windows
-    command = 'dir "' .. media_path .. "\\" .. session_name .. '" /b /a:-d'
-  else                                                   -- Unix-like
-    command = 'ls -p "' .. media_path .. "/" .. session_name .. '" | grep -v /$'
-  end
+  local media_path = GetProjectPath(0)
 
-  local handle = io.popen(command)
-  if handle then
-    local result = handle:read("*a")
-
-    if result then
-      handle:close()
-
-      for filename in result:gmatch("[^\r\n]+") do
-        local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
-
-        if take_capture and take_capture > take_count then
-          take_count = take_capture
-        end
-      end
-    else
-      handle:close()
+  local i = 0
+  while true do
+    local filename = EnumerateFiles(media_path .. separator .. session_name, i)
+    if not filename then
+      break
     end
+
+    local take_capture = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
+    if take_capture and take_capture > take_count then
+      take_count = take_capture
+    end
+
+    i = i + 1
   end
 
   if (GetPlayState() == 5 or GetPlayState() == 6) and take_count > 0 then
