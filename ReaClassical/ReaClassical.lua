@@ -5,6 +5,7 @@
   Take Counter: Add yellow ruler and symbol when rec-paused
   Take Counter: Massively improve efficiency by calling gfx only when necessary
   Take Counter: Update display and underlying settings when switching projects
+  Take Counter: If closed during record or rec-pause, set correct take number
   PDF Manual: Add further rec-pause info to Classical Take Record function in appendix A
 @metapackage
 @provides
