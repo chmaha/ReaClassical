@@ -286,7 +286,7 @@ function get_take_count(session_name)
     end
   end
 
-  if (GetPlayState() == 5 or GetPlayState() == 6) and take_count > 1 then
+  if (GetPlayState() == 5 or GetPlayState() == 6) and take_count > 0 then
     take_count = take_count - 1
   end
 
