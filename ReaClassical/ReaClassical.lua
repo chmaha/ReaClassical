@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.18
+@version 24.25.19
 @changelog
-  Take Counter: Add scheduled and duration-limited recording
-  PDF Manual: Add scheduled recording section
+  Take Counter: Save cursor position before starting scheduled record
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
