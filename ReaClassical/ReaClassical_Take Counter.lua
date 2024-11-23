@@ -78,7 +78,7 @@ SetToggleCommandState(1, take_counter, 1)
 local red_ruler = NamedCommandLookup("_SWS_RECREDRULER")
 local red_ruler_state = GetToggleCommandState(red_ruler)
 if red_ruler_state then
-  Main_OnCommand(red_ruler,0)
+  Main_OnCommand(red_ruler, 0)
 end
 
 local marker_actions = NamedCommandLookup("_SWSMA_ENABLE")
@@ -290,6 +290,7 @@ function main()
     local stop_pos
     if not run_once then
       if not start_time and end_time then
+        current_time = os.time()
         stop_pos = GetCursorPosition() + (end_time - current_time)
         remove_markers_by_name("!1013")
         AddProjectMarker2(0, false, stop_pos, 0, "!1013", 1013, 0)
