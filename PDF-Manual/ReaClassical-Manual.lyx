@@ -3013,6 +3013,24 @@ keys{A}
 \end_layout
 
 \begin_layout Subsection
+Scheduled Recording
+\end_layout
+
+\begin_layout Standard
+To start (and optionally end) a recording at specific times or manually start a recording to end at a certain time or after a certain duration,
+ right-click on the take counter window and add the appropriate entry or entries in HH:MM format.
+ After pressing OK,
+ the take counter window will display information to the right of the take number.
+ If you enter a start or end time earlier or equal to the current time,
+ the function will assume a next day schedule and will annotate the time with an asterisk (*).
+ Likewise,
+ with both a start and end time,
+ if the end time is earlier than or equal to start,
+ it will assume a time 24 hours later.
+ Don't forget to arm your tracks before walking away!
+\end_layout
+
+\begin_layout Subsection
 Overdub Recording
 \end_layout
 
@@ -8456,6 +8474,7 @@ Description:
 
 \emph default
  Track take numbers and session name during recording sessions.
+ Schedule recordings by start/end time or duration.
 \end_layout
 
 \begin_layout Standard
@@ -8487,6 +8506,17 @@ keys{F9}
  The calculated upcoming take number factors in unused files in the project path so as to avoid any file-naming conflicts.
  You should find this to be an extremely robust take system that rivals Pyramix,
  Sequoia etc.
+ To schedule a recording or limit by duration,
+ right-click on the take counter window and add the appropriate entry or entries in HH:MM format.
+ After pressing OK,
+ the take counter window will display information to the right of the take number.
+ If you enter a start or end time earlier or equal to the current time,
+ the function will assume a next day schedule and will annotate the time with an asterisk (*).
+ Likewise,
+ with both a start and end time,
+ if the end time is earlier than or equal to start,
+ it will assume a time 24 hours later.
+ Don't forget to arm your tracks before walking away!
 \end_layout
 
 \begin_layout Standard
