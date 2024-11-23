@@ -3,6 +3,7 @@
 @version 24.25.20
 @changelog
   Take Counter: use up-to-date current time before setting end marker
+  Take Counter: Fix logic for disabling SWS red ruler while recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
