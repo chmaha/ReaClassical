@@ -473,6 +473,8 @@ function check_time()
       local stop_pos = GetCursorPosition() + (end_time - start_time)
       AddProjectMarker2(0, false, stop_pos, 0, "!1013", 1013, 0)
     end
+    local cursor_pos = GetCursorPosition()
+    SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", cursor_pos)
     reaper.Main_OnCommand(1013, 0) -- Record command
     SetProjExtState(0, "ReaClassical", "Recording Start", "")
     SetProjExtState(0, "ReaClassical", "Recording End", "")
