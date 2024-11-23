@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.17
+@version 24.25.18
 @changelog
-  Take Counter: Revise get_take_count function to use EnumerateFiles
-  Take Counter: Remove unnecessary variables and properly use atexit
+  Take Counter: Add scheduled and duration-limited recording
+  PDF Manual: Add scheduled recording section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
