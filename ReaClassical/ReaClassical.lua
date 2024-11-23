@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.19
+@version 24.25.20
 @changelog
-  Take Counter: Save cursor position before starting scheduled record
+  Take Counter: use up-to-date current time before setting end marker
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
