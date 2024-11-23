@@ -77,7 +77,7 @@ SetToggleCommandState(1, take_counter, 1)
 
 local red_ruler = NamedCommandLookup("_SWS_RECREDRULER")
 local red_ruler_state = GetToggleCommandState(red_ruler)
-if red_ruler_state then
+if red_ruler_state == 1 then
   Main_OnCommand(red_ruler, 0)
 end
 
