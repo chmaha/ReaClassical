@@ -75,6 +75,16 @@ end
 local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
 SetToggleCommandState(1, take_counter, 1)
 
+local red_ruler = NamedCommandLookup("_SWS_RECREDRULER")
+local red_ruler_state = GetToggleCommandState(red_ruler)
+if red_ruler_state then
+  Main_OnCommand(red_ruler,0)
+end
+
+local marker_actions = NamedCommandLookup("_SWSMA_ENABLE")
+Main_OnCommand(marker_actions, 0)
+
+
 local session_dir = ""
 local session_suffix = ""
 local session
@@ -198,8 +208,6 @@ function main()
       local reset_choice_num = tonumber(reset_choice)
       if reset_choice_num and (reset_choice_num == 0 or reset_choice_num == 1) then
         reset = reset_choice_num
-      else
-        reset_choice_num = reset
       end
 
       if take_choice >= take_count then
@@ -436,7 +444,7 @@ function parse_time(input)
     local now = os.date("*t")
     now.hour = tonumber(hour)
     now.min = tonumber(min)
-    now.sec = 0 -- Default seconds to 0
+    now.sec = 0
     return os.time(now)
   else
     return nil

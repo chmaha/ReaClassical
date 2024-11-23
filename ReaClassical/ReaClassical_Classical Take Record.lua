@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
-local extract_take_number, check_parent_track, remove_markers_by_name
+local extract_take_number, check_parent_track
 
 ---------------------------------------------------------------------
 
@@ -96,7 +96,6 @@ function main()
         Undo_EndBlock('Classical Take Record', 0)
     else
         Main_OnCommand(40667, 0) -- Transport: Stop (save all recorded media)
-        remove_markers_by_name("!1013")
         local _, session_name = GetProjExtState(0, "ReaClassical", "TakeSessionName")
         session_name = (session_name ~= "" and session_name .. "_") or ""
         local take_number = extract_take_number(rec_wildcards)
@@ -314,20 +313,6 @@ end
 function extract_take_number(rec_wildcards)
     local number = rec_wildcards:match("T(%d+)$")
     return number and tonumber(number) or nil
-end
-
----------------------------------------------------------------------
-
-function remove_markers_by_name(marker_name)
-    local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
-    local total_markers = num_markers + num_regions
-
-    for i = total_markers - 1, 0, -1 do -- Iterate backward to avoid index shifting
-        local retval, isrgn, _, _, name, markrgnindex = reaper.EnumProjectMarkers(i)
-        if retval and name == marker_name then
-            reaper.DeleteProjectMarker(0, markrgnindex, isrgn)
-        end
-    end
 end
 
 ---------------------------------------------------------------------
