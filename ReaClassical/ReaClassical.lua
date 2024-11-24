@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.20
+@version 24.25.21pre1
 @changelog
-  Take Counter: use up-to-date current time before setting end marker
-  Take Counter: Fix logic for disabling SWS red ruler while recording
+  Classical Take Record: Allow use on child track of group
+  Take Counter: Use Classical Take Record if available for scheduled starts
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
