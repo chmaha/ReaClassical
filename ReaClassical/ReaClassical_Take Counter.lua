@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
-local seconds_to_hhmm
+local seconds_to_hhmm, find_first_rec_enabled_parent
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -99,6 +99,8 @@ local gfx = gfx
 local start_time, end_time, duration
 local run_once = false
 
+local F9_command = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+
 ---------------------------------------------------------------------
 
 function main()
@@ -123,6 +125,7 @@ function main()
     if run_once then
       run_once = false
       remove_markers_by_name("!1013")
+      remove_markers_by_name("!" .. F9_command)
     end
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
@@ -290,14 +293,17 @@ function main()
     local stop_pos
     if not run_once then
       if not start_time and end_time then
+        remove_markers_by_name("!" .. F9_command)
+        remove_markers_by_name("!1013")
         current_time = os.time()
         stop_pos = GetCursorPosition() + (end_time - current_time)
-        remove_markers_by_name("!1013")
-        AddProjectMarker2(0, false, stop_pos, 0, "!1013", 1013, 0)
       elseif duration then
         stop_pos = GetCursorPosition() + duration
-        remove_markers_by_name("!1013")
-        AddProjectMarker2(0, false, stop_pos, 0, "!1013", 1013, 0)
+      end
+      if stop_pos then
+        local marker_name = F9_command ~= 0 and "!" .. F9_command or "!1013"
+        local marker_id = F9_command ~= 0 and F9_command or 1013
+        AddProjectMarker2(0, false, stop_pos, 0, marker_name, marker_id, 0)
       end
       run_once = true
     end
@@ -433,6 +439,7 @@ function clean_up()
   SetThemeColor("marker_lane_bg", -1)
   SetThemeColor("region_lane_bg", -1)
   remove_markers_by_name("!1013")
+  remove_markers_by_name("!" .. F9_command)
   UpdateTimeline()
 end
 
@@ -470,13 +477,26 @@ function check_time()
   current_time = os.time()
   if current_time >= start_time and reaper.GetPlayState() ~= 5 then
     if end_time then
-      remove_markers_by_name("!1013")
       local stop_pos = GetCursorPosition() + (end_time - start_time)
-      AddProjectMarker2(0, false, stop_pos, 0, "!1013", 1013, 0)
+      remove_markers_by_name("!" .. F9_command)
+      remove_markers_by_name("!1013")
+      if stop_pos then
+        local marker_name = F9_command ~= 0 and "!" .. F9_command or "!1013"
+        local marker_id = F9_command ~= 0 and F9_command or 1013
+        AddProjectMarker2(0, false, stop_pos, 0, marker_name, marker_id, 0)
+      end
     end
     local cursor_pos = GetCursorPosition()
     SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", cursor_pos)
-    reaper.Main_OnCommand(1013, 0) -- Record command
+    if F9_command ~= 0 then
+      local rec_enabled_parent = find_first_rec_enabled_parent()
+      if rec_enabled_parent then
+        SetOnlyTrackSelected(rec_enabled_parent)
+      end
+      Main_OnCommand(F9_command, 0)
+    else
+      reaper.Main_OnCommand(1013, 0) -- Regular record command
+    end
     SetProjExtState(0, "ReaClassical", "Recording Start", "")
     SetProjExtState(0, "ReaClassical", "Recording End", "")
   end
@@ -502,6 +522,24 @@ function seconds_to_hhmm(seconds)
   local hours = math.floor(seconds / 3600) % 24 -- Wrap around if past midnight
   local minutes = math.floor((seconds % 3600) / 60)
   return string.format("%02d:%02d", hours, minutes)
+end
+
+---------------------------------------------------------------------
+
+function find_first_rec_enabled_parent()
+  local num_tracks = reaper.CountTracks(0) -- Get the number of tracks in the project
+
+  for i = 0, num_tracks - 1 do
+    local track = reaper.GetTrack(0, i)                                           -- Get the track at index i
+    local is_parent = reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 -- Check if it's a parent track
+    local is_rec_enabled = reaper.GetMediaTrackInfo_Value(track, "I_RECARM") == 1 -- Check if record arm is enabled
+
+    if is_parent and is_rec_enabled then
+      return track -- Return the first rec-enabled parent track
+    end
+  end
+
+  return nil -- Return nil if no such track is found
 end
 
 ---------------------------------------------------------------------
