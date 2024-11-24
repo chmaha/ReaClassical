@@ -57,7 +57,16 @@ function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
     local first_selected = GetSelectedTrack(0, 0)
-    if not check_parent_track(first_selected) then return end
+    if not first_selected then return end
+    if not check_parent_track(first_selected) then
+        local parent_track = GetParentTrack(first_selected)
+        if not parent_track then
+            MB("Classical Take Record only works with groups", "Error", 0)
+            return
+        else
+            SetOnlyTrackSelected(parent_track)
+        end
+    end
 
     Undo_BeginBlock()
     local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
@@ -68,7 +77,7 @@ function main()
         local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
         local state = GetToggleCommandState(take_counter)
         if state ~= 1 then
-            Main_OnCommand(take_counter,0)
+            Main_OnCommand(take_counter, 0)
         end
         local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
         Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
@@ -302,7 +311,7 @@ end
 
 function check_parent_track(track)
     if not track or GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") ~= 1 then
-        MB("Please select a parent track before running", "Classical Take Record", 0)
+        -- MB("Please select a parent track before running", "Classical Take Record", 0)
         return false
     end
     return true
