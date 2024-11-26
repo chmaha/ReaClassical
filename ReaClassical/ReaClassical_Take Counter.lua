@@ -51,6 +51,7 @@ local _, duration_text = GetProjExtState(0, "ReaClassical", "Recording Duration"
 local calc_end_time
 local start_next_day = ""
 local end_next_day = ""
+local set_via_right_click = false
 
 if reset == "" then reset = 0 end
 
@@ -129,8 +130,10 @@ function main()
     added_take_number = false
     if run_once then
       run_once = false
-      start_text = ""
-      end_text = ""
+      if set_via_right_click then
+        start_time = nil
+        end_time = nil
+      end
       calc_end_time = nil
       remove_markers_by_name("!1013")
       remove_markers_by_name("!" .. F9_command)
@@ -150,7 +153,6 @@ function main()
       end
     elseif gfx.mouse_cap & 2 == 2 then
       laststate = nil
-
       session_text = session
       local ret, choices = GetUserInputs(
         'ReaClassical Take Counter', 6,
@@ -242,6 +244,8 @@ function main()
         take_text = get_take_count(session) + 1
         rec_name_set = false
       end
+
+      set_via_right_click = true
     end
 
 
@@ -256,8 +260,19 @@ function main()
       laststate = playstate
       draw(playstate)
     end
+
+    if start_time then
+      check_time()
+    end
   elseif playstate == 5 or playstate == 6 then -- recording
     local stop_pos
+
+    if start_time and start_time > current_time then
+      start_time = nil
+      end_time = nil
+      duration = nil
+    end
+
     if not run_once then
       if not start_time and end_time then
         remove_markers_by_name("!" .. F9_command)
@@ -274,6 +289,7 @@ function main()
       end
       run_once = true
     end
+
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
     end
@@ -287,8 +303,6 @@ function main()
         duration = nil
         duration_text = ""
       end
-      start_time = nil
-      end_time = nil
 
       if not added_take_number then
         take_count = take_count + 1
@@ -296,14 +310,6 @@ function main()
         added_take_number = true
         rec_name_set = false
       end
-    end
-  end
-
-  if start_time then
-    check_time()
-    if playstate == 5 then
-      start_time = nil
-      end_time = nil
     end
   end
 
@@ -358,9 +364,6 @@ function clean_up()
   local pos = x .. "," .. y
   SetProjExtState(0, "ReaClassical", "TakeCounterPosition", pos)
   SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
-  SetProjExtState(0, "ReaClassical", "Recording Start", "")
-  SetProjExtState(0, "ReaClassical", "Recording End", "")
-  SetProjExtState(0, "ReaClassical", "Recording Duration", "")
   SetThemeColor("ts_lane_bg", -1)
   SetThemeColor("marker_lane_bg", -1)
   SetThemeColor("region_lane_bg", -1)
@@ -425,6 +428,12 @@ function check_time()
     end
     SetProjExtState(0, "ReaClassical", "Recording Start", "")
     SetProjExtState(0, "ReaClassical", "Recording End", "")
+    start_time = nil
+    end_time = nil
+    start_text = ""
+    end_text = ""
+    duration = nil
+    duration_text = ""
   end
 end
 
@@ -477,12 +486,12 @@ function draw(playstate)
   local scale_x = gfx.w / base_width
   local scale_y = gfx.h / base_height
   local scale = math.min(scale_x, scale_y)
-  
+
   gfx.setfont(1, "Arial", 90 * scale, 98)
   gfx.set(0.5, 0.8, 0.5, 1)
   take_width, take_height = gfx.measurestr(take_text)
   session_text = session
-  
+
   if playstate == 0 or playstate == 1 then
     gfx.x = (gfx.w - take_width) / 2
     gfx.y = (gfx.h - take_height) / 4
@@ -541,21 +550,27 @@ function draw(playstate)
     gfx.y = ((gfx.h - session_height + take_height / 3) / 2)
     gfx.drawstr("\n" .. session_text)
 
-    if start_text ~= "" or end_text ~= "" or duration_text ~= "" then
-      gfx.setfont(1, "Arial", 15 * scale, 98)
-      gfx.set(0.337, 0.627, 0.827, 1)
-      gfx.x = gfx.w - (60 * scale)
-      gfx.y = 15 * scale
-      if start_text ~= "" and end_text ~= "" then
-        gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. end_text .. end_next_day)
-      elseif start_text ~= "" and calc_end_time then
-        gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. calc_end_time .. end_next_day)
-      elseif start_text ~= "" then
-        gfx.drawstr("Start\n" .. start_text .. start_next_day)
-      elseif end_text ~= "" then
-        gfx.drawstr("End\n" .. end_text .. end_next_day)
-      else
-        gfx.drawstr("Dur.\n" .. duration_text)
+    if start_time and start_time > current_time then
+      set_via_right_click = false
+    end
+
+    if set_via_right_click then
+      if start_time or end_time or duration then
+        gfx.setfont(1, "Arial", 15 * scale, 98)
+        gfx.set(0.337, 0.627, 0.827, 1)
+        gfx.x = gfx.w - (60 * scale)
+        gfx.y = 15 * scale
+        if start_time and end_time then
+          gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. end_text .. end_next_day)
+        elseif start_time and calc_end_time then
+          gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. calc_end_time .. end_next_day)
+        elseif start_time then
+          gfx.drawstr("Start\n" .. start_text .. start_next_day)
+        elseif end_time then
+          gfx.drawstr("End\n" .. end_text .. end_next_day)
+        else
+          gfx.drawstr("Dur.\n" .. duration_text)
+        end
       end
     end
   end
@@ -564,7 +579,7 @@ end
 
 ---------------------------------------------------------------------
 
--- profiler.attachToWorld() -- after all functions have been defined
+-- profiler.attachToWorld()
 -- profiler.run()
 
 gfx.init("Take Counter", win.width, win.height, 0, win.xpos, win.ypos)

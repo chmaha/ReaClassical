@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.22pre2
+@version 24.25.22pre3
 @changelog
   Take Counter: Refactor gfx into draw function
   Take Counter: Allow resizing of window
