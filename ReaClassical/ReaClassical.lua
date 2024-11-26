@@ -1,11 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.22
+@version 24.25.23
 @changelog
-  Take Counter: Refactor gfx into draw function
-  Take Counter: Allow resizing of window
-  Take Counter: Allow auto resizing of fonts and symbols
-  Take Counter: Allow start and end times to be retained in right-click menu
+  Take Counter: Show end time after scheduled start
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
