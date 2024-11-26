@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.21pre1
+@version 24.25.21
 @changelog
   Classical Take Record: Allow use on child track of group
   Take Counter: Use Classical Take Record if available for scheduled starts
