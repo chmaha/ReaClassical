@@ -52,6 +52,7 @@ local calc_end_time
 local start_next_day = ""
 local end_next_day = ""
 local set_via_right_click = false
+local auto_started = false
 
 if reset == "" then reset = 0 end
 
@@ -127,6 +128,13 @@ function main()
   end
   local playstate = GetPlayState()
   if playstate == 0 or playstate == 1 then -- stopped or playing
+    if auto_started then
+      auto_started = false
+      end_time = nil
+      end_text = ""
+      duration = nil
+      duration_text = ""
+    end
     added_take_number = false
     if run_once then
       run_once = false
@@ -428,12 +436,10 @@ function check_time()
     end
     SetProjExtState(0, "ReaClassical", "Recording Start", "")
     SetProjExtState(0, "ReaClassical", "Recording End", "")
+    SetProjExtState(0, "ReaClassical", "Recording Duration", "")
     start_time = nil
-    end_time = nil
     start_text = ""
-    end_text = ""
-    duration = nil
-    duration_text = ""
+    auto_started = true
   end
 end
 
