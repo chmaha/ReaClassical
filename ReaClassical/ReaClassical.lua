@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.21
+@version 24.25.22pre2
 @changelog
-  Classical Take Record: Allow use on child track of group
-  Take Counter: Use Classical Take Record if available for scheduled starts
+  Take Counter: Refactor gfx into draw function
+  Take Counter: Allow resizing of window
+  Take Counter: Allow auto resizing of fonts and symbols
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
