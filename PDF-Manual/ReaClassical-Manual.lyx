@@ -2874,6 +2874,7 @@ Classical Take Recording
 \end_layout
 
 \begin_layout Standard
+Select the parent or child track of a track group and then press 
 \begin_inset ERT
 status open
 
@@ -2886,7 +2887,7 @@ keys{F9}
 
 \end_inset
 
- begins 
+ to begin 
 \begin_inset Quotes bld
 \end_inset
 
@@ -2894,9 +2895,9 @@ classical
 \begin_inset Quotes brd
 \end_inset
 
- take recording mode for whatever parent track is selected.
- If the parent isn't record-armed (probably the case before you start your first recording of the session),
- the function will first simply record-arm the group so you can usefully monitor incoming signal.
+ take recording mode.
+ If the track group isn't already record-armed (probably the case before you start your first recording of the session),
+ the function will first simply record-arm the whole group so you can usefully monitor incoming signal.
  On a subsequent press of 
 \begin_inset ERT
 status open
