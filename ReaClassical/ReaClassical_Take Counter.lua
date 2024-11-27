@@ -99,6 +99,9 @@ local session_dir = ""
 local session_suffix = ""
 local session
 
+local rec_color = ColorToNative(255, 0, 0) | 0x1000000
+local recpause_color = ColorToNative(255, 255, 127) | 0x1000000
+
 local laststate
 local project_userdata, project_name
 local gfx = gfx
@@ -516,6 +519,10 @@ function draw(playstate)
     gfx.set(0.8, 0.8, 0.9, 1)
     gfx.drawstr("\n" .. session_text)
 
+    SetThemeColor("ts_lane_bg", -1)
+    SetThemeColor("marker_lane_bg", -1)
+    SetThemeColor("region_lane_bg", -1)
+
     if start_time or end_time or duration then
       gfx.setfont(1, "Arial", 15 * scale, 98)
       gfx.set(0.337, 0.627, 0.827, 1)
@@ -539,10 +546,16 @@ function draw(playstate)
       local pause_y = (gfx.h - take_height) / 4 + (take_height / 2) - (50 * scale) / 2
       gfx.rect(30 * scale, pause_y, 15 * scale, 50 * scale)
       gfx.rect(55 * scale, pause_y, 15 * scale, 50 * scale)
+      SetThemeColor("ts_lane_bg", recpause_color)
+      SetThemeColor("marker_lane_bg", recpause_color)
+      SetThemeColor("region_lane_bg", recpause_color)
     else
       gfx.set(1, 0.5, 0.5, 1)
       local circle_y = (gfx.h - take_height) / 4 + (take_height / 2)
       gfx.circle(50 * scale, circle_y, 20 * scale, 1)
+      SetThemeColor("ts_lane_bg", rec_color)
+      SetThemeColor("marker_lane_bg", rec_color)
+      SetThemeColor("region_lane_bg", rec_color)
     end
 
     gfx.x = (gfx.w - take_width) / 2
