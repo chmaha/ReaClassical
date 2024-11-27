@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.23
+@version 24.25.24
 @changelog
-  Take Counter: Show end time after scheduled start
+  Take Counter: Add back red and yellow ruler code
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
