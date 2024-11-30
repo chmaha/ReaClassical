@@ -133,6 +133,8 @@ function main()
   if playstate == 0 or playstate == 1 then -- stopped or playing
     if auto_started then
       auto_started = false
+      local rec_section = GetToggleCommandState(24802)
+      if rec_section == 1 then Main_OnCommand(24802, 0) end
       end_time = nil
       end_text = ""
       duration = nil
@@ -285,6 +287,8 @@ function main()
     end
 
     if not run_once then
+      local rec_section = GetToggleCommandState(24802)
+      if rec_section ~= 1 then Main_OnCommand(24802, 0) end
       if not start_time and end_time then
         remove_markers_by_name("!" .. F9_command)
         remove_markers_by_name("!1013")
@@ -331,8 +335,16 @@ function main()
   old_height = gfx.h
   old_width = gfx.w
 
+  local quit_response
   local key = gfx.getchar()
-  if key ~= -1 then
+  if key == -1 and (playstate == 5 or playstate == 6) then
+    quit_response = MB("Are you sure you want to quit the take counter window during a recording?", "Take Counter", 4)
+  end
+
+  if quit_response == 7 then
+    gfx.init("Take Counter", gfx.w, gfx.h, 0, win.xpos, win.ypos)
+    defer(main)
+  elseif quit_response == nil and key ~= -1 then
     defer(main)
   end
 end
@@ -380,6 +392,8 @@ function clean_up()
   SetThemeColor("region_lane_bg", -1)
   remove_markers_by_name("!1013")
   remove_markers_by_name("!" .. F9_command)
+  local rec_section = GetToggleCommandState(24802)
+  if rec_section == 1 then Main_OnCommand(24802, 0) end
   UpdateTimeline()
 end
 
@@ -437,6 +451,8 @@ function check_time()
     else
       reaper.Main_OnCommand(1013, 0) -- Regular record command
     end
+    local rec_section = GetToggleCommandState(24802)
+    if rec_section ~= 1 then Main_OnCommand(24802, 0) end
     SetProjExtState(0, "ReaClassical", "Recording Start", "")
     SetProjExtState(0, "ReaClassical", "Recording End", "")
     SetProjExtState(0, "ReaClassical", "Recording Duration", "")
