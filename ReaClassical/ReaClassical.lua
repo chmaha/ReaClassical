@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.25.24
+@version 24.99
 @changelog
-  Take Counter: Add back red and yellow ruler code
+  Take Counter: Warn if trying to close window during recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
