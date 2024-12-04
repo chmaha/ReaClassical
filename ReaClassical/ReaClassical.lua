@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 24.99
+@version 24.99.1
 @changelog
-  Take Counter: Warn if trying to close window during recording
+  Take Counter: Revert switch to alt recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
