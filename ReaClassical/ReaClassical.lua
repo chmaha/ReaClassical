@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 24.99.1
+@version 25.1pre1
 @changelog
-  Take Counter: Revert switch to alt recording
+  PDF Manual: Add 2025 artwork
+  Add 2025 splashscreen
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
