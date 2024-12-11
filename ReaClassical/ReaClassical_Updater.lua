@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, copy_file, get_path, update_reaper_ini, update_keyb_ini
+local ExecUpdate
 
 ---------------------------------------------------------------------
 
@@ -72,8 +73,7 @@ function main()
     end
 
     if response1 == 6 or response2 == 6 then
-        MB("4) REAPER/ReaClassical will now close.", "ReaClassical Updater", 0)
-        Main_OnCommand(40004, 0) -- Save dirty projects and close REAPER
+        ExecUpdate()
     end
 end
 
@@ -195,5 +195,31 @@ function update_keyb_ini(file_path, old_text, new_text)
 end
 
 ---------------------------------------------------------------------
+
+function ExecUpdate()
+    local msg = [[
+        ReaClassical has to close for the update process to complete.
+        Should you have unsaved projects, you will be prompted to save them.
+        After the installation is complete, ReaClassical will restart automatically.
+
+        Quit ReaClassical?]]
+
+    local ret = MB(msg, "ReaClassical Updater", 4)
+    if ret == 7 then
+        return
+    end
+
+    Main_OnCommand(40886, 0)
+
+    if IsProjectDirty(0) == 0 then
+        Main_OnCommand(40063, 0)
+        Main_OnCommand(40004, 0)
+    else
+        MB("Restart cancelled!", "ReaClassical Updater", 0)
+    end
+end
+
+---------------------------------------------------------------------
+
 
 main()
