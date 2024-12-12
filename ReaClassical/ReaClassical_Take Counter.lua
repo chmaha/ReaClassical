@@ -326,10 +326,10 @@ function main()
 
   if old_height ~= gfx.h or old_width ~= gfx.w then
     draw(playstate)
+    old_height = gfx.h
+    old_width = gfx.w
   end
 
-  old_height = gfx.h
-  old_width = gfx.w
 
   local quit_response
   local key = gfx.getchar()
@@ -338,7 +338,8 @@ function main()
   end
 
   if quit_response == 7 then
-    gfx.init("Take Counter", gfx.w, gfx.h, 0, win.xpos, win.ypos)
+    local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
+    gfx.init("Take Counter", gfx.w, gfx.h, 0, x, y)
     defer(main)
   elseif quit_response == nil and key ~= -1 then
     defer(main)
