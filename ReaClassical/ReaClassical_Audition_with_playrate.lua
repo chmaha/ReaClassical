@@ -37,12 +37,12 @@ local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
 mastering = (mastering ~= "" and tonumber(mastering)) or 0
 local ref_is_guide = 0
-local audition_speed = 1
+local audition_speed = 0.75
 if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
     if table[7] then ref_is_guide = tonumber(table[7]) or 0 end
-    if table[9] then audition_speed = tonumber(table[9]) or 1 end
+    if table[9] then audition_speed = tonumber(table[9]) or 0.75 end
 end
 
 function main()
