@@ -1,12 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 25.1pre2
+@version 25.1pre3
 @changelog
+  PDF Manual: Add 2025 artwork
+  Add 2025 splashscreen
   ReaClassical Updater: Auto restart if updating keymap or toolbar
   Take Counter: Restore window position if closed during recording
   Take Counter: Switch to alt recording section when recording
   Audition: Add new shortcut (shift+A) to audition at different playback rate (default is 0.75)
-  Preferences: Add entry for audition playback rawget
+  Preferences: Add entry for audition playback rate
   Increment take number: Shift+F9 to quickly increment take number while recording
   NOTES: UPDATE KEYMAP WHEN ASKED
 @metapackage
