@@ -1,9 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 25.1pre1
+@version 25.1pre2
 @changelog
-  PDF Manual: Add 2025 artwork
-  Add 2025 splashscreen
+  ReaClassical Updater: Auto restart if updating keymap or toolbar
+  Take Counter: Restore window position if closed during recording
+  Take Counter: Switch to alt recording section when recording
+  Audition: Add new shortcut (shift+A) to audition at different playback rate
+  Preferences: Add entry for audition playback rawget
+  Increment take number: Shift+F9 to quickly increment take number while recording
+  NOTES: UPDATE KEYMAP WHEN ASKED
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -69,6 +74,8 @@
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Auto Set Recording Inputs.lua
   [main] ReaClassical_Mastering Mode.lua
+  [main] ReaClassical_Audition_with_playrate.lua
+  [main] ReaClassical_Increment Take Number While Recording.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
