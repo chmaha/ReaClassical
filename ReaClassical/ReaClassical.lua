@@ -10,6 +10,7 @@
   Audition: Add new shortcut (shift+A) to audition at different playback rate (default is 0.75)
   Preferences: Add entry for audition playback rate
   Increment take number: Shift+F9 to quickly increment take number while recording
+  Keymap: Add various shortcuts
   NOTES: UPDATE KEYMAP WHEN ASKED
 @metapackage
 @provides
