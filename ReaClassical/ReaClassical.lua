@@ -5,7 +5,7 @@
   ReaClassical Updater: Auto restart if updating keymap or toolbar
   Take Counter: Restore window position if closed during recording
   Take Counter: Switch to alt recording section when recording
-  Audition: Add new shortcut (shift+A) to audition at different playback rate
+  Audition: Add new shortcut (shift+A) to audition at different playback rate (default is 0.75)
   Preferences: Add entry for audition playback rawget
   Increment take number: Shift+F9 to quickly increment take number while recording
   NOTES: UPDATE KEYMAP WHEN ASKED
