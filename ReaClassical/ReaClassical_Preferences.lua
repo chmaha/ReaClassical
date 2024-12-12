@@ -24,13 +24,12 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 
-local default_values = '35,200,3,7,0,500,0,0'
+local default_values = '35,200,3,7,0,500,0,0,0.75'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 
 ---------------------------------------------------------------------
 
 function main()
-    -- local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local pass
     local input
     repeat
@@ -41,14 +40,6 @@ function main()
     until pass
 
     save_prefs(input)
-
-    -- if workflow == "Vertical" then
-    --     local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-    --     Main_OnCommand(F8_sync, 0)
-    -- elseif workflow == "Horizontal" then
-    --     local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-    --     Main_OnCommand(F7_sync, 0)
-    -- end
 end
 
 -----------------------------------------------------------------------
@@ -63,7 +54,8 @@ function display_prefs()
         'Prepare Takes: Random colors',
         'S-D Marker Check (ms)',
         'REF = Overdub Guide',
-        'Add S-D Markers at Mouse Hover'
+        'Add S-D Markers at Mouse Hover',
+        'Alt Audition Playback Rate'
     }
     local input_labels = table.concat(labels, ',')
     local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)

@@ -37,17 +37,18 @@ local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
 mastering = (mastering ~= "" and tonumber(mastering)) or 0
 local ref_is_guide = 0
+local audition_speed = 1
 if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
     if table[7] then ref_is_guide = tonumber(table[7]) or 0 end
+    if table[9] then audition_speed = tonumber(table[9]) or 1 end
 end
-
 
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    CSurf_OnPlayRateChange(1)
+    CSurf_OnPlayRateChange(audition_speed)
     local colors = get_color_table()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
