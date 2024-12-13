@@ -113,7 +113,7 @@ function folder_check()
             folders = folders + 1
         elseif folders == 1 and not (special_states or special_names) then
             tracks_per_group = tracks_per_group + 1
-        elseif rt then
+        elseif rt_state == "y" then
             rt_count = rt_count + 1
         end
     end
