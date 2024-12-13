@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 25.1pre4
+@version 25.1pre5
 @changelog
-  Themes: Make item labels bold
+  NEW: Add take ranking
+  NEW: Add consolidated special tracks dialog
+  NOTES: UPDATE KEYMAP WHEN ASKED
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -70,6 +72,9 @@
   [main] ReaClassical_Mastering Mode.lua
   [main] ReaClassical_Audition_with_playrate.lua
   [main] ReaClassical_Increment Take Number While Recording.lua
+  [main] ReaClassical_Rank Higher.lua
+  [main] ReaClassical_Rank Lower.lua
+  [main] ReaClassical_Remove Ranking.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
