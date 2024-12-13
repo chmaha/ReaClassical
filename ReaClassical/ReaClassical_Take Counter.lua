@@ -110,6 +110,10 @@ local start_time, end_time, duration
 local run_once = false
 
 local F9_command = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+local auto_group = NamedCommandLookup("_SWS_AWAUTOGROUPTOG")
+local auto_group_state = GetToggleCommandState(auto_group)
+if auto_group_state ~= 1 then Main_OnCommand(auto_group, 0) end
+
 
 ---------------------------------------------------------------------
 
@@ -141,7 +145,7 @@ function main()
     added_take_number = false
     if run_once then
       run_once = false
-      Main_OnCommand(24800,0) -- clear any section override
+      Main_OnCommand(24800, 0) -- clear any section override
       if set_via_right_click then
         start_time = nil
         end_time = nil
@@ -286,8 +290,8 @@ function main()
     end
 
     if not run_once then
-      Main_OnCommand(24800,0) -- clear any section override
-      Main_OnCommand(24802,0) -- set section to recording
+      Main_OnCommand(24800, 0) -- clear any section override
+      Main_OnCommand(24802, 0) -- set section to recording
       if not start_time and end_time then
         remove_markers_by_name("!" .. F9_command)
         remove_markers_by_name("!1013")
