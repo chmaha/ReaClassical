@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.1pre5
+@version 25.1pre6
 @changelog
-  NEW: Add take ranking
-  NEW: Add consolidated special tracks dialog
-  NOTES: UPDATE KEYMAP WHEN ASKED
+  Classical Take Record: Store last recorded item reference
+  Take Ranking: Use stored item reference if no item selected
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
