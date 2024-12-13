@@ -26,6 +26,17 @@ local main, display_prefs, load_prefs, save_prefs, pref_check
 
 local default_values = '35,200,3,7,0,500,0,0,0.75'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
+local labels = {
+    'S-D Crossfade length (ms)',
+    'CD track offset (ms)',
+    'INDEX0 length (s) (>= 1)',
+    'Album lead-out time (s)',
+    'Prepare Takes: Random colors',
+    'S-D Marker Check (ms)',
+    'REF = Overdub Guide',
+    'Add S-D Markers at Mouse Hover',
+    'Alt Audition Playback Rate'
+}
 
 ---------------------------------------------------------------------
 
@@ -46,17 +57,6 @@ end
 
 function display_prefs()
     local saved = load_prefs(NUM_OF_ENTRIES)
-    local labels = {
-        'S-D Crossfade length (ms)',
-        'CD track offset (ms)',
-        'INDEX0 length (s) (>= 1)',
-        'Album lead-out time (s)',
-        'Prepare Takes: Random colors',
-        'S-D Marker Check (ms)',
-        'REF = Overdub Guide',
-        'Add S-D Markers at Mouse Hover',
-        'Alt Audition Playback Rate'
-    }
     local input_labels = table.concat(labels, ',')
     local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)
     return ret, input
@@ -118,7 +118,10 @@ function pref_check(input)
     local binary_error_msg = ""
     -- separate check for binary options
     if #table == NUM_OF_ENTRIES then
-        if tonumber(table[5]) > 1 or tonumber(table[7]) > 1 or tonumber(table[8]) > 1 then
+        local num_5 = tonumber(table[5])
+        local num_7 = tonumber(table[7])
+        local num_8 = tonumber(table[8])
+        if (num_5 and num_5 > 1) or (num_7 and num_7 > 1) or (num_8 and num_8 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
