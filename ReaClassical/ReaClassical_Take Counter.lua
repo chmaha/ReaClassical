@@ -110,9 +110,9 @@ local start_time, end_time, duration
 local run_once = false
 
 local F9_command = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
-local auto_group = NamedCommandLookup("_SWS_AWAUTOGROUPTOG")
-local auto_group_state = GetToggleCommandState(auto_group)
-if auto_group_state ~= 1 then Main_OnCommand(auto_group, 0) end
+-- local auto_group = NamedCommandLookup("_SWS_AWAUTOGROUPTOG")
+-- local auto_group_state = GetToggleCommandState(auto_group)
+-- if auto_group_state ~= 1 then Main_OnCommand(auto_group, 0) end
 
 
 ---------------------------------------------------------------------

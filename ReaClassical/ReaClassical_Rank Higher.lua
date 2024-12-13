@@ -75,7 +75,7 @@ function modify_item_name(item)
                 return colors.rank_good
             end,
             [0] = function()
-                return 0  -- Default color
+                return 0 -- Default color
             end,
             [-1] = function()
                 return colors.rank_below_average
@@ -116,12 +116,13 @@ function process_items()
             modify_item_name(item)
         end
     else
-        local track = GetTrack(0, 0)
-        if track then
-            local item_count = CountTrackMediaItems(track)
-            if item_count > 0 then
-                local last_item = GetTrackMediaItem(track, item_count - 1)
-                modify_item_name(last_item)
+        local _, recorded_item_guid = GetProjExtState(0, "ReaClassical", "LastRecordedItem")
+        if recorded_item_guid ~= "" then
+            local recorded_item = BR_GetMediaItemByGUID(0, recorded_item_guid)
+            if recorded_item then
+                modify_item_name(recorded_item)
+            else
+                MB("The previously recorded item no longer exists.", "ReaClassical Take Ranking", 0)
             end
         end
     end

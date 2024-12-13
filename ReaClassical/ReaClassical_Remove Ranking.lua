@@ -76,13 +76,13 @@ function process_items()
             modify_item_name(item)
         end
     else
-        -- No items selected, process the last item on track 1
-        local track = reaper.GetTrack(0, 0) -- Get track 1
-        if track then
-            local item_count = reaper.CountTrackMediaItems(track)
-            if item_count > 0 then
-                local last_item = reaper.GetTrackMediaItem(track, item_count - 1)
-                modify_item_name(last_item)
+        local _, recorded_item_guid = GetProjExtState(0, "ReaClassical", "LastRecordedItem")
+        if recorded_item_guid ~= "" then
+            local recorded_item = BR_GetMediaItemByGUID(0, recorded_item_guid)
+            if recorded_item then
+                modify_item_name(recorded_item)
+            else
+                MB("The previously recorded item no longer exists.", "ReaClassical Take Ranking", 0)
             end
         end
     end

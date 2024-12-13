@@ -121,6 +121,12 @@ function main()
             end
         end
 
+        --group last recorded items
+        Main_OnCommand(40032, 0)
+        --save recorded item guid
+        local recorded_item = GetSelectedMediaItem(0,0)
+        local recorded_item_guid = BR_GetMediaItemGUID(recorded_item)
+        SetProjExtState(0, "ReaClassical", "LastRecordedItem", recorded_item_guid)
         Main_OnCommand(40289, 0) -- Unselect all items
 
         if workflow == "Vertical" then
