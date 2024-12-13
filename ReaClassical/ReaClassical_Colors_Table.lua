@@ -39,7 +39,13 @@ return {
         audition = ColorToNative(10, 10, 10) | 0x1000000,
         ref = ColorToNative(100, 100, 100) | 0x1000000,
         xfade_red = ColorToNative(242, 46, 55) | 0x1000000,
-        xfade_green = ColorToNative(63, 242, 57) | 0x1000000
+        xfade_green = ColorToNative(63, 242, 57) | 0x1000000,
+        rank_good = ColorToNative(0, 173, 131) | 0x1000000,
+        rank_very_good = ColorToNative(50, 205, 50) | 0x1000000,
+        rank_excellent = ColorToNative(57, 255, 20)  | 0x1000000,
+        rank_below_average = ColorToNative(255, 191, 0) | 0x1000000,
+        rank_poor = ColorToNative(255, 69, 0) | 0x1000000,
+        rank_unusable = ColorToNative(220, 20, 60) | 0x1000000
     }
 
 ---------------------------------------------------------------------
