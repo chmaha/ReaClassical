@@ -92,11 +92,17 @@ function main()
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
             local success = show_track_name_dialog(mixer_table)
             if success then
-                local response = MB("Would you like to automatically assign recording inputs based on track naming?",
-                    "Vertical Workflow", 4)
-                if response == 6 then
+                local response1 = MB("Would you like to automatically assign recording inputs based on track naming?",
+                    "Horizontal Workflow", 4)
+                if response1 == 6 then
                     local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
                     Main_OnCommand(auto_set, 0)
+                end
+                local response2 = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
+                    "Horizontal Workflow", 4)
+                if response2 == 6 then
+                    local add_special_tracks = NamedCommandLookup("_RS9c0fa5c1aae86bf8559df83dd6516c0aa35e264f")
+                    Main_OnCommand(add_special_tracks, 0)
                 end
             end
             copy_track_names(table, mixer_table)

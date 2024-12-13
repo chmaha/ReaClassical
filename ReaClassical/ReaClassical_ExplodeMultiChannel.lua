@@ -43,11 +43,12 @@ function main()
         return
     end
 
-    if num_of_items == 0 then
-        MB(error_message, "Explode Multi-Channel", 0)
-        return
-    end
-    if num_of_items == 0 then return false end
+    -- if num_of_items == 0 then
+    --     MB(error_message, "Explode Multi-Channel", 0)
+    --     return
+    -- end
+
+    -- if num_of_items == 0 then return false end
 
     local return_code, channel_count = check_channel_count(num_of_items)
     if return_code == -2 then
@@ -159,6 +160,14 @@ function main()
 
     local mixer_tracks = create_mixer_table()
     show_track_name_dialog(mixer_tracks)
+
+    local response = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
+        "Horizontal Workflow", 4)
+    if response == 6 then
+        local add_special_tracks = NamedCommandLookup("_RS9c0fa5c1aae86bf8559df83dd6516c0aa35e264f")
+        Main_OnCommand(add_special_tracks, 0)
+    end
+
 
     if updated_folders == 1 then -- run F7 again
         Main_OnCommand(F7_sync, 0)
