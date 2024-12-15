@@ -151,7 +151,7 @@ function main()
                 "as you will need to reset its position before proceeding.",
                 "Horizontal Workflow", 1)
             if response == 1 then
-                reset_mixer_order(track_table)
+                reset_mixer_order(mixer_tracks)
                 create_track_table(true)
             end
         elseif not is_sequential then
