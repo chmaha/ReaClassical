@@ -126,6 +126,7 @@ function process_items()
                 modify_item_name(recorded_item)
             else
                 MB("The previously recorded item no longer exists.", "ReaClassical Take Ranking", 0)
+                SetProjExtState(0, "ReaClassical", "LastRecordedItem", "")
             end
         end
     end

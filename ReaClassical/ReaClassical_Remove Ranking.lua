@@ -49,6 +49,7 @@ function modify_item_name(item)
         item_name = item_name:gsub("[%+%-]+$", "")
 
         reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+
         SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", 0)
 
         local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
@@ -83,6 +84,7 @@ function process_items()
                 modify_item_name(recorded_item)
             else
                 MB("The previously recorded item no longer exists.", "ReaClassical Take Ranking", 0)
+                SetProjExtState(0, "ReaClassical", "LastRecordedItem", "")
             end
         end
     end
