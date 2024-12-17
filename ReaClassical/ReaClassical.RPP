@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "7.20/linux-x86_64" 1724264615
+<REAPER_PROJECT 0.1 "7.28/linux-x86_64" 1734440156
   RIPPLE 1
   GROUPOVERRIDE 0 0 2
   AUTOXFADE 128
@@ -24,7 +24,7 @@
   LOOPGRAN 0 4
   RECORD_PATH "media" ""
   <RECORD_CFG
-    ZXZhdyAAAA==
+    ZXZhdxgAAA==
   >
   <APPLYFX_CFG
   >
@@ -51,10 +51,10 @@
     VOL 0.25 0.125
     BEATLEN 4
     FREQ 800 1600 1
-    SAMPLES "" ""
+    SAMPLES "" "" "" ""
     SPLIGNORE 0 0
-    SPLDEF 2 660 "" 0
-    SPLDEF 3 440 "" 0
+    SPLDEF 2 660 "" 0 ""
+    SPLDEF 3 440 "" 0 ""
     PATTERN 0 169
     PATTERNSTR ABBB
     MULT 1
