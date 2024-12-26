@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.1pre6
+@version 24.99.1
 @changelog
-  Classical Take Record: Store last recorded item reference
-  Take Ranking: Use stored item reference if no item selected
+  Take Counter: Revert switch to alt recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -69,11 +68,6 @@
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Auto Set Recording Inputs.lua
   [main] ReaClassical_Mastering Mode.lua
-  [main] ReaClassical_Audition_with_playrate.lua
-  [main] ReaClassical_Increment Take Number While Recording.lua
-  [main] ReaClassical_Rank Higher.lua
-  [main] ReaClassical_Rank Lower.lua
-  [main] ReaClassical_Remove Ranking.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
