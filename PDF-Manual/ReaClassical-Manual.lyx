@@ -48,7 +48,7 @@
 \pdf_bookmarksopen false
 \pdf_bookmarksopenlevel 1
 \pdf_breaklinks false
-\pdf_pdfborder false
+\pdf_pdfborder true
 \pdf_colorlinks true
 \pdf_backref false
 \pdf_pdfusetitle true
@@ -372,14 +372,26 @@ Copyright © 2022–2024 chmaha
 \begin_layout Standard
 \noindent
 \align center
-Cover photography by Providence Doucet
+Cover art (adapted):
+\emph on
+
 \begin_inset Newline newline
 \end_inset
 
+Composition with Red,
+ Yellow,
+ and Blue
+\emph default
+ (1927) by Piet Mondrian
+\begin_inset Newline newline
+\end_inset
 
+Downloaded from 
 \begin_inset CommandInset href
 LatexCommand href
-target "https://unsplash.com/@providence"
+name "Artvee"
+target "https://artvee.com/dl/composition-with-red-yellow-and-blue#00"
+literal "false"
 
 \end_inset
 
@@ -951,25 +963,10 @@ Versioning Style
 \end_layout
 
 \begin_layout Standard
-ReaClassical currently uses YY.MINOR.MICRO versioning (e.g.
- 24.2.1) which is a sort of hybrid between SemVer and CalVer styles.
- The short year acts as the major version with minor numbers increasing for new features and the micro number increasing for smaller changes such as bugfixes.
- At the very least the short year gives a sense of how recent the ReaClassical version is.
- Another popular piece of software that uses the same versioning style is 
-\begin_inset CommandInset href
-LatexCommand href
-name "pip"
-target "https://pip.pypa.io/en/stable/news/"
-literal "false"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-For ReaClassical 25.x I will move to a YY.M.MICRO versioning (where M is a non-padded month) to more accurately reflect how current the software is.
- I'll therefore plan to release monthly and add fixes as and when.
+ReaClassical currently uses YY.M.MICRO versioning (where M is a non-padded month) to accurately reflect how current the software is.
+ For example,
+ 25.6.2 would indicate a June 2025 release with 2 patches or bugfixes.
+ 
 \end_layout
 
 \begin_layout Section
@@ -1359,7 +1356,7 @@ menu{Extensions > ReaPack > Synchronize packages}
 
 .
  To update the functions and also update/reset the custom toolbar and keymaps to be in line with a standard ReaClassical portable install,
- run the handy ReaClassical_Updater function found in the actions menu via 
+ run the handy ReaClassical_Updater function via 
 \begin_inset ERT
 status open
 
@@ -1367,7 +1364,9 @@ status open
 
 
 \backslash
-keys{?}
+keys{
+\backslash
+shift+U}
 \end_layout
 
 \end_inset
@@ -1586,7 +1585,7 @@ media
 \end_inset
 
  subfolder.
- The default recording format is 32-bit float wave files.
+ The default recording format is 24-bit wave files.
  Video frame rate is set to 75 to align with the number of frames per second for an audio CD.
  You can,
  of course,
@@ -1782,7 +1781,7 @@ inside
  a item fade or crossfade.
  If the reference track is set as overdub guide,
  it will be audible during classical take recording and auditioning which is extremely useful for overdub recording of material after the main session such as a symphonic organ part or narration.
- Finally,
+ Next,
  you can set 
 \begin_inset ERT
 status open
@@ -1847,6 +1846,23 @@ status open
 
 \backslash
 keys{F}
+\end_layout
+
+\end_inset
+
+.
+ Finally,
+ you can set the custom playback rate when auditioning via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
 \end_layout
 
 \end_inset
@@ -2376,7 +2392,7 @@ keys{F7}
 \end_layout
 
 \begin_layout Subsubsection
-Auto Set Recording Inputs
+Auto Set Recording Inputs / Add Special Tracks
 \end_layout
 
 \begin_layout Standard
@@ -2448,6 +2464,16 @@ ctrl+F9}
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+Also,
+ as part of the initial workflow setup,
+ you are asked if you'd like to add any special tracks (aux,
+ submix,
+ roomtone,
+ reference).
+ This is useful if you are setting up an editing/mastering project with pre-recorded material.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2864,7 +2890,20 @@ Again,
  Adjust the individual faders to balance.
  Note that in a vertical workflow moving a fader will automatically move the corresponding fader in the other groups too making same-volume auditioning of different takes extremely easy.
  When using a 32-bit float device with dual AD converters as an interface (such as the Zoom F-series),
- ensure that the recording file format remains on the default 32-bit float setting.
+ ensure that the recording file format is switched to 32-bit float via project preferences 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{P}
+\end_layout
+
+\end_inset
+
+.
  The recorded levels might seem too low or too high during recording,
  but they can be easily adjusted afterward in ReaClassical without introducing any extra noise or distortion.
 \end_layout
@@ -2927,25 +2966,6 @@ keys{F9}
 \end_inset
 
  again.
- To pause and unpause a recording without starting a new take,
- toggle the pause button in the transport or use the shortcut 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-ctrl+
-\backslash
-space}
-\end_layout
-
-\end_inset
-
- (spacebar).
  In horizontal workflow,
  the key press will maintain record arming and will begin recording on a subsequent press.
  In vertical workflow,
@@ -2969,6 +2989,42 @@ textbackslash}
 \end_inset
 
 .
+ To pause and unpause a recording without starting a new take,
+ toggle the pause button in the transport or use the shortcut 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+space}
+\end_layout
+
+\end_inset
+
+ (spacebar).
+ To quickly increment the take number during recording use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+F9}
+\end_layout
+
+\end_inset
+
+ but note that this should only be used during moments of silence (i.e.
+ inbetween quickfire session takes) as it creates a new recorded item.
  During this mode you should use the Takes Counter window 
 \begin_inset ERT
 status open
@@ -3011,6 +3067,117 @@ keys{A}
 \end_inset
 
  which will instantly remove all record-arming from tracks.
+\end_layout
+
+\begin_layout Subsection
+Take Ranking
+\end_layout
+
+\begin_layout Standard
+During or after recording,
+ you can rank one or more recorded takes.
+ Use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+=}
+\end_layout
+
+\end_inset
+
+ to rank higher,
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+-}
+\end_layout
+
+\end_inset
+
+ to rank lower,
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+0}
+\end_layout
+
+\end_inset
+
+ to remove any ranking.
+ If no item is selected,
+ the last recorded item (along with other items in the same group) are affected.
+ Otherwise,
+ you can select one or more parent items.
+ The ranking system uses a series of colors and a scale system of plusses and minuses (+/-) added as a suffix to the item name up to a maximum of three symbols.
+ This allows for seven different rankings.
+ Positive rankings are 3 intensities of green (good,
+ very good,
+ excellent),
+ negative rankings are yellow,
+ orange,
+ red (below average,
+ poor,
+ unusable),
+ with neutral (no ranking) using the default item color.
+\end_layout
+
+\begin_layout Subsection
+Recording Safety
+\end_layout
+
+\begin_layout Standard
+When using the take counter for recording (highly recommended!),
+ there is increased safety when using classical take recording (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+) via the automatic switch to a restricted set of keyboard shortcuts.
+ In addition to stopping the recording via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F9}
+\end_layout
+
+\end_inset
+
+ and record-pausing,
+ you can rank takes and use various zoom shortcuts.
+ Note that you can still click on the transport buttons.
+ In a future version of ReaClassical an even more robust recording safety feature will take the form of an optional unlock button.
 \end_layout
 
 \begin_layout Subsection
@@ -3150,6 +3317,43 @@ shift+T}
 \end_layout
 
 \begin_layout Subsection
+Manipulating Tracks During a Recording Session
+\end_layout
+
+\begin_layout Subsubsection
+Disabling Channels
+\end_layout
+
+\begin_layout Standard
+In a typical recording session,
+ the musicians with the least to record are often allowed to leave the session early once their work is completed.
+ If they were individually recorded using a spot microphone,
+ it wouldn't make sense to continue recording on that channel.
+ In ReaClassical there are two main ways to disable a channel.
+ In a horizontal workflow using a single folder,
+ it is no hassle to simply un-arm the desired track(s).
+ For a vertical workflow with multiple folders,
+ the task could end up being time-consuming with potential for error.
+ So,
+ the recommended ReaClassical way,
+ both easy and visually obvious,
+ is to select the desired tracks in the destination group,
+ right click and choose 
+\begin_inset Quotes bld
+\end_inset
+
+lock track controls
+\begin_inset Quotes brd
+\end_inset
+
+.
+ The tracks are then grayed out.
+ Then sync using F8 and the same tracks are locked in every group.
+ Whether or not the tracks were previously record-armed,
+ those tracks will no longer be involved in the recording.
+\end_layout
+
+\begin_layout Subsubsection
 Adding a New Microphone Mid-Recording Session
 \end_layout
 
@@ -3174,7 +3378,35 @@ shift+T}
  This also works for a single folder while working in a horizontal workflow.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
+Deleting tracks
+\end_layout
+
+\begin_layout Standard
+In both horizontal and vertical workflows,
+ you can use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+
+\backslash
+shift+
+\backslash
+del}
+\end_layout
+
+\end_inset
+
+ on a selected mixer track to quickly delete associated child tracks from all the groups of the project.
+\end_layout
+
+\begin_layout Subsubsection
 Re-ordering tracks
 \end_layout
 
@@ -3208,67 +3440,6 @@ keys{F8}
 
  sync to quickly re-order all the associated tracks across groups at once.
  This includes all audio and assigned recording inputs.
-\end_layout
-
-\begin_layout Subsection
-Deleting tracks
-\end_layout
-
-\begin_layout Standard
-In both horizontal and vertical workflows,
- you can use 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-ctrl+
-\backslash
-shift+
-\backslash
-del}
-\end_layout
-
-\end_inset
-
- on a selected mixer track to quickly delete associated child tracks from all the groups of the project.
-\end_layout
-
-\begin_layout Subsection
-Disabling Channels During a Recording Session
-\end_layout
-
-\begin_layout Standard
-In a typical recording session,
- the musicians with the least to record are often allowed to leave the session early once their work is completed.
- If they were individually recorded using a spot microphone,
- it wouldn't make sense to continue recording on that channel.
- In ReaClassical there are two main ways to disable a channel.
- In a horizontal workflow using a single folder,
- it is no hassle to simply un-arm the desired track(s).
- For a vertical workflow with multiple folders,
- the task could end up being time-consuming with potential for error.
- So,
- the recommended ReaClassical way,
- both easy and visually obvious,
- is to select the desired tracks in the destination group,
- right click and choose 
-\begin_inset Quotes bld
-\end_inset
-
-lock track controls
-\begin_inset Quotes brd
-\end_inset
-
-.
- The tracks are then grayed out.
- Then sync using F8 and the same tracks are locked in every group.
- Whether or not the tracks were previously record-armed,
- those tracks will no longer be involved in the recording.
 \end_layout
 
 \begin_layout Subsection
@@ -3309,7 +3480,7 @@ placement document
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -3331,10 +3502,6 @@ Audio Calculator
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -4318,6 +4485,8 @@ RCMASTER
  bus which leads directly to the master REAPER bus.
  Here you can gain stage into the master bus,
  add FX etc.
+ Seventh,
+ we have reference tracks which lie outside of the RCMASTER structure thereby allowing the user to quickly make comparisons with other imported material via the audition shortcuts.
  Finally,
  the master bus itself where again you can set final levels,
  add FX etc.
@@ -4700,6 +4869,39 @@ keys{A}
 
  on the parent track.
  You can therefore listen to anything from the full mix down to examining just the woodwinds submix or a single reverb bus.
+ To audition using a custom playback rate,
+ use hover + 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+.
+ The custom playback rate can be set via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+.
+ Note that regular auditioning will automatically reset to the standard playback rate.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -6424,20 +6626,7 @@ keys{F8}
 
 \end_inset
 
- then create as many aux/submix tracks after the mixer tracks as you like via the Add Aux 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{@}
-\end_layout
-
-\end_inset
-
- or Add Submix functions 
+ then create as many aux/submix tracks after the mixer tracks as you like via 
 \begin_inset ERT
 status open
 
@@ -6452,7 +6641,7 @@ keys{
 
 \end_inset
 
- .
+.
  It is important to keep the @ or # at the beginning of the track but you can add any name you'd like e.g.
  
 \begin_inset Quotes bld
@@ -6570,12 +6759,12 @@ status open
 \backslash
 keys{
 \backslash
-textasciitilde}
+#}
 \end_layout
 
 \end_inset
 
- (tilde).
+.
  Once added,
  you can add clean recorded noise captured before or after the concert or generate endless roomtone the length of your project from a very small portion of clean silence from the concert itself (hint:
  try using a white noise generator into a convolver such as ReaVerb that uses a few seconds of clean room tone as the impulse!).
@@ -6598,7 +6787,9 @@ status open
 
 
 \backslash
-keys{'}
+keys{
+\backslash
+#}
 \end_layout
 
 \end_inset
@@ -6606,7 +6797,6 @@ keys{'}
  to allow for importing a commercial album track or similar to help achieve the desired loudness levels,
  EQing etc for your own material.
  The reference track is deliberately placed outside of the RCMASTER structure and can therefore be quickly auditioned independent of any effects you have on the mixer and RCMASTER tracks.
- There is currently a limit of one reference track per project.
 \end_layout
 
 \begin_layout Section
@@ -7979,7 +8169,7 @@ keys{F8}
 \begin_layout Standard
 
 \series bold
-Add Room tone track 
+Add special track(s) 
 \series default
 
 \begin_inset ERT
@@ -7991,7 +8181,7 @@ status open
 \backslash
 keys{
 \backslash
-textasciitilde}
+#}
 \end_layout
 
 \end_inset
@@ -8005,15 +8195,10 @@ textasciitilde}
 Description:
  
 \emph default
-Add a burnt sienna-colored aux/submix track labeled 
-\begin_inset Quotes bld
-\end_inset
-
-RoomTone
-\begin_inset Quotes brd
-\end_inset
-
- to the end of the track list that is visible in both the track and mixer panels.
+Adds one or more special tracks (aux,
+ submix,
+ roomtone,
+ reference)
 \end_layout
 
 \begin_layout Standard
@@ -8022,64 +8207,18 @@ RoomTone
 Notes:
  
 \emph default
-The track will be included in the signal path via the regular audition function 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{A}
-\end_layout
-
-\end_inset
-
-.
- If present when creating CD/DDP via the function will also generate volume automation to create perfect crossfades with the items on the first destination track.
- Slicing and dicing room tone audio to fill in digital silence is now a thing of the past.
- Simply add a long recorded or convolution-generated room tone audio item before running the function.
- The ReaClassical way of dealing with room tone is non-destructive and instant!
- 
+ReaClassical projects can have any number of special tracks but are limited to a single roomtone track.
+ See below for details of each kind of track.
 \end_layout
 
 \begin_layout Standard
 
-\series bold
-Add Aux send track 
-\series default
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{@}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Description:
- 
-\emph default
-Add a rosewood-colored aux track prefixed with an ampersand (@) to the end of the track list but is only visible in the mixer.
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Notes:
- 
-\emph default
-This allows the user to keep assigned aux tracks visible in the intelligent mixer.
+\noun on
+Aux send
+\noun default
+:
+ Add a rosewood-colored aux track prefixed with an ampersand (@) to the end of the track list but is only visible in the mixer.
+ This allows the user to keep assigned aux tracks visible in the intelligent mixer.
  Create any connections to the aux in the destination group (including child tracks) and then push to the source groups via the Vertical Workflow function 
 \begin_inset ERT
 status open
@@ -8125,43 +8264,12 @@ keys{F8}
 
 \begin_layout Standard
 
-\series bold
-Add Submix track 
-\series default
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
-#}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Description:
- 
-\emph default
-Add a teal-colored aux track prefixed with an hash (#) to the end of the track list but is only visible in the mixer.
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Notes:
- 
-\emph default
-This allows the user to keep assigned submix tracks visible in the intelligent mixer.
+\noun on
+Submix
+\noun default
+:
+ Add a teal-colored aux track prefixed with an hash (#) to the end of the track list but is only visible in the mixer.
+ This allows the user to keep assigned submix tracks visible in the intelligent mixer.
  Create any connections to the submix in the destination group (including child tracks) and then push to the source groups via the Vertical Workflow function 
 \begin_inset ERT
 status open
@@ -8248,10 +8356,20 @@ keys{F8}
 
 \begin_layout Standard
 
-\series bold
-Add Reference track 
-\series default
+\noun on
+Room tone
+\noun default
+:
+ Add a burnt sienna-colored aux/submix track labeled 
+\begin_inset Quotes bld
+\end_inset
 
+RoomTone
+\begin_inset Quotes brd
+\end_inset
+
+ to the end of the track list that is visible in both the track and mixer panels.
+ The track will be included in the signal path via the regular audition function 
 \begin_inset ERT
 status open
 
@@ -8259,21 +8377,26 @@ status open
 
 
 \backslash
-keys{'}
+keys{A}
 \end_layout
 
 \end_inset
 
-
+.
+ If present when creating CD/DDP via the function will also generate volume automation to create perfect crossfades with the items on the first destination track.
+ Slicing and dicing room tone audio to fill in digital silence is now a thing of the past.
+ Simply add a long recorded or convolution-generated room tone audio item before running the function.
+ The ReaClassical way of dealing with room tone is non-destructive and instant!
+ 
 \end_layout
 
 \begin_layout Standard
 
-\emph on
-Description:
- 
-\emph default
-Add a reference track labeled 
+\noun on
+Reference
+\noun default
+:
+ Add a reference track labeled 
 \begin_inset Quotes bld
 \end_inset
 
@@ -8292,15 +8415,7 @@ REF:
 \end_inset
 
  is automatically added.
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-Notes:
- 
-\emph default
-The track will be placed outside of RCMASTER signal path and easily auditioned via 
+ The track will be placed outside of RCMASTER signal path and easily auditioned via 
 \begin_inset ERT
 status open
 
@@ -8628,6 +8743,186 @@ space}
  record-armed and that the cursor returns to the original position for easy lining up of takes.
  If you run out of source groups,
  the function will automatically create a new one.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Rank Take Higher 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+=}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+
+\emph default
+ Rank higher the last recorded item or selected item(s) (and those in the same group)
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+
+\emph default
+ During or after recording,
+ you can rank one or more recorded takes.
+ If no item is selected,
+ the last recorded item (along with other items in the same group) are affected.
+ Otherwise,
+ you can select one or more parent items.
+ The ranking system uses a series of colors and a scale system of plusses and minuses (+/-) added as a suffix to the item name up to a maximum of three symbols.
+ This allows for seven different rankings.
+ Positive rankings are 3 intensities of green (good,
+ very good,
+ excellent),
+ negative rankings are yellow,
+ orange,
+ red (below average,
+ poor,
+ unusable),
+ with neutral (no ranking) using the default item color.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Rank Take Lower 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+-}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+
+\emph default
+ Rank lower the last recorded item or selected item(s) (and those in the same group)
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+ 
+\emph default
+See the notes above.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Remove Take Ranking 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+0}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+
+\emph default
+ Remove any ranking from the last recorded item or selected item(s) (and those in the same group)
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+ 
+\emph default
+See the notes above.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Increment Take Number 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+F9}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+
+\emph default
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+
+\emph default
+ 
 \end_layout
 
 \begin_layout Standard
@@ -8992,6 +9287,61 @@ keys{A}
  # submix and roomtone tracks so you can easily and quickly set up a custom audition mix including a full mix,
  just the string submix,
  a single reverb bus and anything else you can imagine!
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Audition With Custom Playback Rate 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Description:
+
+\emph default
+ Mouse-driven auditioning of folders or individual tracks but with a custom playback rate.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Notes:
+ 
+\emph default
+Works in the same fashion as regular ReaClassical auditioning but you can set the custom playback rate via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+.
+ Note that regular auditioning will automatically use the standard playback rate.
 \end_layout
 
 \begin_layout Standard
@@ -11744,65 +12094,15 @@ status open
 \backslash
 keys{
 \backslash
-textasciitilde}
-\end_layout
-
-\end_inset
-
- Add a room tone track
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{@}
-\end_layout
-
-\end_inset
-
- Add Aux track
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{
-\backslash
 #}
 \end_layout
 
 \end_inset
 
- Add Submix track
-\end_layout
-
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-keys{'}
-\end_layout
-
-\end_inset
-
- Add Reference track (outside of RCMASTER structure)
+ Add one or more special tracks (aux,
+ submix,
+ roomtone,
+ reference)
 \end_layout
 
 \begin_layout Standard
@@ -11845,6 +12145,101 @@ keys{F9}
 \end_inset
 
  Classical Take Record
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+space}
+\end_layout
+
+\end_inset
+
+ Record-pause
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+F9}
+\end_layout
+
+\end_inset
+
+ Increment take number while recording (use only during silence)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+=}
+\end_layout
+
+\end_inset
+
+ Rank take higher
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+-}
+\end_layout
+
+\end_inset
+
+ Rank take lower
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+ctrl+0}
+\end_layout
+
+\end_inset
+
+ Remove any take ranking
 \end_layout
 
 \begin_layout Labeling
@@ -11961,6 +12356,38 @@ keys{A}
 \end_inset
 
  Audition (full mix or child track) at mouse position (includes any unmuted @ aux or # submix connections)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+A}
+\end_layout
+
+\end_inset
+
+ Audition with custom playback rate (value set via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{F5}
+\end_layout
+
+\end_inset
+
+)
 \end_layout
 
 \begin_layout Labeling
@@ -12997,6 +13424,25 @@ keys{B}
 \end_inset
 
  Batch file converter 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+shift+U}
+\end_layout
+
+\end_inset
+
+ Check for ReaClassical updates
 \end_layout
 
 \begin_layout Labeling
