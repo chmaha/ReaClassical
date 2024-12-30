@@ -119,7 +119,7 @@
 \begin_layout Author
 
 \series bold
-24.x series
+25.x series
 \end_layout
 
 \begin_layout Date
@@ -155,7 +155,7 @@ literal "false"
 \end_inset
 
  (it will create a new ReaClassical folder with a short year + quarter suffix e.g.
- "ReaClassical_24").
+ "ReaClassical_25").
  Double-click on the REAPER binary inside the folder!
 \end_layout
 
