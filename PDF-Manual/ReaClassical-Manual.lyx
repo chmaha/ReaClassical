@@ -1293,7 +1293,7 @@ RCPlugs
 not
 \emph default
  give you the full benefits of ReaClassical which include keyboard shortcuts,
- custom toolbar etc but does include ReaClassical themes and a project template which you should use whether doing classical editing.
+ custom toolbar etc but does include ReaClassical themes and a project template which you should use when doing classical editing.
  It's an easy way to start if you are already familiar with ReaPack and SWS and want to check out source-destination editing etc.
  Note that you 
 \emph on
@@ -1585,7 +1585,7 @@ media
 \end_inset
 
  subfolder.
- The default recording format is 24-bit wave files.
+ The default recording format is 24-bit wave files but you can set to 32-bit float if using a portable recorder with that capability.
  Video frame rate is set to 75 to align with the number of frames per second for an audio CD.
  You can,
  of course,
@@ -2234,7 +2234,7 @@ textbackslash}
 
 \end_inset
 
- shortcut.
+ shortcut,
  but note that using 
 \begin_inset ERT
 status open
@@ -6799,6 +6799,40 @@ keys{
  The reference track is deliberately placed outside of the RCMASTER structure and can therefore be quickly auditioned independent of any effects you have on the mixer and RCMASTER tracks.
 \end_layout
 
+\begin_layout Subsection
+Maintaining/Breaking Connections to RCMASTER
+\end_layout
+
+\begin_layout Standard
+When adding special tracks via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+keys{
+\backslash
+#}
+\end_layout
+
+\end_inset
+
+,
+ set "Maintain Mixer => RCMASTER" to 0 to add a hyphen (-) to the end of every mixer (
+\begin_inset Quotes eld
+\end_inset
+
+M:
+\begin_inset Quotes erd
+\end_inset
+
+) track thereby removing the direct connection to RCMASTER allowing for all sorts of custom routing via submixes etc.
+ By default,
+ the final option is always set to 1 to maintain the current routing.
+\end_layout
+
 \begin_layout Section
 Mastering
 \end_layout
@@ -8260,6 +8294,8 @@ keys{F8}
 \end_inset
 
  syncs.
+ Set "Maintain Mixer => RCMASTER" to 0 to add a hyphen (-) to the end of every mixer track thereby removing the direct connection to RCMASTER allowing for all sorts of nice custom routing.
+ By default the final option is always set to 1 to maintain whatever routing you currently have.
 \end_layout
 
 \begin_layout Standard
