@@ -16,6 +16,7 @@
   Horizontal Workflow: Fix mixer reset if project not yet upgraded
   Take Counter: Clear section override during cleanup
   PDF Manual: Various additions
+  NOTES: UPDATE KEYMAP WHEN ASKED
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
