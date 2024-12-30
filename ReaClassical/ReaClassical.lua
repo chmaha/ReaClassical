@@ -1,8 +1,21 @@
 @description ReaClassical
 @author chmaha
-@version 24.99.1
+@version 25.1
 @changelog
-  Take Counter: Revert switch to alt recording
+  NEW: Add 2025 artwork
+  NEW: Add take ranking
+  NEW: Audition with custom playback rate
+  NEW: Add consolidated special tracks dialog
+  NEW: Audition with custom playback rate
+  NEW: Increased recording safety
+  NEW: Shift+F9 to quickly increment take number while recording
+  ReaClassical Updater: Auto restart if updating keymap or toolbar
+  Take Counter: Restore window position if closed during recording
+  ReaClassical Themes: Make item labels bold
+  Revert to 24-bit recording as default
+  Horizontal Workflow: Fix mixer reset if project not yet upgraded
+  Take Counter: Clear section override during cleanup
+  PDF Manual: Various additions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -68,6 +81,11 @@
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Auto Set Recording Inputs.lua
   [main] ReaClassical_Mastering Mode.lua
+  [main] ReaClassical_Audition_with_playrate.lua
+  [main] ReaClassical_Increment Take Number While Recording.lua
+  [main] ReaClassical_Rank Higher.lua
+  [main] ReaClassical_Rank Lower.lua
+  [main] ReaClassical_Remove Ranking.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
