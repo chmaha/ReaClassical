@@ -386,6 +386,7 @@ end
 ---------------------------------------------------------------------
 
 function clean_up()
+  Main_OnCommand(24800, 0) -- clear any section override
   SetToggleCommandState(1, take_counter, 0)
   local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
   local pos = x .. "," .. y
