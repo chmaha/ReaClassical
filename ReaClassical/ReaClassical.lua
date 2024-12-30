@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 25.1
+@version 25.1.1
 @changelog
   NEW: Add 2025 artwork
   NEW: Add take ranking
@@ -87,6 +87,7 @@
   [main] ReaClassical_Rank Higher.lua
   [main] ReaClassical_Rank Lower.lua
   [main] ReaClassical_Remove Ranking.lua
+  [main] ReaClassical_Add Special Tracks.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
