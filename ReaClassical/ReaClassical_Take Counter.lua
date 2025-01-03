@@ -268,7 +268,7 @@ function main()
     if not rec_name_set then
       local padded_take_text = string.format("%03d", tonumber(take_text))
       SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
-        .. "$track_T" .. padded_take_text)
+        .. "$tracknameornumber_T" .. padded_take_text)
       rec_name_set = true
     end
 
