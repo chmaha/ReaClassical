@@ -35,7 +35,7 @@ end
 function main()
     reaper.Undo_BeginBlock()
     process_items()
-    reaper.Undo_EndBlock("Remove all '+' and '-' from item name", -1)
+    reaper.Undo_EndBlock("Remove Take Ranking", -1)
     reaper.UpdateArrange()
 end
 
@@ -47,6 +47,7 @@ function modify_item_name(item)
         local _, item_name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
 
         item_name = item_name:gsub("[%+%-]+$", "")
+        item_name = item_name:gsub("  $", "") -- remove double space if present
 
         reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
 

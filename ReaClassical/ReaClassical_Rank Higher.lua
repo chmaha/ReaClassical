@@ -34,7 +34,7 @@ end
 function main()
     Undo_BeginBlock()
     process_items()
-    Undo_EndBlock("Add '+' suffix to item name", -1)
+    Undo_EndBlock("Rank Take Higher", -1)
     UpdateArrange()
 end
 
@@ -51,12 +51,20 @@ function modify_item_name(item)
         if count_minus > 0 then
             item_name = item_name:sub(1, #item_name - 1)
             count_minus = count_minus - 1
+            if count_minus == 0 then
+                item_name = item_name:gsub("  $", "")
+            end
         else
             count_plus = item_name:match("%+*$")
             count_plus = count_plus and #count_plus or 0
 
             if count_plus < 3 then
-                item_name = item_name .. "+"
+                -- Ensure two spaces before adding the first '+'
+                if count_plus == 0 and not item_name:find("  +$") then
+                    item_name = item_name:gsub("%s*$", "") .. "  +"
+                else
+                    item_name = item_name .. "+"
+                end
                 count_plus = count_plus + 1
             end
         end
