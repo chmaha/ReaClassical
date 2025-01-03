@@ -2,7 +2,7 @@
 @author chmaha
 @version 25.1.2
 @changelog
-  Recording: Use tracknameornumber wildcard
+  Recording: Use tracknameornumber wildcard if REAPER ver greater than 7.28
   Take Ranking: Add double space after item name
   PDF Manual: Add equivalent modifier key table
 @metapackage
