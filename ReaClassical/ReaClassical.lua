@@ -1,22 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 25.1.1
+@version 25.1.2
 @changelog
-  NEW: Add 2025 artwork
-  NEW: Add take ranking
-  NEW: Audition with custom playback rate
-  NEW: Add consolidated special tracks dialog
-  NEW: Audition with custom playback rate
-  NEW: Increased recording safety
-  NEW: Shift+F9 to quickly increment take number while recording
-  ReaClassical Updater: Auto restart if updating keymap or toolbar
-  Take Counter: Restore window position if closed during recording
-  ReaClassical Themes: Make item labels bold
-  Revert to 24-bit recording as default
-  Horizontal Workflow: Fix mixer reset if project not yet upgraded
-  Take Counter: Clear section override during cleanup
-  PDF Manual: Various additions
-  NOTES: UPDATE KEYMAP WHEN ASKED
+  Recording: Use tracknameornumber wildcard
+  Take Ranking: Add double space after item name
+  PDF Manual: Add equivalent modifier key table
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
