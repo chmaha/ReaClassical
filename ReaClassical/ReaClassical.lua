@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.1.2
+@version 25.1.3
 @changelog
-  Recording: Use tracknameornumber wildcard if REAPER ver greater than 7.28
-  Take Ranking: Add double space after item name
-  PDF Manual: Add equivalent modifier key table
+  PDF Manual: Fix keyboard shortcut reference for remove take names function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
