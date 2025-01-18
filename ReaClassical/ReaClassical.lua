@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.1.3
+@version 25.1.4
 @changelog
-  PDF Manual: Fix keyboard shortcut reference for remove take names function
+  Update copyright notice for 2025
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
