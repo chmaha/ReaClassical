@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.1.4
+@version 25.1.5
 @changelog
-  Update copyright notice for 2025
+  PDF Manual: Add Spread the Word section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
