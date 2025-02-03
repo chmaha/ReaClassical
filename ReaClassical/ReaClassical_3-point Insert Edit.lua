@@ -105,8 +105,7 @@ function main()
         Main_OnCommand(40020, 0) -- Remove time selection
         move_to_project_tab(dest_proj)
         split_at_dest_in()
-        local paste = NamedCommandLookup("_SWS_AWPASTE")
-        Main_OnCommand(paste, 0) -- SWS_AWPASTE
+        Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
         mark_as_edit()
         unlock_items()
         local cur_pos, new_last_item = create_crossfades()

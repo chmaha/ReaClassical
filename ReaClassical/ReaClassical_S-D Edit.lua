@@ -151,8 +151,7 @@ function main()
         Main_OnCommand(40311, 0)  -- Ripple-all mode
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- Adaptive Delete
-        local paste = NamedCommandLookup("_SWS_AWPASTE")
-        Main_OnCommand(paste, 0)  -- SWS_AWPASTE
+        Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
         mark_as_edit()
         unlock_items()
         create_crossfades()
