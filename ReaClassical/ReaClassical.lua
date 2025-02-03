@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2
+@version 25.2.1
 @changelog
-  S-D editing: Replace SWS/A&M paste with native REAPER paste
-  Add Delete all S-D Project Markers function
+  Replace XENAKIOS adaptive delete with regular delete
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
