@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.1.5
+@version 25.2
 @changelog
-  PDF Manual: Add Spread the Word section
+  S-D editing: Replace SWS/A&M paste with native REAPER paste
+  Add Delete all S-D Project Markers function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -74,6 +75,7 @@
   [main] ReaClassical_Rank Lower.lua
   [main] ReaClassical_Remove Ranking.lua
   [main] ReaClassical_Add Special Tracks.lua
+  [main] ReaClassical_Delete S-D Project Markers.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
