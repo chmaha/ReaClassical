@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
+local main, markers, select_matching_folder, split_at_dest_marker, create_crossfades, clean_up
 local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
@@ -104,7 +104,8 @@ function main()
         end
         Main_OnCommand(40020, 0) -- Remove time selection
         move_to_project_tab(dest_proj)
-        split_at_dest_in()
+        split_at_dest_marker(997)
+        split_at_dest_marker(996)
         Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
         mark_as_edit()
         unlock_items()
@@ -266,10 +267,10 @@ end
 
 ---------------------------------------------------------------------
 
-function split_at_dest_in()
+function split_at_dest_marker(num)
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
-    GoToMarker(0, 996, false)
+    GoToMarker(0, num, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups

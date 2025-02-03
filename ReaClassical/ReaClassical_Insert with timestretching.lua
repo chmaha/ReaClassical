@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, select_matching_folder, copy_source, split_at_dest_in
+local main, select_matching_folder, copy_source, split_at_dest_marker
 local create_crossfades, clean_up, lock_items, unlock_items, ripple_lock_mode
 local return_xfade_length, xfade, get_first_last_items, markers
 local mark_as_edit, move_to_project_tab, find_second_folder_track
@@ -72,7 +72,8 @@ function main()
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
         lock_items()
-        split_at_dest_in()
+        split_at_dest_marker(997)
+        split_at_dest_marker(996)
         Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 997, false)
         Main_OnCommand(40626, 0)  -- Time Selection: Set end point
@@ -80,8 +81,7 @@ function main()
         Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
         Main_OnCommand(40630, 0)  -- Go to start of time selection
         Main_OnCommand(40309, 0)  -- ripple off
-        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- Adaptive Delete
+        Main_OnCommand(40697, 0)  -- Delete
         Main_OnCommand(40289, 0)  -- Item: Unselect all items
 
         local state = GetToggleCommandState(1156)
@@ -205,10 +205,10 @@ end
 
 ---------------------------------------------------------------------
 
-function split_at_dest_in()
+function split_at_dest_marker(num)
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
-    GoToMarker(0, 996, false)
+    GoToMarker(0, num, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups

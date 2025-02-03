@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, add_source_marker
-local get_track_length, select_matching_folder, copy_source, split_at_dest_in
+local get_track_length, select_matching_folder, copy_source, split_at_dest_marker
 local create_crossfades, clean_up, lock_items, unlock_items
 local ripple_lock_mode, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
@@ -140,7 +140,8 @@ function main()
         end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
-        split_at_dest_in()
+        split_at_dest_marker(997)
+        split_at_dest_marker(996)
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
         Main_OnCommand(40289, 0)
@@ -149,9 +150,8 @@ function main()
         Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
         Main_OnCommand(40630, 0)  -- Go to start of time selection
         Main_OnCommand(40311, 0)  -- Ripple-all mode
-        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- Adaptive Delete
-        Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
+        Main_OnCommand(40697, 0)  -- Delete
+        Main_OnCommand(42398, 0)  -- Item: Paste items/tracks
         mark_as_edit()
         unlock_items()
         create_crossfades()
@@ -326,11 +326,11 @@ end
 
 ---------------------------------------------------------------------
 
-function split_at_dest_in()
+function split_at_dest_marker(num)
     Main_OnCommand(40769, 0) -- unselect all items/tracks etc
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
-    GoToMarker(0, 996, false)
+    GoToMarker(0, num, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
