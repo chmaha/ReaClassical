@@ -38,6 +38,7 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     ripple_lock_mode()
     local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, _ = markers()
 

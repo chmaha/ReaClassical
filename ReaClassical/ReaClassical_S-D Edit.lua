@@ -59,6 +59,7 @@ function main()
         return
     end
 
+    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     ripple_lock_mode()
     local colors = get_color_table()
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing

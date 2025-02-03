@@ -37,7 +37,7 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
+    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     if source_markers() == 2 then
         local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
         Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
