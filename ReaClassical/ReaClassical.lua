@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.4
+@version 25.2.5
 @changelog
-  Add back adaptive delete
+  Revert all changes since 25.1.5 then add back disable trimming content
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
