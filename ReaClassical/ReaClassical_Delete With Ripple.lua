@@ -23,8 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, source_markers, select_matching_folder, lock_items
-local unlock_items, return_xfade_length, xfade
-local split_at_source_marker
+local unlock_items, ripple_lock_mode, return_xfade_length, xfade
 
 ---------------------------------------------------------------------
 
@@ -37,24 +36,26 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     if source_markers() == 2 then
+        ripple_lock_mode()
         local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
         Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
-        Main_OnCommand(40310, 0) -- Ripple per-track
+        GoToMarker(0, 998, false)
         lock_items()
-        split_at_source_marker(998)
+        Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
-        split_at_source_marker(999)
+        GoToMarker(0, 999, false)
         Main_OnCommand(40626, 0) -- Time Selection: Set end point
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-        -- local folder = GetSelectedTrack(0, 0)
-        -- if GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1 then
-        --     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
-        -- else
-        --     Main_OnCommand(40310, 0) -- Set ripple-per-track
-        -- end
+        local folder = GetSelectedTrack(0, 0)
+        if GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1 then
+            Main_OnCommand(40311, 0) -- Set ripple-all-tracks
+        else
+            Main_OnCommand(40310, 0) -- Set ripple-per-track
+        end
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
         Main_OnCommand(40630, 0)  -- Go to start of time selection
@@ -71,6 +72,7 @@ function main()
         DeleteProjectMarker(NULL, 998, false)
         DeleteProjectMarker(NULL, 999, false)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
+        Main_OnCommand(40310, 0) -- Ripple per-track
     else
         MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete With Ripple", 0)
     end
@@ -140,6 +142,16 @@ end
 
 ---------------------------------------------------------------------
 
+function ripple_lock_mode()
+    local _, original_ripple_lock_mode = get_config_var_string("ripplelockmode")
+    original_ripple_lock_mode = tonumber(original_ripple_lock_mode)
+    if original_ripple_lock_mode ~= 2 then
+        SNM_SetIntConfigVar("ripplelockmode", 2)
+    end
+end
+
+---------------------------------------------------------------------
+
 function return_xfade_length()
     local xfade_len = 0.035
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -165,24 +177,6 @@ function xfade(xfade_len)
     MoveEditCursor(0.001, false)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)
-end
-
----------------------------------------------------------------------
-
-function split_at_source_marker(num)
-    Main_OnCommand(40769, 0) -- unselect all items/tracks etc
-    Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
-    GoToMarker(0, num, false)
-    select_matching_folder()
-    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
-    Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
-    local selected_items = CountSelectedMediaItems(0)
-    Main_OnCommand(40912, 0)        -- Options: Toggle auto-crossfade on split (OFF)
-    if selected_items > 0 then
-        Main_OnCommand(40186, 0)    -- Item: Split items at edit or play cursor (ignoring grouping)
-    end
-    Main_OnCommand(40289, 0)        -- Item: Unselect all items
 end
 
 ---------------------------------------------------------------------

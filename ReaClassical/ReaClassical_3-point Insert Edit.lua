@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, markers, select_matching_folder, split_at_dest_marker, create_crossfades, clean_up
+local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
 local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
@@ -105,8 +105,9 @@ function main()
         end
         Main_OnCommand(40020, 0) -- Remove time selection
         move_to_project_tab(dest_proj)
-        split_at_dest_marker(996)
-        Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
+        split_at_dest_in()
+        local paste = NamedCommandLookup("_SWS_AWPASTE")
+        Main_OnCommand(paste, 0) -- SWS_AWPASTE
         mark_as_edit()
         unlock_items()
         local cur_pos, new_last_item = create_crossfades()
@@ -115,6 +116,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         create_dest_in(cur_pos)
+
         move_to_project_tab(source_proj)
         local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
         Main_OnCommand(restore_view, 0)
@@ -266,10 +268,10 @@ end
 
 ---------------------------------------------------------------------
 
-function split_at_dest_marker(num)
+function split_at_dest_in()
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
-    GoToMarker(0, num, false)
+    GoToMarker(0, 996, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups

@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, add_source_marker
-local get_track_length, select_matching_folder, copy_source, split_at_dest_marker
+local get_track_length, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, lock_items, unlock_items
 local ripple_lock_mode, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
@@ -40,7 +40,7 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-
+    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     local proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in,
     source_out, source_count, pos_table, track_number = markers()
 
@@ -59,7 +59,6 @@ function main()
         return
     end
 
-    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     ripple_lock_mode()
     local colors = get_color_table()
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
@@ -141,8 +140,7 @@ function main()
         end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
-        split_at_dest_marker(997)
-        split_at_dest_marker(996)
+        split_at_dest_in()
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
         Main_OnCommand(40289, 0)
@@ -152,8 +150,9 @@ function main()
         Main_OnCommand(40630, 0)  -- Go to start of time selection
         Main_OnCommand(40311, 0)  -- Ripple-all mode
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
-        Main_OnCommand(42398, 0)  -- Item: Paste items/tracks
+        Main_OnCommand(delete, 0) -- Adaptive Delete
+        local paste = NamedCommandLookup("_SWS_AWPASTE")
+        Main_OnCommand(paste, 0)  -- SWS_AWPASTE
         mark_as_edit()
         unlock_items()
         create_crossfades()
@@ -328,11 +327,11 @@ end
 
 ---------------------------------------------------------------------
 
-function split_at_dest_marker(num)
+function split_at_dest_in()
     Main_OnCommand(40769, 0) -- unselect all items/tracks etc
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
-    GoToMarker(0, num, false)
+    GoToMarker(0, 996, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
