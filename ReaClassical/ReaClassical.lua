@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.2
+@version 25.2.3
 @changelog
-  S-D editing: Auto disable trim content behind media items
+  Assembly Editing: Only split at destination IN marker
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
