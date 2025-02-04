@@ -82,7 +82,8 @@ function main()
         Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
         Main_OnCommand(40630, 0)  -- Go to start of time selection
         Main_OnCommand(40309, 0)  -- ripple off
-        Main_OnCommand(40697, 0)  -- Delete
+        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
+        Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
         Main_OnCommand(40289, 0)  -- Item: Unselect all items
 
         local state = GetToggleCommandState(1156)

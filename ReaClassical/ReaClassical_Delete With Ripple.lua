@@ -55,7 +55,8 @@ function main()
         -- else
         --     Main_OnCommand(40310, 0) -- Set ripple-per-track
         -- end
-        Main_OnCommand(40697, 0)  -- Delete
+        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
+        Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
         Main_OnCommand(40630, 0)  -- Go to start of time selection
         unlock_items()
         local xfade_len = return_xfade_length()
