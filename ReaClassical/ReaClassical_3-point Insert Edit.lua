@@ -105,7 +105,6 @@ function main()
         end
         Main_OnCommand(40020, 0) -- Remove time selection
         move_to_project_tab(dest_proj)
-        split_at_dest_marker(997)
         split_at_dest_marker(996)
         Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
         mark_as_edit()
@@ -116,7 +115,6 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         create_dest_in(cur_pos)
-
         move_to_project_tab(source_proj)
         local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
         Main_OnCommand(restore_view, 0)
