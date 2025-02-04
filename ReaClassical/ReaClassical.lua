@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.3
+@version 25.2.4
 @changelog
-  Assembly Editing: Only split at destination IN marker
+  Add back adaptive delete
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
