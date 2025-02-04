@@ -26,6 +26,7 @@ local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_l
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
 local load_last_assembly_item, find_second_folder_track
+local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -37,7 +38,7 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
+    Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local proj_marker_count, source_proj, dest_proj, dest_in, _, _, _, _, source_count, pos_table, _ = markers()
 
     if proj_marker_count == 1 then
@@ -250,14 +251,27 @@ function copy_source()
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
+    local left_overlap = check_overlapping_items()
     select_matching_folder()
     Main_OnCommand(40625, 0) -- Time Selection: Set start point
     GoToMarker(0, 999, false)
+    local right_overlap = check_overlapping_items()
     Main_OnCommand(40626, 0) -- Time Selection: Set end point
     local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
     local sel_length = end_time - start_time
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
-    if CountSelectedMediaItems(0) == 0 then
+    local selected_items = count_selected_media_items()
+    if left_overlap then
+        local first_item = get_selected_media_item_at(0)
+        SetMediaItemSelected(first_item, false)
+        selected_items = selected_items - 1
+    end
+    if right_overlap then
+        local last_item = get_selected_media_item_at(selected_items - 1)
+        SetMediaItemSelected(last_item, false)
+        selected_items = selected_items - 1
+    end
+    if selected_items == 0 then
         is_selected = false
     end
     Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
@@ -511,6 +525,79 @@ function find_second_folder_track()
             if folder_count == 2 then
                 return track_idx
             end
+        end
+    end
+
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function check_overlapping_items()
+    local track = GetSelectedTrack(0, 0)
+    if not track then
+        ShowMessageBox("No track selected!", "Error", 0)
+        return
+    end
+
+    local cursor_pos = GetCursorPosition()
+    local num_items = CountTrackMediaItems(track)
+    local overlapping = false
+
+    for i = 0, num_items - 1 do
+        local item1 = GetTrackMediaItem(track, i)
+        local start1 = GetMediaItemInfo_Value(item1, "D_POSITION")
+        local length1 = GetMediaItemInfo_Value(item1, "D_LENGTH")
+        local end1 = start1 + length1
+
+        if cursor_pos >= start1 and cursor_pos <= end1 then
+            for j = i + 1, num_items - 1 do
+                local item2 = GetTrackMediaItem(track, j)
+                local start2 = GetMediaItemInfo_Value(item2, "D_POSITION")
+                local length2 = GetMediaItemInfo_Value(item2, "D_LENGTH")
+                local end2 = start2 + length2
+
+                if cursor_pos >= start2 and cursor_pos <= end2 then
+                    overlapping = true
+                    break
+                end
+            end
+        end
+        if overlapping then break end
+    end
+
+    return overlapping
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
         end
     end
 
