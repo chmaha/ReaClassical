@@ -26,6 +26,7 @@ local main, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, lock_items, unlock_items, ripple_lock_mode
 local return_xfade_length, xfade, get_first_last_items, markers
 local mark_as_edit, move_to_project_tab, find_second_folder_track
+local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 
 ---------------------------------------------------------------------
 
@@ -39,7 +40,7 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
     ripple_lock_mode()
-    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
+    Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, _ = markers()
 
     if proj_marker_count == 1 then
@@ -62,7 +63,8 @@ function main()
 
         move_to_project_tab(dest_proj)
         move_to_project_tab(source_proj)
-        local total_selected, parent_selected = copy_source()
+        local xfade_len = return_xfade_length()
+        local total_selected, parent_selected = copy_source(xfade_len)
         if total_selected == 0 then
             Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
             unlock_items()
@@ -89,11 +91,15 @@ function main()
         if state == 1 then
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
         end
-        Main_OnCommand(42398, 0)    -- Item: Paste items/tracks
-        local xfade_len = return_xfade_length()
+        if parent_selected > 1 then
+            MoveEditCursor(-xfade_len * 15, false) -- move cursor back xfade length
+        end
+        Main_OnCommand(42398, 0) -- Item: Paste items/tracks
         GoToMarker(0, 996, false)
-        MoveEditCursor(-xfade_len, false) -- move cursor back xfade length
-        Main_OnCommand(40625, 0)          -- Time Selection: Set start point
+        if parent_selected > 1 then
+            MoveEditCursor(-xfade_len * 15, false) -- move cursor back xfade length
+        end
+        Main_OnCommand(40625, 0) -- Time Selection: Set start point
 
         for i = 0, total_selected - 1, 1 do
             selected_items[i] = GetSelectedMediaItem(0, i)
@@ -103,12 +109,6 @@ function main()
 
         local item_color = GetMediaItemInfo_Value(first_item, "I_CUSTOMCOLOR")
 
-
-        SetMediaItemSelected(first_item, true)
-        Main_OnCommand(40034, 0)         -- Item grouping: Select all items in groups
-        Main_OnCommand(41305, 0)         -- Item edit: Trim left edge of item to edit cursor
-        Main_OnCommand(40289, 0)         -- Item: Unselect all items
-        MoveEditCursor(xfade_len, false) -- move cursor forward xfade length
         for _, v in pairs(selected_items) do
             SetMediaItemSelected(v, true)
             SetMediaItemInfo_Value(v, "C_LOCK", 0)
@@ -117,6 +117,9 @@ function main()
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         else
             Main_OnCommand(40362, 0) -- glue items
+            GoToMarker(0, 996, false)
+            Main_OnCommand(40511, 0) -- trim items left of cursor
+            Main_OnCommand(40625, 0) -- Time Selection: Set start point
             Main_OnCommand(41206, 0) -- Item: Move and stretch items to fit time selection
         end
         Main_OnCommand(40032, 0)     -- group selected items
@@ -132,8 +135,7 @@ function main()
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
         end
         unlock_items()
-        --Main_OnCommand(40626, 0) -- Time Selection: Set end point
-        create_crossfades()
+        create_crossfades(xfade_len)
         clean_up(proj_marker_count)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
@@ -167,36 +169,38 @@ end
 
 ---------------------------------------------------------------------
 
-function copy_source()
+function copy_source(xfade_len)
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
+    local left_overlap = check_overlapping_items()
     select_matching_folder()
     Main_OnCommand(40625, 0) -- Time Selection: Set start point
     GoToMarker(0, 999, false)
+    local right_overlap = check_overlapping_items()
     Main_OnCommand(40626, 0) -- Time Selection: Set end point
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
-    Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-
-    local total_selected_items = CountSelectedMediaItems(0)
-
-    local parent_track_selected_items = 0
-    local first_track = GetSelectedTrack(0, 0)
-
-    if first_track then
-        local folder_depth = GetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH")
-        if folder_depth == 1 then -- First track is a folder
-            for i = 0, total_selected_items - 1 do
-                local item = GetSelectedMediaItem(0, i)
-                local item_track = GetMediaItem_Track(item)
-                if item_track == first_track then
-                    parent_track_selected_items = parent_track_selected_items + 1
-                end
-            end
-        end
+    local parent_track_selected_items = count_selected_media_items()
+    if left_overlap then
+        local first_item = get_selected_media_item_at(0)
+        SetMediaItemSelected(first_item, false)
+        parent_track_selected_items = parent_track_selected_items - 1
     end
+    if right_overlap then
+        local last_item = get_selected_media_item_at(parent_track_selected_items - 1)
+        SetMediaItemSelected(last_item, false)
+        parent_track_selected_items = parent_track_selected_items - 1
+    end
+    Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
+    if parent_track_selected_items > 1 then
+        local loop_start, loop_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
+        local new_loop_start = loop_start - (xfade_len * 15)
+        GetSet_LoopTimeRange(true, false, new_loop_start, loop_end, false)
+    end
+
+    local total_selected_items = count_selected_media_items()
 
     Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection
     Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -223,13 +227,12 @@ end
 
 ---------------------------------------------------------------------
 
-function create_crossfades()
+function create_crossfades(xfade_len)
     local first_sel_item, last_sel_item = get_first_last_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(first_sel_item, true)
     Main_OnCommand(41173, 0) -- Item navigation: Move cursor to start of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-    local xfade_len = return_xfade_length()
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
     MoveEditCursor(xfade_len, false)
@@ -240,7 +243,6 @@ function create_crossfades()
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)
@@ -251,7 +253,6 @@ function create_crossfades()
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
-    return cur_pos
 end
 
 ---------------------------------------------------------------------
@@ -492,6 +493,79 @@ function find_second_folder_track()
             if folder_count == 2 then
                 return track_idx
             end
+        end
+    end
+
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function check_overlapping_items()
+    local track = GetSelectedTrack(0, 0)
+    if not track then
+        ShowMessageBox("No track selected!", "Error", 0)
+        return
+    end
+
+    local cursor_pos = GetCursorPosition()
+    local num_items = CountTrackMediaItems(track)
+    local overlapping = false
+
+    for i = 0, num_items - 1 do
+        local item1 = GetTrackMediaItem(track, i)
+        local start1 = GetMediaItemInfo_Value(item1, "D_POSITION")
+        local length1 = GetMediaItemInfo_Value(item1, "D_LENGTH")
+        local end1 = start1 + length1
+
+        if cursor_pos >= start1 and cursor_pos <= end1 then
+            for j = i + 1, num_items - 1 do
+                local item2 = GetTrackMediaItem(track, j)
+                local start2 = GetMediaItemInfo_Value(item2, "D_POSITION")
+                local length2 = GetMediaItemInfo_Value(item2, "D_LENGTH")
+                local end2 = start2 + length2
+
+                if cursor_pos >= start2 and cursor_pos <= end2 then
+                    overlapping = true
+                    break
+                end
+            end
+        end
+        if overlapping then break end
+    end
+
+    return overlapping
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
         end
     end
 
