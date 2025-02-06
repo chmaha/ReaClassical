@@ -175,8 +175,8 @@ function copy_source(xfade_len)
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
-    local left_overlap = check_overlapping_items()
     select_matching_folder()
+    local left_overlap = check_overlapping_items()
     Main_OnCommand(40625, 0) -- Time Selection: Set start point
     GoToMarker(0, 999, false)
     local right_overlap = check_overlapping_items()
