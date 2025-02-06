@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.7
+@version 25.2.8
 @changelog
-  S-D editing: Select matching source folder before first overlap check
+  S-D editing: Do not count abutting items as overlapping
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
