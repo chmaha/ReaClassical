@@ -600,10 +600,8 @@ function check_overlapping_items()
             for j = i + 1, num_items - 1 do
                 local item2 = GetTrackMediaItem(track, j)
                 local start2 = GetMediaItemInfo_Value(item2, "D_POSITION")
-                local length2 = GetMediaItemInfo_Value(item2, "D_LENGTH")
-                local end2 = start2 + length2
 
-                if cursor_pos >= start2 and cursor_pos <= end2 then
+                if start2 < end1 and cursor_pos >= start2 then
                     overlapping = true
                     break
                 end
