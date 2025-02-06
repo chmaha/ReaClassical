@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.6
+@version 25.2.7
 @changelog
-  S-D editing: Add overlapping items check
-  Insert With Time-Stretching: Add c. 500ms of editing wiggle room for glued inserts
+  S-D editing: Select matching source folder before first overlap check
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
