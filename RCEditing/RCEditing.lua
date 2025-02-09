@@ -1,4 +1,4 @@
-@description ReaClassical Editing Tools
+@description ReaClassical S-D Editing Tools
 @author chmaha
 @version 1.0pre0902
 @changelog
@@ -32,4 +32,5 @@
   [main] RCEditing_Delete S-D Project Markers.lua
 @about
   These functions provide everything you need for professional source-destination editing in REAPER.
+  For a more complete editing, mixing and mastering solution for classical and other acoustic music, please see https://reaclassical.org
 
