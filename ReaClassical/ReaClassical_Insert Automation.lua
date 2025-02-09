@@ -26,6 +26,11 @@ local main
 ---------------------------------------------------------------------
 
 function main()
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if workflow == "" then
+      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+      return
+  end
   local start_time, end_time = reaper.GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
 
   if start_time == end_time then

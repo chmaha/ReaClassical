@@ -32,6 +32,11 @@ if not SWS_exists then
 end
 
 function main()
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if workflow == "" then
+      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+      return
+  end
   local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
   mastering = (mastering ~= "" and tonumber(mastering)) or 0
 

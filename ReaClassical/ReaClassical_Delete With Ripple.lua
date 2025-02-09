@@ -37,6 +37,10 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)

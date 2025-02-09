@@ -40,6 +40,10 @@ end
 
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if workflow == "" then
+      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+      return
+  end
   Main_OnCommand(42022, 0) -- Global automation override: All automation in latch preview mode
   local message
   local _, automation = GetProjExtState(0, "ReaClassical", "AutomationModeSet")

@@ -54,6 +54,11 @@ local formatted_pos_out
 ----------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local ret1, num_of_markers = count_markers()
     if not ret1 then return end
     local ret2, filename = create_filename()

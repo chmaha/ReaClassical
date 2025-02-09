@@ -24,6 +24,11 @@ local main
 ---------------------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     SetEditCurPos(0, true, false)
     Main_OnCommand(40296, 0) -- Track: Select all tracks
     Main_OnCommand(40295, 0) -- View: Zoom out project

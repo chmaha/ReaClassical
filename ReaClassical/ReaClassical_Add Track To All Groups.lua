@@ -28,6 +28,11 @@ local main, add_track_to_folder
 
 function main()
   Undo_BeginBlock()
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if workflow == "" then
+      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+      return
+  end
   -- get folder and child count
   local num_of_tracks = CountTracks(0)
   local folder_count = 0

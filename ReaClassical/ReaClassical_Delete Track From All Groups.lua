@@ -29,7 +29,11 @@ local get_regular_track, handle_invalid, move_up
 
 function main()
   Undo_BeginBlock()
-
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if workflow == "" then
+      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+      return
+  end
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 or selected_tracks == 0 then
     MB("Please select a single mixer track", "Delete Track From All Groups", 0)

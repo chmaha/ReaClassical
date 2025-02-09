@@ -28,6 +28,11 @@ local main, get_grouped_items, copy_shift, empty_items_check
 
 function main()
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local first_track = GetTrack(0, 0)
     local num_of_items = 0
     if first_track then num_of_items = CountTrackMediaItems(first_track) end

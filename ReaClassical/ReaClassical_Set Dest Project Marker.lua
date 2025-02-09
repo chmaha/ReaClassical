@@ -27,18 +27,23 @@ local main
 ---------------------------------------------------------------------
 
 function main()
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
-    local i = 0;
-    while true do
-      local project, _ = EnumProjects(i)
-      if project == nil then
-        break
-      else
-        DeleteProjectMarker(project, 1001, false)
-      end
-      i = i + 1
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if workflow == "" then
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    return
+  end
+  local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+  local i = 0;
+  while true do
+    local project, _ = EnumProjects(i)
+    if project == nil then
+      break
+    else
+      DeleteProjectMarker(project, 1001, false)
     end
-    AddProjectMarker2(-1, false, cur_pos, 0, "DEST PROJECT", 1001, ColorToNative(183,79,105) | 0x1000000)
+    i = i + 1
+  end
+  AddProjectMarker2(-1, false, cur_pos, 0, "DEST PROJECT", 1001, ColorToNative(183, 79, 105) | 0x1000000)
 end
 
 ---------------------------------------------------------------------

@@ -28,6 +28,11 @@ local main, folder_check, get_track_number, get_color_table, get_path
 
 function main()
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local left_pos, right_pos
     local start_time, end_time = GetSet_LoopTimeRange(false, false, 0, 0, false)
     if start_time ~= end_time then

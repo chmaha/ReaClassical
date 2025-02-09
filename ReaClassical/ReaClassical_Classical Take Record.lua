@@ -47,14 +47,17 @@ end
 ---------------------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     if track_check() == 0 then
         MB("Please add at least one folder before running", "Classical Take Record", 0)
         return
     end
 
     local _, rec_wildcards = get_config_var_string("recfile_wildcards")
-
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
     local first_selected = GetSelectedTrack(0, 0)
     if not first_selected then return end

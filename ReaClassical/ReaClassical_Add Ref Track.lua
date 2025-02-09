@@ -27,6 +27,11 @@ local main, folder_check, get_color_table, get_path, trackname_check
 ---------------------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local folders, _, _, _ = folder_check()
     if folders == 0 then
         MB("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",

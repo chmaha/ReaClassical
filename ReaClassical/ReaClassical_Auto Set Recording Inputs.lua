@@ -37,6 +37,11 @@ local pair_words = {
 local MAX_INPUTS = GetNumAudioInputs() -- Retrieve hardware inputs
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local num_tracks = CountTracks(0)
     if num_tracks == 0 then
         MB("Set up your ReaClassical project via F7 or F8 first!", "Auto Set Recording Inputs", 0)
@@ -97,7 +102,6 @@ function main()
         track_index = track_index + 1
     end
 
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local assignment_message
     if workflow == "Vertical" then
         local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")

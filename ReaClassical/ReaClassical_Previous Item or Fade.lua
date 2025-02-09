@@ -39,6 +39,11 @@ if not SWS_exists then
 end
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     win_state = GetToggleCommandState(fade_editor_toggle)
 
     if win_state ~= 1 then

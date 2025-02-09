@@ -27,6 +27,11 @@ local main, file_exists, get_path
 ---------------------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local resource_path = GetResourcePath()
     local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-Manual.pdf")
     local pdf = resource_path .. relative_path

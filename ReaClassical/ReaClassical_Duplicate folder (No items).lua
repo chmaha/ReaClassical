@@ -33,6 +33,11 @@ if not SWS_exists then
 end
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local num_of_tracks = track_check()
     if num_of_tracks == 0 then
         MB("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)

@@ -28,6 +28,11 @@ local main
 
 function main()
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     Main_OnCommand(40034, 0) -- select all in group
     Main_OnCommand(40704, 0) -- set to custom color
     Main_OnCommand(40769, 0) -- unselect all items

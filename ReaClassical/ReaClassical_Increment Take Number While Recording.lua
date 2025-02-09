@@ -38,6 +38,11 @@ local delay_cycles = 2
 ---------------------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local playstate = reaper.GetPlayState()
     if playstate == 5 then
         reaper.Main_OnCommand(classical_take_record, 0)

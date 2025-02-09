@@ -30,7 +30,11 @@ local calc_postgap, is_item_start_crossfaded
 
 function main()
     Undo_BeginBlock()
-
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local take_name, selected_item = takename_check()
     if take_name == -1 or take_name == "" then
         MB('Please select an item that starts a CD track', "Select CD track start", 0)

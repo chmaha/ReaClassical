@@ -29,7 +29,11 @@ local main, clean_take_names
 
 function main()
     Undo_BeginBlock()
-
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local response = MB(
     "Are you sure you would like to remove item take names from the first destination track?", "Remove Take Names", 4)
     if response == 6 then clean_take_names() end

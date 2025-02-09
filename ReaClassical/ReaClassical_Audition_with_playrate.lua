@@ -48,6 +48,11 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     CSurf_OnPlayRateChange(audition_speed)
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
