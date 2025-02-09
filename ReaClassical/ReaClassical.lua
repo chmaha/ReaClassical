@@ -4,7 +4,7 @@
 @changelog
   Enable item grouping toolbar option when running various common functions
   Use ripple mode appropriate to workflow thereby maintaining relative source marker positions
-  Add ReaClassical project check where appropriate
+  Add ReaClassical project check to most functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
