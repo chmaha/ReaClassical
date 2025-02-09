@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.8
+@version 25.2.9
 @changelog
-  S-D editing: Do not count abutting items as overlapping
+  Enable item grouping toolbar option when running various common functions
+  Use ripple mode appropriate to workflow thereby maintaining relative source marker positions
+  Add ReaClassical project check where appropriate
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
