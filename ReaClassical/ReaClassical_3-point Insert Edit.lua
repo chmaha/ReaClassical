@@ -39,6 +39,10 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
     local proj_marker_count, source_proj, dest_proj, dest_in, _, _, _, _, source_count, pos_table, _ = markers()
 
     if proj_marker_count == 1 then

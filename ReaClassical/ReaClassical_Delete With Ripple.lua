@@ -38,6 +38,10 @@ function main()
     Undo_BeginBlock()
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
     if source_markers() == 2 then
         ripple_lock_mode()
         local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")

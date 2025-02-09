@@ -30,6 +30,11 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
+
     if source_markers() == 2 then
         local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
         Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND

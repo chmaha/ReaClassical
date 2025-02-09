@@ -36,6 +36,10 @@ if not SWS_exists then
 end
 
 function main()
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
     SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)

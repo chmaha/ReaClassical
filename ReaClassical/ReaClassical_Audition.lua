@@ -47,6 +47,10 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
     CSurf_OnPlayRateChange(1)
     local colors = get_color_table()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")

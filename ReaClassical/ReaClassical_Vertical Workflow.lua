@@ -43,7 +43,10 @@ end
 
 function main()
     Undo_BeginBlock()
-
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
     local num_pre_selected = CountSelectedTracks(0)
     local pre_selected = {}
     if num_pre_selected > 0 then
