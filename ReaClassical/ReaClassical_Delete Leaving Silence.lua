@@ -55,7 +55,7 @@ function main()
         DeleteProjectMarker(NULL, 998, false)
         DeleteProjectMarker(NULL, 999, false)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
-        Main_OnCommand(41990, 0) -- Toggle ripple per-track (off)
+        Main_OnCommand(41990, 0) -- Toggle ripple per-track (on)
     else
         MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
     end

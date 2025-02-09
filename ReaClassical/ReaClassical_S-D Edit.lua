@@ -41,6 +41,7 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
@@ -153,7 +154,13 @@ function main()
         Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
         Main_OnCommand(40630, 0)  -- Go to start of time selection
-        Main_OnCommand(40311, 0)  -- Ripple-all mode
+
+        if workflow == "Horizontal" then
+            Main_OnCommand(40311, 0) -- Set ripple-all-tracks
+        else
+            Main_OnCommand(40310, 0) -- Set ripple-per-track
+        end
+
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- Adaptive Delete
         local paste = NamedCommandLookup("_SWS_AWPASTE")

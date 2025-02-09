@@ -36,6 +36,7 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
@@ -55,10 +56,11 @@ function main()
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
         local folder = GetSelectedTrack(0, 0)
-        if GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1 then
-            Main_OnCommand(40311, 0) -- Set ripple-all-tracks
-        else
+
+        if workflow == "Vertical" and GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1 then
             Main_OnCommand(40310, 0) -- Set ripple-per-track
+        else
+            Main_OnCommand(40311, 0) -- Set ripple-all-tracks
         end
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL

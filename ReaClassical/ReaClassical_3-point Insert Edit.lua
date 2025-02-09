@@ -38,6 +38,7 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
@@ -111,6 +112,13 @@ function main()
         Main_OnCommand(40020, 0) -- Remove time selection
         move_to_project_tab(dest_proj)
         split_at_dest_in()
+
+        if workflow == "Horizontal" then
+            Main_OnCommand(40311, 0) -- Set ripple-all-tracks
+        else
+            Main_OnCommand(40310, 0) -- Set ripple-per-track
+        end
+
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0) -- SWS_AWPASTE
         mark_as_edit()
@@ -252,7 +260,7 @@ function copy_source()
     local is_selected = true
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
-    Main_OnCommand(40311, 0) -- Set ripple-all-tracks
+    --Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
     select_matching_folder()
