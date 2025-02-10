@@ -2,3 +2,6 @@
 *.lyx#
 *.sh
 release_plan
+PDF-Manual/*
+!PDF-Manual/*.pdf
+!PDF-Manual/*.tex
