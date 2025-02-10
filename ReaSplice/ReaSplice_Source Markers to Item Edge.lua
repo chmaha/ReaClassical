@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -72,7 +72,7 @@ function main()
     AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SOURCE-IN", 998, ColorToNative(23, 223, 143) | 0x1000000)
     AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SOURCE-OUT", 999, ColorToNative(23, 223, 143) | 0x1000000)
 
-    Undo_EndBlock("Source Markers to Item Edge", 0)
+    Undo_EndBlock("ReaSplice Source Markers to Item Edge", 0)
 end
 
 ---------------------------------------------------------------------

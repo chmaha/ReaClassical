@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -21,9 +21,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, markers, move_to_project_tab
+local main, markers, move_to_project_tab, zoom
 
 ---------------------------------------------------------------------
+
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
 
 function main()
     local _, source_proj = markers()
@@ -32,7 +38,23 @@ function main()
         move_to_project_tab(source_proj)
     end
 
-    GoToMarker(0, 998, false)
+    GoToMarker(0, 999, false)
+    zoom()
+end
+
+---------------------------------------------------------------------
+
+function zoom()
+    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+    SetEditCurPos(cur_pos - 3, false, false)
+    Main_OnCommand(40625, 0)             -- Time selection: Set start point
+    SetEditCurPos(cur_pos + 3, false, false)
+    Main_OnCommand(40626, 0)             -- Time selection: Set end point
+    local zoom_to_selection = NamedCommandLookup("_SWS_ZOOMSIT")
+    Main_OnCommand(zoom_to_selection, 0) -- SWS: Zoom to selected items or time selection
+    SetEditCurPos(cur_pos, false, false)
+    Main_OnCommand(1012, 0)              -- View: Zoom in horizontal
+    Main_OnCommand(40635, 0)             -- Time selection: Remove (unselect) time selection
 end
 
 ---------------------------------------------------------------------

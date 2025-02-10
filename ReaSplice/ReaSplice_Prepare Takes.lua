@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -41,8 +41,8 @@ function main()
     end
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
-    SetProjExtState(0, "ReaClassical S-D Editing", "arrangestarttime", start_time)
-    SetProjExtState(0, "ReaClassical S-D Editing", "arrangeendtime", end_time)
+    SetProjExtState(0, "ReaSplice", "arrangestarttime", start_time)
+    SetProjExtState(0, "ReaSplice", "arrangeendtime", end_time)
     local num_of_project_items = CountMediaItems(0)
     if num_of_project_items == 0 then
         MB("Please add your takes before running...", "Prepare Takes", 0)
@@ -103,16 +103,16 @@ function main()
         vertical()
     end
 
-    local _, prev_start_time = GetProjExtState(0, "ReaClassical S-D Editing", "arrangestarttime")
-    local _, prev_end_time = GetProjExtState(0, "ReaClassical S-D Editing", "arrangeendtime")
+    local _, prev_start_time = GetProjExtState(0, "ReaSplice", "arrangestarttime")
+    local _, prev_end_time = GetProjExtState(0, "ReaSplice", "arrangeendtime")
     GetSet_ArrangeView2(0, true, 0, 0, prev_start_time, prev_end_time)
     SetEditCurPos(cur_pos, 0, 0)
 
     local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(scroll_up, 0)
 
-    SetProjExtState(0, "ReaClassical S-D Editing", "arrangestarttime", "")
-    SetProjExtState(0, "ReaClassical S-D Editing", "arrangeendtime", "")
+    SetProjExtState(0, "ReaSplice", "arrangestarttime", "")
+    SetProjExtState(0, "ReaSplice", "arrangeendtime", "")
 
     if empty then
         MB(
@@ -120,7 +120,7 @@ function main()
             "from first child tracks were copied to folder tracks and muted to act as guide tracks."
             , "Guide Tracks Created", 0)
     end
-    Undo_EndBlock('Prepare Takes', 0)
+    Undo_EndBlock('ReaSplice Prepare Takes', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

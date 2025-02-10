@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -32,13 +32,13 @@ if not SWS_exists then
 end
 
 function main()
-    local _, source_proj = markers()
+    local _, _, dest_proj = markers()
 
-    if source_proj then
-        move_to_project_tab(source_proj)
+    if dest_proj then
+        move_to_project_tab(dest_proj)
     end
 
-    GoToMarker(0, 999, false)
+    GoToMarker(0, 997, false)
     zoom()
 end
 
@@ -143,8 +143,8 @@ function markers()
         proj_marker_count = -1
     end
 
-    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
-        source_in, source_out, source_count, pos_table, track_number
+    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in,
+        source_out, source_count, pos_table, track_number
 end
 
 ---------------------------------------------------------------------

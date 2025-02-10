@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -26,7 +26,7 @@ local main, edge_check, return_check_length
 ---------------------------------------------------------------------
 
 function main()
-    local _, input = GetProjExtState(0, "ReaClassical S-D Editing", "Preferences")
+    local _, input = GetProjExtState(0, "ReaSplice", "Preferences")
     local sdmousehover = 0
     if input ~= "" then
         local table = {}
@@ -48,7 +48,7 @@ function main()
             if project == nil then
                 break
             else
-                DeleteProjectMarker(project, 996, false)
+                DeleteProjectMarker(project, 997, false)
             end
             i = i + 1
         end
@@ -56,12 +56,11 @@ function main()
 
         if edge_check(cur_pos) == true then
             local response = MB(
-                "The marker you are trying to add would either be on or close " ..
-                "to an item edge or existing crossfade. Continue?",
-                "Add Dest-IN Marker", 4)
+                "The marker you are trying to add would either be on or close to an item edge or crossfade. Continue?",
+                "Add Dest-OUT Marker", 4)
             if response ~= 6 then return end
         end
-        AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
+        AddProjectMarker2(0, false, cur_pos, 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
     end
 end
 
@@ -78,7 +77,7 @@ function edge_check(cur_pos)
         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_fadein_len = GetMediaItemInfo_Value(item, "D_FADEINLEN")
         local item_fadein_end = item_start + item_fadein_len
-        if cur_pos > item_start and cur_pos < item_fadein_end + check_length then
+        if cur_pos > item_start - check_length and cur_pos < item_fadein_end then
             clash = true
             break
         end
@@ -99,7 +98,7 @@ end
 
 function return_check_length()
     local check_length = 0.5
-    local _, input = GetProjExtState(0, "ReaClassical S-D Editing", "Preferences")
+    local _, input = GetProjExtState(0, "ReaSplice", "Preferences")
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end

@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -51,14 +51,14 @@ end
 function display_prefs()
     local saved = load_prefs(NUM_OF_ENTRIES)
     local input_labels = table.concat(labels, ',')
-    local ret, input = GetUserInputs('ReaClassical S-D Editing Preferences', NUM_OF_ENTRIES, input_labels, saved)
+    local ret, input = GetUserInputs('ReaSplice Preferences', NUM_OF_ENTRIES, input_labels, saved)
     return ret, input
 end
 
 -----------------------------------------------------------------------
 
 function load_prefs()
-    local _, saved = GetProjExtState(0, "ReaClassical S-D Editing", "Preferences")
+    local _, saved = GetProjExtState(0, "ReaSplice", "Preferences")
     if saved == "" then return default_values end
 
     local saved_entries = {}
@@ -91,7 +91,7 @@ end
 -----------------------------------------------------------------------
 
 function save_prefs(input)
-    SetProjExtState(0, "ReaClassical S-D Editing", "Preferences", input)
+    SetProjExtState(0, "ReaSplice", "Preferences", input)
 end
 
 -----------------------------------------------------------------------

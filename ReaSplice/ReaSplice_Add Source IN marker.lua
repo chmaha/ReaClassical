@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -26,7 +26,7 @@ local main, folder_check, get_track_number
 ---------------------------------------------------------------------
 
 function main()
-    local _, input = GetProjExtState(0, "ReaClassical S-D Editing", "Preferences")
+    local _, input = GetProjExtState(0, "ReaSplice", "Preferences")
     local sdmousehover = 0
     if input ~= "" then
         local table = {}

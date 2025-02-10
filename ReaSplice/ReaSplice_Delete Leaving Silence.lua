@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -58,7 +58,7 @@ function main()
     else
         MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
     end
-    Undo_EndBlock('Cut and Ripple', 0)
+    Undo_EndBlock('ReaSplice Delete Leaving Silence', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

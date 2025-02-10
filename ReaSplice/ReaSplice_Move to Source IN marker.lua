@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -26,13 +26,13 @@ local main, markers, move_to_project_tab
 ---------------------------------------------------------------------
 
 function main()
-    local _, _, dest_proj = markers()
+    local _, source_proj = markers()
 
-    if dest_proj then
-        move_to_project_tab(dest_proj)
+    if source_proj then
+        move_to_project_tab(source_proj)
     end
 
-    GoToMarker(0, 996, false)
+    GoToMarker(0, 998, false)
 end
 
 ---------------------------------------------------------------------

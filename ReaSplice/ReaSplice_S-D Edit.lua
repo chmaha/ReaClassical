@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -178,7 +178,7 @@ function main()
         return
     end
 
-    Undo_EndBlock('S-D Edit', 0)
+    Undo_EndBlock('ReaSplice S-D Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
@@ -481,7 +481,7 @@ end
 
 function return_xfade_length()
     local xfade_len = 0.035
-    local _, input = GetProjExtState(0, "ReaClassical S-D Editing", "Preferences")
+    local _, input = GetProjExtState(0, "ReaSplice", "Preferences")
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end

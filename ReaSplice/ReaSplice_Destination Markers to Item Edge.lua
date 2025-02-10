@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -105,7 +105,7 @@ function main()
     AddProjectMarker2(0, false, left_pos, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
     AddProjectMarker2(0, false, right_pos, 0, "DEST-OUT", 997, ColorToNative(23,203,223) | 0x1000000)
 
-    Undo_EndBlock("Destination Markers to Item Edge", 0)
+    Undo_EndBlock("ReaSplice Destination Markers to Item Edge", 0)
 end
 
 ---------------------------------------------------------------------

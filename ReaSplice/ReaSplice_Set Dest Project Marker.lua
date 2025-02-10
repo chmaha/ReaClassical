@@ -1,7 +1,7 @@
 --[[
 @noindex
 
-This file is a part of "ReaClassical Editing" package.
+This file is a part of "ReaSplice" package.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -33,11 +33,11 @@ function main()
     if project == nil then
       break
     else
-      DeleteProjectMarker(project, 1000, false)
+      DeleteProjectMarker(project, 1001, false)
     end
     i = i + 1
   end
-  AddProjectMarker2(-1, false, cur_pos, 0, "SOURCE PROJECT", 1000, ColorToNative(105, 79, 183) | 0x1000000)
+  AddProjectMarker2(-1, false, cur_pos, 0, "DEST PROJECT", 1001, ColorToNative(183, 79, 105) | 0x1000000)
 end
 
 ---------------------------------------------------------------------
