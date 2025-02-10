@@ -1,46 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7">
-  <category name="RCEditing">
-    <reapack name="RCEditing.lua" type="script" desc="ReaClassical S-D Editing Tools">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 These functions provide everything you need for professional source-destination editing in REAPER. For a more complete editing, mixing and mastering solution for classical and other acoustic music, please see https://reaclassical.org\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0pre0902" author="chmaha" time="2025-02-09T18:11:25Z">
-        <changelog><![CDATA[Initial release of just the editing functions from ReaClassical]]></changelog>
-        <source main="main" file="RCEditing_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Add%20Destination%20IN%20marker.lua</source>
-        <source main="main" file="RCEditing_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Add%20Destination%20OUT%20Marker.lua</source>
-        <source main="main" file="RCEditing_Add Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Add%20Source%20IN%20marker.lua</source>
-        <source main="main" file="RCEditing_Add Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Add%20Source%20OUT%20marker.lua</source>
-        <source main="main" file="RCEditing_Delete All S-D markers.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Delete%20All%20S-D%20markers.lua</source>
-        <source main="main" file="RCEditing_Prepare Takes.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Prepare%20Takes.lua</source>
-        <source main="main" file="RCEditing_S-D Edit.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_S-D%20Edit.lua</source>
-        <source main="main" file="RCEditing_Delete Leaving Silence.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Delete%20Leaving%20Silence.lua</source>
-        <source main="main" file="RCEditing_Delete With Ripple.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Delete%20With%20Ripple.lua</source>
-        <source main="main" file="RCEditing_Insert with timestretching.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Insert%20with%20timestretching.lua</source>
-        <source main="main" file="RCEditing_Preferences.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Preferences.lua</source>
-        <source main="main" file="RCEditing_Move to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Move%20to%20Destination%20IN%20marker.lua</source>
-        <source main="main" file="RCEditing_Move to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Move%20to%20Destination%20OUT%20marker.lua</source>
-        <source main="main" file="RCEditing_Move to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Move%20to%20Source%20IN%20marker.lua</source>
-        <source main="main" file="RCEditing_Move to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Move%20to%20Source%20OUT%20marker.lua</source>
-        <source main="main" file="RCEditing_Zoom to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Zoom%20to%20Destination%20IN%20marker.lua</source>
-        <source main="main" file="RCEditing_Zoom to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Zoom%20to%20Destination%20OUT%20marker.lua</source>
-        <source main="main" file="RCEditing_Zoom to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Zoom%20to%20Source%20IN%20marker.lua</source>
-        <source main="main" file="RCEditing_Zoom to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Zoom%20to%20Source%20OUT%20marker.lua</source>
-        <source main="main" file="RCEditing_3-point Insert Edit.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_3-point%20Insert%20Edit.lua</source>
-        <source main="main" file="RCEditing_Set Dest Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Set%20Dest%20Project%20Marker.lua</source>
-        <source main="main" file="RCEditing_Set Source Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Set%20Source%20Project%20Marker.lua</source>
-        <source main="main" file="RCEditing_Source Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Source%20Markers%20to%20Item%20Edge.lua</source>
-        <source main="main" file="RCEditing_Destination Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Destination%20Markers%20to%20Item%20Edge.lua</source>
-        <source main="main" file="RCEditing_Delete S-D Project Markers.lua">https://github.com/chmaha/ReaClassical/raw/cd5d0e80e6315b803a5d5bbcad9852d9e837f7c7/RCEditing/RCEditing_Delete%20S-D%20Project%20Markers.lua</source>
-      </version>
-    </reapack>
-  </category>
+<index version="1" name="chmaha Scripts" commit="0a7e19cf728550c6a444481c9a76e8c2faf5a9ee">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -272,6 +231,47 @@ Add ReaClassical project check to most functions]]></changelog>
         <source file="ReaClassical-kb.ini">https://github.com/chmaha/ReaClassical/raw/69b0358cb92aecd6184318a50032990aa2e6eb76/ReaClassical/ReaClassical-kb.ini</source>
         <source file="audio_calculator.html">https://github.com/chmaha/ReaClassical/raw/69b0358cb92aecd6184318a50032990aa2e6eb76/audio_calculator.html</source>
         <source file="reaclassical_logo.png">https://github.com/chmaha/ReaClassical/raw/69b0358cb92aecd6184318a50032990aa2e6eb76/docs/images/reaclassical_os.png</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="ReaSplice">
+    <reapack name="ReaSplice.lua" type="script" desc="ReaSplice S-D Editing Tools">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These functions provide everything you need for professional source-destination editing in REAPER. For a more complete editing, mixing and mastering solution for classical and other acoustic music, please see https://reaclassical.org\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0pre1002" author="chmaha" time="2025-02-10T15:40:56Z">
+        <changelog><![CDATA[Initial release of just the S-D editing functions from ReaClassical]]></changelog>
+        <source main="main" file="ReaSplice_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Add%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaSplice_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Add%20Destination%20OUT%20Marker.lua</source>
+        <source main="main" file="ReaSplice_Add Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Add%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaSplice_Add Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Add%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaSplice_Delete All S-D markers.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Delete%20All%20S-D%20markers.lua</source>
+        <source main="main" file="ReaSplice_Prepare Takes.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Prepare%20Takes.lua</source>
+        <source main="main" file="ReaSplice_S-D Edit.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_S-D%20Edit.lua</source>
+        <source main="main" file="ReaSplice_Delete Leaving Silence.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Delete%20Leaving%20Silence.lua</source>
+        <source main="main" file="ReaSplice_Delete With Ripple.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Delete%20With%20Ripple.lua</source>
+        <source main="main" file="ReaSplice_Insert with timestretching.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Insert%20with%20timestretching.lua</source>
+        <source main="main" file="ReaSplice_Preferences.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Preferences.lua</source>
+        <source main="main" file="ReaSplice_Move to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Move%20to%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaSplice_Move to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Move%20to%20Destination%20OUT%20marker.lua</source>
+        <source main="main" file="ReaSplice_Move to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Move%20to%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaSplice_Move to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Move%20to%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaSplice_Zoom to Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Zoom%20to%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaSplice_Zoom to Destination OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Zoom%20to%20Destination%20OUT%20marker.lua</source>
+        <source main="main" file="ReaSplice_Zoom to Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Zoom%20to%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaSplice_Zoom to Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Zoom%20to%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaSplice_3-point Insert Edit.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_3-point%20Insert%20Edit.lua</source>
+        <source main="main" file="ReaSplice_Set Dest Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Set%20Dest%20Project%20Marker.lua</source>
+        <source main="main" file="ReaSplice_Set Source Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Set%20Source%20Project%20Marker.lua</source>
+        <source main="main" file="ReaSplice_Source Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Source%20Markers%20to%20Item%20Edge.lua</source>
+        <source main="main" file="ReaSplice_Destination Markers to Item Edge.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Destination%20Markers%20to%20Item%20Edge.lua</source>
+        <source main="main" file="ReaSplice_Delete S-D Project Markers.lua">https://github.com/chmaha/ReaClassical/raw/0a7e19cf728550c6a444481c9a76e8c2faf5a9ee/ReaSplice/ReaSplice_Delete%20S-D%20Project%20Markers.lua</source>
       </version>
     </reapack>
   </category>
