@@ -1,5 +1,3 @@
-*.lyx~
-*.lyx#
 *.sh
 release_plan
 PDF-Manual/*

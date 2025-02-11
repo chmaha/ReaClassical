@@ -1,0 +1,70 @@
+\documentclass[british]{article}
+\usepackage{tgheros}
+\usepackage{tgcursor}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+\usepackage{graphicx}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\usepackage[]
+ {hyperref}
+
+\makeatletter
+\setlength{\parskip}{\medskipamount}
+\setlength{\parindent}{0pt}
+
+\AtBeginDocument{
+  \def\labelitemi{\(\ast\)}
+}
+
+\makeatother
+
+\begin{document}
+\title{\includegraphics[width=1\linewidth]{PDF-Manual/user_guide_images/reaclassical_os}}
+\author{\textbf{25.x series}}
+\date{Release Notes}
+\maketitle
+
+\paragraph*{Ongoing Changelog: \protect\href{https://github.com/chmaha/ReaClassical/commits/main/}{https://github.com/chmaha/ReaClassical/commits/main/}}
+
+\paragraph*{Instructions for a new portable install:}
+\begin{enumerate}
+\item Run the latest portable install as per the \href{https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md}{installation guide}
+(it will create a new ReaClassical folder with a short year + quarter
+suffix e.g. \textquotedbl ReaClassical\_25\textquotedbl ). Double-click
+on the REAPER binary inside the folder!
+\item Follow the update instructions below to get the latest and greatest
+ReaClassical functions, toolbar and keymap.
+\end{enumerate}
+
+\paragraph*{Instructions to update a ReaClassical portable install:}
+\begin{enumerate}
+\item Run the ReaClassical\_Updater function found in the actions dialog
+(or use the shortcut shift+U). This will sync ReaPack to get the latest
+ReaClassical functions then offer to overwrite your toolbars and keymaps
+with the latest ReaClassical portable install defaults. \textbf{DON'T
+answer yes to either of these questions if you have your own custom
+toolbars or keyboard shortcuts as they will be overwritten! }
+\item Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested
+version of REAPER as noted \href{https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt}{here}.
+\end{enumerate}
+
+\paragraph{Basic Manual Install Inside Your Existing REAPER Install:}
+\begin{enumerate}
+\item Install both ReaPack (\href{https://reapack.com/}{https://reapack.com/})
+and latest bleeding edge SWS Extensions (\href{https://www.sws-extension.org/download/pre-release/}{https://www.sws-extension.org/download/pre-release/})
+if you haven't already. 
+\item Import my repository into ReaPack by copying and pasting \href{https://github.com/chmaha/ReaClassical/raw/main/index.xml}{this link}.
+If you need help with importing see \href{https://reapack.com/user-guide\#import-repositories}{https://reapack.com/user-guide\#import-repositories}. 
+\item Search for \textquotedbl ReaClassical\textquotedbl{} and install
+the main ReaClassical package and any jsfx plugins (my \textquotedbl RCPlugs\textquotedbl{}
+are highly recommended for classical work). 
+\item Use the ReaClassical project template for relevant projects (you can
+set this as default in the REAPER preferences) and change to the ReaClassical
+theme (Options > Themes). 
+\item Set up keyboard shortcuts in the actions list (? shortcut) as desired.
+\end{enumerate}
+
+\end{document}
