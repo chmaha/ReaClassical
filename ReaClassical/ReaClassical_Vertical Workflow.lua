@@ -766,7 +766,7 @@ function create_track_table(is_empty)
             if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", k, 1) end
         elseif trackname_check(track, "^M:") or mixer_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
-            local mod_name = string.match(name, "M?:?(.*)")
+            local mod_name = string.match(name, "^M:(.*)") or name
             GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, 1)
             table.insert(mixer_tracks, track)
         elseif trackname_check(track, "^@") or aux_state == "y" then
