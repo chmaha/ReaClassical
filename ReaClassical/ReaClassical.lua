@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.9
+@version 25.2.10
 @changelog
-  Enable item grouping toolbar option when running various common functions
-  Use ripple mode appropriate to workflow thereby maintaining relative source marker positions
-  Add ReaClassical project check to most functions
+  Fix mixer labeling issue when user removes M: and synchronizes via F7 or F8
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
