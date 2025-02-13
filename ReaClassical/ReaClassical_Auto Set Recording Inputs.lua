@@ -64,11 +64,12 @@ function main()
     local mixer_table = create_mixer_table()
 
     local no_input_tracks = {}
-    local previous_inputs = {}
+    local previous_settings = {}
     while track_index < #mixer_table do
         local track = GetTrack(0, track_index)
         local current_input = GetMediaTrackInfo_Value(track, "I_RECINPUT")
-        previous_inputs[track_index + 1] = current_input
+        local current_pan = GetMediaTrackInfo_Value(mixer_table[track_index + 1], "D_PAN")
+        previous_settings[track_index + 1] = { input = current_input, pan = current_pan }
         track_index = track_index + 1
     end
 
@@ -91,9 +92,9 @@ function main()
 
         local input_track = GetTrack(0, track_index - 1)
 
-        set_pan(mixer_track, mixer_trackname)
 
         if input_channel < MAX_INPUTS then
+            set_pan(mixer_track, mixer_trackname)
             local new_input_channel = assign_input(input_track, is_pair, input_channel)
             if new_input_channel then
                 input_channel = new_input_channel
@@ -137,10 +138,16 @@ function main()
 
     if user_response == 7 then
         -- Revert to previous inputs
-        for i, track in ipairs(previous_inputs) do
-            local revert_track = GetTrack(0, i - 1)
-            SetMediaTrackInfo_Value(revert_track, "I_RECINPUT", track)
-            SetMediaTrackInfo_Value(track, "D_PAN", 0)
+        for i, settings in ipairs(previous_settings) do
+            local regular_track = GetTrack(0, i - 1) -- Regular track for input
+            local mixer_track = mixer_table[i]       -- Mixer track for panning
+
+            if regular_track then
+                SetMediaTrackInfo_Value(regular_track, "I_RECINPUT", settings.input) -- Restore input
+            end
+            if mixer_track then
+                SetMediaTrackInfo_Value(mixer_track, "D_PAN", settings.pan) -- Restore pan
+            end
         end
     end
 end
