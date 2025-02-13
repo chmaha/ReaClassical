@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.10
+@version 25.2.11
 @changelog
-  Fix mixer labeling issue when user removes M: and synchronizes via F7 or F8
+  Auto-set rec input: Add panning based on track name
+  Fade Editor: Enforce item grouping when starting function
+  Fade Editor: Only lock lower track items if starting before left item of xfade
+  Classical Crossfade: Add overlap and first track checks
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
