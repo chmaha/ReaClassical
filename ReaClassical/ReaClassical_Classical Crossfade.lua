@@ -36,7 +36,7 @@ function main()
     end
     local correct_cursor_position = is_cursor_between_items()
     if not correct_cursor_position then
-        MB("Ensure the parent items on track 1 overlap and that your cursor " ..
+        MB("Ensure the parent items on track 1 overlap and that the edit cursor " ..
             "is positioned somewhere within the overlap.",
             "Classical Crossfade", 0)
         return
