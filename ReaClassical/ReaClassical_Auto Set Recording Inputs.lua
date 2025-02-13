@@ -22,7 +22,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, trim_prefix, assign_input, create_mixer_table
+local main, trim_prefix, assign_input, create_mixer_table, set_pan
 
 local pair_words = {
     "2ch", "pair", "paire", "paar", "coppia", "par", "пара", "对", "ペア",
@@ -31,6 +31,16 @@ local pair_words = {
     "stereo", "stéréo", "estéreo", "立体声", "ステレオ", "스테레오",
     "ستيريو", "στερεοφωνικός", "סטריאו", "stereotipas", "स्टीरियो",
     "สเตอริโอ", "âm thanh nổi"
+}
+
+local left_words = {
+    "l", "left", "gauche", "sinistra", "izquierda", "esquerda", "ліворуч", "слева", "vlevo", "balra", "vänster",
+    "vasakule", "venstre", "vänstra", "levý", "левый", "lijevo", "stânga", "sol", "kushoto", "ซ้าย", "बाएँ", "बायां"
+}
+
+local right_words = {
+    "r", "right", "droite", "destra", "derecha", "direita", "праворуч", "справа", "vpravo", "jobbra", "höger",
+    "paremale", "høyre", "högra", "pravý", "правый", "desno", "dreapta", "sağ", "kulia", "ขวา", "दाएँ", "दायां"
 }
 
 ---------------------------------------------------------------------
@@ -81,6 +91,8 @@ function main()
 
         local input_track = GetTrack(0, track_index - 1)
 
+        set_pan(mixer_track, mixer_trackname)
+        
         if input_channel < MAX_INPUTS then
             local new_input_channel = assign_input(input_track, is_pair, input_channel)
             if new_input_channel then
@@ -128,6 +140,7 @@ function main()
         for i, track in ipairs(previous_inputs) do
             local revert_track = GetTrack(0, i - 1)
             SetMediaTrackInfo_Value(revert_track, "I_RECINPUT", track)
+            SetMediaTrackInfo_Value(track, "D_PAN", 0)
         end
     end
 end
@@ -171,6 +184,24 @@ function create_mixer_table()
         end
     end
     return mixer_tracks
+end
+
+---------------------------------------------------------------------
+
+function set_pan(track, name)
+    local lower_name = name:lower()
+    for _, word in ipairs(left_words) do
+        if lower_name:match("%s" .. word .. "$") then
+            SetMediaTrackInfo_Value(track, "D_PAN", -1.0) -- 100% Left
+            return
+        end
+    end
+    for _, word in ipairs(right_words) do
+        if lower_name:match("%s" .. word .. "$") then
+            SetMediaTrackInfo_Value(track, "D_PAN", 1.0) -- 100% Right
+            return
+        end
+    end
 end
 
 ---------------------------------------------------------------------
