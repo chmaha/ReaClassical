@@ -148,7 +148,7 @@ end
 
 function is_cursor_between_items()
     local track = GetTrack(0, 0)
-    if not track then return false end
+    if not track or IsTrackSelected(track) == false then return false end
 
     local item_count = CountTrackMediaItems(track)
     if item_count < 2 then return false end
