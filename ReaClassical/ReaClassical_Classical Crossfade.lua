@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, return_xfade_length
+local main, return_xfade_length, is_cursor_between_items
 
 ---------------------------------------------------------------------
 
@@ -32,6 +32,13 @@ function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
+    local correct_cursor_position = is_cursor_between_items()
+    if not correct_cursor_position then
+        MB("Ensure the parent items on track 1 overlap and that your cursor " ..
+            "is positioned somewhere within the overlap.",
+            "Classical Crossfade", 0)
         return
     end
     local xfade_len = return_xfade_length()
@@ -135,6 +142,40 @@ function return_xfade_length()
         if table[1] then xfade_len = table[1] / 1000 end
     end
     return xfade_len
+end
+
+---------------------------------------------------------------------
+
+function is_cursor_between_items()
+    local track = GetTrack(0, 0)
+    if not track then return false end
+
+    local item_count = CountTrackMediaItems(track)
+    if item_count < 2 then return false end
+
+    local cursor_pos = GetCursorPosition()
+    local left_item, right_item = nil, nil
+
+    -- Find the left item
+    for i = 0, item_count - 1 do
+        local item = GetTrackMediaItem(track, i)
+        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+
+        if item_start <= cursor_pos and cursor_pos < item_end then
+            left_item = item
+            right_item = GetTrackMediaItem(track, i + 1) -- Get the next item if it exists
+            break
+        end
+    end
+
+    if not left_item or not right_item then return false end
+
+    local left_item_end = GetMediaItemInfo_Value(left_item, "D_POSITION") +
+        GetMediaItemInfo_Value(left_item, "D_LENGTH")
+    local right_item_start = GetMediaItemInfo_Value(right_item, "D_POSITION")
+
+    return cursor_pos >= right_item_start and cursor_pos <= left_item_end
 end
 
 ---------------------------------------------------------------------
