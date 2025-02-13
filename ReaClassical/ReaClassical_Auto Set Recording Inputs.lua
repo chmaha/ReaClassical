@@ -92,7 +92,7 @@ function main()
         local input_track = GetTrack(0, track_index - 1)
 
         set_pan(mixer_track, mixer_trackname)
-        
+
         if input_channel < MAX_INPUTS then
             local new_input_channel = assign_input(input_track, is_pair, input_channel)
             if new_input_channel then
