@@ -134,6 +134,8 @@ function lock_previous_items(item)
         end
     end
 
+    local parent_item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+
     -- Check items in lower tracks
     for t = 1, tracks_per_group - 1 do
         local track = GetTrack(0, t)
@@ -143,11 +145,12 @@ function lock_previous_items(item)
             for i = 0, lower_item_count - 1 do
                 local track_item = GetTrackMediaItem(track, i)
                 if track_item then
+                    local track_item_start = GetMediaItemInfo_Value(track_item, "D_POSITION")
                     local track_item_group_id = GetMediaItemInfo_Value(track_item, "I_GROUPID")
 
                     -- Check for Group ID match
                     for _, group_id in ipairs(locked_group_ids) do
-                        if track_item_group_id == group_id then
+                        if track_item_group_id == group_id and (track_item_start < parent_item_start - 0.00001) then
                             SetMediaItemInfo_Value(track_item, "C_LOCK", 1)
                             break
                         end
@@ -167,7 +170,6 @@ function fadeStart(item1)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     local item1_length = GetMediaItemInfo_Value(item1, "D_LENGTH")
     local item1_right_edge = item1_start + item1_length
-    lock_previous_items(item1)
     SetProjExtState(0, "ReaClassical", "FirstItemPos", item1_start)
     local item1_take = GetActiveTake(item1)
     local item1_take_offset = GetMediaItemTakeInfo_Value(item1_take, "D_STARTOFFS")
@@ -177,6 +179,7 @@ function fadeStart(item1)
     save_color("1", item1)
     local colors = get_color_table()
     paint(item1, colors.xfade_red)
+    -- group_parent_and_children()
     Main_OnCommand(40311, 0) -- Set ripple editing all tracks
     lock_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -197,7 +200,9 @@ function fadeStart(item1)
     if item2 then
         save_color("2", item2)
         paint(item2, colors.xfade_green)
+        -- group_parent_and_children()
     end
+    lock_previous_items(item1)
     SetMediaItemSelected(item1, false)
 end
 
