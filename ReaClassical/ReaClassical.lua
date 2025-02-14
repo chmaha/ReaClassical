@@ -1,11 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.11
+@version 25.2.12
 @changelog
-  Auto-set rec input: Add panning based on track name
-  Fade Editor: Enforce item grouping when starting function
-  Fade Editor: Only lock lower track items if starting before left item of xfade
-  Classical Crossfade: Add overlap and first track checks
+  F7/F8 sync: Move edit cursor to first previously selected track
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
