@@ -173,7 +173,6 @@ function main()
             rearrange_tracks(table, current_order)
             reset_mixer_order(mixer_tracks)
         end
-
         route_tracks(rcmaster, table, end_of_sources)
         media_razor_group()
         reset_spacers(tracks_per_group, rcmaster_index)
@@ -267,6 +266,7 @@ function main()
 
     if num_pre_selected > 0 then
         Main_OnCommand(40297, 0) --unselect_all
+        SetOnlyTrackSelected(pre_selected[1])
         for _, track in ipairs(pre_selected) do
             if pcall(IsTrackSelected, track) then SetTrackSelected(track, 1) end
         end
