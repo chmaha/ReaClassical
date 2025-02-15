@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.12
+@version 25.2.13
 @changelog
-  F7/F8 sync: Move edit cursor to first previously selected track
+  Auto set recording inputs: add German words
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
