@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.13
+@version 25.2.14
 @changelog
-  Auto set recording inputs: add German words
+  Do not solo first group when creating a project or when rec-arming via F9
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
