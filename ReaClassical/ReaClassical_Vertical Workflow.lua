@@ -341,7 +341,7 @@ function solo()
 
 
         if IsTrackSelected(track) == true then
-            SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+            -- SetMediaTrackInfo_Value(track, "I_SOLO", 2)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
         elseif not (special_states or special_names)
             and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then

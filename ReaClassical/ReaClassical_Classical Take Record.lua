@@ -190,7 +190,7 @@ function solo()
     if not track then
         return false
     end
-    SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+    -- SetMediaTrackInfo_Value(track, "I_SOLO", 2)
 
     for i = 0, CountTracks(0) - 1, 1 do
         track = GetTrack(0, i)

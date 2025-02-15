@@ -226,13 +226,13 @@ end
 ---------------------------------------------------------------------
 
 function solo()
-    local track = GetSelectedTrack(0, 0)
-    if track then
-        SetMediaTrackInfo_Value(track, "I_SOLO", 2)
-    end
+    -- local track = GetSelectedTrack(0, 0)
+    -- if track then
+    --     SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+    -- end
 
     for i = 0, CountTracks(0) - 1, 1 do
-        track = GetTrack(0, i)
+        local track = GetTrack(0, i)
         if IsTrackSelected(track) == false then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
         end
