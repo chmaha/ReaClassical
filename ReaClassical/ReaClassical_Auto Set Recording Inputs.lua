@@ -30,17 +30,19 @@ local pair_words = {
     "pár", "pāris", "pora", "jozi", "जोड़ी", "คู่", "pasang", "cặp",
     "stereo", "stéréo", "estéreo", "立体声", "ステレオ", "스테레오",
     "ستيريو", "στερεοφωνικός", "סטריאו", "stereotipas", "स्टीरियो",
-    "สเตอริโอ", "âm thanh nổi"
+    "สเตอริโอ", "âm thanh nổi", "paarig", "doppel", "duo"
 }
 
 local left_words = {
     "l", "left", "gauche", "sinistra", "izquierda", "esquerda", "ліворуч", "слева", "vlevo", "balra", "vänster",
-    "vasakule", "venstre", "vänstra", "levý", "левый", "lijevo", "stânga", "sol", "kushoto", "ซ้าย", "बाएँ", "बायां"
+    "vasakule", "venstre", "vänstra", "levý", "левый", "lijevo", "stânga", "sol", "kushoto", "ซ้าย", "बाएँ", "बायां",
+    "links", "linke"
 }
 
 local right_words = {
     "r", "right", "droite", "destra", "derecha", "direita", "праворуч", "справа", "vpravo", "jobbra", "höger",
-    "paremale", "høyre", "högra", "pravý", "правый", "desno", "dreapta", "sağ", "kulia", "ขวา", "दाएँ", "दायां"
+    "paremale", "høyre", "högra", "pravý", "правый", "desno", "dreapta", "sağ", "kulia", "ขวา", "दाएँ", "दायां",
+    "rechts", "rechte"
 }
 
 ---------------------------------------------------------------------
