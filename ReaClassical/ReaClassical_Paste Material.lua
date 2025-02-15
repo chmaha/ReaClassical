@@ -35,10 +35,15 @@ end
 
 function main()
     Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local initial_track_count = CountTracks(0)
     Main_OnCommand(42398, 0) -- paste items/tracks
     local final_track_count = CountTracks(0)
-    if check_hidden_track_items() then
+    if check_hidden_track_items(final_track_count) then
         ShowMessageBox("Warning: Items have been pasted on hidden tracks! " ..
             "You definitely want to undo this operation...", "ReaClassical Paste", 0)
         return
@@ -60,8 +65,7 @@ end
 
 ---------------------------------------------------------------------
 
-function check_hidden_track_items()
-    local track_count = CountTracks(0)
+function check_hidden_track_items(track_count)
 
     for i = 0, track_count - 1 do
         local track = GetTrack(0, i)
