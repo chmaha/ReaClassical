@@ -47,8 +47,6 @@ function main()
     end
     local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, 0)
-    SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)
-    SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
     local num_of_project_items = CountMediaItems(0)
     if num_of_project_items == 0 then
         MB("Please add your takes before running...", "Prepare Takes", 0)
@@ -117,16 +115,11 @@ function main()
         vertical(colors)
     end
 
-    local _, prev_start_time = GetProjExtState(0, "ReaClassical", "arrangestarttime")
-    local _, prev_end_time = GetProjExtState(0, "ReaClassical", "arrangeendtime")
-    GetSet_ArrangeView2(0, true, 0, 0, prev_start_time, prev_end_time)
+    GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     SetEditCurPos(cur_pos, 0, 0)
 
     local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(scroll_up, 0)
-
-    SetProjExtState(0, "ReaClassical", "arrangestarttime", "")
-    SetProjExtState(0, "ReaClassical", "arrangeendtime", "")
 
     if empty then
         MB(
