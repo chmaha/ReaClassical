@@ -1,6 +1,6 @@
 @description ReaSplice S-D Editing Tools
 @author chmaha
-@version 1.0pre1002
+@version 1.0pre1502
 @changelog
   Initial release of just the S-D editing functions from ReaClassical
 @metapackage
