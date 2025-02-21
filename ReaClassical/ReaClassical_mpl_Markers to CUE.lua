@@ -82,7 +82,7 @@ function main()
             production_year)
     end
     MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
-        "Create the DPP fileset, matching audio for the generated CUE,\n" ..
+        "Create the DDP fileset, matching audio for the generated CUE,\n" ..
         "and/or individual files via the ReaClassical 'All Settings' presets\nin the Render dialog.\n\n" ..
         "The album reports and CUE file have been written to:\n" .. path, "Create CD Markers", 0)
 end
