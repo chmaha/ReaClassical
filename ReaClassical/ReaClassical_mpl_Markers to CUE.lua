@@ -135,18 +135,8 @@ function get_data(filename)
             table.insert(ddp_metadata_table, value)
         end
 
-        if metadata_saved ~= "" then
-            local saved_metadata_table = {}
-            for value in metadata_saved:gmatch("[^,]+") do
-                table.insert(saved_metadata_table, value)
-            end
-
-            user_inputs = ddp_metadata_table[4] .. ',' .. year .. ',' .. ddp_metadata_table[2] ..
-                ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.' .. extension:lower()
-        else
-            user_inputs = ddp_metadata_table[4] .. ',' .. year .. ',' .. ddp_metadata_table[2] ..
-                ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.' .. extension:lower()
-        end
+        user_inputs = ddp_metadata_table[4] .. ',' .. year .. ',' .. ddp_metadata_table[2] ..
+            ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.' .. extension:lower()
     else
         if metadata_saved ~= "" then
             ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
