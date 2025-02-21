@@ -29,17 +29,18 @@ local create_mixer_table, check_channel_count
 
 function main()
     Undo_BeginBlock()
-    
+
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow ~= "" then
         MB("Please use this function in a vanilla REAPER project.\n" ..
-        "You can either import your media on one regular track for horizontal editing " ..
+            "You can either import your media on one regular track for horizontal editing " ..
             "or on multiple regular tracks for a vertical workflow.\n" ..
-            "The function will automatically create the required folder group(s) and convert the project for use in ReaClassical."
-        , "ReaClassical Error", 0)
+            "The function will automatically create the required folder group(s) " ..
+            "and convert the project for use in ReaClassical."
+            , "ReaClassical Error", 0)
         return
     end
-   
+
     local folders = folder_check()
     local num_of_items = CountMediaItems(0)
 
