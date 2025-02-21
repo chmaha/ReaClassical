@@ -24,7 +24,8 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 
-local default_values = '35,200,3,7,0,500,0,0,0.75'
+local year = os.date("%Y")
+local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade length (ms)',
@@ -35,7 +36,9 @@ local labels = {
     'S-D Marker Check (ms)',
     'REF = Overdub Guide',
     'Add S-D Markers at Mouse Hover',
-    'Alt Audition Playback Rate'
+    'Alt Audition Playback Rate',
+    'Year of Production',
+    'CUE audio format'
 }
 
 ---------------------------------------------------------------------
@@ -90,7 +93,7 @@ function load_prefs()
     elseif #saved_entries > NUM_OF_ENTRIES then
         local j = 1
         for entry in default_values:gmatch("([^,]+)") do
-                saved_entries[j] = entry
+            saved_entries[j] = entry
             j = j + 1
         end
     end
@@ -112,27 +115,36 @@ function pref_check(input)
     local pass = true
     local table = {}
     local invalid_msg = ""
-    for entry in input:gmatch('([^,]*)') do
-        table[#table + 1] = entry
-        if entry == "" or tonumber(entry) == nil or tonumber(entry) < 0 then
+    local i = 0
+    for entry in input:gmatch("([^,]*)") do
+        i = i + 1
+        table[i] = entry
+        if entry == "" or (i ~= 11 and (tonumber(entry) == nil or tonumber(entry) < 0)) then
             pass = false
             invalid_msg = "Entries should not be strings or left empty."
         end
     end
 
     local binary_error_msg = ""
-    -- separate check for binary options
+    local ext_error_msg = ""
+
     if #table == NUM_OF_ENTRIES then
         local num_5 = tonumber(table[5])
         local num_7 = tonumber(table[7])
         local num_8 = tonumber(table[8])
+        local audio_format = tostring(table[11])
         if (num_5 and num_5 > 1) or (num_7 and num_7 > 1) or (num_8 and num_8 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
+        local valid_formats = { WAV = true, FLAC = true, MP3 = true, AIFF = true }
+        if not valid_formats[audio_format] then
+            ext_error_msg = "CUE audio format should be set to WAV, FLAC, AIFF or MP3."
+            pass = false
+        end
     end
 
-    local error_msg = binary_error_msg .. invalid_msg
+    local error_msg = binary_error_msg .. invalid_msg .. ext_error_msg
 
     if not pass then
         MB(error_msg, "Error", 0)

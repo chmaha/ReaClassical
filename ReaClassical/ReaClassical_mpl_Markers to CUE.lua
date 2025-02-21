@@ -3,6 +3,10 @@
 
 mpl Generate CUE from project markers
 
+chmaha 25.2.16 changelog:
+  Take year and CUE audio format from F5 preferences
+  Avoid input dialog where possible
+
 chmaha 04.04.23 changelog:
   Remove dependency on mpl_Various_functions.lua
   CUE format correction: Use "WAV" for WavPack, FLAC etc (still allowing for MP3 and AIFF as alternative formats).
@@ -63,7 +67,7 @@ function main()
     if not ret1 then return end
     local ret2, filename = create_filename()
     if not ret2 then return end
-    local ret3, fields, extension = get_data(filename)
+    local ret3, fields, extension, production_year = get_data(filename)
     if not ret3 then return end
     local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
     local path, slash, cue_file = save_file(fields, string)
@@ -72,8 +76,10 @@ function main()
     local HTMLOutputPath = path .. slash .. 'album_report.html'
     local albumTitle, albumPerformer, tracks = parse_cue_file(cue_file, album_length, num_of_markers)
     if albumTitle and albumPerformer and #tracks > 0 then
-        create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number)
-        create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number)
+        create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number,
+            production_year)
+        create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number,
+            production_year)
     end
     MB(
         "Album reports have been generated in the root project folder.\nCUE file written to \"" .. cue_file .. "\"",
@@ -106,13 +112,24 @@ end
 ----------------------------------------------------------
 
 function get_data(filename)
-    local this_year = os.date("%Y")
-
     local _, ddp_metadata = GetProjExtState(0, "ReaClassical", "AlbumMetadata")
     local _, metadata_saved = GetProjExtState(0, "ReaClassical", "CUEMetadata")
 
     local ret, user_inputs
+
+    local year = tonumber(os.date("%Y"))
+    local extension = "wav"
+
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[10] then year = tonumber(table[10]) end
+        if table[11] then extension = tostring(table[11]) end
+    end
+
     if ddp_metadata ~= "" then
+        ret = true
         local ddp_metadata_table = {}
         for value in ddp_metadata:gmatch("[^,]+") do
             table.insert(ddp_metadata_table, value)
@@ -124,18 +141,11 @@ function get_data(filename)
                 table.insert(saved_metadata_table, value)
             end
 
-            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
-                'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-                ddp_metadata_table[4] ..
-                ',' ..
-                saved_metadata_table[2] ..
-                ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. saved_metadata_table[5])
+            user_inputs = ddp_metadata_table[4] .. ',' .. year .. ',' .. ddp_metadata_table[2] ..
+                ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.' .. extension:lower()
         else
-            ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
-                'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-                ddp_metadata_table[4] ..
-                ',' ..
-                this_year .. ',' .. ddp_metadata_table[2] .. ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.wav')
+            user_inputs = ddp_metadata_table[4] .. ',' .. year .. ',' .. ddp_metadata_table[2] ..
+                ',' .. ddp_metadata_table[1] .. ',' .. filename .. '.' .. extension:lower()
         end
     else
         if metadata_saved ~= "" then
@@ -145,7 +155,7 @@ function get_data(filename)
         else
             ret, user_inputs = GetUserInputs('Add Metadata for CUE file', 5,
                 'Genre,Year,Performer,Album Title,File name (with ext),extrawidth=100',
-                'Classical,' .. this_year .. ',Performer,My Classical Album,' .. filename .. '.wav')
+                'Classical,' .. year .. ',Performer,My Classical Album,' .. filename .. '.' .. extension:lower())
         end
     end
 
@@ -157,13 +167,9 @@ function get_data(filename)
         MB('Sorry. Empty fields not supported.', "Create CUE file", 0)
         return false
     end
-    local extension = fields[5]:match('%.([a-zA-Z0-9]+)$')
-    if not extension then
-        MB('Please enter filename with an extension', "Create CUE file", 0)
-        return false
-    end
+
     save_metadata(user_inputs)
-    return true, fields, extension:upper()
+    return true, fields, extension:upper(), year
 end
 
 ----------------------------------------------------------
@@ -370,7 +376,8 @@ end
 
 -----------------------------------------------------------------
 
-function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, albumLength, catalog_number)
+function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, albumLength, catalog_number,
+                                 production_year)
     local file = io.open(txtOutputPath, "w")
 
     if not file then
@@ -384,6 +391,7 @@ function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPa
     local formattedDate = string.format("%d/%02d/%d %d:%02d%s", date.day, date.month, date.year, hour, date.min, ampm)
     file:write("Generated by ReaClassical (" .. formattedDate .. ")\n\n")
     file:write("Album: ", (albumTitle or "") .. "\n")
+    file:write("Year: ", (production_year or "") .. "\n")
     file:write("Album Performer: ", (albumPerformer or "") .. "\n")
 
     if catalog_number ~= "" then
@@ -417,7 +425,8 @@ end
 
 -----------------------------------------------------------------
 
-function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, albumLength, catalog_number)
+function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, albumLength, catalog_number,
+                            production_year)
     local file = io.open(htmlOutputPath, "w")
 
     if not file then
@@ -430,6 +439,7 @@ function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, 
         "<link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'>\n")
     file:write("<style>\n")
     file:write("  .greenlabel {\n    color: #a0c96d;\n  }\n")
+    file:write("  .redlabel {\n    color: #ff6961;\n  }\n")
     file:write("  .bluelabel {\n    color: #6fb8df;\n  }\n")
     file:write("  .greylabel {\n    color: #757575;\n  }\n")
     file:write("body {\n")
@@ -455,6 +465,7 @@ function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, 
     file:write("<div class='container'>\n")
     file:write("  <h3><span class='greylabel'>Generated by ReaClassical (" .. formattedDate .. ")</span></h2>\n\n")
     file:write("  <h2><span class='greenlabel'>Album:</span> ", (albumTitle or ""), "</h3>\n")
+    file:write("  <h2><span class='redlabel'>Year:</span> ", (production_year or ""), "</h3>\n")
     file:write("  <h2><span class='bluelabel'>Album Performer:</span> ", (albumPerformer or ""), "</h3>\n")
 
     if catalog_number ~= "" then

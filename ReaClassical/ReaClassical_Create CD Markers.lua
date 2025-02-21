@@ -28,6 +28,7 @@ local frame_check, save_metadata, save_codes, add_codes, delete_markers
 local empty_items_check, return_custom_length, start_check
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone, add_roomtone_fadeout
+local check_saved_state
 
 local minimum_points = 15
 local points = {}
@@ -47,6 +48,10 @@ function main()
     MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
     return
   end
+
+  local not_saved = check_saved_state()
+  if not_saved then return end
+
   local first_track = GetTrack(0, 0)
   local num_of_items = 0
   if first_track then num_of_items = CountTrackMediaItems(first_track) end
@@ -59,38 +64,37 @@ function main()
     MB("Error: Empty items found on first track. Delete them to continue.", "Create CD Markers", 0)
     return
   end
-  local choice = MB(
-    "WARNING: This will delete all existing markers, regions and item take markers. " ..
-    "Track titles will be pulled from item take names. Continue?", "Create CD/DDP markers", 4)
-  if choice == 6 then
-    local _, ddp_run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
-    local use_existing = false
-    if ddp_run ~= "" then
-      local saved_values_response = MB("Would you like to use the existing saved values?", "Create CD Markers", 4)
-      if saved_values_response == 6 then
-        use_existing = true
-      end
+
+  local _, ddp_run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
+  local use_existing = false
+  if ddp_run ~= "" then
+    local saved_values_response = MB("Would you like to use the existing saved values?", "Create CD Markers", 4)
+    if saved_values_response == 6 then
+      use_existing = true
     end
-    SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
-    local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(first_track,
-      num_of_items, use_existing)
-    if redbook_track_length_errors == -1 then return end
-    if redbook_track_length_errors > 0 then
-      MB(
-        'This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.',
-        "Warning", 0)
-    end
-    if redbook_total_tracks_error == true then
-      MB('This album does not meet the Red Book standard as it contains more than 99 tracks.',
-        "Warning", 0)
-    end
-    if redbook_project_length > 79.57 then
-      MB('This album does not meet the Red Book standard as it is longer than 79.57 minutes.',
-        "Warning", 0)
-    end
-    room_tone(redbook_project_length * 60)
-    renumber_markers()
   end
+  SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
+  local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(first_track,
+    num_of_items, use_existing)
+  if redbook_track_length_errors == -1 then return end
+  if redbook_track_length_errors > 0 then
+    MB(
+      'This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.',
+      "Warning", 0)
+  end
+  if redbook_total_tracks_error == true then
+    MB('This album does not meet the Red Book standard as it contains more than 99 tracks.',
+      "Warning", 0)
+  end
+  if redbook_project_length > 79.57 then
+    MB('This album does not meet the Red Book standard as it is longer than 79.57 minutes.',
+      "Warning", 0)
+  end
+  room_tone(redbook_project_length * 60)
+  renumber_markers()
+  local create_cue = NamedCommandLookup("_RSa012bb075440de1ce27f06b6e12b88877848ca5b")
+  Main_OnCommand(create_cue, 0)
+
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
 
@@ -792,6 +796,13 @@ function add_roomtone_fadeout(rt_track, project_length)
   end
 
   Envelope_SortPoints(rt_vol)
+end
+
+---------------------------------------------------------------------
+
+function check_saved_state()
+  local full_project_name = GetProjectName(0)
+  return full_project_name == ""
 end
 
 ---------------------------------------------------------------------
