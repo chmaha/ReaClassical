@@ -81,9 +81,10 @@ function main()
         create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number,
             production_year)
     end
-    MB(
-        "Album reports have been generated in the root project folder.\nCUE file written to \"" .. cue_file .. "\"",
-        "Create CD Markers", 0)
+    MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
+        "Create the DPP fileset, matching audio for the generated CUE,\n" ..
+        "and/or individual files via the ReaClassical 'All Settings' presets\nin the Render dialog.\n\n" ..
+        "The album reports and CUE file have been written to:\n" .. path, "Create CD Markers", 0)
 end
 
 ----------------------------------------------------------
