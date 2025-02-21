@@ -29,11 +29,17 @@ local create_mixer_table, check_channel_count
 
 function main()
     Undo_BeginBlock()
+    
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    if workflow ~= "" then
+        MB("Please use this function in a vanilla REAPER project.\n" ..
+        "You can either import your media on one regular track for horizontal editing " ..
+            "or on multiple regular tracks for a vertical workflow.\n" ..
+            "The function will automatically create the required folder group(s) and convert the project for use in ReaClassical."
+        , "ReaClassical Error", 0)
         return
     end
+   
     local folders = folder_check()
     local num_of_items = CountMediaItems(0)
 
@@ -167,7 +173,7 @@ function main()
     show_track_name_dialog(mixer_tracks)
 
     local response = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
-        "Horizontal Workflow", 4)
+        "Explode Multi-Channel", 4)
     if response == 6 then
         local add_special_tracks = NamedCommandLookup("_RS9c0fa5c1aae86bf8559df83dd6516c0aa35e264f")
         Main_OnCommand(add_special_tracks, 0)
