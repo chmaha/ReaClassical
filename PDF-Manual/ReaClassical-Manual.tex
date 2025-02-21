@@ -429,11 +429,11 @@ King
 recommend \emph{Mastering Audio: The Art and the Science} by Bob Katz. 
 \end{itemize}
 
-\subsection{ReaClassical Preferences}
+\subsection{ReaClassical Project Preferences}
 
-Pressing \keys{F5} brings up the ReaClassical Preferences dialog. The first line
-sets the crossfade length in milliseconds for all source-destination editing.
-The next three lines are for
+Pressing \keys{F5} brings up the ReaClassical Project Preferences dialog. The
+first line sets the crossfade length in milliseconds for all source-destination
+editing. The next three lines are for
 \href{https://en.wikipedia.org/wiki/Disc_Description_Protocol}{DDP} creation.
 The defaults are for a 200ms track offset (to account for older CD players that
 couldn't play audio immediately after a track search), the INDEX0 length in
@@ -463,7 +463,7 @@ that these preferences are set per project.
 \begin{centering}
 \includegraphics[scale=0.5]{\string"user_guide_images/RC Prefs\string".png}
 \par\end{centering}
-\caption{ReaClassical Preferences}
+\caption{ReaClassical Project Preferences}
 \end{figure}
 
 
@@ -570,12 +570,12 @@ you wish!) as part of the name. Otherwise, it will be treated as a mono input.
 For example, `ORTF Pair', `Violin Spot 2ch', and `Omni Outrigger Stereo' will
 all be treated as needing a stereo input. If you add `left',`l', `right` or `r'
 (again, in your own language if you wish!), the channel will be auto-panned
-accordingly. For example, `Decca Tree L' will create a mono signal panned 100\% left
-(note that the `L' has a necessary space preceding it and that it is also the
-final part of the name). The function uses the maximum available hardware inputs
-after which it disables recording input. You will see a report of assignments
-with the option to revert to previous settings. You can run this as a standalone
-function at any time via \keys{\ctrl+F9}.
+accordingly. For example, `Decca Tree L' will create a mono signal panned 100\%
+left (note that the `L' has a necessary space preceding it and that it is also
+the final part of the name). The function uses the maximum available hardware
+inputs after which it disables recording input. You will see a report of
+assignments with the option to revert to previous settings. You can run this as
+a standalone function at any time via \keys{\ctrl+F9}.
 
 Also, as part of the initial workflow setup, you are asked if you'd like to add
 any special tracks (aux, submix, roomtone, reference). This is useful if you are
@@ -740,14 +740,15 @@ To record additional material after the fact (say a separate narration track or
 an organ part in a church after the main recording session in a concert hall),
 edit the orchestral material as usual and use a mixdown as a guide track in a
 new project (or new project tab). To achieve this, use a vertical workflow via
-\keys{F8}, add a REF track \keys{'} and set the ReaClassical Preferences option
-`REF = Overdub Guide' to `1' (\keys{F5}). With this setting, audio on the guide
-track will be audible during take recording and auditioning of folders. Use
-Classical Take Recording \keys{F9} and Take Counter window \keys{\ctrl+\enter}
-as normal. You can then S-D edit and mix the overdub material to fit with the
-orchestral mixdown or, if further mixing and mastering work is required on the
-original multi-track material, bring the organ part into that project as a new
-track in the destination folder \keys{\shift+T} (see below).
+\keys{F8}, add a REF track \keys{'} and set the ReaClassical Project Preferences
+option `REF = Overdub Guide' to `1' (\keys{F5}). With this setting, audio on the
+guide track will be audible during take recording and auditioning of folders.
+Use Classical Take Recording \keys{F9} and Take Counter window
+\keys{\ctrl+\enter} as normal. You can then S-D edit and mix the overdub
+material to fit with the orchestral mixdown or, if further mixing and mastering
+work is required on the original multi-track material, bring the organ part into
+that project as a new track in the destination folder \keys{\shift+T} (see
+below).
 
 \subsection{Manipulating Tracks During a Recording Session}
 
@@ -1085,8 +1086,8 @@ grouping), it is really easy to see which takes compose your final edited
 tracks. It's worth pointing out that my S/D and classical crossfade functions
 place the crossfade immediately before the entry and exit points of the pasted
 audio. The crossfade length and other values can be set on a per-project basis
-via ReaClassical Preferences (\keys{F5}). In practice this means that if you
-visually set a marker (or edit cursor in the case of the classical crossfade
+via ReaClassical Project Preferences (\keys{F5}). In practice this means that if
+you visually set a marker (or edit cursor in the case of the classical crossfade
 function) immediately before a transient, said transient will sound
 post-crossfade which is what we generally desire. Often, given this important
 detail, I don't even need to visit the crossfade editor view.
@@ -1285,7 +1286,7 @@ that exit the crossfade. The ability to visually align transients and then
 position the crossfade just before it is absolutely critical (and fun when you
 have the tools to do it!). So, beyond the standard REAPER crossfade editor what
 have I provided? Select the right-hand item of a fade (or hover over the item if
-`Add S-D Markers at Mouse Hover' is set to 1 in ReaClassical Preferences
+`Add S-D Markers at Mouse Hover' is set to 1 in ReaClassical Project Preferences
 \keys{F5}), press \keys{F} and you are moved into crossfade editor mode. Here,
 the first track is given full vertical zoom, the two-lanes for overlapping items
 is enabled, colored red and green, and the fade editor toolbox appears (I
@@ -1557,9 +1558,10 @@ tracks should be named.
 
 The rest of the metadata is then added via the Create CD Markers function
 \keys{Y}. You can add UPC/EAN and ISRC numbers as desired followed by album
-title, performer, composer and genre. The Markers to CUE function \keys{C} will
-take as much information as it can from the saved DDP metadata but the user is
-free to change as desired.
+title, performer, composer and genre. On later runs of the function, you can
+choose to automatically re-use existing values which can save even more time
+when making last-minute S-D edits, altering album spacing, switching album track
+order, or renaming a CD track start.
 
 \begin{figure}
 \begin{centering}
@@ -1601,9 +1603,12 @@ For more information read the description of the DDP function in appendix A.
 
 \subsection{Creating CUE Files}
 
-A CUE file can be generated via \keys{C} (no need create a time selection). The
-high-resolution audio portion can be generated separately in the render dialog
-via the preset. 
+A CUE file is automatically generated as part of the Create CD Markers function
+(\keys{Y}). You can change the production year of the project as well as the CUE
+audio format in ReaClassical Project Preferences. The high-resolution audio
+portion can be generated separately in the render dialog via the preset. The
+naming defaults to that set by the CUE file which is the project filename
+followed by the audio extension set via \keys{F5}.
 
 \subsection{BIN+CUE set}
 
@@ -1614,7 +1619,7 @@ track 1).
 
 \subsection{Album Reports}
 
-When using the \keys{C} shortcut, ReaClassical also generates both a plain text
+When using the \keys{Y} shortcut, ReaClassical also generates both a plain text
 and HTML album report in the project folder including details such as pre-gaps,
 track title, start time, track length, UPC/EAN and ISRC (if present), total
 running time etc. This is a fantastic and automatic way to send information to
@@ -1656,9 +1661,10 @@ built-in REAPER standard triangular dither.
 Now that r8brain free has been introduced as the best quality resampler
 available in REAPER (I highly recommend double-checking that it is selected when
 resampling at render time) I feel I can do everything, including DDP creation,
-without leaving my favorite DAW. However, the Marker to CUE function \keys{C} is
-still useful for all sorts of things and I often create FLAC + CUE for album
-playback in my media player or WAV + CUE to easily burn a CD at home.
+without leaving my favorite DAW. However, generating a CUE file via the Create
+CD Markers function is still useful for all sorts of things and I often create
+FLAC + CUE for album playback in my media player or WAV + CUE to easily burn a
+CD at home.
 
 \subsection{Dither}
 
@@ -1988,8 +1994,8 @@ select a single mixer track and press the shortcut.
 \textbf{Prepare Takes }\keys{T}
 
 \emph{Description:} Intelligently prepares recorded or imported takes for
-source-destination editing. Coloring scheme is set in ReaClassical Preferences
-\keys{F5} .
+source-destination editing. Coloring scheme is set in ReaClassical Project
+Preferences \keys{F5} .
 
 \emph{Notes: }With a single folder group (or individual tracks), the shortcut
 will auto-color and group takes from left to right. With a vertical workflow
@@ -2004,13 +2010,13 @@ recording or importing of media but as of 24.5.3 should work at any point during
 editing (for example to import a patch recording). In this case, the destination
 group items will switch to using alternating colors so that you can easily see
 where your edits are on the timeline. And, as of 24.8.5, the function uses the
-`Prepare Takes: Random colors' value from ReaClassical Preferences to use either
-the new color scheme (default, set to 0) or the old random color method (set to
-1). A reminder that the new REAPER native grouping (when set up via Horizontal
-or Vertical Workflow functions) works for 99\% of situations without Prepare
-Takes but for takes that don't start or end at quite the same point it is a
-must. Prepare Takes honors any custom colors set via the Colorize function
-\keys{K}.
+`Prepare Takes: Random colors' value from ReaClassical Project Preferences to
+use either the new color scheme (default, set to 0) or the old random color
+method (set to 1). A reminder that the new REAPER native grouping (when set up
+via Horizontal or Vertical Workflow functions) works for 99\% of situations
+without Prepare Takes but for takes that don't start or end at quite the same
+point it is a must. Prepare Takes honors any custom colors set via the Colorize
+function \keys{K}.
 
 \textbf{Duplicate Folder (no items) }\keys{\textbackslash}
 
@@ -2269,10 +2275,10 @@ finessing of S-D edits.
 
 \emph{Notes: }To enter the crossfade view, select the right-hand item of a
 crossfaded item pair (or hover over the item if `Add S-D Markers at Mouse Hover'
-is set to 1 in ReaClassical Preferences \keys{F5}). The user is then presented
-with a zoomed-in view of the edit. Red is always the left item, green the right.
-For safety reasons, all items in the first folder before the left red item are
-locked to avoid inadvertently messing with an existing fade. Further,
+is set to 1 in ReaClassical Project Preferences \keys{F5}). The user is then
+presented with a zoomed-in view of the edit. Red is always the left item, green
+the right. For safety reasons, all items in the first folder before the left red
+item are locked to avoid inadvertently messing with an existing fade. Further,
 ReaClassical uses a feature similar to `Classical Mode' in Sequoia's fade
 editor. Essentially, the user is free to move the left item but on running
 Classical Crossfade \keys{X} or exiting using \keys{F} (after, for example,
@@ -2393,11 +2399,12 @@ take names only to destination parent items that are to become CD track starts.
 
 \textbf{Create CD Markers }\keys{Y}
 
-\emph{Description: }Auto-generation of CD/DDP markers, UPC/ISRC codes, and room
-tone automation, for efficient DDP, bin/cue and individual file exporting.
-Checks against Redbook standards and returns warning messages if there are 1)
-more than 99 tracks, or 2) There are tracks shorter than 4 seconds, or 3) the
-total length of the project is greater than 79.57 minutes.
+\emph{Description: }Auto-generation of CD/DDP markers, UPC/ISRC codes, CUE file,
+album reports, and room tone automation, for efficient DDP, bin/cue and
+individual file exporting. Checks against Redbook standards and returns warning
+messages if there are 1) more than 99 tracks, or 2) There are tracks shorter
+than 4 seconds, or 3) the total length of the project is greater than 79.57
+minutes.
 
 \emph{Notes: }This might be the biggest time-saving function in the ReaClassical
 system. It works as follows: 1) Edit gaps between items until you are happy 2)
@@ -2417,14 +2424,14 @@ markers, regions are also generated for easy exporting of individual tracks. If
 you need a countdown into a track, simply add a ! at the start of the take name
 (e.g. `!Allegro'). Then after running the function adjust the position as
 desired (it defaults to 3 seconds in length but this can easily be set in
-ReaClassical Preferences). It is worth repeating at this point that you should
-only give names to items that are track starts. If you skip an item, the
+ReaClassical Project Preferences). It is worth repeating at this point that you
+should only give names to items that are track starts. If you skip an item, the
 function rightly assumes it is part of the previous track. Note that the markers
 snap to exact CD frames and if the media item start is in between CD frames, the
 function will always place the marker on the earlier of the two. By default, the
 function uses a 200ms offset for placement of the markers (as in, markers appear
 200ms to the left of the media item start) but, again, this value can be set via
-ReaClassical Preferences.
+ReaClassical Project Preferences.
 
 If a room tone track exists in the project, the function will also generate
 volume automation to create perfect crossfades with the items on the first
@@ -2432,6 +2439,10 @@ destination track. Slicing and dicing room tone audio to fill in digital silence
 is now a thing of the past. Simply add a long recorded or convolution-generated
 room tone audio item before running the function. The ReaClassical way of
 dealing with room tone is non-destructive and instant! 
+
+In addition, the function automatically generates a CUE file and album reports
+in both HTML and plain text formats. The year and audio format used by the CUE
+can be set via ReaClassical Project Preferences \keys{F5}.
 
 I feel that once you try this CD/DDP marker generation workflow, it is difficult
 to ever go back to other ways of working. The key thing to think about is that
@@ -2447,23 +2458,6 @@ curves.
 Hopefully you agree that this way of working with CD/DDP layout is a
 game-changer, a real time-saver and simply a better way of thinking about this
 portion of the mastering process.
-
-\textbf{Markers to CUE }\keys{C}
-
-\emph{Description: }Once you have used the \emph{Create CD Markers }function, it
-is now extremely easy to generate a CUE file and album reports using partly
-auto-generated metadata.
-
-\emph{Notes: }The genre defaults to classical, the year listed is the current
-year and the filename is based on the project name. Simply fill in the remaining
-details and press OK. Depending on the extension you choose, the CUE file will
-add the correct format to the accordingly. The CUE file (matching the given
-filename) is generated in the root of the project path along with an album
-report suitable for including when sending off to a CD factory or client. Any
-data entered is stored and recalled the next time you use the function. Before
-or after using the function, generate a whole project render in WAV, MP3, AIFF
-or FLAC using the included render preset. Then drag the CUE file into the same
-folder.
 
 \textbf{Lock Toggle (deprecated)}
 
@@ -2593,14 +2587,13 @@ envelope points)
 \item [{\keys{L}}] Marker List (SWS) 
 \item [{\keys{;}}] Regions from items (SWS) 
 \item [{\keys{:}}] Region from selection 
-\item [{\keys{/}}] Selection to item(s)
-\item [{\keys{C}}] Generate CUE file and album reports from project CD markers 
+\item [{\keys{/}}] Selection to item(s) 
 \item [{\keys{R}}] Render 
 \end{lyxlist}
 \textbf{Miscellaneous }
 \begin{lyxlist}{00.00.0000}
-\item [{\keys{F5}}] ReaClassical Preferences (set crossfade length, CD track
-offset, INDEX0 pre-gap length, Album lead-out time)
+\item [{\keys{F5}}] ReaClassical Project Preferences (set crossfade length, CD
+track offset, INDEX0 pre-gap length, Album lead-out time)
 \item [{\keys{F6}}] Open/Close ReaClassical custom toolbar
 \item [{\keys{H}}] Open ReaClassical help system (currently the PDF manual)
 \item [{\keys{\shift+H}}] Open ReaClassical audio calculator
