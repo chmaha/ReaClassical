@@ -31,7 +31,7 @@ local create_single_mixer, route_tracks, create_track_table
 local process_name, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 local rearrange_tracks, reset_mixer_order, copy_track_names_from_dest
-local process_dest
+local process_dest, check_hidden_track_items
 
 ---------------------------------------------------------------------
 
@@ -176,6 +176,12 @@ function main()
     end
 
     PreventUIRefresh(-1)
+
+    if check_hidden_track_items(num_of_tracks) then
+        ShowMessageBox("Warning: Items have been pasted or recorded on hidden tracks! " ..
+            "Open the Track Manager via the View menu, enable the hidden tracks on TCP then delete any items",
+            "Horizontal Workflow", 0)
+    end
 
     if num_pre_selected > 0 then
         Main_OnCommand(40297, 0) --unselect_all
@@ -924,6 +930,28 @@ function process_dest(track)
     if mod_name == nil then mod_name = name end
     -- GetSetMediaTrackInfo_String(track, "P_NAME", mod_name, 1)
     return mod_name
+end
+
+---------------------------------------------------------------------
+
+function check_hidden_track_items(track_count)
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+            local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+            local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+            local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+
+            if mixer_state ~= "" or aux_state ~= "" or submix_state ~= "" or rcmaster_state ~= "" then
+                local item_count = CountTrackMediaItems(track)
+                if item_count > 0 then
+                    return true
+                end
+            end
+        end
+    end
+    return false
 end
 
 ---------------------------------------------------------------------

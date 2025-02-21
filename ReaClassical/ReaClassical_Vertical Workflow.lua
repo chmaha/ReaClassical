@@ -32,12 +32,14 @@ local process_name, reset_spacers, sync, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 local check_mixer_order, rearrange_tracks, reset_mixer_order
 local copy_track_names_from_dest, process_dest, move_items_to_first_source_group
+local check_hidden_track_items
 
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    MB('Please install SWS/S&M extension before running this function'
+    , 'Error: Missing Extension', 0)
     return
 end
 
@@ -263,6 +265,12 @@ function main()
     end
 
     PreventUIRefresh(-1)
+
+    if check_hidden_track_items(num_of_tracks) then
+        ShowMessageBox("Warning: Items have been pasted or recorded on hidden tracks! " ..
+            "Open the Track Manager via the View menu, enable the hidden tracks on TCP then delete any items",
+            "Horizontal Workflow", 0)
+    end
 
     if num_pre_selected > 0 then
         Main_OnCommand(40297, 0) --unselect_all
@@ -1162,6 +1170,28 @@ function move_items_to_first_source_group(tracks_per_group)
             end
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function check_hidden_track_items(track_count)
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+            local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+            local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+            local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+
+            if mixer_state ~= "" or aux_state ~= "" or submix_state ~= "" or rcmaster_state ~= "" then
+                local item_count = CountTrackMediaItems(track)
+                if item_count > 0 then
+                    return true
+                end
+            end
+        end
+    end
+    return false
 end
 
 ---------------------------------------------------------------------
