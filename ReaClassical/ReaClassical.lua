@@ -1,8 +1,16 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.14
+@version 25.2.15
 @changelog
-  Do not solo first group when creating a project or when rec-arming via F9
+  NEW: Copy/Move Destination Material to Source
+  Auto Set Rec Inputs: Add panning info to results page
+  Prepare Takes: Remove empty check and associated messages
+  Prepare Takes: Remove unnecessary use of projextstate
+  F7/F8 Sync: Add hidden items check
+  Create CD Markers: Allow to re-use existing values
+  Explode Multi-Channel: Restrict usage for vanilla REAPER projects only
+  PDF Manual: Add auto-panning based on name info
+  PDF Manual: Remove muted guide track info
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -75,6 +83,8 @@
   [main] ReaClassical_Remove Ranking.lua
   [main] ReaClassical_Add Special Tracks.lua
   [main] ReaClassical_Delete S-D Project Markers.lua
+  [main] ReaClassical_Copy Destination Material to Source.lua
+  [main] ReaClassical_Move Destination Material to Source.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
