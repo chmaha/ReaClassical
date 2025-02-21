@@ -96,13 +96,13 @@ function main()
 
 
         if input_channel < MAX_INPUTS then
-            set_pan(mixer_track, mixer_trackname)
+            local pan_setting = set_pan(mixer_track, mixer_trackname)
             local new_input_channel = assign_input(input_track, is_pair, input_channel)
             if new_input_channel then
                 input_channel = new_input_channel
                 local channel_info = is_pair and string.format("%d/%d", input_channel - 1, input_channel) or
                     string.format("%d", input_channel)
-                local channel_type = is_pair and "(stereo)" or "(mono)"
+                local channel_type = is_pair and "(stereo)" or "(mono -- " .. pan_setting .. ")"
 
                 assignments[#assignments + 1] = string.format("%s: %s %s", channel_info, mixer_trackname, channel_type)
             end
@@ -202,15 +202,16 @@ function set_pan(track, name)
     for _, word in ipairs(left_words) do
         if lower_name:match("%s" .. word .. "$") then
             SetMediaTrackInfo_Value(track, "D_PAN", -1.0) -- 100% Left
-            return
+            return "100%L"
         end
     end
     for _, word in ipairs(right_words) do
         if lower_name:match("%s" .. word .. "$") then
             SetMediaTrackInfo_Value(track, "D_PAN", 1.0) -- 100% Right
-            return
+            return "100%R"
         end
     end
+    return "center"
 end
 
 ---------------------------------------------------------------------
