@@ -83,7 +83,7 @@ function main()
     end
     MB(
         "Album reports have been generated in the root project folder.\nCUE file written to \"" .. cue_file .. "\"",
-        "Create CUE file", 0)
+        "Create CD Markers", 0)
 end
 
 ----------------------------------------------------------
