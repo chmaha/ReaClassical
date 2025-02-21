@@ -44,8 +44,8 @@ function main()
   Undo_BeginBlock()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-      return
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    return
   end
   local first_track = GetTrack(0, 0)
   local num_of_items = 0
@@ -63,9 +63,17 @@ function main()
     "WARNING: This will delete all existing markers, regions and item take markers. " ..
     "Track titles will be pulled from item take names. Continue?", "Create CD/DDP markers", 4)
   if choice == 6 then
+    local _, ddp_run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
+    local use_existing = false
+    if ddp_run ~= "" then
+      local saved_values_response = MB("Would you like to use the existing saved values?", "Create CD Markers", 4)
+      if saved_values_response == 6 then
+        use_existing = true
+      end
+    end
     SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
     local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(first_track,
-      num_of_items)
+      num_of_items, use_existing)
     if redbook_track_length_errors == -1 then return end
     if redbook_track_length_errors > 0 then
       MB(
@@ -88,40 +96,43 @@ end
 
 ---------------------------------------------------------------------
 
-function get_info()
+function get_info(use_existing)
   local _, metadata_saved = GetProjExtState(0, "ReaClassical", "AlbumMetadata")
-  local ret, user_inputs, metadata_table
-  repeat
-    if metadata_saved ~= "" then
-      ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
-        'Album Title,Performer,Composer,Genre,extrawidth=100',
-        metadata_saved)
-    else
-      ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
-        'Album Title,Performer,Composer,Genre,extrawidth=100',
-        'My Classical Album,Performer,Composer,Classical')
-    end
-    metadata_table = {}
-    for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
-    if #metadata_table ~= 4 and ret then
-      MB("Please complete all four metadata entries", "Add Album Metadata", 0)
-    end
-  until not ret or (#metadata_table == 4)
-
+  local ret, user_inputs
+  local metadata_table = {}
+  if use_existing and metadata_saved ~= "" then
+    for entry in metadata_saved:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
+  else
+    repeat
+      if metadata_saved ~= "" then
+        ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
+          'Album Title,Performer,Composer,Genre,extrawidth=100',
+          metadata_saved)
+      else
+        ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
+          'Album Title,Performer,Composer,Genre,extrawidth=100',
+          'My Classical Album,Performer,Composer,Classical')
+      end
+      for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
+      if #metadata_table ~= 4 and ret then
+        MB("Please complete all four metadata entries", "Add Album Metadata", 0)
+      end
+    until not ret or (#metadata_table == 4)
+  end
   return user_inputs, metadata_table
 end
 
 ---------------------------------------------------------------------
 
-function cd_markers(first_track, num_of_items)
+function cd_markers(first_track, num_of_items, use_existing)
   delete_markers()
 
   SNM_SetIntConfigVar('projfrbase', 75)
   Main_OnCommand(40754, 0) --enable snap to grid
 
-  local upc_ret, isrc_ret, upc_input, isrc_input, code_table = add_codes()
-  if upc_ret then save_codes("UPC", upc_input) end
-  if isrc_ret then save_codes("ISRC", isrc_input) end
+  local upc_ret, isrc_ret, upc_input, isrc_input, code_table = add_codes(use_existing)
+  if upc_ret and not use_existing then save_codes("UPC", upc_input) end
+  if isrc_ret and not use_existing then save_codes("ISRC", isrc_input) end
   local pregap_len, offset, postgap = return_custom_length()
 
   start_check(first_track, offset) -- move items to right if not enough room for first offset
@@ -166,8 +177,8 @@ function cd_markers(first_track, num_of_items)
     marker_count)
   local redbook_project_length
   if marker_count ~= 0 then
-    local user_inputs, metadata_table = get_info()
-    if #metadata_table == 4 then save_metadata(user_inputs) end
+    local user_inputs, metadata_table = get_info(use_existing)
+    if #metadata_table == 4 and not use_existing then save_metadata(user_inputs) end
     add_pregap(first_track)
     redbook_project_length = end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
   end
@@ -304,7 +315,7 @@ end
 
 ---------------------------------------------------------------------
 
-function add_codes()
+function add_codes(use_existing)
   local _, upc_saved = GetProjExtState(0, "ReaClassical", "UPC")
   local _, isrc_saved = GetProjExtState(0, "ReaClassical", "ISRC")
   local upc_ret
@@ -312,83 +323,90 @@ function add_codes()
   local upc_input = ""
   local isrc_input = ""
   local code_table = { "", "", "", "", "" }
-  code_table[1] = upc_saved
-  local i = 2
-  for entry in isrc_saved:gmatch('([^,]+)') do
-    code_table[i] = entry
-    i = i + 1
-  end
 
-  local codes_response1 = MB("Add UPC or EAN?", "CD codes", 4)
-  if codes_response1 == 6 then
-    repeat
-      if upc_saved ~= "" then
-        upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
-          'UPC or EAN,extrawidth=100', upc_saved)
-      else
-        upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
-          'UPC or EAN,extrawidth=100', '')
-      end
-
-      if not upc_input:match('^%d+$') or (#upc_input ~= 12 and #upc_input ~= 13) then
-        MB('UPC = 12-digit number; EAN = 13-digit number.', "Invalid UPC", 0)
-      end
-    until ((upc_input:match('^%d+$') and (#upc_input == 12 or #upc_input == 13))) or not upc_ret
-
-    if upc_ret then code_table[1] = upc_input end
-  end
-
-
-  local codes_response2 = MB("Add ISRC?", "CD codes", 4)
-  if codes_response2 == 6 then
-    repeat
-      if isrc_saved ~= "" then
-        isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
-          'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-          'ISRC Designation Code,extrawidth=100', isrc_saved)
-      else
-        isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
-          'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-          'ISRC Designation Code,extrawidth=100', '')
-      end
-
-      local isrc_entries = {}
-      for entry in isrc_input:gmatch('([^,]+)') do
-        isrc_entries[#isrc_entries + 1] = entry
-      end
-
-      if #isrc_entries == 4 then
-        local country_code = isrc_entries[1]
-        local registrant_code = isrc_entries[2]
-        local year = isrc_entries[3]
-        local designation_code = isrc_entries[4]
-
-        if not country_code:match('^[A-Z][A-Z]$') then
-          MB('ISRC Country Code must be 2 uppercase letters.', "Invalid ISRC", 0)
-        elseif not registrant_code:match('^[A-Z0-9][A-Z0-9][A-Z0-9]$') then
-          MB('ISRC Registrant Code must be 3 alphanumeric characters.', "Invalid ISRC", 0)
-        elseif not year:match('^%d%d$') then
-          MB('ISRC Year must be 2 digits.', "Invalid ISRC", 0)
-        elseif not (designation_code:match("^(%d+)$") and #designation_code <= 5) then
-          MB('ISRC Designation Code must be up to 5 digits.', "Invalid ISRC", 0)
+  if use_existing and upc_saved ~= "" then
+    code_table[1] = upc_saved
+    upc_ret = true
+  else
+    local codes_response1 = MB("Add UPC or EAN?", "CD codes", 4)
+    if codes_response1 == 6 then
+      repeat
+        if upc_saved ~= "" then
+          upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
+            'UPC or EAN,extrawidth=100', upc_saved)
         else
-          break
+          upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
+            'UPC or EAN,extrawidth=100', '')
         end
-      else
-        MB('You must provide all 4 ISRC components.', "Invalid ISRC", 0)
-      end
-      isrc_input = ""
-    until not isrc_ret
 
-    local j = 2
-    if isrc_ret then
-      for entry in isrc_input:gmatch('([^,]+)') do
-        code_table[j] = entry
-        j = j + 1
+        if not upc_input:match('^%d+$') or (#upc_input ~= 12 and #upc_input ~= 13) then
+          MB('UPC = 12-digit number; EAN = 13-digit number.', "Invalid UPC", 0)
+        end
+      until ((upc_input:match('^%d+$') and (#upc_input == 12 or #upc_input == 13))) or not upc_ret
+
+      if upc_ret then code_table[1] = upc_input end
+    end
+  end
+
+  if use_existing and isrc_saved ~= "" then
+    isrc_ret = true
+    local i = 2
+    for entry in isrc_saved:gmatch('([^,]+)') do
+      code_table[i] = entry
+      i = i + 1
+    end
+  else
+    local codes_response2 = MB("Add ISRC?", "CD codes", 4)
+    if codes_response2 == 6 then
+      repeat
+        if isrc_saved ~= "" then
+          isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
+            'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
+            'ISRC Designation Code,extrawidth=100', isrc_saved)
+        else
+          isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
+            'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
+            'ISRC Designation Code,extrawidth=100', '')
+        end
+
+        local isrc_entries = {}
+        for entry in isrc_input:gmatch('([^,]+)') do
+          isrc_entries[#isrc_entries + 1] = entry
+        end
+
+        if #isrc_entries == 4 then
+          local country_code = isrc_entries[1]
+          local registrant_code = isrc_entries[2]
+          local year = isrc_entries[3]
+          local designation_code = isrc_entries[4]
+
+          if not country_code:match('^[A-Z][A-Z]$') then
+            MB('ISRC Country Code must be 2 uppercase letters.', "Invalid ISRC", 0)
+          elseif not registrant_code:match('^[A-Z0-9][A-Z0-9][A-Z0-9]$') then
+            MB('ISRC Registrant Code must be 3 alphanumeric characters.', "Invalid ISRC", 0)
+          elseif not year:match('^%d%d$') then
+            MB('ISRC Year must be 2 digits.', "Invalid ISRC", 0)
+          elseif not (designation_code:match("^(%d+)$") and #designation_code <= 5) then
+            MB('ISRC Designation Code must be up to 5 digits.', "Invalid ISRC", 0)
+          else
+            break
+          end
+        else
+          MB('You must provide all 4 ISRC components.', "Invalid ISRC", 0)
+        end
+        isrc_input = ""
+      until not isrc_ret
+
+      local j = 2
+      if isrc_ret then
+        for entry in isrc_input:gmatch('([^,]+)') do
+          code_table[j] = entry
+          j = j + 1
+        end
+      elseif #code_table ~= 5 then
+        MB('Empty code metadata_table not supported: Not adding ISRC codes', "Warning",
+          0)
       end
-    elseif #code_table ~= 5 then
-      MB('Empty code metadata_table not supported: Not ISRC codes', "Warning",
-        0)
     end
   end
   return upc_ret, isrc_ret, upc_input, isrc_input, code_table
@@ -584,9 +602,9 @@ function convert_fades_to_env(item)
   local fade_out_shape = GetMediaItemInfo_Value(item, "C_FADEOUTSHAPE") + 1
   local take = GetActiveTake(item)
   local env = GetTakeEnvelopeByName(take, "Volume")
-  local brENV = BR_EnvAlloc(env,false)
+  local brENV = BR_EnvAlloc(env, false)
   BR_EnvSetProperties(brENV, false, false, false, false, 0, 0, true)
-  BR_EnvFree(brENV,true)
+  BR_EnvFree(brENV, true)
   local fade_in_start = 0
   local fade_out_start = item_length - fade_out_length
 
@@ -737,9 +755,9 @@ function room_tone(project_length)
   Main_OnCommand(40333, 0) -- delete all points
 
   local rt_vol = GetTrackEnvelopeByName(rt_track, "Volume")
-  local brRT = BR_EnvAlloc(rt_vol,false)
+  local brRT = BR_EnvAlloc(rt_vol, false)
   BR_EnvSetProperties(brRT, true, true, true, true, 0, 0, true)
-  BR_EnvFree(brRT,true)
+  BR_EnvFree(brRT, true)
 
   for _, val in pairs(points) do
     InsertEnvelopePoint(rt_vol, val.time, val.value, 0, 1, false, false)
