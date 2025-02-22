@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, duplicate_first_folder, sync_based_on_workflow
 local delete_first_group_items, solo, trackname_check
+local get_path, get_color_table, set_first_folder_items_color
 
 ---------------------------------------------------------------------
 
@@ -44,10 +45,10 @@ function main()
         return
     end
 
+    set_first_folder_items_color()
     local first_track = duplicate_first_folder()
     delete_first_group_items()
     sync_based_on_workflow(workflow)
-    -- prepare_takes()
     SetOnlyTrackSelected(first_track)
     solo()
     Main_OnCommand(40289, 0) -- unselect all items
@@ -184,6 +185,57 @@ end
 function trackname_check(track, string)
     local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, string)
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function set_first_folder_items_color()
+    local colors = get_color_table()
+
+    local track_count = CountTracks(0)
+    if track_count == 0 then return end
+
+    local first_folder = nil
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if folder_depth == 1 then
+            first_folder = track
+            break
+        end
+    end
+
+    if not first_folder then return end
+
+    local track_idx = GetMediaTrackInfo_Value(first_folder, "IP_TRACKNUMBER") - 1
+    for i = track_idx, track_count - 1 do
+        local track = GetTrack(0, i)
+
+        local num_items = CountTrackMediaItems(track)
+        for j = 0, num_items - 1 do
+            local item = GetTrackMediaItem(track, j)
+            SetMediaItemSelected(item, true)
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.edited_material)
+        end
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") < 0 then break end
+    end
 end
 
 ---------------------------------------------------------------------

@@ -23,8 +23,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, duplicate_first_folder, sync_based_on_workflow, prepare_takes
 local shift, vertical_razor, horizontal_group
-local vertical_group, horizontal, vertical
-local empty_items_check, folder_check, trackname_check, solo
+local vertical_group, horizontal, vertical, get_path
+local empty_items_check, folder_check, trackname_check, solo, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -266,8 +266,18 @@ function vertical()
     local start = 2
     Main_OnCommand(next_folder, 0)     -- select next folder
 
-    for _ = start, num_of_folders, 1 do
+    for i = start, num_of_folders, 1 do
         vertical_razor()
+        local colors = get_color_table()
+        if i == start then
+            local selected_items = CountSelectedMediaItems(0)
+            for j = 0, selected_items - 1 do
+                local item = reaper.GetSelectedMediaItem(0, j)
+                if item then
+                    reaper.SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.edited_material)
+                end
+            end
+        end
         local next_group = vertical_group(length, group)
         Main_OnCommand(next_folder, 0) -- select next folder
         group = next_group
@@ -394,6 +404,23 @@ function solo()
             SetMediaTrackInfo_Value(track, "I_SOLO", 1)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
