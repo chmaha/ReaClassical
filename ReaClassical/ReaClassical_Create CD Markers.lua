@@ -50,7 +50,10 @@ function main()
   end
 
   local not_saved = check_saved_state()
-  if not_saved then return end
+  if not_saved then
+    MB("Please save your project before running this function.", "Create CD Markers", 0)
+    return
+  end
 
   local first_track = GetTrack(0, 0)
   local num_of_items = 0
