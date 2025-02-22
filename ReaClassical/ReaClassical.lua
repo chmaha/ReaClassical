@@ -1,13 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.16
+@version 25.2.17
 @changelog
-  Combine Create CD Markers, CUE and album reporting
-  RC Prefs: Add entries for year of production and CUE audio format
-  Create CD Markers: Improve success message
-  Create CD Markers: Ask user to save project before running
-  PDF Manual: Add info combining Create CD Markers, CUE files, and album reporting
-  NOTES: Update Keymap
+  Move/Copy Destination Material to Source: Mute all source groups after operation
+  Move/Copy Destination Material to Source: Color copied/moved dest material Eastern Blue
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
