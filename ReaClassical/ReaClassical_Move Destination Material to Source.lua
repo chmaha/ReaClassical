@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, duplicate_first_folder, sync_based_on_workflow
-local delete_first_group_items
+local delete_first_group_items, solo, trackname_check
 
 ---------------------------------------------------------------------
 
@@ -49,6 +49,7 @@ function main()
     sync_based_on_workflow(workflow)
     -- prepare_takes()
     SetOnlyTrackSelected(first_track)
+    solo()
     Main_OnCommand(40289, 0) -- unselect all items
 
     Undo_EndBlock('Move Destination Material to Source', 0)
@@ -108,6 +109,81 @@ function delete_first_group_items()
             end
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function solo()
+    local selected_track = GetSelectedTrack(0, 0)
+    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+
+    for i = 0, CountTracks(0) - 1, 1 do
+        local track = GetTrack(0, i)
+
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+
+        local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
+            or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"
+        local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
+            or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
+            or trackname_check(track, "^REF")
+
+        if special_states or special_names then
+            local num_of_sends = GetTrackNumSends(track, 0)
+            for j = 0, num_of_sends - 1, 1 do
+                SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
+            end
+        end
+
+
+        if IsTrackSelected(track) == true then
+            -- SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        elseif not (special_states or special_names)
+            and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        elseif not (special_states or special_names) then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        end
+
+        local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
+
+        local states_for_receives = mixer_state == "y" or aux_state == "y"
+            or submix_state == "y" or rcmaster_state == "y"
+        local names_for_receives = trackname_check(track, "^M:") or trackname_check(track, "^@")
+            or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER")
+
+        if (states_for_receives or names_for_receives) and muted == 0 then
+            local receives = GetTrackNumSends(track, -1)
+            for j = 0, receives - 1, 1 do -- loop through receives
+                local origin = GetTrackSendInfo_Value(track, -1, j, "P_SRCTRACK")
+                if origin == selected_track or parent == 1 then
+                    SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                    SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+                    break
+                end
+            end
+        end
+
+        if (trackname_check(track, "^RoomTone") or rt_state == "y") and muted == 0 then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function trackname_check(track, string)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
