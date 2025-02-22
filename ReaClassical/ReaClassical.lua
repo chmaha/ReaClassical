@@ -5,6 +5,7 @@
   Combine Create CD Markers, CUE and album reporting
   RC Prefs: Add entries for year of production and CUE audio format
   Create CD Markers: Improve success message
+  Create CD Markers: Ask user to save project before running
   PDF Manual: Add info combining Create CD Markers, CUE files, and album reporting
   NOTES: Update Keymap
 @metapackage
