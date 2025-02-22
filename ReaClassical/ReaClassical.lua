@@ -1,16 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.15
+@version 25.2.16
 @changelog
-  NEW: Copy/Move Destination Material to Source
-  Auto Set Rec Inputs: Add panning info to results page
-  Prepare Takes: Remove empty check and associated messages
-  Prepare Takes: Remove unnecessary use of projextstate
-  F7/F8 Sync: Add hidden items check
-  Create CD Markers: Allow to re-use existing values
-  Explode Multi-Channel: Restrict usage for vanilla REAPER projects only
-  PDF Manual: Add auto-panning based on name info
-  PDF Manual: Remove muted guide track info
+  Combine Create CD Markers, CUE and album reporting
+  RC Prefs: Add entries for year of production and CUE audio format
+  Create CD Markers: Improve success message
+  PDF Manual: Add info combining Create CD Markers, CUE files, and album reporting
+  NOTES: Update Keymap
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
