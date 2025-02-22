@@ -1,5 +1,5 @@
 ====
-7.29
+7.33
 ====
 
 To update REAPER within a ReaClassical portable install
