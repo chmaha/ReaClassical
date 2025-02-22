@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.17
+@version 25.2.18
 @changelog
-  Move/Copy Destination Material to Source: Mute all source groups after operation
-  Move/Copy Destination Material to Source: Color copied/moved dest material Eastern Blue
+  Add new toolbar icons
+  NOTES: Overwrite custom toolbar when prompted
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -83,6 +83,20 @@
   [theme] ReaClassical Light.ReaperThemeZip
   [theme] ReaClassical WaveColors Dark.ReaperThemeZip
   [theme] ReaClassical WaveColors Light.ReaperThemeZip
+  [data] copy_dest_material.png > toolbar_icons/copy_dest_material.png
+  [data] move_dest_material.png > toolbar_icons/move_dest_material.png
+  [data] delete leaving silence.png > toolbar_icons/delete leaving silence.png
+  [data] Delete SD Markers.png > toolbar_icons/Delete SD Markers.png
+  [data] Delete SD Project Markers.png > toolbar_icons/Delete SD Project Markers.png
+  [data] delete with ripple.png > toolbar_icons/delete with ripple.png
+  [data] Dest IN.png > toolbar_icons/Dest IN.png
+  [data] Dest OUT.png > toolbar_icons/Dest OUT.png
+  [data] Insert with timestretching.png > toolbar_icons/Insert with timestretching.png
+  [data] SD Edit.png > toolbar_icons/SD Edit.png
+  [data] Set_Dest_Proj.png > toolbar_icons/Set_Dest_Proj.png
+  [data] Set_Source_Proj.png > toolbar_icons/Set_Source_Proj.png
+  [data] source IN.png > toolbar_icons/source IN.png
+  [data] source OUT.png > toolbar_icons/source OUT.png
   ReaClassical_Colors_Table.lua > ReaClassical_Colors_Table.lua
   ../PDF-Manual/ReaClassical-Manual.pdf > ReaClassical-Manual.pdf
   reaclassical-splash.png > reaclassical-splash.png
