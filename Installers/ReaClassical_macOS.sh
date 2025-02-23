@@ -109,9 +109,12 @@ echo "Adding ReaClassical splash screen and theme references to reaper.ini"
 sleep 2
 abspath=`pwd $rcfolder`
 
-sed -i'.bak' -e "/^\[REAPER\]/a\\
+# Replace windows keybindings for horizontal and vertical zooming
+sed -i '' 's/KEY 1 223/KEY 0 96/g; s/KEY 9 223/KEY 8 96/g' "${rcfolder}/reaper-kb.ini"
+
+sed -i '' -e "/^\[REAPER\]/a\\
 lastthemefn5=${abspath}\/$rcfolder\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
-sed -i'.bak' -e "/^\[REAPER\]/a\\
+sed -i '' -e "/^\[REAPER\]/a\\
 splashimage=${abspath}\/$rcfolder\/Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-splash.png" $rcfolder/reaper.ini
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2

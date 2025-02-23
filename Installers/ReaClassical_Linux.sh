@@ -99,6 +99,8 @@ unzip -q "$temp_dir/UP_Linux-${arch}.zip" -d "${rcfolder}/UserPlugins/"
 # Get the realpath of $rcfolder
 rcfolder_path=$(realpath "${rcfolder}")
 sleep 2
+# Replace windows keybindings for horizontal and vertical zooming
+sed -i 's/KEY 1 223/KEY 0 96/g; s/KEY 9 223/KEY 8 96/g' "${rcfolder}/reaper-kb.ini"
 # Add the line to reaper.ini under the [REAPER] section
 echo "Adding the ReaClassical theme reference to reaper.ini"
 sed -i "/^\[REAPER\]/a lastthemefn5=${rcfolder_path}/ColorThemes/ReaClassical.ReaperTheme" "${rcfolder}/reaper.ini"
