@@ -105,13 +105,14 @@ echo "Extracting files into $rcfolder folder..."
 sleep 2
 unzip -q "$res_output" -d $rcfolder/
 unzip -q "$up_output" -d $rcfolder/UserPlugins/
-echo "Adding ReaClassical splash screen and theme references to reaper.ini"
+echo "Fixing backtick and Ctrl+backtick references in reaper-kb.ini"
 sleep 2
 abspath=`pwd $rcfolder`
 
 # Replace windows keybindings for horizontal and vertical zooming
 sed -i '' 's/KEY 1 223/KEY 0 96/g; s/KEY 9 223/KEY 8 96/g' "${rcfolder}/reaper-kb.ini"
-
+echo "Adding ReaClassical splash screen and theme references to reaper.ini"
+sleep 2
 sed -i '' -e "/^\[REAPER\]/a\\
 lastthemefn5=${abspath}\/$rcfolder\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
 sed -i '' -e "/^\[REAPER\]/a\\
