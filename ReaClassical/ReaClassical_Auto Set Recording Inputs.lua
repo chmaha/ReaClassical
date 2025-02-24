@@ -59,7 +59,7 @@ function main()
         MB("Set up your ReaClassical project via F7 or F8 first!", "Auto Set Recording Inputs", 0)
         return
     end
-
+    PreventUIRefresh(1)
     local input_channel = 0
     local track_index = 0
 
@@ -133,13 +133,14 @@ function main()
     end
 
     assignment_message = "Number of Hardware Inputs: " .. MAX_INPUTS .. "\n\n" .. assignment_message
-
+    PreventUIRefresh(-1)
     local user_response = MB(
         assignment_message .. "\n\nKeep these settings?\n(Answering \"No\" will revert to previous assignments)",
         "Auto Set Recording Inputs", 4)
 
     if user_response == 7 then
         -- Revert to previous inputs
+        PreventUIRefresh(1)
         for i, settings in ipairs(previous_settings) do
             local regular_track = GetTrack(0, i - 1) -- Regular track for input
             local mixer_track = mixer_table[i]       -- Mixer track for panning
@@ -151,6 +152,7 @@ function main()
                 SetMediaTrackInfo_Value(mixer_track, "D_PAN", settings.pan) -- Restore pan
             end
         end
+        PreventUIRefresh(-1)
     end
 end
 

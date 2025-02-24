@@ -56,7 +56,7 @@ function main()
         MB("Please add at least one folder before running", "Classical Take Record", 0)
         return
     end
-
+    PreventUIRefresh(1)
     local _, rec_wildcards = get_config_var_string("recfile_wildcards")
 
     local first_selected = GetSelectedTrack(0, 0)
@@ -177,6 +177,7 @@ function main()
                 Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
             end
         end
+        PreventUIRefresh(-1)
         Undo_EndBlock('Classical Take Record Stop', 0)
     end
     UpdateArrange()

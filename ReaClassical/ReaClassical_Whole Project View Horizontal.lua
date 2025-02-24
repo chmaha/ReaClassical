@@ -29,10 +29,12 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+    PreventUIRefresh(1)
     SetEditCurPos(0, true, false)
     Main_OnCommand(40296, 0) -- Track: Select all tracks
     Main_OnCommand(40295, 0) -- View: Zoom out project
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+    PreventUIRefresh(-1)
 end
 
 ---------------------------------------------------------------------

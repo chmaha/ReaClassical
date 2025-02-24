@@ -47,18 +47,21 @@ function main()
   local message
   local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
   if mastering ~= "1" then
+    PreventUIRefresh(1)
     local save_view = NamedCommandLookup("_SWS_SAVEVIEW")
     Main_OnCommand(save_view, 0)
     SetProjExtState(0, "ReaClassical", "MasteringModeSet", 1)
     sync_based_on_workflow(workflow)
     local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
     Main_OnCommand(restore_mastering_view, 0)
+    PreventUIRefresh(-1)
     message = "You are now in \"Mastering\" Mode. To leave, press Ctrl+M again.\n" ..
         "Any source groups are hidden and mixer tracks are now shown in the TCP for automation purposes.\n" ..
         "Automation Mode can be engaged and disengaged via the Ctrl+I toggle."
     SetProjExtState(0, "ReaClassical", "MasteringModeSet", "1")
     MB(message, "Mastering Mode", 0)
   else
+    PreventUIRefresh(1)
     SetProjExtState(0, "ReaClassical", "MasteringModeSet", 0)
     SetProjExtState(0, "ReaClassical", "AutomationModeSet", 0)
     Main_OnCommand(40879, 0) -- Global automation override: All automation in latch preview mode
@@ -67,6 +70,7 @@ function main()
     sync_based_on_workflow(workflow)
     local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
     Main_OnCommand(restore_view, 0)
+    PreventUIRefresh(-1)
   end
 end
 

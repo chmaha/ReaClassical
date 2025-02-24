@@ -41,9 +41,10 @@ end
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-      return
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    return
   end
+  PreventUIRefresh(1)
   Main_OnCommand(42022, 0) -- Global automation override: All automation in latch preview mode
   local message
   local _, automation = GetProjExtState(0, "ReaClassical", "AutomationModeSet")
@@ -62,6 +63,7 @@ function main()
       Main_OnCommand(restore_mastering_view, 0) -- Restore only if mastering ~= "1"
     end
 
+    PreventUIRefresh(-1)
     message = "You are now in \"latch preview\" automation mode (\"blue button\" mode)."
         .. "\n1. Set mixer controls (volume, pan, any FX parameters)"
         .. "\n2. Press I to place envelope points at the edit cursor location or inside a time selection if present."

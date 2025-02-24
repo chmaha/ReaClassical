@@ -64,6 +64,7 @@ function main()
   local ret, name = GetUserInputs("Add Track To All Groups", 1, "Track Name:", "")
   if not ret then return end
 
+  PreventUIRefresh(1)
   -- add new track to penultimate position
   for i = 0, num_of_tracks - 1 + folder_count, 1 do
     local track = GetTrack(0, i)
@@ -92,6 +93,7 @@ function main()
     local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
     Main_OnCommand(F7_sync, 0)
   end
+  PreventUIRefresh(-1)
   Undo_EndBlock("Add Track to Folder", -1)
 end
 

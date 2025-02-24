@@ -35,10 +35,12 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+    PreventUIRefresh(1)
     Main_OnCommand(40296, 0) -- Track: Select all tracks
     local zoom = NamedCommandLookup("_SWS_VZOOMFIT")
     Main_OnCommand(zoom, 0)  -- SWS: Vertical zoom to selected tracks
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+    PreventUIRefresh(-1)
 end
 
 ---------------------------------------------------------------------

@@ -63,6 +63,7 @@ function main()
     local ref_num = tonumber(table[4])
     local mixer_connections = tonumber(table[5])
 
+    PreventUIRefresh(1)
     if aux_num > 0 then
         for _ = 1, aux_num do
             Main_OnCommand(add_aux, 0)
@@ -98,7 +99,7 @@ function main()
         -- run F7 or F8 sync
         sync_based_on_workflow(workflow)
     end
-
+    PreventUIRefresh(-1)
     Undo_EndBlock("Add Special Tracks", 0)
 end
 

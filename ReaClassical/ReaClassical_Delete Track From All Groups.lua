@@ -40,6 +40,7 @@ function main()
     return
   end
 
+  PreventUIRefresh(1)
   -- get folder, tracks per group and child count
   local folder_count, tracks_per_group, child_count = evaluate_project()
 
@@ -90,6 +91,7 @@ function main()
     local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
     Main_OnCommand(F7_sync, 0)
   end
+  PreventUIRefresh(-1)
   Undo_EndBlock("Delete Track From All Groups", -1)
 end
 

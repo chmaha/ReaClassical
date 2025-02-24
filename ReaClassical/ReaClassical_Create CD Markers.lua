@@ -93,8 +93,10 @@ function main()
     MB('This album does not meet the Red Book standard as it is longer than 79.57 minutes.',
       "Warning", 0)
   end
+  PreventUIRefresh(1)
   room_tone(redbook_project_length * 60)
   renumber_markers()
+  PreventUIRefresh(-1)
   local create_cue = NamedCommandLookup("_RSa012bb075440de1ce27f06b6e12b88877848ca5b")
   Main_OnCommand(create_cue, 0)
 

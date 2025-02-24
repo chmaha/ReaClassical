@@ -184,11 +184,13 @@ function main()
     end
 
     if num_pre_selected > 0 then
+        PreventUIRefresh(1)
         Main_OnCommand(40297, 0) --unselect_all
         SetOnlyTrackSelected(pre_selected[1])
         for _, track in ipairs(pre_selected) do
             if pcall(IsTrackSelected, track) then SetTrackSelected(track, 1) end
         end
+        PreventUIRefresh(-1)
     end
 
     if not rcmaster_exists then

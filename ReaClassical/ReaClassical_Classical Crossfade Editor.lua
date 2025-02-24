@@ -53,6 +53,7 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+    PreventUIRefresh(1)
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
@@ -81,6 +82,7 @@ function main()
     else
         fadeEnd()
     end
+    PreventUIRefresh(-1)
     Undo_EndBlock('Classical Crossfade Editor', 0)
     UpdateArrange()
     UpdateTimeline()

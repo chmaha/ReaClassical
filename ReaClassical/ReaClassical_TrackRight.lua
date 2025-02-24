@@ -58,7 +58,7 @@ function main()
         return
     end
 
-
+    PreventUIRefresh(1)
 
     next_track(first_track, item_number, count)
 
@@ -66,7 +66,7 @@ function main()
     Main_OnCommand(ReaClassical_TrackLeft, 0)
 
     switch_highlight(selected_item)
-
+    PreventUIRefresh(-1)
     Undo_EndBlock("Move Track Right", -1)
 end
 

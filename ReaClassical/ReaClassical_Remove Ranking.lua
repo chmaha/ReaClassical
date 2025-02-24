@@ -39,7 +39,9 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+    PreventUIRefresh(1)
     process_items()
+    PreventUIRefresh(-1)
     reaper.Undo_EndBlock("Remove Take Ranking", -1)
     reaper.UpdateArrange()
 end

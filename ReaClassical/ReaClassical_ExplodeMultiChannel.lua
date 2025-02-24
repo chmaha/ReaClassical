@@ -98,6 +98,7 @@ function main()
 
     local int = MB("Do you want to treat the first two iso tracks as interleaved stereo?",
         "Explode Multi-channel", 4)
+
     if int == 6 then
         local prev_track_number
         for _, item in pairs(items) do
@@ -172,7 +173,8 @@ function main()
 
     local mixer_tracks = create_mixer_table()
     show_track_name_dialog(mixer_tracks)
-
+    
+    PreventUIRefresh(-1)
     local response = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
         "Explode Multi-Channel", 4)
     if response == 6 then
@@ -187,14 +189,13 @@ function main()
         Main_OnCommand(F8_sync, 0)
     end
 
-    PreventUIRefresh(-1)
-
+    
     local fit_project_vertically = NamedCommandLookup("_RS444f747139500db030a1c4e03b8a0805ac502dfe")
     Main_OnCommand(fit_project_vertically, 0)
-
+    
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
-
+    
     Undo_EndBlock("Explode Multi-channel", 0)
 end
 

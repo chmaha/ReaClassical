@@ -40,7 +40,9 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+    PreventUIRefresh(1)
     process_items()
+    PreventUIRefresh(-1)
     Undo_EndBlock("Rank Take Lower", -1)
     UpdateArrange()
 end

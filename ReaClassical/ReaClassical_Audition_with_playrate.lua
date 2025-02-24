@@ -46,13 +46,13 @@ if input ~= "" then
 end
 
 function main()
-    PreventUIRefresh(1)
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+    PreventUIRefresh(1)
     CSurf_OnPlayRateChange(audition_speed)
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
@@ -73,8 +73,8 @@ function main()
             Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
             SetEditCurPos(pos, 0, 0)
             OnPlayButton()
-            Undo_EndBlock('Audition', 0)
             PreventUIRefresh(-1)
+            Undo_EndBlock('Audition', 0)
             UpdateArrange()
             UpdateTimeline()
             TrackList_AdjustWindows(false)

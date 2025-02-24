@@ -47,6 +47,7 @@ function main()
         return
     end
 
+    PreventUIRefresh(1)
     local first_track, num_of_items = get_track_info()
 
     local item_start_crossfaded = is_item_start_crossfaded(first_track, item_number)
@@ -81,7 +82,7 @@ function main()
 
     Main_OnCommand(40769, 0) -- unselect all
     SetMediaItemSelected(selected_item, true)
-
+    PreventUIRefresh(-1)
     Undo_EndBlock("Move Track Left", -1)
 end
 
