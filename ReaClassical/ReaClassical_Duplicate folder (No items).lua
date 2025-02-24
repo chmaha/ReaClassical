@@ -38,6 +38,13 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    if workflow == "Horizontal" then
+        local convert_response = MB("Are you sure you'd like to convert to a vertical workflow?"
+        , "Vertical Workflow", 4)
+        if convert_response ~=6 then return end
+    end
+    
     local num_of_tracks = track_check()
     if num_of_tracks == 0 then
         MB("Please add at least one track or folder before running", "Duplicate folder (no items)", 0)
