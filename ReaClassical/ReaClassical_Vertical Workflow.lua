@@ -45,6 +45,7 @@ end
 
 function main()
     Undo_BeginBlock()
+    PreventUIRefresh(1)
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
@@ -64,8 +65,6 @@ function main()
     Main_OnCommand(focus, 0)
     remove_track_groups()
     local show = NamedCommandLookup("_SWS_FOLDSMALL")
-
-    PreventUIRefresh(1)
     if num_of_tracks == 0 then
         local is_empty = true
         SetProjExtState(0, "ReaClassical", "RCProject", "y")
@@ -264,8 +263,6 @@ function main()
         return
     end
 
-    PreventUIRefresh(-1)
-
     if check_hidden_track_items(num_of_tracks) then
         ShowMessageBox("Warning: Items have been pasted or recorded on hidden tracks! " ..
             "Open the Track Manager via the View menu, enable the hidden tracks on TCP then delete any items",
@@ -290,6 +287,7 @@ function main()
             , "Vertical Workflow", 0)
     end
 
+    PreventUIRefresh(-1)
     Undo_EndBlock('Vertical Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
@@ -379,10 +377,10 @@ function solo()
             end
         end
 
-        if (trackname_check(track, "^RoomTone") or rt_state == "y") and muted == 0 then
-            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-            SetMediaTrackInfo_Value(track, "I_SOLO", 1)
-        end
+        -- if (trackname_check(track, "^RoomTone") or rt_state == "y") and muted == 0 then
+        --     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        --     SetMediaTrackInfo_Value(track, "I_SOLO", 1)
+        -- end
     end
 end
 

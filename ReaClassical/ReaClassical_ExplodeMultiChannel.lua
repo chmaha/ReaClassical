@@ -173,7 +173,7 @@ function main()
 
     local mixer_tracks = create_mixer_table()
     show_track_name_dialog(mixer_tracks)
-    
+
     PreventUIRefresh(-1)
     local response = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
         "Explode Multi-Channel", 4)
@@ -182,20 +182,18 @@ function main()
         Main_OnCommand(add_special_tracks, 0)
     end
 
-
     if updated_folders == 1 then -- run F7 again
         Main_OnCommand(F7_sync, 0)
     else                         -- run F8 again
         Main_OnCommand(F8_sync, 0)
     end
 
-    
     local fit_project_vertically = NamedCommandLookup("_RS444f747139500db030a1c4e03b8a0805ac502dfe")
     Main_OnCommand(fit_project_vertically, 0)
-    
+
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
-    
+
     Undo_EndBlock("Explode Multi-channel", 0)
 end
 
