@@ -36,7 +36,6 @@ end
 ---------------------------------------------------------------------
 
 function main()
-    -- PreventUIRefresh(1)
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow ~= "Vertical" then
@@ -45,6 +44,7 @@ function main()
         return
     end
 
+    PreventUIRefresh(1)
     set_first_folder_items_color()
     local first_track = duplicate_first_folder()
     delete_first_group_items()
@@ -54,7 +54,7 @@ function main()
     Main_OnCommand(40289, 0) -- unselect all items
 
     Undo_EndBlock('Move Destination Material to Source', 0)
-    -- PreventUIRefresh(-1)
+    PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
 end

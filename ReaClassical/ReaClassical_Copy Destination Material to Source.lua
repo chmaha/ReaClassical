@@ -37,7 +37,6 @@ end
 ---------------------------------------------------------------------
 
 function main()
-    -- PreventUIRefresh(1)
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow ~= "Vertical" then
@@ -46,6 +45,7 @@ function main()
         return
     end
 
+    PreventUIRefresh(1)
     local first_track = duplicate_first_folder()
     sync_based_on_workflow(workflow)
     prepare_takes()
@@ -54,7 +54,7 @@ function main()
     Main_OnCommand(40289, 0) -- unselect all items
 
     Undo_EndBlock('Copy Destination Material to Source', 0)
-    -- PreventUIRefresh(-1)
+    PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
 end
@@ -264,7 +264,7 @@ function vertical()
     DeleteTrackMediaItem(first_track, new_item)
     local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
     local start = 2
-    Main_OnCommand(next_folder, 0)     -- select next folder
+    Main_OnCommand(next_folder, 0) -- select next folder
 
     for i = start, num_of_folders, 1 do
         vertical_razor()
