@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.18
+@version 25.2.19
 @changelog
-  Add new toolbar icons
-  NOTES: Overwrite custom toolbar when prompted
+  Duplicate Folder: Add message to check user wants to convert workflows
+  Various: Fix old RoomTone solo() behavior
+  Various: Prevent UI refresh during operation
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
