@@ -1,4 +1,3 @@
-NoIndex: true
 desc:RCCompressor (chmaha)
 author: chmaha
 about:
@@ -8,7 +7,7 @@ about:
 slider1:-30<-60,0,0.1>Threshold (dB)
 slider2:1.1<1.1,1.3,0.01>Ratio
 slider3:0<-20,20,0.1>Gain
-slider4:0<0,1,1{Peak,RMS}>Detection
+slider4:0<0,4,1{Peak,RMS,LUFS-S,LUFS-M}>Detection
 
 in_pin:left input
 in_pin:right input
@@ -19,8 +18,8 @@ out_pin:right output
 
 @init
   ext_tail_size = -1;
-  log2db = 8.6858896380650365530225783783321; // 20 / ln(10)
-  db2log = 0.11512925464970228420089957273422; // ln(10) / 20 
+  log2db = 8.6858896380650365530225783783321;
+  db2log = 0.11512925464970228420089957273422;
   i=0;
   loop(
     120,
@@ -37,10 +36,24 @@ out_pin:right output
   maxover=0;
   atcoef=exp(-1/(attime * srate));
   relcoef=exp(-1/(reltime * srate));
-  fbacoef=exp(-1000/(2 * srate)); // 2 msec. opto attack for feedback detection
-  fbrcoef=exp(-1000/(200 * srate)); // 200 msec. opto release for feedback detection
+  fbacoef=exp(-1000/(2 * srate));
+  fbrcoef=exp(-1000/(200 * srate));
   sidechain = 0;
   automakeup = 0;
+
+  // K-weighting filter coefficients
+  k_hp_a = exp(-2 * 3.14159265358979 * 60 / srate);
+  k_hp_b = 1 - k_hp_a;
+  k_shelve_a = exp(-2 * 3.14159265358979 * 1681 / srate);
+  k_shelve_b = 1 - k_shelve_a;
+  k_hf_a = exp(-2 * 3.14159265358979 * 12000 / srate);
+  k_hf_b = 1 - k_hf_a;
+
+  // LUFS-S and LUFS-M buffer setup
+  LUFSS_buffer = 0;
+  LUFSS_samples = 3 * srate;
+  LUFSM_buffer = 0;
+  LUFSM_samples = 0.4 * srate;
 
 @slider
   thresh = slider1;
@@ -59,52 +72,52 @@ out_pin:right output
   );
   makeup = slider3;
   makeupv = exp((makeup+autogain) * db2log);
-  RMSdet = slider4;
-  RMSdet ? (
-    rmscoef=exp(-1000/(10 * srate));       // 10 ms RMS window
-  ) : (
-    rmscoef=exp(-1000/(0.0025 * srate));  // 2.5 us Peak detector
-  );
-  opto = 0;
+
+  det_mode = slider4;
 
 @sample
-  sidechain ? (
-    aspl0 = abs(spl2);
-    aspl1 = abs(spl3);
-  ) : (
-    opto ? (
-      ospl = ospl0 * ospl0 + ospl1 * ospl1;
-      ospl > runospl ? (
-        runospl = ospl + atcoef * (runospl - ospl);
-      ) : (
-        runospl = ospl + relcoef * (runospl - ospl);
-      );
-      ospl = sqrt(max(0,runospl));
+  // Apply K-weighting filters
+  aspl0 = abs(spl0);
+  aspl1 = abs(spl1);
+  aspl0 = k_hp_b * aspl0 + k_hp_a * k_hp_prev0;
+  aspl1 = k_hp_b * aspl1 + k_hp_a * k_hp_prev1;
+  k_hp_prev0 = aspl0;
+  k_hp_prev1 = aspl1;
+  aspl0 += k_shelve_b * (aspl0 - k_shelve_prev0);
+  aspl1 += k_shelve_b * (aspl1 - k_shelve_prev1);
+  k_shelve_prev0 = aspl0;
+  k_shelve_prev1 = aspl1;
+  aspl0 = k_hf_b * aspl0 + k_hf_a * k_hf_prev0;
+  aspl1 = k_hf_b * aspl1 + k_hf_a * k_hf_prev1;
+  k_hf_prev0 = aspl0;
+  k_hf_prev1 = aspl1;
 
-      ospl *= 0.5;
-
-      aspl0 = abs(ospl);
-      aspl1 = abs(ospl);
-    ) : (
-      aspl0 = abs(spl0);
-      aspl1 = abs(spl1);
-    );
-  );
-
-  RMSDet ? (  
+  det_mode == 1 ? (
     ave = (aspl0 * aspl0) + (aspl1 * aspl1);
     runave = ave + rmscoef * (runave - ave);
     det = sqrt(max(0,runave));
-  ) : (
+  );
+  det_mode == 2 ? (
+    LUFSS = (aspl0 * aspl0) + (aspl1 * aspl1);
+    LUFSS_buffer += LUFSS - (LUFSS_buffer / LUFSS_samples);
+    det = sqrt(max(0,LUFSS_buffer / LUFSS_samples));
+  );
+  det_mode == 3 ? (
+    LUFSM = (aspl0 * aspl0) + (aspl1 * aspl1);
+    LUFSM_buffer += LUFSM - (LUFSM_buffer / LUFSM_samples);
+    det = sqrt(max(0,LUFSM_buffer / LUFSM_samples));
+  );
+  det_mode == 0 ? (
     maxspl = max(aspl0, aspl1);
     maxspl = maxspl * maxspl;
     runave = maxspl + rmscoef * (runave - maxspl);
     det = sqrt(max(0,runave));
   );
+
   overdb = capsc * log(det/cthreshv);
   overdb > maxover ? (
     maxover = overdb;
-    reltime = overdb / 125;                        // release at constant 125 dB/sec.
+    reltime = overdb / 125;
     relcoef = exp(-1/(reltime * srate));
   );
   overdb = max(0,overdb);
@@ -117,19 +130,16 @@ out_pin:right output
   overdb = rundb;
 
   cratio = (softknee ? (1 + (ratio-1) * min(overdb, 6) / 6) : ratio);
-  
+
   gr = -overdb * (cratio-1)/cratio;
   grv = exp(gr * db2log);
-  
-  runmax = maxover + relcoef * (runmax - maxover);  // highest peak for setting att/rel decays in reltime
+
+  runmax = maxover + relcoef * (runmax - maxover);
   maxover = runmax;
 
   spl0 *= grv * makeupv;
-  spl1 *= grv * makeupv;  
+  spl1 *= grv * makeupv;
 
-  ospl0 = spl0;
-  ospl1 = spl1;
-  
 // Copyright 2006, Thomas Scott Stillwell
 // All rights reserved.
 //
