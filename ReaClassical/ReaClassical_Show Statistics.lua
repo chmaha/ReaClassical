@@ -63,8 +63,15 @@ function get_project_age()
     if retval and creation_date ~= "" then
         local year, month, day, hour, min, sec = creation_date:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
         if year and month and day and hour and min and sec then
-            local creation_time = os.time({ year = tonumber(year), month = tonumber(month), day = tonumber(day), hour =
-            tonumber(hour), min = tonumber(min), sec = tonumber(sec) })
+            local creation_time = os.time({
+                year = tonumber(year),
+                month = tonumber(month),
+                day = tonumber(day),
+                hour =
+                    tonumber(hour),
+                min = tonumber(min),
+                sec = tonumber(sec)
+            })
             local age_seconds = os.time() - creation_time
             local days = math.floor(age_seconds / 86400)
             if days >= 365 then
@@ -143,27 +150,43 @@ function reaclassical_get_stats()
         end
     end
 
+    local tracks_per_group = 0
+    local in_first_folder = false
+
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         if track then
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
             if depth == 1 then
                 folder_count = folder_count + 1
-                if folder_count > 1 then -- Exclude the first folder
-                    local track_items = CountTrackMediaItems(track)
-                    for j = 0, track_items - 1 do
-                        local item = GetTrackMediaItem(track, j)
-                        if item then
-                            total_source_length = total_source_length + GetMediaItemInfo_Value(item, "D_LENGTH")
-                        end
+                if folder_count == 1 then
+                    in_first_folder = true
+                else
+                    in_first_folder = false
+                end
+            end
+
+            if in_first_folder then
+                tracks_per_group = tracks_per_group + 1
+            end
+
+            if folder_count > 1 then -- Exclude the first folder for total_source_length
+                local track_items = CountTrackMediaItems(track)
+                for j = 0, track_items - 1 do
+                    local item = GetTrackMediaItem(track, j)
+                    if item then
+                        total_source_length = total_source_length + GetMediaItemInfo_Value(item, "D_LENGTH")
                     end
                 end
             end
+
             num_fx = num_fx + TrackFX_GetCount(track)
             num_automation_lanes = num_automation_lanes + CountTrackEnvelopes(track)
         end
     end
 
+    local special_tracks = num_tracks - (folder_count * tracks_per_group) - tracks_per_group - 1
     local msg = string.format(
         "Album Stats:\n"
         .. "- Final album length: %s\n"
@@ -173,8 +196,9 @@ function reaclassical_get_stats()
         .. "- Total project length: %s\n"
         .. "- Total length of all source material: %s\n"
         .. "- Total number of items: %d\n"
-        .. "- Number of tracks: %d\n"
         .. "- Number of track folders: %d\n"
+        .. "- Number of tracks per group: %d\n"
+        .. "- Number of special tracks: %d\n"
         .. "- Number of regions: %d\n\n"
         .. "Edit Stats:\n"
         .. "- Number of dest S-D edits: %d\n"
@@ -183,8 +207,8 @@ function reaclassical_get_stats()
         .. "- Total FX count: %d\n"
         .. "- Total automation lanes: %d",
         format_time(album_end), num_cd_markers,
-        project_age, format_time(total_project_length), format_time(total_source_length), num_items, num_tracks,
-        folder_count, num_regions,
+        project_age, format_time(total_project_length), format_time(total_source_length), num_items,
+        folder_count, tracks_per_group, special_tracks, num_regions,
         num_sd_edits, num_splits,
         num_fx, num_automation_lanes
     )
