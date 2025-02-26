@@ -68,6 +68,8 @@ function main()
     if num_of_tracks == 0 then
         local is_empty = true
         SetProjExtState(0, "ReaClassical", "RCProject", "y")
+        local creation_date = os.date("%Y-%m-%d %H:%M:%S", os.time())
+        SetProjExtState(0, "ReaClassical", "CreationDate", creation_date)
         SetProjExtState(0, "ReaClassical", "Workflow", "")
         local boolean, num = GetUserInputs("Vertical Workflow", 1, "How many tracks per group?", 10)
         num = tonumber(num)
