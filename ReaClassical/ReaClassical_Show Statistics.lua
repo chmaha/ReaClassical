@@ -67,6 +67,9 @@ function get_project_age()
             tonumber(hour), min = tonumber(min), sec = tonumber(sec) })
             local age_seconds = os.time() - creation_time
             local days = math.floor(age_seconds / 86400)
+            if days >= 365 then
+                return "> 1 year"
+            end
             local hours = math.floor((age_seconds % 86400) / 3600)
             local minutes = math.floor((age_seconds % 3600) / 60)
             return string.format("%d days, %d hours, %d minutes", days, hours, minutes)
