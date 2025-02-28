@@ -398,11 +398,6 @@ function solo()
                 end
             end
         end
-
-        -- if (trackname_check(track, "^RoomTone") or rt_state == "y") and muted == 0 then
-        --     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        --     SetMediaTrackInfo_Value(track, "I_SOLO", 1)
-        -- end
     end
 end
 
