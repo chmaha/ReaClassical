@@ -1,10 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 25.2.19
+@version 25.3
 @changelog
-  Duplicate Folder: Add message to check user wants to convert workflows
-  Various: Fix old RoomTone solo() behavior
-  Various: Prevent UI refresh during operation
+  NEW: Show Project statistics
+  NEW: ReaClassical top menu system
+  RC Updater: Add logic for fixing verticalproject view shortcut for Linux/MacOS
+  PDF Manual: Add new features info
+  NOTE: Update ReaClassical from ReaPack before running RC Updater
+  NOTE: When using RC Updater, update custom Toolbar when asked
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -79,6 +82,7 @@
   [main] ReaClassical_Delete S-D Project Markers.lua
   [main] ReaClassical_Copy Destination Material to Source.lua
   [main] ReaClassical_Move Destination Material to Source.lua
+  [main] ReaClassical_Show Statistics.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
