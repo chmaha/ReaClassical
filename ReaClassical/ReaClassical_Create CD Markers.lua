@@ -813,13 +813,13 @@ end
 ---------------------------------------------------------------------
 
 function album_item_count()
-  local track = reaper.GetTrack(0, 0) -- Track 1 (0-based index)
+  local track = reaper.GetTrack(0, 0)
   if not track then return 0 end
 
   local item_count = reaper.CountTrackMediaItems(track)
   if item_count == 0 then return 0 end
 
-  local count = 1 -- Start with the first item
+  local count = 1
   local prev_item = reaper.GetTrackMediaItem(track, 0)
   local prev_end = reaper.GetMediaItemInfo_Value(prev_item, "D_POSITION") +
       reaper.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
@@ -828,7 +828,7 @@ function album_item_count()
     local item = reaper.GetTrackMediaItem(track, i)
     local start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
 
-    if start - prev_end > 60 then   -- More than 60 seconds gap
+    if start - prev_end > 60 then   -- More than 1 minute gap
       break
     end
 
