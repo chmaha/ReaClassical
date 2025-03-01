@@ -934,7 +934,16 @@ From left to right, we have: Destination IN and OUT markers (\keys{1},
 (\keys{\backspace}), Delete Leaving Silence (\keys{\ctrl+\backspace}), Set
 Destination Tab Project Marker (\keys{\ctrl+alt+1} or \keys{\ctrl+alt+2}), Set
 Source Tab Project Marker (\keys{\ctrl+alt+3} or \keys{\ctrl+alt+4}), Delete S-D
-Project Markers (\keys{\shift+del}), and finally ReaClassical Help (\keys{H}).
+Project Markers (\keys{\shift+del}), Copy Destination Material to Source, Move
+Destination Material to Source, and finally ReaClassical Help (\keys{H}).
+
+\subsection{ReaClassical Top Menu}
+
+At the top of the arrange window, you will see a dedicated ReaClassical menu (in
+between `Options' and `Extensions'). While not intended to be used as the
+primary way of running ReaClassical functions, it is an organized way of
+discovering the individual available functions and learning the keyboard
+shortcuts.
 
 \subsection{Summary of Track Types in ReaClassical}
 
@@ -1216,6 +1225,19 @@ functions for deletion of material. Delete \& Ripple \keys{\backspace}
 ripple material to the right backwards with a short crossfade. Delete Leaving
 Silence \keys{\ctrl+\backspace} will also delete but maintain the silence
 without rippling backwards.
+
+\subsubsection{Copy/Move Destination Material to Source}
+
+Run either the copy or move version of the function from the ReaClassical
+toolbar (no need to ensure the first track is selected) and the function will
+copy or move all items and edits from the destination group directly below to a
+newly created source group with "Eastern" Blue color for identification
+purposes. This allows for saving versions of finished edits either via iteration
+(\textit{copying} so you can continue to make further edits) or fresh
+(\textit{moving} so you can compile an alternate version of a "best" take from
+scratch). These different edits can then be easily auditioned via the \keys{A}
+shortcut. This is similar to a Pyramix-style iterative editing method while
+still maintaining the destination group as the uppermost group.
 
 \subsubsection{Add S-D Markers to Edges of Item(s) or Time Selection}
 
@@ -1709,6 +1731,19 @@ at this point as I include a very powerful tool to make light work of that side
 of mastering.
 
 \section{Project Management}
+
+\subsection{Statistics}
+
+For a complete set of statistics on the ReaClassical project, either for your
+own information or to assist with billing a client, go to \menu{ReaClassical >
+Utilities > Show Statistics}. For example, you might have a billing system that
+charges clients based on number of source-destination edits, or mixing/mastering
+based on the final length of the album. Information includes: final album
+length, number of CD markers, project age, total project length, total length of
+source material, total number of items, number of track folders, number of
+tracks per group, number of ``special'' tracks, number of regions, number of
+destination S-D edits, number of destination item splits, FX count and number of
+automation lanes.
 
 \subsection{Typing Notes}
 
@@ -2226,8 +2261,24 @@ Project Preferences \keys{F5} .
 \emph{Description:} Deletes material between the source markers, no rippling of
 later material.
 
-\emph{Notes: }This is similar to \emph{Delete with Ripple} but instead leaves a
+\emph{Notes:} This is similar to \emph{Delete with Ripple} but instead leaves a
 gap where the original source material existed.
+
+\textbf{Copy/Move Destination Material to Source}
+
+\emph{Description:} Copies or movies the entire destination material from the
+destination group to a newly-created source group below.
+
+\emph{Notes: }Run either the copy or move version of the function from the ReaClassical
+toolbar (no need to ensure the first track is selected) and the function will
+copy or move all items and edits from the destination group directly below to a
+newly created source group with "Eastern" Blue color for identification
+purposes. This allows for saving versions of finished edits either via iteration
+(\textit{copying} so you can continue to make further edits) or fresh
+(\textit{moving} so you can compile an alternate version of a "best" take from
+scratch). These different edits can then be easily auditioned via the \keys{A}
+shortcut. This is similar to a Pyramix-style iterative editing method while
+still maintaining the destination group as the uppermost group.
 
 \textbf{Add Source Project Marker }\keys{\ctrl+\Alt+3} or \keys{\ctrl+\Alt+4}
 
@@ -2458,6 +2509,15 @@ curves.
 Hopefully you agree that this way of working with CD/DDP layout is a
 game-changer, a real time-saver and simply a better way of thinking about this
 portion of the mastering process.
+
+\textbf{Show Statistics}
+
+\emph{Description:} For a complete set of statistics on the ReaClassical
+project, either for your own information or to assist with billing a client, go
+to \menu{ReaClassical > Utilities > Show Statistics}. 
+
+\emph{Notes:} For determining project age, the project needs to have been
+created in ReaClassical 25.3 or higher. Otherwise, it will display `n/a'.
 
 \textbf{Lock Toggle (deprecated)}
 
