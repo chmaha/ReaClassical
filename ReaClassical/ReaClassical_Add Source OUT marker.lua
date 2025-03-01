@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number, get_color_table, get_path
+local main, folder_check, get_track_number, get_color_table, get_path, other_source_marker_check
 
 ---------------------------------------------------------------------
 
@@ -61,9 +61,12 @@ function main()
         end
 
         local track_number = math.floor(get_track_number(track))
-        --DeleteProjectMarker(NULL, 999, false)
+        local other_source_marker = other_source_marker_check()
         local colors = get_color_table()
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
+        if other_source_marker ~= track_number then
+            MB("Warning: Source OUT marker group does not match SOURCE IN!","Add Source Marker OUT", 0)
+        end
     end
 end
 
@@ -110,6 +113,26 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function other_source_marker_check()
+    local proj = EnumProjects(-1) -- Get the active project
+    if not proj then return nil end
+
+    local _, num_markers, num_regions = CountProjectMarkers(proj)
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
+        local number, label = raw_label:match("(%d+):(.+)") -- Extract number and label
+
+        if label and (label == "SOURCE-IN" or label == "SOURCE-OUT") then
+            return tonumber(number) -- Convert track number to a number and return
+        end
+    end
+
+    return nil -- Return nil if no marker is found
 end
 
 ---------------------------------------------------------------------
