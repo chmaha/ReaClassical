@@ -171,6 +171,7 @@ function main()
         select_matching_folder()
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0) -- SWS_AWPASTE
+        GoToMarker(0, 998, false)
         clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
     else
@@ -518,9 +519,6 @@ function delete_leaving_silence()
     Main_OnCommand(40309, 0)  -- Set ripple per-track (off)
     local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
     Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
-    Main_OnCommand(40630, 0)  -- Go to start of time selection
-    Main_OnCommand(40020, 0)  -- Time Selection: Remove time selection and loop point selection
-    Main_OnCommand(40289, 0)  -- Item: Unselect all items
     Main_OnCommand(40310, 0)  -- Set ripple-per-track
 end
 
