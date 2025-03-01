@@ -28,7 +28,7 @@ local frame_check, save_metadata, save_codes, add_codes, delete_markers
 local empty_items_check, return_custom_length, start_check
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone, add_roomtone_fadeout
-local check_saved_state
+local check_saved_state, album_item_count
 
 local minimum_points = 15
 local points = {}
@@ -57,7 +57,7 @@ function main()
 
   local first_track = GetTrack(0, 0)
   local num_of_items = 0
-  if first_track then num_of_items = CountTrackMediaItems(first_track) end
+  if first_track then num_of_items = album_item_count() end
   if not first_track or num_of_items == 0 then
     MB("Error: No media items found.", "Create CD Markers", 0)
     return
@@ -808,6 +808,35 @@ end
 function check_saved_state()
   local full_project_name = GetProjectName(0)
   return full_project_name == ""
+end
+
+---------------------------------------------------------------------
+
+function album_item_count()
+  local track = reaper.GetTrack(0, 0) -- Track 1 (0-based index)
+  if not track then return 0 end
+
+  local item_count = reaper.CountTrackMediaItems(track)
+  if item_count == 0 then return 0 end
+
+  local count = 1 -- Start with the first item
+  local prev_item = reaper.GetTrackMediaItem(track, 0)
+  local prev_end = reaper.GetMediaItemInfo_Value(prev_item, "D_POSITION") +
+      reaper.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
+
+  for i = 1, item_count - 1 do
+    local item = reaper.GetTrackMediaItem(track, i)
+    local start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+
+    if start - prev_end > 60 then   -- More than 60 seconds gap
+      break
+    end
+
+    count = count + 1
+    prev_end = start + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+  end
+
+  return count
 end
 
 ---------------------------------------------------------------------
