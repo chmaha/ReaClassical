@@ -67,8 +67,15 @@ function main()
     if response2 == 6 then
         copy_file(source_shortcuts_path, dest_shortcuts_path)
         if string.find(system, "^Win") then
-            update_keyb_ini(dest_shortcuts_path, "KEY 8 96 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0"
-            , "KEY 9 223 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0")
+            update_keyb_ini(dest_shortcuts_path,
+                "KEY 8 96 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0",
+                "KEY 9 223 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0"
+            )
+        else
+            update_keyb_ini(dest_shortcuts_path,
+                "KEY 9 223 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0",
+                "KEY 8 96 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0"
+            )
         end
     end
 
