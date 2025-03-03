@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.2
+@version 25.3.3
 @changelog
-  Add reverse S-D edit to toolbar
-  NOTES: Update custom toolbar when asked
+  NEW: Add floating destination group functionality
+  ReaClassical Toolbar: General color improvements and add dedicated assembly edit icon
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -100,6 +100,7 @@
   [data] source IN.png > toolbar_icons/source IN.png
   [data] source OUT.png > toolbar_icons/source OUT.png
   [data] Reverse SD Edit.png > toolbar_icons/Reverse SD Edit.png
+  [data] assembly.png > toolbar_icons/assembly.png
   ReaClassical_Colors_Table.lua > ReaClassical_Colors_Table.lua
   ../PDF-Manual/ReaClassical-Manual.pdf > ReaClassical-Manual.pdf
   reaclassical-splash.png > reaclassical-splash.png
