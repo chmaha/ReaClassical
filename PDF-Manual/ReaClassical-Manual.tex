@@ -1,5 +1,3 @@
-%% LyX 2.4.3 created this file.  For more info, see https://www.lyx.org/. % Do
-%not edit unless you really know what you are doing.
 \documentclass[10pt,american]{article}
 \usepackage{tgschola}
 \usepackage{tgheros}
@@ -21,21 +19,10 @@
 
 \makeatletter
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
-\newenvironment{lyxlist}[1]
-	{\begin{list}{} {\settowidth{\labelwidth}{#1}
-		 \setlength{\leftmargin}{\labelwidth}
-		 \addtolength{\leftmargin}{\labelsep}
-		 \renewcommand{\makelabel}[1]{##1\hfil}}} {\end{list}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 \usepackage{datetime2}
 \usepackage[os=win]{menukeys}
 \renewmenumacro{\keys}[+]{shadowedroundedkeys}
-% Added by lyx2lyx
+
 \setlength{\parskip}{\medskipamount}
 \setlength{\parindent}{0pt}
 
@@ -232,7 +219,8 @@ might be useful for ReaClassical.
 
 ReaClassical currently uses YY.M.MICRO versioning (where M is a non-padded
 month) to accurately reflect how current the software is. For example, 25.6.2
-would indicate a June 2025 release with 2 patches or bugfixes. 
+would indicate a June 2025 release with 2 further updates which might include
+new features, improvements to existing functions, or bugfixes. 
 
 \section{Tools and Languages}
 
@@ -245,10 +233,9 @@ MacOS and Linux are shell scripts. The Windows installers are coded in
 \href{http://getskeleton.com/}{Skeleton}. All coding is done either in REAPER's
 ReaScript Development Environment, \href{https://code.visualstudio.com/}{vscode}
 or \href{https://gedit-technology.github.io/apps/gedit/}{gedit} on Linux. The
-manual is written in \LaTeX{} (\href{https://www.lyx.org/}{lyx.org}) with the
-covers designed in \href{https://www.libreoffice.org/}{LibreOffice} Draw. The
-ReaClassical splash screen and banner are created in
-\href{https://www.gimp.org/}{GIMP}.
+manual is written in \LaTeX{} with the covers designed in
+\href{https://www.libreoffice.org/}{LibreOffice} Draw. The ReaClassical splash
+screen and banner are created in \href{https://www.gimp.org/}{GIMP}.
 
 \section{Keyboard Shortcuts}
 
@@ -1239,6 +1226,30 @@ scratch). These different edits can then be easily auditioned via the \keys{A}
 shortcut. This is similar to a Pyramix-style iterative editing method while
 still maintaining the destination group as the uppermost group.
 
+\subsubsection{Reverse S-D Edit}
+
+Place your destination markers using \keys{1} and \keys{2}, then set a source IN
+marker with \keys{3}. Pressing \keys{6} will copy or move the material between
+the destination IN and OUT markers to the selected source group, as determined
+by the \keys{3} shortcut. Upon execution, you will be prompted to choose whether
+to copy or move the material. This function operates similarly to the
+\textbf{Copy/Move Destination Material to Source} functions but allows for
+precise selection using S-D markers. It is particularly useful for editing a
+single section like a \textit{da capo}, where you may want to construct an edit
+using material from the first run-through without having to scroll back and
+forth along the timeline. For example:
+
+\begin{itemize}
+    \item To use material from the first run, copy it to an existing empty
+    \textit{placeholder} source group using \keys{6} (answering ``No'' when
+    prompted to delete the destination material), then manually position it
+    under the second run.
+    \item If the da capo material serves as a strong foundation, you can leave
+    it in place on the destination group. Alternatively, you can move the da
+    capo material to a second empty source group using \keys{6}, selecting
+    ``Yes'' when prompted to delete the destination material.
+\end{itemize}
+
 \subsubsection{Add S-D Markers to Edges of Item(s) or Time Selection}
 
 Used in combination with Delete / Delete with Ripple (\keys{\ctrl+\backspace} /
@@ -1569,14 +1580,10 @@ couldn't go back to the big classical DAWs at this point.
 
 \subsection{Metadata}
 
-At this stage, the only items present in the destination folder should be those
-comprising the final album. If working in horizontal workflow mode up to this
-point, drag any source material to new group by first creating an empty
-duplicate folder via \keys{\textbackslash}. To quickly remove all the take names
-on the destination parent track, run \keys{\ctrl+T}. Track titles are then added
-to the individual items on the destination parent track by double-clicking on
-the item or selecting and pressing \keys{F2}. Note that only items that start
-tracks should be named. 
+To quickly remove all the take names on the destination parent track, run
+\keys{\ctrl+T}. Track titles are then added to the individual items on the
+destination parent track by double-clicking on the item or selecting and
+pressing \keys{F2}. Note that only items that start tracks should be named. 
 
 The rest of the metadata is then added via the Create CD Markers function
 \keys{Y}. You can add UPC/EAN and ISRC numbers as desired followed by album
@@ -1608,7 +1615,14 @@ source-destination edit versus a new track. For CD tracks that you want to have
 a visual CD player countdown, simply start the item name with an exclamation
 (!). Preferences such as CD marker offset, pre-gap length and album lead-out can
 be set via ReaClassical Project Preferences \keys{F5} . So it's now very quick
-to export a DDP set! 
+to export a DDP set!
+
+\noindent\fbox{\begin{minipage}[t]{1\columnwidth - 2\fboxsep - 2\fboxrule}%
+If working in horizontal workflow, ensure that there is over a minute's worth of
+empty timeline between the end of the proposed album and any other source
+material. Instead, you can also choose to drag any source material to a new group by
+first creating an empty duplicate folder via \keys{\textbackslash}.%
+	\end{minipage}}
 
 Further, you can add audio to the initial pre-gap (an `easter egg' track) by not
 giving the first item (or crossfaded items) a take name. The function will
@@ -1736,7 +1750,7 @@ of mastering.
 
 For a complete set of statistics on the ReaClassical project, either for your
 own information or to assist with billing a client, go to \menu{ReaClassical >
-Utilities > Show Statistics}. For example, you might have a billing system that
+Utilities > Show Statistics} or use the shortcut \keys{F1}. For example, you might have a billing system that
 charges clients based on number of source-destination edits, or mixing/mastering
 based on the final length of the album. Information includes: final album
 length, number of CD markers, project age, total project length, total length of
@@ -2211,6 +2225,18 @@ course, undo the action and return to the previous state. The desired crossfade
 length is set via ReaClassical Project Preferences \keys{F5} . Note that this
 function can be used in multi-tab S-D editing mode (see below).
 
+\textbf{S-D Edit }\keys{6}
+
+\emph{Description:} Make a ``reverse'' source-destination edit (3-point edit)
+
+\emph{Notes: }Place your destination markers using \keys{1} and \keys{2}, then set a source IN
+marker with \keys{3}. Pressing \keys{6} will copy or move the material between
+the destination IN and OUT markers to the selected source group, as determined
+by the \keys{3} shortcut. Upon execution, you will be prompted to choose whether
+to copy or move the material. This function operates similarly to the
+\textbf{Copy/Move Destination Material to Source} functions but allows for
+precise selection using S-D markers.
+
 \textbf{3-point `Assembly Line' Edit }\keys{F3}
 
 \emph{Description:} Uses both source markers and destination-IN marker to
@@ -2442,11 +2468,8 @@ Markers} function to create new markers that align with item starts.
 recorded/imported take names from destination parent items in preparation for
 using the Create CD Markers function.
 
-\emph{Notes: }At this stage, the only items present in the destination folder
-should be those comprising the final album. If working in horizontal workflow
-mode up to this point, drag any source material to new group by first creating
-an empty duplicate folder via \keys{\textbackslash}. As mentioned below, add
-take names only to destination parent items that are to become CD track starts.
+\emph{Notes: }As mentioned below, add take names only to destination parent
+items that are to become CD track starts.
 
 \textbf{Create CD Markers }\keys{Y}
 
@@ -2457,7 +2480,12 @@ messages if there are 1) more than 99 tracks, or 2) There are tracks shorter
 than 4 seconds, or 3) the total length of the project is greater than 79.57
 minutes.
 
-\emph{Notes: }This might be the biggest time-saving function in the ReaClassical
+\emph{Notes: } If working in horizontal workflow, ensure that there is over a minute's
+worth of empty timeline between the end of the proposed album and any other
+source material. Instead, you can also choose to drag any source material to new group by
+first creating an empty duplicate folder via \keys{\textbackslash}.
+
+This might be the biggest time-saving function in the ReaClassical
 system. It works as follows: 1) Edit gaps between items until you are happy 2)
 Add take names only to items that will become CD track starts 3) Run the
 function via shortcut \keys{Y} and you will be asked to enter various
@@ -2510,7 +2538,7 @@ Hopefully you agree that this way of working with CD/DDP layout is a
 game-changer, a real time-saver and simply a better way of thinking about this
 portion of the mastering process.
 
-\textbf{Show Statistics}
+\textbf{Show Statistics} \keys{F1}
 
 \emph{Description:} For a complete set of statistics on the ReaClassical
 project, either for your own information or to assist with billing a client, go
@@ -2536,7 +2564,7 @@ action.\pagebreak{}
 \section{Shortcuts}
 
 \textbf{Navigation}
-\begin{lyxlist}{00.00.0000}
+\begin{description}
 \item [{\keys{Home}}] Project Start 
 \item [{\keys{End}}] Project End 
 \item [{\keys{`}}] Whole Project View (Horizontal)
@@ -2552,9 +2580,9 @@ editor view)
 view)
 \item [{\keys{,}}] Previous Marker 
 \item [{\keys{.}}] Next Marker
-\end{lyxlist}
+\end{description}
 \textbf{Folder \& Source Group Preparation}
-\begin{lyxlist}{00.00.0000}
+\begin{description}
 \item [{\keys{F7}}] Create/Sync Horizontal Workflow (prompts for number of
 tracks) / Re-build routing etc
 \item [{\keys{F8}}] Create/Sync Vertical Workflow (from scratch or from single
@@ -2565,9 +2593,9 @@ existing folder) / Re-build routing etc
 \item [{\keys{\ctrl+\shift+\del}}] Delete Track From All Groups
 \item [{\keys{\#}}] Add one or more special tracks (aux, submix, roomtone,
 reference)
-\end{lyxlist}
+\end{description}
 \textbf{Recording \& Take Management}
-\begin{lyxlist}{00.00.0000}
+\begin{description}
 \item [{\keys{\ctrl+F9}}] Auto set recording inputs based on track names
 \item [{\keys{F9}}] Classical Take Record
 \item [{\keys{\ctrl+space}}] Record-pause
@@ -2581,9 +2609,9 @@ during silence)
 \item [{\keys{T}}] Prepare Takes
 \item [{\keys{\ctrl+T}}] Remove Take Names From Destination Parent Track
 \item [{\keys{K}}] Colorize (add custom color to item group)
-\end{lyxlist}
+\end{description}
 \textbf{Editing}
-\begin{lyxlist}{00.00.0000}
+\begin{description}
 \item [{\keys{A}}] Audition (full mix or child track) at mouse position
 (includes any unmuted @ aux or \# submix connections)
 \item [{\keys{\shift+A}}] Audition with custom playback rate (value set via
@@ -2601,14 +2629,15 @@ during silence)
 \item [{\keys{Z}}] Extent crossfaded items for editing (when in ReaClassical
 Fade Editor view)
 \item [{\keys{V}}] Toggle per-track ripple editing
-\end{lyxlist}
+\end{description}
 \textbf{S-D Editing}
-\begin{lyxlist}{00.00.0000}
+\begin{description}
 \item [{\keys{1}}] Add Destination IN marker 
 \item [{\keys{2}}] Add Destination OUT marker 
 \item [{\keys{3}}] Add Source IN marker 
 \item [{\keys{4}}] Add Source OUT marker 
 \item [{\keys{5}}] Make S/D Edit (2-, 3-, or 4-point cut)
+\item [{\keys{6}}] Make ``reverse'' S/D Edit (3-point cut)
 \item [{\keys{F3}}] 3-point `Assembly Line' edit
 \item [{\keys{F4}}] Insert with time-stretching (All 4 S-D markers)
 \item [{\keys{\backspace}}] Delete with ripple (between 2 source markers) 
@@ -2631,9 +2660,9 @@ selection (time selection takes precedence)
 \item [{\keys{\Alt+4}}] Zoom to Source OUT marker
 \item [{\keys{\ctrl+\del}}] Delete all S-D Markers 
 \item [{\keys{\shift+\del}}] Delete all S-D Project Markers 
-\end{lyxlist}
+\end{description}
 \textbf{Mastering}
-\begin{lyxlist}{00.00.0000}
+\begin{description}
 \item [{\keys{\ctrl+M}}] Enter Mastering Mode
 \item [{\keys{\ctrl+I}}] Enter Automation Mode
 \item [{\keys{I}}] Insert Automation (mixer controls and FX parameters to
@@ -2649,21 +2678,22 @@ envelope points)
 \item [{\keys{:}}] Region from selection 
 \item [{\keys{/}}] Selection to item(s) 
 \item [{\keys{R}}] Render 
-\end{lyxlist}
+\end{description}
 \textbf{Miscellaneous }
-\begin{lyxlist}{00.00.0000}
+\begin{description}
 \item [{\keys{F5}}] ReaClassical Project Preferences (set crossfade length, CD
 track offset, INDEX0 pre-gap length, Album lead-out time)
 \item [{\keys{F6}}] Open/Close ReaClassical custom toolbar
 \item [{\keys{H}}] Open ReaClassical help system (currently the PDF manual)
 \item [{\keys{\shift+H}}] Open ReaClassical audio calculator
+\item [{\keys{F1}}] Show ReaClassical Project Statistics
 \item [{\keys{O}}] Options (Preferences) 
 \item [{\keys{P}}] Project Settings 
 \item [{\keys{B}}] Batch file converter 
 \item [{\keys{\shift+U}}] Check for ReaClassical updates
 \item [{\keys{\ctrl+U}}] Check for REAPER updates (using REAPER update
 utility)\pagebreak{}
-\end{lyxlist}
+\end{description}
 
 \section{Recommended Free Mastering-Grade Plugins}
 
