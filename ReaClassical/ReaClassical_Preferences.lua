@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, display_prefs, load_prefs, save_prefs, pref_check
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV'
+local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade length (ms)',
@@ -38,7 +38,8 @@ local labels = {
     'Add S-D Markers at Mouse Hover',
     'Alt Audition Playback Rate',
     'Year of Production',
-    'CUE audio format'
+    'CUE audio format',
+    'Floating Destination Group'
 }
 
 ---------------------------------------------------------------------
@@ -132,8 +133,9 @@ function pref_check(input)
         local num_5 = tonumber(table[5])
         local num_7 = tonumber(table[7])
         local num_8 = tonumber(table[8])
+        local num_12 = tonumber(table[12])
         local audio_format = tostring(table[11])
-        if (num_5 and num_5 > 1) or (num_7 and num_7 > 1) or (num_8 and num_8 > 1) then
+        if (num_5 and num_5 > 1) or (num_7 and num_7 > 1) or (num_8 and num_8 > 1) or (num_12 and num_12 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end

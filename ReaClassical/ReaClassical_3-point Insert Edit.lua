@@ -27,6 +27,8 @@ local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
 local load_last_assembly_item, find_second_folder_track
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
+local move_destination_folder_to_top, move_destination_folder
+
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -43,17 +45,29 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    local _, prefs = GetProjExtState(0, "ReaClassical", "Preferences")
+    local moveable_dest = 0
+    if prefs ~= "" then
+        local table = {}
+        for entry in prefs:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+    end
+
+    if moveable_dest == 1 then move_destination_folder_to_top() end
+
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
-    local proj_marker_count, source_proj, dest_proj, dest_in, _, _, _, _, source_count, pos_table, _ = markers()
+    local proj_marker_count, source_proj, dest_proj, dest_in, _,_,_,_, source_count, pos_table, track_number = markers()
 
     if proj_marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Assembly Line Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
@@ -62,6 +76,7 @@ function main()
             "Source or destination markers should be paired with the corresponding source " ..
             "or destination project marker.",
             "Multi-tab Assembly Line Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
     ripple_lock_mode()
@@ -139,10 +154,12 @@ function main()
         Main_OnCommand(restore_view, 0)
         local restore_curpos = NamedCommandLookup("_BR_RESTORE_CURSOR_POS_SLOT_1")
         Main_OnCommand(restore_curpos, 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
     else
         MB(
             "Please add 3 valid source-destination markers: DEST-IN, SOURCE-IN and SOURCE-OUT"
             , "Assembly Line Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
@@ -616,6 +633,65 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function move_destination_folder_to_top()
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    -- Find the first folder with a parent that has the "Destination" extstate set to "y"
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end -- No matching folder found
+
+    -- Move the folder to the top
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    if destination_index > 0 then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(0, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function move_destination_folder(track_number)
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end
+
+    local target_track = GetTrack(0, track_number - 1)
+    if not target_track then return end
+
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    local target_index = track_number - 1
+
+    if destination_index ~= target_index then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(target_index, 0)
+    end
 end
 
 ---------------------------------------------------------------------

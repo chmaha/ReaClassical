@@ -27,6 +27,7 @@ local create_crossfades, clean_up, lock_items, unlock_items, ripple_lock_mode
 local return_xfade_length, xfade, get_first_last_items, markers
 local mark_as_edit, move_to_project_tab, find_second_folder_track
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
+local move_destination_folder_to_top, move_destination_folder
 
 ---------------------------------------------------------------------
 
@@ -44,18 +45,30 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local moveable_dest = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+    end
+
+    if moveable_dest == 1 then move_destination_folder_to_top() end
+
     ripple_lock_mode()
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
-    local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, _ = markers()
+    local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, track_number = markers()
 
     if proj_marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
@@ -64,6 +77,7 @@ function main()
             "Source or destination markers should be paired with the " ..
             "corresponding source or destination project marker.",
             "Multi-tab Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
@@ -79,6 +93,7 @@ function main()
             unlock_items()
             MB("Please make sure there is material to copy between your source markers.",
                 "Insert with timestretching", 0)
+            if moveable_dest == 1 then move_destination_folder(track_number) end
             return
         end
         Main_OnCommand(40020, 0) -- remove time selection
@@ -103,12 +118,12 @@ function main()
         if parent_selected > 1 then
             MoveEditCursor(-xfade_len * 15, false) -- move cursor back xfade length
         end
-        Main_OnCommand(42398, 0) -- Item: Paste items/tracks
+        Main_OnCommand(42398, 0)                   -- Item: Paste items/tracks
         GoToMarker(0, 996, false)
         if parent_selected > 1 then
             MoveEditCursor(-xfade_len * 15, false) -- move cursor back xfade length
         end
-        Main_OnCommand(40625, 0) -- Time Selection: Set start point
+        Main_OnCommand(40625, 0)                   -- Time Selection: Set start point
 
         for i = 0, total_selected - 1, 1 do
             selected_items[i] = GetSelectedMediaItem(0, i)
@@ -145,6 +160,7 @@ function main()
         end
         unlock_items()
         create_crossfades(xfade_len)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         clean_up(proj_marker_count)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
@@ -152,6 +168,7 @@ function main()
         MB("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT",
             "Insert with timestretching",
             0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
     end
 
     Undo_EndBlock('Insert with timestretching', 0)
@@ -577,6 +594,65 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function move_destination_folder_to_top()
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    -- Find the first folder with a parent that has the "Destination" extstate set to "y"
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end -- No matching folder found
+
+    -- Move the folder to the top
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    if destination_index > 0 then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(0, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function move_destination_folder(track_number)
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end
+
+    local target_track = GetTrack(0, track_number - 1)
+    if not target_track then return end
+
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    local target_index = track_number - 1
+
+    if destination_index ~= target_index then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(target_index, 0)
+    end
 end
 
 ---------------------------------------------------------------------
