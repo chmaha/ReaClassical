@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.3
+@version 25.3.4
 @changelog
-  NEW: Add floating destination group functionality
-  ReaClassical Toolbar: General color improvements and add dedicated assembly edit icon
+  Floating Destination Group: Fix for horizontal workflow
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
