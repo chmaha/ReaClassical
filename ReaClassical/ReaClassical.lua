@@ -2,7 +2,7 @@
 @author chmaha
 @version 25.3.2
 @changelog
-  Add reverse S-D edit function to toolbar
+  Add reverse S-D edit to toolbar
   NOTES: Update custom toolbar when asked
 @metapackage
 @provides
