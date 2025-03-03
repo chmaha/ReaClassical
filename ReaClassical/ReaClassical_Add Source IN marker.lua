@@ -204,7 +204,7 @@ end
 
 function calculate_destination_info()
     local track_count = CountTracks(0)
-    local destination_folder
+    local destination_folder = GetTrack(0, 0)
     for i = 0, track_count - 1 do
         local track = GetTrack(0, i)
         if track then
