@@ -1,12 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.1
+@version 25.3.2
 @changelog
-  NEW: Reverse S-D Edit function
-  Add Source OUT Marker: Add group check
-  Create CD Markers: Don't process source items starting after a minute's gap on the timeline
-  PDF Manual: Various updates
-  NOTES: Update keymap and toolbar when asked
+  Add reverse S-D edit function to toolbar
+  NOTES: Update custom toolbar when asked
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -102,6 +99,7 @@
   [data] Set_Source_Proj.png > toolbar_icons/Set_Source_Proj.png
   [data] source IN.png > toolbar_icons/source IN.png
   [data] source OUT.png > toolbar_icons/source OUT.png
+  [data] Reverse SD Edit.png > toolbar_icons/Reverse SD Edit.png
   ReaClassical_Colors_Table.lua > ReaClassical_Colors_Table.lua
   ../PDF-Manual/ReaClassical-Manual.pdf > ReaClassical-Manual.pdf
   reaclassical-splash.png > reaclassical-splash.png
