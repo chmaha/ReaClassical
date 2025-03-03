@@ -1,13 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 25.3
+@version 25.3.1
 @changelog
-  NEW: Show Project statistics
-  NEW: ReaClassical top menu system
-  RC Updater: Add logic for fixing verticalproject view shortcut for Linux/MacOS
-  PDF Manual: Add new features info
-  NOTE: Update ReaClassical from ReaPack before running RC Updater
-  NOTE: When using RC Updater, update custom Toolbar when asked
+  NEW: Reverse S-D Edit function
+  Add Source OUT Marker: Add group check
+  Create CD Markers: Don't process source items starting after a minute's gap on the timeline
+  PDF Manual: Various updates
+  NOTES: Update keymap and toolbar when asked
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -83,6 +82,7 @@
   [main] ReaClassical_Copy Destination Material to Source.lua
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Show Statistics.lua
+  [main] ReaClassical_Reverse S-D Edit.lua
   [rpp] ReaClassical.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
