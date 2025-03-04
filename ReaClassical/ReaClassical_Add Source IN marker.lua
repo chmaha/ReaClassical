@@ -51,6 +51,8 @@ function main()
     if moveable_dest == 0 and tonumber(dest_track_num) ~= 1 then
         selected_track = GetSelectedTrack(0, 0) -- Store the selected track
         move_destination_folder_to_top(destination_folder, dest_track_num)
+        local vert_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+        Main_OnCommand(vert_sync, 0)
         dest_track_num = 1
     end
 
