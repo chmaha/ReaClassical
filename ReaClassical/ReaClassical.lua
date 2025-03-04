@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.4
+@version 25.3.5
 @changelog
-  Floating Destination Group: Fix for horizontal workflow
+  Floating Destination Group: Keep source group selected after placing IN marker
+  ReaClassical Project Preferences: When switching back to non-floating dest, move dest to top and sync
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
