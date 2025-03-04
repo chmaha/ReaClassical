@@ -46,10 +46,9 @@ function main()
         if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
-    local selected_track
+    local selected_track = GetSelectedTrack(0, 0)
     local destination_folder, dest_track_num = calculate_destination_info()
     if moveable_dest == 0 and tonumber(dest_track_num) ~= 1 then
-        selected_track = GetSelectedTrack(0, 0) -- Store the selected track
         move_destination_folder_to_top(destination_folder, dest_track_num)
         local vert_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
         Main_OnCommand(vert_sync, 0)
@@ -75,18 +74,18 @@ function main()
             i = i + 1
         end
 
-        if selected_track then SetOnlyTrackSelected(selected_track) end
         local track_number = math.floor(get_track_number(track))
         local colors = get_color_table()
-
+        
         if moveable_dest == 1 then
             move_destination_folder(track_number)
         end
-
+        
         if dest_track_num and dest_track_num > track_number then
             track_number = track_number + get_tracks_per_group()
         end
-
+        
+        if selected_track then SetOnlyTrackSelected(selected_track) end
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
     end
     PreventUIRefresh(-1)
