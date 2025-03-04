@@ -156,7 +156,7 @@ function pref_check(input)
         MB(error_msg, "Error", 0)
     end
 
-    return pass, num_12
+    return pass, tonumber(table[12])
 end
 
 -----------------------------------------------------------------------
