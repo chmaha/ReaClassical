@@ -76,15 +76,15 @@ function main()
 
         local track_number = math.floor(get_track_number(track))
         local colors = get_color_table()
-        
+
         if moveable_dest == 1 then
             move_destination_folder(track_number)
         end
-        
+
         if dest_track_num and dest_track_num > track_number then
             track_number = track_number + get_tracks_per_group()
         end
-        
+
         if selected_track then SetOnlyTrackSelected(selected_track) end
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
     end

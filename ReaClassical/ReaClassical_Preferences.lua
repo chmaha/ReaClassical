@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
+local sync_based_on_workflow, move_destination_folder_to_top
 
 local year = os.date("%Y")
 local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0'
@@ -50,25 +51,28 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local pass
-    local input
+    local pass, input, orig_floating, new_floating
     repeat
         local ret
-        ret, input = display_prefs()
+        ret, input, orig_floating = display_prefs()
         if not ret then return end
-        if ret then pass = pref_check(input) end
+        if ret then pass, new_floating = pref_check(input) end
     until pass
-
     save_prefs(input)
+
+    if new_floating ~= orig_floating and new_floating == 0 then
+        move_destination_folder_to_top()
+        sync_based_on_workflow(workflow)
+    end
 end
 
 -----------------------------------------------------------------------
 
 function display_prefs()
-    local saved = load_prefs(NUM_OF_ENTRIES)
+    local saved, saved_12 = load_prefs(NUM_OF_ENTRIES)
     local input_labels = table.concat(labels, ',')
     local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)
-    return ret, input
+    return ret, input, saved_12
 end
 
 -----------------------------------------------------------------------
@@ -101,7 +105,7 @@ function load_prefs()
 
     saved = table.concat(saved_entries, ',')
 
-    return saved
+    return saved, saved_entries[12]
 end
 
 -----------------------------------------------------------------------
@@ -152,7 +156,45 @@ function pref_check(input)
         MB(error_msg, "Error", 0)
     end
 
-    return pass
+    return pass, num_12
+end
+
+-----------------------------------------------------------------------
+
+function move_destination_folder_to_top()
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end
+
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    if destination_index > 0 then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(0, 0)
+    end
+end
+
+-----------------------------------------------------------------------
+
+function sync_based_on_workflow(workflow)
+    if workflow == "Vertical" then
+        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+        Main_OnCommand(F8_sync, 0)
+    elseif workflow == "Horizontal" then
+        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+        Main_OnCommand(F7_sync, 0)
+    end
 end
 
 -----------------------------------------------------------------------
