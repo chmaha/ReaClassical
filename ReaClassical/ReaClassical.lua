@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.5
+@version 25.3.6
 @changelog
-  Floating Destination Group: Keep source group selected after placing IN marker
-  ReaClassical Project Preferences: When switching back to non-floating dest, move dest to top and sync
+  ReaClassical Project Preferences: When switching back to non-floating dest check against table entry vs out-of-scope variable
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
