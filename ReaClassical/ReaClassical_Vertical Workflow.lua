@@ -132,17 +132,7 @@ function main()
             add_rcmaster(num_of_tracks)
         end
 
-        local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-        local moveable_dest = 0
-        if input ~= "" then
-            local table = {}
-            for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-            if table[12] then moveable_dest = tonumber(table[12]) or 0 end
-        end
-
-        if moveable_dest == 1 then
-            move_destination_folder_to_top()
-        end
+        move_destination_folder_to_top()
 
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table(
             is_empty)
