@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.7
+@version 25.3.8
 @changelog
-  Vertical Workflow: If floating dest mode is active, F8 sync moves dest back to top of project
-  PDF Manual: Various updates
+  Vertical Workflow Sync: Always move destination group to top
+  Add Source IN Marker: Remove unnecessary floating dest mode check
+  Source Markers to Item Edges: support floating dest mode
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
