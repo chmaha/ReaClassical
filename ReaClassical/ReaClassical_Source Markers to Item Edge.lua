@@ -23,12 +23,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number, get_color_table, get_path
-local move_destination_folder
+local move_destination_folder, calculate_destination_info, get_tracks_per_group
 
 ---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
+    PreventUIRefresh(1)
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
@@ -37,6 +38,7 @@ function main()
 
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local moveable_dest = 0
+
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
@@ -84,6 +86,9 @@ function main()
         i = i + 1
     end
 
+    local selected_track = GetSelectedTrack(0, 0)
+    local dest_track_num = calculate_destination_info()
+
     local track_number = math.floor(get_track_number())
 
     if moveable_dest == 1 then
@@ -95,9 +100,10 @@ function main()
     end
 
     local colors = get_color_table()
+    if selected_track then SetOnlyTrackSelected(selected_track) end
     AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
     AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
-
+    PreventUIRefresh(-1)
     Undo_EndBlock("Source Markers to Item Edge", 0)
 end
 
@@ -175,6 +181,50 @@ function move_destination_folder(track_number)
         SetOnlyTrackSelected(destination_folder)
         ReorderSelectedTracks(target_index, 0)
     end
+end
+
+---------------------------------------------------------------------
+
+function calculate_destination_info()
+    local track_count = CountTracks(0)
+    local destination_folder = GetTrack(0, 0)
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+    local dest_track_num = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER")
+    return dest_track_num
+end
+
+---------------------------------------------------------------------
+
+function get_tracks_per_group()
+    local track_count = CountTracks(0)
+    if track_count == 0 then return 0 end
+
+    local tracks_per_group = 1
+    local first_track = GetTrack(0, 0)
+    if not first_track or GetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH") ~= 1 then
+        return 0 -- No valid parent folder
+    end
+
+    for i = 1, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if depth == 1 then
+                break -- New parent folder found, stop counting
+            end
+            tracks_per_group = tracks_per_group + 1
+        end
+    end
+    return tracks_per_group
 end
 
 ---------------------------------------------------------------------
