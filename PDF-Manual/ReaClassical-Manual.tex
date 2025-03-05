@@ -439,12 +439,14 @@ is extremely useful for overdub recording of material after the main session
 such as a symphonic organ part or narration. Next, you can set
 \keys{1},\keys{2},\keys{3}, and \keys{4} to add markers at the mouse hover
 position vs edit cursor. In this mode, you can also enter the fade editor by
-hovering of the right-hand items of a crossfaded pair and pressing \keys{F}.
-Finally, you can set the custom playback rate when auditioning via
-\keys{\shift+A}. There will be more on these settings in subsequent sections of
-the manual. If you are unfamiliar with these concepts, I recommend a quick
-internet search! If in doubt, just use the default values. It is worth noting
-that these preferences are set per project.
+hovering of the right-hand items of a crossfaded pair and pressing \keys{F}. You
+can set the custom playback rate when auditioning via \keys{\shift+A}. Next
+there are two settings associated with CUE file production -- year of production
+and audio file type. Finally, you can enable a floating destintion group which
+shifts position based on the active source group. There will be more on these
+settings in subsequent sections of the manual. If you are unfamiliar with these
+concepts, I recommend a quick internet search! If in doubt, just use the default
+values. It is worth noting that these preferences are set per project.
 
 \begin{figure}
 \begin{centering}
@@ -922,7 +924,8 @@ From left to right, we have: Destination IN and OUT markers (\keys{1},
 Destination Tab Project Marker (\keys{\ctrl+alt+1} or \keys{\ctrl+alt+2}), Set
 Source Tab Project Marker (\keys{\ctrl+alt+3} or \keys{\ctrl+alt+4}), Delete S-D
 Project Markers (\keys{\shift+del}), Copy Destination Material to Source, Move
-Destination Material to Source, and finally ReaClassical Help (\keys{H}).
+Destination Material to Source, Reverse S-D Edit (\keys{6}), and finally
+ReaClassical Help (\keys{H}).
 
 \subsection{ReaClassical Top Menu}
 
@@ -1280,6 +1283,30 @@ automatically move focus to the correct project tab.
 \subsubsection{Delete S-D markers}
 
 To delete all regular S-D markers, press \keys{\ctrl+\del}.
+
+\subsection{Floating Destination Group}
+
+The floating destination group feature enhances vertical workflow efficiency by
+dynamically positioning the destination group just above the selected source
+group. This reduces unnecessary vertical scrolling when setting IN and OUT
+markers for destination and source groups that are far apart in the project.
+Additionally, this feature is fully compatible with mouse hover S-D editing.
+
+To enable the floating destination group, open ReaClassical Project Preferences
+(\keys{F5}) and set the corresponding value to ``1''.
+
+For example, with floating destination enabled, place a source IN marker (via
+\keys{3}) on any source group. The destination group will reposition itself just
+above the selected source group. Add the remaining S-D markers as required.
+Perform any S-D edits via \keys{5}, \keys{F4}, or \keys{F3}. Select another
+source parent and place another marker (\keys{3}). The destination group will
+continue adjusting dynamically. 
+
+To disable floating mode, re-open ReaClassical Project Preferences and set
+``Floating Destination Group'' back to ``0''.
+
+It is worth noting that if the destination group moves above a source group, the
+source marker track number correctly updates to reflect the new order. 
 
 \subsection{Razor Editing}
 
