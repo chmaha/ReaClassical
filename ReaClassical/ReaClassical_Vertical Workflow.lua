@@ -32,7 +32,7 @@ local process_name, reset_spacers, sync, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 local check_mixer_order, rearrange_tracks, reset_mixer_order
 local copy_track_names_from_dest, process_dest, move_items_to_first_source_group
-local check_hidden_track_items
+local check_hidden_track_items, move_destination_folder_to_top
 
 ---------------------------------------------------------------------
 
@@ -130,6 +130,18 @@ function main()
 
         if not rcmaster_exists then
             add_rcmaster(num_of_tracks)
+        end
+
+        local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+        local moveable_dest = 0
+        if input ~= "" then
+            local table = {}
+            for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+            if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+        end
+
+        if moveable_dest == 1 then
+            move_destination_folder_to_top()
         end
 
         local table, rcmaster_index, tracks_per_group, folder_count, mixer_tracks, groups_equal = create_track_table(
@@ -1199,5 +1211,31 @@ function check_hidden_track_items(track_count)
 end
 
 ---------------------------------------------------------------------
+
+function move_destination_folder_to_top()
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end
+
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    if destination_index > 0 then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(0, 0)
+    end
+end
+
+-----------------------------------------------------------------------
 
 main()
