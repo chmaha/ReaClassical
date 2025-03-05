@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number, get_color_table, get_path
-local move_destination_folder, move_destination_folder_to_top, get_tracks_per_group
+local move_destination_folder, get_tracks_per_group
 local calculate_destination_info
 
 ---------------------------------------------------------------------
@@ -47,13 +47,7 @@ function main()
     end
 
     local selected_track = GetSelectedTrack(0, 0)
-    local destination_folder, dest_track_num = calculate_destination_info()
-    if moveable_dest == 0 and tonumber(dest_track_num) ~= 1 then
-        move_destination_folder_to_top(destination_folder, dest_track_num)
-        local vert_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(vert_sync, 0)
-        dest_track_num = 1
-    end
+    local dest_track_num = calculate_destination_info()
 
     local cur_pos, track
     if sdmousehover == 1 then
@@ -169,15 +163,6 @@ end
 
 ---------------------------------------------------------------------
 
-function move_destination_folder_to_top(destination_folder, dest_track_num)
-    if dest_track_num - 1 > 0 then
-        SetOnlyTrackSelected(destination_folder)
-        ReorderSelectedTracks(0, 0)
-    end
-end
-
----------------------------------------------------------------------
-
 function get_tracks_per_group()
     local track_count = CountTracks(0)
     if track_count == 0 then return 0 end
@@ -217,7 +202,7 @@ function calculate_destination_info()
         end
     end
     local dest_track_num = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER")
-    return destination_folder, dest_track_num
+    return dest_track_num
 end
 
 ---------------------------------------------------------------------
