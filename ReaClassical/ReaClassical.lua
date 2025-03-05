@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.6
+@version 25.3.7
 @changelog
-  ReaClassical Project Preferences: When switching back to non-floating dest check against table entry vs out-of-scope variable
+  Vertical Workflow: If floating dest mode is active, F8 sync moves dest back to top of project
+  PDF Manual: Various updates
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
