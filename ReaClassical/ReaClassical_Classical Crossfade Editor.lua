@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, select_check, lock_previous_items, fadeStart
 local fadeEnd, zoom, view, lock_items, unlock_items, save_color
 local paint, load_color, move_back_cursor, folder_check, correct_item_positions
-local check_next_item_overlap, trackname_check, get_color_table, get_path
+local check_next_item_overlap, trackname_check, get_color_table, get_path, get_reaper_version
 
 ---------------------------------------------------------------------
 
@@ -54,33 +54,60 @@ function main()
         return
     end
     PreventUIRefresh(1)
-    local group_state = GetToggleCommandState(1156)
-    if group_state ~= 1 then
-        Main_OnCommand(1156, 0) -- Enable item grouping
-    end
-    if state == -1 or state == 0 then
-        if sdmousehover == 1 then
-        BR_GetMouseCursorContext()
-        local hover_item = BR_GetMouseCursorContext_Item()
-        if hover_item ~= nil then
-            Main_OnCommand(40289, 0) -- Item: Unselect all items
-            SetMediaItemSelected(hover_item, 1)
-        end
-    end
-        local selected_item, item1 = select_check()
-        if item1 and check_next_item_overlap(item1) then
-            local orig_item_guid = BR_GetMediaItemGUID(selected_item)
-            SetProjExtState(0, "ReaClassical", "OrigSelectedItem", orig_item_guid)
-            fadeStart(item1)
-        else
+    local reaper_ver = get_reaper_version()
+    if reaper_ver > 9.99 then
+        local reaper_xfade_toggle = GetToggleCommandState(41827)
+        if reaper_xfade_toggle == 0 or reaper_xfade_toggle == -1 then
             if sdmousehover == 1 then
-                MB("Please hover over the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
-            else
-                MB("Please select the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
+                BR_GetMouseCursorContext()
+                local hover_item = BR_GetMouseCursorContext_Item()
+                if hover_item ~= nil then
+                    Main_OnCommand(40289, 0) -- Item: Unselect all items
+                    SetMediaItemSelected(hover_item, 1)
+                end
             end
+            local _, item1 = select_check()
+            if item1 and check_next_item_overlap(item1) then
+                Main_OnCommand(41827, 0)
+            else
+                if sdmousehover == 1 then
+                    MB("Please hover over the right item of a crossfaded pair", "Crossfade Editor", 0)
+                else
+                    MB("Please select the right item of a crossfaded pair", "Crossfade Editor", 0)
+                end
+            end
+        elseif reaper_xfade_toggle == 1 then
+            Main_OnCommand(41827, 0)
         end
     else
-        fadeEnd()
+        local group_state = GetToggleCommandState(1156)
+        if group_state ~= 1 then
+            Main_OnCommand(1156, 0) -- Enable item grouping
+        end
+        if state == -1 or state == 0 then
+            if sdmousehover == 1 then
+                BR_GetMouseCursorContext()
+                local hover_item = BR_GetMouseCursorContext_Item()
+                if hover_item ~= nil then
+                    Main_OnCommand(40289, 0) -- Item: Unselect all items
+                    SetMediaItemSelected(hover_item, 1)
+                end
+            end
+            local selected_item, item1 = select_check()
+            if item1 and check_next_item_overlap(item1) then
+                local orig_item_guid = BR_GetMediaItemGUID(selected_item)
+                SetProjExtState(0, "ReaClassical", "OrigSelectedItem", orig_item_guid)
+                fadeStart(item1)
+            else
+                if sdmousehover == 1 then
+                    MB("Please hover over the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
+                else
+                    MB("Please select the right item of a crossfaded pair on track 1", "Crossfade Editor", 0)
+                end
+            end
+        else
+            fadeEnd()
+        end
     end
     PreventUIRefresh(-1)
     Undo_EndBlock('Classical Crossfade Editor', 0)
@@ -490,6 +517,14 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function get_reaper_version()
+    local version_str = GetAppVersion()
+    local version = version_str:match("^(%d+%.%d+)")
+    return tonumber(version)
 end
 
 ---------------------------------------------------------------------
