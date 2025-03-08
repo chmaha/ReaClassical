@@ -26,7 +26,7 @@ local main, move_to_item, trackname_check
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
 local correct_item_positions, folder_check, check_next_item_overlap
-local get_color_table, get_path
+local get_color_table, get_path, get_reaper_version
 
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local win_state
@@ -45,19 +45,20 @@ function main()
         return
     end
     win_state = GetToggleCommandState(fade_editor_toggle)
+    local reaper_ver = get_reaper_version()
 
     if win_state ~= 1 then
         move_to_item()
-    else
+    elseif reaper_ver < 9.99 then
         fadeEnd()
         local final_xfade = move_to_item()
         fadeStart()
         if final_xfade then
             MB("You've reached the final crossfade in the project.", "Crossfade Editor", 0)
         end
-        UpdateArrange()
-        UpdateTimeline()
     end
+    UpdateArrange()
+    UpdateTimeline()
 end
 
 ---------------------------------------------------------------------
@@ -446,6 +447,14 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function get_reaper_version()
+    local version_str = GetAppVersion()
+    local version = version_str:match("^(%d+%.%d+)")
+    return tonumber(version)
 end
 
 ---------------------------------------------------------------------
