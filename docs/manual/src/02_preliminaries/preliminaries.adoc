@@ -1,7 +1,5 @@
 == Preliminaries
 
-=== Introduction
-
 It is important to note that if you already own REAPER then the world of classical editing including source-destination editing (aka 2-, 3-, and-4-point editing), crossfade editing and more are available at no extra cost to you via the freely available ReaClassical system. There's no need to spend any of your hard-earned money on Sequoia, Pyramix or SaDiE in order to make editing precise and efficient. As a classical engineer myself, I can say with certainty that what I am about to share with you covers all my recording, editing and mastering needs. Indeed, I couldn't return to the old way of working at this point. Your mileage may vary and I'd love to hear from you if there are functions that you feel might be missing. 
 
 === Compatibility
