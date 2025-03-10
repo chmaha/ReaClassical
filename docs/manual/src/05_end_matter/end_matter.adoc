@@ -1,0 +1,4 @@
+== End Matter
+
+include::thanks.adoc[]
+include::closing_thoughts.adoc[]
