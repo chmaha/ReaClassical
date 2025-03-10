@@ -1,3 +1,5 @@
+'''
+
 [quote]
 ____
 I sincerely appreciate your interest in ReaClassical. This project is a labor of passion, driven by the desire to provide a robust and flexible tool for musicians, composers, and sound engineers in the classical music world. Your support, feedback, and contributions are vital to making ReaClassical better with every update.
@@ -6,3 +8,5 @@ Thank you for being a part of this journey. Whether you're just starting with Re
 ____
 [.text-right]
 image::src/assets/chmaha.png[]
+
+'''
