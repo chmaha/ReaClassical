@@ -10,7 +10,7 @@ ReaClassical runs on any system that is compatible with REAPER (nine architectur
 
 === Quick Start Guide
 
-For first-time users, the \href{https://reaclassical.org/quick_start_guide.html}{quick start guide} website is a great place to learn the basics about ReaClassical. Each section covers major workflow areas and contains simple step-by-step instructions with an accompanying short YouTube video for demonstration (no audio).
+For first-time users, the link:https://reaclassical.org/quick_start_guide.html[quick start guide] website is a great place to learn the basics about ReaClassical. Each section covers major workflow areas and contains simple step-by-step instructions with an accompanying short YouTube video for demonstration (no audio).
 
 === This Manual
 
@@ -20,17 +20,17 @@ I highly recommend doing a complete read of the manual and becoming very familia
 
 === Website
 
-The website \href{https://reaclassical.org}{reaclassical.org} serves as the entry point for new users. From here you can read about key features, donate to the cause, read this PDF manual, installation instructions, navigate to the ReaClassical community thread and more.
+The website link:https://reaclassical.org[reaclassical.org] serves as the entry point for new users. From here you can read about key features, donate to the cause, read this PDF manual, installation instructions, navigate to the ReaClassical community thread and more.
 
 === REAPER Community
 
-The \href{https://forum.cockos.com/showthread.php?t=265145}{community thread} plays an important role in the development of ReaClassical. Not only is it a place for users to suggest feature requests and point out bugs but also discuss more general classical music recording, mixing and mastering techniques. It also serves as something of a development blog as I not only announce the regular releases but also document the under-the-surface details for those that are interested.
+The link:https://forum.cockos.com/showthread.php?t=265145[community thread] plays an important role in the development of ReaClassical. Not only is it a place for users to suggest feature requests and point out bugs but also discuss more general classical music recording, mixing and mastering techniques. It also serves as something of a development blog as I not only announce the regular releases but also document the under-the-surface details for those that are interested.
 
-Relatively new is the \href{https://discord.gg/Gu2m9ccHGS}{ReaClassical Discord server}. This is a great place for live support, general chat, proposing feature requests, workflow discussion, and letting the community know about albums or individual pieces you have created with the help of ReaClassical.
+Relatively new is the link:https://discord.gg/Gu2m9ccHGS[ReaClassical Discord server]. This is a great place for live support, general chat, proposing feature requests, workflow discussion, and letting the community know about albums or individual pieces you have created with the help of ReaClassical.
 
 === Ways to Contribute
 
-The most important way users can contribute to the development of ReaClassical is to actually use the tools! It makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical. Another is to suggest features or let me know about bugs. You can either do this on the \href{https://forum.cockos.com/showthread.php?t=265145}{thread} or via the \href{https://github.com/chmaha/ReaClassical/issues}{Issues} page on the ReaClassical GitHub. Finally, I'd be glad of any monetary donations. You can use \href{https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C}{PayPal}, \href{https://liberapay.com/reaclassical/}{Liberapay} or \href{https://donate.stripe.com/00g5mydzCftQdpeaEE}{Stripe} to do so. 
+The most important way users can contribute to the development of ReaClassical is to actually use the tools! It makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical. Another is to suggest features or let me know about bugs. You can either do this on the link:https://forum.cockos.com/showthread.php?t=265145[thread] or via the link:https://github.com/chmaha/ReaClassical/issues[Issues] page on the ReaClassical GitHub. Finally, I'd be glad of any monetary donations. You can use link:https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C[PayPal], link:https://liberapay.com/reaclassical/[Liberapay] or link:https://donate.stripe.com/00g5mydzCftQdpeaEE[Stripe] to do so. 
 
 === Spread the Word!
 
@@ -38,11 +38,11 @@ If you've enjoyed using ReaClassical in your projects, I'd be incredibly gratefu
 
 === Buy ReaClassical Merch
 
-Get print-on-demand ReaClassical merch like shirts, mugs, totes, pins, stickers and more through my \href{https://www.teepublic.com/user/reaclassical}{TeePublic store}!
+Get print-on-demand ReaClassical merch like shirts, mugs, totes, pins, stickers and more through my link:https://www.teepublic.com/user/reaclassical[TeePublic store]!
 
 === Source Code
 
-The source code for ReaClassical, the mastering grade `RC' plugins, this manual and the website can all be found \href{https://github.com/chmaha/ReaClassical}{here}. ReaClassical is \href{https://www.gnu.org/licenses/gpl-3.0.html}{GPL-3.0} licensed.
+The source code for ReaClassical, the mastering grade `RC' plugins, this manual and the website can all be found link:https://github.com/chmaha/ReaClassical[here]. ReaClassical is link:https://www.gnu.org/licenses/gpl-3.0.html[GPL-3.0] licensed.
 
 === Development Style
 
@@ -54,12 +54,22 @@ ReaClassical currently uses YY.M.MICRO versioning (where M is a non-padded month
 
 === Tools and Languages
 
-ReaClassical works on top of \href{https://www.reaper.fm/}{REAPER}, the digital audio workstation and utilizes \href{https://reapack.com/}{ReaPack} and \href{https://www.sws-extension.org/index.php}{SWS Extensions}. ReaClassical functions are coded using \href{https://www.lua.org/}{Lua}. The installers for MacOS and Linux are shell scripts. The Windows installers are coded in \href{https://go.dev/}{Go}. The ReaClassical and Quick Start Guide websites use \href{http://getskeleton.com/}{Skeleton}. All coding is done either in REAPER's ReaScript Development Environment, \href{https://code.visualstudio.com/}{vscode} or \href{https://gedit-technology.github.io/apps/gedit/}{gedit} on Linux. The manual is written in \LaTeX{} with the covers designed in \href{https://www.libreoffice.org/}{LibreOffice} Draw. The ReaClassical splash screen and banner are created in \href{https://www.gimp.org/}{GIMP}.
+ReaClassical works on top of link:https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes link:https://reapack.com/[ReaPack] and link:https://www.sws-extension.org/index.php[SWS Extensions]. ReaClassical functions are coded using link:https://www.lua.org/[Lua]. The installers for MacOS and Linux are shell scripts. The Windows installers are coded in link:https://go.dev/[Go]. The ReaClassical and Quick Start Guide websites use link:http://getskeleton.com/[Skeleton]. All coding is done either in REAPER's ReaScript Development Environment, link:https://code.visualstudio.com/[vscode] or link:https://gedit-technology.github.io/apps/gedit/[gedit] on Linux. The manual is written in \LaTeX{} with the covers designed in link:https://www.libreoffice.org/[LibreOffice] Draw. The ReaClassical splash screen and banner are created in link:https://www.gimp.org/[GIMP].
 
 === Keyboard Shortcuts
 
-When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut kbd:[?] or by navigating to \menu{Actions > Show action list...} to see the current assignments. For reference (from REAPER's own user guide), here is a table of equivalent modifier keys: \begin{center} \begin{tabular}{cc} \toprule \addlinespace \textsc{PC (Windows or Linux) Key} & \textsc{Mac (MacOS) Key Equivalent}\tabularnewline\addlinespace \midrule \addlinespace \midrule Shift & Shift\tabularnewline \midrule Control (Ctrl) & Command (Cmd)\tabularnewline \midrule Alt & Option\tabularnewline \midrule Windows & Control\tabularnewline \bottomrule \end{tabular} \par\end{center}
+When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut kbd:[?] or by navigating to menu:Actions[Show action list...] to see the current assignments. For reference (from REAPER's own user guide), here is a table of equivalent modifier keys:
+
+[.center, width="75%",cols="^,^"]
+.Shortcut Equivalents
+|===
+|*PC (Windows or Linux) Key*|*Mac (MacOS) Key Equivalent*
+|Shift|Shift
+|Control (Ctrl)|Command (Cmd)
+|Alt|Option
+|Windows|Control
+|===
 
 === Changelog
 
-The changelog for ReaClassical functions can be found by double-clicking on the ReaClassical package in ReaPack and navigating to the `History' tab. Whenever you sync ReaPack via \menu{Extensions > ReaPack > Synchronize packages} or the ReaClassical\_Updater function, this information should also appear automatically. For all updates including those not related to the functions themselves, a changelog can be found in the \href{https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf}{release notes}.
+The changelog for ReaClassical functions can be found by double-clicking on the ReaClassical package in ReaPack and navigating to the `History' tab. Whenever you sync ReaPack via menu:Extensions[ReaPack > Synchronize packages] or the ReaClassical\_Updater function, this information should also appear automatically. For all updates including those not related to the functions themselves, a changelog can be found in the link:https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf[release notes].
