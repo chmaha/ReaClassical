@@ -1,0 +1,13 @@
+=== Install
+
+==== Easy Complete Portable Installation (recommended)
+
+. Follow the installation instructions https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md[here] or in the _Installation & Update_ section of the https://reaclassical.org/quick_start_guide.html[Quick Start Guide]. Simply run where you would like the ReaClassical folder to be created.
+. Start REAPER/ReaClassical.
+. Follow the update instructions on the following page to get the latest and greatest versions of the ReaClassical functions, toolbar and keymap.
+
+Note that if the ReaClassical folder already exists, the installer will automatically add a unique suffix to ensure nothing is overwritten.
+
+==== Just The Scripts and Plugins?
+
+Install both ReaPack and latest bleeding edge SWS Extensions if you haven't already. Import my index.xml into ReaPack (see the ReaPack user guide if you are unsure how) and search for `ReaClassical` for the ReaClassical metapackage and `RCPlugs` for the classical jsfx plugins. Note that out of the box this does not give you the full benefits of ReaClassical which include keyboard shortcuts, custom toolbar etc but does include ReaClassical themes and a project template which you should use when doing classical editing. It's an easy way to start if you are already familiar with ReaPack and SWS and want to check out source-destination editing etc. Note that you do need SWS installed for the functions to work as expected. You can follow the update instructions on the current page to grab the custom toolbar and keymap but please heed the warning about using the _ReaClassical Updater_ function as answering btn:[yes] to either of the questions will overwrite configuration files.

@@ -1,0 +1,82 @@
+=== Creating & Setting Up a Project
+
+When you start REAPER/ReaClassical from a default portable install, you'll see an empty project with ReaClassical project defaults. The first thing you should do is save it via kbd:[Ctrl+S].
+
+==== Theme
+
+The ReaClassical theme is loaded by default. It looks almost exactly like the default REAPER theme. If you'd like to switch to one of several other custom themes, you can do so via menu:Options[Themes]. 'ReaClassical Light' is similar to the default but uses lighter waveforms and peak edging. The two 'WaveColors' themes apply coloring only to the waveforms with option for dark or light item backgrounds.
+
+==== Project Settings
+
+You can open the project settings by pressing kbd:[P] (for 'Project Settings') You shouldn't need to change any settings here. By default, render resampling is set to the highest quality using r8brain free. Media is saved to a `media` subfolder. The default recording format is 24-bit wave files but you can set to 32-bit float if using a portable recorder with that capability. Video frame rate is set to 75 to align with the number of frames per second for an audio CD. You can, of course, fill in the _notes_ section with a title, author and notes as desired.
+
+.REAPER Project Preferences
+image::project_prefs.png[REAPER Project Preferences]
+
+==== Audio Settings
+
+Click on the audio information in the top right of the window or via kbd:[O] (for 'options') navigating to menu:Audio[Device]. These settings are operating system dependent. Choice of blocksize etc is also dependent on need and how modern and/or optimized your system is. For general microphone setup, device and recording settings specifically for classical music etc I recommend referring to one or more of the following:
+
+* _Classical Recording: A Practical Guide in the Decca Tradition_ by Haigh, Dunkerley & Rogers 
+* _Recording Orchestra and Other Classical Music Ensembles_ by Richard King 
+* _Recording Classical Music_ by Robert Toft 
+* For a more detailed look at mastering (for any genre of music), I highly recommend _Mastering Audio: The Art and the Science_ by Bob Katz.
+
+==== ReaClassical Project Preferences
+
+Pressing kbd:[F5] brings up the ReaClassical Project Preferences dialog. The first line sets the crossfade length in milliseconds for all source-destination editing. The next three lines are for https://en.wikipedia.org/wiki/Disc_Description_Protocol[DDP] creation. The defaults are for a 200ms track offset (to account for older CD players that couldn't play audio immediately after a track search), the INDEX0 length in seconds for when to start a CD player _countdown_ display to the next track (a fun visual trick that is, of course, completely irrelevant for purely digital releases) and, finally, the album lead-out time in seconds (essentially the time on a car CD player before the disc returns to the beginning again). There is a setting for the Prepare Takes function to either use the old random coloring method or the newer color scheme that uses blues for destination material and greens for source material. The user can change the checking range (distance beyond an item edge/fade or crossfade) when placing destination IN and OUT markers. Setting to 0 would just check if the marker would be placed _inside_ a item fade or crossfade. If the reference track is set as overdub guide, it will be audible during classical take recording and auditioning which is extremely useful for overdub recording of material after the main session such as a symphonic organ part or narration. Next, you can set kbd:[1],kbd:[2],kbd:[3], and kbd:[4] to add markers at the mouse hover position vs edit cursor. In this mode, you can also enter the fade editor by hovering of the right-hand items of a crossfaded pair and pressing kbd:[F]. You can set the custom playback rate when auditioning via kbd:[Shift+A]. Next there are two settings associated with CUE file production – year of production and audio file type. Finally, you can enable a floating destintion group which shifts position based on the active source group. There will be more on these settings in subsequent sections of the manual. If you are unfamiliar with these concepts, I recommend a quick internet search! If in doubt, just use the default values. It is worth noting that these preferences are set per project.
+
+.ReaClassical Project Preferences
+image::RC_Prefs.png[ReaClassical Project Preferences]
+
+==== Choice of Workflow
+
+The choice between what I refer to as _vertical_ or _horizontal_ workflows will depend somewhat on the complexity of the project. For a quick editing session of, say, a choral piece or short self-standing orchestral piece, a horizontal approach will suffice. For a well-drilled ensemble recording session, I can recommend using the vertical approach. Many classical engineers enjoy using a horizontal approach for recording (potentially the least disruptive and making use of the Take Counter window kbd:[Ctrl+Enter]) and then either sticking with that for editing (also taking advantage of the extremely useful Find Take kbd:[Enter] and Jump to Time kbd:[Tab] functions) or, depending on the number of takes, converting to a vertical workflow. Frankly, there are benefits to both routes, and in the end, it simply comes down to personal preference.
+
+.Take Counter Window
+image::take_counter.png[Take Counter] 
+.Find Take Dialog
+image::find_take.png[Find Take]
+
+===== Vertical Workflow
+
+In this approach, the source and destination track groups are aligned vertically so that the user doesn't have to shuttle back and forth in the arrange window for placing source-destination markers.
+
+*When Recording material:* To begin with a vertical workflow, you could actually use a horizontal workflow approach kbd:[F7] to set up just a single group and record left to right. After recording is complete, and you are ready for editing, you could convert to a vertical workflow via kbd:[F8]. Alternatively, you can press kbd:[F8] for project creation and start immediately with a vertical setup with one _destination_ group and six _source_ groups. In either setup, and whether recording or importing, simply type in the total number of stereo and mono microphone inputs you need, enter track names and optionally auto set recording inputs based on track names. I highly recommend using the first track for the main stereo pair.
+
+*When importing material:* To begin with a vertical workflow, press kbd:[F8] to set up a destination track group and six source groups (don't worry, it's easy to add more if you need them!). Simply type in the number of stereo and mono microphone inputs you need, enter track names and then answer btn:[No] to auto setting recording inputs. I highly recommend using the first track for the main stereo pair.
+
+As mentioned above, the kbd:[F8] function creates six source groups based off the destination track group, and creates a single set of mixer tracks that are shared by the groups. Use these to control volume, panning, polarity, sends and FX across all takes. The function also sets up media item and razor editing grouped by folder. If you need more than the six source groups, simply create them on the fly with the kbd:[\ ] shortcut, but note that using kbd:[F9] (Classical Take Record) creates a new source group as needed after each recording.
+
+A typical scenario: You have vertically recorded, or vertically prepared, multiple takes of a concerto movement with 10 channels. You realize halfway through editing that you want the soloist's microphone to be brought up in volume a little and also panned slightly more to the right to match the position in the main stereo pair. Simply make the change once on the equivalent mixer track!
+
+===== Horizontal Workflow
+
+In this approach, there is a single track or single group of tracks with the source and destination material laid out from left to right. As mentioned above, for shorter pieces of music this is often a perfectly acceptable approach. With the introduction of the Find Take, Jump to Time and Take Counter functions, many might now prefer this workflow.
+
+To begin a horizontal workflow, press kbd:[F7] to set up a track group also with mixer tracks (for making changes to volume, pan, polarity, sends and FX). Whether recording or importing, simply type in the number of tracks or microphone inputs you need, enter the track names then optionally auto set recording inputs based on track names. I highly recommend using the first track for the main stereo pair. In the event you are making a simple stereo recording, just create a track group consisting of two tracks and leave the child track empty and hidden via pressing kbd:[E] on the parent track.
+
+If you wish to convert to a vertical workflow, simply press kbd:[F8] to create six new source groups. If you accidentally switch to a vertical workflow via kbd:[F8], kbd:[\ ](duplicate folder) or similar, simply undo via kbd:[Ctrl+Z] and press kbd:[F7] to set the project to a horizontal workflow again.
+
+===== Auto Set Recording Inputs / Add Special Tracks
+
+As part of initial workflow setup, you are asked if you'd like to auto set recording inputs based on track names. Essentially, if you'd like your track to have a stereo input use words like _pair_ or _stereo_ (in your own language if you wish!) as part of the name. Otherwise, it will be treated as a mono input. For example, _ORTF Pair_, _Violin Spot 2ch_, and _Omni Outrigger Stereo_ will all be treated as needing a stereo input. If you add _left_,_l_, ‘right‘ or _r_ (again, in your own language if you wish!), the channel will be auto-panned accordingly. For example, _Decca Tree L_ will create a mono signal panned 100% left (note that the _L_ has a necessary space preceding it and that it is also the final part of the name). The function uses the maximum available hardware inputs after which it disables recording input. You will see a report of assignments with the option to revert to previous settings. You can run this as a standalone function at any time via kbd:[Ctrl+F9].
+
+Also, as part of the initial workflow setup, you are asked if you'd like to add any special tracks (aux, submix, roomtone, reference). This is useful if you are setting up an editing/mastering project with pre-recorded material.
+
+===== Manually Naming Tracks 
+
+If you didn't name tracks as part of the initial workflow setup, you only need to add track names to the mixer tracks in the mixer panel and then pressing kbd:[F7] or kbd:[F8] will auto-populate the same names to all regular track groups. While re-naming don't worry about keeping the `M:` prefix. On sync, it will be restored. ReaClassical automatically adds Source and Destination prefixes to your chosen track names and are auto-renumbered whenever functions affecting the number of source folders are run (Vertical Workflow kbd:[F8], Duplicate Folder kbd:[\ ], and Classical Take Record kbd:[F9]). Tip: Avoid using any colons in your track names and the auto prefixing will work as expected.
+
+TIP: As you will discover, based on which workflow chosen, you can use kbd:[F7] or kbd:[F8] at any point during project work to (re)create project routing, propagate track-naming based on the mixer tracks, sync record inputs and track lock states. Various ReaClassical functions use the same synchronization under the hood.
+
+===== The Single Mixer & ‘RCMASTER' bus
+
+Whatever your workflow preference, as of 24.10, all audio is routed through a special dedicated mixer tracks leading to an RCMASTER bus. This allows for independent volume adjustments on the parent track which is generally used for the main microphone pair. Converting your projects made with an earlier version of ReaClassical is easy. Simply run kbd:[F7] for horizontal workflows or kbd:[F8] for vertical workflows. The new mixer tracks and bus will be created and all routing taken care of. Any existing track panel settings (including sends and FX) from the first group are automatically transferred to the mixer tracks.
+
+Any and all track setting changes (track naming, volume, pan, phase, FX, sends to @aux tracks, routing to #submixes etc) happen in the mixer tracks. This is identical to the way that Pyramix works with a single mixer being fed by all the source groups. The mixer tracks are always visible in the mixer panel and identified by track names that start with `M:`. Running kbd:[F7] or kbd:[F8] will synchronize the track names from the mixer tracks across the whole project.
+
+.A ReaClassical Mixer Panel
+image::mixer_panel.png[A ReaClassical Mixer Panel]
+
+The basic rule is to not delete these special tracks. But, if you do by accident, don't worry. Try to undo via kbd:[Ctrl+Z]. In in the highly unlikely event that doesn't work, simply run kbd:[F7] or kbd:[F8] again and the mixer tracks will be restored (although any custom routing and automation will be lost). It is also worth noting that aux, submix and roomtone tracks now automatically route through RCMASTER on creation and are also automatically updated when older projects are _upgraded_.

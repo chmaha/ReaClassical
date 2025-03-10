@@ -1,0 +1,9 @@
+== Appendices
+
+include::function_descriptions.adoc[]
+
+include::shortcuts.adoc[]
+
+include::mastering_plugins.adoc[]
+
+include::tweaks.adoc[]

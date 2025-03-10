@@ -1,0 +1,58 @@
+=== Recording
+
+Now that you have decided on a workflow, we can start recording!
+
+==== Manually Setting Inputs
+
+See above for the ReaClassical approach to auto setting recording inputs based on track names. There are also multiple ways to manually set recording inputs. First, you can left-click on the meter part of the track panel. Second, you can press kbd:[Alt+R] to open the routing matrix. Once you have set the inputs for the first group, and you chose a vertical approach, simply press kbd:[F8] to sync these settings to all source groups.
+
+==== Headroom
+
+Again, I refer you to the books on classical music production but in general I suggest aiming for around -12dB peaks on the meters. 24-bit recording allows for a lot of headroom so there's no need to push close to 0dB. Adjust the individual faders to balance. Note that in a vertical workflow moving a fader will automatically move the corresponding fader in the other groups too making same-volume auditioning of different takes extremely easy. When using a 32-bit float device with dual AD converters as an interface (such as the Zoom F-series), ensure that the recording file format is switched to 32-bit float via project preferences kbd:[P]. The recorded levels might seem too low or too high during recording, but they can be easily adjusted afterward in ReaClassical without introducing any extra noise or distortion.
+
+==== Classical Take Recording
+
+Select the parent or child track of a track group and then press kbd:[F9] to begin _classical_ take recording mode. If the track group isn't already record-armed (probably the case before you start your first recording of the session), the function will first simply record-arm the whole group so you can usefully monitor incoming signal. On a subsequent press of kbd:[F9] recording begins. To stop recording, press kbd:[F9] again. In horizontal workflow, the key press will maintain record arming and will begin recording on a subsequent press. In vertical workflow, this key press also automatically moves to, solos and arms the next available group so that recording can begin immediately on the next button press. ReaClassical will automatically create new groups as required. To manually add more destination groups when not recording, press  kbd:[\ ]. To pause and unpause a recording without starting a new take, toggle the pause button in the transport or use the shortcut kbd:[Ctrl+Spacebar]. To quickly increment the take number during recording use kbd:[Shift+F9] but note that this should only be used during moments of silence (i.e. inbetween quickfire session takes) as it creates a new recorded item. During this mode you should use the Takes Counter window kbd:[Ctrl+Enter] to track the upcoming take number (in green) and take number during recording (in red with recording circle). You can right-click on the window to optionally override the automatic numbering and set a take number to increment from in addition to optionally setting a session name to act as media subfolder (which is automatically recalled when the window is reopened). You can left-click to recalculate the track count if you have removed some unused files from the project path. The calculated upcoming take number factors in unused files in the project path so as to avoid any file-naming conflicts. With manual override off (=0), switching back to an existing session will also automatically set the correct incoming take number. Please read the description of the function in Appendix A for best practices.
+
+Once recording is complete, you can briefly use the audition function kbd:[A] which will instantly remove all record-arming from tracks.
+
+==== Take Ranking
+
+During or after recording, you can rank one or more recorded takes. Use kbd:[Ctrl+=] to rank higher, kbd:[Ctrl+-] to rank lower, and kbd:[Ctrl+0] to remove any ranking. If no item is selected, the last recorded item (along with other items in the same group) are affected. Otherwise, you can select one or more parent items. The ranking system uses a series of colors and a scale system of plusses and minuses (+/-) added as a suffix to the item name up to a maximum of three symbols. This allows for seven different rankings. Positive rankings are 3 intensities of green (good, very good, excellent), negative rankings are yellow, orange, red (below average, poor, unusable), with neutral (no ranking) using the default item color.
+
+==== Recording Safety
+
+When using the take counter for recording (highly recommended!), there is increased safety when using classical take recording (kbd:[F9]) via the automatic switch to a restricted set of keyboard shortcuts. In addition to stopping the recording via kbd:[F9] and record-pausing, you can rank takes and use various zoom shortcuts. Note that you can still click on the transport buttons. In a future version of ReaClassical an even more robust recording safety feature will take the form of an optional unlock button.
+
+==== Scheduled Recording
+
+To start (and optionally end) a recording at specific times or manually start a recording to end at a certain time or after a certain duration, right-click on the take counter window and add the appropriate entry or entries in HH:MM format. After pressing btn:[OK], the take counter window will display information to the right of the take number. If you enter a start or end time earlier or equal to the current time, the function will assume a next day schedule and will annotate the time with an asterisk (*). Likewise, with both a start and end time, if the end time is earlier than or equal to start, it will assume a time 24 hours later. Don't forget to arm your tracks before walking away!
+
+==== Overdub Recording
+
+To record additional material after the fact (say a separate narration track or an organ part in a church after the main recording session in a concert hall), edit the orchestral material as usual and use a mixdown as a guide track in a new project (or new project tab). To achieve this, use a vertical workflow via kbd:[F8], add a REF track kbd:[#] and set the ReaClassical Project Preferences option `REF = Overdub Guide` to _1_ (kbd:[F5]). With this setting, audio on the guide track will be audible during take recording and auditioning of folders. Use Classical Take Recording kbd:[F9] and Take Counter window kbd:[Ctrl+Enter] as normal. You can then S-D edit and mix the overdub material to fit with the orchestral mixdown or, if further mixing and mastering work is required on the original multi-track material, bring the organ part into that project as a new track in the destination folder kbd:[Shift+T] (see below).
+
+==== Manipulating Tracks During a Recording Session
+
+===== Disabling Channels
+
+In a typical recording session, the musicians with the least to record are often allowed to leave the session early once their work is completed. If they were individually recorded using a spot microphone, it wouldn't make sense to continue recording on that channel. In ReaClassical there are two main ways to disable a channel. In a horizontal workflow using a single folder, it is no hassle to simply un-arm the desired track(s). For a vertical workflow with multiple folders, the task could end up being time-consuming with potential for error. So, the recommended ReaClassical way, both easy and visually obvious, is to select the desired tracks in the destination group, right click and choose _lock track controls_. The tracks are then grayed out. Then sync using F8 and the same tracks are locked in every group. Whether or not the tracks were previously record-armed, those tracks will no longer be involved in the recording.
+
+===== Adding a New Microphone Mid-Recording Session
+
+As of ReaClassical 24.9 you can add a track to all folders in the project at once by using the shortcut kbd:[Shift+T]. It will prompt you for a name and then add a new track with that name to the end of each group. This also works for a single folder while working in a horizontal workflow.
+
+===== Deleting tracks
+
+In both horizontal and vertical workflows, you can use kbd:[Ctrl+Shift+Delete] on a selected mixer track to quickly delete associated child tracks from all the groups of the project.
+
+===== Re-ordering tracks
+
+In both horizontal and vertical workflows, you can re-order the mixer tracks by dragging followed by a kbd:[F7] or kbd:[F8] sync to quickly re-order all the associated tracks across groups at once. This includes all audio and assigned recording inputs.
+
+==== Audio Calculator
+
+To figure out required disk space for a duration of audio or vice versa to figure out maximum duration of audio you can record based on available disk space, use kbd:[Shift+H] to open a browser-based offline calculator. You can set units, channel count, samplerate, bit depth and format (WAV or MP3 at various bitrates).
+
+.ReaClassical Audio Calculator
+image::audio_calc.png[]

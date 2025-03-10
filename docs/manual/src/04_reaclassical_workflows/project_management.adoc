@@ -1,0 +1,25 @@
+=== Project Management
+
+==== Statistics
+
+For a complete set of statistics on the ReaClassical project, either for your own information or to assist with billing a client, go to menu:ReaClassical[Utilities > Show Statistics] or use the shortcut kbd:[F1]. For example, you might have a billing system that charges clients based on number of source-destination edits, or mixing/mastering based on the final length of the album. Information includes: final album length, number of CD markers, project age, total project length, total length of source material, total number of items, number of track folders, number of tracks per group, number of _special_ tracks, number of regions, number of destination S-D edits, number of destination item splits, FX count and number of automation lanes.
+
+==== Typing Notes
+
+Document your takes either using the built-in REAPER project notes or SWS Notes (for _Notes_) which can be attached to items, tracks, markers etc. I personally prefer item notes on the main microphone pair. It's a very useful tool to have docked at the bottom of the screen.
+
+==== Folder Structure
+
+ReaClassical defaults to placing media and exports into appropriately subfolders making project file navigation easier. Also, ReaClassical defaults to separate folders for automatic backups and auto-saves. These settings are subject to change and can be modified by going to the REAPER preferences kbd:[O](for _Options_).
+
+==== Automatic Backups
+
+REAPER allows for powerful and complex backup routines. As referenced above, ReaClassical defaults to 10 time-stamped backups and 10 auto-saves every 15 minutes when not recording. Feel free to modify for your own way of working including switching to backups and auto saves for a number of unique days.
+
+==== Cleaning
+
+If in doubt, keep everything! Otherwise, the menu:File[Clean currrent project directory] is an excellent way to reduce the size of your projects. Note that when assigning a session name via the Take Counter Window, currently the above REAPER menu item doesn't search recursively. In a way, this reduces the chances of accidentally deleting precious takes. You can always manually delete but, from experience, it is _much_ better to simply keep everything.
+
+==== Archiving
+
+There are various ways to archive classical music projects. First, you can access the Project Bay by kbd:[Ctrl+B] shortcut. You can then ensure that all media used in the project is contained within the project folder itself. If not, you can select as many as necessary, right click and move/copy into the project folder. After this, you can simply compress the folder as a zip and store on an external drive. A further step to guaranteeing ability to open in the future is to freeze tracks so that plugin effects are baked in (with ability to unfreeze later if possible). Alternatively you can save a copy of the project via menu:File[Save project as...], converting to a format like FLAC and trimming the media as you wish. Finally, one to look out for in the future is https://forum.cockos.com/showthread.php?t=280150[Project Archiver]. However, I don't believe it is quite ready for prime-time yet and recommend using one of the other methods for now.

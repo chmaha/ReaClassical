@@ -1,0 +1,8 @@
+== Welcome!
+____
+Thank you for your interest in ReaClassical. This project is driven by a passion to create a flexible tool for musicians, composers, and sound engineers. Your support and feedback are essential for its improvement.
+
+Whether you're new to ReaClassical or have used it from the start, your trust inspires continued innovation. I hope it enhances your classical music production and supports your creative vision.
+
+image::chmaha.png[role=right]
+____

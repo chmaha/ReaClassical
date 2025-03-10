@@ -1,0 +1,73 @@
+== Preliminaries
+
+It is important to note that if you already own REAPER then the world of classical editing including source-destination editing (aka 2-, 3-, and-4-point editing), crossfade editing and more are available at no extra cost to you via the freely available ReaClassical system. There's no need to spend any of your hard-earned money on Sequoia, Pyramix or SaDiE in order to make editing precise and efficient. As a classical engineer myself, I can say with certainty that what I am about to share with you covers all my recording, editing and mastering needs. Indeed, I couldn't return to the old way of working at this point. Your mileage may vary and I'd love to hear from you if there are functions that you feel might be missing. 
+
+=== Compatibility
+
+ReaClassical runs on any system that is compatible with REAPER (nine architectures!). This includes 64-bit and 32-bit versions of Windows, MacOS and Linux (including Raspberry Pi).
+
+=== Quick Start Guide
+
+For first-time users, the https://reaclassical.org/quick_start_guide.html[quick start guide] website is a great place to learn the basics about ReaClassical. Each section covers major workflow areas and contains simple step-by-step instructions with an accompanying short YouTube video for demonstration (no audio).
+
+=== This Manual
+
+This online manual serves as the official manual for ReaClassical. It is also available as an offline PDF from within ReaClassical by pressing kbd:[H] (for _help_). The benefit of the offline version is that it is always in sync with the version of the tools you are using. The structure of the manual is designed to take the user through preliminary remarks, install and update procedures for both ReaClassical and REAPER then a detailed look at workflows from creating a project through to final render. After some brief closing remarks, there follows the appendices (descriptions of all the ReaClassical functions, keyboard shortcut guide, recommended free mastering-grade plugins, system tweaks for all three major OSes, and, finally, a manual install guide mainly for academic purposes). I highly recommend doing a complete read of the manual and becoming very familiar with appendices A and B.
+
+This manual is released under the GNU Free Documentation License v1.3. See https://www.gnu.org/licenses/fdl-1.3-standalone.html.
+
+=== Website
+
+The website https://reaclassical.org[reaclassical.org] serves as the entry point for new users. From here you can read about key features, donate to the cause, read this manual, installation instructions, navigate to the ReaClassical community thread and more.
+
+=== REAPER Community
+
+The https://forum.cockos.com/showthread.php?t=265145[community thread] plays an important role in the development of ReaClassical. Not only is it a place for users to suggest feature requests and point out bugs but also discuss more general classical music recording, mixing and mastering techniques. It also serves as something of a development blog as I not only announce the regular releases but also document the under-the-surface details for those that are interested.
+
+Relatively new is the https://discord.gg/Gu2m9ccHGS[ReaClassical Discord server]. This is a great place for live support, general chat, proposing feature requests, workflow discussion, and letting the community know about albums or individual pieces you have created with the help of ReaClassical.
+
+=== Ways to Contribute
+
+The most important way users can contribute to the development of ReaClassical is to actually use the tools! It makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical. Another is to suggest features or let me know about bugs. You can either do this on the https://forum.cockos.com/showthread.php?t=265145[thread] or via the https://github.com/chmaha/ReaClassical/issues[Issues] page on the ReaClassical GitHub. Finally, I'd be glad of any monetary donations. You can use https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C[PayPal], https://liberapay.com/reaclassical/[Liberapay] or https://donate.stripe.com/00g5mydzCftQdpeaEE[Stripe] to do so. 
+
+=== Spread the Word!
+
+If you've enjoyed using ReaClassical in your projects, I'd be incredibly grateful if you could mention it in your album booklets, social media video descriptions, or anywhere you typically include session details. A simple acknowledgment alongside your usual credits helps spread the word and supports the continued development of the tool.
+
+=== Buy ReaClassical Merch
+
+Get print-on-demand ReaClassical merch like shirts, mugs, totes, pins, stickers and more through my https://www.teepublic.com/user/reaclassical[TeePublic store]!
+
+=== Source Code
+
+The source code for ReaClassical, the mastering grade ReaClassical plugins, this manual and the website can all be found https://github.com/chmaha/ReaClassical[here]. ReaClassical is https://www.gnu.org/licenses/gpl-3.0.html[GPL-3.0] licensed.
+
+=== Development Style
+
+Due to working on GitHub and releasing the functions via ReaPack, I have the ability to push bugfixes and new features very quickly into an existing ReaClassical install. Often bugfixes happen within minutes or hours of receiving the report. When I dream up new features, the development often happens in rapid fashion over the course of a few days. However, now that ReaClassical has what I consider a mature feature set, I foresee maintenance and occasional bugfixes becoming more central to the process. This will give me more opportunity to work on this documentation, a complete video tutorial series etc. Part of development is also ensuring that ReaClassical continues to operate as expected with the latest REAPER versions. That's not to say there won't be new features appearing! As the REAPER developers add more new features, I will always check to see what might be useful for ReaClassical. 
+
+=== Versioning Style
+
+ReaClassical currently uses YY.M.MICRO versioning (where M is a non-padded month) to accurately reflect how current the software is. For example, 25.6.2 would indicate a June 2025 release with 2 further updates which might include new features, improvements to existing functions, or bugfixes. 
+
+=== Tools and Languages
+
+ReaClassical works on top of https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes https://reapack.com/[ReaPack] and https://www.sws-extension.org/index.php[SWS Extensions]. ReaClassical functions are coded using https://www.lua.org/[Lua]. The installers for MacOS and Linux are shell scripts. The Windows installers are coded in https://go.dev/[Go]. The ReaClassical and Quick Start Guide websites use http://getskeleton.com/[Skeleton]. All coding is done either in REAPER's ReaScript Development Environment, https://code.visualstudio.com/[vscode] or https://gedit-technology.github.io/apps/gedit/[gedit] on Linux. The online manual is written in https://asciidoc.org/[AsciiDoc]. The ReaClassical splash screen and banner are created in https://www.gimp.org/[GIMP].
+
+=== Keyboard Shortcuts
+
+When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut kbd:[?] or by navigating to menu:Actions[Show action list...] to see the current assignments. For reference (from REAPER's own user guide), here is a table of equivalent modifier keys:
+
+[.center, width="75%",cols="^,^"]
+.Shortcut Equivalents
+|===
+|*PC (Windows or Linux) Key*|*Mac (MacOS) Key Equivalent*
+|Shift|Shift
+|Control (Ctrl)|Command (Cmd)
+|Alt|Option
+|Windows|Control
+|===
+
+=== Changelog
+
+The changelog for ReaClassical functions can be found by double-clicking on the ReaClassical package in ReaPack and navigating to the `History` tab. Whenever you sync ReaPack via menu:Extensions[ReaPack > Synchronize packages] or the _ReaClassical Updater_ function, this information should also appear automatically. For all updates including those not related to the functions themselves, a changelog can be found in the https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf[release notes].

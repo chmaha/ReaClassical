@@ -1,0 +1,47 @@
+=== C: Recommended Free Mastering-Grade Plugins
+
+First stop: _Reaplugs_, with particular mention of _ReaLimit_ which I consider one of the best free transparent limiter available. You could easily mix and master a whole album using only these fine plugins. Others include:
+
+EQ:
+
+* *RCChannelEQ* (ReaClassical Channel EQ, included in the ReaClassical portable install and available in ReaPack via my https://github.com/chmaha/ReaClassical/raw/main/index.xml[repository]). Uses DSP from airwindows _Baxandall_ and Stillwell's RBJ Highpass/Lowpass Filters for broad-strokes EQing.
+* *RCMasteringEQ* (ReaClassical Mastering EQ, included in the ReaClassical portable install and available in ReaPack via my https://github.com/chmaha/ReaClassical/raw/main/index.xml[repository]). Uses DSP from airwindows _Hull2_ with added _Range_ drop-down (_Classical_ or _Full_) for transparent, musical, broad-strokes EQing. 
+* *ReEQ* https://forum.cockos.com/showthread.php?t=213501. An amazing Fabfilter Pro-Q clone for detailed EQ work. Also comes with ReSpectrum which is an excellent analyzer. Both are included with the ReaClassical install.
+
+Compression:
+
+* *RCCompressor* (ReaClassical compressor, included in the ReaClassical portable install and available in my repository). Uses DSP from Express Bus Compressor by Stillwell. Default settings and ranges tuned to classical music with auto release. Use as an insert. 
+* *RCParallelK* (ReaClassical parallel _Katz_ compressor, included in the ReaClassical portable install and available in my repository). Also uses DSP from Express Bus Compressor by Stillwell to recreate the Bob Katz _transparent_ parallel compression settings. There's only a make-up gain slider as everything else is baked in (-50dB threshold, 2.5:1 ratio, 1ms attack, peak detection mode). Use on a dedicated compressor bus and adjust the gain slider to taste (with the compressor signal somewhere between -15dB and -5dB lower than dry signal according to Katz).
+
+Limiter:
+
+* *RCLimiter* (ReaClassical limiter, included in the ReaClassical portable install and available in my repository). Uses DSP from Smooth Limiter by Geraint Luff to which I added 4x oversampling code. Defaults are tuned to classical music with true-peak and look-ahead functionality. Adjust the release to taste.
+
+Reverb:
+
+* *Convolution:* Convology XT (also runs perfectly at time of writing via yabridge on Linux) coupled with the Samplicity https://samplicity.com/bricasti-m7-impulse-response-files/[Bricasti M7 impulses]. There are other free convolution plugins to use but, whatever the plugin choice, the Bricasti impulses in true stereo are fantastic and sound almost identical to the presets of the well-regarded Liquidsonics Seventh Heaven Professional. 
+* *Algorithmic:* For free and open source options try my https://github.com/chmaha/RCverb/releases[RCVerb] or https://github.com/chmaha/Enover/releases/tag/v0.9[Enover] which uses zita-rev1 DSP. For paid options, ValhallaDSP Room and Vintage Verb, Fabfilter Pro-R, Voxengo Sobor, Acon Digital Verberate 2 and Sonible smart:reverb are all excellent non-iLok options for classical music and work seamlessly via yabridge on Linux. Note that the Liquidsonics offerings no longer require a physical iLok so can also be used on Linux via yabridge and iLok Cloud activation if you are feeling brave.
+
+Final mastering magic:
+
+* *_Sonnox Inflator_-style wave-shaping:* Try *RCInflator Ultimate* (a clone of the Sonnox product) or *MagicFairyDust* on the final stereo bus. Both effects are included in the ReaClassical portable install. 
+* Or, for an easy complete console vibe, use the *RCConsoleChannel*, *RCConsoleBus*, and *RCConsoleFinalizer* at the end of regular tracks, busses and final 2-bus respectively. Note that RCConsoleChannel does not have any controls.
+
+.RCInflator Ultimate
+image::RCInflator_Ultimate.png[]
+
+Restoration:
+
+* *Bertom Denoiser* *Classic* https://www.bertomaudio.com/. *Denoiser Pro* ($25) allows for individual per-band thresholds and includes an adaptive mode. 
+* *RCDeEss Standard* (ReaClassical de-esser, included in the ReaClassical portable install and available in my repository). Uses DSP from airwindows DeEss. 
+* *RCDeEss Advanced* (ReaClassical advanced de-esser, included in the ReaClassical portable install and available in my repository). Uses DSP from airwindows DeBess.
+
+Utilities:
+
+* *RCGain* (ReaClassical gain plugin, included in the ReaClassical portable install and available in my repository). Uses DSP from airwindows PurestGain. Useful before or after plugins in lieu of a native channel trim knob. 
+* *JS Loudness Meter Peak/RMS/LUFS* (Cockos) (included with REAPER). 
+* *RCTime&PhaseTool* (ReaClassical timing and phase tool, included in the ReaClassical portable install and available in my repository). Add to a spot microphone channel. Achieves something similar to Merging's PanNoir to correctly align spot microphone channels with the main pair based on a fundamental Euclidean geometric relation to create a more impactful stereo image. 
+* *RCMidSide* (ReaClassical mid-side encoder-decoder, included in the ReaClassical portable install and available in my repository). Use the default decoder mode if wanting to convert recorded mid-side to regular left-right stereo. 
+* *RCDither* (ReaClassical dither plugin, included in the ReaClassical portable install and available in my repository). Uses DSP from airwindows Not-Just-Another-Dither (Monitoring version) here called _Avant-garde_. This just might be the world's finest dither. There's a drop-down to select between 16-bit and 24-bit.
+
+For descriptions of the other 100+ jsfx airwindows ports (covering dithers, compressors, console emulations, saturation/distortion, delays, bass-specific, brightness, hard and soft clippers, reverbs, tape/vinyl emulations, exciters, stereo wideners, monitoring utilities and more, please see the https://forum.cockos.com/showthread.php?t=275301[dedicated REAPER forums thread] and import the https://github.com/chmaha/airwindows-JSFX-ports/raw/main/index.xml[airwindows JSFX ports] repository into ReaPack.

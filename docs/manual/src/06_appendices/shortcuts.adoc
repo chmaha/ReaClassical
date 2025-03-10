@@ -1,0 +1,203 @@
+=== B: Shortcuts
+
+*Navigation*
+
+kbd:[Home] Project Start
+
+kbd:[End] Project End
+
+kbd:[` ] Whole Project View (Horizontal)
+
+kbd:[Ctrl+`] Whole Project View (Vertical)
+
+kbd:[Enter] Find Take (based on number found at the end of a filename and optional session name)
+
+kbd:[Tab] Jump to Time (within selected item(s) or project)
+
+kbd:[Ctrl+{cursorup}] Increase peaks display zoom for project
+
+kbd:[Ctrl+{cursordown}] Decrease peaks display zoom for project
+
+kbd:[Q] Previous Item edge / previous crossfade (when in crossfade editor view)
+
+kbd:[W] Next Item edge / next crossfade (when in crossfade editor view)
+
+kbd:[,] Previous Marker
+
+kbd:[.] Next Marker
+
+*Folder & Source Group Preparation*
+
+
+kbd:[F7] Create/Sync Horizontal Workflow (prompts for number of tracks) / Re-build routing etc
+
+kbd:[F8] Create/Sync Vertical Workflow (from scratch or from single existing folder) / Re-build routing etc
+
+kbd:[F10] Explode multi-channel items (polywavs)
+
+kbd:[\ ] Duplicate Folder (no items)
+
+kbd:[Shift+T] Add Track To All Groups
+
+kbd:[Ctrl+Shift+Delete] Delete Track From All Groups
+
+kbd:[#] Add one or more special tracks (aux, submix, roomtone, reference)
+
+*Recording & Take Management*
+
+
+kbd:[Ctrl+F9] Auto set recording inputs based on track names
+
+kbd:[F9] Classical Take Record
+
+kbd:[Ctrl+Spacebar] Record-pause
+
+kbd:[Shift+F9] Increment take number while recording (use only during silence)
+
+kbd:[Ctrl+=] Rank take higher
+
+kbd:[Ctrl+-] Rank take lower
+
+kbd:[Ctrl+0] Remove any take ranking
+
+kbd:[Ctrl+Enter] Open Take Counter
+
+kbd:[Alt+C] Open Big Clock
+
+kbd:[T] Prepare Takes
+
+kbd:[Ctrl+T] Remove Take Names From Destination Parent Track
+
+kbd:[K] Colorize (add custom color to item group)
+
+*Editing*
+
+
+kbd:[A] Audition (full mix or child track) at mouse position (includes any unmuted `@` aux or `#` submix connections)
+
+kbd:[Shift+A] Audition with custom playback rate (value set via )
+
+kbd:[D] Display child tracks (plus display automation lanes in _mastering_ mode)
+
+kbd:[E] Ensconce (hide) child tracks (plus hide automation lanes in _mastering_ mode)
+
+kbd:[S] Split item
+
+kbd:[J] Join (glue) item
+
+kbd:[G] Group items
+
+kbd:[U] Ungroup items
+
+kbd:[F] Open ReaClassical Crossfade Editor
+
+kbd:[X] Create a classical crossfade
+
+kbd:[Z] Extend crossfaded items for editing (when in ReaClassical Fade Editor view)
+
+kbd:[V] Toggle per-track ripple editing
+
+*S-D Editing*
+
+
+kbd:[1] Add Destination IN marker
+
+kbd:[2] Add Destination OUT marker
+
+kbd:[3] Add Source IN marker
+
+kbd:[4] Add Source OUT marker
+
+kbd:[5] Make S/D Edit (2-, 3-, or 4-point cut)
+
+kbd:[6] Make _reverse_ S/D Edit (3-point cut)
+
+kbd:[F3] 3-point _Assembly Line_ edit
+
+kbd:[F4] Insert with time-stretching (All 4 S-D markers)
+
+kbd:[Backspace] Delete with ripple (between 2 source markers)
+
+kbd:[Ctrl+Backspace] Delete Leaving Silence (between 2 source markers)
+
+kbd:[Ctrl+Alt+1] Add Destination Project Marker (multi-tab S-D editing)
+
+kbd:[Ctrl+Alt+3] Add Source Project Marker (multi-tab S-D editing)
+
+kbd:[Ctrl+F12] Add Destination Markers to edges of selected item(s) or time selection (time selection takes precedence)
+
+kbd:[F12] Add Source Markers to edges of selected item(s) or time selection (time selection takes precedence)
+
+kbd:[Ctrl+1] Move to Destination IN marker
+
+kbd:[Ctrl+2] Move to Destination OUT marker
+
+kbd:[Ctrl+3] Move to Source IN marker
+
+kbd:[Ctrl+4] Move to Source OUT marker
+
+kbd:[Alt+1] Zoom to Destination IN marker
+
+kbd:[Alt+2] Zoom to Destination OUT marker
+
+kbd:[Alt+3] Zoom to Source IN marker
+
+kbd:[Alt+4] Zoom to Source OUT marker
+
+kbd:[Ctrl+Delete] Delete all S-D Markers
+
+kbd:[Shift+Delete] Delete all S-D Project Markers
+
+*Mastering*
+
+
+kbd:[Ctrl+M] Enter Mastering Mode
+
+kbd:[Ctrl+I] Enter Automation Mode
+
+kbd:[I] Insert Automation (mixer controls and FX parameters to envelope points)
+
+kbd:[Y] Automatically generate a DDP set from items
+
+kbd:[Ctrl+Y] Reposition CD tracks
+
+kbd:[Ctrl+{cursorleft}] Shift CD track one track to the left
+
+kbd:[Ctrl+{cursorright}] Shift CD track one track to the right
+
+kbd:[M] Add Marker
+
+kbd:[N] Open/Close SWS Notes
+
+kbd:[L] Marker List (SWS)
+
+kbd:[;] Regions from items (SWS)
+
+kbd:[:] Region from selection
+
+kbd:[/] Selection to item(s)
+
+kbd:[R] Render
+
+*Miscellaneous*
+
+
+kbd:[F5] ReaClassical Project Preferences (set crossfade length, CD track offset, INDEX0 pre-gap length, Album lead-out time)
+
+kbd:[F6] Open/Close ReaClassical custom toolbar
+
+kbd:[H] Open ReaClassical help system (currently the PDF manual)
+
+kbd:[Shift+H] Open ReaClassical audio calculator
+
+kbd:[F1] Show ReaClassical Project Statistics
+
+kbd:[O] Options (Preferences)
+
+kbd:[P] Project Settings
+
+kbd:[B] Batch file converter
+
+kbd:[Shift+U] Check for ReaClassical updates
+
+kbd:[Ctrl+U] Check for REAPER updates (using REAPER update utility)

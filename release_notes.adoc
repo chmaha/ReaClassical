@@ -1,0 +1,51 @@
+:imagesdir: docs/manual/src/assets
+:nofooter:
+
+image::reaclassical_os.png[]
+
+[discrete]
+=== Release Notes for ReaClassical 25.x
+
+[discrete]
+==== Ongoing Changelog: https://github.com/chmaha/ReaClassical/commits/main/
+
+[discrete]
+==== Instructions for a new portable install:
+
+. Run the latest portable install as per the
+https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md[installation
+guide] (it will create a new ReaClassical folder with a short year +
+quarter suffix e.g. ReaClassical_25). Double-click on the REAPER binary
+inside the folder!
+. Follow the update instructions below to get the latest and greatest
+ReaClassical functions, toolbar and keymap.
+
+[discrete]
+==== Instructions to update a ReaClassical portable install:
+
+. Run the ReaClassical_Updater function found in the actions dialog (or
+use the shortcut shift+U). This will sync ReaPack to get the latest
+ReaClassical functions then offer to overwrite your toolbars and keymaps
+with the latest ReaClassical portable install defaults. *DON'T answer
+yes to either of these questions if you have your own custom toolbars or
+keyboard shortcuts as they will be overwritten!*
+. Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested
+version of REAPER as noted
+https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt[here].
+
+[discrete]
+==== Basic Manual Install Inside Your Existing REAPER Install:
+
+. Install both ReaPack (https://reapack.com/) and latest bleeding edge
+SWS Extensions (https://www.sws-extension.org/download/pre-release/) if
+you haven't already.
+. Import my repository into ReaPack by copying and pasting
+https://github.com/chmaha/ReaClassical/raw/main/index.xml[this link]. If
+you need help with importing see
+https://reapack.com/user-guide#import-repositories.
+. Search for ReaClassical and install the main ReaClassical package and
+any jsfx plugins (my RCPlugs are highly recommended for classical work).
+. Use the ReaClassical project template for relevant projects (you can
+set this as default in the REAPER preferences) and change to the
+ReaClassical theme (Options > Themes).
+. Set up keyboard shortcuts in the actions list (? shortcut) as desired.

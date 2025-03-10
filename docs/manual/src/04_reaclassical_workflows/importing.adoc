@@ -1,0 +1,13 @@
+=== Importing
+
+Read this section if you recorded using a different DAW, portable recorder or are acting solely as editor and have the audio ready to import into ReaClassical.
+
+==== Importing Media
+
+Set up the horizontal or vertical workflow as desired. Then either drag the audio into the REAPER window or select menu:Insert[Media file...].
+
+For classical music purposes, you can then choose whether to insert in the same time position on separate tracks or sequentially on a single track. For recordings with multiple takes using separate files, I recommend inserting/dragging one take at a time onto separate tracks on either the source group or first destination group. Once everything is imported you can then drag sets of tracks to the different source groups as desired. If you have a best take that will be the basis of the final edit, place this on the top destination group tracks.
+
+==== Multi-Channel Audio Import
+
+If you use a portable recorder such as a MixPre, you might have a multi-channel combined file. ReaClassical includes a special function for converting these into a stereo pair + mono track set. Import your multi-channel media using a single regular track (for a horizontal workflow) or multiple regular tracks (for a vertical workflow). Then, simply press kbd:[F10] (no need to select the items). Answer btn:[yes] to the prompt that appears if the first two channels should be treated as stereo interleaved (i.e. they represent your main pair). Depending on the choice made, the number of tracks in the resulting folder(s) will adjust accordingly. Then you are given the opportunity to name your tracks. Obviously if you decide to move to a vertical workflow after exploding using a single track, you can always use kbd:[F8] to create your source folders then drag the media to where you want them. If you need to bring in new takes after running this function, simply open an empty project tab, import additional media then run the function there. Afterwards, copy or cut the exploded items into the original project tab to the desired locations.
