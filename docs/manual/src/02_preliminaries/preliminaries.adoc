@@ -12,7 +12,7 @@ For first-time users, the link:https://reaclassical.org/quick_start_guide.html[q
 
 === This Manual
 
-This PDF manual serves as the official manual for ReaClassical. The latest version is always available directly online or offline from within ReaClassical by pressing kbd:[H] (for `help'). The benefit of the offline version is that it is always in sync with the version of the tools you are using. The structure of the manual is designed to take the user through preliminary remarks, install and update procedures for both ReaClassical and REAPER then a detailed look at workflows from creating a project through to final render. After some brief closing remarks, there follows the appendices (descriptions of all the ReaClassical functions, keyboard shortcut guide, recommended free mastering-grade plugins, system tweaks for all three major OSes, and, finally, a manual install guide mainly for academic purposes).
+This PDF manual serves as the official manual for ReaClassical. The latest version is always available directly online or offline from within ReaClassical by pressing kbd:[H] (for 'help'). The benefit of the offline version is that it is always in sync with the version of the tools you are using. The structure of the manual is designed to take the user through preliminary remarks, install and update procedures for both ReaClassical and REAPER then a detailed look at workflows from creating a project through to final render. After some brief closing remarks, there follows the appendices (descriptions of all the ReaClassical functions, keyboard shortcut guide, recommended free mastering-grade plugins, system tweaks for all three major OSes, and, finally, a manual install guide mainly for academic purposes).
 
 I highly recommend doing a complete read of the manual and becoming very familiar with appendices A and B.
 
@@ -40,7 +40,7 @@ Get print-on-demand ReaClassical merch like shirts, mugs, totes, pins, stickers 
 
 === Source Code
 
-The source code for ReaClassical, the mastering grade `RC' plugins, this manual and the website can all be found link:https://github.com/chmaha/ReaClassical[here]. ReaClassical is link:https://www.gnu.org/licenses/gpl-3.0.html[GPL-3.0] licensed.
+The source code for ReaClassical, the mastering grade "RC" plugins, this manual and the website can all be found link:https://github.com/chmaha/ReaClassical[here]. ReaClassical is link:https://www.gnu.org/licenses/gpl-3.0.html[GPL-3.0] licensed.
 
 === Development Style
 
@@ -52,7 +52,7 @@ ReaClassical currently uses YY.M.MICRO versioning (where M is a non-padded month
 
 === Tools and Languages
 
-ReaClassical works on top of link:https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes link:https://reapack.com/[ReaPack] and link:https://www.sws-extension.org/index.php[SWS Extensions]. ReaClassical functions are coded using link:https://www.lua.org/[Lua]. The installers for MacOS and Linux are shell scripts. The Windows installers are coded in link:https://go.dev/[Go]. The ReaClassical and Quick Start Guide websites use link:http://getskeleton.com/[Skeleton]. All coding is done either in REAPER's ReaScript Development Environment, link:https://code.visualstudio.com/[vscode] or link:https://gedit-technology.github.io/apps/gedit/[gedit] on Linux. The manual is written in \LaTeX{} with the covers designed in link:https://www.libreoffice.org/[LibreOffice] Draw. The ReaClassical splash screen and banner are created in link:https://www.gimp.org/[GIMP].
+ReaClassical works on top of link:https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes link:https://reapack.com/[ReaPack] and link:https://www.sws-extension.org/index.php[SWS Extensions]. ReaClassical functions are coded using link:https://www.lua.org/[Lua]. The installers for MacOS and Linux are shell scripts. The Windows installers are coded in link:https://go.dev/[Go]. The ReaClassical and Quick Start Guide websites use link:http://getskeleton.com/[Skeleton]. All coding is done either in REAPER's ReaScript Development Environment, link:https://code.visualstudio.com/[vscode] or link:https://gedit-technology.github.io/apps/gedit/[gedit] on Linux. The online manual is written in link:https://asciidoc.org/[AsciiDoc]. The ReaClassical splash screen and banner are created in link:https://www.gimp.org/[GIMP].
 
 === Keyboard Shortcuts
 
