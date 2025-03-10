@@ -488,7 +488,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_shortcuts">Shortcuts</a></li>
 <li><a href="#_recommended_free_mastering_grade_plugins">Recommended Free Mastering-Grade Plugins</a></li>
 <li><a href="#_system_tweaks">System Tweaks</a></li>
-<li><a href="#_manual_installation_tweaks">Manual Installation &amp; Tweaks</a></li>
+<li><a href="#_manual_installation_tweaks_2">Manual Installation &amp; Tweaks</a></li>
 </ul>
 </li>
 </ul>
@@ -509,6 +509,21 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 </div>
 <div class="paragraph text-center">
 <p><em>Copyright © 2022–2025 chmaha</em></p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>I sincerely appreciate your interest in ReaClassical. This project is a labor of passion, driven by the desire to provide a robust and flexible tool for musicians, composers, and sound engineers in the classical music world. Your support, feedback, and contributions are vital to making ReaClassical better with every update.</p>
+</div>
+<div class="paragraph">
+<p>Thank you for being a part of this journey. Whether you&#8217;re just starting with ReaClassical or have been using it from the beginning, your trust in this tool inspires me to continue improving and innovating. I hope ReaClassical enhances your classical music production workflow and empowers your creative vision.</p>
+</div>
+</blockquote>
+</div>
+<div class="imageblock text-right">
+<div class="content">
+<img src="src/assets/chmaha.png" alt="chmaha">
+</div>
 </div>
 <div class="sect1">
 <h2 id="_preliminaries">Preliminaries</h2>
@@ -642,11 +657,61 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_install">Install</h3>
-
+<div class="sect3">
+<h4 id="_easy_complete_portable_installation_recommended">Easy Complete Portable Installation (recommended)</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Follow the installation instructions here or in the 'Installation &amp; Update' section of the Quick Start Guide. Simply run where you would like the ReaClassical folder to be created.</p>
+</li>
+<li>
+<p>Start REAPER/ReaClassical.</p>
+</li>
+<li>
+<p>Follow the update instructions on the following page to get the latest and greatest versions of the ReaClassical functions, toolbar and keymap.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Note that if the ReaClassical folder already exists, the installer will automatically add a unique suffix to ensure nothing is overwritten.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_just_the_scripts_and_plugins">Just The Scripts and Plugins?</h4>
+<div class="paragraph">
+<p>Install both ReaPack and latest bleeding edge SWS Extensions if you haven&#8217;t already. Import my index.xml into ReaPack (see the ReaPack user guide if you are unsure how) and search for 'ReaClassical' for the ReaClassical metapackage and 'RCPlugs' for the classical jsfx plugins. Note that out of the box this does not give you the full benefits of ReaClassical which include keyboard shortcuts, custom toolbar etc but does include ReaClassical themes and a project template which you should use when doing classical editing. It&#8217;s an easy way to start if you are already familiar with ReaPack and SWS and want to check out source-destination editing etc. Note that you do need SWS installed for the functions to work as expected. You can follow the update instructions on the current page to grab the custom toolbar and keymap but please heed the warning about using the ReaClassical_Updater function as answering 'yes' to either of the questions will overwrite configuration files.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_manual_installation_tweaks">Manual Installation &amp; Tweaks</h4>
+<div class="paragraph">
+<p>For a manual installation (ideally for educational value only or if you already have a heavily-customized REAPER setup and wish to add all or just parts of ReaClassical) see Appendix E.</p>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_update">Update</h3>
-
+<div class="sect3">
+<h4 id="_updating_an_existing_reaclassical_portable_install">Updating an Existing ReaClassical Portable Install</h4>
+<div class="paragraph">
+<p>To update just the functions, use <span class="menuseq"><b class="menu">Extensions</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">ReaPack</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Synchronize packages</b></span>. To update the functions and also update/reset the custom toolbar and keymaps to be in line with a standard ReaClassical portable install, run the handy <code>ReaClassical_Updater</code> function via <span class="keyseq"><kbd>Shift</kbd>+<kbd>U</kbd></span>. This will sync ReaPack to get the latest ReaClassical functions then offer to overwrite your toolbars and keymaps with ReaClassical portable install defaults. DON&#8217;T do this if you have your own custom toolbars or keyboard shortcuts as they will be overwritten! However, as of 24.8.7 any files will first be backed up (e.g. reaper-kb.ini.backup). Obviously if you run the updater twice before recovering them you will lose your original files.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_updating_reaper">Updating REAPER</h4>
+<div class="paragraph">
+<p>Simply use the shortcut <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>U</kbd></span> to open the REAPER update utility.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/reaper_update_utility.png" alt="REAPER Update Utility">
+</div>
+<div class="title">Figure 1. Reaper Update Utility</div>
+</div>
+<div class="paragraph">
+<p>Either click on the main or pre-release version you are interested in or click on one of the clock icons to select from previous releases. Despite the REAPER developers having a track record of excellent compatibility across even major versions, I recom- mend sticking with the tested version of REAPER noted here to minimize any issues of compatibility.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -735,7 +800,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 </div>
 </div>
 <div class="sect2">
-<h3 id="_manual_installation_tweaks">Manual Installation &amp; Tweaks</h3>
+<h3 id="_manual_installation_tweaks_2">Manual Installation &amp; Tweaks</h3>
 
 </div>
 </div>
@@ -743,7 +808,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-10 15:48:08 UTC
+Last updated 2025-03-10 16:04:52 UTC
 </div>
 </div>
 </body>
