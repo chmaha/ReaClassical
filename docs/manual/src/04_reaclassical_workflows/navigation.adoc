@@ -8,7 +8,7 @@ Use kbd:[` ](backtick) to see the whole project horizontally and/or kbd:[Ctrl+`]
 
 ==== Finding Takes
 
-Use kbd:[Enter] on the main keyboard or numpad if you have one to quickly search for a take based on the underlying filename of the media item. This will work for any file-naming system that uses numbers before the file extension such as _main_pair-T04.wav_, _cello-spot-take_23.flac_ or even ‘ortf_pair(04).wav such as created by Presonus Studio One. Note that if the imported or recorded files have zero-padding that is not a problem. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.
+Use kbd:[Enter] on the main keyboard or numpad if you have one to quickly search for a take based on the underlying filename of the media item. This will work for any file-naming system that uses numbers before the file extension such as _main_pair-T04.wav_, _cello-spot-take_23.flac_ or even _ortf_pair(04).wav_ such as created by Presonus Studio One. Note that if the imported or recorded files have zero-padding that is not a problem. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.
 
 ==== Items & Markers
 

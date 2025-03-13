@@ -60,7 +60,7 @@ If you wish to convert to a vertical workflow, simply press kbd:[F8] to create s
 
 ===== Auto Set Recording Inputs / Add Special Tracks
 
-As part of initial workflow setup, you are asked if you'd like to auto set recording inputs based on track names. Essentially, if you'd like your track to have a stereo input use words like _pair_ or _stereo_ (in your own language if you wish!) as part of the name. Otherwise, it will be treated as a mono input. For example, _ORTF Pair_, _Violin Spot 2ch_, and _Omni Outrigger Stereo_ will all be treated as needing a stereo input. If you add _left_,_l_, ‘right‘ or _r_ (again, in your own language if you wish!), the channel will be auto-panned accordingly. For example, _Decca Tree L_ will create a mono signal panned 100% left (note that the _L_ has a necessary space preceding it and that it is also the final part of the name). The function uses the maximum available hardware inputs after which it disables recording input. You will see a report of assignments with the option to revert to previous settings. You can run this as a standalone function at any time via kbd:[Ctrl+F9].
+As part of initial workflow setup, you are asked if you'd like to auto set recording inputs based on track names. Essentially, if you'd like your track to have a stereo input use words like _pair_ or _stereo_ (in your own language if you wish!) as part of the name. Otherwise, it will be treated as a mono input. For example, _ORTF Pair_, _Violin Spot 2ch_, and _Omni Outrigger Stereo_ will all be treated as needing a stereo input. If you add _left_,_l_, _right_ or _r_ (again, in your own language if you wish!), the channel will be auto-panned accordingly. For example, _Decca Tree L_ will create a mono signal panned 100% left (note that the _L_ has a necessary space preceding it and that it is also the final part of the name). The function uses the maximum available hardware inputs after which it disables recording input. You will see a report of assignments with the option to revert to previous settings. You can run this as a standalone function at any time via kbd:[Ctrl+F9].
 
 Also, as part of the initial workflow setup, you are asked if you'd like to add any special tracks (aux, submix, roomtone, reference). This is useful if you are setting up an editing/mastering project with pre-recorded material.
 
@@ -70,7 +70,7 @@ If you didn't name tracks as part of the initial workflow setup, you only need t
 
 TIP: As you will discover, based on which workflow chosen, you can use kbd:[F7] or kbd:[F8] at any point during project work to (re)create project routing, propagate track-naming based on the mixer tracks, sync record inputs and track lock states. Various ReaClassical functions use the same synchronization under the hood.
 
-===== The Single Mixer & ‘RCMASTER' bus
+===== The Single Mixer & RCMASTER bus
 
 Whatever your workflow preference, as of 24.10, all audio is routed through a special dedicated mixer tracks leading to an RCMASTER bus. This allows for independent volume adjustments on the parent track which is generally used for the main microphone pair. Converting your projects made with an earlier version of ReaClassical is easy. Simply run kbd:[F7] for horizontal workflows or kbd:[F8] for vertical workflows. The new mixer tracks and bus will be created and all routing taken care of. Any existing track panel settings (including sends and FX) from the first group are automatically transferred to the mixer tracks.
 

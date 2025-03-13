@@ -38,7 +38,7 @@ image::takename.png[]
 
 ==== Creating DDP filesets
 
-I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via kbd:[Y](track and region names are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is ‘ smart' in the sense that if there's no take name, no marker or region will be created. In other words, press kbd:[F2] with an item selected to enter track names where markers/regions need to be created. It's perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences kbd:[F5]. So it's now very quick to export a DDP set!
+I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via kbd:[Y](track and region names are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is smart in the sense that if there's no take name, no marker or region will be created. In other words, press kbd:[F2] with an item selected to enter track names where markers/regions need to be created. It's perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences kbd:[F5]. So it's now very quick to export a DDP set!
 
 TIP: If working in horizontal workflow, ensure that there is over a minute's worth of empty timeline between the end of the proposed album and any other source material. Instead, you can also choose to drag any source material to a new group by first creating an empty duplicate folder via kbd:[\ ].
 
@@ -54,7 +54,7 @@ A CUE file is automatically generated as part of the Create CD Markers function 
 
 ==== BIN+CUE set
 
-Create a BIN/CUE pair (either select ‘regions define tracks' and render the whole project or select `use only # markers` and render by time selection if you don't want the first pre-gap as actual silence at the start of track 1).
+Create a BIN/CUE pair (either select `regions define tracks` and render the whole project or select `use only # markers` and render by time selection if you don't want the first pre-gap as actual silence at the start of track 1).
 
 ==== Album Reports
 

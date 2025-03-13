@@ -512,7 +512,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2025 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2025-03-13 11:30:20 UTC</code></p>
+<p><code>Updated: 2025-03-13 11:52:07 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -847,7 +847,7 @@ Don&#8217;t do this if you have your own custom toolbars or keyboard shortcuts a
 <div class="sect4">
 <h5 id="_auto_set_recording_inputs_add_special_tracks">Auto Set Recording Inputs / Add Special Tracks</h5>
 <div class="paragraph">
-<p>As part of initial workflow setup, you are asked if you&#8217;d like to auto set recording inputs based on track names. Essentially, if you&#8217;d like your track to have a stereo input use words like <em>pair</em> or <em>stereo</em> (in your own language if you wish!) as part of the name. Otherwise, it will be treated as a mono input. For example, <em>ORTF Pair</em>, <em>Violin Spot 2ch</em>, and <em>Omni Outrigger Stereo</em> will all be treated as needing a stereo input. If you add <em>left</em>,<em>l</em>, ‘right‘ or <em>r</em> (again, in your own language if you wish!), the channel will be auto-panned accordingly. For example, <em>Decca Tree L</em> will create a mono signal panned 100% left (note that the <em>L</em> has a necessary space preceding it and that it is also the final part of the name). The function uses the maximum available hardware inputs after which it disables recording input. You will see a report of assignments with the option to revert to previous settings. You can run this as a standalone function at any time via <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>F9</kbd></span>.</p>
+<p>As part of initial workflow setup, you are asked if you&#8217;d like to auto set recording inputs based on track names. Essentially, if you&#8217;d like your track to have a stereo input use words like <em>pair</em> or <em>stereo</em> (in your own language if you wish!) as part of the name. Otherwise, it will be treated as a mono input. For example, <em>ORTF Pair</em>, <em>Violin Spot 2ch</em>, and <em>Omni Outrigger Stereo</em> will all be treated as needing a stereo input. If you add <em>left</em>,<em>l</em>, <em>right</em> or <em>r</em> (again, in your own language if you wish!), the channel will be auto-panned accordingly. For example, <em>Decca Tree L</em> will create a mono signal panned 100% left (note that the <em>L</em> has a necessary space preceding it and that it is also the final part of the name). The function uses the maximum available hardware inputs after which it disables recording input. You will see a report of assignments with the option to revert to previous settings. You can run this as a standalone function at any time via <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>F9</kbd></span>.</p>
 </div>
 <div class="paragraph">
 <p>Also, as part of the initial workflow setup, you are asked if you&#8217;d like to add any special tracks (aux, submix, roomtone, reference). This is useful if you are setting up an editing/mastering project with pre-recorded material.</p>
@@ -872,7 +872,7 @@ As you will discover, based on which workflow chosen, you can use <kbd>F7</kbd> 
 </div>
 </div>
 <div class="sect4">
-<h5 id="_the_single_mixer_rcmaster_bus">The Single Mixer &amp; ‘RCMASTER' bus</h5>
+<h5 id="_the_single_mixer_rcmaster_bus">The Single Mixer &amp; RCMASTER bus</h5>
 <div class="paragraph">
 <p>Whatever your workflow preference, as of 24.10, all audio is routed through a special dedicated mixer tracks leading to an RCMASTER bus. This allows for independent volume adjustments on the parent track which is generally used for the main microphone pair. Converting your projects made with an earlier version of ReaClassical is easy. Simply run <kbd>F7</kbd> for horizontal workflows or <kbd>F8</kbd> for vertical workflows. The new mixer tracks and bus will be created and all routing taken care of. Any existing track panel settings (including sends and FX) from the first group are automatically transferred to the mixer tracks.</p>
 </div>
@@ -1016,7 +1016,7 @@ As you will discover, based on which workflow chosen, you can use <kbd>F7</kbd> 
 <div class="sect3">
 <h4 id="_finding_takes">Finding Takes</h4>
 <div class="paragraph">
-<p>Use <kbd>Enter</kbd> on the main keyboard or numpad if you have one to quickly search for a take based on the underlying filename of the media item. This will work for any file-naming system that uses numbers before the file extension such as <em>main_pair-T04.wav</em>, <em>cello-spot-take_23.flac</em> or even ‘ortf_pair(04).wav such as created by Presonus Studio One. Note that if the imported or recorded files have zero-padding that is not a problem. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.</p>
+<p>Use <kbd>Enter</kbd> on the main keyboard or numpad if you have one to quickly search for a take based on the underlying filename of the media item. This will work for any file-naming system that uses numbers before the file extension such as <em>main_pair-T04.wav</em>, <em>cello-spot-take_23.flac</em> or even <em>ortf_pair(04).wav</em> such as created by Presonus Studio One. Note that if the imported or recorded files have zero-padding that is not a problem. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1469,7 +1469,7 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="sect3">
 <h4 id="_creating_ddp_filesets">Creating DDP filesets</h4>
 <div class="paragraph">
-<p>I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via <kbd>Y</kbd>(track and region names are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is ‘ smart' in the sense that if there&#8217;s no take name, no marker or region will be created. In other words, press <kbd>F2</kbd> with an item selected to enter track names where markers/regions need to be created. It&#8217;s perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences <kbd>F5</kbd>. So it&#8217;s now very quick to export a DDP set!</p>
+<p>I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via <kbd>Y</kbd>(track and region names are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is smart in the sense that if there&#8217;s no take name, no marker or region will be created. In other words, press <kbd>F2</kbd> with an item selected to enter track names where markers/regions need to be created. It&#8217;s perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences <kbd>F5</kbd>. So it&#8217;s now very quick to export a DDP set!</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -1502,7 +1502,7 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <div class="sect3">
 <h4 id="_bincue_set">BIN+CUE set</h4>
 <div class="paragraph">
-<p>Create a BIN/CUE pair (either select ‘regions define tracks' and render the whole project or select <code>use only # markers</code> and render by time selection if you don&#8217;t want the first pre-gap as actual silence at the start of track 1).</p>
+<p>Create a BIN/CUE pair (either select <code>regions define tracks</code> and render the whole project or select <code>use only # markers</code> and render by time selection if you don&#8217;t want the first pre-gap as actual silence at the start of track 1).</p>
 </div>
 </div>
 <div class="sect3">

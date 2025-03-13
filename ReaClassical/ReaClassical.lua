@@ -4,6 +4,7 @@
 @changelog
   Add new PDF manual
   PDF Manual: Fix hashes
+  PDF Manual: Fix curly quotes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
