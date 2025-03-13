@@ -3,6 +3,7 @@
 @version 25.3.9
 @changelog
   Add new PDF manual
+  PDF Manual: Fix hashes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
