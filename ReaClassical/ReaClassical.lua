@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.8
+@version 25.3.9
 @changelog
-  Vertical Workflow Sync: Always move destination group to top
-  Add Source IN Marker: Remove unnecessary floating dest mode check
-  Source Markers to Item Edges: support floating dest mode
+  Add new PDF manual
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
