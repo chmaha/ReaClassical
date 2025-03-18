@@ -165,7 +165,7 @@ function cd_markers(first_track, num_of_items, use_existing)
           redbook_track_length_errors = redbook_track_length_errors + 1
         end
         AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(current_start - offset),
-          previous_takename:match("^[!]*(.+)"),
+        previous_takename:match("^[!]*([^|]*)"),
           marker_count)
       end
       previous_start = current_start
@@ -201,6 +201,8 @@ function find_current_start(first_track, i)
   local current_item = GetTrackMediaItem(first_track, i)
   local take = GetActiveTake(current_item)
   local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+  take_name = take_name:gsub("|$", "")
+  GetSetMediaItemTakeInfo_String(take, "P_NAME", take_name, true)
   return GetMediaItemInfo_Value(current_item, "D_POSITION"), take_name
 end
 
@@ -813,27 +815,27 @@ end
 ---------------------------------------------------------------------
 
 function album_item_count()
-  local track = reaper.GetTrack(0, 0)
+  local track = GetTrack(0, 0)
   if not track then return 0 end
 
-  local item_count = reaper.CountTrackMediaItems(track)
+  local item_count = CountTrackMediaItems(track)
   if item_count == 0 then return 0 end
 
   local count = 1
-  local prev_item = reaper.GetTrackMediaItem(track, 0)
-  local prev_end = reaper.GetMediaItemInfo_Value(prev_item, "D_POSITION") +
-      reaper.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
+  local prev_item = GetTrackMediaItem(track, 0)
+  local prev_end = GetMediaItemInfo_Value(prev_item, "D_POSITION") +
+      GetMediaItemInfo_Value(prev_item, "D_LENGTH")
 
   for i = 1, item_count - 1 do
-    local item = reaper.GetTrackMediaItem(track, i)
-    local start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    local item = GetTrackMediaItem(track, i)
+    local start = GetMediaItemInfo_Value(item, "D_POSITION")
 
     if start - prev_end > 60 then   -- More than 1 minute gap
       break
     end
 
     count = count + 1
-    prev_end = start + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+    prev_end = start + GetMediaItemInfo_Value(item, "D_LENGTH")
   end
 
   return count
