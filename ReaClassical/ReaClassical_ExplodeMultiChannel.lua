@@ -76,7 +76,7 @@ function main()
     for i = CountTracks(0) - 1, 0, -1 do
         local track = GetTrack(0, i)
         if CountTrackMediaItems(track) == 0 then
-            reaper.DeleteTrack(track)
+            DeleteTrack(track)
         end
     end
 

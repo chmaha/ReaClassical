@@ -20,9 +20,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 -- luacheck: ignore 113
 
--- local profiler = dofile(reaper.GetResourcePath() ..
+-- local profiler = dofile(GetResourcePath() ..
 --   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
--- reaper.defer = profiler.defer
+-- defer = profiler.defer
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
@@ -455,7 +455,7 @@ end
 
 function check_time()
   current_time = os.time()
-  if current_time >= start_time and reaper.GetPlayState() ~= 5 then
+  if current_time >= start_time and GetPlayState() ~= 5 then
     if end_time then
       local stop_pos = GetCursorPosition() + (end_time - start_time)
       remove_markers_by_name("!" .. F9_command)
@@ -475,7 +475,7 @@ function check_time()
       end
       Main_OnCommand(F9_command, 0)
     else
-      reaper.Main_OnCommand(1013, 0) -- Regular record command
+      Main_OnCommand(1013, 0) -- Regular record command
     end
     SetProjExtState(0, "ReaClassical", "Recording Start", "")
     SetProjExtState(0, "ReaClassical", "Recording End", "")
@@ -489,13 +489,13 @@ end
 ---------------------------------------------------------------------
 
 function remove_markers_by_name(marker_name)
-  local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
+  local _, num_markers, num_regions = CountProjectMarkers(0)
   local total_markers = num_markers + num_regions
 
   for i = total_markers - 1, 0, -1 do
-    local retval, isrgn, _, _, name, markrgnindex = reaper.EnumProjectMarkers(i)
+    local retval, isrgn, _, _, name, markrgnindex = EnumProjectMarkers(i)
     if retval and name == marker_name then
-      reaper.DeleteProjectMarker(0, markrgnindex, isrgn)
+      DeleteProjectMarker(0, markrgnindex, isrgn)
     end
   end
 end
@@ -511,12 +511,12 @@ end
 ---------------------------------------------------------------------
 
 function find_first_rec_enabled_parent()
-  local num_tracks = reaper.CountTracks(0)
+  local num_tracks = CountTracks(0)
 
   for i = 0, num_tracks - 1 do
-    local track = reaper.GetTrack(0, i)
-    local is_parent = reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1
-    local is_rec_enabled = reaper.GetMediaTrackInfo_Value(track, "I_RECARM") == 1
+    local track = GetTrack(0, i)
+    local is_parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1
+    local is_rec_enabled = GetMediaTrackInfo_Value(track, "I_RECARM") == 1
 
     if is_parent and is_rec_enabled then
       return track

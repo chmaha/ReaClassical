@@ -102,11 +102,11 @@ function prepare_takes()
         return
     end
 
-    for track_idx = 0, reaper.CountTracks(0) - 1 do
-        local track = reaper.GetTrack(0, track_idx)
-        for item_idx = 0, reaper.CountTrackMediaItems(track) - 1 do
-            local item = reaper.GetTrackMediaItem(track, item_idx)
-            reaper.SetMediaItemInfo_Value(item, "I_GROUPID", 0)
+    for track_idx = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, track_idx)
+        for item_idx = 0, CountTrackMediaItems(track) - 1 do
+            local item = GetTrackMediaItem(track, item_idx)
+            SetMediaItemInfo_Value(item, "I_GROUPID", 0)
         end
     end
 
@@ -194,11 +194,11 @@ function vertical_group(length, group)
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
 
-        local num_selected_items = reaper.CountSelectedMediaItems(0)
+        local num_selected_items = CountSelectedMediaItems(0)
         for i = 0, num_selected_items - 1 do
-            local selected_item = reaper.GetSelectedMediaItem(0, i)
+            local selected_item = GetSelectedMediaItem(0, i)
             if selected_item then
-                reaper.SetMediaItemInfo_Value(selected_item, "I_GROUPID", group)
+                SetMediaItemInfo_Value(selected_item, "I_GROUPID", group)
             end
         end
         group = group + 1
@@ -272,9 +272,9 @@ function vertical()
         if i == start then
             local selected_items = CountSelectedMediaItems(0)
             for j = 0, selected_items - 1 do
-                local item = reaper.GetSelectedMediaItem(0, j)
+                local item = GetSelectedMediaItem(0, j)
                 if item then
-                    reaper.SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.edited_material)
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.edited_material)
                 end
             end
         end

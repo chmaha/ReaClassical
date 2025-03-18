@@ -33,7 +33,7 @@ end
 
 
 function main()
-    reaper.Undo_BeginBlock()
+    Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
@@ -42,21 +42,21 @@ function main()
     PreventUIRefresh(1)
     process_items()
     PreventUIRefresh(-1)
-    reaper.Undo_EndBlock("Remove Take Ranking", -1)
-    reaper.UpdateArrange()
+    Undo_EndBlock("Remove Take Ranking", -1)
+    UpdateArrange()
 end
 
 ---------------------------------------------------------------------
 
 function modify_item_name(item)
-    local take = reaper.GetActiveTake(item)
+    local take = GetActiveTake(item)
     if take ~= nil then
-        local _, item_name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
 
         item_name = item_name:gsub("[%+%-]+$", "")
         item_name = item_name:gsub("  $", "") -- remove double space if present
 
-        reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+        GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
 
         SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", 0)
 
@@ -76,12 +76,12 @@ end
 ---------------------------------------------------------------------
 
 function process_items()
-    local count_selected = reaper.CountSelectedMediaItems(0)
+    local count_selected = CountSelectedMediaItems(0)
 
     if count_selected > 0 then
         -- Process selected items
         for i = 0, count_selected - 1 do
-            local item = reaper.GetSelectedMediaItem(0, i)
+            local item = GetSelectedMediaItem(0, i)
             modify_item_name(item)
         end
     else

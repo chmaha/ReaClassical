@@ -32,7 +32,7 @@ if not SWS_exists then
     return
 end
 
-local classical_take_record = reaper.NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+local classical_take_record = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
 local delay_cycles = 2
 
 ---------------------------------------------------------------------
@@ -43,10 +43,10 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local playstate = reaper.GetPlayState()
+    local playstate = GetPlayState()
     if playstate == 5 then
-        reaper.Main_OnCommand(classical_take_record, 0)
-        reaper.defer(delayed_record)
+        Main_OnCommand(classical_take_record, 0)
+        defer(delayed_record)
     end
 end
 
@@ -55,9 +55,9 @@ end
 function delayed_record()
     delay_cycles = delay_cycles - 1
     if delay_cycles > 0 then
-        reaper.defer(delayed_record)
+        defer(delayed_record)
     else
-        reaper.Main_OnCommand(classical_take_record, 0)
+        Main_OnCommand(classical_take_record, 0)
     end
 end
 

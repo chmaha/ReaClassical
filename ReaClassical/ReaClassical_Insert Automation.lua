@@ -31,7 +31,7 @@ function main()
       MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
       return
   end
-  local start_time, end_time = reaper.GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
+  local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
 
   if start_time == end_time then
     Main_OnCommand(41162, 0) -- Automation: Write current values for all writing envelopes from cursor to end of project

@@ -1170,7 +1170,7 @@ function move_items_to_first_source_group(tracks_per_group)
         local track1 = GetTrack(0, i)
         local track2 = GetTrack(0, i + tracks_per_group)
         if track1 and track2 then
-            for j = reaper.GetTrackNumMediaItems(track1) - 1, 0, -1 do
+            for j = GetTrackNumMediaItems(track1) - 1, 0, -1 do
                 local item = GetTrackMediaItem(track1, j)
                 MoveMediaItemToTrack(item, track2)
             end
