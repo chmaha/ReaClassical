@@ -1,10 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.9
+@version 25.3.12
 @changelog
-  Add new PDF manual
-  PDF Manual: Fix hashes
-  PDF Manual: Fix curly quotes
+  Create CD Markers: Allow for extra DDP metadata in item Names
+  Add Room tone generation project template
+  Various: Remove reaper. prefixes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -82,6 +82,7 @@
   [main] ReaClassical_Show Statistics.lua
   [main] ReaClassical_Reverse S-D Edit.lua
   [rpp] ReaClassical.RPP
+  [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
   [theme] ReaClassical WaveColors Dark.ReaperThemeZip
