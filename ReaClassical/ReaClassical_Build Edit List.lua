@@ -238,7 +238,7 @@ function build_item_table(fps)
             s_in = format_timecode(start_offset, fps),
             s_out = format_timecode(end_offset, fps),
             length = format_timecode(end_offset - start_offset, fps),
-            playrate = (playrate == 1) and "" or playrate
+            playrate = (math.abs(playrate - 1) < 0.001) and "" or playrate
         })
 
         edit_number = edit_number + 1
