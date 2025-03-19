@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, build_item_table, format_timecode, get_temp_html_file
+local parse_timecode
 
 ---------------------------------------------------------------------
 
@@ -47,13 +48,12 @@ function main()
     local items = build_item_table(fps)
 
     -- Initialize CSV variable with the header row
-    local csv = "Edit,Start,Source Filename,Source In,Source Out,Length,Playback Rate\n"
+    local csv = "Edit,Start,Source In,Source Out,Length,Playback Rate\n"
     -- Append each item's data to the CSV variable
     for _, item in ipairs(items) do
-        csv = csv .. string.format("%s,%s,%s,%s,%s,%s,%s\n",
+        csv = csv .. string.format("%s,%s,%s,%s,%s,%s\n",
             item.edit_number,
             item.position,
-            item.filename,
             item.s_in,
             item.s_out,
             item.length,
@@ -89,15 +89,15 @@ function main()
 ]])
 
     file:write("<div class='info'>\n")
-    file:write("  <h2>Edit List (using source file timing)</h2>\n")
+    file:write("  <h2>Edit List (using BWF Start Offset)</h2>\n")
     file:write("  <p><strong>Project Name:</strong> ", (project_name or "Untitled"), "</p>\n")
     file:write("  <p><strong>Date:</strong> ", (date), "</p>\n")
     file:write("  <p><strong>Frame Rate:</strong> ", (fps or "Unknown"), "</p>\n")
     file:write(
         [[<p><span class="label">Start:</span>
-    <span class="description">Location on the timeline for building the edit</span><br>
+    <span class="description">Absolute timeline location for building the edit</span><br>
     <span class="label">Source In and Source Out:</span>
-    <span class="description">Time relative to the source file</span><br>
+    <span class="description">Absolute timecode references for source material</span><br>
     <span class="label">Length:</span>
     <span class="description">The duration between Source In and Source Out times</span><br>
     <span class="label">Playback rate:</span>
@@ -110,7 +110,6 @@ function main()
             <tr>
                 <th>Edit</th>
                 <th>Start</th>
-                <th>Source Filename</th>
                 <th>Source In</th>
                 <th>Source Out</th>
                 <th>Length</th>
@@ -124,14 +123,14 @@ function main()
     for _, item in ipairs(items) do
         if item.edit_number == "Gap" then
             file:write(string.format(
-                '<tr class="gap-row"><td>%s</td><td>%s</td><td>%s</td>' ..
+                '<tr class="gap-row"><td>%s</td><td>%s</td>' ..
                 '<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
-                item.edit_number, item.position, item.filename, item.s_in, item.s_out, item.length, item.playrate
+                item.edit_number, item.position, item.s_in, item.s_out, item.length, item.playrate
             ))
         else
             file:write(string.format(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
-                item.edit_number, item.position, item.filename, item.s_in, item.s_out, item.length, item.playrate
+                '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
+                item.edit_number, item.position, item.s_in, item.s_out, item.length, item.playrate
             ))
         end
     end
@@ -199,10 +198,8 @@ end
 -- Function to build the item table
 function build_item_table(fps)
     local item_table = {}
-    local track = GetSelectedTrack(0, 0) -- Get first selected track
-    if not track then
-        track = GetTrack(0, 0)           -- Default to first track
-    end
+    local track = GetTrack(0, 0) -- Default to first track
+
     if not track then return item_table end
 
     local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
@@ -230,7 +227,13 @@ function build_item_table(fps)
         local full_path = GetMediaSourceFileName(source)
         local filename = full_path:match("([^\\/]+)$")
 
-        local start_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+        local retval, bwf_offset_str = GetMediaFileMetadata(source, "Generic:StartOffset")
+        local bwf_offset = (retval and bwf_offset_str ~= "") and parse_timecode(bwf_offset_str) or 0
+
+        local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+
+        local start_offset = bwf_offset + item_offset
+
         -- Determine end time
         local next_item_position = (i + 1 < item_count) and
             GetMediaItemInfo_Value(GetTrackMediaItem(track, i + 1), "D_POSITION") or item_end
@@ -295,6 +298,22 @@ function get_temp_html_file()
         SetProjExtState(0, "ReaClassical", "EditListTempPath", temp_path)
     end
     return temp_path
+end
+
+---------------------------------------------------------------------
+
+function parse_timecode(timecode)
+    local h, m, s = timecode:match("^(%d+):(%d+):([%d%.]+)$")
+    if h then
+        return tonumber(h) * 3600 + tonumber(m) * 60 + tonumber(s)
+    end
+
+    m, s = timecode:match("^(%d+):([%d%.]+)$")
+    if m then
+        return tonumber(m) * 60 + tonumber(s)
+    end
+
+    return tonumber(timecode) or 0 -- Fallback if just seconds are provided
 end
 
 ---------------------------------------------------------------------
