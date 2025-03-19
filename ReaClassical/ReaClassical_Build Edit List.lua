@@ -199,7 +199,10 @@ end
 -- Function to build the item table
 function build_item_table(fps)
     local item_table = {}
-    local track = GetTrack(0, 0) -- First track
+    local track = reaper.GetSelectedTrack(0, 0) -- Get first selected track
+    if not track then
+        track = reaper.GetTrack(0, 0) -- Default to first track
+    end
     if not track then return item_table end
 
     local item_count = CountTrackMediaItems(track)
