@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.13
+@version 25.3.14
 @changelog
-  NEW: Build Edit List function
-  Add build edit function to top menu
+  Build Edit List: Use selected track as basis
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
