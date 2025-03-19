@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.12
+@version 25.3.13
 @changelog
-  Create CD Markers: Allow for extra DDP metadata in item Names
-  Add Room tone generation project template
-  Various: Remove reaper. prefixes
+  NEW: Build Edit List function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -81,6 +79,7 @@
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Show Statistics.lua
   [main] ReaClassical_Reverse S-D Edit.lua
+  [main] ReaClassical_Build Edit List.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
