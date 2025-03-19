@@ -223,7 +223,14 @@ function build_item_table(fps)
         -- Determine end time
         local next_item_position = (i + 1 < item_count) and
             GetMediaItemInfo_Value(GetTrackMediaItem(track, i + 1), "D_POSITION") or (position + length)
+
         local end_offset = math.min(start_offset + next_item_position - position, start_offset + length)
+        local source_length = (end_offset - start_offset)
+
+        if (math.abs(playrate - 1) > 0.001) then
+            source_length = source_length / playrate
+            end_offset = start_offset + source_length
+        end
 
         if filename == prev_filename then
             filename = '…'
@@ -237,7 +244,7 @@ function build_item_table(fps)
             filename = filename,
             s_in = format_timecode(start_offset, fps),
             s_out = format_timecode(end_offset, fps),
-            length = format_timecode(end_offset - start_offset, fps),
+            length = format_timecode(source_length, fps),
             playrate = (math.abs(playrate - 1) < 0.001) and "" or playrate
         })
 
