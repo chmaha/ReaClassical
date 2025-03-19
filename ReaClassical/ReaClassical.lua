@@ -3,6 +3,7 @@
 @version 25.3.13
 @changelog
   NEW: Build Edit List function
+  Add build edit function to top menu
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
