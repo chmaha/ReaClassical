@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.16
+@version 25.3.17
 @changelog
-  Build Edit List functions: Switch to End reference instead of source length
-  Build Edit List functions: Have gap cell span all table columns
+  Build Edit List functions: Save HTML to project root folder
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
