@@ -1,13 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.15
+@version 25.3.16
 @changelog
-  Build Edit List: Add new function to use absolute timecode
-  Build Edit List functions: Allow use of time selection
-  Create CD Markers: Fix track titles in reports and CUE file
-  Create CD Markers: Fix saving metadata in corner case
-  CUE file: Use track performer if set
-  NOTES: Update via Shift+U and update keymap and toolbars/menus
+  Build Edit List functions: Switch to End reference instead of source length
+  Build Edit List functions: Have gap cell span all table columns
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
