@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, build_item_table, format_timecode, get_temp_html_file
+local main, build_item_table, format_timecode, get_html_file
 local parse_timecode
 
 ---------------------------------------------------------------------
@@ -62,7 +62,7 @@ function main()
     end
 
     -- Write HTML content
-    local file_path = get_temp_html_file()
+    local file_path = get_html_file()
     local file = io.open(file_path, "w")
     if not file then
         MB("Failed to create HTML file.", "Error", 0)
@@ -288,13 +288,17 @@ end
 
 ---------------------------------------------------------------------
 
-function get_temp_html_file()
-    local _, temp_path = GetProjExtState(0, "ReaClassical", "EditListTempPath")
-    if temp_path == "" then
-        temp_path = os.tmpname() .. ".html"
-        SetProjExtState(0, "ReaClassical", "EditListTempPath", temp_path)
+function get_html_file()
+    local _, path = EnumProjects(-1)
+    local slash = package.config:sub(1, 1)
+    if path == "" then
+        path = GetProjectPath()
+    else
+        local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
+        path = path:match(pattern)
     end
-    return temp_path
+    local file = path .. slash .. 'edit_list_bwfso.html'
+    return file
 end
 
 ---------------------------------------------------------------------
