@@ -401,6 +401,8 @@ function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPa
         track.number = track.title == "pregap" and "p" or string.format("%02d", track.number or 0)
         track.title = track.title == "pregap" and "" or track.title
 
+        track.title = track.title:match("^[!]*([^|]*)")
+
         if track.title == "" then
             file:write(string.format("%-2s | %02d:%02d:%02d | %s |\n",
                 track.number or "", track.mm or 0, track.ss or 0, track.ff or 0, track.length))
@@ -482,6 +484,8 @@ function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, 
     for _, track in ipairs(tracks or {}) do
         track.number = track.title == "pregap" and "p" or tostring(track.number or "")
         track.title = track.title == "pregap" and "" or track.title
+
+        track.title = track.title:match("^[!]*([^|]*)")
 
         file:write("      <tr>\n")
         file:write("        <td>" .. track.number .. "</td>\n")
