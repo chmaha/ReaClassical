@@ -124,11 +124,7 @@ function main()
     -- Append table rows from items
     for _, item in ipairs(items) do
         if item.edit_number == "Gap" then
-            file:write(string.format(
-                '<tr class="gap-row"><td>%s</td><td>%s</td>' ..
-                '<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
-                item.edit_number, item.position, item.s_in, item.s_out, item.dest_end, item.playrate
-            ))
+            file:write(string.format('<tr class="gap-row"><td colspan="7">%s</td></tr>\n', item.edit_number))
         else
             file:write(string.format(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
