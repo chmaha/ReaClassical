@@ -204,16 +204,12 @@ function create_string(fields, num_of_markers, extension)
     for i = 0, num_of_markers - 1 do
         local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, i)
         if name_out:find("^#") then
-            local has_isrc_code = name_out:find("ISRC")
+            local perf = name_out:match("PERFORMER=([^|]+)")
             local isrc_code = name_out:match('ISRC=([%w%d]+)') or ""
-            if has_isrc_code then
-                name_out = name_out:match(('#(.*)|'))
-            else
-                name_out = name_out:match(('#(.*)'))
-            end
+            name_out = name_out:match("^#([^|]+)")
             local formatted_time = format_time(raw_pos_out)
 
-            local perf = fields[3]
+            if not perf then perf = fields[3] end
 
             local id = ("%02d"):format(marker_id)
             marker_id = marker_id + 1
