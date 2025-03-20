@@ -77,7 +77,7 @@ function main()
     end
 
     local dialog_title = count > 0 and "Jump to Time Within Item(s)" or "Jump to Time Within Project"
-    local retval, time_str = GetUserInputs(dialog_title, 1, "Enter time (mm:ss)", "")
+    local retval, time_str = GetUserInputs(dialog_title, 1, "Enter time (right-aligned logic)", "")
 
     if retval then
         local target_time = time_to_seconds(time_str)
@@ -91,7 +91,7 @@ function main()
             local cursor_position = first_position + target_time
             SetEditCurPos(cursor_position, true, false)
         else
-            MB("Invalid time format. Please use mm:ss.", "Error", 0)
+            return
         end
     end
 end
@@ -99,12 +99,47 @@ end
 ---------------------------------------------------------------------
 
 function time_to_seconds(time_str)
-    local minutes, seconds = time_str:match("(%d+):(%d+)")
-    if minutes and seconds then
-        return tonumber(minutes) * 60 + tonumber(seconds)
+    local frames, seconds, minutes, hours = 0, 0, 0, 0
+    local frame_rate = TimeMap_curFrameRate(0)
+
+    if time_str:match("%D") then
+        local parts = {}
+        for part in time_str:gmatch("%d+") do
+            table.insert(parts, tonumber(part))
+        end
+        local len = #parts
+
+        if len == 1 then
+            frames = parts[1]
+        elseif len == 2 then
+            seconds, frames = parts[1], parts[2]
+        elseif len == 3 then
+            minutes, seconds, frames = parts[1], parts[2], parts[3]
+        elseif len == 4 then
+            hours, minutes, seconds, frames = parts[1], parts[2], parts[3], parts[4]
+        else
+            return nil
+        end
     else
+        local num = tonumber(time_str)
+        if not num then return nil end
+        local str = string.format("%08d", num)
+
+        frames    = tonumber(str:sub(-2)) or 0
+        seconds   = tonumber(str:sub(-4, -3)) or 0
+        minutes   = tonumber(str:sub(-6, -5)) or 0
+        hours     = tonumber(str:sub(-8, -7)) or 0
+    end
+
+    if frames >= frame_rate then
+        MB(string.format("Invalid frame count: %d exceeds frame rate of %d.", frames, frame_rate), "Error", 0)
+        return nil
+    elseif seconds >= 60 or minutes >= 60 then
+        MB("Invalid time format: seconds and minutes must be below 60.", "Error", 0)
         return nil
     end
+
+    return hours * 3600 + minutes * 60 + seconds + frames / frame_rate
 end
 
 ---------------------------------------------------------------------
