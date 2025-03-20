@@ -47,6 +47,7 @@ function main()
         MB(error_msg, "", 0)
     end
     local report = generate_report(metadata)
+    ClearConsole()
     reaper.ShowConsoleMsg(report)
 
     Undo_EndBlock('DDP metadata report', 0)
@@ -91,7 +92,7 @@ function parse_markers()
         local _, isrgn, _, _, name, _ = reaper.EnumProjectMarkers(i)
         if not isrgn then                -- Only process markers
             if not name:match("^@") then -- Ignore album line since it's already processed
-                local track_title = name:match("^([^|]+)|")
+                local track_title = name:match("^#([^|]+)")
                 if track_title then
                     local track_data = {
                         title = track_title,

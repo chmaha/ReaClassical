@@ -99,7 +99,8 @@ end
 ---------------------------------------------------------------------
 
 function time_to_seconds(time_str)
-    local frames, seconds, minutes, hours = 0, 0, 0, 0
+    local frames
+    local seconds, minutes, hours = 0, 0, 0
     local frame_rate = TimeMap_curFrameRate(0)
 
     if time_str:match("%D") then

@@ -24,11 +24,17 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_info, cd_markers, find_current_start, create_marker
 local renumber_markers, add_pregap, find_project_end, end_marker
-local frame_check, save_metadata, save_codes, add_codes, delete_markers
+local frame_check, save_codes, add_codes, delete_markers
 local empty_items_check, return_custom_length, start_check
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
-local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone, add_roomtone_fadeout
-local check_saved_state, album_item_count
+local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
+local add_roomtone_fadeout, check_saved_state, album_item_count
+
+local count_markers, create_filename, create_cue_entries, create_string
+local ext_mod, save_file, format_time, parse_cue_file
+local create_plaintext_report, create_html_report, any_isrc_present
+local time_to_mmssff, subtract_time_strings, add_pregaps_to_table
+local formatted_pos_out, parse_markers
 
 local minimum_points = 15
 local points = {}
@@ -71,15 +77,17 @@ function main()
   local _, ddp_run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
   local use_existing = false
   if ddp_run ~= "" then
-    local saved_values_response = MB("Would you like to use the existing saved values?", "Create CD Markers", 4)
+    local saved_values_response = MB("Would you like to use the existing saved values for UPC/ISRC?",
+      "Create CD Markers", 4)
     if saved_values_response == 6 then
       use_existing = true
     end
   end
   SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
-  local redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(first_track,
+  local success, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(
+    first_track,
     num_of_items, use_existing)
-  if redbook_track_length_errors == -1 then return end
+  if not success then return end
   if redbook_track_length_errors > 0 then
     MB(
       'This album does not meet the Red Book standard as at least one of the CD tracks is under 4 seconds in length.',
@@ -97,47 +105,70 @@ function main()
   room_tone(redbook_project_length * 60)
   renumber_markers()
   PreventUIRefresh(-1)
-  local create_cue = NamedCommandLookup("_RSa012bb075440de1ce27f06b6e12b88877848ca5b")
-  Main_OnCommand(create_cue, 0)
+
+  PreventUIRefresh(1)
+  local ret1, num_of_markers = count_markers()
+  if not ret1 then return end
+  local ret2, filename = create_filename()
+  if not ret2 then return end
+  local fields, extension, production_year = create_cue_entries(filename)
+
+  local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
+  local path, slash, cue_file = save_file(fields, string)
+
+  local txtOutputPath = path .. slash .. 'album_report.txt'
+  local HTMLOutputPath = path .. slash .. 'album_report.html'
+  local albumTitle, albumPerformer, tracks = parse_cue_file(cue_file, album_length, num_of_markers)
+  if albumTitle and albumPerformer and #tracks > 0 then
+    create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number,
+      production_year)
+    create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number,
+      production_year)
+  end
+
+
+  MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
+    "Create the DDP fileset, matching audio for the generated CUE,\n" ..
+    "and/or individual files via the ReaClassical 'All Settings' presets\nin the Render dialog.\n\n" ..
+    "The album reports and CUE file have been written to:\n" .. path, "Create CD Markers", 0)
+  PreventUIRefresh(-1)
+
+  local metadata_report = NamedCommandLookup("_RS9dfbe237f69ecb0151b67e27e607b93a7bd0c4b4")
+  Main_OnCommand(metadata_report, 0)
 
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
 
 ---------------------------------------------------------------------
 
-function get_info(use_existing)
-  local _, metadata_saved = GetProjExtState(0, "ReaClassical", "AlbumMetadata")
-  local ret, user_inputs
-  local metadata_table = {}
-  if use_existing and metadata_saved ~= "" then
-    user_inputs = ""
-    for entry in metadata_saved:gmatch('([^,]+)') do
-      metadata_table[#metadata_table + 1] = entry
-      user_inputs = user_inputs .. (user_inputs == "" and "" or ",") .. entry
+function get_info()
+  local track = reaper.GetTrack(0, 0) -- Get first track
+  if not track then return nil end
+
+  for i = 0, reaper.GetTrackNumMediaItems(track) - 1 do
+    local item = reaper.GetTrackMediaItem(track, i)
+    if item then
+      local take = reaper.GetActiveTake(item)
+      if take then
+        local take_name = reaper.GetTakeName(take)
+        if take_name and take_name:match("^@") then
+          return take_name:gsub("|$", "")
+        end
+      end
     end
-  else
-    repeat
-      if metadata_saved ~= "" then
-        ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
-          'Album Title,Performer,Composer,Genre,extrawidth=100',
-          metadata_saved)
-      else
-        ret, user_inputs = GetUserInputs('CD/DDP Album information', 4,
-          'Album Title,Performer,Composer,Genre,extrawidth=100',
-          'My Classical Album,Performer,Composer,Classical')
-      end
-      for entry in user_inputs:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
-      if #metadata_table ~= 4 and ret then
-        MB("Please complete all four metadata entries", "Add Album Metadata", 0)
-      end
-    until not ret or (#metadata_table == 4)
   end
-  return user_inputs, metadata_table
+  MB("No album metadata found.\n" ..
+    "Please add to the last item in your album on the first track being sure to start with @ such as:\n" ..
+    "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various", "Create CD Markers", 0)
+  return false
 end
 
 ---------------------------------------------------------------------
 
 function cd_markers(first_track, num_of_items, use_existing)
+  local album_metadata = get_info()
+  if not album_metadata then return false end
+
   delete_markers()
 
   SNM_SetIntConfigVar('projfrbase', 75)
@@ -159,44 +190,44 @@ function cd_markers(first_track, num_of_items, use_existing)
   local marker_count = 0
   for i = 0, num_of_items - 1, 1 do
     local current_start, take_name = find_current_start(first_track, i)
-    local added_marker = create_marker(current_start, marker_count, take_name, isrc_ret, code_table, offset)
-    if added_marker then
-      if take_name:match("^!") and marker_count > 0 then
-        AddProjectMarker(0, false, frame_check(current_start - (pregap_len + offset)), 0, "!", marker_count)
-      end
-      if marker_count > 0 then
-        if current_start - previous_start < 4 then
-          redbook_track_length_errors = redbook_track_length_errors + 1
+    if not take_name:match("^@") then
+      local added_marker = create_marker(current_start, marker_count, take_name, isrc_ret, code_table, offset)
+      if added_marker then
+        if take_name:match("^!") and marker_count > 0 then
+          AddProjectMarker(0, false, frame_check(current_start - (pregap_len + offset)), 0, "!", marker_count)
         end
-        AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(current_start - offset),
-          previous_takename:match("^[!]*([^|]*)"),
-          marker_count)
+        if marker_count > 0 then
+          if current_start - previous_start < 4 then
+            redbook_track_length_errors = redbook_track_length_errors + 1
+          end
+          AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(current_start - offset),
+            previous_takename:match("^[!]*([^|]*)"),
+            marker_count)
+        end
+        previous_start = current_start
+        previous_takename = take_name
+        marker_count = marker_count + 1
       end
-      previous_start = current_start
-      previous_takename = take_name
-      marker_count = marker_count + 1
     end
   end
   if marker_count == 0 then
     MB('Please add take names to all items that you want to be CD track starts (Select item then press F2)',
       "No track markers created", 0)
-    return -1
+    return false
   end
   if marker_count > 99 then
     redbook_total_tracks_error = true
   end
   AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap,
-    previous_takename:match("^[!]*(.+)"),
+    previous_takename:match("^[!]*([^|]*)"),
     marker_count)
   local redbook_project_length
   if marker_count ~= 0 then
-    local user_inputs, metadata_table = get_info(use_existing)
-    if #metadata_table == 4 then save_metadata(user_inputs) end
     add_pregap(first_track)
-    redbook_project_length = end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
+    redbook_project_length = end_marker(first_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
   end
   Main_OnCommand(40753, 0) -- Snapping: Disable snap
-  return redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
+  return true, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
 end
 
 ---------------------------------------------------------------------
@@ -281,27 +312,19 @@ end
 
 ---------------------------------------------------------------------
 
-function end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
+function end_marker(first_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
   local final_item = GetTrackMediaItem(first_track, num_of_items - 1)
   local final_start = GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
   local catalog = ""
-  if #metadata_table == 4 and upc_ret then
-    if code_table[1] ~= "" then
-      catalog = "|CATALOG=" .. code_table[1]
-    end
-    local album_info = "@" ..
-        metadata_table[1] ..
-        catalog .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
-        "|GENRE=" .. metadata_table[4] .. "|MESSAGE=Created with ReaClassical"
-    AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
-  elseif #metadata_table == 4 then
-    local album_info = "@" ..
-        metadata_table[1] .. "|PERFORMER=" .. metadata_table[2] .. "|COMPOSER=" .. metadata_table[3] ..
-        "|GENRE=" .. metadata_table[4] .. "|MESSAGE=Created with ReaClassical"
-    AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
+  if upc_ret and code_table[1] ~= "" then
+    catalog = "|CATALOG=" .. code_table[1]
   end
+
+  local album_info = album_metadata .. catalog .. "|MESSAGE=Created with ReaClassical"
+  AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
+
   AddProjectMarker(0, false, frame_check(final_end) + postgap, 0, "=END", 0)
   return (frame_check(final_end) + postgap) / 60
 end
@@ -314,12 +337,6 @@ function frame_check(pos)
     pos = BR_GetPrevGridDivision(pos)
   end
   return pos
-end
-
----------------------------------------------------------------------
-
-function save_metadata(user_inputs)
-  SetProjExtState(0, "ReaClassical", "AlbumMetadata", user_inputs)
 end
 
 ---------------------------------------------------------------------
@@ -843,6 +860,487 @@ function album_item_count()
   end
 
   return count
+end
+
+----------------------------------------------------------
+
+function count_markers()
+  local num_of_markers = CountProjectMarkers(0)
+  if num_of_markers == 0 then
+    MB('Please use "Create CD Markers script" first', "Create CUE file", 0)
+    return false
+  end
+  return true, num_of_markers
+end
+
+----------------------------------------------------------
+
+function create_filename()
+  local full_project_name = GetProjectName(0)
+  if full_project_name == "" then
+    MB("Please save your project first!", "Create CUE file", 0)
+    return false
+  else
+    return true, full_project_name:match("^(.+)[.].*$")
+  end
+end
+
+----------------------------------------------------------
+
+function create_cue_entries(filename)
+  local year = tonumber(os.date("%Y"))
+  local extension = "wav"
+
+  local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+  if input ~= "" then
+    local prefs_table = {}
+    for entry in input:gmatch('([^,]+)') do prefs_table[#table + 1] = entry end
+    if prefs_table[10] then year = tonumber(prefs_table[10]) end
+    if prefs_table[11] then extension = tostring(prefs_table[11]) end
+  end
+
+  local album_metadata = parse_markers()
+
+  if album_metadata.genre == nil then album_metadata.genre = "Unknown" end
+  if album_metadata.performer == nil then album_metadata.performer = "Unknown" end
+  if album_metadata.title == nil then album_metadata.title = "Unknown" end
+
+  local fields = {
+    album_metadata.genre,
+    year,
+    album_metadata.performer,
+    album_metadata.title,
+    filename .. '.' .. extension
+  }
+
+  return fields, extension:upper(), year
+end
+
+----------------------------------------------------------
+
+function create_string(fields, num_of_markers, extension)
+  local format = ext_mod(extension)
+
+  local _, _, album_pos_out, _, _ = EnumProjectMarkers2(0, num_of_markers - 1)
+  local album_length = format_time(album_pos_out)
+  local _, _, _, _, album_meta = EnumProjectMarkers2(0, num_of_markers - 2)
+  local catalog_number = album_meta:match('CATALOG=([%w%d]+)') or ""
+  local out_str
+
+  if catalog_number ~= "" then
+    out_str =
+        'REM COMMENT "Generated by ReaClassical"' ..
+        '\nREM GENRE ' .. fields[1] ..
+        '\nREM DATE ' .. fields[2] ..
+        '\nREM ALBUM_LENGTH ' .. album_length ..
+        '\nCATALOG ' .. catalog_number ..
+        '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
+        '\nTITLE ' .. '"' .. fields[4] .. '"' ..
+        '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
+  else
+    out_str =
+        'REM COMMENT "Generated by ReaClassical"' ..
+        '\nREM GENRE ' .. fields[1] ..
+        '\nREM DATE ' .. fields[2] ..
+        '\nREM ALBUM_LENGTH ' .. album_length ..
+        '\nPERFORMER ' .. '"' .. fields[3] .. '"' ..
+        '\nTITLE ' .. '"' .. fields[4] .. '"' ..
+        '\nFILE ' .. '"' .. fields[5] .. '"' .. ' ' .. format .. '\n'
+  end
+
+  local ind3 = '   '
+  local ind5 = '     '
+
+  local marker_id = 1
+  local is_pregap = false
+  local pregap_start = ""
+  for i = 0, num_of_markers - 1 do
+    local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, i)
+    if name_out:find("^#") then
+      local perf = name_out:match("PERFORMER=([^|]+)")
+      local isrc_code = name_out:match('ISRC=([%w%d]+)') or ""
+      name_out = name_out:match("^#([^|]+)")
+      local formatted_time = format_time(raw_pos_out)
+
+      if not perf then perf = fields[3] end
+
+      local id = ("%02d"):format(marker_id)
+      marker_id = marker_id + 1
+      if name_out == nil or name_out == '' then name_out = 'Untitled' end
+
+      if isrc_code ~= "" then
+        out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
+            ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
+            ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n' ..
+            ind5 .. 'ISRC ' .. isrc_code .. '\n'
+        if is_pregap then
+          out_str = out_str .. ind5 .. 'INDEX 00 ' .. pregap_start .. '\n'
+          is_pregap = false
+        end
+        out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_time .. '\n'
+      else
+        out_str = out_str .. ind3 .. 'TRACK ' .. id .. ' AUDIO' .. '\n' ..
+            ind5 .. 'TITLE ' .. '"' .. name_out .. '"' .. '\n' ..
+            ind5 .. 'PERFORMER ' .. '"' .. perf .. '"' .. '\n'
+        if is_pregap then
+          out_str = out_str .. ind5 .. 'INDEX 00 ' .. pregap_start .. '\n'
+          is_pregap = false
+        end
+        out_str = out_str .. ind5 .. 'INDEX 01 ' .. formatted_time .. '\n'
+      end
+    elseif name_out:find("^!") then
+      is_pregap = true
+      pregap_start = format_time(raw_pos_out)
+    end
+  end
+
+  return out_str, catalog_number, album_length
+end
+
+----------------------------------------------------------
+
+function ext_mod(extension)
+  local list = { "AIFF", "MP3" }
+  for _, v in pairs(list) do
+    if extension == v then
+      return extension
+    end
+  end
+  return "WAVE"
+end
+
+----------------------------------------------------------
+
+function save_file(fields, out_str)
+  local _, path = EnumProjects(-1)
+  local slash = package.config:sub(1, 1)
+  if path == "" then
+    path = GetProjectPath()
+  else
+    local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
+    path = path:match(pattern)
+  end
+  local file = path .. slash .. fields[5]:match('^(.+)[.].+') .. '.cue'
+  local f = io.open(file, 'w')
+  if f then
+    f:write(out_str)
+    f:close()
+  else
+    MB(
+      "There was an error creating the file. " ..
+      "Copy and paste the contents of the following console window to a new .cue file.",
+      "Create CUE file", 0)
+    ShowConsoleMsg(out_str)
+  end
+  return path, slash, file
+end
+
+----------------------------------------------------------
+
+function format_time(pos_out)
+  pos_out = format_timestr_pos(pos_out, '', 5)
+  local time = {}
+  for num in pos_out:gmatch('[%d]+') do
+    if tonumber(num) > 10 then num = tonumber(num) end
+    time[#time + 1] = num
+  end
+  if tonumber(time[1]) > 0 then time[2] = tonumber(time[2]) + tonumber(time[1]) * 60 end
+  return table.concat(time, ':', 2)
+end
+
+-----------------------------------------------------------------
+
+function parse_cue_file(cueFilePath, albumLength, num_of_markers)
+  local file = io.open(cueFilePath, "r")
+
+  if not file then
+    return
+  end
+
+  local albumTitle, albumPerformer
+  local tracks = {}
+
+  local currentTrack = {}
+
+  for line in file:lines() do
+    if line:find("^TITLE") then
+      albumTitle = line:match('"([^"]+)"')
+    elseif line:find("^PERFORMER") then
+      albumPerformer = line:match('"([^"]+)"')
+    elseif line:find("^%s+TRACK") then
+      currentTrack = {
+        number = tonumber(line:match("(%d+)")),
+      }
+    elseif line:find("^%s+PERFORMER") then
+      currentTrack.performer = line:match('"([^"]+)"')
+    elseif line:find("^%s+TITLE") then
+      currentTrack.title = line:match('"([^"]+)"')
+    elseif line:find("^%s+ISRC") then
+      currentTrack.isrc = line:match("ISRC%s+(%S+)")
+    elseif line:find("^%s+INDEX 01") then
+      local mm, ss, ff = line:match("(%d+):(%d+):(%d+)")
+      currentTrack.mm = tonumber(mm)
+      currentTrack.ss = tonumber(ss)
+      currentTrack.ff = tonumber(ff)
+      table.insert(tracks, currentTrack)
+    end
+  end
+
+  file:close()
+
+  tracks = add_pregaps_to_table(tracks, num_of_markers)
+
+  table.sort(tracks, function(a, b)
+    return (a.mm * 60 + a.ss + a.ff / 75) < (b.mm * 60 + b.ss + b.ff / 75)
+  end)
+
+
+  for i = 2, #tracks do
+    local secondTimeString = string.format("%02d:%02d:%02d", tracks[i].mm, tracks[i].ss, tracks[i].ff)
+    local firstTimeString = string.format("%02d:%02d:%02d", tracks[i - 1].mm, tracks[i - 1].ss, tracks[i - 1].ff)
+    tracks[i - 1].length = subtract_time_strings(secondTimeString, firstTimeString)
+  end
+
+  -- Deal with final track length based on album length
+  local firstTimeString = string.format("%02d:%02d:%02d", tracks[#tracks].mm, tracks[#tracks].ss, tracks[#tracks].ff)
+  tracks[#tracks].length = subtract_time_strings(albumLength, firstTimeString)
+
+  return albumTitle, albumPerformer, tracks
+end
+
+-----------------------------------------------------------------
+
+function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, albumLength, catalog_number,
+                                 production_year)
+  local file = io.open(txtOutputPath, "w")
+
+  if not file then
+    return
+  end
+
+  local date = os.date("*t")
+  local hour = date.hour % 12
+  hour = hour == 0 and 12 or hour
+  local ampm = date.hour >= 12 and "PM" or "AM"
+  local formattedDate = string.format("%d/%02d/%d %d:%02d%s", date.day, date.month, date.year, hour, date.min, ampm)
+  file:write("Generated by ReaClassical (" .. formattedDate .. ")\n\n")
+  file:write("Album: ", (albumTitle or "") .. "\n")
+  file:write("Year: ", (production_year or "") .. "\n")
+  file:write("Album Performer: ", (albumPerformer or "") .. "\n")
+
+  if catalog_number ~= "" then
+    file:write("UPC/EAN: ", (catalog_number or "") .. "\n\n")
+  else
+    file:write("\n")
+  end
+
+  file:write("-----------------------------\n")
+  file:write("Total Running Time: " .. albumLength .. "\n")
+  file:write("-----------------------------\n\n")
+
+  for _, track in ipairs(tracks or {}) do
+    local isrcSeparator = track.isrc and " | " or ""
+
+    track.number = track.title == "pregap" and "p" or string.format("%02d", track.number or 0)
+    track.title = track.title == "pregap" and "" or track.title
+
+    track.title = track.title:match("^[!]*([^|]*)")
+
+    if track.title == "" then
+      file:write(string.format("%-2s | %02d:%02d:%02d | %s |\n",
+        track.number or "", track.mm or 0, track.ss or 0, track.ff or 0, track.length))
+    else
+      file:write(string.format("%-2s | %02d:%02d:%02d | %-8s | %s%s%s \n",
+        track.number or "", track.mm or 0, track.ss or 0, track.ff or 0, track.length or "", track.title or "",
+        isrcSeparator, track.isrc or ""))
+    end
+  end
+
+  file:close()
+end
+
+-----------------------------------------------------------------
+
+function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, albumLength, catalog_number,
+                            production_year)
+  local file = io.open(htmlOutputPath, "w")
+
+  if not file then
+    return
+  end
+
+  file:write("<html>\n<head>\n")
+  file:write("<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Barlow:wght@200&display=swap'>\n")
+  file:write(
+    "<link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'>\n")
+  file:write("<style>\n")
+  file:write("  .greenlabel {\n    color: #a0c96d;\n  }\n")
+  file:write("  .redlabel {\n    color: #ff6961;\n  }\n")
+  file:write("  .bluelabel {\n    color: #6fb8df;\n  }\n")
+  file:write("  .greylabel {\n    color: #757575;\n  }\n")
+  file:write("body {\n")
+  file:write("  padding: 20px;\n")
+  file:write("  font-family: 'Barlow', sans-serif;\n")
+  file:write("}\n")
+  file:write(".container {\n")
+  file:write("  margin-top: 20px;\n")
+  file:write("}\n")
+  file:write("table {\n")
+  file:write("  margin-top: 20px;\n")
+  file:write("}\n")
+  file:write("table {\n")
+  file:write("  margin-top: 20px;\n")
+  file:write("}\n")
+  file:write("</style>\n</head>\n<body>\n")
+
+  local date = os.date("*t")
+  local hour = date.hour % 12
+  hour = hour == 0 and 12 or hour
+  local ampm = date.hour >= 12 and "PM" or "AM"
+  local formattedDate = string.format("%d/%02d/%d %d:%02d%s", date.day, date.month, date.year, hour, date.min, ampm)
+  file:write("<div class='container'>\n")
+  file:write("  <h3><span class='greylabel'>Generated by ReaClassical (" .. formattedDate .. ")</span></h2>\n\n")
+  file:write("  <h2><span class='greenlabel'>Album:</span> ", (albumTitle or ""), "</h3>\n")
+  file:write("  <h2><span class='redlabel'>Year:</span> ", (production_year or ""), "</h3>\n")
+  file:write("  <h2><span class='bluelabel'>Album Performer:</span> ", (albumPerformer or ""), "</h3>\n")
+
+  if catalog_number ~= "" then
+    file:write("  <h2><span class='greenlabel'>UPC/EAN:</span> ", catalog_number, "</h3>\n")
+  end
+
+  file:write("  <h2><span class='bluelabel'>Total Running Time:</span> " .. albumLength .. "</h3>\n\n")
+
+  file:write("  <table class='table table-striped'>\n")
+  file:write("    <thead class='thead-light'>\n")
+  file:write("      <tr>\n")
+  file:write("        <th>Track</th>\n")
+  file:write("        <th>Start</th>\n")
+  file:write("        <th>Length</th>\n")
+  file:write("        <th>Title</th>\n")
+  if any_isrc_present(tracks) then
+    file:write("        <th>ISRC</th>\n")
+  end
+  file:write("      </tr>\n")
+  file:write("    </thead>\n")
+  file:write("    <tbody>\n")
+
+  for _, track in ipairs(tracks or {}) do
+    track.number = track.title == "pregap" and "p" or tostring(track.number or "")
+    track.title = track.title == "pregap" and "" or track.title
+
+    track.title = track.title:match("^[!]*([^|]*)")
+
+    file:write("      <tr>\n")
+    file:write("        <td>" .. track.number .. "</td>\n")
+    file:write("        <td>" ..
+      string.format("%02d:%02d:%02d", track.mm or 0, track.ss or 0, track.ff or 0) .. "</td>\n")
+    file:write("        <td>" .. (track.length or "") .. "</td>\n")
+    file:write("        <td>" .. (track.title or "") .. "</td>\n")
+    if any_isrc_present(tracks) then
+      file:write("        <td>" .. (track.isrc or "") .. "</td>\n")
+    end
+    file:write("      </tr>\n")
+  end
+
+  file:write("    </tbody>\n")
+  file:write("  </table>\n")
+  file:write("</div>\n</body>\n</html>")
+
+  file:close()
+end
+
+-----------------------------------------------------------------
+
+function any_isrc_present(tracks)
+  for _, track in ipairs(tracks or {}) do
+    if track.isrc then
+      return true
+    end
+  end
+  return false
+end
+
+-----------------------------------------------------------------
+
+function time_to_mmssff(timeString)
+  local minutes, seconds, frames = timeString:match("(%d+):(%d+):(%d+)")
+  return tonumber(minutes), tonumber(seconds), tonumber(frames)
+end
+
+-----------------------------------------------------------------
+
+function subtract_time_strings(timeString1, timeString2)
+  local minutes1, seconds1, frames1 = time_to_mmssff(timeString1)
+  local minutes2, seconds2, frames2 = time_to_mmssff(timeString2)
+
+  local totalFrames1 = frames1 + seconds1 * 75 + minutes1 * 60 * 75
+  local totalFrames2 = frames2 + seconds2 * 75 + minutes2 * 60 * 75
+
+  local differenceFrames = totalFrames1 - totalFrames2
+
+  local minutesResult = math.floor(differenceFrames / 75 / 60)
+  local secondsResult = math.floor(differenceFrames / 75) % 60
+  local framesResult = differenceFrames % 75
+
+  local paddedMinutes = string.format("%02d", minutesResult)
+  local paddedSeconds = string.format("%02d", secondsResult)
+  local paddedFrames = string.format("%02d", framesResult)
+
+  return paddedMinutes .. ":" .. paddedSeconds .. ":" .. paddedFrames
+end
+
+-----------------------------------------------------------------
+
+function add_pregaps_to_table(tracks, num_of_markers)
+  local pregap
+  for i = 0, num_of_markers - 1 do
+    local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, i)
+    if string.sub(name_out, 1, 1) == "!" then
+      formatted_pos_out = format_time(raw_pos_out)
+      local mm, ss, ff = formatted_pos_out:match("(%d+):(%d+):(%d+)")
+      pregap = {
+        title = "pregap",
+        mm = tonumber(mm),
+        ss = tonumber(ss),
+        ff = tonumber(ff)
+      }
+      table.insert(tracks, pregap)
+    end
+  end
+  return tracks
+end
+
+-----------------------------------------------------------------
+
+function parse_markers()
+  local num_markers = reaper.CountProjectMarkers(0)
+  local metadata = {}
+
+  -- First pass: Extract album-wide metadata
+  for i = 0, num_markers - 1 do
+    local _, isrgn, _, _, name, _ = reaper.EnumProjectMarkers(i)
+    if not isrgn then -- Only process markers
+      local album_marker = name:match("^@(.-)|")
+      if album_marker then
+        metadata = {
+          title = album_marker,
+          catalog = name:match("CATALOG=([^|]+)") or name:match("EAN=([^|]+)")
+              or name:match("UPC=([^|]+)") or nil,
+          performer = name:match("PERFORMER=([^|]+)") or nil,
+          songwriter = name:match("SONGWRITER=([^|]+)") or nil,
+          composer = name:match("COMPOSER=([^|]+)") or nil,
+          arranger = name:match("ARRANGER=([^|]+)") or nil,
+          message = name:match("MESSAGE=([^|]+)") or nil,
+          identification = name:match("IDENTIFICATION=([^|]+)") or nil,
+          genre = name:match("GENRE=([^|]+)") or nil,
+          language = name:match("LANGUAGE=([^|]+)") or nil
+        }
+        break -- Stop early after finding album metadata
+      end
+    end
+  end
+
+  return metadata
 end
 
 ---------------------------------------------------------------------
