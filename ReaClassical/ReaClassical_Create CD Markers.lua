@@ -110,7 +110,11 @@ function get_info(use_existing)
   local ret, user_inputs
   local metadata_table = {}
   if use_existing and metadata_saved ~= "" then
-    for entry in metadata_saved:gmatch('([^,]+)') do metadata_table[#metadata_table + 1] = entry end
+    user_inputs = ""
+    for entry in metadata_saved:gmatch('([^,]+)') do
+      metadata_table[#metadata_table + 1] = entry
+      user_inputs = user_inputs .. (user_inputs == "" and "" or ",") .. entry
+    end
   else
     repeat
       if metadata_saved ~= "" then
@@ -165,7 +169,7 @@ function cd_markers(first_track, num_of_items, use_existing)
           redbook_track_length_errors = redbook_track_length_errors + 1
         end
         AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(current_start - offset),
-        previous_takename:match("^[!]*([^|]*)"),
+          previous_takename:match("^[!]*([^|]*)"),
           marker_count)
       end
       previous_start = current_start
@@ -187,7 +191,7 @@ function cd_markers(first_track, num_of_items, use_existing)
   local redbook_project_length
   if marker_count ~= 0 then
     local user_inputs, metadata_table = get_info(use_existing)
-    if #metadata_table == 4 and not use_existing then save_metadata(user_inputs) end
+    if #metadata_table == 4 then save_metadata(user_inputs) end
     add_pregap(first_track)
     redbook_project_length = end_marker(first_track, metadata_table, upc_ret, code_table, postgap, num_of_items)
   end
@@ -830,7 +834,7 @@ function album_item_count()
     local item = GetTrackMediaItem(track, i)
     local start = GetMediaItemInfo_Value(item, "D_POSITION")
 
-    if start - prev_end > 60 then   -- More than 1 minute gap
+    if start - prev_end > 60 then -- More than 1 minute gap
       break
     end
 
