@@ -48,7 +48,7 @@ function main()
     local items = build_item_table(fps)
 
     -- Initialize CSV variable with the header row
-    local csv = "Edit,Start,Source In,Source Out,Length,Playback Rate\n"
+    local csv = "Edit,Start,Source In,Source Out,End,Playback Rate\n"
     -- Append each item's data to the CSV variable
     for _, item in ipairs(items) do
         csv = csv .. string.format("%s,%s,%s,%s,%s,%s\n",
@@ -56,7 +56,7 @@ function main()
             item.position,
             item.s_in,
             item.s_out,
-            item.length,
+            item.dest_end,
             item.playrate
         )
     end
@@ -98,8 +98,10 @@ function main()
     <span class="description">Absolute timeline location for building the edit</span><br>
     <span class="label">Source In and Source Out:</span>
     <span class="description">Absolute timecode references for source material</span><br>
-    <span class="label">Length:</span>
-    <span class="description">The duration between Source In and Source Out times</span><br>
+    <span class="label">End:</span>
+    <span class="description">
+    A reference check for where the inserted material ends on the timeline after the 3-point edit
+    </span><br>
     <span class="label">Playback rate:</span>
     <span class="description">Only shown if not equal to 1</span><br>
     <span <span class="description"><br>Time is in the format HH:MM:SS:FF</span></p>]])
@@ -112,7 +114,7 @@ function main()
                 <th>Start</th>
                 <th>Source In</th>
                 <th>Source Out</th>
-                <th>Length</th>
+                <th>End</th>
                 <th>Playback Rate</th>
             </tr>
         </thead>
@@ -125,12 +127,12 @@ function main()
             file:write(string.format(
                 '<tr class="gap-row"><td>%s</td><td>%s</td>' ..
                 '<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
-                item.edit_number, item.position, item.s_in, item.s_out, item.length, item.playrate
+                item.edit_number, item.position, item.s_in, item.s_out, item.dest_end, item.playrate
             ))
         else
             file:write(string.format(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
-                item.edit_number, item.position, item.s_in, item.s_out, item.length, item.playrate
+                item.edit_number, item.position, item.s_in, item.s_out, item.dest_end, item.playrate
             ))
         end
     end
@@ -258,7 +260,7 @@ function build_item_table(fps)
             filename = filename,
             s_in = format_timecode(start_offset, fps),
             s_out = format_timecode(end_offset, fps),
-            length = format_timecode(source_length, fps),
+            dest_end = format_timecode(position + source_length, fps),
             playrate = (math.abs(playrate - 1) < 0.001) and "" or playrate
         })
 
@@ -269,14 +271,13 @@ function build_item_table(fps)
             local next_position = GetMediaItemInfo_Value(next_item, "D_POSITION")
 
             if next_position > item_end and (not has_time_sel or next_position < time_sel_end) then
-                local gap_duration = next_position - item_end
                 table.insert(item_table, {
                     edit_number = "Gap",
-                    position = format_timecode(item_end, fps),
+                    position = "",
                     filename = "",
                     s_in = "",
                     s_out = "",
-                    length = format_timecode(gap_duration, fps),
+                    dest_end = "",
                     playrate = ""
                 })
                 prev_filename = nil
