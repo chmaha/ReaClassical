@@ -84,8 +84,8 @@ function main()
   local index = (folder_count*tracks_per_folder)+tracks_per_folder-1
   add_track_to_folder(index)
   local new_track = GetTrack(0,index)
-  GetSetMediaTrackInfo_String(new_track, "P_NAME", "M:" .. name, 1)
-  GetSetMediaTrackInfo_String(new_track, "P_EXT:mix_order", index, 1) -- force mix_order reset
+  GetSetMediaTrackInfo_String(new_track, "P_NAME", "M:" .. name, true)
+  GetSetMediaTrackInfo_String(new_track, "P_EXT:mix_order", index, true) -- force mix_order reset
   if folder_count > 1 then
     local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
     Main_OnCommand(F8_sync, 0)

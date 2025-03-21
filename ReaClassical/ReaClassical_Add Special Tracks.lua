@@ -157,12 +157,12 @@ function create_mixer_table()
     local mixer_tracks = {}
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if mixer_state == "y" then
-            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", true)
             local mod_name = string.match(name, "M?:?(.*)")
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, true)
             table.insert(mixer_tracks, track)
         end
     end

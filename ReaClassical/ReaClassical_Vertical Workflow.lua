@@ -329,12 +329,12 @@ function solo()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
             or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"
@@ -405,12 +405,12 @@ function mixer()
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
 
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         if trackname_check(track, "^M:") or mixer_state == "y" then
             SetTrackColor(track, colors.mixer)
@@ -450,7 +450,7 @@ function mixer()
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
 
-        local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", 0)
+        local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", false)
         if trackname_check(track, "^S%d+:") or source_track == "y" then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
         end
@@ -574,24 +574,24 @@ function copy_track_names(track_table, mixer_table)
     end
 
     local dest_parent = track_table[1].parent
-    GetSetMediaTrackInfo_String(dest_parent, "P_NAME", "D:" .. track_names[1], 1)
-    GetSetMediaTrackInfo_String(dest_parent, "P_EXT:Destination", "y", 1)
-    GetSetMediaTrackInfo_String(dest_parent, "P_EXT:Source", "", 1)
+    GetSetMediaTrackInfo_String(dest_parent, "P_NAME", "D:" .. track_names[1], true)
+    GetSetMediaTrackInfo_String(dest_parent, "P_EXT:Destination", "y", true)
+    GetSetMediaTrackInfo_String(dest_parent, "P_EXT:Source", "", true)
 
     for i = 1, #track_table[1].tracks do
         local dest_track = track_table[1].tracks[i]
-        GetSetMediaTrackInfo_String(dest_track, "P_NAME", "D:" .. (track_names[i + 1] or ""), 1)
-        GetSetMediaTrackInfo_String(dest_track, "P_EXT:Destination", "y", 1)
-        GetSetMediaTrackInfo_String(dest_track, "P_EXT:Source", "", 1)
+        GetSetMediaTrackInfo_String(dest_track, "P_NAME", "D:" .. (track_names[i + 1] or ""), true)
+        GetSetMediaTrackInfo_String(dest_track, "P_EXT:Destination", "y", true)
+        GetSetMediaTrackInfo_String(dest_track, "P_EXT:Source", "", true)
     end
 
     -- for rest, prefix Si: where i = number starting at 1
     for i = 2, #track_table, 1 do
         local source_parent = track_table[i].parent
         local parent_mod_name = track_names[1]
-        GetSetMediaTrackInfo_String(source_parent, "P_NAME", "S" .. i - 1 .. ":" .. parent_mod_name, 1)
-        GetSetMediaTrackInfo_String(source_parent, "P_EXT:Source", "y", 1)
-        GetSetMediaTrackInfo_String(source_parent, "P_EXT:Destination", "", 1)
+        GetSetMediaTrackInfo_String(source_parent, "P_NAME", "S" .. i - 1 .. ":" .. parent_mod_name, true)
+        GetSetMediaTrackInfo_String(source_parent, "P_EXT:Source", "y", true)
+        GetSetMediaTrackInfo_String(source_parent, "P_EXT:Destination", "", true)
 
         local num_of_names = #track_names
         local j = 1
@@ -599,9 +599,9 @@ function copy_track_names(track_table, mixer_table)
             local track_index = j % num_of_names + 1
             if track_index == 1 then track_index = 2 end
             local source_mod_name = track_names[track_index]
-            GetSetMediaTrackInfo_String(source_track, "P_NAME", "S" .. (i - 1) .. ":" .. source_mod_name, 1)
-            GetSetMediaTrackInfo_String(source_track, "P_EXT:Source", "y", 1)
-            GetSetMediaTrackInfo_String(source_track, "P_EXT:Destination", "", 1)
+            GetSetMediaTrackInfo_String(source_track, "P_NAME", "S" .. (i - 1) .. ":" .. source_mod_name, true)
+            GetSetMediaTrackInfo_String(source_track, "P_EXT:Source", "y", true)
+            GetSetMediaTrackInfo_String(source_track, "P_EXT:Destination", "", true)
             j = j + 1
         end
     end
@@ -631,8 +631,8 @@ end
 function add_rcmaster(num)
     InsertTrackAtIndex(num, true) -- add RCMASTER
     local rcmaster = GetTrack(0, num)
-    GetSetMediaTrackInfo_String(rcmaster, "P_EXT:rcmaster", "y", 1)
-    GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "RCMASTER", 1)
+    GetSetMediaTrackInfo_String(rcmaster, "P_EXT:rcmaster", "y", true)
+    GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "RCMASTER", true)
     -- SetMediaTrackInfo_Value(rcmaster, "I_SPACER", 1)
     local colors = get_color_table()
     SetTrackColor(rcmaster, colors.rcmaster)
@@ -644,7 +644,7 @@ end
 ---------------------------------------------------------------------
 
 function route_to_track(track, destination)
-    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     if not name:match("^RCMASTER") then
         SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
         CreateTrackSend(track, destination)
@@ -658,15 +658,15 @@ function special_check()
     local num_of_tracks = CountTracks(0)
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
-        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if name:match("^RCMASTER") then
-            GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "y", true)
             rcmaster_exists = true
             break
         end
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         if rcmaster_state == "y" then
-            GetSetMediaTrackInfo_String(track, "P_NAME", "RCMASTER", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "RCMASTER", true)
             rcmaster_exists = true
             break
         end
@@ -694,12 +694,12 @@ function create_single_mixer(tracks_per_group, end_of_sources, track_names)
     local j = 1
     for i = end_of_sources, end_of_sources + tracks_per_group - 1, 1 do
         local track = GetTrack(0, i)
-        GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
-        GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", j, 1)
+        GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", true)
+        GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", j, true)
         if track_names then
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[j], 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[j], true)
         else
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:", true)
         end
         j = j + 1
     end
@@ -720,7 +720,7 @@ function route_tracks(rcmaster, track_table, end_of_sources)
     --routing to rcmaster
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
-        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if name:sub(-1) ~= '-' then
             if name:match("^@") or name:match("^#") or name:match("^RoomTone") or name:match("^M:") then
                 route_to_track(track, rcmaster)
@@ -762,13 +762,13 @@ function create_track_table(is_empty)
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
-        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if parent == 1 then
             if j > 1 and k ~= prev_k then
                 groups_equal = false
@@ -777,35 +777,35 @@ function create_track_table(is_empty)
             prev_k = k
             k = 1
             track_table[j] = { parent = track, tracks = {} }
-            if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", k, 1) end
+            if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", k, true) end
         elseif trackname_check(track, "^M:") or mixer_state == "y" then
-            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", true)
             local mod_name = string.match(name, "^M:(.*)") or name
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, true)
             table.insert(mixer_tracks, track)
         elseif trackname_check(track, "^@") or aux_state == "y" then
-            GetSetMediaTrackInfo_String(track, "P_EXT:aux", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_EXT:aux", "y", true)
             local mod_name = string.match(name, "@?(.*)")
-            GetSetMediaTrackInfo_String(track, "P_NAME", "@" .. mod_name, 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "@" .. mod_name, true)
         elseif trackname_check(track, "^#") or submix_state == "y" then
-            GetSetMediaTrackInfo_String(track, "P_EXT:submix", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_EXT:submix", "y", true)
             local mod_name = string.match(name, "#?(.*)")
-            GetSetMediaTrackInfo_String(track, "P_NAME", "#" .. mod_name, 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "#" .. mod_name, true)
         elseif trackname_check(track, "^RoomTone") or rt_state == "y" then
-            GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", 1)
-            GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", 1)
+            GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", true)
         elseif trackname_check(track, "^REF") or ref_state == "y" then
-            GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", 1)
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", true)
             local mod_name = name:match("^REF:?(.*)") or name
             if name ~= "REF" then
-                GetSetMediaTrackInfo_String(track, "P_NAME", "REF:" .. mod_name, 1)
+                GetSetMediaTrackInfo_String(track, "P_NAME", "REF:" .. mod_name, true)
             end
         elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else
             if j > 0 then
                 table.insert(track_table[j].tracks, track)
-                if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", k + 1, 1) end
+                if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", k + 1, true) end
             else
                 groups_equal = false
             end
@@ -823,7 +823,7 @@ end
 ---------------------------------------------------------------------
 
 function process_name(track)
-    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local mod_name = name:match("^%s*M?:?%s*(.-)%s*%-?$")
     if mod_name == nil then mod_name = name end
     return mod_name
@@ -861,7 +861,7 @@ function save_track_settings(tracks_per_group)
         local track_sends = {}
         for j = 0, num_of_sends - 1 do
             local dest = GetTrackSendInfo_Value(track, 0, j, "P_DESTTRACK")
-            local _, name = GetSetMediaTrackInfo_String(dest, "P_NAME", "", 0)
+            local _, name = GetSetMediaTrackInfo_String(dest, "P_NAME", "", false)
             if name == name:match("^@") or name == name:match("^#") then
                 table.insert(track_sends, dest)
             end
@@ -1028,7 +1028,7 @@ function check_mixer_order(mixer_table)
     local success = true
 
     for i, mixer_track in ipairs(mixer_table) do
-        local _, mix_order_str = GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", "", 0)
+        local _, mix_order_str = GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", "", false)
         local mix_order = tonumber(mix_order_str)
         if mix_order then
             table.insert(current_order, mix_order)
@@ -1064,7 +1064,7 @@ function rearrange_tracks(track_table, current_order)
         end
 
         for _, child in ipairs(group.tracks) do
-            local _, child_mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", "", 0)
+            local _, child_mix_order = GetSetMediaTrackInfo_String(child, "P_EXT:mix_order", "", false)
             child_mix_order = tonumber(child_mix_order) or 1
 
             items_to_move[child_mix_order] = items_to_move[child_mix_order] or {}
@@ -1112,7 +1112,7 @@ function rearrange_tracks(track_table, current_order)
         end
 
         for j, track_info in ipairs(updated_group_tracks) do
-            GetSetMediaTrackInfo_String(track_info.track, "P_EXT:mix_order", tostring(j), 1)
+            GetSetMediaTrackInfo_String(track_info.track, "P_EXT:mix_order", tostring(j), true)
         end
     end
 end
@@ -1121,7 +1121,7 @@ end
 
 function reset_mixer_order(mixer_table)
     for i, mixer_track in ipairs(mixer_table) do
-        GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", i, 1)
+        GetSetMediaTrackInfo_String(mixer_track, "P_EXT:mix_order", i, true)
     end
 end
 
@@ -1143,9 +1143,9 @@ function copy_track_names_from_dest(track_table, mixer_table)
     local i = 1
     for _, track in ipairs(mixer_table) do
         if track_names[i] ~= nil then
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[i], 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. track_names[i], true)
         else
-            GetSetMediaTrackInfo_String(track, "P_NAME", "M:", 1)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:", true)
         end
         i = i + 1
     end
@@ -1156,10 +1156,10 @@ end
 ---------------------------------------------------------------------
 
 function process_dest(track)
-    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", 0)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local mod_name = string.match(name, ":(.*)")
     if mod_name == nil then mod_name = name end
-    -- GetSetMediaTrackInfo_String(track, "P_NAME", mod_name, 1)
+    -- GetSetMediaTrackInfo_String(track, "P_NAME", mod_name, true)
     return mod_name
 end
 

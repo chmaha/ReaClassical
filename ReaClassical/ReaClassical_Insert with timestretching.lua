@@ -493,7 +493,7 @@ function mark_as_edit()
     local selected_items = CountSelectedMediaItems(0)
     for i = 0, selected_items - 1, 1 do
         local item = GetSelectedMediaItem(0, i)
-        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", 1)
+        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
     end
 end
 

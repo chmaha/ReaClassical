@@ -179,12 +179,12 @@ function solo()
 
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
@@ -254,12 +254,12 @@ end
 function mixer(colors)
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         if mixer_state == "y" then
             SetTrackColor(track, colors.mixer)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
@@ -291,7 +291,7 @@ function mixer(colors)
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
 
-        local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", 0)
+        local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", false)
         if trackname_check(track, "^S%d+:") or source_track == "y" then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
         end

@@ -48,7 +48,7 @@ function main()
 
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         if trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster = track
             rcmaster_index = i
@@ -63,7 +63,7 @@ function main()
 
     InsertTrackAtIndex(rcmaster_index, true) -- Add track just before RCMASTER
     local bus = GetTrack(0, rcmaster_index)
-    GetSetMediaTrackInfo_String(bus, "P_EXT:aux", "y", 1)
+    GetSetMediaTrackInfo_String(bus, "P_EXT:aux", "y", true)
     SetMediaTrackInfo_Value(bus, "I_FOLDERDEPTH", 0)
 
     route_to_track(bus, rcmaster)
@@ -94,12 +94,12 @@ function folder_check()
     local total_tracks = CountTracks(0)
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
             or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"

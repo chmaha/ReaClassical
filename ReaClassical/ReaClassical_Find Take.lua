@@ -67,7 +67,7 @@ function main()
                 session_match = filename:lower():find(session_name:lower()) ~= nil
             end
 
-            local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", 0)
+            local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
 
             if take_capture == take_choice and session_match and not edit then
                 found = true

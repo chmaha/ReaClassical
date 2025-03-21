@@ -52,7 +52,7 @@ function main()
   end
 
   local track = GetSelectedTrack(0, 0)
-  local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
+  local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
 
   local orig_selection
   if mixer_state == "y" then
