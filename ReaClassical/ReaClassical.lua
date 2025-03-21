@@ -11,6 +11,7 @@
   NO-OP: Use custom functions when dealing with selected items
   NO-OP: Switch to true/false vs 1/0 for GetSet commands
   Manual: Various additions
+  NOTES: Update keymap and toolbar/menus when asked
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
