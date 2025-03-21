@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, build_item_table, format_timecode, get_html_file
-local parse_timecode
+local parse_timecode, get_offset
 
 ---------------------------------------------------------------------
 
@@ -42,10 +42,13 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    local offset = get_offset()
+
     local project_name = GetProjectName(0)
     local fps = TimeMap_curFrameRate(0)
     local date = os.date("%y-%m-%d %H:%M:%S")
-    local items = build_item_table(fps)
+    local items = build_item_table(fps, offset)
 
     -- Initialize CSV variable with the header row
     local csv = "Edit,Start,Source In,Source Out,End Check,Playback Rate\n"
@@ -117,7 +120,10 @@ function main()
             <span class="label">Playback rate:</span>
             <span class="description">Only shown if not equal to 1</span><br>
             <span class="description"><br>Time is in the format HH:MM:SS:FF</span></p>]])
-
+    if offset ~= 0 then
+        file:write(string.format(
+            '<p><strong style="color: red;">Using user offset of %+d frames</strong></p>\n', offset))
+    end
     file:write("</div>\n")
 
     file:write([[<table>
@@ -195,8 +201,8 @@ end
 ---------------------------------------------------------------------
 
 -- Function to format timecode
-function format_timecode(seconds, fps)
-    local total_frames = math.floor(seconds * fps)
+function format_timecode(seconds, fps, offset_frames)
+    local total_frames = math.floor(seconds * fps) + offset_frames
     local h = math.floor(total_frames / (3600 * fps))
     local m = math.floor((total_frames % (3600 * fps)) / (60 * fps))
     local s = math.floor((total_frames % (60 * fps)) / fps)
@@ -207,7 +213,7 @@ end
 ---------------------------------------------------------------------
 
 -- Function to build the item table
-function build_item_table(fps)
+function build_item_table(fps, offset)
     local item_table = {}
     local track = GetTrack(0, 0) -- Default to first track
 
@@ -265,11 +271,11 @@ function build_item_table(fps)
 
         table.insert(item_table, {
             edit_number = edit_number,
-            position = format_timecode(position, fps),
+            position = format_timecode(position, fps, offset),
             filename = filename,
-            s_in = format_timecode(start_offset, fps),
-            s_out = format_timecode(end_offset, fps),
-            dest_end = format_timecode(position + source_length, fps),
+            s_in = format_timecode(start_offset, fps, offset),
+            s_out = format_timecode(end_offset, fps, offset),
+            dest_end = format_timecode(position + source_length, fps, offset),
             playrate = (math.abs(playrate - 1) < 0.001) and "" or playrate
         })
 
@@ -328,6 +334,16 @@ function parse_timecode(timecode)
     end
 
     return tonumber(timecode) or 0 -- Fallback if just seconds are provided
+end
+
+---------------------------------------------------------------------
+
+function get_offset()
+    local retval, input = reaper.GetUserInputs("Frame Offset", 1, "Enter offset (frames):", "0")
+    if retval then
+        return tonumber(input) or 0
+    end
+    return 0 -- Default if cancelled or invalid input
 end
 
 ---------------------------------------------------------------------
