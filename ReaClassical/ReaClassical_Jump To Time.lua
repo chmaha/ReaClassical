@@ -77,18 +77,24 @@ function main()
     end
 
     local dialog_title = count > 0 and "Jump to Time Within Item(s)" or "Jump to Time Within Project"
-    local retval, time_str = GetUserInputs(dialog_title, 1, "Enter time (right-aligned logic)", "")
+    local retval, time_str = GetUserInputs(dialog_title, 1, "Enter time (use +/- for relative)", "")
 
     if retval then
-        local target_time = time_to_seconds(time_str)
+        local target_time, relative = time_to_seconds(time_str)
 
         if target_time then
-            if target_time < 0 or target_time > combined_length then
+            local cursor_position
+            if relative then
+                cursor_position = GetCursorPosition() + target_time
+            else
+                cursor_position = first_position + target_time
+            end
+
+            if cursor_position < 0 or cursor_position > combined_length then
                 MB("The specified time is outside the valid range.", "Error", 0)
                 return
             end
 
-            local cursor_position = first_position + target_time
             SetEditCurPos(cursor_position, true, false)
         else
             return
@@ -99,6 +105,18 @@ end
 ---------------------------------------------------------------------
 
 function time_to_seconds(time_str)
+    local relative = false
+    local sign = 1
+
+    if time_str:match("^%+") then
+        relative = true
+        time_str = time_str:sub(2)  -- Remove "+"
+    elseif time_str:match("^%-") then
+        relative = true
+        sign = -1
+        time_str = time_str:sub(2)  -- Remove "-"
+    end
+
     local frames
     local seconds, minutes, hours = 0, 0, 0
     local frame_rate = TimeMap_curFrameRate(0)
@@ -140,7 +158,7 @@ function time_to_seconds(time_str)
         return nil
     end
 
-    return hours * 3600 + minutes * 60 + seconds + frames / frame_rate
+    return sign * (hours * 3600 + minutes * 60 + seconds + frames / frame_rate), relative
 end
 
 ---------------------------------------------------------------------
@@ -177,7 +195,6 @@ function get_selected_media_item_at(index)
 
     return nil
 end
-
 
 ---------------------------------------------------------------------
 
