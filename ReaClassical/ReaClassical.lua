@@ -1,8 +1,16 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.17
+@version 25.3.18
 @changelog
-  Build Edit List functions: Save HTML to project root folder
+  Create CD Markers overhaul in terms of album-wide metadata
+  NEW: Album Metadata Reporting
+  Jump To Time: Use right-aligned logic (NLE style)
+  Jump To Time: Allow for relative jumps via +/- prefix
+  Build Edit List functions: Add progress checkboxes
+  Build Edit List (BWF Offset): Allow for custom offset in frames
+  NO-OP: Use custom functions when dealing with selected items
+  NO-OP: Switch to true/false vs 1/0 for GetSet commands
+  Manual: Various additions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -33,7 +41,6 @@
   [main] ReaClassical_Add Aux.lua
   [main] ReaClassical_Add Submix.lua
   [main] ReaClassical_Reposition_Album_Tracks.lua
-  [main] ReaClassical_mpl_Markers to CUE.lua
   [main] ReaClassical_Preferences.lua
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
@@ -81,6 +88,7 @@
   [main] ReaClassical_Reverse S-D Edit.lua
   [main] ReaClassical_Build Edit List.lua
   [main] ReaClassical_Build Edit List using BWF offset.lua
+  [main] ReaClassical_Metadata Report.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
