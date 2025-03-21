@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, show_track_name_dialog, add_rcmaster
 local create_mixer_table, check_channel_count
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -81,13 +81,13 @@ function main()
     end
 
     Main_OnCommand(40182, 0) -- select all items
-    local num = CountSelectedMediaItems(0, 0)
+    local num = count_selected_media_items()
 
     local takes = {}
     local items = {}
     --local track_number
     for i = 0, num - 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         items[#items + 1] = item
         local take = GetActiveTake(item)
         takes[#takes + 1] = take
@@ -305,6 +305,42 @@ function check_channel_count(num_of_items)
     end
     return 0, first_channel_count
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

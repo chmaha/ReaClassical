@@ -27,7 +27,7 @@ local lock_previous_items, fadeStart, fadeEnd, zoom, view
 local lock_items, unlock_items, save_color, paint, load_color
 local correct_item_positions, folder_check, check_next_item_overlap
 local get_color_table, get_path, get_reaper_version
-
+local get_selected_media_item_at, count_selected_media_items
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
 local win_state
 ---------------------------------------------------------------------
@@ -65,7 +65,7 @@ end
 
 function move_to_item()
     if win_state == 0 or win_state == -1 then
-        local item = GetSelectedMediaItem(0, 0)
+        local item = get_selected_media_item_at(0)
         local item_start
         if item then
             item_start = GetMediaItemInfo_Value(item, "D_POSITION")
@@ -78,7 +78,7 @@ function move_to_item()
             Main_OnCommand(40416, 0) -- Select and move to prev item
         end
     elseif win_state == 1 then
-        local item = GetSelectedMediaItem(0, 0)
+        local item = get_selected_media_item_at(0)
         if item == nil then
             return
         end
@@ -157,7 +157,7 @@ end
 
 function fadeStart()
     SetToggleCommandState(1, fade_editor_toggle, 1)
-    local item1 = GetSelectedMediaItem(0, 0)
+    local item1 = get_selected_media_item_at(0)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
     local item1_length = GetMediaItemInfo_Value(item1, "D_LENGTH")
     local item1_right_edge = item1_start + item1_length
@@ -185,7 +185,7 @@ function fadeStart()
     SetMediaItemSelected(item1, true)
     local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection
     Main_OnCommand(select_next, 0)
-    local item2 = GetSelectedMediaItem(0, 1)
+    local item2 = get_selected_media_item_at(1)
     local item2_guid = BR_GetMediaItemGUID(item2)
     SetProjExtState(0, "ReaClassical", "SecondItemGUID", item2_guid)
     if item2 then
@@ -277,9 +277,9 @@ function lock_items()
     Main_OnCommand(select_children, 0) -- select children of track 1
     local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
     Main_OnCommand(unselect_items, 0)  -- unselect items in first folder
-    local total_items = CountSelectedMediaItems(0)
+    local total_items = count_selected_media_items()
     for i = 0, total_items - 1, 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         SetMediaItemInfo_Value(item, "C_LOCK", 1)
     end
 end
@@ -385,9 +385,9 @@ function correct_item_positions(item1)
         Main_OnCommand(40289, 0)                     -- unselect all items
         SetMediaItemSelected(item1, true)
         Main_OnCommand(40034, 0)                     -- Item Grouping: Select all items in group(s)
-        local num_items = CountSelectedMediaItems(0) -- Get the number of selected items
+        local num_items = count_selected_media_items() -- Get the number of selected items
         for i = 0, num_items - 1 do
-            local item = GetSelectedMediaItem(0, i)  -- Get the selected media item
+            local item = get_selected_media_item_at(i)  -- Get the selected media item
             local take = GetActiveTake(item)
             if take then
                 local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take
@@ -464,6 +464,42 @@ function get_reaper_version()
     local version = version_str:match("^(%d+%.%d+)")
     return tonumber(version)
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

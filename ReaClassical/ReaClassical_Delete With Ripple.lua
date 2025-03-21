@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, source_markers, select_matching_folder, lock_items
 local unlock_items, ripple_lock_mode, return_xfade_length, xfade
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -133,9 +133,9 @@ function lock_items()
     Main_OnCommand(unselect_items, 0)    -- unselect items in folder
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- unselect children of folder
-    local total_items = CountSelectedMediaItems(0)
+    local total_items = count_selected_media_items()
     for i = 0, total_items - 1, 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         SetMediaItemInfo_Value(item, "C_LOCK", 1)
     end
 end
@@ -188,6 +188,42 @@ function xfade(xfade_len)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

@@ -383,7 +383,7 @@ function split_at_dest_in()
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
-    local selected_items = CountSelectedMediaItems(0)
+    local selected_items = count_selected_media_items()
     Main_OnCommand(40912, 0)        -- Options: Toggle auto-crossfade on split (OFF)
     if selected_items > 0 then
         Main_OnCommand(40186, 0)    -- Item: Split items at edit or play cursor (ignoring grouping)
@@ -413,7 +413,7 @@ function create_crossfades()
     MoveEditCursor(0.001, false)
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)
-    if CountSelectedMediaItems(0) == 0 then return end
+    if count_selected_media_items() == 0 then return end
     MoveEditCursor(-0.001, false)
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
@@ -535,12 +535,12 @@ end
 ---------------------------------------------------------------------
 
 function get_first_last_items()
-    local num_of_items = CountSelectedMediaItems(0)
+    local num_of_items = count_selected_media_items()
     local first_sel_item
     local last_sel_item
 
     for i = 0, num_of_items - 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         local track = GetMediaItem_Track(item)
         local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
@@ -575,9 +575,9 @@ end
 ---------------------------------------------------------------------
 
 function mark_as_edit()
-    local selected_items = CountSelectedMediaItems(0)
+    local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
     end
 end

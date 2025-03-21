@@ -25,7 +25,7 @@ local main, duplicate_first_folder, sync_based_on_workflow, prepare_takes
 local shift, vertical_razor, horizontal_group
 local vertical_group, horizontal, vertical, get_path
 local empty_items_check, folder_check, trackname_check, solo, get_color_table
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -162,16 +162,16 @@ function horizontal_group(string, group)
         Main_OnCommand(select_children, 0) -- Select child tracks
     end
 
-    local selected = GetSelectedMediaItem(0, 0)
+    local selected = get_selected_media_item_at(0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
     SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
 
-    local num_selected_items = CountSelectedMediaItems(0)
+    local num_selected_items = count_selected_media_items()
     for i = 0, num_selected_items - 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         if item then
             SetMediaItemInfo_Value(item, "I_GROUPID", group)
         end
@@ -187,16 +187,16 @@ function vertical_group(length, group)
 
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
-        local selected = GetSelectedMediaItem(0, 0)
+        local selected = get_selected_media_item_at(0)
         local start = GetMediaItemInfo_Value(selected, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(selected, "D_LENGTH")
         SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
 
-        local num_selected_items = CountSelectedMediaItems(0)
+        local num_selected_items = count_selected_media_items()
         for i = 0, num_selected_items - 1 do
-            local selected_item = GetSelectedMediaItem(0, i)
+            local selected_item = get_selected_media_item_at(i)
             if selected_item then
                 SetMediaItemInfo_Value(selected_item, "I_GROUPID", group)
             end
@@ -270,9 +270,9 @@ function vertical()
         vertical_razor()
         local colors = get_color_table()
         if i == start then
-            local selected_items = CountSelectedMediaItems(0)
+            local selected_items = count_selected_media_items()
             for j = 0, selected_items - 1 do
-                local item = GetSelectedMediaItem(0, j)
+                local item = get_selected_media_item_at(j)
                 if item then
                     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.edited_material)
                 end
@@ -417,6 +417,42 @@ function get_path(...)
     local elements = { ... }
     return table.concat(elements, pathseparator)
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

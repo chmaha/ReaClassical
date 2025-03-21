@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
 local extract_take_number, check_parent_track
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -114,9 +114,9 @@ function main()
         if take_number then
             --for each selected item rename take
             local padded_number = string.format("%03d", take_number)
-            local num_of_selected_items = CountSelectedMediaItems(0)
+            local num_of_selected_items = count_selected_media_items()
             for i = 0, num_of_selected_items - 1 do
-                local item = GetSelectedMediaItem(0, i)
+                local item = get_selected_media_item_at(i)
                 local track = GetMediaItem_Track(item)
                 local _, trackname = GetTrackName(track)
                 local take = GetActiveTake(item)
@@ -333,6 +333,42 @@ function extract_take_number(rec_wildcards)
     local number = rec_wildcards:match("T(%d+)$")
     return number and tonumber(number) or nil
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

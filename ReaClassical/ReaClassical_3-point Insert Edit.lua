@@ -26,8 +26,9 @@ local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_l
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
 local load_last_assembly_item, find_second_folder_track
-local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
+local check_overlapping_items
 local move_destination_folder_to_top, move_destination_folder
+local get_selected_media_item_at, count_selected_media_items
 
 ---------------------------------------------------------------------
 
@@ -517,7 +518,7 @@ function mark_as_edit()
     local selected_items = CountSelectedMediaItems(0)
     for i = 0, selected_items - 1, 1 do
         local item = GetSelectedMediaItem(0, i)
-        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
+        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", 1)
     end
 end
 

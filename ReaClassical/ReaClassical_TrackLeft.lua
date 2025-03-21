@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, takename_check, check_position, get_track_info, paste
 local select_and_cut, go_to_previous, shift, select_CD_track_items
 local calc_postgap, is_item_start_crossfaded
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -75,7 +75,7 @@ function main()
     go_to_previous(item_number, first_track)
     paste()
 
-    selected_item = GetSelectedMediaItem(0, 0)
+    selected_item = get_selected_media_item_at(0)
 
     -- shift forward all future tracks the length of track postgap
     shift(first_track, selected_item, postgap, count, "right")
@@ -89,7 +89,7 @@ end
 ---------------------------------------------------------------------
 
 function takename_check()
-    local item = GetSelectedMediaItem(0, 0)
+    local item = get_selected_media_item_at(0)
     if item then
         local take = GetActiveTake(item)
         local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
@@ -170,9 +170,9 @@ function shift(track, item, shift_amount, items_in_track, direction)
         SetMediaItemSelected(track_item, true)
         Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     end
-    local selected_item_count = CountSelectedMediaItems(0)
+    local selected_item_count = count_selected_media_items()
     for i = 0, selected_item_count - 1 do
-        items_to_move[#items_to_move + 1] = GetSelectedMediaItem(0, i)
+        items_to_move[#items_to_move + 1] = get_selected_media_item_at(i)
     end
     Main_OnCommand(40289, 0) -- unselect all items
     for _, v in pairs(items_to_move) do
@@ -209,7 +209,7 @@ end
 ---------------------------------------------------------------------
 
 function calc_postgap(count, num_of_items, track, selected_item)
-    local last_item_of_track = GetSelectedMediaItem(0, 0 + count)
+    local last_item_of_track = get_selected_media_item_at(0 + count)
     local last_item_of_track_pos = GetMediaItemInfo_Value(last_item_of_track, "D_POSITION")
     local last_item_of_track_length = GetMediaItemInfo_Value(last_item_of_track, "D_LENGTH")
     local last_item_of_track_end = last_item_of_track_pos + last_item_of_track_length
@@ -244,6 +244,42 @@ function is_item_start_crossfaded(first_track, item_number)
     end
     return false
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

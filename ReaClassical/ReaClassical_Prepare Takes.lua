@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
-local trackname_check
+local trackname_check, get_selected_media_item_at, count_selected_media_items
 
 ---------------------------------------------------------------------
 
@@ -149,10 +149,10 @@ function horizontal_color(flip, edits, colors)
             color = colors.dest_items_one
         end
 
-        local num_of_items = CountSelectedMediaItems(0)
+        local num_of_items = count_selected_media_items()
         if edits then
             for i = 0, num_of_items - 1, 1 do
-                local item = GetSelectedMediaItem(0, i)
+                local item = get_selected_media_item_at(i)
                 local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
                 if current_color == 0 or current_color == colors.dest_items_one
                     or current_color == colors.dest_items_two or current_color == colors.source_items then
@@ -161,7 +161,7 @@ function horizontal_color(flip, edits, colors)
             end
         else
             for i = 0, num_of_items - 1, 1 do
-                local item = GetSelectedMediaItem(0, i)
+                local item = get_selected_media_item_at(i)
                 local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
                 if current_color == 0 or current_color == colors.dest_items_one
                     or current_color == colors.dest_items_two or current_color == colors.source_items then
@@ -185,9 +185,9 @@ function vertical_color_razor(colors)
         Main_OnCommand(40706, 0)       -- Item: Set to one random color
     else
         local color_table = get_color_table()
-        local selected_items = CountSelectedMediaItems(0)
+        local selected_items = count_selected_media_items()
         for i = 0, selected_items - 1, 1 do
-            local item = GetSelectedMediaItem(0, i)
+            local item = get_selected_media_item_at(i)
             local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
             if current_color == 0 or current_color == color_table.dest_items_one
                 or current_color == color_table.dest_items_two or current_color == color_table.source_items then
@@ -207,16 +207,16 @@ function horizontal_group(string, group)
         Main_OnCommand(select_children, 0) -- Select child tracks
     end
 
-    local selected = GetSelectedMediaItem(0, 0)
+    local selected = get_selected_media_item_at(0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
     SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
 
-    local num_selected_items = CountSelectedMediaItems(0)
+    local num_selected_items = count_selected_media_items()
     for i = 0, num_selected_items - 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         if item then
             SetMediaItemInfo_Value(item, "I_GROUPID", group)
         end
@@ -232,16 +232,16 @@ function vertical_group(length, group)
 
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
-        local selected = GetSelectedMediaItem(0, 0)
+        local selected = get_selected_media_item_at(0)
         local start = GetMediaItemInfo_Value(selected, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(selected, "D_LENGTH")
         SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
 
-        local num_selected_items = CountSelectedMediaItems(0)
+        local num_selected_items = count_selected_media_items()
         for i = 0, num_selected_items - 1 do
-            local selected_item = GetSelectedMediaItem(0, i)
+            local selected_item = get_selected_media_item_at(i)
             if selected_item then
                 SetMediaItemInfo_Value(selected_item, "I_GROUPID", group)
             end
@@ -424,6 +424,42 @@ function trackname_check(track, string)
     local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, string)
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

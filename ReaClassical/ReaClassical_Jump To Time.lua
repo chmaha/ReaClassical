@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, time_to_seconds
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -35,8 +35,8 @@ function main()
     local selected_items = {}
     local count = 0
 
-    for i = 0, CountSelectedMediaItems(0) - 1 do
-        local item = GetSelectedMediaItem(0, i)
+    for i = 0, count_selected_media_items() - 1 do
+        local item = get_selected_media_item_at(i)
         if item then
             selected_items[count + 1] = item
             count = count + 1
@@ -142,6 +142,42 @@ function time_to_seconds(time_str)
 
     return hours * 3600 + minutes * 60 + seconds + frames / frame_rate
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

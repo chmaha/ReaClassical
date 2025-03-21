@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_color_table, get_path
-
+local get_selected_media_item_at
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -50,8 +50,8 @@ function main()
     end
     local item_one, item_two, color, prev_item, next_item, curpos, diff
 
-    item_one = GetSelectedMediaItem(0, 0)
-    item_two = GetSelectedMediaItem(0, 1)
+    item_one = get_selected_media_item_at(0)
+    item_two = get_selected_media_item_at(1)
     if not item_one and not item_two then
         MB("Please select at least one of the items involved in the crossfade",
             "Edit Classical Crossfade", 0)
@@ -63,11 +63,11 @@ function main()
             item_two = item_one
             prev_item = NamedCommandLookup("_SWS_SELPREVITEM")
             Main_OnCommand(prev_item, 0)
-            item_one = GetSelectedMediaItem(0, 0)
+            item_one = get_selected_media_item_at(0)
         else
             next_item = NamedCommandLookup("_SWS_SELNEXTITEM")
             Main_OnCommand(next_item, 0)
-            item_two = GetSelectedMediaItem(0, 0)
+            item_two = get_selected_media_item_at(0)
         end
     end
     local one_pos = GetMediaItemInfo_Value(item_one, "D_POSITION")
@@ -134,6 +134,26 @@ function get_path(...)
     local elements = { ... }
     return table.concat(elements, pathseparator)
 end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

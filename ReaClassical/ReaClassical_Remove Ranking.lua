@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, modify_item_name, process_items
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -76,12 +76,12 @@ end
 ---------------------------------------------------------------------
 
 function process_items()
-    local count_selected = CountSelectedMediaItems(0)
+    local count_selected = count_selected_media_items()
 
     if count_selected > 0 then
         -- Process selected items
         for i = 0, count_selected - 1 do
-            local item = GetSelectedMediaItem(0, i)
+            local item = get_selected_media_item_at(i)
             modify_item_name(item)
         end
     else
@@ -97,6 +97,42 @@ function process_items()
         end
     end
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

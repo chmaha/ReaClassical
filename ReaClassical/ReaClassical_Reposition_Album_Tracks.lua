@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_grouped_items, copy_shift, empty_items_check
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -103,12 +103,12 @@ function get_grouped_items(item)
     SetMediaItemSelected(item, true)
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
 
-    local selected_item_count = CountSelectedMediaItems(0)
+    local selected_item_count = count_selected_media_items()
 
     local selected_items = {}
 
     for i = 1, selected_item_count - 1 do
-        selected_items[i] = GetSelectedMediaItem(0, i)
+        selected_items[i] = get_selected_media_item_at(i)
     end
     return selected_items
 end
@@ -136,6 +136,42 @@ function empty_items_check(first_track, num_of_items)
     end
     return count
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

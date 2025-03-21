@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, return_xfade_length, is_cursor_between_items
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -56,9 +56,9 @@ function main()
     Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
     Main_OnCommand(40635, 0) -- Time selection: Remove time selection
 
-    local selected_items = CountSelectedMediaItems(0)
+    local selected_items = count_selected_media_items()
     if selected_items > 0 and (state == -1 or state == 0) then
-        local item = GetSelectedMediaItem(0, 0)
+        local item = get_selected_media_item_at(0)
         Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
         SetMediaItemSelected(item, 1)
     end
@@ -66,7 +66,7 @@ function main()
     if state == 1 then
         local _, item1_orig_pos = GetProjExtState(0, "ReaClassical", "FirstItemPos")
         local _, item1_orig_offset = GetProjExtState(0, "ReaClassical", "FirstItemOffset")
-        local item1 = GetSelectedMediaItem(0, 0)
+        local item1 = get_selected_media_item_at(0)
         local item1_take = GetActiveTake(item1)
         local item1_new_offset = GetMediaItemTakeInfo_Value(item1_take, "D_STARTOFFS")
         local offset_amount = item1_new_offset - item1_orig_offset
@@ -103,9 +103,9 @@ function main()
             Main_OnCommand(40289, 0)                     -- unselect all items
             SetMediaItemSelected(item1, true)
             Main_OnCommand(40034, 0)                     -- Item Grouping: Select all items in group(s)
-            local num_items = CountSelectedMediaItems(0) -- Get the number of selected items
+            local num_items = count_selected_media_items() -- Get the number of selected items
             for i = 0, num_items - 1 do
-                local item = GetSelectedMediaItem(0, i)  -- Get the selected media item
+                local item = get_selected_media_item_at(i)  -- Get the selected media item
                 local take = GetActiveTake(item)
                 if take then
                     local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take
@@ -177,6 +177,42 @@ function is_cursor_between_items()
 
     return cursor_pos >= right_item_start and cursor_pos <= left_item_end
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

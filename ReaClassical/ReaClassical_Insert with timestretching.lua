@@ -126,7 +126,7 @@ function main()
         Main_OnCommand(40625, 0)                   -- Time Selection: Set start point
 
         for i = 0, total_selected - 1, 1 do
-            selected_items[i] = GetSelectedMediaItem(0, i)
+            selected_items[i] = get_selected_media_item_at(i)
         end
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         local first_item = selected_items[0]
@@ -148,9 +148,9 @@ function main()
         end
         Main_OnCommand(40032, 0)     -- group selected items
         mark_as_edit()
-        local num_of_selected = CountSelectedMediaItems()
+        local num_of_selected = count_selected_media_items()
         for i = 0, num_of_selected - 1, 1 do
-            local item = GetSelectedMediaItem(0, i)
+            local item = get_selected_media_item_at(i)
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", item_color)
         end
 
@@ -243,7 +243,7 @@ function split_at_dest_in()
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
-    local selected_items = CountSelectedMediaItems(0)
+    local selected_items = count_selected_media_items()
     Main_OnCommand(40912, 0)        -- Options: Toggle auto-crossfade on split (OFF)
     if selected_items > 0 then
         Main_OnCommand(40186, 0)    -- Item: Split items at edit or play cursor (ignoring grouping)
@@ -377,12 +377,12 @@ end
 ---------------------------------------------------------------------
 
 function get_first_last_items()
-    local num_of_items = CountSelectedMediaItems(0)
+    local num_of_items = count_selected_media_items()
     local first_sel_item
     local last_sel_item
 
     for i = 0, num_of_items - 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         local track = GetMediaItem_Track(item)
         local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
@@ -490,9 +490,9 @@ end
 ---------------------------------------------------------------------
 
 function mark_as_edit()
-    local selected_items = CountSelectedMediaItems(0)
+    local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
     end
 end

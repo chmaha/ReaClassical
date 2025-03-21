@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_color_table, get_path
-
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -40,7 +40,7 @@ function main()
         right_pos = end_time
     else
         local parent_track = GetTrack(0, 0)
-        selected = CountSelectedMediaItems(0)
+        selected = count_selected_media_items()
 
         if selected == 0 then
             MB(
@@ -62,7 +62,7 @@ function main()
             end
         end
         for i = 0, selected - 1 do
-            local item = GetSelectedMediaItem(0, i)
+            local item = get_selected_media_item_at(i)
             local item_track = GetMediaItem_Track(item)
 
             local found = false
@@ -79,11 +79,11 @@ function main()
             end
         end
         -- Set marker positions
-        local first_item = GetSelectedMediaItem(0, 0)
+        local first_item = get_selected_media_item_at(0)
         left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
         local last_item
         if selected > 1 then
-            last_item = GetSelectedMediaItem(0, selected - 1)
+            last_item = get_selected_media_item_at(selected - 1)
             local start = GetMediaItemInfo_Value(last_item, "D_POSITION")
             local length = GetMediaItemInfo_Value(last_item, "D_LENGTH")
             right_pos = start + length
@@ -131,6 +131,42 @@ function get_path(...)
     local elements = { ... }
     return table.concat(elements, pathseparator)
 end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 

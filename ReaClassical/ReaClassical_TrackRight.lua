@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, takename_check, check_position, get_track_info
 local select_CD_track_items, next_track, switch_highlight
-local is_item_start_crossfaded, pos_check
+local is_item_start_crossfaded, pos_check, get_selected_media_item_at
 
 ---------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ end
 ---------------------------------------------------------------------
 
 function takename_check()
-    local item = GetSelectedMediaItem(0, 0)
+    local item = get_selected_media_item_at(0)
     if item then
         local take = GetActiveTake(item)
         local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
@@ -165,6 +165,26 @@ function is_item_start_crossfaded(first_track, item_number)
     end
     return false
 end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
+end
+
 
 ---------------------------------------------------------------------
 
