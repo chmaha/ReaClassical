@@ -1,0 +1,12 @@
+=== D: Room Tone Generation
+
+In menu:File[Project Templates] you will find a room tone generation template. The method is derived from https://www.hearspotbark.com/blog/2015/1/26/using-logic-pro-to-generate-air[here].
+
+To create endless room tone based on the venue you recorded:
+
+. click btn:[Browse] in ReaVerb and select your few seconds of recorded reverb.
+. Enable the FX on the first mixer track
+. Adjust the length of the included region to the length of your live album
+. Render using menu:Bounds[All project regions]
+
+Then drop the resulting file into your ReaClassical album project on a dedicated Room Tone track (create via kbd:[#]) and run Create CD Markers via kbd:[Y]. You will see that automation-based fades are added to coincide with opposite fade types on the first track thereby creating perfect crossfades into room tone and back without any fuss. 

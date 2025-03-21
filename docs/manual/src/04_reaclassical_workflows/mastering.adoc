@@ -29,16 +29,24 @@ In terms of loudness, I personally aim for about -18 LUFS Integrated for my clas
 
 ==== Metadata
 
-To quickly remove all the take names on the destination parent track, run kbd:[Ctrl+T]. Track titles are then added to the individual items on the destination parent track by double-clicking on the item or selecting and pressing kbd:[F2]. Note that only items that start tracks should be named.
+To quickly remove all the take names on the destination parent track, run kbd:[Ctrl+T]. Track titles and other DDP metadata are then added to the individual items on the destination parent track by double-clicking on the item or selecting and pressing kbd:[F2]. Note that only items that start tracks should be named. An example item name could be:
 
-The rest of the metadata is then added via the Create CD Markers function kbd:[Y]. You can add UPC/EAN and ISRC numbers as desired followed by album title, performer, composer and genre. On later runs of the function, you can choose to automatically re-use existing values which can save even more time when making last-minute S-D edits, altering album spacing, switching album track order, or renaming a CD track start.
+    Allegro|COMPOSER=Beethoven|PERFORMER=Jones
+
+For the album-wide metadata, to the final item on the first track of your album add an item name starting with `@` and add the album title and any other metadata you desire aside from catalog number (see below). An example item name for album metadata could be:
+
+    @Between Fire and Moonlight|COMPOSER=Beethoven|PERFORMER=Jones|GENRE=Classical|LANGUAGE=English
+
+TIP: If your final item on the first track is also the final CD track start, just find another non-track-start item on the first track to add the name. Location doesn't matter and is merely an attempt at a convention - the DDP marker itself is always added at the correct position just before the =END marker. If you album contains no internal edits, just add a transparent crossfade split to the final item via kbd:[S] and enter the information there.
+
+The UPC/ISRC are then added via the Create CD Markers function kbd:[Y]. On later runs of the function, you can choose to automatically re-use existing UPC/ISRC values which can save even more time when making last-minute S-D edits, altering album spacing, switching album track order, or renaming a CD track start.
 
 .Editing the item name
 image::takename.png[]
 
 ==== Creating DDP filesets
 
-I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via kbd:[Y](track and region names are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is smart in the sense that if there's no take name, no marker or region will be created. In other words, press kbd:[F2] with an item selected to enter track names where markers/regions need to be created. It's perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences kbd:[F5]. So it's now very quick to export a DDP set!
+I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via kbd:[Y](track and region names and all metadata are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is smart in the sense that if there's no take name, no marker or region will be created. In other words, press kbd:[F2] with an item selected to enter track names where markers/regions need to be created. It's perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences kbd:[F5]. So it's now very quick to export a DDP set!
 
 TIP: If working in horizontal workflow, ensure that there is over a minute's worth of empty timeline between the end of the proposed album and any other source material. Instead, you can also choose to drag any source material to a new group by first creating an empty duplicate folder via kbd:[\ ].
 
@@ -46,7 +54,18 @@ Further, you can add audio to the initial pre-gap (an _easter egg_ track) by not
 
 If a room tone track is present in the project, the function will also generate precise track-level volume automation that creates perfectly-matching fades at points where items fade into and out of silence on the first destination track. In other words, slicing and dicing room tone audio to fill in digital silence is no longer necessary in ReaClassical!
 
+After the DDP structure has been generated, open the Render dialog via kbd:[R] and select the ReaClassical DDP option under menu:Presets[All Settings > DDP].
+
 For more information read the description of the DDP function in appendix A.
+
+==== Metadata Reporting ====
+
+This function runs automatically as the final part of the Create CD Markers function but can also be run separately via menu:ReaClassical[Mastering > Show Metadata Report].
+
+.Example Metadata Report
+image::metadata_report.png[]
+
+This is a great way to see all album metadata clearly in one window and could be copied and pasted into a report to send to the factory for checking against the metadata found in the DDP image itself. The function will also alert the user if some track metadata labels (COMPOSER=, PEFORMER=, SONGWRITER=, ARRANGER=) have been used without also using them album-wide via the `@` item name. For more information about DDP metadata see https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info.txt[here] (also available via the Render dialog via menu:Format[DDP] and clicking on btn:[Help]).
 
 ==== Creating CUE Files
 

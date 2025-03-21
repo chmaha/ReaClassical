@@ -472,6 +472,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_importing">Importing</a></li>
 <li><a href="#_navigating_a_project">Navigating a Project</a></li>
 <li><a href="#_editing">Editing</a></li>
+<li><a href="#_collaborating_with_video_editors">Collaborating with Video Editors</a></li>
 <li><a href="#_mixing">Mixing</a></li>
 <li><a href="#_mastering">Mastering</a></li>
 <li><a href="#_rendering">Rendering</a></li>
@@ -489,7 +490,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_a_description_of_reaclassical_functions">A: Description of ReaClassical Functions</a></li>
 <li><a href="#_b_shortcuts">B: Shortcuts</a></li>
 <li><a href="#_c_recommended_free_mastering_grade_plugins">C: Recommended Free Mastering-Grade Plugins</a></li>
-<li><a href="#_d_system_tweaks">D: System Tweaks</a></li>
+<li><a href="#_d_room_tone_generation">D: Room Tone Generation</a></li>
+<li><a href="#_e_system_tweaks">E: System Tweaks</a></li>
 </ul>
 </li>
 </ul>
@@ -512,7 +514,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2025 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2025-03-13 11:52:07 UTC</code></p>
+<p><code>Updated: 2025-03-21 13:56:47 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1020,9 +1022,56 @@ As you will discover, based on which workflow chosen, you can use <kbd>F7</kbd> 
 </div>
 </div>
 <div class="sect3">
+<h4 id="_jump_to_time">Jump to Time</h4>
+<div class="paragraph">
+<p>Press <kbd>TAB</kbd> to jump to a specific absolute or relative time using right-aligned logic, similar to video editing applications. This can be an absolute time within the project or an relative position inside a selected item or a set of consecutive crossfaded items. Prefix with + or - to make relative jumps. Once you get the hang of using this input logic, moving to any position is extremely quick!</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p><strong>Some Right-Aligned Logic Examples:</strong></p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Input</th>
+<th class="tableblock halign-left valign-top">Meaning (based on project frame rate)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>100524</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Move to absolute position 10m 5s 24f</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1141711</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Move to absolute position 1h 14m 17s 11f</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>+8</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jump forward by 8 frames</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>-1015</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jump backward by 10s 15f</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>+23000</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jump forward by 2m 30s (and 0 frames)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_items_markers">Items &amp; Markers</h4>
 <div class="paragraph">
-<p>You can easily shuffle back and forth between item edges by using the <kbd>Q</kbd> and <kbd>W</kbd> keys. You can move between markers by using the <kbd>,</kbd> and <kbd>.</kbd> keys (by design given on my keyboard they are the same keys that have <kbd>&lt;</kbd> and <kbd>&gt;</kbd>). <kbd>Tab</kbd> moves the edit cursor to a time within a selected item or items.</p>
+<p>You can easily shuffle back and forth between item edges by using the <kbd>Q</kbd> and <kbd>W</kbd> keys. You can move between markers by using the <kbd>,</kbd> and <kbd>.</kbd> keys (by design given on my keyboard they are the same keys that have <kbd>&lt;</kbd> and <kbd>&gt;</kbd>).</p>
 </div>
 </div>
 <div class="sect3">
@@ -1372,6 +1421,69 @@ If you are worried about accidentally moving markers and items during precise S-
 </div>
 </div>
 <div class="sect2">
+<h3 id="_collaborating_with_video_editors">Collaborating with Video Editors</h3>
+<div class="paragraph">
+<p>When working on projects that combine audio and video, the audio engineer must ensure that high-resolution audio edits remain synchronized with the final assembled video.</p>
+</div>
+<div class="paragraph">
+<p>Several approaches exist:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>No audio edits required</strong> – The simplest case. The video editor is free to select camera angles without concerns about audio sync.</p>
+</li>
+<li>
+<p><strong>Post-edited audio with playback</strong> – The promotional video is recorded after the audio has been edited, with musicians miming or playing along to playback via loudspeaker. The video editor has complete freedom to cut between angles without sync issues. This method isn’t always feasible.</p>
+</li>
+<li>
+<p><strong>Minor edits in live-recorded video</strong> – When video and audio are recorded simultaneously and only minor edits are needed, the video editor can use a zoomed-out shot of the concert hall, a musician’s face, or another visual to mask a slight time-stretch while preserving timecode accuracy.</p>
+</li>
+<li>
+<p><strong>Multiple synchronized takes</strong> – The most complex scenario. Both video and audio are recorded in multiple takes and synchronized via a timeclock. This is the focus of the following discussion.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>ReaClassical provides tools to generate an edit list for video editors. Rather than a file for direct import, this list serves as a manual reference. For all recordings, but especially those synchronized to a timeclock, REAPER/ReaClassical retains the timeline start position from the recording. This ensures that absolute in/out source positions can be retrieved even after extensive audio edits.</p>
+</div>
+<div class="paragraph">
+<p>To create an edit list:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Perform source-destination edits as usual.</p>
+</li>
+<li>
+<p>Set the desired project framerate in the video tab of Project Settings via <kbd>P</kbd>.</p>
+</li>
+<li>
+<p>Export the edit list via <span class="menuseq"><b class="menu">ReaClassical</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">Utilities</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Build Edit List</b></span>:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Select <em>using BWF start offset</em> for timeclock-synced projects.</p>
+</li>
+<li>
+<p>Choose <em>using source file timing</em> to reference internal source audio positions. In this case, the audio engineer should provide a a single channel of audio to help the video editor locate edit points.</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The resulting HTML table includes a <code>Done</code> column for tracking progress. Additionally, when using <em>Build Edit List (using BWF Start Offset)</em>, an optional offset can be applied to correct slight constant audio-video misalignment.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/build_edit_list.png" alt="build edit list">
+</div>
+<div class="title">Figure 17. An example edit list</div>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_mixing">Mixing</h3>
 <div class="sect3">
 <h4 id="_fx_plugins">FX Plugins</h4>
@@ -1391,7 +1503,7 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="sect3">
 <h4 id="_roomtone">Roomtone</h4>
 <div class="paragraph">
-<p>In a live concert recording that contains audience noise in between movements and applause at the end of a complete piece, it is often desirable to give the impression of a clean recording with no audience present. Recorded or generated room tone then becomes very important as an alternative to audio fading to complete digital silence which destroys the illusion of listening back to a live concert. ReaClassical includes a dedicated room tone track for this purpose. This way, the auditioning tool will keep the track displayed in both track and mixer panels. Add via <kbd>#</kbd>. Once added, you can add clean recorded noise captured before or after the concert or generate endless roomtone the length of your project from a very small portion of clean silence from the concert itself (hint: try using a white noise generator into a convolver such as ReaVerb that uses a few seconds of clean room tone as the impulse!). As of ReaClassical 24.12, the Create CD Markers function automatically generates precise volume automation at the track level to seamlessly fade in and out of room tone! See the mastering section for more details. Please not that there is a limit of one reference track per project.</p>
+<p>In a live concert recording that contains audience noise in between movements and applause at the end of a complete piece, it is often desirable to give the impression of a clean recording with no audience present. Recorded or generated room tone then becomes very important as an alternative to audio fading to complete digital silence which destroys the illusion of listening back to a live concert. ReaClassical includes a dedicated room tone track for this purpose. This way, the auditioning tool will keep the track displayed in both track and mixer panels. Add via <kbd>#</kbd>. Once added, you can add clean recorded noise captured before or after the concert or generate endless roomtone the length of your project from a very small portion of clean silence from the concert itself (hint: try using a white noise generator into a convolver such as ReaVerb that uses a few seconds of clean room tone as the impulse! See Appendix D for the method…). As of ReaClassical 24.12, the Create CD Markers function automatically generates precise volume automation at the track level to seamlessly fade in and out of room tone! See the mastering section for more details. Please not that there is a limit of one reference track per project.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1421,7 +1533,7 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="content">
 <img src="src/assets/mastering_mode.png" alt="mastering mode">
 </div>
-<div class="title">Figure 17. ReaClassical Mastering Mode</div>
+<div class="title">Figure 18. ReaClassical Mastering Mode</div>
 </div>
 </div>
 <div class="sect3">
@@ -1454,22 +1566,47 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="sect3">
 <h4 id="_metadata">Metadata</h4>
 <div class="paragraph">
-<p>To quickly remove all the take names on the destination parent track, run <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>T</kbd></span>. Track titles are then added to the individual items on the destination parent track by double-clicking on the item or selecting and pressing <kbd>F2</kbd>. Note that only items that start tracks should be named.</p>
+<p>To quickly remove all the take names on the destination parent track, run <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>T</kbd></span>. Track titles and other DDP metadata are then added to the individual items on the destination parent track by double-clicking on the item or selecting and pressing <kbd>F2</kbd>. Note that only items that start tracks should be named. An example item name could be:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Allegro|COMPOSER=Beethoven|PERFORMER=Jones</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>The rest of the metadata is then added via the Create CD Markers function <kbd>Y</kbd>. You can add UPC/EAN and ISRC numbers as desired followed by album title, performer, composer and genre. On later runs of the function, you can choose to automatically re-use existing values which can save even more time when making last-minute S-D edits, altering album spacing, switching album track order, or renaming a CD track start.</p>
+<p>For the album-wide metadata, to the final item on the first track of your album add an item name starting with <code>@</code> and add the album title and any other metadata you desire aside from catalog number (see below). An example item name for album metadata could be:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>@Between Fire and Moonlight|COMPOSER=Beethoven|PERFORMER=Jones|GENRE=Classical|LANGUAGE=English</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If your final item on the first track is also the final CD track start, just find another non-track-start item on the first track to add the name. Location doesn&#8217;t matter and is merely an attempt at a convention - the DDP marker itself is always added at the correct position just before the =END marker. If you album contains no internal edits, just add a transparent crossfade split to the final item via <kbd>S</kbd> and enter the information there.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The UPC/ISRC are then added via the Create CD Markers function <kbd>Y</kbd>. On later runs of the function, you can choose to automatically re-use existing UPC/ISRC values which can save even more time when making last-minute S-D edits, altering album spacing, switching album track order, or renaming a CD track start.</p>
 </div>
 <div class="imageblock">
 <div class="content">
 <img src="src/assets/takename.png" alt="takename">
 </div>
-<div class="title">Figure 18. Editing the item name</div>
+<div class="title">Figure 19. Editing the item name</div>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_creating_ddp_filesets">Creating DDP filesets</h4>
 <div class="paragraph">
-<p>I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via <kbd>Y</kbd>(track and region names are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is smart in the sense that if there&#8217;s no take name, no marker or region will be created. In other words, press <kbd>F2</kbd> with an item selected to enter track names where markers/regions need to be created. It&#8217;s perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences <kbd>F5</kbd>. So it&#8217;s now very quick to export a DDP set!</p>
+<p>I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via <kbd>Y</kbd>(track and region names and all metadata are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is smart in the sense that if there&#8217;s no take name, no marker or region will be created. In other words, press <kbd>F2</kbd> with an item selected to enter track names where markers/regions need to be created. It&#8217;s perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences <kbd>F5</kbd>. So it&#8217;s now very quick to export a DDP set!</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -1490,7 +1627,25 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <p>If a room tone track is present in the project, the function will also generate precise track-level volume automation that creates perfectly-matching fades at points where items fade into and out of silence on the first destination track. In other words, slicing and dicing room tone audio to fill in digital silence is no longer necessary in ReaClassical!</p>
 </div>
 <div class="paragraph">
+<p>After the DDP structure has been generated, open the Render dialog via <kbd>R</kbd> and select the ReaClassical DDP option under <span class="menuseq"><b class="menu">Presets</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">All Settings</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">DDP</b></span>.</p>
+</div>
+<div class="paragraph">
 <p>For more information read the description of the DDP function in appendix A.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_metadata_reporting">Metadata Reporting</h4>
+<div class="paragraph">
+<p>This function runs automatically as the final part of the Create CD Markers function but can also be run separately via <span class="menuseq"><b class="menu">ReaClassical</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">Mastering</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Show Metadata Report</b></span>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/metadata_report.png" alt="metadata report">
+</div>
+<div class="title">Figure 20. Example Metadata Report</div>
+</div>
+<div class="paragraph">
+<p>This is a great way to see all album metadata clearly in one window and could be copied and pasted into a report to send to the factory for checking against the metadata found in the DDP image itself. The function will also alert the user if some track metadata labels (COMPOSER=, PEFORMER=, SONGWRITER=, ARRANGER=) have been used without also using them album-wide via the <code>@</code> item name. For more information about DDP metadata see <a href="https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info.txt">here</a> (also available via the Render dialog via <span class="menuseq"><b class="menu">Format</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">DDP</b></span> and clicking on <b class="button">Help</b>).</p>
 </div>
 </div>
 <div class="sect3">
@@ -1514,7 +1669,7 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <div class="content">
 <img src="src/assets/html_album_report.png" alt="html album report">
 </div>
-<div class="title">Figure 19. A example of a ReaClassical HTML album report</div>
+<div class="title">Figure 21. A example of a ReaClassical HTML album report</div>
 </div>
 </div>
 </div>
@@ -1529,7 +1684,7 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <div class="content">
 <img src="src/assets/render_presets.png" alt="render presets">
 </div>
-<div class="title">Figure 20. ReaClassical render presets</div>
+<div class="title">Figure 22. ReaClassical render presets</div>
 </div>
 </div>
 <div class="sect3">
@@ -1846,10 +2001,10 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <p><strong>Jump To Time (Selected Item(s) or Project)</strong> <kbd>Tab</kbd></p>
 </div>
 <div class="paragraph">
-<p><em>Description:</em> Jumps to the specified time (mm:ss) in the project or internal time within a selected item or set of consecutive crossfaded items.</p>
+<p><em>Description:</em> Press <kbd>TAB</kbd> to jump to a specific absolute or relative time using right-aligned logic, similar to video editing applications. This can be an absolute time within the project or an relative position inside a selected item or a set of consecutive crossfaded items.</p>
 </div>
 <div class="paragraph">
-<p><em>Notes:</em> Various use-cases include 1) a musician or producer giving you an exact time in draft exported audio of a heavily-edited symphony movement where they identified extraneous noise or a noticeable edit, 2) building S-D edits from a list or score which includes take number and times.</p>
+<p><em>Notes:</em> Various use-cases include 1) a musician or producer giving you an exact time in draft exported audio of a heavily-edited symphony movement where they identified extraneous noise or a noticeable edit, 2) building S-D edits from a list or score which includes take number and timecode. Prefix with + or - to make relative jumps.</p>
 </div>
 <div class="paragraph">
 <p><strong>Source-Destination Markers</strong> <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>, <kbd>4</kbd></p>
@@ -2002,6 +2157,15 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <p><em>Notes:</em> While in the project view, drag an item (or grouped items) over another, move the edit cursor where you want the edit to happen and press <kbd>X</kbd>. Given the availability of S-D edit functionality and group razor-editing, this function is less useful in this context. However, it is essential in the crossfade editor mode for making the edit. Crossfade length is set via ReaClassical Project Preferences <kbd>F5</kbd>.</p>
 </div>
 <div class="paragraph">
+<p><strong>Build Edit List</strong></p>
+</div>
+<div class="paragraph">
+<p><em>Description:</em> Creates an edit list for use by video editors.</p>
+</div>
+<div class="paragraph">
+<p><em>Notes:</em> Choose the <em>BWF Start Offset</em> version when the audio and video was synchronized to a timeclock and <em>using source file timing</em> to use internal times of the audio sources. Export CSV data using the button below the table. Use the offset option to apply a constant value in frames to correct possible timeclock sync issues.</p>
+</div>
+<div class="paragraph">
 <p><strong>Mastering Mode</strong> <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>M</kbd></span></p>
 </div>
 <div class="paragraph">
@@ -2059,13 +2223,13 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <p><strong>Create CD Markers</strong> <kbd>Y</kbd></p>
 </div>
 <div class="paragraph">
-<p><em>Description:</em> Auto-generation of CD/DDP markers, UPC/ISRC codes, CUE file, album reports, and room tone automation, for efficient DDP, bin/cue and individual file exporting. Checks against Redbook standards and returns warning messages if there are 1) more than 99 tracks, or 2) There are tracks shorter than 4 seconds, or 3) the total length of the project is greater than 79.57 minutes.</p>
+<p><em>Description:</em> Auto-generation of CD/DDP markers, UPC/ISRC codes, CUE file, metadata report, album reports, and room tone automation, for efficient DDP, bin/cue and individual file exporting. Checks against Redbook standards and returns warning messages if there are 1) more than 99 tracks, or 2) There are tracks shorter than 4 seconds, or 3) the total length of the project is greater than 79.57 minutes.</p>
 </div>
 <div class="paragraph">
 <p><em>Notes:</em> If working in horizontal workflow, ensure that there is over a minute&#8217;s worth of empty timeline between the end of the proposed album and any other source material. Instead, you can also choose to drag any source material to new group by first creating an empty duplicate folder via <kbd>\</kbd>.</p>
 </div>
 <div class="paragraph">
-<p>This might be the biggest time-saving function in the ReaClassical system. It works as follows: 1) Edit gaps between items until you are happy 2) Add take names only to items that will become CD track starts 3) Run the function via shortcut <kbd>Y</kbd> and you will be asked to enter various information including UPC/ISRC (optional) and CD metadata. Done! Note that ISRC codes are auto-generated per track based on the numbers you enter.</p>
+<p>This might be the biggest time-saving function in the ReaClassical system. It works as follows: 1) Edit gaps between items until you are happy 2) Add take names and other metadata only to items that will become CD track starts 4) Add a take name starting with @ to the final item of the album and add album-wide metadata 4) Run the function via shortcut <kbd>Y</kbd> and you will be asked to enter UPC/ISRC (optional). Done! Note that ISRC codes are auto-generated per track based on the numbers you enter.</p>
 </div>
 <div class="paragraph">
 <p>You can add audio to the initial pre-gap (easter egg track) by not giving the first item (or crossfaded items) a take name. The function will assume that this is supposed to be hidden and generate the initial pre-gap length accordingly. All album metadata is placed towards the end of the album inside a default 7-second silent lead-out (so that CD players in cars don&#8217;t immediately cycle back to the first track without a little breathing room). This value can be changed via the ReaClassical Project Preferences <kbd>F5</kbd>. In addition to markers, regions are also generated for easy exporting of individual tracks. If you need a countdown into a track, simply add a ! at the start of the take name (e.g. <em>!Allegro</em>). Then after running the function adjust the position as desired (it defaults to 3 seconds in length but this can easily be set in ReaClassical Project Preferences). It is worth repeating at this point that you should only give names to items that are track starts. If you skip an item, the function rightly assumes it is part of the previous track. Note that the markers snap to exact CD frames and if the media item start is in between CD frames, the function will always place the marker on the earlier of the two. By default, the function uses a 200ms offset for placement of the markers (as in, markers appear 200ms to the left of the media item start) but, again, this value can be set via ReaClassical Project Preferences.</p>
@@ -2080,7 +2244,16 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <p>I feel that once you try this CD/DDP marker generation workflow, it is difficult to ever go back to other ways of working. The key thing to think about is that the markers and room tone fade-ins and outs are trivially easy to recreate if you change a gap between items or even rearrange the order of tracks. Just run the function again. The key is the workflow: all marker generation is automatically based on item positioning and naming. Plus, all metadata and ISRC is saved into the project file so once entered you don&#8217;t have to ever type it in again unless you need to make changes. Room tone volume changes are made via auto-generated volume envelope points that precisely map REAPER&#8217;s built-in fade curves.</p>
 </div>
 <div class="paragraph">
-<p>Hopefully you agree that this way of working with CD/DDP layout is a game-changer, a real time-saver and simply a better way of thinking about this portion of the mastering process.</p>
+<p>Hopefully you agree that this way of working with CD/DDP layout is a game-changer, a real time-saver and simply a better way of thinking about this portion of the mastering process. For more information about DDP metadata see <a href="https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info.txt">here</a> (also available via the Render dialog via <span class="menuseq"><b class="menu">Format</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">DDP</b></span> and clicking on <b class="button">Help</b>).</p>
+</div>
+<div class="paragraph">
+<p><strong>Show Metadata Report</strong></p>
+</div>
+<div class="paragraph">
+<p><em>Description:</em> Runs automatically as part of Create CD Markers function or separately via <span class="menuseq"><b class="menu">ReaClassical</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">Mastering</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Show Metadata Report</b></span>. The function shows all proposed metadata that will end up as part of the rendered DDP fileset.</p>
+</div>
+<div class="paragraph">
+<p><em>Notes:</em> The function will alert the user if some track metadata labels (COMPOSER=, PEFORMER=, SONGWRITER=, ARRANGER=) have been used without also using them album-wide via the <code>@</code> item name.</p>
 </div>
 <div class="paragraph">
 <p><strong>Show Statistics</strong> <kbd>F1</kbd></p>
@@ -2472,7 +2645,7 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <div class="content">
 <img src="src/assets/RCInflator_Ultimate.png" alt="RCInflator Ultimate">
 </div>
-<div class="title">Figure 21. RCInflator Ultimate</div>
+<div class="title">Figure 23. RCInflator Ultimate</div>
 </div>
 <div class="paragraph">
 <p>Restoration:</p>
@@ -2517,7 +2690,35 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 </div>
 </div>
 <div class="sect2">
-<h3 id="_d_system_tweaks">D: System Tweaks</h3>
+<h3 id="_d_room_tone_generation">D: Room Tone Generation</h3>
+<div class="paragraph">
+<p>In <span class="menuseq"><b class="menu">File</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Project Templates</b></span> you will find a room tone generation template. The method is derived from <a href="https://www.hearspotbark.com/blog/2015/1/26/using-logic-pro-to-generate-air">here</a>.</p>
+</div>
+<div class="paragraph">
+<p>To create endless room tone based on the venue you recorded:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>click <b class="button">Browse</b> in ReaVerb and select your few seconds of recorded reverb.</p>
+</li>
+<li>
+<p>Enable the FX on the first mixer track</p>
+</li>
+<li>
+<p>Adjust the length of the included region to the length of your live album</p>
+</li>
+<li>
+<p>Render using <span class="menuseq"><b class="menu">Bounds</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">All project regions</b></span></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Then drop the resulting file into your ReaClassical album project on a dedicated Room Tone track (create via <kbd>#</kbd>) and run Create CD Markers via <kbd>Y</kbd>. You will see that automation-based fades are added to coincide with opposite fade types on the first track thereby creating perfect crossfades into room tone and back without any fuss.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_e_system_tweaks">E: System Tweaks</h3>
 <div class="sect3">
 <h4 id="_windows">Windows</h4>
 <div class="paragraph">

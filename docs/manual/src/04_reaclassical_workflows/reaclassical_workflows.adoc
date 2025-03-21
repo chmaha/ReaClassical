@@ -10,6 +10,8 @@ include::navigation.adoc[]
 
 include::editing.adoc[]
 
+include::collaborating_with_video_editors.adoc[]
+
 include::mixing.adoc[]
 
 include::mastering.adoc[]

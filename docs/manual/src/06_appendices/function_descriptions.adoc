@@ -144,9 +144,9 @@ _Notes:_ If the function can't find a media item with that take number and optio
 
 *Jump To Time (Selected Item(s) or Project)* kbd:[Tab]
 
-_Description:_ Jumps to the specified time (mm:ss) in the project or internal time within a selected item or set of consecutive crossfaded items.
+_Description:_ Press kbd:[TAB] to jump to a specific absolute or relative time using right-aligned logic, similar to video editing applications. This can be an absolute time within the project or an relative position inside a selected item or a set of consecutive crossfaded items.
 
-_Notes:_ Various use-cases include 1) a musician or producer giving you an exact time in draft exported audio of a heavily-edited symphony movement where they identified extraneous noise or a noticeable edit, 2) building S-D edits from a list or score which includes take number and times.
+_Notes:_ Various use-cases include 1) a musician or producer giving you an exact time in draft exported audio of a heavily-edited symphony movement where they identified extraneous noise or a noticeable edit, 2) building S-D edits from a list or score which includes take number and timecode. Prefix with + or - to make relative jumps.
 
 *Source-Destination Markers* kbd:[1], kbd:[2], kbd:[3], kbd:[4]
 
@@ -248,6 +248,12 @@ _Description:_ Create a _classical_ crossfade either in regular project view or 
 
 _Notes:_ While in the project view, drag an item (or grouped items) over another, move the edit cursor where you want the edit to happen and press kbd:[X]. Given the availability of S-D edit functionality and group razor-editing, this function is less useful in this context. However, it is essential in the crossfade editor mode for making the edit. Crossfade length is set via ReaClassical Project Preferences kbd:[F5].
 
+*Build Edit List*
+
+_Description:_ Creates an edit list for use by video editors.
+
+_Notes:_ Choose the _BWF Start Offset_ version when the audio and video was synchronized to a timeclock and _using source file timing_ to use internal times of the audio sources. Export CSV data using the button below the table. Use the offset option to apply a constant value in frames to correct possible timeclock sync issues.
+
 *Mastering Mode* kbd:[Ctrl+M]
 
 _Description:_ Allows for focused work on the destination group. Couple with _automation_ mode, to add mixer and FX parameter values as envelope points
@@ -286,11 +292,11 @@ _Notes:_ As mentioned below, add take names only to destination parent items tha
 
 *Create CD Markers* kbd:[Y]
 
-_Description:_ Auto-generation of CD/DDP markers, UPC/ISRC codes, CUE file, album reports, and room tone automation, for efficient DDP, bin/cue and individual file exporting. Checks against Redbook standards and returns warning messages if there are 1) more than 99 tracks, or 2) There are tracks shorter than 4 seconds, or 3) the total length of the project is greater than 79.57 minutes.
+_Description:_ Auto-generation of CD/DDP markers, UPC/ISRC codes, CUE file, metadata report, album reports, and room tone automation, for efficient DDP, bin/cue and individual file exporting. Checks against Redbook standards and returns warning messages if there are 1) more than 99 tracks, or 2) There are tracks shorter than 4 seconds, or 3) the total length of the project is greater than 79.57 minutes.
 
 _Notes:_ If working in horizontal workflow, ensure that there is over a minute's worth of empty timeline between the end of the proposed album and any other source material. Instead, you can also choose to drag any source material to new group by first creating an empty duplicate folder via kbd:[\ ].
 
-This might be the biggest time-saving function in the ReaClassical system. It works as follows: 1) Edit gaps between items until you are happy 2) Add take names only to items that will become CD track starts 3) Run the function via shortcut kbd:[Y] and you will be asked to enter various information including UPC/ISRC (optional) and CD metadata. Done! Note that ISRC codes are auto-generated per track based on the numbers you enter.
+This might be the biggest time-saving function in the ReaClassical system. It works as follows: 1) Edit gaps between items until you are happy 2) Add take names and other metadata only to items that will become CD track starts 4) Add a take name starting with @ to the final item of the album and add album-wide metadata 4) Run the function via shortcut kbd:[Y] and you will be asked to enter UPC/ISRC (optional). Done! Note that ISRC codes are auto-generated per track based on the numbers you enter.
 
 You can add audio to the initial pre-gap (easter egg track) by not giving the first item (or crossfaded items) a take name. The function will assume that this is supposed to be hidden and generate the initial pre-gap length accordingly. All album metadata is placed towards the end of the album inside a default 7-second silent lead-out (so that CD players in cars don't immediately cycle back to the first track without a little breathing room). This value can be changed via the ReaClassical Project Preferences kbd:[F5]. In addition to markers, regions are also generated for easy exporting of individual tracks. If you need a countdown into a track, simply add a ! at the start of the take name (e.g. _!Allegro_). Then after running the function adjust the position as desired (it defaults to 3 seconds in length but this can easily be set in ReaClassical Project Preferences). It is worth repeating at this point that you should only give names to items that are track starts. If you skip an item, the function rightly assumes it is part of the previous track. Note that the markers snap to exact CD frames and if the media item start is in between CD frames, the function will always place the marker on the earlier of the two. By default, the function uses a 200ms offset for placement of the markers (as in, markers appear 200ms to the left of the media item start) but, again, this value can be set via ReaClassical Project Preferences.
 
@@ -300,7 +306,13 @@ In addition, the function automatically generates a CUE file and album reports i
 
 I feel that once you try this CD/DDP marker generation workflow, it is difficult to ever go back to other ways of working. The key thing to think about is that the markers and room tone fade-ins and outs are trivially easy to recreate if you change a gap between items or even rearrange the order of tracks. Just run the function again. The key is the workflow: all marker generation is automatically based on item positioning and naming. Plus, all metadata and ISRC is saved into the project file so once entered you don't have to ever type it in again unless you need to make changes. Room tone volume changes are made via auto-generated volume envelope points that precisely map REAPER's built-in fade curves.
 
-Hopefully you agree that this way of working with CD/DDP layout is a game-changer, a real time-saver and simply a better way of thinking about this portion of the mastering process.
+Hopefully you agree that this way of working with CD/DDP layout is a game-changer, a real time-saver and simply a better way of thinking about this portion of the mastering process. For more information about DDP metadata see https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info.txt[here] (also available via the Render dialog via menu:Format[DDP] and clicking on btn:[Help]).
+
+*Show Metadata Report*
+
+_Description:_ Runs automatically as part of Create CD Markers function or separately via menu:ReaClassical[Mastering > Show Metadata Report]. The function shows all proposed metadata that will end up as part of the rendered DDP fileset.
+
+_Notes:_ The function will alert the user if some track metadata labels (COMPOSER=, PEFORMER=, SONGWRITER=, ARRANGER=) have been used without also using them album-wide via the `@` item name.
 
 *Show Statistics* kbd:[F1]
 
