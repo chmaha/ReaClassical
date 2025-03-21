@@ -48,7 +48,7 @@ function main()
     local items = build_item_table(fps)
 
     -- Initialize CSV variable with the header row
-    local csv = "Edit,Start,Source In,Source Out,End,Playback Rate\n"
+    local csv = "Edit,Start,Source In,Source Out,End Check,Playback Rate\n"
     -- Append each item's data to the CSV variable
     for _, item in ipairs(items) do
         csv = csv .. string.format("%s,%s,%s,%s,%s,%s\n",
@@ -70,23 +70,35 @@ function main()
     end
 
     file:write([[
-<html>
-<head>
-<style>
-    body { font-family: Arial, sans-serif; margin: 20px; padding: 0; }
-    .container { width: 75%; margin: auto; text-align: left; } /* Centers the section but aligns text left */
-    h1 { font-size: 24px; margin-bottom: 5px; }
-    p { font-size: 16px; color: #555; margin-bottom: 10px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid black; padding: 5px; text-align: center; }
-    th { background-color: #f2f2f2; }
-    .gap-row { background-color: #e0e0e0; } /* Light gray */
-    .label { font-size: 0.9em;font-weight: bold; color: #333; }
-    .description { font-size: 0.9em; color: #555; }
-</style>
-</head>
-<body>
-]])
+        <html>
+        <head>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; padding: 0; }
+            .container { width: 75%; margin: auto; text-align: left; } /* Centers the section but aligns text left */
+            h1 { font-size: 24px; margin-bottom: 5px; }
+            p { font-size: 16px; color: #555; margin-bottom: 10px; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid black; padding: 5px; text-align: center; }
+            th { background-color: #f2f2f2; }
+            .gap-row { background-color: #e0e0e0; } /* Light gray */
+            .disabled-row { background-color: #d0d0d0 !important; color: #777 !important; } /* Greyed out */
+            .label { font-size: 0.9em;font-weight: bold; color: #333; }
+            .description { font-size: 0.9em; color: #555; }
+            input[type="checkbox"] { cursor: pointer; }
+        </style>
+        <script>
+        function toggleRow(checkbox) {
+            let row = checkbox.closest("tr");
+            if (checkbox.checked) {
+                row.classList.add("disabled-row");
+            } else {
+                row.classList.remove("disabled-row");
+            }
+        }
+        </script>
+        </head>
+        <body>
+        ]])
 
     file:write("<div class='info'>\n")
     file:write("  <h2>Edit List (using BWF Start Offset)</h2>\n")
@@ -95,48 +107,49 @@ function main()
     file:write("  <p><strong>Frame Rate:</strong> ", (fps or "Unknown"), "</p>\n")
     file:write(
         [[<p><span class="label">Start:</span>
-    <span class="description">Absolute timeline location for building the edit</span><br>
-    <span class="label">Source In and Source Out:</span>
-    <span class="description">Absolute timecode references for source material</span><br>
-    <span class="label">End:</span>
-    <span class="description">
-    A reference check for where the inserted material ends on the timeline after the 3-point edit
-    </span><br>
-    <span class="label">Playback rate:</span>
-    <span class="description">Only shown if not equal to 1</span><br>
-    <span <span class="description"><br>Time is in the format HH:MM:SS:FF</span></p>]])
+            <span class="description">Absolute timeline location for building the edit</span><br>
+            <span class="label">Source In and Source Out:</span>
+            <span class="description">Absolute timecode references for source material</span><br>
+            <span class="label">End:</span>
+            <span class="description">
+            A reference check for where the inserted material ends on the timeline after the 3-point edit
+            </span><br>
+            <span class="label">Playback rate:</span>
+            <span class="description">Only shown if not equal to 1</span><br>
+            <span class="description"><br>Time is in the format HH:MM:SS:FF</span></p>]])
 
     file:write("</div>\n")
+
     file:write([[<table>
-        <thead>
-            <tr>
-                <th>Edit</th>
-                <th>Start</th>
-                <th>Source In</th>
-                <th>Source Out</th>
-                <th>End</th>
-                <th>Playback Rate</th>
-            </tr>
-        </thead>
-        <tbody>
-]])
+            <thead>
+                <tr>
+                    <th>Done</th>
+                    <th>Edit</th>
+                    <th>Start</th>
+                    <th>Source In</th>
+                    <th>Source Out</th>
+                    <th>End Check</th>
+                    <th>Playback Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+        ]])
 
     -- Append table rows from items
     for _, item in ipairs(items) do
         if item.edit_number == "Gap" then
-            file:write(string.format('<tr class="gap-row"><td colspan="7">%s</td></tr>\n', item.edit_number))
+            file:write(string.format('<tr class="gap-row"><td colspan="8">%s</td></tr>\n', item.edit_number))
         else
             file:write(string.format(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
+                '<tr><td><input type="checkbox" onclick="toggleRow(this)"></td><td>%s</td>' ..
+                '<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n',
                 item.edit_number, item.position, item.s_in, item.s_out, item.dest_end, item.playrate
             ))
         end
     end
 
-    -- Add hidden CSV text area and copy button
-    file:write([[
-    </tbody>
-    </table>
+    file:write([[</tbody></table>
+
 
     <div style="margin-top: 20px;">
         <textarea id="csvData" style="position:absolute;left:-9999px;">]] .. csv .. [[</textarea>
