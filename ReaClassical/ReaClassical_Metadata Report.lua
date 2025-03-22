@@ -152,7 +152,7 @@ function generate_report(metadata)
     if metadata.album.title or #metadata.tracks > 0 then
         report = report .. "  Title\n"
         if metadata.album.title then
-            report = report .. "    Disk  : " .. metadata.album.title .. "\n"
+            report = report .. "    Album : " .. metadata.album.title .. "\n"
         end
         for i, track in ipairs(metadata.tracks) do
             if track.title then
@@ -164,7 +164,7 @@ function generate_report(metadata)
     if metadata.album.performer or any(metadata.tracks, "performer") then
         report = report .. "  Performer\n"
         if metadata.album.performer then
-            report = report .. "    Disk  : " .. metadata.album.performer .. "\n"
+            report = report .. "    Album : " .. metadata.album.performer .. "\n"
         end
         for i, track in ipairs(metadata.tracks) do
             if track.performer then
@@ -176,7 +176,7 @@ function generate_report(metadata)
     if metadata.album.composer or any(metadata.tracks, "composer") then
         report = report .. "  Composer\n"
         if metadata.album.composer then
-            report = report .. "    Disk  : " .. metadata.album.composer .. "\n"
+            report = report .. "    Album : " .. metadata.album.composer .. "\n"
         end
         for i, track in ipairs(metadata.tracks) do
             if track.composer then
@@ -188,7 +188,7 @@ function generate_report(metadata)
     if metadata.album.songwriter or any(metadata.tracks, "songwriter") then
         report = report .. "  Songwriter\n"
         if metadata.album.songwriter then
-            report = report .. "    Disk  : " .. metadata.album.songwriter .. "\n"
+            report = report .. "    Album : " .. metadata.album.songwriter .. "\n"
         end
         for i, track in ipairs(metadata.tracks) do
             if track.songwriter then
@@ -200,7 +200,7 @@ function generate_report(metadata)
     if metadata.album.arranger or any(metadata.tracks, "arranger") then
         report = report .. "  Arranger\n"
         if metadata.album.arranger then
-            report = report .. "    Disk  : " .. metadata.album.arranger .. "\n"
+            report = report .. "    Album : " .. metadata.album.arranger .. "\n"
         end
         for i, track in ipairs(metadata.tracks) do
             if track.arranger then
@@ -212,7 +212,7 @@ function generate_report(metadata)
     if metadata.album.message or any(metadata.tracks, "message") then
         report = report .. "  Message\n"
         if metadata.album.message then
-            report = report .. "    Disk  : " .. metadata.album.message .. "\n"
+            report = report .. "    Album : " .. metadata.album.message .. "\n"
         end
         for i, track in ipairs(metadata.tracks) do
             if track.message then
@@ -226,7 +226,7 @@ function generate_report(metadata)
     end
 
     if metadata.album.identification then
-        report = report .. "  Identification\n    Disk  : " .. metadata.album.identification .. "\n"
+        report = report .. "  Identification\n    Album : " .. metadata.album.identification .. "\n"
     end
 
     return report
