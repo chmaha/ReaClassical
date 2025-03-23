@@ -21,7 +21,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, parse_markers, generate_report, any
+local main, parse_markers, generate_report, any, write_rcmeta_file
+local get_txt_file, checksum
 
 ---------------------------------------------------------------------
 
@@ -49,6 +50,8 @@ function main()
     local report = generate_report(metadata)
     ClearConsole()
     reaper.ShowConsoleMsg(report)
+    local metadata_file = get_txt_file()
+    write_rcmeta_file(metadata_file, metadata)
 
     Undo_EndBlock('DDP metadata report', 0)
     PreventUIRefresh(-1)
@@ -101,7 +104,7 @@ function parse_markers()
                         songwriter = name:match("SONGWRITER=([^|]+)") or nil,
                         composer = name:match("COMPOSER=([^|]+)") or nil,
                         arranger = name:match("ARRANGER=([^|]+)") or nil,
-                        message = name:match("MESSAGE=([^|]+)") or nil
+                        message = name:match("MESSAGE=([^|]+)") or nil,
                     }
 
                     local missing_album_metadata = false
@@ -122,9 +125,9 @@ function parse_markers()
                     -- Assign error message to error_msg variable
                     if missing_album_metadata then
                         error_msg = "Note: One or more tracks specify " ..
-                        "performer, songwriter, composer, or arranger\n" ..
-                        "without an associated album-wide entry and " ..
-                        "therefore won't currently be added to the DDP metadata."
+                            "performer, songwriter, composer, or arranger\n" ..
+                            "without an associated album-wide entry and " ..
+                            "therefore won't currently be added to the DDP metadata."
                     end
 
                     table.insert(metadata.tracks, track_data)
@@ -209,6 +212,19 @@ function generate_report(metadata)
         end
     end
 
+    if metadata.album.catalog or any(metadata.tracks, "isrc") then
+        report = report .. "  Codes\n"
+        if metadata.album.catalog then
+            report = report .. "    Album : " .. metadata.album.catalog .. "\n"
+        end
+        for i, track in ipairs(metadata.tracks) do
+            if track.isrc then
+                report = report .. string.format("    Trk %02d: %s\n", i, track.isrc)
+            end
+        end
+    end
+
+
     if metadata.album.message or any(metadata.tracks, "message") then
         report = report .. "  Message\n"
         if metadata.album.message then
@@ -237,6 +253,85 @@ function any(tracks, field)
         if track[field] then return true end
     end
     return false
+end
+
+---------------------------------------------------------------------
+
+function write_rcmeta_file(metadata_file, metadata)
+    local file = io.open(metadata_file, "w")
+    if not file then return false, "Could not open file for writing" end
+
+    file:write("AMF Version         = 1.0 (Sony text file format modification)\n")
+    file:write("Remarks             = IRSC and Catalog entries are just for reference\n")
+    file:write("Language Code       = English\n")
+
+    if metadata.album then
+        file:write(string.format("Album Title         = %s\n", metadata.album.title or ""))
+        file:write(string.format("Catalog Number      = %s\n", metadata.album.catalog or ""))
+        file:write(string.format("Performer           = %s\n", metadata.album.performer or ""))
+        file:write(string.format("Songwriter          = %s\n", metadata.album.songwriter or ""))
+        file:write(string.format("Composer            = %s\n", metadata.album.composer or ""))
+        file:write(string.format("Arranger            = %s\n", metadata.album.arranger or ""))
+        file:write(string.format("Album Message       = %s\n", metadata.album.message or ""))
+        file:write(string.format("Identification      = %s\n", metadata.album.identification or ""))
+        file:write(string.format("Genre Code          = %s\n", metadata.album.genre or ""))
+        file:write(string.format("Language            = %s\n", metadata.album.language or ""))
+    end
+
+    if metadata.tracks and #metadata.tracks > 0 then
+        file:write("First Track Number  = 1\n")
+        file:write(string.format("Last Track Number   = %d\n", #metadata.tracks))
+
+        for i, track in ipairs(metadata.tracks) do
+            local track_num = string.format("%02d", i)
+            file:write(string.format("Track %s Title      = %s\n", track_num, track.title or ""))
+            file:write(string.format("Track %s Performer  = %s\n", track_num, track.performer or ""))
+            file:write(string.format("Track %s Songwriter = %s\n", track_num, track.songwriter or ""))
+            file:write(string.format("Track %s Composer   = %s\n", track_num, track.composer or ""))
+            file:write(string.format("Track %s Arranger   = %s\n", track_num, track.arranger or ""))
+            file:write(string.format("Track %s Message    = %s\n", track_num, track.message or ""))
+            file:write(string.format("ISRC %s             = %s\n", track_num, track.isrc or ""))
+        end
+    end
+
+    file:close()
+
+    local new_checksum = checksum(metadata_file)
+    SetProjExtState(0, "ReaClassical", "MetadataChecksum", new_checksum)
+
+    return true
+end
+
+---------------------------------------------------------------------
+
+function get_txt_file()
+    local _, path = EnumProjects(-1)
+    local slash = package.config:sub(1, 1)
+    if path == "" then
+        path = GetProjectPath()
+    else
+        local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
+        path = path:match(pattern)
+    end
+    local file = path .. slash .. 'metadata.txt'
+    return file
+end
+
+---------------------------------------------------------------------
+
+function checksum(filename)
+    local file = io.open(filename, "rb")
+    if not file then return nil, "Cannot open file" end
+
+    local file_checksum = 0
+    for line in file:lines() do
+        for i = 1, #line do
+            file_checksum = (file_checksum + line:byte(i)) % 0xFFFFFFFF
+        end
+    end
+
+    file:close()
+    return file_checksum
 end
 
 ---------------------------------------------------------------------
