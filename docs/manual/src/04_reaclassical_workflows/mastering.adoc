@@ -27,26 +27,9 @@ The other situation is when you want to start with uniform gaps between a series
 
 In terms of loudness, I personally aim for about -18 LUFS Integrated for my classical albums though it can be as high as -16 LUFS and as low as -20 LUFS. The new loudness JSFX meter in REAPER along with the normalization of loudness and true-peak limiting in the render dialog are priceless. It's another reason I couldn't go back to the big classical DAWs at this point.
 
-==== Metadata
-
-To quickly remove all the take names on the destination parent track, run kbd:[Ctrl+T]. Track titles and other DDP metadata are then added to the individual items on the destination parent track by double-clicking on the item or selecting and pressing kbd:[F2]. Note that only items that start tracks should be named. An example item name could be:
-
-    Allegro|COMPOSER=Beethoven|PERFORMER=Jones
-
-For the album-wide metadata, to the final item on the first track of your album add an item name starting with `@` and add the album title and any other metadata you desire aside from catalog number (see below). An example item name for album metadata could be:
-
-    @Between Fire and Moonlight|COMPOSER=Beethoven|PERFORMER=Jones|GENRE=Classical|LANGUAGE=English
-
-TIP: If your final item on the first track is also the final CD track start, just find another non-track-start item on the first track to add the name. Location doesn't matter and is merely an attempt at a convention - the DDP marker itself is always added at the correct position just before the =END marker. If you album contains no internal edits, just add a transparent crossfade split to the final item via kbd:[S] and enter the information there.
-
-The UPC/ISRC are then added via the Create CD Markers function kbd:[Y]. On later runs of the function, you can choose to automatically re-use existing UPC/ISRC values which can save even more time when making last-minute S-D edits, altering album spacing, switching album track order, or renaming a CD track start.
-
-.Editing the item name
-image::takename.png[]
-
 ==== Creating DDP filesets
 
-I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via kbd:[Y](track and region names and all metadata are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!) . It is smart in the sense that if there's no take name, no marker or region will be created. In other words, press kbd:[F2] with an item selected to enter track names where markers/regions need to be created. It's perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences kbd:[F5]. So it's now very quick to export a DDP set!
+I have introduced a workflow to automatically add the CD/DDP markers, regions and room tone automation via kbd:[Y](track and region names and all metadata are pulled from item take names, markers/regions auto-snap to CD frames, initial 2-second pre-gap, silent roll out and album metadata also added!). It is smart in the sense that if there's no take name, no marker or region will be created. In other words, press kbd:[F2] with an item selected to enter track names where markers/regions need to be created. It's perfect for classical releases where a crossfaded item is likely an internal source-destination edit versus a new track. For CD tracks that you want to have a visual CD player countdown, simply start the item name with an exclamation (!). Preferences such as CD marker offset, pre-gap length and album lead-out can be set via ReaClassical Project Preferences kbd:[F5]. So it's now very quick to export a DDP set!
 
 TIP: If working in horizontal workflow, ensure that there is over a minute's worth of empty timeline between the end of the proposed album and any other source material. Instead, you can also choose to drag any source material to a new group by first creating an empty duplicate folder via kbd:[\ ].
 
@@ -58,7 +41,32 @@ After the DDP structure has been generated, open the Render dialog via kbd:[R] a
 
 For more information read the description of the DDP function in appendix A.
 
-==== Metadata Reporting ====
+==== Preparation for Metadata Entry
+
+See Metadata Entry Method 2 for the new preferred way to edit metadata in ReaClassical. Using either method, to quickly remove all the current take names on the destination parent track, run kbd:[Ctrl+T]. Track titles and other DDP metadata are then added to the individual items on the destination parent track by double-clicking on the item or selecting and pressing kbd:[F2]. Note that only items that start CD tracks should be named. The only exception is using the final item of the first track to store album-wide data starting with `@`.
+
+==== Metadata Entry Method 1
+
+Press F2 on a first-track item that starts a CD track An example item name and track metadata (aside from ISRC) could be:
+
+    Allegro|COMPOSER=Beethoven|PERFORMER=Jones
+
+For the album-wide metadata, to the final item on the first track of your album add an item name starting with `@` and add the album title and any other metadata you desire aside from catalog number (see below). An example item name for album metadata could be:
+
+    @Between Fire and Moonlight|COMPOSER=Beethoven|PERFORMER=Jones|GENRE=Classical|LANGUAGE=English
+
+The UPC/EAN and/or ISRC are then added via the Create CD Markers function kbd:[Y]. On later runs of the function, you can choose to automatically re-use existing Catalog and ISRC values which can save even more time when making last-minute S-D edits, altering album spacing, switching album track order, or renaming a CD track start.
+
+.Editing the item name
+image::takename.png[]
+
+==== Metadata Entry Method 2 (recommended)
+
+Since ReaClassical 25.3.19, as part of running Create CD Markers function kbd:[Y], a `metadata.txt` file is created in the project folder. You can edit this file by adding or modifying metadata entries using a basic text editor. This is now the recommended way to enter metadata given you can be as detailed as you wish and not have to worry about entering keys (for example PERFORMER=) or pipes (kbd[|]) which can be tiresome to enter on certain keyboards. All you have to do to get started with metadata with this method is create a very basic DDP structure of just the track titles on first-track items that start CD tracks and an album-wide title (e.g. @MyAlbumTitle) on the last first-track item of your album. Then press kbd:[Y], have the function generate the `metadata.txt` file and open it in a text editor like Notepad or TextEdit. Save your modifications and on re-running kbd:[Y], the function will check for changes and offer to use them.
+
+TIP: If your final item on the first track is also the final CD track start, just find another non-track-start item on the first track to add the @name. Location doesn't matter and is merely an attempt at a convention - the DDP marker itself is always added at the correct position just before the =END marker. If your album contains no internal edits, just add a transparent crossfade split to the final item via kbd:[S] and enter the album title there.
+
+==== Metadata Reporting
 
 This function runs automatically as the final part of the Create CD Markers function but can also be run separately via menu:ReaClassical[Mastering > Show Metadata Report].
 
