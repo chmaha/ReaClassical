@@ -1,17 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.18
+@version 25.3.19
 @changelog
-  Create CD Markers overhaul in terms of album-wide metadata
-  NEW: Album Metadata Reporting
-  Jump To Time: Use right-aligned logic (NLE style)
-  Jump To Time: Allow for relative jumps via +/- prefix
-  Build Edit List functions: Add progress checkboxes
-  Build Edit List (BWF Offset): Allow for custom offset in frames
-  NO-OP: Use custom functions when dealing with selected items
-  NO-OP: Switch to true/false vs 1/0 for GetSet commands
-  Manual: Various additions
-  NOTES: Update keymap and toolbar/menus when asked
+  Metadata Report: Generate plaintext file as preferred way to add metadata information
+  Create CD Markers: Compare stored and current checksum on metadata.txt and offer to import changes
+  Metadata Report: In console window use album vs disk terminology
+  Manual: Various changes
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
