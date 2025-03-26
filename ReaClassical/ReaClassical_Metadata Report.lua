@@ -263,7 +263,6 @@ function write_rcmeta_file(metadata_file, metadata)
 
     file:write("AMF Version         = 1.0 (Sony text file format modification)\n")
     file:write("Remarks             = IRSC and Catalog entries are just for reference\n")
-    file:write("Language Code       = English\n")
 
     if metadata.album then
         file:write(string.format("Album Title         = %s\n", metadata.album.title or ""))
