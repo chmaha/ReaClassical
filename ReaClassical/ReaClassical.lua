@@ -1,11 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.19
+@version 25.3.20
 @changelog
-  Metadata Report: Generate plaintext file as preferred way to add metadata information
-  Create CD Markers: Compare stored and current checksum on metadata.txt and offer to import changes
-  Metadata Report: In console window use album vs disk terminology
-  Manual: Various changes
+  Metadata Report: Remove hard-coded English language line from metadata.txt
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
