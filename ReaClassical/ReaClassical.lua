@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.20
+@version 25.3.21
 @changelog
-  Metadata Report: Remove hard-coded English language line from metadata.txt
+  Find Take: Fix take search incorrectly matching substring in session names
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
