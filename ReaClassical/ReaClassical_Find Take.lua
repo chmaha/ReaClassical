@@ -64,7 +64,7 @@ function main()
             local session_match = true
 
             if session_name and session_name ~= "" then
-                session_match = filename:lower():find(session_name:lower()) ~= nil
+                session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
             end
 
             local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
