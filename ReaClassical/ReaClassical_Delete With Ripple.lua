@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, lock_items
+local main, source_markers, lock_items, find_second_folder_track
 local unlock_items, ripple_lock_mode, return_xfade_length, xfade
 
 ---------------------------------------------------------------------
@@ -127,6 +127,28 @@ function lock_items()
             SetMediaItemInfo_Value(item, "C_LOCK", 1)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function find_second_folder_track()
+    local total_tracks = CountTracks(0)
+    local folder_count = 0
+
+    for track_idx = 0, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+        if folder_depth == 1 then
+            folder_count = folder_count + 1
+
+            if folder_count == 2 then
+                return track_idx
+            end
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
