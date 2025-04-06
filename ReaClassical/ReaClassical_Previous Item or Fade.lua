@@ -29,7 +29,7 @@ local correct_item_positions, folder_check, check_next_item_overlap
 local get_color_table, get_path, get_reaper_version
 local get_selected_media_item_at, count_selected_media_items
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-local win_state
+local win_state, find_second_folder_track
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -271,17 +271,46 @@ end
 ---------------------------------------------------------------------
 
 function lock_items()
-    Main_OnCommand(40182, 0)           -- select all items
-    Main_OnCommand(40939, 0)           -- select track 01
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- select children of track 1
-    local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
-    Main_OnCommand(unselect_items, 0)  -- unselect items in first folder
-    local total_items = count_selected_media_items()
-    for i = 0, total_items - 1, 1 do
-        local item = get_selected_media_item_at(i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 1)
+    local second_folder_track = find_second_folder_track()
+
+    if second_folder_track == nil then
+        return
     end
+
+    local total_tracks = CountTracks(0)
+
+    for track_idx = second_folder_track, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+
+        local num_items = CountTrackMediaItems(track)
+
+        for item_idx = 0, num_items - 1 do
+            local item = GetTrackMediaItem(track, item_idx)
+            SetMediaItemInfo_Value(item, "C_LOCK", 1)
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function find_second_folder_track()
+    local total_tracks = CountTracks(0)
+    local folder_count = 0
+
+    for track_idx = 0, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+        if folder_depth == 1 then
+            folder_count = folder_count + 1
+
+            if folder_count == 2 then
+                return track_idx
+            end
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------

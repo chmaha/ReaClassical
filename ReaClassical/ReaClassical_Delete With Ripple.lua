@@ -22,9 +22,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, select_matching_folder, lock_items
+local main, source_markers, lock_items
 local unlock_items, ripple_lock_mode, return_xfade_length, xfade
-local get_selected_media_item_at, count_selected_media_items
+
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -108,35 +108,24 @@ end
 
 ---------------------------------------------------------------------
 
-function select_matching_folder()
-    local cursor = GetCursorPosition()
-    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
-    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
-    local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
-    for i = 0, CountTracks(0) - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
-            SetOnlyTrackSelected(track)
-            break
-        end
-    end
-end
-
----------------------------------------------------------------------
-
 function lock_items()
-    select_matching_folder()
-    Main_OnCommand(40182, 0)             -- select all items
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0)   -- select children of folder
-    local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
-    Main_OnCommand(unselect_items, 0)    -- unselect items in folder
-    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-    Main_OnCommand(unselect_children, 0) -- unselect children of folder
-    local total_items = count_selected_media_items()
-    for i = 0, total_items - 1, 1 do
-        local item = get_selected_media_item_at(i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 1)
+    local second_folder_track = find_second_folder_track()
+
+    if second_folder_track == nil then
+        return
+    end
+
+    local total_tracks = CountTracks(0)
+
+    for track_idx = second_folder_track, total_tracks - 1 do
+        local track = GetTrack(0, track_idx)
+
+        local num_items = CountTrackMediaItems(track)
+
+        for item_idx = 0, num_items - 1 do
+            local item = GetTrackMediaItem(track, item_idx)
+            SetMediaItemInfo_Value(item, "C_LOCK", 1)
+        end
     end
 end
 
@@ -188,42 +177,6 @@ function xfade(xfade_len)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)
 end
-
----------------------------------------------------------------------
-
-function count_selected_media_items()
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            selected_count = selected_count + 1
-        end
-    end
-
-    return selected_count
-end
-
----------------------------------------------------------------------
-
-function get_selected_media_item_at(index)
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            if selected_count == index then
-                return item
-            end
-            selected_count = selected_count + 1
-        end
-    end
-
-    return nil
-end
-
 
 ---------------------------------------------------------------------
 
