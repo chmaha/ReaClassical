@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.4
+@version 25.4.1
 @changelog
-  Various: Use more efficient lock_items function
+  Various: Remove unnecessary locking and unlocking of items
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
