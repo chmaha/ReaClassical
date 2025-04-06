@@ -23,9 +23,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, select_matching_folder, copy_source, split_at_dest_in
-local create_crossfades, clean_up, lock_items, unlock_items, ripple_lock_mode
+local create_crossfades, clean_up, ripple_lock_mode
 local return_xfade_length, xfade, get_first_last_items, markers
-local mark_as_edit, move_to_project_tab, find_second_folder_track
+local mark_as_edit, move_to_project_tab
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 
@@ -90,7 +90,7 @@ function main()
         local total_selected, parent_selected = copy_source(xfade_len)
         if total_selected == 0 then
             Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
-            unlock_items()
+
             MB("Please make sure there is material to copy between your source markers.",
                 "Insert with timestretching", 0)
             if moveable_dest == 1 then move_destination_folder(track_number) end
@@ -98,7 +98,7 @@ function main()
         end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
-        lock_items()
+
         split_at_dest_in()
         Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 997, false)
@@ -158,7 +158,7 @@ function main()
         if state == 0 then
             Main_OnCommand(1156, 0) -- Options: Toggle item grouping and track media/razor edit grouping
         end
-        unlock_items()
+
         create_crossfades(xfade_len)
         if moveable_dest == 1 then move_destination_folder(track_number) end
         clean_up(proj_marker_count)
@@ -299,39 +299,6 @@ function clean_up(proj_marker_count)
         DeleteProjectMarker(project, 997, false)
 
         i = i + 1
-    end
-end
-
----------------------------------------------------------------------
-
-function lock_items()
-    local second_folder_track = find_second_folder_track()
-
-    if second_folder_track == nil then
-        return
-    end
-
-    local total_tracks = CountTracks(0)
-
-    for track_idx = second_folder_track, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-
-        local num_items = CountTrackMediaItems(track)
-
-        for item_idx = 0, num_items - 1 do
-            local item = GetTrackMediaItem(track, item_idx)
-            SetMediaItemInfo_Value(item, "C_LOCK", 1)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function unlock_items()
-    local total_items = CountMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 0)
     end
 end
 
@@ -501,28 +468,6 @@ end
 
 function move_to_project_tab(proj_type)
     SelectProjectInstance(proj_type)
-end
-
----------------------------------------------------------------------
-
-function find_second_folder_track()
-    local total_tracks = CountTracks(0)
-    local folder_count = 0
-
-    for track_idx = 0, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
-        if folder_depth == 1 then
-            folder_count = folder_count + 1
-
-            if folder_count == 2 then
-                return track_idx
-            end
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------

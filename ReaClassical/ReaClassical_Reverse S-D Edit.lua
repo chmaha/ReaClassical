@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, add_source_marker, delete_leaving_silence
 local get_track_length, select_matching_folder, copy_or_move_dest
-local clean_up, unlock_items, ripple_lock_mode
+local clean_up, ripple_lock_mode
 local get_color_table, get_path, move_to_project_tab
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 
@@ -385,19 +385,8 @@ function clean_up(is_selected, proj_marker_count, source_count, source_in, sourc
             i = i + 1
         end
     else
-        unlock_items()
         MB("Please make sure there is material to copy between your source markers...",
             "Source-Destination Edit", 0)
-    end
-end
-
----------------------------------------------------------------------
-
-function unlock_items()
-    local total_items = CountMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 0)
     end
 end
 

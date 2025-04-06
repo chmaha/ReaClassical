@@ -22,8 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, lock_items, find_second_folder_track
-local unlock_items, ripple_lock_mode, return_xfade_length, xfade
+local main, source_markers
+local ripple_lock_mode, return_xfade_length, xfade
 
 ---------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ function main()
         return
     end
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
-    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
+    Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
@@ -52,7 +52,7 @@ function main()
         local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
         Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
         GoToMarker(0, 998, false)
-        lock_items()
+
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 999, false)
@@ -69,7 +69,7 @@ function main()
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
         Main_OnCommand(40630, 0)  -- Go to start of time selection
-        unlock_items()
+
         local xfade_len = return_xfade_length()
         MoveEditCursor(xfade_len, false)
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
@@ -104,61 +104,6 @@ function source_markers()
         end
     end
     return exists
-end
-
----------------------------------------------------------------------
-
-function lock_items()
-    local second_folder_track = find_second_folder_track()
-
-    if second_folder_track == nil then
-        return
-    end
-
-    local total_tracks = CountTracks(0)
-
-    for track_idx = second_folder_track, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-
-        local num_items = CountTrackMediaItems(track)
-
-        for item_idx = 0, num_items - 1 do
-            local item = GetTrackMediaItem(track, item_idx)
-            SetMediaItemInfo_Value(item, "C_LOCK", 1)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function find_second_folder_track()
-    local total_tracks = CountTracks(0)
-    local folder_count = 0
-
-    for track_idx = 0, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
-        if folder_depth == 1 then
-            folder_count = folder_count + 1
-
-            if folder_count == 2 then
-                return track_idx
-            end
-        end
-    end
-
-    return nil
-end
-
----------------------------------------------------------------------
-
-function unlock_items()
-    local total_items = CountMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 0)
-    end
 end
 
 ---------------------------------------------------------------------

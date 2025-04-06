@@ -22,10 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
-local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
+local ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
-local load_last_assembly_item, find_second_folder_track
+local load_last_assembly_item
 local check_overlapping_items
 local move_destination_folder_to_top, move_destination_folder
 local get_selected_media_item_at, count_selected_media_items
@@ -62,9 +62,9 @@ function main()
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
-    local proj_marker_count, source_proj, dest_proj, dest_in, _,_,_,_, source_count, pos_table, track_number = markers()
+    local marker_count, source_proj, dest_proj, dest_in, _, _, _, _, source_count, pos_table, track_number = markers()
 
-    if proj_marker_count == 1 then
+    if marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Assembly Line Edit", 0)
@@ -72,7 +72,7 @@ function main()
         return
     end
 
-    if proj_marker_count == -1 then
+    if marker_count == -1 then
         MB(
             "Source or destination markers should be paired with the corresponding source " ..
             "or destination project marker.",
@@ -116,7 +116,7 @@ function main()
             end
         end
 
-        lock_items()
+
         move_to_project_tab(source_proj)
 
         local stored_view = NamedCommandLookup("_SWS_SAVEVIEW")
@@ -126,7 +126,7 @@ function main()
 
         local _, is_selected = copy_source()
         if is_selected == false then
-            clean_up(is_selected, proj_marker_count)
+            clean_up(is_selected, marker_count)
             return
         end
         Main_OnCommand(40020, 0) -- Remove time selection
@@ -142,10 +142,10 @@ function main()
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0) -- SWS_AWPASTE
         mark_as_edit()
-        unlock_items()
+
         local cur_pos, new_last_item = create_crossfades()
         save_last_assembly_item(new_last_item)
-        clean_up(is_selected, proj_marker_count)
+        clean_up(is_selected, marker_count)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         create_dest_in(cur_pos)
@@ -181,7 +181,7 @@ function markers()
 
     local num = 0
     local source_proj, dest_proj
-    local proj_marker_count = 0
+    local marker_count = 0
     local pos_table = {}
     local active_proj = EnumProjects(-1)
     local track_number = 1
@@ -216,16 +216,16 @@ function markers()
                 pos_table[4] = pos
             elseif string.match(label, "SOURCE PROJECT") then
                 source_proj = proj
-                proj_marker_count = proj_marker_count + 1
+                marker_count = marker_count + 1
             elseif string.match(label, "DEST PROJECT") then
                 dest_proj = proj
-                proj_marker_count = proj_marker_count + 1
+                marker_count = marker_count + 1
             end
         end
         num = num + 1
     end
 
-    if proj_marker_count == 0 then
+    if marker_count == 0 then
         for _, marker in pairs(sd_markers) do
             if marker.proj ~= active_proj then
                 marker.count = 0
@@ -247,16 +247,16 @@ function markers()
     local source_count = source_in + source_out
     local dest_count = dest_in + dest_out
 
-    if (source_count == 2 and sin ~= sout) or (dest_count == 2 and din ~= dout) then proj_marker_count = -1 end
+    if (source_count == 2 and sin ~= sout) or (dest_count == 2 and din ~= dout) then marker_count = -1 end
 
     if source_proj and ((sin and sin ~= source_proj) or (sout and sout ~= source_proj)) then
-        proj_marker_count = -1
+        marker_count = -1
     end
     if dest_proj and ((din and din ~= dest_proj) or (dout and dout ~= dest_proj)) then
-        proj_marker_count = -1
+        marker_count = -1
     end
 
-    return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
+    return marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
         source_in, source_out, source_count, pos_table, track_number
 end
 
@@ -366,7 +366,7 @@ end
 
 ---------------------------------------------------------------------
 
-function clean_up(is_selected, proj_marker_count)
+function clean_up(is_selected, marker_count)
     Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     if is_selected then
         local i = 0
@@ -376,7 +376,7 @@ function clean_up(is_selected, proj_marker_count)
                 break
             end
 
-            if proj_marker_count ~= 2 then
+            if marker_count ~= 2 then
                 DeleteProjectMarker(project, 998, false)
                 DeleteProjectMarker(project, 999, false)
             end
@@ -386,42 +386,8 @@ function clean_up(is_selected, proj_marker_count)
             i = i + 1
         end
     else
-        unlock_items()
         MB("Please make sure there is material to copy between your source markers...",
             "Assembly Line Edit", 0)
-    end
-end
-
----------------------------------------------------------------------
-
-function lock_items()
-    local second_folder_track = find_second_folder_track()
-
-    if second_folder_track == nil then
-        return
-    end
-
-    local total_tracks = CountTracks(0)
-
-    for track_idx = second_folder_track, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-
-        local num_items = CountTrackMediaItems(track)
-
-        for item_idx = 0, num_items - 1 do
-            local item = GetTrackMediaItem(track, item_idx)
-            SetMediaItemInfo_Value(item, "C_LOCK", 1)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function unlock_items()
-    local total_items = CountMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 0)
     end
 end
 
@@ -541,28 +507,6 @@ function load_last_assembly_item()
     local _, item_guid = GetProjExtState(0, "ReaClassical", "LastAssemblyItem")
     local item = BR_GetMediaItemByGUID(0, item_guid)
     return item
-end
-
----------------------------------------------------------------------
-
-function find_second_folder_track()
-    local total_tracks = CountTracks(0)
-    local folder_count = 0
-
-    for track_idx = 0, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
-        if folder_depth == 1 then
-            folder_count = folder_count + 1
-
-            if folder_count == 2 then
-                return track_idx
-            end
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------

@@ -24,12 +24,12 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, move_to_item, trackname_check
 local lock_previous_items, fadeStart, fadeEnd, zoom, view
-local lock_items, unlock_items, save_color, paint, load_color
+local unlock_items, save_color, paint, load_color
 local correct_item_positions, folder_check, check_next_item_overlap
 local get_color_table, get_path, get_reaper_version
 local get_selected_media_item_at, count_selected_media_items
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-local win_state, find_second_folder_track
+local win_state
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -52,7 +52,7 @@ function main()
     elseif reaper_ver < 9.99 then
         fadeEnd()
         local final_xfade = move_to_item()
-        fadeStart()
+        fadeStart(workflow)
         if final_xfade then
             MB("You've reached the final crossfade in the project.", "Crossfade Editor", 0)
         end
@@ -147,7 +147,7 @@ end
 
 ---------------------------------------------------------------------
 
-function fadeStart()
+function fadeStart(workflow)
     SetToggleCommandState(1, fade_editor_toggle, 1)
     local item1 = get_selected_media_item_at(0)
     local item1_start = GetMediaItemInfo_Value(item1, "D_POSITION")
@@ -163,8 +163,14 @@ function fadeStart()
     save_color("1", item1)
     local colors = get_color_table()
     paint(item1, colors.xfade_red)
-    Main_OnCommand(40311, 0) -- Set ripple editing all tracks
-    lock_items()
+
+    if workflow == "Horizontal" then
+        Main_OnCommand(40311, 0) -- Set ripple-all-tracks
+    else
+        Main_OnCommand(40310, 0) -- Set ripple-per-track
+    end
+
+
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, false)
     SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)
@@ -258,51 +264,6 @@ function view()
 
     local scroll_home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(scroll_home, 0) -- XENAKIOS_TVPAGEHOME
-end
-
----------------------------------------------------------------------
-
-function lock_items()
-    local second_folder_track = find_second_folder_track()
-
-    if second_folder_track == nil then
-        return
-    end
-
-    local total_tracks = CountTracks(0)
-
-    for track_idx = second_folder_track, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-
-        local num_items = CountTrackMediaItems(track)
-
-        for item_idx = 0, num_items - 1 do
-            local item = GetTrackMediaItem(track, item_idx)
-            SetMediaItemInfo_Value(item, "C_LOCK", 1)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function find_second_folder_track()
-    local total_tracks = CountTracks(0)
-    local folder_count = 0
-
-    for track_idx = 0, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
-        if folder_depth == 1 then
-            folder_count = folder_count + 1
-
-            if folder_count == 2 then
-                return track_idx
-            end
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------
@@ -403,12 +364,12 @@ function correct_item_positions(item1)
         MoveEditCursor(-move_amount, false)
     end
     if item1_orig_offset ~= "" and math.abs(offset_amount) > 1e-10 then
-        Main_OnCommand(40289, 0)                     -- unselect all items
+        Main_OnCommand(40289, 0)                       -- unselect all items
         SetMediaItemSelected(item1, true)
-        Main_OnCommand(40034, 0)                     -- Item Grouping: Select all items in group(s)
+        Main_OnCommand(40034, 0)                       -- Item Grouping: Select all items in group(s)
         local num_items = count_selected_media_items() -- Get the number of selected items
         for i = 0, num_items - 1 do
-            local item = get_selected_media_item_at(i)  -- Get the selected media item
+            local item = get_selected_media_item_at(i) -- Get the selected media item
             local take = GetActiveTake(item)
             if take then
                 local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")          -- Get the active take
@@ -520,7 +481,6 @@ function get_selected_media_item_at(index)
 
     return nil
 end
-
 
 ---------------------------------------------------------------------
 
