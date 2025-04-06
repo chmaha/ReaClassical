@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.3.21
+@version 25.4
 @changelog
-  Find Take: Fix take search incorrectly matching substring in session names
+  Various: Use more efficient lock_items function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
