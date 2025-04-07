@@ -88,13 +88,10 @@ function main()
         SetMediaItemSelected(item_one, true)
         diff = end_of_one - curpos
         SetEditCurPos(end_of_one + diff, false, false)
-        Main_OnCommand(41991, 0) -- toggle ripple-all OFF
         Main_OnCommand(41311, 0) -- extend item right
-        Main_OnCommand(41991, 0) -- toggle ripple-all ON
     elseif mouse_pos > two_pos then
         SetEditCurPos(mouse_pos, false, false)
         SetMediaItemSelected(item_one, true)
-        Main_OnCommand(41991, 0) -- toggle ripple-all OFF
         Main_OnCommand(41311, 0) -- extend item right
         SetMediaItemSelected(item_one, false)
         SetMediaItemSelected(item_two, true)
@@ -103,7 +100,6 @@ function main()
         diff = end_of_one - two_pos
         SetEditCurPos(two_pos - diff, false, false)
         Main_OnCommand(41305, 0) -- extend item left
-        Main_OnCommand(41991, 0) -- toggle ripple-all ON
     end
 
     SetMediaItemSelected(item_one, false)
