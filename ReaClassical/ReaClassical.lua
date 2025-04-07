@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.4.1
+@version 25.4.2
 @changelog
-  Various: Remove unnecessary locking and unlocking of items
+  Edit Crossfade: Don't mess with ripple when extending xfade items
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
