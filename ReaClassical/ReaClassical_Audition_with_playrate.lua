@@ -63,7 +63,9 @@ function main()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
     if fade_editor_state ~= 1 then
-        local track, _, pos = BR_TrackAtMouseCursor()
+        local pos = BR_PositionAtMouseCursor(false)
+        local screen_x, screen_y = GetMousePosition()
+        local track = GetTrackFromPoint(screen_x, screen_y)
         if track then
             SetOnlyTrackSelected(track)
             solo()

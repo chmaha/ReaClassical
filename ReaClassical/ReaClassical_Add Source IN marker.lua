@@ -51,7 +51,9 @@ function main()
 
     local cur_pos, track
     if sdmousehover == 1 then
-        track, _, cur_pos = BR_TrackAtMouseCursor()
+        cur_pos = BR_PositionAtMouseCursor(false)
+        local screen_x, screen_y = GetMousePosition()
+        track = GetTrackFromPoint(screen_x, screen_y)
     else
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end

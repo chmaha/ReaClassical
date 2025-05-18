@@ -43,7 +43,9 @@ function main()
 
     local cur_pos, track
     if sdmousehover == 1 then
-        track, _, cur_pos = BR_TrackAtMouseCursor()
+        cur_pos = BR_PositionAtMouseCursor(false)
+        local screen_x, screen_y = GetMousePosition()
+        track = GetTrackFromPoint(screen_x, screen_y)
     else
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end
@@ -65,7 +67,7 @@ function main()
         local colors = get_color_table()
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
         if other_source_marker ~= track_number then
-            MB("Warning: Source OUT marker group does not match Source IN!","Add Source Marker OUT", 0)
+            MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
         end
     end
 end
