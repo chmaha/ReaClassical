@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.4.2
+@version 25.5
 @changelog
-  Edit Crossfade: Don't mess with ripple when extending xfade items
+  Various: Use GetMousePosition and GetTrackFromPoint functions to reliably find track at mouse position
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
