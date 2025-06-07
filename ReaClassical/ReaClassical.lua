@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.5
+@version 25.6
 @changelog
-  Various: Use GetMousePosition and GetTrackFromPoint functions to reliably find track at mouse position
+  Prepare for new xfade editor with REAPER 7.40
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
