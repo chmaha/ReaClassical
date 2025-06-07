@@ -55,7 +55,7 @@ function main()
     end
     PreventUIRefresh(1)
     local reaper_ver = get_reaper_version()
-    if reaper_ver > 9.99 then
+    if reaper_ver >= 7.40 then
         local reaper_xfade_toggle = GetToggleCommandState(41827)
         if reaper_xfade_toggle == 0 or reaper_xfade_toggle == -1 then
             if sdmousehover == 1 then
