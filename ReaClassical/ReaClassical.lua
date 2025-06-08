@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.6
+@version 25.6.1
 @changelog
-  Prepare for new xfade editor with REAPER 7.40
+  New Crossfade Editor: Add mouse hover + A audition shortcut
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
