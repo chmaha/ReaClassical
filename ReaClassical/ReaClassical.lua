@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.6.1
+@version 25.6.2
 @changelog
-  New Crossfade Editor: Add mouse hover + A audition shortcut
+  Remove Z shortcut
+  Manual: Update for new crossfade editor
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -14,7 +15,6 @@
   [main] ReaClassical_Classical Take Record.lua
   [main] ReaClassical_Delete All S-D markers.lua
   [main] ReaClassical_Duplicate folder (No items).lua
-  [main] ReaClassical_Edit Classical Crossfade.lua
   [main] ReaClassical_Prepare Takes.lua
   [main] ReaClassical_S-D Edit.lua
   [main] ReaClassical_Whole Project View Horizontal.lua
