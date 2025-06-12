@@ -128,7 +128,10 @@ So, now you are in the crossfade editor mode, my own preferred method of getting
 .ReaClassical Crossfade Editor View
 image::xfade_window.png[]
 
-In reality, this process can be just a few seconds to achieve the perfect edit. 
+In reality, this process can be just a few seconds to achieve the perfect edit. To ensure that previous xfades are unaffected, make sure that _Lock left-hand start_ is checked:
+
+.Locking start of left item
+image::xfade_left_lock.png[]
 
 To audition material:
 
