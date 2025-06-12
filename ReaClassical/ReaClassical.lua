@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.6.2
+@version 25.6.3
 @changelog
-  Remove Z shortcut
-  Manual: Update for new crossfade editor
+  Manual: Add note about left item start locking
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
