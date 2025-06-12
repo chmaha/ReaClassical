@@ -514,7 +514,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2025 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2025-03-26 15:23:14 UTC</code></p>
+<p><code>Updated: 2025-06-12 14:52:31 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1143,7 +1143,7 @@ Maintain the prefixes for the special tracks (<code>@</code>, <code>#</code> and
 <div class="sect3">
 <h4 id="_introduction_to_editing_workflows">Introduction to Editing Workflows</h4>
 <div class="paragraph">
-<p>Once you have recorded or imported your classical music audio, you are ready to start editing the raw material! Here we talk about the meat and potatoes of the classical editing workflows. Workflows—plural—because I have included different approaches to suit as many tastes as possible within the confines of the REAPER application. I will explain each in detail after this brief introduction. As described previously, you have multiple ways of proceeding. First you can have all your takes lined up in a row horizontally and you place your source in and out markers, destination in and out markers then press a keyboard shortcut to achieve your 2-, 3- or 4-point edit. The second way is to set up your takes vertically and then either use the same marker system to make your edits or use razor edits (my preferred method when working vertically). Whichever option you choose, you will then end up in the crossfade editor view which uses a custom two-lane view with classical crossfade function to make precise edits really easy in REAPER. I don&#8217;t often use the fade editor dialog that comes with REAPER even though I make it appear as part of the function.</p>
+<p>Once you have recorded or imported your classical music audio, you are ready to start editing the raw material! Here we talk about the meat and potatoes of the classical editing workflows. Workflows—plural—because I have included different approaches to suit as many tastes as possible within the confines of the REAPER application. I will explain each in detail after this brief introduction. As described previously, you have multiple ways of proceeding. First you can have all your takes lined up in a row horizontally and you place your source in and out markers, destination in and out markers then press a keyboard shortcut to achieve your 2-, 3- or 4-point edit. The second way is to set up your takes vertically and then either use the same marker system to make your edits or use razor edits (my preferred method when working vertically). Whichever option you choose, you will then end up in the crossfade editor view which uses a two-lane view to make precise edits really easy in REAPER.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1342,32 +1342,10 @@ If you are worried about accidentally moving markers and items during precise S-
 <p>Now that you&#8217;ve made your precise edits using S/D workflow or razor editing (no worries if it&#8217;s a bit rough!), it&#8217;s time to check things through with the help of the crossfade editor view.</p>
 </div>
 <div class="paragraph">
-<p>While REAPER includes an excellent crossfade editor, it does not reach the same levels as the ones in specialist classical DAWs such as Sequoia and Pyramix. This is mainly due to the inability to see the continued waveforms of the items beyond the crossfade they enter and likewise the previous waveforms of the items that exit the crossfade. The ability to visually align transients and then position the crossfade just before it is absolutely critical (and fun when you have the tools to do it!). So, beyond the standard REAPER crossfade editor what have I provided? Select the right-hand item of a fade (or hover over the item if <code>Add S-D Markers at Mouse Hover</code> is set to 1 in ReaClassical Project Preferences <kbd>F5</kbd>), press <kbd>F</kbd> and you are moved into crossfade editor mode. Here, the first track is given full vertical zoom, the two-lanes for overlapping items is enabled, colored red and green, and the fade editor toolbox appears (I personally position it to hover over the middle of my mixer. Note also that you are automatically centered on the crossfade and can use the mouse wheel to zoom in and out. Press <kbd>F</kbd> again and you exit that mode. If for some reason you accidentally close just the fade toolbox, either open again using action in the action list or, better still, simply close and re-open the fade editor using <kbd>F</kbd>.</p>
+<p>Since v7.40, REAPER includes an excellent professional two-lane crossfade editor similar in nature to the specialist classical DAWs such as Sequoia and Pyramix. With the improved crossfade editor, users can see the continued "ghost" waveforms of the items beyond the crossfade they enter and likewise the previous waveforms of the items that exit the crossfade. The ability to visually align transients and then position the crossfade just before it is absolutely critical (and fun when you have the tools to do it!). Select the right-hand item of a fade (or hover over the item if <code>Add S-D Markers at Mouse Hover</code> is set to 1 in ReaClassical Project Preferences <kbd>F5</kbd>), press <kbd>F</kbd> and you are moved into crossfade editor mode. Note also that you are automatically centered on the crossfade and can use the mouse wheel to zoom in and out. Press <kbd>F</kbd> again and you exit that mode.</p>
 </div>
 <div class="paragraph">
-<p>So, now you are in the crossfade editor mode, ensuring one or both items are selected, hover your mouse over a blank area and press <kbd>Z</kbd> to automatically mirror extend the waveform view of each item. Essentially, it increases the overlap so you can spot and align the transient you want. My own preferred method of getting the perfect crossfade is to locate the transient I want on the red left item, place the edit cursor just before it, then drag my green right item so that the two transients align. Then I press <kbd>X</kbd> (classical crossfade) and I&#8217;m done! The crossfade happens at the location of the edit cursor (well, just before it as explained above).</p>
-</div>
-<div class="paragraph">
-<p>I love this method so much that I don&#8217;t miss Sequoia or Pyramix any more. Here it is in ordered list form:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Increase overlap (by hovering mouse either in a blank area or over one of the items and pressing <kbd>Z</kbd> shortcut to mirror extend the item edges)</p>
-</li>
-<li>
-<p>Find transient in red left item that you want be edit point</p>
-</li>
-<li>
-<p>Place edit cursor just before it</p>
-</li>
-<li>
-<p>Drag green right item to align transients (this automatically ripples all items, markers and regions)</p>
-</li>
-<li>
-<p>Press <kbd>X</kbd> (classical crossfade)</p>
-</li>
-</ol>
+<p>So, now you are in the crossfade editor mode, my own preferred method of getting the perfect crossfade is to move the transient I want on the left (upper) item to just after the crossfade by dragging on the ghost waveform. Then I drag the "ghost" waveform of my right (lower) item so that the two transients align. That&#8217;s it! Drag on the active part of the waveform to also move the location of the crossfade. You can just move or resize the crossfade by hovering directly over the lower portion of the crossfade and dragging either the edge or the shaded rectangle. Be aware that markers are not rippled in ripple-per-track mode (but with the introduction of the Create CD Markers, I highly recommend not bothering to create any markers at this point).</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1376,44 +1354,29 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="title">Figure 15. ReaClassical Crossfade Editor View</div>
 </div>
 <div class="paragraph">
-<p>In reality, this process can be just a few seconds to achieve the perfect edit. In the unlikely event you need to undo, either use the standard <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Z</kbd></span> combination or simply extend the overlapping item edges again then create a new classical crossfade.</p>
+<p>In reality, this process can be just a few seconds to achieve the perfect edit.</p>
 </div>
 <div class="paragraph">
-<p>While you could use the auditioning tools in the dialog, I have created something I find quicker and more useful. While the two items involved in the crossfade are selected, try the following:</p>
+<p>To audition material:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Hover over left item / press <kbd>A</kbd> to solo audition the left item from mouse cursor to end of item</p>
+<p>Hover to the left of the crossfade and press <kbd>A</kbd> to audition the crossfade from mouse cursor to mirrored position on the other side of the crossfade</p>
 </li>
 <li>
-<p>Hover over right item / press <kbd>A</kbd> to solo audition the right item from start of item to mouse cursor</p>
-</li>
-<li>
-<p>Hover in blank space on left item side / press <kbd>A</kbd> to solo audition the crossfade from mouse cursor to mirrored position on the other side of the crossfade</p>
-</li>
-<li>
-<p>Hover in blank space on right item side / press <kbd>A</kbd> to solo audition the crossfade from mirrored position other side to the mouse cursor.</p>
+<p>Optionally check the mute left/right item boxes to only hear one side of the crossfade or check <em>Solo crossfaded items</em> to only hear the visible items.</p>
 </li>
 </ol>
 </div>
-<div class="imageblock">
-<div class="content">
-<img src="src/assets/xfade_auditioning.png" alt="xfade auditioning">
-</div>
-<div class="title">Figure 16. Crossfade Auditioning</div>
-</div>
 <div class="paragraph">
-<p>As you&#8217;ll see, the playback stops using a special marker with <strong>!1016</strong> as the label which is executed as a stop command. It is deleted automatically after playback ends. If you try to run the function another time before it has finished, just select new instance if you get a pop-up box. You can stack instances and on completion of the latest run, all instances are removed. Better to experience than describe but it works really well. You&#8217;ll also see that the edit cursor returns to the middle of the crossfade to aid in mouse scroll zooming keeping the crossfade centered. The mirrored position takes into consideration the overlap of the items so you can have a complicated set of fades and still get an exact mirrored stopping point.</p>
-</div>
-<div class="paragraph">
-<p>You can shuttle between crossfades using the <kbd>Q</kbd> and <kbd>W</kbd> shortcuts. Do <strong>NOT</strong> use the built-in Previous Next buttons on the standard fade dialog box! However, there is still a benefit of having the fade editor dialog in view. You can also tweak the fade using the knobs if you prefer. Center, Start, End and Length knobs are particularly useful here to maintain symmetry. Be aware that the Contents knobs will not ripple markers (but with the introduction of the Create CD Markers, I highly recommend not bothering to create any markers at this point).</p>
+<p>You can shuttle between crossfades using the <kbd>Q</kbd> and <kbd>W</kbd> shortcuts. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.</p>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_other_editing_tips">Other Editing Tips</h4>
 <div class="paragraph">
-<p>In my key map, I include all sorts of useful shortcuts to use during editing. As mentioned above, in vertical editing workflows, the Audition function <kbd>A</kbd> is brilliant for listening to various takes before applying a razor or S/D edit. I can shuttle between items with <kbd>Q</kbd> and <kbd>W</kbd> (the same keys perform a more advanced role when in crossfade editor mode), shuttle between markers with <kbd>,</kbd> and <kbd>.</kbd> (the same keys with <kbd>&lt;</kbd> and <kbd>&gt;</kbd> on them on my UK keyboard), <kbd>S</kbd> for splitting a long recorded session into takes, <kbd>`</kbd>(backtick) and <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>`</kbd></span> for zooming out to the whole project both horizontally and vertically etc. There are plenty more for the mastering end of things so I encourage you to explore.</p>
+<p>In my key map, I include all sorts of useful shortcuts to use during editing. As mentioned above, in vertical editing workflows, the Audition function <kbd>A</kbd> is brilliant for listening to various takes before applying a razor or S/D edit. I can shuttle between items with <kbd>Q</kbd> and <kbd>W</kbd> (the same keys shuttle between crossfades in crossfade editor mode), shuttle between markers with <kbd>,</kbd> and <kbd>.</kbd> (the same keys with <kbd>&lt;</kbd> and <kbd>&gt;</kbd> on them on my UK keyboard), <kbd>S</kbd> for splitting a long recorded session into takes, <kbd>`</kbd>(backtick) and <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>`</kbd></span> for zooming out to the whole project both horizontally and vertically etc. There are plenty more for the mastering end of things so I encourage you to explore.</p>
 </div>
 <div class="paragraph">
 <p>It is worth noting that all regular markers and regions are ripple edited appropriately when using my source-destination editing functions and crossfade editor. I also introduced the ReaClassical_Lock Toggle function which temporarily locks all source groups and engages ripple-all-tracks mode to enable you to drag destination items and simultaneously ripple markers and regions in the regular arrange view. This allows vertical source groups to retain their independence yet still give ripple-all-tracks behavior which is useful for destination album track spacing etc. However, I consider this function deprecated given I strongly feel that the Create CD Markers function is now the ultimate way to deal with CD tracks/markers.</p>
@@ -1480,7 +1443,7 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="content">
 <img src="src/assets/build_edit_list.png" alt="build edit list">
 </div>
-<div class="title">Figure 17. An example edit list</div>
+<div class="title">Figure 16. An example edit list</div>
 </div>
 </div>
 <div class="sect2">
@@ -1533,7 +1496,7 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="content">
 <img src="src/assets/mastering_mode.png" alt="mastering mode">
 </div>
-<div class="title">Figure 18. ReaClassical Mastering Mode</div>
+<div class="title">Figure 17. ReaClassical Mastering Mode</div>
 </div>
 </div>
 <div class="sect3">
@@ -1624,7 +1587,7 @@ If working in horizontal workflow, ensure that there is over a minute&#8217;s wo
 <div class="content">
 <img src="src/assets/takename.png" alt="takename">
 </div>
-<div class="title">Figure 19. Editing the item name</div>
+<div class="title">Figure 18. Editing the item name</div>
 </div>
 </div>
 <div class="sect3">
@@ -1654,7 +1617,7 @@ If your final item on the first track is also the final CD track start, just fin
 <div class="content">
 <img src="src/assets/metadata_report.png" alt="metadata report">
 </div>
-<div class="title">Figure 20. Example Metadata Report</div>
+<div class="title">Figure 19. Example Metadata Report</div>
 </div>
 <div class="paragraph">
 <p>This is a great way to see all album metadata clearly in one window and could be copied and pasted into a report to send to the factory for checking against the metadata found in the DDP image itself. The function will also alert the user if some track metadata labels (COMPOSER=, PEFORMER=, SONGWRITER=, ARRANGER=) have been used without also using them album-wide via the <code>@</code> item name. For more information about DDP metadata see <a href="https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info.txt">here</a> (also available via the Render dialog via <span class="menuseq"><b class="menu">Format</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">DDP</b></span> and clicking on <b class="button">Help</b>).</p>
@@ -1681,7 +1644,7 @@ If your final item on the first track is also the final CD track start, just fin
 <div class="content">
 <img src="src/assets/html_album_report.png" alt="html album report">
 </div>
-<div class="title">Figure 21. A example of a ReaClassical HTML album report</div>
+<div class="title">Figure 20. A example of a ReaClassical HTML album report</div>
 </div>
 </div>
 </div>
@@ -1696,7 +1659,7 @@ If your final item on the first track is also the final CD track start, just fin
 <div class="content">
 <img src="src/assets/render_presets.png" alt="render presets">
 </div>
-<div class="title">Figure 22. ReaClassical render presets</div>
+<div class="title">Figure 21. ReaClassical render presets</div>
 </div>
 </div>
 <div class="sect3">
@@ -2139,34 +2102,35 @@ If your final item on the first track is also the final CD track start, just fin
 <p><strong>Classical Crossfade Editor</strong> <kbd>F</kbd></p>
 </div>
 <div class="paragraph">
-<p><em>Description:</em> Opens a custom two-line crossfade editor view for precise finessing of S-D edits.</p>
+<p><em>Description:</em> Opens a two-line crossfade editor view for precise finessing of S-D edits.</p>
 </div>
 <div class="paragraph">
-<p><em>Notes:</em> To enter the crossfade view, select the right-hand item of a crossfaded item pair (or hover over the item if <em>Add S-D Markers at Mouse Hover</em> is set to 1 in ReaClassical Project Preferences <kbd>F5</kbd>). The user is then presented with a zoomed-in view of the edit. Red is always the left item, green the right. For safety reasons, all items in the first folder before the left red item are locked to avoid inadvertently messing with an existing fade. Further, ReaClassical uses a feature similar to <em>Classical Mode</em> in Sequoia&#8217;s fade editor. Essentially, the user is free to move the left item but on running Classical Crossfade <kbd>X</kbd> or exiting using <kbd>F</kbd>(after, for example, setting a more complex fade by hand), the red item snaps back to its original position (all future items are also relatively shifted), thereby perfectly preserving the previous fade. To immediately audition, use the A shortcut in one of four areas. Hover the mouse in either of the blank areas (no media item) in the top left or bottom right of the view to audition the function from that location to the mirrored location on the other side of the edit. Note how easy it is to quickly set an audition length! Or, hover the mouse on the first item and press <kbd>A</kbd> to just audition the material into the fade. Hover and press <kbd>A</kbd> on the outgoing item to only hear the material out of the fade. Note that auditioning in the arrange window or in fade editor mode maintains muted items on the folder track.</p>
+<p><em>Notes:</em> Since v7.40, REAPER includes an excellent professional two-lane crossfade editor similar in nature to the specialist classical DAWs such as Sequoia and Pyramix. Drag on the "ghost" waveforms to align transients and drag on the lower area or edge of the crossfade to move or resize the crossfade itself. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.</p>
 </div>
 <div class="paragraph">
-<p>To actually finesse the edit, ensure at least one of the crossfaded items is selected. Then hover your mouse in a blank area (similar to the above fade editor audition tool process) and press <kbd>Z</kbd>. You&#8217;ll notice that the waves mirror extend to the mouse position to allow for easy lining up of the material. Place the edit cursor at an appropriate edit point on the left red item (i.e. just before a transient) then simply move the right green item to align and then press <kbd>X</kbd>. Audition again, <kbd>Z</kbd> to expand again. You can quickly move to the previous or next crossfade pair (with all coloring and locking automatically happening behind the scenes) by pressing <kbd>Q</kbd> or <kbd>W</kbd>. Or, simply press <kbd>F</kbd> to exit the fade view (it goes without saying that the original colors of the project items are restored).</p>
+<p>To audition material:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Hover to the left of the crossfade and press <kbd>A</kbd> to audition the crossfade from mouse cursor to mirrored position on the other side of the crossfade</p>
+</li>
+<li>
+<p>Optionally check the mute left/right item boxes to only hear one side of the crossfade or check <em>Solo crossfaded items</em> to only hear the visible items.</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
-<p>Note also that while in crossfade editor view, any edits only affect the destination group.</p>
-</div>
-<div class="paragraph">
-<p><strong>Edit Classical Crossfade</strong> <kbd>Z</kbd></p>
-</div>
-<div class="paragraph">
-<p><em>Description:</em> Expand the crossfade for editing while in the crossfade editor view.</p>
-</div>
-<div class="paragraph">
-<p><em>Notes:</em> This shortcut will only work while in crossfade editor view. If you attempt to use it in other situations, you will receive a helpful message. As described above, when either one or both items are highlighted, hover your mouse in a blank area and press <kbd>Z</kbd>. You&#8217;ll notice that the waveforms are mirror extended to allow for easy lining up of the material. Simply put the edit cursor just before a transient on the red item, move the green right item to align, and then press <kbd>X</kbd>.</p>
+<p>You can shuttle between crossfades using the <kbd>Q</kbd> and <kbd>W</kbd> shortcuts.</p>
 </div>
 <div class="paragraph">
 <p><strong>Classical Crossfade</strong> <kbd>X</kbd></p>
 </div>
 <div class="paragraph">
-<p><em>Description:</em> Create a <em>classical</em> crossfade either in regular project view or crossfade editor mode.</p>
+<p><em>Description:</em> Create a <em>classical</em> crossfade in regular project view.</p>
 </div>
 <div class="paragraph">
-<p><em>Notes:</em> While in the project view, drag an item (or grouped items) over another, move the edit cursor where you want the edit to happen and press <kbd>X</kbd>. Given the availability of S-D edit functionality and group razor-editing, this function is less useful in this context. However, it is essential in the crossfade editor mode for making the edit. Crossfade length is set via ReaClassical Project Preferences <kbd>F5</kbd>.</p>
+<p><em>Notes:</em> While in the project view, drag an item (or grouped items) over another, move the edit cursor where you want the edit to happen and press <kbd>X</kbd>. Given the availability of S-D edit functionality and group razor-editing, this function is less useful in this context. Crossfade length is set via ReaClassical Project Preferences <kbd>F5</kbd>.</p>
 </div>
 <div class="paragraph">
 <p><strong>Build Edit List</strong></p>
@@ -2421,10 +2385,7 @@ If your final item on the first track is also the final CD track start, just fin
 <p><kbd>F</kbd> Open ReaClassical Crossfade Editor</p>
 </div>
 <div class="paragraph">
-<p><kbd>X</kbd> Create a classical crossfade</p>
-</div>
-<div class="paragraph">
-<p><kbd>Z</kbd> Extend crossfaded items for editing (when in ReaClassical Fade Editor view)</p>
+<p><kbd>X</kbd> Create a classical crossfade in arrange view</p>
 </div>
 <div class="paragraph">
 <p><kbd>V</kbd> Toggle per-track ripple editing</p>
@@ -2657,7 +2618,7 @@ If your final item on the first track is also the final CD track start, just fin
 <div class="content">
 <img src="src/assets/RCInflator_Ultimate.png" alt="RCInflator Ultimate">
 </div>
-<div class="title">Figure 23. RCInflator Ultimate</div>
+<div class="title">Figure 22. RCInflator Ultimate</div>
 </div>
 <div class="paragraph">
 <p>Restoration:</p>

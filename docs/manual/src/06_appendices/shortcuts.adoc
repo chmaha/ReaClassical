@@ -91,9 +91,7 @@ kbd:[U] Ungroup items
 
 kbd:[F] Open ReaClassical Crossfade Editor
 
-kbd:[X] Create a classical crossfade
-
-kbd:[Z] Extend crossfaded items for editing (when in ReaClassical Fade Editor view)
+kbd:[X] Create a classical crossfade in arrange view
 
 kbd:[V] Toggle per-track ripple editing
 

@@ -228,25 +228,22 @@ _Notes:_ In order to switch back to regular single-tab S-D editing, it is import
 
 *Classical Crossfade Editor* kbd:[F]
 
-_Description:_ Opens a custom two-line crossfade editor view for precise finessing of S-D edits.
+_Description:_ Opens a two-line crossfade editor view for precise finessing of S-D edits.
 
-_Notes:_ To enter the crossfade view, select the right-hand item of a crossfaded item pair (or hover over the item if _Add S-D Markers at Mouse Hover_ is set to 1 in ReaClassical Project Preferences kbd:[F5]). The user is then presented with a zoomed-in view of the edit. Red is always the left item, green the right. For safety reasons, all items in the first folder before the left red item are locked to avoid inadvertently messing with an existing fade. Further, ReaClassical uses a feature similar to _Classical Mode_ in Sequoia's fade editor. Essentially, the user is free to move the left item but on running Classical Crossfade kbd:[X] or exiting using kbd:[F](after, for example, setting a more complex fade by hand), the red item snaps back to its original position (all future items are also relatively shifted), thereby perfectly preserving the previous fade. To immediately audition, use the A shortcut in one of four areas. Hover the mouse in either of the blank areas (no media item) in the top left or bottom right of the view to audition the function from that location to the mirrored location on the other side of the edit. Note how easy it is to quickly set an audition length! Or, hover the mouse on the first item and press kbd:[A] to just audition the material into the fade. Hover and press kbd:[A] on the outgoing item to only hear the material out of the fade. Note that auditioning in the arrange window or in fade editor mode maintains muted items on the folder track.
+_Notes:_ Since v7.40, REAPER includes an excellent professional two-lane crossfade editor similar in nature to the specialist classical DAWs such as Sequoia and Pyramix. Drag on the "ghost" waveforms to align transients and drag on the lower area or edge of the crossfade to move or resize the crossfade itself. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.
 
-To actually finesse the edit, ensure at least one of the crossfaded items is selected. Then hover your mouse in a blank area (similar to the above fade editor audition tool process) and press kbd:[Z]. You'll notice that the waves mirror extend to the mouse position to allow for easy lining up of the material. Place the edit cursor at an appropriate edit point on the left red item (i.e. just before a transient) then simply move the right green item to align and then press kbd:[X]. Audition again, kbd:[Z] to expand again. You can quickly move to the previous or next crossfade pair (with all coloring and locking automatically happening behind the scenes) by pressing kbd:[Q] or kbd:[W]. Or, simply press kbd:[F] to exit the fade view (it goes without saying that the original colors of the project items are restored).
+To audition material:
 
-Note also that while in crossfade editor view, any edits only affect the destination group.
+. Hover to the left of the crossfade and press kbd:[A] to audition the crossfade from mouse cursor to mirrored position on the other side of the crossfade
+. Optionally check the mute left/right item boxes to only hear one side of the crossfade or check _Solo crossfaded items_ to only hear the visible items.
 
-*Edit Classical Crossfade* kbd:[Z]
-
-_Description:_ Expand the crossfade for editing while in the crossfade editor view.
-
-_Notes:_ This shortcut will only work while in crossfade editor view. If you attempt to use it in other situations, you will receive a helpful message. As described above, when either one or both items are highlighted, hover your mouse in a blank area and press kbd:[Z]. You'll notice that the waveforms are mirror extended to allow for easy lining up of the material. Simply put the edit cursor just before a transient on the red item, move the green right item to align, and then press kbd:[X].
+You can shuttle between crossfades using the kbd:[Q] and kbd:[W] shortcuts. 
 
 *Classical Crossfade* kbd:[X]
 
-_Description:_ Create a _classical_ crossfade either in regular project view or crossfade editor mode.
+_Description:_ Create a _classical_ crossfade in regular project view.
 
-_Notes:_ While in the project view, drag an item (or grouped items) over another, move the edit cursor where you want the edit to happen and press kbd:[X]. Given the availability of S-D edit functionality and group razor-editing, this function is less useful in this context. However, it is essential in the crossfade editor mode for making the edit. Crossfade length is set via ReaClassical Project Preferences kbd:[F5].
+_Notes:_ While in the project view, drag an item (or grouped items) over another, move the edit cursor where you want the edit to happen and press kbd:[X]. Given the availability of S-D edit functionality and group razor-editing, this function is less useful in this context. Crossfade length is set via ReaClassical Project Preferences kbd:[F5].
 
 *Build Edit List*
 
