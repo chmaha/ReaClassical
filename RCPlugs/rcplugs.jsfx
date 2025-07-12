@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.13
+@version 1.14
 @changelog
-  RCInflator: Correct typo in name
+  Add recital hall reverb (send and insert versions)
 @metapackage
 @provides
   RCComp.jsfx
@@ -20,5 +20,8 @@
   RCConsoleChannel.jsfx
   RCConsoleFinalizer.jsfx
   RCMidSide.jsfx
+  RCReverb_Insert.jsfx
+  RCReverb_Send.jsfx
+
 @about
   These plugins are suitable for classical music mixing and mastering.

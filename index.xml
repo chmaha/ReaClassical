@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="33c6838b5b67822eed20d98a4796bf6a2e58d708">
+<index version="1" name="chmaha Scripts" commit="1a35781065cdcf5594c7fdcaf3907b71aaf2d0af">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -60,7 +60,6 @@
 }
 ]]></description>
       </metadata>
-      
       <version name="25.6.2" author="chmaha" time="2025-06-12T14:56:10Z">
         <changelog><![CDATA[Remove Z shortcut
 Manual: Update for new crossfade editor]]></changelog>
