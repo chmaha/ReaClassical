@@ -32,11 +32,14 @@ function main()
     local separator = package.config:sub(1, 1)
     local resource_path = GetResourcePath()
     local menu_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-menu.ini")
+    local renderpresets_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-render.ini")
     local source_file_path = resource_path .. menu_relative_path
+    local source_renderpresets_path = resource_path .. renderpresets_relative_path
     local destination_file_path = resource_path .. separator .. "reaper-menu.ini"
     local kb_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-kb.ini")
     local source_shortcuts_path = resource_path .. kb_relative_path
     local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
+    local dest_renderpresets_path = resource_path .. separator .. "reaper-render.ini"
     local splash_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
     local splash_abs_path = resource_path .. splash_relative_path
     local reaper_ini = resource_path .. separator .. "reaper.ini"
@@ -50,6 +53,8 @@ function main()
     Main_OnCommand(sync_reapack, 0)
     MB("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.",
         "ReaClassical Updater", 0)
+
+    copy_file(source_renderpresets_path, destination_renderpresets_path)
 
     local response1 = MB(
         "2) This section will overwrite your custom toolbars and menus.\nAre you sure you want to continue?",
