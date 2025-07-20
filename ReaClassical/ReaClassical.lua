@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.7
+@version 25.7.1
 @changelog
-  Add OPUS 160kbps VBR render preset
+  Use combined bitrate option for OPUS preset
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
