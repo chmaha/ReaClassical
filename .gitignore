@@ -1,6 +1,7 @@
 *.sh
 release_plan
 ReaClassical_Changelog_Formatter.html
+scripts/changelog-update.rb
 PDF-Manual/*
 !PDF-Manual/*.pdf
 !build-docs.sh

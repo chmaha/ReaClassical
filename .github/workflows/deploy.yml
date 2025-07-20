@@ -24,5 +24,13 @@ jobs:
       run:  gem install reapack-index
     - name: Update index.xml
       run:  reapack-index --commit
+    - name: Install Nokogiri
+      run: gem install nokogiri
+    - name: Prune index.xml to last two versions per category
+      run: ruby scripts/prune_index.rb
+    - name: Commit pruned index.xml
+      run: |-
+        git add index.xml
+        git commit -m "Prune index.xml to last 2 versions" || echo "No changes to commit"
     - name: Push changes
       run:  git push
