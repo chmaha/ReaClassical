@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.6.3
+@version 25.7
 @changelog
-  Manual: Add note about left item start locking
+  Add OPUS 160kbps VBR render preset
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -107,6 +107,7 @@
   reaclassical-splash.png > reaclassical-splash.png
   ReaClassical-menu.ini > ReaClassical-menu.ini
   ReaClassical-kb.ini > ReaClassical-kb.ini
+  ReaClassical-render.ini > ReaClassical-render.ini
   ../audio_calculator.html > audio_calculator.html
   ../docs/images/reaclassical_os.png > reaclassical_logo.png
 @about
