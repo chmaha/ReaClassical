@@ -54,7 +54,7 @@ function main()
     MB("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.",
         "ReaClassical Updater", 0)
 
-    copy_file(source_renderpresets_path, destination_renderpresets_path)
+    copy_file(source_renderpresets_path, dest_renderpresets_path)
 
     local response1 = MB(
         "2) This section will overwrite your custom toolbars and menus.\nAre you sure you want to continue?",
