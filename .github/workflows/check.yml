@@ -1,5 +1,11 @@
 name: check
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - ReaClassical/ReaClassical.lua
+  pull_request:
+    paths:
+      - ReaClassical/ReaClassical.lua
 jobs:
   reapack-index:
     runs-on: ubuntu-latest
