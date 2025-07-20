@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.7.1
+@version 25.7.2
 @changelog
-  Use combined bitrate option for OPUS preset
+  Updater: Fix wrong variable name for destination reaper-render.ini path
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
