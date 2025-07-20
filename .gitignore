@@ -1,6 +1,6 @@
 *.sh
 release_plan
+ReaClassical_Changelog_Formatter.html
 PDF-Manual/*
 !PDF-Manual/*.pdf
-!PDF-Manual/*.tex
 !build-docs.sh

@@ -1,0 +1,96 @@
+#!/usr/bin/ruby
+
+require 'nokogiri'
+
+home_dir = Dir.home
+index_file_path = "#{home_dir}/code/chmaha/ReaClassical/index.xml"
+html_file_path = "#{home_dir}/code/chmaha/ReaClassical/ReaClassical_Changelog_Formatter.html"
+lua_file_path = "#{home_dir}/code/chmaha/ReaClassical/ReaClassical/ReaClassical.lua"
+
+begin
+  # Extract versions from index.xml
+  xml_doc = Nokogiri::XML(File.read(index_file_path))
+  
+  # Function to keep only the last two versions for a given category
+  def keep_last_two_versions(xml_doc, category_name)
+    versions = xml_doc.xpath("//category[@name='#{category_name}']/reapack/version/@name").map(&:value)
+
+    # Debugging output
+    puts "Retrieved versions for #{category_name}: #{versions.inspect}"
+
+    # Check if any versions were found
+    if versions.any?
+      # Sort versions and keep the last two
+      sorted_versions = versions.map { |v| Gem::Version.new(v) }.sort
+      versions_to_keep = sorted_versions.last(2).map(&:to_s)
+
+      # Remove versions except for the last two
+      xml_doc.xpath("//category[@name='#{category_name}']/reapack/version").each do |version_node|
+        version_name = version_node.attribute('name').value
+        unless versions_to_keep.include?(version_name)
+          version_node.remove
+        end
+      end
+
+      puts "Removed old versions from #{category_name}, keeping only: #{versions_to_keep.inspect}"
+      return versions_to_keep
+    else
+      puts "No version found in #{category_name} section of #{index_file_path}"
+      return []
+    end
+  end
+
+  # Keep last two versions for ReaClassical and RCPlugs
+  versions_reaclassical = keep_last_two_versions(xml_doc, 'ReaClassical')
+  versions_rcplugs = keep_last_two_versions(xml_doc, 'RCPlugs')
+
+  # Save the modified index.xml back to the file
+  File.write(index_file_path, xml_doc.to_xml)
+
+  # Determine highest version for ReaClassical
+  highest_version_reaclassical = versions_reaclassical.max_by { |v| Gem::Version.new(v) } if versions_reaclassical.any?
+  
+  # Read the HTML file and update the version input field
+  html_content = File.read(html_file_path)
+  updated_html = html_content.gsub(
+    /(<input type="text" id="version" name="version" value=")([^"]*)(")/,
+    "\\1#{highest_version_reaclassical}\\3"
+  ) if highest_version_reaclassical
+
+  # Read ReaClassical.lua and extract changelog
+  changelog_lines = []
+  in_changelog_section = false
+  in_metapackage_section = false
+
+  File.readlines(lua_file_path).each do |line|
+    if line =~ /^@\s*changelog/i
+      in_changelog_section = true
+      next
+    elsif line =~ /^@\s*metapackage/i
+      in_metapackage_section = true
+      break  # Stop processing if we reach the metapackage section
+    elsif in_changelog_section
+      changelog_lines << line.strip unless line.strip.empty?
+    end
+  end
+
+  # Prepare changelog content for the textarea
+  changelog_textarea_content = changelog_lines.join("\n")
+
+  # Update the textarea in the HTML
+  updated_html.gsub!(
+    /(<textarea id="changelog" name="changelog">)(.*?)(<\/textarea>)/m,
+    "\\1#{changelog_textarea_content}\\3"
+  )
+
+  # Write the updated content back to the HTML file
+  File.write(html_file_path, updated_html)
+  
+  puts "Updated version to #{highest_version_reaclassical} and added changelog to textarea in #{html_file_path}"
+
+  system("xdg-open #{html_file_path}") # For Linux
+  
+rescue => e
+  puts "Failed to update: #{e.message}"
+end
+
