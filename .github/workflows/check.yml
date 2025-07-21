@@ -3,9 +3,13 @@ on:
   push:
     paths:
       - ReaClassical/ReaClassical.lua
+      - RCPlugs/rcplugs.jsfx
+      - ReaSplice/ReaSplice.lua
   pull_request:
     paths:
       - ReaClassical/ReaClassical.lua
+      - RCPlugs/rcplugs.jsfx
+      - ReaSplice/ReaSplice.lua
 jobs:
   reapack-index:
     runs-on: ubuntu-latest
