@@ -92,25 +92,23 @@ function main()
             end
         end
 
+        local pan_setting = set_pan(mixer_track, mixer_trackname)
+        local channel_type = is_pair and "(stereo)" or "(mono -- " .. pan_setting .. ")"
         local input_track = GetTrack(0, track_index - 1)
-
-
+        
         if input_channel < MAX_INPUTS then
-            local pan_setting = set_pan(mixer_track, mixer_trackname)
             local new_input_channel = assign_input(input_track, is_pair, input_channel)
             if new_input_channel then
                 input_channel = new_input_channel
                 local channel_info = is_pair and string.format("%d/%d", input_channel - 1, input_channel) or
                     string.format("%d", input_channel)
-                local channel_type = is_pair and "(stereo)" or "(mono -- " .. pan_setting .. ")"
-
                 assignments[#assignments + 1] = string.format("%s: %s %s", channel_info, mixer_trackname, channel_type)
             end
         else
             if input_channel < #mixer_table then
                 -- Beyond max hardware inputs, set input to none
                 SetMediaTrackInfo_Value(input_track, "I_RECINPUT", -1)
-                no_input_tracks[#no_input_tracks + 1] = mixer_trackname
+                no_input_tracks[#no_input_tracks + 1] = string.format("%s: %s",  mixer_trackname, channel_type)
             end
         end
 
