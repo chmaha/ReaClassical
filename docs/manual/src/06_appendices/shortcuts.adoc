@@ -167,7 +167,7 @@ kbd:[M] Add Marker
 
 kbd:[N] Open/Close SWS Notes
 
-kbd:[L] Marker List (SWS)
+kbd:[L] Region/Marker Manager
 
 kbd:[;] Regions from items (SWS)
 
