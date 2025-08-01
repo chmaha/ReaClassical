@@ -60,7 +60,7 @@ function main()
         if take then
             local src = GetMediaItemTake_Source(take)
             local filename = GetMediaSourceFileName(src, "")
-            local take_capture = tonumber(filename:match("(%d+)%.[^%.]+$"))
+            local take_capture = tonumber(filename:match("(%d+)%)?%.[^%.]+$"))
             local session_match = true
 
             if session_name and session_name ~= "" then
