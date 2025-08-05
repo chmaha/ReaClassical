@@ -1,6 +1,8 @@
 name: check
 on:
   push:
+    branches-ignore:
+      - main
     paths:
       - ReaClassical/ReaClassical.lua
       - RCPlugs/rcplugs.jsfx
