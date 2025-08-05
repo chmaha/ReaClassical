@@ -1,8 +1,8 @@
 @description ReaSplice S-D Editing Tools
 @author chmaha
-@version 1.0pre1502
+@version 1.0beta
 @changelog
-  Initial release of just the S-D editing functions from ReaClassical
+  Remove unnecessary locking and unlocking of items
 @metapackage
 @provides
   [main] ReaSplice_Add Destination IN marker.lua
