@@ -21,8 +21,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, select_matching_folder, lock_items
-local unlock_items, ripple_lock_mode, return_xfade_length, xfade
+local main, source_markers, select_matching_folder
+local ripple_lock_mode, return_xfade_length, xfade
 
 ---------------------------------------------------------------------
 
@@ -46,7 +46,6 @@ function main()
         local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
         Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
         GoToMarker(0, 998, false)
-        lock_items()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 999, false)
@@ -63,7 +62,6 @@ function main()
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
         Main_OnCommand(40630, 0)  -- Go to start of time selection
-        unlock_items()
         local xfade_len = return_xfade_length()
         MoveEditCursor(xfade_len, false)
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
@@ -113,34 +111,6 @@ function select_matching_folder()
             SetOnlyTrackSelected(track)
             break
         end
-    end
-end
-
----------------------------------------------------------------------
-
-function lock_items()
-    select_matching_folder()
-    Main_OnCommand(40182, 0)             -- select all items
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0)   -- select children of folder
-    local unselect_items = NamedCommandLookup("_SWS_UNSELONTRACKS")
-    Main_OnCommand(unselect_items, 0)    -- unselect items in folder
-    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-    Main_OnCommand(unselect_children, 0) -- unselect children of folder
-    local total_items = CountSelectedMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetSelectedMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 1)
-    end
-end
-
----------------------------------------------------------------------
-
-function unlock_items()
-    local total_items = CountMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 0)
     end
 end
 

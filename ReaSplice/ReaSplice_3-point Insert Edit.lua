@@ -21,10 +21,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_folder, split_at_dest_in, create_crossfades, clean_up
-local lock_items, unlock_items, ripple_lock_mode, create_dest_in, return_xfade_length, xfade
+local ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
-local load_last_assembly_item, find_second_folder_track
+local load_last_assembly_item
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 ---------------------------------------------------------------------
 
@@ -95,7 +95,6 @@ function main()
             end
         end
 
-        lock_items()
         move_to_project_tab(source_proj)
 
         local stored_view = NamedCommandLookup("_SWS_SAVEVIEW")
@@ -121,7 +120,6 @@ function main()
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0) -- SWS_AWPASTE
         mark_as_edit()
-        unlock_items()
         local cur_pos, new_last_item = create_crossfades()
         save_last_assembly_item(new_last_item)
         clean_up(is_selected, proj_marker_count)
@@ -363,42 +361,8 @@ function clean_up(is_selected, proj_marker_count)
             i = i + 1
         end
     else
-        unlock_items()
         MB("Please make sure there is material to copy between your source markers...",
             "Assembly Line Edit", 0)
-    end
-end
-
----------------------------------------------------------------------
-
-function lock_items()
-    local second_folder_track = find_second_folder_track()
-
-    if second_folder_track == nil then
-        return
-    end
-
-    local total_tracks = CountTracks(0)
-
-    for track_idx = second_folder_track, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-
-        local num_items = CountTrackMediaItems(track)
-
-        for item_idx = 0, num_items - 1 do
-            local item = GetTrackMediaItem(track, item_idx)
-            SetMediaItemInfo_Value(item, "C_LOCK", 1)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function unlock_items()
-    local total_items = CountMediaItems(0)
-    for i = 0, total_items - 1, 1 do
-        local item = GetMediaItem(0, i)
-        SetMediaItemInfo_Value(item, "C_LOCK", 0)
     end
 end
 
@@ -500,28 +464,6 @@ function load_last_assembly_item()
     local _, item_guid = GetProjExtState(0, "ReaSplice", "LastAssemblyItem")
     local item = BR_GetMediaItemByGUID(0, item_guid)
     return item
-end
-
----------------------------------------------------------------------
-
-function find_second_folder_track()
-    local total_tracks = CountTracks(0)
-    local folder_count = 0
-
-    for track_idx = 0, total_tracks - 1 do
-        local track = GetTrack(0, track_idx)
-        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
-        if folder_depth == 1 then
-            folder_count = folder_count + 1
-
-            if folder_count == 2 then
-                return track_idx
-            end
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------
