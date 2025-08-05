@@ -1,4 +1,4 @@
-@description ReaClassical Core S-D Editing Tools
+@description ReaClassical Core
 @author chmaha
 @version 1.0
 @changelog
