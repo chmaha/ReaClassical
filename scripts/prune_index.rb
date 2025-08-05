@@ -28,6 +28,7 @@ begin
 
     keep_last_two_versions(xml_doc, 'ReaClassical')
     keep_last_two_versions(xml_doc, 'RCPlugs')
+    keep_last_two_versions(xml_doc, 'ReaClassicalCore')
 
     cleaned_xml = xml_doc.to_xml.lines.reject { |line| line.strip.empty? }.join
     File.write(index_file_path, cleaned_xml)
