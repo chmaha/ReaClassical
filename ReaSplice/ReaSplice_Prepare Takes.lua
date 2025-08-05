@@ -22,8 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, shift, vertical_razor, horizontal_group
-local vertical_group, horizontal, vertical, copy_track_items
-local tracks_per_folder, empty_items_check, folder_check
+local vertical_group, horizontal, vertical
+local empty_items_check, folder_check
 local trackname_check
 
 ---------------------------------------------------------------------
@@ -64,35 +64,11 @@ function main()
     end
 
     Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
-    local folders, tracks_per_group = folder_check()
-    local total_tracks = folders * tracks_per_group
-    local empty = false
-    for i = 0, total_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1.0 then
-            local items = CountTrackMediaItems(track)
-            if items == 0 then
-                for j = i + 1, i + 1 + tracks_per_group, 1 do
-                    local child_track = GetTrack(0, j)
-                    local child_items = CountTrackMediaItems(child_track)
-                    if child_items > 0 then
-                        empty = true
-                        break
-                    end
-                end
-            end
-        end
-    end
 
     local first_item = GetMediaItem(0, 0)
     local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
     if position == 0.0 then
         shift()
-    end
-
-    if empty then
-        local folder_size = tracks_per_folder()
-        copy_track_items(folder_size, total_tracks)
     end
 
     if folders == 0 or folders == 1 then
@@ -107,12 +83,10 @@ function main()
     local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(scroll_up, 0)
 
-    if empty then
-        MB(
-            "Some folder tracks are empty. If the folders are not completely empty, items " ..
-            "from first child tracks were copied to folder tracks and muted to act as guide tracks."
-            , "Guide Tracks Created", 0)
-    end
+    MB("Project takes have been prepared! " ..
+        "You can run again if you import or record more material..."
+        , "ReaSplice", 0)
+
     Undo_EndBlock('ReaSplice Prepare Takes', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -263,47 +237,6 @@ function vertical()
     SelectAllMediaItems(0, false)
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
     SetEditCurPos(0, false, false)
-end
-
----------------------------------------------------------------------
-
-function copy_track_items(folder_size, total_tracks)
-    local pos = 0;
-    for i = 1, total_tracks - 1, folder_size do
-        local track = GetTrack(0, i)
-        local previous_track = GetTrack(0, i - 1)
-        local count_items = CountTrackMediaItems(previous_track)
-        if count_items > 0 then goto continue end -- guard clause for populated folder
-        SetOnlyTrackSelected(track)
-        local num_of_items = CountTrackMediaItems(track)
-        if num_of_items == 0 then goto continue end -- guard clause for empty first child
-        for j = 0, num_of_items - 1 do
-            local item = GetTrackMediaItem(track, j)
-            if j == 0 then
-                pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            end
-            SetMediaItemSelected(item, 1)
-        end
-        Main_OnCommand(40698, 0) -- Edit: Copy items
-        SetOnlyTrackSelected(previous_track)
-        SetEditCurPos(pos, false, false)
-        Main_OnCommand(42398, 0) -- Item: Paste items/tracks
-        Main_OnCommand(40719, 0) -- Item properties: Mute
-        Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
-        ::continue::
-    end
-end
-
----------------------------------------------------------------------
-
-function tracks_per_folder()
-    local first_track = GetTrack(0, 0)
-    SetOnlyTrackSelected(first_track)
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-    local selected_tracks = CountSelectedTracks(0)
-    Main_OnCommand(40297, 0)           -- Track: Unselect (clear selection of) all tracks
-    return selected_tracks
 end
 
 ---------------------------------------------------------------------
