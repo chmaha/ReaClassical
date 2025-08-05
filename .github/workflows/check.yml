@@ -6,12 +6,12 @@ on:
     paths:
       - ReaClassical/ReaClassical.lua
       - RCPlugs/rcplugs.jsfx
-      - ReaSplice/ReaSplice.lua
+      - ReaClassicalCore/ReaClassicalCore.lua
   pull_request:
     paths:
       - ReaClassical/ReaClassical.lua
       - RCPlugs/rcplugs.jsfx
-      - ReaSplice/ReaSplice.lua
+      - ReaClassicalCore/ReaClassicalCore.lua
 jobs:
   reapack-index:
     runs-on: ubuntu-latest
