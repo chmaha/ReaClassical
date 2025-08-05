@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8
+@version 25.8.1
 @changelog
-  Set pan based on track naming independent of recording inputs
-  Find Take: Tweak regex to allow capturing digits from more filenaming patterns
-  Keymap: L opens native region/marker manager
+  Update ReaClassical menu for native region/marker manager
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
