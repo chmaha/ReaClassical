@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="a0dc564c166581c8c748984a7f6f15de904fd171">
+<index version="1" name="chmaha Scripts" commit="82ab70c94a0d38025d7b7e1493492f1df0eb5adb">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <version name="1.13" author="chmaha" time="2024-10-15T18:47:56Z">
@@ -278,6 +278,7 @@ Keymap: L opens native region/marker manager]]></changelog>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
+
 {\pard \ql \f0 \sa180 \li0 \fi0 These functions provide everything you need for professional source-destination editing in REAPER. For a more complete editing, mixing and mastering solution for classical and other acoustic music, please see https://reaclassical.org\par}
 }
 ]]></description>
