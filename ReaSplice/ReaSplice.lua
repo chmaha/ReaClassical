@@ -1,8 +1,8 @@
 @description ReaSplice S-D Editing Tools
 @author chmaha
-@version 1.0beta
+@version 1.0beta2
 @changelog
-  Remove unnecessary locking and unlocking of items
+  Remove empty tracks check
 @metapackage
 @provides
   [main] ReaSplice_Add Destination IN marker.lua
