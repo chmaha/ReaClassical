@@ -21,10 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, shift, vertical_razor, horizontal_group
-local vertical_group, horizontal, vertical
-local empty_items_check, folder_check
-local trackname_check
+local main, shift, item_group, prepare, empty_items_check
 
 ---------------------------------------------------------------------
 
@@ -55,11 +52,11 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
-    for track_idx = 0, reaper.CountTracks(0) - 1 do
-        local track = reaper.GetTrack(0, track_idx)
-        for item_idx = 0, reaper.CountTrackMediaItems(track) - 1 do
-            local item = reaper.GetTrackMediaItem(track, item_idx)
-            reaper.SetMediaItemInfo_Value(item, "I_GROUPID", 0)
+    for track_idx = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, track_idx)
+        for item_idx = 0, CountTrackMediaItems(track) - 1 do
+            local item = GetTrackMediaItem(track, item_idx)
+            SetMediaItemInfo_Value(item, "I_GROUPID", 0)
         end
     end
 
@@ -71,11 +68,7 @@ function main()
         shift()
     end
 
-    if folders == 0 or folders == 1 then
-        horizontal()
-    else
-        vertical()
-    end
+    prepare()
 
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     SetEditCurPos(cur_pos, 0, 0)
@@ -104,18 +97,7 @@ end
 
 ---------------------------------------------------------------------
 
-function vertical_razor()
-    Main_OnCommand(40042, 0)           -- Transport: Go to start of project
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- Select child tracks
-    Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
-    Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
-    Main_OnCommand(40421, 0)           -- Item: Select all items in track
-end
-
----------------------------------------------------------------------
-
-function horizontal_group(string, group)
+function item_group(string, group)
     if string == "horizontal" then
         Main_OnCommand(40296, 0) -- Track: Select all tracks
     else
@@ -141,38 +123,7 @@ end
 
 ---------------------------------------------------------------------
 
-function vertical_group(length, group)
-    local track = GetSelectedTrack(0, 0)
-    local item = AddMediaItemToTrack(track)
-    SetMediaItemPosition(item, length + 1, false)
-
-    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    repeat
-        local selected = GetSelectedMediaItem(0, 0)
-        local start = GetMediaItemInfo_Value(selected, "D_POSITION")
-        local item_length = GetMediaItemInfo_Value(selected, "D_LENGTH")
-        SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
-        local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-        Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
-
-        local num_selected_items = reaper.CountSelectedMediaItems(0)
-        for i = 0, num_selected_items - 1 do
-            local selected_item = reaper.GetSelectedMediaItem(0, i)
-            if selected_item then
-                reaper.SetMediaItemInfo_Value(selected_item, "I_GROUPID", group)
-            end
-        end
-        group = group + 1
-        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    until IsMediaItemSelected(item) == true
-
-    DeleteTrackMediaItem(track, item)
-    return group
-end
-
----------------------------------------------------------------------
-
-function horizontal()
+function prepare()
     local length = GetProjectLength(0)
     local first_track = GetTrack(0, 0)
     local new_item = AddMediaItemToTrack(first_track)
@@ -187,7 +138,7 @@ function horizontal()
     local group = 1
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
-        horizontal_group(workflow, group)
+        item_group(workflow, group)
         group = group + 1
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     until IsMediaItemSelected(new_item) == true
@@ -196,45 +147,6 @@ function horizontal()
     SelectAllMediaItems(0, false)
     Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
-    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-    SetEditCurPos(0, false, false)
-end
-
----------------------------------------------------------------------
-
-function vertical()
-    local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
-    Main_OnCommand(select_all_folders, 0) -- select all folders
-    local num_of_folders = CountSelectedTracks(0)
-    local length = GetProjectLength(0)
-    local first_track = GetTrack(0, 0)
-
-    local new_item = AddMediaItemToTrack(first_track)
-    SetMediaItemPosition(new_item, length + 1, false)
-    local group = 1
-    SetOnlyTrackSelected(first_track)
-    SetEditCurPos(0, false, false)
-    local workflow = "vertical"
-    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    repeat
-        horizontal_group(workflow, group)
-        group = group + 1
-        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    until IsMediaItemSelected(new_item) == true
-
-    DeleteTrackMediaItem(first_track, new_item)
-    local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-    local start = 1
-    start = 2
-    Main_OnCommand(next_folder, 0)     -- select next folder
-
-    for _ = start, num_of_folders, 1 do
-        vertical_razor()
-        local next_group = vertical_group(length, group)
-        Main_OnCommand(next_folder, 0) -- select next folder
-        group = next_group
-    end
-    SelectAllMediaItems(0, false)
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
     SetEditCurPos(0, false, false)
 end
@@ -251,43 +163,6 @@ function empty_items_check(num_of_items)
         end
     end
     return count
-end
-
----------------------------------------------------------------------
-
-function folder_check()
-    local folders = 0
-    local tracks_per_group = 1
-    local total_tracks = CountTracks(0)
-    for i = 0, total_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", 0)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
-
-        local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
-            or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"
-        local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
-            or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
-            or trackname_check(track, "^REF")
-
-        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-            folders = folders + 1
-        elseif folders == 1 and not (special_states or special_names) then
-            tracks_per_group = tracks_per_group + 1
-        end
-    end
-    return folders, tracks_per_group, total_tracks
-end
-
----------------------------------------------------------------------
-
-function trackname_check(track, string)
-    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, string)
 end
 
 ---------------------------------------------------------------------
