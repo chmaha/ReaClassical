@@ -1,6 +1,6 @@
 === Introduction to Editing Workflows
 
-Once you have recorded or imported your classical music audio, you are ready to start editing the raw material! Here we talk about the meat and potatoes of the classical editing workflows. If you have followed the importing audio section, you will have all your takes lined up in a row horizontally and you place your source in and out markers, destination in and out markers then press a keyboard shortcut to achieve your 2-, 3- or 4-point edit.
+Once you have recorded or imported your classical music audio, you are ready to start editing the raw material! Here we talk about the meat and potatoes of the classical editing workflows. If you have followed the importing audio section, you will have all your takes lined up in a row horizontally. In summary, place your source in and out markers, destination in and out markers, then run one of the S-D edit functions to achieve your 2-, 3- or 4-point edit.
 
 === Marking Edits on your Scores
 
