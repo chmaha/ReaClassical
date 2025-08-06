@@ -1,8 +1,8 @@
 @description ReaClassical Core
 @author chmaha
-@version 1.0
+@version 1.1
 @changelog
-  Initial public release
+  Prepare Takes: Simplify for use with or without track grouping
 @metapackage
 @provides
   [main] ReaClassical Core_Add Destination IN marker.lua
