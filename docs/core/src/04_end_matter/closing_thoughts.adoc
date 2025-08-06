@@ -1,0 +1,3 @@
+=== Closing Thoughts
+
+I hope you enjoy the ability to do serious classical editing with ReaClassical Core on REAPER and that my efforts go some way to making things better, easier and more efficient. Remember that if you find any oddities with the functions or have a bright idea for something new and shiny, please add your thoughts to the dedicated thread on the forums and/or create an issue or start a discussion on my GitHub repository located at https://github.com/chmaha/ReaClassical. If you've had fun using ReaClassical Core, don't forget to check out the full recording, editing, mixing and mastering solution at https://reaclassical.org.

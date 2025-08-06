@@ -52,7 +52,7 @@ ReaClassical currently uses YY.M.MICRO versioning (where M is a non-padded month
 
 === Tools and Languages
 
-ReaClassical works on top of https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes https://reapack.com/[ReaPack] and https://www.sws-extension.org/index.php[SWS Extensions]. ReaClassical functions are coded using https://www.lua.org/[Lua]. The installers for MacOS and Linux are shell scripts. The Windows installers are coded in https://go.dev/[Go]. The ReaClassical and Quick Start Guide websites use http://getskeleton.com/[Skeleton]. All coding is done either in REAPER's ReaScript Development Environment, https://code.visualstudio.com/[vscode] or https://gedit-technology.github.io/apps/gedit/[gedit] on Linux. The online manual is written in https://asciidoc.org/[AsciiDoc]. The ReaClassical splash screen and banner are created in https://www.gimp.org/[GIMP].
+ReaClassical works on top of https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes https://reapack.com/[ReaPack] and https://www.sws-extension.org/index.php[SWS Extensions]. ReaClassical functions are coded using https://www.lua.org/[Lua]. The installers for MacOS and Linux are shell scripts. The Windows installers are coded in https://go.dev/[Go]. The ReaClassical and Quick Start Guide websites use http://getskeleton.com/[Skeleton]. All coding is done either in REAPER's ReaScript Development Environment, https://code.visualstudio.com/[vscode] or https://apps.kde.org/kate/[kate] on Linux. The online manual is written in https://asciidoc.org/[AsciiDoc]. The ReaClassical splash screen and banner are created in https://www.gimp.org/[GIMP].
 
 === Keyboard Shortcuts
 

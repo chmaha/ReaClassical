@@ -1,0 +1,1 @@
+image::reaclassical_core_os.png[width=75%,align="center"]

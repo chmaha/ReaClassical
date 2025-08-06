@@ -1,0 +1,3 @@
+== Appendix
+
+include::function_descriptions.adoc[]

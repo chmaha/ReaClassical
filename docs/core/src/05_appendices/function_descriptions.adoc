@@ -1,0 +1,93 @@
+=== Description of ReaClassical Core Functions
+
+_Preliminary Note:_ I include the default ReaClassical keyboard shortcuts as recommendations.
+
+*Prepare Takes* kbd:[T]
+
+_Description:_ Intelligently prepares recorded or imported takes for source-destination editing.
+
+_Notes:_ Groups items in a more robust way than REAPER's auto-grouping. The function allows for takes that don't start or end exactly at the same time (this can happen if you receive pre-edited materials). The end result is if you drag one item of a take group, every other item will move in sync. NOTE: The function was designed for use after initial recording or importing of media but will work at any point during editing (for example after importing a patch recording). A reminder that the REAPER native grouping (with "automatically group all tracks…" enabled) works for 99% of situations but for takes that don't potentially start or end at quite the same point Prepare Takes is a must.
+
+*ReaClassical Core Project Preferences* kbd:[F5]
+
+_Description:_ Set S-D crossfade length, S-D Destination Marker Check Range (ms), Add S-D Markers at Mouse Hover.
+
+_Notes:_ The user can change the checking range (distance beyond an item edge/fade or crossfade) when placing destination IN and OUT markers. Setting to 0 would just check if the marker would be placed _inside_ a item fade or crossfade. You can also choose to add S-D markers at the mouse hover position vs edit cursor.
+
+*Find Take (based on filename)* kbd:[Enter]
+
+_Description:_ Enter a take number based on the numerical suffixes at the end of filenames and optional session name to quickly jump to that media item.
+
+_Notes:_ If the function can't find a media item with that take number and optional session name, it will let you know and offer to try again with a different number or session name. This will work for any file-naming system that uses numbers before the file extension such as _mvt1_main_pair-T04.wav_ or _beethoven_cello-take_23.flac_. Note that if the imported or recorded files have zero-padding that is not a problem as the function strips these away. The session name search can be used to find any text in the filename and allows for partial searches. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.
+
+*Source-Destination Markers* kbd:[1], kbd:[2], kbd:[3], kbd:[4]
+
+_Description:_ Add source-destination markers ready for making the edit.
+
+_Notes:_ kbd:[1], kbd:[2] = destination IN/OUT; kbd:[3], kbd:[4] = Source IN/OUT. In between the destination markers is where the edit will actually happen. In between the source markers is where the material is taken from. Use all four markers for 4-point editing. Use any combination of 3 markers for 3-point editing. Use either 1 source and 1 destination (more useful) or just the source markers for 2-point editing (less useful). By default, the markers are added at the edit cursor location. Additionally, you can set the placement of S-D markers at mouse hover position via ReaClassical Preferences (kbd:[F5]). The benefit, other than speed, is that you don't have to worry about making sure source tracks are selected by clicking on the item - simply hover over the desired item and add the source markers!
+
+If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a crossfade or item edge, the function will alert you (pressing btn:[OK] places the marker anyway). This helps avoid awkward _sliver_ edits that can happen especially if you are zoomed out and placing markers by ear. You can set the check range via ReaClassical Core Project Preferences. The check range (in milliseconds) is the distance beyond an item edge, fade or crossfade. For example, setting to 0 would only check for placement _inside_ a fade or crossfade.
+
+*S-D Edit* kbd:[5]
+
+_Description:_ Make the source-destination edit (2-, 3- and 4-point editing)
+
+_Notes:_ Once you have placed your S-D markers use this function to make the edit. Whatever the number of markers you used, the edit will be crossfaded using a short equal power fade (you can change this in REAPER via menu:Preferences...[Media Item Defaults]) and when using 4 markers, the S-D markers removed ready for the next edit. The edits are perfectly crossfaded and the user only needs to focus on the selection of source material. For any S-D edit you can, of course, undo the action and return to the previous state. The desired crossfade length is set via ReaClassical Core Project Preferences. Note that this function can be used in multi-tab S-D editing mode (see below).
+
+*3-point _Assembly Line_ Edit* kbd:[F3]
+
+_Description:_ Uses both source markers and destination-IN marker to compile edits from start to finish.
+
+_Notes:_ The destination-IN marker is retained and placed at the end of the edit so that for subsequent operations the user only has to set the source markers. 
+
+If you accidentally move the location of the destination IN marker in the middle of assembly line editing, the function will let you know and offer to move the marker back to the right edge of the latest item in the edit. This will even allow you to do some regular 3- or 4-point editing earlier in the sequence before continuing with the assembly line edits. Just place the destination IN marker anywhere in the project and answer btn:[No] when the message box appears. Note that this function can also be used in multi-tab S-D editing mode (see below).
+
+*Insert with* *Timestretching* kbd:[F4]
+
+_Description:_ Makes the source material fit the the space in between the destination markers using time-stretching vs rippling later material.
+
+_Notes:_ Requires placing all four S-D markers. This is less useful for classical music editing but perhaps very useful for video work where replacement material has to fit exactly into the time used by the original. Crossfade length is set via ReaClassical Project Preferences. Note that this function can also be used in multi-tab S-D editing mode (see below).
+
+*Delete with Ripple* kbd:[Backspace]
+
+_Description:_ Deletes material between the source markers, rippling all later material.
+
+_Notes:_ This only affects the folder group that was highlighted when the source markers were placed which will almost always be the destination group (the top folder in the project). Crossfade length is set via ReaClassical Core Project Preferences.
+
+*Delete Leaving Silence* kbd:[Ctrl+Backspace]
+
+_Description:_ Deletes material between the source markers, no rippling of later material.
+
+_Notes:_ This is similar to _Delete with Ripple_ but instead leaves a gap where the original source material existed.
+
+*Add Source Project Marker* kbd:[Ctrl+Alt+3] or kbd:[Ctrl+Alt+4]
+
+_Description:_ Enables multi-tab editing
+
+_Notes:_ To work in multi-tab S-D edit mode, the user is required to use the S-D project markers as a pair, one in the _destination_ tab and the other in the _source_ tab. In multi-tab S-D edit mode, any source makers placed by the user are not deleted in order to aid a quick undo in the destination tab ready to reapply a tweaked edit.
+
+*Add Destination Project Marker* kbd:[Ctrl+Alt+1] or kbd:[Ctrl+Alt+2]
+
+_Description:_ Enables multi-tab editing
+
+_Notes:_ To work in multi-tab S-D edit mode, the user is required to use the S-D project markers as a pair, one in the _destination_ tab and the other in the _source_ tab. In multi-tab S-D edit mode, any source makers placed by the user are not deleted in order to aid a quick undo in the destination tab ready to reapply a tweaked edit.
+
+*Delete all S-D Markers* kbd:[Ctrl+Delete]
+
+_Description:_ Deletes source and destination markers.
+
+_Notes:_ Useful if you want to abandon a S-D edit, however, there's also no problem leaving the markers for another time given that the source/destination IN/OUT marker functions replace any existing version of the marker.
+
+*Delete all S-D Project Markers* kbd:[Shift+Delete]
+
+_Description:_ Deletes both source and destination project markers
+
+_Notes:_ In order to switch back to regular single-tab S-D editing, it is important to run this command otherwise the S-D edit functions will continue to attempt to find markers elsewhere.
+
+*REAPER Crossfade Editor* kbd:[F]
+
+_Description:_ Opens a two-line crossfade editor view for precise finessing of S-D edits.
+
+_Notes:_ Since v7.40, REAPER includes an excellent professional two-lane crossfade editor similar in nature to the specialist classical DAWs such as Sequoia and Pyramix. Drag on the "ghost" waveforms to align transients and drag on the lower area or edge of the crossfade to move or resize the crossfade itself. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.
+
+You can shuttle between crossfades using the keyboard arrow keys.

@@ -1,0 +1,7 @@
+== Editing using ReaClassical Core
+
+include::importing_audio.adoc[]
+
+include::prefs.adoc[]
+
+include::editing.adoc[]

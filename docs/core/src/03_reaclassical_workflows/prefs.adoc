@@ -1,0 +1,3 @@
+=== ReaClassical Core Preferences
+
+Before starting to edit using ReaClassical Core, it is worth opening the ReaClassical Core preferences window. Here you can set default crossfade length when using the S-D edit functions, the safety length for alerting the user when placing markers close to existing edits, and the option to add S-D markers at mouse hover location (to enable, change the 0 to a 1).
