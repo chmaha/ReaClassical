@@ -1,0 +1,3 @@
+=== Beyond editing
+
+Once you have successfully edited your material, export your audio stems for your mixing/mastering engineer using the REAPER render dialog. Or, if your engineer is an enlighened being, simply send over a zip of your project folder (ensuring all audio is first moved or copied in via the REAPER project bay window) for them to import into ReaClassical.

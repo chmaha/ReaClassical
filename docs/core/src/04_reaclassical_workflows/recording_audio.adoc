@@ -1,0 +1,3 @@
+=== Recording Audio
+
+If you are recording your music in REAPER, a good idea would be to set the recorded filename pattern to use take numbers. Go to menu:Options[Preferences] or use kbd:[Ctrl+P] and set "Recorded Filenames:" to something like `$tracknumber-$track-T$recpass` or `$tracknameornumber-T$recpass`. This way, you can easily identify your takes and also use the ReaClassical Core Find Takes function to search for takes based on underlying filename.

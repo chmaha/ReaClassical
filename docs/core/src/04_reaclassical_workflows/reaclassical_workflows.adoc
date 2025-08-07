@@ -1,7 +1,11 @@
 == Editing using ReaClassical Core
 
+include::recording_audio.adoc[]
+
 include::importing_audio.adoc[]
 
 include::prefs.adoc[]
 
 include::editing.adoc[]
+
+include::next.adoc[]
