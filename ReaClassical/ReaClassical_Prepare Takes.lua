@@ -116,9 +116,12 @@ function main()
         end
     end
 
-    MB("Project takes have been prepared! " ..
-        "You can run again if you import or record more material..."
-        , "ReaClassical", 0)
+    local _, converted = GetProjExtState(0, "ReaClassical", "Converted")
+    if converted ~= "y" then
+        MB("Project takes have been prepared! " ..
+            "You can run again if you import or record more material..."
+            , "ReaClassical", 0)
+    end
 
     Undo_EndBlock('Prepare Takes', 0)
     PreventUIRefresh(-1)

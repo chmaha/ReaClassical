@@ -195,7 +195,8 @@ function main()
         PreventUIRefresh(-1)
     end
 
-    if not rcmaster_exists then
+    local _, converted = GetProjExtState(0, "ReaClassical", "Converted")
+    if not rcmaster_exists and converted ~= "y" then
         MB("Your project has been upgraded"
             .. " to use a single mixer set routed to RCMASTER bus. "
             .. "You can now move the parent fader without affecting the volume of child tracks.\n"
