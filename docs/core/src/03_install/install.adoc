@@ -9,3 +9,17 @@ To install ReaClassical Core:
 . Search for "SWS" and mark "SWS/S&M extension" for install.
 . Search for "core" in the ReaPack and mark "ReaClassical Core" for install. 
 . Click "Apply".
+
+== Assigning Keyboard Shortcuts
+
+Unlike the full ReaClassical ecosystem, ReaClassical Core does not provide any keyboard shortcuts and leaves it up to the user to assign as they see fit. The appendix includes suggested shortcuts. Open up the actions menu via keyboard shortcut kbd:[?] or by navigating to menu:Actions[Show action list...] to see the ReaClassical Core functions (you can filter at the top of the screen). You can add your own shortcuts via the box in the bottom left of the actions menu dialog. For reference (from REAPER's own user guide), here is a table of equivalent modifier keys for the different OSes:
+
+[.center, width="75%",cols="^,^"]
+.Shortcut Equivalents
+|===
+|*PC (Windows or Linux) Key*|*Mac (MacOS) Key Equivalent*
+|Shift|Shift
+|Control (Ctrl)|Command (Cmd)
+|Alt|Option
+|Windows|Control
+|===

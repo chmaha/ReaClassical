@@ -50,20 +50,6 @@ Unlike the full ReaClassical system, ReaClassical Core will not receive as many 
 
 ReaClassical Core works on top of https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes https://reapack.com/[ReaPack] and https://www.sws-extension.org/index.php[SWS Extensions]. ReaClassical Core functions are coded using https://www.lua.org/[Lua]. All coding is done either in REAPER's ReaScript Development Environment, https://code.visualstudio.com/[vscode] or https://apps.kde.org/kate/[kate] on Linux. The online manual is written in https://asciidoc.org/[AsciiDoc]. The ReaClassical Core logo and banner were created in https://www.gimp.org/[GIMP].
 
-=== Assigning Keyboard Shortcuts
-
-Unlike the full ReaClassical ecosystem, ReaClassical Core does not provide any keyboard shortcuts and leaves it up to the user to assign as they see fit. The appendix includes suggested shortcuts. Open up the actions menu via keyboard shortcut kbd:[?] or by navigating to menu:Actions[Show action list...] to see the ReaClassical Core functions (you can filter at the top of the screen). For reference (from REAPER's own user guide), here is a table of equivalent modifier keys for the different OSes:
-
-[.center, width="75%",cols="^,^"]
-.Shortcut Equivalents
-|===
-|*PC (Windows or Linux) Key*|*Mac (MacOS) Key Equivalent*
-|Shift|Shift
-|Control (Ctrl)|Command (Cmd)
-|Alt|Option
-|Windows|Control
-|===
-
 === Changelog
 
 The changelog for ReaClassical Core functions can be found by double-clicking on the ReaClassical Core package in ReaPack and navigating to the `History` tab. Whenever you sync ReaPack via menu:Extensions[ReaPack > Synchronize packages], this information should also appear automatically.
