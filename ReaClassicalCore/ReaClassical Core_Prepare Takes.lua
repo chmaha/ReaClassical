@@ -75,6 +75,8 @@ function main()
 
     local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(scroll_up, 0)
+    
+    reaper.Main_OnCommand(40310,0) -- set ripple-per-track
 
     MB("Project takes have been prepared! " ..
         "You can run again if you import or record more material..."
