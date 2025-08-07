@@ -76,7 +76,7 @@ function duplicate_project_in_new_tab()
     local dir = proj_path:match("^(.*)[\\/][^\\/]-%.RPP$") or GetProjectPath("")
 
     -- Build new filename
-    local new_filename = current_filename .. "_Converted.RPP"
+    local new_filename = current_filename .. "_converted.RPP"
     local new_filepath = dir .. "/" .. new_filename
 
     -- Save current project as the new file
