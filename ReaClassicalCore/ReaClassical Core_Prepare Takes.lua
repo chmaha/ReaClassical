@@ -75,6 +75,9 @@ function main()
 
     local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
     Main_OnCommand(scroll_up, 0)
+
+    SetProjExtState(0, "ReaClassical Core", "RCCoreProject", "y")
+    SetProjExtState(0, "ReaClassical Core", "PreparedTakes", "y")
     
     reaper.Main_OnCommand(40310,0) -- set ripple-per-track
 
