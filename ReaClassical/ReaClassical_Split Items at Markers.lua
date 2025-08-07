@@ -51,23 +51,21 @@ end
 ---------------------------------------------------------------------
 
 function split_items_at_markers()
-    Undo_BeginBlock()
     local cursor_pos = GetCursorPosition() -- Save current edit cursor position
 
     -- Collect all regular (non-region) markers and their names
-    local marker_positions = {}
-    local marker_names = {}
+    local marker_data = {}
     local _, num_markers, _ = CountProjectMarkers(0)
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, _, name, _ = EnumProjectMarkers(i)
-        if not isrgn then
-            table.insert(marker_positions, pos)
-            table.insert(marker_names, name)
+        local retval, isrgn, pos, _, name, markrgnindex = EnumProjectMarkers(i)
+        if retval and not isrgn then
+            local label = name ~= "" and name or ("Marker " .. tostring(markrgnindex))
+            table.insert(marker_data, {pos = pos, name = label})
         end
     end
 
-    for idx, marker_pos in ipairs(marker_positions) do
-        SetEditCurPos(marker_pos, false, false)
+    for _, marker in ipairs(marker_data) do
+        SetEditCurPos(marker.pos, false, false)
         Main_OnCommand(40289, 0) -- Unselect all items
 
         local item_count = CountMediaItems(0)
@@ -80,38 +78,36 @@ function split_items_at_markers()
                 local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
                 local item_end = item_pos + item_len
 
-                if marker_pos > item_pos and marker_pos < item_end then
+                if marker.pos > item_pos and marker.pos < item_end then
                     SetMediaItemSelected(item, true)
                     Main_OnCommand(40034, 0) -- Select all items in group
                     Main_OnCommand(40012, 0) -- Split at timeline markers
+
                     clear_item_names_from_selected()
 
                     local new_item_count = CountMediaItems(0)
-                    local marker_name = marker_names[idx]
                     for j = 0, new_item_count - 1 do
                         local new_item = GetMediaItem(0, j)
                         local new_track = GetMediaItemTrack(new_item)
                         local new_track_index = GetMediaTrackInfo_Value(new_track, "IP_TRACKNUMBER")
                         local new_item_pos = GetMediaItemInfo_Value(new_item, "D_POSITION")
 
-                        if new_track_index == 1 and math.abs(new_item_pos - marker_pos) < 0.0001 then
+                        if new_track_index == 1 and math.abs(new_item_pos - marker.pos) < 0.0001 then
                             local take = GetActiveTake(new_item)
                             if take then
-                                GetSetMediaItemTakeInfo_String(take, "P_NAME", marker_name, true)
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", marker.name, true)
                                 break
                             end
                         end
                     end
 
-                    break -- Only one group per marker
+                    break -- Only process one group per marker
                 end
             end
         end
     end
 
-    -- Restore original edit cursor position
-    SetEditCurPos(cursor_pos, false, false)
-    Undo_EndBlock('Split Items at Markers and Rename', 0)
+    SetEditCurPos(cursor_pos, false, false) -- Restore cursor position
 end
 
 ---------------------------------------------------------------------
@@ -132,3 +128,4 @@ end
 ---------------------------------------------------------------------
 
 main()
+
