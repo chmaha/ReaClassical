@@ -1,11 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.2
+@version 25.8.3
 @changelog
-  Add regular REAPER project conversion function
-  Prepare Takes: Do not show message if part of conversion
-  Horizontal Workflow: Do not show message if part of conversion
-  NOTE: Update keymap and menu via ReaClassical Updater
+  Add function to split item(s) at markers and rename
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -84,6 +81,7 @@
   [main] ReaClassical_Build Edit List using BWF offset.lua
   [main] ReaClassical_Metadata Report.lua
   [main] ReaClassical_Convert REAPER project.lua
+  [main] ReaClassical_Split Items at Markers.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
