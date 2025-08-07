@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.1
+@version 25.8.2
 @changelog
-  Update ReaClassical menu for native region/marker manager
+  Add regular REAPER project conversion function
+  Prepare Takes: Do not show message if part of conversion
+  Horizontal Workflow: Do not show message if part of conversion
+  NOTE: Update keymap and menu via ReaClassical Updater
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -80,6 +83,7 @@
   [main] ReaClassical_Build Edit List.lua
   [main] ReaClassical_Build Edit List using BWF offset.lua
   [main] ReaClassical_Metadata Report.lua
+  [main] ReaClassical_Convert REAPER project.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
