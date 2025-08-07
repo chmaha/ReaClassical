@@ -1,8 +1,8 @@
 @description ReaClassical Core
 @author chmaha
-@version 1.1
+@version 1.2
 @changelog
-  Prepare Takes: Simplify for use with or without track grouping
+  Add Find Take function
 @metapackage
 @provides
   [main] ReaClassical Core_Add Destination IN marker.lua
@@ -30,6 +30,7 @@
   [main] ReaClassical Core_Source Markers to Item Edge.lua
   [main] ReaClassical Core_Destination Markers to Item Edge.lua
   [main] ReaClassical Core_Delete S-D Project Markers.lua
+  [main] ReaClassical Core_Find Take.lua
 @about
   These functions provide everything you need for professional source-destination editing in REAPER.
   For a more complete editing, mixing and mastering solution for classical and other acoustic music, please see https://reaclassical.org
