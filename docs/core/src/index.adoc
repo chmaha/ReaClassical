@@ -11,7 +11,7 @@
 :title-logo-image: image:reaclassical_core_logo.png[top=33%,align=right,pdfwidth=2in]
 ifdef::backend-pdf[]
 = ReaClassical Core Manual
-Generated 2025-08-07 00:19:48 UTC
+Generated 2025-08-07 00:39:01 UTC
 :title-page:
 {copyright}
 endif::[]
@@ -20,8 +20,10 @@ include::01_front_matter/front_matter.adoc[]
 
 include::02_preliminaries/preliminaries.adoc[]
 
-include::03_reaclassical_workflows/reaclassical_workflows.adoc[]
+include::03_install/install.adoc[]
 
-include::04_end_matter/end_matter.adoc[]
+include::04_reaclassical_workflows/reaclassical_workflows.adoc[]
 
-include::05_appendices/appendices.adoc[]
+include::05_end_matter/end_matter.adoc[]
+
+include::06_appendices/appendices.adoc[]
