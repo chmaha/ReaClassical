@@ -33,7 +33,6 @@ function main()
         left_pos = start_time
         right_pos = end_time
     else
-        local parent_track = GetTrack(0, 0)
         selected = CountSelectedMediaItems(0)
 
         if selected == 0 then
@@ -44,34 +43,6 @@ function main()
             return
         end
 
-        local folder_tracks = {}
-        local num_tracks = CountTracks(0)
-
-        for i = 0, num_tracks - 1 do
-            local track = GetTrack(0, i)
-            if i == 0 or GetParentTrack(track) == parent_track then
-                table.insert(folder_tracks, track)
-            else
-                break
-            end
-        end
-        for i = 0, selected - 1 do
-            local item = GetSelectedMediaItem(0, i)
-            local item_track = GetMediaItem_Track(item)
-
-            local found = false
-            for _, folder_track in ipairs(folder_tracks) do
-                if item_track == folder_track then
-                    found = true
-                    break
-                end
-            end
-
-            if not found then
-                MB("Any selected items should be in the first folder.", "Error", 0)
-                return
-            end
-        end
         -- Set marker positions
         local first_item = GetSelectedMediaItem(0, 0)
         left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
