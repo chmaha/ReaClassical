@@ -13,6 +13,10 @@ image::score-edits.png[]
 
 After importing audio, you should use the Prepare Takes function. It is far more robust than the built-in REAPER auto-grouping. Super simple! Every set of items comprising a take is now grouped. Prepare Takes can be re-run at any point (useful if you subsequently record some extra patches).
 
+=== Finding Takes
+
+Use the ReaClassical Core_Find Take function to locate a take number (and optional session name) by number in an underlying media filename. If the function can't find a media item with that take number and optional session name, it will let you know and offer to try again with a different number or session name. This will work for any file-naming system that uses numbers before the file extension such as _mvt1_main_pair-T04.wav_ or _beethoven_cello-take_23.flac_. Note that if the imported or recorded files have zero-padding that is not a problem as the function strips these away. The session name search can be used to find any text in the filename and allows for partial searches. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.
+
 === Source-Destination Editing
 
 You set your in and out points using special colored labeled markers. Simply run the S-D edit function make the 2-, 3- or 4-point edit. depending on how many markers you set. If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a crossfade or item edge, the function will alert you (pressing btn:[OK] places the marker anyway). This helps avoid awkward _sliver_ edits that can happen especially if you are zoomed out and placing markers by ear. You can customize the check range via ReaClassical Core Preferences. The check range (in milliseconds) is the distance beyond an item edge, fade or crossfade. For example, setting to 0 would only check for placement _inside_ a fade or crossfade.
