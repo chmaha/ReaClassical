@@ -28,12 +28,17 @@ local delete_all_fx, add_rc_ext_state
 ---------------------------------------------------------------------
 
 function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow ~= "" then
+        MB("This is already a ReaClassical project.", "ReaClassical Conversion", 0)
+        return
+    end
+
     local ret = duplicate_project_in_new_tab()
     if ret == -1 then return end
     flatten_all_folders()
     delete_empty_tracks()
     reset_all_routing()
-    delete_all_fx()
     make_all_tracks_one_folder()
     add_rc_ext_state()
     local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
@@ -43,9 +48,9 @@ function main()
     SetProjExtState(0, "ReaClassical", "Converted", "")
     Main_SaveProject(0, false)
     MB("Your project has been converted.\n\n"
-    .. "Any folders have been flattened and a single folder created for horizontal workflow.\n"
-    .. "Copy/Paste any FX from your original project onto the ReaClassical mixer tracks.\n"
-    .. "Recreate any custom routing using ReaClassical special tracks via # shortcut."
+    .. "Any folders have been flattened, empty tracks removed, and a single folder created for horizontal workflow.\n"
+    .. "Any regular track FX from your original project have been placed onto the ReaClassical mixer tracks.\n"
+    .. "Recreate any custom routing and bus FX using ReaClassical special tracks via # shortcut."
     , "ReaClassical Conversion", 0)
 end
 
