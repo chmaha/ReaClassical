@@ -2,9 +2,12 @@
 
 include::create.adoc[]
 
+
 include::recording.adoc[]
 
 include::importing.adoc[]
+
+include::convert.adoc[]
 
 include::navigation.adoc[]
 
