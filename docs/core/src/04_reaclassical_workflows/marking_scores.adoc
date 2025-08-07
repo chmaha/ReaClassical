@@ -1,0 +1,6 @@
+=== Marking Edits on your Scores
+
+This is best done using a physical, photocopied score by the conductor or lead musician. I advocate for a “T” system where a large T is inserted into the score at the intended edit point. Either side of the T stem, and under the crossbar, the outgoing and incoming take numbers are written. A wavy crossbar indicates some leeway for where the edit point can be placed. Further notes can be attached underneath the T such as directions for tightening the gap etc.
+
+.Editing a physical score
+image::score-edits.png[]

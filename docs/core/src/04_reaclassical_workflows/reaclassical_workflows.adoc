@@ -1,8 +1,10 @@
-== Editing using ReaClassical Core
+== Editing with ReaClassical Core
 
 include::recording_audio.adoc[]
 
 include::importing_audio.adoc[]
+
+include::marking_scores.adoc[]
 
 include::prefs.adoc[]
 

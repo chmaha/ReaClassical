@@ -6,7 +6,7 @@ _Preliminary Note:_ I include the default ReaClassical keyboard shortcuts as rec
 
 _Description:_ Intelligently prepares recorded or imported takes for source-destination editing.
 
-_Notes:_ Groups items in a more robust way than REAPER's auto-grouping. The function allows for takes that don't start or end exactly at the same time (this can happen if you receive pre-edited materials). The end result is if you drag one item of a take group, every other item will move in sync. NOTE: The function was designed for use after initial recording or importing of media but will work at any point during editing (for example after importing a patch recording). A reminder that the REAPER native grouping (with "automatically group all tracks…" enabled) works for 99% of situations but for takes that don't potentially start or end at quite the same point Prepare Takes is a must.
+_Notes:_ Groups items in a more robust way than REAPER's auto-grouping. The function allows for takes that don't start or end exactly at the same time (this can happen if you receive pre-edited materials). The end result is if you drag one item of a take group, every other item will move in sync. NOTE: The function was designed for use after initial recording or importing of media but will work at any point during editing (for example after importing a patch recording). A reminder that the REAPER native grouping (with "automatically group all tracks…" enabled) works for 99% of situations but for takes that don't potentially start or end at quite the same point Prepare Takes is a must. The function is required to have run at least once before any S-D edits can occur.
 
 *ReaClassical Core Project Preferences* kbd:[F5]
 

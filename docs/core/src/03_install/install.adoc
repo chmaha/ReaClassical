@@ -1,4 +1,4 @@
-== Install
+== Installing ReaClassical Core
 
 Requirements: _ReaPack_, _SWS/S&M extension_
 
