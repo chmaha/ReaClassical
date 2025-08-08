@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, duplicate_project_in_new_tab, flatten_all_folders
 local make_all_tracks_one_folder, delete_empty_tracks, reset_all_routing
-local delete_all_fx, add_rc_ext_state
+local add_rc_ext_state
 
 ---------------------------------------------------------------------
 
@@ -162,22 +162,6 @@ function reset_all_routing()
 
         -- Ensure track sends audio to master/parent
         SetMediaTrackInfo_Value(track, "B_MAINSEND", 1)
-    end
-end
-
----------------------------------------------------------------------
-
-function delete_all_fx()
-    local num_tracks = CountTracks(0)
-
-    for i = 0, num_tracks - 1 do
-        local track = GetTrack(0, i)
-
-        -- Remove all FX from this track
-        local fx_count = TrackFX_GetCount(track)
-        for fx = fx_count - 1, 0, -1 do
-            TrackFX_Delete(track, fx)
-        end
     end
 end
 
