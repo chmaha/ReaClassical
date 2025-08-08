@@ -196,7 +196,8 @@ function cd_markers(first_track, num_of_items, use_existing)
   delete_markers()
 
   SNM_SetIntConfigVar('projfrbase', 75)
-  Main_OnCommand(40754, 0) --enable snap to grid
+  Main_OnCommand(40904, 0) -- set grid to frames
+  Main_OnCommand(40754, 0) -- enable snap to grid
 
   local upc_ret, isrc_ret, upc_input, isrc_input, code_table = add_codes(use_existing)
   if upc_ret and not use_existing then save_codes("UPC", upc_input) end
