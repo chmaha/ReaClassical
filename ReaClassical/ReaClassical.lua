@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.3
+@version 25.8.4
 @changelog
-  Add function to split item(s) at markers and rename
+  Create CD Markers: Set grid line spacing to frames for accurate nearest frame checking
+  Conversion Function: Remove superfluous function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
