@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.4
+@version 25.8.5
 @changelog
-  Create CD Markers: Set grid line spacing to frames for accurate nearest frame checking
-  Conversion Function: Remove superfluous function
+  Add show/hide children to alt recording section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
