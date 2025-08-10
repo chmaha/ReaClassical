@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.5
+@version 25.8.6
 @changelog
-  Add show/hide children to alt recording section
+  Take Counter: Use local time for calculating end time of scheduled recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
