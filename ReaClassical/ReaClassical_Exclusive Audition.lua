@@ -24,6 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check
 local mixer, on_stop, get_color_table, get_path
+local get_selected_media_item_at
 
 ---------------------------------------------------------------------
 
@@ -62,8 +63,8 @@ function main()
             SetMediaItemSelected(hover_item, 1)
             reaper.UpdateArrange()
         end
-        local item_one = GetSelectedMediaItem(0, 0)
-        local item_two = GetSelectedMediaItem(0, 1)
+        local item_one = get_selected_media_item_at(0)
+        local item_two = get_selected_media_item_at(1)
         if not item_one and not item_two then
             ShowMessageBox("Please select at least one of the items involved in the crossfade", "Exclusive Audition", 0)
             return
@@ -73,11 +74,11 @@ function main()
                 item_two = item_one
                 local prev_item = NamedCommandLookup("_SWS_SELPREVITEM")
                 Main_OnCommand(prev_item, 0)
-                item_one = GetSelectedMediaItem(0, 0)
+                item_one = get_selected_media_item_at(0)
             else
                 local next_item = NamedCommandLookup("_SWS_SELNEXTITEM")
                 Main_OnCommand(next_item, 0)
-                item_two = GetSelectedMediaItem(0, 0)
+                item_two = get_selected_media_item_at(0)
             end
         end
         local item_one_muted = GetMediaItemInfo_Value(item_one, "B_MUTE")
@@ -309,6 +310,25 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
