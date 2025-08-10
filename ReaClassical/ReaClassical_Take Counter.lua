@@ -503,9 +503,8 @@ end
 ---------------------------------------------------------------------
 
 function seconds_to_hhmm(seconds)
-  local hours = math.floor(seconds / 3600) % 24
-  local minutes = math.floor((seconds % 3600) / 60)
-  return string.format("%02d:%02d", hours, minutes)
+   local t = os.date("*t", seconds)
+  return string.format("%02d:%02d", t.hour, t.min)
 end
 
 ---------------------------------------------------------------------
