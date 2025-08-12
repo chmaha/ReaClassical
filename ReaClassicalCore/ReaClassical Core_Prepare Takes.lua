@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, shift, item_group, prepare, empty_items_check
+local get_selected_media_item_at, count_selected_media_items
 
 ---------------------------------------------------------------------
 
@@ -110,16 +111,16 @@ function item_group(string, group)
         Main_OnCommand(select_children, 0) -- Select child tracks
     end
 
-    local selected = GetSelectedMediaItem(0, 0)
+    local selected = get_selected_media_item_at(0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
     SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
     local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
     Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
 
-    local num_selected_items = CountSelectedMediaItems(0)
+    local num_selected_items = count_selected_media_items()
     for i = 0, num_selected_items - 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         if item then
             SetMediaItemInfo_Value(item, "I_GROUPID", group)
         end
@@ -168,6 +169,41 @@ function empty_items_check(num_of_items)
         end
     end
     return count
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------

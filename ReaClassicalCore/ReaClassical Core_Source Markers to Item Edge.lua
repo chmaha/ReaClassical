@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number
+local get_selected_media_item_at, count_selected_media_items
 
 ---------------------------------------------------------------------
 
@@ -33,7 +34,7 @@ function main()
         left_pos = start_time
         right_pos = end_time
     else
-        local num = CountSelectedMediaItems(0)
+        local num = count_selected_media_items()
         if num == 0 then
             MB(
                 "Please select one or more consecutive media items on a parent track " ..
@@ -42,11 +43,11 @@ function main()
             return
         end
 
-        local first_item = GetSelectedMediaItem(0, 0)
+        local first_item = get_selected_media_item_at(0)
         left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
         local last_item
         if num > 1 then
-            last_item = GetSelectedMediaItem(0, num - 1)
+            last_item = get_selected_media_item_at(num - 1)
             local start = GetMediaItemInfo_Value(last_item, "D_POSITION")
             local length = GetMediaItemInfo_Value(last_item, "D_LENGTH")
             right_pos = start + length
@@ -101,6 +102,41 @@ function get_track_number()
         local folder = GetParentTrack(selected)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
