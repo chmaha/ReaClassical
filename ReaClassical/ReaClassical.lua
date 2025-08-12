@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.6
+@version 25.8.7
 @changelog
-  Take Counter: Use local time for calculating end time of scheduled recording
+  Various: Replace remaining GetSelected and CountSelected media items functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
