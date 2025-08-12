@@ -1,10 +1,8 @@
 @description ReaClassical Core
 @author chmaha
-@version 1.3
+@version 1.4
 @changelog
-  Prepare Takes: Set ripple-per-track
-  Ensure Prepare Takes is once at least once before an S-D edit
-  Simplify requirements to place destination markers at item edges
+  Replace CountSelectedMediaItems & GetSelectedMediaItem functions
 @metapackage
 @provides
   [main] ReaClassical Core_Add Destination IN marker.lua
