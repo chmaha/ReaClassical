@@ -116,7 +116,7 @@ end
 function clear_item_names_from_selected()
     local selected_item_count = count_selected_media_items()
     for i = 0, selected_item_count - 1 do
-        local item = get_selected_media_item_at(0)
+        local item = get_selected_media_item_at(i)
         if item then
             local take = GetActiveTake(item)
             if take then
