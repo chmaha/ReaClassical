@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.8
+@version 25.8.9
 @changelog
-  Add new all-items zoom toggle function
-  Change shortcuts for horizontal and vertical zoom functions
+  Add new function and changed shortcuts to documentation
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
