@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.7
+@version 25.8.8
 @changelog
-  Various: Replace remaining GetSelected and CountSelected media items functions
+  Add new all-items zoom toggle function
+  Change shortcuts for horizontal and vertical zoom functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -82,6 +83,7 @@
   [main] ReaClassical_Metadata Report.lua
   [main] ReaClassical_Convert REAPER project.lua
   [main] ReaClassical_Split Items at Markers.lua
+  [main] ReaClassical_Zoom to All Items Toggle.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
