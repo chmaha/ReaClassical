@@ -4,7 +4,7 @@ In addition to built-in REAPER functions, ReaClassical uses a series of shortcut
 
 ==== Whole Project
 
-Use kbd:[` ](backtick) to see the whole project horizontally and/or kbd:[Ctrl+`] to see everything vertically. I chose to separate these functions because one of the axes (often the vertical) is set exactly how you need for editing and it would be a pain to have the axis reset each time. You can also go to the start or end of the project by pressing the kbd:[Home] or kbd:[End] key respectively.
+Use kbd:[Ctrl+Alt+{cursorright}] to see the whole project horizontally and/or kbd:[Ctrl+Alt+{cursordown}] to see everything vertically. I chose to separate these functions because one of the axes (often the vertical) is set exactly how you need for editing and it would be a pain to have the axis reset each time. You can also go to the start or end of the project by pressing the kbd:[Home] or kbd:[End] key respectively.
 
 ==== Finding Takes
 

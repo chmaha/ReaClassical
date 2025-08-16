@@ -118,17 +118,23 @@ _Description:_ Mouse-driven auditioning of folders or individual tracks but with
 
 _Notes:_ Works in the same fashion as regular ReaClassical auditioning but you can set the custom playback rate via kbd:[F5]. Note that regular auditioning will automatically use the standard playback rate.
 
-*Whole Project View Horizontal* kbd:[` ]
+*Whole Project View Horizontal* kbd:[Ctrl+Alt+{cursorright}]
 
 _Description:_ Zoom to show the whole project horizontally.
 
 _Notes:_ Very useful for a birds-eye view of your project so you can navigate to another section. If there are multiple folders, the function collapses them. If fewer than two folders, the function respects the current folder view.
 
-*Whole Project View Vertical* kbd:[Ctrl+`]
+*Whole Project View Vertical* kbd:[Ctrl+Alt+{cursordown}]
 
 _Description:_ Zoom to show the whole project vertically.
 
 _Notes:_ Very useful for a birds-eye view of your project so you can see all vertical take folders. The function respects current child track visibility to allow for a typical editing situation of viewing all of the destination group but only the folder tracks of source groups.
+
+Zoom Out to All Items* kbd:[` ]
+
+_Description:_ Zoom out to show all items in the project.
+
+_Notes:_ Only zooms out enough to show all items and not lower empty groups and tracks. Run again to return to the previous zoom level.
 
 *ReaClassical Project Preferences* kbd:[F5]
 

@@ -6,9 +6,11 @@ kbd:[Home] Project Start
 
 kbd:[End] Project End
 
-kbd:[` ] Whole Project View (Horizontal)
+kbd:[Ctrl+Alt+{cursorright}] Whole Project View (Horizontal)
 
-kbd:[Ctrl+`] Whole Project View (Vertical)
+kbd:[Ctrl+Alt+{cursordown}] Whole Project View (Vertical)
+
+kbd:[` ] Zoom out to see all items in the project (toggle)
 
 kbd:[Enter] Find Take (based on number found at the end of a filename and optional session name)
 

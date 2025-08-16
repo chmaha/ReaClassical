@@ -515,7 +515,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2025 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2025-08-16 20:22:48 UTC</code></p>
+<p><code>Updated: 2025-08-16 20:47:58 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1044,7 +1044,7 @@ As you will discover, based on which workflow chosen, you can use <kbd>F7</kbd> 
 <div class="sect3">
 <h4 id="_whole_project">Whole Project</h4>
 <div class="paragraph">
-<p>Use <kbd>`</kbd>(backtick) to see the whole project horizontally and/or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>`</kbd></span> to see everything vertically. I chose to separate these functions because one of the axes (often the vertical) is set exactly how you need for editing and it would be a pain to have the axis reset each time. You can also go to the start or end of the project by pressing the <kbd>Home</kbd> or <kbd>End</kbd> key respectively.</p>
+<p>Use <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8594;</kbd></span> to see the whole project horizontally and/or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8595;</kbd></span> to see everything vertically. I chose to separate these functions because one of the axes (often the vertical) is set exactly how you need for editing and it would be a pain to have the axis reset each time. You can also go to the start or end of the project by pressing the <kbd>Home</kbd> or <kbd>End</kbd> key respectively.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1414,7 +1414,7 @@ If you are worried about accidentally moving markers and items during precise S-
 <div class="sect3">
 <h4 id="_other_editing_tips">Other Editing Tips</h4>
 <div class="paragraph">
-<p>In my key map, I include all sorts of useful shortcuts to use during editing. As mentioned above, in vertical editing workflows, the Audition function <kbd>A</kbd> is brilliant for listening to various takes before applying a razor or S/D edit. I can shuttle between items with <kbd>Q</kbd> and <kbd>W</kbd> (the same keys shuttle between crossfades in crossfade editor mode), shuttle between markers with <kbd>,</kbd> and <kbd>.</kbd> (the same keys with <kbd>&lt;</kbd> and <kbd>&gt;</kbd> on them on my UK keyboard), <kbd>S</kbd> for splitting a long recorded session into takes, <kbd>`</kbd>(backtick) and <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>`</kbd></span> for zooming out to the whole project both horizontally and vertically etc. There are plenty more for the mastering end of things so I encourage you to explore.</p>
+<p>In my key map, I include all sorts of useful shortcuts to use during editing. As mentioned above, in vertical editing workflows, the Audition function <kbd>A</kbd> is brilliant for listening to various takes before applying a razor or S/D edit. I can shuttle between items with <kbd>Q</kbd> and <kbd>W</kbd> (the same keys shuttle between crossfades in crossfade editor mode), shuttle between markers with <kbd>,</kbd> and <kbd>.</kbd> (the same keys with <kbd>&lt;</kbd> and <kbd>&gt;</kbd> on them on my UK keyboard), <kbd>S</kbd> for splitting a long recorded session into takes, <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8594;</kbd></span> and <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8595;</kbd></span> for zooming out to the whole project both horizontally and vertically etc. There are plenty more for the mastering end of things so I encourage you to explore.</p>
 </div>
 <div class="paragraph">
 <p>It is worth noting that all regular markers and regions are ripple edited appropriately when using my source-destination editing functions and crossfade editor. I also introduced the ReaClassical_Lock Toggle function which temporarily locks all source groups and engages ripple-all-tracks mode to enable you to drag destination items and simultaneously ripple markers and regions in the regular arrange view. This allows vertical source groups to retain their independence yet still give ripple-all-tracks behavior which is useful for destination album track spacing etc. However, I consider this function deprecated given I strongly feel that the Create CD Markers function is now the ultimate way to deal with CD tracks/markers.</p>
@@ -1975,7 +1975,7 @@ If your final item on the first track is also the final CD track start, just fin
 <p><em>Notes:</em> Works in the same fashion as regular ReaClassical auditioning but you can set the custom playback rate via <kbd>F5</kbd>. Note that regular auditioning will automatically use the standard playback rate.</p>
 </div>
 <div class="paragraph">
-<p><strong>Whole Project View Horizontal</strong> <kbd>`</kbd></p>
+<p><strong>Whole Project View Horizontal</strong> <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8594;</kbd></span></p>
 </div>
 <div class="paragraph">
 <p><em>Description:</em> Zoom to show the whole project horizontally.</p>
@@ -1984,13 +1984,22 @@ If your final item on the first track is also the final CD track start, just fin
 <p><em>Notes:</em> Very useful for a birds-eye view of your project so you can navigate to another section. If there are multiple folders, the function collapses them. If fewer than two folders, the function respects the current folder view.</p>
 </div>
 <div class="paragraph">
-<p><strong>Whole Project View Vertical</strong> <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>`</kbd></span></p>
+<p><strong>Whole Project View Vertical</strong> <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8595;</kbd></span></p>
 </div>
 <div class="paragraph">
 <p><em>Description:</em> Zoom to show the whole project vertically.</p>
 </div>
 <div class="paragraph">
 <p><em>Notes:</em> Very useful for a birds-eye view of your project so you can see all vertical take folders. The function respects current child track visibility to allow for a typical editing situation of viewing all of the destination group but only the folder tracks of source groups.</p>
+</div>
+<div class="paragraph">
+<p>Zoom Out to All Items* <kbd>`</kbd></p>
+</div>
+<div class="paragraph">
+<p><em>Description:</em> Zoom out to show all items in the project.</p>
+</div>
+<div class="paragraph">
+<p><em>Notes:</em> Only zooms out enough to show all items and not lower empty groups and tracks. Run again to return to the previous zoom level.</p>
 </div>
 <div class="paragraph">
 <p><strong>ReaClassical Project Preferences</strong> <kbd>F5</kbd></p>
@@ -2300,10 +2309,13 @@ If your final item on the first track is also the final CD track start, just fin
 <p><kbd>End</kbd> Project End</p>
 </div>
 <div class="paragraph">
-<p><kbd>`</kbd> Whole Project View (Horizontal)</p>
+<p><span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8594;</kbd></span> Whole Project View (Horizontal)</p>
 </div>
 <div class="paragraph">
-<p><span class="keyseq"><kbd>Ctrl</kbd>+<kbd>`</kbd></span> Whole Project View (Vertical)</p>
+<p><span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8595;</kbd></span> Whole Project View (Vertical)</p>
+</div>
+<div class="paragraph">
+<p><kbd>`</kbd> Zoom out to see all items in the project (toggle)</p>
 </div>
 <div class="paragraph">
 <p><kbd>Enter</kbd> Find Take (based on number found at the end of a filename and optional session name)</p>
