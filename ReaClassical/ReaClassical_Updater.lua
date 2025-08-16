@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, copy_file, get_path, update_reaper_ini, update_keyb_ini
+local main, copy_file, get_path, update_reaper_ini
 local ExecUpdate
 
 ---------------------------------------------------------------------
@@ -36,9 +36,6 @@ function main()
     local source_file_path = resource_path .. menu_relative_path
     local source_renderpresets_path = resource_path .. renderpresets_relative_path
     local destination_file_path = resource_path .. separator .. "reaper-menu.ini"
-    local kb_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-kb.ini")
-    local source_shortcuts_path = resource_path .. kb_relative_path
-    local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
     local dest_renderpresets_path = resource_path .. separator .. "reaper-render.ini"
     local splash_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
     local splash_abs_path = resource_path .. splash_relative_path
@@ -69,20 +66,6 @@ function main()
         "ReaClassical Updater",
         4
     )
-    if response2 == 6 then
-        copy_file(source_shortcuts_path, dest_shortcuts_path)
-        if string.find(system, "^Win") then
-            update_keyb_ini(dest_shortcuts_path,
-                "KEY 8 96 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0",
-                "KEY 9 223 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0"
-            )
-        else
-            update_keyb_ini(dest_shortcuts_path,
-                "KEY 9 223 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0",
-                "KEY 8 96 _RS444f747139500db030a1c4e03b8a0805ac502dfe 0"
-            )
-        end
-    end
 
     if response1 == 6 or response2 == 6 then
         ExecUpdate()
@@ -175,35 +158,6 @@ function update_reaper_ini(ini_file, key, value)
     file:close()
 
     return true
-end
-
----------------------------------------------------------------------
-
-function update_keyb_ini(file_path, old_text, new_text)
-    local file = io.open(file_path, "r")
-    if not file then return false end
-
-    local lines = {}
-    local updated = false
-
-    for line in file:lines() do
-        local new_line = line:gsub(old_text, new_text)
-        if new_line ~= line then
-            updated = true
-        end
-        table.insert(lines, new_line)
-    end
-    file:close()
-
-    file = io.open(file_path, "w")
-    if not file then return false end
-
-    for _, line in ipairs(lines) do
-        file:write(line .. "\n")
-    end
-    file:close()
-
-    return updated
 end
 
 ---------------------------------------------------------------------
