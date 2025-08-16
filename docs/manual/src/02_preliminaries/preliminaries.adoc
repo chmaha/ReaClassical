@@ -28,7 +28,7 @@ Relatively new is the https://discord.gg/Gu2m9ccHGS[ReaClassical Discord server]
 
 === Ways to Contribute
 
-The most important way users can contribute to the development of ReaClassical is to actually use the tools! It makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical. Another is to suggest features or let me know about bugs. You can either do this on the https://forum.cockos.com/showthread.php?t=265145[thread] or via the https://github.com/chmaha/ReaClassical/issues[Issues] page on the ReaClassical GitHub. Finally, I'd be glad of any monetary donations. You can use https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C[PayPal], https://liberapay.com/reaclassical/[Liberapay] or https://donate.stripe.com/00g5mydzCftQdpeaEE[Stripe] to do so. 
+The most important way users can contribute to the development of ReaClassical is to actually use the tools! It makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical. Another is to suggest features or let me know about bugs. You can either do this on the https://forum.cockos.com/showthread.php?t=265145[thread] or via the https://github.com/chmaha/ReaClassical/issues[Issues] page on the ReaClassical GitHub. Finally, I'd be glad of any monetary donations. You can use https://www.paypal.com/donate/?hosted_button_id=DHA5C96L6W8VN[PayPal] to do so. 
 
 === Spread the Word!
 
