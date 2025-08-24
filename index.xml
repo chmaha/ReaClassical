@@ -1,44 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="5b584c09c6c897101b3aacffeb6260c45ced0700">
+<index version="1" name="chmaha Scripts" commit="1b55053e762255bbd7abdbc9569088dff3e75f65">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
-      <version name="1.13" author="chmaha" time="2024-10-15T18:47:56Z">
-        <changelog><![CDATA[RCInflator: Correct typo in name]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCDeEss_Advanced.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCDither.jsfx</source>
-        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCChannelEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCParallelK.jsfx</source>
-        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCMasteringEQ.jsfx</source>
-        <source file="RCInflator.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCInflator.jsfx</source>
-        <source file="RCTimePhase.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCTimePhase.jsfx</source>
-        <source file="RCConsoleBus.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCConsoleBus.jsfx</source>
-        <source file="RCConsoleChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCConsoleChannel.jsfx</source>
-        <source file="RCConsoleFinalizer.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCConsoleFinalizer.jsfx</source>
-        <source file="RCMidSide.jsfx">https://github.com/chmaha/ReaClassical/raw/05b989ef6678cd758ab8723d30d0efd982c6e22a/RCPlugs/RCMidSide.jsfx</source>
+      <version name="1.15" author="chmaha" time="2025-08-24T15:52:08Z">
+        <changelog><![CDATA[Reverb: Add various improvements]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCDeEss_Advanced.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCDither.jsfx</source>
+        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCChannelEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCMasteringEQ.jsfx</source>
+        <source file="RCInflator.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCInflator.jsfx</source>
+        <source file="RCTimePhase.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCTimePhase.jsfx</source>
+        <source file="RCConsoleBus.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCConsoleBus.jsfx</source>
+        <source file="RCConsoleChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCConsoleChannel.jsfx</source>
+        <source file="RCConsoleFinalizer.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCConsoleFinalizer.jsfx</source>
+        <source file="RCMidSide.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCMidSide.jsfx</source>
+        <source file="RCReverb_Insert.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCReverb_Insert.jsfx</source>
+        <source file="RCReverb_Send.jsfx">https://github.com/chmaha/ReaClassical/raw/7ccb531b62e005368bc9b927f68d23ae3c82565c/RCPlugs/RCReverb_Send.jsfx</source>
       </version>
-      <version name="1.14" author="chmaha" time="2025-07-12T15:07:38Z">
-        <changelog><![CDATA[Add recital hall reverb (send and insert versions)]]></changelog>
-        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCComp.jsfx</source>
-        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCDeEss.jsfx</source>
-        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCDeEss_Advanced.jsfx</source>
-        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCDither.jsfx</source>
-        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCChannelEQ.jsfx</source>
-        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCGain.jsfx</source>
-        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCLimiter.jsfx</source>
-        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCParallelK.jsfx</source>
-        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCMasteringEQ.jsfx</source>
-        <source file="RCInflator.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCInflator.jsfx</source>
-        <source file="RCTimePhase.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCTimePhase.jsfx</source>
-        <source file="RCConsoleBus.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCConsoleBus.jsfx</source>
-        <source file="RCConsoleChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCConsoleChannel.jsfx</source>
-        <source file="RCConsoleFinalizer.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCConsoleFinalizer.jsfx</source>
-        <source file="RCMidSide.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCMidSide.jsfx</source>
-        <source file="RCReverb_Insert.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCReverb_Insert.jsfx</source>
-        <source file="RCReverb_Send.jsfx">https://github.com/chmaha/ReaClassical/raw/ee1224bab941100234421c98914e40eb6578dc66/RCPlugs/RCReverb_Send.jsfx</source>
+      <version name="1.16" author="chmaha" time="2025-08-24T16:35:28Z">
+        <changelog><![CDATA[Reverb: Various NO-OP adjustments to files]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCDeEss_Advanced.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCDither.jsfx</source>
+        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCChannelEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCMasteringEQ.jsfx</source>
+        <source file="RCInflator.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCInflator.jsfx</source>
+        <source file="RCTimePhase.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCTimePhase.jsfx</source>
+        <source file="RCConsoleBus.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCConsoleBus.jsfx</source>
+        <source file="RCConsoleChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCConsoleChannel.jsfx</source>
+        <source file="RCConsoleFinalizer.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCConsoleFinalizer.jsfx</source>
+        <source file="RCMidSide.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCMidSide.jsfx</source>
+        <source file="RCReverb_Insert.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCReverb_Insert.jsfx</source>
+        <source file="RCReverb_Send.jsfx">https://github.com/chmaha/ReaClassical/raw/1b55053e762255bbd7abdbc9569088dff3e75f65/RCPlugs/RCReverb_Send.jsfx</source>
       </version>
     </reapack>
   </category>

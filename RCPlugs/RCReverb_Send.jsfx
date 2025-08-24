@@ -2,9 +2,9 @@ NoIndex: true
 desc: RCReverb Send (chmaha)
 author: chmaha
 about:
-Uses DSP from airwindows "kBeyond" by Chris Johnson
-https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kBeyond (MIT License)
-JSFX version released under GPLv3 license
+  Uses DSP from airwindows "kBeyond" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kBeyond (MIT License)
+  JSFX version released under GPLv3 license
 
 slider1:50<0,100,1>Size
 slider2:50<0,100,1>Early Reflections
@@ -152,42 +152,36 @@ bez[bez_cycle] = 1.0;
 
 fir = freemem; freemem += 50;
 
-// High-pass (200 Hz) and low-pass (2000 Hz) states
+// EQ and LFO
 hp_a0 = 0; hp_b1 = 0; hp_z1L = 0; hp_z1R = 0;
 lp_a0 = 0; lp_b1 = 0; lp_z1L = 0; lp_z1R = 0;
 
-// Calculate coefficients once
 twoPi = 2*$pi;
 
-// base frequencies
 freq1_base = 0.12;
 freq2_base = 0.31;
 
-// start with base freqs
 freq1 = freq1_base;
 freq2 = freq2_base;
 
-// drift ranges (± % of base frequency)
 drift_amt1 = 0.01;  // 1% drift
 drift_amt2 = 0.02;  // 2% drift
 
-// how often to refresh drift (in samples)
 drift_interval = srate * 0.5; // every 0.5s
 drift_counter = 0;
 
-// phase accumulators
 ph1 = 0;
 ph2 = 0;
 
 depth = 0.5;
 
-// High-pass (200 Hz)
+// High-pass
 hp_cut = 200 / srate;
 hp_x = exp(-twoPi*hp_cut);
 hp_a0 = (1+hp_x)/2;
 hp_b1 = hp_x;
 
-// Low-pass (2000 Hz)
+// Low-pass
 lp_cut = 2000 / srate;
 lp_x = exp(-twoPi*lp_cut);
 lp_a0 = 1 - lp_x;
@@ -228,16 +222,13 @@ fip = 25; while (fip < 48)  (
     fip += 1;
 );
 
-// update increments per sample
 incr1 = twoPi*freq1/srate; 
 incr2 = twoPi*freq2/srate;
 
-// drift update counter
 drift_counter += samplesblock;
 drift_counter >= drift_interval ? (
     drift_counter = 0;
     
-    // pick new freqs within drift range
     freq1 = freq1_base * (1 + (rand(2)-1) * drift_amt1);
     freq2 = freq2_base * (1 + (rand(2)-1) * drift_amt2);
 );
@@ -664,27 +655,22 @@ lp_z1L = inputSampleL;
 inputSampleR = lp_a0*inputSampleR + lp_b1*lp_z1R;
 lp_z1R = inputSampleR;
 
-// advance phases
+// LFO
 ph1 += incr1;
 ph2 += incr2;
 
-// wrap to 0..2pi
 ph1 >= twoPi ? ph1 -= twoPi;
 ph2 >= twoPi ? ph2 -= twoPi;
 
-// calculate LFOs (sine waves)
 lfo1 = sin(ph1);
 lfo2 = sin(ph2);
 
-// mix equally
 lfo_left  = (lfo1 + lfo2) * 0.5;
 lfo_right = (lfo1 + sin(ph2 + $pi/2)) * 0.5; // 90° phase offset for right channel
 
-// map to gain: unity with ±0.5*depth swing
 gain_left  = 1 + lfo_left  * depth * 0.5;
 gain_right = 1 + lfo_right * depth * 0.5;
 
-// apply to audio
 inputSampleL *= gain_left;
 inputSampleR *= gain_right;
 

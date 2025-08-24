@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.14
+@version 1.16
 @changelog
-  Add recital hall reverb (send and insert versions)
+  Reverb: Various NO-OP adjustments to files
 @metapackage
 @provides
   RCComp.jsfx
