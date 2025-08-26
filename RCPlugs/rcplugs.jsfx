@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.16
+@version 1.17
 @changelog
-  Reverb: Various NO-OP adjustments to files
+  Add RCModulator plugin
 @metapackage
 @provides
   RCComp.jsfx
@@ -22,6 +22,7 @@
   RCMidSide.jsfx
   RCReverb_Insert.jsfx
   RCReverb_Send.jsfx
+  RCModulator.jsfx
 
 @about
   These plugins are suitable for classical music mixing and mastering.
