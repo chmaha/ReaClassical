@@ -1,6 +1,13 @@
 # Instructions for installing ReaClassical
 
-For the complete and recommended experience on Linux, MacOS and Windows you can run a single install script that does everything for you...
+For the complete and recommended experience on Linux, macOS, and Windows, simply run the single install script provided. You do not need to download or install REAPER separately — ReaClassical comes bundled with its own fully configured REAPER environment.
+
+This means:
+- One-step install — everything is set up automatically.
+- Self-contained environment — ReaClassical comes with its own REAPER.
+- Ready to use immediately — launch and start working right away.
+
+⚠️ Important: Don’t install ReaClassical inside an existing REAPER setup. Let the installer create its own separate ReaClassical folder.
 
 ## Quick Full Portable Install on Linux, MacOS & Windows (for all nine architectures supported by REAPER)
 
