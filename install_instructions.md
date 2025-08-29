@@ -32,11 +32,11 @@ The executable or script will pull the REAPER binary archive, resource folder ba
 1. Run the ReaClassical_Updater function (Shift+U). This will sync ReaPack to get the latest ReaClassical functions then offer to overwrite your toolbars and keymaps with the latest ReaClassical portable install defaults. **DON'T answer yes to either of these questions if you have your own custom toolbars or keyboard shortcuts as they will be overwritten!**
 2. Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version of REAPER noted [here](https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt).
 
-For those who only want access to the scripts and jsfx plugins:
+For those who only want access to the scripts and jsfx plugins you can install ReaClassical "Core":
 
 ## Basic manual install of just the S-D editing tools inside Your existing REAPER Install
 
-To just use the scripts and jsfx plugins without any customization of keymaps, toolbar etc:
+To just use the S-D editing scripts and my jsfx plugins without any customization of keymaps, toolbar etc:
 1. Install both ReaPack (https://reapack.com/) and latest bleeding edge SWS Extensions (https://www.sws-extension.org/download/pre-release/) if you haven't already
 2. Import my repository into ReaPack by copying and pasting [this link](https://github.com/chmaha/ReaClassical/raw/main/index.xml). If you need help with importing see https://reapack.com/user-guide#import-repositories.
 3. Search for "ReaClassical Core" and install the main ReaClassical package and any jsfx plugins (my "RCPlugs" are highly recommended for classical work). 
