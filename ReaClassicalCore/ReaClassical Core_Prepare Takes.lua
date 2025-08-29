@@ -79,8 +79,8 @@ function main()
 
     SetProjExtState(0, "ReaClassical Core", "RCCoreProject", "y")
     SetProjExtState(0, "ReaClassical Core", "PreparedTakes", "y")
-    
-    reaper.Main_OnCommand(40310,0) -- set ripple-per-track
+
+    reaper.Main_OnCommand(40310, 0) -- set ripple-per-track
 
     MB("Project takes have been prepared! " ..
         "You can run again if you import or record more material..."

@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, select_matching_folder
+local main, source_markers
 local ripple_lock_mode, return_xfade_length, xfade
 
 ---------------------------------------------------------------------
@@ -34,7 +34,8 @@ end
 
 local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
 if prepared == "" then
-    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.", "ReaClassical Core Error", 0)
+    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
+        "ReaClassical Core Error", 0)
     return
 end
 
@@ -42,7 +43,7 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
-    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
+    Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
@@ -102,22 +103,6 @@ function source_markers()
         end
     end
     return exists
-end
-
----------------------------------------------------------------------
-
-function select_matching_folder()
-    local cursor = GetCursorPosition()
-    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
-    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
-    local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
-    for i = 0, CountTracks(0) - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
-            SetOnlyTrackSelected(track)
-            break
-        end
-    end
 end
 
 ---------------------------------------------------------------------

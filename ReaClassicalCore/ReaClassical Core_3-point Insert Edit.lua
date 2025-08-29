@@ -36,7 +36,8 @@ end
 
 local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
 if prepared == "" then
-    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.", "ReaClassical Core Error", 0)
+    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
+        "ReaClassical Core Error", 0)
     return
 end
 
@@ -96,7 +97,7 @@ function main()
                         i = i + 1
                     end
                     AddProjectMarker2(0, false, item_right_edge, 0, "DEST-IN", 996, ColorToNative(23, 203, 223) |
-                    0x1000000)
+                        0x1000000)
                 end
             end
         end

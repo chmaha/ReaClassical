@@ -54,7 +54,8 @@ function main()
         end
 
         local track_number = math.floor(get_track_number(track))
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, ColorToNative(23, 223, 143) | 0x1000000)
+        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998,
+        ColorToNative(23, 223, 143) | 0x1000000)
     end
 end
 

@@ -27,7 +27,8 @@ local main, source_markers, select_matching_folder
 
 local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
 if prepared == "" then
-    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.", "ReaClassical Core Error", 0)
+    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
+    "ReaClassical Core Error", 0)
     return
 end
 

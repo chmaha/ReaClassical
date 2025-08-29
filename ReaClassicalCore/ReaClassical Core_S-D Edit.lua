@@ -39,14 +39,15 @@ end
 
 local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
 if prepared == "" then
-    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.", "ReaClassical Core Error", 0)
+    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
+        "ReaClassical Core Error", 0)
     return
 end
 
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    Main_OnCommand(41121,0) -- Options: Disable trim content behind media items when editing
+    Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
@@ -77,12 +78,12 @@ function main()
             pos = pos_table[2]
             distance = pos_table[4] - pos_table[3]
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, pos - distance, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
+            AddProjectMarker2(0, false, pos - distance, 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
         elseif dest_out == 0 then
             pos = pos_table[1]
             distance = pos_table[4] - pos_table[3]
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, pos + distance, 0, "DEST-OUT", 997, ColorToNative(23,203,223) | 0x1000000)
+            AddProjectMarker2(0, false, pos + distance, 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
         elseif source_in == 0 then
             pos = pos_table[4]
             distance = pos_table[1] - pos_table[2]
@@ -107,12 +108,12 @@ function main()
             add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
             local dest_end = GetProjectLength(0)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, ColorToNative(23,203,223) | 0x1000000)
+            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
         elseif dest_out == 1 and source_out == 1 then
             move_to_project_tab(source_proj)
             add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
+            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
         elseif source_in == 1 and dest_out == 1 then
             move_to_project_tab(dest_proj)
             local source_end
@@ -124,17 +125,17 @@ function main()
             move_to_project_tab(source_proj)
             add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
+            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
         elseif source_out == 1 and dest_in == 1 then
             move_to_project_tab(source_proj)
             add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
             local dest_end = GetProjectLength(0)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, ColorToNative(23,203,223) | 0x1000000)
+            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
         end
     elseif source_count == 2 and dest_count == 0 and pos_table ~= nil and proj_marker_count == 0 then
-        AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
-        AddProjectMarker2(0, false, pos_table[4], 0, "DEST-OUT", 997, ColorToNative(23,203,223) | 0x1000000)
+        AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
+        AddProjectMarker2(0, false, pos_table[4], 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
     end
 
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _ = markers()
@@ -152,10 +153,10 @@ function main()
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
         Main_OnCommand(40289, 0)
-        Main_OnCommand(40626, 0)  -- Time Selection: Set end point
-        Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
-        Main_OnCommand(40630, 0)  -- Go to start of time selection
+        Main_OnCommand(40626, 0) -- Time Selection: Set end point
+        Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+        Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
+        Main_OnCommand(40630, 0) -- Go to start of time selection
 
         if workflow == "Horizontal" then
             Main_OnCommand(40311, 0) -- Set ripple-all-tracks
@@ -282,7 +283,8 @@ end
 
 function add_source_marker(pos, distance, track_number, label, num)
     DeleteProjectMarker(NULL, num, false)
-    AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, ColorToNative(23, 223, 143) | 0x1000000)
+    AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num,
+        ColorToNative(23, 223, 143) | 0x1000000)
 end
 
 ---------------------------------------------------------------------

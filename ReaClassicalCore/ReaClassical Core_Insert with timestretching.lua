@@ -37,7 +37,8 @@ end
 
 local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
 if prepared == "" then
-    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.", "ReaClassical Core Error", 0)
+    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
+        "ReaClassical Core Error", 0)
     return
 end
 
@@ -101,12 +102,12 @@ function main()
         if parent_selected > 1 then
             MoveEditCursor(-xfade_len * 15, false) -- move cursor back xfade length
         end
-        Main_OnCommand(42398, 0) -- Item: Paste items/tracks
+        Main_OnCommand(42398, 0)                   -- Item: Paste items/tracks
         GoToMarker(0, 996, false)
         if parent_selected > 1 then
             MoveEditCursor(-xfade_len * 15, false) -- move cursor back xfade length
         end
-        Main_OnCommand(40625, 0) -- Time Selection: Set start point
+        Main_OnCommand(40625, 0)                   -- Time Selection: Set start point
 
         for i = 0, total_selected - 1, 1 do
             selected_items[i] = get_selected_media_item_at(i)
