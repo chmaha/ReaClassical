@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.9
+@version 25.8.10
 @changelog
-  Add new function and changed shortcuts to documentation
+  Satisfy luacheck for length of lines
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
