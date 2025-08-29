@@ -32,7 +32,8 @@ function main()
     local separator = package.config:sub(1, 1)
     local resource_path = GetResourcePath()
     local menu_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-menu.ini")
-    local renderpresets_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-render.ini")
+    local renderpresets_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical",
+    "ReaClassical-render.ini")
     local source_file_path = resource_path .. menu_relative_path
     local source_renderpresets_path = resource_path .. renderpresets_relative_path
     local destination_file_path = resource_path .. separator .. "reaper-menu.ini"

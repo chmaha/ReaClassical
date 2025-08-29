@@ -98,7 +98,8 @@ function main()
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
             local success = show_track_name_dialog(mixer_table)
             if success then
-                local response1 = MB("Would you like to automatically assign panning and recording inputs based on track naming?",
+                local response1 = MB(
+                "Would you like to automatically assign panning and recording inputs based on track naming?",
                     "Horizontal Workflow", 4)
                 if response1 == 6 then
                     local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")

@@ -48,17 +48,19 @@ function main()
     SetProjExtState(0, "ReaClassical", "Converted", "")
     Main_SaveProject(0, false)
     MB("Your project has been converted.\n\n"
-    .. "Any folders have been flattened, empty tracks removed, and a single folder created for horizontal workflow.\n"
-    .. "Any regular track FX from your original project have been placed onto the ReaClassical mixer tracks.\n"
-    .. "Recreate any custom routing and bus FX using ReaClassical special tracks via # shortcut."
-    , "ReaClassical Conversion", 0)
+        .. "Any folders have been flattened, empty tracks removed"
+        .. "and a single folder created for horizontal workflow.\n"
+        .. "Any regular track FX from your original project have been"
+        .. "placed onto the ReaClassical mixer tracks.\n"
+        .. "Recreate any custom routing and bus FX using ReaClassical special tracks via # shortcut."
+        , "ReaClassical Conversion", 0)
 end
 
 ---------------------------------------------------------------------
 
 function duplicate_project_in_new_tab()
     -- Get current project path
-    local retval, proj_path = EnumProjects(-1, "")
+    local _, proj_path = EnumProjects(-1, "")
     local isdirty = IsProjectDirty(0)
     if not proj_path or proj_path == "" or not proj_path:lower():match("%.rpp$") or isdirty == 1 then
         MB("Please save the project before duplicating.", "Project Not Saved", 0)

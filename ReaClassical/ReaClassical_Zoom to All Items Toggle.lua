@@ -52,7 +52,7 @@ function zoom_out_to_all_items()
 
     Main_OnCommand(40182, 0) -- Select all items in project
     Main_OnCommand(41622, 0) -- View: Zoom out project
-    
+
     -- Restore original selection
     Main_OnCommand(40289, 0) -- Unselect all
     for _, item in ipairs(sel_items) do
@@ -65,4 +65,3 @@ end
 ---------------------------------------------------------------------
 
 main()
-
