@@ -34,18 +34,11 @@ version of REAPER as noted
 https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt[here].
 
 [discrete]
-==== Basic Manual Install Inside Your Existing REAPER Install:
+==== ReaClassical Core: Basic manual install of just the S-D editing tools inside your existing REAPER Install
 
-. Install both ReaPack (https://reapack.com/) and latest bleeding edge
-SWS Extensions (https://www.sws-extension.org/download/pre-release/) if
-you haven't already.
-. Import my repository into ReaPack by copying and pasting
-https://github.com/chmaha/ReaClassical/raw/main/index.xml[this link]. If
-you need help with importing see
-https://reapack.com/user-guide#import-repositories.
-. Search for ReaClassical and install the main ReaClassical package and
-any jsfx plugins (my RCPlugs are highly recommended for classical work).
-. Use the ReaClassical project template for relevant projects (you can
-set this as default in the REAPER preferences) and change to the
-ReaClassical theme (Options > Themes).
+To just use the S-D editing functions and my jsfx plugins without any customization of keymaps, toolbar etc:
+
+. Install both ReaPack (https://reapack.com/) and latest SWS Extensions (https://www.sws-extension.org/download/pre-release/) if you haven't already
+. Import my repository into ReaPack by copying and pasting https://github.com/chmaha/ReaClassical/raw/main/index.xml[this link]. If you need help with importing see https://reapack.com/user-guide#import-repositories.
+. Search for "ReaClassical Core" and install the metapackage and any jsfx plugins (my "RCPlugs" are highly recommended for classical work). 
 . Set up keyboard shortcuts in the actions list (? shortcut) as desired.
