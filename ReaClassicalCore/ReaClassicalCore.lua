@@ -1,8 +1,8 @@
 @description ReaClassical Core
 @author chmaha
-@version 1.4
+@version 1.5
 @changelog
-  Replace CountSelectedMediaItems & GetSelectedMediaItem functions
+  Satisfy luacheck in terms of line length
 @metapackage
 @provides
   [main] ReaClassical Core_Add Destination IN marker.lua
