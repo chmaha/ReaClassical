@@ -8,4 +8,4 @@ For a full ReaClassical experience read the [Installation guide](https://github.
 
 To just use the functions, jsfx plugins, theme, and default template but without keymaps, toolbar etc, follow the [basic install](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md#basic-manual-install-inside-your-existing-reaper-install) instructions.
 
-If you find these tools useful, please consider donating via [PayPal](https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C), [Liberapay](https://liberapay.com/reaclassical/) or [Stripe](https://donate.stripe.com/00g5mydzCftQdpeaEE).
+If you find these tools useful, please consider donating via [PayPal](https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C).
