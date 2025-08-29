@@ -34,7 +34,7 @@ The executable or script will pull the REAPER binary archive, resource folder ba
 
 For those who only want access to the scripts and jsfx plugins you can install ReaClassical "Core":
 
-## Basic manual install of just the S-D editing tools inside Your existing REAPER Install
+## Basic manual install of just the S-D editing tools inside your existing REAPER Install
 
 To just use the S-D editing scripts and my jsfx plugins without any customization of keymaps, toolbar etc:
 1. Install both ReaPack (https://reapack.com/) and latest bleeding edge SWS Extensions (https://www.sws-extension.org/download/pre-release/) if you haven't already
