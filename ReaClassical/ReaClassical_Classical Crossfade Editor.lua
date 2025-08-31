@@ -76,6 +76,8 @@ function main()
                     MB("Please select the right item of a crossfaded pair", "Crossfade Editor", 0)
                 end
             end
+        local lock_fade = GetToggleCommandStateEx(32065, 43592)
+        if lock_fade == 0 then CrossfadeEditor_OnCommand(43592) end -- set fade lock
         elseif reaper_xfade_toggle == 1 then
             Main_OnCommand(41827, 0)
         end
