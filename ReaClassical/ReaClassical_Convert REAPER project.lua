@@ -73,12 +73,16 @@ function duplicate_project_in_new_tab()
     -- Now open the saved project in the new tab (which is currently active)
     Main_openProject(proj_path)
 
-    -- Extract filename and directory
-    local current_filename = proj_path:match("([^\\/]-)%.RPP$") or "Untitled"
-    local dir = proj_path:match("^(.*)[\\/][^\\/]-%.RPP$") or GetProjectPath("")
+    -- Extract filename and extension
+    local current_filename, ext = proj_path:match("([^\\/]-)%.([Rr][Pp][Pp])$")
+    current_filename = current_filename or "Untitled"
+    ext = ext or "RPP"
 
-    -- Build new filename
-    local new_filename = current_filename .. "_converted.RPP"
+    -- Extract directory path
+    local dir = proj_path:match("^(.*)[\\/][^\\/]-%.([Rr][Pp][Pp])$") or GetProjectPath("")
+
+    -- Build new filename keeping original extension case
+    local new_filename = current_filename .. "_converted." .. ext
     local new_filepath = dir .. "/" .. new_filename
 
     -- Save current project as the new file
