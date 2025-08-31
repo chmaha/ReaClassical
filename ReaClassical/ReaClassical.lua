@@ -2,7 +2,8 @@
 @author chmaha
 @version 25.8.11
 @changelog
-  Add new xfade editor actions for auditioning left or right item
+  Convert REAPER Project: Fix when project only contains a single track with items
+  Convert REAPER Project: Follow existing extension case creating converted filename
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -83,9 +84,6 @@
   [main] ReaClassical_Convert REAPER project.lua
   [main] ReaClassical_Split Items at Markers.lua
   [main] ReaClassical_Zoom to All Items Toggle.lua
-  [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
-  [main=crossfade_editor] ReaClassical_Play Left Crossfade Item.lua
-  [main=crossfade_editor] ReaClassical_Play Right Crossfade Item.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
