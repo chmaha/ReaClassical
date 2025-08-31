@@ -134,6 +134,13 @@ function delete_empty_tracks()
             DeleteTrack(track)
         end
     end
+
+    -- After deleting, check how many tracks are left
+    local remaining_tracks = CountTracks(0)
+    if remaining_tracks == 1 then
+        -- Add a second empty track
+        InsertTrackAtIndex(1, true)
+    end
 end
 
 ---------------------------------------------------------------------
