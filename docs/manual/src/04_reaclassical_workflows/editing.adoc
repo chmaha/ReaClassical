@@ -133,10 +133,11 @@ In reality, this process can be just a few seconds to achieve the perfect edit. 
 .Locking start of left item
 image::xfade_left_lock.png[]
 
-To audition material:
+To audition material, hover the mouse inside the crossfade window and:
 
-. Hover to the left of the crossfade and press kbd:[A] to audition the crossfade from mouse cursor to mirrored position on the other side of the crossfade
-. Optionally check the mute left/right item boxes to only hear one side of the crossfade or check _Solo crossfaded items_ to only hear the visible items.
+. press kbd:[A] to audition the crossfade with mirrored pre/post roll based on mouse cursor location
+. press kbd:[S] to audition just the left item based on mouse cursor location or its mirrored position
+. press kbd:[D] to audition just the right item based on mouse cursor location or its mirrored position
 
 You can shuttle between crossfades using the kbd:[Q] and kbd:[W] shortcuts. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.
 

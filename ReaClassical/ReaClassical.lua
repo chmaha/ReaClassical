@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.10
+@version 25.8.11
 @changelog
-  Satisfy luacheck for length of lines
+  Add new xfade editor actions for auditioning left or right item
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -83,6 +83,9 @@
   [main] ReaClassical_Convert REAPER project.lua
   [main] ReaClassical_Split Items at Markers.lua
   [main] ReaClassical_Zoom to All Items Toggle.lua
+  [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
+  [main=crossfade_editor] ReaClassical_Play Left Crossfade Item.lua
+  [main=crossfade_editor] ReaClassical_Play Right Crossfade Item.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
