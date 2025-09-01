@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.12
+@version 25.9
 @changelog
-  ReaClassical Updater: Start updating keyboard ini again
+  ReaClassical Updater: Delete just the logic to stop switching out backtick combo
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
