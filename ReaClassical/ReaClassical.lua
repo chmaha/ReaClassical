@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.8.11
+@version 25.8.12
 @changelog
-  Convert REAPER Project: Fix when project only contains a single track with items
-  Convert REAPER Project: Follow existing extension case creating converted filename
+  ReaClassical Updater: Start updating keyboard ini again
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
