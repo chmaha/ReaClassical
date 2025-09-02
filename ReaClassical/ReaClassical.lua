@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.9
+@version 26.0
 @changelog
-  ReaClassical Updater: Delete just the logic to stop switching out backtick combo
+  Switch to non-updating stable release
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -47,7 +47,6 @@
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [main] ReaClassical_3-point Insert Edit.lua
-  [main] ReaClassical_Updater.lua
   [main] ReaClassical_Find Take.lua
   [main] ReaClassical_Take Counter.lua
   [main] ReaClassical_Add Track To All Groups.lua
