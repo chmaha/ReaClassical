@@ -47,6 +47,7 @@
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [main] ReaClassical_3-point Insert Edit.lua
+  [main] ReaClassical_Reset Keymap and menu.lua
   [main] ReaClassical_Find Take.lua
   [main] ReaClassical_Take Counter.lua
   [main] ReaClassical_Add Track To All Groups.lua

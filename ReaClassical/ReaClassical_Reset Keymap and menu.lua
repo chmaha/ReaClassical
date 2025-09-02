@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, copy_file, get_path, update_reaper_ini, update_keyb_ini
+local main, copy_file, get_path, update_reaper_ini
 local ExecUpdate
 
 ---------------------------------------------------------------------
@@ -50,22 +50,17 @@ function main()
         update_reaper_ini(reaper_ini, "splashimage", splash_abs_path)
     end
 
-    local sync_reapack = NamedCommandLookup("_REAPACK_SYNC")
-    Main_OnCommand(sync_reapack, 0)
-    MB("1) Syncing ReaPack repos. Please wait for this to complete before pressing OK.",
-        "ReaClassical Updater", 0)
-
     copy_file(source_renderpresets_path, dest_renderpresets_path)
 
     local response1 = MB(
-        "2) This section will overwrite your custom toolbars and menus.\nAre you sure you want to continue?",
+        "1) This section will overwrite your custom toolbars and menus.\nAre you sure you want to continue?",
         "ReaClassical Updater", 4)
     if response1 == 6 then
         copy_file(source_file_path, destination_file_path)
     end
 
     local response2 = MB(
-        "3) This section will overwrite your custom keymaps!\n" ..
+        "2) This section will overwrite your custom keymaps!\n" ..
         "Are you sure you want to continue?",
         "ReaClassical Updater",
         4
@@ -169,35 +164,6 @@ end
 
 ---------------------------------------------------------------------
 
-function update_keyb_ini(file_path, old_text, new_text)
-    local file = io.open(file_path, "r")
-    if not file then return false end
-
-    local lines = {}
-    local updated = false
-
-    for line in file:lines() do
-        local new_line = line:gsub(old_text, new_text)
-        if new_line ~= line then
-            updated = true
-        end
-        table.insert(lines, new_line)
-    end
-    file:close()
-
-    file = io.open(file_path, "w")
-    if not file then return false end
-
-    for _, line in ipairs(lines) do
-        file:write(line .. "\n")
-    end
-    file:close()
-
-    return updated
-end
-
----------------------------------------------------------------------
-
 function ExecUpdate()
     local msg = [[
         ReaClassical has to close for the update process to complete.
@@ -222,6 +188,5 @@ function ExecUpdate()
 end
 
 ---------------------------------------------------------------------
-
 
 main()
