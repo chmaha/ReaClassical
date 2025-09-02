@@ -79,12 +79,12 @@ func Install32bit(rcfolder string, pkgver string, rcver string) {
 	addLineToReaperIni(rcfolder)
 
 	// Fix Ctrl+backtick shortcut
-	fmt.Println("Fixing Ctrl+backtick reference in reaper-kb.ini")
-	filePath := filepath.Join(rcfolder, "reaper-kb.ini")
-	err := replaceKeyInFile(filePath)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-	}
+	// fmt.Println("Fixing Ctrl+backtick reference in reaper-kb.ini")
+	// filePath := filepath.Join(rcfolder, "reaper-kb.ini")
+	// err := replaceKeyInFile(filePath)
+	// if err != nil {
+	// 	fmt.Printf("Error: %v\n", err)
+	// }
 
 	// Remove temporary files and directories
 	fmt.Println("Removing temporary files...")

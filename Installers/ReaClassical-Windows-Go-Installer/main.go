@@ -56,11 +56,12 @@ func main() {
 	fmt.Printf("Versions: REAPER %s (%s), ReaClassical %s\n\n", pkgver, arch, rcver)
 	time.Sleep(2 * time.Second)
 
-	if arch == "amd64" || arch == "arm64" {
+	switch arch {
+	case "amd64", "arm64":
 		Install64bit(rcfolder, pkgver, rcver, arch)
-	} else if arch == "386" {
+	case "386":
 		Install32bit(rcfolder, pkgver, rcver)
-	} else {
+	default:
 		fmt.Printf("Sorry, your system architecture is not supported.")
 	}
 

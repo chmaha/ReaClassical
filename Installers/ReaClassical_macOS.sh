@@ -110,7 +110,7 @@ sleep 2
 abspath=`pwd $rcfolder`
 
 # Replace windows keybindings for horizontal and vertical zooming
-sed -i '' 's/KEY 1 223/KEY 0 96/g; s/KEY 9 223/KEY 8 96/g' "${rcfolder}/reaper-kb.ini"
+# sed -i '' 's/KEY 1 223/KEY 0 96/g; s/KEY 9 223/KEY 8 96/g' "${rcfolder}/reaper-kb.ini"
 echo "Adding ReaClassical splash screen and theme references to reaper.ini"
 sleep 2
 sed -i '' -e "/^\[REAPER\]/a\\
