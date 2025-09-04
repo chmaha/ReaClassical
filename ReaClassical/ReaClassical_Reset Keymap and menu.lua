@@ -50,26 +50,19 @@ function main()
         update_reaper_ini(reaper_ini, "splashimage", splash_abs_path)
     end
 
-    copy_file(source_renderpresets_path, dest_renderpresets_path)
+    local response = MB(
+        "This function will reset keymap, menu and render presets to ReaClassical defaults." ..
+        "\nAffected files will be backed up with a .backup extension." ..
+        "\n\nAre you sure you want to continue?",
+        "ReaClassical Reset", 4)
 
-    local response1 = MB(
-        "1) This section will overwrite your custom toolbars and menus.\nAre you sure you want to continue?",
-        "ReaClassical Updater", 4)
-    if response1 == 6 then
+    if response == 6 then
+        copy_file(source_renderpresets_path, dest_renderpresets_path)
         copy_file(source_file_path, destination_file_path)
-    end
-
-    local response2 = MB(
-        "2) This section will overwrite your custom keymaps!\n" ..
-        "Are you sure you want to continue?",
-        "ReaClassical Updater",
-        4
-    )
-    if response2 == 6 then
         copy_file(source_shortcuts_path, dest_shortcuts_path)
     end
 
-    if response1 == 6 or response2 == 6 then
+    if response == 6 then
         ExecUpdate()
     end
 end
@@ -86,7 +79,7 @@ function copy_file(source, destination)
         os.remove(backup_destination)
         local success, err = os.rename(destination, backup_destination)
         if not success then
-            MB("Error creating backup: " .. err, "ReaClassical Updater", 0)
+            MB("Error creating backup: " .. err, "ReaClassical Reset", 0)
             return
         end
     end
@@ -94,7 +87,7 @@ function copy_file(source, destination)
     -- Open source file
     local source_file = io.open(source, "rb")
     if not source_file then
-        MB("Error opening source file: " .. source, "ReaClassical Updater", 0)
+        MB("Error opening source file: " .. source, "ReaClassical Reset", 0)
         return
     end
 
@@ -102,7 +95,7 @@ function copy_file(source, destination)
     local destination_file = io.open(destination, "wb")
     if not destination_file then
         source_file:close()
-        MB("Error opening destination file: " .. destination, "ReaClassical Updater", 0)
+        MB("Error opening destination file: " .. destination, "ReaClassical Reset", 0)
         return
     end
 
@@ -172,7 +165,7 @@ function ExecUpdate()
 
         Quit ReaClassical?]]
 
-    local ret = MB(msg, "ReaClassical Updater", 4)
+    local ret = MB(msg, "ReaClassical Reset", 4)
     if ret == 7 then
         return
     end
@@ -183,7 +176,7 @@ function ExecUpdate()
         Main_OnCommand(40063, 0)
         Main_OnCommand(40004, 0)
     else
-        MB("Restart cancelled!", "ReaClassical Updater", 0)
+        MB("Restart cancelled!", "ReaClassical Reset", 0)
     end
 end
 
