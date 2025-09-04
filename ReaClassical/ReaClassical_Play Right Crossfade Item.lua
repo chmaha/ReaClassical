@@ -21,8 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, get_color_table, get_path
-local move_cursor_to_time_selection_midpoint
+local main, move_cursor_to_time_selection_midpoint
 ---------------------------------------------------------------------
 
 function main()
@@ -31,7 +30,6 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local colors = get_color_table()
 
     DeleteProjectMarker(NULL, 1016, false)
     CSurf_OnPlayRateChange(1)
@@ -45,24 +43,7 @@ function main()
     CrossfadeEditor_OnCommand(43483) -- decrease preview momentarily
 
     CrossfadeEditor_OnCommand(43491) -- set pre/post and play both items
-    local midpoint = move_cursor_to_time_selection_midpoint()
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
+    move_cursor_to_time_selection_midpoint()
 end
 
 ---------------------------------------------------------------------
@@ -75,7 +56,6 @@ function move_cursor_to_time_selection_midpoint()
 
     local midpoint = (start_time + end_time) / 2
     SetEditCurPos(midpoint, true, true) -- move cursor, seek playback if playing
-    return midpoint
 end
 
 ---------------------------------------------------------------------

@@ -48,7 +48,7 @@ function main()
 
     -- prevent action 43491 from not playing if mouse cursor doesn't move
     CrossfadeEditor_OnCommand(43483) -- decrease preview momentarily
-    
+
     CSurf_OnPlayRateChange(audition_speed)
     CrossfadeEditor_OnCommand(43491) -- set pre/post and play both items
 end

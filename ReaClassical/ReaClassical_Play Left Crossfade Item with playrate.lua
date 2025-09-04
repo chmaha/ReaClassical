@@ -59,7 +59,7 @@ function main()
     CSurf_OnPlayRateChange(audition_speed)
     -- prevent action 43491 from not playing if mouse cursor doesn't move
     CrossfadeEditor_OnCommand(43483) -- decrease preview momentarily
-    
+
     CrossfadeEditor_OnCommand(43491) -- set pre/post and play both items
     AddProjectMarker2(0, false, midpoint, 0, "!1016", 1016, colors.audition)
     on_stop()
