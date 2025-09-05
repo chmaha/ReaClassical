@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.1
+@version 25.9.2
 @changelog
-  Add variable playrate xfade audition functions
+  Documentation: Add reference to new xfade actions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
