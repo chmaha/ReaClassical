@@ -31,7 +31,7 @@ local create_single_mixer, route_tracks, create_track_table
 local process_name, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 local rearrange_tracks, reset_mixer_order, copy_track_names_from_dest
-local process_dest, check_hidden_track_items
+local process_dest, check_hidden_track_items, get_whole_number_input
 
 ---------------------------------------------------------------------
 
@@ -66,15 +66,12 @@ function main()
         local creation_date = os.date("%Y-%m-%d %H:%M:%S", os.time())
         SetProjExtState(0, "ReaClassical", "CreationDate", creation_date)
         SetProjExtState(0, "ReaClassical", "Workflow", "")
-        local boolean, num = GetUserInputs("Horizontal Workflow", 1, "How many tracks?", 10)
-        num = tonumber(num)
+        local num = get_whole_number_input()
+        if not num then return end
         local rcmaster
-        if boolean == true and num > 1 then
+        if num >= 2 then
             rcmaster = create_destination_group(num)
             rcmaster_exists = true
-        elseif boolean == true and num < 2 then
-            MB("You need 2 or more tracks to make a folder!", "Horizontal Workflow", 0)
-            return
         else
             return
         end
@@ -88,7 +85,7 @@ function main()
             local success = show_track_name_dialog(mixer_track_table)
             if success then
                 local response1 = MB(
-                "Would you like to automatically assign panning and recording inputs based on track naming?",
+                    "Would you like to automatically assign panning and recording inputs based on track naming?",
                     "Horizontal Workflow", 4)
                 if response1 == 6 then
                     local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
@@ -958,6 +955,23 @@ function check_hidden_track_items(track_count)
         end
     end
     return false
+end
+
+---------------------------------------------------------------------
+
+function get_whole_number_input()
+    while true do
+        local ok, num = reaper.GetUserInputs("Horizontal Workflow", 1, "How many tracks?", "10")
+        if not ok then return nil end -- User cancelled
+
+        num = tonumber(num)
+
+        if num and num == math.floor(num) and num > 1 then
+            return num
+        else
+            ShowMessageBox("Please enter a valid number. You need 2 or more tracks to make a folder!", "Invalid Input", 0)
+        end
+    end
 end
 
 ---------------------------------------------------------------------
