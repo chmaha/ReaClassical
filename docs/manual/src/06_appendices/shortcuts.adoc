@@ -20,9 +20,9 @@ kbd:[Ctrl+{cursorup}] Increase peaks display zoom for project
 
 kbd:[Ctrl+{cursordown}] Decrease peaks display zoom for project
 
-kbd:[Q] Previous Item edge / previous crossfade (when in crossfade editor view)
+kbd:[Q] Previous Item edge
 
-kbd:[W] Next Item edge / next crossfade (when in crossfade editor view)
+kbd:[W] Next Item edge
 
 kbd:[,] Previous Marker
 
@@ -147,6 +147,24 @@ kbd:[Alt+4] Zoom to Source OUT marker
 kbd:[Ctrl+Delete] Delete all S-D Markers
 
 kbd:[Shift+Delete] Delete all S-D Project Markers
+
+*Crossfade Editor*
+
+Mouse hover + kbd:[A] Audition both sides of the crossfade
+
+Mouse hover + kbd:[S] Audition just the left side of the crossfade
+
+Mouse hover + kbd:[D] Audition just the right side of the crossfade
+
+Mouse hover + kbd:[Shift+A] Audition both sides of the crossfade with custom playrate
+
+Mouse hover + kbd:[Shift+S] Audition just the left side of the crossfade with custom playrate
+
+Mouse hover + kbd:[Shift+D] Audition just the right side of the crossfade with custom playrate
+
+kbd:[Q] Move to previous crossfade
+
+kbd:[W] Move to next crossfade
 
 *Mastering*
 
