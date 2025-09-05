@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 html_file_path = "scripts/ReaClassical_Changelog_Formatter.html"
-lua_file_path = "RC.txt"
+lua_file_path = "ReaClassical/RC.txt"
 
 begin
   # Extract version from @version line in ReaClassical.lua

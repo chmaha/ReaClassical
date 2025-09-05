@@ -139,6 +139,8 @@ To audition material, hover the mouse inside the crossfade window and:
 . press kbd:[S] to audition just the left item based on mouse cursor location or its mirrored position
 . press kbd:[D] to audition just the right item based on mouse cursor location or its mirrored position
 
+Use kbd:[Shift+A], kbd:[Shift+S] or kbd:[Shift+D] to do the equivalent but with a custom playrate as set in kbd:[F5] preferences.
+
 You can shuttle between crossfades using the kbd:[Q] and kbd:[W] shortcuts. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.
 
 ==== Other Editing Tips
