@@ -45,7 +45,6 @@ MenuSets/
 ProjectTemplates/ReaClassical.RPP
 ProjectTemplates/Room_Tone_Generation.RPP
 ReaPack/
-Scripts/FTC Tools/
 Scripts/ReaTeam Scripts/Development/cfillion_Interactive ReaScript.lua
 Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua
 Scripts/chmaha Scripts/
@@ -91,8 +90,16 @@ sed -i '/home\/chmaha/d;/media\/chmaha/d;/Users\\xxx/d;/Users\\chmaha/d;/^Recent
 echo "Copying keymap, menu, project template and theme files..."
 
 cp $dir/reaper-kb.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-kb.ini
+cp $dir/reaper-kb.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
+
 cp $dir/reaper-menu.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-menu.ini
+cp $dir/reaper-menu.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-menu.ini"
+
 cp $dir/reaper-render.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-render.ini
+cp $dir/reaper-render.ini"$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
+
+cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
+
 cp $dir/ProjectTemplates/ReaClassical.RPP ~/code/chmaha/ReaClassical/ReaClassical/
 cp $dir/ProjectTemplates/Room_Tone_Generation.RPP ~/code/chmaha/ReaClassical/ReaClassical/
 cp "$dir/ColorThemes/ReaClassical Light.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 html_file_path = "scripts/ReaClassical_Changelog_Formatter.html"
-lua_file_path = "ReaClassical/ReaClassical.lua"
+lua_file_path = "RC.txt"
 
 begin
   # Extract version from @version line in ReaClassical.lua
@@ -31,9 +31,6 @@ begin
     if line =~ /^@\s*changelog/i
       in_changelog_section = true
       next
-    elsif line =~ /^@\s*metapackage/i
-      in_metapackage_section = true
-      break
     elsif in_changelog_section
       changelog_lines << line.strip unless line.strip.empty?
     end
