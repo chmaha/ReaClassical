@@ -8,7 +8,7 @@ dir="$HOME/Downloads/Resource_Folder_Base"
 mkdir -p "$dir"
 
 # Source directory
-src="$HOME/Desktop/ReaClassical_26/" -- change to src="$HOME/.config/REAPER/" when 26 released!
+src="$HOME/Desktop/ReaClassical_26/" # change to src="$HOME/.config/REAPER/" when 26 released!
 
 # List of files and directories to copy
 files="BR.ini
