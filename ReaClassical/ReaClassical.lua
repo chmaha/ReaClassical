@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.9
+@version 25.9.1
 @changelog
-  ReaClassical Updater: Delete just the logic to stop switching out backtick combo
+  Add variable playrate xfade audition functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -83,6 +83,12 @@
   [main] ReaClassical_Convert REAPER project.lua
   [main] ReaClassical_Split Items at Markers.lua
   [main] ReaClassical_Zoom to All Items Toggle.lua
+  [nomain] ReaClassical_Play Both Items of Crossfade.lua
+  [nomain] ReaClassical_Play Both Items of Crossfade with playrate.lua
+  [nomain] ReaClassical_Play Left Crossfade Item.lua
+  [nomain] ReaClassical_Play Left Crossfade Item with playrate.lua
+  [nomain] ReaClassical_Play Right Crossfade Item.lua
+  [nomain] ReaClassical_Play Right Crossfade Item with playrate.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
