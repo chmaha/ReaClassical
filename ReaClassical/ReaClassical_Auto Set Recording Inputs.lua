@@ -23,6 +23,7 @@ If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, trim_prefix, assign_input, create_mixer_table, set_pan
+local sync
 
 local pair_words = {
     "2ch", "pair", "paire", "paar", "coppia", "par", "пара", "对", "ペア",
@@ -117,8 +118,7 @@ function main()
 
     local assignment_message
     if workflow == "Vertical" then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
+        sync(#mixer_table, #mixer_table*7)
         assignment_message = "New Recording Inputs (synced across all folders):\n\n" ..
             table.concat(assignments, "\n")
     else
@@ -212,6 +212,45 @@ function set_pan(track, name)
         end
     end
     return "center"
+end
+
+---------------------------------------------------------------------
+
+function sync(tracks_per_group, end_of_sources)
+    local rec_inputs = {}
+    local locks = {}
+
+    -- get inputs and locks
+    for i = 0, tracks_per_group - 1 do
+        local track = GetTrack(0, i)
+
+        -- inputs
+        local track_rec_input = GetMediaTrackInfo_Value(track, "I_RECINPUT")
+        rec_inputs[i + 1] = track_rec_input
+
+        -- lock state
+        local _, locked = GetTrackStateChunk(track, "", 0)
+        local is_locked = string.match(locked, "%s*LOCK%s+1")
+        locks[i + 1] = is_locked
+    end
+
+    -- set inputs and locks
+    local j = 1
+    for i = 0, end_of_sources - 1 do
+        local track = GetTrack(0, i)
+        j = j % tracks_per_group
+        if j == 0 then j = tracks_per_group end
+        SetMediaTrackInfo_Value(track, "I_RECINPUT", rec_inputs[j])
+        local _, locked = GetTrackStateChunk(track, "", 0)
+        local str
+        if locks[j] then
+            str = locked:gsub("<TRACK", "<TRACK\nLOCK 1")
+        else
+            str = locked:gsub("\nLOCK 1", "")
+        end
+        SetTrackStateChunk(track, str, 0)
+        j = j + 1
+    end
 end
 
 ---------------------------------------------------------------------

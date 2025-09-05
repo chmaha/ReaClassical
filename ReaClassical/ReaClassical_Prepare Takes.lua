@@ -116,8 +116,8 @@ function main()
         end
     end
 
-    local _, converted = GetProjExtState(0, "ReaClassical", "Converted")
-    if converted ~= "y" then
+    local _, silent = GetProjExtState(0, "ReaClassical", "prepare_silent")
+    if silent ~= "y" then
         MB("Project takes have been prepared! " ..
             "You can run again if you import or record more material..."
             , "ReaClassical", 0)
