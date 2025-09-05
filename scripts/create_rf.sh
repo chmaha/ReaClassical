@@ -96,7 +96,7 @@ cp $dir/reaper-menu.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-men
 cp $dir/reaper-menu.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-menu.ini"
 
 cp $dir/reaper-render.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-render.ini
-cp $dir/reaper-render.ini"$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
+cp $dir/reaper-render.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
 
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 
