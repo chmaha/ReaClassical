@@ -133,6 +133,11 @@ function main()
         end
     end
 
+    if workflow == "Vertical" then
+        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+        Main_OnCommand(F8_sync, 0)
+    end
+
     Undo_EndBlock('Recording Input and Panning', 0)
 end
 
