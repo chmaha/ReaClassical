@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.2
+@version 25.9.3
 @changelog
-  Documentation: Add reference to new xfade actions
+  Auto-set rec inputs: Use local sync() function to propagate settings
+  Prepare Takes: Use generic silent extstate for future functions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
