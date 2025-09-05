@@ -247,7 +247,7 @@ func getReaperVersion() (string, error) {
 
 func getReaClassicalMajorVersion() (string, error) {
 	// Fetch the content of the online file
-	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua")
+	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/RC.txt")
 	if err != nil {
 		return "", err
 	}

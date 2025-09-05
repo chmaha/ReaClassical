@@ -1,3 +1,5 @@
+@description ReaClassical
+@author chmaha
 @version 26.0
 @changelog
   Switch to non-updating stable release

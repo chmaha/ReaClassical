@@ -45,7 +45,7 @@ function main()
     Main_OnCommand(F7_sync, 0)
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
-    SetProjExtState(0, "ReaClassical", "Converted", "")
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
     Main_SaveProject(0, false)
     MB("Your project has been converted.\n\n"
         .. "Any folders have been flattened, empty tracks removed"
@@ -182,7 +182,7 @@ end
 
 function add_rc_ext_state()
     SetProjExtState(0, "ReaClassical", "RCProject", "y")
-    SetProjExtState(0, "ReaClassical", "Converted", "y")
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
     local creation_date = os.date("%Y-%m-%d %H:%M:%S", os.time())
     SetProjExtState(0, "ReaClassical", "CreationDate", creation_date)
 end

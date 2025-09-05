@@ -39,7 +39,7 @@ check_internet
 ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/ltsc/tested_reaper_ver.txt"
 ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
-rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/ltsc/ReaClassical/ReaClassical.lua"
+rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/ltsc/ReaClassical/RC.txt"
 rcver=$(curl -sS "$rcver_txt" | awk '/@version/{split($2, version, "."); print version[1]}')
 
 rcfolder="ReaClassical_${rcver}"

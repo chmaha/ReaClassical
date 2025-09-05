@@ -44,7 +44,8 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    abort_if_items_exist()
+    local items = abort_if_items_exist()
+    if items then return end
     local files = scan_media_folder()
     -- Show error if no audio files found
     if #files == 0 then
@@ -171,13 +172,25 @@ function main()
         ::continue::
     end
 
-    Undo_EndBlock("Import Audio",-1)
+    Undo_EndBlock("Import Audio", -1)
+
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
+    -- Prepare Takes
+    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    Main_OnCommand(prepare_takes, 0)
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
+    PreventUIRefresh(-1)
+    -- Zoom to all items horizontally
+    local zoom_horizontally = NamedCommandLookup("_RSe4ae3f4797f2fb7f209512fc22ad6ef9854ca770")
+    Main_OnCommand(zoom_horizontally, 0)
 
     if #errors > 0 then
-        ShowMessageBox("The following issues were found:\n\n" .. table.concat(errors, "\n"), "Import Errors", 0)
+        MB("The following issues were found:\n\n" .. table.concat(errors, "\n"), "Import Errors", 0)
+    else
+        MB("Files imported successfully!", "ReaClassical Smart Import", 0)
     end
-    Undo_EndBlock('???', 0)
-    PreventUIRefresh(-1)
+
+    Undo_EndBlock('Smart Import Audio', 0)
     UpdateArrange()
     UpdateTimeline()
 end
