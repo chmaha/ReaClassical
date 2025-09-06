@@ -198,10 +198,16 @@ end
 ---------------------------------------------------------------------
 
 function get_project_media_path()
-    local _, projfn = EnumProjects(-1, '')
+    local _, projfn = EnumProjects(-1, "")
+    if not projfn or projfn == "" then return nil end
+
+    -- detect last path separator
     local projpath = projfn:match("^(.*)[/\\]")
     if not projpath then return nil end
-    return projpath .. "/media"
+
+    -- normalize separator for OS
+    local sep = package.config:sub(1,1) -- "\" on Windows, "/" on Unix/Mac
+    return projpath .. sep .. "media"
 end
 
 ---------------------------------------------------------------------
