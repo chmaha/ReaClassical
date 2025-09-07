@@ -22,7 +22,7 @@ echo "Adding index.xml to git..."
 git add index.xml || error_exit "git add"
 
 echo "Committing changes..."
-git commit -m "Prune index.xml" || error_exit "git commit"
+git commit -m "Add new version to index.xml and prune" || error_exit "git commit"
 
 echo "Pushing to GitHub..."
 git push || error_exit "git push"
