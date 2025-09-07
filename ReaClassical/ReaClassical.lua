@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.3
+@version 25.9.4
 @changelog
-  Auto-set rec inputs: Use local sync() function to propagate settings
-  Prepare Takes: Use generic silent extstate for future functions
+  F7/F8 initial setup: Only allow numeric entry for number of tracks per group
+  PDF manual: Fix missing cursor up an down glyphs
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
