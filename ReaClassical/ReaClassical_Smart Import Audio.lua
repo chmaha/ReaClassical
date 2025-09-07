@@ -241,6 +241,7 @@ function get_tracks()
     for i = 0, CountTracks(0) - 1 do
         local tr = GetTrack(0, i)
         local _, name = GetTrackName(tr)
+        name = name:gsub("^%s*(.-)%s*$", "%1") -- strip leading/trailing whitespace
         tracks[#tracks + 1] = { name = name:lower(), tr = tr, rawname = name }
     end
     return tracks
@@ -277,8 +278,11 @@ end
 ---------------------------------------------------------------------
 
 function find_track(tracks, fname)
+    fname = fname:gsub("^%s*(.-)%s*$", "%1"):lower() -- also strip whitespace from fname
     for _, t in ipairs(tracks) do
-        if fname:find(t.name, 1, true) then return t.tr, t.rawname end
+        if fname:find(t.name, 1, true) then
+            return t.tr, t.rawname
+        end
     end
     return nil, nil
 end
