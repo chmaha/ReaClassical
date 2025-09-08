@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.4
+@version 25.9.5
 @changelog
-  F7/F8 initial setup: Only allow numeric entry for number of tracks per group
-  PDF manual: Fix missing cursor up an down glyphs
+  Find Take: Allow for searching exploded filenames (originating from polywav)
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
