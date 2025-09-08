@@ -60,7 +60,13 @@ function main()
         if take then
             local src = GetMediaItemTake_Source(take)
             local filename = GetMediaSourceFileName(src, "")
-            local take_capture = tonumber(filename:match("(%d+)%)?%.[^%.]+$"))
+            local take_capture = tonumber(
+            -- Case: (###)[chan X].wav  or  ### [chan X].wav  (with or without space)
+                filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
+                -- Case: (###).wav  or  ###.wav
+                or filename:match("(%d+)%)?%.[^%.]+$")
+            )
+
             local session_match = true
 
             if session_name and session_name ~= "" then
