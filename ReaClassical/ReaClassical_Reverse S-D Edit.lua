@@ -24,9 +24,10 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, add_source_marker, delete_leaving_silence
 local get_track_length, select_matching_folder, copy_or_move_dest
-local clean_up, ripple_lock_mode
-local get_color_table, get_path, move_to_project_tab
+local clean_up, ripple_lock_mode, delete_dest_markers
+local get_color_table, get_path, move_to_project_tab, xfade
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
+local create_crossfades, get_first_last_items, return_xfade_length
 
 ---------------------------------------------------------------------
 
@@ -67,6 +68,8 @@ function main()
         return
     end
 
+    Main_OnCommand(40310, 0)  -- Set ripple-per-track
+    
     ripple_lock_mode()
     local colors = get_color_table()
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
@@ -147,18 +150,22 @@ function main()
             clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
             return
         end
+
         if remove then delete_leaving_silence() end
+        
+        delete_dest_markers()
+        
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(source_proj)
         Main_OnCommand(40769, 0) -- unselect all items/tracks etc
 
         Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
 
-        select_matching_folder()
         GoToMarker(0, 998, false)
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 999, false)
         Main_OnCommand(40626, 0) -- Time Selection: Set end point
+        select_matching_folder()
 
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
@@ -168,9 +175,9 @@ function main()
 
         local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
         Main_OnCommand(delete, 0) -- Adaptive Delete
-        select_matching_folder()
         local paste = NamedCommandLookup("_SWS_AWPASTE")
-        Main_OnCommand(paste, 0) -- SWS_AWPASTE
+        Main_OnCommand(paste, 0)  -- SWS_AWPASTE
+        create_crossfades()
         GoToMarker(0, 998, false)
         clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -322,7 +329,6 @@ function copy_or_move_dest()
     local is_selected = true
     local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
-    Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 996, false)
     Main_OnCommand(40939, 0) -- Track: Select track 01
@@ -509,6 +515,106 @@ function delete_leaving_silence()
     local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
     Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
     Main_OnCommand(40310, 0)  -- Set ripple-per-track
+end
+
+---------------------------------------------------------------------
+
+function delete_dest_markers()
+    local i = 0
+    while true do
+        local project, _ = EnumProjects(i)
+        if project == nil then
+            break
+        else
+            DeleteProjectMarker(project, 996, false)
+            DeleteProjectMarker(project, 997, false)
+        end
+        i = i + 1
+    end
+end
+
+---------------------------------------------------------------------
+
+function create_crossfades()
+    local first_sel_item, last_sel_item = get_first_last_items()
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    SetMediaItemSelected(first_sel_item, true)
+    Main_OnCommand(41173, 0) -- Item navigation: Move cursor to start of items
+    Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
+    local xfade_len = return_xfade_length()
+    MoveEditCursor(-xfade_len, false)
+    Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
+    MoveEditCursor(xfade_len, false)
+    MoveEditCursor(-0.0001, false)
+    xfade(xfade_len)
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    SetMediaItemSelected(last_sel_item, true)
+    Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
+    Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
+    Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
+    MoveEditCursor(0.001, false)
+    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+    Main_OnCommand(select_under, 0)
+    if count_selected_media_items() == 0 then return end
+    MoveEditCursor(-0.001, false)
+    MoveEditCursor(-xfade_len, false)
+    Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
+    MoveEditCursor(xfade_len, false)
+    MoveEditCursor(-0.0001, false)
+    xfade(xfade_len)
+    Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
+end
+
+---------------------------------------------------------------------
+
+function get_first_last_items()
+    local num_of_items = count_selected_media_items()
+    local first_sel_item
+    local last_sel_item
+
+    for i = 0, num_of_items - 1 do
+        local item = get_selected_media_item_at(i)
+        local track = GetMediaItem_Track(item)
+        local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+
+        -- if track_num == 1 then
+            if not first_sel_item then
+                first_sel_item = item
+            end
+            last_sel_item = item
+        -- end
+    end
+
+    return first_sel_item, last_sel_item
+end
+
+---------------------------------------------------------------------
+
+function return_xfade_length()
+    local xfade_len = 0.035
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[1] then xfade_len = table[1] / 1000 end
+    end
+    return xfade_len
+end
+
+---------------------------------------------------------------------
+
+function xfade(xfade_len)
+    local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
+    Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    MoveEditCursor(-xfade_len, false)
+    Main_OnCommand(40625, 0)        -- Time selection: Set start point
+    MoveEditCursor(xfade_len, false)
+    Main_OnCommand(40626, 0)        -- Time selection: Set end point
+    Main_OnCommand(40916, 0)        -- Item: Crossfade items within time selection
+    Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
+    MoveEditCursor(0.001, false)
+    Main_OnCommand(select_items, 0)
+    MoveEditCursor(-0.001, false)
 end
 
 ---------------------------------------------------------------------
