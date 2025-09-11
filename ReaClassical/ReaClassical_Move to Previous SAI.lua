@@ -23,24 +23,29 @@ function prev_sai_marker()
             local track_num = tonumber(name:match("^(%d+):"))
             if track_num and name:match("SAI") then
                 track_markers[track_num] = track_markers[track_num] or {}
-                table.insert(track_markers[track_num], {pos=pos, idx=idx})
+                table.insert(track_markers[track_num], { pos = pos, idx = idx })
             end
         end
     end
 
+    if next(track_markers) == nil then
+        Main_OnCommand(40172, 0)
+        return
+    end
+
     -- search for previous marker starting from current track, going backward
-    for offset = 0, num_tracks-1 do
+    for offset = 0, num_tracks - 1 do
         local track_idx = ((start_track_idx - offset - 1 + num_tracks) % num_tracks) + 1
         local markers = track_markers[track_idx]
         if markers then
-            table.sort(markers, function(a,b) return a.pos > b.pos end) -- sort descending
+            table.sort(markers, function(a, b) return a.pos > b.pos end) -- sort descending
             for _, marker in ipairs(markers) do
                 if offset > 0 or marker.pos < editPos - 1e-9 then
-                    local track = GetTrack(0, track_idx-1)
+                    local track = GetTrack(0, track_idx - 1)
                     SetEditCurPos(marker.pos, true, true) -- move cursor and scroll
-                    Main_OnCommand(40297, 0) -- unselect all tracks
+                    Main_OnCommand(40297, 0)              -- unselect all tracks
                     SetTrackSelected(track, true)
-                    solo() -- call your existing solo function
+                    solo()                                -- call your existing solo function
                     return
                 end
             end

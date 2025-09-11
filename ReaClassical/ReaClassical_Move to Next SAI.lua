@@ -17,25 +17,30 @@ function next_sai_marker()
             local track_num = tonumber(name:match("^(%d+):"))
             if track_num and name:match("SAI") then
                 track_markers[track_num] = track_markers[track_num] or {}
-                table.insert(track_markers[track_num], {pos=pos, idx=idx})
+                table.insert(track_markers[track_num], { pos = pos, idx = idx })
             end
         end
     end
 
+    if next(track_markers) == nil then
+        Main_OnCommand(40173, 0)
+        return
+    end
+
     -- search for next marker starting from current track
-    for offset = 0, num_tracks-1 do
+    for offset = 0, num_tracks - 1 do
         local track_idx = ((start_track_idx + offset - 1) % num_tracks) + 1
         local markers = track_markers[track_idx]
         if markers then
-            table.sort(markers, function(a,b) return a.pos < b.pos end)
+            table.sort(markers, function(a, b) return a.pos < b.pos end)
             for _, marker in ipairs(markers) do
                 if offset > 0 or marker.pos > curPos + 1e-9 then
                     -- move to marker
-                    local track = GetTrack(0, track_idx-1)
+                    local track = GetTrack(0, track_idx - 1)
                     SetEditCurPos(marker.pos, true, true)
                     Main_OnCommand(40297, 0) -- unselect all tracks
                     SetTrackSelected(track, true)
-                    solo() -- call your existing solo function
+                    solo()                   -- call your existing solo function
                     return
                 end
             end
@@ -112,89 +117,5 @@ function solo()
         end
     end
 end
-
----------------------------------------------------------------------
-
-function mixer(colors)
-    for i = 0, CountTracks(0) - 1, 1 do
-        local track = GetTrack(0, i)
-        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
-        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
-        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
-        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
-        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
-        if mixer_state == "y" then
-            SetTrackColor(track, colors.mixer)
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-        end
-        if aux_state == "y" then
-            SetTrackColor(track, colors.aux)
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-        end
-        if submix_state == "y" then
-            SetTrackColor(track, colors.submix)
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-        end
-        if rt_state == "y" then
-            SetTrackColor(track, colors.roomtone)
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
-        end
-        if ref_state == "y" then
-            SetTrackColor(track, colors.ref)
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
-        end
-        if rcmaster_state == "y" then
-            SetTrackColor(track, colors.rcmaster)
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-        end
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
-            or rt_state == "y" or ref_state == "y" then
-            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
-        else
-            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
-        end
-
-        local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", false)
-        if trackname_check(track, "^S%d+:") or source_track == "y" then
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
-        end
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y" then
-            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 1 or 0)
-        end
-        if mastering == 1 and i == 0 then
-            Main_OnCommand(40727, 0) -- minimize all tracks
-            SetTrackSelected(track, 1)
-            Main_OnCommand(40723, 0) -- expand and minimize others
-            SetTrackSelected(track, 0)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
-function trackname_check(track, string)
-    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    return string.find(trackname, string)
-end
-
----------------------------------------------------------------------
 
 next_sai_marker()
