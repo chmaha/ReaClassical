@@ -2,10 +2,17 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local solo, mixer, get_color_table, get_path, trackname_check
 
 function prev_sai_marker()
-    local curPos = GetCursorPosition()
+    local playPos = GetPlayPosition()   -- current playhead
+    local editPos = GetCursorPosition() -- edit cursor
     local sel_track = GetSelectedTrack(0, 0)
     local start_track_idx = sel_track and math.floor(GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER")) or 1
     local num_tracks = CountTracks(0)
+
+    -- If playhead is > 2s ahead of edit cursor, just move to edit cursor
+    if playPos - editPos > 2 then
+        SetEditCurPos(editPos, true, true)
+        return
+    end
 
     -- collect all SAI markers by track
     local track_markers = {}
@@ -28,7 +35,7 @@ function prev_sai_marker()
         if markers then
             table.sort(markers, function(a,b) return a.pos > b.pos end) -- sort descending
             for _, marker in ipairs(markers) do
-                if offset > 0 or marker.pos < curPos - 1e-9 then
+                if offset > 0 or marker.pos < editPos - 1e-9 then
                     local track = GetTrack(0, track_idx-1)
                     SetEditCurPos(marker.pos, true, true) -- move cursor and scroll
                     Main_OnCommand(40297, 0) -- unselect all tracks
