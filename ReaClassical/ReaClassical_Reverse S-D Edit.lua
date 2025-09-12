@@ -28,6 +28,7 @@ local clean_up, ripple_lock_mode, delete_dest_markers
 local get_color_table, get_path, move_to_project_tab, xfade
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local create_crossfades, get_first_last_items, return_xfade_length
+local move_destination_folder_to_top, move_destination_folder
 
 ---------------------------------------------------------------------
 
@@ -50,13 +51,21 @@ function main()
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
-    local proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in,
-    source_out, source_count, pos_table, track_number = markers()
+
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local moveable_dest = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+    end
+
 
     if proj_marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
@@ -65,11 +74,18 @@ function main()
             "Source or destination markers should be paired with " ..
             "the corresponding source or destination project marker.",
             "Multi-tab Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
-
-    Main_OnCommand(40310, 0)  -- Set ripple-per-track
     
+    Main_OnCommand(40310, 0) -- Set ripple-per-track
+    
+    local response = MB("Delete Destination Material?", "ReaClassical Reverse S-D Edit", 4)
+    if moveable_dest == 1 then move_destination_folder_to_top() end
+
+    local proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in,
+    source_out, source_count, pos_table, track_number = markers()
+
     ripple_lock_mode()
     local colors = get_color_table()
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
@@ -143,7 +159,7 @@ function main()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
         move_to_project_tab(dest_proj)
         local remove = false
-        local response = MB("Delete Destination Material?", "ReaClassical Reverse S-D Edit", 4)
+
         if response == 6 then remove = true end
         local _, is_selected = copy_or_move_dest()
         if is_selected == false then
@@ -152,9 +168,9 @@ function main()
         end
 
         if remove then delete_leaving_silence() end
-        
+
         delete_dest_markers()
-        
+
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(source_proj)
         Main_OnCommand(40769, 0) -- unselect all items/tracks etc
@@ -178,6 +194,7 @@ function main()
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0)  -- SWS_AWPASTE
         create_crossfades()
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         GoToMarker(0, 998, false)
         clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -188,6 +205,7 @@ function main()
             "or both SOURCE markers (when not in multi-tab mode)\n" ..
             "3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
             , "Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
@@ -578,10 +596,10 @@ function get_first_last_items()
         local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
         -- if track_num == 1 then
-            if not first_sel_item then
-                first_sel_item = item
-            end
-            last_sel_item = item
+        if not first_sel_item then
+            first_sel_item = item
+        end
+        last_sel_item = item
         -- end
     end
 
@@ -615,6 +633,65 @@ function xfade(xfade_len)
     MoveEditCursor(0.001, false)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)
+end
+
+---------------------------------------------------------------------
+
+function move_destination_folder_to_top()
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    -- Find the first folder with a parent that has the "Destination" extstate set to "y"
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end -- No matching folder found
+
+    -- Move the folder to the top
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    if destination_index > 0 then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(0, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function move_destination_folder(track_number)
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end
+
+    local target_track = GetTrack(0, track_number - 1)
+    if not target_track then return end
+
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    local target_index = track_number - 1
+
+    if destination_index ~= target_index then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(target_index, 0)
+    end
 end
 
 ---------------------------------------------------------------------
