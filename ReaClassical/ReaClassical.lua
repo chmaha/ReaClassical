@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.6
+@version 25.9.7
 @changelog
-  Reverse S-D Edit: Allow for floating destination
-  Reverse S-D Edit: Make xfades
-  Various: Add crossfade editor functions to section
+  Various: Revert Add crossfade editor functions to section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -85,12 +83,12 @@
   [main] ReaClassical_Convert REAPER project.lua
   [main] ReaClassical_Split Items at Markers.lua
   [main] ReaClassical_Zoom to All Items Toggle.lua
-  [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
-  [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade with playrate.lua
-  [main=crossfade_editor] ReaClassical_Play Left Crossfade Item.lua
-  [main=crossfade_editor] ReaClassical_Play Left Crossfade Item with playrate.lua
-  [main=crossfade_editor] ReaClassical_Play Right Crossfade Item.lua
-  [main=crossfade_editor] ReaClassical_Play Right Crossfade Item with playrate.lua
+  [nomain] ReaClassical_Play Both Items of Crossfade.lua
+  [nomain] ReaClassical_Play Both Items of Crossfade with playrate.lua
+  [nomain] ReaClassical_Play Left Crossfade Item.lua
+  [nomain] ReaClassical_Play Left Crossfade Item with playrate.lua
+  [nomain] ReaClassical_Play Right Crossfade Item.lua
+  [nomain] ReaClassical_Play Right Crossfade Item with playrate.lua
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Generation.RPP
   [theme] ReaClassical.ReaperThemeZip
