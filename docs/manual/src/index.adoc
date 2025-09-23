@@ -11,7 +11,7 @@
 :title-logo-image: image:reaclassical_logo.png[top=33%,align=right,pdfwidth=2in]
 ifdef::backend-pdf[]
 = ReaClassical Manual
-Generated 2025-09-07 16:29:52 UTC
+Generated 2025-09-23 15:23:44 UTC
 :title-page:
 {copyright}
 endif::[]

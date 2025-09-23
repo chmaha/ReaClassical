@@ -70,6 +70,12 @@ _Description:_ Remove any ranking from the last recorded item or selected item(s
 
 _Notes:_ See the notes above.
 
+*Set New Recording Section (vertical)* kbd:[Alt+F9]
+
+_Description:_ On transport stop, move back to, and record-arm, the first group. The edit cursor is placed 5 seconds after the end of the final item in the project.
+
+_Notes:_ This function can be used when you are ready to record a series of takes for new musical material. In combination with the standard kbd:[F9] behavior that automatically moves to the next available source group (creating extra as needed), it is very quick to organize your recording session with takes of the same material vertically aligned. 
+
 *Increment Take Number* kbd:[Shift+F9]
 
 _Description:_

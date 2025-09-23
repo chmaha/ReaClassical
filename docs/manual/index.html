@@ -515,7 +515,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2025 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2025-09-07 16:29:52 UTC</code></p>
+<p><code>Updated: 2025-09-23 15:23:44 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -917,7 +917,7 @@ As you will discover, based on which workflow chosen, you can use <kbd>F7</kbd> 
 <div class="sect3">
 <h4 id="_classical_take_recording">Classical Take Recording</h4>
 <div class="paragraph">
-<p>Select the parent or child track of a track group and then press <kbd>F9</kbd> to begin <em>classical</em> take recording mode. If the track group isn&#8217;t already record-armed (probably the case before you start your first recording of the session), the function will first simply record-arm the whole group so you can usefully monitor incoming signal. On a subsequent press of <kbd>F9</kbd> recording begins. To stop recording, press <kbd>F9</kbd> again. In horizontal workflow, the key press will maintain record arming and will begin recording on a subsequent press. In vertical workflow, this key press also automatically moves to, solos and arms the next available group so that recording can begin immediately on the next button press. ReaClassical will automatically create new groups as required. To manually add more destination groups when not recording, press  <kbd>\</kbd>. To pause and unpause a recording without starting a new take, toggle the pause button in the transport or use the shortcut <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Spacebar</kbd></span>. To quickly increment the take number during recording use <span class="keyseq"><kbd>Shift</kbd>+<kbd>F9</kbd></span> but note that this should only be used during moments of silence (i.e. inbetween quickfire session takes) as it creates a new recorded item. During this mode you should use the Takes Counter window <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span> to track the upcoming take number (in green) and take number during recording (in red with recording circle). You can right-click on the window to optionally override the automatic numbering and set a take number to increment from in addition to optionally setting a session name to act as media subfolder (which is automatically recalled when the window is reopened). You can left-click to recalculate the track count if you have removed some unused files from the project path. The calculated upcoming take number factors in unused files in the project path so as to avoid any file-naming conflicts. With manual override off (=0), switching back to an existing session will also automatically set the correct incoming take number. Please read the description of the function in Appendix A for best practices.</p>
+<p>Select the parent or child track of a track group and then press <kbd>F9</kbd> to begin <em>classical</em> take recording mode. If the track group isn&#8217;t already record-armed (probably the case before you start your first recording of the session), the function will first simply record-arm the whole group so you can usefully monitor incoming signal. On a subsequent press of <kbd>F9</kbd> recording begins. To stop recording, press <kbd>F9</kbd> again. In horizontal workflow, the key press will maintain record arming and will begin recording on a subsequent press. In vertical workflow, this key press also automatically moves to, solos and arms the next available group so that recording can begin immediately on the next button press. ReaClassical will automatically create new groups as required. To manually add more destination groups when not recording, press  <kbd>\</kbd>. Also in a vertical workflow, to move back to the first group in preparation for recording new material, press <span class="keyseq"><kbd>Alt</kbd>+<kbd>F9</kbd></span> while transport is stopped. To pause and unpause a recording without starting a new take, toggle the pause button in the transport or use the shortcut <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Spacebar</kbd></span>. To quickly increment the take number during recording use <span class="keyseq"><kbd>Shift</kbd>+<kbd>F9</kbd></span> but note that this should only be used during moments of silence (i.e. inbetween quickfire session takes) as it creates a new recorded item. During this mode you should use the Takes Counter window <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span> to track the upcoming take number (in green) and take number during recording (in red with recording circle). You can right-click on the window to optionally override the automatic numbering and set a take number to increment from in addition to optionally setting a session name to act as media subfolder (which is automatically recalled when the window is reopened). You can left-click to recalculate the track count if you have removed some unused files from the project path. The calculated upcoming take number factors in unused files in the project path so as to avoid any file-naming conflicts. With manual override off (=0), switching back to an existing session will also automatically set the correct incoming take number. Please read the description of the function in Appendix A for best practices.</p>
 </div>
 <div class="paragraph">
 <p>Once recording is complete, you can briefly use the audition function <kbd>A</kbd> which will instantly remove all record-arming from tracks.</p>
@@ -1912,6 +1912,15 @@ If your final item on the first track is also the final CD track start, just fin
 <p><em>Notes:</em> See the notes above.</p>
 </div>
 <div class="paragraph">
+<p><strong>Set New Recording Section (vertical)</strong> <span class="keyseq"><kbd>Alt</kbd>+<kbd>F9</kbd></span></p>
+</div>
+<div class="paragraph">
+<p><em>Description:</em> On transport stop, move back to, and record-arm, the first group. The edit cursor is placed 5 seconds after the end of the final item in the project.</p>
+</div>
+<div class="paragraph">
+<p><em>Notes:</em> This function can be used when you are ready to record a series of takes for new musical material. In combination with the standard <kbd>F9</kbd> behavior that automatically moves to the next available source group (creating extra as needed), it is very quick to organize your recording session with takes of the same material vertically aligned.</p>
+</div>
+<div class="paragraph">
 <p><strong>Increment Take Number</strong> <span class="keyseq"><kbd>Shift</kbd>+<kbd>F9</kbd></span></p>
 </div>
 <div class="paragraph">
@@ -2388,6 +2397,9 @@ If your final item on the first track is also the final CD track start, just fin
 </div>
 <div class="paragraph">
 <p><span class="keyseq"><kbd>Shift</kbd>+<kbd>F9</kbd></span> Increment take number while recording (use only during silence)</p>
+</div>
+<div class="paragraph">
+<p><span class="keyseq"><kbd>Alt</kbd>+<kbd>F9</kbd></span> Set new recording section (in vertical workflow)</p>
 </div>
 <div class="paragraph">
 <p><span class="keyseq"><kbd>Ctrl</kbd>+<kbd>=</kbd></span> Rank take higher</p>
