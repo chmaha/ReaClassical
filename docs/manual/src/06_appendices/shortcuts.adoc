@@ -56,6 +56,8 @@ kbd:[Ctrl+Spacebar] Record-pause
 
 kbd:[Shift+F9] Increment take number while recording (use only during silence)
 
+kbd:[Alt+F9] Set new recording section (in vertical workflow)
+
 kbd:[Ctrl+=] Rank take higher
 
 kbd:[Ctrl+-] Rank take lower
