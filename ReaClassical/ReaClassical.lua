@@ -83,6 +83,7 @@
   [main] ReaClassical_Convert REAPER project.lua
   [main] ReaClassical_Split Items at Markers.lua
   [main] ReaClassical_Zoom to All Items Toggle.lua
+  [main] ReaClassical_Set Next Recording Section.lua
   [nomain] ReaClassical_Play Both Items of Crossfade.lua
   [nomain] ReaClassical_Play Both Items of Crossfade with playrate.lua
   [nomain] ReaClassical_Play Left Crossfade Item.lua
