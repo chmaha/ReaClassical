@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.7
+@version 25.9.8
 @changelog
-  Various: Revert Add crossfade editor functions to section
+  Add new function to set new recording section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
