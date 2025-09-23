@@ -26,7 +26,7 @@ local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, get_selected_media_item_at, count_selected_media_items
-
+local delete_empty_items
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -64,8 +64,7 @@ function main()
     end
     local empty_count = empty_items_check(num_of_project_items)
     if empty_count > 0 then
-        MB("Error: Empty items found. Delete them to continue.", "Prepare Takes", 0)
-        return
+        delete_empty_items(num_of_project_items)
     end
 
     PreventUIRefresh(1)
@@ -463,6 +462,20 @@ function get_selected_media_item_at(index)
     return nil
 end
 
+
+---------------------------------------------------------------------
+
+function delete_empty_items(num_of_project_items)
+  for i = num_of_project_items-1, 0, -1 do
+    local item = GetMediaItem(0, i)
+    local take = GetActiveTake(item)
+
+    if not take then
+      DeleteTrackMediaItem(GetMediaItemTrack(item), item)
+    end
+  end
+
+end
 
 ---------------------------------------------------------------------
 
