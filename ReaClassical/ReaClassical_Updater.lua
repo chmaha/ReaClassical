@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, copy_file, get_path, update_reaper_ini, update_keyb_ini
+local main, copy_file, get_path, update_reaper_ini
 local ExecUpdate
 
 ---------------------------------------------------------------------
@@ -165,35 +165,6 @@ function update_reaper_ini(ini_file, key, value)
     file:close()
 
     return true
-end
-
----------------------------------------------------------------------
-
-function update_keyb_ini(file_path, old_text, new_text)
-    local file = io.open(file_path, "r")
-    if not file then return false end
-
-    local lines = {}
-    local updated = false
-
-    for line in file:lines() do
-        local new_line = line:gsub(old_text, new_text)
-        if new_line ~= line then
-            updated = true
-        end
-        table.insert(lines, new_line)
-    end
-    file:close()
-
-    file = io.open(file_path, "w")
-    if not file then return false end
-
-    for _, line in ipairs(lines) do
-        file:write(line .. "\n")
-    end
-    file:close()
-
-    return updated
 end
 
 ---------------------------------------------------------------------

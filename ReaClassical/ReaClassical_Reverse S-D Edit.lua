@@ -77,9 +77,9 @@ function main()
         if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
-    
+
     Main_OnCommand(40310, 0) -- Set ripple-per-track
-    
+
     local response = MB("Delete Destination Material?", "ReaClassical Reverse S-D Edit", 4)
     if moveable_dest == 1 then move_destination_folder_to_top() end
 
@@ -592,15 +592,11 @@ function get_first_last_items()
 
     for i = 0, num_of_items - 1 do
         local item = get_selected_media_item_at(i)
-        local track = GetMediaItem_Track(item)
-        local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
-        -- if track_num == 1 then
         if not first_sel_item then
             first_sel_item = item
         end
         last_sel_item = item
-        -- end
     end
 
     return first_sel_item, last_sel_item
