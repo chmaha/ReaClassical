@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.8
+@version 25.9.9
 @changelog
-  Add new function to set new recording section
+  Set new recording section: move to first source group instead of destination
+  Update tested REAPER version to 7.46
+  Add check for tested REAPER version
+  Fix various luacheck errors
+  NOTES: Update keymap and menu when asked
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
@@ -120,6 +124,7 @@
   ReaClassical-render.ini > ReaClassical-render.ini
   ../audio_calculator.html > audio_calculator.html
   ../docs/images/reaclassical_os.png > reaclassical_logo.png
+  ../tested_reaper_ver.txt > tested_reaper_ver.txt
 @about
   These scripts, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
