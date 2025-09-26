@@ -52,7 +52,7 @@ local function main()
     end
 
     for idx, parent_idx in ipairs(parents) do
-        if idx == 1 then
+        if idx == 2 then
             set_group_state(parent_idx, true, false)
         else
             set_group_state(parent_idx, false, true)
@@ -61,9 +61,13 @@ local function main()
 
     if CountTracks(0) > 0 then
         Main_OnCommand(40297, 0) -- Unselect all tracks
-        local first_track = GetTrack(0, 0)
-        if first_track then
-            SetTrackSelected(first_track, true)
+        local parents = find_folder_parents_indices()
+        local second_parent_idx = parents[2]
+        if second_parent_idx then
+            local second_parent = GetTrack(0, second_parent_idx)
+            if second_parent then
+                SetTrackSelected(second_parent, true)
+            end
         end
     end
     Main_OnCommand(40913,0) -- scroll first group into view
