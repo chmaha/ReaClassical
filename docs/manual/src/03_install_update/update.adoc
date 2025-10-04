@@ -8,7 +8,7 @@ CAUTION: Don't do this if you have your own custom toolbars or keyboard shortcut
 
 ==== Updating REAPER
 
-Simply use the shortcut kbd:[Ctrl+U] to open the REAPER update utility.
+Simply use the shortcut kbd:[Ctrl+U] to open the REAPER updater. If you are already on the recommended version, a wrapper will notify you and offer to exit. If your version is either below or above the recommended one, you’ll see a message alerting you, and the REAPER utility will then open so you can manually upgrade or downgrade.
 
 .Reaper Update Utility by Ilias-Timon Poulakis (FeedTheCat)
 image::reaper_update_utility.png[REAPER Update Utility]
