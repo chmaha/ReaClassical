@@ -1,12 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.9.9
+@version 25.10
 @changelog
-  Set new recording section: move to first source group instead of destination
-  Update tested REAPER version to 7.46
-  Add check for tested REAPER version
-  Fix various luacheck errors
-  NOTES: Update keymap and menu when asked
+  Documentation: Modify REAPER update instructions
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
