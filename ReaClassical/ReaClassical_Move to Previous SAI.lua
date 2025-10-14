@@ -1,7 +1,29 @@
-for key in pairs(reaper) do _G[key] = reaper[key] end
-local solo, mixer, get_color_table, get_path, trackname_check
+--[[
+@noindex
 
-function prev_sai_marker()
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2025 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+local main, solo
+
+function main()
     local playPos = GetPlayPosition()   -- current playhead
     local editPos = GetCursorPosition() -- edit cursor
     local sel_track = GetSelectedTrack(0, 0)
@@ -18,7 +40,7 @@ function prev_sai_marker()
     local track_markers = {}
     local num_markers = CountProjectMarkers(0)
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, idx = EnumProjectMarkers(i)
+        local _, isrgn, pos, _, name, idx = EnumProjectMarkers(i)
         if not isrgn then
             local track_num = tonumber(name:match("^(%d+):"))
             if track_num and name:match("SAI") then
@@ -124,4 +146,4 @@ function solo()
 end
 
 -- call it
-prev_sai_marker()
+main()

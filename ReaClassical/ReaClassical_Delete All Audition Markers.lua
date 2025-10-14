@@ -35,15 +35,15 @@ function main()
 
   local i = 0
   while true do
-    local project, projfn = EnumProjects(i)
+    local project, _ = EnumProjects(i)
     if not project then break end
 
-    local retval, num_markers, num_regions = CountProjectMarkers(project)
+    local _, num_markers, num_regions = CountProjectMarkers(project)
     local total = num_markers + num_regions
 
     -- Loop backwards so indices remain valid when deleting
     for j = total - 1, 0, -1 do
-      local ok, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers2(project, j)
+      local ok, isrgn, _, _, name, _ = EnumProjectMarkers2(project, j)
       if ok and not isrgn and name then
         if name:match("^%d+:SAI") or name:match("^%d+:SAO") then
           DeleteProjectMarkerByIndex(project, j)

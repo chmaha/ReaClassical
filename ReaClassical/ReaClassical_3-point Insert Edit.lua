@@ -514,7 +514,7 @@ end
 function check_overlapping_items()
     local track = GetSelectedTrack(0, 0)
     if not track then
-        ShowMessageBox("No track selected!", "Error", 0)
+        MB("No track selected!", "Error", 0)
         return
     end
 

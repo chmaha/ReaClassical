@@ -267,7 +267,7 @@ function main()
     end
 
     if check_hidden_track_items(num_of_tracks) then
-        ShowMessageBox("Warning: Items have been pasted or recorded on hidden tracks! " ..
+        MB("Warning: Items have been pasted or recorded on hidden tracks! " ..
             "Open the Track Manager via the View menu, enable the hidden tracks on TCP then delete any items",
             "Horizontal Workflow", 0)
     end
@@ -1237,7 +1237,7 @@ function get_whole_number_input()
         if num and num == math.floor(num) and num > 1 then
             return num
         else
-            ShowMessageBox("Please enter a valid number. You need 2 or more tracks to make a folder!", "Invalid Input", 0)
+            MB("Please enter a valid number. You need 2 or more tracks to make a folder!", "Invalid Input", 0)
         end
     end
 end

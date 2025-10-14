@@ -74,7 +74,7 @@ function main()
             labels[#labels + 1] = (i + 1) .. ": " .. name
             defaults[#defaults + 1] = get_current_input_pan(input_track, mixer_track)
         end
-    
+
         while true do
             local ret, input = GetUserInputs(
                 string.format("Tracks %d-%d: input:pan", start_idx + 1, end_idx + 1),
@@ -82,49 +82,49 @@ function main()
                 table.concat(labels, ","),
                 table.concat(defaults, ",")
             )
-    
+
             if not ret then
                 success = false
                 break
             end
-    
+
             local entries = {}
             for val in input:gmatch("[^,]+") do
                 entries[#entries + 1] = val:match("^%s*(.-)%s*$")
             end
-    
+
             local all_good = true
             for idx, entry in ipairs(entries) do
                 local track_idx = start_idx + idx - 1
                 local input_track = GetTrack(0, track_idx)
                 local mixer_track = mixer_table[track_idx + 1]
-    
+
                 local recInput, panVal, err = parse_input_pan(entry)
                 if err then
                     MB("Track " .. (track_idx + 1) .. ": " .. err, "Input Error", 0)
                     all_good = false
                     break
                 end
-    
+
                 local is_pair = false
                 if recInput and recInput >= 1024 then
                     is_pair = true
                     recInput = recInput - 1024
                 end
-    
+
                 local new_input = assign_input(input_track, is_pair, recInput)
                 if not new_input and is_pair then
                     MB("Cannot assign stereo input for track " .. (track_idx + 1), "Input Error", 0)
                     all_good = false
                     break
                 end
-    
+
                 SetMediaTrackInfo_Value(mixer_track, "D_PAN", panVal)
             end
-    
+
             if all_good then break end
         end
-    
+
         if not success then break end
     end
 

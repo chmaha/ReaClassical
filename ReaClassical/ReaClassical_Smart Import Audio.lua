@@ -49,7 +49,7 @@ function main()
     local files = scan_media_folder()
     -- Show error if no audio files found
     if #files == 0 then
-        ShowMessageBox("No audio files were found in the 'media' folder. Please add audio files and try again.",
+        MB("No audio files were found in the 'media' folder. Please add audio files and try again.",
             "Import Aborted", 0)
         return
     end
@@ -300,7 +300,7 @@ end
 
 function abort_if_items_exist()
     if CountMediaItems(0) > 0 then
-        ShowMessageBox("Project already contains items. Please run on an empty project.", "Import Aborted", 0)
+        MB("Project already contains items. Please run on an empty project.", "Import Aborted", 0)
         return true
     end
     return false
