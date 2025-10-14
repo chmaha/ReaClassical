@@ -28,16 +28,15 @@ local set_group_state, find_folder_parents_indices
 
 local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.",
+    MB("Please create a vertical workflow ReaClassical project using F8 to use this function.",
         "ReaClassical Error", 0)
     return
 end
 
 ---------------------------------------------------------------------
 
-local function main()
+function main()
 
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow ~= "Vertical" then
         MB("This function only runs on a vertical workflow project.", "ReaClassical Error", 0)
         return
@@ -61,7 +60,6 @@ local function main()
 
     if CountTracks(0) > 0 then
         Main_OnCommand(40297, 0) -- Unselect all tracks
-        local parents = find_folder_parents_indices()
         local second_parent_idx = parents[2]
         if second_parent_idx then
             local second_parent = GetTrack(0, second_parent_idx)
