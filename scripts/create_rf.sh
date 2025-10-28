@@ -44,11 +44,9 @@ Effects/chmaha airwindows JSFX Ports
 MenuSets/
 ProjectTemplates/ReaClassical.RPP
 ProjectTemplates/Room_Tone_Generation.RPP
-ReaPack/
 Scripts/ReaTeam Scripts/Development/cfillion_Interactive ReaScript.lua
 Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua
 Scripts/chmaha Scripts/
-reapack.ini
 reaper-convertmetadata.ini
 reaper-fxfolders.ini
 reaper-hwoutfx.ini
