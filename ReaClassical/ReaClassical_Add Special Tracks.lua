@@ -24,13 +24,14 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, pref_check, create_mixer_table, sync_based_on_workflow
 
-local starting_values = '0,0,0,0,1'
+local starting_values = '0,0,0,0,0,1'
 local NUM_OF_ENTRIES = select(2, starting_values:gsub(",", ",")) + 1
 local labels = {
     'Aux',
     'Submix',
     'Room Tone',
     'Reference',
+    'Live Bounce',
     'Maintain Mixer => RCMASTER?'
 }
 
@@ -57,11 +58,13 @@ function main()
     local add_submix = NamedCommandLookup("_RSdbfe4281d2bd56a7afc1c5e3967219c9f1c2095c")
     local add_roomtone = NamedCommandLookup("_RS3798d5ce6052ef404cd99dacf481f2befed4eacc")
     local add_ref = NamedCommandLookup("_RS00c2ccc67c644739aa15a0c93eea2c755554b30d")
+    local add_livebounce = NamedCommandLookup("_RS3f8d9e9a5731c664bc87eb08923a2450aef06537")
     local aux_num = tonumber(table[1])
     local submix_num = tonumber(table[2])
     local roomtone_num = tonumber(table[3])
     local ref_num = tonumber(table[4])
-    local mixer_connections = tonumber(table[5])
+    local livebounce_num = tonumber(table[5])
+    local mixer_connections = tonumber(table[6])
 
     PreventUIRefresh(1)
     if aux_num > 0 then
@@ -83,6 +86,12 @@ function main()
     if ref_num > 0 then
         for _ = 1, ref_num do
             Main_OnCommand(add_ref, 0)
+        end
+    end
+
+    if livebounce_num > 0 then
+        for _ = 1, livebounce_num do
+            Main_OnCommand(add_livebounce, 0)
         end
     end
 
@@ -127,21 +136,27 @@ function pref_check(input)
 
     local roomtone_err = ""
     local connection_err = ""
+    local livebounce_err = ""
     -- separate check for binary options
     if #table == NUM_OF_ENTRIES then
         local num_3 = tonumber(table[3])
         local num_5 = tonumber(table[5])
+        local num_6 = tonumber(table[6])
         if (num_3 and num_3 > 1) then
             roomtone_err = "You can only add one room tone track per project.\n"
             pass = false
         end
         if (num_5 and num_5 > 1) then
+            livebounce_err = "You can only add one live bounce track per project.\n"
+            pass = false
+        end
+        if (num_6 and num_6 > 1) then
             connection_err = "Set \"Mixer Tracks to RCMASTER?\" = 0 to disconnect for custom routing.\n"
             pass = false
         end
     end
 
-    local error_msg = roomtone_err .. connection_err .. invalid_err
+    local error_msg = roomtone_err .. connection_err .. livebounce_err .. invalid_err
 
     if not pass then
         MB(error_msg, "Error", 0)

@@ -28,11 +28,11 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 return {
         dest_marker = ColorToNative(23,203,223) | 0x1000000,
         source_marker = ColorToNative(23, 223, 143) | 0x1000000,
-        aux = ColorToNative(127, 88, 85),
-        submix = ColorToNative(85,124,127),
-        roomtone = ColorToNative(127, 99, 65),
-        rcmaster = ColorToNative(25, 75, 25),
-        mixer = ColorToNative(200, 200, 250),
+        aux = ColorToNative(127, 88, 85) | 0x1000000,
+        submix = ColorToNative(85,124,127) | 0x1000000,
+        roomtone = ColorToNative(127, 99, 65) | 0x1000000,
+        rcmaster = ColorToNative(25, 75, 25) | 0x1000000,
+        mixer = ColorToNative(200, 200, 250) | 0x1000000,
         dest_items_one = ColorToNative(18, 121, 177)|0x1000000,
         dest_items_two = ColorToNative(99, 180, 220)|0x1000000,
         edited_material = ColorToNative(18, 163, 173) | 0x1000000;
@@ -46,7 +46,8 @@ return {
         rank_excellent = ColorToNative(57, 255, 20)  | 0x1000000,
         rank_below_average = ColorToNative(255, 191, 0) | 0x1000000,
         rank_poor = ColorToNative(255, 117, 56) | 0x1000000,
-        rank_unusable = ColorToNative(220, 20, 60) | 0x1000000
+        rank_unusable = ColorToNative(220, 20, 60) | 0x1000000,
+        live = ColorToNative(255, 160, 160) | 0x1000000
     }
 
 ---------------------------------------------------------------------

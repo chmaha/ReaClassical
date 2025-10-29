@@ -235,6 +235,7 @@ function mixer()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", 0)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", 0)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", 0)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", 0)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", 0)
         if mixer_state == "y" then
@@ -257,12 +258,16 @@ function mixer()
             SetTrackColor(track, colors.ref)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
+        if live_state == "y" then
+            SetTrackColor(track, colors.live)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+        end
         if rcmaster_state == "y" then
             SetTrackColor(track, colors.rcmaster)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or
-            rcmaster_state == "y" or rt_state == "y" or ref_state == "y" then
+            rcmaster_state == "y" or rt_state == "y" or live_state == "y" or ref_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

@@ -33,10 +33,15 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local folders = folder_check()
+    local folders, _, _, live_count = folder_check()
     if folders == 0 then
         MB("Please set up a horizontal workflow (F7) or vertical workflow (F8) first!",
-            "Add Submix", 0)
+            "Add Live Bounce Track", 0)
+        return
+    end
+    if live_count > 0 then
+        MB("Only one live bounce track is allowed per project.",
+            "Add Live Bounce Track", 0)
         return
     end
 
@@ -61,19 +66,24 @@ function main()
         return
     end
 
-    InsertTrackAtIndex(rcmaster_index, true) -- Add track just before RCMASTER
-    local bus = GetTrack(0, rcmaster_index)
-    GetSetMediaTrackInfo_String(bus, "P_EXT:submix", "y", true)
-    SetMediaTrackInfo_Value(bus, "I_FOLDERDEPTH", 0)
+    -- Insert a new empty track to the right
+    InsertTrackAtIndex(rcmaster_index + 1, true)
+    local live_track = GetTrack(0, rcmaster_index + 1)
 
-    route_to_track(bus, rcmaster)
+    -- Rename new track to LIVE
+    GetSetMediaTrackInfo_String(live_track, "P_NAME", "LIVE", true)
+
+    CreateTrackSend(rcmaster, live_track)
+    SetMediaTrackInfo_Value(live_track, "B_MAINSEND", 1)
+
+    -- Set the P_EXT key for the new track
+    GetSetMediaTrackInfo_String(live_track, "P_EXT:live", "y", true)
+    SetMediaTrackInfo_Value(live_track, "I_RECMODE", 3)
+    SetMediaTrackInfo_Value(live_track, "I_RECINPUT", -1)
+    SetMediaTrackInfo_Value(live_track, "I_RECMODE_FLAGS", 2)
+
     local colors = get_color_table()
-    SetTrackColor(bus, colors.submix)
-    GetSetMediaTrackInfo_String(bus, "P_NAME", "#", true) -- Add @ as track name
-    SetMediaTrackInfo_Value(bus, "B_SHOWINTCP", 0)
-    Main_OnCommand(40297, 0)
-    local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
-    Main_OnCommand(home, 0)
+    SetTrackColor(live_track, colors.live)
 
     if folders > 1 then
         local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
@@ -83,7 +93,7 @@ function main()
         Main_OnCommand(F7_sync, 0)
     end
 
-    Undo_EndBlock("Add Submix", 0)
+    Undo_EndBlock("Add Aux", 0)
 end
 
 ---------------------------------------------------------------------
@@ -92,14 +102,15 @@ function folder_check()
     local folders = 0
     local tracks_per_group = 1
     local total_tracks = CountTracks(0)
+    local live_count = 0
     for i = 0, total_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
-        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
@@ -112,9 +123,11 @@ function folder_check()
             folders = folders + 1
         elseif folders == 1 and not (special_states or special_names) then
             tracks_per_group = tracks_per_group + 1
+        elseif live_state == "y" then
+            live_count = live_count + 1
         end
     end
-    return folders, tracks_per_group, total_tracks
+    return folders, tracks_per_group, total_tracks, live_count
 end
 
 ---------------------------------------------------------------------

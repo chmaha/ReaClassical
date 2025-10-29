@@ -103,14 +103,15 @@ function solo()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
-            or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"
+            or rt_state == "y" or ref_state == "y" or live_state == "y" or rcmaster_state == "y"
         local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
             or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
-            or trackname_check(track, "^REF")
+            or trackname_check(track, "^LIVE") or trackname_check(track, "^REF")
 
         if special_states or special_names then
             local num_of_sends = GetTrackNumSends(track, 0)
@@ -150,11 +151,6 @@ function solo()
                 end
             end
         end
-
-        -- if (trackname_check(track, "^RoomTone") or rt_state == "y") and muted == 0 then
-        --     SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-        --     SetMediaTrackInfo_Value(track, "I_SOLO", 1)
-        -- end
     end
 end
 

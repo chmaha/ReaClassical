@@ -26,6 +26,7 @@ local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
 local extract_take_number, check_parent_track
 local get_selected_media_item_at, count_selected_media_items
+local clear_all_rec_armed_except_live
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -90,7 +91,7 @@ function main()
             MB("Please select a folder or track before running", "Classical Take Record", 0)
             return
         end
-        ClearAllRecArmed()
+        clear_all_rec_armed_except_live()
         local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
         Main_OnCommand(arm, 0)               -- Xenakios/SWS: Set selected tracks record armed
         local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
@@ -191,7 +192,6 @@ function solo()
     if not track then
         return false
     end
-    -- SetMediaTrackInfo_Value(track, "I_SOLO", 2)
 
     for i = 0, CountTracks(0) - 1, 1 do
         track = GetTrack(0, i)
@@ -199,11 +199,12 @@ function solo()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         if IsTrackSelected(track) == false and mixer_state ~= "y" and aux_state ~= "y" and submix_state ~= "y"
-            and rt_state ~= "y" and rcmaster_state ~= "y" then
+            and rt_state ~= "y" and live_state == "y" and rcmaster_state ~= "y" then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
@@ -232,6 +233,7 @@ function mixer()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
@@ -251,6 +253,10 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
+        if live_state == "y" then
+            SetTrackColor(track, colors.live)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+        end
         if ref_state == "y" then
             SetTrackColor(track, colors.ref)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
@@ -260,7 +266,7 @@ function mixer()
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
-            or rt_state == "y" or ref_state == "y" then
+            or rt_state == "y" or live_state == "y" or ref_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -369,6 +375,23 @@ function get_selected_media_item_at(index)
     return nil
 end
 
+---------------------------------------------------------------------
+
+function clear_all_rec_armed_except_live()
+    local num_tracks = CountTracks(0)
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        local _, live_flag = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        
+        if live_flag ~= "y" then
+            -- Disarm track
+            SetMediaTrackInfo_Value(track, "I_RECARM", 0)
+        else
+            -- Optional: ensure LIVE track is armed
+            SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        end
+    end
+end
 
 ---------------------------------------------------------------------
 

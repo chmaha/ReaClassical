@@ -268,6 +268,7 @@ function mixer()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
@@ -287,6 +288,13 @@ function mixer()
             SetTrackColor(track, colors.roomtone)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
+        if trackname_check(track, "^LIVE") or live_state == "y" then
+            SetTrackColor(track, colors.live)
+            SetMediaTrackInfo_Value(track, "I_RECMODE", 3)
+            SetMediaTrackInfo_Value(track, "I_RECINPUT", -1)
+            SetMediaTrackInfo_Value(track, "I_RECMODE_FLAGS", 2)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+        end
         if trackname_check(track, "^REF") or ref_state == "y" then
             SetTrackColor(track, colors.ref)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
@@ -297,20 +305,16 @@ function mixer()
         end
 
         local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
-            or rt_state == "y" or ref_state == "y" or rcmaster_state == "y"
+            or rt_state == "y" or ref_state == "y" or live_state == "y" or rcmaster_state == "y"
         local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
             or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
-            or trackname_check(track, "^REF")
+            or trackname_check(track, "^LIVE") or trackname_check(track, "^REF")
 
         if special_states or special_names then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
-
-        -- if trackname_check(track, "^S%d+:") then
-        --     SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (mastering == 1) and 0 or 1)
-        -- end
 
         local states_for_mastering = mixer_state == "y" or aux_state == "y"
             or submix_state == "y" or rcmaster_state == "y"
@@ -547,7 +551,7 @@ function route_tracks(rcmaster, track_table, end_of_sources)
         local mixer_track = GetTrack(0, i)
         remove_connections(mixer_track)
     end
-    --routing to rcmaster
+    --routing to/from rcmaster
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
@@ -555,6 +559,12 @@ function route_tracks(rcmaster, track_table, end_of_sources)
             if name:match("^@") or name:match("^#") or name:match("^RoomTone") or name:match("^M:") then
                 route_to_track(track, rcmaster)
             end
+        end
+        -- route rcmaster to live bounce if present
+        if name:match("^LIVE") then
+            remove_connections(track)
+            CreateTrackSend(rcmaster, track)
+            SetMediaTrackInfo_Value(track, "B_MAINSEND", 1)
         end
     end
 
@@ -596,6 +606,7 @@ function create_track_table(is_empty)
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
@@ -624,6 +635,9 @@ function create_track_table(is_empty)
         elseif trackname_check(track, "^RoomTone") or rt_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", true)
+        elseif trackname_check(track, "^LIVE") or live_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:live", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "LIVE", true)
         elseif trackname_check(track, "^REF") or ref_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", true)
             local mod_name = name:match("^REF:?(.*)") or name
