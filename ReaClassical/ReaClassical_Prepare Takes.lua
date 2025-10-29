@@ -122,6 +122,8 @@ function main()
             , "ReaClassical", 0)
     end
 
+    SetProjExtState(0, "ReaClassical", "PreparedTakes", "y")
+    
     Undo_EndBlock('Prepare Takes', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

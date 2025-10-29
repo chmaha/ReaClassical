@@ -28,7 +28,7 @@ local clean_up, ripple_lock_mode, delete_dest_markers
 local get_color_table, get_path, move_to_project_tab, xfade
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local create_crossfades, get_first_last_items, return_xfade_length
-local move_destination_folder_to_top, move_destination_folder
+local move_destination_folder_to_top, move_destination_folder, mark_as_edit
 
 ---------------------------------------------------------------------
 
@@ -193,6 +193,7 @@ function main()
         Main_OnCommand(delete, 0) -- Adaptive Delete
         local paste = NamedCommandLookup("_SWS_AWPASTE")
         Main_OnCommand(paste, 0)  -- SWS_AWPASTE
+        mark_as_edit()
         create_crossfades()
         if moveable_dest == 1 then move_destination_folder(track_number) end
         GoToMarker(0, 998, false)
@@ -687,6 +688,16 @@ function move_destination_folder(track_number)
     if destination_index ~= target_index then
         SetOnlyTrackSelected(destination_folder)
         ReorderSelectedTracks(target_index, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function mark_as_edit()
+    local selected_items = count_selected_media_items()
+    for i = 0, selected_items - 1, 1 do
+        local item = get_selected_media_item_at(i)
+        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
     end
 end
 
