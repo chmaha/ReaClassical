@@ -26,7 +26,7 @@ local main, display_prefs, load_prefs, save_prefs, pref_check
 local sync_based_on_workflow, move_destination_folder_to_top
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0'
+local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade length (ms)',
@@ -40,7 +40,8 @@ local labels = {
     'Alt Audition Playback Rate',
     'Year of Production',
     'CUE audio format',
-    'Floating Destination Group'
+    'Floating Destination Group',
+    'Find takes using item names'
 }
 
 ---------------------------------------------------------------------
@@ -138,8 +139,10 @@ function pref_check(input)
         local num_7 = tonumber(table[7])
         local num_8 = tonumber(table[8])
         local num_12 = tonumber(table[12])
+        local num_13 = tonumber(table[13])
         local audio_format = tostring(table[11])
-        if (num_5 and num_5 > 1) or (num_7 and num_7 > 1) or (num_8 and num_8 > 1) or (num_12 and num_12 > 1) then
+        if (num_5 and num_5 > 1) or (num_7 and num_7 > 1)
+        or (num_8 and num_8 > 1) or (num_12 and num_12 > 1) or (num_13 and num_13 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end

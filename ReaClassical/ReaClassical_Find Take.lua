@@ -38,6 +38,15 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local find_takes_using_items = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[13] then find_takes_using_items = tonumber(table[13]) or 0 end
+    end
+
     local take_choice
     local _, session_name = GetProjExtState(0, "ReaClassical", "SessionNameSearch")
     ::start::
@@ -54,37 +63,72 @@ function main()
     local found = false
     local num_of_items = CountMediaItems(0)
 
-    for i = 0, num_of_items - 1, 1 do
-        local item = GetMediaItem(0, i)
-        local take = GetActiveTake(item)
-        if take then
-            local src = GetMediaItemTake_Source(take)
-            local filename = GetMediaSourceFileName(src, "")
-            local take_capture = tonumber(
-            -- Case: (###)[chan X].wav  or  ### [chan X].wav  (with or without space)
-                filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
-                -- Case: (###).wav  or  ###.wav
-                or filename:match("(%d+)%)?%.[^%.]+$")
-            )
+    if find_takes_using_items == 0 then -- search using filenames
+        for i = 0, num_of_items - 1, 1 do
+            local item = GetMediaItem(0, i)
+            local take = GetActiveTake(item)
+            if take then
+                local src = GetMediaItemTake_Source(take)
+                local filename = GetMediaSourceFileName(src, "")
+                local take_capture = tonumber(
+                -- Case: (###)[chan X].wav  or  ### [chan X].wav  (with or without space)
+                    filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
+                    -- Case: (###).wav  or  ###.wav
+                    or filename:match("(%d+)%)?%.[^%.]+$")
+                )
 
-            local session_match = true
+                local session_match = true
 
-            if session_name and session_name ~= "" then
-                session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                if session_name and session_name ~= "" then
+                    session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                end
+
+                local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+
+                if take_capture == take_choice and session_match and not edit then
+                    found = true
+                    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                    SetEditCurPos(item_start, 1, 0)
+                    local center = NamedCommandLookup("_SWS_HSCROLL50")
+                    Main_OnCommand(center, 0)
+                    Main_OnCommand(40769, 0) -- unselect all items
+                    SetMediaItemSelected(item, true)
+                    Main_OnCommand(40034, 0) -- select all in group
+                    break
+                end
             end
+        end
+    else -- search using take names
+        for i = 0, num_of_items - 1 do
+            local item = GetMediaItem(0, i)
+            local take = GetActiveTake(item)
+            if take then
+                local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                local session_match = true
+                if session_name and session_name ~= "" then
+                    session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                end
 
-            local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+                if take_name and session_match then
+                    if take_choice then
+                        local take_num = tonumber(take_name:match("(%d+)"))
+                        if take_num == take_choice then
+                            found = true
+                        end
+                    else
+                        found = true
+                    end
 
-            if take_capture == take_choice and session_match and not edit then
-                found = true
-                local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-                SetEditCurPos(item_start, 1, 0)
-                local center = NamedCommandLookup("_SWS_HSCROLL50")
-                Main_OnCommand(center, 0)
-                Main_OnCommand(40769, 0) -- unselect all items
-                SetMediaItemSelected(item, true)
-                Main_OnCommand(40034, 0) -- select all in group
-                break
+                    if found then
+                        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                        SetEditCurPos(item_start, 1, 0)
+                        Main_OnCommand(NamedCommandLookup("_SWS_HSCROLL50"), 0)
+                        Main_OnCommand(40769, 0)
+                        SetMediaItemSelected(item, true)
+                        Main_OnCommand(40034, 0)
+                        break
+                    end
+                end
             end
         end
     end
