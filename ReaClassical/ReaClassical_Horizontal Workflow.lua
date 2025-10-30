@@ -32,6 +32,7 @@ local process_name, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 local rearrange_tracks, reset_mixer_order, copy_track_names_from_dest
 local process_dest, check_hidden_track_items, get_whole_number_input
+local set_recording_to_primary_and_secondary
 
 ---------------------------------------------------------------------
 
@@ -99,6 +100,7 @@ function main()
                 end
             end
             copy_track_names(track_table, mixer_track_table)
+            set_recording_to_primary_and_secondary(mixer_track_table)
         end
     elseif folder_check() > 1 then
         MB("This function only runs on projects with a single folder", "Horizontal Workflow", 0)
@@ -166,6 +168,7 @@ function main()
         route_tracks(rcmaster, track_table, end_of_sources)
         groupings_mcp()
         remove_spacers(rcmaster_index)
+        set_recording_to_primary_and_secondary(mixer_tracks)
         SetProjExtState(0, "ReaClassical", "Workflow", "Horizontal")
     else
         MB(
@@ -975,7 +978,7 @@ end
 
 function get_whole_number_input()
     while true do
-        local ok, num = reaper.GetUserInputs("Horizontal Workflow", 1, "How many tracks?", "10")
+        local ok, num = GetUserInputs("Horizontal Workflow", 1, "How many tracks?", "10")
         if not ok then return nil end -- User cancelled
 
         num = tonumber(num)
@@ -986,6 +989,25 @@ function get_whole_number_input()
             MB("Please enter a valid number. You need 2 or more tracks to make a folder!", "Invalid Input", 0)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function set_recording_to_primary_and_secondary(mixer_track_table)
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    local track_count = CountTracks(0)
+    local i = 0
+
+    while i < #mixer_track_table do
+        if i < track_count then -- make sure the track exists
+            local track = GetTrack(0, i)
+            SetTrackSelected(track, true)
+        end
+        i = i + 1
+    end
+
+    Main_OnCommand(41323, 0) -- set primary+secondary
+    Main_OnCommand(40297, 0) -- Unselect all tracks
 end
 
 ---------------------------------------------------------------------

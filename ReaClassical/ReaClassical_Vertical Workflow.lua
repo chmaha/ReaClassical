@@ -33,7 +33,7 @@ local save_track_settings, reset_track_settings, write_to_mixer
 local check_mixer_order, rearrange_tracks, reset_mixer_order
 local copy_track_names_from_dest, process_dest, move_items_to_first_source_group
 local check_hidden_track_items, move_destination_folder_to_top
-local get_whole_number_input
+local get_whole_number_input, set_recording_to_primary_and_secondary
 
 ---------------------------------------------------------------------
 
@@ -111,6 +111,7 @@ function main()
                 end
             end
             copy_track_names(table, mixer_table)
+            set_recording_to_primary_and_secondary(end_of_sources)
         end
     elseif folder_check() > 1 then
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
@@ -182,6 +183,7 @@ function main()
         reset_spacers(tracks_per_group, rcmaster_index)
         sync(tracks_per_group, end_of_sources)
         mixer()
+        set_recording_to_primary_and_secondary(end_of_sources)
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     elseif folder_check() == 1 then
         local convert_response = MB("Are you sure you'd like to convert to a vertical workflow?",
@@ -254,6 +256,7 @@ function main()
         mixer()
         Main_OnCommand(show, 0) -- show children of destination
         move_items_to_first_source_group(tracks_per_group)
+        set_recording_to_primary_and_secondary(end_of_sources)
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     else
         MB(
@@ -1254,6 +1257,25 @@ function get_whole_number_input()
             MB("Please enter a valid number. You need 2 or more tracks to make a folder!", "Invalid Input", 0)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function set_recording_to_primary_and_secondary(end_of_sources)
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    local track_count = CountTracks(0)
+    local i = 0
+
+    while i < end_of_sources do
+        if i < track_count then -- make sure the track exists
+            local track = GetTrack(0, i)
+            SetTrackSelected(track, true)
+        end
+        i = i + 1
+    end
+
+    Main_OnCommand(41323, 0) -- set primary+secondary
+    Main_OnCommand(40297, 0) -- Unselect all tracks
 end
 
 ---------------------------------------------------------------------
