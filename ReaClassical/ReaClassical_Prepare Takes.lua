@@ -26,7 +26,7 @@ local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, get_selected_media_item_at, count_selected_media_items
-local delete_empty_items, pastel_color
+local delete_empty_items, pastel_color, color_tracks_from_first_item
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -99,10 +99,13 @@ function main()
     end
 
     if folders == 0 or folders == 1 then
-        horizontal(colors)
+        horizontal()
     else
         vertical()
     end
+    PreventUIRefresh(-1)
+    color_tracks_from_first_item()
+    PreventUIRefresh(1)
 
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     SetEditCurPos(cur_pos, 0, 0)
@@ -126,7 +129,6 @@ function main()
     end
 
     SetProjExtState(0, "ReaClassical", "PreparedTakes", "y")
-
     Undo_EndBlock('Prepare Takes', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -504,6 +506,27 @@ function pastel_color(index)
     )
 
     return color_int | 0x1000000
+end
+
+---------------------------------------------------------------------
+
+function color_tracks_from_first_item()
+    local num_tracks = CountTracks(0)
+
+    for t = 0, num_tracks - 1 do
+        local track = GetTrack(0, t)
+        local num_items = CountTrackMediaItems(track)
+
+        if num_items > 0 then
+            local first_item = GetTrackMediaItem(track, 0)
+            local item_color = GetMediaItemInfo_Value(first_item, "I_CUSTOMCOLOR")
+
+            -- Apply the item color to the track if it has a color
+            if item_color ~= 0 then
+                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", item_color)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------
