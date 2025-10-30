@@ -382,7 +382,7 @@ function clear_all_rec_armed_except_live()
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         local _, live_flag = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
-        
+
         if live_flag ~= "y" then
             -- Disarm track
             SetMediaTrackInfo_Value(track, "I_RECARM", 0)

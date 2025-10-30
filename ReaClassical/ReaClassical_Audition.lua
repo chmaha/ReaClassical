@@ -219,6 +219,13 @@ function solo()
             end
         end
 
+        if live_state == "y" then
+            if IsTrackSelected(track) then
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            end
+        end
+
         if ref_state == "y" then
             local is_selected = IsTrackSelected(track)
             local mute_state = 1

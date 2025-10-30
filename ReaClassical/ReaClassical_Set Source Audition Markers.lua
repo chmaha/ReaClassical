@@ -24,7 +24,6 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number, get_color_table, get_path
 local move_destination_folder, calculate_destination_info, get_tracks_per_group
-local get_selected_media_item_at, count_selected_media_items
 local SelectFirstRazorEditTrack
 ---------------------------------------------------------------------
 
@@ -46,8 +45,8 @@ function main()
         if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
-    Main_OnCommand(40635,0) -- remove time selection
-    Main_OnCommand(42474,0) -- set selection to razor edit
+    Main_OnCommand(40635, 0) -- remove time selection
+    Main_OnCommand(42474, 0) -- set selection to razor edit
 
     local left_pos, right_pos
     local start_time, end_time = GetSet_LoopTimeRange(false, false, 0, 0, false)
@@ -56,7 +55,7 @@ function main()
         right_pos = end_time
         SelectFirstRazorEditTrack()
     else
-        MB("test","tester title",0)
+        MB("test", "tester title", 0)
         return
     end
 
@@ -78,8 +77,8 @@ function main()
     if selected_track then SetOnlyTrackSelected(selected_track) end
     AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SAI", -1, colors.source_marker)
     AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SAO", -1, colors.source_marker)
-    Main_OnCommand(40635,0) -- remove time selection
-    Main_OnCommand(42406,0) -- remove razor edit areas
+    Main_OnCommand(40635, 0) -- remove time selection
+    Main_OnCommand(42406, 0) -- remove razor edit areas
     PreventUIRefresh(-1)
     Undo_EndBlock("Source Markers to Item Edge", 0)
 end
@@ -206,56 +205,21 @@ end
 
 ---------------------------------------------------------------------
 
-function count_selected_media_items()
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            selected_count = selected_count + 1
-        end
-    end
-
-    return selected_count
-end
-
----------------------------------------------------------------------
-
-function get_selected_media_item_at(index)
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            if selected_count == index then
-                return item
-            end
-            selected_count = selected_count + 1
-        end
-    end
-
-    return nil
-end
-
----------------------------------------------------------------------
-
 function SelectFirstRazorEditTrack()
-  local trackCount = reaper.CountTracks(0)
-  
-  -- deselect all tracks
-  reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
-  
-  for i = 0, trackCount-1 do
-    local track = reaper.GetTrack(0, i)
-    local ok, area = reaper.GetSetMediaTrackInfo_String(track, "P_RAZOREDITS", "", false)
-    if ok and area ~= "" then
-      -- select this track
-      reaper.SetTrackSelected(track, true)
-      return -- stop after the first one
+    local trackCount = reaper.CountTracks(0)
+
+    -- deselect all tracks
+    reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
+
+    for i = 0, trackCount - 1 do
+        local track = reaper.GetTrack(0, i)
+        local ok, area = reaper.GetSetMediaTrackInfo_String(track, "P_RAZOREDITS", "", false)
+        if ok and area ~= "" then
+            -- select this track
+            reaper.SetTrackSelected(track, true)
+            return -- stop after the first one
+        end
     end
-  end
 end
 
 ---------------------------------------------------------------------

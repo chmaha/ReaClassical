@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_color_table, get_path
-local route_to_track, trackname_check
+local trackname_check
 
 ---------------------------------------------------------------------
 
@@ -145,13 +145,6 @@ function get_path(...)
     local pathseparator = package.config:sub(1, 1);
     local elements = { ... }
     return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
-function route_to_track(track, rcmaster)
-    SetMediaTrackInfo_Value(track, "B_MAINSEND", 0)
-    CreateTrackSend(track, rcmaster)
 end
 
 ---------------------------------------------------------------------

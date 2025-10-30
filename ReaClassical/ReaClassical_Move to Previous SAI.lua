@@ -90,7 +90,8 @@ function solo()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or live_state == "y" or ref_state == "y" then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
+            or live_state == "y" or ref_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)

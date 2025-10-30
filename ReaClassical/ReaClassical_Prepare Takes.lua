@@ -100,7 +100,7 @@ function main()
     if folders == 0 or folders == 1 then
         horizontal(colors)
     else
-        vertical(colors)
+        vertical()
     end
 
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
@@ -143,35 +143,41 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_color(edits, colors)
-    colors = get_color_table()
-    local color
-    color = colors.dest_items
+function horizontal_color(workflow, edits)
+    local colors = get_color_table()
+    local dest_blue = colors.dest_items
+    local pastel = pastel_color(color_index)
     local num_of_items = count_selected_media_items()
-    if edits then
-        for i = 0, num_of_items - 1, 1 do
+    if edits and workflow == "vertical" then
+        for i = 0, num_of_items - 1 do
             local item = get_selected_media_item_at(i)
             local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-            if current_color == 0 or current_color == colors.dest_items
-                or current_color == colors.source_items then
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
+            if current_color == 0 then
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
             end
         end
-    else
-        for i = 0, num_of_items - 1, 1 do
+    elseif edits and workflow == "horizontal" then
+
+    elseif workflow == "vertical" then
+        for i = 0, num_of_items - 1 do
             local item = get_selected_media_item_at(i)
             local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-            if current_color == 0 or current_color == colors.dest_items
-                or current_color == colors.source_items then
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items)
+            if current_color == 0 then
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
             end
+        end
+    elseif not edits and workflow == "horizontal" then
+        for i = 0, num_of_items - 1 do
+            local item = get_selected_media_item_at(i)
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
+            color_index = color_index + 1
         end
     end
 end
 
 ---------------------------------------------------------------------
 
-function vertical_color_razor(colors)
+function vertical_color_razor()
     Main_OnCommand(40042, 0)           -- Transport: Go to start of project
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- Select child tracks
@@ -179,11 +185,9 @@ function vertical_color_razor(colors)
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40421, 0)           -- Item: Select all items in trac
 
-    local color_table = get_color_table()
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
-        local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
         local pastel = pastel_color(color_index)
         SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
     end
@@ -250,7 +254,7 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal(colors)
+function horizontal()
     local edits = xfade_check()
     local length = GetProjectLength(0)
     local first_track = GetTrack(0, 0)
@@ -267,7 +271,7 @@ function horizontal(colors)
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
         horizontal_group(workflow, group)
-        horizontal_color(edits, colors)
+        horizontal_color(workflow, edits)
         group = group + 1
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     until IsMediaItemSelected(new_item) == true
@@ -282,7 +286,7 @@ end
 
 ---------------------------------------------------------------------
 
-function vertical(colors)
+function vertical()
     local edits = xfade_check()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
@@ -300,19 +304,18 @@ function vertical(colors)
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
         horizontal_group(workflow, group)
-        horizontal_color(edits, colors)
+        horizontal_color(workflow, edits)
         group = group + 1
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     until IsMediaItemSelected(new_item) == true
 
     DeleteTrackMediaItem(first_track, new_item)
     local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-    local start = 1
-    start = 2
+    local start = 2
     Main_OnCommand(next_folder, 0) -- select next folder
 
     for _ = start, num_of_folders, 1 do
-        vertical_color_razor(colors)
+        vertical_color_razor()
         local next_group = vertical_group(length, group)
         Main_OnCommand(next_folder, 0) -- select next folder
         group = next_group
@@ -487,7 +490,7 @@ function pastel_color(index)
     local g = h2rgb(p, q, hue)
     local b = h2rgb(p, q, hue - 1 / 3)
 
-    local color_int = reaper.ColorToNative(
+    local color_int = ColorToNative(
         math.floor(r * 255 + 0.5),
         math.floor(g * 255 + 0.5),
         math.floor(b * 255 + 0.5)
