@@ -32,7 +32,7 @@ local process_name, show_track_name_dialog
 local save_track_settings, reset_track_settings, write_to_mixer
 local rearrange_tracks, reset_mixer_order, copy_track_names_from_dest
 local process_dest, check_hidden_track_items, get_whole_number_input
-local set_recording_to_primary_and_secondary
+local set_recording_to_primary_and_secondary, reorder_special_tracks
 
 ---------------------------------------------------------------------
 
@@ -117,6 +117,7 @@ function main()
                 SetProjExtState(0, "ReaClassical", "RCProject", "y")
             end
         end
+        reorder_special_tracks()
         local is_empty = false
         Main_OnCommand(focus, 0)
         remove_track_groups()
@@ -1008,6 +1009,84 @@ function set_recording_to_primary_and_secondary(mixer_track_table)
 
     Main_OnCommand(41323, 0) -- set primary+secondary
     Main_OnCommand(40297, 0) -- Unselect all tracks
+end
+
+---------------------------------------------------------------------
+
+function reorder_special_tracks()
+    local num_tracks = CountTracks(0)
+    if num_tracks == 0 then return end
+
+    local rcmaster_track = nil
+    local m_tracks, aux_tracks, submix_tracks, roomtone_tracks = {}, {}, {}, {}
+    local live_tracks, ref_tracks = {}, {}
+
+    -- Collect tracks by type
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+
+        if name:match("^RCMASTER") or rcmaster_state == "y" then
+            rcmaster_track = track
+        elseif live_state == "y" or name:match("^LIVE") then
+            table.insert(live_tracks, track)
+        elseif ref_state == "y" or name:match("^REF") then
+            table.insert(ref_tracks, track)
+        elseif mixer_state == "y" then
+            table.insert(m_tracks, track)
+        elseif aux_state == "y" or name:match("^@") then
+            table.insert(aux_tracks, track)
+        elseif submix_state == "y" or name:match("^#") then
+            table.insert(submix_tracks, track)
+        elseif rt_state == "y" or name:match("^RoomTone") then
+            table.insert(roomtone_tracks, track)
+        end
+    end
+
+    -- Helper: select and reorder tracks at current RCMASTER position
+    local function select_and_reorder(tracks)
+        if #tracks == 0 then return end
+        Main_OnCommand(40297, 0) -- unselect all
+        for _, t in ipairs(tracks) do SetTrackSelected(t, true) end
+        local index = rcmaster_track and GetMediaTrackInfo_Value(rcmaster_track, "IP_TRACKNUMBER") - 1 or 0
+        ReorderSelectedTracks(index, 0)
+        Main_OnCommand(40297, 0)
+    end
+
+    -- Pre-RCMASTER order: M: → aux → submix → roomtone
+    select_and_reorder(m_tracks)
+    select_and_reorder(aux_tracks)
+    select_and_reorder(submix_tracks)
+    select_and_reorder(roomtone_tracks)
+
+    -- LIVE tracks immediately after RCMASTER
+    if rcmaster_track then
+        Main_OnCommand(40297, 0)
+        for _, t in ipairs(live_tracks) do SetTrackSelected(t, true) end
+        local live_index = GetMediaTrackInfo_Value(rcmaster_track, "IP_TRACKNUMBER")
+        ReorderSelectedTracks(live_index, 0)
+        Main_OnCommand(40297, 0)
+    else
+        -- No RCMASTER: LIVE tracks after special tracks
+        local start_index = #m_tracks + #aux_tracks + #submix_tracks + #roomtone_tracks
+        Main_OnCommand(40297, 0)
+        for _, t in ipairs(live_tracks) do SetTrackSelected(t, true) end
+        ReorderSelectedTracks(start_index, 0)
+        Main_OnCommand(40297, 0)
+    end
+
+    -- REF tracks at the end
+    Main_OnCommand(40297, 0)
+    for _, t in ipairs(ref_tracks) do SetTrackSelected(t, true) end
+    ReorderSelectedTracks(CountTracks(0), 0)
+    Main_OnCommand(40297, 0)
 end
 
 ---------------------------------------------------------------------
