@@ -181,9 +181,6 @@ function get_info()
       end
     end
   end
-  MB("No album metadata found.\n" ..
-    "Added generic album metadata to end of album:\n" ..
-    "You can open metadata.txt to edit…", "Create CD Markers", 0)
   return false
 end
 
@@ -193,6 +190,9 @@ function cd_markers(first_track, num_of_items, use_existing)
   local album_metadata = get_info()
   if not album_metadata then
     album_metadata = split_and_tag_final_item()
+    MB("No album metadata found.\n" ..
+      "Added generic album metadata to end of album:\n" ..
+      "You can open metadata.txt to edit…", "Create CD Markers", 0)
   end
 
   delete_markers()
@@ -1550,67 +1550,86 @@ end
 ---------------------------------------------------------------------
 
 function split_and_tag_final_item()
-  local track = GetTrack(0, 0)
-  if not track then return end
+    local track = GetTrack(0, 0)
+    if not track then return end
 
-  local item_count = CountTrackMediaItems(track)
-  if item_count == 0 then return end
+    local item_count = CountTrackMediaItems(track)
+    if item_count == 0 then return end
 
-  local last_item = nil
-  local last_end = 0
-  local gap_threshold = 60 -- seconds
+    local last_item = nil
+    local unnamed_item = nil
+    local last_end = 0
+    local gap_threshold = 60 -- seconds
 
-  -- Find the last item or last before ≥1 min gap
-  for i = 0, item_count - 1 do
-    local item = GetTrackMediaItem(track, i)
-    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-    local item_end = pos + len
+    -- Loop through items to find last item and last unnamed take
+    for i = 0, item_count - 1 do
+        local item = GetTrackMediaItem(track, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local item_end = pos + len
 
-    if pos - last_end >= gap_threshold then
-      break -- found ≥1 min gap, stop at previous item
+        -- Track the last item before a ≥1 min gap
+        if pos - last_end >= gap_threshold then
+            break
+        end
+        last_item = item
+        last_end = item_end
+
+        -- Check if item has a take without a name
+        local take = GetActiveTake(item)
+        if take then
+            local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            if name == "" then
+                unnamed_item = item
+            end
+        end
     end
 
-    last_item = item
-    last_end = item_end
-  end
+    -- Prefer unnamed take if available
+    local target_item = unnamed_item or last_item
+    if not target_item then return false end
 
-  if not last_item then return false end
+    local take = GetActiveTake(target_item)
+    if not take then return false end
 
-  -- Split 1 second before end
-  local pos = GetMediaItemInfo_Value(last_item, "D_POSITION")
-  local len = GetMediaItemInfo_Value(last_item, "D_LENGTH")
-  local split_pos = pos + math.max(0, len - 1)
-  -- Move cursor to split position
-  SetEditCurPos(split_pos, false, false)
-
-  -- Select only the last item before splitting
-  -- Main_OnCommand(40289, 0) -- Unselect all items
-  SetMediaItemSelected(last_item, true)
-
-  -- Perform the split using REAPER command (40012)
-  Main_OnCommand(40012, 0) -- Item: Split items at edit cursor
-
-  -- Get the new item (the one after the split)
-  local new_item = nil
-  local new_item_count = CountTrackMediaItems(track)
-  for i = 0, new_item_count - 1 do
-    local item = GetTrackMediaItem(track, i)
-    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    if math.abs(item_pos - split_pos) < 0.0001 then
-      new_item = item
-      break
+    -- If we have an unnamed take, just rename it (no split)
+    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    local item_name = "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various|MESSAGE=Created with ReaClassical"
+    if name == "" then
+        GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+        return item_name
     end
-  end
 
-  if not new_item then return false end
+    -- Otherwise, split 1 second before end (fallback)
+    local pos = GetMediaItemInfo_Value(target_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(target_item, "D_LENGTH")
+    local split_pos = pos + math.max(0, len - 1)
 
-  -- Rename the new item
-  local take = GetActiveTake(new_item)
-  if not take then return false end
-  local item_name = "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various|MESSAGE=Created with ReaClassical"
-  GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
-  return item_name
+    SetEditCurPos(split_pos, false, false)
+
+    Main_OnCommand(40289, 0) -- Unselect all items
+    SetMediaItemSelected(target_item, true)
+    Main_OnCommand(40012, 0) -- Split items at edit cursor
+
+    -- Get the new item (the one after the split)
+    local new_item = nil
+    local new_item_count = CountTrackMediaItems(track)
+    for i = 0, new_item_count - 1 do
+        local item = GetTrackMediaItem(track, i)
+        local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        if math.abs(item_pos - split_pos) < 0.0001 then
+            new_item = item
+            break
+        end
+    end
+
+    if not new_item then return false end
+
+    local new_take = GetActiveTake(new_item)
+    if not new_take then return false end
+    GetSetMediaItemTakeInfo_String(new_take, "P_NAME", item_name, true)
+
+    return item_name
 end
 
 ---------------------------------------------------------------------
