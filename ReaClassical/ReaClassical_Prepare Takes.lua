@@ -26,7 +26,7 @@ local main, shift, horizontal_color, vertical_color_razor, horizontal_group
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, get_selected_media_item_at, count_selected_media_items
-local delete_empty_items
+local delete_empty_items, pastel_color
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -34,6 +34,8 @@ if not SWS_exists then
     MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
+
+local color_index = 0
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -123,7 +125,7 @@ function main()
     end
 
     SetProjExtState(0, "ReaClassical", "PreparedTakes", "y")
-    
+
     Undo_EndBlock('Prepare Takes', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -141,36 +143,27 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_color(flip, edits, colors)
-    if colors == 1 then
-        Main_OnCommand(40706, 0) -- Item: Set to one random color
-    else
-        colors = get_color_table()
-        local color
-        if flip then
-            color = colors.dest_items_two
-        else
-            color = colors.dest_items_one
-        end
-
-        local num_of_items = count_selected_media_items()
-        if edits then
-            for i = 0, num_of_items - 1, 1 do
-                local item = get_selected_media_item_at(i)
-                local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-                if current_color == 0 or current_color == colors.dest_items_one
-                    or current_color == colors.dest_items_two or current_color == colors.source_items then
-                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
-                end
+function horizontal_color(edits, colors)
+    colors = get_color_table()
+    local color
+    color = colors.dest_items
+    local num_of_items = count_selected_media_items()
+    if edits then
+        for i = 0, num_of_items - 1, 1 do
+            local item = get_selected_media_item_at(i)
+            local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+            if current_color == 0 or current_color == colors.dest_items
+                or current_color == colors.source_items then
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
             end
-        else
-            for i = 0, num_of_items - 1, 1 do
-                local item = get_selected_media_item_at(i)
-                local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-                if current_color == 0 or current_color == colors.dest_items_one
-                    or current_color == colors.dest_items_two or current_color == colors.source_items then
-                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items_one)
-                end
+        end
+    else
+        for i = 0, num_of_items - 1, 1 do
+            local item = get_selected_media_item_at(i)
+            local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+            if current_color == 0 or current_color == colors.dest_items
+                or current_color == colors.source_items then
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items)
             end
         end
     end
@@ -184,21 +177,18 @@ function vertical_color_razor(colors)
     Main_OnCommand(select_children, 0) -- Select child tracks
     Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
-    Main_OnCommand(40421, 0)           -- Item: Select all items in track
-    if colors == 1 then
-        Main_OnCommand(40706, 0)       -- Item: Set to one random color
-    else
-        local color_table = get_color_table()
-        local selected_items = count_selected_media_items()
-        for i = 0, selected_items - 1, 1 do
-            local item = get_selected_media_item_at(i)
-            local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-            if current_color == 0 or current_color == color_table.dest_items_one
-                or current_color == color_table.dest_items_two or current_color == color_table.source_items then
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_table.source_items)
-            end
-        end
+    Main_OnCommand(40421, 0)           -- Item: Select all items in trac
+
+    local color_table = get_color_table()
+    local selected_items = count_selected_media_items()
+    for i = 0, selected_items - 1, 1 do
+        local item = get_selected_media_item_at(i)
+        local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+        local pastel = pastel_color(color_index)
+        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
     end
+
+    color_index = color_index + 1
 end
 
 ---------------------------------------------------------------------
@@ -272,14 +262,12 @@ function horizontal(colors)
     end
     SetEditCurPos(0, false, false)
 
-    local flip = false
     local workflow = "horizontal"
     local group = 1
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
         horizontal_group(workflow, group)
-        horizontal_color(flip, edits, colors)
-        flip = not flip
+        horizontal_color(edits, colors)
         group = group + 1
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     until IsMediaItemSelected(new_item) == true
@@ -306,28 +294,22 @@ function vertical(colors)
     SetMediaItemPosition(new_item, length + 1, false)
     local group = 1
     SetOnlyTrackSelected(first_track)
-    if colors == 0 then
-        -- color destination items the same as horizontal workflow
-        SetEditCurPos(0, false, false)
-        local workflow = "vertical"
-        local flip = false
+
+    SetEditCurPos(0, false, false)
+    local workflow = "vertical"
+    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+    repeat
+        horizontal_group(workflow, group)
+        horizontal_color(edits, colors)
+        group = group + 1
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-        repeat
-            horizontal_group(workflow, group)
-            horizontal_color(flip, edits, colors)
-            flip = not flip
-            group = group + 1
-            Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-        until IsMediaItemSelected(new_item) == true
-    end
+    until IsMediaItemSelected(new_item) == true
 
     DeleteTrackMediaItem(first_track, new_item)
     local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
     local start = 1
-    if colors == 0 then
-        start = 2
-        Main_OnCommand(next_folder, 0) -- select next folder
-    end
+    start = 2
+    Main_OnCommand(next_folder, 0) -- select next folder
 
     for _ = start, num_of_folders, 1 do
         vertical_color_razor(colors)
@@ -465,19 +447,53 @@ function get_selected_media_item_at(index)
     return nil
 end
 
-
 ---------------------------------------------------------------------
 
 function delete_empty_items(num_of_project_items)
-  for i = num_of_project_items-1, 0, -1 do
-    local item = GetMediaItem(0, i)
-    local take = GetActiveTake(item)
+    for i = num_of_project_items - 1, 0, -1 do
+        local item = GetMediaItem(0, i)
+        local take = GetActiveTake(item)
 
-    if not take then
-      DeleteTrackMediaItem(GetMediaItemTrack(item), item)
+        if not take then
+            DeleteTrackMediaItem(GetMediaItemTrack(item), item)
+        end
     end
-  end
+end
 
+---------------------------------------------------------------------
+
+function pastel_color(index)
+    local golden_ratio_conjugate = 0.61803398875
+    local hue                    = (index * golden_ratio_conjugate) % 1.0
+
+    -- Subtle variation in saturation/lightness
+    local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
+    local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
+
+    local function h2rgb(p, q, t)
+        if t < 0 then t = t + 1 end
+        if t > 1 then t = t - 1 end
+        if t < 1 / 6 then return p + (q - p) * 6 * t end
+        if t < 1 / 2 then return q end
+        if t < 2 / 3 then return p + (q - p) * (2 / 3 - t) * 6 end
+        return p
+    end
+
+    local q = lightness < 0.5 and (lightness * (1 + saturation))
+        or (lightness + saturation - lightness * saturation)
+    local p = 2 * lightness - q
+
+    local r = h2rgb(p, q, hue + 1 / 3)
+    local g = h2rgb(p, q, hue)
+    local b = h2rgb(p, q, hue - 1 / 3)
+
+    local color_int = reaper.ColorToNative(
+        math.floor(r * 255 + 0.5),
+        math.floor(g * 255 + 0.5),
+        math.floor(b * 255 + 0.5)
+    )
+
+    return color_int | 0x1000000
 end
 
 ---------------------------------------------------------------------

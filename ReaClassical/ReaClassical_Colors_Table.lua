@@ -33,8 +33,7 @@ return {
         roomtone = ColorToNative(127, 99, 65) | 0x1000000,
         rcmaster = ColorToNative(25, 75, 25) | 0x1000000,
         mixer = ColorToNative(200, 200, 250) | 0x1000000,
-        dest_items_one = ColorToNative(18, 121, 177)|0x1000000,
-        dest_items_two = ColorToNative(99, 180, 220)|0x1000000,
+        dest_items = ColorToNative(18, 121, 177)|0x1000000,
         edited_material = ColorToNative(18, 163, 173) | 0x1000000;
         source_items = ColorToNative(65, 127, 99)|0x1000000,
         audition = ColorToNative(10, 10, 10) | 0x1000000,
