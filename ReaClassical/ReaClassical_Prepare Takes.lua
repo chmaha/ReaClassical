@@ -36,6 +36,7 @@ if not SWS_exists then
 end
 
 local color_index = 0
+local first_horizontal_run = nil
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -144,6 +145,7 @@ end
 ---------------------------------------------------------------------
 
 function horizontal_color(workflow, edits)
+    if first_horizontal_run == nil then first_horizontal_run = true end
     local colors = get_color_table()
     local dest_blue = colors.dest_items
     local pastel = pastel_color(color_index)
@@ -169,10 +171,15 @@ function horizontal_color(workflow, edits)
     elseif not edits and workflow == "horizontal" then
         for i = 0, num_of_items - 1 do
             local item = get_selected_media_item_at(i)
-            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
-            color_index = color_index + 1
+            if first_horizontal_run then
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
+            else
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
+                color_index = color_index + 1
+            end
         end
     end
+    first_horizontal_run = false
 end
 
 ---------------------------------------------------------------------
