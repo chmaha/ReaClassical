@@ -36,6 +36,7 @@ local create_plaintext_report, create_html_report, any_isrc_present
 local time_to_mmssff, subtract_time_strings, add_pregaps_to_table
 local formatted_pos_out, parse_markers, checksum, get_txt_file
 local create_metadata_report_and_file, split_and_tag_final_item
+local check_first_track_for_names
 
 local minimum_points = 15
 local points = {}
@@ -74,6 +75,9 @@ function main()
     MB("Error: Empty items found on first track. Delete them to continue.", "Create CD Markers", 0)
     return
   end
+
+  local names_on_first_track = check_first_track_for_names()
+  if not names_on_first_track then return end
 
   local metadata_file = get_txt_file()
   local f = io.open(metadata_file, "r")
@@ -238,8 +242,8 @@ function cd_markers(first_track, num_of_items, use_existing)
     end
   end
   if marker_count == 0 then
-    MB('Please add take names to all items that you want to be CD track starts (Select item then press F2)',
-      "No track markers created", 0)
+    -- MB('Please add take names to all items that you want to be CD track starts (Select item then press F2)',
+    --   "No track markers created", 0)
     return false
   end
   if marker_count > 99 then
@@ -1550,87 +1554,140 @@ end
 ---------------------------------------------------------------------
 
 function split_and_tag_final_item()
-    local track = GetTrack(0, 0)
-    if not track then return end
+  local track = GetTrack(0, 0)
+  if not track then return end
 
-    local item_count = CountTrackMediaItems(track)
-    if item_count == 0 then return end
+  local item_count = CountTrackMediaItems(track)
+  if item_count == 0 then return end
 
-    local last_item = nil
-    local unnamed_item = nil
-    local last_end = 0
-    local gap_threshold = 60 -- seconds
+  local last_item = nil
+  local unnamed_item = nil
+  local last_end = 0
+  local gap_threshold = 60 -- seconds
 
-    -- Loop through items to find last item and last unnamed take
-    for i = 0, item_count - 1 do
-        local item = GetTrackMediaItem(track, i)
-        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-        local item_end = pos + len
+  -- Loop through items to find last item and last unnamed take
+  for i = 0, item_count - 1 do
+    local item = GetTrackMediaItem(track, i)
+    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+    local item_end = pos + len
 
-        -- Track the last item before a ≥1 min gap
-        if pos - last_end >= gap_threshold then
-            break
-        end
-        last_item = item
-        last_end = item_end
-
-        -- Check if item has a take without a name
-        local take = GetActiveTake(item)
-        if take then
-            local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-            if name == "" then
-                unnamed_item = item
-            end
-        end
+    -- Track the last item before a ≥1 min gap
+    if pos - last_end >= gap_threshold then
+      break
     end
+    last_item = item
+    last_end = item_end
 
-    -- Prefer unnamed take if available
-    local target_item = unnamed_item or last_item
-    if not target_item then return false end
-
-    local take = GetActiveTake(target_item)
-    if not take then return false end
-
-    -- If we have an unnamed take, just rename it (no split)
-    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-    local item_name = "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various|MESSAGE=Created with ReaClassical"
-    if name == "" then
-        GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
-        return item_name
+    -- Check if item has a take without a name
+    local take = GetActiveTake(item)
+    if take then
+      local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+      if name == "" then
+        unnamed_item = item
+      end
     end
+  end
 
-    -- Otherwise, split 1 second before end (fallback)
-    local pos = GetMediaItemInfo_Value(target_item, "D_POSITION")
-    local len = GetMediaItemInfo_Value(target_item, "D_LENGTH")
-    local split_pos = pos + math.max(0, len - 1)
+  -- Prefer unnamed take if available
+  local target_item = unnamed_item or last_item
+  if not target_item then return false end
 
-    SetEditCurPos(split_pos, false, false)
+  local take = GetActiveTake(target_item)
+  if not take then return false end
 
-    Main_OnCommand(40289, 0) -- Unselect all items
-    SetMediaItemSelected(target_item, true)
-    Main_OnCommand(40012, 0) -- Split items at edit cursor
-
-    -- Get the new item (the one after the split)
-    local new_item = nil
-    local new_item_count = CountTrackMediaItems(track)
-    for i = 0, new_item_count - 1 do
-        local item = GetTrackMediaItem(track, i)
-        local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-        if math.abs(item_pos - split_pos) < 0.0001 then
-            new_item = item
-            break
-        end
-    end
-
-    if not new_item then return false end
-
-    local new_take = GetActiveTake(new_item)
-    if not new_take then return false end
-    GetSetMediaItemTakeInfo_String(new_take, "P_NAME", item_name, true)
-
+  -- If we have an unnamed take, just rename it (no split)
+  local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+  local item_name = "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various|MESSAGE=Created with ReaClassical"
+  if name == "" then
+    GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
     return item_name
+  end
+
+  -- Otherwise, split 1 second before end (fallback)
+  local pos = GetMediaItemInfo_Value(target_item, "D_POSITION")
+  local len = GetMediaItemInfo_Value(target_item, "D_LENGTH")
+  local split_pos = pos + math.max(0, len - 1)
+
+  SetEditCurPos(split_pos, false, false)
+
+  Main_OnCommand(40289, 0) -- Unselect all items
+  SetMediaItemSelected(target_item, true)
+  Main_OnCommand(40012, 0) -- Split items at edit cursor
+
+  -- Get the new item (the one after the split)
+  local new_item = nil
+  local new_item_count = CountTrackMediaItems(track)
+  for i = 0, new_item_count - 1 do
+    local item = GetTrackMediaItem(track, i)
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    if math.abs(item_pos - split_pos) < 0.0001 then
+      new_item = item
+      break
+    end
+  end
+
+  if not new_item then return false end
+
+  local new_take = GetActiveTake(new_item)
+  if not new_take then return false end
+  GetSetMediaItemTakeInfo_String(new_take, "P_NAME", item_name, true)
+
+  return item_name
 end
+
+---------------------------------------------------------------------
+
+function check_first_track_for_names()
+  -- Get the first track
+  local track = GetTrack(0, 0)
+  if not track then
+    ShowMessageBox("No track found", "Error", 0)
+    return false
+  end
+
+  -- Get number of items on the track
+  local itemCount = CountTrackMediaItems(track)
+  if itemCount == 0 then
+    ShowMessageBox("No items on the first track", "Error", 0)
+    return false
+  end
+
+  local prevEnd = nil
+
+  -- Check each item for at least one take name that doesn't start with "@"
+  for i = 0, itemCount - 1 do
+    local item = GetTrackMediaItem(track, i)
+    local itemStart = GetMediaItemInfo_Value(item, "D_POSITION")
+    local itemEnd = itemStart + GetMediaItemInfo_Value(item, "D_LENGTH")
+
+    -- Stop checking if gap to previous item >= 60 seconds
+    if prevEnd and (itemStart - prevEnd) >= 60 then
+      break
+    end
+    prevEnd = itemEnd
+
+    local takeCount = CountTakes(item)
+    for t = 0, takeCount - 1 do
+      local take = GetMediaItemTake(item, t)
+      if take then
+        local takeName = GetTakeName(take)
+        if takeName ~= "" and string.sub(takeName, 1, 1) ~= "@" then
+          return true -- Found a valid take name
+        end
+      end
+    end
+  end
+
+  -- If no valid takes found
+  ShowMessageBox(
+    "Please add take names to all items that you want to be CD track starts (Select item then press F2)",
+    "No track markers created",
+    0
+  )
+  return false
+end
+
 
 ---------------------------------------------------------------------
 
