@@ -73,10 +73,12 @@ function main()
         track_number = track_number + get_tracks_per_group()
     end
 
-    local colors = get_color_table()
     if selected_track then SetOnlyTrackSelected(selected_track) end
-    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SAI", -1, colors.source_marker)
-    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SAO", -1, colors.source_marker)
+
+    local marker_color = selected_track and GetTrackColor(selected_track) or 0
+
+    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SAI", -1, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SAO", -1, marker_color)
     Main_OnCommand(40635, 0) -- remove time selection
     Main_OnCommand(42406, 0) -- remove razor edit areas
     PreventUIRefresh(-1)
