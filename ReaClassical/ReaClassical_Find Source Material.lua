@@ -33,93 +33,79 @@ end
 
 ---------------------------------------------------------------------
 
-function main()
+local function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    -- Safety check 1: Exactly one item selected
-    local sel_count = count_selected_media_items(0)
-    if sel_count ~= 1 then
-        MB("Error: Please select exactly one item.", "Error", 0)
+
+    -- Safety: exactly one edited item selected
+    if CountSelectedMediaItems(0) ~= 1 then
+        MB("Error: Please select exactly one edited item.", "Error", 0)
         return
     end
 
-    local item = get_selected_media_item_at(0)
-
-    -- Safety check 2: Ensure it's on the first track
-    local track = GetMediaItemTrack(item)
-    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-    if track_idx ~= 1 then
-        MB("Error: The selected item must be on the first track.", "Error", 0)
+    local edit_item = GetSelectedMediaItem(0, 0)
+    local _, saved_guid = GetSetMediaItemInfo_String(edit_item, "P_EXT:src_guid", "", false)
+    if saved_guid == "" then
+        MB("Error: No source GUID stored for this item.", "Error", 0)
         return
     end
 
-    local _, saved_data = GetSetMediaItemInfo_String(item, "P_EXT:src_details", "", false)
-    local saved_guid, offset_src_in, offset_src_out, track_number
-    if saved_data ~= "" then
-        local src_details = {}
-        for entry in saved_data:gmatch('([^,]+)') do src_details[#src_details + 1] = entry end
-        if src_details[1] then saved_guid = src_details[1] or nil end
-        if src_details[2] then offset_src_in = src_details[2] or nil end
-        if src_details[3] then offset_src_out = src_details[3] or nil end
-        if src_details[4] then track_number = src_details[4] or nil end
-    end
-
-    if not saved_guid or not offset_src_in or not offset_src_out or not track_number then
-        MB("Error: No S-D edit data for this item.", "Error", 0)
-        return
-    end
-
-    local off_998 = tonumber(offset_src_in)
-    local off_999 = tonumber(offset_src_out)
-
-    -- Compare GUID
     local source_item = BR_GetMediaItemByGUID(0, saved_guid)
     if not source_item then
         MB("Error: Source item no longer exists!", "Error", 0)
         return
     end
 
-    -- Compute marker positions relative to current item start
-    local item_start = GetMediaItemInfo_Value(source_item, "D_POSITION")
-    local item_len   = GetMediaItemInfo_Value(source_item, "D_LENGTH")
-    local pos_998    = item_start + off_998
-    local pos_999    = item_start + off_999
+    -- --- Gather key values ---
+    local src_start      = GetMediaItemInfo_Value(source_item, "D_POSITION")
+    local src_len        = GetMediaItemInfo_Value(source_item, "D_LENGTH")
+    local src_startoffs  = GetMediaItemTakeInfo_Value(GetActiveTake(source_item), "D_STARTOFFS")
 
-    -- Check that markers fall within item boundaries
-    if pos_998 < item_start or pos_998 > item_start + item_len
-        or pos_999 < item_start or pos_999 > item_start + item_len then
-        MB("Error: One or both markers fall outside the item bounds.", "Error", 0)
+    local take           = GetActiveTake(edit_item)
+    local edit_startoffs = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+    local edit_len       = GetMediaItemInfo_Value(edit_item, "D_LENGTH")
+    local playrate       = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+
+
+    -- --- Compute difference between source and edited start offsets ---
+    local offset_diff = edit_startoffs - src_startoffs
+    local pos_in      = src_start + offset_diff
+    local pos_out     = pos_in + (edit_len * playrate)
+
+    -- Safety: ensure both IN and OUT markers fit within the source item
+    if pos_in < src_start or pos_out > src_start + src_len then
+        MB("Error: Edited section exceeds the source item boundaries.", "Error", 0)
         return
     end
 
-    -- Delete any existing markers 998 or 999 before creating new ones
+    -- --- Remove existing 998/999 markers ---
     local i = 0
     while true do
-        local project, _ = EnumProjects(i)
-        if project == nil then
-            break
-        else
-            DeleteProjectMarker(project, 998, false)
-            DeleteProjectMarker(project, 999, false)
-        end
+        local proj = EnumProjects(i)
+        if not proj then break end
+        DeleteProjectMarker(proj, 998, false)
+        DeleteProjectMarker(proj, 999, false)
         i = i + 1
     end
 
-    -- Create the markers
-    local color_track = GetMediaItemTrack(source_item)
-    local marker_color = color_track and GetTrackColor(color_track) or 0
-    AddProjectMarker2(0, false, pos_998, 0, track_number .. ":SOURCE-IN", 998, marker_color)
-    AddProjectMarker2(0, false, pos_999, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
-    local move_to_src_in = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
-    Main_OnCommand(move_to_src_in, 0)
-    SetOnlyTrackSelected(color_track)
+    -- --- Add markers ---
+    local marker_color = GetTrackColor(GetMediaItemTrack(source_item)) or 0
+    AddProjectMarker2(0, false, pos_in, 0, "SOURCE-IN", 998, marker_color)
+    AddProjectMarker2(0, false, pos_out, 0, "SOURCE-OUT", 999, marker_color)
 
-    Undo_EndBlock('Find Source Material', 0)
+    -- --- Optionally move to IN marker ---
+    local move_to_src_in = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
+    if move_to_src_in then Main_OnCommand(move_to_src_in, 0) end
+
+    SetOnlyTrackSelected(GetMediaItemTrack(source_item))
+
+    Undo_EndBlock('Find Source Material (simplified)', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
@@ -132,8 +118,8 @@ function count_selected_media_items()
     local total_items = CountMediaItems(0)
 
     for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
+        local edit_item = GetMediaItem(0, i)
+        if IsMediaItemSelected(edit_item) then
             selected_count = selected_count + 1
         end
     end
@@ -148,10 +134,10 @@ function get_selected_media_item_at(index)
     local total_items = CountMediaItems(0)
 
     for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
+        local edit_item = GetMediaItem(0, i)
+        if IsMediaItemSelected(edit_item) then
             if selected_count == index then
-                return item
+                return edit_item
             end
             selected_count = selected_count + 1
         end

@@ -551,9 +551,9 @@ end
 
 function mark_as_edit()
     local first_sel_item = get_selected_media_item_at(0)
-    local _, src_details = GetProjExtState(0, "ReaClassical", "temp_src_details")
-    GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_details", src_details, true)
-    SetProjExtState(0, "ReaClassical", "temp_src_details", "")
+    local _, src_guid = GetProjExtState(0, "ReaClassical", "temp_src_guid")
+    GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_guid", src_guid, true)
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", "")
 
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
@@ -702,38 +702,14 @@ end
 
 function save_source_details()
     local item = get_selected_media_item_at(0)
-    if not item then
-        return
-    end
+    if not item then return end
 
-    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+    -- Get the selected item’s GUID
     local guid = BR_GetMediaItemGUID(item)
+    if not guid or guid == "" then return end
 
-    local _, num_markers, num_regions = CountProjectMarkers(0)
-    local pos_998, pos_999, track_num
-
-    for i = 0, num_markers + num_regions - 1 do
-        local _, isrgn, pos, _, name, idx, _ = EnumProjectMarkers3(0, i)
-        if not isrgn then
-            if idx == 998 then
-                pos_998 = pos
-                track_num = tonumber(name:match("^(%d+):"))
-            end
-
-            if idx == 999 then pos_999 = pos end
-        end
-    end
-
-    if not pos_998 or not pos_999 then
-        return
-    end
-
-    local offset_998 = pos_998 - item_start
-    local offset_999 = pos_999 - item_start
-
-    local result = string.format("%s,%.6f,%.6f,%d", guid, offset_998, offset_999, track_num)
-
-    SetProjExtState(0, "ReaClassical", "temp_src_details", result)
+    -- Save the GUID to the project’s ExtState
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
 end
 
 ---------------------------------------------------------------------

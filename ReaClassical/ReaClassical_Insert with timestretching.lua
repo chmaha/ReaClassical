@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, ripple_lock_mode
 local return_xfade_length, xfade, get_first_last_items, markers
-local mark_as_edit, move_to_project_tab
+local mark_as_edit, move_to_project_tab, save_source_details
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 
@@ -215,6 +215,7 @@ function copy_source(xfade_len)
     local right_overlap = check_overlapping_items()
     Main_OnCommand(40626, 0) -- Time Selection: Set end point
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+    save_source_details()
     local parent_track_selected_items = count_selected_media_items()
     if left_overlap then
         local first_item = get_selected_media_item_at(0)
@@ -464,6 +465,11 @@ end
 ---------------------------------------------------------------------
 
 function mark_as_edit()
+    local first_sel_item = get_selected_media_item_at(0)
+    local _, src_guid = GetProjExtState(0, "ReaClassical", "temp_src_guid")
+    GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_guid", src_guid, true)
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", "")
+
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
@@ -605,6 +611,20 @@ function move_destination_folder(track_number)
         SetOnlyTrackSelected(destination_folder)
         ReorderSelectedTracks(target_index, 0)
     end
+end
+
+---------------------------------------------------------------------
+
+function save_source_details()
+    local item = get_selected_media_item_at(0)
+    if not item then return end
+
+    -- Get the selected item’s GUID
+    local guid = BR_GetMediaItemGUID(item)
+    if not guid or guid == "" then return end
+
+    -- Save the GUID to the project’s ExtState
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
 end
 
 ---------------------------------------------------------------------

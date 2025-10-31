@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, add_source_marker, delete_leaving_silence
 local get_track_length, select_matching_folder, copy_or_move_dest
-local clean_up, ripple_lock_mode, delete_dest_markers
+local clean_up, ripple_lock_mode, delete_dest_markers, save_source_details
 local get_color_table, get_path, move_to_project_tab, xfade
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local create_crossfades, get_first_last_items, return_xfade_length
@@ -359,6 +359,7 @@ function copy_or_move_dest()
     local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
     local sel_length = end_time - start_time
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+    save_source_details()
     local selected_items = count_selected_media_items()
     if left_overlap then
         local first_item = get_selected_media_item_at(0)
@@ -694,11 +695,30 @@ end
 ---------------------------------------------------------------------
 
 function mark_as_edit()
+    local first_sel_item = get_selected_media_item_at(0)
+    local _, src_guid = GetProjExtState(0, "ReaClassical", "temp_src_guid")
+    GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_guid", src_guid, true)
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", "")
+
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
         GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
     end
+end
+
+---------------------------------------------------------------------
+
+function save_source_details()
+    local item = get_selected_media_item_at(0)
+    if not item then return end
+
+    -- Get the selected item’s GUID
+    local guid = BR_GetMediaItemGUID(item)
+    if not guid or guid == "" then return end
+
+    -- Save the GUID to the project’s ExtState
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
 end
 
 ---------------------------------------------------------------------

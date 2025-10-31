@@ -25,7 +25,7 @@ local main, markers, select_matching_folder, split_at_dest_in, create_crossfades
 local ripple_lock_mode, create_dest_in, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local copy_source, move_to_project_tab, save_last_assembly_item
-local load_last_assembly_item
+local load_last_assembly_item, save_source_details
 local check_overlapping_items
 local move_destination_folder_to_top, move_destination_folder
 local get_selected_media_item_at, count_selected_media_items
@@ -301,6 +301,7 @@ function copy_source()
     local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
     local sel_length = end_time - start_time
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+    save_source_details()
     local selected_items = count_selected_media_items()
     if left_overlap then
         local first_item = get_selected_media_item_at(0)
@@ -488,10 +489,15 @@ end
 ---------------------------------------------------------------------
 
 function mark_as_edit()
+    local first_sel_item = get_selected_media_item_at(0)
+    local _, src_guid = GetProjExtState(0, "ReaClassical", "temp_src_guid")
+    GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_guid", src_guid, true)
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", "")
+
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
-        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", 1)
+        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
     end
 end
 
@@ -644,6 +650,20 @@ function move_destination_folder(track_number)
         SetOnlyTrackSelected(destination_folder)
         ReorderSelectedTracks(target_index, 0)
     end
+end
+
+---------------------------------------------------------------------
+
+function save_source_details()
+    local item = get_selected_media_item_at(0)
+    if not item then return end
+
+    -- Get the selected item’s GUID
+    local guid = BR_GetMediaItemGUID(item)
+    if not guid or guid == "" then return end
+
+    -- Save the GUID to the project’s ExtState
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
 end
 
 ---------------------------------------------------------------------

@@ -160,8 +160,6 @@ function horizontal_color(workflow, edits)
                 SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
             end
         end
-    elseif edits and workflow == "horizontal" then
-
     elseif workflow == "vertical" then
         for i = 0, num_of_items - 1 do
             local item = get_selected_media_item_at(i)
@@ -186,7 +184,7 @@ end
 
 ---------------------------------------------------------------------
 
-function vertical_color_razor()
+function vertical_color_razor(dest)
     Main_OnCommand(40042, 0)           -- Transport: Go to start of project
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- Select child tracks
@@ -198,7 +196,7 @@ function vertical_color_razor()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
         local pastel = pastel_color(color_index)
-        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
+        if dest ~= "y" then SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel) end
     end
 
     color_index = color_index + 1
@@ -324,7 +322,9 @@ function vertical()
     Main_OnCommand(next_folder, 0) -- select next folder
 
     for _ = start, num_of_folders, 1 do
-        vertical_color_razor()
+        local track = GetSelectedTrack(0, 0)
+        local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
+        vertical_color_razor(dest)
         local next_group = vertical_group(length, group)
         Main_OnCommand(next_folder, 0) -- select next folder
         group = next_group
