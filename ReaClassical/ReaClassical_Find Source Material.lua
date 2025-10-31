@@ -115,6 +115,9 @@ function main()
     local marker_color = color_track and GetTrackColor(color_track) or 0
     AddProjectMarker2(0, false, pos_998, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     AddProjectMarker2(0, false, pos_999, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
+    local move_to_src_in = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
+    Main_OnCommand(move_to_src_in, 0)
+    SetOnlyTrackSelected(color_track)
 
     Undo_EndBlock('Find Source Material', 0)
     PreventUIRefresh(-1)
