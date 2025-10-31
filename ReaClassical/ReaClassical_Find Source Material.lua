@@ -116,7 +116,6 @@ function main()
     AddProjectMarker2(0, false, pos_998, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     AddProjectMarker2(0, false, pos_999, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
 
-    MB("Markers 998 and 999 restored successfully.", "Success", 0)
     Undo_EndBlock('Find Source Material', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
