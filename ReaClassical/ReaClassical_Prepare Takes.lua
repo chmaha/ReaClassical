@@ -152,35 +152,63 @@ function horizontal_color(workflow, edits)
     local dest_blue = colors.dest_items
     local pastel = pastel_color(color_index)
     local num_of_items = count_selected_media_items()
-    if edits and workflow == "vertical" then
-        for i = 0, num_of_items - 1 do
-            local item = get_selected_media_item_at(i)
-            local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-            if current_color == 0 then
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
+
+    for i = 0, num_of_items - 1 do
+        local item = get_selected_media_item_at(i)
+        local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+
+        -- Check for saved GUID
+        local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+        if saved_guid ~= "" then
+            -- Find the referenced item
+            local referenced_item = nil
+            local total_items = CountMediaItems(0)
+            for j = 0, total_items - 1 do
+                local test_item = GetMediaItem(0, j)
+                local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
+                if test_guid == saved_guid then
+                    referenced_item = test_item
+                    break
+                end
             end
-        end
-    elseif workflow == "vertical" then
-        for i = 0, num_of_items - 1 do
-            local item = get_selected_media_item_at(i)
-            local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-            if current_color == 0 then
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
-            end
-        end
-    elseif not edits and workflow == "horizontal" then
-        for i = 0, num_of_items - 1 do
-            local item = get_selected_media_item_at(i)
-            if first_horizontal_run then
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
+
+            -- Apply color to group
+            if referenced_item then
+                local ref_color = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
+                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+
+                for j = 0, total_items - 1 do
+                    local test_item = GetMediaItem(0, j)
+                    if test_item == item or group_id ~= 0 and GetMediaItemInfo_Value(test_item, "I_GROUPID") == group_id then
+                        SetMediaItemInfo_Value(test_item, "I_CUSTOMCOLOR", ref_color)
+                    end
+                end
             else
+                -- Fallback to pastel
                 SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
                 color_index = color_index + 1
             end
+
+        else
+            -- No GUID, original logic
+            if edits or workflow == "vertical" then
+                if current_color == 0 then
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
+                end
+            elseif workflow == "horizontal" then
+                if first_horizontal_run then
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
+                else
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
+                    color_index = color_index + 1
+                end
+            end
         end
     end
+
     first_horizontal_run = false
 end
+
 
 ---------------------------------------------------------------------
 
