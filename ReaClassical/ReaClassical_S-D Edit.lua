@@ -27,7 +27,7 @@ local get_track_length, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up
 local ripple_lock_mode, return_xfade_length, xfade
 local get_first_last_items, get_color_table, get_path, mark_as_edit
-local move_to_project_tab
+local move_to_project_tab, save_source_details
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 
@@ -361,6 +361,7 @@ function copy_source()
     local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
     local sel_length = end_time - start_time
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+    save_source_details()
     local selected_items = count_selected_media_items()
     if left_overlap then
         local first_item = get_selected_media_item_at(0)
@@ -549,6 +550,11 @@ end
 ---------------------------------------------------------------------
 
 function mark_as_edit()
+    local first_sel_item = get_selected_media_item_at(0)
+    local _, src_details = GetProjExtState(0, "ReaClassical", "temp_src_details")
+    GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_details", src_details, true)
+    SetProjExtState(0, "ReaClassical", "temp_src_details", "")
+
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
@@ -690,6 +696,44 @@ function move_destination_folder(track_number)
         SetOnlyTrackSelected(destination_folder)
         ReorderSelectedTracks(target_index, 0)
     end
+end
+
+---------------------------------------------------------------------
+
+function save_source_details()
+    local item = get_selected_media_item_at(0)
+    if not item then
+        return
+    end
+
+    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+    local guid = BR_GetMediaItemGUID(item)
+
+    local _, num_markers, num_regions = CountProjectMarkers(0)
+    local pos_998, pos_999, track_num
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, isrgn, pos, _, name, idx, _ = EnumProjectMarkers3(0, i)
+        if not isrgn then
+            if idx == 998 then
+                pos_998 = pos
+                track_num = tonumber(name:match("^(%d+):"))
+            end
+
+            if idx == 999 then pos_999 = pos end
+        end
+    end
+
+    if not pos_998 or not pos_999 then
+        return
+    end
+
+    local offset_998 = pos_998 - item_start
+    local offset_999 = pos_999 - item_start
+
+    local result = string.format("%s,%.6f,%.6f,%d", guid, offset_998, offset_999, track_num)
+
+    SetProjExtState(0, "ReaClassical", "temp_src_details", result)
 end
 
 ---------------------------------------------------------------------

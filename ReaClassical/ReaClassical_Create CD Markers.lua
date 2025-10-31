@@ -1642,14 +1642,14 @@ function check_first_track_for_names()
   -- Get the first track
   local track = GetTrack(0, 0)
   if not track then
-    ShowMessageBox("No track found", "Error", 0)
+    MB("No track found", "Error", 0)
     return false
   end
 
   -- Get number of items on the track
   local itemCount = CountTrackMediaItems(track)
   if itemCount == 0 then
-    ShowMessageBox("No items on the first track", "Error", 0)
+    MB("No items on the first track", "Error", 0)
     return false
   end
 
@@ -1680,7 +1680,7 @@ function check_first_track_for_names()
   end
 
   -- If no valid takes found
-  ShowMessageBox(
+  MB(
     "Please add take names to all items that you want to be CD track starts (Select item then press F2)",
     "No track markers created",
     0

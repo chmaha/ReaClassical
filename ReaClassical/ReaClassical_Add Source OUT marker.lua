@@ -41,6 +41,8 @@ function main()
         if table[8] then sdmousehover = tonumber(table[8]) or 0 end
     end
 
+    local selected_track = GetSelectedTrack(0, 0)
+    
     local cur_pos, track
     if sdmousehover == 1 then
         cur_pos = BR_PositionAtMouseCursor(false)
@@ -64,8 +66,11 @@ function main()
 
         local track_number = math.floor(get_track_number(track))
         local other_source_marker = other_source_marker_check()
-        local colors = get_color_table()
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
+        
+        local color_track = selected_track or track
+        local marker_color = color_track and GetTrackColor(color_track) or 0
+        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
+
         if other_source_marker ~= track_number then
             MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
         end

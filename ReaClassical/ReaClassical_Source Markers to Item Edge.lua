@@ -99,10 +99,13 @@ function main()
         track_number = track_number + get_tracks_per_group()
     end
 
-    local colors = get_color_table()
     if selected_track then SetOnlyTrackSelected(selected_track) end
-    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
-    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SOURCE-OUT", 999, colors.source_marker)
+
+    local color_track = GetTrack(0, track_number - 1)
+    local marker_color = color_track and GetTrackColor(color_track) or 0
+    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
+
     PreventUIRefresh(-1)
     Undo_EndBlock("Source Markers to Item Edge", 0)
 end
@@ -261,7 +264,6 @@ function get_selected_media_item_at(index)
 
     return nil
 end
-
 
 ---------------------------------------------------------------------
 

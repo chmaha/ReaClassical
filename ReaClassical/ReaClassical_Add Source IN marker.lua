@@ -82,7 +82,10 @@ function main()
         end
 
         if selected_track then SetOnlyTrackSelected(selected_track) end
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, colors.source_marker)
+
+        local color_track = selected_track or track
+        local marker_color = color_track and GetTrackColor(color_track) or 0
+        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     end
     PreventUIRefresh(-1)
 end

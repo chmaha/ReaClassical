@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, zoom_out_to_all_items
+local count_selected_media_items, get_selected_media_item_at
 
 ---------------------------------------------------------------------
 
@@ -45,9 +46,9 @@ end
 function zoom_out_to_all_items()
     -- Save current item selection
     local sel_items = {}
-    local sel_count = reaper.CountSelectedMediaItems(0)
+    local sel_count = count_selected_media_items(0)
     for i = 0, sel_count - 1 do
-        sel_items[#sel_items + 1] = reaper.GetSelectedMediaItem(0, i)
+        sel_items[#sel_items + 1] = get_selected_media_item_at(i)
     end
 
     Main_OnCommand(40182, 0) -- Select all items in project
@@ -60,6 +61,41 @@ function zoom_out_to_all_items()
             SetMediaItemSelected(item, true)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------

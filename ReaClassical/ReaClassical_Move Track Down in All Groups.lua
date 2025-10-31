@@ -31,7 +31,7 @@ function main()
 
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 or selected_tracks == 0 then
-    ShowMessageBox("Please select a single child track from the first group", "Move Track Down in All Groups", 0)
+    MB("Please select a single child track from the first group", "Move Track Down in All Groups", 0)
     return
   end
 
@@ -61,7 +61,7 @@ function main()
   local tracks_per_group = child_count + 1
 
   if folder_count == 0 then
-    ShowMessageBox("This function can only be used on a project with one or more folders",
+    MB("This function can only be used on a project with one or more folders",
       "Move Track Down in All Groups", 0)
     return
   end
@@ -70,14 +70,14 @@ function main()
   local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
 
   if track_idx == 0 or track_idx >= tracks_per_group then
-    ShowMessageBox("Please select a child track in the first folder", "Move Track Down in All Groups", 0)
+    MB("Please select a child track in the first folder", "Move Track Down in All Groups", 0)
     return
   end
 
   local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
 
   if depth == -1 then
-    ShowMessageBox("The track is already the last in the folder", "Move Track Down in All Groups", 0)
+    MB("The track is already the last in the folder", "Move Track Down in All Groups", 0)
     return
   end
 

@@ -31,7 +31,7 @@ function main()
 
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 or selected_tracks == 0 then
-    ShowMessageBox("Please select a single child track from the first group", "Move Track Up in All Groups", 0)
+    MB("Please select a single child track from the first group", "Move Track Up in All Groups", 0)
     return
   end
 
@@ -61,7 +61,7 @@ function main()
   local tracks_per_group = child_count + 1
 
   if folder_count == 0 then
-    ShowMessageBox("This function can only be used on a project with one or more folders",
+    MB("This function can only be used on a project with one or more folders",
       "Move Track Up in All Groups", 0)
     return
   end
@@ -74,15 +74,15 @@ function main()
   if earlier_track then
     track_idx = GetMediaTrackInfo_Value(earlier_track, "IP_TRACKNUMBER") - 1
   else
-    ShowMessageBox("Please select a child track in the folder", "Move Track Up in All Groups", 0)
+    MB("Please select a child track in the folder", "Move Track Up in All Groups", 0)
     return
   end
 
   if track_idx == 0 then
-    ShowMessageBox("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
+    MB("The track is already the first child in the folder", "Move Track Up in All Groups", 0)
     return
   elseif track_idx >= tracks_per_group - 1 then
-    ShowMessageBox("Please select a child track in the first folder", "Move Track Up in All Groups", 0)
+    MB("Please select a child track in the first folder", "Move Track Up in All Groups", 0)
     return
   end
 
