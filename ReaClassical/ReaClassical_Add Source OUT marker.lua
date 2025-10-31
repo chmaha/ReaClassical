@@ -67,7 +67,7 @@ function main()
         local track_number = math.floor(get_track_number(track))
         local other_source_marker = other_source_marker_check()
         
-        local color_track = selected_track or track
+        local color_track = track or selected_track
         local marker_color = color_track and GetTrackColor(color_track) or 0
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
 

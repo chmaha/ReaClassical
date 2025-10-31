@@ -83,7 +83,7 @@ function main()
 
         if selected_track then SetOnlyTrackSelected(selected_track) end
 
-        local color_track = selected_track or track
+        local color_track = track or selected_track
         local marker_color = color_track and GetTrackColor(color_track) or 0
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     end
