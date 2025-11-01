@@ -184,7 +184,6 @@ function horizontal_color(workflow, edits)
                     end
                 end
             end
-
         else
             -- No GUID, original logic
             if edits or workflow == "vertical" then
@@ -205,7 +204,6 @@ function horizontal_color(workflow, edits)
     first_horizontal_run = false
 end
 
-
 ---------------------------------------------------------------------
 
 function vertical_color_razor(dest)
@@ -220,7 +218,41 @@ function vertical_color_razor(dest)
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
         local pastel = pastel_color(color_index)
-        if dest ~= "y" then SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel) end
+        if dest ~= "y" then
+            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
+        else
+            -- Check for saved GUID
+            local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+            if saved_guid ~= "" then
+                -- Find the referenced item
+                local referenced_item = nil
+                local total_items = CountMediaItems(0)
+                for j = 0, total_items - 1 do
+                    local test_item = GetMediaItem(0, j)
+                    local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
+                    if test_guid == saved_guid then
+                        referenced_item = test_item
+                        break
+                    end
+                end
+
+                -- Apply color to group
+                if referenced_item then
+                    local ref_color = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
+                    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+
+                    for j = 0, total_items - 1 do
+                        local test_item = GetMediaItem(0, j)
+                        if test_item == item or group_id ~= 0 and GetMediaItemInfo_Value(test_item, "I_GROUPID") == group_id then
+                            SetMediaItemInfo_Value(test_item, "I_CUSTOMCOLOR", ref_color)
+                        end
+                    end
+                end
+            else
+                local colors = get_color_table()
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items)
+            end
+        end
     end
 
     color_index = color_index + 1
