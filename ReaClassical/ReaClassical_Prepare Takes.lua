@@ -22,11 +22,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, shift, horizontal_color, vertical_color_razor, horizontal_group
+local main, shift, color, vertical_razor, group_items
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, get_selected_media_item_at, count_selected_media_items
 local delete_empty_items, pastel_color, color_tracks_from_first_item
+local color_group_items
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -34,9 +35,6 @@ if not SWS_exists then
     MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
-
-local color_index = 0
-local first_horizontal_run = nil
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -98,12 +96,14 @@ function main()
         if table[5] then colors = tonumber(table[5]) or 0 end
     end
 
+    local edits = false
     if folders == 0 or folders == 1 then
-        horizontal()
+        edits = horizontal()
     else
         vertical()
     end
     PreventUIRefresh(-1)
+    color(edits)
     color_tracks_from_first_item()
     PreventUIRefresh(1)
 
@@ -146,121 +146,198 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_color(workflow, edits)
-    if first_horizontal_run == nil then first_horizontal_run = true end
+function color(edits)
     local colors = get_color_table()
-    local dest_blue = colors.dest_items
-    local pastel = pastel_color(color_index)
-    local num_of_items = count_selected_media_items()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
-    for i = 0, num_of_items - 1 do
-        local item = get_selected_media_item_at(i)
-        local current_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+    if workflow == "Horizontal" and not edits then
+        local dest_blue = colors.dest_items
+        local color_index = 0
 
-        -- Check for saved GUID
-        local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
-        if saved_guid ~= "" then
-            -- Find the referenced item
-            local referenced_item = nil
-            local total_items = CountMediaItems(0)
-            for j = 0, total_items - 1 do
-                local test_item = GetMediaItem(0, j)
-                local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
-                if test_guid == saved_guid then
-                    referenced_item = test_item
-                    break
-                end
-            end
+        local num_items = CountMediaItems(0)
 
-            -- Apply color to group
-            if referenced_item then
-                local ref_color = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
-                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+        -- Step 1: Collect items by group ID
+        local groups = {}
+        for i = 0, num_items - 1 do
+            local item = GetMediaItem(0, i)
+            local group_id = GetMediaItemInfo_Value(item, "I_GROUPID") or 0
+            if not groups[group_id] then groups[group_id] = {} end
+            table.insert(groups[group_id], item)
+        end
 
-                for j = 0, total_items - 1 do
-                    local test_item = GetMediaItem(0, j)
-                    if test_item == item or group_id ~= 0 and GetMediaItemInfo_Value(test_item, "I_GROUPID") == group_id then
-                        SetMediaItemInfo_Value(test_item, "I_CUSTOMCOLOR", ref_color)
+        -- Step 2: Sort group IDs for deterministic order
+        local sorted_group_ids = {}
+        for gid in pairs(groups) do table.insert(sorted_group_ids, gid) end
+        table.sort(sorted_group_ids)
+
+        -- Step 3: Color each group
+        local first_group = true
+        for _, gid in ipairs(sorted_group_ids) do
+            local group_items = groups[gid]
+            local group_color = nil
+
+            -- Check for GUID override
+            for _, item in ipairs(group_items) do
+                local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                if src_guid ~= "" then
+                    local src_item = BR_GetMediaItemByGUID(0, src_guid)
+                    if src_item then
+                        group_color = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                        break
                     end
                 end
             end
-        else
-            -- No GUID, original logic
-            if edits or workflow == "vertical" then
-                if current_color == 0 then
-                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
-                end
-            elseif workflow == "horizontal" then
-                if first_horizontal_run then
-                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", dest_blue)
+
+            -- Assign default color if no GUID override
+            if not group_color then
+                if first_group then
+                    group_color = dest_blue
+                    first_group = false
                 else
-                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
+                    group_color = pastel_color(color_index)
                     color_index = color_index + 1
                 end
             end
+
+            -- Step 4: Apply color to all items in the group and their parent tracks
+            for _, item in ipairs(group_items) do
+                color_group_items(item, group_color)
+                local track = GetMediaItem_Track(item)
+                if track then
+                    SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", group_color)
+                end
+            end
+        end
+    elseif workflow == "Vertical" then
+        local num_tracks = CountTracks(0)
+        local first_folder_done = false
+        local index_for_folder_pastel = 0
+
+        local pastel_folders = {}
+        local dest_folders = {}
+
+        -- First pass: categorize folders
+        for t = 0, num_tracks - 1 do
+            local track = GetTrack(0, t)
+            local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
+            local is_folder = depth == 1
+            local should_color_dest = false
+
+            if is_folder then
+                if not first_folder_done then
+                    should_color_dest = true
+                    first_folder_done = true
+                elseif dest == "y" then
+                    should_color_dest = true
+                end
+
+                if should_color_dest then
+                    table.insert(dest_folders, track)
+                else
+                    table.insert(pastel_folders, track)
+                end
+            end
+        end
+
+        -- Second pass: color pastel folders and their children
+        for _, track in ipairs(pastel_folders) do
+            local num_items = CountTrackMediaItems(track)
+            local folder_color = pastel_color(index_for_folder_pastel)
+            SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", folder_color)
+            index_for_folder_pastel = index_for_folder_pastel + 1
+
+            -- Color items and their groups, check GUID
+            for i = 0, num_items - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                local color_val = folder_color
+                if src_guid ~= "" then
+                    local src_item = BR_GetMediaItemByGUID(0, src_guid)
+                    if src_item then
+                        color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                    end
+                end
+                color_group_items(item, color_val)
+            end
+
+            -- Child tracks pastel coloring
+            local index = 0
+            local folder_depth = 1
+            local next_track = (GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1) + 1
+            while next_track < num_tracks and folder_depth > 0 do
+                local child = GetTrack(0, next_track)
+                local d = GetMediaTrackInfo_Value(child, "I_FOLDERDEPTH")
+                folder_depth = folder_depth + d
+                if folder_depth > 0 then
+                    local num_items_child = CountTrackMediaItems(child)
+                    for i = 0, num_items_child - 1 do
+                        local item = GetTrackMediaItem(child, i)
+                        local c = pastel_color(index) | 0x1000000
+                        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", c)
+                    end
+                    index = index + 1
+                end
+                next_track = next_track + 1
+            end
+        end
+
+        -- Third pass: color destination/first folders (after pastel folders)
+        for _, track in ipairs(dest_folders) do
+            local num_items = CountTrackMediaItems(track)
+            local folder_color = colors.dest_items | 0x1000000
+            SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", folder_color)
+
+            for i = 0, num_items - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                local color_val = folder_color
+                if src_guid ~= "" then
+                    local src_item = BR_GetMediaItemByGUID(0, src_guid)
+                    if src_item then
+                        color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                    end
+                end
+                color_group_items(item, color_val)
+            end
+
+            -- Child tracks (pastel starting at 0 if desired)
+            local index = 0
+            local folder_depth = 1
+            local next_track = (GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1) + 1
+            while next_track < num_tracks and folder_depth > 0 do
+                local child = GetTrack(0, next_track)
+                local d = GetMediaTrackInfo_Value(child, "I_FOLDERDEPTH")
+                folder_depth = folder_depth + d
+                if folder_depth > 0 then
+                    local num_items_child = CountTrackMediaItems(child)
+                    for i = 0, num_items_child - 1 do
+                        local item = GetTrackMediaItem(child, i)
+                        local c = pastel_color(index)
+                        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", c)
+                    end
+                    index = index + 1
+                end
+                next_track = next_track + 1
+            end
         end
     end
-
-    first_horizontal_run = false
 end
 
 ---------------------------------------------------------------------
 
-function vertical_color_razor(dest)
+function vertical_razor()
     Main_OnCommand(40042, 0)           -- Transport: Go to start of project
     local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     Main_OnCommand(select_children, 0) -- Select child tracks
     Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40421, 0)           -- Item: Select all items in trac
-
-    local selected_items = count_selected_media_items()
-    for i = 0, selected_items - 1, 1 do
-        local item = get_selected_media_item_at(i)
-        local pastel = pastel_color(color_index)
-        if dest ~= "y" then
-            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
-        else
-            -- Check for saved GUID
-            local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
-            if saved_guid ~= "" then
-                -- Find the referenced item
-                local referenced_item = nil
-                local total_items = CountMediaItems(0)
-                for j = 0, total_items - 1 do
-                    local test_item = GetMediaItem(0, j)
-                    local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
-                    if test_guid == saved_guid then
-                        referenced_item = test_item
-                        break
-                    end
-                end
-
-                -- Apply color to group
-                if referenced_item then
-                    local ref_color = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
-                    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-
-                    for j = 0, total_items - 1 do
-                        local test_item = GetMediaItem(0, j)
-                        if test_item == item or group_id ~= 0 and GetMediaItemInfo_Value(test_item, "I_GROUPID") == group_id then
-                            SetMediaItemInfo_Value(test_item, "I_CUSTOMCOLOR", ref_color)
-                        end
-                    end
-                end
-            else
-                local colors = get_color_table()
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.dest_items)
-            end
-        end
-    end
-
-    color_index = color_index + 1
 end
 
 ---------------------------------------------------------------------
 
-function horizontal_group(string, group)
+function group_items(string, group)
     if string == "horizontal" then
         Main_OnCommand(40296, 0) -- Track: Select all tracks
     else
@@ -333,8 +410,7 @@ function horizontal()
     local group = 1
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
-        horizontal_group(workflow, group)
-        horizontal_color(workflow, edits)
+        group_items(workflow, group)
         group = group + 1
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     until IsMediaItemSelected(new_item) == true
@@ -345,12 +421,13 @@ function horizontal()
     Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
     SetEditCurPos(0, false, false)
+    return edits
 end
 
 ---------------------------------------------------------------------
 
 function vertical()
-    local edits = xfade_check()
+    -- local edits = xfade_check()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
     local num_of_folders = CountSelectedTracks(0)
@@ -366,8 +443,7 @@ function vertical()
     local workflow = "vertical"
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     repeat
-        horizontal_group(workflow, group)
-        horizontal_color(workflow, edits)
+        group_items(workflow, group)
         group = group + 1
         Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
     until IsMediaItemSelected(new_item) == true
@@ -380,11 +456,12 @@ function vertical()
     for _ = start, num_of_folders, 1 do
         local track = GetSelectedTrack(0, 0)
         local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
-        vertical_color_razor(dest)
+        vertical_razor()
         local next_group = vertical_group(length, group)
         Main_OnCommand(next_folder, 0) -- select next folder
         group = next_group
     end
+
     SelectAllMediaItems(0, false)
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
     SetEditCurPos(0, false, false)
@@ -580,6 +657,22 @@ function color_tracks_from_first_item()
             -- Apply the item color to the track if it has a color
             if item_color ~= 0 then
                 SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", item_color)
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function color_group_items(item, color_val)
+    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_val)
+    local group = GetMediaItemInfo_Value(item, "I_GROUPID")
+    if group > 0 then
+        local total = CountMediaItems(0)
+        for j = 0, total - 1 do
+            local other = GetMediaItem(0, j)
+            if GetMediaItemInfo_Value(other, "I_GROUPID") == group then
+                SetMediaItemInfo_Value(other, "I_CUSTOMCOLOR", color_val)
             end
         end
     end

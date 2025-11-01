@@ -79,6 +79,7 @@ function main()
     Main_OnCommand(delete_items, 0)
     local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
     Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+
     local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
     Main_OnCommand(sync, 0)
     solo()
@@ -87,6 +88,13 @@ function main()
     UpdateArrange()
     UpdateTimeline()
     TrackList_AdjustWindows(false)
+
+    -- Prepare Takes
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
+    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    Main_OnCommand(prepare_takes, 0)
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
+
     Undo_EndBlock('Duplicate folder (No items)', 0)
 end
 
