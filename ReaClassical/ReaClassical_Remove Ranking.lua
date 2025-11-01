@@ -146,25 +146,30 @@ end
 ---------------------------------------------------------------------
 
 function process_items()
+    -- Step 1: Collect all selected items first
+    local selected_items = {}
     local count_selected = count_selected_media_items()
+    for i = 0, count_selected - 1 do
+        local item = get_selected_media_item_at(i)
+        if item then
+            table.insert(selected_items, item)
+        end
+    end
 
-    if count_selected > 0 then
-        -- Process selected items
-        for i = 0, count_selected - 1 do
-            local item = get_selected_media_item_at(i)
-            modify_item_name(item)
+    -- Step 2: Deselect any items not on a parent track
+    local items_to_process = {}
+    for _, item in ipairs(selected_items) do
+        local track = GetMediaItem_Track(item)
+        if track and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") > 0 then
+            table.insert(items_to_process, item) -- keep for processing
+        else
+            SetMediaItemInfo_Value(item, "B_UISEL", 0) -- deselect
         end
-    else
-        local _, recorded_item_guid = GetProjExtState(0, "ReaClassical", "LastRecordedItem")
-        if recorded_item_guid ~= "" then
-            local recorded_item = BR_GetMediaItemByGUID(0, recorded_item_guid)
-            if recorded_item then
-                modify_item_name(recorded_item)
-            else
-                MB("The previously recorded item no longer exists.", "ReaClassical Take Ranking", 0)
-                SetProjExtState(0, "ReaClassical", "LastRecordedItem", "")
-            end
-        end
+    end
+
+    -- Step 3: Process only the items on parent tracks
+    for _, item in ipairs(items_to_process) do
+        modify_item_name(item)
     end
 end
 

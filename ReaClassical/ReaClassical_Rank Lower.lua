@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, modify_item_name, process_items, get_color_table, get_path
 local get_selected_media_item_at, count_selected_media_items
+local pastel_color
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -196,24 +197,30 @@ end
 ---------------------------------------------------------------------
 
 function process_items()
+    -- Step 1: Collect all selected items first
+    local selected_items = {}
     local count_selected = count_selected_media_items()
+    for i = 0, count_selected - 1 do
+        local item = get_selected_media_item_at(i)
+        if item then
+            table.insert(selected_items, item)
+        end
+    end
 
-    if count_selected > 0 then
-        for i = 0, count_selected - 1 do
-            local item = get_selected_media_item_at(i)
-            modify_item_name(item)
+    -- Step 2: Deselect any items not on a parent track
+    local items_to_process = {}
+    for _, item in ipairs(selected_items) do
+        local track = GetMediaItem_Track(item)
+        if track and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") > 0 then
+            table.insert(items_to_process, item) -- keep for processing
+        else
+            SetMediaItemInfo_Value(item, "B_UISEL", 0) -- deselect
         end
-    else
-        local _, recorded_item_guid = GetProjExtState(0, "ReaClassical", "LastRecordedItem")
-        if recorded_item_guid ~= "" then
-            local recorded_item = BR_GetMediaItemByGUID(0, recorded_item_guid)
-            if recorded_item then
-                modify_item_name(recorded_item)
-            else
-                MB("The previously recorded item no longer exists.", "ReaClassical Take Ranking", 0)
-                SetProjExtState(0, "ReaClassical", "LastRecordedItem", "")
-            end
-        end
+    end
+
+    -- Step 3: Process only the items on parent tracks
+    for _, item in ipairs(items_to_process) do
+        modify_item_name(item)
     end
 end
 
@@ -267,6 +274,42 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function pastel_color(index)
+    local golden_ratio_conjugate = 0.61803398875
+    local hue                    = (index * golden_ratio_conjugate) % 1.0
+
+    -- Subtle variation in saturation/lightness
+    local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
+    local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
+
+    local function h2rgb(p, q, t)
+        if t < 0 then t = t + 1 end
+        if t > 1 then t = t - 1 end
+        if t < 1 / 6 then return p + (q - p) * 6 * t end
+        if t < 1 / 2 then return q end
+        if t < 2 / 3 then return p + (q - p) * (2 / 3 - t) * 6 end
+        return p
+    end
+
+    local q = lightness < 0.5 and (lightness * (1 + saturation))
+        or (lightness + saturation - lightness * saturation)
+    local p = 2 * lightness - q
+
+    local r = h2rgb(p, q, hue + 1 / 3)
+    local g = h2rgb(p, q, hue)
+    local b = h2rgb(p, q, hue - 1 / 3)
+
+    local color_int = ColorToNative(
+        math.floor(r * 255 + 0.5),
+        math.floor(g * 255 + 0.5),
+        math.floor(b * 255 + 0.5)
+    )
+
+    return color_int | 0x1000000
 end
 
 ---------------------------------------------------------------------
