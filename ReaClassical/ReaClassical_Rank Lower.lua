@@ -93,7 +93,77 @@ function modify_item_name(item)
                 return colors.rank_good
             end,
             [0] = function()
-                return 0 -- Default color
+                -- Determine color to use
+                local color_to_use = nil
+                local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+
+                -- Check GUID first
+                if saved_guid ~= "" then
+                    local referenced_item = nil
+                    local total_items = CountMediaItems(0)
+                    for i = 0, total_items - 1 do
+                        local test_item = GetMediaItem(0, i)
+                        local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
+                        if test_guid == saved_guid then
+                            referenced_item = test_item
+                            break
+                        end
+                    end
+
+                    if referenced_item then
+                        color_to_use = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
+                    end
+                end
+
+                -- If no GUID color, use folder-based logic
+                if not color_to_use then
+                    local item_track = GetMediaItemTrack(item)
+                    local folder_tracks = {}
+                    local num_tracks = CountTracks(0)
+
+                    -- Build list of folder tracks in project order
+                    for t = 0, num_tracks - 1 do
+                        local track = GetTrack(0, t)
+                        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                        if depth > 0 then
+                            table.insert(folder_tracks, track)
+                        end
+                    end
+
+                    -- Find parent folder track of the item
+                    local parent_folder = nil
+                    local track_idx = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
+                    for t = track_idx - 1, 0, -1 do
+                        local track = GetTrack(0, t)
+                        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                        if depth > 0 then
+                            parent_folder = track
+                            break
+                        end
+                    end
+
+                    -- Compute pastel index: second folder → index 0
+                    local folder_index = 0
+                    local colors = get_color_table()
+                    if parent_folder then
+                        for i, track in ipairs(folder_tracks) do
+                            if track == parent_folder then
+                                folder_index = i - 1 -- subtract 1 so second folder → 0
+                                break
+                            end
+                        end
+                        -- First folder special case
+                        if folder_index < 0 then
+                            color_to_use = colors.dest_items -- use default color for first folder
+                        else
+                            color_to_use = pastel_color(folder_index)
+                        end
+                    else
+                        -- No folder: fallback to dest_items
+                        color_to_use = colors.dest_items
+                    end
+                end
+                return color_to_use
             end,
             [-1] = function()
                 return colors.rank_below_average
@@ -198,7 +268,6 @@ function get_selected_media_item_at(index)
 
     return nil
 end
-
 
 ---------------------------------------------------------------------
 
