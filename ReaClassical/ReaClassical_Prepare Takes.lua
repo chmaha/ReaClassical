@@ -183,10 +183,6 @@ function horizontal_color(workflow, edits)
                         SetMediaItemInfo_Value(test_item, "I_CUSTOMCOLOR", ref_color)
                     end
                 end
-            else
-                -- Fallback to pastel
-                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", pastel)
-                color_index = color_index + 1
             end
 
         else
