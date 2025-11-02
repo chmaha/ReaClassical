@@ -133,7 +133,7 @@ function modify_item_name(item)
                     -- Find parent folder track of the item
                     local parent_folder = nil
                     local track_idx = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
-                    for t = track_idx - 1, 0, -1 do
+                    for t = track_idx, 0, -1 do
                         local track = GetTrack(0, t)
                         local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
                         if depth > 0 then
@@ -145,10 +145,20 @@ function modify_item_name(item)
                     -- Compute pastel index: second folder → index 0
                     local folder_index = 0
                     local colors = get_color_table()
+
+                    -- Count all dest_copy tracks in the project
+                    local dest_copy_count = 0
+                    for _, track in ipairs(folder_tracks) do
+                        local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
+                        if dest ~= "" then
+                            dest_copy_count = dest_copy_count + 1
+                        end
+                    end
+
                     if parent_folder then
                         for i, track in ipairs(folder_tracks) do
                             if track == parent_folder then
-                                folder_index = i - 1 -- subtract 1 so second folder → 0
+                                folder_index = i - (2 + dest_copy_count) -- account for dest and dest copies
                                 break
                             end
                         end
@@ -211,7 +221,7 @@ function process_items()
     for _, item in ipairs(selected_items) do
         local track = GetMediaItem_Track(item)
         if track and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") > 0 then
-            table.insert(items_to_process, item) -- keep for processing
+            table.insert(items_to_process, item)       -- keep for processing
         else
             SetMediaItemInfo_Value(item, "B_UISEL", 0) -- deselect
         end
