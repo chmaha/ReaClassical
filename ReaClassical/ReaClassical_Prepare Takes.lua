@@ -184,7 +184,10 @@ function color(edits)
                     break
                 end
             end
-            if skip_group then goto continue_group end
+            if skip_group then
+                color_index = color_index + 1
+                goto continue_group
+            end
 
             -- Determine group color
             local group_color = nil
@@ -217,7 +220,8 @@ function color(edits)
             -- Color the track of first item
             local first_track = GetMediaItem_Track(group_items[1])
             if first_track then
-                SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", group_color)
+                SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", colors.dest_items)
+                color_folder_children(first_track, colors.dest_items)
             end
 
             ::continue_group::
@@ -409,7 +413,6 @@ end
 ---------------------------------------------------------------------
 
 function vertical()
-    -- local edits = xfade_check()
     local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
     Main_OnCommand(select_all_folders, 0) -- select all folders
     local num_of_folders = CountSelectedTracks(0)
@@ -666,25 +669,25 @@ function color_folder_children(parent_track, folder_color)
     if not parent_track or not folder_color then return end
 
     -- get parent index
-    local parent_idx = reaper.GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
-    local num_tracks = reaper.CountTracks(0)
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
 
     -- start from next track
     local idx = parent_idx + 1
     local depth = 1
 
     while idx < num_tracks and depth > 0 do
-        local tr = reaper.GetTrack(0, idx)
+        local tr = GetTrack(0, idx)
         if not tr then break end
 
-        local folder_depth = reaper.GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+        local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
 
         -- color current track if still inside folder
         if depth > 0 then
-            reaper.SetMediaTrackInfo_Value(tr, "I_CUSTOMCOLOR", folder_color)
+            SetMediaTrackInfo_Value(tr, "I_CUSTOMCOLOR", folder_color)
         end
 
-        depth = depth + folder_depth  -- update folder depth AFTER coloring
+        depth = depth + folder_depth -- update folder depth AFTER coloring
 
         if depth <= 0 then
             break -- folder closed
