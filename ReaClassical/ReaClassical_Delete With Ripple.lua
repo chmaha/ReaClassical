@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers
+local main, source_markers, dest_check
 local ripple_lock_mode, return_xfade_length, xfade
 
 ---------------------------------------------------------------------
@@ -41,6 +41,13 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    local first_group = dest_check()
+    if not first_group then
+        MB("Delete with ripple can only be run on the destination folder.", "ReaClassical Error", 0)
+        return
+    end
+
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
@@ -60,7 +67,9 @@ function main()
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
         local folder = GetSelectedTrack(0, 0)
-
+        if not folder or GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") ~= 1 then
+            return
+        end
         if workflow == "Vertical" and GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1 then
             Main_OnCommand(40310, 0) -- Set ripple-per-track
         else
@@ -80,7 +89,7 @@ function main()
         Main_OnCommand(41305, 0)        -- Item edit: Trim left edge of item to edit cursor
         SetEditCurPos(source_in_pos, false, false)
         xfade(xfade_len)
-        Main_OnCommand(40020, 0)        -- Time Selection: Remove time selection and loop point selection
+        Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
         DeleteProjectMarker(NULL, 998, false)
         DeleteProjectMarker(NULL, 999, false)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
@@ -145,6 +154,31 @@ function xfade(xfade_len)
     MoveEditCursor(0.001, false)
     Main_OnCommand(select_items, 0)
     MoveEditCursor(-0.001, false)
+end
+
+---------------------------------------------------------------------
+
+function dest_check()
+    -- Get first selected item
+    local item = GetSelectedMediaItem(0, 0)
+    if not item then
+        return
+    end
+
+    -- Find its track
+    local track = GetMediaItem_Track(item)
+    if not track then
+        return
+    end
+
+    -- Walk upward to the topmost parent (folder) track
+    local folder = track
+    while GetParentTrack(folder) do
+        folder = GetParentTrack(folder)
+    end
+
+    -- Check if that folder is the first track
+    return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1
 end
 
 ---------------------------------------------------------------------

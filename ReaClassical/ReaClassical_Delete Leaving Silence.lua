@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, select_matching_folder
+local main, source_markers, select_matching_folder, dest_check
 
 ---------------------------------------------------------------------
 
@@ -33,6 +33,12 @@ function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
+
+    local first_group = dest_check()
+    if not first_group then
+        MB("Delete leaving silence can only be run on the destination folder.", "ReaClassical Error", 0)
         return
     end
 
@@ -99,6 +105,31 @@ function select_matching_folder()
             break
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function dest_check()
+    -- Get first selected item
+    local item = GetSelectedMediaItem(0, 0)
+    if not item then
+        return
+    end
+
+    -- Find its track
+    local track = GetMediaItem_Track(item)
+    if not track then
+        return
+    end
+
+    -- Walk upward to the topmost parent (folder) track
+    local folder = track
+    while GetParentTrack(folder) do
+        folder = GetParentTrack(folder)
+    end
+
+    -- Check if that folder is the first track
+    return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1
 end
 
 ---------------------------------------------------------------------
