@@ -80,7 +80,6 @@ function main()
 
     Main_OnCommand(40310, 0) -- Set ripple-per-track
 
-    local response = MB("Delete Destination Material?", "ReaClassical Reverse S-D Edit", 4)
     if moveable_dest == 1 then move_destination_folder_to_top() end
 
     local proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in,
@@ -159,7 +158,7 @@ function main()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
         move_to_project_tab(dest_proj)
         local remove = false
-
+        local response = MB("Delete Destination Material?", "ReaClassical Reverse S-D Edit", 4)
         if response == 6 then remove = true end
         local _, is_selected = copy_or_move_dest()
         if is_selected == false then
