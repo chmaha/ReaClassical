@@ -52,7 +52,7 @@ function main()
         local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
         Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
         GoToMarker(0, 998, false)
-
+        local source_in_pos = GetCursorPosition()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 999, false)
@@ -71,12 +71,14 @@ function main()
         Main_OnCommand(40630, 0)  -- Go to start of time selection
 
         local xfade_len = return_xfade_length()
+        SetEditCurPos(source_in_pos, false, false)
         MoveEditCursor(xfade_len, false)
+        MoveEditCursor(-0.0001, false)
         local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
         Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
         MoveEditCursor(-xfade_len * 2, false)
         Main_OnCommand(41305, 0)        -- Item edit: Trim left edge of item to edit cursor
-        Main_OnCommand(40630, 0)        -- Go to start of time selection
+        SetEditCurPos(source_in_pos, false, false)
         xfade(xfade_len)
         Main_OnCommand(40020, 0)        -- Time Selection: Remove time selection and loop point selection
         DeleteProjectMarker(NULL, 998, false)
