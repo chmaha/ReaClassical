@@ -169,6 +169,7 @@ function process_items()
 
     -- Step 3: Process only the items on parent tracks
     for _, item in ipairs(items_to_process) do
+        GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", true)
         modify_item_name(item)
     end
 end

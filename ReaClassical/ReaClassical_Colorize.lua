@@ -33,12 +33,29 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
     PreventUIRefresh(1)
+
     Main_OnCommand(40034, 0) -- select all in group
     Main_OnCommand(40704, 0) -- set to custom color
+
+    -- loop through selected items and set P_EXT:ranked="y" if on a folder track
+    local sel_count = CountSelectedMediaItems(0)
+    for i = 0, sel_count - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        local track = GetMediaItemTrack(item)
+        if track then
+            local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if folder_depth > 0 then
+                GetSetMediaItemInfo_String(item, "P_EXT:ranked", "y", true)
+            end
+        end
+    end
+
     Main_OnCommand(40769, 0) -- unselect all items
+
     PreventUIRefresh(-1)
-    Undo_EndBlock("ReaClassical Colorize", 0)
+    Undo_EndBlock("ReaClassical Colorize + Mark Folder Items Ranked", 0)
 end
 
 ---------------------------------------------------------------------

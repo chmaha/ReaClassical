@@ -94,6 +94,8 @@ function modify_item_name(item)
                 return colors.rank_good
             end,
             [0] = function()
+                GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", true)
+
                 -- Determine color to use
                 local color_to_use = nil
                 local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -212,7 +214,7 @@ function process_items()
     for _, item in ipairs(selected_items) do
         local track = GetMediaItem_Track(item)
         if track and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") > 0 then
-            table.insert(items_to_process, item) -- keep for processing
+            table.insert(items_to_process, item)       -- keep for processing
         else
             SetMediaItemInfo_Value(item, "B_UISEL", 0) -- deselect
         end
@@ -220,6 +222,7 @@ function process_items()
 
     -- Step 3: Process only the items on parent tracks
     for _, item in ipairs(items_to_process) do
+        GetSetMediaItemInfo_String(item, "P_EXT:ranked", "y", true)
         modify_item_name(item)
     end
 end

@@ -91,6 +91,8 @@ function modify_item_name(item)
                 return colors.rank_good
             end,
             [0] = function()
+                GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", true)
+
                 -- Determine color to use
                 local color_to_use = nil
                 local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -217,6 +219,7 @@ function process_items()
 
     -- Step 3: Process only the items on parent tracks
     for _, item in ipairs(items_to_process) do
+        GetSetMediaItemInfo_String(item, "P_EXT:ranked", "y", true)
         modify_item_name(item)
     end
 end
