@@ -48,6 +48,8 @@ function main()
             local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
             if folder_depth > 0 then
                 GetSetMediaItemInfo_String(item, "P_EXT:ranked", "y", true)
+                local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+                GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
             end
         end
     end

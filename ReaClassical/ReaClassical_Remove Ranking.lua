@@ -148,6 +148,7 @@ function modify_item_name(item)
             local other_group_id = GetMediaItemInfo_Value(other_item, "I_GROUPID")
             if other_item == item or (group_id ~= 0 and other_group_id == group_id) then
                 SetMediaItemInfo_Value(other_item, "I_CUSTOMCOLOR", color_to_use)
+                GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", true)
             end
         end
     end
