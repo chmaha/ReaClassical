@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
+local main, get_selected_media_item_at
 
 ---------------------------------------------------------------------
 
@@ -37,6 +37,14 @@ function main()
     PreventUIRefresh(1)
 
     Main_OnCommand(40034, 0) -- select all in group
+    local item = get_selected_media_item_at(0)
+    if item then
+        local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+        if saved_color == "" then
+            local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+            GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
+        end
+    end
     Main_OnCommand(40704, 0) -- set to custom color
 
     -- loop through selected items and set P_EXT:ranked="y" if on a folder track
@@ -48,8 +56,6 @@ function main()
             local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
             if folder_depth > 0 then
                 GetSetMediaItemInfo_String(item, "P_EXT:ranked", "y", true)
-                local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-                GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
             end
         end
     end
@@ -58,6 +64,25 @@ function main()
 
     PreventUIRefresh(-1)
     Undo_EndBlock("ReaClassical Colorize + Mark Folder Items Ranked", 0)
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------

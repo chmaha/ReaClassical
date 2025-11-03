@@ -215,6 +215,8 @@ function color(edits)
             -- Apply color to all items in group
             for _, item in ipairs(group_items) do
                 color_group_items(item, group_color)
+                local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+                GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
             end
 
             -- Color the track of first item

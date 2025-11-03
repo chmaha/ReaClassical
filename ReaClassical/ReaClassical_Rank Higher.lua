@@ -49,6 +49,7 @@ end
 ---------------------------------------------------------------------
 
 function modify_item_name(item)
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local take = GetActiveTake(item)
     if take ~= nil then
         local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
@@ -114,9 +115,15 @@ function modify_item_name(item)
                         color_to_use = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
                     end
                 end
-
-                -- If no GUID color, use folder-based logic
-                if not color_to_use then
+                if workflow == "Horizontal" then
+                    local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+                    if saved_color ~= "" then
+                        color_to_use = saved_color
+                    else
+                        color_to_use = colors.dest_items
+                    end
+                    -- If no GUID color, use folder-based logic
+                elseif not color_to_use then
                     local item_track = GetMediaItemTrack(item)
                     local folder_tracks = {}
                     local num_tracks = CountTracks(0)
@@ -171,6 +178,15 @@ function modify_item_name(item)
                     else
                         -- No folder: fallback to dest_items
                         color_to_use = colors.dest_items
+                    end
+                    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+                    if workflow == "Horizontal" then
+                        local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+                        if saved_color ~= "" then
+                            color_to_use = saved_color
+                        else
+                            color_to_use = colors.dest_items
+                        end
                     end
                 end
                 return color_to_use
@@ -228,6 +244,14 @@ function process_items()
     end
 
     -- Step 3: Process only the items on parent tracks
+    local item = get_selected_media_item_at(0)
+    if item then
+        local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+        if saved_color == "" then
+            local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+            GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
+        end
+    end
     for _, item in ipairs(items_to_process) do
         GetSetMediaItemInfo_String(item, "P_EXT:ranked", "y", true)
         modify_item_name(item)

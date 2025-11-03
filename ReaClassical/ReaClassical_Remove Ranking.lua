@@ -50,6 +50,8 @@ end
 ---------------------------------------------------------------------
 
 function modify_item_name(item)
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    local colors = get_color_table()
     local take = GetActiveTake(item)
     if take ~= nil then
         local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
@@ -80,9 +82,15 @@ function modify_item_name(item)
                 color_to_use = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
             end
         end
-
-        -- If no GUID color, use folder-based logic
-        if not color_to_use then
+        if workflow == "Horizontal" then
+            local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+            if saved_color ~= "" then
+                color_to_use = saved_color
+            else
+                color_to_use = colors.dest_items
+            end
+            -- If no GUID color, use folder-based logic
+        elseif not color_to_use then
             local item_track = GetMediaItemTrack(item)
             local folder_tracks = {}
             local num_tracks = CountTracks(0)
@@ -110,7 +118,6 @@ function modify_item_name(item)
 
             -- Compute pastel index: second folder → index 0
             local folder_index = 0
-            local colors = get_color_table()
 
             -- Count all dest_copy tracks in the project
             local dest_copy_count = 0
@@ -139,7 +146,6 @@ function modify_item_name(item)
                 color_to_use = colors.dest_items
             end
         end
-
         -- Apply color to item and all items in its item group
         local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
         local count_items = CountMediaItems(0)
@@ -148,7 +154,7 @@ function modify_item_name(item)
             local other_group_id = GetMediaItemInfo_Value(other_item, "I_GROUPID")
             if other_item == item or (group_id ~= 0 and other_group_id == group_id) then
                 SetMediaItemInfo_Value(other_item, "I_CUSTOMCOLOR", color_to_use)
-                GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", true)
+                -- GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", true)
             end
         end
     end
