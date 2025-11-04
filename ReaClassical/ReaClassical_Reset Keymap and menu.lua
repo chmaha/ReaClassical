@@ -31,16 +31,24 @@ function main()
     local system = GetOS()
     local separator = package.config:sub(1, 1)
     local resource_path = GetResourcePath()
+
     local menu_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-menu.ini")
+    local kb_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-kb.ini")
     local renderpresets_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical",
         "ReaClassical-render.ini")
-    local source_file_path = resource_path .. menu_relative_path
-    local source_renderpresets_path = resource_path .. renderpresets_relative_path
-    local destination_file_path = resource_path .. separator .. "reaper-menu.ini"
-    local kb_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-kb.ini")
-    local source_shortcuts_path = resource_path .. kb_relative_path
+    local main_ini_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical",
+        "ReaClassical.ini")
+
+    local src_menu_path = resource_path .. menu_relative_path
+    local src_renderpresets_path = resource_path .. renderpresets_relative_path
+    local src_shortcuts_path = resource_path .. kb_relative_path
+    local src_main_ini_path = resource_path .. main_ini_relative_path
+
+    local dest_menu_path = resource_path .. separator .. "reaper-menu.ini"
     local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
     local dest_renderpresets_path = resource_path .. separator .. "reaper-render.ini"
+    local dest_main_ini_path = resource_path .. separator .. "reaper.ini"
+
     local splash_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
     local splash_abs_path = resource_path .. splash_relative_path
     local reaper_ini = resource_path .. separator .. "reaper.ini"
@@ -57,9 +65,10 @@ function main()
         "ReaClassical Reset", 4)
 
     if response == 6 then
-        copy_file(source_renderpresets_path, dest_renderpresets_path)
-        copy_file(source_file_path, destination_file_path)
-        copy_file(source_shortcuts_path, dest_shortcuts_path)
+        copy_file(src_renderpresets_path, dest_renderpresets_path)
+        copy_file(src_menu_path, dest_menu_path)
+        copy_file(src_shortcuts_path, dest_shortcuts_path)
+        copy_file(src_main_ini_path, dest_main_ini_path)
     end
 
     if response == 6 then

@@ -8,7 +8,7 @@ dir="$HOME/Downloads/Resource_Folder_Base"
 mkdir -p "$dir"
 
 # Source directory
-src="$HOME/Desktop/ReaClassical_26/" # change to src="$HOME/.config/REAPER/" when 26 released!
+src="$HOME/Desktop/ReaClassical_26/"
 
 # List of files and directories to copy
 files="BR.ini
@@ -86,6 +86,10 @@ echo "Removing references to chmaha and plugin search history..."
 sed -i '/home\/chmaha/d;/media\/chmaha/d;/Users\\xxx/d;/Users\\chmaha/d;/^RecentFX/d;/\/mnt\//d;/\/tmp/d;/^Count=/d;/^autonbworkerthreads/d;/^workthreads/d;\|D:/|d' $dir/reaper.ini
 
 echo "Copying keymap, menu, project template and theme files..."
+
+cp $dir/reaper.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical.ini
+cp $dir/reaper.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
+cp $dir/reaper.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
 
 cp $dir/reaper-kb.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-kb.ini
 cp $dir/reaper-kb.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
