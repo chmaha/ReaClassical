@@ -24,27 +24,8 @@ func main() {
 	fmt.Println("Welcome to the ReaClassical installer...")
 	fmt.Println()
 
-	if !checkInternet() {
-		fmt.Println()
-		fmt.Println("Error: The ReaClassical installer requires an internet connection.")
-		fmt.Println("Enable the connection if possible or transfer the portable install from an online machine.")
-		fmt.Println()
-		fmt.Print("Press Enter to exit...")
-		fmt.Scanln()
-		return
-	}
-
-	pkgver, err := getReaperVersion()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	rcver, err := getReaClassicalMajorVersion()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
+	rcver := "26"
+	pkgver := "7.52"
 
 	var (
 		rcfolder = fmt.Sprintf("ReaClassical_%s", rcver)

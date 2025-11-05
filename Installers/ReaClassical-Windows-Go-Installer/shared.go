@@ -16,33 +16,53 @@ package main
 import (
 	"archive/zip"
 	"crypto/sha256"
+	_ "embed"
 	"encoding/hex"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 )
 
-const urlToTest = "https://www.google.com"
+// REAPER installers
+//
+//go:embed reaper752_x64-install.exe
+var Reaper64 []byte
 
-func checkInternet() bool {
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
+//go:embed reaper752_win11_arm64ec_beta-install.exe
+var ReaperARM64 []byte
 
-	resp, err := client.Get(urlToTest)
-	if err != nil {
-		return false
-	}
-	defer resp.Body.Close()
+// 32-bit REAPER installer
+//
+//go:embed reaper752-install.exe
+var Reaper32 []byte
 
-	return resp.StatusCode == http.StatusOK
-}
+// Resource Folder
+//
+//go:embed Resource_Folder_Base.zip
+var ResourceZip []byte
+
+// UserPlugins zip
+//
+//go:embed UP_Windows-x64.zip
+var UP64 []byte
+
+//go:embed UP_Windows-x86.zip
+var UP32 []byte
+
+//go:embed UP_Windows-arm64ec.zip
+var UPARM64 []byte
+
+// 7zip
+//
+//go:embed 7zip.zip
+var zip64 []byte
+
+//go:embed 7zip32.zip
+var zip32 []byte
 
 func getHashedDateSuffix() string {
 	// Get the current epoch time in seconds
@@ -60,28 +80,6 @@ func getHashedDateSuffix() string {
 	hashString := hex.EncodeToString(hashInBytes)[:5]
 
 	return hashString
-}
-
-func downloadFile(url, destination string) {
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("Error downloading file from %s: %s\n", url, err)
-		os.Exit(1)
-	}
-	defer response.Body.Close()
-
-	file, err := os.Create(destination)
-	if err != nil {
-		fmt.Printf("Error creating file %s: %s\n", destination, err)
-		os.Exit(1)
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		fmt.Printf("Error copying content to file %s: %s\n", destination, err)
-		os.Exit(1)
-	}
 }
 
 func extractArchive(archive, destination string) {
@@ -214,116 +212,3 @@ func addLineToReaperIni(rcfolder string) {
 	}
 
 }
-
-func getReaperVersion() (string, error) {
-	// Fetch the content of the online file
-	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt")
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	// Read the body of the response
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	// Define a regular expression pattern to extract the version number
-	pattern := `====\s*(\d+\.\d+)\s*====`
-
-	// Compile the regular expression
-	re := regexp.MustCompile(pattern)
-
-	// Find the version number in the content
-	matches := re.FindStringSubmatch(string(body))
-	if len(matches) < 2 {
-		return "", fmt.Errorf("version number not found")
-	}
-
-	// Return the version number
-	return matches[1], nil
-}
-
-func getReaClassicalMajorVersion() (string, error) {
-	// Fetch the content of the online file
-	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/RC.txt")
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	// Read the body of the response
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	// Define a regular expression pattern to extract the major version number
-	pattern := `@version\s*(\d+)\.\d+`
-
-	// Compile the regular expression
-	re := regexp.MustCompile(pattern)
-
-	// Find the major version number in the content
-	matches := re.FindStringSubmatch(string(body))
-	if len(matches) < 2 {
-		return "", fmt.Errorf("major version number not found")
-	}
-
-	// Return the major version number
-	return matches[1], nil
-}
-
-// func replaceKeyInFile(filePath string) error {
-// 	// Open the file for reading
-// 	file, err := os.Open(filePath)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to open file: %v", err)
-// 	}
-// 	defer file.Close()
-
-// 	// Create a temporary file to store the modified content
-// 	tempFilePath := filePath + ".tmp"
-// 	tempFile, err := os.Create(tempFilePath)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to create temp file: %v", err)
-// 	}
-// 	defer tempFile.Close()
-
-// 	// Scanner to read the file line by line
-// 	scanner := bufio.NewScanner(file)
-// 	writer := bufio.NewWriter(tempFile)
-
-// 	// Find and replace the line starting with "KEY 8 96"
-// 	for scanner.Scan() {
-// 		line := scanner.Text()
-// 		if strings.HasPrefix(line, "KEY 8 96") {
-// 			// Replace with "KEY 9 223"
-// 			line = strings.Replace(line, "KEY 8 96", "KEY 9 223", 1)
-// 		}
-// 		_, err := writer.WriteString(line + "\n")
-// 		if err != nil {
-// 			return fmt.Errorf("failed to write to temp file: %v", err)
-// 		}
-// 	}
-
-// 	if err := scanner.Err(); err != nil {
-// 		return fmt.Errorf("error reading file: %v", err)
-// 	}
-
-// 	// Flush the writer buffer to ensure all content is written to the temp file
-// 	if err := writer.Flush(); err != nil {
-// 		return fmt.Errorf("failed to flush writer: %v", err)
-// 	}
-
-// 	// Close the original file and replace it with the temporary file
-// 	file.Close()
-// 	tempFile.Close()
-
-// 	if err := os.Rename(tempFilePath, filePath); err != nil {
-// 		return fmt.Errorf("failed to replace original file with temp file: %v", err)
-// 	}
-
-// 	return nil
-// }

@@ -21,6 +21,7 @@ import (
 	"time"
 )
 
+// Install32bit installs the 32-bit version using embedded resources
 func Install32bit(rcfolder string, pkgver string, rcver string) {
 
 	// Create a unique hash-based date suffix
@@ -28,70 +29,69 @@ func Install32bit(rcfolder string, pkgver string, rcver string) {
 	tempDir := os.TempDir()
 	tempFilePath := filepath.Join(tempDir, "ReaClassical_"+dateSuffix)
 
-	if err := os.Mkdir(tempFilePath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(tempFilePath, os.ModePerm); err != nil {
 		fmt.Println("Error creating temporary directory:", err)
 		return
 	}
 
-	// Check if the folder ReaClassical_${rcver} exists
+	// Check if the target folder already exists
 	if _, err := os.Stat(rcfolder); err == nil {
-		// If it exists, append the hash-based date suffix
 		rcfolder = fmt.Sprintf("ReaClassical_%s_%s", rcver, dateSuffix)
 		fmt.Printf("Folder ReaClassical_%s already exists. Adding unique identifier as suffix.\n", rcver)
 	}
 
-	// Use filepath.Join to create paths within the temporary directory for downloaded files
+	// Write embedded 7-zip to temp and extract
 	sevenZipDir := filepath.Join(tempFilePath, "7zip32")
+	os.MkdirAll(sevenZipDir, os.ModePerm)
+	zipPath := filepath.Join(tempFilePath, "7zip32.zip")
+	if err := os.WriteFile(zipPath, zip32, 0644); err != nil {
+		fmt.Println("Error writing 7zip32.zip:", err)
+		return
+	}
+	fmt.Println("Extracting embedded 7-zip...")
+	extractArchive(zipPath, sevenZipDir)
+	os.Remove(zipPath)
+
+	// Write embedded REAPER 32-bit installer to temp
 	reaperExePath := filepath.Join(tempFilePath, fmt.Sprintf("reaper%s-install.exe", strings.ReplaceAll(pkgver, ".", "")))
-
-	// Download and extract portable 7-zip
-	fmt.Println("Downloading and extracting portable 7-zip...")
-	time.Sleep(2 * time.Second)
-	downloadFile("https://github.com/chmaha/7-zip/raw/main/7zip32.zip", filepath.Join(tempFilePath, "7zip32.zip"))
-	extractArchive(filepath.Join(tempFilePath, "7zip32.zip"), sevenZipDir)
-	os.Remove(filepath.Join(tempFilePath, "7zip32.zip"))
-
-	// Download REAPER
-	fmt.Printf("Downloading REAPER %s from reaper.fm\n", pkgver)
-	time.Sleep(2 * time.Second)
-	reaperURL := fmt.Sprintf("https://www.reaper.fm/files/%s.x/reaper%s-install.exe", strings.Split(pkgver, ".")[0], strings.ReplaceAll(pkgver, ".", ""))
-	downloadFile(reaperURL, reaperExePath)
+	if err := os.WriteFile(reaperExePath, Reaper32, 0644); err != nil {
+		fmt.Println("Error writing REAPER installer:", err)
+		return
+	}
 
 	// Extract REAPER
-	fmt.Printf("Extracting REAPER from .exe to %s folder...\n", rcfolder)
-	time.Sleep(2 * time.Second)
+	fmt.Printf("Extracting REAPER from embedded installer to %s folder...\n", rcfolder)
+	time.Sleep(1 * time.Second)
 	runCommand(filepath.Join(sevenZipDir, "7z.exe"), "x", reaperExePath, "-o"+rcfolder)
 
-	// Download ReaClassical files from GitHub
-	fmt.Println("Downloading ReaClassical files from GitHub...")
-	time.Sleep(2 * time.Second)
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/ltsc/Resource%20Folder/Resource_Folder_Base.zip", filepath.Join(tempFilePath, "Resource_Folder_Base.zip"))
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/ltsc/Resource%20Folder/UserPlugins/UP_Windows-x86.zip", filepath.Join(tempFilePath, "UP_Windows-x86.zip"))
+	// Write embedded ReaClassical Resource_Folder_Base.zip
+	resZipPath := filepath.Join(tempFilePath, "Resource_Folder_Base.zip")
+	if err := os.WriteFile(resZipPath, ResourceZip, 0644); err != nil {
+		fmt.Println("Error writing Resource_Folder_Base.zip:", err)
+		return
+	}
+	extractArchive(resZipPath, rcfolder)
+	os.Remove(resZipPath)
 
-	// Extract ReaClassical files
-	fmt.Println("Extracting ReaClassical files to ReaClassical folder...")
-	time.Sleep(2 * time.Second)
-	extractArchive(filepath.Join(tempFilePath, "Resource_Folder_Base.zip"), rcfolder)
-	extractArchive(filepath.Join(tempFilePath, "UP_Windows-x86.zip"), filepath.Join(rcfolder, "UserPlugins"))
+	// Write embedded UserPlugins 32-bit zip
+	upZipPath := filepath.Join(tempFilePath, "UP_Windows-x86.zip")
+	if err := os.WriteFile(upZipPath, UP32, 0644); err != nil {
+		fmt.Println("Error writing UP_Windows-x86.zip:", err)
+		return
+	}
+	extractArchive(upZipPath, filepath.Join(rcfolder, "UserPlugins"))
+	os.Remove(upZipPath)
 
-	// Add the line to reaper.ini under the [REAPER] section
+	// Configure REAPER theme and splash
 	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")
 	addLineToReaperIni(rcfolder)
 
-	// Fix Ctrl+backtick shortcut
-	// fmt.Println("Fixing Ctrl+backtick reference in reaper-kb.ini")
-	// filePath := filepath.Join(rcfolder, "reaper-kb.ini")
-	// err := replaceKeyInFile(filePath)
-	// if err != nil {
-	// 	fmt.Printf("Error: %v\n", err)
-	// }
-
-	// Remove temporary files and directories
+	// Remove temporary files
 	fmt.Println("Removing temporary files...")
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	os.RemoveAll(tempFilePath)
 
-	fmt.Println("Done!")
+	fmt.Println("32-bit Installation complete!")
 
 	// Wait for user input before exiting
 	fmt.Print("Press Enter to exit...")
