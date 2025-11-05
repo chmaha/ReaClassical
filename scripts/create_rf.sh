@@ -89,6 +89,7 @@ echo "Copying keymap, menu, project template and theme files..."
 
 cp $dir/reaper.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical.ini
 cp $dir/reaper.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
+sed -i "/^\[REAPER\]/a lastthemefn5=/home/chmaha/Desktop/ReaClassical_26/ColorThemes/ReaClassical.ReaperTheme" "/home/chmaha/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
 cp $dir/reaper.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
 
 cp $dir/reaper-kb.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-kb.ini
