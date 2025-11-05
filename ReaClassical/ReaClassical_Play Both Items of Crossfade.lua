@@ -33,6 +33,8 @@ function main()
     end
     -- check if left or right item is muted
     DeleteProjectMarker(NULL, 1016, false)
+    local in_bounds = GetToggleCommandStateEx(32065, 43664)
+    if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
     local left_mute = GetToggleCommandStateEx(32065, 43633)
     local right_mute = GetToggleCommandStateEx(32065, 43634)
     if left_mute == 1 then CrossfadeEditor_OnCommand(43633) end

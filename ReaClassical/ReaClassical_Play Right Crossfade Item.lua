@@ -33,6 +33,8 @@ function main()
 
     DeleteProjectMarker(NULL, 1016, false)
     CSurf_OnPlayRateChange(1)
+    local in_bounds = GetToggleCommandStateEx(32065, 43664)
+    if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
     -- check if left or right item is muted
     local left_mute = GetToggleCommandStateEx(32065, 43633)
     local right_mute = GetToggleCommandStateEx(32065, 43634)

@@ -51,11 +51,10 @@ function main()
 
     local splash_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
     local splash_abs_path = resource_path .. splash_relative_path
-    local reaper_ini = resource_path .. separator .. "reaper.ini"
 
     -- re-apply absolute splash reference on MacOS
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
-        update_reaper_ini(reaper_ini, "splashimage", splash_abs_path)
+        update_reaper_ini(dest_main_ini_path, "splashimage", splash_abs_path)
     end
 
     local response = MB(

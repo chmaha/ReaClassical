@@ -21,16 +21,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, move_cursor_to_time_selection_midpoint
----------------------------------------------------------------------
+local main
 
-local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-local audition_speed = 0.75
-if input ~= "" then
-    local table = {}
-    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[9] then audition_speed = tonumber(table[9]) or 0.75 end
-end
+---------------------------------------------------------------------
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -38,34 +31,20 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-
-    DeleteProjectMarker(NULL, 1016, false)
-    CSurf_OnPlayRateChange(audition_speed)
-    local in_bounds = GetToggleCommandStateEx(32065, 43664)
-    if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
     -- check if left or right item is muted
+    DeleteProjectMarker(NULL, 1016, false)
+    local bottom_only = GetToggleCommandStateEx(32065, 43669)
+    if bottom_only ~= 1 then CrossfadeEditor_OnCommand(43669) end -- set bottom lane only
     local left_mute = GetToggleCommandStateEx(32065, 43633)
     local right_mute = GetToggleCommandStateEx(32065, 43634)
+    if left_mute == 1 then CrossfadeEditor_OnCommand(43633) end
     if right_mute == 1 then CrossfadeEditor_OnCommand(43634) end
-    if left_mute == 0 then CrossfadeEditor_OnCommand(43633) end
 
     -- prevent action 43491 from not playing if mouse cursor doesn't move
     CrossfadeEditor_OnCommand(43483) -- decrease preview momentarily
 
+    CSurf_OnPlayRateChange(1)
     CrossfadeEditor_OnCommand(43491) -- set pre/post and play both items
-    move_cursor_to_time_selection_midpoint()
-end
-
----------------------------------------------------------------------
-
-function move_cursor_to_time_selection_midpoint()
-    local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
-    if start_time == end_time then
-        return nil -- no active time selection
-    end
-
-    local midpoint = (start_time + end_time) / 2
-    SetEditCurPos(midpoint, true, true) -- move cursor, seek playback if playing
 end
 
 ---------------------------------------------------------------------

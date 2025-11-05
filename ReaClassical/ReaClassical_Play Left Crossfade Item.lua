@@ -41,6 +41,8 @@ function main()
     end
     local marker_actions = NamedCommandLookup("_SWSMA_ENABLE")
     Main_OnCommand(marker_actions, 0)
+    local in_bounds = GetToggleCommandStateEx(32065, 43664)
+    if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
     -- check if left or right item is muted
     local left_mute = GetToggleCommandStateEx(32065, 43633)
     local right_mute = GetToggleCommandStateEx(32065, 43634)
