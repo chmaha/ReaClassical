@@ -45,6 +45,9 @@ function main()
         if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
+    local mgr_open = GetToggleCommandState(40326) == 1
+    if not mgr_open then Main_OnCommand(40326,0) end
+
     Main_OnCommand(40635, 0) -- remove time selection
     Main_OnCommand(42474, 0) -- set selection to razor edit
 
