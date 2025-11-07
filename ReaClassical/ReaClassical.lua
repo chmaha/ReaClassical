@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.10
+@version 25.11
 @changelog
-  Documentation: Modify REAPER update instructions
+  Add various actions to alt recording
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
