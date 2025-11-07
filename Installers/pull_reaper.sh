@@ -12,9 +12,28 @@ ver_no_dot=$(echo "$ver" | tr -d '.')
 resource_zip="$HOME/code/chmaha/ReaClassical/Resource Folder/Resource_Folder_Base.zip"
 
 # Create directories
-linux_dir="Makeself builds/linux"
-macos_dir="Makeself builds/macos"
-mkdir -p "$linux_dir" "$macos_dir"
+linux_dir="src/linux"
+macos_dir="src/macos"
+win_dir="src/windows"
+mkdir -p "$linux_dir" "$macos_dir" "$win_dir"
+
+# --- Clean up old Reaper binaries that don't match the version ---
+echo "🔹 Removing old Reaper binaries not matching version $ver ..."
+for dir in "$linux_dir" "$macos_dir" "$win_dir"; do
+    [ -d "$dir" ] || continue
+    for f in "$dir"/reaper*; do
+        # Skip if no files match
+        [ -e "$f" ] || continue
+        # Keep only files containing the desired version
+        case "$f" in
+            *"$ver_no_dot"*) ;;      # keep matching version
+            *)
+                echo "Deleting old file: $f"
+                rm -f "$f"
+                ;;
+        esac
+    done
+done
 
 # --- Linux downloads ---
 for arch in x86_64 i686 aarch64 armv7l; do
@@ -43,9 +62,6 @@ for macarch in universal x86_64 i386; do
 done
 
 # --- Windows downloads ---
-win_dir="ReaClassical-Windows-Go-Installer"
-mkdir -p "$win_dir"
-
 # 64-bit
 file="$win_dir/reaper${ver_no_dot}_x64-install.exe"
 url="https://reaper.fm/files/${major}.x/reaper${ver_no_dot}_x64-install.exe"
@@ -75,15 +91,5 @@ else
     echo "Downloading Windows ARM64 (beta): $url"
     curl -L -o "$file" "$url"
 fi
-
-# --- Copy Resource_Folder_Base.zip into all three folders (always overwrite) ---
-for folder in "$linux_dir" "$macos_dir"; do
-    dest="$folder/Resource_Folder_Base.zip"
-    echo "Copying resource folder to $folder (overwriting if exists)"
-    cp -f "$resource_zip" "$dest"
-done
-
-echo "Copying resource folder to Windows installer folder (overwriting if exists)"
-cp -f "$resource_zip" "$win_dir/Resource_Folder_Base.zip"
 
 echo "✅ Completed successfully!"

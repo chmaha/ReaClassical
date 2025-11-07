@@ -1,0 +1,153 @@
+Version: 1.1
+desc:Altitude Brightness EQ (chmaha)
+author: chmaha
+changelog:
+  Update according to airwindows commit 09cdb13
+about:
+  Uses DSP from airwindows "SlewSonic" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SlewSonic (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:20<5,25,0.01>Mute (kHZ)
+slider2:0<0,1,0.01>Bright
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+biquadA = freemem; freemem +=15;
+biquadB = freemem; freemem +=15;
+biquadC = freemem; freemem +=15;
+biquadD = freemem; freemem +=15;
+
+@slider
+
+A = (slider1-5)/20;
+B = slider2;
+
+@block
+
+trim = 2.302585092994045684017991; 
+freq = ((A*20000.0)+5000.0) / srate;
+(freq > 0.499) ? freq = 0.499;
+biquadD[0] = biquadC[0] = biquadB[0] = biquadA[0] = freq;
+biquadA[1] = 2.24697960; 
+biquadB[1] = 0.80193774;
+biquadC[1] = 0.55495813;
+biquadD[1] = 0.5;
+
+K = tan($pi * biquadA[0]); 
+norm = 1.0 / (1.0 + K / biquadA[1] + K * K);
+biquadA[2] = K * K * norm;
+biquadA[3] = 2.0 * biquadA[2];
+biquadA[4] = biquadA[2];
+biquadA[5] = 2.0 * (K * K - 1.0) * norm;
+biquadA[6] = (1.0 - K / biquadA[1] + K * K) * norm;
+
+K = tan($pi * biquadA[0]);
+norm = 1.0 / (1.0 + K / biquadB[1] + K * K);
+biquadB[2] = K * K * norm;
+biquadB[3] = 2.0 * biquadB[2];
+biquadB[4] = biquadB[2];
+biquadB[5] = 2.0 * (K * K - 1.0) * norm;
+biquadB[6] = (1.0 - K / biquadB[1] + K * K) * norm;
+
+K = tan($pi * biquadC[0]);
+norm = 1.0 / (1.0 + K / biquadC[1] + K * K);
+biquadC[2] = K * K * norm;
+biquadC[3] = 2.0 * biquadC[2];
+biquadC[4] = biquadC[2];
+biquadC[5] = 2.0 * (K * K - 1.0) * norm;
+biquadC[6] = (1.0 - K / biquadC[1] + K * K) * norm;
+
+K = tan($pi * biquadD[0]);
+norm = 1.0 / (1.0 + K / biquadD[1] + K * K);
+biquadD[2] = K * K * norm;
+biquadD[3] = 2.0 * biquadD[2];
+biquadD[4] = biquadD[2];
+biquadD[5] = 2.0 * (K * K - 1.0) * norm;
+biquadD[6] = (1.0 - K / biquadD[1] + K * K) * norm;
+
+aWet = 0.0;
+bWet = 0.0;
+cWet = B * 3.0;
+
+(cWet < 1.0) ? (aWet = cWet; cWet = 0.0;)
+: (cWet < 2.0) ? (bWet = cWet - 1.0; aWet = 1.0; cWet = 0.0;)
+: (cWet -= 2.0; bWet = aWet = 1.0;);
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+dryStageAL = 0.0;
+dryStageBL = 0.0;
+dryStageAR = 0.0;
+dryStageBR = 0.0;
+dryFinalBiquadL = 0.0;
+dryFinalBiquadR = 0.0;
+outSampleL = 0.0;
+outSampleR = 0.0;
+
+(aWet > 0.0) ? (
+  outSampleL = biquadA[2]*inputSampleL+biquadA[3]*biquadA[7]+biquadA[4]*biquadA[8]-biquadA[5]*biquadA[9]-biquadA[6]*biquadA[10];
+  biquadA[8] = biquadA[7]; biquadA[7] = inputSampleL; inputSampleL = outSampleL; biquadA[10] = biquadA[9]; biquadA[9] = inputSampleL; //DF1 left
+  outSampleR = biquadA[2]*inputSampleR+biquadA[3]*biquadA[11]+biquadA[4]*biquadA[12]-biquadA[5]*biquadA[13]-biquadA[6]*biquadA[14];
+  biquadA[12] = biquadA[11]; biquadA[11] = inputSampleR; inputSampleR = outSampleR; biquadA[14] = biquadA[13]; biquadA[13] = inputSampleR; //DF1 right
+  outSampleL = (inputSampleL - lastSampleAL)*trim;
+  lastSampleAL = inputSampleL; inputSampleL = outSampleL;
+  dryStageAL = inputSampleL = (inputSampleL * aWet) + (drySampleL * (1.0-aWet));
+  outSampleR = (inputSampleR - lastSampleAR)*trim;
+  lastSampleAR = inputSampleR; inputSampleR = outSampleR;
+  dryStageAR = inputSampleR = (inputSampleR * aWet) + (drySampleR * (1.0-aWet));
+);
+
+(bWet > 0.0) ? (
+  outSampleL = biquadB[2]*inputSampleL+biquadB[3]*biquadB[7]+biquadB[4]*biquadB[8]-biquadB[5]*biquadB[9]-biquadB[6]*biquadB[10];
+  biquadB[8] = biquadB[7]; biquadB[7] = inputSampleL; inputSampleL = outSampleL; biquadB[10] = biquadB[9]; biquadB[9] = inputSampleL; //DF1 left
+  outSampleR = biquadB[2]*inputSampleR+biquadB[3]*biquadB[11]+biquadB[4]*biquadB[12]-biquadB[5]*biquadB[13]-biquadB[6]*biquadB[14];
+  biquadB[12] = biquadB[11]; biquadB[11] = inputSampleR; inputSampleR = outSampleR; biquadB[14] = biquadB[13]; biquadB[13] = inputSampleR; //DF1 right
+  outSampleL = (inputSampleL - lastSampleBL)*trim;
+  lastSampleBL = inputSampleL; inputSampleL = outSampleL;
+  dryStageBL = inputSampleL = (inputSampleL * bWet) + (dryStageAL * (1.0-bWet));
+  outSampleR = (inputSampleR - lastSampleBR)*trim;
+  lastSampleBR = inputSampleR; inputSampleR = outSampleR;
+  dryStageBR = inputSampleR = (inputSampleR * bWet) + (dryStageAR * (1.0-bWet));
+);
+
+(cWet > 0.0) ? (
+  outSampleL = biquadC[2]*inputSampleL+biquadC[3]*biquadC[7]+biquadC[4]*biquadC[8]-biquadC[5]*biquadC[9]-biquadC[6]*biquadC[10];
+  biquadC[8] = biquadC[7]; biquadC[7] = inputSampleL; inputSampleL = outSampleL; biquadC[10] = biquadC[9]; biquadC[9] = inputSampleL; 
+  outSampleR = biquadC[2]*inputSampleR+biquadC[3]*biquadC[11]+biquadC[4]*biquadC[12]-biquadC[5]*biquadC[13]-biquadC[6]*biquadC[14];
+  biquadC[12] = biquadC[11]; biquadC[11] = inputSampleR; inputSampleR = outSampleR; biquadC[14] = biquadC[13]; biquadC[13] = inputSampleR;
+  outSampleL = (inputSampleL - lastSampleCL)*trim;
+  lastSampleCL = inputSampleL; inputSampleL = outSampleL;
+  inputSampleL = (inputSampleL * cWet) + (dryStageBL * (1.0-cWet));
+  outSampleR = (inputSampleR - lastSampleCR)*trim;
+  lastSampleCR = inputSampleR; inputSampleR = outSampleR;
+  inputSampleR = (inputSampleR * cWet) + (dryStageBR * (1.0-cWet));
+);
+
+(aWet > 0.0) ? (
+  dryFinalBiquadL = inputSampleL;
+  dryFinalBiquadR = inputSampleR;
+  outSampleL = biquadD[2]*inputSampleL+biquadD[3]*biquadD[7]+biquadD[4]*biquadD[8]-biquadD[5]*biquadD[9]-biquadD[6]*biquadD[10];
+  biquadD[8] = biquadD[7]; biquadD[7] = inputSampleL; inputSampleL = outSampleL; biquadD[10] = biquadD[9]; biquadD[9] = inputSampleL;
+  outSampleR = biquadD[2]*inputSampleR+biquadD[3]*biquadD[11]+biquadD[4]*biquadD[12]-biquadD[5]*biquadD[13]-biquadD[6]*biquadD[14];
+  biquadD[12] = biquadD[11]; biquadD[11] = inputSampleR; inputSampleR = outSampleR; biquadD[14] = biquadD[13]; biquadD[13] = inputSampleR;
+  inputSampleL = (inputSampleL * aWet) + (dryFinalBiquadL * (1.0-aWet));
+  inputSampleR = (inputSampleR * aWet) + (dryFinalBiquadR * (1.0-aWet));
+);
+
+(inputSampleL > 1.0) ? inputSampleL = 1.0;
+(inputSampleL < -1.0) ? inputSampleL = -1.0;
+(inputSampleR > 1.0) ? inputSampleR = 1.0;
+(inputSampleR < -1.0) ? inputSampleR = -1.0;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

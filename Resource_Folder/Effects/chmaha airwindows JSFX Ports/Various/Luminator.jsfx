@@ -1,0 +1,53 @@
+Version: 1.0
+desc:Luminator Waveshaper (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Inflamer" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Inflamer (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Drive
+slider2:0<-50,50,1>Curve
+slider3:1<0,1,0.01>Effect
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+
+A = slider1;
+B = (slider2 + 50) / 100;
+C = slider3;
+
+@block
+
+gain = A;
+negacurve = min(1 - B, 0.5);
+curve = min(B, 0.5);
+effectOut = C;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+inputSampleL *= gain;
+inflamerPlus = (inputSampleL*2.0)-pow(inputSampleL,2);
+inflamerMinus = inputSampleL+(pow(inputSampleL,3)*0.25)-((pow(inputSampleL,2)+pow(inputSampleL,4))*0.0625); //-50
+inputSampleL = (inflamerPlus * curve) + (inflamerMinus * negacurve);
+inputSampleL = (inputSampleL * effectOut) + (drySampleL * (1.0-effectOut));
+
+inputSampleR *= gain;
+inflamerPlus = (inputSampleR*2.0)-pow(inputSampleR,2);
+inflamerMinus = inputSampleR+(pow(inputSampleR,3)*0.25)-((pow(inputSampleR,2)+pow(inputSampleR,4))*0.0625); //-50
+inputSampleR = (inflamerPlus * curve) + (inflamerMinus * negacurve);
+inputSampleR = (inputSampleR * effectOut) + (drySampleR * (1.0-effectOut));
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

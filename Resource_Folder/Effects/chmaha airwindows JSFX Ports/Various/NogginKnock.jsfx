@@ -1,0 +1,89 @@
+Version: 1.0
+desc:Noggin Knock Head Bump (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "DubSub2" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DubSub2 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Head Bump
+slider2:68.75<25,200,0.01>Head Frequency (Hz)
+slider3:0.5<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+
+hdbA = freemem; freemem += 11;
+hdbB = freemem; freemem += 11;
+
+hdb_freq = 0;hdb_reso = 1;hdb_a0 = 2;hdb_a1 = 3;hdb_a2 = 4;
+hdb_b1 = 5;hdb_b2 = 6;hdb_sL1 = 7;hdb_sL2 = 8;hdb_sR1 = 9;
+hdb_sR2 = 10;
+
+@slider
+
+A = slider1;
+B = sqrt((slider2-25)/175); // (B*B)*175.0)+25.0
+C = slider3;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+headBumpDrive = (A*0.1)/overallscale;
+
+hdbA[hdb_freq] = (((B*B)*175.0)+25.0)/srate;
+hdbB[hdb_freq] = hdbA[hdb_freq]*0.9375;
+hdbB[hdb_reso] = hdbA[hdb_reso] = 0.618033988749894848204586;
+hdbB[hdb_a1] = hdbA[hdb_a1] = 0.0;
+
+K = tan($pi * hdbA[hdb_freq]);
+norm = 1.0 / (1.0 + K / hdbA[hdb_reso] + K * K);
+hdbA[hdb_a0] = K / hdbA[hdb_reso] * norm;
+hdbA[hdb_a2] = -hdbA[hdb_a0];
+hdbA[hdb_b1] = 2.0 * (K * K - 1.0) * norm;
+hdbA[hdb_b2] = (1.0 - K / hdbA[hdb_reso] + K * K) * norm;
+K = tan($pi * hdbB[hdb_freq]);
+norm = 1.0 / (1.0 + K / hdbB[hdb_reso] + K * K);
+hdbB[hdb_a0] = K / hdbB[hdb_reso] * norm;
+hdbB[hdb_a2] = -hdbB[hdb_a0];
+hdbB[hdb_b1] = 2.0 * (K * K - 1.0) * norm;
+hdbB[hdb_b2] = (1.0 - K / hdbB[hdb_reso] + K * K) * norm;
+
+headWet = C;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+headBumpL += (inputSampleL * headBumpDrive);
+headBumpL -= (headBumpL * headBumpL * headBumpL * (0.0618/sqrt(overallscale)));
+headBumpR += (inputSampleR * headBumpDrive);
+headBumpR -= (headBumpR * headBumpR * headBumpR * (0.0618/sqrt(overallscale)));
+headBiqSampleL = (headBumpL * hdbA[hdb_a0]) + hdbA[hdb_sL1];
+hdbA[hdb_sL1] = (headBumpL * hdbA[hdb_a1]) - (headBiqSampleL * hdbA[hdb_b1]) + hdbA[hdb_sL2];
+hdbA[hdb_sL2] = (headBumpL * hdbA[hdb_a2]) - (headBiqSampleL * hdbA[hdb_b2]);
+headBumpSampleL = (headBiqSampleL * hdbB[hdb_a0]) + hdbB[hdb_sL1];
+hdbB[hdb_sL1] = (headBiqSampleL * hdbB[hdb_a1]) - (headBumpSampleL * hdbB[hdb_b1]) + hdbB[hdb_sL2];
+hdbB[hdb_sL2] = (headBiqSampleL * hdbB[hdb_a2]) - (headBumpSampleL * hdbB[hdb_b2]);
+headBiqSampleR = (headBumpR * hdbA[hdb_a0]) + hdbA[hdb_sR1];
+hdbA[hdb_sR1] = (headBumpR * hdbA[hdb_a1]) - (headBiqSampleR * hdbA[hdb_b1]) + hdbA[hdb_sR2];
+hdbA[hdb_sR2] = (headBumpR * hdbA[hdb_a2]) - (headBiqSampleR * hdbA[hdb_b2]);
+headBumpSampleR = (headBiqSampleR * hdbB[hdb_a0]) + hdbB[hdb_sR1];
+hdbB[hdb_sR1] = (headBiqSampleR * hdbB[hdb_a1]) - (headBumpSampleR * hdbB[hdb_b1]) + hdbB[hdb_sR2];
+hdbB[hdb_sR2] = (headBiqSampleR * hdbB[hdb_a2]) - (headBumpSampleR * hdbB[hdb_b2]);
+
+inputSampleL = (headBumpSampleL * headWet) + (drySampleL * (1.0-headWet));
+inputSampleR = (headBumpSampleR * headWet) + (drySampleR * (1.0-headWet));
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

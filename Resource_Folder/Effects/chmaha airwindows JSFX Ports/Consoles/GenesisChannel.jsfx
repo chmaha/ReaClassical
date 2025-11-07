@@ -1,0 +1,104 @@
+NoIndex: true
+desc:Genesis Console Channel (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Console0Channel" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console0Channel (MIT License)
+  JSFX version released under GPLv3 license
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+slider1:0<-17,2,1>Volume
+slider2:0<-17,17,1>Pan
+
+@init
+
+@slider
+
+A = slider1;
+B = slider2;
+
+@block
+
+bitshiftL = bitshiftR = -A;
+
+panBits = B;
+(panBits > 0) ? bitshiftL += abs(panBits);
+(panBits < 0) ? bitshiftR += abs(panBits);
+
+(bitshiftL < -2) ? bitshiftL = -2; (bitshiftL > 17) ? bitshiftL = 17;
+(bitshiftR < -2) ? bitshiftR = -2; (bitshiftR > 17) ? bitshiftR = 17;
+
+gainL = (bitshiftL == 17) ? 0.0 :
+        (bitshiftL == 16) ? 0.0000152587890625 :
+        (bitshiftL == 15) ? 0.000030517578125 :
+        (bitshiftL == 14) ? 0.00006103515625 :
+        (bitshiftL == 13) ? 0.0001220703125 :
+        (bitshiftL == 12) ? 0.000244140625 :
+        (bitshiftL == 11) ? 0.00048828125 :
+        (bitshiftL == 10) ? 0.0009765625 :
+        (bitshiftL == 9)  ? 0.001953125 :
+        (bitshiftL == 8)  ? 0.00390625 :
+        (bitshiftL == 7)  ? 0.0078125 :
+        (bitshiftL == 6)  ? 0.015625 :
+        (bitshiftL == 5)  ? 0.03125 :
+        (bitshiftL == 4)  ? 0.0625 :
+        (bitshiftL == 3)  ? 0.125 :
+        (bitshiftL == 2)  ? 0.25 :
+        (bitshiftL == 1)  ? 0.5 :
+        (bitshiftL == 0)  ? 1.0 :
+        (bitshiftL == -1) ? 2.0 :
+        (bitshiftL == -2) ? 4.0;
+
+gainR = (bitshiftR == 17) ? 0.0 :
+        (bitshiftR == 16) ? 0.0000152587890625 :
+        (bitshiftR == 15) ? 0.000030517578125 :
+        (bitshiftR == 14) ? 0.00006103515625 :
+        (bitshiftR == 13) ? 0.0001220703125 :
+        (bitshiftR == 12) ? 0.000244140625 :
+        (bitshiftR == 11) ? 0.00048828125 :
+        (bitshiftR == 10) ? 0.0009765625 :
+        (bitshiftR == 9)  ? 0.001953125 :
+        (bitshiftR == 8)  ? 0.00390625 :
+        (bitshiftR == 7)  ? 0.0078125 :
+        (bitshiftR == 6)  ? 0.015625 :
+        (bitshiftR == 5)  ? 0.03125 :
+        (bitshiftR == 4)  ? 0.0625 :
+        (bitshiftR == 3)  ? 0.125 :
+        (bitshiftR == 2)  ? 0.25 :
+        (bitshiftR == 1)  ? 0.5 :
+        (bitshiftR == 0)  ? 1.0 :
+        (bitshiftR == -1) ? 2.0 :
+        (bitshiftR == -2) ? 4.0;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+temp = inputSampleL;
+inputSampleL = (inputSampleL + avgAL) * 0.5; avgAL = temp;
+temp = inputSampleR;
+inputSampleR = (inputSampleR + avgAR) * 0.5; avgAR = temp;
+
+inputSampleL *= gainL;
+inputSampleR *= gainR;
+
+(inputSampleL > 1.4137166941154) ? inputSampleL = 1.4137166941154;
+(inputSampleL < -1.4137166941154) ? inputSampleL = -1.4137166941154;
+(inputSampleL > 0.0) ? inputSampleL = (inputSampleL/2.0)*(2.8274333882308-inputSampleL)
+: inputSampleL = -(inputSampleL/-2.0)*(2.8274333882308+inputSampleL);
+(inputSampleR > 1.4137166941154) ? inputSampleR = 1.4137166941154;
+(inputSampleR < -1.4137166941154) ? inputSampleR = -1.4137166941154;
+(inputSampleR > 0.0) ? inputSampleR = (inputSampleR/2.0)*(2.8274333882308-inputSampleR)
+: inputSampleR = -(inputSampleR/-2.0)*(2.8274333882308+inputSampleR);
+
+temp = inputSampleL;
+inputSampleL = (inputSampleL + avgBL) * 0.5; avgBL = temp;
+temp = inputSampleR;
+inputSampleR = (inputSampleR + avgBR) * 0.5; avgBR = temp;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

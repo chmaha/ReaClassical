@@ -1,0 +1,180 @@
+version: 1.0
+desc:Channel Twister (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "MSFlipTimer","LRFlipTimer", "LeftoMono" & "RightoMono" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/MSFlipTimer (MIT License)
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/LRFlipTimer (MIT License)
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/LeftoMono (MIT License)
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/RightoMono (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,1,1{Mono-to-Stereo,Left-Right-Swap,Left-to-Mono,Right-to-Mono}>Flip Type
+slider2:1<0,10,1>Minutes
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+
+A = slider1;
+B = slider2;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+time = B * 60.0 * srate | 0;
+transition = srate*0.1 | 0;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+outputSampleL = inputSampleL;
+outputSampleR = inputSampleR;
+		
+tick+=1;
+(tick > time*2) ? tick = 0;
+
+(A == 0) ? ( //mono-to-stereo
+	(tick < time) ? (
+		(tick < transition) ? (
+			crossfade = tick;
+			crossfade /= transition;
+			mono = (inputSampleL+inputSampleR)*0.5;
+			(crossfade < 0.5) ? (
+				outputSampleL = (inputSampleL*crossfade)+(mono*(1.0-crossfade));
+				outputSampleR = (inputSampleR*crossfade)+(mono*(1.0-crossfade));
+			) : (
+				crossfade = abs(crossfade-1.0);
+				outputSampleL = (mono*crossfade)+(inputSampleL*(1.0-crossfade));
+				outputSampleR = (mono*crossfade)+(inputSampleR*(1.0-crossfade));
+			)
+		) : (
+			applied = 0;
+			outputSampleL = inputSampleL;
+			outputSampleR = inputSampleR;
+			)
+	) : (
+		((tick - time) < transition && time > 0) ? (
+			crossfade = tick-time;
+			crossfade /= transition;
+				mono = (inputSampleL+inputSampleR)*0.5;
+				(crossfade < 0.5) ? (
+					outputSampleL = (mono*crossfade)+(inputSampleL*(1.0-crossfade));
+					outputSampleR = (mono*crossfade)+(inputSampleR*(1.0-crossfade));
+				) : (
+					crossfade = abs(crossfade-1.0);
+					outputSampleL = (inputSampleL*crossfade)+(mono*(1.0-crossfade));
+					outputSampleR = (inputSampleR*crossfade)+(mono*(1.0-crossfade));
+				)
+		) : (
+			applied = 1;
+			mono = (inputSampleL+inputSampleR)*0.5;
+			outputSampleL = outputSampleR = mono;
+		)
+	)
+) : (A == 1) ? ( //LR-swap
+    (tick < time) ? (
+	    (tick < transition) ? (
+		    crossfade = tick;
+		    crossfade /= transition;
+		    (crossfade < 0.5) ? (
+			    outputSampleL = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+			    outputSampleR = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+		    ) : (
+			    crossfade = abs(crossfade-1.0);
+			    outputSampleL = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+			    outputSampleR = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+		    )
+	    ) : (
+		    outputSampleL = inputSampleL;
+		    outputSampleR = inputSampleR;
+	    )
+    ) : (
+	    ((tick - time) < transition && time > 0) ? (
+		    crossfade = tick-time;
+		    crossfade /= transition;
+		    (crossfade < 0.5) ? (
+			    outputSampleL = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+			    outputSampleR = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+		    ) : (
+			    crossfade = abs(crossfade-1.0);
+			    outputSampleL = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+			    outputSampleR = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+		    )
+	    ) : (
+		    outputSampleL = inputSampleR;
+		    outputSampleR = inputSampleL;
+	    )
+    )
+) : (A == 2) ? (
+	(tick < time) ? ( //left to mono
+		(tick < transition) ? (
+			crossfade = tick;
+			crossfade /= transition;
+			(crossfade < 0.5) ? (
+				outputSampleR = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+			) : (
+				crossfade = abs(crossfade-1.0);
+				outputSampleR = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+			)
+		) : (
+			outputSampleL = inputSampleL;
+			outputSampleR = inputSampleR;
+		)
+	) : (
+		((tick - time) < transition && time > 0) ? (
+			crossfade = tick-time;
+			crossfade /= transition;
+			(crossfade < 0.5) ? (
+				outputSampleR = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+			) : (
+				crossfade = abs(crossfade-1.0);
+				outputSampleR = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+			)
+		) : (
+			outputSampleL = inputSampleL;
+			outputSampleR = inputSampleL;
+		)
+	)
+) : (A == 3) ? (
+	(tick < time) ? ( //right to mono
+		(tick < transition) ? (
+			crossfade = tick;
+			crossfade /= transition;
+			(crossfade < 0.5) ? (
+				outputSampleL = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+			) : (
+				crossfade = abs(crossfade-1.0);
+				outputSampleL = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+			)
+		) : (
+			outputSampleL = inputSampleL;
+			outputSampleR = inputSampleR;
+		)
+	) : (
+		((tick - time) < transition && time > 0) ? (
+			crossfade = tick-time;
+			crossfade /= transition;
+			(crossfade < 0.5) ? (
+				outputSampleL = (inputSampleR*crossfade)+(inputSampleL*(1.0-crossfade));
+			) : (
+				crossfade = abs(crossfade-1.0);
+				outputSampleL = (inputSampleL*crossfade)+(inputSampleR*(1.0-crossfade));
+			)
+		) : (
+			outputSampleL = inputSampleR;
+			outputSampleR = inputSampleR;
+		)
+	)
+);
+
+spl0 = outputSampleL;
+spl1 = outputSampleR;

@@ -1,0 +1,87 @@
+Version: 1.0
+desc:Saccharine Distortion (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Sweeten" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Sweeten (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,1,0.01>Sweeten
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+savg = freemem; freemem+=20;
+
+@slider
+A = slider1;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+cycleEnd = floor(overallscale);
+(cycleEnd < 1) ? cycleEnd = 1;
+(cycleEnd > 4) ? cycleEnd = 4;
+
+sweetBits = 12-floor(A*13.0);
+sweet = 1.0;
+
+sweet = (sweetBits == 12) ? 0.0
+      : (sweetBits == 11) ? 0.00048828125
+      : (sweetBits == 10) ? 0.0009765625
+      : (sweetBits == 9)  ? 0.001953125
+      : (sweetBits == 8)  ? 0.00390625
+      : (sweetBits == 7)  ? 0.0078125
+      : (sweetBits == 6)  ? 0.015625
+      : (sweetBits == 5)  ? 0.03125
+      : (sweetBits == 4)  ? 0.0625
+      : (sweetBits == 3)  ? 0.125
+      : (sweetBits == 2)  ? 0.25
+      : (sweetBits == 1)  ? 0.5
+      : (sweetBits == 0)  ? 1.0
+      : (sweetBits == -1) ? 2.0;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+sweetSample = inputSampleL;
+ sv = sweetSample; sweetSample = (sweetSample + savg[0]) * 0.5; savg[0] = sv;
+(cycleEnd > 1) ? (sv = sweetSample; sweetSample = (sweetSample + savg[1]) * 0.5; savg[1] = sv;
+  (cycleEnd > 2) ? (sv = sweetSample; sweetSample = (sweetSample + savg[2]) * 0.5; savg[2] = sv;
+    (cycleEnd > 3) ? (sv = sweetSample; sweetSample = (sweetSample + savg[3]) * 0.5; savg[3] = sv;)
+  )
+); 
+sweetSample = (sweetSample*sweetSample*sweet); //second harmonic (nonlinearity)
+sv = sweetSample; sweetSample = (sweetSample + savg[4]) * 0.5; savg[4] = sv;
+(cycleEnd > 1) ? (sv = sweetSample; sweetSample = (sweetSample + savg[5]) * 0.5; savg[5] = sv;
+  (cycleEnd > 2) ? (sv = sweetSample; sweetSample = (sweetSample + savg[6]) * 0.5; savg[6] = sv;
+    (cycleEnd > 3) ? (sv = sweetSample; sweetSample = (sweetSample + savg[7]) * 0.5; savg[7] = sv;)
+  )
+); 
+inputSampleL -= sweetSample; //apply the filtered second harmonic correction
+
+sweetSample = inputSampleR;
+sv = sweetSample; sweetSample = (sweetSample + savg[8]) * 0.5; savg[8] = sv;
+(cycleEnd > 1) ? (sv = sweetSample; sweetSample = (sweetSample + savg[9]) * 0.5; savg[9] = sv;
+  (cycleEnd > 2) ? (sv = sweetSample; sweetSample = (sweetSample + savg[10]) * 0.5; savg[10] = sv;
+    (cycleEnd > 3) ? (sv = sweetSample; sweetSample = (sweetSample + savg[11]) * 0.5; savg[11] = sv;)
+  )
+); 
+sweetSample = (sweetSample*sweetSample*sweet); //second harmonic (nonlinearity)
+sv = sweetSample; sweetSample = (sweetSample + savg[12]) * 0.5; savg[12] = sv;
+(cycleEnd > 1) ? (sv = sweetSample; sweetSample = (sweetSample + savg[13]) * 0.5; savg[13] = sv;
+  (cycleEnd > 2) ? (sv = sweetSample; sweetSample = (sweetSample + savg[14]) * 0.5; savg[14] = sv;
+    (cycleEnd > 3) ? (sv = sweetSample; sweetSample = (sweetSample + savg[15]) * 0.5; savg[15] = sv;)
+  )
+);
+inputSampleR -= sweetSample; //apply the filtered second harmonic correction
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+

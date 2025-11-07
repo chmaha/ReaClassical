@@ -4,7 +4,7 @@
 #
 # by chmaha (Jan 2025)
 
-dir="$HOME/Downloads/Resource_Folder_Base"
+dir="$HOME/code/chmaha/ReaClassical/Resource_Folder/"
 mkdir -p "$dir"
 
 # Source directory
@@ -112,22 +112,5 @@ cp "$dir/ColorThemes/ReaClassical Light.ReaperThemeZip" ~/code/chmaha/ReaClassic
 cp "$dir/ColorThemes/ReaClassical WaveColors Dark.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/
 cp "$dir/ColorThemes/ReaClassical WaveColors Light.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/
 cp "$dir/ColorThemes/ReaClassical.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/
-
-echo "Zipping resource folder base..."
-
-cd $dir
-zip -rq Resource_Folder_Base.zip .
-
-echo "Deleting old zipped Resource Folder Base in ReaClassical code directory..."
-
-rm ~/code/chmaha/ReaClassical/Resource\ Folder/Resource_Folder_Base.zip
-
-echo "Moving new zipped Resource Folder Base to ReaClassical code directory..."
-
-mv $dir/Resource_Folder_Base.zip ~/code/chmaha/ReaClassical/Resource\ Folder/
-
-echo "Removing Resource Folder Base..."
-
-rm -r ~/Downloads/Resource_Folder_Base
 
 echo "Done!"

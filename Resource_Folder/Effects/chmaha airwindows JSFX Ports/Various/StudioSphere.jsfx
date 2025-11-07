@@ -1,0 +1,497 @@
+Version: 1.0
+desc:StudioSphere Room Simulator (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Cans" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Cans (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:2<0,4,1{Studio A,Studio B,Studio C,Studio D,Studio E}>Room
+slider2:0.5<0,1,0.01>Diffuse
+slider3:0.5<0,1,0.01>Damping
+slider4:0.5<0,1,0.01>Crossfade
+slider5:0.5<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+kshortA = 193;kshortB = 588;kshortC = 551;kshortD = 325;
+kshortE = 166;kshortF = 427;kshortG = 313;kshortH = 575;
+kshortI = 101;kshortJ = 794;kshortK = 789;kshortL = 385;
+kshortM = 12;kshortN = 1009;kshortO = 64;kshortP = 544;
+
+bez_AL = 0;bez_AR = 1;bez_BL = 2;bez_BR = 3;bez_CL = 4;
+bez_CR = 5;bez_InL = 6;bez_InR = 7;bez_UnInL = 8;bez_UnInR = 9;
+bez_SampL = 10;bez_SampR = 11;bez_cycle = 12;
+
+freemem = 0;
+
+aAL = freemem; freemem+=kshortA+5;
+aBL = freemem; freemem+=kshortB+5;
+aCL = freemem; freemem+=kshortC+5;
+aDL = freemem; freemem+=kshortD+5;
+aEL = freemem; freemem+=kshortE+5;
+aFL = freemem; freemem+=kshortF+5;
+aGL = freemem; freemem+=kshortG+5;
+aHL = freemem; freemem+=kshortH+5;
+aIL = freemem; freemem+=kshortI+5;
+aJL = freemem; freemem+=kshortJ+5;
+aKL = freemem; freemem+=kshortK+5;
+aLL = freemem; freemem+=kshortL+5;
+aML = freemem; freemem+=kshortM+5;
+aNL = freemem; freemem+=kshortN+5;
+aOL = freemem; freemem+=kshortO+5;
+aPL = freemem; freemem+=kshortP+5;
+
+aAR = freemem; freemem+=kshortA+5;
+aBR = freemem; freemem+=kshortB+5;
+aCR = freemem; freemem+=kshortC+5;
+aDR = freemem; freemem+=kshortD+5;
+aER = freemem; freemem+=kshortE+5;
+aFR = freemem; freemem+=kshortF+5;
+aGR = freemem; freemem+=kshortG+5;
+aHR = freemem; freemem+=kshortH+5;
+aIR = freemem; freemem+=kshortI+5;
+aJR = freemem; freemem+=kshortJ+5;
+aKR = freemem; freemem+=kshortK+5;
+aLR = freemem; freemem+=kshortL+5;
+aMR = freemem; freemem+=kshortM+5;
+aNR = freemem; freemem+=kshortN+5;
+aOR = freemem; freemem+=kshortO+5;
+aPR = freemem; freemem+=kshortP+5;
+
+bez = freemem; freemem+=13;
+
+countA = 1;countB = 1;countC = 1;countD = 1;countE = 1;
+countF = 1;countG = 1;countH = 1;countI = 1;countJ = 1;
+countK = 1;countL = 1;countM = 1;countN = 1;countO = 1;
+countP = 1;
+
+shortA = 23;shortB = 357;shortC = 305;shortD = 186;shortE = 104;
+shortF = 255;shortG = 163;shortH = 147;shortI = 56;shortJ = 480;
+shortK = 317;shortL = 107;shortM = 11;shortN = 704;shortO = 26;
+shortP = 543;prevclearcoat = -1;
+
+bez[bez_cycle] = 1.0;
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+E = slider5;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+clearcoat = A;
+(clearcoat != prevclearcoat) ? (
+
+    count = 0; while (count < kshortA + 2) (aAL[count] = 0.0; aAR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortB + 2) (aBL[count] = 0.0; aBR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortC + 2) (aCL[count] = 0.0; aCR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortD + 2) (aDL[count] = 0.0; aDR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortE + 2) (aEL[count] = 0.0; aER[count] = 0.0; count += 1);
+    count = 0; while (count < kshortF + 2) (aFL[count] = 0.0; aFR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortG + 2) (aGL[count] = 0.0; aGR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortH + 2) (aHL[count] = 0.0; aHR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortI + 2) (aIL[count] = 0.0; aIR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortJ + 2) (aJL[count] = 0.0; aJR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortK + 2) (aKL[count] = 0.0; aKR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortL + 2) (aLL[count] = 0.0; aLR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortM + 2) (aML[count] = 0.0; aMR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortN + 2) (aNL[count] = 0.0; aNR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortO + 2) (aOL[count] = 0.0; aOR[count] = 0.0; count += 1);
+    count = 0; while (count < kshortP + 2) (aPL[count] = 0.0; aPR[count] = 0.0; count += 1);
+
+    countA = 1;
+    countB = 1;
+    countC = 1;
+    countD = 1;
+    countE = 1;
+    countF = 1;
+    countG = 1;
+    countH = 1;
+    countI = 1;
+    countJ = 1;
+    countK = 1;
+    countL = 1;
+    countM = 1;
+    countN = 1;
+    countO = 1;
+    countP = 1;
+
+    clearcoat == 0 ? (
+    shortA = 34; shortB = 193; shortC = 255; shortD = 150; shortE = 24; shortF = 204; shortG = 85; shortH = 295; shortI = 40; shortJ = 371;
+    shortK = 370; shortL = 202; shortM = 11; shortN = 431; shortO = 23; shortP = 323
+) : clearcoat == 1 ? (
+    shortA = 32; shortB = 298; shortC = 402; shortD = 161; shortE = 165; shortF = 149; shortG = 43; shortH = 313; shortI = 83; shortJ = 397;
+    shortK = 316; shortL = 315; shortM = 11; shortN = 685; shortO = 16; shortP = 486
+) : clearcoat == 2 ? (
+    shortA = 23; shortB = 357; shortC = 305; shortD = 186; shortE = 104; shortF = 255; shortG = 163; shortH = 147; shortI = 56; shortJ = 480;
+    shortK = 317; shortL = 107; shortM = 11; shortN = 704; shortO = 26; shortP = 543
+) : clearcoat == 3 ? (
+    shortA = 192; shortB = 463; shortC = 420; shortD = 34; shortE = 161; shortF = 426; shortG = 160; shortH = 474; shortI = 21; shortJ = 343;
+    shortK = 296; shortL = 294; shortM = 11; shortN = 987; shortO = 64; shortP = 482
+) : (
+    shortA = 173; shortB = 587; shortC = 550; shortD = 324; shortE = 165; shortF = 324; shortG = 312; shortH = 574; shortI = 100; shortJ = 793;
+    shortK = 788; shortL = 385; shortM = 11; shortN = 1008; shortO = 46; shortP = 380
+);
+
+    prevclearcoat = clearcoat;
+);
+derez = 1.0/overallscale;
+derez = 1.0 /(1.0/derez);
+
+diffuse = pow(B,1.618033988749894848204586)*16;
+iirAmt = 1.0-pow(1.0-C,1.618033988749894848204586);
+iirExt = iirAmt/overallscale;
+crossfade = (1.0-pow(1.0-D,1.618033988749894848204586));
+wet = pow(E,1.618033988749894848204586);
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+iirInL = (inputSampleL*iirExt)+(iirInL*(1.0-iirExt)); inputSampleL = iirInL;
+iirInR = (inputSampleR*iirExt)+(iirInR*(1.0-iirExt)); inputSampleR = iirInR;
+
+bez[bez_cycle] += derez;
+bez[bez_SampL] += ((inputSampleL+bez[bez_InL]) * derez);
+bez[bez_SampR] += ((inputSampleR+bez[bez_InR]) * derez);
+bez[bez_InL] = inputSampleL; bez[bez_InR] = inputSampleR;
+(bez[bez_cycle] > 1.0) ? ( //hit the end point and we do a reverb sample
+    bez[bez_cycle] = 0.0;
+
+    iirFAL = (feedbackAL*iirAmt)+(iirFAL*(1.0-iirAmt)); feedbackAL = iirFAL;
+    iirFAR = (feedbackAR*iirAmt)+(iirFAR*(1.0-iirAmt)); feedbackAR = iirFAR;
+    iirFBL = (feedbackBL*iirAmt)+(iirFBL*(1.0-iirAmt)); feedbackBL = iirFBL;
+    iirFBR = (feedbackBR*iirAmt)+(iirFBR*(1.0-iirAmt)); feedbackBR = iirFBR;
+    iirFCL = (feedbackCL*iirAmt)+(iirFCL*(1.0-iirAmt)); feedbackCL = iirFCL;
+    iirFCR = (feedbackCR*iirAmt)+(iirFCR*(1.0-iirAmt)); feedbackCR = iirFCR;
+    iirFDL = (feedbackDL*iirAmt)+(iirFDL*(1.0-iirAmt)); feedbackDL = iirFDL;
+    iirFDR = (feedbackDR*iirAmt)+(iirFDR*(1.0-iirAmt)); feedbackDR = iirFDR;
+
+    (diffuse < 4) ? (
+        aAL[countA] = (bez[bez_SampL]) + (feedbackAL * 0.03125);
+        aAR[countA] = (bez[bez_SampR]) + (feedbackAR * 0.03125);
+        countA+=1; (countA < 0 || countA > shortA) ? countA = 0;
+        outAL = aAL[countA-((countA > shortA)?shortA+1:0)];
+        outAR = aAR[countA-((countA > shortA)?shortA+1:0)];
+    ) : (
+        outAL = (bez[bez_SampL] - (aAL[(countA+1)-((countA+1 > shortA)?shortA+1:0)]*0.618033988749894848204586)) + (feedbackAL * 0.03125);
+        aAL[countA] = outAL; outAL *= 0.618033988749894848204586;
+        outAR = (bez[bez_SampR] - (aAR[(countA+1)-((countA+1 > shortA)?shortA+1:0)]*0.618033988749894848204586)) + (feedbackAR * 0.03125);
+        aAR[countA] = outAR; outAR *= 0.618033988749894848204586;
+        countA+=1; (countA < 0 || countA > shortA) ? countA = 0;
+        outAL += aAL[countA-((countA > shortA)?shortA+1:0)];
+        outAR += aAR[countA-((countA > shortA)?shortA+1:0)];
+    );
+
+    (diffuse < 12) ? (
+        aBL[countB] = (bez[bez_SampL]) + (feedbackBL * 0.03125);
+        aBR[countB] = (bez[bez_SampR]) + (feedbackBR * 0.03125);
+        countB+=1; (countB < 0 || countB > shortB) ? countB = 0;
+        outBL = aBL[countB-((countB > shortB)?shortB+1:0)];
+        outBR = aBR[countB-((countB > shortB)?shortB+1:0)];
+    ) : (
+        outBL = (bez[bez_SampL] - (aBL[(countB+1)-((countB+1 > shortB)?shortB+1:0)]*0.618033988749894848204586)) + (feedbackBL * 0.03125);
+        aBL[countB] = outBL; outBL *= 0.618033988749894848204586;
+        outBR = (bez[bez_SampR] - (aBR[(countB+1)-((countB+1 > shortB)?shortB+1:0)]*0.618033988749894848204586)) + (feedbackBR * 0.03125);
+        aBR[countB] = outBR; outBR *= 0.618033988749894848204586;
+        countB+=1; (countB < 0 || countB > shortB) ? countB = 0;
+        outBL += aBL[countB-((countB > shortB)?shortB+1:0)];
+        outBR += aBR[countB-((countB > shortB)?shortB+1:0)];
+    );
+
+    (diffuse < 10) ? (
+        aCL[countC] = (bez[bez_SampL]) + (feedbackCL * 0.03125);
+        aCR[countC] = (bez[bez_SampR]) + (feedbackCR * 0.03125);
+        countC+=1; (countC < 0 || countC > shortC) ? countC = 0;
+        outCL = aCL[countC-((countC > shortC)?shortC+1:0)];
+        outCR = aCR[countC-((countC > shortC)?shortC+1:0)];
+    ) : (
+        outCL = (bez[bez_SampL] - (aCL[(countC+1)-((countC+1 > shortC)?shortC+1:0)]*0.618033988749894848204586)) + (feedbackCL * 0.03125);
+        aCL[countC] = outCL; outCL *= 0.618033988749894848204586;
+        outCR = (bez[bez_SampR] - (aCR[(countC+1)-((countC+1 > shortC)?shortC+1:0)]*0.618033988749894848204586)) + (feedbackCR * 0.03125);
+        aCR[countC] = outCR; outCR *= 0.618033988749894848204586;
+        countC+=1; (countC < 0 || countC > shortC) ? countC = 0;
+        outCL += aCL[countC-((countC > shortC)?shortC+1:0)];
+        outCR += aCR[countC-((countC > shortC)?shortC+1:0)];
+    );
+
+    (diffuse < 6) ? (
+        aDL[countD] = (bez[bez_SampL]) + (feedbackDL * 0.03125);
+        aDR[countD] = (bez[bez_SampR]) + (feedbackDR * 0.03125);
+        countD+=1; (countD < 0 || countD > shortD) ? countD = 0;
+        outDL = aDL[countD-((countD > shortD)?shortD+1:0)];
+        outDR = aDR[countD-((countD > shortD)?shortD+1:0)];
+    ) : (
+        outDL = (bez[bez_SampL] - (aDL[(countD+1)-((countD+1 > shortD)?shortD+1:0)]*0.618033988749894848204586)) + (feedbackDL * 0.03125);
+        aDL[countD] = outDL; outDL *= 0.618033988749894848204586;
+        outDR = (bez[bez_SampR] - (aDR[(countD+1)-((countD+1 > shortD)?shortD+1:0)]*0.618033988749894848204586)) + (feedbackDR * 0.03125);
+        aDR[countD] = outDR; outDR *= 0.618033988749894848204586;
+        countD+=1; (countD < 0 || countD > shortD) ? countD = 0;
+        outDL += aDL[countD-((countD > shortD)?shortD+1:0)];
+        outDR += aDR[countD-((countD > shortD)?shortD+1:0)];
+    );
+
+    (diffuse < 3) ? (
+        aEL[countE] = outAL - (outBL + outCL + outDL);
+        aER[countE] = outAR - (outBR + outCR + outDR);
+        countE+=1; (countE < 0 || countE > shortE) ? countE = 0;
+        outEL = aEL[countE-((countE > shortE)?shortE+1:0)];
+        outER = aER[countE-((countE > shortE)?shortE+1:0)];
+    ) : (
+        outEL = (outAL - (outBL + outCL + outDL)) - (aEL[(countE+1)-((countE+1 > shortE)?shortE+1:0)]*0.618033988749894848204586);
+        aEL[countE] = outEL; outEL *= 0.618033988749894848204586;
+        outER = (outAR - (outBR + outCR + outDR)) - (aER[(countE+1)-((countE+1 > shortE)?shortE+1:0)]*0.618033988749894848204586);
+        aER[countE] = outER; outER *= 0.618033988749894848204586;
+        countE+=1; (countE < 0 || countE > shortE) ? countE = 0;
+        outEL += aEL[countE-((countE > shortE)?shortE+1:0)];
+        outER += aER[countE-((countE > shortE)?shortE+1:0)];
+    );
+
+    (diffuse < 8) ? (
+        aFL[countF] = outBL - (outAL + outCL + outDL);
+        aFR[countF] = outBR - (outAR + outCR + outDR);
+        countF+=1; (countF < 0 || countF > shortF) ? countF = 0;
+        outFL = aFL[countF-((countF > shortF)?shortF+1:0)];
+        outFR = aFR[countF-((countF > shortF)?shortF+1:0)];
+    ) : (
+        outFL = (outBL - (outAL + outCL + outDL)) - (aFL[(countF+1)-((countF+1 > shortF)?shortF+1:0)]*0.618033988749894848204586);
+        aFL[countF] = outFL; outFL *= 0.618033988749894848204586;
+        outFR = (outBR - (outAR + outCR + outDR)) - (aFR[(countF+1)-((countF+1 > shortF)?shortF+1:0)]*0.618033988749894848204586);
+        aFR[countF] = outFR; outFR *= 0.618033988749894848204586;
+        countF+=1; (countF < 0 || countF > shortF) ? countF = 0;
+        outFL += aFL[countF-((countF > shortF)?shortF+1:0)];
+        outFR += aFR[countF-((countF > shortF)?shortF+1:0)];
+    );
+
+    (diffuse < 5) ? (
+        aGL[countG] = outCL - (outAL + outBL + outDL);
+        aGR[countG] = outCR - (outAR + outBR + outDR);
+        countG+=1; (countG < 0 || countG > shortG) ? countG = 0;
+        outGL = aGL[countG-((countG > shortG)?shortG+1:0)];
+        outGR = aGR[countG-((countG > shortG)?shortG+1:0)];
+    ) : (
+        outGL = (outCL - (outAL + outBL + outDL)) - (aGL[(countG+1)-((countG+1 > shortG)?shortG+1:0)]*0.618033988749894848204586);
+        aGL[countG] = outGL; outGL *= 0.618033988749894848204586;
+        outGR = (outCR - (outAR + outBR + outDR)) - (aGR[(countG+1)-((countG+1 > shortG)?shortG+1:0)]*0.618033988749894848204586);
+        aGR[countG] = outGR; outGR *= 0.618033988749894848204586;
+        countG+=1; (countG < 0 || countG > shortG) ? countG = 0;
+        outGL += aGL[countG-((countG > shortG)?shortG+1:0)];
+        outGR += aGR[countG-((countG > shortG)?shortG+1:0)];
+    );
+
+    (diffuse < 11) ? (
+        aHL[countH] = outDL - (outAL + outBL + outCL);
+        aHR[countH] = outDR - (outAR + outBR + outCR);
+        countH+=1; (countH < 0 || countH > shortH) ? countH = 0;
+        outHL = aHL[countH-((countH > shortH)?shortH+1:0)];
+        outHR = aHR[countH-((countH > shortH)?shortH+1:0)];
+    ) : (
+        outHL = (outDL - (outAL + outBL + outCL)) - (aHL[(countH+1)-((countH+1 > shortH)?shortH+1:0)]*0.618033988749894848204586);
+        aHL[countH] = outHL; outHL *= 0.618033988749894848204586;
+        outHR = (outDR - (outAR + outBR + outCR)) - (aHR[(countH+1)-((countH+1 > shortH)?shortH+1:0)]*0.618033988749894848204586);
+        aHR[countH] = outHR; outHR *= 0.618033988749894848204586;
+        countH+=1; (countH < 0 || countH > shortH) ? countH = 0;
+        outHL += aHL[countH-((countH > shortH)?shortH+1:0)];
+        outHR += aHR[countH-((countH > shortH)?shortH+1:0)];
+    );
+
+    (diffuse < 2) ? (
+        aIL[countI] = outEL - (outFL + outGL + outHL);
+        aIR[countI] = outER - (outFR + outGR + outHR);
+        countI+=1; (countI < 0 || countI > shortI) ? countI = 0;
+        outIL = aIL[countI-((countI > shortI)?shortI+1:0)];
+        outIR = aIR[countI-((countI > shortI)?shortI+1:0)];
+    ) : (
+        outIL = (outEL - (outFL + outGL + outHL)) - (aIL[(countI+1)-((countI+1 > shortI)?shortI+1:0)]*0.618033988749894848204586);
+        aIL[countI] = outIL; outIL *= 0.618033988749894848204586;
+        outIR = (outER - (outFR + outGR + outHR)) - (aIR[(countI+1)-((countI+1 > shortI)?shortI+1:0)]*0.618033988749894848204586);
+        aIR[countI] = outIR; outIR *= 0.618033988749894848204586;
+        countI+=1; (countI < 0 || countI > shortI) ? countI = 0;
+        outIL += aIL[countI-((countI > shortI)?shortI+1:0)];
+        outIR += aIR[countI-((countI > shortI)?shortI+1:0)];
+    );
+
+    (diffuse < 14) ? (
+        aJL[countJ] = outFL - (outEL + outGL + outHL);
+        aJR[countJ] = outFR - (outER + outGR + outHR);
+        countJ+=1; (countJ < 0 || countJ > shortJ) ? countJ = 0;
+        outJL = aJL[countJ-((countJ > shortJ)?shortJ+1:0)];
+        outJR = aJR[countJ-((countJ > shortJ)?shortJ+1:0)];
+    ) : (
+        outJL = (outFL - (outEL + outGL + outHL)) - (aJL[(countJ+1)-((countJ+1 > shortJ)?shortJ+1:0)]*0.618033988749894848204586);
+        aJL[countJ] = outJL; outJL *= 0.618033988749894848204586;
+        outJR = (outFR - (outER + outGR + outHR)) - (aJR[(countJ+1)-((countJ+1 > shortJ)?shortJ+1:0)]*0.618033988749894848204586);
+        aJR[countJ] = outJR; outJR *= 0.618033988749894848204586;
+        countJ+=1; (countJ < 0 || countJ > shortJ) ? countJ = 0;
+        outJL += aJL[countJ-((countJ > shortJ)?shortJ+1:0)];
+        outJR += aJR[countJ-((countJ > shortJ)?shortJ+1:0)];
+    );
+
+    (diffuse < 13) ? (
+        aKL[countK] = outGL - (outEL + outFL + outHL);
+        aKR[countK] = outGR - (outER + outFR + outHR);
+        countK+=1; (countK < 0 || countK > shortK) ? countK = 0;
+        outKL = aKL[countK-((countK > shortK)?shortK+1:0)];
+        outKR = aKR[countK-((countK > shortK)?shortK+1:0)];
+    ) : (
+        outKL = (outGL - (outEL + outFL + outHL)) - (aKL[(countK+1)-((countK+1 > shortK)?shortK+1:0)]*0.618033988749894848204586);
+        aKL[countK] = outKL; outKL *= 0.618033988749894848204586;
+        outKR = (outGR - (outER + outFR + outHR)) - (aKR[(countK+1)-((countK+1 > shortK)?shortK+1:0)]*0.618033988749894848204586);
+        aKR[countK] = outKR; outKR *= 0.618033988749894848204586;
+        countK+=1; (countK < 0 || countK > shortK) ? countK = 0;
+        outKL += aKL[countK-((countK > shortK)?shortK+1:0)];
+        outKR += aKR[countK-((countK > shortK)?shortK+1:0)];
+    );
+
+    (diffuse < 7) ? (
+        aLL[countL] = outHL - (outEL + outFL + outGL);
+        aLR[countL] = outHR - (outER + outFR + outGR);
+        countL+=1; (countL < 0 || countL > shortL) ? countL = 0;
+        outLL = aLL[countL-((countL > shortL)?shortL+1:0)];
+        outLR = aLR[countL-((countL > shortL)?shortL+1:0)];
+    ) : (
+        outLL = (outHL - (outEL + outFL + outGL)) - (aLL[(countL+1)-((countL+1 > shortL)?shortL+1:0)]*0.618033988749894848204586);
+        aLL[countL] = outLL; outLL *= 0.618033988749894848204586;
+        outLR = (outHR - (outER + outFR + outGR)) - (aLR[(countL+1)-((countL+1 > shortL)?shortL+1:0)]*0.618033988749894848204586);
+        aLR[countL] = outLR; outLR *= 0.618033988749894848204586;
+        countL+=1; (countL < 0 || countL > shortL) ? countL = 0;
+        outLL += aLL[countL-((countL > shortL)?shortL+1:0)];
+        outLR += aLR[countL-((countL > shortL)?shortL+1:0)];
+    );
+
+    (diffuse < 0) ? (
+        aML[countM] = outIL - (outJL + outKL + outLL);
+        aMR[countM] = outIR - (outJR + outKR + outLR);
+        countM+=1; (countM < 0 || countM > shortM) ? countM = 0;
+        outML = aML[countM-((countM > shortM)?shortM+1:0)];
+        outMR = aMR[countM-((countM > shortM)?shortM+1:0)];
+    ) : (
+        outML = (outIL - (outJL + outKL + outLL)) - (aML[(countM+1)-((countM+1 > shortM)?shortM+1:0)]*0.618033988749894848204586);
+        aML[countM] = outML; outML *= 0.618033988749894848204586;
+        outMR = (outIR - (outJR + outKR + outLR)) - (aMR[(countM+1)-((countM+1 > shortM)?shortM+1:0)]*0.618033988749894848204586);
+        aMR[countM] = outMR; outMR *= 0.618033988749894848204586;
+        countM+=1; (countM < 0 || countM > shortM) ? countM = 0;
+        outML += aML[countM-((countM > shortM)?shortM+1:0)];
+        outMR += aMR[countM-((countM > shortM)?shortM+1:0)];
+    );
+
+    (diffuse < 15) ? (
+        aNL[countN] = outJL - (outIL + outKL + outLL);
+        aNR[countN] = outJR - (outIR + outKR + outLR);
+        countN+=1; (countN < 0 || countN > shortN) ? countN = 0;
+        outNL = aNL[countN-((countN > shortN)?shortN+1:0)];
+        outNR = aNR[countN-((countN > shortN)?shortN+1:0)];
+    ) : (
+        outNL = (outJL - (outIL + outKL + outLL)) - (aNL[(countN+1)-((countN+1 > shortN)?shortN+1:0)]*0.618033988749894848204586);
+        aNL[countN] = outNL; outNL *= 0.618033988749894848204586;
+        outNR = (outJR - (outIR + outKR + outLR)) - (aNR[(countN+1)-((countN+1 > shortN)?shortN+1:0)]*0.618033988749894848204586);
+        aNR[countN] = outNR; outNR *= 0.618033988749894848204586;
+        countN+=1; (countN < 0 || countN > shortN) ? countN = 0;
+        outNL += aNL[countN-((countN > shortN)?shortN+1:0)];
+        outNR += aNR[countN-((countN > shortN)?shortN+1:0)];
+    );
+
+    (diffuse < 1) ? (
+        aOL[countO] = outKL - (outIL + outJL + outLL);
+        aOR[countO] = outKR - (outIR + outJR + outLR);
+        countO+=1; (countO < 0 || countO > shortO) ? countO = 0;
+        outOL = aOL[countO-((countO > shortO)?shortO+1:0)];
+        outOR = aOR[countO-((countO > shortO)?shortO+1:0)];
+    ) : (
+        outOL = (outKL - (outIL + outJL + outLL)) - (aOL[(countO+1)-((countO+1 > shortO)?shortO+1:0)]*0.618033988749894848204586);
+        aOL[countO] = outOL; outOL *= 0.618033988749894848204586;
+        outOR = (outKR - (outIR + outJR + outLR)) - (aOR[(countO+1)-((countO+1 > shortO)?shortO+1:0)]*0.618033988749894848204586);
+        aOR[countO] = outOR; outOR *= 0.618033988749894848204586;
+        countO+=1; (countO < 0 || countO > shortO) ? countO = 0;
+        outOL += aOL[countO-((countO > shortO)?shortO+1:0)];
+        outOR += aOR[countO-((countO > shortO)?shortO+1:0)];
+    );
+
+    (diffuse < 9) ? (
+        aPL[countP] = outLL - (outIL + outJL + outKL);
+        aPR[countP] = outLR - (outIR + outJR + outKR);
+        countP+=1; (countP < 0 || countP > shortP) ? countP = 0;
+        outPL = aPL[countP-((countP > shortP)?shortP+1:0)];
+        outPR = aPR[countP-((countP > shortP)?shortP+1:0)];
+    ) : (
+        outPL = (outLL - (outIL + outJL + outKL)) - (aPL[(countP+1)-((countP+1 > shortP)?shortP+1:0)]*0.618033988749894848204586);
+        aPL[countP] = outPL; outPL *= 0.618033988749894848204586;
+        outPR = (outLR - (outIR + outJR + outKR)) - (aPR[(countP+1)-((countP+1 > shortP)?shortP+1:0)]*0.618033988749894848204586);
+        aPR[countP] = outPR; outPR *= 0.618033988749894848204586;
+        countP+=1; (countP < 0 || countP > shortP) ? countP = 0;
+        outPL += aPL[countP-((countP > shortP)?shortP+1:0)];
+        outPR += aPR[countP-((countP > shortP)?shortP+1:0)];
+    );
+
+    steerAL = outML - (outNL + outOL + outPL);
+    steerBL = outNL - (outML + outOL + outPL);
+    steerCL = outOL - (outML + outNL + outPL);
+    steerDL = outPL - (outML + outNL + outOL);
+
+    steerAR = outMR - (outNR + outOR + outPR);
+    steerBR = outNR - (outMR + outOR + outPR);
+    steerCR = outOR - (outMR + outNR + outPR);
+    steerDR = outPR - (outMR + outNR + outOR);
+
+    feedbackAL = (steerAL * (1.0-crossfade)) + (steerAR * crossfade);
+    feedbackBL = (steerBL * (1.0-crossfade)) + (steerBR * crossfade);
+    feedbackCL = (steerCL * (1.0-crossfade)) + (steerCR * crossfade);
+    feedbackDL = (steerDL * (1.0-crossfade)) + (steerDR * crossfade);
+
+    feedbackAR = (steerAR * (1.0-crossfade)) + (steerAL * crossfade);
+    feedbackBR = (steerBR * (1.0-crossfade)) + (steerBL * crossfade);
+    feedbackCR = (steerCR * (1.0-crossfade)) + (steerCL * crossfade);
+    feedbackDR = (steerDR * (1.0-crossfade)) + (steerDL * crossfade);
+    //which we need to feed back into the input again, a bit
+
+    inputSampleL = (outML + outNL + outOL + outPL)/16.0;
+    inputSampleR = (outMR + outNR + outOR + outPR)/16.0;
+    //and take the final combined sum of outputs, corrected for Householder gain and averaging
+
+    bez[bez_CL] = bez[bez_BL];
+    bez[bez_BL] = bez[bez_AL];
+    bez[bez_AL] = inputSampleL;
+    bez[bez_SampL] = 0.0;
+
+    bez[bez_CR] = bez[bez_BR];
+    bez[bez_BR] = bez[bez_AR];
+    bez[bez_AR] = inputSampleR;
+    bez[bez_SampR] = 0.0;
+);
+CBL = (bez[bez_CL]*(1.0-bez[bez_cycle]))+(bez[bez_BL]*bez[bez_cycle]);
+CBR = (bez[bez_CR]*(1.0-bez[bez_cycle]))+(bez[bez_BR]*bez[bez_cycle]);
+BAL = (bez[bez_BL]*(1.0-bez[bez_cycle]))+(bez[bez_AL]*bez[bez_cycle]);
+BAR = (bez[bez_BR]*(1.0-bez[bez_cycle]))+(bez[bez_AR]*bez[bez_cycle]);
+CBAL = (bez[bez_BL]+(CBL*(1.0-bez[bez_cycle]))+(BAL*bez[bez_cycle]))*0.125;
+CBAR = (bez[bez_BR]+(CBR*(1.0-bez[bez_cycle]))+(BAR*bez[bez_cycle]))*0.125;
+inputSampleL = CBAL;
+inputSampleR = CBAR;
+
+iirOutL = (inputSampleL*iirExt)+(iirOutL*(1.0-iirExt)); inputSampleL = iirOutL;
+iirOutR = (inputSampleR*iirExt)+(iirOutR*(1.0-iirExt)); inputSampleR = iirOutR;
+
+inputSampleL = (inputSampleL*wet)+(drySampleL*(1.0-wet));
+inputSampleR = (inputSampleR*wet)+(drySampleR*(1.0-wet));
+
+(inputSampleL > 1.0) ? inputSampleL = 1.0;
+(inputSampleL < -1.0) ? inputSampleL = -1.0;
+(inputSampleR > 1.0) ? inputSampleR = 1.0;
+(inputSampleR < -1.0) ? inputSampleR = -1.0;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

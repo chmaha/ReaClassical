@@ -1,0 +1,82 @@
+NoIndex: true
+desc:Orpheus Console Channel Out (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Console8" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Console8 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Fader
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+
+//inTrimA = 0.5; inTrimB = 0.5;
+
+
+@slider
+
+inTrim = slider1*2.0;
+
+@block
+(srate > 49000.0) ? hsr = 1 : hsr = 0;
+fix_freq = 24000.0 / srate;
+fix_reso = 3.51333709;
+K = tan($pi * fix_freq); //lowpass
+norm = 1.0 / (1.0 + K / fix_reso + K * K);
+fix_a0 = K * K * norm;
+fix_a1 = 2.0 * fix_a0;
+fix_a2 = fix_a0;
+fix_b1 = 2.0 * (K * K - 1.0) * norm;
+fix_b2 = (1.0 - K / fix_reso + K * K) * norm;
+//this is the fixed biquad distributed anti-aliasing filter
+//inTrimA = inTrimB; inTrimB = A*2.0;
+//0.5 is unity gain, and we can attenuate to silence or boost slightly over 12dB
+//into softclipping overdrive.
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+
+//position = sampleFrames/inFramesToProcess;
+//input trim smoothed to cut out zipper noise
+inputSampleL *= inTrim;
+(inputSampleL > 1.57079633) ? inputSampleL = 1.57079633;(inputSampleL < -1.57079633)? inputSampleL = -1.57079633;
+inputSampleL = sin(inputSampleL);
+//Console8 gain stage clips at exactly 1.0 post-sin()
+inputSampleR *= inTrim;
+(inputSampleR > 1.57079633) ? inputSampleR = 1.57079633; (inputSampleR < -1.57079633) ? inputSampleR = -1.57079633;
+inputSampleR = sin(inputSampleR);
+//Console8 gain stage clips at exactly 1.0 post-sin()
+(hsr) ? (
+  outSample = (inputSampleL * fix_a0) + fix_sL1;
+  fix_sL1 = (inputSampleL * fix_a1) - (outSample * fix_b1) + fix_sL2;
+  fix_sL2 = (inputSampleL * fix_a2) - (outSample * fix_b2);
+  inputSampleL = outSample;
+  outSample = (inputSampleR * fix_a0) + fix_sR1;
+  fix_sR1 = (inputSampleR * fix_a1) - (outSample * fix_b1) + fix_sR2;
+  fix_sR2 = (inputSampleR * fix_a2) - (outSample * fix_b2);
+  inputSampleR = outSample;
+); //fixed biquad filtering ultrasonics
+inputSampleL *= inTrim;
+(inputSampleL > 1.57079633) ? inputSampleL = 1.57079633; (inputSampleL < -1.57079633) ? inputSampleL = -1.57079633;
+inputSampleL = sin(inputSampleL);
+//Console8 gain stage clips at exactly 1.0 post-sin()
+inputSampleR *= inTrim;
+(inputSampleR > 1.57079633) ? inputSampleR = 1.57079633; (inputSampleR < -1.57079633) ? inputSampleR = -1.57079633;
+inputSampleR = sin(inputSampleR);
+//Console8 gain stage clips at exactly 1.0 post-sin()
+
+
+ 
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+
+

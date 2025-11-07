@@ -1,10 +1,21 @@
+# Ignore generated changelog HTML
 scripts/ReaClassical_Changelog_Formatter.html
-Installers/*.run
-Installers/*.exe
-Installers/win_go_installer/*.zip
-Installers/win_go_installer/*.exe
-Installers/Makeself builds/linux/*.zip
-Installers/Makeself builds/linux/*.tar.xz
-Installers/Makeself builds/macos/*.zip
-Installers/Makeself builds/macos/*.dmg
-Resource Folder/Resource_Folder_Base.zip
+
+# === Installers ===
+# Top-level installers
+Installers/**/*.run
+Installers/**/*.exe
+
+# Windows GO installer - ignore all zips and exes except specific ones
+Installers/src/windows/*.zip
+!Installers/src/windows/7zip.zip
+!Installers/src/windows/7zip32.zip
+
+# Makeself builds
+Installers/src/linux/*.zip
+Installers/src/linux/*.tar.xz
+Installers/src/macos/*.zip
+Installers/src/macos/*.dmg
+
+# === Resource folders ===
+Resource\ Folder/Resource_Folder_Base.zip

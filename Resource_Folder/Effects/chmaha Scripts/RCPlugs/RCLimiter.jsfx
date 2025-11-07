@@ -1,0 +1,259 @@
+NoIndex: true
+desc:RCLimiter (chmaha)
+author: chmaha
+about:
+  Uses DSP with permission from Smooth Limiter by Geraint Luff
+  Uses oversampling code by user "Smashed Transistors" (https://forum.cockos.com/showthread.php?t=178543)
+  https://geraintluff.github.io/jsfx/
+  https://signalsmith-audio.co.uk/
+
+in_pin:Left
+in_pin:Right
+out_pin:Left
+out_pin:Right
+
+slider1:0<-12,12,0.1>Input Gain (dB)
+slider2:-1<-3,0,0.1>Threshold (dBTP)
+//slider3:10<0.1,100,0.1>Lookahead (ms)
+slider3:10<1,200,0.1>Release (ms)
+// slider5:0<0,1,0.01>Distortion
+slider4:0<0,1,1{On,Off}>True Peak
+
+@init
+
+function tanh(x) (
+	x >= 20 ? (
+		1;
+	) : x <= -20 ? (
+		-1;
+	) : (
+		(exp(2*x) - 1)/(exp(2*x) + 1);
+	);
+);
+function atanh(x) (
+	x >= 1 ? (
+		20;
+	) ? (x <= -1) ? (
+		-20;
+	) : (
+		log((1 + x)/(1 - x))*0.5;
+	);
+);
+
+function sat(x)(  min(1,max(-1,x)); );
+function dec2(x0 x1) 
+	instance(R1 R2 R3 R4 R5 R6) local(h5x0 h3x0 h1x0) (
+	h5x0 = 0.01300578 * x0; h3x0 = -0.0635838 * x0; h1x0 = 0.300578 * x0;
+	R6 = R5 + h5x0; R5 = R4 + h3x0; R4 = R3 + h1x0;
+	R3 = R2 + h1x0 + 0.5 * x1;  R2 = R1 + h3x0;  R1 = h5x0;
+	R6;
+);
+function dec4(x0 x1 x2 x3) (
+this.dec2(this.sub.dec2(x0, x1), this.sub.dec2(x2, x3)); 
+);
+
+writepos = 10;
+delaysamples = 10;
+attacksamples = 10;
+releasesamples = 100;
+limit = 1;
+
+releasestartvalue = 1; 
+releaseindex = over_srate;
+
+s4 = 0;
+
+function flush() (
+	memset(0,0,buffer1);
+);
+
+function update() ( 
+	(s4 != slider4) ? flush();
+	slider4 == 0 ? (s4 = 0;over_srate = 4 * srate) : (s4 = 1;over_srate = srate); 
+	attacksamples = ceil(10*srate/1000);
+	releasesamples = ceil(slider3*srate/1000);
+	delaysamples = ceil(attacksamples);
+	limit = pow(10, slider2/20);
+	pregain_factor = pow(10, slider1/20);
+);
+// Starts at 0, goes to 1
+function attackwindow(ratio) (
+	0.5 - 0.5*cos(ratio*$pi);
+);
+function releasewindow(ratio) (
+	0.5 + 0.5*cos(ratio*$pi);
+);
+
+A = 0;
+B = 1;
+function dist(x) (
+	B*x/(A*abs(x) + 1);
+);
+function distortion_for_peak(peak, limit) (
+	A = (1 - pow(limit/oldpeak, 0))/limit;
+);
+function scaling_for_peak(peak, limit) (
+	pow(limit/peak, 1);
+);
+
+@slider
+update();
+
+@block
+bufferlength = ceil(over_srate*1);
+buffer0 = 0;
+buffer1 = buffer0 + bufferlength;
+bufferpeak = buffer1 + bufferlength;
+freemem = bufferpeak + bufferlength;
+
+overcorrect_factor = 1.1; // about 0.1dB
+
+pdc_bot_ch = 0;
+pdc_top_ch = 2;
+pdc_delay = delaysamples - 1;
+
+@sample
+
+function over_sample()(
+    (slider4 == 1) ? (
+    over_spl0 = spl0 * pregain_factor; 
+    over_spl1 = spl1 * pregain_factor;
+    ) :
+    (
+    over_spl0 *= pregain_factor;
+    over_spl1 *= pregain_factor;
+    );
+    truepeak = max(abs(over_spl0), abs(over_spl1));
+    releasepeak = limit;
+    releaseindex < releasesamples ? (
+	    releasepeak = limit + (releasestartvalue - limit)*releasewindow(releaseindex/releasesamples);
+	    releaseindex += 1;
+    );
+    peak = max(releasepeak, truepeak);
+    //peak = max(peak - releasegradient, truepeak);
+
+    peak < limit ? (
+	    peak = limit;
+	    releasestartvalue = limit;
+	    releaseindex = over_srate;
+    ) : (truepeak == peak) ? (
+	    // It's a new peak
+	    peak *= overcorrect_factor; // Add just a little bit extra, in the hopes that we don't have to do this again soon
+
+	    // For future decay
+	    //releasegradient = (peak - limit)/releasesamples;
+	    releasestartvalue = peak;
+	    releaseindex = 0;
+	    // Attempt to extend an existing attack
+	    i = 1;
+	    startpeak = limit;
+	    foundabove = 0;
+	    foundintersection = 0;
+
+	    intersectionindex = -1;
+	    bestcorrection = -1;
+	    bestindex = delaysamples - 1;
+	    beststartpeak = limit;
+	    while (i < attacksamples && !foundintersection) (
+		    window = attackwindow(1 - i/attacksamples);
+
+		    readpos = writepos - i;
+		    readpos < 0 ? readpos += bufferlength;
+		    oldpeak = bufferpeak[readpos];
+
+		    newstartpeak = peak + (oldpeak - peak)/(1 - window);
+		    newstartpeak > startpeak ? (
+			    // Keep track of the smallest alteration,
+			    //     but with a bias towards f
+			    diff = (newstartpeak - startpeak)*(1 - window);
+			    (bestcorrection < 0 || diff < bestcorrection) ? (
+				    bestcorrection = diff;
+				    bestindex = i;
+				    beststartpeak = newstartpeak;
+			    );
+
+			    startpeak = newstartpeak;
+			    intersectionindex = i;
+			    foundabove = 1;
+		    ) : (foundabove) ? (
+			    foundintersection = 1;
+		    );
+		    i += 1;
+	    );
+
+	    foundintersection ? (
+		    i = 0;
+		    while (i < intersectionindex) (
+			    window = attackwindow(1 - i/attacksamples);
+
+			    readpos = writepos - i;
+			    readpos < 0 ? readpos += bufferlength;
+			    newpeak = startpeak + (peak - startpeak)*window;
+			    bufferpeak[readpos] = newpeak;
+			    i += 1;
+		    );
+	    ) : (
+		    i = 0;
+		    while (i < bestindex) (
+			    window = attackwindow(1 - i/attacksamples);
+
+			    readpos = writepos - i;
+			    readpos < 0 ? readpos += bufferlength;
+			    newpeak = beststartpeak + (peak - beststartpeak)*window;
+
+			    faderatio = (1 - i/bestindex);
+			    fadewindow = 1 - (1 - faderatio)*(1 - faderatio);
+			    bufferpeak[readpos] += (newpeak - bufferpeak[readpos])*fadewindow;
+			    i += 1;
+			);
+		);
+	 );
+
+buffer0[writepos] = over_spl0;
+buffer1[writepos] = over_spl1;
+bufferpeak[writepos] = peak;
+
+writepos += 1;
+writepos >= bufferlength ? (
+	writepos = 0;
+	);
+
+readpos = writepos - delaysamples;
+readpos < 0 ? readpos += bufferlength;
+reduction = limit/bufferpeak[readpos];
+
+oldpeak = bufferpeak[readpos];
+B = scaling_for_peak(oldpeak, limit);
+A = distortion_for_peak(oldpeak, limit);
+
+over_spl0 = dist(buffer0[readpos]);
+over_spl1 = dist(buffer1[readpos]);
+);
+
+(slider4 == 0) ? (
+	delta_spl0 = 0.25 * (spl0 - interp_spl0);
+	delta_spl1 = 0.25 * (spl1 - interp_spl1);
+	
+	over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+	over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+	over_sample(); spl0_0 = over_spl0; spl1_0 = over_spl1;
+	
+	over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+	over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+	over_sample(); spl0_1 = over_spl0; spl1_1 = over_spl1;
+	
+	over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+	over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+	over_sample(); spl0_2 = over_spl0; spl1_2 = over_spl1;
+	
+	over_spl0 = (filt_spl0 += 0.25 * ((interp_spl0 += delta_spl0) - filt_spl0));
+	over_spl1 = (filt_spl1 += 0.25 * ((interp_spl1 += delta_spl1) - filt_spl1));
+	over_sample(); spl0_3 = over_spl0; spl1_3 = over_spl1;
+	
+	spl0 =  left.dec4(spl0_0, spl0_1, spl0_2, spl0_3);
+	spl1 = right.dec4(spl1_0, spl1_1, spl1_2, spl1_3);
+):(
+	over_sample();
+	spl0 = over_spl0;
+	spl1 = over_spl1;
+);

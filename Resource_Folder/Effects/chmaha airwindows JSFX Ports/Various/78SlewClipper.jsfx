@@ -1,0 +1,72 @@
+version: 1.1
+desc:78 Slew Clipper (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "PlatinumSlew" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PlatinumSlew (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:21.5<0,100,0.1>Slew
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+
+A = slider1/100;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+source = pow(1-A,4)/overallscale;
+
+gslew[49] = source;
+source *= 1.618033988749894848204586;
+gslew[44] = source;
+source *= 1.618033988749894848204586;
+gslew[39] = source;
+source *= 1.618033988749894848204586;
+gslew[34] = source;
+source *= 1.618033988749894848204586;
+gslew[29] = source;
+source *= 1.618033988749894848204586;
+gslew[24] = source;
+source *= 1.618033988749894848204586;
+gslew[19] = source;
+source *= 1.618033988749894848204586;
+gslew[14] = source;
+source *= 1.618033988749894848204586;
+gslew[9] = source;
+source *= 1.618033988749894848204586;
+gslew[4] = source;
+source *= 1.618033988749894848204586;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+x = 0; while (x < 50) (
+  (((inputSampleL-gslew[x])-((gslew[x]-gslew[x+2])*0.618033988749894848204586)) > gslew[x+4]) ?
+    inputSampleL = (gslew[x]-((gslew[x]-gslew[x+2])*0.156)) + (gslew[x+4]*0.844);
+  (-((inputSampleL-gslew[x])-((gslew[x]-gslew[x+2])*0.618033988749894848204586)) > gslew[x+4]) ?
+    inputSampleL = (gslew[x]-((gslew[x]-gslew[x+2])*0.2)) - (gslew[x+4]*0.8);
+  gslew[x+2] = gslew[x]*0.844;
+  gslew[x] = inputSampleL;
+  
+  (((inputSampleR-gslew[x+1])-((gslew[x+1]-gslew[x+3])*0.618033988749894848204586)) > gslew[x+4]) ?
+    inputSampleR = (gslew[x+1]-((gslew[x+1]-gslew[x+3])*0.156)) + (gslew[x+4]*0.844);
+  (-((inputSampleR-gslew[x+1])-((gslew[x+1]-gslew[x+3])*0.618033988749894848204586)) > gslew[x+4]) ?
+    inputSampleR = (gslew[x+1]-((gslew[x+1]-gslew[x+3])*0.2)) - (gslew[x+4]*0.8);
+  gslew[x+3] = gslew[x+1]*0.844;
+  gslew[x+1] = inputSampleR;
+  x+=5;
+);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
