@@ -69,16 +69,14 @@ echo "$files" | while IFS= read -r item; do
         mkdir -p "$(dirname "$dest_path")"
 
         if [ -d "$src_path" ]; then
-            mkdir -p "$dest_path"
-            cp -r "$src_path/." "$dest_path/"
+            rsync -a --update --delete "$src_path/" "$dest_path/"
         else
-            cp "$src_path" "$dest_path"
+            rsync -a --update "$src_path" "$dest_path"
         fi
     else
         echo "Warning: $src_path does not exist"
     fi
 done
-
 
 echo "Files copied to $dir successfully."
 
