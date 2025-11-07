@@ -24,9 +24,10 @@ for dir in "$linux_dir" "$macos_dir" "$win_dir"; do
     for f in "$dir"/reaper*; do
         # Skip if no files match
         [ -e "$f" ] || continue
-        # Keep only files containing the desired version
+
         case "$f" in
-            *"$ver_no_dot"*) ;;      # keep matching version
+            *"$ver_no_dot"*) ;;          # keep matching version
+            *.so|*.dylib|*.dll) ;;       # ignore shared libraries
             *)
                 echo "Deleting old file: $f"
                 rm -f "$f"

@@ -73,14 +73,20 @@ func Install32bit(rcfolder string, pkgver string, rcver string) {
 	extractArchive(resZipPath, rcfolder)
 	os.Remove(resZipPath)
 
-	// Write embedded UserPlugins 32-bit zip
-	upZipPath := filepath.Join(tempFilePath, "UP_Windows-x86.zip")
-	if err := os.WriteFile(upZipPath, UP32, 0644); err != nil {
-		fmt.Println("Error writing UP_Windows-x86.zip:", err)
+	// Write and extract UserPlugins based on architecture
+	// Ensure UserPlugins folder exists
+	userPluginsDir := filepath.Join(rcfolder, "UserPlugins")
+	if err := os.MkdirAll(userPluginsDir, 0755); err != nil {
+		fmt.Println("Error creating UserPlugins folder:", err)
 		return
 	}
-	extractArchive(upZipPath, filepath.Join(rcfolder, "UserPlugins"))
-	os.Remove(upZipPath)
+
+	// Write the DLL file
+	dllPath := filepath.Join(userPluginsDir, "reaper_sws-x64.dll")
+	if err := os.WriteFile(dllPath, sws32, 0644); err != nil {
+		fmt.Println("Error writing reaper_sws-x64.dll:", err)
+		return
+	}
 
 	// Configure REAPER theme and splash
 	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")

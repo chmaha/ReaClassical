@@ -5,6 +5,9 @@ scripts/ReaClassical_Changelog_Formatter.html
 # Top-level installers
 Installers/**/*.run
 Installers/**/*.exe
+Installers/src/linux/*.so
+Installers/src/macos/*.dylib
+Installers/src/windows/*.dll
 
 # Windows GO installer - ignore all zips and exes except specific ones
 Installers/src/windows/*.zip

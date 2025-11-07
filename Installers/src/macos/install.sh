@@ -58,17 +58,18 @@ hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint "$mount_dir" "
 
 # Extract bundled ReaClassical resources
 res_zip="./Resource_Folder_Base.zip"
-up_zip="./UP_MacOS-${arch}.zip"
+up_file="./reaper_sws-"$arch".dylib"
 
-if [ ! -f "$res_zip" ] || [ ! -f "$up_zip" ]; then
-    echo "Error: Resource_Folder_Base.zip or UP_MacOS-${arch}.zip missing from bundle."
+if [ ! -f "$res_zip" ] || [ ! -f "$up_file" ]; then
+    echo "Error: Resource_Folder_Base.zip or reaper_sws-${arch}.dylib missing from bundle."
     exit 1
 fi
 
 echo "Extracting ReaClassical resources into $rcfolder..."
 mkdir -p "$rcfolder"
 unzip -q "$res_zip" -d "$rcfolder/"
-unzip -q "$up_zip" -d "$rcfolder/UserPlugins/"
+mkdir -p "$rcfolder/UserPlugins"
+cp -f "$up_file" "$rcfolder/UserPlugins/"
 
 # Absolute path for configuration
 rcfolder_path=$(realpath "$rcfolder")

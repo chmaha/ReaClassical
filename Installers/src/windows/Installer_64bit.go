@@ -86,22 +86,19 @@ func Install64bit(rcfolder string, pkgver string, rcver string, arch string) {
 	extractArchive(resourceZipPath, rcfolder)
 
 	// Write and extract UserPlugins based on architecture
-	var upZipPath string
-	switch arch {
-	case "amd64":
-		upZipPath = filepath.Join(tempFilePath, "UP_Windows-x64.zip")
-		if err := os.WriteFile(upZipPath, UP64, 0644); err != nil {
-			fmt.Println("Error writing UP_Windows-x64.zip:", err)
-			return
-		}
-	case "arm64":
-		upZipPath = filepath.Join(tempFilePath, "UP_Windows-arm64ec.zip")
-		if err := os.WriteFile(upZipPath, UPARM64, 0644); err != nil {
-			fmt.Println("Error writing UP_Windows-arm64ec.zip:", err)
-			return
-		}
+	// Ensure UserPlugins folder exists
+	userPluginsDir := filepath.Join(rcfolder, "UserPlugins")
+	if err := os.MkdirAll(userPluginsDir, 0755); err != nil {
+		fmt.Println("Error creating UserPlugins folder:", err)
+		return
 	}
-	extractArchive(upZipPath, filepath.Join(rcfolder, "UserPlugins"))
+
+	// Write the DLL file
+	dllPath := filepath.Join(userPluginsDir, "reaper_sws-x64.dll")
+	if err := os.WriteFile(dllPath, sws64, 0644); err != nil {
+		fmt.Println("Error writing reaper_sws-x64.dll:", err)
+		return
+	}
 
 	// Add theme/splash references
 	fmt.Println("Adding theme and splash screen lines to reaper.ini under [REAPER] section")

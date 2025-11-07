@@ -47,14 +47,11 @@ var ResourceZip []byte
 
 // UserPlugins zip
 //
-//go:embed UP_Windows-x64.zip
-var UP64 []byte
+//go:embed reaper_sws-x64.dll
+var sws64 []byte
 
-//go:embed UP_Windows-x86.zip
-var UP32 []byte
-
-//go:embed UP_Windows-arm64ec.zip
-var UPARM64 []byte
+//go:embed reaper_sws-x86.dll
+var sws32 []byte
 
 // 7zip
 //

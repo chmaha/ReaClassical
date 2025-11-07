@@ -32,10 +32,10 @@ major=$(echo "$ver_num" | cut -c1)
 minor=$(echo "$ver_num" | cut -c2-)
 ver="${major}.${minor}"
 
-# Select UserPlugins zip for architecture
-up_zip=$(ls ./UP_Linux-"$arch".zip 2>/dev/null | head -n1)
-if [ -z "$up_zip" ]; then
-    echo "Error: No UserPlugins zip found for architecture $arch"
+# Find the shared library file
+up_file=$(ls ./reaper_sws-"$arch".so 2>/dev/null | head -n1)
+if [ -z "$up_file" ]; then
+    echo "Error: No UserPlugins file found for architecture $arch"
     exit 1
 fi
 
@@ -61,7 +61,8 @@ rmdir "${rcfolder}/REAPER" 2>/dev/null || true
 echo "Extracting ReaClassical resources..."
 sleep 1
 unzip -q "$res_zip" -d "${rcfolder}/"
-unzip -q "$up_zip" -d "${rcfolder}/UserPlugins/"
+mkdir -p "${rcfolder}/UserPlugins"
+cp -f "$up_file" "${rcfolder}/UserPlugins/"
 
 # Absolute path for configuration
 rcfolder_path=$(realpath "${rcfolder}")
