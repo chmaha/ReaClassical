@@ -8,7 +8,7 @@ Download an official release for Linux, MacOS or Windows visit https://github.co
 
 **To build for all systems (currently requires Linux):**
 
-Dependencies: makeself (Linux, Mac), go (Windows), 7z (Mac & Windows)
+Dependencies: `makeself` (Linux, Mac), `go` (Windows), `7z` (Mac & Windows)
 
 1. git clone the repo
 2. Open a terminal in the `Installers` folder
