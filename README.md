@@ -15,6 +15,6 @@ Dependencies: makeself (Linux, Mac), go (Windows), 7z (Mac & Windows)
 3. Run `sh pull_reaper.sh [REAPER ver]` to grab REAPER install binaries and SWS plugin for all platforms _e.g._ `sh pull_reaper.sh 7.52` _to download REAPER 7.52_
 4. Run `sh build_all.sh` to build for all platforms or individual scripts for a single OS (e.g. `sh build_linux.sh` etc)
 
-To just use the functions, jsfx plugins, theme, and default template but without keymaps, toolbar etc, follow the [basic install](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md#basic-manual-install-inside-your-existing-reaper-install) instructions.
+To just use the functions, jsfx plugins, theme, and default template but without keymaps, toolbar etc, follow the [ReaClassical Core](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md#basic-manual-install-of-just-the-s-d-editing-tools-inside-your-existing-reaper-install) instructions.
 
 If you find these tools useful, please consider donating via [PayPal](https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C).
