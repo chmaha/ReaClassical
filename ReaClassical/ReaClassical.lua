@@ -2,7 +2,7 @@
 @author chmaha
 @version 25.11
 @changelog
-  Add various actions to alt recording
+  Add various actions to alt recording section
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
