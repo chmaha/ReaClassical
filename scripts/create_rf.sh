@@ -61,21 +61,24 @@ reaper-mouse.ini
 reaper-wndpos.ini
 reaper.ini"
 
-# Loop through each file and directory
 echo "$files" | while IFS= read -r item; do
     src_path="$src/$item"
     dest_path="$dir/$item"
 
     if [ -e "$src_path" ]; then
-        # Create the destination directory if it doesn't exist
         mkdir -p "$(dirname "$dest_path")"
 
-        # Copy the file or directory
-        cp -r "$src_path" "$dest_path"
+        if [ -d "$src_path" ]; then
+            mkdir -p "$dest_path"
+            cp -r "$src_path/." "$dest_path/"
+        else
+            cp "$src_path" "$dest_path"
+        fi
     else
         echo "Warning: $src_path does not exist"
     fi
 done
+
 
 echo "Files copied to $dir successfully."
 
