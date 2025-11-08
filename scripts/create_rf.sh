@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Script to create ReaClassical resource folder
+# Script to create ReaClassical folder
 #
-# by chmaha (Jan 2025)
+# by chmaha (November 2025)
 
-dir="$HOME/code/chmaha/ReaClassical/Resource_Folder/"
+dir="$HOME/code/chmaha/ReaClassical/ReaClassical/"
 mkdir -p "$dir"
 
 # Source directory
@@ -88,30 +88,19 @@ sed -i '/home\/chmaha/d;/media\/chmaha/d;/Users\\xxx/d;/Users\\chmaha/d;/^Recent
 
 echo "Copying keymap, menu, project template and theme files..."
 
-cp $dir/reaper.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical.ini
 cp $dir/reaper.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
 cp $dir/reaper.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
-sed -i "/^\[REAPER\]/a lastthemefn5=/home/chmaha/Desktop/ReaClassical_26/ColorThemes/ReaClassical.ReaperTheme" "/home/chmaha/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
 
-cp $dir/reaper-kb.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-kb.ini
 cp $dir/reaper-kb.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
 cp $dir/reaper-kb.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
 
-cp $dir/reaper-menu.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-menu.ini
 cp $dir/reaper-menu.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-menu.ini"
 cp $dir/reaper-menu.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-menu.ini"
 
-cp $dir/reaper-render.ini ~/code/chmaha/ReaClassical/ReaClassical/ReaClassical-render.ini
 cp $dir/reaper-render.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
 cp $dir/reaper-render.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
 
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
-
-cp $dir/ProjectTemplates/ReaClassical.RPP ~/code/chmaha/ReaClassical/ReaClassical/
-cp $dir/ProjectTemplates/Room_Tone_Generation.RPP ~/code/chmaha/ReaClassical/ReaClassical/
-cp "$dir/ColorThemes/ReaClassical Light.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/
-cp "$dir/ColorThemes/ReaClassical WaveColors Dark.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/
-cp "$dir/ColorThemes/ReaClassical WaveColors Light.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/
-cp "$dir/ColorThemes/ReaClassical.ReaperThemeZip" ~/code/chmaha/ReaClassical/ReaClassical/
+cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 
 echo "Done!"
