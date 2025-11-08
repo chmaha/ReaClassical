@@ -1,5 +1,5 @@
 # Ignore generated changelog HTML
-scripts/ReaClassical_Changelog_Formatter.html
+admin_scripts/ReaClassical_Changelog_Formatter.html
 
 # === Installers ===
 # Top-level installers
