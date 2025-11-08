@@ -56,45 +56,68 @@ function convert_audition_markers()
     -- 1. Initial setup
     local curPos = GetCursorPosition()
     local markerCount = CountProjectMarkers(0)
-    local start_pos, start_tracknum, end_pos, sai_color
+    local start_pos, end_pos, start_tracknum, sai_color
+    local marker_type = nil  -- "SAI" or "SAO"
 
-    -- 2. Find SAI marker under edit cursor and extract track number + color
+    -- 2. Find SAI or SAO marker under edit cursor
     for i = 0, markerCount - 1 do
         local retval, isrgn, pos, rgnend, raw_label, idx, color = EnumProjectMarkers3(0, i)
         if not isrgn and math.abs(pos - curPos) < 1e-9 then
-            -- Match "<number>: SAI"
-            local number = raw_label:match("^(%d+):%s*SAI")
-            if number then
-                start_tracknum = tonumber(number)
-                start_pos = pos
-                sai_color = color or 0
+            local number, suffix = raw_label:match("^(%d+):%s*(%S+)")
+            if number and suffix then
+                if suffix:match("^SAI") then
+                    marker_type = "SAI"
+                    start_tracknum = tonumber(number)
+                    start_pos = pos
+                    sai_color = color or 0
+                elseif suffix:match("^SAO") then
+                    marker_type = "SAO"
+                    start_tracknum = tonumber(number)
+                    end_pos = pos
+                    sai_color = color or 0
+                end
             end
             break
         end
     end
 
-    -- Fail if no matching SAI marker under cursor
-    if not start_pos or not start_tracknum then return false end
+    -- Fail if no valid SAI/SAO marker under cursor
+    if not marker_type or not start_tracknum then return false end
 
-    -- 3. Find next "N: SAO" marker for the same track, after SAI
-    for i = 0, markerCount - 1 do
-        local retval, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
-        local num, suffix = name:match("^(%d+):%s*(%S+)")
-        if not isrgn and num and tonumber(num) == start_tracknum then
-            if pos > start_pos and suffix == "SAO" then
-                end_pos = pos
-                break
+    -- 3. Depending on marker type, find the matching partner
+    if marker_type == "SAI" then
+        -- Find next SAO marker for same track
+        for i = 0, markerCount - 1 do
+            local retval, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
+            local num, suffix = name:match("^(%d+):%s*(%S+)")
+            if not isrgn and num and tonumber(num) == start_tracknum then
+                if pos > start_pos and suffix:match("^SAO") then
+                    end_pos = pos
+                    break
+                end
+            end
+        end
+    elseif marker_type == "SAO" then
+        -- Find previous SAI marker for same track
+        for i = markerCount - 1, 0, -1 do
+            local retval, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
+            local num, suffix = name:match("^(%d+):%s*(%S+)")
+            if not isrgn and num and tonumber(num) == start_tracknum then
+                if pos < end_pos and suffix:match("^SAI") then
+                    start_pos = pos
+                    break
+                end
             end
         end
     end
 
-    -- Fail if no SAO pairing found
-    if not end_pos then return false end
+    -- Fail if no partner found
+    if not start_pos or not end_pos then return false end
 
     -- 4. Create time selection between SAI and SAO
     GetSet_LoopTimeRange(true, false, start_pos, end_pos, false)
 
-    -- 5. Delete all "SAI"/"SAO" markers (currently global)
+    -- 5. Delete all "SAI"/"SAO" markers
     for i = markerCount - 1, 0, -1 do
         local retval, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
         if not isrgn and (name:find("SAI") or name:find("SAO")) then
@@ -112,6 +135,7 @@ function convert_audition_markers()
 
     return true
 end
+
 
 ---------------------------------------------------------------------
 
