@@ -105,7 +105,7 @@ function main()
     local marker_color = color_track and GetTrackColor(color_track) or 0
     AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
-
+    Main_OnCommand(40635, 0) -- remove time selection
     PreventUIRefresh(-1)
     Undo_EndBlock("Source Markers to Item Edge", 0)
 end
