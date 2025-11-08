@@ -7,7 +7,7 @@ echo " Building MacOS ReaClassical installer... "
 echo "============================================"
 echo
 sleep 2
-src="../Resource_Folder"
+src="../ReaClassical"
 zip_file="Resource_Folder_Base.zip"
 macos_dir="src/macos"
 mkdir -p "$macos_dir"

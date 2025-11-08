@@ -7,7 +7,7 @@ echo " Building Windows ReaClassical installer... "
 echo "============================================"
 echo
 sleep 2
-src="../Resource_Folder"
+src="../ReaClassical"
 zip_file="Resource_Folder_Base.zip"
 win_dir="src/windows"
 mkdir -p "$win_dir"

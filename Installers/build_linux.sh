@@ -6,7 +6,7 @@ echo " Building Linux ReaClassical installer... "
 echo "============================================"
 echo
 sleep 2
-src="../Resource_Folder"
+src="../ReaClassical"
 zip_file="Resource_Folder_Base.zip"
 linux_dir="src/linux"
 mkdir -p "$linux_dir"
