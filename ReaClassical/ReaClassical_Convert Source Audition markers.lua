@@ -63,7 +63,7 @@ function convert_audition_markers()
         local retval, isrgn, pos, rgnend, raw_label, idx, color = EnumProjectMarkers3(0, i)
         if not isrgn and math.abs(pos - curPos) < 1e-9 then
             -- Match "<number>: SAI"
-            local number = raw_label:match("^(%d+):%s*SAI$")
+            local number = raw_label:match("^(%d+):%s*SAI")
             if number then
                 start_tracknum = tonumber(number)
                 start_pos = pos
