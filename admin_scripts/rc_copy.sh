@@ -38,6 +38,7 @@ Data/toolbar_icons/copy_dest_material.png
 Data/toolbar_icons/move_dest_material.png
 Data/toolbar_icons/Reverse SD Edit.png
 Data/toolbar_icons/assembly.png
+Data/toolbar_icons/promote to dest.png
 Effects/ReJJ/
 Effects/chmaha Scripts/
 Effects/chmaha airwindows JSFX Ports
