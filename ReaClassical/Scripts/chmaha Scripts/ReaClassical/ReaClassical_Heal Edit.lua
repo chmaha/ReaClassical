@@ -42,7 +42,8 @@ function main()
         return
     end
 
-    local selected, prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape, total_selected_length = select_previous_and_next()
+    local selected, prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape, total_selected_length =
+    select_previous_and_next()
 
     if selected then
         heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape, total_selected_length)
@@ -143,7 +144,7 @@ function select_previous_and_next()
     local next_length = GetMediaItemInfo_Value(next_item, "D_LENGTH")
 
     if next_startoffs <= (prev_startoffs + prev_length) then
-        MB("Next item starts before or overlaps previous item in source media.", "Error", 0)
+        MB("Next item starts before previous item in source media.", "Error", 0)
         return false
     end
 
@@ -289,6 +290,7 @@ function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
             end
         end
     end
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
 end
 
 ---------------------------------------------------------------------
