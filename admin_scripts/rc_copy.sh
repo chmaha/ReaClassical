@@ -67,12 +67,15 @@ echo "$files" | while IFS= read -r item; do
     dest_path="$dir/$item"
 
     if [ -e "$src_path" ]; then
+        # Create destination directory if it doesn't exist
         mkdir -p "$(dirname "$dest_path")"
 
         if [ -d "$src_path" ]; then
-            rsync -a --update --delete "$src_path/" "$dest_path/"
+            # Copy directory, overwrite files if needed, delete extraneous files
+            rsync -a --delete "$src_path/" "$dest_path/"
         else
-            rsync -a --update "$src_path" "$dest_path"
+            # Copy file, overwrite if content differs
+            rsync -a --checksum "$src_path" "$dest_path"
         fi
     else
         echo "Warning: $src_path does not exist"
