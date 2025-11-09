@@ -34,6 +34,25 @@ else
     echo "Using universal dmg file..."
 fi
 
+# --- Find bundled REAPER DMG matching the dmgtype ---
+reaper_dmg=$(ls ./reaper*_"${dmgtype}".dmg 2>/dev/null | head -n 1)
+echo $reaper_dmg
+if [ -z "$reaper_dmg" ]; then
+    echo "Error: No REAPER dmg found matching type '${dmgtype}'."
+    echo "Expected something like: reaper752_${dmgtype}.dmg"
+    exit 1
+fi
+
+# --- Extract REAPER version from filename (e.g. reaper752_universal.dmg → 7.52) ---
+dmg_basename=$(basename "$reaper_dmg")
+ver_num=$(echo "$dmg_basename" | sed -E 's/reaper([0-9]+)_.*/\1/')
+r_major=$(echo "$ver_num" | cut -c1)
+r_minor=$(echo "$ver_num" | cut -c2-)
+reaper_ver="${r_major}.${r_minor}"
+
+printf "Versions: REAPER $reaper_ver ($dmgtype), ReaClassical $rcver\n\n"
+sleep 1
+
 # Temporary folder for mounting DMG
 date_suffix=$(date +%s | shasum -a 256 | cut -c1-5)
 temp_dir=$(mktemp -d 2>/dev/null)
@@ -44,13 +63,6 @@ fi
 
 mount_dir="$temp_dir/reaper_mount"
 mkdir -p "$mount_dir"
-
-# Mount bundled REAPER DMG
-reaper_dmg="./REAPER_${dmgtype}.dmg"
-if [ ! -f "$reaper_dmg" ]; then
-    echo "Error: REAPER DMG missing from bundle."
-    exit 1
-fi
 
 echo "Mounting REAPER DMG..."
 hdiutil convert -quiet "$reaper_dmg" -format UDTO -o "$temp_dir/reaper_temp"
