@@ -43,7 +43,7 @@ function main()
     end
 
     local selected, prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape, total_selected_length =
-    select_previous_and_next()
+        select_previous_and_next()
 
     if selected then
         heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape, total_selected_length)
@@ -63,6 +63,16 @@ function select_previous_and_next()
     if sel_count == 0 then
         MB("No items selected.", "Error", 0)
         return false
+    end
+
+    -- Check all selected items have P_EXT:SD == "y"
+    for i = 0, sel_count - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        local _, sd_flag = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+        if sd_flag ~= "y" then
+            MB("All selected items must be S-D edits", "Error", 0)
+            return false
+        end
     end
 
     -- Get the track of the first selected item
@@ -143,7 +153,14 @@ function select_previous_and_next()
     local prev_length = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
     local next_length = GetMediaItemInfo_Value(next_item, "D_LENGTH")
 
-    if next_startoffs <= (prev_startoffs + prev_length) then
+    local next_fadein = GetMediaItemInfo_Value(next_item, "D_FADEINLEN")
+    local next_fadein_auto = GetMediaItemInfo_Value(next_item, "D_FADEINLEN_AUTO")
+
+    if next_fadein_auto > 0 then
+        next_fadein = next_fadein_auto
+    end
+
+    if next_startoffs <= (prev_startoffs + prev_length - (next_fadein + 0.0001)) then
         MB("Next item starts before previous item in source media.", "Error", 0)
         return false
     end
@@ -153,11 +170,11 @@ function select_previous_and_next()
     if next_item then SetMediaItemSelected(next_item, true) end
 
     -- === Gather fade info ===
-    local fadeout_len = GetMediaItemInfo_Value(next_item, "D_FADEOUTLEN")
-    local fadeout_len_auto = GetMediaItemInfo_Value(next_item, "D_FADEOUTLEN_AUTO")
+    local next_fadeout_len = GetMediaItemInfo_Value(next_item, "D_FADEOUTLEN")
+    local next_fadeout_len_auto = GetMediaItemInfo_Value(next_item, "D_FADEOUTLEN_AUTO")
 
-    if fadeout_len_auto > 0 then
-        fadeout_len = fadeout_len_auto
+    if next_fadeout_len_auto > 0 then
+        next_fadeout_len = next_fadeout_len_auto
     end
 
     local fadeout_shape = GetMediaItemInfo_Value(next_item, "C_FADEOUTSHAPE")
@@ -176,7 +193,7 @@ function select_previous_and_next()
     local total_selected_length = (last_pos + last_length) - first_pos
 
     -- Return total_selected_length along with previous values
-    return true, prev_startoffs, next_end, fadeout_len, fadeout_shape, total_selected_length
+    return true, prev_startoffs, next_end, next_fadeout_len, fadeout_shape, total_selected_length
 end
 
 ---------------------------------------------------------------------
