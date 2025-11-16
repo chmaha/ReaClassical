@@ -26,7 +26,7 @@ local main, shift, color, vertical_razor, group_items
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, get_selected_media_item_at, count_selected_media_items
-local delete_empty_items, pastel_color, color_tracks_from_first_item
+local delete_empty_items, pastel_color
 local color_group_items, color_folder_children
 ---------------------------------------------------------------------
 
@@ -89,11 +89,11 @@ function main()
     end
 
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local colors = 0
+    local color_pref = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[5] then colors = tonumber(table[5]) or 0 end
+        if table[5] then color_pref = tonumber(table[5]) or 0 end
     end
 
     local edits = false
@@ -103,8 +103,7 @@ function main()
         vertical()
     end
     PreventUIRefresh(-1)
-    color(edits)
-    -- color_tracks_from_first_item()
+    color(edits, color_pref)
     PreventUIRefresh(1)
 
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
@@ -146,12 +145,15 @@ end
 
 ---------------------------------------------------------------------
 
-function color(edits)
-    local colors = get_color_table()
+function color(edits, color_pref)
+    local unedited_color = 0
+    if color_pref == 0 then
+        local colors = get_color_table()
+        unedited_color = colors.dest_items
+    end
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
     if workflow == "Horizontal" and not edits then
-        local dest_blue = colors.dest_items
         local color_index = 0
 
         local num_items = CountMediaItems(0)
@@ -204,7 +206,7 @@ function color(edits)
 
             if not group_color then
                 if first_group then
-                    group_color = dest_blue
+                    group_color = unedited_color
                     first_group = false
                 else
                     group_color = pastel_color(color_index)
@@ -222,8 +224,8 @@ function color(edits)
             -- Color the track of first item
             local first_track = GetMediaItem_Track(group_items[1])
             if first_track then
-                SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", colors.dest_items)
-                color_folder_children(first_track, colors.dest_items)
+                SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", unedited_color)
+                color_folder_children(first_track, unedited_color)
             end
 
             ::continue_group::
@@ -287,25 +289,27 @@ function color(edits)
         end
 
         -- Third pass: dest folders
-        for _, track in ipairs(dest_folders) do
-            local num_items = CountTrackMediaItems(track)
-            local folder_color = colors.dest_items
-            SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", folder_color)
-            color_folder_children(track, folder_color)
+        for _ = 1, 2 do
+            for _, track in ipairs(dest_folders) do
+                local num_items = CountTrackMediaItems(track)
+                local folder_color = unedited_color
+                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", folder_color)
+                color_folder_children(track, folder_color)
 
-            for i = 0, num_items - 1 do
-                local item = GetTrackMediaItem(track, i)
-                local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", false)
-                if ranked ~= "y" then
-                    local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
-                    local color_val = folder_color
-                    if src_guid ~= "" then
-                        local src_item = BR_GetMediaItemByGUID(0, src_guid)
-                        if src_item then
-                            color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                for i = 0, num_items - 1 do
+                    local item = GetTrackMediaItem(track, i)
+                    local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", false)
+                    if ranked ~= "y" then
+                        local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                        local color_val = folder_color
+                        if src_guid ~= "" then
+                            local src_item = BR_GetMediaItemByGUID(0, src_guid)
+                            if src_item then
+                                color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                            end
                         end
+                        color_group_items(item, color_val)
                     end
-                    color_group_items(item, color_val)
                 end
             end
         end
@@ -626,27 +630,6 @@ function pastel_color(index)
     )
 
     return color_int | 0x1000000
-end
-
----------------------------------------------------------------------
-
-function color_tracks_from_first_item()
-    local num_tracks = CountTracks(0)
-
-    for t = 0, num_tracks - 1 do
-        local track = GetTrack(0, t)
-        local num_items = CountTrackMediaItems(track)
-
-        if num_items > 0 then
-            local first_item = GetTrackMediaItem(track, 0)
-            local item_color = GetMediaItemInfo_Value(first_item, "I_CUSTOMCOLOR")
-
-            -- Apply the item color to the track if it has a color
-            if item_color ~= 0 then
-                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", item_color)
-            end
-        end
-    end
 end
 
 ---------------------------------------------------------------------

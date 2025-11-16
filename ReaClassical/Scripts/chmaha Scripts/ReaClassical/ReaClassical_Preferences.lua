@@ -24,6 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 local sync_based_on_workflow, move_destination_folder_to_top
+local prepare_takes
 
 local year = os.date("%Y")
 local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0'
@@ -33,7 +34,7 @@ local labels = {
     'CD track offset (ms)',
     'INDEX0 length (s) (>= 1)',
     'Album lead-out time (s)',
-    'Prepare Takes: Random colors',
+    'Unedited Items = Default Color',
     'S-D Marker Check (ms)',
     'REF = Overdub Guide',
     'Add S-D Markers at Mouse Hover',
@@ -52,28 +53,30 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local pass, input, orig_floating, new_floating
+    local pass, input, orig_floating, new_floating, orig_color, new_color
     repeat
         local ret
-        ret, input, orig_floating = display_prefs()
+        ret, input, orig_floating, orig_color = display_prefs()
         if not ret then return end
-        if ret then pass, new_floating = pref_check(input) end
+        if ret then pass, new_floating, new_color = pref_check(input) end
     until pass
     save_prefs(input)
-
     if new_floating ~= orig_floating and new_floating == 0 then
         move_destination_folder_to_top()
         sync_based_on_workflow(workflow)
+    end
+    if new_color ~= orig_color then
+        prepare_takes()
     end
 end
 
 -----------------------------------------------------------------------
 
 function display_prefs()
-    local saved, saved_12 = load_prefs(NUM_OF_ENTRIES)
+    local saved, saved_12, saved_5 = load_prefs()
     local input_labels = table.concat(labels, ',')
     local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)
-    return ret, input, saved_12
+    return ret, input, tonumber(saved_12), tonumber(saved_5)
 end
 
 -----------------------------------------------------------------------
@@ -106,7 +109,7 @@ function load_prefs()
 
     saved = table.concat(saved_entries, ',')
 
-    return saved, saved_entries[12]
+    return saved, saved_entries[12], saved_entries[5]
 end
 
 -----------------------------------------------------------------------
@@ -142,7 +145,7 @@ function pref_check(input)
         local num_13 = tonumber(table[13])
         local audio_format = tostring(table[11])
         if (num_5 and num_5 > 1) or (num_7 and num_7 > 1)
-        or (num_8 and num_8 > 1) or (num_12 and num_12 > 1) or (num_13 and num_13 > 1) then
+            or (num_8 and num_8 > 1) or (num_12 and num_12 > 1) or (num_13 and num_13 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
@@ -159,7 +162,7 @@ function pref_check(input)
         MB(error_msg, "Error", 0)
     end
 
-    return pass, tonumber(table[12])
+    return pass, tonumber(table[12]), tonumber(table[5])
 end
 
 -----------------------------------------------------------------------
@@ -198,6 +201,15 @@ function sync_based_on_workflow(workflow)
         local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
         Main_OnCommand(F7_sync, 0)
     end
+end
+
+-----------------------------------------------------------------------
+
+function prepare_takes()
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
+    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    Main_OnCommand(prepare_takes, 0)
+    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
 end
 
 -----------------------------------------------------------------------
