@@ -36,10 +36,10 @@ trap cleanup EXIT
 
 check_internet
 
-ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/v25/tested_reaper_ver.txt"
 ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
-rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua"
+rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/v25/ReaClassical/ReaClassical.lua"
 rcver=$(curl -sS "$rcver_txt" | awk '/@version/{split($2, version, "."); print version[1]}')
 
 major=$(echo $ver | awk -F. '{print $1}')
@@ -87,10 +87,10 @@ rmdir "${rcfolder}/REAPER"
 echo "Downloading ReaClassical files from Github..."
 sleep 2
 res_output="$temp_dir/Resource_Folder_Base.zip"
-res_url="https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip"
+res_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/Resource_Folder_Base.zip"
 curl -L -o "$res_output" --progress-bar "$res_url"
 up_output="$temp_dir/UP_Linux-${arch}.zip"
-up_url="https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Linux-${arch}.zip"
+up_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/UserPlugins/UP_Linux-${arch}.zip"
 curl -L -o "$up_output" --progress-bar "$up_url"
 sleep 2
 unzip -q "$temp_dir/Resource_Folder_Base.zip" -d "${rcfolder}/"
