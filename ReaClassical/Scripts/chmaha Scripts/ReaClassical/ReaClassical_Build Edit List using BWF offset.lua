@@ -339,7 +339,7 @@ end
 ---------------------------------------------------------------------
 
 function get_offset()
-    local retval, input = reaper.GetUserInputs("Frame Offset", 1, "Enter offset (frames):", "0")
+    local retval, input = GetUserInputs("Frame Offset", 1, "Enter offset (frames):", "0")
     if retval then
         return tonumber(input) or 0
     end

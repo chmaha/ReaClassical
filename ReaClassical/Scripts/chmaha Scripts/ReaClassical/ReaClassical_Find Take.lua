@@ -88,9 +88,7 @@ function main()
                 if take_capture == take_choice and session_match and not edit then
                     found = true
                     local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-                    SetEditCurPos(item_start, 1, 0)
-                    local center = NamedCommandLookup("_SWS_HSCROLL50")
-                    Main_OnCommand(center, 0)
+                    SetEditCurPos(item_start, true, false)
                     Main_OnCommand(40769, 0) -- unselect all items
                     SetMediaItemSelected(item, true)
                     Main_OnCommand(40034, 0) -- select all in group
@@ -121,8 +119,7 @@ function main()
 
                     if found then
                         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-                        SetEditCurPos(item_start, 1, 0)
-                        Main_OnCommand(NamedCommandLookup("_SWS_HSCROLL50"), 0)
+                        SetEditCurPos(item_start, true, false)
                         Main_OnCommand(40769, 0)
                         SetMediaItemSelected(item, true)
                         Main_OnCommand(40034, 0)

@@ -23,11 +23,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, select_matching_folder, copy_source, split_at_dest_in
-local create_crossfades, clean_up, ripple_lock_mode
+local create_crossfades, clean_up, ripple_lock_mode, adaptive_delete
 local return_xfade_length, xfade, get_first_last_items, markers
 local mark_as_edit, move_to_project_tab, save_source_details
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
+local select_item_under_cursor_on_selected_track, fix_marker_pair
 
 ---------------------------------------------------------------------
 
@@ -90,9 +91,8 @@ function main()
 
     if dest_count + source_count == 4 then
         local selected_items = {}
-
-        move_to_project_tab(dest_proj)
         move_to_project_tab(source_proj)
+        fix_marker_pair(998,999)
         local xfade_len = return_xfade_length()
         local total_selected, parent_selected = copy_source(xfade_len)
         if total_selected == 0 then
@@ -105,7 +105,7 @@ function main()
         end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
-
+        fix_marker_pair(996,997)
         split_at_dest_in()
         Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 997, false)
@@ -114,8 +114,7 @@ function main()
         Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
         Main_OnCommand(40630, 0)  -- Go to start of time selection
         Main_OnCommand(40309, 0)  -- ripple off
-        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- Adaptive Delete
+        adaptive_delete()
         Main_OnCommand(40289, 0)  -- Item: Unselect all items
 
         local state = GetToggleCommandState(1156)
@@ -203,8 +202,7 @@ end
 ---------------------------------------------------------------------
 
 function copy_source(xfade_len)
-    local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
-    Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
+    SetCursorContext(1, nil)
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
@@ -248,8 +246,7 @@ function split_at_dest_in()
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
     GoToMarker(0, 996, false)
-    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    select_item_under_cursor_on_selected_track()
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
     local selected_items = count_selected_media_items()
     Main_OnCommand(40912, 0)        -- Options: Toggle auto-crossfade on split (OFF)
@@ -278,8 +275,7 @@ function create_crossfades(xfade_len)
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
     MoveEditCursor(0.001, false)
-    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0)
+    select_item_under_cursor_on_selected_track()
     MoveEditCursor(-0.001, false)
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
@@ -336,8 +332,7 @@ end
 ---------------------------------------------------------------------
 
 function xfade(xfade_len)
-    local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    select_item_under_cursor_on_selected_track()
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(40625, 0)        -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
@@ -345,7 +340,7 @@ function xfade(xfade_len)
     Main_OnCommand(40916, 0)        -- Item: Crossfade items within time selection
     Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
     MoveEditCursor(0.001, false)
-    Main_OnCommand(select_items, 0)
+    select_item_under_cursor_on_selected_track()
     MoveEditCursor(-0.001, false)
 end
 
@@ -625,6 +620,116 @@ function save_source_details()
 
     -- Save the GUID to the project’s ExtState
     SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
+end
+
+---------------------------------------------------------------------
+
+function adaptive_delete()
+  local sel_items = {}
+  local item_count = CountSelectedMediaItems(0)
+  for i = 0, item_count - 1 do
+    sel_items[#sel_items+1] = GetSelectedMediaItem(0, i)
+  end
+
+  local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
+  local items_in_time_sel = {}
+
+  if time_sel_end - time_sel_start > 0 then
+    for _, item in ipairs(sel_items) do
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
+
+      if item_sel then
+        local intersectmatches = 0
+        -- conditions copied from original C++ logic
+        if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
+          intersectmatches = intersectmatches + 1
+        end
+        if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
+          intersectmatches = intersectmatches + 1
+        end
+        if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
+          intersectmatches = intersectmatches + 1
+        end
+        if time_sel_end >= item_pos and time_sel_start < item_pos then
+          intersectmatches = intersectmatches + 1
+        end
+
+        if intersectmatches > 0 then
+          table.insert(items_in_time_sel, item)
+        end
+      end
+    end
+  end
+
+  if #items_in_time_sel > 0 then
+    Main_OnCommand(40312, 0) -- Delete items in time selection
+  else
+    Main_OnCommand(40006, 0) -- Delete items or time selection contents
+  end
+end
+
+---------------------------------------------------------------------
+
+function select_item_under_cursor_on_selected_track()
+  Main_OnCommand(40289, 0) -- Unselect all items
+
+  local curpos = GetCursorPosition()
+  local item_count = CountMediaItems(0)
+
+  for i = 0, item_count - 1 do
+    local item = GetMediaItem(0, i)
+    local track = GetMediaItem_Track(item)
+    local track_sel = IsTrackSelected(track)
+
+    if track_sel then
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_end = item_pos + item_len
+
+      if curpos >= item_pos and curpos <= item_end then
+        SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
+      end
+    end
+  end
+end
+
+---------------------------------------------------------------------
+
+function fix_marker_pair(id_in, id_out)
+
+    local in_pos, out_pos
+    local in_name, out_name
+
+    local _, num_markers, num_regions = CountProjectMarkers(0)
+    local total = num_markers + num_regions
+
+    -- find both markers by ID
+    for i = 0, total - 1 do
+        local _, _, pos, _, name, id = EnumProjectMarkers2(0, i)
+        if id == id_in then
+            in_pos = pos
+            in_name = name
+        elseif id == id_out then
+            out_pos = pos
+            out_name = name
+        end
+    end
+
+    -- if missing → nothing to do
+    if not in_pos or not out_pos then return end
+
+    -- if reversed → FIX by swapping POSITIONS
+    if out_pos < in_pos then
+        -- delete old
+        DeleteProjectMarker(0, id_in, false)
+        DeleteProjectMarker(0, id_out, false)
+
+        -- re-add with POSITIONS SWAPPED
+        AddProjectMarker2(0, false, out_pos, 0, in_name,  id_in, 0)
+        AddProjectMarker2(0, false, in_pos, 0, out_name, id_out, 0)
+    end
 end
 
 ---------------------------------------------------------------------

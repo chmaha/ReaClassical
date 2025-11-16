@@ -27,8 +27,8 @@ local main, sync_based_on_workflow
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
+  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+  return
 end
 
 local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
@@ -41,19 +41,17 @@ end
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-      return
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    return
   end
   local message
   local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
   if mastering ~= "1" then
     PreventUIRefresh(1)
-    local save_view = NamedCommandLookup("_SWS_SAVEVIEW")
-    Main_OnCommand(save_view, 0)
     SetProjExtState(0, "ReaClassical", "MasteringModeSet", 1)
     sync_based_on_workflow(workflow)
-    local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
-    Main_OnCommand(restore_mastering_view, 0)
+    -- local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
+    -- Main_OnCommand(restore_mastering_view, 0)
     PreventUIRefresh(-1)
     message = "You are now in \"Mastering\" Mode. To leave, press Ctrl+M again.\n" ..
         "Any source groups are hidden and mixer tracks are now shown in the TCP for automation purposes.\n" ..
@@ -65,13 +63,10 @@ function main()
     SetProjExtState(0, "ReaClassical", "MasteringModeSet", 0)
     SetProjExtState(0, "ReaClassical", "AutomationModeSet", 0)
     Main_OnCommand(40879, 0) -- Global automation override: All automation in latch preview mode
-    local save_mastering_view = NamedCommandLookup("_WOL_SAVEVIEWS5")
-    Main_OnCommand(save_mastering_view, 0)
     sync_based_on_workflow(workflow)
-    local restore_view = NamedCommandLookup("_SWS_RESTOREVIEW")
-    Main_OnCommand(restore_view, 0)
     PreventUIRefresh(-1)
   end
+TrackList_AdjustWindows(false)
 end
 
 ---------------------------------------------------------------------

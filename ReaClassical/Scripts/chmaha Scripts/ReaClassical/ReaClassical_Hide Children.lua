@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main
+local main, collapse_folder
 
 ---------------------------------------------------------------------
 
@@ -50,10 +50,23 @@ function main()
     if mastering == 1 and special then
       Main_OnCommand(40889, 0) -- Envelope: Hide all envelopes for tracks
     else
-      local collapse = NamedCommandLookup("_SWS_COLLAPSE")
-      Main_OnCommand(collapse, 0)
+      collapse_folder()
     end
   end
+end
+
+---------------------------------------------------------------------
+
+function collapse_folder()
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
+            local folderDepth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if folderDepth == 1 then -- folder start
+                SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 2)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

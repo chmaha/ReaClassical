@@ -28,6 +28,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, get_reaper_version
+local marker_actions
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -37,8 +38,8 @@ end
 
 local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-    return
+  MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+  return
 end
 
 ---------------------------------------------------------------------
@@ -103,15 +104,7 @@ local old_width = win.width
 local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
 SetToggleCommandState(1, take_counter, 1)
 
-local red_ruler = NamedCommandLookup("_SWS_RECREDRULER")
-local red_ruler_state = GetToggleCommandState(red_ruler)
-if red_ruler_state == 1 then
-  Main_OnCommand(red_ruler, 0)
-end
-
-local marker_actions = NamedCommandLookup("_SWSMA_ENABLE")
-Main_OnCommand(marker_actions, 0)
-
+local marker_actions_running = false
 
 local session_dir = ""
 local session_suffix = ""
@@ -128,10 +121,6 @@ local start_time, end_time, duration
 local run_once = false
 
 local F9_command = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
--- local auto_group = NamedCommandLookup("_SWS_AWAUTOGROUPTOG")
--- local auto_group_state = GetToggleCommandState(auto_group)
--- if auto_group_state ~= 1 then Main_OnCommand(auto_group, 0) end
-
 
 ---------------------------------------------------------------------
 
@@ -186,6 +175,7 @@ function main()
         rec_name_set = false
       end
     elseif gfx.mouse_cap & 2 == 2 then
+      marker_actions_running = false
       laststate = nil
       session_text = session
       local ret, choices = GetUserInputs(
@@ -327,6 +317,7 @@ function main()
         local marker_name = F9_command ~= 0 and "!" .. F9_command or "!1013"
         local marker_id = F9_command ~= 0 and F9_command or 1013
         AddProjectMarker2(0, false, stop_pos, 0, marker_name, marker_id, 0)
+        marker_actions()
       end
       run_once = true
     end
@@ -464,6 +455,7 @@ function check_time()
         local marker_name = F9_command ~= 0 and "!" .. F9_command or "!1013"
         local marker_id = F9_command ~= 0 and F9_command or 1013
         AddProjectMarker2(0, false, stop_pos, 0, marker_name, marker_id, 0)
+        marker_actions()
       end
     end
     local cursor_pos = GetCursorPosition()
@@ -503,7 +495,7 @@ end
 ---------------------------------------------------------------------
 
 function seconds_to_hhmm(seconds)
-   local t = os.date("*t", seconds)
+  local t = os.date("*t", seconds)
   return string.format("%02d:%02d", t.hour, t.min)
 end
 
@@ -633,6 +625,82 @@ function draw(playstate)
     end
   end
   UpdateTimeline()
+end
+
+---------------------------------------------------------------------
+
+function marker_actions()
+  if marker_actions_running then return end   -- do not start twice
+  marker_actions_running = true
+
+  local markers = {}
+  local next_idx = 1
+  local tolerance = 0.05   -- seconds (50 ms)
+
+  -- Pre-scan markers once
+  local function scan_markers()
+    markers = {}
+    local num_markers, num_regions = CountProjectMarkers(0)
+    for i = 0, num_markers + num_regions - 1 do
+      local retval, isrgn, pos, rgnend, name, mark_idx = EnumProjectMarkers(i)
+      if retval and not isrgn and name:sub(1, 1) == "!" then
+        local cmd = tonumber(name:sub(2))
+        if cmd then
+          table.insert(markers, { pos = pos, cmd = cmd, mark_idx = mark_idx })
+        end
+      end
+    end
+    table.sort(markers, function(a, b) return a.pos < b.pos end)
+  end
+
+  scan_markers()   -- initial scan
+
+  local function reset_marker_index(play_pos)
+    for i, m in ipairs(markers) do
+      if m.pos >= play_pos then
+        next_idx = i
+        return
+      end
+    end
+    next_idx = 1
+  end
+
+  local function check_next_marker()
+    if not marker_actions_running then return end     -- allow external stop
+
+    local state = GetPlayState()
+
+    if state & 1 == 0 then
+      reset_marker_index(GetCursorPosition())
+    else
+      local play_pos = GetPlayPosition()
+      local target = markers[next_idx]
+
+      if target and play_pos >= target.pos - tolerance then
+        Main_OnCommand(target.cmd, 0)
+
+        if GetPlayState() & 1 == 0 then
+          marker_actions_running = false
+          return
+        end
+
+        next_idx = next_idx + 1
+        if next_idx > #markers then
+          next_idx = 1
+        end
+      end
+    end
+
+    defer(check_next_marker)
+  end
+
+  if #markers == 0 then
+    marker_actions_running = false
+    ShowMessageBox("No !<command_id> markers found in project", "Marker Trigger", 0)
+  else
+    reset_marker_index(GetCursorPosition())
+    check_next_marker()
+  end
 end
 
 ---------------------------------------------------------------------

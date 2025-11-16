@@ -51,17 +51,15 @@ function main()
   local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
   if automation ~= "1" then
     if mastering ~= "1" then
-      local save_view = NamedCommandLookup("_SWS_SAVEVIEW")
-      Main_OnCommand(save_view, 0)
       SetProjExtState(0, "ReaClassical", "MasteringModeSet", 1)
     end
 
     sync_based_on_workflow(workflow)
 
-    if mastering ~= "1" then
-      local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
-      Main_OnCommand(restore_mastering_view, 0) -- Restore only if mastering ~= "1"
-    end
+    -- if mastering ~= "1" then
+    --   local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
+    --   Main_OnCommand(restore_mastering_view, 0) -- Restore only if mastering ~= "1"
+    -- end
 
     PreventUIRefresh(-1)
     message = "You are now in \"latch preview\" automation mode (\"blue button\" mode)."

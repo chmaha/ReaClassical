@@ -23,6 +23,9 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, shift, item_group, prepare, empty_items_check
 local get_selected_media_item_at, count_selected_media_items
+local nudge_right, scroll_to_first_track
+local select_item_under_cursor_on_selected_track
+local select_children_of_selected_folders
 
 ---------------------------------------------------------------------
 
@@ -74,13 +77,12 @@ function main()
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     SetEditCurPos(cur_pos, 0, 0)
 
-    local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
-    Main_OnCommand(scroll_up, 0)
+    scroll_to_first_track()
 
     SetProjExtState(0, "ReaClassical Core", "RCCoreProject", "y")
     SetProjExtState(0, "ReaClassical Core", "PreparedTakes", "y")
 
-    reaper.Main_OnCommand(40310, 0) -- set ripple-per-track
+    Main_OnCommand(40310, 0) -- set ripple-per-track
 
     MB("Project takes have been prepared! " ..
         "You can run again if you import or record more material..."
@@ -96,8 +98,7 @@ end
 
 function shift()
     Main_OnCommand(40182, 0)       -- select all items
-    local nudge_right = NamedCommandLookup("_SWS_NUDGESAMPLERIGHT")
-    Main_OnCommand(nudge_right, 0) -- shift items by 1 sample to the right
+    nudge_right(1)
     Main_OnCommand(40289, 0)       -- unselect all items
 end
 
@@ -107,16 +108,14 @@ function item_group(string, group)
     if string == "horizontal" then
         Main_OnCommand(40296, 0) -- Track: Select all tracks
     else
-        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-        Main_OnCommand(select_children, 0) -- Select child tracks
+        select_children_of_selected_folders()
     end
 
     local selected = get_selected_media_item_at(0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
     SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
-    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
+    select_item_under_cursor_on_selected_track()
 
     local num_selected_items = count_selected_media_items()
     for i = 0, num_selected_items - 1 do
@@ -204,6 +203,107 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function nudge_right(nudgeSamples)
+    -- get project sample rate using GetSetProjectInfo
+    local sampleRate = GetSetProjectInfo(0, "PROJECT_SRATE", 0, false)
+
+    local nudgeAmount = nudgeSamples / sampleRate
+
+    local numTracks = CountTracks(0)
+    for i = 0, numTracks - 1 do
+        local track = GetTrack(0, i)
+        local itemCount = CountTrackMediaItems(track)
+        for j = 0, itemCount - 1 do
+            local item = GetTrackMediaItem(track, j)
+            if IsMediaItemSelected(item) then
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                SetMediaItemInfo_Value(item, "D_POSITION", pos + nudgeAmount)
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function scroll_to_first_track()
+  local track1 = GetTrack(0, 0)
+  if not track1 then return end
+
+  -- Save current selected tracks to restore later
+  local saved_sel = {}
+  local count_sel = CountSelectedTracks(0)
+  for i = 0, count_sel - 1 do
+    saved_sel[i+1] = GetSelectedTrack(0, i)
+  end
+
+  -- Select only Track 1
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  SetTrackSelected(track1, true)
+
+  -- Scroll Track 1 into view (vertically)
+  Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
+
+  -- Restore previous selection
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  for i, tr in ipairs(saved_sel) do
+    SetTrackSelected(tr, true)
+  end
+end
+
+---------------------------------------------------------------------
+
+function select_item_under_cursor_on_selected_track()
+  Main_OnCommand(40289, 0) -- Unselect all items
+
+  local curpos = GetCursorPosition()
+  local item_count = CountMediaItems(0)
+
+  for i = 0, item_count - 1 do
+    local item = GetMediaItem(0, i)
+    local track = GetMediaItem_Track(item)
+    local track_sel = IsTrackSelected(track)
+
+    if track_sel then
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_end = item_pos + item_len
+
+      if curpos >= item_pos and curpos <= item_end then
+        SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
+      end
+    end
+  end
+end
+
+---------------------------------------------------------------------
+
+function select_children_of_selected_folders()
+  local track_count = CountTracks(0)
+
+  for i = 0, track_count - 1 do
+    local tr = GetTrack(0, i)
+    if IsTrackSelected(tr) then
+      local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+      if depth == 1 then -- folder parent
+        local j = i + 1
+        while j < track_count do
+          local ch_tr = GetTrack(0, j)
+          SetTrackSelected(ch_tr, true) -- select child track
+
+          local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+          if ch_depth == -1 then
+            break -- end of folder children
+          end
+
+          j = j + 1
+        end
+      end
+    end
+  end
 end
 
 ---------------------------------------------------------------------

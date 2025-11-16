@@ -29,7 +29,7 @@ local correct_item_positions, folder_check, check_next_item_overlap
 local get_color_table, get_path, get_reaper_version
 local get_selected_media_item_at, count_selected_media_items
 local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-local win_state
+local win_state, scroll_to_first_track, select_next_item
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -183,14 +183,12 @@ function fadeStart(workflow)
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, false)
     SetProjExtState(0, "ReaClassical", "arrangestarttime", start_time)
     SetProjExtState(0, "ReaClassical", "arrangeendtime", end_time)
-    local select_1 = NamedCommandLookup("_SWS_SEL1") -- SWS: Select only track 1
-    Main_OnCommand(select_1, 0)
+    Main_OnCommand(40939, 0) -- select only track 1
     SetEditCurPos(item1_right_edge, false, false)
     view()
     zoom()
     SetMediaItemSelected(item1, true)
-    local select_next = NamedCommandLookup("_SWS_SELNEXTITEM2") -- SWS: Select next item, keeping current selection
-    Main_OnCommand(select_next, 0)
+    select_next_item(false)
     local item2 = get_selected_media_item_at(1)
     local item2_guid = BR_GetMediaItemGUID(item2)
     SetProjExtState(0, "ReaClassical", "SecondItemGUID", item2_guid)
@@ -241,25 +239,29 @@ end
 ---------------------------------------------------------------------
 
 function zoom()
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
-    SetEditCurPos(cur_pos - 3, false, false)
-    Main_OnCommand(40625, 0)             -- Time selection: Set start point
-    SetEditCurPos(cur_pos + 3, false, false)
-    Main_OnCommand(40626, 0)             -- Time selection: Set end point
-    local zoom_to_selection = NamedCommandLookup("_SWS_ZOOMSIT")
-    Main_OnCommand(zoom_to_selection, 0) -- SWS: Zoom to selected items or time selection
+    local cur_pos  = (GetPlayState() == 0)
+        and GetCursorPosition()
+        or GetPlayPosition()
+
+    local ts_start = math.max(0, cur_pos - 3)
+    local ts_end   = cur_pos + 3
+
+    SetEditCurPos(ts_start, false, false)
+    Main_OnCommand(40625, 0) -- Time selection: Set start point
+    SetEditCurPos(ts_end, false, false)
+    Main_OnCommand(40626, 0) -- Time selection: Set end point
+    GetSet_ArrangeView2(0, true, 0, 0, ts_start, ts_end)
     SetEditCurPos(cur_pos, false, false)
-    Main_OnCommand(1012, 0)              -- View: Zoom in horizontal
-    Main_OnCommand(40635, 0)             -- Time selection: Remove (unselect) time selection
+    Main_OnCommand(1012, 0)  -- View: Zoom in horizontal
+    Main_OnCommand(40635, 0) -- Time selection: Remove
 end
 
 ---------------------------------------------------------------------
 
 function view()
-    local track1 = NamedCommandLookup("_SWS_SEL1")
     local tog_state = GetToggleCommandState(fade_editor_toggle)
     local overlap_state = GetToggleCommandState(40507)
-    Main_OnCommand(track1, 0) -- select only track 1
+    Main_OnCommand(40939, 0) -- select only track 1
 
     local max_height = GetToggleCommandState(40113)
     if max_height ~= tog_state then
@@ -270,8 +272,7 @@ function view()
         Main_OnCommand(40507, 0) -- Options: Offset overlapping media items vertically
     end
 
-    local scroll_home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
-    Main_OnCommand(scroll_home, 0) -- XENAKIOS_TVPAGEHOME
+    scroll_to_first_track()
 end
 
 ---------------------------------------------------------------------
@@ -489,6 +490,63 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function scroll_to_first_track()
+  local track1 = GetTrack(0, 0)
+  if not track1 then return end
+
+  -- Save current selected tracks to restore later
+  local saved_sel = {}
+  local count_sel = CountSelectedTracks(0)
+  for i = 0, count_sel - 1 do
+    saved_sel[i+1] = GetSelectedTrack(0, i)
+  end
+
+  -- Select only Track 1
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  SetTrackSelected(track1, true)
+
+  -- Scroll Track 1 into view (vertically)
+  Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
+
+  -- Restore previous selection
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  for i, tr in ipairs(saved_sel) do
+    SetTrackSelected(tr, true)
+  end
+end
+
+---------------------------------------------------------------------
+
+function select_next_item(unselect_all_first)
+    local num_tracks = CountTracks(0)
+    local nextMi = nil
+
+    -- Scan tracks from last to first
+    for i = num_tracks - 1, 0, -1 do
+        local tr = GetTrack(0, i)
+        if IsTrackVisible(tr, false) then -- Visible in TCP/MCP
+            -- Scan items from last to first
+            local num_items = CountTrackMediaItems(tr)
+            for j = num_items - 1, 0, -1 do
+                local mi = GetTrackMediaItem(tr, j)
+                if GetMediaItemInfo_Value(mi, "B_UISEL") == 1 then
+                    if nextMi then
+                        if unselect_all_first then
+                            Main_OnCommand(40289, 0) -- Unselect all items
+                        end
+                        SetMediaItemSelected(nextMi, true)
+                        UpdateArrange()
+                        return
+                    end
+                end
+                nextMi = mi
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

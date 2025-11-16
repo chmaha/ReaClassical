@@ -27,6 +27,8 @@ local load_prefs, save_prefs, get_color_table, get_path
 local extract_take_number, check_parent_track
 local get_selected_media_item_at, count_selected_media_items
 local clear_all_rec_armed_except_live
+local select_children_of_selected_folders
+local unselect_folder_children, set_rec_arm_for_selected_tracks
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -83,8 +85,7 @@ function main()
         if state ~= 1 then
             Main_OnCommand(take_counter, 0)
         end
-        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-        Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+        select_children_of_selected_folders()
         mixer()
         local selected = solo()
         if not selected then
@@ -92,10 +93,8 @@ function main()
             return
         end
         clear_all_rec_armed_except_live()
-        local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-        Main_OnCommand(arm, 0)               -- Xenakios/SWS: Set selected tracks record armed
-        local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-        Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+        set_rec_arm_for_selected_tracks(1)
+        unselect_folder_children()
 
         if rec_arm ~= 1 then
             TrackList_AdjustWindows(false)
@@ -134,15 +133,13 @@ function main()
         Main_OnCommand(40289, 0) -- Unselect all items
 
         if workflow == "Vertical" then
-            local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-            Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+            select_children_of_selected_folders()
             local ret, cursor_pos = load_prefs()
             if ret then
                 SetEditCurPos(cursor_pos, true, false)
                 SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", "")
             end
-            local unarm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECUNARMED")
-            Main_OnCommand(unarm, 0) -- Xenakios/SWS: Set selected tracks record unarmed
+            set_rec_arm_for_selected_tracks(0)
 
             local num_tracks = CountTracks(0)
             local selected_track = GetSelectedTrack(0, 0)
@@ -153,13 +150,11 @@ function main()
                 if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
                     Main_OnCommand(40297, 0)           -- deselect all tracks
                     SetTrackSelected(track, true)
-                    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+                    select_children_of_selected_folders()
                     solo()
-                    local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-                    Main_OnCommand(arm, 0) -- Xenakios/SWS: Set selected tracks record armed
+                    set_rec_arm_for_selected_tracks(1)
                     mixer()
-                    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-                    Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+                    unselect_folder_children()
                     Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
                     bool = true
                     TrackList_AdjustWindows(false)
@@ -169,12 +164,10 @@ function main()
             if bool == false then
                 local duplicate = NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
                 Main_OnCommand(duplicate, 0)
-                Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
-                local arm = NamedCommandLookup("_XENAKIOS_SELTRAX_RECARMED")
-                Main_OnCommand(arm, 0)             -- Xenakios/SWS: Set selected tracks record armed
+                select_children_of_selected_folders()
+                set_rec_arm_for_selected_tracks(1)
                 solo()
-                local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-                Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+                unselect_folder_children()
                 Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
             end
         end
@@ -391,6 +384,80 @@ function clear_all_rec_armed_except_live()
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function select_children_of_selected_folders()
+  local track_count = CountTracks(0)
+
+  for i = 0, track_count - 1 do
+    local tr = GetTrack(0, i)
+    if IsTrackSelected(tr) then
+      local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+      if depth == 1 then -- folder parent
+        local j = i + 1
+        while j < track_count do
+          local ch_tr = GetTrack(0, j)
+          SetTrackSelected(ch_tr, true) -- select child track
+
+          local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+          if ch_depth == -1 then
+            break -- end of folder children
+          end
+
+          j = j + 1
+        end
+      end
+    end
+  end
+end
+
+---------------------------------------------------------------------
+
+function unselect_folder_children()
+    local num_tracks = CountTracks(0)
+    local depth = 0
+    local unselect_mode = false
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folder_change = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if IsTrackSelected(tr) and folder_change == 1 then
+            -- We found a selected folder parent
+            unselect_mode = true
+        elseif unselect_mode then
+            SetTrackSelected(tr, false)
+        end
+
+        -- Adjust folder depth
+        if folder_change > 0 then
+            depth = depth + folder_change
+        elseif folder_change < 0 then
+            depth = depth + folder_change
+            if depth <= 0 then
+                unselect_mode = false
+                depth = 0
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function set_rec_arm_for_selected_tracks(state)
+    -- state: 0 = disarm, 1 = arm
+    local num_tracks = CountTracks(0)
+
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if IsTrackSelected(track) then
+            SetMediaTrackInfo_Value(track, "I_RECARM", state)
+        end
+    end
+
+    UpdateArrange()
 end
 
 ---------------------------------------------------------------------

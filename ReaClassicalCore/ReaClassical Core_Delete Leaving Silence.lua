@@ -21,14 +21,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, select_matching_folder
+local main, source_markers, select_matching_folder, adaptive_delete
 
 ---------------------------------------------------------------------
 
 local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
 if prepared == "" then
     MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
-    "ReaClassical Core Error", 0)
+        "ReaClassical Core Error", 0)
     return
 end
 
@@ -42,8 +42,7 @@ function main()
     end
 
     if source_markers() == 2 then
-        local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
-        Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
+        SetCursorContext(1, nil)
         Main_OnCommand(40310, 0) -- Set ripple per-track
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         GoToMarker(0, 998, false)
@@ -54,8 +53,7 @@ function main()
         Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
         Main_OnCommand(41990, 0)  -- Toggle ripple per-track (off)
-        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- XENAKIOS_TSADEL
+        adaptive_delete()
         Main_OnCommand(40630, 0)  -- Go to start of time selection
         Main_OnCommand(40020, 0)  -- Time Selection: Remove time selection and loop point selection
         DeleteProjectMarker(NULL, 998, false)
@@ -99,6 +97,54 @@ function select_matching_folder()
             break
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function adaptive_delete()
+  local sel_items = {}
+  local item_count = CountSelectedMediaItems(0)
+  for i = 0, item_count - 1 do
+    sel_items[#sel_items+1] = GetSelectedMediaItem(0, i)
+  end
+
+  local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
+  local items_in_time_sel = {}
+
+  if time_sel_end - time_sel_start > 0 then
+    for _, item in ipairs(sel_items) do
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
+
+      if item_sel then
+        local intersectmatches = 0
+        -- conditions copied from original C++ logic
+        if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
+          intersectmatches = intersectmatches + 1
+        end
+        if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
+          intersectmatches = intersectmatches + 1
+        end
+        if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
+          intersectmatches = intersectmatches + 1
+        end
+        if time_sel_end >= item_pos and time_sel_start < item_pos then
+          intersectmatches = intersectmatches + 1
+        end
+
+        if intersectmatches > 0 then
+          table.insert(items_in_time_sel, item)
+        end
+      end
+    end
+  end
+
+  if #items_in_time_sel > 0 then
+    Main_OnCommand(40312, 0) -- Delete items in time selection
+  else
+    Main_OnCommand(40006, 0) -- Delete items or time selection contents
+  end
 end
 
 ---------------------------------------------------------------------

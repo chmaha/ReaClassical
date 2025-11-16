@@ -33,6 +33,8 @@ local save_track_settings, reset_track_settings, write_to_mixer
 local rearrange_tracks, reset_mixer_order, copy_track_names_from_dest
 local process_dest, check_hidden_track_items, get_whole_number_input
 local set_recording_to_primary_and_secondary, reorder_special_tracks
+local select_children_of_selected_folders, unselect_folder_children
+local select_next_folder, make_folder, select_all_parents
 
 ---------------------------------------------------------------------
 
@@ -59,7 +61,6 @@ function main()
 
     local num_of_tracks = CountTracks(0)
     local rcmaster_exists
-    local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
         local is_empty = true
@@ -119,7 +120,7 @@ function main()
         end
         reorder_special_tracks()
         local is_empty = false
-        Main_OnCommand(focus, 0)
+        SetCursorContext(1, nil)
         remove_track_groups()
 
         rcmaster_exists = special_check()
@@ -226,8 +227,7 @@ function create_destination_group(num)
         local track = GetTrack(0, i)
         SetTrackSelected(track, 1)
     end
-    local make_folder = NamedCommandLookup("_SWS_MAKEFOLDER")
-    Main_OnCommand(make_folder, 0) -- make folder from tracks
+    make_folder()
     for i = 0, num - 1, 1 do
         local track = GetTrack(0, i)
         SetTrackSelected(track, 0)
@@ -358,47 +358,42 @@ function groupings_mcp()
     media_razor_group()
     SetOnlyTrackSelected(first_track)
     solo()
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0)   -- SWS: Select children of selected folder track(s)
-    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-    Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+    select_children_of_selected_folders()
+    unselect_folder_children()
 end
 
 ---------------------------------------------------------------------
 
 function media_razor_group()
-    local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
-    Main_OnCommand(select_all_folders, 0) -- select all folders
+    select_all_parents()
     local num_of_folders = CountSelectedTracks(0)
     local first_track = GetTrack(0, 0)
     SetOnlyTrackSelected(first_track)
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
     if num_of_folders > 1 then
         for _ = 1, num_of_folders, 1 do
-            Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-            Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group
-            local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
-            Main_OnCommand(next_folder, 0)     -- select next folder
+            select_children_of_selected_folders()
+            Main_OnCommand(42578, 0) -- Track: Create rcmaster_exists track media/razor editing group
+            ShowConsoleMsg("here!")
+            select_next_folder()
         end
     else
-        Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-        Main_OnCommand(42578, 0)           -- Track: Create rcmaster_exists track media/razor editing group
+        select_children_of_selected_folders()
+        Main_OnCommand(42578, 0) -- Track: Create rcmaster_exists track media/razor editing group
     end
-    Main_OnCommand(40296, 0)               -- Track: Select all tracks
+    Main_OnCommand(40296, 0)     -- Track: Select all tracks
 
-    Main_OnCommand(40297, 0)               -- Track: Unselect (clear selection of) all tracks
-    Main_OnCommand(40939, 0)               -- Track: Select track 01
-    Main_OnCommand(select_children, 0)     -- SWS: Select children of selected folder track(s)
+    Main_OnCommand(40297, 0)     -- Track: Unselect (clear selection of) all tracks
+    Main_OnCommand(40939, 0)     -- Track: Select track 01
+    select_children_of_selected_folders()
 
     solo()
-    Main_OnCommand(select_children, 0) -- SWS: Select children of selected folder track(s)
+    select_children_of_selected_folders()
     local tracks_per_group = CountSelectedTracks(0)
     mixer()
-    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-    Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+    unselect_folder_children()
 
-    Main_OnCommand(40297, 0)             -- Track: Unselect (clear selection of) all tracks
-    Main_OnCommand(40939, 0)             -- select track 01
+    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+    Main_OnCommand(40939, 0) -- select track 01
     return tracks_per_group
 end
 
@@ -406,8 +401,30 @@ end
 
 function remove_track_groups()
     Main_OnCommand(40296, 0) -- select all tracks
-    local remove_grouping = NamedCommandLookup("_S&M_REMOVE_TR_GRP")
-    Main_OnCommand(remove_grouping, 0)
+
+    local function remove_track_grouping(track)
+        local changed = false
+        local _, chunk = GetTrackStateChunk(track, "", false)
+
+        -- Remove GROUP_FLAGS and GROUP_FLAGS_HIGH lines entirely
+        local new_chunk, subs = chunk:gsub("\nGROUP_FLAGS[^\n]*", "")
+        if subs > 0 then changed = true end
+        new_chunk, subs = new_chunk:gsub("\nGROUP_FLAGS_HIGH[^\n]*", "")
+        if subs > 0 then changed = true end
+
+        if changed then
+            SetTrackStateChunk(track, new_chunk, false)
+        end
+
+        return changed
+    end
+
+    for i = -1, CountTracks(0) - 1 do
+        local track = (i == -1) and GetMasterTrack(0) or GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
+            remove_track_grouping(track)
+        end
+    end
     Main_OnCommand(40297, 0) -- unselect all tracks
 end
 
@@ -1087,6 +1104,150 @@ function reorder_special_tracks()
     for _, t in ipairs(ref_tracks) do SetTrackSelected(t, true) end
     ReorderSelectedTracks(CountTracks(0), 0)
     Main_OnCommand(40297, 0)
+end
+
+---------------------------------------------------------------------
+
+function select_children_of_selected_folders()
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local tr = GetTrack(0, i)
+        if IsTrackSelected(tr) then
+            local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+            if depth == 1 then -- folder parent
+                local j = i + 1
+                while j < track_count do
+                    local ch_tr = GetTrack(0, j)
+                    SetTrackSelected(ch_tr, true) -- select child track
+
+                    local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+                    if ch_depth == -1 then
+                        break -- end of folder children
+                    end
+
+                    j = j + 1
+                end
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function unselect_folder_children()
+    local num_tracks = CountTracks(0)
+    local depth = 0
+    local unselect_mode = false
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folder_change = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if IsTrackSelected(tr) and folder_change == 1 then
+            -- We found a selected folder parent
+            unselect_mode = true
+        elseif unselect_mode then
+            SetTrackSelected(tr, false)
+        end
+
+        -- Adjust folder depth
+        if folder_change > 0 then
+            depth = depth + folder_change
+        elseif folder_change < 0 then
+            depth = depth + folder_change
+            if depth <= 0 then
+                unselect_mode = false
+                depth = 0
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_next_folder()
+    local num_tracks = CountTracks(0)
+    local depth = 0
+    local target_depth = -1
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folder_change = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if target_depth ~= -1 then
+            -- We're in search mode for the next folder at the same depth
+            if depth == target_depth and folder_change == 1 then
+                Main_OnCommand(40297, 0) -- Unselect all
+                SetTrackSelected(tr, true)
+                return
+            elseif depth < target_depth then
+                -- Gone out of that folder level, stop searching
+                target_depth = -1
+            end
+        else
+            -- Look for the selected folder
+            if IsTrackSelected(tr) and folder_change == 1 then
+                target_depth = depth
+            end
+        end
+
+        -- Update depth for next iteration
+        depth = depth + folder_change
+    end
+end
+
+---------------------------------------------------------------------
+
+function make_folder()
+    local numTracks = CountTracks(0)
+    local i = 0
+
+    while i < numTracks - 1 do
+        local tr = GetTrack(0, i)
+        local nextTr = GetTrack(0, i + 1)
+
+        if GetMediaTrackInfo_Value(tr, "I_SELECTED") == 1
+            and GetMediaTrackInfo_Value(nextTr, "I_SELECTED") == 1 then
+            -- Set first track as folder start
+            local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH") + 1
+            SetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH", depth)
+
+            -- Move through consecutive selected tracks
+            repeat
+                i = i + 1
+                tr = nextTr
+                if i + 1 < numTracks then
+                    nextTr = GetTrack(0, i + 1)
+                else
+                    nextTr = nil
+                end
+            until not nextTr or GetMediaTrackInfo_Value(nextTr, "I_SELECTED") ~= 1
+
+            -- Set last track as folder end
+            depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH") - 1
+            SetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH", depth)
+        else
+            i = i + 1
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_all_parents()
+    local num_tracks = CountTracks(0)
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folderdepth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if folderdepth == 1 then
+            SetMediaTrackInfo_Value(tr, "I_SELECTED", 1)
+        else
+            SetMediaTrackInfo_Value(tr, "I_SELECTED", 0)
+        end
+    end
 end
 
 ---------------------------------------------------------------------

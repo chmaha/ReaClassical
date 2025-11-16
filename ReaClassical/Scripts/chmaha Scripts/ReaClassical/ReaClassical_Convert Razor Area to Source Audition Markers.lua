@@ -211,17 +211,17 @@ end
 ---------------------------------------------------------------------
 
 function SelectFirstRazorEditTrack()
-    local trackCount = reaper.CountTracks(0)
+    local trackCount = CountTracks(0)
 
     -- deselect all tracks
-    reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
+    Main_OnCommand(40297, 0) -- Unselect all tracks
 
     for i = 0, trackCount - 1 do
-        local track = reaper.GetTrack(0, i)
-        local ok, area = reaper.GetSetMediaTrackInfo_String(track, "P_RAZOREDITS", "", false)
+        local track = GetTrack(0, i)
+        local ok, area = GetSetMediaTrackInfo_String(track, "P_RAZOREDITS", "", false)
         if ok and area ~= "" then
             -- select this track
-            reaper.SetTrackSelected(track, true)
+            SetTrackSelected(track, true)
             return -- stop after the first one
         end
     end

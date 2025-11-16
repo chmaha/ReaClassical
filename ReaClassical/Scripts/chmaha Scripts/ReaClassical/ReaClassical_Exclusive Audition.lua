@@ -24,7 +24,8 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check
 local mixer, on_stop, get_color_table, get_path
-local get_selected_media_item_at
+local get_selected_media_item_at, unselect_folder_children
+local select_next_item, select_prev_item
 
 ---------------------------------------------------------------------
 
@@ -45,8 +46,7 @@ function main()
             SetOnlyTrackSelected(track)
             solo()
             mixer()
-            local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-            Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+            unselect_folder_children()
             SetEditCurPos(pos, 0, 0)
             OnPlayButton()
             Undo_EndBlock('Audition', 0)
@@ -61,7 +61,7 @@ function main()
         local hover_item = BR_GetMouseCursorContext_Item()
         if hover_item ~= nil then
             SetMediaItemSelected(hover_item, 1)
-            reaper.UpdateArrange()
+            UpdateArrange()
         end
         local item_one = get_selected_media_item_at(0)
         local item_two = get_selected_media_item_at(1)
@@ -72,12 +72,10 @@ function main()
             local color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
             if color == 20967993 then
                 item_two = item_one
-                local prev_item = NamedCommandLookup("_SWS_SELPREVITEM")
-                Main_OnCommand(prev_item, 0)
+                select_prev_item(true)
                 item_one = get_selected_media_item_at(0)
             else
-                local next_item = NamedCommandLookup("_SWS_SELNEXTITEM")
-                Main_OnCommand(next_item, 0)
+                select_next_item(true)
                 item_two = get_selected_media_item_at(0)
             end
         end
@@ -334,6 +332,97 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function unselect_folder_children()
+    local num_tracks = CountTracks(0)
+    local depth = 0
+    local unselect_mode = false
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folder_change = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if IsTrackSelected(tr) and folder_change == 1 then
+            -- We found a selected folder parent
+            unselect_mode = true
+        elseif unselect_mode then
+            SetTrackSelected(tr, false)
+        end
+
+        -- Adjust folder depth
+        if folder_change > 0 then
+            depth = depth + folder_change
+        elseif folder_change < 0 then
+            depth = depth + folder_change
+            if depth <= 0 then
+                unselect_mode = false
+                depth = 0
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_next_item(unselect_all_first)
+    local num_tracks = CountTracks(0)
+    local nextMi = nil
+
+    -- Scan tracks from last to first
+    for i = num_tracks - 1, 0, -1 do
+        local tr = GetTrack(0, i)
+        if IsTrackVisible(tr, false) then -- Visible in TCP/MCP
+            -- Scan items from last to first
+            local num_items = CountTrackMediaItems(tr)
+            for j = num_items - 1, 0, -1 do
+                local mi = GetTrackMediaItem(tr, j)
+                if GetMediaItemInfo_Value(mi, "B_UISEL") == 1 then
+                    if nextMi then
+                        if unselect_all_first then
+                            Main_OnCommand(40289, 0) -- Unselect all items
+                        end
+                        SetMediaItemSelected(nextMi, true)
+                        UpdateArrange()
+                        return
+                    end
+                end
+                nextMi = mi
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_prev_item(unselect_all_first)
+    local num_tracks = CountTracks(0)
+    local prevMi = nil
+
+    -- Scan tracks from first to last (forward)
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        if IsTrackVisible(tr, false) then -- Visible in TCP/MCP
+            -- Scan items from first to last
+            local num_items = CountTrackMediaItems(tr)
+            for j = 0, num_items - 1 do
+                local mi = GetTrackMediaItem(tr, j)
+                if GetMediaItemInfo_Value(mi, "B_UISEL") == 1 then
+                    if prevMi then
+                        if unselect_all_first then
+                            Main_OnCommand(40289, 0) -- Unselect all items
+                        end
+                        SetMediaItemSelected(prevMi, true)
+                        UpdateArrange()
+                        return
+                    end
+                end
+                prevMi = mi
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

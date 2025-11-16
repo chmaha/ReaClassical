@@ -26,7 +26,7 @@ local get_track_length, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up
 local ripple_lock_mode, return_xfade_length, xfade
 local get_first_last_items, mark_as_edit
-local move_to_project_tab
+local move_to_project_tab, adaptive_delete, select_item_under_cursor_on_selected_track
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 
 ---------------------------------------------------------------------
@@ -164,10 +164,8 @@ function main()
             Main_OnCommand(40310, 0) -- Set ripple-per-track
         end
 
-        local delete = NamedCommandLookup("_XENAKIOS_TSADEL")
-        Main_OnCommand(delete, 0) -- Adaptive Delete
-        local paste = NamedCommandLookup("_SWS_AWPASTE")
-        Main_OnCommand(paste, 0)  -- SWS_AWPASTE
+        adaptive_delete()
+        Main_OnCommand(42398, 0)  -- paste
         mark_as_edit()
         create_crossfades()
         clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
@@ -319,8 +317,7 @@ end
 
 function copy_source()
     local is_selected = true
-    local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
-    Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
+    SetCursorContext(1, nil)
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
@@ -360,8 +357,7 @@ function split_at_dest_in()
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(40939, 0) -- Track: Select track 01
     GoToMarker(0, 996, false)
-    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    select_item_under_cursor_on_selected_track()
     Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
     local selected_items = count_selected_media_items()
     Main_OnCommand(40912, 0)        -- Options: Toggle auto-crossfade on split (OFF)
@@ -391,8 +387,7 @@ function create_crossfades()
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
     MoveEditCursor(0.001, false)
-    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0)
+    select_item_under_cursor_on_selected_track()
     if count_selected_media_items() == 0 then return end
     MoveEditCursor(-0.001, false)
     MoveEditCursor(-xfade_len, false)
@@ -465,8 +460,7 @@ end
 ---------------------------------------------------------------------
 
 function xfade(xfade_len)
-    local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    select_item_under_cursor_on_selected_track()
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(40625, 0)        -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
@@ -474,7 +468,7 @@ function xfade(xfade_len)
     Main_OnCommand(40916, 0)        -- Item: Crossfade items within time selection
     Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
     MoveEditCursor(0.001, false)
-    Main_OnCommand(select_items, 0)
+    select_item_under_cursor_on_selected_track()
     MoveEditCursor(-0.001, false)
 end
 
@@ -522,7 +516,7 @@ end
 function check_overlapping_items()
     local track = GetSelectedTrack(0, 0)
     if not track then
-        ShowMessageBox("No track selected!", "Error", 0)
+        MB("No track selected!", "Error", 0)
         return
     end
 
@@ -586,6 +580,79 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function adaptive_delete()
+  local sel_items = {}
+  local item_count = CountSelectedMediaItems(0)
+  for i = 0, item_count - 1 do
+    sel_items[#sel_items+1] = GetSelectedMediaItem(0, i)
+  end
+
+  local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
+  local items_in_time_sel = {}
+
+  if time_sel_end - time_sel_start > 0 then
+    for _, item in ipairs(sel_items) do
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
+
+      if item_sel then
+        local intersectmatches = 0
+        -- conditions copied from original C++ logic
+        if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
+          intersectmatches = intersectmatches + 1
+        end
+        if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
+          intersectmatches = intersectmatches + 1
+        end
+        if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
+          intersectmatches = intersectmatches + 1
+        end
+        if time_sel_end >= item_pos and time_sel_start < item_pos then
+          intersectmatches = intersectmatches + 1
+        end
+
+        if intersectmatches > 0 then
+          table.insert(items_in_time_sel, item)
+        end
+      end
+    end
+  end
+
+  if #items_in_time_sel > 0 then
+    Main_OnCommand(40312, 0) -- Delete items in time selection
+  else
+    Main_OnCommand(40006, 0) -- Delete items or time selection contents
+  end
+end
+
+---------------------------------------------------------------------
+
+function select_item_under_cursor_on_selected_track()
+  Main_OnCommand(40289, 0) -- Unselect all items
+
+  local curpos = GetCursorPosition()
+  local item_count = CountMediaItems(0)
+
+  for i = 0, item_count - 1 do
+    local item = GetMediaItem(0, i)
+    local track = GetMediaItem_Track(item)
+    local track_sel = IsTrackSelected(track)
+
+    if track_sel then
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_end = item_pos + item_len
+
+      if curpos >= item_pos and curpos <= item_end then
+        SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
+      end
+    end
+  end
 end
 
 ---------------------------------------------------------------------

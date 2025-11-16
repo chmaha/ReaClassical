@@ -22,8 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_color_table, get_path
-local get_selected_media_item_at
+local main, get_color_table, get_path, select_prev_item
+local get_selected_media_item_at, select_next_item
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -61,12 +61,10 @@ function main()
         color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
         if color == colors.xfade_green then
             item_two = item_one
-            prev_item = NamedCommandLookup("_SWS_SELPREVITEM")
-            Main_OnCommand(prev_item, 0)
+            select_prev_item(true)
             item_one = get_selected_media_item_at(0)
         else
-            next_item = NamedCommandLookup("_SWS_SELNEXTITEM")
-            Main_OnCommand(next_item, 0)
+            select_next_item(true)
             item_two = get_selected_media_item_at(0)
         end
     end
@@ -150,6 +148,66 @@ function get_selected_media_item_at(index)
     return nil
 end
 
+
+---------------------------------------------------------------------
+
+function select_next_item(unselect_all_first)
+    local num_tracks = CountTracks(0)
+    local nextMi = nil
+
+    -- Scan tracks from last to first
+    for i = num_tracks - 1, 0, -1 do
+        local tr = GetTrack(0, i)
+        if IsTrackVisible(tr, false) then -- Visible in TCP/MCP
+            -- Scan items from last to first
+            local num_items = CountTrackMediaItems(tr)
+            for j = num_items - 1, 0, -1 do
+                local mi = GetTrackMediaItem(tr, j)
+                if GetMediaItemInfo_Value(mi, "B_UISEL") == 1 then
+                    if nextMi then
+                        if unselect_all_first then
+                            Main_OnCommand(40289, 0) -- Unselect all items
+                        end
+                        SetMediaItemSelected(nextMi, true)
+                        UpdateArrange()
+                        return
+                    end
+                end
+                nextMi = mi
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_prev_item(unselect_all_first)
+    local num_tracks = CountTracks(0)
+    local prevMi = nil
+
+    -- Scan tracks from first to last (forward)
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        if IsTrackVisible(tr, false) then -- Visible in TCP/MCP
+            -- Scan items from first to last
+            local num_items = CountTrackMediaItems(tr)
+            for j = 0, num_items - 1 do
+                local mi = GetTrackMediaItem(tr, j)
+                if GetMediaItemInfo_Value(mi, "B_UISEL") == 1 then
+                    if prevMi then
+                        if unselect_all_first then
+                            Main_OnCommand(40289, 0) -- Unselect all items
+                        end
+                        SetMediaItemSelected(prevMi, true)
+                        UpdateArrange()
+                        return
+                    end
+                end
+                prevMi = mi
+            end
+        end
+    end
+end
 
 ---------------------------------------------------------------------
 

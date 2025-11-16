@@ -22,7 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, solo, trackname_check
+local main, solo, trackname_check, select_children_of_selected_folders
+local unselect_folder_children, delete_items
 
 ---------------------------------------------------------------------
 
@@ -71,14 +72,11 @@ function main()
     end
 
     Main_OnCommand(40340, 0)
-    Main_OnCommand(40062, 0)           -- Duplicate track
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- SWS_SELCHILDREN2
-    Main_OnCommand(40421, 0)           -- Item: Select all items in track
-    local delete_items = NamedCommandLookup("_SWS_DELALLITEMS")
-    Main_OnCommand(delete_items, 0)
-    local unselect_children = NamedCommandLookup("_SWS_UNSELCHILDREN")
-    Main_OnCommand(unselect_children, 0) -- SWS: Unselect children of selected folder track(s)
+    Main_OnCommand(40062, 0) -- Duplicate track
+    select_children_of_selected_folders()
+    Main_OnCommand(40421, 0) -- Item: Select all items in track
+    delete_items()
+    unselect_folder_children()
 
     local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
     Main_OnCommand(sync, 0)
@@ -167,6 +165,79 @@ end
 function trackname_check(track, string)
     local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, string)
+end
+
+---------------------------------------------------------------------
+
+function select_children_of_selected_folders()
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local tr = GetTrack(0, i)
+        if IsTrackSelected(tr) then
+            local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+            if depth == 1 then -- folder parent
+                local j = i + 1
+                while j < track_count do
+                    local ch_tr = GetTrack(0, j)
+                    SetTrackSelected(ch_tr, true) -- select child track
+
+                    local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+                    if ch_depth == -1 then
+                        break -- end of folder children
+                    end
+
+                    j = j + 1
+                end
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function unselect_folder_children()
+    local num_tracks = CountTracks(0)
+    local depth = 0
+    local unselect_mode = false
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folder_change = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if IsTrackSelected(tr) and folder_change == 1 then
+            -- We found a selected folder parent
+            unselect_mode = true
+        elseif unselect_mode then
+            SetTrackSelected(tr, false)
+        end
+
+        -- Adjust folder depth
+        if folder_change > 0 then
+            depth = depth + folder_change
+        elseif folder_change < 0 then
+            depth = depth + folder_change
+            if depth <= 0 then
+                unselect_mode = false
+                depth = 0
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function delete_items()
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
+            -- Delete items from this track until none remain
+            while CountTrackMediaItems(track) > 0 do
+                local item = GetTrackMediaItem(track, 0)
+                DeleteTrackMediaItem(track, item)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

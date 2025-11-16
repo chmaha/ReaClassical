@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, folder_check, show_track_name_dialog, add_rcmaster
 local create_mixer_table, check_channel_count
 local get_selected_media_item_at, count_selected_media_items
+local collapse_folder, fold_small
 ---------------------------------------------------------------------
 
 function main()
@@ -145,14 +146,12 @@ function main()
         end
     end
 
-    Main_OnCommand(40769, 0)    -- unselect all items
+    Main_OnCommand(40769, 0) -- unselect all items
     PreventUIRefresh(1)
-    Main_OnCommand(40296, 0)    -- select all tracks
-    local collapse = NamedCommandLookup("_SWS_COLLAPSE")
-    Main_OnCommand(collapse, 0) -- collapse all tracks
-    Main_OnCommand(40939, 0)    -- select track 1
-    local show = NamedCommandLookup("_SWS_FOLDSMALL")
-    Main_OnCommand(show, 0)     -- show child tracks
+    Main_OnCommand(40296, 0) -- select all tracks
+    collapse_folder()
+    Main_OnCommand(40939, 0) -- select track 1
+    fold_small()
 
     add_rcmaster()
     local updated_folders = folder_check()
@@ -341,6 +340,33 @@ function get_selected_media_item_at(index)
     return nil
 end
 
+---------------------------------------------------------------------
+
+function collapse_folder()
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
+            local folderDepth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if folderDepth == 1 then -- folder start
+                SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 2)
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function fold_small()
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
+            local folderDepth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if folderDepth == 1 then -- folder start
+                SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 1)
+            end
+        end
+    end
+end
 
 ---------------------------------------------------------------------
 

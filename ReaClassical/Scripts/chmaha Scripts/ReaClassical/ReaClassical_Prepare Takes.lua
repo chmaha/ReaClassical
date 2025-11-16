@@ -26,8 +26,10 @@ local main, shift, color, vertical_razor, group_items
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, get_selected_media_item_at, count_selected_media_items
-local delete_empty_items, pastel_color
-local color_group_items, color_folder_children
+local delete_empty_items, pastel_color, nudge_right
+local color_group_items, color_folder_children, scroll_to_first_track
+local select_children_of_selected_folders, select_next_folder
+local select_all_parents, select_item_under_cursor_on_selected_track
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -109,8 +111,7 @@ function main()
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
     SetEditCurPos(cur_pos, 0, 0)
 
-    local scroll_up = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
-    Main_OnCommand(scroll_up, 0)
+    scroll_to_first_track()
 
     if num_pre_selected > 0 then
         Main_OnCommand(40297, 0) --unselect_all
@@ -137,10 +138,9 @@ end
 ---------------------------------------------------------------------
 
 function shift()
-    Main_OnCommand(40182, 0)       -- select all items
-    local nudge_right = NamedCommandLookup("_SWS_NUDGESAMPLERIGHT")
-    Main_OnCommand(nudge_right, 0) -- shift items by 1 sample to the right
-    Main_OnCommand(40289, 0)       -- unselect all items
+    Main_OnCommand(40182, 0) -- select all items
+    nudge_right(1)
+    Main_OnCommand(40289, 0) -- unselect all items
 end
 
 ---------------------------------------------------------------------
@@ -320,8 +320,7 @@ end
 
 function vertical_razor()
     Main_OnCommand(40042, 0)           -- Transport: Go to start of project
-    local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-    Main_OnCommand(select_children, 0) -- Select child tracks
+    select_children_of_selected_folders()
     Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
     Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
     Main_OnCommand(40421, 0)           -- Item: Select all items in trac
@@ -333,16 +332,14 @@ function group_items(string, group)
     if string == "horizontal" then
         Main_OnCommand(40296, 0) -- Track: Select all tracks
     else
-        local select_children = NamedCommandLookup("_SWS_SELCHILDREN2")
-        Main_OnCommand(select_children, 0) -- Select child tracks
+        select_children_of_selected_folders()
     end
 
     local selected = get_selected_media_item_at(0)
     local start = GetMediaItemInfo_Value(selected, "D_POSITION")
     local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
     SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
-    local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_under, 0)                   -- XENAKIOS_SELITEMSUNDEDCURSELTX
+    select_item_under_cursor_on_selected_track()
 
     local num_selected_items = count_selected_media_items()
     for i = 0, num_selected_items - 1 do
@@ -366,8 +363,7 @@ function vertical_group(length, group)
         local start = GetMediaItemInfo_Value(selected, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(selected, "D_LENGTH")
         SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
-        local select_under = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-        Main_OnCommand(select_under, 0)                        -- XENAKIOS_SELITEMSUNDEDCURSELTX
+        select_item_under_cursor_on_selected_track()
 
         local num_selected_items = count_selected_media_items()
         for i = 0, num_selected_items - 1 do
@@ -419,8 +415,7 @@ end
 ---------------------------------------------------------------------
 
 function vertical()
-    local select_all_folders = NamedCommandLookup("_SWS_SELALLPARENTS")
-    Main_OnCommand(select_all_folders, 0) -- select all folders
+    select_all_parents()
     local num_of_folders = CountSelectedTracks(0)
     local length = GetProjectLength(0)
     local first_track = GetTrack(0, 0)
@@ -440,16 +435,15 @@ function vertical()
     until IsMediaItemSelected(new_item) == true
 
     DeleteTrackMediaItem(first_track, new_item)
-    local next_folder = NamedCommandLookup("_SWS_SELNEXTFOLDER")
     local start = 2
-    Main_OnCommand(next_folder, 0) -- select next folder
+    select_next_folder()
 
     for _ = start, num_of_folders, 1 do
         local track = GetSelectedTrack(0, 0)
         local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
         vertical_razor()
         local next_group = vertical_group(length, group)
-        Main_OnCommand(next_folder, 0) -- select next folder
+        select_next_folder()
         group = next_group
     end
 
@@ -680,6 +674,157 @@ function color_folder_children(parent_track, folder_color)
 
         idx = idx + 1
     end
+end
+
+---------------------------------------------------------------------
+
+function nudge_right(nudgeSamples)
+    -- get project sample rate using GetSetProjectInfo
+    local sampleRate = GetSetProjectInfo(0, "PROJECT_SRATE", 0, false)
+
+    local nudgeAmount = nudgeSamples / sampleRate
+
+    local numTracks = CountTracks(0)
+    for i = 0, numTracks - 1 do
+        local track = GetTrack(0, i)
+        local itemCount = CountTrackMediaItems(track)
+        for j = 0, itemCount - 1 do
+            local item = GetTrackMediaItem(track, j)
+            if IsMediaItemSelected(item) then
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                SetMediaItemInfo_Value(item, "D_POSITION", pos + nudgeAmount)
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function scroll_to_first_track()
+  local track1 = GetTrack(0, 0)
+  if not track1 then return end
+
+  -- Save current selected tracks to restore later
+  local saved_sel = {}
+  local count_sel = CountSelectedTracks(0)
+  for i = 0, count_sel - 1 do
+    saved_sel[i+1] = GetSelectedTrack(0, i)
+  end
+
+  -- Select only Track 1
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  SetTrackSelected(track1, true)
+
+  -- Scroll Track 1 into view (vertically)
+  Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
+
+  -- Restore previous selection
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  for i, tr in ipairs(saved_sel) do
+    SetTrackSelected(tr, true)
+  end
+end
+
+---------------------------------------------------------------------
+
+function select_children_of_selected_folders()
+  local track_count = CountTracks(0)
+
+  for i = 0, track_count - 1 do
+    local tr = GetTrack(0, i)
+    if IsTrackSelected(tr) then
+      local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+      if depth == 1 then -- folder parent
+        local j = i + 1
+        while j < track_count do
+          local ch_tr = GetTrack(0, j)
+          SetTrackSelected(ch_tr, true) -- select child track
+
+          local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+          if ch_depth == -1 then
+            break -- end of folder children
+          end
+
+          j = j + 1
+        end
+      end
+    end
+  end
+end
+
+---------------------------------------------------------------------
+
+function select_next_folder()
+    local num_tracks = CountTracks(0)
+    local depth = 0
+    local target_depth = -1
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folder_change = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if target_depth ~= -1 then
+            -- We're in search mode for the next folder at the same depth
+            if depth == target_depth and folder_change == 1 then
+                Main_OnCommand(40297, 0) -- Unselect all
+                SetTrackSelected(tr, true)
+                return
+            elseif depth < target_depth then
+                -- Gone out of that folder level, stop searching
+                target_depth = -1
+            end
+        else
+            -- Look for the selected folder
+            if IsTrackSelected(tr) and folder_change == 1 then
+                target_depth = depth
+            end
+        end
+
+        -- Update depth for next iteration
+        depth = depth + folder_change
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_all_parents()
+    local num_tracks = CountTracks(0)
+
+    for i = 0, num_tracks - 1 do
+        local tr = GetTrack(0, i)
+        local folderdepth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if folderdepth == 1 then
+            SetMediaTrackInfo_Value(tr, "I_SELECTED", 1)
+        else
+            SetMediaTrackInfo_Value(tr, "I_SELECTED", 0)
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_item_under_cursor_on_selected_track()
+  Main_OnCommand(40289, 0) -- Unselect all items
+
+  local curpos = GetCursorPosition()
+  local item_count = CountMediaItems(0)
+
+  for i = 0, item_count - 1 do
+    local item = GetMediaItem(0, i)
+    local track = GetMediaItem_Track(item)
+    local track_sel = IsTrackSelected(track)
+
+    if track_sel then
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_end = item_pos + item_len
+
+      if curpos >= item_pos and curpos <= item_end then
+        SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
+      end
+    end
+  end
 end
 
 ---------------------------------------------------------------------

@@ -49,7 +49,7 @@ function main()
     end
     local report = generate_report(metadata)
     ClearConsole()
-    reaper.ShowConsoleMsg(report)
+    ShowConsoleMsg(report)
     local metadata_file = get_txt_file()
     write_rcmeta_file(metadata_file, metadata)
 
@@ -62,13 +62,13 @@ end
 ---------------------------------------------------------------------
 
 function parse_markers()
-    local num_markers = reaper.CountProjectMarkers(0)
+    local num_markers = CountProjectMarkers(0)
     local metadata = { album = {}, tracks = {} }
     local error_msg = ""
 
     -- First pass: Extract album-wide metadata
     for i = 0, num_markers - 1 do
-        local _, isrgn, _, _, name, _ = reaper.EnumProjectMarkers(i)
+        local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
         if not isrgn then -- Only process markers
             local album_marker = name:match("^@(.-)|")
             if album_marker then
@@ -92,7 +92,7 @@ function parse_markers()
 
     -- Second pass: Process track markers
     for i = 0, num_markers - 1 do
-        local _, isrgn, _, _, name, _ = reaper.EnumProjectMarkers(i)
+        local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
         if not isrgn then                -- Only process markers
             if not name:match("^@") then -- Ignore album line since it's already processed
                 local track_title = name:match("^#([^|]+)")

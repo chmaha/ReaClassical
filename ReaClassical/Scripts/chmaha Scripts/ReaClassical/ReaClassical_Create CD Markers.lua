@@ -36,7 +36,7 @@ local create_plaintext_report, create_html_report, any_isrc_present
 local time_to_mmssff, subtract_time_strings, add_pregaps_to_table
 local formatted_pos_out, parse_markers, checksum, get_txt_file
 local create_metadata_report_and_file, split_and_tag_final_item
-local check_first_track_for_names
+local check_first_track_for_names, delete_all_markers_and_regions
 
 local minimum_points = 15
 local points = {}
@@ -483,10 +483,7 @@ end
 ---------------------------------------------------------------------
 
 function delete_markers()
-  local delete_all_markers = NamedCommandLookup("_SWSMARKERLIST9")
-  Main_OnCommand(delete_all_markers, 0)
-  local delete_regions = NamedCommandLookup("_SWSMARKERLIST10")
-  Main_OnCommand(delete_regions, 0)
+  delete_all_markers_and_regions()
   Main_OnCommand(40182, 0) -- select all items
   Main_OnCommand(42387, 0) -- Delete all take markers
   Main_OnCommand(40289, 0) -- Unselect all items
@@ -1688,6 +1685,21 @@ function check_first_track_for_names()
   return false
 end
 
+
+---------------------------------------------------------------------
+
+function delete_all_markers_and_regions()
+    local retval, num_markers, num_regions = CountProjectMarkers(0)
+    local total = num_markers + num_regions
+
+    -- Iterate backwards by project index
+    for i = total - 1, 0, -1 do
+        local retval, is_region, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+        if retval then
+            DeleteProjectMarker(0, markrgnindexnumber, is_region)
+        end
+    end
+end
 
 ---------------------------------------------------------------------
 

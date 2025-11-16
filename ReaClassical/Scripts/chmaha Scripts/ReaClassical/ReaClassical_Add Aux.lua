@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_color_table, get_path
-local route_to_track, trackname_check
+local route_to_track, trackname_check, scroll_to_first_track
 
 ---------------------------------------------------------------------
 
@@ -72,8 +72,7 @@ function main()
     GetSetMediaTrackInfo_String(bus, "P_NAME", "@", true) -- Add @ as track name
     SetMediaTrackInfo_Value(bus, "B_SHOWINTCP", 0)
     Main_OnCommand(40297, 0)
-    local home = NamedCommandLookup("_XENAKIOS_TVPAGEHOME")
-    Main_OnCommand(home, 0)
+    scroll_to_first_track()
 
     if folders > 1 then
         local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
@@ -146,6 +145,33 @@ end
 function trackname_check(track, string)
     local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     return string.find(trackname, string)
+end
+
+---------------------------------------------------------------------
+
+function scroll_to_first_track()
+  local track1 = GetTrack(0, 0)
+  if not track1 then return end
+
+  -- Save current selected tracks to restore later
+  local saved_sel = {}
+  local count_sel = CountSelectedTracks(0)
+  for i = 0, count_sel - 1 do
+    saved_sel[i+1] = GetSelectedTrack(0, i)
+  end
+
+  -- Select only Track 1
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  SetTrackSelected(track1, true)
+
+  -- Scroll Track 1 into view (vertically)
+  Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
+
+  -- Restore previous selection
+  Main_OnCommand(40297, 0) -- Unselect all tracks
+  for i, tr in ipairs(saved_sel) do
+    SetTrackSelected(tr, true)
+  end
 end
 
 ---------------------------------------------------------------------

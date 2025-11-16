@@ -24,6 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, return_xfade_length, is_cursor_between_items
 local get_selected_media_item_at, count_selected_media_items
+local select_item_under_cursor_on_selected_track
 ---------------------------------------------------------------------
 
 function main()
@@ -44,8 +45,7 @@ function main()
     local xfade_len = return_xfade_length()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local state = GetToggleCommandState(fade_editor_toggle)
-    local select_items = NamedCommandLookup("_XENAKIOS_SELITEMSUNDEDCURSELTX")
-    Main_OnCommand(select_items, 0) -- Xenakios/SWS: Select items under edit cursor on selected tracks
+    select_item_under_cursor_on_selected_track()
     Main_OnCommand(40297, 0)        -- Track: Unselect (clear selection of) all tracks
 
     MoveEditCursor(-xfade_len, false)
@@ -213,6 +213,31 @@ function get_selected_media_item_at(index)
     return nil
 end
 
+
+---------------------------------------------------------------------
+
+function select_item_under_cursor_on_selected_track()
+  Main_OnCommand(40289, 0) -- Unselect all items
+
+  local curpos = GetCursorPosition()
+  local item_count = CountMediaItems(0)
+
+  for i = 0, item_count - 1 do
+    local item = GetMediaItem(0, i)
+    local track = GetMediaItem_Track(item)
+    local track_sel = IsTrackSelected(track)
+
+    if track_sel then
+      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+      local item_end = item_pos + item_len
+
+      if curpos >= item_pos and curpos <= item_end then
+        SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
+      end
+    end
+  end
+end
 
 ---------------------------------------------------------------------
 

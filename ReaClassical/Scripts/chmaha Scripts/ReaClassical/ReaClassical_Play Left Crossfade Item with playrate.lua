@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, move_cursor_to_time_selection_midpoint, get_color_table
-local get_path, on_stop
+local get_path, on_stop, marker_actions
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -47,8 +47,6 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local marker_actions = NamedCommandLookup("_SWSMA_ENABLE")
-    Main_OnCommand(marker_actions, 0)
     local in_bounds = GetToggleCommandStateEx(32065, 43664)
     if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
     -- check if left or right item is muted
@@ -64,6 +62,7 @@ function main()
 
     CrossfadeEditor_OnCommand(43491) -- set pre/post and play both items
     AddProjectMarker2(0, false, midpoint, 0, "!1016", 1016, colors.audition)
+    marker_actions()
     on_stop()
 end
 
@@ -107,6 +106,65 @@ function on_stop()
     else
         defer(on_stop)
     end
+end
+
+---------------------------------------------------------------------
+
+function marker_actions()
+    local markers = {}
+    local next_idx = 1
+    local tolerance = 0.05 -- seconds (50 ms)
+
+    -- Pre-scan markers once
+    local num_markers, num_regions = CountProjectMarkers(0)
+    for i = 0, num_markers + num_regions - 1 do
+        local retval, isrgn, pos, rgnend, name, mark_idx = EnumProjectMarkers(i)
+        if retval and not isrgn and name:sub(1, 1) == "!" then
+            local cmd = tonumber(name:sub(2))
+            if cmd then
+                table.insert(markers, { pos = pos, cmd = cmd, mark_idx = mark_idx })
+            end
+        end
+    end
+
+    table.sort(markers, function(a, b) return a.pos < b.pos end)
+
+    local function reset_marker_index(play_pos)
+        for i, m in ipairs(markers) do
+            if m.pos >= play_pos then
+                next_idx = i
+                return
+            end
+        end
+        next_idx = 1
+    end
+
+    local function check_next_marker()
+        local state = GetPlayState()
+        if state & 1 == 0 then
+            reset_marker_index(GetCursorPosition())
+        else
+            if markers[next_idx] then
+                local play_pos = GetPlayPosition()
+                local target = markers[next_idx]
+                if play_pos >= target.pos - tolerance then
+                    Main_OnCommand(target.cmd, 0)
+                    -- Check immediately if playback has stopped
+                    if GetPlayState() & 1 == 0 then
+                        return -- stop script entirely
+                    end
+                    next_idx = next_idx + 1
+                    if next_idx > #markers then
+                        next_idx = 1
+                    end
+                end
+            end
+        end
+        defer(check_next_marker)
+    end
+
+    reset_marker_index(GetCursorPosition())
+    check_next_marker()
 end
 
 ---------------------------------------------------------------------

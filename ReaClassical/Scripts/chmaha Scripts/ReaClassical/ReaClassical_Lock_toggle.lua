@@ -37,8 +37,7 @@ function main()
     Undo_BeginBlock()
     local lock_toggle = NamedCommandLookup("_RS63db9a9d1dae64f15f6ca0b179bb5ea0bc4d06f6")
     local state = GetToggleCommandState(lock_toggle)
-    local focus = NamedCommandLookup("_BR_FOCUS_ARRANGE_WND")
-    Main_OnCommand(focus, 0) -- BR_FOCUS_ARRANGE_WND
+    SetCursorContext(1, nil)
     if state == 0 or state == -1 then
         SetToggleCommandState(1, lock_toggle, 1)
         Main_OnCommand(40311, 0) -- Set ripple editing all tracks
