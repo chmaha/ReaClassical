@@ -8,7 +8,7 @@ dir="$HOME/Downloads/Resource_Folder_Base"
 mkdir -p "$dir"
 
 # Source directory
-src="$HOME/.config/REAPER/"
+src="$HOME/Desktop/ReaClassical_25/"
 
 # List of files and directories to copy
 files="BR.ini
