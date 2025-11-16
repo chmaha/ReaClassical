@@ -70,11 +70,11 @@ func Install64bit(rcfolder string, pkgver string, rcver string, arch string) {
 	// Download ReaClassical files from GitHub
 	fmt.Println("Downloading ReaClassical files from GitHub...")
 	time.Sleep(2 * time.Second)
-	downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip", filepath.Join(tempFilePath, "Resource_Folder_Base.zip"))
+	downloadFile("https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/Resource_Folder_Base.zip", filepath.Join(tempFilePath, "Resource_Folder_Base.zip"))
 	if arch == "amd64" {
-		downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-x64.zip", filepath.Join(tempFilePath, "UP_Windows.zip"))
+		downloadFile("https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/UserPlugins/UP_Windows-x64.zip", filepath.Join(tempFilePath, "UP_Windows.zip"))
 	} else {
-		downloadFile("https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_Windows-arm64ec.zip", filepath.Join(tempFilePath, "UP_Windows.zip"))
+		downloadFile("https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/UserPlugins/UP_Windows-arm64ec.zip", filepath.Join(tempFilePath, "UP_Windows.zip"))
 	}
 	// Extract ReaClassical files
 	fmt.Println("Extracting ReaClassical files to ReaClassical folder...")

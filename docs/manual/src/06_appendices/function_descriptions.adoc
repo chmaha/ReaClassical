@@ -315,7 +315,7 @@ In addition, the function automatically generates a CUE file and album reports i
 
 I feel that once you try this CD/DDP marker generation workflow, it is difficult to ever go back to other ways of working. The key thing to think about is that the markers and room tone fade-ins and outs are trivially easy to recreate if you change a gap between items or even rearrange the order of tracks. Just run the function again. The key is the workflow: all marker generation is automatically based on item positioning and naming. Plus, all metadata and ISRC is saved into the project file so once entered you don't have to ever type it in again unless you need to make changes. Room tone volume changes are made via auto-generated volume envelope points that precisely map REAPER's built-in fade curves.
 
-Hopefully you agree that this way of working with CD/DDP layout is a game-changer, a real time-saver and simply a better way of thinking about this portion of the mastering process. For more information about DDP metadata see https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info[here] (also available via the Render dialog via menu:Format[DDP] and clicking on btn:[Help]).
+Hopefully you agree that this way of working with CD/DDP layout is a game-changer, a real time-saver and simply a better way of thinking about this portion of the mastering process. For more information about DDP metadata see https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/v25/docs/manual/src/assets/ddp_info[here] (also available via the Render dialog via menu:Format[DDP] and clicking on btn:[Help]).
 
 *Show Metadata Report*
 

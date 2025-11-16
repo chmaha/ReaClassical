@@ -73,7 +73,7 @@ This function runs automatically as the final part of the Create CD Markers func
 .Example Metadata Report
 image::metadata_report.png[]
 
-This is a great way to see all album metadata clearly in one window and could be copied and pasted into a report to send to the factory for checking against the metadata found in the DDP image itself. The function will also alert the user if some track metadata labels (COMPOSER=, PEFORMER=, SONGWRITER=, ARRANGER=) have been used without also using them album-wide via the `@` item name. For more information about DDP metadata see https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info[here] (also available via the Render dialog via menu:Format[DDP] and clicking on btn:[Help]).
+This is a great way to see all album metadata clearly in one window and could be copied and pasted into a report to send to the factory for checking against the metadata found in the DDP image itself. The function will also alert the user if some track metadata labels (COMPOSER=, PEFORMER=, SONGWRITER=, ARRANGER=) have been used without also using them album-wide via the `@` item name. For more information about DDP metadata see https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/v25/docs/manual/src/assets/ddp_info[here] (also available via the Render dialog via menu:Format[DDP] and clicking on btn:[Help]).
 
 ==== Creating CUE Files
 

@@ -218,7 +218,7 @@ func addLineToReaperIni(rcfolder string) {
 
 func getReaperVersion() (string, error) {
 	// Fetch the content of the online file
-	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt")
+	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/v25/tested_reaper_ver.txt")
 	if err != nil {
 		return "", err
 	}
@@ -248,7 +248,7 @@ func getReaperVersion() (string, error) {
 
 func getReaClassicalMajorVersion() (string, error) {
 	// Fetch the content of the online file
-	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua")
+	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/v25/ReaClassical/ReaClassical.lua")
 	if err != nil {
 		return "", err
 	}

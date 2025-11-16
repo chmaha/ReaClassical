@@ -36,10 +36,10 @@ trap cleanup EXIT
 
 check_internet
 
-ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/v25/tested_reaper_ver.txt"
 ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
-rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaClassical/ReaClassical.lua"
+rcver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/v25/ReaClassical/ReaClassical.lua"
 rcver=$(curl -sS "$rcver_txt" | awk '/@version/{split($2, version, "."); print version[1]}')
 
 rcfolder="ReaClassical_${rcver}"
@@ -87,10 +87,10 @@ hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint "$temp_dir/rea
 echo "Downloading ReaClassical resource folder base and userplugins for MacOS"
 sleep 2
 res_output="$temp_dir/Resource_Folder_Base.zip"
-res_url="https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/Resource_Folder_Base.zip"
+res_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/Resource_Folder_Base.zip"
 curl -L -o "$res_output" "$res_url"
 up_output="$temp_dir/UP_MacOS-$arch.zip"
-up_url="https://github.com/chmaha/ReaClassical/raw/main/Resource%20Folder/UserPlugins/UP_MacOS-$arch.zip"
+up_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/UserPlugins/UP_MacOS-$arch.zip"
 curl -L -o "$up_output" "$up_url"
 
 # Check if a ReaClassical folder already exists

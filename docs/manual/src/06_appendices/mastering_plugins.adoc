@@ -4,8 +4,8 @@ First stop: _Reaplugs_, with particular mention of _ReaLimit_ which I consider o
 
 EQ:
 
-* *RCChannelEQ* (ReaClassical Channel EQ, included in the ReaClassical portable install and available in ReaPack via my https://github.com/chmaha/ReaClassical/raw/main/index.xml[repository]). Uses DSP from airwindows _Baxandall_ and Stillwell's RBJ Highpass/Lowpass Filters for broad-strokes EQing.
-* *RCMasteringEQ* (ReaClassical Mastering EQ, included in the ReaClassical portable install and available in ReaPack via my https://github.com/chmaha/ReaClassical/raw/main/index.xml[repository]). Uses DSP from airwindows _Hull2_ with added _Range_ drop-down (_Classical_ or _Full_) for transparent, musical, broad-strokes EQing. 
+* *RCChannelEQ* (ReaClassical Channel EQ, included in the ReaClassical portable install and available in ReaPack via my https://github.com/chmaha/ReaClassical/raw/v25/index.xml[repository]). Uses DSP from airwindows _Baxandall_ and Stillwell's RBJ Highpass/Lowpass Filters for broad-strokes EQing.
+* *RCMasteringEQ* (ReaClassical Mastering EQ, included in the ReaClassical portable install and available in ReaPack via my https://github.com/chmaha/ReaClassical/raw/v25/index.xml[repository]). Uses DSP from airwindows _Hull2_ with added _Range_ drop-down (_Classical_ or _Full_) for transparent, musical, broad-strokes EQing. 
 * *ReEQ* https://forum.cockos.com/showthread.php?t=213501. An amazing Fabfilter Pro-Q clone for detailed EQ work. Also comes with ReSpectrum which is an excellent analyzer. Both are included with the ReaClassical install.
 
 Compression:
