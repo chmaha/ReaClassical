@@ -5,7 +5,7 @@ Requirements: _ReaPack_, _SWS/S&M extension_
 To install ReaClassical Core:
 
 . Download ReaPack from https://reapack.com/. Read the instructions at https://reapack.com/user-guide for how to install the plugin, add repositories, add packages etc.
-. Import my repository into ReaPack by copying and pasting this https://github.com/chmaha/ReaClassical/raw/main/index.xml[link] into ReaPack. 
+. Import my repository into ReaPack by copying and pasting this https://github.com/chmaha/ReaClassical/raw/v25/index.xml[link] into ReaPack. 
 . Search for "SWS" and mark "SWS/S&M extension" for install.
 . Search for "core" in the ReaPack and mark "ReaClassical Core" for install. 
 . Click "Apply".

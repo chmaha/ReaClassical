@@ -2,10 +2,10 @@
 %ÿÿÿÿ
 1 0 obj
 << /Title (Untitled)
-/Creator (Asciidoctor PDF 2.3.4, based on Prawn 2.4.0)
-/Producer (Asciidoctor PDF 2.3.4, based on Prawn 2.4.0)
-/ModDate (D:20250829113635-04'00')
-/CreationDate (D:20250829113638-04'00')
+/Creator <feff>
+/Producer (Asciidoctor PDF 2.3.19, based on Prawn 2.4.0)
+/ModDate (D:20251116132041-05'00')
+/CreationDate (D:20251116132128-05'00')
 >>
 endobj
 2 0 obj
@@ -48,20 +48,18 @@ endobj
 >>
 endobj
 6 0 obj
-<< /Length 10777
+<< /Length 10743
 >>
 stream
 q
-/DeviceRGB cs
-0.0 0.0 0.0 scn
-/DeviceRGB CS
-0.0 0.0 0.0 SCN
 
 q
 498.8 0.0 0.0 145.6496 48.24 660.2404 cm
 /I1 Do
 Q
+/DeviceRGB cs
 0.2 0.2 0.2 scn
+/DeviceRGB CS
 0.2 0.2 0.2 SCN
 
 BT
@@ -89,7 +87,7 @@ ET
 BT
 181.841 589.4764 Td
 /F2.0 13 Tf
-<68747470733a2f2f6769746875622e636f6d2f63686d6168612f526561436c6173736963616c2f636f6d6d6974732f6d61696e2f> Tj
+<68747470733a2f2f6769746875622e636f6d2f63686d6168612f526561436c6173736963616c2f636f6d6d6974732f7632352f> Tj
 ET
 
 0.0 0.0 0.0 SCN
@@ -1548,7 +1546,7 @@ endobj
 >>
 endobj
 12 0 obj
-<< /Names [(__anchor-top) 30 0 R (_instructions_for_a_new_portable_install) 16 0 R (_instructions_to_update_a_reaclassical_portable_install) 19 0 R (_ongoing_changelog_httpsgithub_comchmahareaclassicalcommitsmain) 14 0 R (_reaclassical_core_basic_manual_install_of_just_the_s_d_editing_tools_inside_your_existing_reaper_install) 21 0 R (_release_notes_for_reaclassical_25_x) 10 0 R]
+<< /Names [(__anchor-top) 30 0 R (_instructions_for_a_new_portable_install) 16 0 R (_instructions_to_update_a_reaclassical_portable_install) 19 0 R (_ongoing_changelog_httpsgithub_comchmahareaclassicalcommitsv25) 14 0 R (_reaclassical_core_basic_manual_install_of_just_the_s_d_editing_tools_inside_your_existing_reaper_install) 21 0 R (_release_notes_for_reaclassical_25_x) 10 0 R]
 >>
 endobj
 13 0 obj
@@ -1569,10 +1567,10 @@ endobj
 << /Border [0 0 0]
 /A << /Type /Action
 /S /URI
-/URI (https://github.com/chmaha/ReaClassical/commits/main/)
+/URI (https://github.com/chmaha/ReaClassical/commits/v25/)
 >>
 /Subtype /Link
-/Rect [181.841 585.6804 544.918 603.3604]
+/Rect [181.841 585.6804 533.491 603.3604]
 /Type /Annot
 >>
 endobj
@@ -1594,7 +1592,7 @@ endobj
 << /Border [0 0 0]
 /A << /Type /Action
 /S /URI
-/URI (https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md)
+/URI (https://github.com/chmaha/ReaClassical/blob/v25/install_instructions.md)
 >>
 /Subtype /Link
 /Rect [282.21227 526.5704 371.1483 540.8504]
@@ -1608,7 +1606,7 @@ endobj
 << /Border [0 0 0]
 /A << /Type /Action
 /S /URI
-/URI (https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt)
+/URI (https://raw.githubusercontent.com/chmaha/ReaClassical/v25/tested_reaper_ver.txt)
 >>
 /Subtype /Link
 /Rect [97.5405 295.7104 120.378 309.9904]
@@ -1655,7 +1653,7 @@ endobj
 << /Border [0 0 0]
 /A << /Type /Action
 /S /URI
-/URI (https://github.com/chmaha/ReaClassical/raw/main/index.xml)
+/URI (https://github.com/chmaha/ReaClassical/raw/v25/index.xml)
 >>
 /Subtype /Link
 /Rect [381.56834 135.8504 424.4122 150.1304]
@@ -1743,7 +1741,7 @@ endobj
 << /Type /FontDescriptor
 /FontName /77291f+NotoSerif-Bold
 /FontFile2 31 0 R
-/FontBBox [-212 -250 1306 1058]
+/FontBBox [-555 -250 1306 1058]
 /Flags 6
 /StemV 0
 /ItalicAngle 0
@@ -1813,7 +1811,7 @@ endobj
 << /Type /FontDescriptor
 /FontName /c4f521+NotoSerif
 /FontFile2 35 0 R
-/FontBBox [-212 -250 1246 1047]
+/FontBBox [-518 -250 1246 1047]
 /Flags 6
 /StemV 0
 /ItalicAngle 0
@@ -1839,48 +1837,48 @@ xref
 0 39
 0000000000 65535 f 
 0000000015 00000 n 
-0000000240 00000 n 
-0000000442 00000 n 
-0000000499 00000 n 
-0000000550 00000 n 
-0000000822 00000 n 
-0000011652 00000 n 
-0000012053 00000 n 
-0000171381 00000 n 
-0000195656 00000 n 
-0000195701 00000 n 
-0000195750 00000 n 
-0000196152 00000 n 
-0000196322 00000 n 
-0000196367 00000 n 
-0000196566 00000 n 
-0000196611 00000 n 
-0000196776 00000 n 
-0000196998 00000 n 
-0000197043 00000 n 
-0000197270 00000 n 
-0000197315 00000 n 
-0000197486 00000 n 
-0000197685 00000 n 
-0000197882 00000 n 
-0000198089 00000 n 
-0000198288 00000 n 
-0000198362 00000 n 
-0000198487 00000 n 
-0000198532 00000 n 
-0000198575 00000 n 
-0000207046 00000 n 
-0000207263 00000 n 
-0000208617 00000 n 
-0000209531 00000 n 
-0000218692 00000 n 
-0000218904 00000 n 
-0000220258 00000 n 
+0000000202 00000 n 
+0000000404 00000 n 
+0000000461 00000 n 
+0000000512 00000 n 
+0000000784 00000 n 
+0000011580 00000 n 
+0000011981 00000 n 
+0000171309 00000 n 
+0000195584 00000 n 
+0000195629 00000 n 
+0000195678 00000 n 
+0000196079 00000 n 
+0000196249 00000 n 
+0000196294 00000 n 
+0000196492 00000 n 
+0000196537 00000 n 
+0000196702 00000 n 
+0000196923 00000 n 
+0000196968 00000 n 
+0000197194 00000 n 
+0000197239 00000 n 
+0000197410 00000 n 
+0000197609 00000 n 
+0000197806 00000 n 
+0000198012 00000 n 
+0000198211 00000 n 
+0000198285 00000 n 
+0000198410 00000 n 
+0000198455 00000 n 
+0000198498 00000 n 
+0000206969 00000 n 
+0000207186 00000 n 
+0000208540 00000 n 
+0000209454 00000 n 
+0000218615 00000 n 
+0000218827 00000 n 
+0000220181 00000 n 
 trailer
 << /Size 39
 /Root 2 0 R
 /Info 1 0 R
 >>
 startxref
-221173
+221096
 %%EOF

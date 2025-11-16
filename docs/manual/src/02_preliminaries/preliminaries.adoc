@@ -70,4 +70,4 @@ When providing keyboard shortcuts, this manual assumes Windows or Linux as the o
 
 === Changelog
 
-The changelog for ReaClassical functions can be found by double-clicking on the ReaClassical package in ReaPack and navigating to the `History` tab. Whenever you sync ReaPack via menu:Extensions[ReaPack > Synchronize packages] or the _ReaClassical Updater_ function, this information should also appear automatically. For all updates including those not related to the functions themselves, a changelog can be found in the https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf[release notes].
+The changelog for ReaClassical functions can be found by double-clicking on the ReaClassical package in ReaPack and navigating to the `History` tab. Whenever you sync ReaPack via menu:Extensions[ReaPack > Synchronize packages] or the _ReaClassical Updater_ function, this information should also appear automatically. For all updates including those not related to the functions themselves, a changelog can be found in the https://github.com/chmaha/ReaClassical/raw/v25/release_notes.pdf[release notes].
