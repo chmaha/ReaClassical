@@ -165,9 +165,9 @@ function main()
         Main_OnCommand(42398, 0) -- paste
         mark_as_edit()
 
-        local cur_pos, new_last_item = create_crossfades()
+        local new_last_item = create_crossfades()
         save_last_assembly_item(new_last_item)
-        clean_up(is_selected, marker_count)
+        clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         local item_start = GetMediaItemInfo_Value(new_last_item, "D_POSITION")
@@ -188,7 +188,6 @@ function main()
 
         if moveable_dest == 1 then move_destination_folder(track_number) end
 
-        -- clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
@@ -382,7 +381,6 @@ function create_crossfades()
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
     Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
     Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     MoveEditCursor(0.001, false)
     select_item_under_cursor_on_selected_track()
     MoveEditCursor(-0.001, false)
@@ -392,7 +390,7 @@ function create_crossfades()
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
-    return cur_pos, last_sel_item
+    return last_sel_item
 end
 
 ---------------------------------------------------------------------
