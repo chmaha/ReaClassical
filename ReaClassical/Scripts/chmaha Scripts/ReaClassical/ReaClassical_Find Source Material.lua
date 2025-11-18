@@ -25,14 +25,6 @@ local main, count_selected_media_items, get_selected_media_item_at
 local get_color_table, get_path
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
----------------------------------------------------------------------
-
 local function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()

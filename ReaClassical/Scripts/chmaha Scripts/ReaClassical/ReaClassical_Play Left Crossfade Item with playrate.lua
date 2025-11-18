@@ -25,14 +25,6 @@ local main, move_cursor_to_time_selection_midpoint, get_color_table
 local get_path, on_stop, marker_actions
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
----------------------------------------------------------------------
-
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local audition_speed = 0.75
 if input ~= "" then

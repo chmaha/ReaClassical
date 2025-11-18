@@ -26,12 +26,6 @@ local main, delayed_record
 
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
 local classical_take_record = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
 local delay_cycles = 2
 

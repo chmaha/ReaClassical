@@ -26,14 +26,6 @@ local get_current_input_pan
 
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
----------------------------------------------------------------------
-
 local MAX_INPUTS = GetNumAudioInputs()
 local TRACKS_PER_PAGE = 16
 

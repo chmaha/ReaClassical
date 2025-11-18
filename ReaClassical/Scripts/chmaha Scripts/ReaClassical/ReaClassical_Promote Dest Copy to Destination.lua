@@ -25,14 +25,6 @@ local main, swap_selected_dest_copy_with_destination
 
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
----------------------------------------------------------------------
-
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()

@@ -25,15 +25,6 @@ local main, item_edge_overlaps
 
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-  return
-end
-
----------------------------------------------------------------------
-
-
 -- Helper: check if an item's start or end overlaps with another item on the same track
 function item_edge_overlaps(item, check_start)
   local track = GetMediaItem_Track(item)

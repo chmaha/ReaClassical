@@ -30,12 +30,6 @@ local main, get_take_count, clean_up, parse_time, parse_duration, check_time, re
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, get_reaper_version
 local marker_actions
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-  return
-end
-
 local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 if workflow == "" then
   MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)

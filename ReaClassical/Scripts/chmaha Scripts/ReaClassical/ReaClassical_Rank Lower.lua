@@ -26,14 +26,6 @@ local get_selected_media_item_at, count_selected_media_items
 local pastel_color
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
----------------------------------------------------------------------
-
 function main()
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")

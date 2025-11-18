@@ -25,12 +25,6 @@ local main, sync_based_on_workflow
 
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-  return
-end
-
 local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
 if RCProject ~= "y" then
   MB("This function can only run on a ReaClassical project. Create one in an empty project via F7 or F8.",
@@ -50,8 +44,6 @@ function main()
     PreventUIRefresh(1)
     SetProjExtState(0, "ReaClassical", "MasteringModeSet", 1)
     sync_based_on_workflow(workflow)
-    -- local restore_mastering_view = NamedCommandLookup("_WOL_RESTOREVIEWS5")
-    -- Main_OnCommand(restore_mastering_view, 0)
     PreventUIRefresh(-1)
     message = "You are now in \"Mastering\" Mode. To leave, press Ctrl+M again.\n" ..
         "Any source groups are hidden and mixer tracks are now shown in the TCP for automation purposes.\n" ..

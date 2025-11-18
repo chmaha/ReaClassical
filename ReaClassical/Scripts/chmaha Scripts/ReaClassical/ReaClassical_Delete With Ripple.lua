@@ -28,12 +28,6 @@ local select_item_under_cursor_on_selected_track
 
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
