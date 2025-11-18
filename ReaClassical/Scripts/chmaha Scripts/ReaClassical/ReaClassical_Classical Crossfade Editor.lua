@@ -122,7 +122,7 @@ function select_check()
     end
 
     local track = GetMediaItemTrack(selected_item)
-    local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+    -- local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
     -- if track_num ~= 1 then
     --     return false
@@ -573,7 +573,7 @@ function scroll_to_first_track()
 
     -- Restore previous selection
     Main_OnCommand(40297, 0) -- Unselect all tracks
-    for i, tr in ipairs(saved_sel) do
+    for _, tr in ipairs(saved_sel) do
         SetTrackSelected(tr, true)
     end
 end

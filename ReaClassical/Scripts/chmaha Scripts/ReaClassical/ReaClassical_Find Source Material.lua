@@ -22,10 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, count_selected_media_items, get_selected_media_item_at
-local get_color_table, get_path
+
 ---------------------------------------------------------------------
 
-local function main()
+function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
@@ -36,12 +36,12 @@ local function main()
     end
 
     -- Safety: exactly one edited item selected
-    if CountSelectedMediaItems(0) ~= 1 then
+    if count_selected_media_items() ~= 1 then
         MB("Error: Please select exactly one edited item.", "Error", 0)
         return
     end
 
-    local edit_item = GetSelectedMediaItem(0, 0)
+    local edit_item = get_selected_media_item_at(0)
     local _, saved_guid = GetSetMediaItemInfo_String(edit_item, "P_EXT:src_guid", "", false)
     if saved_guid == "" then
         MB("Error: No source GUID stored for this item.", "Error", 0)
@@ -136,23 +136,6 @@ function get_selected_media_item_at(index)
     end
 
     return nil
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

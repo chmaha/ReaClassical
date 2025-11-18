@@ -636,7 +636,7 @@ function marker_actions()
     markers = {}
     local num_markers, num_regions = CountProjectMarkers(0)
     for i = 0, num_markers + num_regions - 1 do
-      local retval, isrgn, pos, rgnend, name, mark_idx = EnumProjectMarkers(i)
+      local retval, isrgn, pos, _, name, mark_idx = EnumProjectMarkers(i)
       if retval and not isrgn and name:sub(1, 1) == "!" then
         local cmd = tonumber(name:sub(2))
         if cmd then
@@ -690,7 +690,7 @@ function marker_actions()
 
   if #markers == 0 then
     marker_actions_running = false
-    ShowMessageBox("No !<command_id> markers found in project", "Marker Trigger", 0)
+    MB("No !<command_id> markers found in project", "ReaClassical Marker Actions", 0)
   else
     reset_marker_index(GetCursorPosition())
     check_next_marker()

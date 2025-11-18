@@ -45,9 +45,9 @@ end
 ---------------------------------------------------------------------
 
 function zoom()
-    local cur_pos = (GetPlayState() == 0) 
-                    and GetCursorPosition() 
-                    or GetPlayPosition()
+    local cur_pos  = (GetPlayState() == 0)
+        and GetCursorPosition()
+        or GetPlayPosition()
 
     local ts_start = math.max(0, cur_pos - 3)
     local ts_end   = cur_pos + 3
@@ -58,7 +58,7 @@ function zoom()
     Main_OnCommand(40626, 0) -- Time selection: Set end point
     GetSet_ArrangeView2(0, true, 0, 0, ts_start, ts_end)
     SetEditCurPos(cur_pos, false, false)
-    Main_OnCommand(1012, 0) -- View: Zoom in horizontal
+    Main_OnCommand(1012, 0)  -- View: Zoom in horizontal
     Main_OnCommand(40635, 0) -- Time selection: Remove
 end
 

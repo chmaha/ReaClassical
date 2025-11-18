@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, select_previous_and_next, heal
+local count_selected_media_items, get_selected_media_item_at
 
 ---------------------------------------------------------------------
 
@@ -51,7 +52,7 @@ end
 
 function select_previous_and_next()
     -- Get selected items
-    local sel_count = CountSelectedMediaItems(0)
+    local sel_count = count_selected_media_items()
     if sel_count == 0 then
         MB("No items selected.", "Error", 0)
         return false
@@ -59,7 +60,7 @@ function select_previous_and_next()
 
     -- Check all selected items have P_EXT:SD == "y"
     for i = 0, sel_count - 1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         local _, sd_flag = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
         if sd_flag ~= "y" then
             MB("All selected items must be S-D edits", "Error", 0)
@@ -68,7 +69,7 @@ function select_previous_and_next()
     end
 
     -- Get the track of the first selected item
-    local first_item = GetSelectedMediaItem(0, 0)
+    local first_item = get_selected_media_item_at(0)
     local track = GetMediaItem_Track(first_item)
 
     -- Check if the track is a parent (has child tracks)
@@ -174,9 +175,9 @@ function select_previous_and_next()
     local next_end = next_startoffs + next_length
 
     -- Determine total selected length on the parent track
-    sel_count = CountSelectedMediaItems(0)
-    local first_sel_item = GetSelectedMediaItem(0, 0)
-    local last_sel_item = GetSelectedMediaItem(0, sel_count - 1)
+    sel_count = count_selected_media_items()
+    local first_sel_item = get_selected_media_item_at(0)
+    local last_sel_item = get_selected_media_item_at(sel_count - 1)
 
     local first_pos = GetMediaItemInfo_Value(first_sel_item, "D_POSITION")
     local last_pos = GetMediaItemInfo_Value(last_sel_item, "D_POSITION")
@@ -192,14 +193,14 @@ end
 
 function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
               total_selected_length)
-    local sel_count = CountSelectedMediaItems(0)
+    local sel_count = count_selected_media_items()
     if sel_count == 0 then
         MB("No items selected.", "Error", 0)
         return false
     end
 
     -- Step 0: determine prev_item (first selected)
-    local prev_item = GetSelectedMediaItem(0, 0)
+    local prev_item = get_selected_media_item_at(0)
     if not prev_item then
         MB("No previous item found.", "Error", 0)
         return false
@@ -212,7 +213,7 @@ function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
     -- Step 1: delete other groups from selection
     local items_to_delete_groups = {}
     for i = sel_count - 1, 0, -1 do
-        local item = GetSelectedMediaItem(0, i)
+        local item = get_selected_media_item_at(i)
         local group_id = GetMediaItemInfo_Value(item, "I_GROUPID") or 0
         if item ~= prev_item and group_id ~= prev_group_id then
             items_to_delete_groups[group_id] = true
@@ -300,6 +301,41 @@ function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
         end
     end
     Main_OnCommand(40289, 0) -- Item: Unselect all items
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------

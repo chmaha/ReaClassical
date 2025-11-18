@@ -22,8 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, move_cursor_to_time_selection_midpoint, get_color_table
-local get_path, on_stop, marker_actions, reset_marker_index
-local check_next_marker
+local get_path, on_stop, marker_actions
 ---------------------------------------------------------------------
 
 function main()
@@ -44,7 +43,7 @@ function main()
     CSurf_OnPlayRateChange(1)
     -- prevent action 43491 from not playing if mouse cursor doesn't move
     CrossfadeEditor_OnCommand(43483) -- decrease preview momentarily
-    
+
     CrossfadeEditor_OnCommand(43491) -- set pre/post and play both items
     AddProjectMarker2(0, false, midpoint, 0, "!1016", 1016, colors.audition)
     marker_actions()
@@ -103,7 +102,7 @@ function marker_actions()
     -- Pre-scan markers once
     local num_markers, num_regions = CountProjectMarkers(0)
     for i = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, pos, rgnend, name, mark_idx = EnumProjectMarkers(i)
+        local retval, isrgn, pos, _, name, mark_idx = EnumProjectMarkers(i)
         if retval and not isrgn and name:sub(1, 1) == "!" then
             local cmd = tonumber(name:sub(2))
             if cmd then

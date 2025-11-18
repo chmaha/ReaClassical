@@ -146,7 +146,7 @@ function modify_item_name(item)
 
                     -- Compute pastel index: second folder → index 0
                     local folder_index = 0
-                    local colors = get_color_table()
+                    -- local colors = get_color_table()
 
                     -- Count all dest_copy tracks in the project
                     local dest_copy_count = 0
@@ -174,8 +174,8 @@ function modify_item_name(item)
                         -- No folder: fallback to dest_items
                         color_to_use = colors.dest_items
                     end
-                    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-                    if workflow == "Horizontal" then
+                    local _, rc_workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+                    if rc_workflow == "Horizontal" then
                         local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
                         if saved_color ~= "" then
                             color_to_use = saved_color
@@ -239,12 +239,12 @@ function process_items()
     end
 
     -- Step 3: Process only the items on parent tracks
-    local item = get_selected_media_item_at(0)
-    if item then
-        local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+    local selected_item = get_selected_media_item_at(0)
+    if selected_item then
+        local _, saved_color = GetSetMediaItemInfo_String(selected_item, "P_EXT:saved_color", "", false)
         if saved_color == "" then
-            local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-            GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
+            local color = GetMediaItemInfo_Value(selected_item, "I_CUSTOMCOLOR")
+            GetSetMediaItemInfo_String(selected_item, "P_EXT:saved_color", color, true)
         end
     end
     for _, item in ipairs(items_to_process) do

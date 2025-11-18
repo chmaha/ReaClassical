@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, shift, color, vertical_razor, group_items
+local main, shift, color_items, vertical_razor, group_items
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, get_selected_media_item_at, count_selected_media_items
@@ -99,7 +99,7 @@ function main()
         vertical()
     end
     PreventUIRefresh(-1)
-    color(edits, color_pref)
+    color_items(edits, color_pref)
     PreventUIRefresh(1)
 
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
@@ -139,7 +139,7 @@ end
 
 ---------------------------------------------------------------------
 
-function color(edits, color_pref)
+function color_items(edits, color_pref)
     local unedited_color = 0
     if color_pref == 0 then
         local colors = get_color_table()
@@ -169,11 +169,11 @@ function color(edits, color_pref)
         -- Step 3: Color each group
         local first_group = true
         for _, gid in ipairs(sorted_group_ids) do
-            local group_items = groups[gid]
+            local grouped_items = groups[gid]
 
             -- Skip group if any item is ranked = "y"
             local skip_group = false
-            for _, item in ipairs(group_items) do
+            for _, item in ipairs(grouped_items) do
                 local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", false)
                 if ranked == "y" then
                     skip_group = true
@@ -187,7 +187,7 @@ function color(edits, color_pref)
 
             -- Determine group color
             local group_color = nil
-            for _, item in ipairs(group_items) do
+            for _, item in ipairs(grouped_items) do
                 local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                 if src_guid ~= "" then
                     local src_item = BR_GetMediaItemByGUID(0, src_guid)
@@ -209,14 +209,14 @@ function color(edits, color_pref)
             end
 
             -- Apply color to all items in group
-            for _, item in ipairs(group_items) do
+            for _, item in ipairs(grouped_items) do
                 color_group_items(item, group_color)
                 local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
                 GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
             end
 
             -- Color the track of first item
-            local first_track = GetMediaItem_Track(group_items[1])
+            local first_track = GetMediaItem_Track(grouped_items[1])
             if first_track then
                 SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", unedited_color)
                 color_folder_children(first_track, unedited_color)
@@ -434,7 +434,7 @@ function vertical()
 
     for _ = start, num_of_folders, 1 do
         local track = GetSelectedTrack(0, 0)
-        local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
+        GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
         vertical_razor()
         local next_group = vertical_group(length, group)
         select_next_folder()
@@ -714,7 +714,7 @@ function scroll_to_first_track()
 
   -- Restore previous selection
   Main_OnCommand(40297, 0) -- Unselect all tracks
-  for i, tr in ipairs(saved_sel) do
+  for _, tr in ipairs(saved_sel) do
     SetTrackSelected(tr, true)
   end
 end

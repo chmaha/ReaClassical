@@ -98,14 +98,14 @@ function main()
             local dest_in_pos = pos_table[1]
             local threshold = 0.0001
             if math.abs(item_right_edge - dest_in_pos) > threshold then
-                local input = MB(
+                local user_input = MB(
                     "The DEST-IN marker has been moved since the last assembly line edit.\n" ..
                     "Do you want to start a new edit sequence?\n" ..
                     "Answering \"No\" will move the DEST-IN marker back to the previous item edge.",
                     "Assembly Line / 3-point Insert Edit", 3)
-                if input == 2 then
+                if user_input == 2 then
                     return
-                elseif input == 7 then
+                elseif user_input == 7 then
                     local i = 0
                     while true do
                         local project, _ = EnumProjects(i)
@@ -671,9 +671,9 @@ end
 
 function adaptive_delete()
     local sel_items = {}
-    local item_count = CountSelectedMediaItems(0)
+    local item_count = count_selected_media_items()
     for i = 0, item_count - 1 do
-        sel_items[#sel_items + 1] = GetSelectedMediaItem(0, i)
+        sel_items[#sel_items + 1] = get_selected_media_item_at(i)
     end
 
     local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)

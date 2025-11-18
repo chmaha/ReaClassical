@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_selected_media_item_at
+local main, get_selected_media_item_at, count_selected_media_items
 
 ---------------------------------------------------------------------
 
@@ -48,14 +48,14 @@ function main()
     Main_OnCommand(40704, 0) -- set to custom color
 
     -- loop through selected items and set P_EXT:ranked="y" if on a folder track
-    local sel_count = CountSelectedMediaItems(0)
+    local sel_count = count_selected_media_items()
     for i = 0, sel_count - 1 do
-        local item = GetSelectedMediaItem(0, i)
-        local track = GetMediaItemTrack(item)
+        local selected_item = get_selected_media_item_at(i)
+        local track = GetMediaItemTrack(selected_item)
         if track then
             local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
             if folder_depth > 0 then
-                GetSetMediaItemInfo_String(item, "P_EXT:ranked", "y", true)
+                GetSetMediaItemInfo_String(selected_item, "P_EXT:ranked", "y", true)
             end
         end
     end
@@ -83,6 +83,22 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
 end
 
 ---------------------------------------------------------------------

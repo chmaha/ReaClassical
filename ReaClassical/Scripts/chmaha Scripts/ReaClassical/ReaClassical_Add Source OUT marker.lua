@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number, get_color_table, get_path, other_source_marker_check
+local main, folder_check, get_track_number, other_source_marker_check
 
 ---------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ function main()
     end
 
     local selected_track = GetSelectedTrack(0, 0)
-    
+
     local cur_pos, track
     if sdmousehover == 1 then
         cur_pos = BR_PositionAtMouseCursor(false)
@@ -66,7 +66,7 @@ function main()
 
         local track_number = math.floor(get_track_number(track))
         local other_source_marker = other_source_marker_check()
-        
+
         local color_track = track or selected_track
         local marker_color = color_track and GetTrackColor(color_track) or 0
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
@@ -103,23 +103,6 @@ function get_track_number(track)
         local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

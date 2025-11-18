@@ -110,7 +110,7 @@ function marker_actions()
     -- Pre-scan markers once
     local num_markers, num_regions = CountProjectMarkers(0)
     for i = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, pos, rgnend, name, mark_idx = EnumProjectMarkers(i)
+        local retval, isrgn, pos, _, name, mark_idx = EnumProjectMarkers(i)
         if retval and not isrgn and name:sub(1, 1) == "!" then
             local cmd = tonumber(name:sub(2))
             if cmd then

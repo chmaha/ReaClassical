@@ -1683,12 +1683,12 @@ end
 ---------------------------------------------------------------------
 
 function delete_all_markers_and_regions()
-    local retval, num_markers, num_regions = CountProjectMarkers(0)
+    local _, num_markers, num_regions = CountProjectMarkers(0)
     local total = num_markers + num_regions
 
     -- Iterate backwards by project index
     for i = total - 1, 0, -1 do
-        local retval, is_region, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+        local retval, is_region, _, _, _, markrgnindexnumber = EnumProjectMarkers(i)
         if retval then
             DeleteProjectMarker(0, markrgnindexnumber, is_region)
         end

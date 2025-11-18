@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, source_markers, select_matching_folder, dest_check
-local adaptive_delete
+local adaptive_delete, count_selected_media_items, get_selected_media_item_at
 
 ---------------------------------------------------------------------
 
@@ -110,7 +110,7 @@ end
 
 function dest_check()
     -- Get first selected item
-    local item = GetSelectedMediaItem(0, 0)
+    local item = get_selected_media_item_at(0)
     if not item then
         return
     end
@@ -135,9 +135,9 @@ end
 
 function adaptive_delete()
   local sel_items = {}
-  local item_count = CountSelectedMediaItems(0)
+  local item_count = count_selected_media_items()
   for i = 0, item_count - 1 do
-    sel_items[#sel_items+1] = GetSelectedMediaItem(0, i)
+    sel_items[#sel_items+1] = get_selected_media_item_at(i)
   end
 
   local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
@@ -177,6 +177,41 @@ function adaptive_delete()
   else
     Main_OnCommand(40006, 0) -- Delete items or time selection contents
   end
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------

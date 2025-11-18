@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number, get_color_table, get_path
+local main, folder_check, get_track_number
 local move_destination_folder, get_tracks_per_group
 local calculate_destination_info
 
@@ -71,7 +71,6 @@ function main()
         end
 
         local track_number = math.floor(get_track_number(track))
-        local colors = get_color_table()
 
         if moveable_dest == 1 then
             move_destination_folder(track_number)
@@ -116,23 +115,6 @@ function get_track_number(track)
         local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

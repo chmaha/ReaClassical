@@ -41,8 +41,8 @@ end
 function set_all_tracks_to_same_height()
     local numTracks = CountTracks(0)
 
-    local track = GetTrack(0, 0)
-    SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", 100)
+    local first_track = GetTrack(0, 0)
+    SetMediaTrackInfo_Value(first_track, "I_HEIGHTOVERRIDE", 100)
 
     for i = 1, numTracks - 1 do
         local track = GetTrack(0, i)
@@ -77,7 +77,7 @@ function scroll_to_first_track()
 
     -- Restore previous selection
     Main_OnCommand(40297, 0) -- Unselect all tracks
-    for i, tr in ipairs(saved_sel) do
+    for _, tr in ipairs(saved_sel) do
         SetTrackSelected(tr, true)
     end
 end

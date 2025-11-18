@@ -169,7 +169,7 @@ function scroll_to_first_track()
 
   -- Restore previous selection
   Main_OnCommand(40297, 0) -- Unselect all tracks
-  for i, tr in ipairs(saved_sel) do
+  for _, tr in ipairs(saved_sel) do
     SetTrackSelected(tr, true)
   end
 end

@@ -620,9 +620,9 @@ end
 
 function adaptive_delete()
   local sel_items = {}
-  local item_count = CountSelectedMediaItems(0)
+  local item_count = count_selected_media_items()
   for i = 0, item_count - 1 do
-    sel_items[#sel_items+1] = GetSelectedMediaItem(0, i)
+    sel_items[#sel_items+1] = get_selected_media_item_at(i)
   end
 
   local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)

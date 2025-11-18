@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, duplicate_first_folder, sync_based_on_workflow
 local delete_first_group_items, solo, trackname_check
-local get_path, get_color_table, set_first_folder_items_color
+local set_first_folder_items_color
 
 ---------------------------------------------------------------------
 
@@ -186,26 +186,7 @@ end
 
 ---------------------------------------------------------------------
 
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
 function set_first_folder_items_color()
-    local colors = get_color_table()
-
     local track_count = CountTracks(0)
     if track_count == 0 then return end
 

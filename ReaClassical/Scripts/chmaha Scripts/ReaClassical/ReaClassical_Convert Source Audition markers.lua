@@ -53,7 +53,7 @@ function convert_audition_markers()
 
     -- 2. Find SAI or SAO marker under edit cursor
     for i = 0, markerCount - 1 do
-        local retval, isrgn, pos, rgnend, raw_label, idx, color = EnumProjectMarkers3(0, i)
+        local _, isrgn, pos, _, raw_label, _, color = EnumProjectMarkers3(0, i)
         if not isrgn and math.abs(pos - curPos) < 1e-9 then
             local number, suffix = raw_label:match("^(%d+):%s*(%S+)")
             if number and suffix then
@@ -80,7 +80,7 @@ function convert_audition_markers()
     if marker_type == "SAI" then
         -- Find next SAO marker for same track
         for i = 0, markerCount - 1 do
-            local retval, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
+            local _, isrgn, pos, _, name = EnumProjectMarkers(i)
             local num, suffix = name:match("^(%d+):%s*(%S+)")
             if not isrgn and num and tonumber(num) == start_tracknum then
                 if pos > start_pos and suffix:match("^SAO") then
@@ -92,7 +92,7 @@ function convert_audition_markers()
     elseif marker_type == "SAO" then
         -- Find previous SAI marker for same track
         for i = markerCount - 1, 0, -1 do
-            local retval, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
+            local _, isrgn, pos, _, name = EnumProjectMarkers(i)
             local num, suffix = name:match("^(%d+):%s*(%S+)")
             if not isrgn and num and tonumber(num) == start_tracknum then
                 if pos < end_pos and suffix:match("^SAI") then
@@ -111,7 +111,7 @@ function convert_audition_markers()
 
     -- 5. Delete all "SAI"/"SAO" markers
     for i = markerCount - 1, 0, -1 do
-        local retval, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
+        local _, isrgn, _, _, name = EnumProjectMarkers(i)
         if not isrgn and (name:find("SAI") or name:find("SAO")) then
             DeleteProjectMarkerByIndex(0, i)
         end
