@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.11
+@version 25.11.1
 @changelog
-  Add various actions to alt recording section
+  Add improved 3-point insert function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
