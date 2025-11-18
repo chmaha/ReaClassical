@@ -350,47 +350,74 @@ function split_at_dest_in()
     select_item_under_cursor_on_selected_track()
     local initial_selected_items = count_selected_media_items()
     -- New logic: if exactly 2 items are selected, move the second item to marker 996
-if initial_selected_items == 2 then
-    local second_item = GetSelectedMediaItem(0, 1)
-    if second_item then
-        -- Find position of marker 996
-        local marker_pos = nil
-        local i = 0
-        while true do
-            local retval, isrgn, pos, _, _, markrgnindexnumber = EnumProjectMarkers(i)
-            if not retval then break end
-            if not isrgn and markrgnindexnumber == 996 then
-                marker_pos = pos
-                break
+    if initial_selected_items == 2 then
+        local second_item = get_selected_media_item_at(1)
+        if second_item then
+            -- Find position of marker 996
+            local marker_pos = nil
+            local i = 0
+            while true do
+                local retval, isrgn, pos, _, _, markrgnindexnumber = EnumProjectMarkers(i)
+                if not retval then break end
+                if not isrgn and markrgnindexnumber == 996 then
+                    marker_pos = pos
+                    break
+                end
+                i = i + 1
             end
-            i = i + 1
-        end
 
-        if marker_pos then
-            -- Get all items in the same group as second_item
-            local group_id = GetMediaItemInfo_Value(second_item, "I_GROUPID")
-            local num_items = CountMediaItems(0)
+            if marker_pos then
+                -- Get group ID of second item
+                local group_id = GetMediaItemInfo_Value(second_item, "I_GROUPID")
+                if group_id ~= 0 then
+                    -- Find the first folder track
+                    local num_tracks = CountTracks(0)
+                    local folder_start, folder_end = nil, nil
+                    for t = 0, num_tracks - 1 do
+                        local track = GetTrack(0, t)
+                        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                        if depth == 1 then
+                            folder_start = t
+                            -- find folder end
+                            folder_end = t
+                            local x = t + 1
+                            while x < num_tracks do
+                                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                                folder_end = x
+                                if d < 0 then break end
+                                x = x + 1
+                            end
+                            break
+                        end
+                    end
 
-            for j = 0, num_items - 1 do
-                local item = GetMediaItem(0, j)
-                if item and GetMediaItemInfo_Value(item, "I_GROUPID") == group_id and group_id ~= 0 then
-                    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-                    local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
-
-                    if marker_pos > item_start and marker_pos < item_end then
-                        -- Shift the left edge to marker 996, keep right edge fixed
-                        local new_len = item_end - marker_pos
-                        SetMediaItemInfo_Value(item, "D_POSITION", marker_pos)
-                        SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
+                    if folder_start then
+                        -- Loop through items only on tracks within first folder
+                        for t = folder_start, folder_end do
+                            local track = GetTrack(0, t)
+                            local num_items_on_track = CountTrackMediaItems(track)
+                            for j = 0, num_items_on_track - 1 do
+                                local item = GetTrackMediaItem(track, j)
+                                if GetMediaItemInfo_Value(item, "I_GROUPID") == group_id then
+                                    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                                    local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+                                    if marker_pos > item_start and marker_pos < item_end then
+                                        -- Shift left edge to marker 996, keep right edge fixed
+                                        local new_len = item_end - marker_pos
+                                        SetMediaItemInfo_Value(item, "D_POSITION", marker_pos)
+                                        SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
+                                    end
+                                end
+                            end
+                        end
                     end
                 end
             end
-        end
 
-        -- Deselect the second item
-        SetMediaItemSelected(second_item, false)
+            -- Deselect the second item
+            SetMediaItemSelected(second_item, false)
+        end
     end
-end
     local final_selected_items = count_selected_media_items()
     Main_OnCommand(40034, 0)     -- Item grouping: Select all items in groups
     Main_OnCommand(40912, 0)     -- Options: Toggle auto-crossfade on split (OFF)
