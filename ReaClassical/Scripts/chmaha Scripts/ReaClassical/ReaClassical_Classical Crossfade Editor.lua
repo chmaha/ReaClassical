@@ -130,9 +130,9 @@ function select_check()
     local track = GetMediaItemTrack(selected_item)
     local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
-    if track_num ~= 1 then
-        return false
-    end
+    -- if track_num ~= 1 then
+    --     return false
+    -- end
 
     local current_item_index = GetMediaItemInfo_Value(selected_item, "IP_ITEMNUMBER")
     local prev_item = GetTrackMediaItem(track, current_item_index - 1)

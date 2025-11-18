@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
+local main, set_all_tracks_to_same_height, scroll_to_first_track
 
 ---------------------------------------------------------------------
 
@@ -36,11 +36,56 @@ function main()
         return
     end
     PreventUIRefresh(1)
-    Main_OnCommand(40296, 0) -- Track: Select all tracks
-    local zoom = NamedCommandLookup("_SWS_VZOOMFIT")
-    Main_OnCommand(zoom, 0)  -- SWS: Vertical zoom to selected tracks
-    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+    Main_OnCommand(40111, 0) -- zoom in vertical a little to avoid toggle behavior
+    set_all_tracks_to_same_height()
+    scroll_to_first_track()
     PreventUIRefresh(-1)
+end
+
+---------------------------------------------------------------------
+
+function set_all_tracks_to_same_height()
+    local numTracks = CountTracks(0)
+
+    local track = GetTrack(0, 0)
+    SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", 100)
+
+    for i = 1, numTracks - 1 do
+        local track = GetTrack(0, i)
+        SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", 40)
+    end
+
+
+    -- Refresh UI
+    TrackList_AdjustWindows(false)
+    UpdateArrange()
+end
+
+---------------------------------------------------------------------
+
+function scroll_to_first_track()
+    local track1 = GetTrack(0, 0)
+    if not track1 then return end
+
+    -- Save current selected tracks to restore later
+    local saved_sel = {}
+    local count_sel = CountSelectedTracks(0)
+    for i = 0, count_sel - 1 do
+        saved_sel[i + 1] = GetSelectedTrack(0, i)
+    end
+
+    -- Select only Track 1
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    SetTrackSelected(track1, true)
+
+    -- Scroll Track 1 into view (vertically)
+    Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
+
+    -- Restore previous selection
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    for i, tr in ipairs(saved_sel) do
+        SetTrackSelected(tr, true)
+    end
 end
 
 ---------------------------------------------------------------------

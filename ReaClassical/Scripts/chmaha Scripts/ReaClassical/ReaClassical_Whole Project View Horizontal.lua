@@ -31,9 +31,28 @@ function main()
     end
     PreventUIRefresh(1)
     SetEditCurPos(0, true, false)
+
+    local num_pre_selected = CountSelectedTracks(0)
+    local pre_selected = {}
+    if num_pre_selected > 0 then
+        for i = 0, num_pre_selected - 1, 1 do
+            local track = GetSelectedTrack(0, i)
+            table.insert(pre_selected, track)
+        end
+    end
+
     Main_OnCommand(40296, 0) -- Track: Select all tracks
     Main_OnCommand(40295, 0) -- View: Zoom out project
     Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+
+    if num_pre_selected > 0 then
+        Main_OnCommand(40297, 0) --unselect_all
+        SetOnlyTrackSelected(pre_selected[1])
+        for _, track in ipairs(pre_selected) do
+            if pcall(IsTrackSelected, track) then SetTrackSelected(track, 1) end
+        end
+    end
+
     PreventUIRefresh(-1)
 end
 
