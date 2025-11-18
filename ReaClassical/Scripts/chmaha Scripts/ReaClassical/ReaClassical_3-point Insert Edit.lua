@@ -348,10 +348,53 @@ function split_at_dest_in()
     Main_OnCommand(40939, 0) -- Track: Select track 01
     GoToMarker(0, 996, false)
     select_item_under_cursor_on_selected_track()
+    local initial_selected_items = count_selected_media_items()
+    -- New logic: if exactly 2 items are selected, move the second item to marker 996
+if initial_selected_items == 2 then
+    local second_item = GetSelectedMediaItem(0, 1)
+    if second_item then
+        -- Find position of marker 996
+        local marker_pos = nil
+        local i = 0
+        while true do
+            local retval, isrgn, pos, _, _, markrgnindexnumber = EnumProjectMarkers(i)
+            if not retval then break end
+            if not isrgn and markrgnindexnumber == 996 then
+                marker_pos = pos
+                break
+            end
+            i = i + 1
+        end
+
+        if marker_pos then
+            -- Get all items in the same group as second_item
+            local group_id = GetMediaItemInfo_Value(second_item, "I_GROUPID")
+            local num_items = CountMediaItems(0)
+
+            for j = 0, num_items - 1 do
+                local item = GetMediaItem(0, j)
+                if item and GetMediaItemInfo_Value(item, "I_GROUPID") == group_id and group_id ~= 0 then
+                    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                    local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+
+                    if marker_pos > item_start and marker_pos < item_end then
+                        -- Shift the left edge to marker 996, keep right edge fixed
+                        local new_len = item_end - marker_pos
+                        SetMediaItemInfo_Value(item, "D_POSITION", marker_pos)
+                        SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
+                    end
+                end
+            end
+        end
+
+        -- Deselect the second item
+        SetMediaItemSelected(second_item, false)
+    end
+end
+    local final_selected_items = count_selected_media_items()
     Main_OnCommand(40034, 0)     -- Item grouping: Select all items in groups
-    local selected_items = count_selected_media_items()
     Main_OnCommand(40912, 0)     -- Options: Toggle auto-crossfade on split (OFF)
-    if selected_items > 0 then
+    if final_selected_items > 0 then
         Main_OnCommand(40186, 0) -- Item: Split items at edit or play cursor (ignoring grouping)
     end
     Main_OnCommand(40289, 0)     -- Item: Unselect all items
@@ -803,7 +846,7 @@ function add_dest_out_marker()
             if id == 996 then
                 -- Add marker 997 at the same position
                 AddProjectMarker2(project, false, pos, 0, "DEST-OUT", 997, 0)
-                break  -- stop after the first 996 found
+                break -- stop after the first 996 found
             end
         end
 
