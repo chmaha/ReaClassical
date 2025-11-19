@@ -30,7 +30,7 @@ local check_overlapping_items, count_selected_media_items, get_selected_media_it
 local create_crossfades, get_first_last_items, return_xfade_length
 local move_destination_folder_to_top, move_destination_folder, mark_as_edit
 local adaptive_delete, select_item_under_cursor_on_selected_track
-local fix_marker_pair
+local fix_marker_pair, get_item_guid
 
 ---------------------------------------------------------------------
 
@@ -704,7 +704,7 @@ function save_source_details()
     if not item then return end
 
     -- Get the selected item’s GUID
-    local guid = BR_GetMediaItemGUID(item)
+    local guid = get_item_guid(item)
     if not guid or guid == "" then return end
 
     -- Save the GUID to the project’s ExtState
@@ -817,6 +817,22 @@ function fix_marker_pair(id_in, id_out)
         -- re-add with POSITIONS SWAPPED
         AddProjectMarker2(0, false, out_pos, 0, in_name, id_in, 0)
         AddProjectMarker2(0, false, in_pos, 0, out_name, id_out, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function get_item_guid(item)
+    if not item then
+        return ""
+    end
+
+    -- Get GUID string from the item
+    local retval, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+    if retval then
+        return guid
+    else
+        return ""
     end
 end
 

@@ -24,13 +24,14 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, select_matching_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, load_last_assembly_item
-local ripple_lock_mode, return_xfade_length, xfade
+local ripple_lock_mode, return_xfade_length, xfade, get_item_guid
 local get_first_last_items, get_color_table, get_path, mark_as_edit
 local move_to_project_tab, save_source_details, adaptive_delete
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
 local add_dest_out_marker, save_last_assembly_item, create_dest_in
+local get_item_by_guid
 
 ---------------------------------------------------------------------
 
@@ -730,7 +731,7 @@ function save_source_details()
     if not item then return end
 
     -- Get the selected item’s GUID
-    local guid = BR_GetMediaItemGUID(item)
+    local guid = get_item_guid(item)
     if not guid or guid == "" then return end
 
     -- Save the GUID to the project’s ExtState
@@ -850,7 +851,7 @@ end
 
 function load_last_assembly_item()
     local _, item_guid = GetProjExtState(0, "ReaClassical", "LastAssemblyItem")
-    local item = BR_GetMediaItemByGUID(0, item_guid)
+    local item = get_item_by_guid(0, item_guid)
     return item
 end
 
@@ -884,7 +885,7 @@ end
 ---------------------------------------------------------------------
 
 function save_last_assembly_item(item)
-    local item_guid = BR_GetMediaItemGUID(item)
+    local item_guid = get_item_guid(item)
     SetProjExtState(0, "ReaClassical", "LastAssemblyItem", item_guid)
 end
 
@@ -894,6 +895,40 @@ function create_dest_in(cur_pos)
     SetEditCurPos(cur_pos, false, false)
     local colors = get_color_table()
     AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
+end
+
+---------------------------------------------------------------------
+
+function get_item_guid(item)
+    if not item then
+        return ""
+    end
+
+    -- Get GUID string from the item
+    local retval, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+    if retval then
+        return guid
+    else
+        return ""
+    end
+end
+
+---------------------------------------------------------------------
+
+function get_item_by_guid(project, guid)
+    if not guid or guid == "" then return nil end
+    project = project or 0  -- default to current project if nil
+
+    local numItems = reaper.CountMediaItems(project)
+    for i = 0, numItems - 1 do
+        local item = reaper.GetMediaItem(project, i)
+        local retval, itemGUID = reaper.GetSetMediaItemInfo_String(item, "GUID", "", false)
+        if retval and itemGUID == guid then
+            return item
+        end
+    end
+
+    return nil  -- not found
 end
 
 ---------------------------------------------------------------------

@@ -362,11 +362,17 @@ end
 ---------------------------------------------------------------------
 
 function frame_check(pos)
-  local nearest_grid = BR_GetClosestGridDivision(pos)
-  if pos ~= nearest_grid then
-    pos = BR_GetPrevGridDivision(pos)
-  end
-  return pos
+    local cd_fps = 75
+
+    -- nearest CD frame
+    local nearest_grid = math.floor(pos * cd_fps + 0.5) / cd_fps
+
+    -- if pos isn't exactly on the grid, move back to previous frame
+    if math.abs(pos - nearest_grid) > 1e-12 then
+        nearest_grid = math.floor(pos * cd_fps) / cd_fps
+    end
+
+    return nearest_grid
 end
 
 ---------------------------------------------------------------------

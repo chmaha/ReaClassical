@@ -27,7 +27,8 @@ local fadeEnd, zoom, view, unlock_items, save_color
 local paint, load_color, move_back_cursor, folder_check, correct_item_positions
 local check_next_item_overlap, trackname_check, get_color_table, get_path, get_reaper_version
 local get_selected_media_item_at, count_selected_media_items
-local scroll_to_first_track, select_next_item
+local scroll_to_first_track, select_next_item, get_item_guid
+local get_item_by_guid
 ---------------------------------------------------------------------
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -92,7 +93,7 @@ function main()
             end
             local selected_item, item1 = select_check()
             if item1 and check_next_item_overlap(item1) then
-                local orig_item_guid = BR_GetMediaItemGUID(selected_item)
+                local orig_item_guid = get_item_guid(selected_item)
                 SetProjExtState(0, "ReaClassical", "OrigSelectedItem", orig_item_guid)
                 fadeStart(item1, workflow)
             else
@@ -200,7 +201,7 @@ function fadeStart(item1, workflow)
     local item1_take = GetActiveTake(item1)
     local item1_take_offset = GetMediaItemTakeInfo_Value(item1_take, "D_STARTOFFS")
     SetProjExtState(0, "ReaClassical", "FirstItemOffset", item1_take_offset)
-    local item1_guid = BR_GetMediaItemGUID(item1)
+    local item1_guid = get_item_guid(item1)
     SetProjExtState(0, "ReaClassical", "FirstItemGUID", item1_guid)
     save_color("1", item1)
     local colors = get_color_table()
@@ -224,7 +225,7 @@ function fadeStart(item1, workflow)
     SetMediaItemSelected(item1, true)
     select_next_item(false)
     local item2 = get_selected_media_item_at(1)
-    local item2_guid = BR_GetMediaItemGUID(item2)
+    local item2_guid = get_item_guid(item2)
     SetProjExtState(0, "ReaClassical", "SecondItemGUID", item2_guid)
     if item2 then
         save_color("2", item2)
@@ -242,8 +243,8 @@ function fadeEnd()
 
     local _, item1_guid = GetProjExtState(0, "ReaClassical", "FirstItemGUID")
     local _, item2_guid = GetProjExtState(0, "ReaClassical", "SecondItemGUID")
-    local item1 = BR_GetMediaItemByGUID(0, item1_guid)
-    local item2 = BR_GetMediaItemByGUID(0, item2_guid)
+    local item1 = get_item_by_guid(0, item1_guid)
+    local item2 = get_item_by_guid(0, item2_guid)
 
     local first_color = load_color("1")
     paint(item1, first_color)
@@ -258,7 +259,7 @@ function fadeEnd()
 
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     local _, orig_item_guid = GetProjExtState(0, "ReaClassical", "OrigSelectedItem")
-    local orig_selected_item = BR_GetMediaItemByGUID(0, orig_item_guid)
+    local orig_selected_item = get_item_by_guid(0, orig_item_guid)
     if orig_selected_item then
         SetMediaItemSelected(orig_selected_item, true)
     end
@@ -606,6 +607,40 @@ function select_next_item(unselect_all_first)
             end
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function get_item_guid(item)
+    if not item then
+        return ""
+    end
+
+    -- Get GUID string from the item
+    local retval, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+    if retval then
+        return guid
+    else
+        return ""
+    end
+end
+
+---------------------------------------------------------------------
+
+function get_item_by_guid(project, guid)
+    if not guid or guid == "" then return nil end
+    project = project or 0  -- default to current project if nil
+
+    local numItems = reaper.CountMediaItems(project)
+    for i = 0, numItems - 1 do
+        local item = reaper.GetMediaItem(project, i)
+        local retval, itemGUID = reaper.GetSetMediaItemInfo_String(item, "GUID", "", false)
+        if retval and itemGUID == guid then
+            return item
+        end
+    end
+
+    return nil  -- not found
 end
 
 ---------------------------------------------------------------------

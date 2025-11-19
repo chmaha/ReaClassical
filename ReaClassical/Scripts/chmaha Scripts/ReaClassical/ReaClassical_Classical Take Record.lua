@@ -26,7 +26,7 @@ local main, solo, trackname_check, mixer, track_check
 local load_prefs, save_prefs, get_color_table, get_path
 local extract_take_number, check_parent_track
 local get_selected_media_item_at, count_selected_media_items
-local clear_all_rec_armed_except_live
+local clear_all_rec_armed_except_live, get_item_guid
 local select_children_of_selected_folders
 local unselect_folder_children, set_rec_arm_for_selected_tracks
 ---------------------------------------------------------------------
@@ -122,7 +122,7 @@ function main()
         Main_OnCommand(40032, 0)
         --save recorded item guid
         local recorded_item = get_selected_media_item_at(0)
-        local recorded_item_guid = BR_GetMediaItemGUID(recorded_item)
+        local recorded_item_guid = get_item_guid(recorded_item)
         SetProjExtState(0, "ReaClassical", "LastRecordedItem", recorded_item_guid)
         Main_OnCommand(40289, 0) -- Unselect all items
 
@@ -452,6 +452,22 @@ function set_rec_arm_for_selected_tracks(state)
     end
 
     UpdateArrange()
+end
+
+---------------------------------------------------------------------
+
+function get_item_guid(item)
+    if not item then
+        return ""
+    end
+
+    -- Get GUID string from the item
+    local retval, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+    if retval then
+        return guid
+    else
+        return ""
+    end
 end
 
 ---------------------------------------------------------------------

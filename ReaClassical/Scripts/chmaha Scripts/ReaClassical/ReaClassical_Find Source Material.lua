@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, count_selected_media_items, get_selected_media_item_at
+local get_item_by_guid
 
 ---------------------------------------------------------------------
 
@@ -48,7 +49,7 @@ function main()
         return
     end
 
-    local source_item = BR_GetMediaItemByGUID(0, saved_guid)
+    local source_item = get_item_by_guid(0, saved_guid)
     if not source_item then
         MB("Error: Source item no longer exists!", "Error", 0)
         return
@@ -136,6 +137,24 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function get_item_by_guid(project, guid)
+    if not guid or guid == "" then return nil end
+    project = project or 0  -- default to current project if nil
+
+    local numItems = reaper.CountMediaItems(project)
+    for i = 0, numItems - 1 do
+        local item = reaper.GetMediaItem(project, i)
+        local retval, itemGUID = reaper.GetSetMediaItemInfo_String(item, "GUID", "", false)
+        if retval and itemGUID == guid then
+            return item
+        end
+    end
+
+    return nil  -- not found
 end
 
 ---------------------------------------------------------------------

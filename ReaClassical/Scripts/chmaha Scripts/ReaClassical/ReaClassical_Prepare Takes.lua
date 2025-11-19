@@ -30,6 +30,7 @@ local delete_empty_items, pastel_color, nudge_right
 local color_group_items, color_folder_children, scroll_to_first_track
 local select_children_of_selected_folders, select_next_folder
 local select_all_parents, select_item_under_cursor_on_selected_track
+local get_item_by_guid
 ---------------------------------------------------------------------
 
 function main()
@@ -190,7 +191,7 @@ function color_items(edits, color_pref)
             for _, item in ipairs(grouped_items) do
                 local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                 if src_guid ~= "" then
-                    local src_item = BR_GetMediaItemByGUID(0, src_guid)
+                    local src_item = get_item_by_guid(0, src_guid)
                     if src_item then
                         group_color = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                         break
@@ -272,7 +273,7 @@ function color_items(edits, color_pref)
                     local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                     local color_val = folder_color
                     if src_guid ~= "" then
-                        local src_item = BR_GetMediaItemByGUID(0, src_guid)
+                        local src_item = get_item_by_guid(0, src_guid)
                         if src_item then
                             color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                         end
@@ -297,7 +298,7 @@ function color_items(edits, color_pref)
                         local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                         local color_val = folder_color
                         if src_guid ~= "" then
-                            local src_item = BR_GetMediaItemByGUID(0, src_guid)
+                            local src_item = get_item_by_guid(0, src_guid)
                             if src_item then
                                 color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                             end
@@ -819,6 +820,24 @@ function select_item_under_cursor_on_selected_track()
       end
     end
   end
+end
+
+---------------------------------------------------------------------
+
+function get_item_by_guid(project, guid)
+    if not guid or guid == "" then return nil end
+    project = project or 0  -- default to current project if nil
+
+    local numItems = reaper.CountMediaItems(project)
+    for i = 0, numItems - 1 do
+        local item = reaper.GetMediaItem(project, i)
+        local retval, itemGUID = reaper.GetSetMediaItemInfo_String(item, "GUID", "", false)
+        if retval and itemGUID == guid then
+            return item
+        end
+    end
+
+    return nil  -- not found
 end
 
 ---------------------------------------------------------------------
