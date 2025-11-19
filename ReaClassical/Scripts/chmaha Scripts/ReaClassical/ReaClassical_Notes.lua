@@ -60,7 +60,8 @@ function main()
 
         editing_track = track
         if track then
-            _, track_note = GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
+            local _, note = GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
+            track_note = note
         end
     end
 
@@ -72,7 +73,8 @@ function main()
 
         editing_item = item
         if item then
-            _, item_note = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
+            local _, note = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
+            item_note = note
         end
     end
 
