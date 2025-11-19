@@ -95,26 +95,26 @@ else
     curl -L -o "$file" "$url"
 fi
 
-# # --- SWS Plugin downloads ---
-#
-# # URLs by platform
-# win_sws_urls="
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x86.exe
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x64.exe
-# "
-#
-# mac_sws_urls="
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-i386.dmg
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-x86_64.dmg
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-arm64.dmg
-# "
-#
-# linux_sws_urls="
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-i686.tar.xz
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-x86_64.tar.xz
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-armv7l.tar.xz
-# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-aarch64.tar.xz
-# "
+# --- SWS Plugin downloads ---
+
+# URLs by platform
+win_sws_urls="
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x86.exe
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x64.exe
+"
+
+mac_sws_urls="
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-i386.dmg
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-x86_64.dmg
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-arm64.dmg
+"
+
+linux_sws_urls="
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-i686.tar.xz
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-x86_64.tar.xz
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-armv7l.tar.xz
+https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-aarch64.tar.xz
+"
 
 # --- imgui Plugin downloads ---
 
@@ -190,28 +190,28 @@ extract_tar_xz() {
     rm -f "$archive"
 }
 
-# # --- Windows SWS DLLs ---
-# for url in $win_sws_urls; do
-#     archive="$win_dir/$(basename "$url")"
-#     download_file "$url" "$archive"
-#     extract_7z "$archive" "$win_dir" "reaper_sws*.dll"
-# done
-#
-# # --- macOS SWS dylibs ---
-# for url in $mac_sws_urls; do
-#     archive="$macos_dir/$(basename "$url")"
-#     download_file "$url" "$archive"
-#     extract_7z "$archive" "$macos_dir" "reaper_sws*.dylib"
-# done
-#
-# # --- Linux SWS shared objects ---
-# for url in $linux_sws_urls; do
-#     archive="$linux_dir/$(basename "$url")"
-#     download_file "$url" "$archive"
-#     extract_tar_xz "$archive" "$linux_dir" "reaper_sws*.so"
-# done
-#
-# echo "✅ SWS extraction completed!"
+# --- Windows SWS DLLs ---
+for url in $win_sws_urls; do
+    archive="$win_dir/$(basename "$url")"
+    download_file "$url" "$archive"
+    extract_7z "$archive" "$win_dir" "reaper_sws*.dll"
+done
+
+# --- macOS SWS dylibs ---
+for url in $mac_sws_urls; do
+    archive="$macos_dir/$(basename "$url")"
+    download_file "$url" "$archive"
+    extract_7z "$archive" "$macos_dir" "reaper_sws*.dylib"
+done
+
+# --- Linux SWS shared objects ---
+for url in $linux_sws_urls; do
+    archive="$linux_dir/$(basename "$url")"
+    download_file "$url" "$archive"
+    extract_tar_xz "$archive" "$linux_dir" "reaper_sws*.so"
+done
+
+echo "✅ SWS extraction completed!"
 
 # --- Windows imgui DLLs ---
 for url in $win_imgui_urls; do

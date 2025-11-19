@@ -33,9 +33,16 @@ minor=$(echo "$ver_num" | cut -c2-)
 ver="${major}.${minor}"
 
 # Find the shared library file
-up_file=$(ls ./reaper_imgui-"$arch".so 2>/dev/null | head -n1)
-if [ -z "$up_file" ]; then
-    echo "Error: No UserPlugins file found for architecture $arch"
+imgui_file=$(ls ./reaper_imgui-"$arch".so 2>/dev/null | head -n1)
+if [ -z "$imgui_file" ]; then
+    echo "Error: No reaimgui file found for architecture $arch"
+    exit 1
+fi
+
+# Find the shared library file
+sws_file=$(ls ./reaper_sws-"$arch".so 2>/dev/null | head -n1)
+if [ -z "$sws_file" ]; then
+    echo "Error: No SWS file found for architecture $arch"
     exit 1
 fi
 
@@ -62,7 +69,15 @@ echo "Extracting ReaClassical resources..."
 sleep 1
 unzip -q "$res_zip" -d "${rcfolder}/"
 mkdir -p "${rcfolder}/UserPlugins"
-cp -f "$up_file" "${rcfolder}/UserPlugins/"
+cp -f "$imgui_file" "${rcfolder}/UserPlugins/"
+cp -f "$sws_file" "${rcfolder}/UserPlugins/"
+
+# Merge InstallData into $rcfolder using POSIX tools
+if [ -d "${rcfolder}/InstallData" ]; then
+    echo "Merging InstallData contents into $rcfolder..."
+    # Copy recursively, updating files if newer
+    cp -ru "${rcfolder}/InstallData/"* "${rcfolder}/"
+fi
 
 # Absolute path for configuration
 rcfolder_path=$(realpath "${rcfolder}")

@@ -45,13 +45,21 @@ var Reaper32 []byte
 //go:embed Resource_Folder_Base.zip
 var ResourceZip []byte
 
-// UserPlugins zip
+// imgui
 //
 //go:embed reaper_imgui-x64.dll
 var reaimgui64 []byte
 
 //go:embed reaper_imgui-x86.dll
 var reaimgui32 []byte
+
+// sws
+//
+//go:embed reaper_sws-x64.dll
+var sws64 []byte
+
+//go:embed reaper_sws-x86.dll
+var sws32 []byte
 
 // 7zip
 //
@@ -208,4 +216,40 @@ func addLineToReaperIni(rcfolder string) {
 		os.Exit(1)
 	}
 
+}
+
+func mergeDir(srcDir, dstDir string) error {
+	return filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Compute relative path from srcDir
+		relPath, err := filepath.Rel(srcDir, path)
+		if err != nil {
+			return err
+		}
+		dstPath := filepath.Join(dstDir, relPath)
+
+		if d.IsDir() {
+			// Create subdirectory in destination if it doesn't exist
+			return os.MkdirAll(dstPath, 0755)
+		} else {
+			// Copy file
+			srcFile, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer srcFile.Close()
+
+			dstFile, err := os.Create(dstPath)
+			if err != nil {
+				return err
+			}
+			defer dstFile.Close()
+
+			_, err = io.Copy(dstFile, srcFile)
+			return err
+		}
+	})
 }

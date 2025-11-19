@@ -94,10 +94,25 @@ func Install64bit(rcfolder string, pkgver string, rcver string, arch string) {
 	}
 
 	// Write the DLL file
-	dllPath := filepath.Join(userPluginsDir, "reaper_imgui-x64.dll")
-	if err := os.WriteFile(dllPath, reaimgui64, 0644); err != nil {
+	reaimgui_dllPath := filepath.Join(userPluginsDir, "reaper_imgui-x64.dll")
+	if err := os.WriteFile(reaimgui_dllPath, reaimgui64, 0644); err != nil {
 		fmt.Println("Error writing reaper_imgui-x64.dll:", err)
 		return
+	}
+
+	// Write the DLL file
+	sws_dllPath := filepath.Join(userPluginsDir, "reaper_imgui-x64.dll")
+	if err := os.WriteFile(sws_dllPath, sws64, 0644); err != nil {
+		fmt.Println("Error writing reaper_sws-x64.dll:", err)
+		return
+	}
+
+	installDataDir := filepath.Join(rcfolder, "InstallData")
+	if _, err := os.Stat(installDataDir); err == nil {
+		fmt.Println("Merging InstallData contents into", rcfolder)
+		if err := mergeDir(installDataDir, rcfolder); err != nil {
+			fmt.Println("Error merging InstallData:", err)
+		}
 	}
 
 	// Add theme/splash references

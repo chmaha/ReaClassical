@@ -81,10 +81,16 @@ func Install32bit(rcfolder string, pkgver string, rcver string) {
 		return
 	}
 
-	// Write the DLL file
-	dllPath := filepath.Join(userPluginsDir, "reaper_imgui-x64.dll")
-	if err := os.WriteFile(dllPath, reaimgui32, 0644); err != nil {
+	// Write the DLL files
+	reaimgui_dllPath := filepath.Join(userPluginsDir, "reaper_imgui-x64.dll")
+	if err := os.WriteFile(reaimgui_dllPath, reaimgui32, 0644); err != nil {
 		fmt.Println("Error writing reaper_imgui-x64.dll:", err)
+		return
+	}
+
+	sws_dllPath := filepath.Join(userPluginsDir, "reaper_imgui-x64.dll")
+	if err := os.WriteFile(sws_dllPath, sws32, 0644); err != nil {
+		fmt.Println("Error writing reaper_sws-x64.dll:", err)
 		return
 	}
 

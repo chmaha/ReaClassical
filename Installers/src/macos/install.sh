@@ -71,9 +71,20 @@ hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint "$mount_dir" "
 # Extract bundled ReaClassical resources
 res_zip="./Resource_Folder_Base.zip"
 up_file="./reaper_imgui-"$arch".dylib"
+sws_file="./reaper_sws-"$arch".dylib"
 
-if [ ! -f "$res_zip" ] || [ ! -f "$up_file" ]; then
-    echo "Error: Resource_Folder_Base.zip or reaper_imgui-${arch}.dylib missing from bundle."
+if [ ! -f "$res_zip" ]; then
+    echo "Error: $res_zip is missing from bundle."
+    exit 1
+fi
+
+if [ ! -f "$imgui_file" ]; then
+    echo "Error: $imgui_file is missing from bundle."
+    exit 1
+fi
+
+if [ ! -f "$sws_file" ]; then
+    echo "Error: $sws_file is missing from bundle."
     exit 1
 fi
 
@@ -81,7 +92,15 @@ echo "Extracting ReaClassical resources into $rcfolder..."
 mkdir -p "$rcfolder"
 unzip -q "$res_zip" -d "$rcfolder/"
 mkdir -p "$rcfolder/UserPlugins"
-cp -f "$up_file" "$rcfolder/UserPlugins/"
+cp -f "$imgui_file" "$rcfolder/UserPlugins/"
+cp -f "$sws_file" "$rcfolder/UserPlugins/"
+
+# Merge InstallData into $rcfolder on macOS
+if [ -d "${rcfolder}/InstallData" ]; then
+    echo "Merging InstallData contents into $rcfolder..."
+    # Copy recursively and preserve attributes
+    cp -R "${rcfolder}/InstallData/"* "${rcfolder}/"
+fi
 
 # Absolute path for configuration
 rcfolder_path=$(realpath "$rcfolder")
