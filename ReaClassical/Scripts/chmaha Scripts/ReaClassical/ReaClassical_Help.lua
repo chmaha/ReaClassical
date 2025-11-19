@@ -26,6 +26,12 @@ local main, file_exists, get_path
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
 function main()
     local resource_path = GetResourcePath()
     local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-Manual.pdf")
