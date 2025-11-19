@@ -21,8 +21,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-package.path = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui = require 'imgui' '0.10'
+package.path        = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui         = require 'imgui' '0.10'
 local main
 
 ---------------------------------------------------------------------
@@ -37,7 +37,6 @@ local MIN_H_PROJECT = 60
 local MIN_H_TRACK   = 80
 local MIN_H_ITEM    = 80
 
-local project_note  = ""
 local track_note    = ""
 local item_note     = ""
 
@@ -47,14 +46,11 @@ local editing_item  = nil
 ---------------------------------------------------------------------
 
 function main()
-    local item  = GetSelectedMediaItem(0, 0)
-    local track = GetSelectedTrack(0, 0)
-    local proj  = 0
+    local item   = GetSelectedMediaItem(0, 0)
+    local track  = GetSelectedTrack(0, 0)
+    local proj   = 0
 
-    if project_note == "" then
-        local _, str = GetSetProjectNotes(proj, false, "")
-        project_note = str or ""
-    end
+    local project_note = GetSetProjectNotes(proj, false, "")
 
     if editing_track ~= track then
         ImGui.SetWindowFocus(ctx)
@@ -64,10 +60,7 @@ function main()
 
         editing_track = track
         if track then
-            local _, str = GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
-            track_note = str or ""
-        else
-            track_note = ""
+            _, track_note = GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
         end
     end
 
@@ -79,23 +72,20 @@ function main()
 
         editing_item = item
         if item then
-            local _, str = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
-            item_note = str or ""
-        else
-            item_note = ""
+            _, item_note = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
         end
     end
 
     if window_open then
-        local FLT_MAX = 3.402823466e+38
+        local _, FLT_MAX = ImGui.NumericLimits_Float()
         ImGui.SetNextWindowSizeConstraints(ctx, DEFAULT_W, DEFAULT_H, FLT_MAX, FLT_MAX)
         local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Notes", window_open)
         window_open = open_ref
 
         if opened then
-            local avail_w, avail_h = ImGui_GetContentRegionAvail(ctx)
+            local avail_w, avail_h = ImGui.GetContentRegionAvail(ctx)
 
-            local static_height    = 3 * ImGui_GetTextLineHeightWithSpacing(ctx) + 40
+            local static_height    = 3 * ImGui.GetTextLineHeightWithSpacing(ctx) + 40
             local dynamic_h        = math.max(0, avail_h - static_height)
 
             local base_total       = MIN_H_PROJECT + MIN_H_TRACK + MIN_H_ITEM
@@ -109,7 +99,7 @@ function main()
             ImGui.Text(ctx, "Project Note:")
             local changed_project
             changed_project, project_note = ImGui.InputTextMultiline(ctx, "##project_note", project_note, avail_w,
-            h_project)
+                h_project)
             if changed_project then
                 GetSetProjectNotes(proj, true, project_note)
             end
