@@ -29,6 +29,12 @@ local select_children_of_selected_folders, select_prev_item
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
 mastering = (mastering ~= "" and tonumber(mastering)) or 0

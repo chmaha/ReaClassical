@@ -32,14 +32,36 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local _, _, dest_proj = markers()
 
-    if dest_proj then
-        move_to_project_tab(dest_proj)
+    -- Check if marker exists in any project
+    local marker_exists = false
+    local i = 0
+    while true do
+        local proj = EnumProjects(i)
+        if proj == nil then break end
+
+        local _, num_markers, num_regions = CountProjectMarkers(proj)
+        for j = 0, num_markers + num_regions - 1 do
+            local _, region, _, _, _, id = EnumProjectMarkers2(proj, j)
+            if not region and id == 997 then
+                marker_exists = true
+                break
+            end
+        end
+
+        if marker_exists then break end
+        i = i + 1
     end
+    if marker_exists then
+        local _, _, dest_proj = markers()
 
-    GoToMarker(0, 997, false)
-    zoom()
+        if dest_proj then
+            move_to_project_tab(dest_proj)
+        end
+
+        GoToMarker(0, 997, false)
+        zoom()
+    end
 end
 
 ---------------------------------------------------------------------
