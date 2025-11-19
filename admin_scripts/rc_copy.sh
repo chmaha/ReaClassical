@@ -40,6 +40,7 @@ Data/toolbar_icons/Reverse SD Edit.png
 Data/toolbar_icons/assembly.png
 Data/toolbar_icons/promote to dest.png
 Data/toolbar_icons/toolbar_tool_erase_delete_remove.png
+Data/reaper_imgui_doc.html
 Effects/ReJJ/
 Effects/chmaha Scripts/
 Effects/chmaha airwindows JSFX Ports
@@ -48,6 +49,7 @@ ProjectTemplates/ReaClassical.RPP
 ProjectTemplates/Room_Tone_Generation.RPP
 Scripts/ReaTeam Scripts/Development/cfillion_Interactive ReaScript.lua
 Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua
+Scripts/ReaTeam Extensions/API/
 Scripts/chmaha Scripts/
 reaper-convertmetadata.ini
 reaper-fxfolders.ini
