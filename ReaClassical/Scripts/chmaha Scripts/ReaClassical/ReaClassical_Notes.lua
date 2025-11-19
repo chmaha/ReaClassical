@@ -1,162 +1,142 @@
-local ctx            = reaper.ImGui_CreateContext('Notes Window')
-local window_open    = true
+--[[
+@noindex
 
--- Default target window size
-local DEFAULT_W      = 350
-local DEFAULT_H      = 375
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
 
--- Minimum heights for each section
-local MIN_H_PROJECT  = 60
-local MIN_H_TRACK    = 80
-local MIN_H_ITEM     = 80
+Copyright (C) 2022–2025 chmaha
 
--- Buffers
-local project_note   = ""
-local track_note     = ""
-local item_note      = ""
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
 
--- Selection tracking
-local last_item      = nil
-local last_track     = nil
-local last_proj_note = nil
+-- luacheck: ignore 113
 
--- Editing freeze pointers
-local editing_item   = nil
-local editing_track  = nil
+for key in pairs(reaper) do _G[key] = reaper[key] end
+package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui = require 'imgui' '0.10'
+local main
 
--- Helper to get item GUID
-local function get_item_guid(item)
-    local ok, guid = reaper.GetSetMediaItemInfo_String(item, "GUID", "", false)
-    if ok then return guid end
-    return nil
-end
+---------------------------------------------------------------------
+
+local ctx           = ImGui.CreateContext('ReaClassical Notes Window')
+local window_open   = true
+
+local DEFAULT_W     = 350
+local DEFAULT_H     = 375
+
+local MIN_H_PROJECT = 60
+local MIN_H_TRACK   = 80
+local MIN_H_ITEM    = 80
+
+local project_note  = ""
+local track_note    = ""
+local item_note     = ""
+
+local editing_track = nil
+local editing_item  = nil
+
+---------------------------------------------------------------------
 
 function main()
-    local item  = reaper.GetSelectedMediaItem(0, 0)
-    local track = reaper.GetSelectedTrack(0, 0)
+    local item  = GetSelectedMediaItem(0, 0)
+    local track = GetSelectedTrack(0, 0)
     local proj  = 0
 
-    ------------------------------------------------------------------
-    -- PROJECT NOTE (load once)
-    ------------------------------------------------------------------
-    if last_proj_note == nil then
-        local _, str = reaper.GetSetProjectNotes(proj, false, "")
+    if project_note == "" then
+        local _, str = GetSetProjectNotes(proj, false, "")
         project_note = str or ""
-        last_proj_note = project_note
     end
 
-    ------------------------------------------------------------------
-    -- TRACK NOTE (flush when selection changes)
-    ------------------------------------------------------------------
-    local track_guid = track and reaper.GetTrackGUID(track) or nil
     if editing_track ~= track then
-        editing_track = nil
+        if editing_track then
+            GetSetMediaTrackInfo_String(editing_track, "P_EXT:track_notes", track_note, true)
+        end
+
+        editing_track = track
         if track then
-            local _, str = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
+            local _, str = GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
             track_note = str or ""
         else
             track_note = ""
         end
     end
 
-    ------------------------------------------------------------------
-    -- ITEM NOTE (flush when selection changes)
-    ------------------------------------------------------------------
-    local item_guid = item and get_item_guid(item) or nil
     if editing_item ~= item then
-        editing_item = nil
+        ImGui.SetWindowFocus(ctx)
+        if editing_item then
+            GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
+        end
+
+        editing_item = item
         if item then
-            local _, str = reaper.GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
+            local _, str = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
             item_note = str or ""
         else
             item_note = ""
         end
     end
 
-    ------------------------------------------------------------------
-    -- WINDOW
-    ------------------------------------------------------------------
     if window_open then
-        -- Prevent window from shrinking below minimum size
-        reaper.ImGui_SetNextWindowSizeConstraints(ctx, DEFAULT_W, DEFAULT_H, 10000, 10000)
-        local opened, open_ref = reaper.ImGui_Begin(ctx, "Notes", window_open)
+        local FLT_MAX = 3.402823466e+38
+        ImGui.SetNextWindowSizeConstraints(ctx, DEFAULT_W, DEFAULT_H, FLT_MAX, FLT_MAX)
+        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Notes", window_open)
         window_open = open_ref
 
         if opened then
-            local avail_w, avail_h   = reaper.ImGui_GetContentRegionAvail(ctx)
+            local avail_w, avail_h = ImGui_GetContentRegionAvail(ctx)
 
-            -- Proportional heights for text boxes
-            local static_height      = 3 * reaper.ImGui_GetTextLineHeightWithSpacing(ctx) + 40
-            local save_button_height = 30
-            local dynamic_h          = math.max(0, avail_h - static_height - save_button_height)
+            local static_height    = 3 * ImGui_GetTextLineHeightWithSpacing(ctx) + 40
+            local dynamic_h        = math.max(0, avail_h - static_height)
 
-            local base_total         = MIN_H_PROJECT + MIN_H_TRACK + MIN_H_ITEM
-            local extra              = math.max(0, dynamic_h - base_total)
+            local base_total       = MIN_H_PROJECT + MIN_H_TRACK + MIN_H_ITEM
+            local extra            = math.max(0, dynamic_h - base_total)
 
-            local h_project          = math.max(MIN_H_PROJECT, MIN_H_PROJECT + extra * 0.2)
-            local h_track            = math.max(MIN_H_TRACK, MIN_H_TRACK + extra * 0.4)
-            local h_item             = math.max(MIN_H_ITEM, MIN_H_ITEM + extra * 0.4)
+            local h_project        = math.max(MIN_H_PROJECT, MIN_H_PROJECT + extra * 0.2)
+            local h_track          = math.max(MIN_H_TRACK, MIN_H_TRACK + extra * 0.4)
+            local h_item           = math.max(MIN_H_ITEM, MIN_H_ITEM + extra * 0.4)
 
-            ------------------------------------------------------------------
             -- PROJECT NOTE
-            ------------------------------------------------------------------
-            reaper.ImGui_Text(ctx, "Project Note:")
-            local changed_p
-            changed_p, project_note = reaper.ImGui_InputTextMultiline(ctx, "##project_note", project_note, avail_w,
-                h_project)
-            if changed_p then
-                reaper.GetSetProjectNotes(proj, true, project_note)
+            ImGui.Text(ctx, "Project Note:")
+            local changed_project
+            changed_project, project_note = ImGui.InputTextMultiline(ctx, "##project_note", project_note, avail_w,
+            h_project)
+            if changed_project then
+                GetSetProjectNotes(proj, true, project_note)
             end
 
-            ------------------------------------------------------------------
             -- TRACK NOTE
-            ------------------------------------------------------------------
-            reaper.ImGui_Text(ctx, "Track Note:")
-            local changed_t
-            changed_t, track_note = reaper.ImGui_InputTextMultiline(ctx, "##track_note", track_note, avail_w, h_track)
-            if changed_t and editing_track == nil then
-                editing_track = track
+            ImGui.Text(ctx, "Track Note:")
+            local changed_track
+            changed_track, track_note = ImGui.InputTextMultiline(ctx, "##track_note", track_note, avail_w, h_track)
+            if changed_track and editing_track then
+                GetSetMediaTrackInfo_String(editing_track, "P_EXT:track_notes", track_note, true)
             end
 
-            ------------------------------------------------------------------
+
             -- ITEM NOTE
-            ------------------------------------------------------------------
-            reaper.ImGui_Text(ctx, "Item Note:")
-            local changed_i
-            changed_i, item_note = reaper.ImGui_InputTextMultiline(ctx, "##item_note", item_note, avail_w, h_item)
-            if changed_i and editing_item == nil then
-                editing_item = item
+            ImGui.Text(ctx, "Item Note:")
+            local changed_item
+            changed_item, item_note = ImGui.InputTextMultiline(ctx, "##item_note", item_note, avail_w, h_item)
+            if changed_item and editing_item then
+                GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
             end
 
-            ------------------------------------------------------------------
-            -- SAVE BUTTON (always visible)
-            ------------------------------------------------------------------
-            if reaper.ImGui_Button(ctx, "Save Notes", avail_w, save_button_height) then
-                if editing_track then
-                    reaper.GetSetMediaTrackInfo_String(editing_track, "P_EXT:track_notes", track_note, true)
-                end
-                if editing_item then
-                    reaper.GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
-                end
-                editing_track = nil
-                editing_item  = nil
-            end
-
-            reaper.ImGui_End(ctx)
+            ImGui.End(ctx)
         end
 
-        reaper.defer(main)
+        defer(main)
     end
 end
 
-function toggle_window()
-    if window_open then
-        window_open = false
-    else
-        window_open = true
-        main()
-    end
-end
+---------------------------------------------------------------------
 
-main()
-
+defer(main)
