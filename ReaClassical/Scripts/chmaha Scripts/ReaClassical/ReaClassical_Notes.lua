@@ -57,6 +57,7 @@ function main()
     end
 
     if editing_track ~= track then
+        ImGui.SetWindowFocus(ctx)
         if editing_track then
             GetSetMediaTrackInfo_String(editing_track, "P_EXT:track_notes", track_note, true)
         end
