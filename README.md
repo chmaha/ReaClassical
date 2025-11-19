@@ -16,6 +16,7 @@ Dependencies: `makeself` (Linux, Mac), `go` (Windows), `7z` (Mac & Windows)
 4. Run `sh build_all.sh` to build for all platforms or individual scripts for a single OS (e.g. `sh build_linux.sh` etc)
 
 ReaImGui source code can be found [here](https://github.com/cfillion/reaimgui).
+REAPER binaries are bundled with permission from the developers.
 
 To just use the functions, jsfx plugins, theme, and default template but without keymaps, toolbar etc, follow the [ReaClassical Core](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md#reaclassical-core-just-the-s-d-editing-tools-inside-your-existing-reaper-install) instructions.
 
