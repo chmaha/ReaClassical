@@ -70,10 +70,10 @@ hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint "$mount_dir" "
 
 # Extract bundled ReaClassical resources
 res_zip="./Resource_Folder_Base.zip"
-up_file="./reaper_sws-"$arch".dylib"
+up_file="./reaper_imgui-"$arch".dylib"
 
 if [ ! -f "$res_zip" ] || [ ! -f "$up_file" ]; then
-    echo "Error: Resource_Folder_Base.zip or reaper_sws-${arch}.dylib missing from bundle."
+    echo "Error: Resource_Folder_Base.zip or reaper_imgui-${arch}.dylib missing from bundle."
     exit 1
 fi
 

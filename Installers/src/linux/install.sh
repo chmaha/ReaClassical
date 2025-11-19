@@ -33,7 +33,7 @@ minor=$(echo "$ver_num" | cut -c2-)
 ver="${major}.${minor}"
 
 # Find the shared library file
-up_file=$(ls ./reaper_sws-"$arch".so 2>/dev/null | head -n1)
+up_file=$(ls ./reaper_imgui-"$arch".so 2>/dev/null | head -n1)
 if [ -z "$up_file" ]; then
     echo "Error: No UserPlugins file found for architecture $arch"
     exit 1

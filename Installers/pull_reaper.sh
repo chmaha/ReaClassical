@@ -6,6 +6,8 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
+realmgui_ver = "0.10.0.2"
+
 ver="$1"
 major=$(echo "$ver" | cut -d. -f1)
 ver_no_dot=$(echo "$ver" | tr -d '.')
@@ -93,25 +95,46 @@ else
     curl -L -o "$file" "$url"
 fi
 
-# --- SWS Plugin downloads ---
+# # --- SWS Plugin downloads ---
+#
+# # URLs by platform
+# win_sws_urls="
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x86.exe
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x64.exe
+# "
+#
+# mac_sws_urls="
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-i386.dmg
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-x86_64.dmg
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-arm64.dmg
+# "
+#
+# linux_sws_urls="
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-i686.tar.xz
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-x86_64.tar.xz
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-armv7l.tar.xz
+# https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-aarch64.tar.xz
+# "
+
+# --- imgui Plugin downloads ---
 
 # URLs by platform
-win_sws_urls="
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x86.exe
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Windows-x64.exe
+win_imgui_urls="
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x86.dll
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x64.dll
 "
 
-mac_sws_urls="
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-i386.dmg
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-x86_64.dmg
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Darwin-arm64.dmg
+mac_imgui_urls="
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-i386.dylib
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x86_64.dylib
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-arm64.dylib
 "
 
-linux_sws_urls="
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-i686.tar.xz
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-x86_64.tar.xz
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-armv7l.tar.xz
-https://standingwaterstudios.com/download/featured/sws-2.14.0.7-Linux-aarch64.tar.xz
+linux_imgui_urls="
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-i686.so
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x86_64.so
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-armv7l.so
+https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-aarch64.so
 "
 
 # Generic download function
@@ -167,25 +190,45 @@ extract_tar_xz() {
     rm -f "$archive"
 }
 
-# --- Windows SWS DLLs ---
-for url in $win_sws_urls; do
+# # --- Windows SWS DLLs ---
+# for url in $win_sws_urls; do
+#     archive="$win_dir/$(basename "$url")"
+#     download_file "$url" "$archive"
+#     extract_7z "$archive" "$win_dir" "reaper_sws*.dll"
+# done
+#
+# # --- macOS SWS dylibs ---
+# for url in $mac_sws_urls; do
+#     archive="$macos_dir/$(basename "$url")"
+#     download_file "$url" "$archive"
+#     extract_7z "$archive" "$macos_dir" "reaper_sws*.dylib"
+# done
+#
+# # --- Linux SWS shared objects ---
+# for url in $linux_sws_urls; do
+#     archive="$linux_dir/$(basename "$url")"
+#     download_file "$url" "$archive"
+#     extract_tar_xz "$archive" "$linux_dir" "reaper_sws*.so"
+# done
+#
+# echo "✅ SWS extraction completed!"
+
+# --- Windows imgui DLLs ---
+for url in $win_imgui_urls; do
     archive="$win_dir/$(basename "$url")"
     download_file "$url" "$archive"
-    extract_7z "$archive" "$win_dir" "reaper_sws*.dll"
 done
 
-# --- macOS SWS dylibs ---
-for url in $mac_sws_urls; do
+# --- macOS imgui dylibs ---
+for url in $mac_imgui_urls; do
     archive="$macos_dir/$(basename "$url")"
     download_file "$url" "$archive"
-    extract_7z "$archive" "$macos_dir" "reaper_sws*.dylib"
 done
 
-# --- Linux SWS shared objects ---
-for url in $linux_sws_urls; do
+# --- Linux imgui shared objects ---
+for url in $linux_imgui_urls; do
     archive="$linux_dir/$(basename "$url")"
     download_file "$url" "$archive"
-    extract_tar_xz "$archive" "$linux_dir" "reaper_sws*.so"
 done
 
-echo "✅ SWS extraction completed!"
+echo "✅ Reaimgui download completed!"

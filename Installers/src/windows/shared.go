@@ -47,11 +47,11 @@ var ResourceZip []byte
 
 // UserPlugins zip
 //
-//go:embed reaper_sws-x64.dll
-var sws64 []byte
+//go:embed reaper_imgui-x64.dll
+var reaimgui64 []byte
 
-//go:embed reaper_sws-x86.dll
-var sws32 []byte
+//go:embed reaper_imgui-x86.dll
+var reaimgui32 []byte
 
 // 7zip
 //
