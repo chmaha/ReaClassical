@@ -6,7 +6,7 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-realmgui_ver = "0.10.0.2"
+reaimgui_ver="0.10.0.2"
 
 ver="$1"
 major=$(echo "$ver" | cut -d. -f1)
@@ -120,21 +120,21 @@ fi
 
 # URLs by platform
 win_imgui_urls="
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x86.dll
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x64.dll
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-x86.dll
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-x64.dll
 "
 
 mac_imgui_urls="
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-i386.dylib
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x86_64.dylib
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-arm64.dylib
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-i386.dylib
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-x86_64.dylib
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-arm64.dylib
 "
 
 linux_imgui_urls="
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-i686.so
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-x86_64.so
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-armv7l.so
-https://github.com/cfillion/reaimgui/releases/download/v$realmgui_ver/reaper_imgui-aarch64.so
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-i686.so
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-x86_64.so
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-armv7l.so
+https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-aarch64.so
 "
 
 # Generic download function
