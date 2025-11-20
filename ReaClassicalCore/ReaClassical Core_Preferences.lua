@@ -2,7 +2,6 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
-See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -23,61 +22,43 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
-local sync_based_on_workflow, move_destination_folder_to_top
-local prepare_takes
 
-local year = os.date("%Y")
-local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0'
+local default_values = '35,500,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade length (ms)',
-    'CD track offset (ms)',
-    'INDEX0 length (s) (>= 1)',
-    'Album lead-out time (s)',
-    'Unedited Items = Default Color',
     'S-D Marker Check (ms)',
-    'REF = Overdub Guide',
-    'Add S-D Markers at Mouse Hover',
-    'Alt Audition Playback Rate',
-    'Year of Production',
-    'CUE audio format',
-    'Floating Destination Group',
-    'Find takes using item names'
+    'Add S-D Markers at Mouse Hover'
 }
 
 ---------------------------------------------------------------------
 
 function main()
-    local pass, input, orig_floating, new_floating, orig_color, new_color
+    local pass
+    local input
     repeat
         local ret
-        ret, input, orig_floating, orig_color = display_prefs()
+        ret, input = display_prefs()
         if not ret then return end
-        if ret then pass, new_floating, new_color = pref_check(input) end
+        if ret then pass = pref_check(input) end
     until pass
+
     save_prefs(input)
-    if new_floating ~= orig_floating and new_floating == 0 then
-        move_destination_folder_to_top()
-        sync_based_on_workflow(workflow)
-    end
-    if new_color ~= orig_color then
-        prepare_takes()
-    end
 end
 
 -----------------------------------------------------------------------
 
 function display_prefs()
-    local saved, saved_12, saved_5 = load_prefs()
+    local saved = load_prefs(NUM_OF_ENTRIES)
     local input_labels = table.concat(labels, ',')
-    local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)
-    return ret, input, tonumber(saved_12), tonumber(saved_5)
+    local ret, input = GetUserInputs('ReaClassical Core Preferences', NUM_OF_ENTRIES, input_labels, saved)
+    return ret, input
 end
 
 -----------------------------------------------------------------------
 
 function load_prefs()
-    local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, saved = GetProjExtState(0, "ReaClassical Core", "Preferences")
     if saved == "" then return default_values end
 
     local saved_entries = {}
@@ -97,20 +78,20 @@ function load_prefs()
     elseif #saved_entries > NUM_OF_ENTRIES then
         local j = 1
         for entry in default_values:gmatch("([^,]+)") do
-            saved_entries[j] = entry
+                saved_entries[j] = entry
             j = j + 1
         end
     end
 
     saved = table.concat(saved_entries, ',')
 
-    return saved, saved_entries[12], saved_entries[5]
+    return saved
 end
 
 -----------------------------------------------------------------------
 
 function save_prefs(input)
-    SetProjExtState(0, "ReaClassical", "Preferences", input)
+    SetProjExtState(0, "ReaClassical Core", "Preferences", input)
 end
 
 -----------------------------------------------------------------------
@@ -119,92 +100,31 @@ function pref_check(input)
     local pass = true
     local table = {}
     local invalid_msg = ""
-    local i = 0
-    for entry in input:gmatch("([^,]*)") do
-        i = i + 1
-        table[i] = entry
-        if entry == "" or (i ~= 11 and (tonumber(entry) == nil or tonumber(entry) < 0)) then
+    for entry in input:gmatch('([^,]*)') do
+        table[#table + 1] = entry
+        if entry == "" or tonumber(entry) == nil or tonumber(entry) < 0 then
             pass = false
             invalid_msg = "Entries should not be strings or left empty."
         end
     end
 
     local binary_error_msg = ""
-    local ext_error_msg = ""
-
+    -- separate check for binary options
     if #table == NUM_OF_ENTRIES then
-        local num_5 = tonumber(table[5])
-        local num_7 = tonumber(table[7])
-        local num_8 = tonumber(table[8])
-        local num_12 = tonumber(table[12])
-        local num_13 = tonumber(table[13])
-        local audio_format = tostring(table[11])
-        if (num_5 and num_5 > 1) or (num_7 and num_7 > 1)
-            or (num_8 and num_8 > 1) or (num_12 and num_12 > 1) or (num_13 and num_13 > 1) then
-            binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
-            pass = false
-        end
-        local valid_formats = { WAV = true, FLAC = true, MP3 = true, AIFF = true }
-        if not valid_formats[audio_format] then
-            ext_error_msg = "CUE audio format should be set to WAV, FLAC, AIFF or MP3."
+        local num_3 = tonumber(table[3])
+        if (num_3 and num_3 > 1) then
+            binary_error_msg = "Mouse Hover option must be set to 0 or 1.\n"
             pass = false
         end
     end
 
-    local error_msg = binary_error_msg .. invalid_msg .. ext_error_msg
+    local error_msg = binary_error_msg .. invalid_msg
 
     if not pass then
         MB(error_msg, "Error", 0)
     end
 
-    return pass, tonumber(table[12]), tonumber(table[5])
-end
-
------------------------------------------------------------------------
-
-function move_destination_folder_to_top()
-    local destination_folder = nil
-    local track_count = CountTracks(0)
-
-    for i = 0, track_count - 1 do
-        local track = GetTrack(0, i)
-        if track then
-            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                destination_folder = track
-                break
-            end
-        end
-    end
-
-    if not destination_folder then return end
-
-    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
-    if destination_index > 0 then
-        SetOnlyTrackSelected(destination_folder)
-        ReorderSelectedTracks(0, 0)
-    end
-end
-
------------------------------------------------------------------------
-
-function sync_based_on_workflow(workflow)
-    if workflow == "Vertical" then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
-    elseif workflow == "Horizontal" then
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
-    end
-end
-
------------------------------------------------------------------------
-
-function prepare_takes()
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
-    local prepare_takes_command = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-    Main_OnCommand(prepare_takes_command, 0)
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
+    return pass
 end
 
 -----------------------------------------------------------------------
