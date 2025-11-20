@@ -27,6 +27,11 @@ local main
 ---------------------------------------------------------------------
 
 function main()
+  local workflow = "Horizontal"
+  if workflow == "" then
+      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+      return
+  end
   local i = 0
   while true do
     local project, _ = EnumProjects(i)

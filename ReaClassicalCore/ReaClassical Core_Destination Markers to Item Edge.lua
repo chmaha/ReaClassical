@@ -28,6 +28,11 @@ local get_selected_media_item_at, count_selected_media_items
 
 function main()
     Undo_BeginBlock()
+    local workflow = "Horizontal"
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local left_pos, right_pos, selected
     local start_time, end_time = GetSet_LoopTimeRange(false, false, 0, 0, false)
     if start_time ~= end_time then

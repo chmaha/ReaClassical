@@ -43,6 +43,11 @@ end
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+    local workflow = "Horizontal"
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
 
     local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
     if prepared == "" then

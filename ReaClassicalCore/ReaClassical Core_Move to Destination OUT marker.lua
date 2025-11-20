@@ -27,6 +27,11 @@ local main, markers, move_to_project_tab
 ---------------------------------------------------------------------
 
 function main()
+    local workflow = "Horizontal"
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local _, _, dest_proj = markers()
 
     if dest_proj then

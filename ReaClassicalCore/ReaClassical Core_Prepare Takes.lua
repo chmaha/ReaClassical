@@ -34,6 +34,11 @@ local get_item_by_guid
 ---------------------------------------------------------------------
 
 function main()
+    local workflow = "Horizontal"
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
@@ -141,6 +146,19 @@ function color_items(edits, color_pref)
         local colors = get_color_table()
         unedited_color = colors.dest_items
     end
+    local workflow = "Horizontal"
+
+    if workflow == "Horizontal" and not edits then
+        local color_index = 0
+
+        local num_items = CountMediaItems(0)
+
+        -- Step 1: Collect items by group ID
+        local groups = {}
+        for i = 0, num_items - 1 do
+            local item = GetMediaItem(0, i)
+            local group_id = GetMediaItemInfo_Value(item, "I_GROUPID") or 0
+            if not groups[group_id] then groups[group_id] = {} end
             table.insert(groups[group_id], item)
         end
 

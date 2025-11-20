@@ -30,6 +30,11 @@ local get_selected_media_item_at, count_selected_media_items
 function main()
     Undo_BeginBlock()
     PreventUIRefresh(1)
+    local workflow = "Horizontal"
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
 
     local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local moveable_dest = 0

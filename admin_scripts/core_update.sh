@@ -56,9 +56,9 @@ printf '%s\n' "$FILES" | while IFS= read -r name; do
             -e 's|"ReaClassical.lua"|"ReaClassicalCore.lua"|' \
             "$dest_file"
 
-        sed -i '/local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")/,/end$/d' "$dest_file"
-
         sed -i 's|ProjExtState(0, "ReaClassical"|ProjExtState(0, "ReaClassical Core"|g' "$dest_file"
+
+        sed -i 's|local _, workflow = GetProjExtState(0, "ReaClassical Core", "Workflow")$|local workflow = "Horizontal"|' "$dest_file"
     else
         echo "Warning: Source file not found: $src_file"
     fi

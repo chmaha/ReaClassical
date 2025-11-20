@@ -33,6 +33,11 @@ if not SWS_exists then
 end
 
 function main()
+    local workflow = "Horizontal"
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local sdmousehover = 0
     if input ~= "" then

@@ -27,6 +27,11 @@ local main, markers, move_to_project_tab, zoom
 ---------------------------------------------------------------------
 
 function main()
+    local workflow = "Horizontal"
+    if workflow == "" then
+        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        return
+    end
     -- Check if marker exists in any project
     local marker_exists = false
     local i = 0
