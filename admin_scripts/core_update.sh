@@ -1,17 +1,9 @@
 #!/bin/sh
 
 # POSIX-compliant script to copy ReaClassical Lua scripts from $SRC to $DEST
-# Adjust $SRC and $DEST as needed before running
 
-# Example:
 SRC="$HOME/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical"
 DEST="$HOME/code/chmaha/ReaClassical/ReaClassicalCore"
-
-# Check that SRC and DEST are set
-if [ -z "$SRC" ] || [ -z "$DEST" ]; then
-    echo "Error: SRC and DEST must be set."
-    exit 1
-fi
 
 # Ensure DEST directory exists
 mkdir -p "$DEST"
@@ -46,13 +38,15 @@ Zoom to Source IN marker
 Zoom to Source OUT marker
 "
 
-# Loop through and copy each file
-for name in $FILES; do
+printf '%s\n' "$FILES" | while IFS= read -r name; do
+    # Skip empty lines
+    [ -z "$name" ] && continue
+
     src_file="$SRC/ReaClassical_${name}.lua"
     dest_file="$DEST/ReaClassical Core_${name}.lua"
 
     if [ -f "$src_file" ]; then
-        cp "$src_file" "$dest_file"
+        cp -f "$src_file" "$dest_file"
         echo "Copied: $src_file -> $dest_file"
     else
         echo "Warning: Source file not found: $src_file"
