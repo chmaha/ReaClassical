@@ -102,7 +102,7 @@ function main()
     if selected_track then SetOnlyTrackSelected(selected_track) end
 
     local color_track = GetTrack(0, track_number - 1)
-    local marker_color = color_track and GetTrackColor(color_track) or 0
+    local marker_color = color_track and GetTrackColor(color_track) or ColorToNative(23, 223, 143) | 0x1000000
     AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
     Main_OnCommand(40635, 0) -- remove time selection
