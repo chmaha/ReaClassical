@@ -2,6 +2,7 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
+See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 

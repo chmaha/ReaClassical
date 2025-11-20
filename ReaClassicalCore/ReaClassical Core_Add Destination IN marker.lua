@@ -2,6 +2,7 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
+See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -21,22 +22,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, edge_check, return_check_length
+local main, get_color_table, get_path, edge_check, return_check_length
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
 function main()
-    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local sdmousehover = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[3] then sdmousehover = tonumber(table[3]) or 0 end
+        if table[8] then sdmousehover = tonumber(table[8]) or 0 end
     end
 
     local cur_pos
     if sdmousehover == 1 then
-        _, _, cur_pos = BR_TrackAtMouseCursor()
+        cur_pos = BR_PositionAtMouseCursor(false)
     else
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end
@@ -61,8 +68,27 @@ function main()
                 "Add Dest-IN Marker", 4)
             if response ~= 6 then return end
         end
-        AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
+        --DeleteProjectMarker(NULL, 996, false)
+        local colors = get_color_table()
+        AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
     end
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
@@ -99,11 +125,11 @@ end
 
 function return_check_length()
     local check_length = 0.5
-    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[2] then check_length = table[2] / 1000 end
+        if table[6] then check_length = table[6] / 1000 end
     end
     return check_length
 end

@@ -2,6 +2,7 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
+See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -25,21 +26,37 @@ local main, markers, move_to_project_tab, zoom
 
 ---------------------------------------------------------------------
 
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
-end
-
 function main()
-    local _, _, dest_proj = markers()
 
-    if dest_proj then
-        move_to_project_tab(dest_proj)
+    -- Check if marker exists in any project
+    local marker_exists = false
+    local i = 0
+    while true do
+        local proj = EnumProjects(i)
+        if proj == nil then break end
+
+        local _, num_markers, num_regions = CountProjectMarkers(proj)
+        for j = 0, num_markers + num_regions - 1 do
+            local _, region, _, _, _, id = EnumProjectMarkers2(proj, j)
+            if not region and id == 997 then
+                marker_exists = true
+                break
+            end
+        end
+
+        if marker_exists then break end
+        i = i + 1
     end
+    if marker_exists then
+        local _, _, dest_proj = markers()
 
-    GoToMarker(0, 997, false)
-    zoom()
+        if dest_proj then
+            move_to_project_tab(dest_proj)
+        end
+
+        GoToMarker(0, 997, false)
+        zoom()
+    end
 end
 
 ---------------------------------------------------------------------

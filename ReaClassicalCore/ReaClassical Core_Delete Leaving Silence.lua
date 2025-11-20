@@ -2,6 +2,7 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
+See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -21,20 +22,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, select_matching_folder, adaptive_delete
+local main, source_markers, select_matching_folder, dest_check
+local adaptive_delete, count_selected_media_items, get_selected_media_item_at
 
 ---------------------------------------------------------------------
-
-local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
-if prepared == "" then
-    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
-        "ReaClassical Core Error", 0)
-    return
-end
 
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+
+
+    local first_group = dest_check()
+    if not first_group then
+        MB("Delete leaving silence can only be run on the destination folder.", "ReaClassical Error", 0)
+        return
+    end
 
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
@@ -63,7 +65,7 @@ function main()
     else
         MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
     end
-    Undo_EndBlock('ReaClassical Core Delete Leaving Silence', 0)
+    Undo_EndBlock('Cut and Ripple', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
@@ -101,11 +103,36 @@ end
 
 ---------------------------------------------------------------------
 
+function dest_check()
+    -- Get first selected item
+    local item = get_selected_media_item_at(0)
+    if not item then
+        return
+    end
+
+    -- Find its track
+    local track = GetMediaItem_Track(item)
+    if not track then
+        return
+    end
+
+    -- Walk upward to the topmost parent (folder) track
+    local folder = track
+    while GetParentTrack(folder) do
+        folder = GetParentTrack(folder)
+    end
+
+    -- Check if that folder is the first track
+    return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1
+end
+
+---------------------------------------------------------------------
+
 function adaptive_delete()
   local sel_items = {}
-  local item_count = CountSelectedMediaItems(0)
+  local item_count = count_selected_media_items()
   for i = 0, item_count - 1 do
-    sel_items[#sel_items+1] = GetSelectedMediaItem(0, i)
+    sel_items[#sel_items+1] = get_selected_media_item_at(i)
   end
 
   local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
@@ -145,6 +172,41 @@ function adaptive_delete()
   else
     Main_OnCommand(40006, 0) -- Delete items or time selection contents
   end
+end
+
+---------------------------------------------------------------------
+
+function count_selected_media_items()
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            selected_count = selected_count + 1
+        end
+    end
+
+    return selected_count
+end
+
+---------------------------------------------------------------------
+
+function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
+
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------

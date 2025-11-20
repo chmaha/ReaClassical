@@ -2,6 +2,7 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
+See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -23,11 +24,13 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, add_source_marker
 local get_track_length, select_matching_folder, copy_source, split_at_dest_in
-local create_crossfades, clean_up
+local create_crossfades, clean_up, get_item_guid
 local ripple_lock_mode, return_xfade_length, xfade
-local get_first_last_items, mark_as_edit
-local move_to_project_tab, adaptive_delete, select_item_under_cursor_on_selected_track
+local get_first_last_items, get_color_table, get_path, mark_as_edit
+local move_to_project_tab, save_source_details, adaptive_delete
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
+local move_destination_folder_to_top, move_destination_folder
+local select_item_under_cursor_on_selected_track, fix_marker_pair
 
 ---------------------------------------------------------------------
 
@@ -37,21 +40,33 @@ if not SWS_exists then
     return
 end
 
-local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
-if prepared == "" then
-    MB("Please run ReaClassical Core_Prepare Takes once before running a source-destination edit function.",
-        "ReaClassical Core Error", 0)
-    return
-end
-
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
+
+    local _, prepared = GetProjExtState(0, "ReaClassical", "PreparedTakes")
+    if prepared == "" then
+        MB("Please run ReaClassical Prepare Takes (T) once before running a source-destination edit function.",
+            "ReaClassical Error", 0)
+        return
+    end
+
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
+
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local moveable_dest = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+    end
+
+    if moveable_dest == 1 then move_destination_folder_to_top() end
+
     local proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count, source_in,
     source_out, source_count, pos_table, track_number = markers()
 
@@ -59,6 +74,7 @@ function main()
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
@@ -67,10 +83,12 @@ function main()
             "Source or destination markers should be paired with " ..
             "the corresponding source or destination project marker.",
             "Multi-tab Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
     ripple_lock_mode()
+    local colors = get_color_table()
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
         local distance
         local pos
@@ -78,12 +96,12 @@ function main()
             pos = pos_table[2]
             distance = pos_table[4] - pos_table[3]
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, pos - distance, 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
+            AddProjectMarker2(0, false, pos - distance, 0, "DEST-IN", 996, colors.dest_marker)
         elseif dest_out == 0 then
             pos = pos_table[1]
             distance = pos_table[4] - pos_table[3]
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, pos + distance, 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
+            AddProjectMarker2(0, false, pos + distance, 0, "DEST-OUT", 997, colors.dest_marker)
         elseif source_in == 0 then
             pos = pos_table[4]
             distance = pos_table[1] - pos_table[2]
@@ -108,12 +126,12 @@ function main()
             add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
             local dest_end = GetProjectLength(0)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
+            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, colors.dest_marker)
         elseif dest_out == 1 and source_out == 1 then
             move_to_project_tab(source_proj)
             add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
+            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, colors.dest_marker)
         elseif source_in == 1 and dest_out == 1 then
             move_to_project_tab(dest_proj)
             local source_end
@@ -125,23 +143,23 @@ function main()
             move_to_project_tab(source_proj)
             add_source_marker(source_end, 0, track_number, "SOURCE-OUT", 999)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
+            AddProjectMarker2(0, false, 0, 0, "DEST-IN", 996, colors.dest_marker)
         elseif source_out == 1 and dest_in == 1 then
             move_to_project_tab(source_proj)
             add_source_marker(0, 0, track_number, "SOURCE-IN", 998)
             local dest_end = GetProjectLength(0)
             move_to_project_tab(dest_proj)
-            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
+            AddProjectMarker2(0, false, dest_end, 0, "DEST-OUT", 997, colors.dest_marker)
         end
     elseif source_count == 2 and dest_count == 0 and pos_table ~= nil and proj_marker_count == 0 then
-        AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, ColorToNative(23, 203, 223) | 0x1000000)
-        AddProjectMarker2(0, false, pos_table[4], 0, "DEST-OUT", 997, ColorToNative(23, 203, 223) | 0x1000000)
+        AddProjectMarker2(0, false, pos_table[3], 0, "DEST-IN", 996, colors.dest_marker)
+        AddProjectMarker2(0, false, pos_table[4], 0, "DEST-OUT", 997, colors.dest_marker)
     end
 
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _ = markers()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
-        move_to_project_tab(dest_proj)
         move_to_project_tab(source_proj)
+        fix_marker_pair(998,999)
         local _, is_selected = copy_source()
         if is_selected == false then
             clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
@@ -149,6 +167,7 @@ function main()
         end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
+        fix_marker_pair(996,997)
         split_at_dest_in()
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
@@ -167,7 +186,11 @@ function main()
         adaptive_delete()
         Main_OnCommand(42398, 0)  -- paste
         mark_as_edit()
+
         create_crossfades()
+
+        if moveable_dest == 1 then move_destination_folder(track_number) end
+
         clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
@@ -178,10 +201,11 @@ function main()
             "or both SOURCE markers (when not in multi-tab mode)\n" ..
             "3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
             , "Source-Destination Edit", 0)
+        if moveable_dest == 1 then move_destination_folder(track_number) end
         return
     end
 
-    Undo_EndBlock('ReaClassical Core S-D Edit', 0)
+    Undo_EndBlock('S-D Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
@@ -280,9 +304,9 @@ end
 ---------------------------------------------------------------------
 
 function add_source_marker(pos, distance, track_number, label, num)
+    local colors = get_color_table()
     DeleteProjectMarker(NULL, num, false)
-    AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num,
-        ColorToNative(23, 223, 143) | 0x1000000)
+    AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, colors.source_marker)
 end
 
 ---------------------------------------------------------------------
@@ -330,6 +354,7 @@ function copy_source()
     local start_time, end_time = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
     local sel_length = end_time - start_time
     Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+    save_source_details()
     local selected_items = count_selected_media_items()
     if left_overlap then
         local first_item = get_selected_media_item_at(0)
@@ -448,7 +473,7 @@ end
 
 function return_xfade_length()
     local xfade_len = 0.035
-    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
@@ -497,11 +522,33 @@ end
 
 ---------------------------------------------------------------------
 
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
 function mark_as_edit()
+    local first_sel_item = get_selected_media_item_at(0)
+    local _, src_guid = GetProjExtState(0, "ReaClassical", "temp_src_guid")
+    GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_guid", src_guid, true)
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", "")
+
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
-        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", 1)
+        GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
     end
 end
 
@@ -584,11 +631,84 @@ end
 
 ---------------------------------------------------------------------
 
+function move_destination_folder_to_top()
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    -- Find the first folder with a parent that has the "Destination" extstate set to "y"
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end -- No matching folder found
+
+    -- Move the folder to the top
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    if destination_index > 0 then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(0, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function move_destination_folder(track_number)
+    local destination_folder = nil
+    local track_count = CountTracks(0)
+
+    for i = 0, track_count - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                destination_folder = track
+                break
+            end
+        end
+    end
+
+    if not destination_folder then return end
+
+    local target_track = GetTrack(0, track_number - 1)
+    if not target_track then return end
+
+    local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
+    local target_index = track_number - 1
+
+    if destination_index ~= target_index then
+        SetOnlyTrackSelected(destination_folder)
+        ReorderSelectedTracks(target_index, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function save_source_details()
+    local item = get_selected_media_item_at(0)
+    if not item then return end
+
+    -- Get the selected item’s GUID
+    local guid = get_item_guid(item)
+    if not guid or guid == "" then return end
+
+    -- Save the GUID to the project’s ExtState
+    SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
+end
+
+---------------------------------------------------------------------
+
 function adaptive_delete()
   local sel_items = {}
-  local item_count = CountSelectedMediaItems(0)
+  local item_count = count_selected_media_items()
   for i = 0, item_count - 1 do
-    sel_items[#sel_items+1] = GetSelectedMediaItem(0, i)
+    sel_items[#sel_items+1] = get_selected_media_item_at(i)
   end
 
   local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
@@ -653,6 +773,59 @@ function select_item_under_cursor_on_selected_track()
       end
     end
   end
+end
+
+---------------------------------------------------------------------
+
+function fix_marker_pair(id_in, id_out)
+
+    local in_pos, out_pos
+    local in_name, out_name
+
+    local _, num_markers, num_regions = CountProjectMarkers(0)
+    local total = num_markers + num_regions
+
+    -- find both markers by ID
+    for i = 0, total - 1 do
+        local _, _, pos, _, name, id = EnumProjectMarkers2(0, i)
+        if id == id_in then
+            in_pos = pos
+            in_name = name
+        elseif id == id_out then
+            out_pos = pos
+            out_name = name
+        end
+    end
+
+    -- if missing → nothing to do
+    if not in_pos or not out_pos then return end
+
+    -- if reversed → FIX by swapping POSITIONS
+    if out_pos < in_pos then
+        -- delete old
+        DeleteProjectMarker(0, id_in, false)
+        DeleteProjectMarker(0, id_out, false)
+
+        -- re-add with POSITIONS SWAPPED
+        AddProjectMarker2(0, false, out_pos, 0, in_name,  id_in, 0)
+        AddProjectMarker2(0, false, in_pos, 0, out_name, id_out, 0)
+    end
+end
+
+---------------------------------------------------------------------
+
+function get_item_guid(item)
+    if not item then
+        return ""
+    end
+
+    -- Get GUID string from the item
+    local retval, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+    if retval then
+        return guid
+    else
+        return ""
+    end
 end
 
 ---------------------------------------------------------------------

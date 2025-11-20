@@ -2,6 +2,7 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
+See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -22,22 +23,32 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number
+local main, folder_check, get_track_number, other_source_marker_check
 
 ---------------------------------------------------------------------
 
+local SWS_exists = APIExists("CF_GetSWSVersion")
+if not SWS_exists then
+    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
 function main()
-    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local sdmousehover = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[3] then sdmousehover = tonumber(table[3]) or 0 end
+        if table[8] then sdmousehover = tonumber(table[8]) or 0 end
     end
+
+    local selected_track = GetSelectedTrack(0, 0)
 
     local cur_pos, track
     if sdmousehover == 1 then
-        track, _, cur_pos = BR_TrackAtMouseCursor()
+        cur_pos = BR_PositionAtMouseCursor(false)
+        local screen_x, screen_y = GetMousePosition()
+        track = GetTrackFromPoint(screen_x, screen_y)
     else
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end
@@ -55,8 +66,15 @@ function main()
         end
 
         local track_number = math.floor(get_track_number(track))
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999,
-        ColorToNative(23, 223, 143) | 0x1000000)
+        local other_source_marker = other_source_marker_check()
+
+        local color_track = track or selected_track
+        local marker_color = color_track and GetTrackColor(color_track) or 0
+        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
+
+        if other_source_marker ~= track_number then
+            MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
+        end
     end
 end
 
@@ -86,6 +104,26 @@ function get_track_number(track)
         local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function other_source_marker_check()
+    local proj = EnumProjects(-1) -- Get the active project
+    if not proj then return nil end
+
+    local _, num_markers, num_regions = CountProjectMarkers(proj)
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
+        local number, label = raw_label:match("(%d+):(.+)") -- Extract number and label
+
+        if label and (label == "SOURCE-IN" or label == "SOURCE-OUT") then
+            return tonumber(number) -- Convert track number to a number and return
+        end
+    end
+
+    return nil -- Return nil if no marker is found
 end
 
 ---------------------------------------------------------------------

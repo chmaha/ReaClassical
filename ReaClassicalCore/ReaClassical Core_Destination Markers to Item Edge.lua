@@ -2,6 +2,7 @@
 @noindex
 
 This file is a part of "ReaClassical Core" package.
+See "ReaClassicalCore.lua" for more information.
 
 Copyright (C) 2022–2025 chmaha
 
@@ -21,8 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_selected_media_item_at, count_selected_media_items
-
+local main, get_color_table, get_path
+local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -33,6 +34,7 @@ function main()
         left_pos = start_time
         right_pos = end_time
     else
+        local parent_track = GetTrack(0, 0)
         selected = count_selected_media_items()
 
         if selected == 0 then
@@ -43,6 +45,34 @@ function main()
             return
         end
 
+        local folder_tracks = {}
+        local num_tracks = CountTracks(0)
+
+        for i = 0, num_tracks - 1 do
+            local track = GetTrack(0, i)
+            if i == 0 or GetParentTrack(track) == parent_track then
+                table.insert(folder_tracks, track)
+            else
+                break
+            end
+        end
+        for i = 0, selected - 1 do
+            local item = get_selected_media_item_at(i)
+            local item_track = GetMediaItem_Track(item)
+
+            local found = false
+            for _, folder_track in ipairs(folder_tracks) do
+                if item_track == folder_track then
+                    found = true
+                    break
+                end
+            end
+
+            if not found then
+                MB("Any selected items should be in the first folder.", "Error", 0)
+                return
+            end
+        end
         -- Set marker positions
         local first_item = get_selected_media_item_at(0)
         left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
@@ -72,11 +102,29 @@ function main()
         i = i + 1
     end
 
-    -- add new markers
-    AddProjectMarker2(0, false, left_pos, 0, "DEST-IN", 996, ColorToNative(23,203,223) | 0x1000000)
-    AddProjectMarker2(0, false, right_pos, 0, "DEST-OUT", 997, ColorToNative(23,203,223) | 0x1000000)
+    -- Get color table and add new markers
+    local colors = get_color_table()
+    AddProjectMarker2(0, false, left_pos, 0, "DEST-IN", 996, colors.dest_marker)
+    AddProjectMarker2(0, false, right_pos, 0, "DEST-OUT", 997, colors.dest_marker)
 
-    Undo_EndBlock("ReaClassical Core Destination Markers to Item Edge", 0)
+    Undo_EndBlock("Destination Markers to Item Edge", 0)
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
@@ -113,6 +161,7 @@ function get_selected_media_item_at(index)
 
     return nil
 end
+
 
 ---------------------------------------------------------------------
 
