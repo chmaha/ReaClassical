@@ -38,6 +38,7 @@ Zoom to Source IN marker
 Zoom to Source OUT marker
 "
 
+# Use a while read loop to handle spaces correctly
 printf '%s\n' "$FILES" | while IFS= read -r name; do
     # Skip empty lines
     [ -z "$name" ] && continue
@@ -46,8 +47,17 @@ printf '%s\n' "$FILES" | while IFS= read -r name; do
     dest_file="$DEST/ReaClassical Core_${name}.lua"
 
     if [ -f "$src_file" ]; then
+        # Copy the file
         cp -f "$src_file" "$dest_file"
-        echo "Copied: $src_file -> $dest_file"
+
+        # Replace the header text
+        # Use a POSIX-compliant sed command
+        sed -i \
+            -e 's|"ReaClassical" package|"ReaClassical Core" package|' \
+            -e 's|"ReaClassical.lua"|"ReaClassicalCore.lua"|' \
+            "$dest_file"
+
+        sed -i '/local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")/,/end$/d' "$dest_file"
     else
         echo "Warning: Source file not found: $src_file"
     fi
