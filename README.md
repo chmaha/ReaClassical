@@ -21,6 +21,6 @@ ReaImGui source code can be found [here](https://github.com/cfillion/reaimgui).
 ReEQ and ReSpectrum source code can be found [here](https://github.com/Justin-Johnson/ReJJ).  
 cfillion Lua profiler and iReaScript source code can be found [here](https://github.com/ReaTeam/ReaScripts/tree/master/Development).
 
-To just use the functions, jsfx plugins, theme, and default template but without keymaps, toolbar etc, follow the [ReaClassical Core](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md#reaclassical-core-just-the-s-d-editing-tools-inside-your-existing-reaper-install) instructions.
+To just use the S-D editing functions, jsfx plugins without theme, keymaps, toolbar etc, follow the [ReaClassical Core](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md#reaclassical-core-just-the-s-d-editing-tools-inside-your-existing-reaper-install) instructions.
 
 If you find these tools useful, please consider donating via [PayPal](https://www.paypal.com/donate/?hosted_button_id=PKJLC3E2UPW6C).
