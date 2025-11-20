@@ -12,7 +12,7 @@ Dependencies: `makeself` (Linux, Mac), `go` (Windows), `7z` (Mac & Windows)
 
 1. git clone the repo
 2. Open a terminal in the `Installers` folder
-3. Run `sh pull_reaper.sh [REAPER ver]` to grab REAPER install binaries and SWS plugin for all platforms _e.g._ `sh pull_reaper.sh 7.52` _to download REAPER 7.52_
+3. Run `sh pull_reaper.sh [REAPER ver]` to grab REAPER install binaries and required userplugins for all platforms _e.g._ `sh pull_reaper.sh 7.52` _to download REAPER 7.52_
 4. Run `sh build_all.sh` to build for all platforms or individual scripts for a single OS (e.g. `sh build_linux.sh` etc)
 
 REAPER [binaries](https://www.reaper.fm/download.php) are bundled with permission from the developers.  
