@@ -100,7 +100,6 @@ function main()
         vertical()
     end
     PreventUIRefresh(-1)
-    color_items(edits, color_pref)
     PreventUIRefresh(1)
 
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
@@ -140,7 +139,6 @@ end
 
 ---------------------------------------------------------------------
 
-function color_items(edits, color_pref)
     local unedited_color = 0
     if color_pref == 0 then
         local colors = get_color_table()
