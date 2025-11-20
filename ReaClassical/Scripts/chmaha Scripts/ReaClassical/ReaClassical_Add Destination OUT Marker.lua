@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_color_table, get_path, edge_check, return_check_length
+local get_track_number, folder_check, other_dest_marker_check
 
 ---------------------------------------------------------------------
 
@@ -33,6 +34,7 @@ if not SWS_exists then
 end
 
 function main()
+    PreventUIRefresh(1)
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
@@ -46,9 +48,13 @@ function main()
         if table[8] then sdmousehover = tonumber(table[8]) or 0 end
     end
 
-    local cur_pos
+    local selected_track = GetSelectedTrack(0, 0)
+
+    local cur_pos, track
     if sdmousehover == 1 then
         cur_pos = BR_PositionAtMouseCursor(false)
+        local screen_x, screen_y = GetMousePosition()
+        track = GetTrackFromPoint(screen_x, screen_y)
     else
         cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
     end
@@ -65,17 +71,31 @@ function main()
             i = i + 1
         end
 
+        local track_number = math.floor(get_track_number(track))
+        local other_dest_marker = other_dest_marker_check()
 
-        if edge_check(cur_pos) == true then
+        if selected_track then SetOnlyTrackSelected(selected_track) end
+
+        local final_track = track or selected_track
+
+        if edge_check(cur_pos, final_track) == true then
             local response = MB(
                 "The marker you are trying to add would either be on or close to an item edge or crossfade. Continue?",
-                "Add Dest-OUT Marker", 4)
+                "Add Dest-IN Marker", 4)
             if response ~= 6 then return end
         end
-        
+
         local colors = get_color_table()
-        AddProjectMarker2(0, false, cur_pos, 0, "DEST-OUT", 997, colors.dest_marker)
+        local marker_color = final_track and GetTrackColor(final_track) or colors.dest_marker
+
+        -- AddProjectMarker2(0, false, cur_pos, 0, "DEST-OUT", 997, colors.dest_marker)
+        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
+
+        if other_dest_marker ~= track_number then
+            MB("Warning: Dest OUT marker group does not match Dest IN!", "Add Dest Marker OUT", 0)
+        end
     end
+    PreventUIRefresh(-1)
 end
 
 ---------------------------------------------------------------------
@@ -97,18 +117,17 @@ end
 
 ---------------------------------------------------------------------
 
-function edge_check(cur_pos)
+function edge_check(cur_pos, track)
     local num_of_items = 0
     local check_length = return_check_length()
-    local first_track = GetTrack(0, 0)
-    if first_track then num_of_items = CountTrackMediaItems(first_track) end
+    if track then num_of_items = CountTrackMediaItems(track) end
     local clash = false
     for i = 0, num_of_items - 1 do
-        local item = GetTrackMediaItem(first_track, i)
+        local item = GetTrackMediaItem(track, i)
         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_fadein_len = GetMediaItemInfo_Value(item, "D_FADEINLEN")
         local item_fadein_end = item_start + item_fadein_len
-        if cur_pos > item_start - check_length and cur_pos < item_fadein_end then
+        if cur_pos > item_start and cur_pos < item_fadein_end + check_length then
             clash = true
             break
         end
@@ -136,6 +155,54 @@ function return_check_length()
         if table[6] then check_length = table[6] / 1000 end
     end
     return check_length
+end
+
+---------------------------------------------------------------------
+
+function get_track_number(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return 1
+    elseif GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        return GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+    else
+        local folder = GetParentTrack(track)
+        return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
+    end
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
+function other_dest_marker_check()
+    local proj = EnumProjects(-1) -- Get the active project
+    if not proj then return nil end
+
+    local _, num_markers, num_regions = CountProjectMarkers(proj)
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
+        local number, label = raw_label:match("(%d+):(.+)") -- Extract number and label
+
+        if label and (label == "DEST-IN" or label == "DEST-OUT") then
+            return tonumber(number) -- Convert track number to a number and return
+        end
+    end
+
+    return nil -- Return nil if no marker is found
 end
 
 ---------------------------------------------------------------------

@@ -1234,18 +1234,6 @@ end
 ---------------------------------------------------------------------
 
 function move_destination_folder_to_top()
-    local function get_folder_end_index(start_idx, total)
-        local depth = GetMediaTrackInfo_Value(GetTrack(0, start_idx), "I_FOLDERDEPTH")
-        if depth <= 0 then return start_idx end
-        local i = start_idx + 1
-        while i < total do
-            depth = depth + GetMediaTrackInfo_Value(GetTrack(0, i), "I_FOLDERDEPTH")
-            if depth == 0 then return i end
-            i = i + 1
-        end
-        return total - 1
-    end
-
     local track_count = CountTracks(0)
     if track_count == 0 then return end
 

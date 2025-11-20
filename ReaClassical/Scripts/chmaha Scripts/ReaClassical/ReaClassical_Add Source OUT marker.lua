@@ -34,6 +34,7 @@ if not SWS_exists then
 end
 
 function main()
+    PreventUIRefresh(1)
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
@@ -81,6 +82,7 @@ function main()
             MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
         end
     end
+    PreventUIRefresh(-1)
 end
 
 ---------------------------------------------------------------------
