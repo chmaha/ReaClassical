@@ -21,6 +21,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
+
+local imgui_exists = APIExists("ImGui_GetVersion")
+if not imgui_exists then
+    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
 package.path        = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui         = require 'imgui' '0.10'
 local main
