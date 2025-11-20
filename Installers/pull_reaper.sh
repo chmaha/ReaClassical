@@ -137,6 +137,13 @@ https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_img
 https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_imgui-aarch64.so
 "
 
+# Check if a final SWS file already exists for the given extension
+sws_exists() {
+    dir="$1"
+    pattern="$2"
+    find "$dir" -maxdepth 1 -type f -name "$pattern" | grep -q .
+}
+
 # Generic download function
 download_file() {
     url="$1"
@@ -191,25 +198,37 @@ extract_tar_xz() {
 }
 
 # --- Windows SWS DLLs ---
-for url in $win_sws_urls; do
-    archive="$win_dir/$(basename "$url")"
-    download_file "$url" "$archive"
-    extract_7z "$archive" "$win_dir" "reaper_sws*.dll"
-done
+if sws_exists "$win_dir" "reaper_sws-*.dll"; then
+    echo "Skipping Windows SWS download — final DLL already exists."
+else
+    for url in $win_sws_urls; do
+        archive="$win_dir/$(basename "$url")"
+        download_file "$url" "$archive"
+        extract_7z "$archive" "$win_dir" "reaper_sws*.dll"
+    done
+fi
 
 # --- macOS SWS dylibs ---
-for url in $mac_sws_urls; do
-    archive="$macos_dir/$(basename "$url")"
-    download_file "$url" "$archive"
-    extract_7z "$archive" "$macos_dir" "reaper_sws*.dylib"
-done
+if sws_exists "$macos_dir" "reaper_sws-*.dylib"; then
+    echo "Skipping macOS SWS download — final dylib already exists."
+else
+    for url in $mac_sws_urls; do
+        archive="$macos_dir/$(basename "$url")"
+        download_file "$url" "$archive"
+        extract_7z "$archive" "$macos_dir" "reaper_sws*.dylib"
+    done
+fi
 
 # --- Linux SWS shared objects ---
-for url in $linux_sws_urls; do
-    archive="$linux_dir/$(basename "$url")"
-    download_file "$url" "$archive"
-    extract_tar_xz "$archive" "$linux_dir" "reaper_sws*.so"
-done
+if sws_exists "$linux_dir" "reaper_sws-*.so"; then
+    echo "Skipping Linux SWS download — final .so already exists."
+else
+    for url in $linux_sws_urls; do
+        archive="$linux_dir/$(basename "$url")"
+        download_file "$url" "$archive"
+        extract_tar_xz "$archive" "$linux_dir" "reaper_sws*.so"
+    done
+fi
 
 echo "✅ SWS extraction completed!"
 
