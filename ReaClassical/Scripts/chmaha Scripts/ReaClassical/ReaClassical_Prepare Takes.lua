@@ -237,7 +237,6 @@ function color_items(edits, color_pref)
         for t = 0, num_tracks - 1 do
             local track = GetTrack(0, t)
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
             local is_folder = depth == 1
             local should_color_dest = false
 
@@ -245,8 +244,6 @@ function color_items(edits, color_pref)
                 if not first_folder_done then
                     should_color_dest = true
                     first_folder_done = true
-                elseif dest == "y" then
-                    should_color_dest = true
                 end
 
                 if should_color_dest then
@@ -434,8 +431,6 @@ function vertical()
     select_next_folder()
 
     for _ = start, num_of_folders, 1 do
-        local track = GetSelectedTrack(0, 0)
-        GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
         vertical_razor()
         local next_group = vertical_group(length, group)
         select_next_folder()

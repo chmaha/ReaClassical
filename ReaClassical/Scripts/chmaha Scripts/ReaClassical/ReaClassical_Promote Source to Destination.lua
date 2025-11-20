@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, swap_selected_dest_copy_with_destination
+local main, swap_selected_source_with_destination
 
 ---------------------------------------------------------------------
 
@@ -34,9 +34,9 @@ function main()
         return
     end
 
-    swap_selected_dest_copy_with_destination()
+    swap_selected_source_with_destination()
 
-    Undo_EndBlock('Make Dest Copy Destination', 0)
+    Undo_EndBlock('Make Source Group Destination', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
@@ -44,7 +44,7 @@ end
 
 ---------------------------------------------------------------------
 
-function swap_selected_dest_copy_with_destination()
+function swap_selected_source_with_destination()
     local track_count = CountTracks(0)
     if track_count == 0 then return end
 
@@ -66,14 +66,14 @@ function swap_selected_dest_copy_with_destination()
         end
     end
 
-    -- Check if parent_track is a dest_copy
-    local _, is_copy = GetSetMediaTrackInfo_String(parent_track, "P_EXT:dest_copy", "", false)
-    if is_copy ~= "y" then
-        MB("Selected track (or its parent) is not a dest_copy.", "Swap Failed", 0)
+    -- Check if parent_track is a source group
+    local _, is_source = GetSetMediaTrackInfo_String(parent_track, "P_EXT:Source", "", false)
+    if is_source ~= "y" then
+        MB("Selected track (or its parent) is not a source group.", "Swap Failed", 0)
         return
     end
 
-    local selected_dest_copy = parent_track
+    local selected_source = parent_track
 
     -- Find the destination folder
     local destination_folder = nil
@@ -92,9 +92,9 @@ function swap_selected_dest_copy_with_destination()
 
     -- Swap the p_ext markers
     GetSetMediaTrackInfo_String(destination_folder, "P_EXT:destination", "", true)
-    GetSetMediaTrackInfo_String(destination_folder, "P_EXT:dest_copy", "y", true)
-    GetSetMediaTrackInfo_String(selected_dest_copy, "P_EXT:dest_copy", "", true)
-    GetSetMediaTrackInfo_String(selected_dest_copy, "P_EXT:destination", "y", true)
+    GetSetMediaTrackInfo_String(destination_folder, "P_EXT:Source", "y", true)
+    GetSetMediaTrackInfo_String(selected_source, "P_EXT:Source", "", true)
+    GetSetMediaTrackInfo_String(selected_source, "P_EXT:destination", "y", true)
 
     local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
     Main_OnCommand(F8_sync, 0)

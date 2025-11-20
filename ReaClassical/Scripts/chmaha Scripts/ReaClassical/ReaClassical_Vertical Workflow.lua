@@ -1263,36 +1263,6 @@ function move_destination_folder_to_top()
     end
     if not destination_folder then return end
 
-    -- Collect all dest_copy parent tracks
-    local dest_copy_parents = {}
-    for i = 0, track_count - 1 do
-        local track = GetTrack(0, i)
-        if track then
-            local _, is_copy = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "", false)
-            if is_copy == "y" and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                table.insert(dest_copy_parents, track)
-            end
-        end
-    end
-
-    -- Move all dest_copy groups together, preserving their order
-    if #dest_copy_parents > 0 then
-        -- Select all dest_copy folder blocks
-        for _, track in ipairs(dest_copy_parents) do
-            local start_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
-            local end_idx = get_folder_end_index(start_idx, CountTracks(0))
-            for j = start_idx, end_idx do
-                SetTrackSelected(GetTrack(0, j), true)
-            end
-        end
-        -- Move the combined selection to the top
-        ReorderSelectedTracks(0, 0)
-        -- Unselect everything
-        for i = 0, CountTracks(0) - 1 do
-            SetTrackSelected(GetTrack(0, i), false)
-        end
-    end
-
     -- Finally, move the destination folder itself to top
     local dest_idx = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
     if dest_idx > 0 then

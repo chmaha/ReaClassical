@@ -147,19 +147,10 @@ function modify_item_name(item)
                     local folder_index = 0
                     -- local colors = get_color_table()
 
-                    -- Count all dest_copy tracks in the project
-                    local dest_copy_count = 0
-                    for _, track in ipairs(folder_tracks) do
-                        local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
-                        if dest ~= "" then
-                            dest_copy_count = dest_copy_count + 1
-                        end
-                    end
-
                     if parent_folder then
                         for i, track in ipairs(folder_tracks) do
                             if track == parent_folder then
-                                folder_index = i - (2 + dest_copy_count) -- account for dest and dest copies
+                                folder_index = i - 2 -- account for dest
                                 break
                             end
                         end

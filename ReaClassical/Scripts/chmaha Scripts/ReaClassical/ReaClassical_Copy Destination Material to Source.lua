@@ -59,12 +59,12 @@ end
 function duplicate_first_folder()
     local first_track = GetTrack(0, 0)
     if not first_track then return end
-    GetSetMediaTrackInfo_String(first_track, "P_EXT:dest_copy", "y", true)
+    GetSetMediaTrackInfo_String(first_track, "P_EXT:Source", "y", true)
     GetSetMediaTrackInfo_String(first_track, "P_EXT:destination", "", true)
     SetOnlyTrackSelected(first_track)
 
     Main_OnCommand(40062, 0) -- Track: Duplicate tracks
-    GetSetMediaTrackInfo_String(first_track, "P_EXT:dest_copy", "", true)
+    GetSetMediaTrackInfo_String(first_track, "P_EXT:Source", "", true)
     GetSetMediaTrackInfo_String(first_track, "P_EXT:destination", "y", true)
     return first_track
 end
