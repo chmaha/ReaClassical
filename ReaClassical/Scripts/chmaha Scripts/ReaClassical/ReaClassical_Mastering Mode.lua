@@ -57,6 +57,8 @@ function main()
     Main_OnCommand(40879, 0) -- Global automation override: All automation in latch preview mode
     sync_based_on_workflow(workflow)
     PreventUIRefresh(-1)
+    local fit_project = NamedCommandLookup("_RS63665092232578f8c8d10c5936ca5013a9ecab51")
+    Main_OnCommand(fit_project,0)
   end
 TrackList_AdjustWindows(false)
 end
