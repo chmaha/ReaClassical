@@ -74,7 +74,7 @@ function main()
         local other_source_marker = other_source_marker_check()
 
         local color_track = track or selected_track
-        local marker_color = color_track and GetTrackColor(color_track) or ColorToNative(23, 223, 143) | 0x1000000
+        local marker_color = ColorToNative(23, 223, 143) | 0x1000000
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
 
         if other_source_marker ~= track_number then

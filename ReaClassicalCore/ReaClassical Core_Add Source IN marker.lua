@@ -89,7 +89,7 @@ function main()
         if selected_track then SetOnlyTrackSelected(selected_track) end
 
         local color_track = track or selected_track
-        local marker_color = color_track and GetTrackColor(color_track) or ColorToNative(23, 223, 143) | 0x1000000
+        local marker_color = ColorToNative(23, 223, 143) | 0x1000000
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     end
     PreventUIRefresh(-1)

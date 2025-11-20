@@ -60,7 +60,7 @@ printf '%s\n' "$FILES" | while IFS= read -r name; do
 
         sed -i 's|local _, workflow = GetProjExtState(0, "ReaClassical Core", "Workflow")$|local workflow = "Horizontal"|' "$dest_file"
 
-        sed -i 's#local marker_color = color_track and GetTrackColor(color_track) or 0#local marker_color = color_track and GetTrackColor(color_track) or ColorToNative(23, 223, 143) | 0x1000000#' "$dest_file"
+        sed -i 's#local marker_color = color_track and GetTrackColor(color_track) or 0#local marker_color = ColorToNative(23, 223, 143) | 0x1000000#' "$dest_file"
     else
         echo "Warning: Source file not found: $src_file"
     fi
