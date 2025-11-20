@@ -73,7 +73,7 @@ function main()
                 "Add Dest-IN Marker", 4)
             if response ~= 6 then return end
         end
-        --DeleteProjectMarker(NULL, 996, false)
+
         local colors = get_color_table()
         AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
     end
