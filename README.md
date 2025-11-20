@@ -4,7 +4,7 @@
 
 Everything you need to do professional classical music recording, editing, mixing and mastering in REAPER for free. Please begin by visiting the [website](https://reaclassical.org), and reading the [quick start guide](https://reaclassical.org/quick_start_guide.html), [online manual](https://reaclassical.org/manual) and latest [release notes](https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf).
 
-Download an official release for Linux, MacOS or Windows visit https://github.com/chmaha/ReaClassical/releases
+To download an official release for Linux, MacOS or Windows visit https://github.com/chmaha/ReaClassical/releases
 
 **To build for all systems (currently requires Linux):**
 
