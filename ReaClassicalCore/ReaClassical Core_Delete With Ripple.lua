@@ -125,7 +125,7 @@ end
 
 function return_xfade_length()
     local xfade_len = 0.035
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end

@@ -26,7 +26,6 @@ Move to Destination IN marker
 Move to Destination OUT marker
 Move to Source IN marker
 Move to Source OUT marker
-Preferences
 Prepare Takes
 S-D Edit
 Set Dest Project Marker
@@ -58,6 +57,8 @@ printf '%s\n' "$FILES" | while IFS= read -r name; do
             "$dest_file"
 
         sed -i '/local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")/,/end$/d' "$dest_file"
+
+        sed -i 's|ProjExtState(0, "ReaClassical"|ProjExtState(0, "ReaClassical Core"|g' "$dest_file"
     else
         echo "Warning: Source file not found: $src_file"
     fi

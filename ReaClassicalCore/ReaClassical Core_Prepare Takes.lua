@@ -80,7 +80,7 @@ function main()
         shift()
     end
 
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local color_pref = 0
     if input ~= "" then
         local table = {}
@@ -111,14 +111,14 @@ function main()
         end
     end
 
-    local _, silent = GetProjExtState(0, "ReaClassical", "prepare_silent")
+    local _, silent = GetProjExtState(0, "ReaClassical Core", "prepare_silent")
     if silent ~= "y" then
         MB("Project takes have been prepared! " ..
             "You can run again if you import or record more material..."
             , "ReaClassical", 0)
     end
 
-    SetProjExtState(0, "ReaClassical", "PreparedTakes", "y")
+    SetProjExtState(0, "ReaClassical Core", "PreparedTakes", "y")
     Undo_EndBlock('Prepare Takes', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

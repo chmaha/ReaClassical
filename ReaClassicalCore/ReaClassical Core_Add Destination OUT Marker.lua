@@ -33,7 +33,7 @@ if not SWS_exists then
 end
 
 function main()
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local sdmousehover = 0
     if input ~= "" then
         local table = {}
@@ -124,7 +124,7 @@ end
 
 function return_check_length()
     local check_length = 0.5
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end

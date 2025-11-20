@@ -31,7 +31,7 @@ function main()
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local moveable_dest = 0
 
     if input ~= "" then

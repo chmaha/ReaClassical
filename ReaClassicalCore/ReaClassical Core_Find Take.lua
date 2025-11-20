@@ -28,7 +28,7 @@ local main
 
 function main()
 
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local find_takes_using_items = 0
     if input ~= "" then
         local table = {}
@@ -37,7 +37,7 @@ function main()
     end
 
     local take_choice
-    local _, session_name = GetProjExtState(0, "ReaClassical", "SessionNameSearch")
+    local _, session_name = GetProjExtState(0, "ReaClassical Core", "SessionNameSearch")
     ::start::
     local retval, inputs = GetUserInputs('Find Take', 2, 'Take Number:,Session Name (optional):', ',' .. session_name)
     if not retval then return end
@@ -47,7 +47,7 @@ function main()
     if not take_choice and session_name ~= "" then take_choice = 1 end
 
     session_name = session_name:match("^%s*(.-)%s*$") -- Trim spaces around the session name
-    SetProjExtState(0, "ReaClassical", "SessionNameSearch", session_name)
+    SetProjExtState(0, "ReaClassical Core", "SessionNameSearch", session_name)
 
     local found = false
     local num_of_items = CountMediaItems(0)

@@ -34,7 +34,7 @@ if not SWS_exists then
 end
 
 function main()
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local sdmousehover = 0
     if input ~= "" then
         local table = {}

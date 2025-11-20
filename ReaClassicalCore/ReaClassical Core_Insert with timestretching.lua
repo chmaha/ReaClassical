@@ -43,14 +43,14 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
-    local _, prepared = GetProjExtState(0, "ReaClassical", "PreparedTakes")
+    local _, prepared = GetProjExtState(0, "ReaClassical Core", "PreparedTakes")
     if prepared == "" then
         MB("Please run ReaClassical Prepare Takes (T) once before running a source-destination edit function.",
             "ReaClassical Core Error", 0)
         return
     end
 
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local moveable_dest = 0
     if input ~= "" then
         local table = {}
@@ -316,7 +316,7 @@ end
 
 function return_xfade_length()
     local xfade_len = 0.035
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
@@ -457,9 +457,9 @@ end
 
 function mark_as_edit()
     local first_sel_item = get_selected_media_item_at(0)
-    local _, src_guid = GetProjExtState(0, "ReaClassical", "temp_src_guid")
+    local _, src_guid = GetProjExtState(0, "ReaClassical Core", "temp_src_guid")
     GetSetMediaItemInfo_String(first_sel_item, "P_EXT:src_guid", src_guid, true)
-    SetProjExtState(0, "ReaClassical", "temp_src_guid", "")
+    SetProjExtState(0, "ReaClassical Core", "temp_src_guid", "")
 
     local selected_items = count_selected_media_items()
     for i = 0, selected_items - 1, 1 do
@@ -615,7 +615,7 @@ function save_source_details()
     if not guid or guid == "" then return end
 
     -- Save the GUID to the project’s ExtState
-    SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
+    SetProjExtState(0, "ReaClassical Core", "temp_src_guid", guid)
 end
 
 ---------------------------------------------------------------------
