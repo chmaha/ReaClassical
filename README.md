@@ -15,8 +15,9 @@ Dependencies: `makeself` (Linux, Mac), `go` (Windows), `7z` (Mac & Windows)
 3. Run `sh pull_reaper.sh [REAPER ver]` to grab REAPER install binaries and SWS plugin for all platforms _e.g._ `sh pull_reaper.sh 7.52` _to download REAPER 7.52_
 4. Run `sh build_all.sh` to build for all platforms or individual scripts for a single OS (e.g. `sh build_linux.sh` etc)
 
+REAPER [binaries](https://www.reaper.fm/download.php) are bundled with permission from the developers.  
+SWS/S&M source code can be found [here](https://github.com/reaper-oss/sws).  
 ReaImGui source code can be found [here](https://github.com/cfillion/reaimgui).  
-REAPER binaries are bundled with permission from the developers.  
 ReEQ and ReSpectrum source code can be found [here](https://github.com/Justin-Johnson/ReJJ).  
 cfillion Lua profiler and iReaScript source code can be found [here](https://github.com/ReaTeam/ReaScripts/tree/master/Development).
 
