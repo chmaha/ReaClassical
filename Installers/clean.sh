@@ -6,6 +6,7 @@
 linux_dir="src/linux"
 macos_dir="src/macos"
 win_dir="src/windows"
+builds="builds"
 
 # Function to safely delete files matching a pattern
 clean_dir() {
@@ -36,5 +37,7 @@ clean_dir "$win_dir" "reaper*-install.exe"
 clean_dir "$win_dir" "reaper_sws*.dll"
 clean_dir "$win_dir" "reaper_imgui*.dll"
 clean_dir "$win_dir" "Resource_Folder_Base.zip"
+
+clean_dir "builds" "ReaClassical*"
 
 echo "✅ Cleanup completed!"

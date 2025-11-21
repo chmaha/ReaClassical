@@ -139,9 +139,13 @@ https://github.com/cfillion/reaimgui/releases/download/v$reaimgui_ver/reaper_img
 
 # Check if a final SWS file already exists for the given extension
 sws_exists() {
-    dir="$1"
-    pattern="$2"
-    find "$dir" -maxdepth 1 -type f -name "$pattern" | grep -q .
+    # Usage: sws_exists "file1 file2 file3 ..."
+    for f in $1; do
+        if [ ! -f "$f" ]; then
+            return 1  # false: at least one file missing
+        fi
+    done
+    return 0      # true: all files exist
 }
 
 # Generic download function
@@ -198,8 +202,9 @@ extract_tar_xz() {
 }
 
 # --- Windows SWS DLLs ---
-if sws_exists "$win_dir" "reaper_sws-*.dll"; then
-    echo "Skipping Windows SWS download — final DLL already exists."
+win_sws_files="$win_dir/reaper_sws-x86.dll $win_dir/reaper_sws-x64.dll"
+if sws_exists "$win_sws_files"; then
+    echo "Skipping Windows SWS download — complete fileset already exists."
 else
     for url in $win_sws_urls; do
         archive="$win_dir/$(basename "$url")"
@@ -209,8 +214,9 @@ else
 fi
 
 # --- macOS SWS dylibs ---
-if sws_exists "$macos_dir" "reaper_sws-*.dylib"; then
-    echo "Skipping macOS SWS download — final dylib already exists."
+mac_sws_files="$macos_dir/reaper_sws-i386.dylib $macos_dir/reaper_sws-x86_64.dylib $macos_dir/reaper_sws-arm64.dylib"
+if sws_exists "$mac_sws_files"; then
+    echo "Skipping macOS SWS download — complete fileset already exists."
 else
     for url in $mac_sws_urls; do
         archive="$macos_dir/$(basename "$url")"
@@ -220,8 +226,9 @@ else
 fi
 
 # --- Linux SWS shared objects ---
-if sws_exists "$linux_dir" "reaper_sws-*.so"; then
-    echo "Skipping Linux SWS download — final .so already exists."
+linux_sws_files="$linux_dir/reaper_sws-i686.so $linux_dir/reaper_sws-x86_64.so $linux_dir/reaper_sws-armv7l.so $linux_dir/reaper_sws-aarch64.so"
+if sws_exists "$linux_sws_files"; then
+    echo "Skipping Linux SWS download — complete fileset already exists."
 else
     for url in $linux_sws_urls; do
         archive="$linux_dir/$(basename "$url")"
