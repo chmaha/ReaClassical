@@ -45,8 +45,15 @@ function main()
         if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
-    local mgr_open = GetToggleCommandState(40326) == 1
-    if not mgr_open then Main_OnCommand(40326,0) end
+    local first_run = false
+    local razor_enabled = GetToggleCommandState(42618) == 1
+    if not razor_enabled then
+        Main_OnCommand(42618, 0)
+        first_run = true
+        MB("Source Audition Marker mode activated.\n" ..
+            "Left click drag to set a razor selection and press Z to convert to a marker pair."
+            , "ReaClassical", 0)
+    end
 
     Main_OnCommand(40635, 0) -- remove time selection
     Main_OnCommand(42474, 0) -- set selection to razor edit
@@ -57,31 +64,30 @@ function main()
         left_pos = start_time
         right_pos = end_time
         SelectFirstRazorEditTrack()
-    else
+        local selected_track = GetSelectedTrack(0, 0)
+        local dest_track_num = calculate_destination_info()
+
+        local track_number = math.floor(get_track_number())
+
+        if moveable_dest == 1 then
+            move_destination_folder(track_number)
+        end
+
+        if dest_track_num and dest_track_num > track_number then
+            track_number = track_number + get_tracks_per_group()
+        end
+
+        if selected_track then SetOnlyTrackSelected(selected_track) end
+
+        local marker_color = selected_track and GetTrackColor(selected_track) or 0
+
+        AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SAI", -1, marker_color)
+        AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SAO", -1, marker_color)
+    elseif not first_run then
         MB("Error: Create a razor edit area before running.", "Set Source Audition Markers", 0)
         return
     end
 
-
-    local selected_track = GetSelectedTrack(0, 0)
-    local dest_track_num = calculate_destination_info()
-
-    local track_number = math.floor(get_track_number())
-
-    if moveable_dest == 1 then
-        move_destination_folder(track_number)
-    end
-
-    if dest_track_num and dest_track_num > track_number then
-        track_number = track_number + get_tracks_per_group()
-    end
-
-    if selected_track then SetOnlyTrackSelected(selected_track) end
-
-    local marker_color = selected_track and GetTrackColor(selected_track) or 0
-
-    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SAI", -1, marker_color)
-    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SAO", -1, marker_color)
     Main_OnCommand(40635, 0) -- remove time selection
     Main_OnCommand(42406, 0) -- remove razor edit areas
     PreventUIRefresh(-1)
