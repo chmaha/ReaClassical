@@ -42,10 +42,12 @@ function main()
     end
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local sdmousehover = 0
+    local moveable_dest = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
         if table[8] then sdmousehover = tonumber(table[8]) or 0 end
+        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
     local selected_track = GetSelectedTrack(0, 0)
@@ -95,7 +97,10 @@ function main()
             marker_color = final_track and GetTrackColor(final_track) or colors.dest_marker
         end
 
-        -- AddProjectMarker2(0, false, cur_pos, 0, "DEST-OUT", 997, colors.dest_marker)
+        if moveable_dest == 1 then
+            track_number = 1
+            marker_color = colors.dest_items
+        end
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
 
         if other_dest_marker and other_dest_marker ~= track_number then

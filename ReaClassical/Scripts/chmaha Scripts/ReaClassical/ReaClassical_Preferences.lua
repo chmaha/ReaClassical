@@ -41,7 +41,7 @@ local labels = {
     'Alt Audition Playback Rate',
     'Year of Production',
     'CUE audio format',
-    'Floating Destination Group',
+    'Floating Destination Folder',
     'Find takes using item names'
 }
 
@@ -64,6 +64,8 @@ function main()
     if new_floating ~= orig_floating and new_floating == 0 then
         move_destination_folder_to_top()
         sync_based_on_workflow(workflow)
+    elseif new_floating ~= orig_floating and new_floating == 1 then
+        MB("When the floating destination folder is active, DEST-IN and DEST-OUT markers are always associated with the \"D:\" folder.","ReaClassical", 0)
     end
     if new_color ~= orig_color then
         prepare_takes()
