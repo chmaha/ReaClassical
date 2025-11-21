@@ -89,8 +89,8 @@ function main()
         SetEditCurPos(source_in_pos, false, false)
         xfade(xfade_len)
         Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
-        DeleteProjectMarker(NULL, 998, false)
-        DeleteProjectMarker(NULL, 999, false)
+        DeleteProjectMarker(nil, 998, false)
+        DeleteProjectMarker(nil, 999, false)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Ripple per-track
     else

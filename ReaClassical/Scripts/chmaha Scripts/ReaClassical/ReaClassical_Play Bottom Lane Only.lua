@@ -32,7 +32,7 @@ function main()
         return
     end
     -- check if left or right item is muted
-    DeleteProjectMarker(NULL, 1016, false)
+    DeleteProjectMarker(nil, 1016, false)
     local bottom_only = GetToggleCommandStateEx(32065, 43669)
     if bottom_only ~= 1 then CrossfadeEditor_OnCommand(43669) end -- set bottom lane only
     local left_mute = GetToggleCommandStateEx(32065, 43633)

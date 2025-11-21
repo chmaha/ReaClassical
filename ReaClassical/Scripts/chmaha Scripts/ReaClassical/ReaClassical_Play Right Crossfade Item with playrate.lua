@@ -39,7 +39,7 @@ function main()
         return
     end
 
-    DeleteProjectMarker(NULL, 1016, false)
+    DeleteProjectMarker(nil, 1016, false)
     CSurf_OnPlayRateChange(audition_speed)
     local in_bounds = GetToggleCommandStateEx(32065, 43664)
     if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end

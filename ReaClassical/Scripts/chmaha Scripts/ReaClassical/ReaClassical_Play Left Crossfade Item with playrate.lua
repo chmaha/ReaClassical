@@ -92,7 +92,7 @@ end
 
 function on_stop()
     if GetPlayState() == 0 then
-        DeleteProjectMarker(NULL, 1016, false)
+        DeleteProjectMarker(nil, 1016, false)
         Main_OnCommand(41185, 0) -- Item properties: Unsolo all
         return
     else

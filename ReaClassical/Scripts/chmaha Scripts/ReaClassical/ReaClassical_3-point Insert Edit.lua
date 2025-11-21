@@ -920,7 +920,7 @@ end
 ---------------------------------------------------------------------
 
 function add_marker(pos, distance, track_number, label, num, color)
-    DeleteProjectMarker(NULL, num, false)
+    DeleteProjectMarker(nil, num, false)
     AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, color)
 end
 

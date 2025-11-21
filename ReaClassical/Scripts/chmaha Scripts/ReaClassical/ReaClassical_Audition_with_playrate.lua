@@ -82,7 +82,7 @@ function main()
             TrackList_AdjustWindows(false)
         end
     else
-        DeleteProjectMarker(NULL, 1016, false)
+        DeleteProjectMarker(nil, 1016, false)
         BR_GetMouseCursorContext()
         local hover_item = BR_GetMouseCursorContext_Item()
         if hover_item ~= nil then
@@ -154,7 +154,7 @@ function main()
                 colors.audition)
             GoToMarker(0, 1111, false)
             OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
-            DeleteProjectMarker(NULL, 1111, false)
+            DeleteProjectMarker(nil, 1111, false)
         end
         Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
         SetMediaItemSelected(item_one, false)
@@ -316,7 +316,7 @@ end
 
 function on_stop()
     if GetPlayState() == 0 then
-        DeleteProjectMarker(NULL, 1016, false)
+        DeleteProjectMarker(nil, 1016, false)
         Main_OnCommand(41185, 0) -- Item properties: Unsolo all
         return
     else

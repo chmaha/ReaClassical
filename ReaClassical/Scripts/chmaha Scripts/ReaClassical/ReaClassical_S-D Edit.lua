@@ -310,7 +310,7 @@ end
 
 function add_source_marker(pos, distance, track_number, label, num)
     local colors = get_color_table()
-    DeleteProjectMarker(NULL, num, false)
+    DeleteProjectMarker(nil, num, false)
     AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, colors.source_marker)
 end
 
