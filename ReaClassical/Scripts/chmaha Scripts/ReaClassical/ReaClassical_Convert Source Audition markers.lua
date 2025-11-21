@@ -122,7 +122,11 @@ function convert_audition_markers()
     AddProjectMarker2(0, false, end_pos, 0, start_tracknum .. ":SOURCE-OUT", 999, sai_color)
     Main_OnCommand(40635, 0) -- remove time selection
 
-    -- 7. Clear arrange window override
+    -- 7. Disable razor selection
+    local razor_enabled = GetToggleCommandState(42618) == 1
+    if razor_enabled then Main_OnCommand(42618, 0) end
+
+    -- 8. Clear arrange window override
     Main_OnCommand(42621, 0)
 
     return true
