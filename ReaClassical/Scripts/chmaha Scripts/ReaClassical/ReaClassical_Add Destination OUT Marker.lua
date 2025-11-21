@@ -86,12 +86,19 @@ function main()
         end
 
         local colors = get_color_table()
-        local marker_color = final_track and GetTrackColor(final_track) or colors.dest_marker
+        
+        -- Force dest marker color for Horizontal workflow
+        local marker_color
+        if workflow == "Horizontal" then
+            marker_color = colors.dest_marker
+        else
+            marker_color = final_track and GetTrackColor(final_track) or colors.dest_marker
+        end
 
         -- AddProjectMarker2(0, false, cur_pos, 0, "DEST-OUT", 997, colors.dest_marker)
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
 
-        if other_dest_marker ~= track_number then
+        if other_dest_marker and other_dest_marker ~= track_number then
             MB("Warning: Dest OUT marker group does not match Dest IN!", "Add Dest Marker OUT", 0)
         end
     end

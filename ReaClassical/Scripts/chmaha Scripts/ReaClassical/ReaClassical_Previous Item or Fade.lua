@@ -22,14 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, move_to_item, trackname_check
-local lock_previous_items, fadeStart, fadeEnd, zoom, view
-local unlock_items, save_color, paint, load_color
-local correct_item_positions, folder_check, check_next_item_overlap
-local get_color_table, get_path, get_reaper_version, get_item_by_guid
-local get_selected_media_item_at, count_selected_media_items
-local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-local win_state, scroll_to_first_track, select_next_item, get_item_guid
+local main, move_to_item, get_selected_media_item_at
+
 ---------------------------------------------------------------------
 
 function main()
@@ -48,19 +42,18 @@ end
 ---------------------------------------------------------------------
 
 function move_to_item()
-    
-        local item = get_selected_media_item_at(0)
-        local item_start
-        if item then
-            item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-        end
-        local cursor_position = GetCursorPosition()
-        if item_start and cursor_position > item_start then
-            Main_OnCommand(40416, 0) -- Select and move to prev item
-            Main_OnCommand(40416, 0) -- Select and move to prev item
-        else
-            Main_OnCommand(40416, 0) -- Select and move to prev item
-        end
+    local item = get_selected_media_item_at(0)
+    local item_start
+    if item then
+        item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+    end
+    local cursor_position = GetCursorPosition()
+    if item_start and cursor_position > item_start then
+        Main_OnCommand(40416, 0)     -- Select and move to prev item
+        Main_OnCommand(40416, 0)     -- Select and move to prev item
+    else
+        Main_OnCommand(40416, 0)     -- Select and move to prev item
+    end
 end
 
 ---------------------------------------------------------------------

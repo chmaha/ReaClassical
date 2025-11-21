@@ -142,8 +142,8 @@ end
 
 function color_items(edits, color_pref)
     local unedited_color = 0
+    local colors = get_color_table()
     if color_pref == 0 then
-        local colors = get_color_table()
         unedited_color = colors.dest_items
     end
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -285,8 +285,8 @@ function color_items(edits, color_pref)
             for _, track in ipairs(dest_folders) do
                 local num_items = CountTrackMediaItems(track)
                 local folder_color = unedited_color
-                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", folder_color)
-                color_folder_children(track, folder_color)
+                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", colors.dest_items)
+                color_folder_children(track, colors.dest_items)
 
                 for i = 0, num_items - 1 do
                     local item = GetTrackMediaItem(track, i)

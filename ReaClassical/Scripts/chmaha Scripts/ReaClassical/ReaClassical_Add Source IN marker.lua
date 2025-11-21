@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number
 local move_destination_folder, get_tracks_per_group
-local calculate_destination_info
+local calculate_destination_info, get_path, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -89,7 +89,14 @@ function main()
         if selected_track then SetOnlyTrackSelected(selected_track) end
 
         local color_track = track or selected_track
-        local marker_color = color_track and GetTrackColor(color_track) or 0
+        local colors = get_color_table()
+        local marker_color
+        if workflow == "Horizontal" then
+            marker_color = colors.source_marker
+        else
+            marker_color = color_track and GetTrackColor(color_track) or colors.source_marker
+        end
+
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     end
     PreventUIRefresh(-1)
@@ -196,6 +203,23 @@ function calculate_destination_info()
     end
     local dest_track_num = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER")
     return dest_track_num
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

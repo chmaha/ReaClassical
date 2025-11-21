@@ -25,12 +25,12 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_source_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, load_last_assembly_item
 local ripple_lock_mode, return_xfade_length, xfade, get_item_guid
-local get_first_last_items, get_color_table, get_path, mark_as_edit
+local get_first_last_items, mark_as_edit
 local move_to_project_tab, save_source_details, adaptive_delete
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
-local add_dest_out_marker, save_last_assembly_item, create_dest_in
+local save_last_assembly_item
 local get_item_by_guid, select_matching_dest_folder, add_marker
 
 ---------------------------------------------------------------------
@@ -93,7 +93,7 @@ function main()
     end
 
     ripple_lock_mode()
-    local colors = get_color_table()
+
     if dest_in == 1 and source_count == 2 then
         local last_saved_item = load_last_assembly_item()
         if last_saved_item then
@@ -120,7 +120,7 @@ function main()
                         end
                         i = i + 1
                     end
-                    add_marker(item_right_edge, 0, dest_track_number, "DEST-OUT", 996, 0)
+                    add_marker(item_right_edge, 0, dest_track_number, "DEST-IN", 996, 0)
                 end
             end
         end
@@ -392,7 +392,7 @@ function split_at_dest_in()
                 -- Get group ID of second item
                 local group_id = GetMediaItemInfo_Value(second_item, "I_GROUPID")
                 if group_id ~= 0 then
-                    -- Find the first folder track
+                    -- Find the folder track
                     local num_tracks = CountTracks(0)
                     local sel_track = GetSelectedTrack(0, 0)
                     local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
@@ -416,7 +416,7 @@ function split_at_dest_in()
                     end
 
                     if folder_start then
-                        -- Loop through items only on tracks within first folder
+                        -- Loop through items only on tracks within selected folder
                         for t = folder_start, folder_end do
                             local track = GetTrack(0, t)
                             local num_items_on_track = CountTrackMediaItems(track)
@@ -565,8 +565,6 @@ function get_first_last_items()
 
     for i = 0, num_of_items - 1 do
         local item = get_selected_media_item_at(i)
-        local track = GetMediaItem_Track(item)
-        local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
         if not first_sel_item then
             first_sel_item = item
@@ -575,23 +573,6 @@ function get_first_last_items()
     end
 
     return first_sel_item, last_sel_item
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
