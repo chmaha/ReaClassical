@@ -27,13 +27,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
-local seconds_to_hhmm, find_first_rec_enabled_parent, draw, get_reaper_version
-local marker_actions
+local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
+  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+  return
 end
 
 local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -43,16 +42,6 @@ if workflow == "" then
 end
 
 ---------------------------------------------------------------------
-
-function get_reaper_version()
-  local version_str = GetAppVersion()
-  local version = version_str:match("^(%d+%.%d+)")
-  return tonumber(version)
-end
-
----------------------------------------------------------------------
-
-local reaper_ver = get_reaper_version()
 
 local iterated_filenames = false
 local added_take_number = false
@@ -275,13 +264,8 @@ function main()
 
     if not rec_name_set then
       local padded_take_text = string.format("%03d", tonumber(take_text))
-      if reaper_ver > 7.28 then
-        SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
-          .. "$tracknameornumber_T" .. padded_take_text)
-      else
-        SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
-          .. "$track_T" .. padded_take_text)
-      end
+      SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
+        .. "$tracknameornumber_T" .. padded_take_text)
       rec_name_set = true
     end
 
@@ -630,12 +614,12 @@ end
 ---------------------------------------------------------------------
 
 function marker_actions()
-  if marker_actions_running then return end   -- do not start twice
+  if marker_actions_running then return end -- do not start twice
   marker_actions_running = true
 
   local markers = {}
   local next_idx = 1
-  local tolerance = 0.05   -- seconds (50 ms)
+  local tolerance = 0.05 -- seconds (50 ms)
 
   -- Pre-scan markers once
   local function scan_markers()
@@ -653,7 +637,7 @@ function marker_actions()
     table.sort(markers, function(a, b) return a.pos < b.pos end)
   end
 
-  scan_markers()   -- initial scan
+  scan_markers() -- initial scan
 
   local function reset_marker_index(play_pos)
     for i, m in ipairs(markers) do
@@ -666,7 +650,7 @@ function marker_actions()
   end
 
   local function check_next_marker()
-    if not marker_actions_running then return end     -- allow external stop
+    if not marker_actions_running then return end -- allow external stop
 
     local state = GetPlayState()
 
