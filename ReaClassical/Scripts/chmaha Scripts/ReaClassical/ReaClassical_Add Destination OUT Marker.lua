@@ -86,7 +86,7 @@ function main()
         end
 
         local colors = get_color_table()
-        
+
         -- Force dest marker color for Horizontal workflow
         local marker_color
         if workflow == "Horizontal" then
