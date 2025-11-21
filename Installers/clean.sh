@@ -23,15 +23,18 @@ echo "🔹 Cleaning Linux folder..."
 clean_dir "$linux_dir" "reaper*.tar.xz"
 clean_dir "$linux_dir" "reaper_sws*.so"
 clean_dir "$linux_dir" "reaper_imgui*.so"
+clean_dir "$linux_dir" "Resource_Folder_Base.zip"
 
 echo "🔹 Cleaning macOS folder..."
 clean_dir "$macos_dir" "reaper*.dmg"
 clean_dir "$macos_dir" "reaper_sws*.dylib"
 clean_dir "$macos_dir" "reaper_imgui*.dylib"
+clean_dir "$macos_dir" "Resource_Folder_Base.zip"
 
 echo "🔹 Cleaning Windows folder..."
 clean_dir "$win_dir" "reaper*-install.exe"
 clean_dir "$win_dir" "reaper_sws*.dll"
 clean_dir "$win_dir" "reaper_imgui*.dll"
+clean_dir "$win_dir" "Resource_Folder_Base.zip"
 
 echo "✅ Cleanup completed!"
