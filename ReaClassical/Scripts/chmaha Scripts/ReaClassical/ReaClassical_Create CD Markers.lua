@@ -70,13 +70,28 @@ function main()
     return
   end
 
-  local folder_depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
-  if folder_depth ~= 1 then
-    MB("Error: Please select a parent folder track.", "Create CD Markers", 0)
-    return
+  -- Find folder parent (or use selected if already a folder)
+  local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+  if depth ~= 1 then
+    local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
+    local folder_track = nil
+    for i = track_index - 1, 0, -1 do
+      local t = GetTrack(0, i)
+      if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+        folder_track = t
+        break
+      end
+    end
+    if not folder_track then
+      MB("Error: The selected track is not inside a folder. Please select a folder or a child track inside a folder.",
+        "Create CD Markers", 0)
+      return
+    end
+    selected_track = folder_track
   end
+
   local num_of_items = 0
-  if selected_track then num_of_items = album_item_count() end
+  if selected_track then num_of_items = album_item_count(selected_track) end
   if not selected_track or num_of_items == 0 then
     MB("Error: No media items found.", "Create CD Markers", 0)
     return
@@ -87,7 +102,7 @@ function main()
     return
   end
 
-  local names_on_first_track = check_first_track_for_names()
+  local names_on_first_track = check_first_track_for_names(selected_track)
   if not names_on_first_track then return end
 
   local metadata_file = get_txt_file()
@@ -105,7 +120,7 @@ function main()
         "Change detected in metadata.txt. Would you like to update the project with the new values?",
         "Metadata Change Detected", 4)
       if metadata_choice == 6 then
-        local success = import_sony_metadata(metadata_file)
+        local success = import_sony_metadata(metadata_file, selected_track)
         if not success then
           MB("Error importing new metadata. Using old values…", "Metadata Import Error", 0)
         end
@@ -142,7 +157,7 @@ function main()
       "Warning", 0)
   end
   PreventUIRefresh(1)
-  room_tone(redbook_project_length * 60)
+  room_tone(redbook_project_length * 60, selected_track)
   renumber_markers()
   PreventUIRefresh(-1)
 
@@ -180,8 +195,7 @@ end
 
 ---------------------------------------------------------------------
 
-function get_info()
-  local track = GetSelectedTrack(0, 0) -- Get first track
+function get_info(track)
   if not track then return nil end
 
   for i = 0, GetTrackNumMediaItems(track) - 1 do
@@ -202,9 +216,9 @@ end
 ---------------------------------------------------------------------
 
 function cd_markers(selected_track, num_of_items, use_existing)
-  local album_metadata = get_info()
+  local album_metadata = get_info(selected_track)
   if not album_metadata then
-    album_metadata = split_and_tag_final_item()
+    album_metadata = split_and_tag_final_item(selected_track)
     MB("No album metadata found.\n" ..
       "Added generic album metadata to end of album:\n" ..
       "You can open metadata.txt to edit…", "Create CD Markers", 0)
@@ -220,21 +234,6 @@ function cd_markers(selected_track, num_of_items, use_existing)
   if upc_ret and not use_existing then save_codes("UPC", upc_input) end
   if isrc_ret and not use_existing then save_codes("ISRC", isrc_input) end
   local pregap_len, offset, postgap = return_custom_length()
-
-  -- local project_item_start, track_item_start = get_earliest_item_positions(selected_track)
-
-  -- local shift_amt = 0
-  -- if track_item_start > project_item_start then
-  --   shift_amt = project_item_start - track_item_start
-  -- end
-
-  -- if project_item_start < offset then
-  --   shift_amt = shift_amt + (offset - project_item_start)
-  -- end
-
-  -- if shift_amt ~= 0 then
-  --   shift_folder_items_and_markers(selected_track, shift_amt)
-  -- end
 
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end(selected_track, num_of_items)
@@ -548,8 +547,7 @@ end
 
 ---------------------------------------------------------------------
 
-function pos_check(item)
-  local selected_track = GetSelectedTrack(0, 0)
+function pos_check(item, selected_track)
   local item_number = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
   local item_start_crossfaded = is_item_start_crossfaded(selected_track, item_number)
   local item_end_crossfaded = is_item_end_crossfaded(selected_track, item_number)
@@ -796,8 +794,7 @@ end
 
 ---------------------------------------------------------------------
 
-function room_tone(project_length)
-  local selected_track = GetSelectedTrack(0, 0)
+function room_tone(project_length, selected_track)
   local num_of_selected_track_items = CountTrackMediaItems(selected_track)
 
   local rt_track
@@ -882,8 +879,7 @@ end
 
 ---------------------------------------------------------------------
 
-function album_item_count()
-  local track = GetSelectedTrack(0, 0)
+function album_item_count(track)
   if not track then return 0 end
 
   local item_count = CountTrackMediaItems(track)
@@ -1424,7 +1420,7 @@ end
 
 ---------------------------------------------------------------------
 
-function import_sony_metadata(metadata_file)
+function import_sony_metadata(metadata_file, selected_track)
   local file = io.open(metadata_file, "r")
   if not file then return false end
 
@@ -1475,7 +1471,6 @@ function import_sony_metadata(metadata_file)
     return false
   end
 
-  local selected_track = GetSelectedTrack(0, 0) -- Get the first track
   if not selected_track then return end
 
   local num_items = CountTrackMediaItems(selected_track)
@@ -1564,8 +1559,7 @@ end
 
 ---------------------------------------------------------------------
 
-function split_and_tag_final_item()
-  local track = GetSelectedTrack(0, 0)
+function split_and_tag_final_item(track)
   if not track then return end
 
   local item_count = CountTrackMediaItems(track)
@@ -1649,9 +1643,8 @@ end
 
 ---------------------------------------------------------------------
 
-function check_first_track_for_names()
-  -- Get the first track
-  local track = GetSelectedTrack(0, 0)
+function check_first_track_for_names(track)
+  -- Get the selected track
   if not track then
     MB("No track found", "Error", 0)
     return false
