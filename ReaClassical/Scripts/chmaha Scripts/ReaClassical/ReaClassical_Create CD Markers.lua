@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_info, cd_markers, find_current_start, create_marker
 local renumber_markers, add_pregap, find_project_end, end_marker
-local frame_check, save_codes, add_codes, delete_markers
+local frame_check, delete_markers
 local empty_items_check, return_custom_length
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
@@ -65,8 +65,35 @@ function main()
   end
 
   local selected_track = GetSelectedTrack(0, 0)
+  if not selected_track then
+    MB("Error: No track selected.", "Create CD Markers", 0)
+    return
+  end
+
+  -- Find folder parent (or use selected if already a folder)
+  local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+  if depth ~= 1 then
+    local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
+    local folder_track = nil
+    for i = track_index - 1, 0, -1 do
+      local t = GetTrack(0, i)
+      if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+        folder_track = t
+        break
+      end
+    end
+    if not folder_track then
+      MB("Error: The selected track is not inside a folder. Please select a folder or a child track inside a folder.",
+        "Create CD Markers", 0)
+      return
+    end
+    selected_track = folder_track
+  end
+
+  local track_color = GetTrackColor(selected_track)
+
   local num_of_items = 0
-  if selected_track then num_of_items = album_item_count() end
+  if selected_track then num_of_items = album_item_count(selected_track) end
   if not selected_track or num_of_items == 0 then
     MB("Error: No media items found.", "Create CD Markers", 0)
     return
@@ -77,46 +104,39 @@ function main()
     return
   end
 
-  local names_on_first_track = check_first_track_for_names()
+  local names_on_first_track = check_first_track_for_names(selected_track)
   if not names_on_first_track then return end
 
-  local metadata_file = get_txt_file()
+  local _, selected_track_name = GetTrackName(selected_track)
+  local metadata_file, prefix = get_txt_file(selected_track_name)
   local f = io.open(metadata_file, "r")
   if f then
-    local _, stored_checksum = GetProjExtState(0, "ReaClassical", "MetadataChecksum")
+    local _, stored_checksum = GetProjExtState(0, "ReaClassical", prefix .. "MetadataChecksum")
     stored_checksum = tonumber(stored_checksum) or 0
     local new_checksum = tonumber(checksum(metadata_file))
     f:close()
     if stored_checksum == 0 then
-      SetProjExtState(0, "ReaClassical", "MetadataChecksum", new_checksum)
+      SetProjExtState(0, "ReaClassical", prefix .. "MetadataChecksum", new_checksum)
     end
     if stored_checksum ~= new_checksum then
       local metadata_choice = MB(
         "Change detected in metadata.txt. Would you like to update the project with the new values?",
         "Metadata Change Detected", 4)
       if metadata_choice == 6 then
-        local success = import_sony_metadata(metadata_file)
-        if not success then
+        local success = import_sony_metadata(metadata_file, selected_track)
+        if success then
+          SetProjExtState(0, "ReaClassical", prefix .. "MetadataChecksum", new_checksum)
+        else
           MB("Error importing new metadata. Using old values…", "Metadata Import Error", 0)
         end
       end
     end
   end
 
-  local _, ddp_run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
-  local use_existing = false
-  if ddp_run ~= "" then
-    local saved_values_response = MB("Would you like to use the existing saved values for UPC/ISRC?",
-      "Create CD Markers", 4)
-    if saved_values_response == 6 then
-      use_existing = true
-    end
-  end
-
   SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
   local success, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(
     selected_track,
-    num_of_items, use_existing)
+    num_of_items, track_color)
   if not success then return end
   if redbook_track_length_errors > 0 then
     MB(
@@ -132,8 +152,8 @@ function main()
       "Warning", 0)
   end
   PreventUIRefresh(1)
-  room_tone(redbook_project_length * 60)
-  renumber_markers()
+  room_tone(redbook_project_length * 60, selected_track)
+  renumber_markers(track_color)
   PreventUIRefresh(-1)
 
   PreventUIRefresh(1)
@@ -146,8 +166,8 @@ function main()
   local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
   local path, slash, cue_file = save_file(fields, string)
 
-  local txtOutputPath = path .. slash .. 'album_report.txt'
-  local HTMLOutputPath = path .. slash .. 'album_report.html'
+  local txtOutputPath = path .. slash .. prefix .. 'album_report.txt'
+  local HTMLOutputPath = path .. slash .. prefix .. 'album_report.html'
   local albumTitle, albumPerformer, tracks = parse_cue_file(cue_file, album_length, num_of_markers)
   if albumTitle and albumPerformer and #tracks > 0 then
     create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number,
@@ -156,9 +176,9 @@ function main()
       production_year)
   end
 
-  create_metadata_report_and_file()
-
   PreventUIRefresh(-1)
+  UpdateArrange()
+  create_metadata_report_and_file()
 
   MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
     "Create the DDP fileset, matching audio for the generated CUE,\n" ..
@@ -170,8 +190,7 @@ end
 
 ---------------------------------------------------------------------
 
-function get_info()
-  local track = GetSelectedTrack(0, 0) -- Get first track
+function get_info(track)
   if not track then return nil end
 
   for i = 0, GetTrackNumMediaItems(track) - 1 do
@@ -191,10 +210,10 @@ end
 
 ---------------------------------------------------------------------
 
-function cd_markers(selected_track, num_of_items, use_existing)
-  local album_metadata = get_info()
+function cd_markers(selected_track, num_of_items, track_color)
+  local album_metadata = get_info(selected_track)
   if not album_metadata then
-    album_metadata = split_and_tag_final_item()
+    album_metadata = split_and_tag_final_item(selected_track)
     MB("No album metadata found.\n" ..
       "Added generic album metadata to end of album:\n" ..
       "You can open metadata.txt to edit…", "Create CD Markers", 0)
@@ -206,25 +225,7 @@ function cd_markers(selected_track, num_of_items, use_existing)
   Main_OnCommand(40904, 0) -- set grid to frames
   Main_OnCommand(40754, 0) -- enable snap to grid
 
-  local upc_ret, isrc_ret, upc_input, isrc_input, code_table = add_codes(use_existing)
-  if upc_ret and not use_existing then save_codes("UPC", upc_input) end
-  if isrc_ret and not use_existing then save_codes("ISRC", isrc_input) end
   local pregap_len, offset, postgap = return_custom_length()
-
-  -- local project_item_start, track_item_start = get_earliest_item_positions(selected_track)
-
-  -- local shift_amt = 0
-  -- if track_item_start > project_item_start then
-  --   shift_amt = project_item_start - track_item_start
-  -- end
-
-  -- if project_item_start < offset then
-  --   shift_amt = shift_amt + (offset - project_item_start)
-  -- end
-
-  -- if shift_amt ~= 0 then
-  --   shift_folder_items_and_markers(selected_track, shift_amt)
-  -- end
 
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end(selected_track, num_of_items)
@@ -236,18 +237,20 @@ function cd_markers(selected_track, num_of_items, use_existing)
   for i = 0, num_of_items - 1, 1 do
     local current_start, take_name = find_current_start(selected_track, i)
     if not take_name:match("^@") then
-      local added_marker = create_marker(current_start, marker_count, take_name, isrc_ret, code_table, offset)
+      local added_marker = create_marker(current_start, marker_count, take_name, offset,
+        track_color)
       if added_marker then
         if take_name:match("^!") and marker_count > 0 then
-          AddProjectMarker(0, false, frame_check(current_start - (pregap_len + offset)), 0, "!", marker_count)
+          AddProjectMarker2(0, false, frame_check(current_start - (pregap_len + offset)), 0, "!", marker_count,
+            track_color)
         end
         if marker_count > 0 then
           if current_start - previous_start < 4 then
             redbook_track_length_errors = redbook_track_length_errors + 1
           end
-          AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(current_start - offset),
+          AddProjectMarker2(0, true, frame_check(previous_start - offset), frame_check(current_start - offset),
             previous_takename:match("^[!]*([^|]*)"),
-            marker_count)
+            marker_count, track_color)
         end
         previous_start = current_start
         previous_takename = take_name
@@ -256,20 +259,19 @@ function cd_markers(selected_track, num_of_items, use_existing)
     end
   end
   if marker_count == 0 then
-    -- MB('Please add take names to all items that you want to be CD track starts (Select item then press F2)',
-    --   "No track markers created", 0)
     return false
   end
   if marker_count > 99 then
     redbook_total_tracks_error = true
   end
-  AddProjectMarker(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap,
+  AddProjectMarker2(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap,
     previous_takename:match("^[!]*([^|]*)"),
-    marker_count)
+    marker_count, track_color)
   local redbook_project_length
   if marker_count ~= 0 then
-    add_pregap(selected_track)
-    redbook_project_length = end_marker(selected_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
+    add_pregap(selected_track, track_color)
+    redbook_project_length = end_marker(selected_track, album_metadata, postgap, num_of_items,
+      track_color)
   end
   Main_OnCommand(40753, 0) -- Snapping: Disable snap
   return true, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
@@ -288,20 +290,12 @@ end
 
 ---------------------------------------------------------------------
 
-function create_marker(current_start, marker_count, take_name, isrc_ret, code_table, offset)
+function create_marker(current_start, marker_count, take_name, offset, track_color)
   local added_marker = false
-  local track_title
   if take_name ~= "" then
     local corrected_current_start = frame_check(current_start - offset)
-    if #code_table == 5 and isrc_ret then
-      track_title = "#" ..
-          take_name:match("^[!]*(.+)") ..
-          "|ISRC=" ..
-          code_table[2] .. code_table[3] .. code_table[4] .. string.format("%05d", code_table[5] + marker_count)
-    else
-      track_title = "#" .. take_name:match("^[!]*(.+)")
-    end
-    AddProjectMarker(0, false, corrected_current_start, 0, track_title, marker_count + 1)
+    local track_title = "#" .. take_name:match("^[!]*(.+)")
+    AddProjectMarker2(0, false, corrected_current_start, 0, track_title, marker_count + 1, track_color)
     added_marker = true
   end
   return added_marker
@@ -309,14 +303,14 @@ end
 
 ---------------------------------------------------------------------
 
-function renumber_markers()
+function renumber_markers(track_color)
   local num_markers, num_regions = CountProjectMarkers(0)
   local marker_idx = 0
 
   for i = 0, num_markers + num_regions - 1 do
     local _, isrgn, pos, rgnend, name = EnumProjectMarkers(i)
     if not isrgn then
-      SetProjectMarkerByIndex(0, i, isrgn, pos, rgnend, marker_idx, name, 0)
+      SetProjectMarkerByIndex(0, i, isrgn, pos, rgnend, marker_idx, name, track_color)
       marker_idx = marker_idx + 1
     end
   end
@@ -324,7 +318,7 @@ end
 
 ---------------------------------------------------------------------
 
-function add_pregap(selected_track)
+function add_pregap(selected_track, track_color)
   local first_item_start, _ = find_current_start(selected_track, 0)
   local _, _, first_marker, _, _, _ = EnumProjectMarkers(0)
   local first_pregap
@@ -338,7 +332,7 @@ function add_pregap(selected_track)
   shift_folder_items_and_markers(selected_track, first_pregap)
   shift_all_markers_and_regions(first_pregap)
 
-  AddProjectMarker(0, false, 0, 0, "!", 0)
+  AddProjectMarker2(0, false, 0, 0, "!", 0, track_color)
   SNM_SetDoubleConfigVar('projtimeoffs', 0)
 end
 
@@ -353,15 +347,12 @@ end
 
 ---------------------------------------------------------------------
 
-function end_marker(selected_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
+function end_marker(selected_track, album_metadata, postgap, num_of_items, track_color)
   local final_item = GetTrackMediaItem(selected_track, num_of_items - 1)
   local final_start = GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
   local catalog = ""
-  if upc_ret and code_table[1] ~= "" then
-    catalog = "|CATALOG=" .. code_table[1]
-  end
 
   local album_info = album_metadata .. catalog
 
@@ -369,8 +360,8 @@ function end_marker(selected_track, album_metadata, postgap, num_of_items, upc_r
     album_info = album_info .. "|MESSAGE=Created with ReaClassical"
   end
 
-  AddProjectMarker(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0)
-  AddProjectMarker(0, false, frame_check(final_end) + postgap, 0, "=END", 0)
+  AddProjectMarker2(0, false, frame_check(final_end) + (postgap - 3), 0, album_info, 0, track_color)
+  AddProjectMarker2(0, false, frame_check(final_end) + postgap, 0, "=END", 0, track_color)
 
   return (frame_check(final_end) + postgap) / 60
 end
@@ -389,111 +380,6 @@ function frame_check(pos)
   end
 
   return nearest_grid
-end
-
----------------------------------------------------------------------
-
-function save_codes(type, input)
-  SetProjExtState(0, "ReaClassical", type, input)
-end
-
----------------------------------------------------------------------
-
-function add_codes(use_existing)
-  local _, upc_saved = GetProjExtState(0, "ReaClassical", "UPC")
-  local _, isrc_saved = GetProjExtState(0, "ReaClassical", "ISRC")
-  local upc_ret
-  local isrc_ret
-  local upc_input = ""
-  local isrc_input = ""
-  local code_table = { "", "", "", "", "" }
-
-  if use_existing and upc_saved ~= "" then
-    code_table[1] = upc_saved
-    upc_ret = true
-  else
-    local codes_response1 = MB("Add UPC or EAN?", "CD codes", 4)
-    if codes_response1 == 6 then
-      repeat
-        if upc_saved ~= "" then
-          upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
-            'UPC or EAN,extrawidth=100', upc_saved)
-        else
-          upc_ret, upc_input = GetUserInputs('UPC/EAN', 1,
-            'UPC or EAN,extrawidth=100', '')
-        end
-
-        if not upc_input:match('^%d+$') or (#upc_input ~= 12 and #upc_input ~= 13) then
-          MB('UPC = 12-digit number; EAN = 13-digit number.', "Invalid UPC", 0)
-        end
-      until ((upc_input:match('^%d+$') and (#upc_input == 12 or #upc_input == 13))) or not upc_ret
-
-      if upc_ret then code_table[1] = upc_input end
-    end
-  end
-
-  if use_existing and isrc_saved ~= "" then
-    isrc_ret = true
-    local i = 2
-    for entry in isrc_saved:gmatch('([^,]+)') do
-      code_table[i] = entry
-      i = i + 1
-    end
-  else
-    local codes_response2 = MB("Add ISRC?", "CD codes", 4)
-    if codes_response2 == 6 then
-      repeat
-        if isrc_saved ~= "" then
-          isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
-            'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-            'ISRC Designation Code,extrawidth=100', isrc_saved)
-        else
-          isrc_ret, isrc_input = GetUserInputs('ISRC', 4,
-            'ISRC Country Code,ISRC Registrant Code,ISRC Year (YY),' ..
-            'ISRC Designation Code,extrawidth=100', '')
-        end
-
-        local isrc_entries = {}
-        for entry in isrc_input:gmatch('([^,]+)') do
-          isrc_entries[#isrc_entries + 1] = entry
-        end
-
-        if #isrc_entries == 4 then
-          local country_code = isrc_entries[1]
-          local registrant_code = isrc_entries[2]
-          local year = isrc_entries[3]
-          local designation_code = isrc_entries[4]
-
-          if not country_code:match('^[A-Z][A-Z]$') then
-            MB('ISRC Country Code must be 2 uppercase letters.', "Invalid ISRC", 0)
-          elseif not registrant_code:match('^[A-Z0-9][A-Z0-9][A-Z0-9]$') then
-            MB('ISRC Registrant Code must be 3 alphanumeric characters.', "Invalid ISRC", 0)
-          elseif not year:match('^%d%d$') then
-            MB('ISRC Year must be 2 digits.', "Invalid ISRC", 0)
-          elseif not (designation_code:match("^(%d+)$") and #designation_code <= 5) then
-            MB('ISRC Designation Code must be up to 5 digits.', "Invalid ISRC", 0)
-          else
-            break
-          end
-        else
-          MB('You must provide all 4 ISRC components.', "Invalid ISRC", 0)
-        end
-        isrc_input = ""
-      until not isrc_ret
-
-      local j = 2
-      if isrc_ret then
-        for entry in isrc_input:gmatch('([^,]+)') do
-          code_table[j] = entry
-          j = j + 1
-        end
-      elseif #code_table ~= 5 then
-        MB('Empty code metadata_table not supported: Not adding ISRC codes', "Warning",
-          0)
-      end
-    end
-  end
-  return upc_ret, isrc_ret, upc_input, isrc_input, code_table
 end
 
 ---------------------------------------------------------------------
@@ -538,8 +424,7 @@ end
 
 ---------------------------------------------------------------------
 
-function pos_check(item)
-  local selected_track = GetSelectedTrack(0, 0)
+function pos_check(item, selected_track)
   local item_number = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
   local item_start_crossfaded = is_item_start_crossfaded(selected_track, item_number)
   local item_end_crossfaded = is_item_end_crossfaded(selected_track, item_number)
@@ -786,8 +671,7 @@ end
 
 ---------------------------------------------------------------------
 
-function room_tone(project_length)
-  local selected_track = GetSelectedTrack(0, 0)
+function room_tone(project_length, selected_track)
   local num_of_selected_track_items = CountTrackMediaItems(selected_track)
 
   local rt_track
@@ -872,8 +756,7 @@ end
 
 ---------------------------------------------------------------------
 
-function album_item_count()
-  local track = GetSelectedTrack(0, 0)
+function album_item_count(track)
   if not track then return 0 end
 
   local item_count = CountTrackMediaItems(track)
@@ -1399,22 +1282,30 @@ end
 
 ---------------------------------------------------------------------
 
-function get_txt_file()
+function get_txt_file(selected_track_name)
   local _, path = EnumProjects(-1)
   local slash = package.config:sub(1, 1)
+
   if path == "" then
     path = GetProjectPath()
   else
     local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
     path = path:match(pattern)
   end
-  local file = path .. slash .. 'metadata.txt'
-  return file
+
+  -- Extract prefix before ':' in selected_track_name
+  local prefix = selected_track_name:match("^(.-):") .. "_"
+  if not prefix then
+    prefix = "" -- fallback if no prefix found
+  end
+
+  local file = path .. slash .. prefix .. 'metadata.txt'
+  return file, prefix
 end
 
 ---------------------------------------------------------------------
 
-function import_sony_metadata(metadata_file)
+function import_sony_metadata(metadata_file, selected_track)
   local file = io.open(metadata_file, "r")
   if not file then return false end
 
@@ -1455,6 +1346,17 @@ function import_sony_metadata(metadata_file)
         metadata.album.genre = value
       elseif key == "Language" then
         metadata.album.language = value
+      elseif key == "Catalog Number" then
+        metadata.album.catalog = value
+      end
+      -- ISRC lines
+      local isrc_track = key:match("^ISRC%s+(%d+)$")
+      if isrc_track then
+        local track_num = tonumber(isrc_track)
+        if track_num then
+          metadata.tracks[track_num] = metadata.tracks[track_num] or {}
+          metadata.tracks[track_num].isrc = value
+        end
       end
     end
   end
@@ -1465,7 +1367,6 @@ function import_sony_metadata(metadata_file)
     return false
   end
 
-  local selected_track = GetSelectedTrack(0, 0) -- Get the first track
   if not selected_track then return end
 
   local num_items = CountTrackMediaItems(selected_track)
@@ -1485,7 +1386,7 @@ function import_sony_metadata(metadata_file)
             new_take_name = new_take_name .. "|PERFORMER=" .. metadata.album.performer
           end
           if metadata.album.songwriter then
-            new_take_name = new_take_name .. "|SONGWRITER=" .. metadata.album.arranger
+            new_take_name = new_take_name .. "|SONGWRITER=" .. metadata.album.songwriter
           end
           if metadata.album.composer then
             new_take_name = new_take_name .. "|COMPOSER=" .. metadata.album.composer
@@ -1522,7 +1423,7 @@ function import_sony_metadata(metadata_file)
               new_take_name = new_take_name .. "|PERFORMER=" .. metadata.tracks[track_number].performer
             end
             if metadata.tracks[track_number].songwriter then
-              new_take_name = new_take_name .. "|SONGWRITER=" .. metadata.tracks[track_number].arranger
+              new_take_name = new_take_name .. "|SONGWRITER=" .. metadata.tracks[track_number].songwriter
             end
             if metadata.tracks[track_number].composer then
               new_take_name = new_take_name .. "|COMPOSER=" .. metadata.tracks[track_number].composer
@@ -1533,7 +1434,9 @@ function import_sony_metadata(metadata_file)
             if metadata.tracks[track_number].message then
               new_take_name = new_take_name .. "|MESSAGE=" .. metadata.tracks[track_number].message
             end
-
+            if metadata.tracks[track_number].isrc then
+              new_take_name = new_take_name .. "|ISRC=" .. metadata.tracks[track_number].isrc
+            end
             -- Apply metadata to the take name
             GetSetMediaItemTakeInfo_String(take, "P_NAME", new_take_name, true)
           end
@@ -1554,8 +1457,7 @@ end
 
 ---------------------------------------------------------------------
 
-function split_and_tag_final_item()
-  local track = GetSelectedTrack(0, 0)
+function split_and_tag_final_item(track)
   if not track then return end
 
   local item_count = CountTrackMediaItems(track)
@@ -1639,9 +1541,8 @@ end
 
 ---------------------------------------------------------------------
 
-function check_first_track_for_names()
-  -- Get the first track
-  local track = GetSelectedTrack(0, 0)
+function check_first_track_for_names(track)
+  -- Get the selected track
   if not track then
     MB("No track found", "Error", 0)
     return false
@@ -1782,10 +1683,10 @@ function shift_all_markers_and_regions(shift_amount)
   for _, m in ipairs(markers) do
     if m.isrgn then
       -- Region
-      AddProjectMarker2(0, true, m.pos + shift_amount, m.rgnend + shift_amount, m.name, -1, 0)
+      AddProjectMarker2(0, true, m.pos + shift_amount, m.rgnend + shift_amount, m.name, -1, 0, 0)
     else
       -- Marker
-      AddProjectMarker2(0, false, m.pos + shift_amount, 0, m.name, -1, 0)
+      AddProjectMarker2(0, false, m.pos + shift_amount, 0, m.name, -1, 0, 0)
     end
   end
 end

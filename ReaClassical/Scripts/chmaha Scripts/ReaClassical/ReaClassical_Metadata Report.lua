@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, parse_markers, generate_report, any, write_rcmeta_file
-local get_txt_file, checksum
+local get_txt_file, checksum, get_track_color_from_marker
 
 ---------------------------------------------------------------------
 
@@ -42,9 +42,13 @@ function main()
     local report = generate_report(metadata)
     ClearConsole()
     ShowConsoleMsg(report)
-    local metadata_file = get_txt_file()
-    write_rcmeta_file(metadata_file, metadata)
 
+    local track = get_track_color_from_marker()
+    if track then
+        local _, track_name = GetTrackName(track)
+        local metadata_file = get_txt_file(track_name)
+        write_rcmeta_file(metadata_file, metadata)
+    end
     Undo_EndBlock('DDP metadata report', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
@@ -295,16 +299,24 @@ end
 
 ---------------------------------------------------------------------
 
-function get_txt_file()
+function get_txt_file(track_name)
     local _, path = EnumProjects(-1)
     local slash = package.config:sub(1, 1)
+
     if path == "" then
         path = GetProjectPath()
     else
         local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
         path = path:match(pattern)
     end
-    local file = path .. slash .. 'metadata.txt'
+
+    -- Extract prefix before ':' in track_name
+    local prefix = track_name:match("^(.-):") .. "_"
+    if not prefix then
+        prefix = "" -- fallback if no prefix found
+    end
+
+    local file = path .. slash .. prefix .. 'metadata.txt'
     return file
 end
 
@@ -323,6 +335,45 @@ function checksum(filename)
 
     file:close()
     return file_checksum
+end
+
+---------------------------------------------------------------------
+
+function get_track_color_from_marker()
+    local proj = 0
+    local marker_count = CountProjectMarkers(proj)
+
+    local target_color = nil
+
+    -- Search markers via EnumProjectMarkers3
+    for i = 0, marker_count - 1 do
+        local retval, isrgn, _, _, name,
+        markrgnindexnumber, color =
+            EnumProjectMarkers3(proj, i)
+
+        if retval ~= 0 then
+            if not isrgn and markrgnindexnumber == 0 and name == "!" then
+                target_color = color
+                break
+            end
+        end
+    end
+
+    if not target_color then return nil end
+
+    -- Find first track with matching color
+    local track_count = CountTracks(proj)
+
+    for i = 0, track_count - 1 do
+        local track = GetTrack(proj, i)
+        local track_color = GetTrackColor(track)
+
+        if track_color == target_color then
+            return track
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
