@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, get_info, cd_markers, find_current_start, create_marker
 local renumber_markers, add_pregap, find_project_end, end_marker
 local frame_check, save_codes, add_codes, delete_markers
-local empty_items_check, return_custom_length, start_check
+local empty_items_check, return_custom_length
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
 local add_roomtone_fadeout, check_saved_state, album_item_count
@@ -37,6 +37,7 @@ local time_to_mmssff, subtract_time_strings, add_pregaps_to_table
 local formatted_pos_out, parse_markers, checksum, get_txt_file
 local create_metadata_report_and_file, split_and_tag_final_item
 local check_first_track_for_names, delete_all_markers_and_regions
+local shift_folder_items_and_markers, shift_all_markers_and_regions
 
 local minimum_points = 15
 local points = {}
@@ -45,8 +46,8 @@ local points = {}
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
-    return
+  MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+  return
 end
 
 function main()
@@ -63,14 +64,14 @@ function main()
     return
   end
 
-  local first_track = GetTrack(0, 0)
+  local selected_track = GetSelectedTrack(0, 0)
   local num_of_items = 0
-  if first_track then num_of_items = album_item_count() end
-  if not first_track or num_of_items == 0 then
+  if selected_track then num_of_items = album_item_count() end
+  if not selected_track or num_of_items == 0 then
     MB("Error: No media items found.", "Create CD Markers", 0)
     return
   end
-  local empty_count = empty_items_check(first_track, num_of_items)
+  local empty_count = empty_items_check(selected_track, num_of_items)
   if empty_count > 0 then
     MB("Error: Empty items found on first track. Delete them to continue.", "Create CD Markers", 0)
     return
@@ -114,7 +115,7 @@ function main()
 
   SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
   local success, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(
-    first_track,
+    selected_track,
     num_of_items, use_existing)
   if not success then return end
   if redbook_track_length_errors > 0 then
@@ -155,14 +156,14 @@ function main()
       production_year)
   end
 
+  create_metadata_report_and_file()
+
+  PreventUIRefresh(-1)
 
   MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
     "Create the DDP fileset, matching audio for the generated CUE,\n" ..
     "and/or individual files via the ReaClassical 'All Settings' presets\nin the Render dialog.\n\n" ..
     "The album reports and CUE file have been written to:\n" .. path, "Create CD Markers", 0)
-  PreventUIRefresh(-1)
-
-  create_metadata_report_and_file()
 
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
@@ -170,7 +171,7 @@ end
 ---------------------------------------------------------------------
 
 function get_info()
-  local track = GetTrack(0, 0) -- Get first track
+  local track = GetSelectedTrack(0, 0) -- Get first track
   if not track then return nil end
 
   for i = 0, GetTrackNumMediaItems(track) - 1 do
@@ -190,7 +191,7 @@ end
 
 ---------------------------------------------------------------------
 
-function cd_markers(first_track, num_of_items, use_existing)
+function cd_markers(selected_track, num_of_items, use_existing)
   local album_metadata = get_info()
   if not album_metadata then
     album_metadata = split_and_tag_final_item()
@@ -210,17 +211,30 @@ function cd_markers(first_track, num_of_items, use_existing)
   if isrc_ret and not use_existing then save_codes("ISRC", isrc_input) end
   local pregap_len, offset, postgap = return_custom_length()
 
-  start_check(first_track, offset) -- move items to right if not enough room for first offset
+  -- local project_item_start, track_item_start = get_earliest_item_positions(selected_track)
+
+  -- local shift_amt = 0
+  -- if track_item_start > project_item_start then
+  --   shift_amt = project_item_start - track_item_start
+  -- end
+
+  -- if project_item_start < offset then
+  --   shift_amt = shift_amt + (offset - project_item_start)
+  -- end
+
+  -- if shift_amt ~= 0 then
+  --   shift_folder_items_and_markers(selected_track, shift_amt)
+  -- end
 
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
-  local final_end = find_project_end(first_track, num_of_items)
+  local final_end = find_project_end(selected_track, num_of_items)
   local previous_start
   local redbook_track_length_errors = 0
   local redbook_total_tracks_error = false
   local previous_takename
   local marker_count = 0
   for i = 0, num_of_items - 1, 1 do
-    local current_start, take_name = find_current_start(first_track, i)
+    local current_start, take_name = find_current_start(selected_track, i)
     if not take_name:match("^@") then
       local added_marker = create_marker(current_start, marker_count, take_name, isrc_ret, code_table, offset)
       if added_marker then
@@ -254,8 +268,8 @@ function cd_markers(first_track, num_of_items, use_existing)
     marker_count)
   local redbook_project_length
   if marker_count ~= 0 then
-    add_pregap(first_track)
-    redbook_project_length = end_marker(first_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
+    add_pregap(selected_track)
+    redbook_project_length = end_marker(selected_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
   end
   Main_OnCommand(40753, 0) -- Snapping: Disable snap
   return true, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length
@@ -263,8 +277,8 @@ end
 
 ---------------------------------------------------------------------
 
-function find_current_start(first_track, i)
-  local current_item = GetTrackMediaItem(first_track, i)
+function find_current_start(selected_track, i)
+  local current_item = GetTrackMediaItem(selected_track, i)
   local take = GetActiveTake(current_item)
   local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
   take_name = take_name:gsub("|$", "")
@@ -310,32 +324,28 @@ end
 
 ---------------------------------------------------------------------
 
-function add_pregap(first_track)
-  local first_item_start, _ = find_current_start(first_track, 0)
+function add_pregap(selected_track)
+  local first_item_start, _ = find_current_start(selected_track, 0)
   local _, _, first_marker, _, _, _ = EnumProjectMarkers(0)
   local first_pregap
   if first_marker - first_item_start < 2 then
-    first_pregap = first_item_start - 2 +
+    first_pregap = -first_item_start + 2 -
         (first_marker - first_item_start) -- Ensure initial pre-gap is at least 2 seconds in length
   else
-    first_pregap = first_item_start
+    first_pregap = -first_item_start
   end
-  if first_pregap > 0 then
-    GetSet_LoopTimeRange(true, false, 0, first_pregap, false)
-    Main_OnCommand(40201, 0) -- Time selection: Remove contents of time selection (moving later items)
-  elseif first_pregap < 0 then
-    GetSet_LoopTimeRange(true, false, 0, 0 - first_pregap, false)
-    Main_OnCommand(40200, 0) -- Time selection: Insert empty space at time selection (moving later items)
-    GetSet_LoopTimeRange(true, false, 0, 0, false)
-  end
+
+  shift_folder_items_and_markers(selected_track, first_pregap)
+  shift_all_markers_and_regions(first_pregap)
+
   AddProjectMarker(0, false, 0, 0, "!", 0)
   SNM_SetDoubleConfigVar('projtimeoffs', 0)
 end
 
 ---------------------------------------------------------------------
 
-function find_project_end(first_track, num_of_items)
-  local final_item = GetTrackMediaItem(first_track, num_of_items - 1)
+function find_project_end(selected_track, num_of_items)
+  local final_item = GetTrackMediaItem(selected_track, num_of_items - 1)
   local final_start = GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = GetMediaItemInfo_Value(final_item, "D_LENGTH")
   return final_start + final_length
@@ -343,8 +353,8 @@ end
 
 ---------------------------------------------------------------------
 
-function end_marker(first_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
-  local final_item = GetTrackMediaItem(first_track, num_of_items - 1)
+function end_marker(selected_track, album_metadata, postgap, num_of_items, upc_ret, code_table)
+  local final_item = GetTrackMediaItem(selected_track, num_of_items - 1)
   local final_start = GetMediaItemInfo_Value(final_item, "D_POSITION")
   local final_length = GetMediaItemInfo_Value(final_item, "D_LENGTH")
   local final_end = final_start + final_length
@@ -368,17 +378,17 @@ end
 ---------------------------------------------------------------------
 
 function frame_check(pos)
-    local cd_fps = 75
+  local cd_fps = 75
 
-    -- nearest CD frame
-    local nearest_grid = math.floor(pos * cd_fps + 0.5) / cd_fps
+  -- nearest CD frame
+  local nearest_grid = math.floor(pos * cd_fps + 0.5) / cd_fps
 
-    -- if pos isn't exactly on the grid, move back to previous frame
-    if math.abs(pos - nearest_grid) > 1e-12 then
-        nearest_grid = math.floor(pos * cd_fps) / cd_fps
-    end
+  -- if pos isn't exactly on the grid, move back to previous frame
+  if math.abs(pos - nearest_grid) > 1e-12 then
+    nearest_grid = math.floor(pos * cd_fps) / cd_fps
+  end
 
-    return nearest_grid
+  return nearest_grid
 end
 
 ---------------------------------------------------------------------
@@ -497,10 +507,10 @@ end
 
 ---------------------------------------------------------------------
 
-function empty_items_check(first_track, num_of_items)
+function empty_items_check(selected_track, num_of_items)
   local count = 0
   for i = 0, num_of_items - 1, 1 do
-    local current_item = GetTrackMediaItem(first_track, i)
+    local current_item = GetTrackMediaItem(selected_track, i)
     local take = GetActiveTake(current_item)
     if not take then
       count = count + 1
@@ -528,33 +538,21 @@ end
 
 ---------------------------------------------------------------------
 
-function start_check(first_track, offset)
-  local first_item = GetTrackMediaItem(first_track, 0)
-  local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
-  if position < offset then
-    GetSet_LoopTimeRange(true, false, 0, offset - position, false)
-    Main_OnCommand(40200, 0) -- insert time at time selection
-    Main_OnCommand(40635, 0) -- remove time selection
-  end
-end
-
----------------------------------------------------------------------
-
 function pos_check(item)
-  local first_track = GetTrack(0, 0)
+  local selected_track = GetSelectedTrack(0, 0)
   local item_number = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
-  local item_start_crossfaded = is_item_start_crossfaded(first_track, item_number)
-  local item_end_crossfaded = is_item_end_crossfaded(first_track, item_number)
+  local item_start_crossfaded = is_item_start_crossfaded(selected_track, item_number)
+  local item_end_crossfaded = is_item_end_crossfaded(selected_track, item_number)
   return item_start_crossfaded, item_end_crossfaded
 end
 
 ---------------------------------------------------------------------
 
-function is_item_start_crossfaded(first_track, item_number)
+function is_item_start_crossfaded(selected_track, item_number)
   local bool = false
-  local item = GetTrackMediaItem(first_track, item_number)
+  local item = GetTrackMediaItem(selected_track, item_number)
   local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-  local prev_item = GetTrackMediaItem(first_track, item_number - 1)
+  local prev_item = GetTrackMediaItem(selected_track, item_number - 1)
   if prev_item then
     local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
     local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
@@ -568,13 +566,13 @@ end
 
 ---------------------------------------------------------------------
 
-function is_item_end_crossfaded(first_track, item_number)
+function is_item_end_crossfaded(selected_track, item_number)
   local bool = false
-  local item = GetTrackMediaItem(first_track, item_number)
+  local item = GetTrackMediaItem(selected_track, item_number)
   local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
   local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
   local item_end = item_pos + item_length
-  local next_item = GetTrackMediaItem(first_track, item_number + 1)
+  local next_item = GetTrackMediaItem(selected_track, item_number + 1)
   if next_item then
     local next_pos = GetMediaItemInfo_Value(next_item, "D_POSITION")
     if next_pos < item_end then
@@ -789,8 +787,8 @@ end
 ---------------------------------------------------------------------
 
 function room_tone(project_length)
-  local first_track = GetTrack(0, 0)
-  local num_of_first_track_items = CountTrackMediaItems(first_track)
+  local selected_track = GetSelectedTrack(0, 0)
+  local num_of_selected_track_items = CountTrackMediaItems(selected_track)
 
   local rt_track
   for i = 0, CountTracks(0) - 1 do
@@ -806,8 +804,8 @@ function room_tone(project_length)
   end
   Main_OnCommand(40769, 0) -- unselect all tracks, items etc
 
-  for i = 0, num_of_first_track_items - 1 do
-    local item = GetTrackMediaItem(first_track, i)
+  for i = 0, num_of_selected_track_items - 1 do
+    local item = GetTrackMediaItem(selected_track, i)
     SetMediaItemSelected(item, 1)
   end
 
@@ -815,8 +813,8 @@ function room_tone(project_length)
   Main_OnCommand(40693, 0) -- setvolume envelope active
   Main_OnCommand(40693, 0) -- setvolume envelope inactive
 
-  for i = 0, num_of_first_track_items - 1 do
-    local item = GetTrackMediaItem(first_track, i)
+  for i = 0, num_of_selected_track_items - 1 do
+    local item = GetTrackMediaItem(selected_track, i)
     convert_fades_to_env(item)
   end
 
@@ -875,7 +873,7 @@ end
 ---------------------------------------------------------------------
 
 function album_item_count()
-  local track = GetTrack(0, 0)
+  local track = GetSelectedTrack(0, 0)
   if not track then return 0 end
 
   local item_count = CountTrackMediaItems(track)
@@ -1467,13 +1465,13 @@ function import_sony_metadata(metadata_file)
     return false
   end
 
-  local first_track = GetTrack(0, 0) -- Get the first track
-  if not first_track then return end
+  local selected_track = GetSelectedTrack(0, 0) -- Get the first track
+  if not selected_track then return end
 
-  local num_items = CountTrackMediaItems(first_track)
+  local num_items = CountTrackMediaItems(selected_track)
   track_number = 0
   for i = 0, num_items - 1 do
-    local item = GetTrackMediaItem(first_track, i)
+    local item = GetTrackMediaItem(selected_track, i)
     if item then
       local take = GetActiveTake(item)
       if take then
@@ -1557,7 +1555,7 @@ end
 ---------------------------------------------------------------------
 
 function split_and_tag_final_item()
-  local track = GetTrack(0, 0)
+  local track = GetSelectedTrack(0, 0)
   if not track then return end
 
   local item_count = CountTrackMediaItems(track)
@@ -1643,7 +1641,7 @@ end
 
 function check_first_track_for_names()
   -- Get the first track
-  local track = GetTrack(0, 0)
+  local track = GetSelectedTrack(0, 0)
   if not track then
     MB("No track found", "Error", 0)
     return false
@@ -1691,20 +1689,105 @@ function check_first_track_for_names()
   return false
 end
 
-
 ---------------------------------------------------------------------
 
 function delete_all_markers_and_regions()
-    local _, num_markers, num_regions = CountProjectMarkers(0)
-    local total = num_markers + num_regions
+  local _, num_markers, num_regions = CountProjectMarkers(0)
+  local total = num_markers + num_regions
 
-    -- Iterate backwards by project index
-    for i = total - 1, 0, -1 do
-        local retval, is_region, _, _, _, markrgnindexnumber = EnumProjectMarkers(i)
-        if retval then
-            DeleteProjectMarker(0, markrgnindexnumber, is_region)
-        end
+  -- Iterate backwards by project index
+  for i = total - 1, 0, -1 do
+    local retval, is_region, _, _, _, markrgnindexnumber = EnumProjectMarkers(i)
+    if retval then
+      DeleteProjectMarker(0, markrgnindexnumber, is_region)
     end
+  end
+end
+
+---------------------------------------------------------------------
+
+function shift_folder_items_and_markers(parent_track, shift_amount)
+  if not parent_track or shift_amount == 0 then return end
+
+  local tracks_to_shift = { parent_track }
+  local folder_depth = GetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH")
+
+  -- Collect all tracks in folder (parent + children)
+  if folder_depth == 1 then
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local depth = 1
+    for i = parent_idx + 1, num_tracks - 1 do
+      local tr = GetTrack(0, i)
+      depth = depth + GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+      table.insert(tracks_to_shift, tr)
+      if depth <= 0 then break end
+    end
+  end
+
+  -- Collect all items in all tracks first
+  local folder_items = {}
+  for _, tr in ipairs(tracks_to_shift) do
+    local num_items = CountTrackMediaItems(tr)
+    for i = 0, num_items - 1 do
+      table.insert(folder_items, GetTrackMediaItem(tr, i))
+    end
+  end
+
+  -- Determine iteration order based on shift direction
+  if shift_amount > 0 then
+    -- Move forward: iterate from last to first
+    for i = #folder_items, 1, -1 do
+      local item = folder_items[i]
+      local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
+    end
+  else
+    -- Move backward: iterate from first to last
+    for i = 1, #folder_items do
+      local item = folder_items[i]
+      local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
+    end
+  end
+end
+
+---------------------------------------------------------------------
+
+function shift_all_markers_and_regions(shift_amount)
+  if not shift_amount or shift_amount == 0 then return end
+
+  local markers = {}
+  local _, num_markers, num_regions = CountProjectMarkers(0)
+  local total = num_markers + num_regions
+
+  -- Collect all markers and regions
+  for i = 0, total - 1 do
+    local _, isrgn, pos, rgnend, name, idx = EnumProjectMarkers(i)
+    markers[#markers + 1] = {
+      isrgn = isrgn,
+      pos = pos,
+      rgnend = rgnend,
+      name = name,
+      idx = idx
+    }
+  end
+
+  -- Delete all markers/regions by their true index
+  for _, m in ipairs(markers) do
+    DeleteProjectMarker(0, m.idx, m.isrgn)
+  end
+
+  -- Recreate markers/regions with shifted positions
+  for _, m in ipairs(markers) do
+    if m.isrgn then
+      -- Region
+      AddProjectMarker2(0, true, m.pos + shift_amount, m.rgnend + shift_amount, m.name, -1, 0)
+    else
+      -- Marker
+      AddProjectMarker2(0, false, m.pos + shift_amount, 0, m.name, -1, 0)
+    end
+  end
 end
 
 ---------------------------------------------------------------------
