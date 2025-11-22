@@ -65,6 +65,16 @@ function main()
   end
 
   local selected_track = GetSelectedTrack(0, 0)
+  if not selected_track then
+    MB("Error: No track selected.", "Create CD Markers", 0)
+    return
+  end
+
+  local folder_depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+  if folder_depth ~= 1 then
+    MB("Error: Please select a parent folder track.", "Create CD Markers", 0)
+    return
+  end
   local num_of_items = 0
   if selected_track then num_of_items = album_item_count() end
   if not selected_track or num_of_items == 0 then
