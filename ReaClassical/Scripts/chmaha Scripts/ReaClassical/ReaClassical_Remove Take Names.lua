@@ -34,32 +34,41 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    local selected_track = GetSelectedTrack(0, 0)
+
+    if not selected_track then
+        MB("Error: No track selected.", "Remove Take Names", 0)
+        return
+    end
+
+    -- Find folder parent (or use selected if already a folder)
+    local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+    if depth ~= 1 then
+        MB("Error: The selected track is not a folder track.",
+            "Remove Take Names", 0)
+        return
+    end
+
+    local num_of_items = CountTrackMediaItems(selected_track)
+
+    if num_of_items == 0 then
+        MB("No items found on the selected track", "Error", 0)
+        return
+    end
+
     local response = MB(
-    "Are you sure you would like to remove item take names from the first destination track?", "Remove Take Names", 4)
-    if response == 6 then clean_take_names() end
+        "Are you sure you would like to remove item take names from the selected folder track?", "Remove Take Names", 4)
+    if response == 6 then clean_take_names(selected_track, num_of_items) end
 
     Undo_EndBlock('Remove Take Names', 0)
 end
 
 ---------------------------------------------------------------------
 
-function clean_take_names()
-    local first_dest_track = GetTrack(0, 0)
-
-    if not first_dest_track then
-        MB("No tracks found! First set up a ReaClassical project via F7 or F8.", "Error", 0)
-        return
-    end
-
-    local num_of_items = CountTrackMediaItems(first_dest_track)
-
-    if num_of_items == 0 then
-        MB("No items found on the first track", "Error", 0)
-        return
-    end
-
+function clean_take_names(selected_track, num_of_items)
     for i = 0, num_of_items - 1 do
-        local item = GetTrackMediaItem(first_dest_track, i)
+        local item = GetTrackMediaItem(selected_track, i)
         local take = GetActiveTake(item)
         if take then
             GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
