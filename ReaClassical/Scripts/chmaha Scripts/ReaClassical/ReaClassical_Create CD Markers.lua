@@ -181,6 +181,9 @@ function main()
   create_metadata_report_and_file()
 
   MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
+    "Add ISRC/UPC and other metadata by editing:\n\n"
+    .. path .. slash .. prefix .. "metadata.txt\n\n" 
+    .."then re-run this function.\n\n" ..
     "Create the DDP fileset, matching audio for the generated CUE,\n" ..
     "and/or individual files via the ReaClassical 'All Settings' presets\nin the Render dialog.\n\n" ..
     "The album reports and CUE file have been written to:\n" .. path, "Create CD Markers", 0)

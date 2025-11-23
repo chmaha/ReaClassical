@@ -258,7 +258,7 @@ function write_rcmeta_file(metadata_file, metadata)
     if not file then return false, "Could not open file for writing" end
 
     file:write("AMF Version         = 1.0 (Sony text file format modification)\n")
-    file:write("Remarks             = IRSC and Catalog entries are just for reference\n")
+    file:write("Remarks             = For use with ReaClassical\n")
 
     if metadata.album then
         file:write(string.format("Album Title         = %s\n", metadata.album.title or ""))
