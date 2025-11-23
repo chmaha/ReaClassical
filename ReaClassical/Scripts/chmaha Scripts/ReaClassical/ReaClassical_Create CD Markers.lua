@@ -31,10 +31,10 @@ local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_to
 local add_roomtone_fadeout, check_saved_state, album_item_count
 
 local count_markers, create_filename, create_cue_entries, create_string
-local ext_mod, save_file, format_time, parse_cue_file, import_sony_metadata
+local ext_mod, save_file, format_time, parse_cue_file
 local create_plaintext_report, create_html_report, any_isrc_present
 local time_to_mmssff, subtract_time_strings, add_pregaps_to_table
-local formatted_pos_out, parse_markers, checksum, get_txt_file
+local formatted_pos_out, parse_markers, get_txt_file
 local create_metadata_report_and_file, split_and_tag_final_item
 local check_first_track_for_names, delete_all_markers_and_regions
 local shift_folder_items_and_markers, shift_all_markers_and_regions
@@ -108,30 +108,7 @@ function main()
   if not names_on_first_track then return end
 
   local _, selected_track_name = GetTrackName(selected_track)
-  local metadata_file, prefix = get_txt_file(selected_track_name)
-  local f = io.open(metadata_file, "r")
-  if f then
-    local _, stored_checksum = GetProjExtState(0, "ReaClassical", prefix .. "MetadataChecksum")
-    stored_checksum = tonumber(stored_checksum) or 0
-    local new_checksum = tonumber(checksum(metadata_file))
-    f:close()
-    if stored_checksum == 0 then
-      SetProjExtState(0, "ReaClassical", prefix .. "MetadataChecksum", new_checksum)
-    end
-    if stored_checksum ~= new_checksum then
-      local metadata_choice = MB(
-        "Change detected in metadata.txt. Would you like to update the project with the new values?",
-        "Metadata Change Detected", 4)
-      if metadata_choice == 6 then
-        local success = import_sony_metadata(metadata_file, selected_track)
-        if success then
-          SetProjExtState(0, "ReaClassical", prefix .. "MetadataChecksum", new_checksum)
-        else
-          MB("Error importing new metadata. Using old values…", "Metadata Import Error", 0)
-        end
-      end
-    end
-  end
+  local _, prefix = get_txt_file(selected_track_name)
 
   SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
   local success, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(
@@ -181,12 +158,10 @@ function main()
   create_metadata_report_and_file()
 
   MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
-    "Add ISRC/UPC and other metadata by editing:\n\n"
-    .. path .. slash .. prefix .. "metadata.txt\n\n" 
-    .."then re-run this function.\n\n" ..
+    "Edit ISRC/UPC and other metadata by opening the DDP Metadata Editor.\n\n" ..
     "Create the DDP fileset, matching audio for the generated CUE,\n" ..
     "and/or individual files via the ReaClassical 'All Settings' presets\nin the Render dialog.\n\n" ..
-    "The album reports and CUE file have been written to:\n" .. path, "Create CD Markers", 0)
+    "The album reports, CUE file and metadata report have been written to:\n" .. path, "Create CD Markers", 0)
 
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
@@ -1268,23 +1243,6 @@ end
 
 ---------------------------------------------------------------------
 
-function checksum(filename)
-  local file = io.open(filename, "rb")
-  if not file then return nil, "Cannot open file" end
-
-  local file_checksum = 0
-  for line in file:lines() do
-    for i = 1, #line do
-      file_checksum = (file_checksum + line:byte(i)) % 0xFFFFFFFF
-    end
-  end
-
-  file:close()
-  return file_checksum
-end
-
----------------------------------------------------------------------
-
 function get_txt_file(selected_track_name)
   local _, path = EnumProjects(-1)
   local slash = package.config:sub(1, 1)
@@ -1304,151 +1262,6 @@ function get_txt_file(selected_track_name)
 
   local file = path .. slash .. prefix .. 'metadata.txt'
   return file, prefix
-end
-
----------------------------------------------------------------------
-
-function import_sony_metadata(metadata_file, selected_track)
-  local file = io.open(metadata_file, "r")
-  if not file then return false end
-
-  local metadata = { album = {}, tracks = {} }
-  local track_number = nil
-  local expected_tracks = nil
-
-  for line in file:lines() do
-    local key, value = line:match("^(.-)%s*=%s*(.-)$")
-    if key and value:match("%w") then
-      if key == "Last Track Number" then
-        expected_tracks = tonumber(value)
-      elseif key:match("^Track %d+ Title$") then
-        track_number = tonumber(key:match("Track (%d+) Title"))
-        if track_number then
-          metadata.tracks[track_number] = metadata.tracks[track_number] or {}
-          metadata.tracks[track_number].title = value
-        end
-      elseif track_number and key:match("^Track %d+ ") then
-        local field = key:match("^Track %d+ (.+)")
-        metadata.tracks[track_number] = metadata.tracks[track_number] or {}
-        metadata.tracks[track_number][field:lower()] = value
-      elseif key == "Album Title" then
-        metadata.album.title = value
-      elseif key == "Performer" then
-        metadata.album.performer = value
-      elseif key == "Songwriter" then
-        metadata.album.songwriter = value
-      elseif key == "Composer" then
-        metadata.album.composer = value
-      elseif key == "Arranger" then
-        metadata.album.arranger = value
-      elseif key == "Identification" then
-        metadata.album.identification = value
-      elseif key == "Album Message" then
-        metadata.album.message = value
-      elseif key == "Genre Code" then
-        metadata.album.genre = value
-      elseif key == "Language" then
-        metadata.album.language = value
-      elseif key == "Catalog Number" then
-        metadata.album.catalog = value
-      end
-      -- ISRC lines
-      local isrc_track = key:match("^ISRC%s+(%d+)$")
-      if isrc_track then
-        local track_num = tonumber(isrc_track)
-        if track_num then
-          metadata.tracks[track_num] = metadata.tracks[track_num] or {}
-          metadata.tracks[track_num].isrc = value
-        end
-      end
-    end
-  end
-
-  file:close()
-
-  if not expected_tracks or #metadata.tracks ~= expected_tracks then
-    return false
-  end
-
-  if not selected_track then return end
-
-  local num_items = CountTrackMediaItems(selected_track)
-  track_number = 0
-  for i = 0, num_items - 1 do
-    local item = GetTrackMediaItem(selected_track, i)
-    if item then
-      local take = GetActiveTake(item)
-      if take then
-        local take_name = GetTakeName(take)
-
-        -- Handle album-wide metadata for @ item
-        if take_name and take_name:sub(1, 1) == "@" then
-          local new_take_name = "@" .. (metadata.album.title or "")
-
-          if metadata.album.performer then
-            new_take_name = new_take_name .. "|PERFORMER=" .. metadata.album.performer
-          end
-          if metadata.album.songwriter then
-            new_take_name = new_take_name .. "|SONGWRITER=" .. metadata.album.songwriter
-          end
-          if metadata.album.composer then
-            new_take_name = new_take_name .. "|COMPOSER=" .. metadata.album.composer
-          end
-          if metadata.album.arranger then
-            new_take_name = new_take_name .. "|ARRANGER=" .. metadata.album.arranger
-          end
-          if metadata.album.genre then
-            new_take_name = new_take_name .. "|GENRE=" .. metadata.album.genre
-          end
-          if metadata.album.identification then
-            new_take_name = new_take_name .. "|IDENTIFICATION=" .. metadata.album.identification
-          end
-          if metadata.album.language then
-            new_take_name = new_take_name .. "|LANGUAGE=" .. metadata.album.language
-          end
-          if metadata.album.catalog then
-            new_take_name = new_take_name .. "|CATALOG=" .. metadata.album.catalog
-          end
-          if metadata.album.message then
-            new_take_name = new_take_name .. "|MESSAGE=" .. metadata.album.message
-          end
-
-          -- Apply metadata to the @ item
-          GetSetMediaItemTakeInfo_String(take, "P_NAME", new_take_name, true)
-
-          -- Process track metadata for all other takes
-        elseif take_name and take_name ~= "" then
-          track_number = track_number + 1 -- Assuming items are in order
-          if metadata.tracks[track_number] then
-            local new_take_name = metadata.tracks[track_number].title or ""
-
-            if metadata.tracks[track_number].performer then
-              new_take_name = new_take_name .. "|PERFORMER=" .. metadata.tracks[track_number].performer
-            end
-            if metadata.tracks[track_number].songwriter then
-              new_take_name = new_take_name .. "|SONGWRITER=" .. metadata.tracks[track_number].songwriter
-            end
-            if metadata.tracks[track_number].composer then
-              new_take_name = new_take_name .. "|COMPOSER=" .. metadata.tracks[track_number].composer
-            end
-            if metadata.tracks[track_number].arranger then
-              new_take_name = new_take_name .. "|ARRANGER=" .. metadata.tracks[track_number].arranger
-            end
-            if metadata.tracks[track_number].message then
-              new_take_name = new_take_name .. "|MESSAGE=" .. metadata.tracks[track_number].message
-            end
-            if metadata.tracks[track_number].isrc then
-              new_take_name = new_take_name .. "|ISRC=" .. metadata.tracks[track_number].isrc
-            end
-            -- Apply metadata to the take name
-            GetSetMediaItemTakeInfo_String(take, "P_NAME", new_take_name, true)
-          end
-        end
-      end
-    end
-  end
-
-  return true
 end
 
 ---------------------------------------------------------------------

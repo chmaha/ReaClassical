@@ -28,6 +28,10 @@ if not imgui_exists then
     return
 end
 
+-- local profiler = dofile(GetResourcePath() ..
+--   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
+-- defer = profiler.defer
+
 package.path        = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui         = require 'imgui' '0.10'
 local main
@@ -53,11 +57,22 @@ local editing_item  = nil
 ---------------------------------------------------------------------
 
 function main()
-    local item   = GetSelectedMediaItem(0, 0)
-    local track  = GetSelectedTrack(0, 0)
-    local proj   = 0
+    local item         = GetSelectedMediaItem(0, 0)
+    local track        = GetSelectedTrack(0, 0)
+    local proj         = 0
 
     local project_note = GetSetProjectNotes(proj, false, "")
+
+    -- Safety: check if last edited item/track still exists
+    if editing_item and not ValidatePtr2(0, editing_item, "MediaItem*") then
+        editing_item = nil
+        item_note = ""
+    end
+
+    if editing_track and not ValidatePtr2(0, editing_track, "MediaTrack*") then
+        editing_track = nil
+        track_note = ""
+    end
 
     if editing_track ~= track then
         ImGui.SetWindowFocus(ctx)
@@ -138,5 +153,8 @@ function main()
 end
 
 ---------------------------------------------------------------------
+
+-- profiler.attachToWorld()
+-- profiler.run()
 
 defer(main)

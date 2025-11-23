@@ -20,11 +20,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 -- luacheck: ignore 113
 
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
 -- local profiler = dofile(GetResourcePath() ..
 --   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
 -- defer = profiler.defer
-
-for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions

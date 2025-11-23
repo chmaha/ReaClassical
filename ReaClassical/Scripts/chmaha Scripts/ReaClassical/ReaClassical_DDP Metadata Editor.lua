@@ -1,30 +1,71 @@
--- @noindex
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2025 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-if not reaper.APIExists("ImGui_GetVersion") then
-    reaper.MB('Please install ReaImGui before running this script', 'Error', 0)
+local main, parse_item_name, serialize_metadata, increment_isrc
+local update_marker_and_region, update_album_marker
+
+-- local profiler = dofile(GetResourcePath() ..
+--   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
+-- defer = profiler.defer
+
+---------------------------------------------------------------------
+
+local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+if workflow == "" then
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
     return
 end
 
-package.path = reaper.ImGui_GetBuiltinPath() .. '/?.lua'
+local imgui_exists = APIExists("ImGui_GetVersion")
+if not imgui_exists then
+    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
+package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
-local ctx = reaper.ImGui_CreateContext('DDP Metadata Editor')
+local ctx = ImGui.CreateContext('DDP Metadata Editor')
 local window_open = true
 
--- Track item labels
 local labels = { "Title", "Performer", "Songwriter", "Composer", "Arranger", "Message", "ISRC" }
 local keys = { "title", "performer", "songwriter", "composer", "arranger", "message", "isrc" }
 
--- Album labels
 local album_keys_line1 = { "title", "performer", "songwriter", "composer", "arranger" }
 local album_labels_line1 = { "Album Title", "Performer", "Songwriter", "Composer", "Arranger" }
 local album_keys_line2 = { "genre", "identification", "language", "catalog", "message" }
 local album_labels_line2 = { "Genre", "Identification", "Language", "Catalog", "Message" }
 
--- Parse item name
-local function parseItemName(name, is_album)
+local isrc_pattern = "^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$"
+
+local editing_track = nil
+local album_metadata, album_item = nil, nil
+local track_items_metadata = {}
+
+---------------------------------------------------------------------
+
+function parse_item_name(name, is_album)
     local data = {}
     local parts = {}
     for part in name:gmatch("[^|]+") do table.insert(parts, part) end
@@ -55,8 +96,9 @@ local function parseItemName(name, is_album)
     return data
 end
 
--- Serialize metadata
-local function serializeMetadata(data, is_album)
+---------------------------------------------------------------------
+
+function serialize_metadata(data, is_album)
     local parts = {}
     if is_album then
         parts[#parts + 1] = "@" .. (data.title or "")
@@ -75,264 +117,327 @@ local function serializeMetadata(data, is_album)
     return table.concat(parts, "|")
 end
 
--- ISRC validation pattern (no hyphens)
-local isrc_pattern = "^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$"
+---------------------------------------------------------------------
 
--- Increment ISRC
-local function incrementISRC(isrc, offset)
+function increment_isrc(isrc, offset)
     local prefix, year, seq = isrc:match("^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$")
     if not prefix or not year or not seq then return isrc end
     local new_seq = tonumber(seq) + offset
     return string.format("%s%s%05d", prefix, year, new_seq)
 end
 
--- Update nearest marker and region for a track item
-local function update_marker_and_region(item)
+---------------------------------------------------------------------
+
+function update_marker_and_region(item)
     if not item then return end
-    local take = reaper.GetActiveTake(item)
+
+    local take = GetActiveTake(item)
     if not take then return end
-    local _, item_name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
     if not item_name or item_name == "" then return end
 
-    local item_pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-    local threshold = 0.5 -- seconds, allow slightly before the item start
+    local track = GetMediaItemTrack(item)
+    local track_color = GetTrackColor(track)
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local threshold = 0.5
 
-    local num_markers, num_regions = reaper.CountProjectMarkers(0)
+    local num_markers, num_regions = CountProjectMarkers(0)
 
-    -- First, update the marker
     for idx = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnID = reaper.EnumProjectMarkers(idx)
+        local _, isrgn, pos, _, _, markrgnID, color = EnumProjectMarkers3(0, idx)
         if not isrgn and pos <= item_pos and item_pos - pos <= threshold then
-            reaper.SetProjectMarkerByIndex(0, idx, false, pos, 0, markrgnID, "#" .. item_name, 0)
-            break -- only update first matching marker
+            if track_color == color then
+                SetProjectMarkerByIndex(0, idx, false, pos, 0, markrgnID, "#" .. item_name, color)
+            end
+            break
         end
     end
 
-    -- Then, update the region
     for idx = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnID = reaper.EnumProjectMarkers(idx)
+        local _, isrgn, pos, rgnend, _, markrgnID, color = EnumProjectMarkers3(0, idx)
         if isrgn and pos <= item_pos and item_pos <= rgnend then
-            reaper.SetProjectMarkerByIndex(0, idx, true, pos, rgnend, markrgnID, parseItemName(item_name,false).title, 0)
-            break -- only update first matching region
-        end
-    end
-end
-
--- Update album marker (@) by name
-local function update_album_marker(album_item)
-    if not album_item then return end
-    local take = reaper.GetActiveTake(album_item)
-    if not take then return end
-    local _, item_name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-    if not item_name or not item_name:match("^@") then return end
-
-    local num_markers, num_regions = reaper.CountProjectMarkers(0)
-    for idx = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnID = reaper.EnumProjectMarkers(idx)
-        if not isrgn and name:match("^@") then
-            reaper.SetProjectMarkerByIndex(0, idx, false, pos, 0, markrgnID, item_name, 0)
+            if track_color == color then
+                SetProjectMarkerByIndex(0, idx, true, pos, rgnend, markrgnID, parse_item_name(item_name, false).title,
+                    color)
+            end
             break
         end
     end
 end
 
-local function main()
+---------------------------------------------------------------------
+
+function update_album_marker(item)
+    if not item then return end
+    local take = GetActiveTake(item)
+    if not take then return end
+    local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    if not item_name or not item_name:match("^@") then return end
+
+    local num_markers, num_regions = CountProjectMarkers(0)
+    for idx = 0, num_markers + num_regions - 1 do
+        local _, isrgn, pos, _, name, markrgnID = EnumProjectMarkers(idx)
+        if not isrgn and name:match("^@") then
+            SetProjectMarkerByIndex(0, idx, false, pos, 0, markrgnID, item_name, 0)
+            break
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function main()
     if not window_open then return end
 
+    local _, FLT_MAX = ImGui.NumericLimits_Float()
     local album_total_width = 900
-    reaper.ImGui_SetNextWindowSizeConstraints(ctx, album_total_width, 0, 10000, 10000)
-    local opened, open_ref = reaper.ImGui_Begin(ctx, "DDP Metadata Editor", window_open)
+    ImGui.SetNextWindowSizeConstraints(ctx, 1000, 500, FLT_MAX, FLT_MAX)
+    local opened, open_ref = ImGui.Begin(ctx, "DDP Metadata Editor", window_open)
     window_open = open_ref
 
     if opened then
-        local selected_track = reaper.GetSelectedTrack(0, 0)
-        if not selected_track then return end
+        local selected_track = GetSelectedTrack(0, 0)
 
-        -- Find folder parent
-        local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
-        if depth ~= 1 then
-            local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
-            local folder_track = nil
-            for i = track_index - 1, 0, -1 do
-                local t = GetTrack(0, i)
-                if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
-                    folder_track = t
-                    break
+        if selected_track then
+            if editing_track ~= selected_track then
+                editing_track = selected_track
+
+                local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+                if depth ~= 1 then
+                    local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
+                    local folder_track = nil
+                    for i = track_index - 1, 0, -1 do
+                        local t = GetTrack(0, i)
+                        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                            folder_track = t
+                            break
+                        end
+                    end
+                    if folder_track then selected_track = folder_track end
+                end
+
+                album_metadata, album_item = nil, nil
+                for i = 0, CountTrackMediaItems(selected_track) - 1 do
+                    local item = GetTrackMediaItem(selected_track, i)
+                    local take = GetActiveTake(item)
+                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    if name:match("^@") then
+                        album_metadata = parse_item_name(name, true)
+                        album_item = item
+                        break
+                    end
+                end
+
+                track_items_metadata = {}
+                local item_count = CountTrackMediaItems(selected_track)
+                for i = 0, item_count - 1 do
+                    local item = GetTrackMediaItem(selected_track, i)
+                    local take = GetActiveTake(item)
+                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    if name and name:match("%S") and not name:match("^@") then
+                        track_items_metadata[i] = parse_item_name(name, false)
+                    end
                 end
             end
-            if folder_track then selected_track = folder_track end
-        end
 
-        -- Find album metadata item
-        local album_metadata, album_item = nil, nil
-        for i = 0, reaper.CountTrackMediaItems(selected_track) - 1 do
-            local item = reaper.GetTrackMediaItem(selected_track, i)
-            local take = reaper.GetActiveTake(item)
-            local _, name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-            if name:match("^@") then
-                album_metadata = parseItemName(name, true)
-                album_item = item
-                break
+            if album_metadata then
+                -- Initialize previous_valid_catalog when first loading album metadata
+                local previous_valid_catalog = album_metadata.catalog or ""
+
+                -- Album Metadata input
+                ImGui.Text(ctx, "Album Metadata:")
+                ImGui.Separator(ctx)
+                local spacing = 5
+                local line1_units = { 2, 1, 1, 1, 1 }
+                local line2_units = { 1, 1, 1, 1, 1 }
+                local total_units1, total_units2 = 0, 0
+                for _, u in ipairs(line1_units) do total_units1 = total_units1 + u end
+                for _, u in ipairs(line2_units) do total_units2 = total_units2 + u end
+                local line1_widths, line2_widths = {}, {}
+                for i, u in ipairs(line1_units) do line1_widths[i] = album_total_width * (u / total_units1) end
+                for i, u in ipairs(line2_units) do line2_widths[i] = album_total_width * (u / total_units2) end
+
+                -- Line 1 fields
+                for j = 1, #album_keys_line1 do
+                    ImGui.BeginGroup(ctx)
+                    ImGui.AlignTextToFramePadding(ctx)
+                    ImGui.Text(ctx, album_labels_line1[j])
+                    ImGui.PushItemWidth(ctx, line1_widths[j])
+                    local changed
+                    changed, album_metadata[album_keys_line1[j]] = ImGui.InputText(
+                        ctx,
+                        "##album_" .. album_keys_line1[j],
+                        album_metadata[album_keys_line1[j]] or "",
+                        128
+                    )
+                    ImGui.PopItemWidth(ctx)
+                    ImGui.EndGroup(ctx)
+                    if j < #album_keys_line1 then ImGui.SameLine(ctx, 0, spacing) end
+                    if changed then
+                        local take = GetActiveTake(album_item)
+                        local new_name = serialize_metadata(album_metadata, true)
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                        update_album_marker(album_item)
+                    end
+                end
+
+                -- Line 2 fields
+                for j = 1, #album_keys_line2 do
+                    ImGui.BeginGroup(ctx)
+                    ImGui.AlignTextToFramePadding(ctx)
+                    ImGui.Text(ctx, album_labels_line2[j])
+                    ImGui.PushItemWidth(ctx, line2_widths[j])
+
+                    local key = album_keys_line2[j]
+                    local changed
+                    changed, album_metadata[key] = ImGui.InputText(
+                        ctx,
+                        "##album_" .. key,
+                        album_metadata[key] or "",
+                        128
+                    )
+
+                    ImGui.PopItemWidth(ctx)
+                    ImGui.EndGroup(ctx)
+                    if j < #album_keys_line2 then ImGui.SameLine(ctx, 0, spacing) end
+
+                    if changed then
+                        -- Catalog validation
+                        if key == "catalog" then
+                            local v = album_metadata.catalog or ""
+
+                            if not v:match("^%d*$") or (v ~= "" and (#v ~= 12 and #v ~= 13)) then
+                                -- Revert to last valid catalog (original on first load)
+                                album_metadata.catalog = previous_valid_catalog
+                                goto skip_album_write
+                            end
+
+                            -- Only update previous_valid_catalog if current value is valid
+                            previous_valid_catalog = v
+                        end
+
+                        local take = GetActiveTake(album_item)
+                        local new_name = serialize_metadata(album_metadata, true)
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                        update_album_marker(album_item)
+
+                        ::skip_album_write::
+                    end
+                end
             end
-        end
 
-        -- Album editor
-        if album_metadata then
-            reaper.ImGui_Text(ctx, "Album Metadata:")
-            reaper.ImGui_Separator(ctx)
+            ImGui.Text(ctx, "Track Metadata:")
+            ImGui.Separator(ctx)
+            local item_count = CountTrackMediaItems(selected_track)
             local spacing = 5
-            local line1_units = { 2, 1, 1, 1, 1 }
-            local line2_units = { 1, 1, 1, 1, 1 }
-            local total_units1, total_units2 = 0,0
-            for _, u in ipairs(line1_units) do total_units1 = total_units1 + u end
-            for _, u in ipairs(line2_units) do total_units2 = total_units2 + u end
-            local line1_widths, line2_widths = {},{}
-            for i,u in ipairs(line1_units) do line1_widths[i] = album_total_width*(u/total_units1) end
-            for i,u in ipairs(line2_units) do line2_widths[i] = album_total_width*(u/total_units2) end
+            local padding_right = 15
 
-            -- line1
-            for j = 1,#album_keys_line1 do
-                reaper.ImGui_BeginGroup(ctx)
-                reaper.ImGui_AlignTextToFramePadding(ctx)
-                reaper.ImGui_Text(ctx, album_labels_line1[j])
-                reaper.ImGui_PushItemWidth(ctx, line1_widths[j])
-                local changed
-                changed, album_metadata[album_keys_line1[j]] = reaper.ImGui_InputText(ctx, "##album_"..album_keys_line1[j], album_metadata[album_keys_line1[j]] or "",128)
-                reaper.ImGui_PopItemWidth(ctx)
-                reaper.ImGui_EndGroup(ctx)
-                if j < #album_keys_line1 then reaper.ImGui_SameLine(ctx, 0, spacing) end
-                if changed then
-                    local take = reaper.GetActiveTake(album_item)
-                    local new_name = serializeMetadata(album_metadata,true)
-                    reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
-                    update_album_marker(album_item)
-                end
-            end
+            local track_number_counter = 1
+            local avail_w, _ = ImGui.GetContentRegionAvail(ctx)
+            local normal_boxes = #keys - 1
+            local normal_box_w = (avail_w - padding_right - spacing * (#keys)) / (normal_boxes + 2)
+            local title_box_w = 2 * normal_box_w
+            local first_isrc = nil
 
-            -- line2
-            for j = 1,#album_keys_line2 do
-                reaper.ImGui_BeginGroup(ctx)
-                reaper.ImGui_AlignTextToFramePadding(ctx)
-                reaper.ImGui_Text(ctx, album_labels_line2[j])
-                reaper.ImGui_PushItemWidth(ctx, line2_widths[j])
-                local original_val = album_metadata[album_keys_line2[j]]
-                local changed
-                changed, album_metadata[album_keys_line2[j]] = reaper.ImGui_InputText(ctx,"##album_"..album_keys_line2[j],album_metadata[album_keys_line2[j]] or "",128)
-                reaper.ImGui_PopItemWidth(ctx)
-                reaper.ImGui_EndGroup(ctx)
-                if j < #album_keys_line2 then reaper.ImGui_SameLine(ctx,0,spacing) end
-                if changed then
-                    local take = reaper.GetActiveTake(album_item)
-                    local new_name = serializeMetadata(album_metadata,true)
-                    reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name,true)
-                    update_album_marker(album_item)
-                end
-            end
-            reaper.ImGui_Dummy(ctx,0,15)
-        end
-
-        -- Track items editor
-        reaper.ImGui_Text(ctx,"Track Metadata:")
-        reaper.ImGui_Separator(ctx)
-        local item_count = reaper.CountTrackMediaItems(selected_track)
-        local spacing = 5
-        local padding_right = 15
-        local first_item_done = false
-        local track_number_counter = 1
-        local avail_w,_ = reaper.ImGui_GetContentRegionAvail(ctx)
-        local normal_boxes = #keys - 1
-        local normal_box_w = (avail_w - padding_right - spacing*(#keys)) / (normal_boxes + 2)
-        local title_box_w = 2 * normal_box_w
-        local first_isrc = nil
-
-        -- Draw labels
-        if not first_item_done then
-            local track_number_w,_ = reaper.ImGui_CalcTextSize(ctx,"00")
+            local track_number_w, _ = ImGui.CalcTextSize(ctx, "00")
             track_number_w = track_number_w + spacing
-            reaper.ImGui_Dummy(ctx, track_number_w,0)
-            reaper.ImGui_SameLine(ctx,0,spacing)
-            for j=1,#keys do
-                reaper.ImGui_BeginGroup(ctx)
-                local w = (j==1) and title_box_w or normal_box_w
-                reaper.ImGui_Dummy(ctx,w,0)
-                reaper.ImGui_AlignTextToFramePadding(ctx)
-                reaper.ImGui_Text(ctx,labels[j])
-                reaper.ImGui_EndGroup(ctx)
-                if j<#keys then reaper.ImGui_SameLine(ctx,0,spacing) end
+            ImGui.Dummy(ctx, track_number_w, 0)
+            ImGui.SameLine(ctx, 0, spacing)
+            for j = 1, #keys do
+                ImGui.BeginGroup(ctx)
+                local w = (j == 1) and title_box_w or normal_box_w
+                ImGui.Dummy(ctx, w, 0)
+                ImGui.AlignTextToFramePadding(ctx)
+                ImGui.Text(ctx, labels[j])
+                ImGui.EndGroup(ctx)
+                if j < #keys then ImGui.SameLine(ctx, 0, spacing) end
             end
-            reaper.ImGui_Dummy(ctx,0,5)
-        end
+            ImGui.Dummy(ctx, 0, 5)
 
-        -- First ISRC
-        for i=0,item_count-1 do
-            local item = reaper.GetTrackMediaItem(selected_track,i)
-            local take = reaper.GetActiveTake(item)
-            local _, name = reaper.GetSetMediaItemTakeInfo_String(take,"P_NAME","",false)
-            if name and name:match("%S") and not name:match("^@") then
-                local md = parseItemName(name,false)
-                if md.isrc and md.isrc:match(isrc_pattern) then
+            for i = 0, item_count - 1 do
+                local md = track_items_metadata[i]
+                if md and md.isrc and md.isrc:match(isrc_pattern) then
                     first_isrc = md.isrc
                     break
                 end
             end
-        end
 
-        -- Draw items
-        for i=0,item_count-1 do
-            local item = reaper.GetTrackMediaItem(selected_track,i)
-            local take = reaper.GetActiveTake(item)
-            local _, name = reaper.GetSetMediaItemTakeInfo_String(take,"P_NAME","",false)
-            if name and name:match("%S") and not name:match("^@") then
-                local md = parseItemName(name,false)
-                -- Track number + title
-                reaper.ImGui_BeginGroup(ctx)
-                local track_number_str = string.format("%02d",track_number_counter)
-                reaper.ImGui_AlignTextToFramePadding(ctx)
-                reaper.ImGui_Text(ctx,track_number_str)
-                reaper.ImGui_SameLine(ctx,0,spacing)
-                local original_title = md.title
-                reaper.ImGui_PushItemWidth(ctx,title_box_w)
-                local changed
-                changed, md.title = reaper.ImGui_InputText(ctx,"##"..i.."_title",md.title or "",128)
-                reaper.ImGui_PopItemWidth(ctx)
-                if md.title=="" then md.title=original_title end
-                reaper.ImGui_EndGroup(ctx)
+            local any_changed = false
+            local changed
 
-                -- Remaining boxes
-                for j=2,#keys do
-                    reaper.ImGui_SameLine(ctx,0,spacing)
-                    reaper.ImGui_BeginGroup(ctx)
-                    reaper.ImGui_PushItemWidth(ctx, normal_box_w)
-                    local original_val = md[keys[j]]
-                    changed, md[keys[j]] = reaper.ImGui_InputText(ctx,"##"..i.."_"..keys[j],md[keys[j]] or "",128)
-                    if keys[j]=="isrc" then
-                        if md.isrc~="" and md.isrc:match(isrc_pattern) then
-                            if i==0 then first_isrc = md.isrc end
-                        else
-                            md.isrc = first_isrc and incrementISRC(first_isrc, track_number_counter-1) or ""
+            for i = 0, item_count - 1 do
+                local item = GetTrackMediaItem(selected_track, i)
+                local take = GetActiveTake(item)
+                local md = track_items_metadata[i]
+                if md then
+                    ImGui.BeginGroup(ctx)
+                    local track_number_str = string.format("%02d", track_number_counter)
+                    ImGui.AlignTextToFramePadding(ctx)
+                    ImGui.Text(ctx, track_number_str)
+                    ImGui.SameLine(ctx, 0, spacing)
+                    local original_title = md.title
+                    ImGui.PushItemWidth(ctx, title_box_w)
+                    changed, md.title = ImGui.InputText(ctx, "##" .. i .. "_title", md.title or "", 128)
+                    any_changed = any_changed or changed
+                    ImGui.PopItemWidth(ctx)
+                    if md.title == "" then md.title = original_title end
+                    ImGui.EndGroup(ctx)
+
+                    for j = 2, #keys do
+                        ImGui.SameLine(ctx, 0, spacing)
+                        ImGui.BeginGroup(ctx)
+                        ImGui.PushItemWidth(ctx, normal_box_w)
+
+                        changed, md[keys[j]] = ImGui.InputText(ctx, "##" .. i .. "_" .. keys[j], md[keys[j]] or "", 128)
+                        any_changed = any_changed or changed
+
+                        if keys[j] == "isrc" then
+                            if i == 0 then
+                                if md.isrc == "" then
+                                    first_isrc = nil
+                                elseif md.isrc:match(isrc_pattern) then
+                                    first_isrc = md.isrc
+                                else
+                                    md.isrc = first_isrc or ""
+                                end
+                            else
+                                if first_isrc then
+                                    md.isrc = increment_isrc(first_isrc, track_number_counter - 1)
+                                else
+                                    if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
+                                        md.isrc = ""
+                                    end
+                                end
+                            end
                         end
-                        if i>0 and first_isrc then
-                            md.isrc = incrementISRC(first_isrc, track_number_counter-1)
-                        end
+
+                        ImGui.PopItemWidth(ctx)
+                        ImGui.EndGroup(ctx)
                     end
-                    reaper.ImGui_PopItemWidth(ctx)
-                    reaper.ImGui_EndGroup(ctx)
+
+                    if any_changed then
+                        local new_name = serialize_metadata(md, false)
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                        update_marker_and_region(item)
+                    end
+
+                    track_number_counter = track_number_counter + 1
+                    ImGui.Dummy(ctx, 0, 10)
                 end
-
-                -- Apply changes
-                local new_name = serializeMetadata(md,false)
-                reaper.GetSetMediaItemTakeInfo_String(take,"P_NAME",new_name,true)
-                update_marker_and_region(item)
-
-                first_item_done = true
-                track_number_counter = track_number_counter + 1
-                reaper.ImGui_Dummy(ctx,0,10)
             end
+        else
+            ImGui.Text(ctx, "No track selected. Please select a folder track to edit metadata.")
         end
+
+        ImGui.End(ctx)
     end
 
-    reaper.ImGui_End(ctx)
-    reaper.defer(main)
+    defer(main)
 end
 
-reaper.defer(main)
+---------------------------------------------------------------------
+
+-- profiler.attachToWorld()
+-- profiler.run()
+
+defer(main)
