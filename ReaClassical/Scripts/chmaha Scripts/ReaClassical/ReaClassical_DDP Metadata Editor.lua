@@ -79,6 +79,7 @@ function main()
 
         if selected_track then
             if editing_track ~= selected_track then
+                editing_track = selected_track
                 local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
                 if depth ~= 1 then
                     local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
@@ -224,6 +225,7 @@ function main()
                 ImGui.EndGroup(ctx)
                 if j < #keys then ImGui.SameLine(ctx, 0, spacing) end
             end
+            
             ImGui.Dummy(ctx, 0, 5)
 
             for i = 0, item_count - 1 do
@@ -233,7 +235,7 @@ function main()
                     break
                 end
             end
-
+            
             local any_changed = false
             local changed
 
@@ -288,7 +290,7 @@ function main()
                         ImGui.EndGroup(ctx)
                     end
 
-                    if any_changed and GetSelectedTrack(0, 0) == editing_track then
+                    if any_changed then
                         local new_name = serialize_metadata(md, false)
                         GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
                         update_marker_and_region(item)
@@ -298,9 +300,6 @@ function main()
                     track_number_counter = track_number_counter + 1
                     ImGui.Dummy(ctx, 0, 10)
                 end
-            end
-            if GetSelectedTrack(0, 0) ~= editing_track then
-                editing_track = selected_track
             end
         else
             ImGui.Text(ctx, "No track selected. Please select a folder track to edit metadata.")
