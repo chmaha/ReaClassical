@@ -31,11 +31,11 @@ local update_marker_and_region, update_album_marker
 
 ---------------------------------------------------------------------
 
-local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-    return
-end
+-- local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+-- if workflow == "" then
+--     MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+--     return
+-- end
 
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
@@ -59,9 +59,258 @@ local album_labels_line2 = { "Genre", "Identification", "Language", "Catalog", "
 
 local isrc_pattern = "^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$"
 
-local editing_track = nil
-local album_metadata, album_item = nil, nil
+local editing_track
+local album_metadata, album_item
 local track_items_metadata = {}
+
+---------------------------------------------------------------------
+
+function main()
+    if not window_open then return end
+
+    local _, FLT_MAX = ImGui.NumericLimits_Float()
+    local album_total_width = 900
+    ImGui.SetNextWindowSizeConstraints(ctx, 1000, 500, FLT_MAX, FLT_MAX)
+    local opened, open_ref = ImGui.Begin(ctx, "ReaClassical DDP Metadata Editor", window_open)
+    window_open = open_ref
+
+    if opened then
+        local selected_track = GetSelectedTrack(0, 0)
+
+        if selected_track then
+            if editing_track ~= selected_track then
+                local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+                if depth ~= 1 then
+                    local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
+                    local folder_track = nil
+                    for i = track_index - 1, 0, -1 do
+                        local t = GetTrack(0, i)
+                        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                            folder_track = t
+                            break
+                        end
+                    end
+                    if folder_track then selected_track = folder_track end
+                end
+
+                album_metadata, album_item = nil, nil
+                for i = 0, CountTrackMediaItems(selected_track) - 1 do
+                    local item = GetTrackMediaItem(selected_track, i)
+                    local take = GetActiveTake(item)
+                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    if name:match("^@") then
+                        album_metadata = parse_item_name(name, true)
+                        album_item = item
+                        break
+                    end
+                end
+
+                track_items_metadata = {}
+                local item_count = CountTrackMediaItems(selected_track)
+                for i = 0, item_count - 1 do
+                    local item = GetTrackMediaItem(selected_track, i)
+                    local take = GetActiveTake(item)
+                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    if name and name:match("%S") and not name:match("^@") then
+                        track_items_metadata[i] = parse_item_name(name, false)
+                    end
+                end
+            end
+
+            if album_metadata then
+                local previous_valid_catalog = album_metadata.catalog or ""
+
+                ImGui.Text(ctx, "Album Metadata:")
+                ImGui.Separator(ctx)
+                local spacing = 5
+                local line1_units = { 2, 1, 1, 1, 1 }
+                local line2_units = { 1, 1, 1, 1, 1 }
+                local total_units1, total_units2 = 0, 0
+                for _, u in ipairs(line1_units) do total_units1 = total_units1 + u end
+                for _, u in ipairs(line2_units) do total_units2 = total_units2 + u end
+                local line1_widths, line2_widths = {}, {}
+                for i, u in ipairs(line1_units) do line1_widths[i] = album_total_width * (u / total_units1) end
+                for i, u in ipairs(line2_units) do line2_widths[i] = album_total_width * (u / total_units2) end
+
+                for j = 1, #album_keys_line1 do
+                    ImGui.BeginGroup(ctx)
+                    ImGui.AlignTextToFramePadding(ctx)
+                    ImGui.Text(ctx, album_labels_line1[j])
+                    ImGui.PushItemWidth(ctx, line1_widths[j])
+                    local changed
+                    local albumkeys1_widget_id = "##album_" .. album_keys_line1[j] .. "_" .. tostring(selected_track)
+                    changed, album_metadata[album_keys_line1[j]] = ImGui.InputText(
+                        ctx,
+                        albumkeys1_widget_id,
+                        album_metadata[album_keys_line1[j]] or "",
+                        128
+                    )
+                    ImGui.PopItemWidth(ctx)
+                    ImGui.EndGroup(ctx)
+                    if j < #album_keys_line1 then ImGui.SameLine(ctx, 0, spacing) end
+                    if changed and GetSelectedTrack(0, 0) == editing_track then
+                        local take = GetActiveTake(album_item)
+                        local new_name = serialize_metadata(album_metadata, true)
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                        update_album_marker(album_item)
+                    end
+                end
+
+                for j = 1, #album_keys_line2 do
+                    ImGui.BeginGroup(ctx)
+                    ImGui.AlignTextToFramePadding(ctx)
+                    ImGui.Text(ctx, album_labels_line2[j])
+                    ImGui.PushItemWidth(ctx, line2_widths[j])
+
+                    local key = album_keys_line2[j]
+                    local changed
+                    local albumkeys2_widget_id = "##album_" .. key .. "_" .. tostring(selected_track)
+                    changed, album_metadata[key] = ImGui.InputText(
+                        ctx,
+                        albumkeys2_widget_id,
+                        album_metadata[key] or "",
+                        128
+                    )
+
+                    ImGui.PopItemWidth(ctx)
+                    ImGui.EndGroup(ctx)
+                    if j < #album_keys_line2 then ImGui.SameLine(ctx, 0, spacing) end
+
+                    if changed and GetSelectedTrack(0, 0) == editing_track then
+                        if key == "catalog" then
+                            local v = album_metadata.catalog or ""
+
+                            if not v:match("^%d*$") or (v ~= "" and (#v ~= 12 and #v ~= 13)) then
+                                album_metadata.catalog = previous_valid_catalog
+                                goto skip_album_write
+                            end
+
+                            previous_valid_catalog = v
+                        end
+
+                        local take = GetActiveTake(album_item)
+                        local new_name = serialize_metadata(album_metadata, true)
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                        update_album_marker(album_item)
+
+                        ::skip_album_write::
+                    end
+                end
+            end
+
+            ImGui.Text(ctx, "Track Metadata:")
+            ImGui.Separator(ctx)
+            local item_count = CountTrackMediaItems(selected_track)
+            local spacing = 5
+            local padding_right = 15
+
+            local track_number_counter = 1
+            local avail_w, _ = ImGui.GetContentRegionAvail(ctx)
+            local normal_boxes = #keys - 1
+            local normal_box_w = (avail_w - padding_right - spacing * (#keys)) / (normal_boxes + 2)
+            local title_box_w = 2 * normal_box_w
+            local first_isrc = nil
+
+            local track_number_w, _ = ImGui.CalcTextSize(ctx, "00")
+            track_number_w = track_number_w + spacing
+            ImGui.Dummy(ctx, track_number_w, 0)
+            ImGui.SameLine(ctx, 0, spacing)
+            for j = 1, #keys do
+                ImGui.BeginGroup(ctx)
+                local w = (j == 1) and title_box_w or normal_box_w
+                ImGui.Dummy(ctx, w, 0)
+                ImGui.AlignTextToFramePadding(ctx)
+                ImGui.Text(ctx, labels[j])
+                ImGui.EndGroup(ctx)
+                if j < #keys then ImGui.SameLine(ctx, 0, spacing) end
+            end
+            ImGui.Dummy(ctx, 0, 5)
+
+            for i = 0, item_count - 1 do
+                local md = track_items_metadata[i]
+                if md and md.isrc and md.isrc:match(isrc_pattern) then
+                    first_isrc = md.isrc
+                    break
+                end
+            end
+
+            local any_changed = false
+            local changed
+
+            for i = 0, item_count - 1 do
+                local item = GetTrackMediaItem(selected_track, i)
+                local take = GetActiveTake(item)
+                local md = track_items_metadata[i]
+                if md then
+                    ImGui.BeginGroup(ctx)
+                    local track_number_str = string.format("%02d", track_number_counter)
+                    ImGui.AlignTextToFramePadding(ctx)
+                    ImGui.Text(ctx, track_number_str)
+                    ImGui.SameLine(ctx, 0, spacing)
+                    local original_title = md.title
+                    ImGui.PushItemWidth(ctx, title_box_w)
+                    local title_widget_id = "##" .. i .. "_title_" .. tostring(selected_track)
+                    changed, md.title = ImGui.InputText(ctx, title_widget_id, md.title or "", 128)
+                    any_changed = any_changed or changed
+                    ImGui.PopItemWidth(ctx)
+                    if md.title == "" then md.title = original_title end
+                    ImGui.EndGroup(ctx)
+
+                    for j = 2, #keys do
+                        ImGui.SameLine(ctx, 0, spacing)
+                        ImGui.BeginGroup(ctx)
+                        ImGui.PushItemWidth(ctx, normal_box_w)
+                        local keys_widget_id = "##" .. i .. "_" .. keys[j] .. " " .. tostring(selected_track)
+                        changed, md[keys[j]] = ImGui.InputText(ctx, keys_widget_id, md[keys[j]] or "", 128)
+                        any_changed = any_changed or changed
+
+                        if keys[j] == "isrc" then
+                            if i == 0 then
+                                if md.isrc == "" then
+                                    first_isrc = nil
+                                elseif md.isrc:match(isrc_pattern) then
+                                    first_isrc = md.isrc
+                                else
+                                    md.isrc = first_isrc or ""
+                                end
+                            else
+                                if first_isrc then
+                                    md.isrc = increment_isrc(first_isrc, track_number_counter - 1)
+                                else
+                                    if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
+                                        md.isrc = ""
+                                    end
+                                end
+                            end
+                        end
+
+                        ImGui.PopItemWidth(ctx)
+                        ImGui.EndGroup(ctx)
+                    end
+
+                    if any_changed and GetSelectedTrack(0, 0) == editing_track then
+                        local new_name = serialize_metadata(md, false)
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                        update_marker_and_region(item)
+                    end
+
+
+                    track_number_counter = track_number_counter + 1
+                    ImGui.Dummy(ctx, 0, 10)
+                end
+            end
+            if GetSelectedTrack(0, 0) ~= editing_track then
+                editing_track = selected_track
+            end
+        else
+            ImGui.Text(ctx, "No track selected. Please select a folder track to edit metadata.")
+        end
+
+        ImGui.End(ctx)
+    end
+
+    defer(main)
+end
 
 ---------------------------------------------------------------------
 
@@ -182,257 +431,6 @@ function update_album_marker(item)
             break
         end
     end
-end
-
----------------------------------------------------------------------
-
-function main()
-    if not window_open then return end
-
-    local _, FLT_MAX = ImGui.NumericLimits_Float()
-    local album_total_width = 900
-    ImGui.SetNextWindowSizeConstraints(ctx, 1000, 500, FLT_MAX, FLT_MAX)
-    local opened, open_ref = ImGui.Begin(ctx, "DDP Metadata Editor", window_open)
-    window_open = open_ref
-
-    if opened then
-        local selected_track = GetSelectedTrack(0, 0)
-
-        if selected_track then
-            if editing_track ~= selected_track then
-                editing_track = selected_track
-
-                local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
-                if depth ~= 1 then
-                    local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
-                    local folder_track = nil
-                    for i = track_index - 1, 0, -1 do
-                        local t = GetTrack(0, i)
-                        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
-                            folder_track = t
-                            break
-                        end
-                    end
-                    if folder_track then selected_track = folder_track end
-                end
-
-                album_metadata, album_item = nil, nil
-                for i = 0, CountTrackMediaItems(selected_track) - 1 do
-                    local item = GetTrackMediaItem(selected_track, i)
-                    local take = GetActiveTake(item)
-                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                    if name:match("^@") then
-                        album_metadata = parse_item_name(name, true)
-                        album_item = item
-                        break
-                    end
-                end
-
-                track_items_metadata = {}
-                local item_count = CountTrackMediaItems(selected_track)
-                for i = 0, item_count - 1 do
-                    local item = GetTrackMediaItem(selected_track, i)
-                    local take = GetActiveTake(item)
-                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                    if name and name:match("%S") and not name:match("^@") then
-                        track_items_metadata[i] = parse_item_name(name, false)
-                    end
-                end
-            end
-
-            if album_metadata then
-                -- Initialize previous_valid_catalog when first loading album metadata
-                local previous_valid_catalog = album_metadata.catalog or ""
-
-                -- Album Metadata input
-                ImGui.Text(ctx, "Album Metadata:")
-                ImGui.Separator(ctx)
-                local spacing = 5
-                local line1_units = { 2, 1, 1, 1, 1 }
-                local line2_units = { 1, 1, 1, 1, 1 }
-                local total_units1, total_units2 = 0, 0
-                for _, u in ipairs(line1_units) do total_units1 = total_units1 + u end
-                for _, u in ipairs(line2_units) do total_units2 = total_units2 + u end
-                local line1_widths, line2_widths = {}, {}
-                for i, u in ipairs(line1_units) do line1_widths[i] = album_total_width * (u / total_units1) end
-                for i, u in ipairs(line2_units) do line2_widths[i] = album_total_width * (u / total_units2) end
-
-                -- Line 1 fields
-                for j = 1, #album_keys_line1 do
-                    ImGui.BeginGroup(ctx)
-                    ImGui.AlignTextToFramePadding(ctx)
-                    ImGui.Text(ctx, album_labels_line1[j])
-                    ImGui.PushItemWidth(ctx, line1_widths[j])
-                    local changed
-                    changed, album_metadata[album_keys_line1[j]] = ImGui.InputText(
-                        ctx,
-                        "##album_" .. album_keys_line1[j],
-                        album_metadata[album_keys_line1[j]] or "",
-                        128
-                    )
-                    ImGui.PopItemWidth(ctx)
-                    ImGui.EndGroup(ctx)
-                    if j < #album_keys_line1 then ImGui.SameLine(ctx, 0, spacing) end
-                    if changed then
-                        local take = GetActiveTake(album_item)
-                        local new_name = serialize_metadata(album_metadata, true)
-                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
-                        update_album_marker(album_item)
-                    end
-                end
-
-                -- Line 2 fields
-                for j = 1, #album_keys_line2 do
-                    ImGui.BeginGroup(ctx)
-                    ImGui.AlignTextToFramePadding(ctx)
-                    ImGui.Text(ctx, album_labels_line2[j])
-                    ImGui.PushItemWidth(ctx, line2_widths[j])
-
-                    local key = album_keys_line2[j]
-                    local changed
-                    changed, album_metadata[key] = ImGui.InputText(
-                        ctx,
-                        "##album_" .. key,
-                        album_metadata[key] or "",
-                        128
-                    )
-
-                    ImGui.PopItemWidth(ctx)
-                    ImGui.EndGroup(ctx)
-                    if j < #album_keys_line2 then ImGui.SameLine(ctx, 0, spacing) end
-
-                    if changed then
-                        -- Catalog validation
-                        if key == "catalog" then
-                            local v = album_metadata.catalog or ""
-
-                            if not v:match("^%d*$") or (v ~= "" and (#v ~= 12 and #v ~= 13)) then
-                                -- Revert to last valid catalog (original on first load)
-                                album_metadata.catalog = previous_valid_catalog
-                                goto skip_album_write
-                            end
-
-                            -- Only update previous_valid_catalog if current value is valid
-                            previous_valid_catalog = v
-                        end
-
-                        local take = GetActiveTake(album_item)
-                        local new_name = serialize_metadata(album_metadata, true)
-                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
-                        update_album_marker(album_item)
-
-                        ::skip_album_write::
-                    end
-                end
-            end
-
-            ImGui.Text(ctx, "Track Metadata:")
-            ImGui.Separator(ctx)
-            local item_count = CountTrackMediaItems(selected_track)
-            local spacing = 5
-            local padding_right = 15
-
-            local track_number_counter = 1
-            local avail_w, _ = ImGui.GetContentRegionAvail(ctx)
-            local normal_boxes = #keys - 1
-            local normal_box_w = (avail_w - padding_right - spacing * (#keys)) / (normal_boxes + 2)
-            local title_box_w = 2 * normal_box_w
-            local first_isrc = nil
-
-            local track_number_w, _ = ImGui.CalcTextSize(ctx, "00")
-            track_number_w = track_number_w + spacing
-            ImGui.Dummy(ctx, track_number_w, 0)
-            ImGui.SameLine(ctx, 0, spacing)
-            for j = 1, #keys do
-                ImGui.BeginGroup(ctx)
-                local w = (j == 1) and title_box_w or normal_box_w
-                ImGui.Dummy(ctx, w, 0)
-                ImGui.AlignTextToFramePadding(ctx)
-                ImGui.Text(ctx, labels[j])
-                ImGui.EndGroup(ctx)
-                if j < #keys then ImGui.SameLine(ctx, 0, spacing) end
-            end
-            ImGui.Dummy(ctx, 0, 5)
-
-            for i = 0, item_count - 1 do
-                local md = track_items_metadata[i]
-                if md and md.isrc and md.isrc:match(isrc_pattern) then
-                    first_isrc = md.isrc
-                    break
-                end
-            end
-
-            local any_changed = false
-            local changed
-
-            for i = 0, item_count - 1 do
-                local item = GetTrackMediaItem(selected_track, i)
-                local take = GetActiveTake(item)
-                local md = track_items_metadata[i]
-                if md then
-                    ImGui.BeginGroup(ctx)
-                    local track_number_str = string.format("%02d", track_number_counter)
-                    ImGui.AlignTextToFramePadding(ctx)
-                    ImGui.Text(ctx, track_number_str)
-                    ImGui.SameLine(ctx, 0, spacing)
-                    local original_title = md.title
-                    ImGui.PushItemWidth(ctx, title_box_w)
-                    changed, md.title = ImGui.InputText(ctx, "##" .. i .. "_title", md.title or "", 128)
-                    any_changed = any_changed or changed
-                    ImGui.PopItemWidth(ctx)
-                    if md.title == "" then md.title = original_title end
-                    ImGui.EndGroup(ctx)
-
-                    for j = 2, #keys do
-                        ImGui.SameLine(ctx, 0, spacing)
-                        ImGui.BeginGroup(ctx)
-                        ImGui.PushItemWidth(ctx, normal_box_w)
-
-                        changed, md[keys[j]] = ImGui.InputText(ctx, "##" .. i .. "_" .. keys[j], md[keys[j]] or "", 128)
-                        any_changed = any_changed or changed
-
-                        if keys[j] == "isrc" then
-                            if i == 0 then
-                                if md.isrc == "" then
-                                    first_isrc = nil
-                                elseif md.isrc:match(isrc_pattern) then
-                                    first_isrc = md.isrc
-                                else
-                                    md.isrc = first_isrc or ""
-                                end
-                            else
-                                if first_isrc then
-                                    md.isrc = increment_isrc(first_isrc, track_number_counter - 1)
-                                else
-                                    if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
-                                        md.isrc = ""
-                                    end
-                                end
-                            end
-                        end
-
-                        ImGui.PopItemWidth(ctx)
-                        ImGui.EndGroup(ctx)
-                    end
-
-                    if any_changed then
-                        local new_name = serialize_metadata(md, false)
-                        GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
-                        update_marker_and_region(item)
-                    end
-
-                    track_number_counter = track_number_counter + 1
-                    ImGui.Dummy(ctx, 0, 10)
-                end
-            end
-        else
-            ImGui.Text(ctx, "No track selected. Please select a folder track to edit metadata.")
-        end
-
-        ImGui.End(ctx)
-    end
-
-    defer(main)
 end
 
 ---------------------------------------------------------------------
