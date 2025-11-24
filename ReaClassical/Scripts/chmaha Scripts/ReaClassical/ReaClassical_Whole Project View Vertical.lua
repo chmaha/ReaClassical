@@ -36,10 +36,30 @@ function main()
         return
     end
     PreventUIRefresh(1)
-    Main_OnCommand(40296, 0)     -- Track: Select all tracks
+
+    local num_pre_selected = CountSelectedTracks(0)
+    local pre_selected = {}
+    if num_pre_selected > 0 then
+        for i = 0, num_pre_selected - 1, 1 do
+            local track = GetSelectedTrack(0, i)
+            table.insert(pre_selected, track)
+        end
+    end
+
+    Main_OnCommand(40296, 0) -- Track: Select all tracks
     local zoom = NamedCommandLookup("_SWS_VZOOMFIT")
-    Main_OnCommand(zoom, 0)      -- SWS: Vertical zoom to selected tracks
-    Main_OnCommand(40297, 0)     -- Track: Unselect (clear selection of) all tracks
+    Main_OnCommand(zoom, 0)  -- SWS: Vertical zoom to selected tracks
+    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
+
+    if num_pre_selected > 0 then
+        PreventUIRefresh(1)
+        Main_OnCommand(40297, 0) --unselect_all
+        SetOnlyTrackSelected(pre_selected[1])
+        for _, track in ipairs(pre_selected) do
+            if pcall(IsTrackSelected, track) then SetTrackSelected(track, 1) end
+        end
+    end
+
     PreventUIRefresh(-1)
 end
 

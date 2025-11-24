@@ -189,9 +189,9 @@ function main()
         for _, track in ipairs(pre_selected) do
             if pcall(IsTrackSelected, track) then SetTrackSelected(track, 1) end
         end
-        PreventUIRefresh(-1)
     end
-
+    
+    PreventUIRefresh(-1)
     local _, converted = GetProjExtState(0, "ReaClassical", "Converted")
     if not rcmaster_exists and converted ~= "y" then
         MB("Your project has been upgraded"
