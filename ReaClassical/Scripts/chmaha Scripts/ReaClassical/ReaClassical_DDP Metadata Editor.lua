@@ -31,11 +31,11 @@ local update_marker_and_region, update_album_marker
 
 ---------------------------------------------------------------------
 
--- local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
--- if workflow == "" then
---     MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
---     return
--- end
+local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+if workflow == "" then
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    return
+end
 
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
@@ -62,14 +62,15 @@ local isrc_pattern = "^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$"
 local editing_track
 local album_metadata, album_item
 local track_items_metadata = {}
-
+local manual_isrc_entry = false
+local prev_isrc_values = {}
 ---------------------------------------------------------------------
 
 function main()
     if not window_open then return end
 
     local _, FLT_MAX = ImGui.NumericLimits_Float()
-    local album_total_width = 900
+    -- local album_total_width = 900
     ImGui.SetNextWindowSizeConstraints(ctx, 1000, 500, FLT_MAX, FLT_MAX)
     local opened, open_ref = ImGui.Begin(ctx, "ReaClassical DDP Metadata Editor", window_open)
     window_open = open_ref
@@ -120,18 +121,31 @@ function main()
 
             if album_metadata then
                 local previous_valid_catalog = album_metadata.catalog or ""
-
                 ImGui.Text(ctx, "Album Metadata:")
                 ImGui.Separator(ctx)
+                ImGui.Dummy(ctx, 0, 10)
+
                 local spacing = 5
+
+                -- Units remain the same, only width calculation changes
                 local line1_units = { 2, 1, 1, 1, 1 }
-                local line2_units = { 1, 1, 1, 1, 1 }
+                local line2_units = { 0.5, 1, 0.5, 0.5, 2 }
+
+                -- Total horizontal space available *right now*
+                local avail_w = select(1, ImGui.GetContentRegionAvail(ctx))
+
                 local total_units1, total_units2 = 0, 0
                 for _, u in ipairs(line1_units) do total_units1 = total_units1 + u end
                 for _, u in ipairs(line2_units) do total_units2 = total_units2 + u end
+
+                -- Compute widths as a fraction of available window space
                 local line1_widths, line2_widths = {}, {}
-                for i, u in ipairs(line1_units) do line1_widths[i] = album_total_width * (u / total_units1) end
-                for i, u in ipairs(line2_units) do line2_widths[i] = album_total_width * (u / total_units2) end
+                for i, u in ipairs(line1_units) do
+                    line1_widths[i] = (avail_w - spacing * (#line1_units - 1)) * (u / total_units1)
+                end
+                for i, u in ipairs(line2_units) do
+                    line2_widths[i] = (avail_w - spacing * (#line2_units - 1)) * (u / total_units2)
+                end
 
                 for j = 1, #album_keys_line1 do
                     ImGui.BeginGroup(ctx)
@@ -198,9 +212,21 @@ function main()
                     end
                 end
             end
-
+            ImGui.Dummy(ctx, 0, 10)
             ImGui.Text(ctx, "Track Metadata:")
             ImGui.Separator(ctx)
+            -- right-align the whole group
+            local avail = select(1, ImGui.GetContentRegionAvail(ctx))
+            local text_w = ImGui.CalcTextSize(ctx, "Manual ISRC entry")
+            local checkbox_w = ImGui.GetFrameHeight(ctx)
+
+            ImGui.SetCursorPosX(ctx, avail - (text_w + checkbox_w + 8))
+
+            ImGui.Text(ctx, "Manual ISRC entry")
+            ImGui.SameLine(ctx)
+
+            _, manual_isrc_entry = ImGui.Checkbox(ctx, "##manual_isrc_chk", manual_isrc_entry)
+
             local item_count = CountTrackMediaItems(selected_track)
             local spacing = 5
             local padding_right = 15
@@ -225,7 +251,7 @@ function main()
                 ImGui.EndGroup(ctx)
                 if j < #keys then ImGui.SameLine(ctx, 0, spacing) end
             end
-            
+
             ImGui.Dummy(ctx, 0, 5)
 
             for i = 0, item_count - 1 do
@@ -235,7 +261,7 @@ function main()
                     break
                 end
             end
-            
+
             local any_changed = false
             local changed
 
@@ -267,23 +293,36 @@ function main()
                         any_changed = any_changed or changed
 
                         if keys[j] == "isrc" then
-                            if i == 0 then
-                                if md.isrc == "" then
-                                    first_isrc = nil
-                                elseif md.isrc:match(isrc_pattern) then
-                                    first_isrc = md.isrc
-                                else
-                                    md.isrc = first_isrc or ""
+                            local prev_isrc = prev_isrc_values[i] or md.isrc -- default to current
+                            if manual_isrc_entry then
+                                -- In manual mode, validate after input
+                                if changed then
+                                    if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
+                                        md.isrc = prev_isrc -- revert if invalid
+                                    end
                                 end
                             else
-                                if first_isrc then
-                                    md.isrc = increment_isrc(first_isrc, track_number_counter - 1)
+                                -- Auto-increment mode (existing logic)
+                                if i == 0 then
+                                    if md.isrc == "" then
+                                        first_isrc = nil
+                                    elseif md.isrc:match(isrc_pattern) then
+                                        first_isrc = md.isrc
+                                    else
+                                        md.isrc = first_isrc or ""
+                                    end
                                 else
-                                    if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
-                                        md.isrc = ""
+                                    if first_isrc then
+                                        md.isrc = increment_isrc(first_isrc, track_number_counter - 1)
+                                    else
+                                        if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
+                                            md.isrc = ""
+                                        end
                                     end
                                 end
                             end
+                            -- Store current value as previous for next frame
+                            prev_isrc_values[i] = md.isrc
                         end
 
                         ImGui.PopItemWidth(ctx)
