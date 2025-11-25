@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, parse_item_name, serialize_metadata, increment_isrc
-local update_marker_and_region, update_album_marker
+local update_marker_and_region, update_album_marker, propagate_album_field
 
 -- local profiler = dofile(GetResourcePath() ..
 --   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
@@ -62,8 +62,14 @@ local isrc_pattern = "^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$"
 local editing_track
 local album_metadata, album_item
 local track_items_metadata = {}
-local manual_isrc_entry = false
 local prev_isrc_values = {}
+
+local _, manual_isrc_entry_str = GetProjExtState(0, "ReaClassical", "manual_isrc_entry")
+local manual_isrc_entry = manual_isrc_entry_str == "1"
+
+local _, manual_people_entry_str = GetProjExtState(0, "ReaClassical", "manual_people_entry")
+local manual_people_entry = manual_people_entry_str == "1"
+
 ---------------------------------------------------------------------
 
 function main()
@@ -127,6 +133,19 @@ function main()
 
                 local spacing = 5
 
+                -- right-align the whole group
+                local avail = select(1, ImGui.GetContentRegionAvail(ctx))
+                local text_w = ImGui.CalcTextSize(ctx, "Manual Contributors Entry")
+                local checkbox_w = ImGui.GetFrameHeight(ctx)
+
+                ImGui.SetCursorPosX(ctx, avail - (text_w + checkbox_w + 8))
+
+                ImGui.Text(ctx, "Manual Contributors Entry")
+                ImGui.SameLine(ctx)
+
+                _, manual_people_entry = ImGui.Checkbox(ctx, "##manual_people_chk", manual_people_entry)
+                SetProjExtState(0, "ReaClassical", "manual_people_entry", manual_people_entry and "1" or "0")
+
                 -- Units remain the same, only width calculation changes
                 local line1_units = { 2, 1, 1, 1, 1 }
                 local line2_units = { 0.5, 1, 0.5, 0.5, 2 }
@@ -147,7 +166,34 @@ function main()
                     line2_widths[i] = (avail_w - spacing * (#line2_units - 1)) * (u / total_units2)
                 end
 
+                if not manual_people_entry then
+                    -- Track if any field changed
+                    local album_changed = false
+
+                    -- Propagate performer, songwriter, composer, arranger
+                    for _, f in ipairs({ "performer", "songwriter", "composer", "arranger" }) do
+                        local old_value = album_metadata[f]
+                        propagate_album_field(f)
+                        if album_metadata[f] ~= old_value then
+                            album_changed = true
+                        end
+                    end
+
+                    -- Write back to album item and update marker only if something changed
+                    if album_changed and album_item then
+                        local take = GetActiveTake(album_item)
+                        if take then
+                            local new_name = serialize_metadata(album_metadata, true)
+                            GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                            update_album_marker(album_item)
+                        end
+                    end
+                end
+
                 for j = 1, #album_keys_line1 do
+                    if not manual_people_entry and (album_keys_line1[j] ~= "title") then
+                        ImGui.BeginDisabled(ctx)
+                    end
                     ImGui.BeginGroup(ctx)
                     ImGui.AlignTextToFramePadding(ctx)
                     ImGui.Text(ctx, album_labels_line1[j])
@@ -168,6 +214,9 @@ function main()
                         local new_name = serialize_metadata(album_metadata, true)
                         GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
                         update_album_marker(album_item)
+                    end
+                    if not manual_people_entry and (album_keys_line1[j] ~= "title") then
+                        ImGui.EndDisabled(ctx)
                     end
                 end
 
@@ -215,6 +264,7 @@ function main()
             ImGui.Dummy(ctx, 0, 10)
             ImGui.Text(ctx, "Track Metadata:")
             ImGui.Separator(ctx)
+
             -- right-align the whole group
             local avail = select(1, ImGui.GetContentRegionAvail(ctx))
             local text_w = ImGui.CalcTextSize(ctx, "Manual ISRC entry")
@@ -226,6 +276,7 @@ function main()
             ImGui.SameLine(ctx)
 
             _, manual_isrc_entry = ImGui.Checkbox(ctx, "##manual_isrc_chk", manual_isrc_entry)
+            SetProjExtState(0, "ReaClassical", "manual_isrc_entry", manual_isrc_entry and "1" or "0")
 
             local item_count = CountTrackMediaItems(selected_track)
             local spacing = 5
@@ -289,7 +340,13 @@ function main()
                         ImGui.BeginGroup(ctx)
                         ImGui.PushItemWidth(ctx, normal_box_w)
                         local keys_widget_id = "##" .. i .. "_" .. keys[j] .. " " .. tostring(selected_track)
+                        if keys[j] == "isrc" and not manual_isrc_entry and i > 0 then
+                            ImGui.BeginDisabled(ctx)
+                        end
                         changed, md[keys[j]] = ImGui.InputText(ctx, keys_widget_id, md[keys[j]] or "", 128)
+                        if keys[j] == "isrc" and not manual_isrc_entry and i > 0 then
+                            ImGui.EndDisabled(ctx)
+                        end
                         any_changed = any_changed or changed
 
                         if keys[j] == "isrc" then
@@ -334,7 +391,6 @@ function main()
                         GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
                         update_marker_and_region(item)
                     end
-
 
                     track_number_counter = track_number_counter + 1
                     ImGui.Dummy(ctx, 0, 10)
@@ -469,6 +525,32 @@ function update_album_marker(item)
             break
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function propagate_album_field(field)
+    local val, mixed = nil, false
+
+    -- Gather track values
+    for _, md in pairs(track_items_metadata) do
+        if md and md[field] and md[field] ~= "" then
+            if not val then
+                val = md[field]
+            elseif val ~= md[field] then
+                mixed = true
+                break
+            end
+        end
+    end
+
+    -- Determine desired album value
+    local desired = nil
+    if val then
+        desired = mixed and "Various" or val
+    end
+
+    album_metadata[field] = desired
 end
 
 ---------------------------------------------------------------------
