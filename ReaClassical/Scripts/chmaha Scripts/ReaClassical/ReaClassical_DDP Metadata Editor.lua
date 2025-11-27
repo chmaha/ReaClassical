@@ -24,9 +24,10 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, parse_item_name, serialize_metadata, increment_isrc
 local update_marker_and_region, update_album_marker, propagate_album_field
+local track_has_valid_items
 
 -- local profiler = dofile(GetResourcePath() ..
---   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
+--     '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
 -- defer = profiler.defer
 
 ---------------------------------------------------------------------
@@ -70,6 +71,7 @@ local manual_isrc_entry = manual_isrc_entry_str == "1"
 local _, manual_people_entry_str = GetProjExtState(0, "ReaClassical", "manual_people_entry")
 local manual_people_entry = manual_people_entry_str == "1"
 
+
 ---------------------------------------------------------------------
 
 function main()
@@ -83,23 +85,28 @@ function main()
 
     if opened then
         local selected_track = GetSelectedTrack(0, 0)
-
         if selected_track then
+            local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+            if depth ~= 1 then
+                local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
+                local folder_track = nil
+                for i = track_index - 1, 0, -1 do
+                    local t = GetTrack(0, i)
+                    if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                        folder_track = t
+                        break
+                    end
+                end
+                if folder_track then selected_track = folder_track end
+            end
+        end
+        local valid_items = track_has_valid_items(selected_track)
+
+        if selected_track and not valid_items then
+            ImGui.Text(ctx, "No valid item names found for DDP metadata editing.")
+        elseif selected_track then
             if editing_track ~= selected_track then
                 editing_track = selected_track
-                local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
-                if depth ~= 1 then
-                    local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
-                    local folder_track = nil
-                    for i = track_index - 1, 0, -1 do
-                        local t = GetTrack(0, i)
-                        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
-                            folder_track = t
-                            break
-                        end
-                    end
-                    if folder_track then selected_track = folder_track end
-                end
 
                 album_metadata, album_item = nil, nil
                 for i = 0, CountTrackMediaItems(selected_track) - 1 do
@@ -551,6 +558,23 @@ function propagate_album_field(field)
     end
 
     album_metadata[field] = desired
+end
+
+---------------------------------------------------------------------
+
+function track_has_valid_items(track)
+    if not track then return false end
+    local item_count = CountTrackMediaItems(track)
+    if item_count == 0 then return false end
+    for i = 0, item_count - 1 do
+        local item = GetTrackMediaItem(track, i)
+        local take = GetActiveTake(item)
+        if take then
+            local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            if name and (name:match("^@") or name:match("^#")) then return true end
+        end
+    end
+    return false
 end
 
 ---------------------------------------------------------------------
