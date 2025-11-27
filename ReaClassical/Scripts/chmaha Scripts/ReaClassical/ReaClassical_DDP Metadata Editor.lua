@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, parse_item_name, serialize_metadata, increment_isrc
 local update_marker_and_region, update_album_marker, propagate_album_field
-local track_has_valid_items
+local track_has_valid_items, create_metadata_report_and_cue
 
 -- local profiler = dofile(GetResourcePath() ..
 --     '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
@@ -71,11 +71,19 @@ local manual_isrc_entry = manual_isrc_entry_str == "1"
 local _, manual_people_entry_str = GetProjExtState(0, "ReaClassical", "manual_people_entry")
 local manual_people_entry = manual_people_entry_str == "1"
 
+local create_CD_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
+
+local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
+SetToggleCommandState(1, ddp_editor, 1)
 
 ---------------------------------------------------------------------
 
 function main()
-    if not window_open then return end
+    if not window_open then
+        SetToggleCommandState(1, ddp_editor, 0)
+        create_metadata_report_and_cue()
+        return
+    end
 
     local _, FLT_MAX = ImGui.NumericLimits_Float()
     -- local album_total_width = 900
@@ -107,7 +115,8 @@ function main()
         elseif selected_track then
             if editing_track ~= selected_track then
                 editing_track = selected_track
-
+                Main_OnCommand(create_CD_markers, 0)
+                create_metadata_report_and_cue()
                 album_metadata, album_item = nil, nil
                 for i = 0, CountTrackMediaItems(selected_track) - 1 do
                     local item = GetTrackMediaItem(selected_track, i)
@@ -575,6 +584,13 @@ function track_has_valid_items(track)
         end
     end
     return false
+end
+
+---------------------------------------------------------------------
+
+function create_metadata_report_and_cue()
+  local metadata_report = NamedCommandLookup("_RS9dfbe237f69ecb0151b67e27e607b93a7bd0c4b4")
+  Main_OnCommand(metadata_report, 0)
 end
 
 ---------------------------------------------------------------------
