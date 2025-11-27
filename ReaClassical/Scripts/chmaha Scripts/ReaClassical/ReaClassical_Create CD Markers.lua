@@ -521,7 +521,7 @@ end
 
 ---------------------------------------------------------------------
 
-function convert_fades_to_env(item)
+function convert_fades_to_env(item, selected_track)
   local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
   local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
   local fade_in_length = GetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO") ~= 0 and
@@ -540,7 +540,7 @@ function convert_fades_to_env(item)
   local fade_in_start = 0
   local fade_out_start = item_length - fade_out_length
 
-  local item_start_crossfaded, item_end_crossfaded = pos_check(item)
+  local item_start_crossfaded, item_end_crossfaded = pos_check(item, selected_track)
 
   if fade_in_length > 0 and not item_start_crossfaded then
     -- create fade in if no overlap
@@ -677,7 +677,7 @@ function room_tone(project_length, selected_track)
 
   for i = 0, num_of_selected_track_items - 1 do
     local item = GetTrackMediaItem(selected_track, i)
-    convert_fades_to_env(item)
+    convert_fades_to_env(item, selected_track)
   end
 
   SetOnlyTrackSelected(rt_track)
