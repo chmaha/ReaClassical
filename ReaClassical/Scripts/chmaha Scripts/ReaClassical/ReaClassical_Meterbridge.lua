@@ -12,7 +12,7 @@ local ctx                       = ImGui.CreateContext("ReaClassical Meterbridge"
 local track_state               = {}
 local window_open               = true
 local max_channels_per_row_numeric = 8   -- For numeric display
-local max_channels_per_row_graphical = 16 -- For graphical display
+local max_channels_per_row_graphical = 8 -- For graphical display (reduced since we show L+R)
 local show_graphical_meters     = false
 
 -- Color threshold settings (in dB)
@@ -24,7 +24,8 @@ local default_yellow_to_red     = -6
 
 -- Meter display settings
 local meter_height              = 200
-local meter_width               = 30
+local meter_width               = 15  -- Width per channel
+local meter_spacing             = 1   -- Space between L and R meters
 
 local function clamp(v, a, b)
   if v < a then return a elseif v > b then return b else return v end
@@ -232,38 +233,31 @@ local function clear_all_holds()
   end
 end
 
-local function draw_graphical_meter(db, peak_hold_db, label)
-  ImGui.BeginGroup(ctx)
-
-  -- Draw the meter bar
-  local draw_list = ImGui.GetWindowDrawList(ctx)
-  local cursor_x, cursor_y = ImGui.GetCursorScreenPos(ctx)
-
+local function draw_single_meter(draw_list, x, y, width, height, db, peak_hold_db)
   -- Background
   local bg_color = ImGui.ColorConvertDouble4ToU32(0.2, 0.2, 0.2, 1.0)
-  ImGui.DrawList_AddRectFilled(draw_list, cursor_x, cursor_y, cursor_x + meter_width, cursor_y + meter_height, bg_color)
+  ImGui.DrawList_AddRectFilled(draw_list, x, y, x + width, y + height, bg_color)
 
   -- Calculate meter fill height (-60 dB to 0 dB range)
   local db_range = 60
   local db_normalized = clamp((db + db_range) / db_range, 0, 1)
-  local fill_height = db_normalized * meter_height
+  local fill_height = db_normalized * height
 
   -- Draw meter fill from bottom up with color zones
-  local bottom_y = cursor_y + meter_height
+  local bottom_y = y + height
 
   -- Calculate color zone heights
   local green_threshold_norm = (threshold_green_to_yellow + db_range) / db_range
   local yellow_threshold_norm = (threshold_yellow_to_red + db_range) / db_range
 
-  local green_height = green_threshold_norm * meter_height
-  local yellow_height = yellow_threshold_norm * meter_height
+  local green_height = green_threshold_norm * height
+  local yellow_height = yellow_threshold_norm * height
 
   -- Draw red zone (top)
   if db_normalized > yellow_threshold_norm then
-    local red_fill = fill_height - yellow_height
     local red_color = ImGui.ColorConvertDouble4ToU32(0.9, 0.2, 0.2, 1.0)
-    ImGui.DrawList_AddRectFilled(draw_list, cursor_x, bottom_y - fill_height,
-      cursor_x + meter_width, bottom_y - yellow_height, red_color)
+    ImGui.DrawList_AddRectFilled(draw_list, x, bottom_y - fill_height,
+      x + width, bottom_y - yellow_height, red_color)
   end
 
   -- Draw yellow zone (middle)
@@ -271,8 +265,8 @@ local function draw_graphical_meter(db, peak_hold_db, label)
     local yellow_fill = math.min(fill_height, yellow_height) - green_height
     if yellow_fill > 0 then
       local yellow_color = ImGui.ColorConvertDouble4ToU32(0.9, 0.8, 0.0, 1.0)
-      ImGui.DrawList_AddRectFilled(draw_list, cursor_x, bottom_y - math.min(fill_height, yellow_height),
-        cursor_x + meter_width, bottom_y - green_height, yellow_color)
+      ImGui.DrawList_AddRectFilled(draw_list, x, bottom_y - math.min(fill_height, yellow_height),
+        x + width, bottom_y - green_height, yellow_color)
     end
   end
 
@@ -280,38 +274,88 @@ local function draw_graphical_meter(db, peak_hold_db, label)
   local green_fill = math.min(fill_height, green_height)
   if green_fill > 0 then
     local green_color = ImGui.ColorConvertDouble4ToU32(0.0, 0.8, 0.0, 1.0)
-    ImGui.DrawList_AddRectFilled(draw_list, cursor_x, bottom_y - green_fill,
-      cursor_x + meter_width, bottom_y, green_color)
+    ImGui.DrawList_AddRectFilled(draw_list, x, bottom_y - green_fill,
+      x + width, bottom_y, green_color)
   end
 
   -- Draw peak hold line
   local peak_normalized = clamp((peak_hold_db + db_range) / db_range, 0, 1)
-  local peak_y = bottom_y - (peak_normalized * meter_height)
+  local peak_y = bottom_y - (peak_normalized * height)
   local peak_color = color_for_db(peak_hold_db)
-  ImGui.DrawList_AddLine(draw_list, cursor_x, peak_y, cursor_x + meter_width, peak_y, peak_color, 2)
+  ImGui.DrawList_AddLine(draw_list, x, peak_y, x + width, peak_y, peak_color, 2)
 
   -- Draw border
   local border_color = ImGui.ColorConvertDouble4ToU32(0.5, 0.5, 0.5, 1.0)
-  ImGui.DrawList_AddRect(draw_list, cursor_x, cursor_y, cursor_x + meter_width, cursor_y + meter_height, border_color)
+  ImGui.DrawList_AddRect(draw_list, x, y, x + width, y + height, border_color)
+end
 
-  -- Advance cursor past the meter
-  ImGui.Dummy(ctx, meter_width, meter_height)
+local function draw_graphical_meter(db_L, db_R, peak_hold_L, peak_hold_R, label)
+  ImGui.BeginGroup(ctx)
 
-  -- Draw peak hold value
-  ImGui.PushFont(ctx, nil, 10)
-  local hold_text = string.format("%.1f", peak_hold_db)
-  local hold_text_width = ImGui.CalcTextSize(ctx, hold_text)
-  local hold_offset = (meter_width - hold_text_width) * 0.5
-  if hold_offset > 0 then
-    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + hold_offset)
+  -- Draw the meter bars
+  local draw_list = ImGui.GetWindowDrawList(ctx)
+  local cursor_x, cursor_y = ImGui.GetCursorScreenPos(ctx)
+
+  -- Draw L channel meter
+  draw_single_meter(draw_list, cursor_x, cursor_y, meter_width, meter_height, db_L, peak_hold_L)
+  
+  -- Draw R channel meter
+  local r_x = cursor_x + meter_width + meter_spacing
+  draw_single_meter(draw_list, r_x, cursor_y, meter_width, meter_height, db_R, peak_hold_R)
+
+  -- Total width for both meters
+  local total_width = meter_width * 2 + meter_spacing
+
+  -- Advance cursor past the meters
+  ImGui.Dummy(ctx, total_width, meter_height)
+
+  -- Draw L and R labels above peak values
+  ImGui.PushFont(ctx, nil, 9)
+  local l_text = "L"
+  local r_text = "R"
+  local l_width = ImGui.CalcTextSize(ctx, l_text)
+  local r_width = ImGui.CalcTextSize(ctx, r_text)
+  
+  -- L label centered over L meter
+  local l_offset = (meter_width - l_width) * 0.5
+  if l_offset > 0 then
+    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + l_offset)
   end
-  local hold_color = color_for_db(peak_hold_db)
-  ImGui.TextColored(ctx, hold_color, hold_text)
+  ImGui.Text(ctx, l_text)
+  
+  -- R label centered over R meter
+  ImGui.SameLine(ctx)
+  local r_offset = meter_spacing + (meter_width - r_width) * 0.5
+  ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + r_offset)
+  ImGui.Text(ctx, r_text)
   ImGui.PopFont(ctx)
 
-  -- Draw label
+  -- Draw peak hold values
+  ImGui.PushFont(ctx, nil, 10)
+  
+  -- L peak value
+  local hold_L_text = string.format("%.1f", peak_hold_L)
+  local hold_L_width = ImGui.CalcTextSize(ctx, hold_L_text)
+  local hold_L_offset = (meter_width - hold_L_width) * 0.5
+  if hold_L_offset > 0 then
+    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + hold_L_offset)
+  end
+  local hold_L_color = color_for_db(peak_hold_L)
+  ImGui.TextColored(ctx, hold_L_color, hold_L_text)
+  
+  -- R peak value
+  ImGui.SameLine(ctx)
+  local hold_R_text = string.format("%.1f", peak_hold_R)
+  local hold_R_width = ImGui.CalcTextSize(ctx, hold_R_text)
+  local hold_R_offset = meter_spacing + (meter_width - hold_R_width) * 0.5
+  ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + hold_R_offset)
+  local hold_R_color = color_for_db(peak_hold_R)
+  ImGui.TextColored(ctx, hold_R_color, hold_R_text)
+  ImGui.PopFont(ctx)
+
+  -- Draw label centered under both meters
   local label_width = ImGui.CalcTextSize(ctx, label)
-  local label_offset = (meter_width - label_width) * 0.5
+  local label_offset = (total_width - label_width) * 0.5
   if label_offset > 0 then
     ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + label_offset)
   end
@@ -327,16 +371,18 @@ local function display_track_row(tracks, max_channels_per_row)
     local st = track_state[guid]
 
     if st then
-      -- Get instant peak values for graphical meters
+      -- Get instant peak values for both channels
       local p0 = Track_GetPeakInfo(tr, 0) or 0
       local p1 = Track_GetPeakInfo(tr, 1) or 0
-      local peak = math.max(p0, p1, 0)
-      local db = lin_to_db(peak)
+      local db_L = lin_to_db(p0)
+      local db_R = lin_to_db(p1)
 
-      -- Get peak hold values from both channels
-      local hold0 = Track_GetPeakHoldDB(tr, 0, false) * 100
-      local hold1 = Track_GetPeakHoldDB(tr, 1, false) * 100
-      local peak_hold_db = math.max(hold0, hold1)
+      -- Get peak hold values from both channels separately
+      local peak_hold_L = Track_GetPeakHoldDB(tr, 0, false) * 100
+      local peak_hold_R = Track_GetPeakHoldDB(tr, 1, false) * 100
+      
+      -- For numeric display, use the max of both channels
+      local peak_hold_db = math.max(peak_hold_L, peak_hold_R)
 
       -- Check if we need to start a new row
       if track_count > 0 and track_count % max_channels_per_row == 0 then
@@ -349,7 +395,7 @@ local function display_track_row(tracks, max_channels_per_row)
       track_count = track_count + 1
 
       if show_graphical_meters then
-        draw_graphical_meter(db, peak_hold_db, st.input_label)
+        draw_graphical_meter(db_L, db_R, peak_hold_L, peak_hold_R, st.input_label)
       else
         -- Numeric display: show ONLY peak hold value
         ImGui.BeginGroup(ctx)
