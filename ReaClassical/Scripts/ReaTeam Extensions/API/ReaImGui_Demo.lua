@@ -2847,7 +2847,7 @@ local function DemoWindowWidgetsTextInput()
 */
 
 label:
-	lock cmpxchg8b eax
+  lock cmpxchg8b eax
 ]],
         flags = ImGui.InputTextFlags_AllowTabInput,
       }

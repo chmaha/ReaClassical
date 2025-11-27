@@ -1,16 +1,17 @@
-Version: 1.1
+Version: 2.0
 desc:Elemental Mastering (chmaha)
 author: chmaha
 about:
   Uses DSP from airwindows "Mastering" by Chris Johnson
-  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Mastering (MIT License)
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Mastering2(MIT License)
   JSFX version released under GPLv3 license
 
-slider1:0<0,100,0.1>Water
-slider2:50<0,100,0.1>Air
-slider3:50<0,100,0.1>Fire
-slider4:50<0,100,0.1>Earth
-slider5:50<0,100,0.1>Aether
+slider1:0<0,100,0.1>Nihilum
+slider2:0<0,100,0.1>Water
+slider3:50<0,100,0.1>Air
+slider4:50<0,100,0.1>Fire
+slider5:50<0,100,0.1>Earth
+slider6:50<0,100,0.1>Aether
 
 in_pin:left input
 in_pin:right input
@@ -32,36 +33,41 @@ B = slider2/100;
 C = slider3/100;
 D = slider4/100;
 E = slider5/100;
+F = slider6/100;
 
 @block
 overallscale = 1.0;
 overallscale /= 44100.0;
 overallscale *= srate;
 
-threshSinew = (0.25+((1.0-A)*0.333))/overallscale;
-depthSinew = 1.0-pow(1.0-A,2.0);
+iirSide = pow(A,3) * (0.1 / overallscale);
 
-trebleZoom = B-0.5;
+threshSinew = (0.25+((1.0-B)*0.333))/overallscale;
+depthSinew = 1.0-pow(1.0-B,2.0);
+
+trebleZoom = C-0.5;
 trebleGain = (trebleZoom*abs(trebleZoom))+1.0;
 (trebleGain > 1.0) ? trebleGain = pow(trebleGain,3.0+sqrt(overallscale));
 
-midZoom = C-0.5;
+midZoom = D-0.5;
 midGain = (midZoom*abs(midZoom))+1.0;
-kalMid = 0.35-(C*0.25); 
-kalSub = 0.45+(C*0.25); 
+kalMid = 0.35-(D*0.25);
+kalSub = 0.45+(D*0.25);
 
-bassZoom = (D*0.5)-0.25;
+bassZoom = (E*0.5)-0.25;
 bassGain = (-bassZoom*abs(bassZoom))+1.0;
-subGain = ((D*0.25)-0.125)+1.0;
+subGain = ((E*0.25)-0.125)+1.0;
 (subGain < 1.0) ?subGain = 1.0;
 
-driveIn = (E-0.5)+1.0;
-driveOut = (-(E-0.5)*abs(E-0.5))+1.0;
+driveIn = (F-0.5)+1.0;
+driveOut = (-(F-0.5)*abs(F-0.5))+1.0;
 
 spacing = floor(overallscale); 
 (spacing < 1) ? spacing = 1; (spacing > 16) ? spacing = 16;
 depth = (17.0*overallscale) | 0;
 (depth < 3) ? depth = 3; (depth > 98) ? depth = 98;
+
+fpFlip = 1;
 
 @sample
 inputSampleL = spl0;
@@ -69,6 +75,24 @@ inputSampleR = spl1;
 
 inputSampleL *= driveIn;
 inputSampleR *= driveIn;
+
+mid = inputSampleL + inputSampleR;
+side = inputSampleL - inputSampleR;
+temp = side;
+
+(fpFlip) ? (
+    iirA = (iirA * (1.0 - iirSide)) + (temp * iirSide); temp = iirA;
+) : (
+    iirB = (iirB * (1.0 - iirSide)) + (temp * iirSide); temp = iirB;
+);
+iirC = (iirC * (1.0 - iirSide)) + (temp * iirSide); temp = iirC;
+
+side -= sin(temp);
+fpFlip = !fpFlip;
+
+inputSampleL = (mid+side)/2.0;
+inputSampleR = (mid-side)/2.0;
+
 drySampleL = inputSampleL;
 drySampleR = inputSampleR;
 
@@ -83,7 +107,7 @@ air[16] *= 0.5; air[16] += abs(drySampleL-air[15])*0.5;
 air[12] = air[9]; air[9] = air[5];
 air[5] = air[1]; air[1] = (air[16] * air[15]) + drySampleL;
 midL = drySampleL - ((air[15]*0.5)+(drySampleL*(0.457-(0.017*overallscale))));
-temp = (midL + air[14])*0.5; air[14] = midL; midL = temp;
+temp = (midL + air[gndavgL])*0.5; air[gndavgL] = midL; midL = temp;
 trebleL = drySampleL-midL;
 
 air[29] = air[28] - air[25]; air[26] = air[25] - air[21];
@@ -298,3 +322,4 @@ inputSampleR = (inputSampleR * (1.0-depthSinew))+(lastSinewR*depthSinew);
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
+
