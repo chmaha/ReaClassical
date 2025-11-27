@@ -170,9 +170,9 @@ function cd_markers(selected_track, num_of_items, track_color)
   local album_metadata = get_info(selected_track)
   if not album_metadata then
     album_metadata = split_and_tag_final_item(selected_track)
-    MB("No album metadata found.\n" ..
-      "Added generic album metadata to end of album:\n" ..
-      "You can open metadata.txt to edit…", "Create CD Markers", 0)
+    -- MB("No album metadata found.\n" ..
+    --   "Added generic album metadata to end of album:\n" ..
+    --   "You can open metadata.txt to edit…", "Create CD Markers", 0)
   end
 
   delete_markers()
