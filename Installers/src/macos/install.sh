@@ -103,7 +103,7 @@ if [ -d "${rcfolder}/InstallData" ]; then
 fi
 
 # Absolute path for configuration
-rcfolder_path=$(realpath "$rcfolder")
+rcfolder_path=$(cd "$rcfolder" && pwd)
 
 # Configure ReaClassical theme and splash
 echo "Adding theme and splash references to reaper.ini..."
