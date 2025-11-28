@@ -44,13 +44,6 @@ function main()
         return
     end
 
-    local _, prepared = GetProjExtState(0, "ReaClassical", "PreparedTakes")
-    if prepared == "" then
-        MB("Please run ReaClassical Prepare Takes (T) once before running a source-destination edit function.",
-            "ReaClassical Core Error", 0)
-        return
-    end
-
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
