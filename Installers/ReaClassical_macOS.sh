@@ -114,9 +114,9 @@ sed -i '' 's/KEY 1 223/KEY 0 96/g; s/KEY 9 223/KEY 8 96/g' "${rcfolder}/reaper-k
 echo "Adding ReaClassical splash screen and theme references to reaper.ini"
 sleep 2
 sed -i '' -e "/^\[REAPER\]/a\\
-lastthemefn5=${abspath}\/$rcfolder\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
+lastthemefn5=${abspath}\/ColorThemes\/ReaClassical.ReaperTheme" "$rcfolder/reaper.ini"
 sed -i '' -e "/^\[REAPER\]/a\\
-splashimage=${abspath}\/$rcfolder\/Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-splash.png" $rcfolder/reaper.ini
+splashimage=${abspath}\/Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-splash.png" $rcfolder/reaper.ini
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
 cp -R "$temp_dir/reaper_temp/REAPER.app" "$rcfolder/"
