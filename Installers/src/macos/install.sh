@@ -70,7 +70,7 @@ hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint "$mount_dir" "
 
 # Extract bundled ReaClassical resources
 res_zip="./Resource_Folder_Base.zip"
-up_file="./reaper_imgui-"$arch".dylib"
+imgui_file="./reaper_imgui-"$arch".dylib"
 sws_file="./reaper_sws-"$arch".dylib"
 
 if [ ! -f "$res_zip" ]; then
