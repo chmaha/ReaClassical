@@ -136,29 +136,39 @@ function update_reaper_ini(ini_file, key, value)
 
     local lines = {}
     local updated = false
-    local section_found = false
+    local in_reaper_section = false
+    local reaper_section_index = nil
 
     for line in file:lines() do
-        if line:match("^%[REAPER%]") then
-            section_found = true
+        -- Detect section headers
+        if line:match("^%[.+%]") then
+            if line:match("^%[REAPER%]") then
+                in_reaper_section = true
+                reaper_section_index = #lines + 1
+            else
+                in_reaper_section = false
+            end
         end
 
-        if section_found and line:match("^" .. key .. "=") then
+        -- Update existing key inside REAPER section
+        if in_reaper_section and line:match("^" .. key .. "=") then
             line = key .. "=" .. value
             updated = true
         end
 
         table.insert(lines, line)
     end
+
     file:close()
 
-    if not updated and section_found then
-        table.insert(lines, key .. "=" .. value)
+    -- Insert new key if it was not found
+    if not updated and reaper_section_index then
+        table.insert(lines, reaper_section_index + 1, key .. "=" .. value)
     end
 
+    -- Write file back
     file = io.open(ini_file, "w")
     if not file then return false end
-
     for _, line in ipairs(lines) do
         file:write(line .. "\n")
     end
@@ -166,6 +176,7 @@ function update_reaper_ini(ini_file, key, value)
 
     return true
 end
+
 
 ---------------------------------------------------------------------
 
