@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 25.11.1
+@version 25.11.2
 @changelog
-  Add improved 3-point insert function
+  Remove prepare takes check from new 3-point edit function
 @metapackage
 @provides
   [main] ReaClassical_Add Destination IN marker.lua
