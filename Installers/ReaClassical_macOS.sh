@@ -107,7 +107,7 @@ unzip -q "$res_output" -d $rcfolder/
 unzip -q "$up_output" -d $rcfolder/UserPlugins/
 echo "Fixing backtick and Ctrl+backtick references in reaper-kb.ini"
 sleep 2
-abspath=`pwd $rcfolder`
+abspath=$(cd "$rcfolder" && pwd)
 
 # Replace windows keybindings for horizontal and vertical zooming
 sed -i '' 's/KEY 1 223/KEY 0 96/g; s/KEY 9 223/KEY 8 96/g' "${rcfolder}/reaper-kb.ini"
