@@ -52,23 +52,27 @@ function main()
     local splash_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
     local splash_abs_path = resource_path .. splash_relative_path
 
-    -- re-apply absolute splash reference on MacOS
-    if string.find(system, "^OSX") or string.find(system, "^macOS") then
-        update_reaper_ini(dest_main_ini_path, "splashimage", splash_abs_path)
-    end
-
+    local theme_relative_path = get_path("", "ColorThemes", "ReaClassical.ReaperTheme")
+    local theme_abs_path = resource_path .. theme_relative_path
+    
     local response = MB(
         "This function will reset keymap, menu and render presets to ReaClassical defaults." ..
-        "\nAffected files will be backed up with a .backup extension." ..
-        "\n\nAre you sure you want to continue?",
-        "ReaClassical Reset", 4)
-
-    if response == 6 then
-        copy_file(src_renderpresets_path, dest_renderpresets_path)
-        copy_file(src_menu_path, dest_menu_path)
-        copy_file(src_shortcuts_path, dest_shortcuts_path)
-        copy_file(src_main_ini_path, dest_main_ini_path)
-    end
+            "\nAffected files will be backed up with a .backup extension." ..
+            "\n\nAre you sure you want to continue?",
+            "ReaClassical Reset", 4)
+            
+            if response == 6 then
+                copy_file(src_renderpresets_path, dest_renderpresets_path)
+                copy_file(src_menu_path, dest_menu_path)
+                copy_file(src_shortcuts_path, dest_shortcuts_path)
+                copy_file(src_main_ini_path, dest_main_ini_path)
+            end
+            
+            -- re-apply absolute splash reference on MacOS
+            if string.find(system, "^OSX") or string.find(system, "^macOS") then
+                update_reaper_ini(dest_main_ini_path, "splashimage", splash_abs_path)
+                update_reaper_ini(dest_main_ini_path, "lastthemefn5", theme_abs_path)
+            end
 
     if response == 6 then
         ExecUpdate()
