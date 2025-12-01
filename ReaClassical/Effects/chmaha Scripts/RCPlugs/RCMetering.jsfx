@@ -3,7 +3,7 @@ desc:ReaClassical Metering Suite (chmaha)
 author: chmaha
 about:
   Released under GPLv3 license
-  
+
 options:no_meter
 
 @init
@@ -65,7 +65,7 @@ function sinc_gen_val() global(srate sinc_sz) local(sincpos windowpos) instance(
 
 function sinc_gen_slice(cs, o*) instance(sinc_gen_val slice_pos) local(x) global(sinc_sz) (
   slice_pos = cs;
-<? 
+<?
   use_mem_sinc ? (
     printf("o.v = alloc(sinc_sz);  loop(x=0;sinc_sz, o.v[x] = sinc_gen_val(); x+=1); ");
   ) : (
@@ -101,10 +101,10 @@ function init(chidx)
   this.f1p1=this.f1p2=this.f2p1=this.f2p2=0;
   this.pkval=this.hipkval=this.clips=0;
   this.ch_lufs_sum=this.ch_rms_sum=0;
-  <? 
+  <?
     use_mem_sinc ? (
-      printf("this.h = alloc(sinc_sz);\n"); 
-    ) : ( 
+      printf("this.h = alloc(sinc_sz);\n");
+    ) : (
       loop(x=0;sinc_sz, printf("this.h%02d =%s",x,x==sinc_sz-1 ? " 0" : (x&7)==7 ? "\n" : " "); x+=1);
     );
   ?>
@@ -146,7 +146,7 @@ function proc(lspl)
         <? emit_sinc("this","sinc.s1") ?>
        );
     srate < 96000 ? pspl = max(pspl,max( <? emit_sinc("this","sinc.s2") ?>,  <? emit_sinc("this","sinc.s3") ?>));
-  ) : 
+  ) :
   cfg_peak == 3 || cfg_peak == 4 ? (
     pspl=abs(lspl);
   );
@@ -164,14 +164,14 @@ function proc(lspl)
   win_pos == 0 ? ch_rms_sum=ch_lufs_sum=0;
 
   rval += (ch_rms_sum += lspl*lspl);
-  
+
   lspl *= wt;
 
   f1p0=lspl-f1a1*f1p1-f1a2*f1p2;
   lspl=f1b0*f1p0+f1b1*f1p1+f1b2*f1p2;
   f1p2=f1p1;
   f1p1=f1p0;
-  
+
   f2p0=lspl-f2a1*f2p1-f2a2*f2p2;
   lspl=f2b0*f2p0+f2b1*f2p1+f2b2*f2p2;
   f2p2=f2p1;
@@ -274,7 +274,7 @@ init_lufs_filters();
   corr_LL_sum = 0;
   corr_RR_sum = 0;
   corr_count = 0;
-  
+
 bitbuf_len = 64;
 
 bbuf = alloc(bitbuf_len);
@@ -332,10 +332,10 @@ rval=lval=0;
 
   prev_rval=rms_buf[cur_buf];
   rms_buf[cur_buf]=rval;
-  
+
   prev_lval=lufs_buf[cur_buf];
   lufs_buf[cur_buf]=lval;
-  
+
   prev_lval2=lufs_buf2[cur_buf2];
   lufs_buf2[cur_buf2]=lval;
 
@@ -345,7 +345,7 @@ rval=lval=0;
   rms_m_sum += (rval-prev_rval)*i_win_len;
   lufs_m_sum += (lval-prev_lval)*i_win_len;
   lufs_s_sum += (lval-prev_lval2)*i_win_len2;
-  
+
   WANT_INTEGRATED_ALWAYS || (play_state&1) ? (
     rms_i_sum += rms_m_sum;
     rms_i_sum_cnt += 1;
@@ -355,14 +355,14 @@ rval=lval=0;
       rms_i_db=-100;
     );
   );
-  
+
   rms_m_sum > 0 && win_cnt >= m_win_cnt ? (
     rms_m_db=log(rms_m_sum)*10/log(10);
     rms_m_db > rms_m_db_max ? rms_m_db_max=rms_m_db;
   ) : (
     rms_m_db=-100;
   );
-  
+
   lufs_m_sum > 0 && win_cnt >= m_win_cnt ? (
     lufs_m_sum > lufs_m_sum_max ? lufs_m_sum_max=lufs_m_sum;
     lufs_m_db=-0.691+log(lufs_m_sum)*10/log(10);
@@ -502,7 +502,7 @@ gfx_rectto(gfx_w, gfx_h);
 gfx_a = 1;
 
 // Clear text areas
-gfx_r = 0.05; gfx_g = 0.05; gfx_b = 0.05;
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_rect(0, 0, gfx_w, 260);
 gfx_rect(340, 295, 260, 30);
 gfx_rect(0, 455, gfx_w, gfx_h);
@@ -664,13 +664,14 @@ gfx_drawstr(" +S");
 gfx_x = gonio_x + gonio_size_display - 20; gfx_y = gonio_y + gonio_half - 5;
 gfx_drawstr("-S");
 
-gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gonio_x + gonio_half - 40; gfx_y = gonio_y + gonio_size_display + 10;
-gfx_drawstr("Goniometer");
-
 gonio_pos = 0;
 
 );
+
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gonio_x + gonio_half - 40; gfx_y = gonio_y + gonio_size_display + 10;
+gfx_drawstr("Goniometer");
 
 // Phase Meter
 phase_meter_x = 328;
@@ -766,3 +767,4 @@ gfx_drawstr("Bitmeter", 1);
 has_click = (mouse_cap&1 && !last_cap) ? 1 : 0;
 has_click ? Reset();
 last_cap = mouse_cap;
+
