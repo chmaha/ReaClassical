@@ -498,13 +498,15 @@ nch = cfg_mono ? 1 : max(num_ch,2);
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_a = 0.025;
 gfx_x = 0; gfx_y = 0;
-gfx_rectto(350, gfx_h);
+gfx_rectto(gfx_w, gfx_h);
 gfx_a = 1;
 
 // Clear text areas
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_rect(0, 0, gfx_w, 260);
-gfx_rect(340, 295, 260, 30);
+gfx_rect(335, 295, 225, 30);
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_rect(320, 385, 260, 20);
 gfx_rect(0, 455, gfx_w, gfx_h);
 
 // Title
