@@ -498,7 +498,7 @@ nch = cfg_mono ? 1 : max(num_ch,2);
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_a = 0.025;
 gfx_x = 0; gfx_y = 0;
-gfx_rectto(gfx_w, gfx_h);
+gfx_rectto(350, gfx_h);
 gfx_a = 1;
 
 // Clear text areas
@@ -624,6 +624,10 @@ loop(samples_to_draw,
   idx = i;
   L = gonio_buffer_L[idx];
   R = gonio_buffer_R[idx];
+
+  // --- Normalize L and R to keep the plot inside bounding box ---
+  peak = max(abs(L), abs(R));
+  peak > 1.5 ? (L /= peak; R /= peak;);
 
   s0 = sign(L);
   s1 = sign(R);
@@ -767,4 +771,3 @@ gfx_drawstr("Bitmeter", 1);
 has_click = (mouse_cap&1 && !last_cap) ? 1 : 0;
 has_click ? Reset();
 last_cap = mouse_cap;
-
