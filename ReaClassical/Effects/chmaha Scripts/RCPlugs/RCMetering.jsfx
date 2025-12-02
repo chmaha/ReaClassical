@@ -26,6 +26,8 @@ ext_nodenorm    = 1;
 ext_noinit = 1;
 last_gfx_ext_retina = -1;
 
+#VERSION = "RCPlugs";
+
 spectrum.mem_index = 0;
 
 /*
@@ -137,14 +139,14 @@ function draw_info_panel(note_select)
     xpos = gfx_w/2 + 10;
     xpos2 = xpos + 55;
     gfx_ext_retina != 2 ? xpos2 -= 15;
-    ypos = 0 + (gfx_texth*2);  // Bottom of upper half, minus panel height and margin
+    ypos = 20;  // Bottom of upper half, minus panel height and margin
     
     gfx_x = xpos;
     gfx_y = ypos;
     gfx_r = 0; gfx_g = 0; gfx_b = 0; gfx_a = 1.0;
     
     draw_filled_rect(gfx_x-5, gfx_y-5, width, gfx_texth*4, 8, 1);
-    gfx_r = (114 / 255) * 0.5; gfx_g = (215 / 255) * 0.5; gfx_b = (253 / 255) * 0.5; gfx_a = 1.0;
+    gfx_r = (0 / 255) * 0.5; gfx_g = (153 / 255) * 0.5; gfx_b = (255 / 255) * 0.5; gfx_a = 1.0;
     draw_filled_rect(gfx_x-10, gfx_y-10, width, gfx_texth*4, 8, 1);
     gfx_r = 114 / 255; gfx_g = 215 / 255; gfx_b = 253 / 255; gfx_a = 1.0;
     gfx_ext_retina != 2 ? gfx_y -= 8;
@@ -260,14 +262,14 @@ function draw_peak_button() instance (x, y, width, menutext, label, pressed, hei
   height = h + 8;
 
   mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
-    gfx_r = (114 / 255) * 0.6;
-    gfx_g = (215 / 255) * 0.6;
-    gfx_b = (253 / 255) * 0.6;
+    gfx_r = (0 / 255) * 0.6;
+    gfx_g = (153 / 255) * 0.6;
+    gfx_b = (255 / 255) * 0.6;
   ) : (
     Show_Peaks ? a = 0.6 : a = 0.4;
-    gfx_r = (114 / 255) * a;
-    gfx_g = (215 / 255) * a;
-    gfx_b = (253 / 255) * a;
+    gfx_r = (0 / 255) * a;
+    gfx_g = (153 / 255) * a;
+    gfx_b = (255 / 255) * a;
   );
 
   gfx_rect(x, y, width, h+9);
@@ -336,13 +338,13 @@ function draw_menu_button() instance (x, y, width, menutext, label, pressed, hei
   height = h + 8;
 
   mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
-    gfx_r = (114 / 255) * 0.6;
-    gfx_g = (215 / 255) * 0.6;
-    gfx_b = (253 / 255) * 0.6;
+    gfx_r = (0 / 255) * 0.6;
+    gfx_g = (153 / 255) * 0.6;
+    gfx_b = (255 / 255) * 0.6;
   ) : (
-    gfx_r = (114 / 255) * 0.4;
-    gfx_g = (215 / 255) * 0.4;
-    gfx_b = (253 / 255) * 0.4;
+    gfx_r = (0 / 255) * 0.4;
+    gfx_g = (153 / 255) * 0.4;
+    gfx_b = (255 / 255) * 0.4;
   );
 
   gfx_rect(x, y, width, h+9);
@@ -1306,7 +1308,9 @@ very_compact_width | very_compact_height ? (
   spectrum.bottom_margin = -18 * gfx_ext_retina;
 ) : ( 
   spectrum.bottom_margin = gfx_h/2;
-  spectrum.left_margin = gfx_w/1.88;
+  spectrum.left_margin = gfx_w/2+40;
+  spectrum.top_margin = 20;
+  spectrum.right_margin= 20;
 );
 
 
