@@ -26,23 +26,21 @@ options:no_meter
 //==================================================================================
 
 gfx_ext_retina == 0 ? gfx_ext_retina = 1;
-fftsize=32768;
-recpos=0;
 gfx_clear=-1;
 windowtype=-1;
 over24=1/24;
-histsize=fftsize*4;
 
 lrecpos=0;
-need_button_refs=1;
 
-lfft=fftsize;
 fftsize=2^10;
+lfft=fftsize;
+histsize=fftsize*4;
 minvol=10^(-180/20*2); // squared
 islogmode = 0;
 g_logscale=1;
 pixels_per_frame = 1;
 need_button_refs=1;
+rec_write_pos = 0;
 
 //==================================================================================
 // Spectrum analyzer init
@@ -722,10 +720,11 @@ function init_lufs_filters()
 );
 
 spectrum.init();
-alloc.top = spectrum.mem_index;
+spectrum_mem_end = spectrum.mem_index;
+alloc.top = spectrum_mem_end;
 recpos = alloc(histsize);
-fftworkspace = alloc(histsize);
-window = alloc(fftworkspace + fftsize*2);
+fftworkspace = alloc(fftsize*2);
+window = alloc(fftsize);
 
 function Reset() (
   init_lufs_filters();
@@ -846,11 +845,6 @@ loop
 
 @sample
 
-recpos[]=(spl0+spl1);
-recpos+=1;
-reccnt+=1;
-recpos >= spectrum_mem_end + histsize ? recpos=spectrum_mem_end;
-
 // Mid/Side encode
 mid = (spl0 + spl1) * 0.5;
 side = (spl0 - spl1) * 0.5;
@@ -864,12 +858,12 @@ Spectrum_Mode == 4 ? spectrum.sample0(spl0) :
 Spectrum_Mode == 5 ? spectrum.sample0(spl1) :
 Spectrum_Mode == 6 ? (spectrum.sample0(spl0); spectrum.sample1(spl1));
 
-// Filter if we're in listen mode
-do_listen ? (
-  mono = 0.5 * (spl0 + spl1);
-  filter.svf_bp2(listen_freq, listen_q);
-  spl0 = spl1 = filter.svf_svf0(mono); 
-);
+// // Filter if we're in listen mode
+// do_listen ? (
+//   mono = 0.5 * (spl0 + spl1);
+//   filter.svf_bp2(listen_freq, listen_q);
+//   spl0 = spl1 = filter.svf_svf0(mono); 
+// );
 
 rval=lval=0;
 
@@ -1028,6 +1022,11 @@ loop
   );
   c += 1;
 );
+
+recpos[rec_write_pos]=(spl0+spl1);
+rec_write_pos+=1;
+reccnt+=1;
+rec_write_pos >= histsize ? rec_write_pos=0;
 
 //==================================================================================
 // gfx section start
@@ -1328,108 +1327,108 @@ gfx_drawstr("Bitmeter", 1);
 
 // ==================================================================================
 
-// gfx_ext_retina != last_gfx_ext_retina ? (
-//   last_gfx_ext_retina = gfx_ext_retina;
+gfx_ext_retina != last_gfx_ext_retina ? (
+  last_gfx_ext_retina = gfx_ext_retina;
    
-//   gfx_ext_retina > 1 ? (
-//     gfx_setfont(1,"Arial",20,'b');
-//     gfx_setfont(2,"Arial",18,'b');
-//   ) : (
-//     gfx_setfont(1,"Arial",12,'b');
-//     gfx_setfont(2,"Arial",10,'b');
-//   );
-//   gfx_setfont(1);
-// );
+  gfx_ext_retina > 1 ? (
+    gfx_setfont(1,"Arial",20,'b');
+    gfx_setfont(2,"Arial",18,'b');
+  ) : (
+    gfx_setfont(1,"Arial",12,'b');
+    gfx_setfont(2,"Arial",10,'b');
+  );
+  gfx_setfont(1);
+);
 
-// actual_width = gfx_w / gfx_ext_retina;
-// actual_height = gfx_h / gfx_ext_retina;
+actual_width = gfx_w / gfx_ext_retina;
+actual_height = gfx_h / gfx_ext_retina;
 
-// // Calculage compact view flags
-// // These are used to disable certain elements for graceful visual shrinking
-// compact_width = actual_width < 600;
-// compact_height = actual_height < 320;
+// Calculage compact view flags
+// These are used to disable certain elements for graceful visual shrinking
+compact_width = actual_width < 600;
+compact_height = actual_height < 320;
 
-// gfx_ext_retina != 2 ? (
-//   very_compact_width = (actual_width < 450);
-//   very_compact_height = (actual_height < 240);
-// ) : (
-//   very_compact_width = (actual_width < 300);
-//   very_compact_height = (actual_height < 160);
-// );
+gfx_ext_retina != 2 ? (
+  very_compact_width = (actual_width < 450);
+  very_compact_height = (actual_height < 240);
+) : (
+  very_compact_width = (actual_width < 300);
+  very_compact_height = (actual_height < 160);
+);
 
-// very_compact_width | very_compact_height ? (
-//   spectrum.bottom_margin = -18 * gfx_ext_retina;
-// ) : ( 
-//   spectrum.bottom_margin = gfx_h/2;
-//   spectrum.left_margin = gfx_w/2+40;
-//   spectrum.top_margin = 20;
-//   spectrum.right_margin= 20;
-// );
+very_compact_width | very_compact_height ? (
+  spectrum.bottom_margin = -18 * gfx_ext_retina;
+) : ( 
+  spectrum.bottom_margin = gfx_h/2;
+  spectrum.left_margin = gfx_w/2+40;
+  spectrum.top_margin = 20;
+  spectrum.right_margin= 20;
+);
 
-// Display_Mode < 2 ? (
-//   spectrum.draw(0);
-//   Spectrum_Mode == 3 || Spectrum_Mode == 6 ? spectrum.draw(1);
-// );
+Display_Mode < 2 ? (
+  spectrum.draw(0);
+  Spectrum_Mode == 3 || Spectrum_Mode == 6 ? spectrum.draw(1);
+);
 
-// ht = (gfx_h/2 - spectrum.bottom_margin - gfx_texth) + 2;
+ht = (gfx_h/2 - spectrum.bottom_margin - gfx_texth) + 2;
 
-// dst_a = 0.55 / ht;
-// gfx_gradrect(0, ht/2, gfx_w, ht/2, 0,0,0,0,    0, 0, 0, 0, 0, 0, 0, dst_a*2); 
+dst_a = 0.55 / ht;
+gfx_gradrect(0, ht/2, gfx_w, ht/2, 0,0,0,0,    0, 0, 0, 0, 0, 0, 0, dst_a*2); 
 
-// !((very_compact_width) | (very_compact_height)) ? (
-//   spectrum.draw_grid(0);
-// );
+!((very_compact_width) | (very_compact_height)) ? (
+  spectrum.draw_grid(0);
+);
 
-// chr = gfx_getchar();
+chr = gfx_getchar();
 
-// mouse_cap & 8 ? (
-//   do_listen = 1;
-//   draw_listen_helper();
+mouse_cap & 8 ? (
+  do_listen = 1;
+  draw_listen_helper();
 
-//   mw = mouse_wheel;
-//   md = -(mw - last_wheel) / 120;
-//   last_wheel = mw;
+  mw = mouse_wheel;
+  md = -(mw - last_wheel) / 120;
+  last_wheel = mw;
 
-//   listen_width += md / 200;
-//   listen_width = min(0.30, listen_width);
-//   listen_width = max(0.01, listen_width);
+  listen_width += md / 200;
+  listen_width = min(0.30, listen_width);
+  listen_width = max(0.01, listen_width);
 
-// ) : do_listen = 0;
+) : do_listen = 0;
 
-// draw_info_panel(note_select);
+draw_info_panel(note_select);
 
-// note_select == 0 ? (
-//   draw_mouse_crosshair();
-// ); 
+note_select == 0 ? (
+  draw_mouse_crosshair();
+); 
 
-// !((very_compact_width) | (very_compact_height)) ? (
+!((very_compact_width) | (very_compact_height)) ? (
   
-//   gfx_ext_retina == 2 ? (peaks.x = gfx_w - 150; peaks.width = 100;) : (peaks.x = gfx_w - 100; peaks.width = 60;);
-//   gfx_ext_retina == 2 ? (mode_button.x = gfx_w - 400; mode_button.width = 120;) : (mode_button.x = gfx_w - 280; mode_button.width = 80;);
-//   gfx_ext_retina == 2 ? (channel_button.x = gfx_w - 280; channel_button.width = 120;) : (channel_button.x = gfx_w - 200; channel_button.width = 80;);
-//   mode_button.draw_mode_button();
-//   mode_button.handle_mode_button();
-//   // Only draw channel button if not in Full mode
-//   strcmp(mode_button.label, prev_mode_label) != 0 ? (
-//     strcmp(mode_button.label, "Mid/Side") == 0 ? (
-//       channel_button.label = "Mid+Side";
-//       Spectrum_Mode = 3;
-//    );
-//     strcmp(mode_button.label, "Left/Right") == 0 ? (
-//       channel_button.label = "Left+Right";
-//       Spectrum_Mode = 6;
-//     );
-//     // Update previous mode
-//     prev_mode_label = mode_button.label;
-//   );
-//   // Draw + handle channel button only if not Full mode
-//   strcmp(mode_button.label, "Full") != 0 ? (
-//       channel_button.draw_channel_button();
-//       channel_button.handle_channel_button(mode_button.label);
-//   );
-//   peaks.draw_peak_button();
-//   peaks.handle_peak_button();
-// );
+  gfx_ext_retina == 2 ? (peaks.x = gfx_w - 150; peaks.width = 100;) : (peaks.x = gfx_w - 100; peaks.width = 60;);
+  gfx_ext_retina == 2 ? (mode_button.x = gfx_w - 400; mode_button.width = 120;) : (mode_button.x = gfx_w - 280; mode_button.width = 80;);
+  gfx_ext_retina == 2 ? (channel_button.x = gfx_w - 280; channel_button.width = 120;) : (channel_button.x = gfx_w - 200; channel_button.width = 80;);
+  mode_button.draw_mode_button();
+  mode_button.handle_mode_button();
+  // Only draw channel button if not in Full mode
+  strcmp(mode_button.label, prev_mode_label) != 0 ? (
+    strcmp(mode_button.label, "Mid/Side") == 0 ? (
+      channel_button.label = "Mid+Side";
+      Spectrum_Mode = 3;
+   );
+    strcmp(mode_button.label, "Left/Right") == 0 ? (
+      channel_button.label = "Left+Right";
+      Spectrum_Mode = 6;
+    );
+    // Update previous mode
+    prev_mode_label = mode_button.label;
+  );
+  // Draw + handle channel button only if not Full mode
+  strcmp(mode_button.label, "Full") != 0 ? (
+      channel_button.draw_channel_button();
+      channel_button.handle_channel_button(mode_button.label);
+  );
+  peaks.draw_peak_button();
+  peaks.handle_peak_button();
+);
 
 //==================================================================================
 // Spectrogram gfx
@@ -1475,7 +1474,7 @@ reccnt>0 ? (
     amt = min(reccnt,histsize*2);
     reccnt=0;
     drecpos = amt/pixels_per_frame;
-    lrecpos = recpos - amt;
+    lrecpos = rec_write_pos - amt;
     draw_pos=0;
 
     loop(pixels_per_frame,
@@ -1507,7 +1506,7 @@ reccnt>0 ? (
         buf2=window;
         buf3=fftworkspace;
         loop(fftsize*.5+1,
-            buf3[] = buf1[]*buf2[];
+            buf3[] = recpos[buf1]*buf2[];
             buf3[1]=0;
             buf3+=2;
 
@@ -1516,7 +1515,7 @@ reccnt>0 ? (
         );
         buf2-=1;
         loop(fftsize*.5-1,
-            buf3[] = buf1[]*(buf2-=1)[];
+            buf3[] = recpos[buf1]*(buf2-=1)[];
             buf3[1]=0;
             buf3+=2;
 
@@ -1633,7 +1632,7 @@ mouse_y >= gfx_h/2 && mouse_y < gfx_h ? (
     bla+=1;
   );
   (
-    
+
   // Top and bottom of the spectrogram in pixels
   top_pixel    = gfx_h/2 - 20;
   bottom_pixel = use_h;
