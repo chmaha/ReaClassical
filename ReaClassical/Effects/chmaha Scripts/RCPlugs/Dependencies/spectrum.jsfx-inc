@@ -747,7 +747,7 @@ function spectrum.draw_grid(skip_dblines) local(db, y, f, lx, tx, dotext, frq, w
     y > gfx_y ? (
       !skip_dblines ? (
         gfx_r=gfx_g=gfx_b=1; gfx_a=0.3;
-        gfx_line(gfx_w/2,y,gfx_w,y,0);
+        gfx_line(gfx_w/2,y,gfx_w-15,y,0);
       );
       gfx_x=gfx_w/2-25;
       gfx_r=gfx_g=gfx_b=0.4; gfx_a=1.0;
@@ -770,7 +770,7 @@ function spectrum.draw_grid(skip_dblines) local(db, y, f, lx, tx, dotext, frq, w
 
     dotext = tx > gfx_x && (f==20 || f==50 || f==100 || f == 200 || f == 500 || f == 1000 || f == 2000 || f == 5000 || f == 10000);
     gfx_a = dotext ? 0.8 : 0.6;
-    tx > lx ? ( lx=tx+4; gfx_line(tx,0,tx,gfx_h - (dotext ? 12 : gfx_texth+2) - spectrum.bottom_margin,0); );
+    tx > lx ? ( lx=tx+4; gfx_line(tx,10,tx,gfx_h - (dotext ? 12 : gfx_texth+2) - spectrum.bottom_margin,0); );
     dotext ? (
       gfx_r=gfx_g=gfx_b=0.4; gfx_a=1.0;
 

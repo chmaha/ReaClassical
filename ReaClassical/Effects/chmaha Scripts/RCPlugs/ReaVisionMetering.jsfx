@@ -1,8 +1,16 @@
-NoIndex: true
-desc:ReaClassical Metering Suite (chmaha)
+Version: 0.99
+desc:ReaVision Metering Suite (chmaha)
 author: chmaha
 about:
   Released under GPLv3 license
+  Includes DSP (LGPL) from:
+  Cockos Loudness Meter Copyright (C) 2021 and later Cockos Incorporated
+  Cockos Bit Meter Copyright (C) 2020 and later Cockos Incorporated
+  Spectrograph Meter Copyright (C) 2007 Cockos Incorporated
+  https://www.gnu.org/licenses/lgpl-3.0.html
+  Includes DSP (MIT License) from:
+  ReJJ ReSpectrum Copyright (c) 2021 Justin Johnson
+  https://github.com/Justin-Johnson/ReJJ/tree/master/ReSpectrum
 
 slider1:Spectrum_Mode=0<0,5,1{Full,Mid,Side,Mid / Side,Left,Right,Left / Right}>-Spectrum
 slider2:Display_Mode=0<0,2,1{Fill,Line,None}>-Display
@@ -21,11 +29,14 @@ options:no_meter
 
 @init
 
+gfx_ext_retina  = 1;
+ext_nodenorm = 1;
+ext_noinit = 1;
+
 //==================================================================================
 // Spectrogram init
 //==================================================================================
 
-gfx_ext_retina == 0 ? gfx_ext_retina = 1;
 gfx_clear=-1;
 windowtype=-1;
 over24=1/24;
@@ -45,11 +56,6 @@ rec_write_pos = 0;
 //==================================================================================
 // Spectrum analyzer init
 //==================================================================================
-
-gfx_ext_retina  = 1;
-ext_nodenorm    = 1;
-ext_noinit = 1;
-last_gfx_ext_retina = -1;
 
 prev_mode_label = "";
 spectrum.mem_index = 0;
@@ -415,7 +421,7 @@ function handle_channel_button(mode_label) instance (x, y, width, label, pressed
           Spectrum_Mode = 6;
         );
       );
-      
+    spectrum.reset_buffers()
     ) : pressed = 0;
   ) : ( 
     !(mouse_cap & 1) ? pressed = 0;
@@ -808,6 +814,12 @@ update_state();
 
 @block
 
+// Detect transport restart
+!(last_play_state & 1) && (play_state & 1) ? (
+  need_clear_spectro = 1;
+);
+last_play_state = play_state;
+
 ifftsize=1/fftsize;
 
 (num_ch > 0 && num_ch != last_nch) || srate != last_sr ? Reset();
@@ -1060,19 +1072,19 @@ gfx_rect(335, 295, 225, 30);
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_rect(320, 385, 260, 20);
 gfx_rect(gfx_w/2-50, 0, gfx_w, gfx_h/2);
-gfx_rect(0, 455, gfx_w/2, gfx_h);
+gfx_rect(0, 455, gfx_w/2-50, gfx_h);
 
 //Title
 gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
-gfx_x = 10; gfx_y = 10;
+gfx_x = 20; gfx_y = 10;
 gfx_setfont(1, "Arial", 18);
-gfx_drawstr("REACLASSICAL METERING SUITE");
+gfx_drawstr("ReaVision Metering Suite");
 
 gfx_setfont(1, "Arial", 14);
 
 //LUFS Display
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 10; gfx_y = 50;
+gfx_x = 20; gfx_y = 50;
 gfx_drawstr("LUFS Integrated:");
 gfx_x = 180; gfx_y = 50;
 sprintf(#str, "%.1f LUFS", lufs_i_db);
@@ -1083,7 +1095,7 @@ gfx_drawstr("---")
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 10; gfx_y = 80;
+gfx_x = 20; gfx_y = 80;
 gfx_drawstr("LUFS Short-term:");
 gfx_x = 180; gfx_y = 80;
 sprintf(#str, "%.1f LUFS", lufs_s_db);
@@ -1098,7 +1110,7 @@ sprintf(#str, "(max: %.1f)", -0.691+log(lufs_s_sum_max)*10/log(10));
 gfx_drawstr(#str);
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 10; gfx_y = 110;
+gfx_x = 20; gfx_y = 110;
 gfx_drawstr("LUFS Momentary:");
 gfx_x = 180; gfx_y = 110;
 sprintf(#str, "%.1f LUFS", lufs_m_db);
@@ -1114,7 +1126,7 @@ gfx_drawstr(#str);
 
 // LRA Display
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 10; gfx_y = 140;
+gfx_x = 20; gfx_y = 140;
 gfx_drawstr("LRA (Loudness Range):");
 gfx_x = 180; gfx_y = 140;
 lra_db_diff > 0 ? (
@@ -1125,7 +1137,7 @@ lra_db_diff > 0 ? (
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 10; gfx_y = 170;
+gfx_x = 20; gfx_y = 170;
 gfx_drawstr("True Peak L:");
 gfx_x = 180; gfx_y = 170;
 sprintf(#str, "%.2f dBTP", tp_l_db);
@@ -1137,7 +1149,7 @@ gfx_drawstr("---")
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 10; gfx_y = 200;
+gfx_x = 20; gfx_y = 200;
 gfx_drawstr("True Peak R:");
 gfx_x = 180; gfx_y = 200;
 sprintf(#str, "%.2f dBTP", tp_r_db);
@@ -1326,9 +1338,6 @@ gfx_drawstr("Bitmeter", 1);
 
 
 // ==================================================================================
-
-gfx_ext_retina != last_gfx_ext_retina ? (
-  last_gfx_ext_retina = gfx_ext_retina;
    
   gfx_ext_retina > 1 ? (
     gfx_setfont(1,"Arial",20,'b');
@@ -1338,7 +1347,6 @@ gfx_ext_retina != last_gfx_ext_retina ? (
     gfx_setfont(2,"Arial",10,'b');
   );
   gfx_setfont(1);
-);
 
 actual_width = gfx_w / gfx_ext_retina;
 actual_height = gfx_h / gfx_ext_retina;
@@ -1433,6 +1441,18 @@ note_select == 0 ? (
 //==================================================================================
 // Spectrogram gfx
 //==================================================================================
+
+need_clear_spectro ? (
+  need_clear_spectro = 0;
+  cur_xpos = 0;
+  
+  // Clear the spectrogram area (bottom-right quadrant)
+  gfx_r = gfx_g = gfx_b = 0;
+  gfx_a = 1;
+  gfx_x = gfx_w/2;
+  gfx_y = gfx_h/2;
+  gfx_rectto(gfx_w, gfx_h);
+);
 
 gfx_ext_retina>1 ? gfx_setfont(1,"Arial",16*gfx_ext_retina,'b') : gfx_setfont(0);
 
