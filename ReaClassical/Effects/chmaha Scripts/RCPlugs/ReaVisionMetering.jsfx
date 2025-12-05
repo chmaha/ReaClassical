@@ -29,7 +29,7 @@ options:no_meter
 
 @init
 
-gfx_ext_retina  = 1;
+gfx_ext_retina=max(gfx_ext_retina,1);
 ext_nodenorm = 1;
 ext_noinit = 1;
 
@@ -1045,10 +1045,11 @@ rec_write_pos >= histsize ? rec_write_pos=0;
 //==================================================================================
 
 @gfx 1280 625
-gfx_w != 1280 || gfx_h != 625 ? (
-  gfx_w = 1280;
-  gfx_h = 625;
-);
+
+gfx_min_w = 987;
+gfx_min_h = 538;
+gfx_w < gfx_min_w ? gfx_w = gfx_min_w;
+gfx_h < gfx_min_h ? gfx_h = gfx_min_h;
 
 <? do_all_channels("ch%d.copypks(); ");?>;
 
@@ -1058,29 +1059,78 @@ last_t=t;
 
 nch = cfg_mono ? 1 : max(num_ch,2);
 
-// Fade for goniometer trail
-gfx_r = 0; gfx_g = 0; gfx_b = 0;
-gfx_a = 0.025;
-gfx_x = 0; gfx_y = 250;
-gfx_rectto(gfx_w/4, 500);
-gfx_a = 1;
+function draw_text(x, y, text)
+(
+  // Save current color for text
+  r_txt = gfx_r;
+  g_txt = gfx_g;
+  b_txt = gfx_b;
+
+  // Save starting coordinates
+  tx = x;
+  ty = y;
+
+  // Measure text
+  gfx_measurestr(text, tw, th);
+
+  // Rectangle dimensions
+  rx = tx - 4;
+  ry = ty - 4;
+  rw = tw + 4;
+  rh = th + 4;
+
+  // Draw black background
+  gfx_r = 0; gfx_g = 0; gfx_b = 0;
+  gfx_rect(rx, ry, rw, rh, 1);  // filled
+
+  // Restore text color
+  gfx_r = r_txt; gfx_g = g_txt; gfx_b = b_txt;
+
+  // Draw text
+  gfx_x = tx;
+  gfx_y = ty;
+  gfx_drawstr(text);
+);
+
+// Font sizing like Cockos loudness meter
+FONT_SZ_MIN = 12;
+FONT_SZ_MAX = 22;
+FONT_SZ_MIN_NORMAL = 10;
+FONT_SZ_MAX_NORMAL = 18;
+
+// Calculate font sizes based on window width (tuned for 18/14 at 1280 width)
+fsz_title = FONT_SZ_MIN + min(gfx_w/213, FONT_SZ_MAX - FONT_SZ_MIN);  // 12 + 6 at 1280 = 18
+fsz_normal = FONT_SZ_MIN_NORMAL + min(gfx_w/320, FONT_SZ_MAX_NORMAL - FONT_SZ_MIN_NORMAL);  // 10 + 4 at 1280 = 14
+
+// Scale for retina
+gfx_ext_retina > 1 ? (
+  fsz_title *= 1.5;
+  fsz_normal *= 1.5;
+);
+
+// Set fonts
+gfx_setfont(1, "Arial", fsz_title);
+font_normal = fsz_normal;
+
+// Goniometer - scale with window size (percentage based)
+gonio_x = gfx_w * 0.039;  // ~50 at 1280 width
+gonio_y = gfx_h * 0.432;  // ~270 at 625 height
+gonio_size_display = min(gfx_w * 0.141, gfx_h * 0.288);  // ~180 at default size, scales proportionally
+gonio_half = gonio_size_display / 2;
+gonio_scale = gonio_half * 0.95;
 
 //Clear text areas
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
-gfx_rect(0, 0, gfx_w/2, 260);
-gfx_rect(335, 295, 225, 30); 
-gfx_r = 0; gfx_g = 0; gfx_b = 0;
-gfx_rect(320, 385, 260, 20);
-gfx_rect(gfx_w/2-50, 0, gfx_w, gfx_h/2);
-gfx_rect(0, 455, gfx_w/2-50, gfx_h);
+gfx_rect(0, 0, gfx_w/2, gfx_h * 0.4);  // EBU section
+gfx_rect(gfx_w/2 - gfx_w * 0.039, 0, gfx_w, gfx_h/2);  // Spectrum Analyzer
+
 
 //Title
 gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
 gfx_x = 20; gfx_y = 10;
-gfx_setfont(1, "Arial", 18);
 gfx_drawstr("ReaVision Metering Suite");
 
-gfx_setfont(1, "Arial", 14);
+gfx_setfont(1, "Arial", font_normal);
 
 //LUFS Display
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
@@ -1160,12 +1210,14 @@ gfx_drawstr(#str);
 gfx_drawstr("---")
 );
 
-// Goniometer
-gonio_x = 50;
-gonio_y = 270;
-gonio_size_display = 180;
-gonio_half = gonio_size_display / 2;
-gonio_scale = gonio_half * 0.95;
+// Fade for goniometer trail
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_a = 0.025;
+gfx_circle(gonio_x + gonio_half, gonio_y + gonio_half, gonio_half+35, 1,0);
+gfx_a = 1;
+
+// Line width for retina
+line_width = gfx_ext_retina > 1 ? 2 : 1;
 
 gonio_pos > 0 ? (
 
@@ -1194,7 +1246,7 @@ loop(samples_to_draw,
 
   // --- Normalize L and R to keep the plot inside bounding box ---
   peak = max(abs(L), abs(R));
-  peak > 1.5 ? (L /= peak; R /= peak;);
+  peak > 1 ? (L /= peak; R /= peak;);
 
   s0 = sign(L);
   s1 = sign(R);
@@ -1241,14 +1293,15 @@ gonio_pos = 0;
 
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gonio_x + gonio_half - 40; gfx_y = gonio_y + gonio_size_display + 10;
-gfx_drawstr("Goniometer");
+// gfx_x = gonio_x + gonio_half - 40; gfx_y = gonio_y + gonio_size_display + 10;
+draw_text(gonio_x + gonio_half - 40, gonio_y + gonio_size_display + 10,"Goniometer");
+// gfx_drawstr("Goniometer");
 
-// Phase Meter
-phase_meter_x = 328;
-phase_meter_y = 350;
-phase_meter_w = 250;
-phase_meter_h = 30;
+// Phase Meter - scale with window size
+phase_meter_x = gfx_w * 0.256;  // ~328 at 1280 width
+phase_meter_y = gfx_h * 0.560;  // ~350 at 625 height
+phase_meter_w = gfx_w * 0.195;  // ~250 at 1280 width
+phase_meter_h = gfx_h * 0.048;  // ~30 at 625 height
 
 gfx_r = 0.1; gfx_g = 0.1; gfx_b = 0.1;
 gfx_rect(phase_meter_x, phase_meter_y, phase_meter_w, phase_meter_h);
@@ -1257,35 +1310,30 @@ gfx_r = 0.5; gfx_g = 0.5; gfx_b = 0.5;
 gfx_line(phase_meter_x + phase_meter_w/2, phase_meter_y, phase_meter_x + phase_meter_w/2, phase_meter_y + phase_meter_h);
 
 phase_pos = phase_meter_x + phase_meter_w/2 + (phase_correlation * phase_meter_w/2);
+indicator_width = 4 * gfx_ext_retina;  // Scale indicator width for retina
 phase_correlation < 0 ? (
   gfx_r = 1; gfx_g = 0.6; gfx_b = 0;
 ) : (
   gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
 );
-gfx_rect(phase_pos - 2, phase_meter_y, 4, phase_meter_h);
+gfx_rect(phase_pos - indicator_width/2, phase_meter_y, indicator_width, phase_meter_h);
 
 gfx_r = 0.8; gfx_g = 0.8; gfx_b = 0.8;
-gfx_x = phase_meter_x; gfx_y = phase_meter_y + phase_meter_h + 5;
-gfx_drawstr("-1");
-gfx_x = phase_meter_x + phase_meter_w - 15; gfx_y = phase_meter_y + phase_meter_h + 5;
-gfx_drawstr("+1");
-gfx_x = phase_meter_x + phase_meter_w/2 - 5; gfx_y = phase_meter_y + phase_meter_h + 5;
-gfx_drawstr("0");
+draw_text(phase_meter_x,phase_meter_y + phase_meter_h + 5,"-1");
+draw_text(phase_meter_x + phase_meter_w - 15, phase_meter_y + phase_meter_h + 5,"+1");
+draw_text(phase_meter_x + phase_meter_w/2 - 5, phase_meter_y + phase_meter_h + 5,"0");
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = phase_meter_x + 30; gfx_y = phase_meter_y - 50;
-gfx_drawstr("Phase Correlation:");
-gfx_x = phase_meter_x + 175; gfx_y = phase_meter_y - 50;
-sprintf(#str, "%.3f", phase_correlation);
+draw_text(phase_meter_x + 30, phase_meter_y - 50, "Phase Correlation:");
+sprintf(#str, "%.3f   ", phase_correlation);
 phase_correlation < 0 ? (gfx_r = 1; gfx_g = 0.5; gfx_b = 0;);
-gfx_drawstr(#str);
+draw_text(phase_meter_x + 160, phase_meter_y - 50, #str);
 
 
 mtstart     = gfx_texth * 3;
 mtrange     = gfx_w/2.5;
-// Place the bitmeter a bit higher
-mtvalstart  = gfx_h - 75;        // meter Y-position
-mtvalrange  = 600;                // how tall the meter is
+mtvalstart  = gfx_h - 75;
+mtvalrange  = 600;
 
 i = 0;
 loop(65,
@@ -1297,16 +1345,14 @@ loop(65,
 
   tick ?
   (
-    // measure the number width
     sprintf(#txt, "%d", i);
     gfx_measurestr(#txt, tw, th);
 
-    // center it on the tick
-    gfx_x = x - tw*0.5;
-    gfx_y = y + gfx_texth;
+    // gfx_x = x - tw*0.5;
+    // gfx_y = y + gfx_texth;
 
     gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
-    gfx_drawstr(#txt);
+    draw_text(x - tw*0.5,y + gfx_texth, #txt);
   );
 
   i > 0 ?
@@ -1330,12 +1376,8 @@ loop(65,
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_setfont(1, "Arial", 14);
-gfx_x = mtstart + mtrange * 0.44;  // center horizontally
-gfx_y = gfx_h-35;               // safely inside window
-gfx_drawstr("Bitmeter", 1);
-
-
+gfx_setfont(1, "Arial", font_normal);
+draw_text(mtstart + mtrange * 0.44,gfx_h-35, "Bitmeter");
 
 // ==================================================================================
    
@@ -1348,24 +1390,24 @@ gfx_drawstr("Bitmeter", 1);
   );
   gfx_setfont(1);
 
-actual_width = gfx_w / gfx_ext_retina;
-actual_height = gfx_h / gfx_ext_retina;
+// actual_width = gfx_w / gfx_ext_retina;
+// actual_height = gfx_h / gfx_ext_retina;
 
-// Calculage compact view flags
-// These are used to disable certain elements for graceful visual shrinking
-compact_width = actual_width < 600;
-compact_height = actual_height < 320;
+// // Calculage compact view flags
+// // These are used to disable certain elements for graceful visual shrinking
+// compact_width = actual_width < 600;
+// compact_height = actual_height < 320;
 
-gfx_ext_retina != 2 ? (
-  very_compact_width = (actual_width < 450);
-  very_compact_height = (actual_height < 240);
-) : (
-  very_compact_width = (actual_width < 300);
-  very_compact_height = (actual_height < 160);
-);
+// gfx_ext_retina != 2 ? (
+//   very_compact_width = (actual_width < 450);
+//   very_compact_height = (actual_height < 240);
+// ) : (
+//   very_compact_width = (actual_width < 300);
+//   very_compact_height = (actual_height < 160);
+// );
 
 very_compact_width | very_compact_height ? (
-  spectrum.bottom_margin = -18 * gfx_ext_retina;
+  spectrum.bottom_margin = -18;
 ) : ( 
   spectrum.bottom_margin = gfx_h/2;
   spectrum.left_margin = gfx_w/2+40;
