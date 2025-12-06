@@ -1134,9 +1134,9 @@ gfx_setfont(1, "Arial", font_normal);
 
 //LUFS Display
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = 50;
+gfx_x = 20; gfx_y = gfx_h*0.08;
 gfx_drawstr("LUFS Integrated:");
-gfx_x = 180; gfx_y = 50;
+gfx_x = 180;
 sprintf(#str, "%.1f LUFS", lufs_i_db);
 lufs_i_db > -100 ? (
 gfx_drawstr(#str);
@@ -1145,40 +1145,40 @@ gfx_drawstr("---")
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = 80;
+gfx_x = 20; gfx_y = gfx_h*0.128;
 gfx_drawstr("LUFS Short-term:");
-gfx_x = 180; gfx_y = 80;
+gfx_x = 180;
 sprintf(#str, "%.1f LUFS", lufs_s_db);
 lufs_s_db > -100 ? (
 gfx_drawstr(#str);
 ) : (
 gfx_drawstr("---")
 );
-gfx_x = 300; gfx_y = 80;
+gfx_x = 300;
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 sprintf(#str, "(max: %.1f)", -0.691+log(lufs_s_sum_max)*10/log(10));
 gfx_drawstr(#str);
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = 110;
+gfx_x = 20; gfx_y = gfx_h*0.176;
 gfx_drawstr("LUFS Momentary:");
-gfx_x = 180; gfx_y = 110;
+gfx_x = 180;
 sprintf(#str, "%.1f LUFS", lufs_m_db);
 lufs_m_db > -100 ? (
 gfx_drawstr(#str);
 ) : (
 gfx_drawstr("---")
 );
-gfx_x = 300; gfx_y = 110;
+gfx_x = 300;
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 sprintf(#str, "(max: %.1f)", -0.691+log(lufs_m_sum_max)*10/log(10));
 gfx_drawstr(#str);
 
 // LRA Display
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = 140;
-gfx_drawstr("LRA (Loudness Range):");
-gfx_x = 180; gfx_y = 140;
+gfx_x = 20; gfx_y = gfx_h*0.224;
+gfx_drawstr("Loudness Range:");
+gfx_x = 180;
 lra_db_diff > 0 ? (
   sprintf(#str, "%.1f LU", lra_db_diff+0.01);
   gfx_drawstr(#str);
@@ -1187,9 +1187,9 @@ lra_db_diff > 0 ? (
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = 170;
+gfx_x = 20; gfx_y =  gfx_h*0.272;
 gfx_drawstr("True Peak L:");
-gfx_x = 180; gfx_y = 170;
+gfx_x = 180;
 sprintf(#str, "%.2f dBTP", tp_l_db);
 tp_l_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
 tp_l_db > -150 ? (
@@ -1199,9 +1199,9 @@ gfx_drawstr("---")
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = 200;
+gfx_x = 20; gfx_y = gfx_h*0.32;
 gfx_drawstr("True Peak R:");
-gfx_x = 180; gfx_y = 200;
+gfx_x = 180;
 sprintf(#str, "%.2f dBTP", tp_r_db);
 tp_r_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
 tp_r_db > -150 ? (
@@ -1299,7 +1299,7 @@ draw_text(gonio_x + gonio_half - 40, gonio_y + gonio_size_display + 10,"Goniomet
 
 // Phase Meter - scale with window size
 phase_meter_x = gfx_w * 0.256;  // ~328 at 1280 width
-phase_meter_y = gfx_h * 0.560;  // ~350 at 625 height
+phase_meter_y = gonio_y + gonio_half - phase_meter_h/2;;  // ~350 at 625 height
 phase_meter_w = gfx_w * 0.195;  // ~250 at 1280 width
 phase_meter_h = gfx_h * 0.048;  // ~30 at 625 height
 
@@ -1381,39 +1381,14 @@ draw_text(mtstart + mtrange * 0.44,gfx_h-35, "Bitmeter");
 
 // ==================================================================================
    
-  gfx_ext_retina > 1 ? (
-    gfx_setfont(1,"Arial",20,'b');
-    gfx_setfont(2,"Arial",18,'b');
-  ) : (
     gfx_setfont(1,"Arial",12,'b');
-    gfx_setfont(2,"Arial",10,'b');
-  );
-  gfx_setfont(1);
 
-// actual_width = gfx_w / gfx_ext_retina;
-// actual_height = gfx_h / gfx_ext_retina;
 
-// // Calculage compact view flags
-// // These are used to disable certain elements for graceful visual shrinking
-// compact_width = actual_width < 600;
-// compact_height = actual_height < 320;
-
-// gfx_ext_retina != 2 ? (
-//   very_compact_width = (actual_width < 450);
-//   very_compact_height = (actual_height < 240);
-// ) : (
-//   very_compact_width = (actual_width < 300);
-//   very_compact_height = (actual_height < 160);
-// );
-
-very_compact_width | very_compact_height ? (
-  spectrum.bottom_margin = -18;
-) : ( 
   spectrum.bottom_margin = gfx_h/2;
   spectrum.left_margin = gfx_w/2+40;
   spectrum.top_margin = 20;
   spectrum.right_margin= 20;
-);
+
 
 Display_Mode < 2 ? (
   spectrum.draw(0);
