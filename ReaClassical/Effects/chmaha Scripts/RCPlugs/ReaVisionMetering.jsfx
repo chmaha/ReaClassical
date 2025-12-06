@@ -1139,8 +1139,6 @@ gonio_x = gfx_w * 0.039;  // ~50 at 1280 width
 gonio_y = gfx_h * 0.432;  // ~270 at 625 height
 gonio_size_display = min(gfx_w * 0.141, gfx_h * 0.288);  // ~180 at default size, scales proportionally
 gonio_half = gonio_size_display / 2;
-// Scale factor must account for retina to prevent overflow
-// gonio_scale = gonio_half * 0.95 / max(1, gfx_ext_retina);
 
 //Clear text areas
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
@@ -1436,24 +1434,24 @@ zone_x = k20_x;
 zone_w = k20_w * 0.55;  
 
 
-green_top = dbfs_to_k20_y(-20, k20_y, k20_h);
-green_bottom = k20_y + k20_h;
-gfx_r = 0; gfx_g = 0.6; gfx_b = 0;
-gfx_a = 0.3;
-gfx_rect(zone_x, green_top, zone_w, green_bottom - green_top, 1);
+purple_top = dbfs_to_k20_y(-20, k20_y, k20_h);
+blue_bottom = k20_y + k20_h;
+gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+gfx_a = 0.5;
+gfx_rect(zone_x, purple_top, zone_w, blue_bottom - purple_top, 1);
 
 
 yellow_top = dbfs_to_k20_y(-16, k20_y, k20_h);
-yellow_bottom = green_top;
-gfx_r = 0.8; gfx_g = 0.8; gfx_b = 0;
-gfx_a = 0.3;
-gfx_rect(zone_x, yellow_top, zone_w, yellow_bottom - yellow_top, 1);
+green_bottom = purple_top;
+gfx_r = 0; gfx_g = 1; gfx_b = 1;
+gfx_a = 0.5;
+gfx_rect(zone_x, yellow_top, zone_w, green_bottom - yellow_top, 1);
 
 
 red_top = k20_y;
 red_bottom = yellow_top;
-gfx_r = 0.8; gfx_g = 0; gfx_b = 0;
-gfx_a = 0.3;
+gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+gfx_a = 0.5;
 gfx_rect(zone_x, red_top, zone_w, red_bottom - red_top, 1);
 
 
@@ -1469,7 +1467,7 @@ loop(9,
   gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + 3, mark_y); 
   
   k20_marks == 0 ? (
-    gfx_r = 1; gfx_g = 1; gfx_b = 0;
+    gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
     sprintf(#k20_str, "0");
   ) : k20_marks > 0 ? (
     sprintf(#k20_str, "+%d", k20_marks);
@@ -1506,8 +1504,7 @@ loop(8,
 
 gfx_setfont(1, "Arial", font_normal);
 
-bar_w = zone_w * 0.4;
-bar_spacing = zone_w * 0.1;
+bar_w = zone_w * 0.5;
 
 // Left channel RMS bar
 k20_l_rms_db > -100 ? (
@@ -1516,27 +1513,27 @@ k20_l_rms_db > -100 ? (
   
   // Color based on K-20 zones
   k20_l_rms_db >= -16 ? (
-    gfx_r = 1; gfx_g = 0; gfx_b = 0;  // Red (above +4 dB K-20)
+    gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
   ) : k20_l_rms_db >= -20 ? (
-    gfx_r = 1; gfx_g = 1; gfx_b = 0;  // Yellow (0 to +4 dB K-20)
+    gfx_r = 0; gfx_g = 1; gfx_b = 1;
   ) : (
-    gfx_r = 0; gfx_g = 1; gfx_b = 0;  // Green (below 0 dB K-20)
+    gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
   );
   gfx_a = 0.8;
-  gfx_rect(zone_x + bar_spacing, bar_top, bar_w, bar_height, 1);
+  gfx_rect(zone_x, bar_top, bar_w, bar_height, 1);
   
   // Peak indicator (colored to match zone)
   k20_l_peak_db > -100 ? (
     peak_y = dbfs_to_k20_y(k20_l_peak_db, k20_y, k20_h);
     k20_l_peak_db >= -16 ? (
-      gfx_r = 1; gfx_g = 0; gfx_b = 0;  // Red
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
     ) : k20_l_peak_db >= -20 ? (
-      gfx_r = 1; gfx_g = 1; gfx_b = 0;  // Yellow
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
     ) : (
-      gfx_r = 0; gfx_g = 1; gfx_b = 0;  // Green
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
     );
     gfx_a = 0.9;
-    gfx_rect(zone_x + bar_spacing, peak_y - 1, bar_w, 2, 1);
+    gfx_rect(zone_x, peak_y - 1, bar_w, 2, 1);
   );
 );
 
@@ -1547,27 +1544,27 @@ num_ch > 1 && k20_r_rms_db > -100 ? (
   
   // Color based on K-20 zones
   k20_r_rms_db >= -16 ? (
-    gfx_r = 1; gfx_g = 0; gfx_b = 0;  // Red (above +4 dB K-20)
+    gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
   ) : k20_r_rms_db >= -20 ? (
-    gfx_r = 1; gfx_g = 1; gfx_b = 0;  // Yellow (0 to +4 dB K-20)
+    gfx_r = 0; gfx_g = 1; gfx_b = 1;
   ) : (
-    gfx_r = 0; gfx_g = 1; gfx_b = 0;  // Green (below 0 dB K-20)
+    gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
   );
   gfx_a = 0.8;
-  gfx_rect(zone_x + bar_spacing * 2 + bar_w, bar_top, bar_w, bar_height, 1);
+  gfx_rect(zone_x + bar_w, bar_top, bar_w, bar_height, 1);
   
   // Peak indicator (colored to match zone)
   k20_r_peak_db > -100 ? (
     peak_y = dbfs_to_k20_y(k20_r_peak_db, k20_y, k20_h);
     k20_r_peak_db >= -16 ? (
-      gfx_r = 1; gfx_g = 0; gfx_b = 0;  // Red
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
     ) : k20_r_peak_db >= -20 ? (
-      gfx_r = 1; gfx_g = 1; gfx_b = 0;  // Yellow
+      gfx_r = 0.043; gfx_g = 0; gfx_b = 0.5;
     ) : (
-      gfx_r = 0; gfx_g = 1; gfx_b = 0;  // Green
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
     );
     gfx_a = 0.9;
-    gfx_rect(zone_x + bar_spacing * 2 + bar_w, peak_y - 1, bar_w, 2, 1);
+    gfx_rect(zone_x + bar_w, peak_y - 1, bar_w, 2, 1);
   );
 );
 
