@@ -1,4 +1,4 @@
-Version: 0.99
+Version: 1.01
 desc:ReaVision Metering Suite (chmaha)
 author: chmaha
 about:
@@ -22,7 +22,7 @@ slider7:Block_Value=2<0,3,1{2048,4096,8192,16384}>-Block Size
 slider8:Show_Piano=0<0,1,1{Off,On}>-Show Piano
 slider9:Show_Peaks=0<0,1,1{Off,On}>-Show Peaks
 
-import Dependencies/spectrum.jsfx-inc
+import Dependencies/chmaha_spectrum.jsfx-inc
 import Dependencies/svf_filter.jsfx-inc
 
 options:no_meter
@@ -52,6 +52,27 @@ g_logscale=1;
 pixels_per_frame = 1;
 need_button_refs=1;
 rec_write_pos = 0;
+
+function calc_color(mv, col*) globals(over24)
+(
+  col.r = col.g = col.b = 0; // start with black
+
+  // Very quiet -> almost black, deep blue
+  mv <= -96 ? (
+    mv > -168 ? (
+      mv <= -144 ? ( col.b = (mv+168)*over24*0.1; col.r = (mv+168)*over24*0.02 ) :  // very dark blue/black
+      mv <= -120 ? ( col.b = 0.1 + (mv+144)*over24*0.12; col.r = 0.02 + (mv+144)*over24*0.04 ) : // slightly brighter
+                   ( col.r = (mv+120)*over24*0.08; col.b = 0.2 + (mv+120)*over24*0.12 )
+    )
+  ) : (
+    // Medium -> more vibrant purple-blue shades
+    mv <= -72 ? ( col.r = (mv+96)*over24*0.3; col.b = 0.5 + (mv+96)*over24*0.25 ) :
+    mv <= -48 ? ( col.r = 0.3 + (mv+72)*over24*0.25; col.b = 0.7 + (mv+72)*over24*0.15 ) :
+    mv <= -24 ? ( col.r = 0.55 + (mv+48)*over24*0.2; col.b = 0.85 - (mv+48)*over24*0.1 ) :
+    mv <= 0  ? ( col.r = 0.7 + (mv+24)*over24*0.15; col.b = 0.75 + (mv+24)*over24*0.1 ) :
+      col.r = 0.85; col.b = 0.85;  // loudest -> vibrant purple-blue
+  );
+);
 
 //==================================================================================
 // Spectrum analyzer init
@@ -227,52 +248,6 @@ function draw_info_panel(note_select)
     gfx_y += gfx_texth+2;
     gfx_drawstr(sprintf(#,"%.1f DB", read_amp));
   );
-);
-
-/*
- * Draw the listener boundaries and set the Q for the bandpass filter
- */
-function draw_listen_helper()
-  local (mouse_spec, lread_freq, rread_freq, lfreq, rfreq, lx, rx, c0, lnsemi, lnoct, rnsemi, rnoct, oct)
-(
-  gfx_r = 114 / 255; gfx_g = 215 / 255; gfx_b = 253 / 255;
-
-  listen_freq = spectrum.x_to_freq(mouse_x);
-
-  mouse_spec = (mouse_x - spectrum.left_margin) / (gfx_w - spectrum.left_margin - spectrum.right_margin);
-
-  lread_freq = spectrum.min_freq * exp(spectrum.freq_log_max * (mouse_spec - listen_width));
-  rread_freq = spectrum.min_freq * exp(spectrum.freq_log_max * (mouse_spec + listen_width));
-
-  lfreq = lread_freq;
-  rfreq = rread_freq;
-
-  lx = spectrum.freq_to_x(lfreq);
-  rx = spectrum.freq_to_x(rfreq);
-
-  c0 = 440.0 * 2.0 ^ (-57.0 / 12.0);    //C0 is 57 semitones below A4 (440 Hz)
-
-  lnsemi = 12.0 * log(lfreq / c0) / log(2.0);
-  lnoct = lnsemi / 12;           //Scientific pitch notation octave number
-
-  rnsemi = 12.0 * log(rfreq / c0) / log(2.0);
-  rnoct = rnsemi / 12;           //Scientific pitch notation octave number
-
-  oct = rnoct - lnoct;
-
-  listen_q = filter.svf_bwtoq(oct);
-
-  gfx_a = 1.0;
-  gfx_line(lx, 0, lx, gfx_h - gfx_texth+2);
-  gfx_line(rx, 0, rx, gfx_h - gfx_texth+2);
-
-  gfx_a = 0.8;
-  gfx_line(lx-2, 0, lx-2, gfx_h - gfx_texth+2);
-  gfx_line(rx+2, 0, rx+2, gfx_h - gfx_texth+2);
-
-  gfx_a = 0.5;
-  gfx_line(lx-4, 0, lx-4, gfx_h - gfx_texth+2);
-  gfx_line(rx+4, 0, rx+4, gfx_h - gfx_texth+2);
 );
 
 /*
@@ -497,14 +472,6 @@ function handle_peak_button() instance (x, y, width, label, pressed, height, lab
   );
 );
 
-
-/*
- * Set global state vars
- */
-
-do_listen = 0;
-listen_width = 0.10;
-
 filter.svf_set_sample_rate(srate);
 
 gfx_ext_retina == 2 ? (
@@ -522,6 +489,39 @@ spectrum.set_show_peaks(Show_Peaks);
 //==================================================================================
 // Loudness, Gonio, Correl inits
 //==================================================================================
+
+function draw_text(x, y, text)
+(
+  // Save current color for text
+  r_txt = gfx_r;
+  g_txt = gfx_g;
+  b_txt = gfx_b;
+
+  // Save starting coordinates
+  tx = x;
+  ty = y;
+
+  // Measure text
+  gfx_measurestr(text, tw, th);
+
+  // Rectangle dimensions
+  rx = tx - 4;
+  ry = ty - 4;
+  rw = tw + 4;
+  rh = th + 4;
+
+  // Draw black background
+  gfx_r = 0; gfx_g = 0; gfx_b = 0;
+  gfx_rect(rx, ry, rw, rh, 1);  // filled
+
+  // Restore text color
+  gfx_r = r_txt; gfx_g = g_txt; gfx_b = b_txt;
+
+  // Draw text
+  gfx_x = tx;
+  gfx_y = ty;
+  gfx_drawstr(text);
+);
 
 <?
   nch = max(max_nch,64); // maximum channel count
@@ -1059,39 +1059,6 @@ last_t=t;
 
 nch = cfg_mono ? 1 : max(num_ch,2);
 
-function draw_text(x, y, text)
-(
-  // Save current color for text
-  r_txt = gfx_r;
-  g_txt = gfx_g;
-  b_txt = gfx_b;
-
-  // Save starting coordinates
-  tx = x;
-  ty = y;
-
-  // Measure text
-  gfx_measurestr(text, tw, th);
-
-  // Rectangle dimensions
-  rx = tx - 4;
-  ry = ty - 4;
-  rw = tw + 4;
-  rh = th + 4;
-
-  // Draw black background
-  gfx_r = 0; gfx_g = 0; gfx_b = 0;
-  gfx_rect(rx, ry, rw, rh, 1);  // filled
-
-  // Restore text color
-  gfx_r = r_txt; gfx_g = g_txt; gfx_b = b_txt;
-
-  // Draw text
-  gfx_x = tx;
-  gfx_y = ty;
-  gfx_drawstr(text);
-);
-
 // Font sizing like Cockos loudness meter
 FONT_SZ_MIN = 12;
 FONT_SZ_MAX = 22;
@@ -1117,7 +1084,8 @@ gonio_x = gfx_w * 0.039;  // ~50 at 1280 width
 gonio_y = gfx_h * 0.432;  // ~270 at 625 height
 gonio_size_display = min(gfx_w * 0.141, gfx_h * 0.288);  // ~180 at default size, scales proportionally
 gonio_half = gonio_size_display / 2;
-gonio_scale = gonio_half * 0.95;
+// Scale factor must account for retina to prevent overflow
+// gonio_scale = gonio_half * 0.95 / max(1, gfx_ext_retina);
 
 //Clear text areas
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
@@ -1127,16 +1095,16 @@ gfx_rect(gfx_w/2 - gfx_w * 0.039, 0, gfx_w, gfx_h/2);  // Spectrum Analyzer
 
 //Title
 gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
-gfx_x = 20; gfx_y = 10;
+gfx_x = gfx_w*0.0202; gfx_y = 10;
 gfx_drawstr("ReaVision Metering Suite");
 
 gfx_setfont(1, "Arial", font_normal);
 
 //LUFS Display
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = gfx_h*0.08;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.08;
 gfx_drawstr("LUFS Integrated:");
-gfx_x = 180;
+gfx_x = gfx_w*0.1367;
 sprintf(#str, "%.1f LUFS", lufs_i_db);
 lufs_i_db > -100 ? (
 gfx_drawstr(#str);
@@ -1145,40 +1113,40 @@ gfx_drawstr("---")
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = gfx_h*0.128;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.128;
 gfx_drawstr("LUFS Short-term:");
-gfx_x = 180;
+gfx_x = gfx_w*0.1367;
 sprintf(#str, "%.1f LUFS", lufs_s_db);
 lufs_s_db > -100 ? (
 gfx_drawstr(#str);
 ) : (
 gfx_drawstr("---")
 );
-gfx_x = 300;
+gfx_x = gfx_w*0.225;
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 sprintf(#str, "(max: %.1f)", -0.691+log(lufs_s_sum_max)*10/log(10));
 gfx_drawstr(#str);
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = gfx_h*0.176;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.176;
 gfx_drawstr("LUFS Momentary:");
-gfx_x = 180;
+gfx_x = gfx_w*0.1367;
 sprintf(#str, "%.1f LUFS", lufs_m_db);
 lufs_m_db > -100 ? (
 gfx_drawstr(#str);
 ) : (
 gfx_drawstr("---")
 );
-gfx_x = 300;
+gfx_x = gfx_w*0.225;
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 sprintf(#str, "(max: %.1f)", -0.691+log(lufs_m_sum_max)*10/log(10));
 gfx_drawstr(#str);
 
 // LRA Display
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = gfx_h*0.224;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.224;
 gfx_drawstr("Loudness Range:");
-gfx_x = 180;
+gfx_x = gfx_w*0.1367;
 lra_db_diff > 0 ? (
   sprintf(#str, "%.1f LU", lra_db_diff+0.01);
   gfx_drawstr(#str);
@@ -1187,9 +1155,9 @@ lra_db_diff > 0 ? (
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y =  gfx_h*0.272;
+gfx_x = gfx_w*0.0202; gfx_y =  gfx_h*0.272;
 gfx_drawstr("True Peak L:");
-gfx_x = 180;
+gfx_x = gfx_w*0.1367;
 sprintf(#str, "%.2f dBTP", tp_l_db);
 tp_l_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
 tp_l_db > -150 ? (
@@ -1199,9 +1167,9 @@ gfx_drawstr("---")
 );
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = 20; gfx_y = gfx_h*0.32;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.32;
 gfx_drawstr("True Peak R:");
-gfx_x = 180;
+gfx_x = gfx_w*0.1367;
 sprintf(#str, "%.2f dBTP", tp_r_db);
 tp_r_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
 tp_r_db > -150 ? (
@@ -1261,8 +1229,8 @@ loop(samples_to_draw,
   vert = cos(angle) * radius;
   horiz = sin(angle) * radius;
 
-  plot_x = gonio_x + gonio_half + vert * gonio_scale;
-  plot_y = gonio_y + gonio_half - horiz * gonio_scale;
+  plot_x = gonio_x + gonio_half + vert * gonio_half * 0.95;
+  plot_y = gonio_y + gonio_half - horiz * gonio_half * 0.95;
 
   i > 0 ? (
     gfx_line(last_x, last_y, plot_x, plot_y);
@@ -1280,22 +1248,23 @@ gfx_x = gonio_x + gonio_half*0.3; gfx_y = gonio_y + gonio_half*0.4;
 gfx_drawstr("L");
 gfx_x = gonio_x + gonio_half*1.6; gfx_y = gonio_y + gonio_half*0.4;
 gfx_drawstr("R");
-gfx_x = gonio_x + gonio_half - 5; gfx_y = gonio_y;
+// Center "M" label at top
+gfx_measurestr("M", tw, th);
+gfx_x = gonio_x + gonio_half - tw/2; gfx_y = gonio_y + gfx_h * 0.008;
 gfx_drawstr("M");
-gfx_x = gonio_x; gfx_y = gonio_y + gonio_half - 5;
+gfx_x = gonio_x; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
 gfx_drawstr(" +S");
-gfx_x = gonio_x + gonio_size_display - 20; gfx_y = gonio_y + gonio_half - 5;
+gfx_x = gonio_x + gonio_size_display - gfx_w * 0.016; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
 gfx_drawstr("-S");
 
 gonio_pos = 0;
 
 );
 
-
+// Center "Goniometer" label
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-// gfx_x = gonio_x + gonio_half - 40; gfx_y = gonio_y + gonio_size_display + 10;
-draw_text(gonio_x + gonio_half - 40, gonio_y + gonio_size_display + 10,"Goniometer");
-// gfx_drawstr("Goniometer");
+gfx_measurestr("Goniometer", tw, th);
+draw_text(gonio_x + gonio_half - tw/2, gonio_y + gonio_size_display + gfx_h * 0.016,"Goniometer");
 
 // Phase Meter - scale with window size
 phase_meter_x = gfx_w * 0.256;  // ~328 at 1280 width
@@ -1319,70 +1288,66 @@ phase_correlation < 0 ? (
 gfx_rect(phase_pos - indicator_width/2, phase_meter_y, indicator_width, phase_meter_h);
 
 gfx_r = 0.8; gfx_g = 0.8; gfx_b = 0.8;
-draw_text(phase_meter_x,phase_meter_y + phase_meter_h + 5,"-1");
-draw_text(phase_meter_x + phase_meter_w - 15, phase_meter_y + phase_meter_h + 5,"+1");
-draw_text(phase_meter_x + phase_meter_w/2 - 5, phase_meter_y + phase_meter_h + 5,"0");
+draw_text(phase_meter_x,phase_meter_y + phase_meter_h + gfx_h * 0.008,"-1");
+gfx_measurestr("+1", tw, th);
+draw_text(phase_meter_x + phase_meter_w - tw, phase_meter_y + phase_meter_h + gfx_h * 0.008,"+1");
+gfx_measurestr("0", tw, th);
+draw_text(phase_meter_x + phase_meter_w/2 - tw/2, phase_meter_y + phase_meter_h + gfx_h * 0.008,"0");
+
+// Center-align phase correlation label and value above meter
+sprintf(#str, "%.3f", phase_correlation);
+gfx_measurestr("Phase Correlation: ", label_w, th);
+gfx_measurestr(#str, value_w, th);
+total_w = label_w + value_w;
+start_x = phase_meter_x + phase_meter_w/2 - total_w/2;
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-draw_text(phase_meter_x + 30, phase_meter_y - 50, "Phase Correlation:");
-sprintf(#str, "%.3f   ", phase_correlation);
+draw_text(start_x, phase_meter_y - gfx_h * 0.08, "Phase Correlation: ");
 phase_correlation < 0 ? (gfx_r = 1; gfx_g = 0.5; gfx_b = 0;);
-draw_text(phase_meter_x + 160, phase_meter_y - 50, #str);
+draw_text(start_x + label_w, phase_meter_y - gfx_h * 0.08, #str);
 
 
 mtstart     = gfx_texth * 3;
-mtrange     = gfx_w/2.5;
-mtvalstart  = gfx_h - 75;
-mtvalrange  = 600;
-
+mtrange     = gfx_w * 0.4;  // Proportional to width
+mtvalstart  = gfx_h * 0.85;  // Proportional to height (85% down)
+mtvalrange  = gfx_h * 0.6;   // Proportional to height
 i = 0;
 loop(65,
-
   x = mtstart + mtrange*(i-1)/64;
   y = mtvalstart;
-
   tick = !(i&7);
-
   tick ?
   (
     sprintf(#txt, "%d", i);
     gfx_measurestr(#txt, tw, th);
-
-    // gfx_x = x - tw*0.5;
-    // gfx_y = y + gfx_texth;
-
     gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
-    draw_text(x - tw*0.5,y + gfx_texth, #txt);
+    draw_text(x - tw*0.5, y + gfx_texth, #txt);
   );
-
   i > 0 ?
   (
     val = bbuf[64-i];
-
     val > 0.0 ?
     (
       gfx_r = 0; gfx_g = tick ? 1.0 : 0.625; gfx_b = 1;
     ) : (
       gfx_r = gfx_g = gfx_b = tick ? 0.75 : 0.5;
     );
-
     gfx_x = x;
     gfx_y = y;
-
     gfx_lineto(x, y - 2 - mtvalrange*0.1*val);
   );
-
   i += 1;
 );
-
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
 gfx_setfont(1, "Arial", font_normal);
-draw_text(mtstart + mtrange * 0.44,gfx_h-35, "Bitmeter");
+draw_text(mtstart + mtrange * 0.44, gfx_h * 0.93, "Bitmeter");  // Proportional label position
 
 // ==================================================================================
-   
+   gfx_ext_retina > 1 ? (
+    gfx_setfont(1,"Arial",20,'b');
+   ) : (
     gfx_setfont(1,"Arial",12,'b');
-
+   );
 
   spectrum.bottom_margin = gfx_h/2;
   spectrum.left_margin = gfx_w/2+40;
@@ -1405,20 +1370,6 @@ gfx_gradrect(0, ht/2, gfx_w, ht/2, 0,0,0,0,    0, 0, 0, 0, 0, 0, 0, dst_a*2);
 );
 
 chr = gfx_getchar();
-
-mouse_cap & 8 ? (
-  do_listen = 1;
-  draw_listen_helper();
-
-  mw = mouse_wheel;
-  md = -(mw - last_wheel) / 120;
-  last_wheel = mw;
-
-  listen_width += md / 200;
-  listen_width = min(0.30, listen_width);
-  listen_width = max(0.01, listen_width);
-
-) : do_listen = 0;
 
 draw_info_panel(note_select);
 
@@ -1485,27 +1436,6 @@ old_w != gfx_w || old_h!=gfx_h? (
 );
 
 use_h = small_mode ? gfx_h : (gfx_h-gfx_texth - 4);
-
-function calc_color(mv, col*) globals(over24)
-(
-  col.r = col.g = col.b = 0; // start with black
-
-  // Very quiet -> almost black, deep blue
-  mv <= -96 ? (
-    mv > -168 ? (
-      mv <= -144 ? ( col.b = (mv+168)*over24*0.1; col.r = (mv+168)*over24*0.02 ) :  // very dark blue/black
-      mv <= -120 ? ( col.b = 0.1 + (mv+144)*over24*0.12; col.r = 0.02 + (mv+144)*over24*0.04 ) : // slightly brighter
-                   ( col.r = (mv+120)*over24*0.08; col.b = 0.2 + (mv+120)*over24*0.12 )
-    )
-  ) : (
-    // Medium -> more vibrant purple-blue shades
-    mv <= -72 ? ( col.r = (mv+96)*over24*0.3; col.b = 0.5 + (mv+96)*over24*0.25 ) :
-    mv <= -48 ? ( col.r = 0.3 + (mv+72)*over24*0.25; col.b = 0.7 + (mv+72)*over24*0.15 ) :
-    mv <= -24 ? ( col.r = 0.55 + (mv+48)*over24*0.2; col.b = 0.85 - (mv+48)*over24*0.1 ) :
-    mv <= 0  ? ( col.r = 0.7 + (mv+24)*over24*0.15; col.b = 0.75 + (mv+24)*over24*0.1 ) :
-      col.r = 0.85; col.b = 0.85;  // loudest -> vibrant purple-blue
-  );
-);
 
 reccnt>0 ? (
     amt = min(reccnt,histsize*2);
