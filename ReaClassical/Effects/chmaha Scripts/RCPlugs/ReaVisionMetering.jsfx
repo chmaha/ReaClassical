@@ -1,4 +1,4 @@
-Version: 1.02
+Version: 1.1
 desc:ReaVision Metering Suite (chmaha)
 author: chmaha
 about:
@@ -32,6 +32,21 @@ options:no_meter
 gfx_ext_retina=max(gfx_ext_retina,1);
 ext_nodenorm = 1;
 ext_noinit = 1;
+
+//==================================================================================
+// K-meter init
+//==================================================================================
+
+k_system_mode = 0;
+
+function init_k_system_button(xpos, ypos, buttonwidth) instance (x, y, width, pressed) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+  pressed = 0;
+);
+
+k_system_button.init_k_system_button(0, 0, 0); 
 
 // K-20 meter init
 k20_l.z1 = k20_l.z2 = k20_l.rms = k20_l.peak = 0;
@@ -921,13 +936,6 @@ Spectrum_Mode == 4 ? spectrum.sample0(spl0) :
 Spectrum_Mode == 5 ? spectrum.sample0(spl1) :
 Spectrum_Mode == 6 ? (spectrum.sample0(spl0); spectrum.sample1(spl1));
 
-// // Filter if we're in listen mode
-// do_listen ? (
-//   mono = 0.5 * (spl0 + spl1);
-//   filter.svf_bp2(listen_freq, listen_q);
-//   spl0 = spl1 = filter.svf_svf0(mono); 
-// );
-
 rval=lval=0;
 
 <? do_all_channels("ch%d.proc(spl%d); "); ?>;
@@ -1348,7 +1356,7 @@ gfx_measurestr("0", tw, th);
 draw_text(phase_meter_x + phase_meter_w/2 - tw/2, phase_meter_y + phase_meter_h + gfx_h * 0.008,"0");
 
 // Center-align phase correlation label and value above meter
-sprintf(#str, "%.3f", phase_correlation);
+sprintf(#str, "%.3f ", phase_correlation);
 gfx_measurestr("Phase Correlation: ", label_w, th);
 gfx_measurestr(#str, value_w, th);
 total_w = label_w + value_w;
@@ -1364,6 +1372,11 @@ mtstart     = gfx_texth * 3;
 mtrange     = gfx_w * 0.4;  // Proportional to width
 mtvalstart  = gfx_h * 0.85;  // Proportional to height (85% down)
 mtvalrange  = gfx_h * 0.6;   // Proportional to height
+
+// Clear the area of the meter every frame
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_rect(mtstart, mtvalstart - 2 - mtvalrange*0.1, mtrange, 2 + mtvalrange*0.1);
+
 i = 0;
 loop(65,
   x = mtstart + mtrange*(i-1)/64;
@@ -1396,183 +1409,262 @@ gfx_setfont(1, "Arial", font_normal);
 draw_text(mtstart + mtrange * 0.44, gfx_h * 0.93, "Bitmeter");  // Proportional label position
 
 // ==================================================================================
-// K-20 Meter
+// K-System Meter (K-20, K-14, K-12)
 // ==================================================================================
 
-k20_x = gfx_w * 0.36;  // Start at 1/3 of half width
-k20_y = gfx_h * 0.06;   // Adjusted start position for taller meter
-k20_w = gfx_w * 0.0625; // Half the original width
-k20_h = gfx_h * 0.375;   // 1.5x the original height (was 0.32)
+// K-meter positioning - proportional to window size
+k20_x = gfx_w * 0.36;
+k20_y = gfx_h * 0.06;
+k20_w = gfx_w * 0.0625;
 
-// Set smaller font for scale markings
+// Calculate phase correlation label position (from phase meter code)
+phase_meter_label_y = phase_meter_y - gfx_h * 0.05;
+
+// Calculate available space and cap K-meter height to stay clear
+min_spacing = gfx_h * 0.03;  // Minimum 3% spacing between elements
+max_k20_h = phase_meter_label_y - k20_y - min_spacing;
+k20_h = min(gfx_h * 0.375, max_k20_h);  // Original proportion but capped to avoid overlap
+
+// Set font for scale markings - proportional sizing
 gfx_ext_retina > 1 ? (
-  gfx_setfont(2, "Arial", 14);
+  gfx_setfont(2, "Arial", gfx_h * 0.018);
 ) : (
-  gfx_setfont(2, "Arial", 9);   
+  gfx_setfont(2, "Arial", gfx_h * 0.012);   
 );
 
 gfx_measurestr("-60", label_w, label_h);
-bg_padding = label_w + 8; 
+bg_padding = label_w + gfx_w * 0.005; 
 
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_rect(k20_x - bg_padding, k20_y - label_h, k20_w + bg_padding, k20_h + label_h * 2, 1);
 
-k20_l_rms_db = k20_l.rms > 0 ? 20.0 * log(k20_l.rms) / log(10) : -100;
-k20_r_rms_db = num_ch > 1 && k20_r.rms > 0 ? 20.0 * log(k20_r.rms) / log(10) : -100;
+// Get RMS and peak in dBFS
+k20_l_rms_dbfs = k20_l.rms > 0 ? 20.0 * log(k20_l.rms) / log(10) : -100;
+k20_r_rms_dbfs = num_ch > 1 && k20_r.rms > 0 ? 20.0 * log(k20_r.rms) / log(10) : -100;
+k20_l_peak_dbfs = k20_l.peak > 0 ? 20.0 * log(k20_l.peak) / log(10) : -100;
+k20_r_peak_dbfs = k20_r.peak > 0 ? 20.0 * log(k20_r.peak) / log(10) : -100;
 
-k20_l_peak_db = k20_l.peak > 0 ? 20.0 * log(k20_l.peak) / log(10) : -100;
-k20_r_peak_db = k20_r.peak > 0 ? 20.0 * log(k20_r.peak) / log(10) : -100;
+k_system_mode == 0 ? (
+  k_ref_level = -20;  // K-20
+  k_max = 20;
+) : k_system_mode == 1 ? (
+  k_ref_level = -14;  // K-14
+  k_max = 14;
+) : (
+  k_ref_level = -12;  // K-12
+  k_max = 12;
+);
 
-function dbfs_to_k20_y(dbfs, base_y, height) local(k20_value, normalized) (
-  k20_value = dbfs + 20; 
-  k20_value = max(-60, min(k20_value, 20)); 
-  normalized = (k20_value + 60) / 80; 
-  base_y + height * (1 - normalized)
+k_range = 60 + k_max;
+
+k20_l_rms_k = k20_l_rms_dbfs - k_ref_level;
+k20_r_rms_k = k20_r_rms_dbfs - k_ref_level;
+k20_l_peak_k = k20_l_peak_dbfs - k_ref_level;
+k20_r_peak_k = k20_r_peak_dbfs - k_ref_level;
+
+function k_to_y(k_db, base_y, height) local(normalized) (
+  k_db = max(-60, min(k_db, k_max));
+  normalized = (k_db + 60) / k_range;
+  floor(base_y + height * (1 - normalized) + 0.5)  // Round to nearest pixel
 );
 
 zone_x = k20_x;
-zone_w = k20_w * 0.55;  
+zone_w = k20_w * 0.55;
 
-
-purple_top = dbfs_to_k20_y(-20, k20_y, k20_h);
+// Draw color zones with no gaps
+blue_top = k_to_y(0, k20_y, k20_h);
 blue_bottom = k20_y + k20_h;
 gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
 gfx_a = 0.5;
-gfx_rect(zone_x, purple_top, zone_w, blue_bottom - purple_top, 1);
+gfx_rect(zone_x, blue_top, zone_w, blue_bottom - blue_top + 1, 1);  // +1 to ensure no gap
 
-
-yellow_top = dbfs_to_k20_y(-16, k20_y, k20_h);
-green_bottom = purple_top;
+cyan_top = k_to_y(4, k20_y, k20_h);
+cyan_bottom = blue_top + 1;  // +1 overlap to prevent gap
 gfx_r = 0; gfx_g = 1; gfx_b = 1;
 gfx_a = 0.5;
-gfx_rect(zone_x, yellow_top, zone_w, green_bottom - yellow_top, 1);
+gfx_rect(zone_x, cyan_top, zone_w, cyan_bottom - cyan_top, 1);
 
-
-red_top = k20_y;
-red_bottom = yellow_top;
+purple_top = k20_y;
+purple_bottom = cyan_top + 1;  // +1 overlap to prevent gap
 gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
 gfx_a = 0.5;
-gfx_rect(zone_x, red_top, zone_w, red_bottom - red_top, 1);
+gfx_rect(zone_x, purple_top, zone_w, purple_bottom - purple_top, 1);
 
-
+// Draw scale markings
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 gfx_a = 1;
 
 k20_marks = -60;
-loop(9,
-  dbfs_equiv = k20_marks - 20; 
-  mark_y = dbfs_to_k20_y(dbfs_equiv, k20_y, k20_h);
+mark_step = 4;
+tick_count = 0;
+
+num_ticks = k_system_mode == 1 ? (60 + 8)/4 + 1 : (60 + k_max)/4 + 1;
+
+loop(num_ticks,
   
-  gfx_line(zone_x - 3, mark_y, zone_x, mark_y);  
-  gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + 3, mark_y); 
-  
-  k20_marks == 0 ? (
-    gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
-    sprintf(#k20_str, "0");
-  ) : k20_marks > 0 ? (
-    sprintf(#k20_str, "+%d", k20_marks);
-  ) : (
-    sprintf(#k20_str, "%d", k20_marks);
-  );
-  
+  // Draw tick line - proportional size
+  mark_y = k_to_y(k20_marks, k20_y, k20_h);
+  tick_length = gfx_w * 0.002;
+  gfx_line(zone_x - tick_length, mark_y, zone_x, mark_y);
+  gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + tick_length, mark_y);
+
+  // Decide label
+  should_label = 0;
+  k20_marks < 0 ? ( ((k20_marks + 60) % 8 == 0) ? should_label = 1 : 0 ) : ( (k20_marks % 4 == 0) ? should_label = 1 : 0 );
+  k_system_mode == 1 && k20_marks == 12 ? should_label = 0 : 0;  // skip +12
+  k20_marks == k_max ? should_label = 1 : 0;
+
+  should_label ? (
+    k20_marks == 0 ? ( gfx_r = 0; gfx_g = 0.6; gfx_b = 1; sprintf(#k20_str, "0"); ) :
+    k20_marks > 0 ? ( sprintf(#k20_str, "+%d", k20_marks); ) :
+    ( sprintf(#k20_str, "%d", k20_marks); );
+    
+    gfx_measurestr(#k20_str, tw, th);
+    gfx_x = zone_x - tw - gfx_w * 0.003;
+    gfx_y = mark_y - gfx_texth * 0.5;
+    gfx_drawstr(#k20_str);
+    
+    gfx_x = zone_x + zone_w + gfx_w * 0.003;
+    gfx_y = mark_y - gfx_texth * 0.5;
+    gfx_drawstr(#k20_str);
+    
+    k20_marks == 0 ? ( gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7; ) : 0;
+  ) : 0;
+
+  k20_marks += mark_step;
+  tick_count += 1;
+);
+
+// Add final K-14 tick at +14
+k_system_mode == 1 ? (
+  k20_marks = 14;
+  mark_y = k_to_y(k20_marks, k20_y, k20_h);
+  tick_length = gfx_w * 0.002;
+  gfx_line(zone_x - tick_length, mark_y, zone_x, mark_y);
+  gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + tick_length, mark_y);
+
+  // Label +14
+  gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
+  sprintf(#k20_str, "+14");
   gfx_measurestr(#k20_str, tw, th);
-  gfx_x = zone_x - tw - 5;
-  gfx_y = mark_y - gfx_texth * 0.5;
+  gfx_x = zone_x - tw - gfx_w * 0.003; 
+  gfx_y = mark_y - gfx_texth * 0.5; 
   gfx_drawstr(#k20_str);
-  
-  gfx_x = zone_x + zone_w + 5;
-  gfx_y = mark_y - gfx_texth * 0.5;
+  gfx_x = zone_x + zone_w + gfx_w * 0.003; 
+  gfx_y = mark_y - gfx_texth * 0.5; 
   gfx_drawstr(#k20_str);
-  
-  k20_marks == 0 ? (
-    gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7; 
-  );
-  
-  k20_marks += 10;
-);
-
-gfx_r = 0.5; gfx_g = 0.5; gfx_b = 0.5;
-k20_marks = -55;
-loop(8,
-  dbfs_equiv = k20_marks - 20;
-  mark_y = dbfs_to_k20_y(dbfs_equiv, k20_y, k20_h);
-
-  gfx_line(zone_x - 2, mark_y, zone_x, mark_y);
-  gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + 2, mark_y);
-  k20_marks += 10;
-);
+) : 0;
 
 gfx_setfont(1, "Arial", font_normal);
 
 bar_w = zone_w * 0.5;
 
 // Left channel RMS bar
-k20_l_rms_db > -100 ? (
-  bar_top = dbfs_to_k20_y(k20_l_rms_db, k20_y, k20_h);
-  bar_height = k20_y + k20_h - bar_top;
+k20_l_rms_k > -100 ? (
+  bar_top = k_to_y(k20_l_rms_k, k20_y, k20_h);
+  bar_bottom = k20_y + k20_h;
+  bar_height = bar_bottom - bar_top;
   
-  // Color based on K-20 zones
-  k20_l_rms_db >= -16 ? (
-    gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
-  ) : k20_l_rms_db >= -20 ? (
-    gfx_r = 0; gfx_g = 1; gfx_b = 1;
-  ) : (
-    gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
-  );
-  gfx_a = 0.8;
-  gfx_rect(zone_x, bar_top, bar_w, bar_height, 1);
-  
-  // Peak indicator (colored to match zone)
-  k20_l_peak_db > -100 ? (
-    peak_y = dbfs_to_k20_y(k20_l_peak_db, k20_y, k20_h);
-    k20_l_peak_db >= -16 ? (
+  // Only draw if height is at least 1 pixel to prevent wobble
+  bar_height >= 1 ? (
+    k20_l_rms_k >= 4 ? (
       gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
-    ) : k20_l_peak_db >= -20 ? (
+    ) : k20_l_rms_k >= 0 ? (
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
+    ) : (
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+    );
+    gfx_a = 0.8;
+    gfx_rect(zone_x, bar_top, bar_w, bar_height, 1);
+  );
+  
+  k20_l_peak_k > -100 ? (
+    peak_y = k_to_y(k20_l_peak_k, k20_y, k20_h);
+    peak_height = max(1, gfx_h * 0.0025);  // Proportional peak indicator height with minimum
+    k20_l_peak_k >= 4 ? (
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+    ) : k20_l_peak_k >= 0 ? (
       gfx_r = 0; gfx_g = 1; gfx_b = 1;
     ) : (
       gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
     );
     gfx_a = 0.9;
-    gfx_rect(zone_x, peak_y - 1, bar_w, 2, 1);
+    gfx_rect(zone_x, peak_y - peak_height, bar_w, peak_height * 2, 1);
   );
 );
 
 // Right channel RMS bar
-num_ch > 1 && k20_r_rms_db > -100 ? (
-  bar_top = dbfs_to_k20_y(k20_r_rms_db, k20_y, k20_h);
-  bar_height = k20_y + k20_h - bar_top;
+num_ch > 1 && k20_r_rms_k > -100 ? (
+  bar_top = k_to_y(k20_r_rms_k, k20_y, k20_h);
+  bar_bottom = k20_y + k20_h;
+  bar_height = bar_bottom - bar_top;
   
-  // Color based on K-20 zones
-  k20_r_rms_db >= -16 ? (
-    gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
-  ) : k20_r_rms_db >= -20 ? (
-    gfx_r = 0; gfx_g = 1; gfx_b = 1;
-  ) : (
-    gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
-  );
-  gfx_a = 0.8;
-  gfx_rect(zone_x + bar_w, bar_top, bar_w, bar_height, 1);
-  
-  // Peak indicator (colored to match zone)
-  k20_r_peak_db > -100 ? (
-    peak_y = dbfs_to_k20_y(k20_r_peak_db, k20_y, k20_h);
-    k20_r_peak_db >= -16 ? (
+  // Only draw if height is at least 1 pixel to prevent wobble
+  bar_height >= 1 ? (
+    k20_r_rms_k >= 4 ? (
       gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
-    ) : k20_r_peak_db >= -20 ? (
-      gfx_r = 0.043; gfx_g = 0; gfx_b = 0.5;
+    ) : k20_r_rms_k >= 0 ? (
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
+    ) : (
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+    );
+    gfx_a = 0.8;
+    gfx_rect(zone_x + bar_w, bar_top, bar_w, bar_height, 1);
+  );
+  
+  k20_r_peak_k > -100 ? (
+    peak_y = k_to_y(k20_r_peak_k, k20_y, k20_h);
+    peak_height = max(1, gfx_h * 0.0025);  // Proportional peak indicator height with minimum
+    k20_r_peak_k >= 4 ? (
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+    ) : k20_r_peak_k >= 0 ? (
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
     ) : (
       gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
     );
     gfx_a = 0.9;
-    gfx_rect(zone_x + bar_w, peak_y - 1, bar_w, 2, 1);
+    gfx_rect(zone_x + bar_w, peak_y - peak_height, bar_w, peak_height * 2, 1);
   );
 );
 
+// Draw clickable K-System label
+k_system_mode == 0 ? sprintf(#k_label, "K-20") :
+k_system_mode == 1 ? sprintf(#k_label, "K-14") :
+sprintf(#k_label, "K-12");
+
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_measurestr("K-20", tw, th);
-draw_text(zone_x + zone_w * 0.5 - tw * 0.5, k20_y - gfx_h * 0.032, "K-20");
+gfx_measurestr(#k_label, tw, th);
+label_x = zone_x + zone_w * 0.5 - tw * 0.5;
+label_y = k20_y - gfx_h * 0.032;
+
+// Update button position for click detection - proportional padding
+button_padding = gfx_w * 0.003;
+k_system_button.x = label_x - button_padding;
+k_system_button.y = label_y - button_padding;
+k_system_button.width = tw + button_padding * 2;
+k_system_button.height = th + button_padding * 2;
+
+// Highlight on hover
+mouse_x >= k_system_button.x && mouse_x <= k_system_button.x + k_system_button.width &&
+mouse_y >= k_system_button.y && mouse_y <= k_system_button.y + k_system_button.height ? (
+  gfx_r = 0; gfx_g = 0.8; gfx_b = 1;
+);
+
+draw_text(label_x, label_y, #k_label);
+
+// Handle clicking to cycle K-System modes
+mouse_cap & 1 && !k_system_button.pressed ? (
+  mouse_x >= k_system_button.x && mouse_x <= k_system_button.x + k_system_button.width &&
+  mouse_y >= k_system_button.y && mouse_y <= k_system_button.y + k_system_button.height ? (
+    k_system_button.pressed = 1;
+    k_system_mode = (k_system_mode + 1) % 3;
+  );
+) : !(mouse_cap & 1) ? (
+  k_system_button.pressed = 0;
+);
 
 // ==================================================================================
+
    gfx_ext_retina > 1 ? (
     gfx_setfont(1,"Arial",20,'b');
    ) : (
