@@ -1,4 +1,4 @@
-Version: 1.1
+Version: 1.2
 desc:ReaVision Metering Suite (chmaha)
 author: chmaha
 about:
@@ -113,26 +113,260 @@ pixels_per_frame = 1;
 need_button_refs=1;
 rec_write_pos = 0;
 
-function calc_color(mv, col*) globals(over24)
-(
-  col.r = col.g = col.b = 0; // start with black
+current_colormap = 0;
 
-  // Very quiet -> almost black, deep blue
-  mv <= -96 ? (
-    mv > -168 ? (
-      mv <= -144 ? ( col.b = (mv+168)*over24*0.1; col.r = (mv+168)*over24*0.02 ) :  // very dark blue/black
-      mv <= -120 ? ( col.b = 0.1 + (mv+144)*over24*0.12; col.r = 0.02 + (mv+144)*over24*0.04 ) : // slightly brighter
-                   ( col.r = (mv+120)*over24*0.08; col.b = 0.2 + (mv+120)*over24*0.12 )
-    )
-  ) : (
-    // Medium -> more vibrant purple-blue shades
-    mv <= -72 ? ( col.r = (mv+96)*over24*0.3; col.b = 0.5 + (mv+96)*over24*0.25 ) :
-    mv <= -48 ? ( col.r = 0.3 + (mv+72)*over24*0.25; col.b = 0.7 + (mv+72)*over24*0.15 ) :
-    mv <= -24 ? ( col.r = 0.55 + (mv+48)*over24*0.2; col.b = 0.85 - (mv+48)*over24*0.1 ) :
-    mv <= 0  ? ( col.r = 0.7 + (mv+24)*over24*0.15; col.b = 0.75 + (mv+24)*over24*0.1 ) :
-      col.r = 0.85; col.b = 0.85;  // loudest -> vibrant purple-blue
+/*
+ * Initialise the colormap button
+ */
+function init_colormap_button(xpos, ypos, buttonwidth) instance (x, y, width) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+);
+
+/*
+ * Draw the colormap button
+ */
+function draw_colormap_button() instance (x, y, width, height) 
+local(w, h, a, label) ( 
+  // Only show when hovering over spectrogram
+  mouse_x >= gfx_w/2 && mouse_x < gfx_w && mouse_y >= gfx_h/2 && mouse_y < gfx_h ? (
+    // Set label based on current colormap
+    current_colormap == 0 ? label = "Dark" :
+    current_colormap == 1 ? label = "Rooster" :
+    current_colormap == 2 ? label = "Viridis" :
+    current_colormap == 3 ? label = "Magma" :
+    current_colormap == 4 ? label = "Plasma" :
+    current_colormap == 5 ? label = "Inferno" :
+    current_colormap == 6 ? label = "Cividis" :
+    current_colormap == 7 ? label = "Mako" :
+    current_colormap == 8 ? label = "Rocket" :
+    current_colormap == 9 ? label = "Turbo" : label = "Dark";
+
+
+    
+    gfx_a = 1;
+    gfx_measurestr(label, w, h);
+    height = h + 8;
+    
+    // Hover highlight
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.6;
+    ) : (
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.4;
+    );
+    
+    gfx_rect(x, y, width, h+9, 1);
+    
+    // Text color
+    gfx_r = (114 / 255);
+    gfx_g = (215 / 255);
+    gfx_b = (253 / 255);
+    gfx_a = 1;
+    gfx_x = x + (width / 2) - (w / 2);
+    gfx_y = y + 4;
+    gfx_drawstr(label);
   );
 );
+
+/*
+ * Handle clicking the colormap button
+ */
+function handle_colormap_button() instance (x, y, width, height, pressed)
+(
+  mouse_cap & 1 && !pressed ? (
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      pressed = 1;
+      current_colormap = (current_colormap + 1) % 10;
+    ) : pressed = 0;
+  ) : ( 
+    !(mouse_cap & 1) ? pressed = 0;
+  );
+);
+
+function calc_color(mv, col*, current_colormap) globals(over24)
+(
+  col.r = col.g = col.b = 0; // start black
+  
+  current_colormap == 0 ? (
+    // Original Dark
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.b = (mv+168)*over24*0.1; col.r = (mv+168)*over24*0.02 ) :
+        mv <= -120 ? ( col.b = 0.1 + (mv+144)*over24*0.12; col.r = 0.02 + (mv+144)*over24*0.04 ) :
+                     ( col.r = (mv+120)*over24*0.08; col.b = 0.2 + (mv+120)*over24*0.12 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = (mv+96)*over24*0.3; col.b = 0.5 + (mv+96)*over24*0.25 ) :
+      mv <= -48 ? ( col.r = 0.3 + (mv+72)*over24*0.25; col.b = 0.7 + (mv+72)*over24*0.15 ) :
+      mv <= -24 ? ( col.r = 0.55 + (mv+48)*over24*0.2; col.b = 0.85 - (mv+48)*over24*0.1 ) :
+      mv <= 0   ? ( col.r = 0.7 + (mv+24)*over24*0.15; col.b = 0.75 + (mv+24)*over24*0.1 ) :
+                  ( col.r = 0.85; col.b = 0.85 )
+    );
+  ) :
+  
+  current_colormap == 1 ? (
+    // Original Cockos
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.b = (mv+168)*over24*0.25 ) :
+        mv <= -120 ? ( col.g = (mv+144)*over24*0.25; col.b = 0.25 ) :
+                     ( col.g = 0.25+(mv+120)*over24*0.5; col.b = 0.25-(mv+120)*over24*0.25 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = (mv+96)*over24; col.g = 0.75 ) :
+      mv <= -48 ? ( col.r = 1; col.g = 0.75-(mv+72)*over24*0.75 ) :
+      mv <= -24 ? ( col.r = 1; col.b = (mv+48)*over24 ) :
+      mv <= 0   ? ( col.r = col.b = 1; col.g = (mv+24)*over24 ) :
+                  ( col.r = col.g = col.b = 1 )
+    );
+  ) :
+  
+  current_colormap == 2 ? (
+    // Viridis (purple->blue->green->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.27 + (mv+168)*over24*0.02; col.g = 0.00 + (mv+168)*over24*0.05; col.b = 0.33 + (mv+168)*over24*0.08 ) :
+        mv <= -120 ? ( col.r = 0.29 + (mv+144)*over24*0.03; col.g = 0.05 + (mv+144)*over24*0.10; col.b = 0.41 + (mv+144)*over24*0.08 ) :
+                     ( col.r = 0.32 - (mv+120)*over24*0.10; col.g = 0.15 + (mv+120)*over24*0.15; col.b = 0.49 + (mv+120)*over24*0.05 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.22 - (mv+96)*over24*0.10; col.g = 0.30 + (mv+96)*over24*0.20; col.b = 0.54 - (mv+96)*over24*0.09 ) :
+      mv <= -48 ? ( col.r = 0.12 + (mv+72)*over24*0.10; col.g = 0.50 + (mv+72)*over24*0.18; col.b = 0.45 - (mv+72)*over24*0.12 ) :
+      mv <= -24 ? ( col.r = 0.22 + (mv+48)*over24*0.33; col.g = 0.68 + (mv+48)*over24*0.15; col.b = 0.33 - (mv+48)*over24*0.13 ) :
+      mv <= 0   ? ( col.r = 0.55 + (mv+24)*over24*0.38; col.g = 0.83 + (mv+24)*over24*0.10; col.b = 0.20 - (mv+24)*over24*0.07 ) :
+                  ( col.r = 0.93; col.g = 0.93; col.b = 0.13 )
+    );
+  ) :
+  
+  current_colormap == 3 ? (
+    // Magma (black->purple->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.00 + (mv+168)*over24*0.03; col.g = 0.00 + (mv+168)*over24*0.01; col.b = 0.02 + (mv+168)*over24*0.05 ) :
+        mv <= -120 ? ( col.r = 0.03 + (mv+144)*over24*0.10; col.g = 0.01 + (mv+144)*over24*0.02; col.b = 0.07 + (mv+144)*over24*0.15 ) :
+                     ( col.r = 0.13 + (mv+120)*over24*0.25; col.g = 0.03 + (mv+120)*over24*0.05; col.b = 0.22 + (mv+120)*over24*0.20 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.38 + (mv+96)*over24*0.32; col.g = 0.08 + (mv+96)*over24*0.12; col.b = 0.42 + (mv+96)*over24*0.08 ) :
+      mv <= -48 ? ( col.r = 0.70 + (mv+72)*over24*0.20; col.g = 0.20 + (mv+72)*over24*0.25; col.b = 0.50 - (mv+72)*over24*0.12 ) :
+      mv <= -24 ? ( col.r = 0.90 + (mv+48)*over24*0.05; col.g = 0.45 + (mv+48)*over24*0.30; col.b = 0.38 - (mv+48)*over24*0.13 ) :
+      mv <= 0   ? ( col.r = 0.95 + (mv+24)*over24*0.03; col.g = 0.75 + (mv+24)*over24*0.20; col.b = 0.25 - (mv+24)*over24*0.12 ) :
+                  ( col.r = 0.99; col.g = 0.95; col.b = 0.13 )
+    );
+  ) :
+  
+  current_colormap == 4 ? (
+    // Plasma (purple->pink->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.05 + (mv+168)*over24*0.15; col.g = 0.03 + (mv+168)*over24*0.00; col.b = 0.53 - (mv+168)*over24*0.03 ) :
+        mv <= -120 ? ( col.r = 0.20 + (mv+144)*over24*0.20; col.g = 0.03 + (mv+144)*over24*0.03; col.b = 0.50 - (mv+144)*over24*0.05 ) :
+                     ( col.r = 0.40 + (mv+120)*over24*0.20; col.g = 0.06 + (mv+120)*over24*0.09; col.b = 0.45 - (mv+120)*over24*0.08 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.60 + (mv+96)*over24*0.20; col.g = 0.15 + (mv+96)*over24*0.20; col.b = 0.37 - (mv+96)*over24*0.15 ) :
+      mv <= -48 ? ( col.r = 0.80 + (mv+72)*over24*0.10; col.g = 0.35 + (mv+72)*over24*0.25; col.b = 0.22 - (mv+72)*over24*0.10 ) :
+      mv <= -24 ? ( col.r = 0.90 + (mv+48)*over24*0.05; col.g = 0.60 + (mv+48)*over24*0.20; col.b = 0.12 - (mv+48)*over24*0.05 ) :
+      mv <= 0   ? ( col.r = 0.95 + (mv+24)*over24*0.03; col.g = 0.80 + (mv+24)*over24*0.15; col.b = 0.07 + (mv+24)*over24*0.13 ) :
+                  ( col.r = 0.98; col.g = 0.95; col.b = 0.20 )
+    );
+  ) :
+  
+  current_colormap == 5 ? (
+    // Inferno (black->purple->red->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.00 + (mv+168)*over24*0.04; col.g = 0.00 + (mv+168)*over24*0.01; col.b = 0.01 + (mv+168)*over24*0.05 ) :
+        mv <= -120 ? ( col.r = 0.04 + (mv+144)*over24*0.16; col.g = 0.01 + (mv+144)*over24*0.02; col.b = 0.06 + (mv+144)*over24*0.16 ) :
+                     ( col.r = 0.20 + (mv+120)*over24*0.30; col.g = 0.03 + (mv+120)*over24*0.07; col.b = 0.22 + (mv+120)*over24*0.18 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.50 + (mv+96)*over24*0.30; col.g = 0.10 + (mv+96)*over24*0.15; col.b = 0.40 - (mv+96)*over24*0.10 ) :
+      mv <= -48 ? ( col.r = 0.80 + (mv+72)*over24*0.12; col.g = 0.25 + (mv+72)*over24*0.30; col.b = 0.30 - (mv+72)*over24*0.15 ) :
+      mv <= -24 ? ( col.r = 0.92 + (mv+48)*over24*0.04; col.g = 0.55 + (mv+48)*over24*0.25; col.b = 0.15 - (mv+48)*over24*0.05 ) :
+      mv <= 0   ? ( col.r = 0.96 + (mv+24)*over24*0.02; col.g = 0.80 + (mv+24)*over24*0.15; col.b = 0.10 + (mv+24)*over24*0.15 ) :
+                  ( col.r = 0.99; col.g = 0.95; col.b = 0.25 )
+    );
+  ) :
+  
+  current_colormap == 6 ? (
+    // Cividis (blue->yellow, colorblind optimized)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.00 + (mv+168)*over24*0.12; col.g = 0.13 + (mv+168)*over24*0.07; col.b = 0.30 + (mv+168)*over24*0.08 ) :
+        mv <= -120 ? ( col.r = 0.12 + (mv+144)*over24*0.13; col.g = 0.20 + (mv+144)*over24*0.10; col.b = 0.38 + (mv+144)*over24*0.05 ) :
+                     ( col.r = 0.25 + (mv+120)*over24*0.15; col.g = 0.30 + (mv+120)*over24*0.12; col.b = 0.43 + (mv+120)*over24*0.00 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.40 + (mv+96)*over24*0.15; col.g = 0.42 + (mv+96)*over24*0.12; col.b = 0.43 - (mv+96)*over24*0.08 ) :
+      mv <= -48 ? ( col.r = 0.55 + (mv+72)*over24*0.15; col.g = 0.54 + (mv+72)*over24*0.13; col.b = 0.35 - (mv+72)*over24*0.10 ) :
+      mv <= -24 ? ( col.r = 0.70 + (mv+48)*over24*0.15; col.g = 0.67 + (mv+48)*over24*0.13; col.b = 0.25 - (mv+48)*over24*0.08 ) :
+      mv <= 0   ? ( col.r = 0.85 + (mv+24)*over24*0.10; col.g = 0.80 + (mv+24)*over24*0.15; col.b = 0.17 - (mv+24)*over24*0.05 ) :
+                  ( col.r = 0.95; col.g = 0.95; col.b = 0.12 )
+    );
+  ) :
+  
+  current_colormap == 7 ? (
+    // Mako (black->teal->cyan->blue)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.04 + (mv+168)*over24*0.02; col.g = 0.09 + (mv+168)*over24*0.06; col.b = 0.12 + (mv+168)*over24*0.08 ) :
+        mv <= -120 ? ( col.r = 0.06 + (mv+144)*over24*0.03; col.g = 0.15 + (mv+144)*over24*0.12; col.b = 0.20 + (mv+144)*over24*0.10 ) :
+                     ( col.r = 0.09 + (mv+120)*over24*0.05; col.g = 0.27 + (mv+120)*over24*0.15; col.b = 0.30 + (mv+120)*over24*0.12 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.14 + (mv+96)*over24*0.11; col.g = 0.42 + (mv+96)*over24*0.18; col.b = 0.42 + (mv+96)*over24*0.13 ) :
+      mv <= -48 ? ( col.r = 0.25 + (mv+72)*over24*0.20; col.g = 0.60 + (mv+72)*over24*0.15; col.b = 0.55 + (mv+72)*over24*0.15 ) :
+      mv <= -24 ? ( col.r = 0.45 + (mv+48)*over24*0.25; col.g = 0.75 + (mv+48)*over24*0.10; col.b = 0.70 + (mv+48)*over24*0.15 ) :
+      mv <= 0   ? ( col.r = 0.70 + (mv+24)*over24*0.20; col.g = 0.85 + (mv+24)*over24*0.10; col.b = 0.85 + (mv+24)*over24*0.10 ) :
+                  ( col.r = 0.90; col.g = 0.95; col.b = 0.95 )
+    );
+  ) :
+  
+  current_colormap == 8 ? (
+    // Rocket (black->red->pink->white)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.02 + (mv+168)*over24*0.04; col.g = 0.01 + (mv+168)*over24*0.01; col.b = 0.02 + (mv+168)*over24*0.03 ) :
+        mv <= -120 ? ( col.r = 0.06 + (mv+144)*over24*0.12; col.g = 0.02 + (mv+144)*over24*0.02; col.b = 0.05 + (mv+144)*over24*0.05 ) :
+                     ( col.r = 0.18 + (mv+120)*over24*0.22; col.g = 0.04 + (mv+120)*over24*0.06; col.b = 0.10 + (mv+120)*over24*0.08 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.40 + (mv+96)*over24*0.25; col.g = 0.10 + (mv+96)*over24*0.15; col.b = 0.18 + (mv+96)*over24*0.15 ) :
+      mv <= -48 ? ( col.r = 0.65 + (mv+72)*over24*0.15; col.g = 0.25 + (mv+72)*over24*0.25; col.b = 0.33 + (mv+72)*over24*0.22 ) :
+      mv <= -24 ? ( col.r = 0.80 + (mv+48)*over24*0.10; col.g = 0.50 + (mv+48)*over24*0.25; col.b = 0.55 + (mv+48)*over24*0.25 ) :
+      mv <= 0   ? ( col.r = 0.90 + (mv+24)*over24*0.08; col.g = 0.75 + (mv+24)*over24*0.20; col.b = 0.80 + (mv+24)*over24*0.15 ) :
+                  ( col.r = 0.98; col.g = 0.95; col.b = 0.95 )
+    );
+  ) :
+  
+  current_colormap == 9 ? (
+    // Turbo (blue->cyan->green->yellow->orange->red)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.19 + (mv+168)*over24*0.05; col.g = 0.07 + (mv+168)*over24*0.15; col.b = 0.48 + (mv+168)*over24*0.15 ) :
+        mv <= -120 ? ( col.r = 0.24 + (mv+144)*over24*0.01; col.g = 0.22 + (mv+144)*over24*0.20; col.b = 0.63 + (mv+144)*over24*0.10 ) :
+                     ( col.r = 0.25 - (mv+120)*over24*0.08; col.g = 0.42 + (mv+120)*over24*0.23; col.b = 0.73 + (mv+120)*over24*0.05 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.17 + (mv+96)*over24*0.10; col.g = 0.65 + (mv+96)*over24*0.20; col.b = 0.78 - (mv+96)*over24*0.15 ) :
+      mv <= -48 ? ( col.r = 0.27 + (mv+72)*over24*0.38; col.g = 0.85 + (mv+72)*over24*0.08; col.b = 0.63 - (mv+72)*over24*0.25 ) :
+      mv <= -24 ? ( col.r = 0.65 + (mv+48)*over24*0.28; col.g = 0.93 - (mv+48)*over24*0.20; col.b = 0.38 - (mv+48)*over24*0.18 ) :
+      mv <= 0   ? ( col.r = 0.93 + (mv+24)*over24*0.05; col.g = 0.73 - (mv+24)*over24*0.33; col.b = 0.20 - (mv+24)*over24*0.10 ) :
+                  ( col.r = 0.98; col.g = 0.40; col.b = 0.10 )
+    );
+  );
+);
+
+
+
 
 //==================================================================================
 // Spectrum analyzer init
@@ -549,6 +783,8 @@ spectrum.set_show_peaks(Show_Peaks);
 //==================================================================================
 // Loudness, Gonio, Correl inits
 //==================================================================================
+
+gonio_gain_state = 0; 
 
 function draw_text(x, y, text)
 (
@@ -1242,7 +1478,7 @@ gfx_drawstr("---")
 // Fade for goniometer trail
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_a = 0.025;
-gfx_circle(gonio_x + gonio_half, gonio_y + gonio_half, gonio_half+35, 1,0);
+gfx_circle(gonio_x + gonio_half, gonio_y + gonio_half, gonio_half+5, 1,0);
 gfx_a = 1;
 
 // Line width for retina
@@ -1272,10 +1508,27 @@ loop(samples_to_draw,
   idx = i;
   L = gonio_buffer_L[idx];
   R = gonio_buffer_R[idx];
+  
+  // Apply visual gain boost
+  gonio_gain_state == 1 ? (
+    L *= 2.0;  // +6dB = 2x
+    R *= 2.0;
+  ) : gonio_gain_state == 2 ? (
+    L *= 4.0;  // +12dB = 4x
+    R *= 4.0;
+  );
+  
+  // --- Keep plot inside circle by normalizing the radius ---
+  radius = sqrt(L*L + R*R);
+  radius > 1 ? (
+    L /= radius;
+    R /= radius;
+  );
 
-  // --- Normalize L and R to keep the plot inside bounding box ---
-  peak = max(abs(L), abs(R));
-  peak > 1 ? (L /= peak; R /= peak;);
+  s0 = sign(L);
+  s1 = sign(R);
+  // ... rest of your angle calculation ...
+  radius = sqrt(L*L + R*R);  // Final radius for plotting
 
   s0 = sign(L);
   s1 = sign(R);
@@ -1304,34 +1557,73 @@ loop(samples_to_draw,
 );
 
 gfx_a = 1;
-gfx_r = 0.8; gfx_g = 0.8; gfx_b = 0.8;
-gfx_x = gonio_x + gonio_half*0.3; gfx_y = gonio_y + gonio_half*0.4;
-gfx_drawstr("L");
-gfx_x = gonio_x + gonio_half*1.6; gfx_y = gonio_y + gonio_half*0.4;
-gfx_drawstr("R");
+gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+gfx_x = gonio_x; gfx_y = gonio_y+15;
+draw_text(gfx_x, gfx_y,"L");
+gfx_x = gonio_x + gonio_size_display*0.95; gfx_y = gonio_y+15;
+draw_text(gfx_x, gfx_y,"R");
 // Center "M" label at top
 gfx_measurestr("M", tw, th);
-gfx_x = gonio_x + gonio_half - tw/2; gfx_y = gonio_y + gfx_h * 0.008;
-gfx_drawstr("M");
-gfx_x = gonio_x; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
-gfx_drawstr(" +S");
-gfx_x = gonio_x + gonio_size_display - gfx_w * 0.016; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
-gfx_drawstr("-S");
+gfx_x = gonio_x + gonio_half - tw/2; gfx_y = gonio_y - gfx_h * 0.03;
+draw_text(gfx_x, gfx_y,"M");
+gfx_x = gonio_x-25; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
+draw_text(gfx_x, gfx_y,"+S");
+gfx_x = gonio_x + gonio_size_display+10; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
+draw_text(gfx_x, gfx_y,"-S");
 
 gonio_pos = 0;
 
 );
 
-// Center "Goniometer" label
+// Center "Goniometer" label - make it clickable
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
 gfx_measurestr("Goniometer", tw, th);
-draw_text(gonio_x + gonio_half - tw/2, gonio_y + gonio_size_display + gfx_h * 0.016,"Goniometer");
+label_x = gonio_x + gonio_half - tw/2;
+label_y = gonio_y + gonio_size_display + gfx_h * 0.016;
+
+// Check for click on label
+
+mouse_cap == 1 && !last_mouse_cap ? (
+  mouse_x >= label_x && mouse_x <= label_x + tw &&
+  mouse_y >= label_y && mouse_y <= label_y + th ? (
+    gonio_gain_state = (gonio_gain_state + 1) % 3;
+  );
+);
+
+// Clear the label area first
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_measurestr("Goniometer (+12dB)", tw_max, th);  // Measure longest text
+gfx_rect(label_x - 2, label_y - 2, tw_max + 4, th + 4);
+
+// Draw label with gain indicator
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+mouse_x >= label_x && mouse_x <= label_x + tw &&
+mouse_y >= label_y && mouse_y <= label_y + th ? (
+  gfx_r = 0; gfx_g = 0.8; gfx_b = 1;
+);
+gonio_gain_state == 1 ? (
+  draw_text(label_x, label_y, "Goniometer (+6dB)");
+) : gonio_gain_state == 2 ? (
+  draw_text(label_x, label_y, "Goniometer (+12dB)");
+) : (
+  draw_text(label_x, label_y, "Goniometer");
+);
+
+last_mouse_cap = mouse_cap;
+
+//set up bitmeter dimensions here
+mtstart     = gfx_texth * 3;
+mtrange     = gfx_w * 0.4;  // Proportional to width
+mtvalstart  = gfx_h * 0.85;  // Proportional to height (85% down)
+mtvalrange  = gfx_h * 0.6;   // Proportional to height
 
 // Phase Meter - scale with window size
-phase_meter_x = gfx_w * 0.256;  // ~328 at 1280 width
-phase_meter_y = gonio_y + gonio_half - phase_meter_h/2;;  // ~350 at 625 height
-phase_meter_w = gfx_w * 0.195;  // ~250 at 1280 width
-phase_meter_h = gfx_h * 0.048;  // ~30 at 625 height
+phase_meter_x = gfx_w * 0.23;
+phase_meter_y = gonio_y + gonio_half*1.65; 
+phase_meter_w = (mtstart + mtrange)-phase_meter_x;
+phase_meter_h = gfx_h * 0.048;
+
+// gfx_rect(mtstart, mtvalstart - 2 - mtvalrange*0.1, mtrange, 2 + mtvalrange*0.1);
 
 gfx_r = 0.1; gfx_g = 0.1; gfx_b = 0.1;
 gfx_rect(phase_meter_x, phase_meter_y, phase_meter_w, phase_meter_h);
@@ -1367,12 +1659,6 @@ draw_text(start_x, phase_meter_y - gfx_h * 0.05, "Phase Correlation: ");
 phase_correlation < 0 ? (gfx_r = 1; gfx_g = 0.5; gfx_b = 0;);
 draw_text(start_x + label_w, phase_meter_y - gfx_h * 0.05, #str);
 
-
-mtstart     = gfx_texth * 3;
-mtrange     = gfx_w * 0.4;  // Proportional to width
-mtvalstart  = gfx_h * 0.85;  // Proportional to height (85% down)
-mtvalrange  = gfx_h * 0.6;   // Proportional to height
-
 // Clear the area of the meter every frame
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_rect(mtstart, mtvalstart - 2 - mtvalrange*0.1, mtrange, 2 + mtvalrange*0.1);
@@ -1404,6 +1690,14 @@ loop(65,
   );
   i += 1;
 );
+
+mouse_cap && mouse_x >= mtstart && mouse_x <= mtstart+mtrange &&
+mouse_y >= mtvalstart - 2 - mtvalrange*0.1 && mouse_y <= mtvalstart ?
+(
+  memset(tbuf, 0, 64);
+  memset(bbuf, 0, 64);
+);
+
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
 gfx_setfont(1, "Arial", font_normal);
 draw_text(mtstart + mtrange * 0.44, gfx_h * 0.93, "Bitmeter");  // Proportional label position
@@ -1413,17 +1707,6 @@ draw_text(mtstart + mtrange * 0.44, gfx_h * 0.93, "Bitmeter");  // Proportional 
 // ==================================================================================
 
 // K-meter positioning - proportional to window size
-k20_x = gfx_w * 0.36;
-k20_y = gfx_h * 0.06;
-k20_w = gfx_w * 0.0625;
-
-// Calculate phase correlation label position (from phase meter code)
-phase_meter_label_y = phase_meter_y - gfx_h * 0.05;
-
-// Calculate available space and cap K-meter height to stay clear
-min_spacing = gfx_h * 0.03;  // Minimum 3% spacing between elements
-max_k20_h = phase_meter_label_y - k20_y - min_spacing;
-k20_h = min(gfx_h * 0.375, max_k20_h);  // Original proportion but capped to avoid overlap
 
 // Set font for scale markings - proportional sizing
 gfx_ext_retina > 1 ? (
@@ -1431,6 +1714,21 @@ gfx_ext_retina > 1 ? (
 ) : (
   gfx_setfont(2, "Arial", gfx_h * 0.012);   
 );
+
+gfx_measurestr("Max: -100dB)", tw, th);
+tw /= gfx_ext_retina;  // scale text width back to logical pixels
+gfx_measurestr("Max: -100dB)", tw, th);
+k20_x = max(gfx_w * 0.36, gfx_w*0.225+tw);  // Original proportion but capped to avoid overlap
+k20_y = gfx_h * 0.05;
+k20_w = gfx_w * 0.05;
+
+// Calculate phase correlation label position (from phase meter code)
+phase_meter_label_y = phase_meter_y - gfx_h * 0.05;
+
+// Calculate available space and cap K-meter height to stay clear
+min_spacing = gfx_h * 0.03;  // Minimum 3% spacing between elements
+max_k20_h = phase_meter_label_y - k20_y - min_spacing;
+k20_h = min(gfx_h * 0.5, max_k20_h);  // Original proportion but capped to avoid overlap
 
 gfx_measurestr("-60", label_w, label_h);
 bg_padding = label_w + gfx_w * 0.005; 
@@ -1627,6 +1925,7 @@ num_ch > 1 && k20_r_rms_k > -100 ? (
   );
 );
 
+
 // Draw clickable K-System label
 k_system_mode == 0 ? sprintf(#k_label, "K-20") :
 k_system_mode == 1 ? sprintf(#k_label, "K-14") :
@@ -1651,6 +1950,32 @@ mouse_y >= k_system_button.y && mouse_y <= k_system_button.y + k_system_button.h
 );
 
 draw_text(label_x, label_y, #k_label);
+
+stripe_count_per_tick = 4;
+
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_a = 1;
+
+db = -60;
+while(db < k_max)(
+    top_y = k_to_y(db + 4, k20_y, k20_h);
+    bottom_y = k_to_y(db, k20_y, k20_h);
+    tick_height = bottom_y - top_y;
+
+    actual_count = min(stripe_count_per_tick, max(1, floor(tick_height)));
+
+    stripe_height = tick_height / actual_count;
+    y_pos = top_y;
+    loop(actual_count,
+        line_height = max(1, floor(stripe_height/4));
+        (y_pos + line_height > bottom_y) ? line_height = bottom_y - y_pos;
+        gfx_rect(zone_x, y_pos, zone_w, line_height, 1);
+        y_pos += stripe_height;
+    );
+
+    db += 4;
+);
+
 
 // Handle clicking to cycle K-System modes
 mouse_cap & 1 && !k_system_button.pressed ? (
@@ -1755,6 +2080,7 @@ old_w != gfx_w || old_h!=gfx_h? (
   gfx_x=gfx_y=0;
   gfx_rectto(gfx_w,gfx_h);
   need_button_refs=1;
+  colormap_button.init_colormap_button(gfx_w - 80, gfx_h/2 + 10, 65);
 );
 
 use_h = small_mode ? gfx_h : (gfx_h-gfx_texth - 4);
@@ -1877,7 +2203,7 @@ reccnt>0 ? (
                 gfx_y = use_h - (i+1);  // bottom half
                 gfx_a = 1;
 
-                calc_color(spectro_mv, drawc);
+                calc_color(spectro_mv, drawc, current_colormap);
                 gfx_setpixel(drawc.r, drawc.g, drawc.b);
 
                 i+=1;
@@ -1896,6 +2222,10 @@ gfx_r=gfx_g=gfx_b=0;
 gfx_a=1;
 gfx_rectto(gfx_w,gfx_h);
 
+// Draw and handle colormap button
+colormap_button.draw_colormap_button();
+colormap_button.handle_colormap_button();
+
 mouse_x >= gfx_w/2 && mouse_x < gfx_w - 20 &&
 mouse_y >= gfx_h/2 && mouse_y < gfx_h ? (
   !(mouse_cap&1) ? mb=-169;
@@ -1911,7 +2241,7 @@ mouse_y >= gfx_h/2 && mouse_y < gfx_h ? (
       bestdist = 10000000000;
       while (i<=0)
       (        
-        calc_color(i,tmp);
+        calc_color(i,tmp, current_colormap);
         dist = sqr(tmp.r-r)+sqr(tmp.g-g)+sqr(tmp.b-b);
         dist < bestdist ? ( val=i; bestdist=dist; );
         i+=1;
@@ -1967,5 +2297,5 @@ first_load == 1 ? (
 //==================================================================================
 
 has_click = (mouse_cap&1 && !last_cap) ? 1 : 0;
-has_click && mouse_x < 375 && mouse_y < 225 ? Reset();
+has_click && mouse_x < gfx_w*0.225 && mouse_y < gfx_h*0.4 ? Reset();
 last_cap = mouse_cap;
