@@ -362,7 +362,7 @@ function calc_color(mv, col*, current_colormap) globals(over24)
                   ( col.r = 0.98; col.g = 0.40; col.b = 0.10 )
     );
   ) :
-  current_colormap == 10 ? (
+current_colormap == 10 ? (
     // Parula (deep blue->cyan->teal->orange->yellow)
     mv <= -96 ? (
       mv > -168 ? (
@@ -1574,6 +1574,7 @@ loop(samples_to_draw,
 gfx_a = 1;
 gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
 gfx_x = gonio_x; gfx_y = gonio_y+15;
+gfx_setfont(1, "Arial", 10);
 draw_text(gfx_x, gfx_y,"L");
 gfx_x = gonio_x + gonio_size_display*0.95; gfx_y = gonio_y+15;
 draw_text(gfx_x, gfx_y,"R");
@@ -1590,6 +1591,7 @@ gonio_pos = 0;
 
 );
 
+gfx_setfont(1, "Arial", fsz_normal);
 // Center "Goniometer" label - make it clickable
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
 gfx_measurestr("Goniometer", tw, th);
@@ -2012,7 +2014,7 @@ mouse_cap & 1 && !k_system_button.pressed ? (
    );
 
   spectrum.bottom_margin = gfx_h/2;
-  spectrum.left_margin = gfx_w/2+40;
+  spectrum.left_margin = gfx_w/2+gfx_w*0.0312;
   spectrum.top_margin = 20;
   spectrum.right_margin= 20;
 
