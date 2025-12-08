@@ -141,10 +141,9 @@ local(w, h, a, label) (
     current_colormap == 6 ? label = "Cividis" :
     current_colormap == 7 ? label = "Mako" :
     current_colormap == 8 ? label = "Rocket" :
-    current_colormap == 9 ? label = "Turbo" : label = "Dark";
+    current_colormap == 9 ? label = "Turbo" :
+    current_colormap == 10 ? label = "Parula" : label = "Dark";
 
-
-    
     gfx_a = 1;
     gfx_measurestr(label, w, h);
     height = h + 8;
@@ -183,7 +182,7 @@ function handle_colormap_button() instance (x, y, width, height, pressed)
   mouse_cap & 1 && !pressed ? (
     mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
       pressed = 1;
-      current_colormap = (current_colormap + 1) % 10;
+      current_colormap = (current_colormap + 1) % 11;
     ) : pressed = 0;
   ) : ( 
     !(mouse_cap & 1) ? pressed = 0;
@@ -361,6 +360,22 @@ function calc_color(mv, col*, current_colormap) globals(over24)
       mv <= -24 ? ( col.r = 0.65 + (mv+48)*over24*0.28; col.g = 0.93 - (mv+48)*over24*0.20; col.b = 0.38 - (mv+48)*over24*0.18 ) :
       mv <= 0   ? ( col.r = 0.93 + (mv+24)*over24*0.05; col.g = 0.73 - (mv+24)*over24*0.33; col.b = 0.20 - (mv+24)*over24*0.10 ) :
                   ( col.r = 0.98; col.g = 0.40; col.b = 0.10 )
+    );
+  ) :
+  current_colormap == 10 ? (
+    // Parula (deep blue->cyan->teal->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.15 + (mv+168)*over24*0.08; col.g = 0.10 + (mv+168)*over24*0.12; col.b = 0.55 + (mv+168)*over24*0.20 ) :
+        mv <= -120 ? ( col.r = 0.23 + (mv+144)*over24*0.02; col.g = 0.22 + (mv+144)*over24*0.18; col.b = 0.75 + (mv+144)*over24*0.10 ) :
+                     ( col.r = 0.25 - (mv+120)*over24*0.05; col.g = 0.40 + (mv+120)*over24*0.18; col.b = 0.85 - (mv+120)*over24*0.02 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.20 + (mv+96)*over24*0.08; col.g = 0.58 + (mv+96)*over24*0.14; col.b = 0.83 - (mv+96)*over24*0.18 ) :
+      mv <= -48 ? ( col.r = 0.28 + (mv+72)*over24*0.22; col.g = 0.72 + (mv+72)*over24*0.08; col.b = 0.65 - (mv+72)*over24*0.20 ) :
+      mv <= -24 ? ( col.r = 0.50 + (mv+48)*over24*0.25; col.g = 0.80 + (mv+48)*over24*0.08; col.b = 0.45 - (mv+48)*over24*0.22 ) :
+      mv <= 0   ? ( col.r = 0.75 + (mv+24)*over24*0.21; col.g = 0.88 + (mv+24)*over24*0.08; col.b = 0.23 - (mv+24)*over24*0.15 ) :
+                  ( col.r = 0.96; col.g = 0.96; col.b = 0.08 )
     );
   );
 );
