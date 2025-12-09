@@ -1,4 +1,4 @@
-Version: 1.2
+Version: 1.3
 desc:ReaVision Metering Suite (chmaha)
 author: chmaha
 about:
@@ -1805,6 +1805,13 @@ gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
 gfx_a = 0.5;
 gfx_rect(zone_x, purple_top, zone_w, purple_bottom - purple_top, 1);
 
+// Draw vertical divider line in the middle
+divider_x = zone_x + zone_w * 0.5;
+divider_width = max(1, gfx_w * 0.001);  // Proportional width with minimum of 1px
+gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+gfx_a = 0.6;
+gfx_rect(divider_x - divider_width * 0.5, k20_y, divider_width, k20_h, 1);
+
 // Draw scale markings
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 gfx_a = 1;
@@ -1942,6 +1949,13 @@ num_ch > 1 && k20_r_rms_k > -100 ? (
   );
 );
 
+
+// Draw vertical divider on top of meter bars
+divider_x = zone_x + zone_w * 0.5;
+divider_width = max(1, gfx_w * 0.001);  // Proportional width with minimum of 1px
+gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+gfx_a = 0.6;
+gfx_rect(divider_x - divider_width * 0.5, k20_y, divider_width, k20_h, 1);
 
 // Draw clickable K-System label
 k_system_mode == 0 ? sprintf(#k_label, "K-20") :
@@ -2088,6 +2102,9 @@ need_clear_spectro ? (
 
 gfx_ext_retina>1 ? gfx_setfont(1,"Arial",16*gfx_ext_retina,'b') : gfx_setfont(0);
 
+// Initialize frequency zoom if not set
+!freq_zoom_factor ? freq_zoom_factor = 1.0;
+
 old_w != gfx_w || old_h!=gfx_h? (
   small_mode = gfx_w<200*gfx_ext_retina || gfx_h<200*gfx_ext_retina;
   cur_xpos=0;
@@ -2101,6 +2118,29 @@ old_w != gfx_w || old_h!=gfx_h? (
 );
 
 use_h = small_mode ? gfx_h : (gfx_h-gfx_texth - 4);
+
+// Handle mouse wheel for frequency zoom in spectrogram area
+mouse_x >= gfx_w/2 && mouse_x < gfx_w - 20 &&
+mouse_y >= gfx_h/2 && mouse_y < use_h ? (
+  mouse_wheel ? (
+    // Mouse wheel zoom
+    wheel_sensitivity = 0.0002;
+    freq_zoom_factor = max(0.1, min(10.0, freq_zoom_factor + mouse_wheel * wheel_sensitivity));
+    mouse_wheel = 0;
+  );
+  
+  // Ctrl + Left click = reset zoom
+  mouse_cap & 1 && mouse_cap & 4 ? (
+    !freq_reset_handled ? (
+      freq_zoom_factor = 1.0;
+      freq_reset_handled = 1;
+    );
+  ) : (
+    freq_reset_handled = 0;
+  );
+) : (
+  freq_reset_handled = 0;
+);
 
 reccnt>0 ? (
     amt = min(reccnt,histsize*2);
@@ -2198,7 +2238,9 @@ reccnt>0 ? (
             sc2=g_logscale/(gfx_h/2-20);
 
             loop(gfx_h/2-20,
-                tpos = (uselm ? ((fftsize*0.5 - 1 - log(1+(gfx_h/2-20-1-i)*sc2)*sc)) : i*sc)|0;
+                // Apply frequency zoom factor to the position calculation
+                zoomed_i = i / freq_zoom_factor;
+                tpos = (uselm ? ((fftsize*0.5 - 1 - log(1+(gfx_h/2-20-1-zoomed_i)*sc2)*sc)) : zoomed_i*sc)|0;
                 tpos >= fftsize*0.5 ? tpos=fftsize*0.5;
                 lfftpos >= tpos ? ( lfftpos=tpos-1; );
                 spectro_mv=0;
@@ -2244,42 +2286,45 @@ colormap_button.draw_colormap_button();
 colormap_button.handle_colormap_button();
 
 mouse_x >= gfx_w/2 && mouse_x < gfx_w - 20 &&
-mouse_y >= gfx_h/2 && mouse_y < gfx_h ? (
-  !(mouse_cap&1) ? mb=-169;
-  bla=0;
-  loop(9,
-    gfx_x=mouse_x - 1 + (bla%3); 
-    gfx_y=mouse_y - 1 + (bla/3);
-    gfx_getpixel(r,g,b); 
+mouse_y >= gfx_h/2 && mouse_y < gfx_h ?
+  !(mouse_cap&1) ? (  // Show info when not clicking
+    mb=-169;
+    bla=0;
+    loop(9,
+      gfx_x=mouse_x - 1 + (bla%3); 
+      gfx_y=mouse_y - 1 + (bla/3);
+      gfx_getpixel(r,g,b); 
 
-    r||g||b ? 
-    ( 
-      val = i = -169;
-      bestdist = 10000000000;
-      while (i<=0)
-      (        
-        calc_color(i,tmp, current_colormap);
-        dist = sqr(tmp.r-r)+sqr(tmp.g-g)+sqr(tmp.b-b);
-        dist < bestdist ? ( val=i; bestdist=dist; );
-        i+=1;
+      r||g||b ? 
+      ( 
+        val = i = -169;
+        bestdist = 10000000000;
+        while (i<=0)
+        (        
+          calc_color(i,tmp, current_colormap);
+          dist = sqr(tmp.r-r)+sqr(tmp.g-g)+sqr(tmp.b-b);
+          dist < bestdist ? ( val=i; bestdist=dist; );
+          i+=1;
+        );
+        mb = max(mb,val);
       );
-      mb = max(mb,val);
+      bla+=1;
     );
-    bla+=1;
-  );
-  (
+    (
 
-  // Top and bottom of the spectrogram in pixels
-  top_pixel    = gfx_h/2 - 20;
-  bottom_pixel = use_h;
-  // Clamp mouse_y to the visible spectrogram area
-  clamped_y = max(top_pixel, min(mouse_y, bottom_pixel-1));
-  // Compute pixel index (bottom-up, matches gfx_y = use_h - (i+1))
-  i = bottom_pixel - 1 - clamped_y;
-  // Map pixel index to FFT bin
-  bin_index = i * (0.5 * fftsize) / (gfx_h/2-20);
-  // Convert FFT bin to Hz
-  converted_hz = bin_index * srate / fftsize;
+    // Top and bottom of the spectrogram in pixels
+    top_pixel    = gfx_h/2 - 20;
+    bottom_pixel = use_h;
+    // Clamp mouse_y to the visible spectrogram area
+    clamped_y = max(top_pixel, min(mouse_y, bottom_pixel-1));
+    // Compute pixel index (bottom-up, matches gfx_y = use_h - (i+1))
+    i = bottom_pixel - 1 - clamped_y;
+    // Apply zoom factor to frequency calculation
+    zoomed_i = i / freq_zoom_factor;
+    // Map pixel index to FFT bin
+    bin_index = zoomed_i * (0.5 * fftsize) / (gfx_h/2-20);
+    // Convert FFT bin to Hz
+    converted_hz = bin_index * srate / fftsize;
 
 
     // converted_hz=(1-disp_hz)*srate*0.5;
@@ -2289,6 +2334,11 @@ mouse_y >= gfx_h/2 && mouse_y < gfx_h ? (
      sprintf(#infostr, "%s %.1fdB",#infostr,mb);
     ) : (
      #infostr += " -oodB";
+    );
+    
+    // Add zoom level indicator
+    freq_zoom_factor != 1.0 ? (
+      sprintf(#infostr, "%s (%.2fx)",#infostr, freq_zoom_factor);
     );
     
     gfx_measurestr(#infostr,wid,0);
