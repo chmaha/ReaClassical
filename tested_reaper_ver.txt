@@ -1,8 +1,5 @@
 ====
-7.45
+7.52
 ====
-
-To update REAPER within a ReaClassical portable install
-press Ctrl+U to start the REAPER Update Utility.
 
 

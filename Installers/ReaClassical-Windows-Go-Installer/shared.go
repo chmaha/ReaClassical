@@ -15,59 +15,35 @@ package main
 
 import (
 	"archive/zip"
+	"bufio"
 	"crypto/sha256"
-	_ "embed"
 	"encoding/hex"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
 
-// REAPER installers
-//
-//go:embed reaper752_x64-install.exe
-var Reaper64 []byte
+const urlToTest = "https://www.google.com"
 
-//go:embed reaper752_win11_arm64ec_beta-install.exe
-var ReaperARM64 []byte
+func checkInternet() bool {
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
 
-// 32-bit REAPER installer
-//
-//go:embed reaper752-install.exe
-var Reaper32 []byte
+	resp, err := client.Get(urlToTest)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
 
-// Resource Folder
-//
-//go:embed Resource_Folder_Base.zip
-var ResourceZip []byte
-
-// imgui
-//
-//go:embed reaper_imgui-x64.dll
-var reaimgui64 []byte
-
-//go:embed reaper_imgui-x86.dll
-var reaimgui32 []byte
-
-// sws
-//
-//go:embed reaper_sws-x64.dll
-var sws64 []byte
-
-//go:embed reaper_sws-x86.dll
-var sws32 []byte
-
-// 7zip
-//
-//go:embed 7zip.zip
-var zip64 []byte
-
-//go:embed 7zip32.zip
-var zip32 []byte
+	return resp.StatusCode == http.StatusOK
+}
 
 func getHashedDateSuffix() string {
 	// Get the current epoch time in seconds
@@ -85,6 +61,28 @@ func getHashedDateSuffix() string {
 	hashString := hex.EncodeToString(hashInBytes)[:5]
 
 	return hashString
+}
+
+func downloadFile(url, destination string) {
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("Error downloading file from %s: %s\n", url, err)
+		os.Exit(1)
+	}
+	defer response.Body.Close()
+
+	file, err := os.Create(destination)
+	if err != nil {
+		fmt.Printf("Error creating file %s: %s\n", destination, err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, response.Body)
+	if err != nil {
+		fmt.Printf("Error copying content to file %s: %s\n", destination, err)
+		os.Exit(1)
+	}
 }
 
 func extractArchive(archive, destination string) {
@@ -218,38 +216,115 @@ func addLineToReaperIni(rcfolder string) {
 
 }
 
-func mergeDir(srcDir, dstDir string) error {
-	return filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
+func getReaperVersion() (string, error) {
+	// Fetch the content of the online file
+	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/v25/tested_reaper_ver.txt")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Read the body of the response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Define a regular expression pattern to extract the version number
+	pattern := `====\s*(\d+\.\d+)\s*====`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(pattern)
+
+	// Find the version number in the content
+	matches := re.FindStringSubmatch(string(body))
+	if len(matches) < 2 {
+		return "", fmt.Errorf("version number not found")
+	}
+
+	// Return the version number
+	return matches[1], nil
+}
+
+func getReaClassicalMajorVersion() (string, error) {
+	// Fetch the content of the online file
+	resp, err := http.Get("https://raw.githubusercontent.com/chmaha/ReaClassical/v25/ReaClassical/ReaClassical.lua")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Read the body of the response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Define a regular expression pattern to extract the major version number
+	pattern := `@version\s*(\d+)\.\d+`
+
+	// Compile the regular expression
+	re := regexp.MustCompile(pattern)
+
+	// Find the major version number in the content
+	matches := re.FindStringSubmatch(string(body))
+	if len(matches) < 2 {
+		return "", fmt.Errorf("major version number not found")
+	}
+
+	// Return the major version number
+	return matches[1], nil
+}
+
+func replaceKeyInFile(filePath string) error {
+	// Open the file for reading
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Create a temporary file to store the modified content
+	tempFilePath := filePath + ".tmp"
+	tempFile, err := os.Create(tempFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %v", err)
+	}
+	defer tempFile.Close()
+
+	// Scanner to read the file line by line
+	scanner := bufio.NewScanner(file)
+	writer := bufio.NewWriter(tempFile)
+
+	// Find and replace the line starting with "KEY 8 96"
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "KEY 8 96") {
+			// Replace with "KEY 9 223"
+			line = strings.Replace(line, "KEY 8 96", "KEY 9 223", 1)
+		}
+		_, err := writer.WriteString(line + "\n")
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to write to temp file: %v", err)
 		}
+	}
 
-		// Compute relative path from srcDir
-		relPath, err := filepath.Rel(srcDir, path)
-		if err != nil {
-			return err
-		}
-		dstPath := filepath.Join(dstDir, relPath)
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error reading file: %v", err)
+	}
 
-		if d.IsDir() {
-			// Create subdirectory in destination if it doesn't exist
-			return os.MkdirAll(dstPath, 0755)
-		} else {
-			// Copy file
-			srcFile, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer srcFile.Close()
+	// Flush the writer buffer to ensure all content is written to the temp file
+	if err := writer.Flush(); err != nil {
+		return fmt.Errorf("failed to flush writer: %v", err)
+	}
 
-			dstFile, err := os.Create(dstPath)
-			if err != nil {
-				return err
-			}
-			defer dstFile.Close()
+	// Close the original file and replace it with the temporary file
+	file.Close()
+	tempFile.Close()
 
-			_, err = io.Copy(dstFile, srcFile)
-			return err
-		}
-	})
+	if err := os.Rename(tempFilePath, filePath); err != nil {
+		return fmt.Errorf("failed to replace original file with temp file: %v", err)
+	}
+
+	return nil
 }

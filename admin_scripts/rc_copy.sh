@@ -110,4 +110,13 @@ cp $dir/reaper-render.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 
+src="ReaClassical"
+zip_file="Resource_Folder_Base.zip"
+installer_dir="Installers"
+
+(
+  cd "$src" || exit 1
+  zip -rq "$OLDPWD/$installer_dir/$zip_file" .
+)
+
 echo "Done!"

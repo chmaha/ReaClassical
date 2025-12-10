@@ -24,8 +24,27 @@ func main() {
 	fmt.Println("Welcome to the ReaClassical installer...")
 	fmt.Println()
 
-	rcver := "26"
-	pkgver := "7.52"
+	if !checkInternet() {
+		fmt.Println()
+		fmt.Println("Error: The ReaClassical installer requires an internet connection.")
+		fmt.Println("Enable the connection if possible or transfer the portable install from an online machine.")
+		fmt.Println()
+		fmt.Print("Press Enter to exit...")
+		fmt.Scanln()
+		return
+	}
+
+	pkgver, err := getReaperVersion()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	rcver, err := getReaClassicalMajorVersion()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 
 	var (
 		rcfolder = fmt.Sprintf("ReaClassical_%s", rcver)
@@ -37,12 +56,11 @@ func main() {
 	fmt.Printf("Versions: REAPER %s (%s), ReaClassical %s\n\n", pkgver, arch, rcver)
 	time.Sleep(2 * time.Second)
 
-	switch arch {
-	case "amd64", "arm64":
+	if arch == "amd64" || arch == "arm64" {
 		Install64bit(rcfolder, pkgver, rcver, arch)
-	case "386":
+	} else if arch == "386" {
 		Install32bit(rcfolder, pkgver, rcver)
-	default:
+	} else {
 		fmt.Printf("Sorry, your system architecture is not supported.")
 	}
 
