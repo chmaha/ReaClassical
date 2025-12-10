@@ -1,5 +1,5 @@
-﻿# PowerShell script to install ReaClassical on Windows
-# Works for x64 architecture compatible with REAPER
+# Script to install ReaClassical on Windows
+# Works for all architectures that are compatible with REAPER
 
 # Copyright (C) 2022–2025 chmaha
 
@@ -14,144 +14,189 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+$ErrorActionPreference = "Stop"
+
+# Version
 $rcver = "26"
 $tempDir = $null
 
-# Detect system architecture
-$systemArch = $env:PROCESSOR_ARCHITECTURE
-if ($systemArch -eq "AMD64") {
-    $arch = "x64"
-} elseif ($systemArch -eq "ARM64") {
-    $arch = "arm64ec"
-} elseif ($systemArch -eq "x86") {
-    $arch = "x86"
-} else {
-    Write-Host "Unknown architecture: $systemArch"
-    exit 1
-}
-
+# ------------------------
+# Cleanup function
+# ------------------------
 function Cleanup {
     if ($tempDir -and (Test-Path $tempDir)) {
         Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
+# Cleanup trap
+trap {
+    Cleanup
+    Write-Host "`nInstallation failed or cancelled. Temporary files removed."
+    break
+}
+
+# ------------------------
+# Internet check
+# ------------------------
 function Check-Internet {
     try {
-        $ping = Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet -ErrorAction Stop
-        if (-not $ping) {
-            throw
-        }
-    }
-    catch {
-        Write-Host "`nError: The ReaClassical installer requires an internet connection."
-        Write-Host "Enable the connection if possible or transfer the portable install from an online machine."
-        Write-Host "Exiting...`n"
+        if (-not (Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet)) { throw }
+    } catch {
+        Write-Host "`nError: Installer requires an internet connection."
+        Write-Host "Exiting..."
         exit 1
     }
 }
 
-# Ensure cleanup runs on exit
-trap {
-    Cleanup
-    break
+# ------------------------
+# Detect Architecture
+# ------------------------
+$systemArch = $env:PROCESSOR_ARCHITECTURE
+switch ($systemArch) {
+    "AMD64" { $arch = "x64" }
+    "ARM64" { $arch = "arm64ec" }
+    "x86"   { $arch = "x86" }
+    default {
+        Write-Host "Unknown architecture: $systemArch"
+        exit 1
+    }
 }
 
+# ------------------------
+# Ask user where to install
+# ------------------------
+Add-Type -AssemblyName System.Windows.Forms
+$dialog = New-Object System.Windows.Forms.FolderBrowserDialog
+$dialog.Description = "Choose where to install ReaClassical. A new folder named ReaClassical_$rcver will be created here."
+$dialog.ShowNewFolderButton = $true
+
+if ($dialog.ShowDialog() -ne "OK") {
+    Write-Host "Installation cancelled by user."
+    return
+}
+
+$userSelectedPath = $dialog.SelectedPath
+
+# ------------------------
+# Determine final folder with random suffix if needed
+# ------------------------
+function Get-RandomAlphaNum($length = 5) {
+    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    -join ((1..$length) | ForEach-Object { $chars[(Get-Random -Minimum 0 -Maximum $chars.Length)] })
+}
+
+$finalInstallPath = Join-Path $userSelectedPath "ReaClassical_$rcver"
+$suffixApplied = $false
+
+while (Test-Path $finalInstallPath) {
+    $suffix = "_" + (Get-RandomAlphaNum 5)
+    $finalInstallPath = Join-Path $userSelectedPath "ReaClassical_$rcver$suffix"
+    $suffixApplied = $true
+}
+
+if ($suffixApplied) {
+    Write-Host "Folder 'ReaClassical_$rcver' already exists. Using unique suffix..."
+}
+
+Write-Host "`nSelected install location: $finalInstallPath`n"
+Start-Sleep -Seconds 1
+
+# ------------------------
+# Check internet after location
+# ------------------------
 Check-Internet
 
+# ------------------------
+# Get tested REAPER version
+# ------------------------
 $verTxt = "https://raw.githubusercontent.com/chmaha/ReaClassical/v26/tested_reaper_ver.txt"
 $verContent = Invoke-WebRequest -Uri $verTxt -UseBasicParsing | Select-Object -ExpandProperty Content
 $ver = ($verContent -split "`n" | Select-String -Pattern "====" -Context 0,1).Context.PostContext[0].Trim()
-
 $major = $ver.Split('.')[0]
 $minor = $ver.Split('.')[1]
-$rcfolder = "ReaClassical_$rcver"
 
-Write-Host "Welcome to the ReaClassical installer...`n"
-Start-Sleep -Seconds 2
-Write-Host "Versions: REAPER $ver ($arch), ReaClassical $rcver`n"
-Start-Sleep -Seconds 2
-
-# Create unique date suffix
-$dateSuffix = -join ((Get-FileHash -InputStream ([IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes([DateTimeOffset]::Now.ToUnixTimeSeconds()))) -Algorithm SHA256).Hash[0..4] | ForEach-Object { $_.ToString("x2") })
-
-# Create temporary directory
-$tempDir = Join-Path $env:TEMP "ReaClassical_$dateSuffix"
+# ------------------------
+# Create TEMP workspace
+# ------------------------
+$tempDir = [System.IO.Path]::Combine($env:TEMP, [System.IO.Path]::GetRandomFileName())
 New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
 
-Write-Host "Downloading REAPER from reaper.fm..."
-Start-Sleep -Seconds 2
+$tempInstallRoot = Join-Path $tempDir "ReaClassical_$rcver"
+New-Item -Path $tempInstallRoot -ItemType Directory -Force | Out-Null
 
-# Build REAPER download URL based on architecture
-if ($arch -eq "x64") {
-    $reaperOutput = Join-Path $tempDir "reaper$($major)$($minor)_x64-install.exe"
-    $reaperUrl = "https://www.reaper.fm/files/$major.x/reaper$($major)$($minor)_x64-install.exe"
-} elseif ($arch -eq "arm64ec") {
-    $reaperOutput = Join-Path $tempDir "reaper$($major)$($minor)_win11_arm64ec_beta-install.exe"
-    $reaperUrl = "https://www.reaper.fm/files/$major.x/reaper$($major)$($minor)_win11_arm64ec_beta-install.exe"
-} elseif ($arch -eq "x86") {
-    $reaperOutput = Join-Path $tempDir "reaper$($major)$($minor)-install.exe"
-    $reaperUrl = "https://www.reaper.fm/files/$major.x/reaper$($major)$($minor)-install.exe"
+Write-Host "Building ReaClassical in temporary workspace..."
+Start-Sleep -Seconds 1
+
+# ------------------------
+# Download REAPER installer
+# ------------------------
+Write-Host "Downloading REAPER $ver ($arch)..."
+switch ($arch) {
+    "x64" {
+        $reaperFile = "reaper$major$minor`_x64-install.exe"
+        $reaperUrl  = "https://www.reaper.fm/files/$major.x/$reaperFile"
+    }
+    "arm64ec" {
+        $reaperFile = "reaper$major$minor`_win11_arm64ec_beta-install.exe"
+        $reaperUrl  = "https://www.reaper.fm/files/$major.x/$reaperFile"
+    }
+    "x86" {
+        $reaperFile = "reaper$major$minor-install.exe"
+        $reaperUrl  = "https://www.reaper.fm/files/$major.x/$reaperFile"
+    }
 }
 
+$reaperOutput = Join-Path $tempDir $reaperFile
 Invoke-WebRequest -Uri $reaperUrl -OutFile $reaperOutput -UseBasicParsing
 
-# Check if ReaClassical folder already exists
-if (Test-Path "ReaClassical_$rcver") {
-    $rcfolder = "ReaClassical_$($rcver)_$dateSuffix"
-    Start-Sleep -Seconds 2
-    Write-Host "Folder ReaClassical_$rcver already exists. Adding unique identifier as suffix."
-}
-
-Start-Sleep -Seconds 2
-Write-Host "Extracting files from REAPER archive to $rcfolder folder"
-
-# Download portable 7-zip for extraction
-$sevenZipPath = Join-Path $tempDir "7zip"
+# ------------------------
+# Download portable 7zip
+# ------------------------
 $sevenZipZip = Join-Path $tempDir "7zip.zip"
+$sevenZipPath = Join-Path $tempDir "7zip"
+
 Invoke-WebRequest -Uri "https://github.com/chmaha/7zip/raw/main/7zip.zip" -OutFile $sevenZipZip -UseBasicParsing
 Expand-Archive -Path $sevenZipZip -DestinationPath $sevenZipPath -Force
 
-# Extract REAPER exe to temp directory
+# ------------------------
+# Extract REAPER inside TEMP
+# ------------------------
+Write-Host "Extracting REAPER..."
 $reaperExtract = Join-Path $tempDir "reaper_extract"
 & "$sevenZipPath\7z.exe" x $reaperOutput "-o$reaperExtract" -y | Out-Null
+Get-ChildItem -Path $reaperExtract -Recurse | Move-Item -Destination $tempInstallRoot -Force
 
-# Move extracted REAPER files to final folder
-New-Item -Path $rcfolder -ItemType Directory -Force | Out-Null
-Get-ChildItem -Path $reaperExtract -Recurse | Move-Item -Destination $rcfolder -Force
-
-Write-Host "Downloading ReaClassical files from Github..."
-Start-Sleep -Seconds 2
+# ------------------------
+# Download ReaClassical components
+# ------------------------
+Write-Host "Downloading ReaClassical components..."
 $resOutput = Join-Path $tempDir "Resource_Folder_Base.zip"
-$resUrl = "https://github.com/chmaha/ReaClassical/raw/v26/Installers/Resource_Folder_Base.zip"
-Invoke-WebRequest -Uri $resUrl -OutFile $resOutput -UseBasicParsing
+$upOutput  = Join-Path $tempDir "UP_Windows-$arch.zip"
 
-$upOutput = Join-Path $tempDir "UP_Windows-$arch.zip"
-$upUrl = "https://github.com/chmaha/ReaClassical/raw/v26/Installers/UserPlugins/UP_Windows-$arch.zip"
-Invoke-WebRequest -Uri $upUrl -OutFile $upOutput -UseBasicParsing
+Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/v26/Installers/Resource_Folder_Base.zip" -OutFile $resOutput -UseBasicParsing
+Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/v26/Installers/UserPlugins/UP_Windows-$arch.zip" -OutFile $upOutput -UseBasicParsing
 
-Start-Sleep -Seconds 2
-Expand-Archive -Path $resOutput -DestinationPath $rcfolder -Force
-Expand-Archive -Path $upOutput -DestinationPath (Join-Path $rcfolder "UserPlugins") -Force
+Expand-Archive -Path $resOutput -DestinationPath $tempInstallRoot -Force
+Expand-Archive -Path $upOutput  -DestinationPath (Join-Path $tempInstallRoot "UserPlugins") -Force
 
-# Get absolute path of rcfolder
-$rcfolderPath = (Resolve-Path $rcfolder).Path
+# ------------------------
+# Modify reaper.ini
+# ------------------------
+$iniPath = Join-Path $tempInstallRoot "reaper.ini"
 
-Start-Sleep -Seconds 2
-Write-Host "Adding the ReaClassical theme reference to reaper.ini"
-$iniPath = Join-Path $rcfolder "reaper.ini"
+# Add theme
 $iniContent = Get-Content $iniPath
 $newContent = @()
 foreach ($line in $iniContent) {
     $newContent += $line
     if ($line -eq "[REAPER]") {
-        $newContent += "lastthemefn5=$rcfolderPath\ColorThemes\ReaClassical.ReaperTheme"
+        $newContent += "lastthemefn5=$tempInstallRoot\ColorThemes\ReaClassical.ReaperTheme"
     }
 }
 $newContent | Set-Content $iniPath
 
-Start-Sleep -Seconds 2
-Write-Host "Adding the ReaClassical splash to reaper.ini"
+# Add splash
 $iniContent = Get-Content $iniPath
 $newContent = @()
 foreach ($line in $iniContent) {
@@ -162,7 +207,17 @@ foreach ($line in $iniContent) {
 }
 $newContent | Set-Content $iniPath
 
-Start-Sleep -Seconds 2
-Write-Host "Portable ReaClassical Installation complete!"
+# ------------------------
+# MOVE final install to user-selected destination
+# ------------------------
+Write-Host "`nFinalizing installation..."
+Move-Item -Path $tempInstallRoot -Destination $finalInstallPath -Force
 
+Write-Host "`nReaClassical installation complete!"
+Write-Host "Installed to: $finalInstallPath"
+
+# ------------------------
+# Cleanup TEMP
+# ------------------------
 Cleanup
+
