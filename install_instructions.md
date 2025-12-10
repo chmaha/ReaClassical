@@ -12,7 +12,10 @@ This means:
 ## Quick Full Portable Install on Linux, MacOS & Windows (for all nine architectures supported by REAPER)
 
 ##### Windows
-Download [ReaClassical_Win64.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win64.exe) (64-bit) or [ReaClassical_Win32.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win32.exe) (32-bit) where you want to install ReaClassical and double-click. The source code for the installer is [here](https://github.com/chmaha/ReaClassical/tree/main/Installers/ReaClassical-Windows-Go-Installer).
+Open a powershell instance, navigate to the folder where you want to download ReaClassical and paste the following:
+```sh
+irm "https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win.ps1" | iex
+```
 
 ##### MacOS
 Open a terminal, navigate to the folder where you want to download ReaClassical and paste the following:
@@ -25,14 +28,7 @@ Open a terminal, navigate to the folder where you want to download ReaClassical 
 curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Linux.sh | sh
 ```
 
-The executable or script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic. On first run, follow the update instructions below to get the latest and greatest ReaClassical functions, toolbar and keymap.
-
-## For updating an existing portable install of ReaClassical:
-
-1. Run the ReaClassical_Updater function (Shift+U). This will sync ReaPack to get the latest ReaClassical functions then offer to overwrite your toolbars and keymaps with the latest ReaClassical portable install defaults. **DON'T answer yes to either of these questions if you have your own custom toolbars or keyboard shortcuts as they will be overwritten!**
-2. Run the REAPER Update Utility (Ctrl+U) to upgrade to the latest tested version of REAPER noted [here](https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt).
-
-For those who only want access to the scripts and jsfx plugins you can install ReaClassical "Core":
+The script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic.
 
 ## Basic manual install of just the S-D editing tools inside your existing REAPER Install
 
