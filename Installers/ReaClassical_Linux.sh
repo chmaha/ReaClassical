@@ -43,11 +43,31 @@ ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
 major=$(echo $ver | awk -F. '{print $1}')
 minor=$(echo $ver | awk -F. '{print $2}')
-rcfolder="ReaClassical_${rcver}"
 arch=$(uname -m)
 
 printf "Welcome to the ReaClassical installer...\n\n"
 sleep 2
+
+# Ask user where to install
+default_install="$HOME/Desktop"
+printf "Enter the folder where you want to install ReaClassical [Default: %s]: " "$default_install"
+read -r user_input
+install_dir="${user_input:-$default_install}"
+
+# Make sure the directory exists
+mkdir -p "$install_dir" || {
+    echo "Failed to create installation directory: $install_dir"
+    exit 1
+}
+
+# # Change into the chosen directory for installation
+# cd "$install_dir" || {
+#     echo "Cannot change into installation directory: $install_dir"
+#     exit 1
+# }
+
+rcfolder="$install_dir/ReaClassical_$rcver"
+
 printf "Versions: REAPER $ver ($arch), ReaClassical $rcver\n\n"
 sleep 2
 
@@ -70,9 +90,9 @@ reaper_url="https://reaper.fm/files/${major}.x/reaper${major}${minor}_linux_${ar
 curl -L -o "$reaper_output" --progress-bar "$reaper_url"
 
 # Check if a ReaClassical folder already exists
-if [ -d "ReaClassical_${rcver}" ]; then
+if [ -d "$rcfolder" ]; then
     # If it exists, create a folder with a date suffix
-    rcfolder="ReaClassical_${rcver}_${date_suffix}"
+    rcfolder="${rcfolder}_${date_suffix}"
     sleep 2
     echo "Folder ReaClassical_${rcver} already exists. Adding unique identifier as suffix."
 fi
