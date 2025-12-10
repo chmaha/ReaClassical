@@ -49,8 +49,8 @@ function main()
     local dest_renderpresets_path = resource_path .. separator .. "reaper-render.ini"
     local dest_main_ini_path = resource_path .. separator .. "reaper.ini"
 
-    local splash_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
-    local splash_abs_path = resource_path .. splash_relative_path
+    local splash_relative_path = get_path("Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
+    local splash_abs_path = resource_path .. separator .. splash_relative_path
 
     local theme_relative_path = get_path("", "ColorThemes", "ReaClassical.ReaperTheme")
     local theme_abs_path = resource_path .. theme_relative_path
@@ -67,11 +67,14 @@ function main()
                 copy_file(src_shortcuts_path, dest_shortcuts_path)
                 copy_file(src_main_ini_path, dest_main_ini_path)
             end
+
+            update_reaper_ini(dest_main_ini_path, "lastthemefn5", theme_abs_path)
             
             -- re-apply absolute splash reference on MacOS
             if string.find(system, "^OSX") or string.find(system, "^macOS") then
                 update_reaper_ini(dest_main_ini_path, "splashimage", splash_abs_path)
-                update_reaper_ini(dest_main_ini_path, "lastthemefn5", theme_abs_path)
+            else
+                update_reaper_ini(dest_main_ini_path, "splashimage", splash_relative_path)
             end
 
     if response == 6 then

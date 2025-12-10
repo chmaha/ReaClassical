@@ -123,11 +123,11 @@ Get-ChildItem -Path $reaperExtract -Recurse | Move-Item -Destination $rcfolder -
 Write-Host "Downloading ReaClassical files from Github..."
 Start-Sleep -Seconds 2
 $resOutput = Join-Path $tempDir "Resource_Folder_Base.zip"
-$resUrl = "https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/Resource_Folder_Base.zip"
+$resUrl = "https://github.com/chmaha/ReaClassical/raw/v26/Installers/Resource_Folder_Base.zip"
 Invoke-WebRequest -Uri $resUrl -OutFile $resOutput -UseBasicParsing
 
 $upOutput = Join-Path $tempDir "UP_Windows-$arch.zip"
-$upUrl = "https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/UserPlugins/UP_Windows-$arch.zip"
+$upUrl = "https://github.com/chmaha/ReaClassical/raw/v26/Installers/UserPlugins/UP_Windows-$arch.zip"
 Invoke-WebRequest -Uri $upUrl -OutFile $upOutput -UseBasicParsing
 
 Start-Sleep -Seconds 2

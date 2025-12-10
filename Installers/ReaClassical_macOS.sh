@@ -86,10 +86,10 @@ hdiutil attach -quiet -nobrowse -noverify -noautoopen -mountpoint "$temp_dir/rea
 echo "Downloading ReaClassical resource folder base and userplugins for MacOS"
 sleep 2
 res_output="$temp_dir/Resource_Folder_Base.zip"
-res_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/Resource_Folder_Base.zip"
+res_url="https://github.com/chmaha/ReaClassical/raw/v26/Installers/Resource_Folder_Base.zip"
 curl -L -o "$res_output" "$res_url"
 up_output="$temp_dir/UP_MacOS-$arch.zip"
-up_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/UserPlugins/UP_MacOS-$arch.zip"
+up_url="https://github.com/chmaha/ReaClassical/raw/v26/Installers/UserPlugins/UP_MacOS-$arch.zip"
 curl -L -o "$up_output" "$up_url"
 
 # Check if a ReaClassical folder already exists

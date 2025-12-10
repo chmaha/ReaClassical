@@ -86,10 +86,10 @@ rmdir "${rcfolder}/REAPER"
 echo "Downloading ReaClassical files from Github..."
 sleep 2
 res_output="$temp_dir/Resource_Folder_Base.zip"
-res_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/Resource_Folder_Base.zip"
+res_url="https://github.com/chmaha/ReaClassical/raw/v26/Installers/Resource_Folder_Base.zip"
 curl -L -o "$res_output" --progress-bar "$res_url"
 up_output="$temp_dir/UP_Linux-${arch}.zip"
-up_url="https://github.com/chmaha/ReaClassical/raw/v25/Resource%20Folder/UserPlugins/UP_Linux-${arch}.zip"
+up_url="https://github.com/chmaha/ReaClassical/raw/v26/Installers/UserPlugins/UP_Linux-${arch}.zip"
 curl -L -o "$up_output" --progress-bar "$up_url"
 sleep 2
 unzip -q "$temp_dir/Resource_Folder_Base.zip" -d "${rcfolder}/"
