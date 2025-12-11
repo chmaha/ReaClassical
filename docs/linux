@@ -60,12 +60,6 @@ mkdir -p "$install_dir" || {
     exit 1
 }
 
-# # Change into the chosen directory for installation
-# cd "$install_dir" || {
-#     echo "Cannot change into installation directory: $install_dir"
-#     exit 1
-# }
-
 rcfolder="$install_dir/ReaClassical_$rcver"
 
 printf "Versions: REAPER $ver ($arch), ReaClassical $rcver\n\n"
