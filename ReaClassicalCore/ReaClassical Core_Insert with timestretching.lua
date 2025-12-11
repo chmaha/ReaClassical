@@ -22,14 +22,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, select_matching_folder, copy_source, split_at_dest_in
+local main, select_matching_src_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, ripple_lock_mode, adaptive_delete
 local return_xfade_length, xfade, get_first_last_items, markers
 local mark_as_edit, move_to_project_tab, save_source_details
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
-local get_item_guid
+local get_item_guid, select_matching_dest_folder
 
 ---------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ function main()
     if dest_count + source_count == 4 then
         local selected_items = {}
         move_to_project_tab(source_proj)
-        fix_marker_pair(998,999)
+        fix_marker_pair(998, 999)
         local xfade_len = return_xfade_length()
         local total_selected, parent_selected = copy_source(xfade_len)
         if total_selected == 0 then
@@ -106,17 +106,18 @@ function main()
         end
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
-        fix_marker_pair(996,997)
+        fix_marker_pair(996, 997)
+        select_matching_dest_folder()
         split_at_dest_in()
-        Main_OnCommand(40625, 0)  -- Time Selection: Set start point
+        Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
-        Main_OnCommand(40626, 0)  -- Time Selection: Set end point
-        Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
-        Main_OnCommand(40630, 0)  -- Go to start of time selection
-        Main_OnCommand(40309, 0)  -- ripple off
+        Main_OnCommand(40626, 0) -- Time Selection: Set end point
+        Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
+        Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
+        Main_OnCommand(40630, 0) -- Go to start of time selection
+        Main_OnCommand(40309, 0) -- ripple off
         adaptive_delete()
-        Main_OnCommand(40289, 0)  -- Item: Unselect all items
+        Main_OnCommand(40289, 0) -- Item: Unselect all items
 
         local state = GetToggleCommandState(1156)
         if state == 1 then
@@ -186,7 +187,7 @@ end
 
 ---------------------------------------------------------------------
 
-function select_matching_folder()
+function select_matching_src_folder()
     local cursor = GetCursorPosition()
     local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
     local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
@@ -207,7 +208,7 @@ function copy_source(xfade_len)
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
-    select_matching_folder()
+    select_matching_src_folder()
     local left_overlap = check_overlapping_items()
     Main_OnCommand(40625, 0) -- Time Selection: Set start point
     GoToMarker(0, 999, false)
@@ -245,16 +246,86 @@ end
 
 function split_at_dest_in()
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
-    Main_OnCommand(40939, 0) -- Track: Select track 01
-    GoToMarker(0, 996, false)
     select_item_under_cursor_on_selected_track()
-    Main_OnCommand(40034, 0)        -- Item grouping: Select all items in groups
-    local selected_items = count_selected_media_items()
-    Main_OnCommand(40912, 0)        -- Options: Toggle auto-crossfade on split (OFF)
-    if selected_items > 0 then
-        Main_OnCommand(40186, 0)    -- Item: Split items at edit or play cursor (ignoring grouping)
+    local initial_selected_items = count_selected_media_items()
+    -- New logic: if exactly 2 items are selected, move the second item to marker 996
+    if initial_selected_items == 2 then
+        local second_item = get_selected_media_item_at(1)
+        if second_item then
+            -- Find position of marker 996
+            local marker_pos = nil
+            local i = 0
+            while true do
+                local retval, isrgn, pos, _, _, markrgnindexnumber = EnumProjectMarkers(i)
+                if not retval then break end
+                if not isrgn and markrgnindexnumber == 996 then
+                    marker_pos = pos
+                    break
+                end
+                i = i + 1
+            end
+
+            if marker_pos then
+                -- Get group ID of second item
+                local group_id = GetMediaItemInfo_Value(second_item, "I_GROUPID")
+                if group_id ~= 0 then
+                    -- Find the folder track
+                    local num_tracks = CountTracks(0)
+                    local sel_track = GetSelectedTrack(0, 0)
+                    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+                    local folder_start, folder_end = nil, nil
+                    for t = track_num, num_tracks - 1 do
+                        local track = GetTrack(0, t)
+                        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                        if depth == 1 then
+                            folder_start = t
+                            -- find folder end
+                            folder_end = t
+                            local x = t + 1
+                            while x < num_tracks do
+                                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                                folder_end = x
+                                if d < 0 then break end
+                                x = x + 1
+                            end
+                            break
+                        end
+                    end
+
+                    if folder_start then
+                        -- Loop through items only on tracks within selected folder
+                        for t = folder_start, folder_end do
+                            local track = GetTrack(0, t)
+                            local num_items_on_track = CountTrackMediaItems(track)
+                            for j = 0, num_items_on_track - 1 do
+                                local item = GetTrackMediaItem(track, j)
+                                if GetMediaItemInfo_Value(item, "I_GROUPID") == group_id then
+                                    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                                    local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+                                    if marker_pos > item_start and marker_pos < item_end then
+                                        -- Shift left edge to marker 996, keep right edge fixed
+                                        local new_len = item_end - marker_pos
+                                        SetMediaItemInfo_Value(item, "D_POSITION", marker_pos)
+                                        SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- Deselect the second item
+            SetMediaItemSelected(second_item, false)
+        end
     end
-    Main_OnCommand(40289, 0)        -- Item: Unselect all items
+    local final_selected_items = count_selected_media_items()
+    Main_OnCommand(40034, 0)     -- Item grouping: Select all items in groups
+    Main_OnCommand(40912, 0)     -- Options: Toggle auto-crossfade on split (OFF)
+    if final_selected_items > 0 then
+        Main_OnCommand(40186, 0) -- Item: Split items at edit or play cursor (ignoring grouping)
+    end
+    Main_OnCommand(40289, 0)     -- Item: Unselect all items
 end
 
 ---------------------------------------------------------------------
@@ -335,11 +406,11 @@ end
 function xfade(xfade_len)
     select_item_under_cursor_on_selected_track()
     MoveEditCursor(-xfade_len, false)
-    Main_OnCommand(40625, 0)        -- Time selection: Set start point
+    Main_OnCommand(40625, 0) -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
-    Main_OnCommand(40626, 0)        -- Time selection: Set end point
-    Main_OnCommand(40916, 0)        -- Item: Crossfade items within time selection
-    Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
+    Main_OnCommand(40626, 0) -- Time selection: Set end point
+    Main_OnCommand(40916, 0) -- Item: Crossfade items within time selection
+    Main_OnCommand(40635, 0) -- Time selection: Remove time selection
     MoveEditCursor(0.001, false)
     select_item_under_cursor_on_selected_track()
     MoveEditCursor(-0.001, false)
@@ -354,15 +425,11 @@ function get_first_last_items()
 
     for i = 0, num_of_items - 1 do
         local item = get_selected_media_item_at(i)
-        local track = GetMediaItem_Track(item)
-        local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
-        if track_num == 1 then
-            if not first_sel_item then
-                first_sel_item = item
-            end
-            last_sel_item = item
+        if not first_sel_item then
+            first_sel_item = item
         end
+        last_sel_item = item
     end
 
     return first_sel_item, last_sel_item
@@ -626,80 +693,79 @@ end
 ---------------------------------------------------------------------
 
 function adaptive_delete()
-  local sel_items = {}
-  local item_count = count_selected_media_items()
-  for i = 0, item_count - 1 do
-    sel_items[#sel_items+1] = get_selected_media_item_at(i)
-  end
-
-  local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
-  local items_in_time_sel = {}
-
-  if time_sel_end - time_sel_start > 0 then
-    for _, item in ipairs(sel_items) do
-      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-      local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
-
-      if item_sel then
-        local intersectmatches = 0
-        -- conditions copied from original C++ logic
-        if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
-          intersectmatches = intersectmatches + 1
-        end
-        if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
-          intersectmatches = intersectmatches + 1
-        end
-        if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
-          intersectmatches = intersectmatches + 1
-        end
-        if time_sel_end >= item_pos and time_sel_start < item_pos then
-          intersectmatches = intersectmatches + 1
-        end
-
-        if intersectmatches > 0 then
-          table.insert(items_in_time_sel, item)
-        end
-      end
+    local sel_items = {}
+    local item_count = count_selected_media_items()
+    for i = 0, item_count - 1 do
+        sel_items[#sel_items + 1] = get_selected_media_item_at(i)
     end
-  end
 
-  if #items_in_time_sel > 0 then
-    Main_OnCommand(40312, 0) -- Delete items in time selection
-  else
-    Main_OnCommand(40006, 0) -- Delete items or time selection contents
-  end
+    local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
+    local items_in_time_sel = {}
+
+    if time_sel_end - time_sel_start > 0 then
+        for _, item in ipairs(sel_items) do
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
+
+            if item_sel then
+                local intersectmatches = 0
+                -- conditions copied from original C++ logic
+                if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
+                    intersectmatches = intersectmatches + 1
+                end
+                if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
+                    intersectmatches = intersectmatches + 1
+                end
+                if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
+                    intersectmatches = intersectmatches + 1
+                end
+                if time_sel_end >= item_pos and time_sel_start < item_pos then
+                    intersectmatches = intersectmatches + 1
+                end
+
+                if intersectmatches > 0 then
+                    table.insert(items_in_time_sel, item)
+                end
+            end
+        end
+    end
+
+    if #items_in_time_sel > 0 then
+        Main_OnCommand(40312, 0) -- Delete items in time selection
+    else
+        Main_OnCommand(40006, 0) -- Delete items or time selection contents
+    end
 end
 
 ---------------------------------------------------------------------
 
 function select_item_under_cursor_on_selected_track()
-  Main_OnCommand(40289, 0) -- Unselect all items
+    Main_OnCommand(40289, 0) -- Unselect all items
 
-  local curpos = GetCursorPosition()
-  local item_count = CountMediaItems(0)
+    local curpos = GetCursorPosition()
+    local item_count = CountMediaItems(0)
 
-  for i = 0, item_count - 1 do
-    local item = GetMediaItem(0, i)
-    local track = GetMediaItem_Track(item)
-    local track_sel = IsTrackSelected(track)
+    for i = 0, item_count - 1 do
+        local item = GetMediaItem(0, i)
+        local track = GetMediaItem_Track(item)
+        local track_sel = IsTrackSelected(track)
 
-    if track_sel then
-      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-      local item_end = item_pos + item_len
+        if track_sel then
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            local item_end = item_pos + item_len
 
-      if curpos >= item_pos and curpos <= item_end then
-        SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
-      end
+            if curpos >= item_pos and curpos <= item_end then
+                SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
+            end
+        end
     end
-  end
 end
 
 ---------------------------------------------------------------------
 
 function fix_marker_pair(id_in, id_out)
-
     local in_pos, out_pos
     local in_name, out_name
 
@@ -728,7 +794,7 @@ function fix_marker_pair(id_in, id_out)
         DeleteProjectMarker(0, id_out, false)
 
         -- re-add with POSITIONS SWAPPED
-        AddProjectMarker2(0, false, out_pos, 0, in_name,  id_in, 0)
+        AddProjectMarker2(0, false, out_pos, 0, in_name, id_in, 0)
         AddProjectMarker2(0, false, in_pos, 0, out_name, id_out, 0)
     end
 end
@@ -746,6 +812,23 @@ function get_item_guid(item)
         return guid
     else
         return ""
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_matching_dest_folder()
+    GoToMarker(0, 996, false)
+    local cursor = GetCursorPosition()
+    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
+    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
+    local folder_number = tonumber(string.match(label, "(%d*):DEST*"))
+    for i = 0, CountTracks(0) - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
+            SetOnlyTrackSelected(track)
+            break
+        end
     end
 end
 

@@ -24,6 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number, other_source_marker_check
+local get_path, get_color_table
 
 ---------------------------------------------------------------------
 
@@ -34,6 +35,7 @@ if not SWS_exists then
 end
 
 function main()
+    PreventUIRefresh(1)
     local workflow = "Horizontal"
     if workflow == "" then
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
@@ -74,13 +76,22 @@ function main()
         local other_source_marker = other_source_marker_check()
 
         local color_track = track or selected_track
-        local marker_color = ColorToNative(23, 223, 143) | 0x1000000
+        local colors = get_color_table()
+
+        local marker_color
+        if workflow == "Horizontal" then
+            marker_color = colors.source_marker
+        else
+            marker_color = color_track and GetTrackColor(color_track) or colors.source_marker
+        end
+
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
 
-        if other_source_marker ~= track_number then
+        if other_source_marker and other_source_marker ~= track_number then
             MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
         end
     end
+    PreventUIRefresh(-1)
 end
 
 ---------------------------------------------------------------------
@@ -129,6 +140,23 @@ function other_source_marker_check()
     end
 
     return nil -- Return nil if no marker is found
+end
+
+---------------------------------------------------------------------
+
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

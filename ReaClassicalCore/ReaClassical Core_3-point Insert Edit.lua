@@ -22,16 +22,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, markers, select_matching_folder, copy_source, split_at_dest_in
+local main, markers, select_matching_source_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, load_last_assembly_item
 local ripple_lock_mode, return_xfade_length, xfade, get_item_guid
-local get_first_last_items, get_color_table, get_path, mark_as_edit
+local get_first_last_items, mark_as_edit
 local move_to_project_tab, save_source_details, adaptive_delete
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
-local add_dest_out_marker, save_last_assembly_item, create_dest_in
-local get_item_by_guid
+local save_last_assembly_item
+local get_item_by_guid, select_matching_dest_folder, add_marker
 
 ---------------------------------------------------------------------
 
@@ -74,13 +74,12 @@ function main()
     if moveable_dest == 1 then move_destination_folder_to_top() end
 
     local proj_marker_count, source_proj, dest_proj, dest_in, _, _, source_in,
-    source_out, source_count, pos_table, track_number = markers()
-
+    source_out, source_count, pos_table, src_track_number, dest_track_number = markers()
     if proj_marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
             .. "\nor use two for multi-tab S-D editing.", "Source-Destination Edit", 0)
-        if moveable_dest == 1 then move_destination_folder(track_number) end
+        if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
 
@@ -89,7 +88,7 @@ function main()
             "Source or destination markers should be paired with " ..
             "the corresponding source or destination project marker.",
             "Multi-tab Source-Destination Edit", 0)
-        if moveable_dest == 1 then move_destination_folder(track_number) end
+        if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
 
@@ -101,9 +100,8 @@ function main()
             local item_start = GetMediaItemInfo_Value(last_saved_item, "D_POSITION")
             local item_length = GetMediaItemInfo_Value(last_saved_item, "D_LENGTH")
             local item_right_edge = item_start + item_length
-            local dest_in_pos = pos_table[1]
             local threshold = 0.0001
-            if math.abs(item_right_edge - dest_in_pos) > threshold then
+            if math.abs(item_right_edge - pos_table[1]) > threshold then
                 local user_input = MB(
                     "The DEST-IN marker has been moved since the last assembly line edit.\n" ..
                     "Do you want to start a new edit sequence?\n" ..
@@ -122,20 +120,19 @@ function main()
                         end
                         i = i + 1
                     end
-                    local colors = get_color_table()
-                    AddProjectMarker2(0, false, item_right_edge, 0, "DEST-IN", 996, colors.dest_marker)
+                    add_marker(item_right_edge, 0, dest_track_number, "DEST-IN", 996, 0)
                 end
             end
         end
-        add_dest_out_marker()
+        add_marker(pos_table[1], 0, dest_track_number, "DEST-OUT", 997, 0)
     else
         MB(
             "Please add 3 valid source-destination markers: DEST-IN, SOURCE-IN and SOURCE-OUT"
             , "Assembly Line / 3-point Insert Edit", 0)
-        if moveable_dest == 1 then move_destination_folder(track_number) end
+        if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
-    local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _ = markers()
+    local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _, _ = markers()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
         move_to_project_tab(source_proj)
         fix_marker_pair(998, 999)
@@ -147,6 +144,7 @@ function main()
         Main_OnCommand(40020, 0) -- remove time selection
         move_to_project_tab(dest_proj)
         fix_marker_pair(996, 997)
+        select_matching_dest_folder()
         split_at_dest_in()
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
         GoToMarker(0, 997, false)
@@ -174,7 +172,8 @@ function main()
         local item_start = GetMediaItemInfo_Value(new_last_item, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(new_last_item, "D_LENGTH")
         local end_of_new_item = item_start + item_length
-        create_dest_in(end_of_new_item)
+        local dest_track = GetTrack(0, dest_track_number-1)
+        add_marker(end_of_new_item,0,dest_track_number,"DEST-IN",996,GetTrackColor(dest_track))
 
         move_to_project_tab(source_proj)
 
@@ -192,7 +191,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
-        if moveable_dest == 1 then move_destination_folder(track_number) end
+        if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
 
@@ -216,7 +215,8 @@ function markers()
     local proj_marker_count = 0
     local pos_table = {}
     local active_proj = EnumProjects(-1)
-    local track_number = 1
+    local dest_track_number = 1
+    local src_track_number = 1
     while true do
         local proj = EnumProjects(num)
         if proj == nil then
@@ -229,20 +229,22 @@ function markers()
             local label = string.match(raw_label, "%d*:?(.+)") or ""
 
             if label == "DEST-IN" then
+                dest_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[1] = pos
             elseif label == "DEST-OUT" then
+                dest_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[2] = pos
             elseif label == "SOURCE-IN" then
-                track_number = number
+                src_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[3] = pos
             elseif label == "SOURCE-OUT" then
-                track_number = number
+                src_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[4] = pos
@@ -289,16 +291,33 @@ function markers()
     end
 
     return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
-        source_in, source_out, source_count, pos_table, track_number
+        source_in, source_out, source_count, pos_table, src_track_number, dest_track_number
 end
 
 ---------------------------------------------------------------------
 
-function select_matching_folder()
+function select_matching_source_folder()
     local cursor = GetCursorPosition()
     local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
     local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
     local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
+    for i = 0, CountTracks(0) - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
+            SetOnlyTrackSelected(track)
+            break
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_matching_dest_folder()
+    GoToMarker(0, 996, false)
+    local cursor = GetCursorPosition()
+    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
+    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
+    local folder_number = tonumber(string.match(label, "(%d*):DEST*"))
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
@@ -316,7 +335,7 @@ function copy_source()
     Main_OnCommand(40311, 0) -- Set ripple-all-tracks
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     GoToMarker(0, 998, false)
-    select_matching_folder()
+    select_matching_source_folder()
     local left_overlap = check_overlapping_items()
     Main_OnCommand(40625, 0) -- Time Selection: Set start point
     GoToMarker(0, 999, false)
@@ -349,10 +368,7 @@ end
 ---------------------------------------------------------------------
 
 function split_at_dest_in()
-    Main_OnCommand(40769, 0) -- unselect all items/tracks etc
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
-    Main_OnCommand(40939, 0) -- Track: Select track 01
-    GoToMarker(0, 996, false)
     select_item_under_cursor_on_selected_track()
     local initial_selected_items = count_selected_media_items()
     -- New logic: if exactly 2 items are selected, move the second item to marker 996
@@ -376,10 +392,12 @@ function split_at_dest_in()
                 -- Get group ID of second item
                 local group_id = GetMediaItemInfo_Value(second_item, "I_GROUPID")
                 if group_id ~= 0 then
-                    -- Find the first folder track
+                    -- Find the folder track
                     local num_tracks = CountTracks(0)
+                    local sel_track = GetSelectedTrack(0, 0)
+                    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
                     local folder_start, folder_end = nil, nil
-                    for t = 0, num_tracks - 1 do
+                    for t = track_num, num_tracks - 1 do
                         local track = GetTrack(0, t)
                         local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
                         if depth == 1 then
@@ -398,7 +416,7 @@ function split_at_dest_in()
                     end
 
                     if folder_start then
-                        -- Loop through items only on tracks within first folder
+                        -- Loop through items only on tracks within selected folder
                         for t = folder_start, folder_end do
                             local track = GetTrack(0, t)
                             local num_items_on_track = CountTrackMediaItems(track)
@@ -547,35 +565,14 @@ function get_first_last_items()
 
     for i = 0, num_of_items - 1 do
         local item = get_selected_media_item_at(i)
-        local track = GetMediaItem_Track(item)
-        local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
 
-        if track_num == 1 then
-            if not first_sel_item then
-                first_sel_item = item
-            end
-            last_sel_item = item
+        if not first_sel_item then
+            first_sel_item = item
         end
+        last_sel_item = item
     end
 
     return first_sel_item, last_sel_item
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
@@ -862,44 +859,9 @@ end
 
 ---------------------------------------------------------------------
 
-function add_dest_out_marker()
-    local i = 0
-    while true do
-        local project, _ = EnumProjects(i)
-        if not project then break end
-
-        -- Delete any existing marker 997 in this project
-        DeleteProjectMarker(project, 997, false)
-
-        -- Find marker 996
-        local _, num_markers, num_regions = CountProjectMarkers(project)
-        local total = num_markers + num_regions
-        for idx = 0, total - 1 do
-            local _, _, pos, _, _, id = EnumProjectMarkers2(project, idx)
-            if id == 996 then
-                -- Add marker 997 at the same position
-                AddProjectMarker2(project, false, pos, 0, "DEST-OUT", 997, 0)
-                break -- stop after the first 996 found
-            end
-        end
-
-        i = i + 1
-    end
-end
-
----------------------------------------------------------------------
-
 function save_last_assembly_item(item)
     local item_guid = get_item_guid(item)
     SetProjExtState(0, "ReaClassical Core", "LastAssemblyItem", item_guid)
-end
-
----------------------------------------------------------------------
-
-function create_dest_in(cur_pos)
-    SetEditCurPos(cur_pos, false, false)
-    local colors = get_color_table()
-    AddProjectMarker2(0, false, cur_pos, 0, "DEST-IN", 996, colors.dest_marker)
 end
 
 ---------------------------------------------------------------------
@@ -922,7 +884,7 @@ end
 
 function get_item_by_guid(project, guid)
     if not guid or guid == "" then return nil end
-    project = project or 0  -- default to current project if nil
+    project = project or 0 -- default to current project if nil
 
     local numItems = reaper.CountMediaItems(project)
     for i = 0, numItems - 1 do
@@ -933,7 +895,14 @@ function get_item_by_guid(project, guid)
         end
     end
 
-    return nil  -- not found
+    return nil -- not found
+end
+
+---------------------------------------------------------------------
+
+function add_marker(pos, distance, track_number, label, num, color)
+    DeleteProjectMarker(nil, num, false)
+    AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, color)
 end
 
 ---------------------------------------------------------------------

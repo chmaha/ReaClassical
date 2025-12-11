@@ -140,8 +140,8 @@ end
 ---------------------------------------------------------------------
 
     local unedited_color = 0
+    local colors = get_color_table()
     if color_pref == 0 then
-        local colors = get_color_table()
         unedited_color = colors.dest_items
     end
     local workflow = "Horizontal"
@@ -235,7 +235,6 @@ end
         for t = 0, num_tracks - 1 do
             local track = GetTrack(0, t)
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            local _, dest = GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
             local is_folder = depth == 1
             local should_color_dest = false
 
@@ -243,8 +242,6 @@ end
                 if not first_folder_done then
                     should_color_dest = true
                     first_folder_done = true
-                elseif dest == "y" then
-                    should_color_dest = true
                 end
 
                 if should_color_dest then
@@ -286,8 +283,8 @@ end
             for _, track in ipairs(dest_folders) do
                 local num_items = CountTrackMediaItems(track)
                 local folder_color = unedited_color
-                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", folder_color)
-                color_folder_children(track, folder_color)
+                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", colors.dest_items)
+                color_folder_children(track, colors.dest_items)
 
                 for i = 0, num_items - 1 do
                     local item = GetTrackMediaItem(track, i)
@@ -432,8 +429,6 @@ function vertical()
     select_next_folder()
 
     for _ = start, num_of_folders, 1 do
-        local track = GetSelectedTrack(0, 0)
-        GetSetMediaTrackInfo_String(track, "P_EXT:dest_copy", "y", false)
         vertical_razor()
         local next_group = vertical_group(length, group)
         select_next_folder()
