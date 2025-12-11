@@ -56,7 +56,6 @@ end
 -- Draw microphone icon
 --------------------------------------------
 local function draw_mic_icon(draw_list, x, y, size, state)
-
   -- Determine color based on state
   local mic_color
   if state == "recording" then
@@ -68,7 +67,7 @@ local function draw_mic_icon(draw_list, x, y, size, state)
   else
     mic_color = ImGui.ColorConvertDouble4ToU32(0.6, 0.6, 0.6, 1.0)
   end
-  
+
   local center_x = x + size / 2
   local center_y = y + size / 2
 
@@ -77,17 +76,17 @@ local function draw_mic_icon(draw_list, x, y, size, state)
   local capsule_height = size * 0.45
   local capsule_top = center_y - size * 0.28
   local capsule_radius = capsule_width / 2
-  
+
   -- Draw filled rounded rectangle for capsule
   ImGui.DrawList_AddRectFilled(draw_list,
-    center_x - capsule_width/2, capsule_top,
-    center_x + capsule_width/2, capsule_top + capsule_height,
+    center_x - capsule_width / 2, capsule_top,
+    center_x + capsule_width / 2, capsule_top + capsule_height,
     mic_color, capsule_radius, ImGui.DrawFlags_RoundCornersAll)
 
- -- U-shaped bracket below capsule
+  -- U-shaped bracket below capsule
   local bracket_width = size * 0.50
   local bracket_height = size * 0.12
-  local bracket_top = capsule_top + capsule_height/2.5 - size * 0.02
+  local bracket_top = capsule_top + capsule_height / 2.5 - size * 0.02
   local bracket_thickness = size * 0.06
 
   -- Bottom curve of bracket (arc)
@@ -109,8 +108,8 @@ local function draw_mic_icon(draw_list, x, y, size, state)
   -- Base
   local base_width = size * 0.42
   ImGui.DrawList_AddLine(draw_list,
-    center_x - base_width/2, stem_bottom,
-    center_x + base_width/2, stem_bottom,
+    center_x - base_width / 2, stem_bottom,
+    center_x + base_width / 2, stem_bottom,
     mic_color, bracket_thickness)
 
   -- Glow effect
@@ -129,13 +128,13 @@ local function draw_mic_icon(draw_list, x, y, size, state)
     end
 
     -- Outer glow
-    ImGui.DrawList_AddCircle(draw_list, 
-      center_x, capsule_top + capsule_height/2, 
+    ImGui.DrawList_AddCircle(draw_list,
+      center_x, capsule_top + capsule_height / 2,
       size * 0.45, glow_color, 32, 6)
-    
+
     -- Inner glow
-    ImGui.DrawList_AddCircle(draw_list, 
-      center_x, capsule_top + capsule_height/2, 
+    ImGui.DrawList_AddCircle(draw_list,
+      center_x, capsule_top + capsule_height / 2,
       size * 0.38, glow_color, 32, 4)
   end
 end
@@ -147,10 +146,10 @@ local function main()
   if not window_open then return end
 
   local window_flags = ImGui.WindowFlags_NoResize |
-                       ImGui.WindowFlags_NoTitleBar |
-                       ImGui.WindowFlags_NoScrollbar |
-                       ImGui.WindowFlags_AlwaysAutoResize |
-                       ImGui.WindowFlags_TopMost
+      ImGui.WindowFlags_NoTitleBar |
+      ImGui.WindowFlags_NoScrollbar |
+      ImGui.WindowFlags_AlwaysAutoResize |
+      ImGui.WindowFlags_TopMost
 
   local opened, open_ref = ImGui.Begin(ctx, "Recording Indicator", true, window_flags)
   window_open = open_ref
@@ -164,8 +163,7 @@ local function main()
   local armed = count_rec_armed_tracks()
   local play_state = GetPlayState()
 
-  local state = "idle"
-  local label = ""
+  local state, label
 
   if armed == 0 then
     state = "idle"

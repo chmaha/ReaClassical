@@ -28,26 +28,26 @@ if not imgui_exists then
   return
 end
 
-package.path                    = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui                     = require 'imgui' '0.10'
-local ctx                       = ImGui.CreateContext("ReaClassical Meterbridge")
-local track_state               = {}
-local window_open               = true
-local max_channels_per_row_numeric = 8   -- For numeric display
+package.path                         = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui                          = require 'imgui' '0.10'
+local ctx                            = ImGui.CreateContext("ReaClassical Meterbridge")
+local track_state                    = {}
+local window_open                    = true
+local max_channels_per_row_numeric   = 8 -- For numeric display
 local max_channels_per_row_graphical = 8 -- For graphical display (reduced since we show L+R)
-local show_graphical_meters     = false
+local show_graphical_meters          = false
 
 -- Color threshold settings (in dB)
-local threshold_green_to_yellow = -18
-local threshold_yellow_to_red   = -6
+local threshold_green_to_yellow      = -18
+local threshold_yellow_to_red        = -6
 -- Default values for reset
-local default_green_to_yellow   = -18
-local default_yellow_to_red     = -6
+local default_green_to_yellow        = -18
+local default_yellow_to_red          = -6
 
 -- Meter display settings
-local meter_height              = 200
-local meter_width               = 15  -- Width per channel
-local meter_spacing             = 1   -- Space between L and R meters
+local meter_height                   = 200
+local meter_width                    = 15 -- Width per channel
+local meter_spacing                  = 1  -- Space between L and R meters
 
 local function clamp(v, a, b)
   if v < a then return a elseif v > b then return b else return v end
@@ -320,7 +320,7 @@ local function draw_graphical_meter(db_L, db_R, peak_hold_L, peak_hold_R, label)
 
   -- Draw L channel meter
   draw_single_meter(draw_list, cursor_x, cursor_y, meter_width, meter_height, db_L, peak_hold_L)
-  
+
   -- Draw R channel meter
   local r_x = cursor_x + meter_width + meter_spacing
   draw_single_meter(draw_list, r_x, cursor_y, meter_width, meter_height, db_R, peak_hold_R)
@@ -337,14 +337,14 @@ local function draw_graphical_meter(db_L, db_R, peak_hold_L, peak_hold_R, label)
   local r_text = "R"
   local l_width = ImGui.CalcTextSize(ctx, l_text)
   local r_width = ImGui.CalcTextSize(ctx, r_text)
-  
+
   -- L label centered over L meter
   local l_offset = (meter_width - l_width) * 0.5
   if l_offset > 0 then
     ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + l_offset)
   end
   ImGui.Text(ctx, l_text)
-  
+
   -- R label centered over R meter
   ImGui.SameLine(ctx)
   local r_offset = meter_spacing + (meter_width - r_width) * 0.5
@@ -354,7 +354,7 @@ local function draw_graphical_meter(db_L, db_R, peak_hold_L, peak_hold_R, label)
 
   -- Draw peak hold values
   ImGui.PushFont(ctx, nil, 10)
-  
+
   -- L peak value
   local hold_L_text = string.format("%.1f", peak_hold_L)
   local hold_L_width = ImGui.CalcTextSize(ctx, hold_L_text)
@@ -364,7 +364,7 @@ local function draw_graphical_meter(db_L, db_R, peak_hold_L, peak_hold_R, label)
   end
   local hold_L_color = color_for_db(peak_hold_L)
   ImGui.TextColored(ctx, hold_L_color, hold_L_text)
-  
+
   -- R peak value
   ImGui.SameLine(ctx)
   local hold_R_text = string.format("%.1f", peak_hold_R)
@@ -402,7 +402,7 @@ local function display_track_row(tracks, max_channels_per_row)
       -- Get peak hold values from both channels separately
       local peak_hold_L = Track_GetPeakHoldDB(tr, 0, false) * 100
       local peak_hold_R = Track_GetPeakHoldDB(tr, 1, false) * 100
-      
+
       -- For numeric display, use the max of both channels
       local peak_hold_db = math.max(peak_hold_L, peak_hold_R)
 
@@ -474,7 +474,8 @@ local function main()
       ImGui.Separator(ctx)
 
       -- Determine max channels per row based on display mode
-      local max_channels_per_row = show_graphical_meters and max_channels_per_row_graphical or max_channels_per_row_numeric
+      local max_channels_per_row = show_graphical_meters and max_channels_per_row_graphical or
+          max_channels_per_row_numeric
 
       -- Get tracks in categorized groups
       local rec_armed, m_tracks, other_masters = get_tracks_to_display()
@@ -508,8 +509,8 @@ local function main()
       ImGui.Spacing(ctx)
 
       ImGui.PushItemWidth(ctx, 250)
-      local changed1, new_green_yellow = ImGui.SliderDouble(ctx, "Green --> Yellow (dB)", threshold_green_to_yellow, -60,
-        0, "%.1f")
+      local changed1, new_green_yellow = ImGui.SliderDouble(ctx, "Green --> Yellow (dB)",
+        threshold_green_to_yellow, -60, 0, "%.1f")
       if changed1 then
         threshold_green_to_yellow = new_green_yellow
         if threshold_yellow_to_red < threshold_green_to_yellow then
