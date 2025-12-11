@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, parse_markers, generate_report, any, write_rcmeta_file
+local main, parse_markers, write_rcmeta_file
 local get_txt_file, checksum, get_track_color_from_marker
 local count_markers, create_filename, create_cue_entries, create_string
 local ext_mod, save_file, format_time, parse_cue_file, create_plaintext_report
@@ -31,374 +31,256 @@ local add_pregaps_to_table
 ---------------------------------------------------------------------
 
 function main()
-    PreventUIRefresh(1)
-    Undo_BeginBlock()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-        return
-    end
+  PreventUIRefresh(1)
+  Undo_BeginBlock()
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if workflow == "" then
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    return
+  end
 
-    local metadata, error_msg = parse_markers()
-    if error_msg ~= "" then
-        MB(error_msg, "", 0)
-    end
-    
-    generate_report(metadata)
+  local metadata, error_msg = parse_markers()
+  if error_msg ~= "" then
+    MB(error_msg, "", 0)
+  end
 
-    local track = get_track_color_from_marker()
-    local metadata_file
-    local prefix = ""
-    if track then
-        local _, track_name = GetTrackName(track)
-        metadata_file, prefix = get_txt_file(track_name)
-        write_rcmeta_file(metadata_file, metadata)
-    end
+  local track = get_track_color_from_marker()
+  local metadata_file
+  local prefix = ""
+  if track then
+    local _, track_name = GetTrackName(track)
+    metadata_file, prefix = get_txt_file(track_name)
+    write_rcmeta_file(metadata_file, metadata)
+  end
 
-    local ret1, num_of_markers = count_markers()
-    if not ret1 then return end
-    local ret2, filename = create_filename()
-    if not ret2 then return end
-    local fields, extension, production_year = create_cue_entries(filename)
+  local ret1, num_of_markers = count_markers()
+  if not ret1 then return end
+  local ret2, filename = create_filename()
+  if not ret2 then return end
+  local fields, extension, production_year = create_cue_entries(filename, metadata)
 
-    local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
-    local path, slash, cue_file = save_file(fields, string)
+  local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
+  local path, slash, cue_file = save_file(fields, string)
 
-    local txtOutputPath = path .. slash .. prefix .. 'album_report.txt'
-    local HTMLOutputPath = path .. slash .. prefix .. 'album_report.html'
-    local albumTitle, albumPerformer, tracks = parse_cue_file(cue_file, album_length, num_of_markers)
-    if albumTitle and albumPerformer and #tracks > 0 then
-        create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number,
-            production_year)
-        create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number,
-            production_year)
-    end
+  local txtOutputPath = path .. slash .. prefix .. 'album_report.txt'
+  local HTMLOutputPath = path .. slash .. prefix .. 'album_report.html'
+  local albumTitle, albumPerformer, tracks = parse_cue_file(cue_file, album_length, num_of_markers)
+  if albumTitle and albumPerformer and #tracks > 0 then
+    create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number,
+      production_year)
+    create_html_report(albumTitle, albumPerformer, tracks, HTMLOutputPath, album_length, catalog_number,
+      production_year)
+  end
 
-    Undo_EndBlock('DDP metadata report', 0)
-    PreventUIRefresh(-1)
-    UpdateArrange()
-    UpdateTimeline()
+  Undo_EndBlock('DDP metadata report', 0)
+  PreventUIRefresh(-1)
+  UpdateArrange()
+  UpdateTimeline()
 end
 
 ---------------------------------------------------------------------
 
 function parse_markers()
-    local num_markers = CountProjectMarkers(0)
-    local metadata = { album = {}, tracks = {} }
-    local error_msg = ""
+  local num_markers = CountProjectMarkers(0)
+  local metadata = { album = {}, tracks = {} }
+  local error_msg = ""
 
-    -- First pass: Extract album-wide metadata
-    for i = 0, num_markers - 1 do
-        local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
-        if not isrgn then -- Only process markers
-            local album_marker = name:match("^@(.-)|")
-            if album_marker then
-                metadata.album = {
-                    title = album_marker,
-                    catalog = name:match("CATALOG=([^|]+)") or name:match("EAN=([^|]+)") or name:match("UPC=([^|]+)") or
-                        nil,
-                    performer = name:match("PERFORMER=([^|]+)") or nil,
-                    songwriter = name:match("SONGWRITER=([^|]+)") or nil,
-                    composer = name:match("COMPOSER=([^|]+)") or nil,
-                    arranger = name:match("ARRANGER=([^|]+)") or nil,
-                    message = name:match("MESSAGE=([^|]+)") or nil,
-                    identification = name:match("IDENTIFICATION=([^|]+)") or nil,
-                    genre = name:match("GENRE=([^|]+)") or nil,
-                    language = name:match("LANGUAGE=([^|]+)") or nil
-                }
-                break -- Stop early after finding album metadata
-            end
-        end
+  -- First pass: Extract album-wide metadata
+  for i = 0, num_markers - 1 do
+    local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
+    if not isrgn then     -- Only process markers
+      local album_marker = name:match("^@(.-)|")
+      if album_marker then
+        metadata.album = {
+          title = album_marker,
+          catalog = name:match("CATALOG=([^|]+)") or name:match("EAN=([^|]+)") or name:match("UPC=([^|]+)") or
+              nil,
+          performer = name:match("PERFORMER=([^|]+)") or nil,
+          songwriter = name:match("SONGWRITER=([^|]+)") or nil,
+          composer = name:match("COMPOSER=([^|]+)") or nil,
+          arranger = name:match("ARRANGER=([^|]+)") or nil,
+          message = name:match("MESSAGE=([^|]+)") or nil,
+          identification = name:match("IDENTIFICATION=([^|]+)") or nil,
+          genre = name:match("GENRE=([^|]+)") or nil,
+          language = name:match("LANGUAGE=([^|]+)") or nil
+        }
+        break         -- Stop early after finding album metadata
+      end
     end
+  end
 
-    -- Second pass: Process track markers
-    for i = 0, num_markers - 1 do
-        local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
-        if not isrgn then                -- Only process markers
-            if not name:match("^@") then -- Ignore album line since it's already processed
-                local track_title = name:match("^#([^|]+)")
-                if track_title then
-                    local track_data = {
-                        title = track_title,
-                        isrc = name:match("ISRC=([^|]+)") or nil,
-                        performer = name:match("PERFORMER=([^|]+)") or nil,
-                        songwriter = name:match("SONGWRITER=([^|]+)") or nil,
-                        composer = name:match("COMPOSER=([^|]+)") or nil,
-                        arranger = name:match("ARRANGER=([^|]+)") or nil,
-                        message = name:match("MESSAGE=([^|]+)") or nil,
-                    }
+  -- Second pass: Process track markers
+  for i = 0, num_markers - 1 do
+    local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
+    if not isrgn then                    -- Only process markers
+      if not name:match("^@") then       -- Ignore album line since it's already processed
+        local track_title = name:match("^#([^|]+)")
+        if track_title then
+          local track_data = {
+            title = track_title,
+            isrc = name:match("ISRC=([^|]+)") or nil,
+            performer = name:match("PERFORMER=([^|]+)") or nil,
+            songwriter = name:match("SONGWRITER=([^|]+)") or nil,
+            composer = name:match("COMPOSER=([^|]+)") or nil,
+            arranger = name:match("ARRANGER=([^|]+)") or nil,
+            message = name:match("MESSAGE=([^|]+)") or nil,
+          }
 
-                    local missing_album_metadata = false
+          local missing_album_metadata = false
 
-                    if track_data.performer ~= nil and metadata.album.performer == nil then
-                        missing_album_metadata = true
-                    end
-                    if track_data.songwriter ~= nil and metadata.album.songwriter == nil then
-                        missing_album_metadata = true
-                    end
-                    if track_data.composer ~= nil and metadata.album.composer == nil then
-                        missing_album_metadata = true
-                    end
-                    if track_data.arranger ~= nil and metadata.album.arranger == nil then
-                        missing_album_metadata = true
-                    end
+          if track_data.performer ~= nil and metadata.album.performer == nil then
+            missing_album_metadata = true
+          end
+          if track_data.songwriter ~= nil and metadata.album.songwriter == nil then
+            missing_album_metadata = true
+          end
+          if track_data.composer ~= nil and metadata.album.composer == nil then
+            missing_album_metadata = true
+          end
+          if track_data.arranger ~= nil and metadata.album.arranger == nil then
+            missing_album_metadata = true
+          end
 
-                    -- Assign error message to error_msg variable
-                    if missing_album_metadata then
-                        error_msg = "Note: One or more tracks specify " ..
-                            "performer, songwriter, composer, or arranger\n" ..
-                            "without an associated album-wide entry and " ..
-                            "therefore won't currently be added to the DDP metadata."
-                    end
+          -- Assign error message to error_msg variable
+          if missing_album_metadata then
+            error_msg = "Note: One or more tracks specify " ..
+                "performer, songwriter, composer, or arranger\n" ..
+                "without an associated album-wide entry and " ..
+                "therefore won't currently be added to the DDP metadata."
+          end
 
-                    table.insert(metadata.tracks, track_data)
-                end
-            end
+          table.insert(metadata.tracks, track_data)
         end
+      end
     end
+  end
 
-    return metadata, error_msg
-end
-
----------------------------------------------------------------------
-
-function generate_report(metadata)
-    local report = "CD Text Information\n===================\n"
-
-    if metadata.album.language then
-        report = report .. "  Language     : " .. metadata.album.language .. "\n"
-    end
-
-    if #metadata.tracks > 0 then
-        report = report .. "  Tracks       : 1-" .. #metadata.tracks .. "\n"
-    end
-
-    if metadata.album.title or #metadata.tracks > 0 then
-        report = report .. "  Title\n"
-        if metadata.album.title then
-            report = report .. "    Album : " .. metadata.album.title .. "\n"
-        end
-        for i, track in ipairs(metadata.tracks) do
-            if track.title then
-                report = report .. string.format("    Trk %02d: %s\n", i, track.title)
-            end
-        end
-    end
-
-    if metadata.album.performer or any(metadata.tracks, "performer") then
-        report = report .. "  Performer\n"
-        if metadata.album.performer then
-            report = report .. "    Album : " .. metadata.album.performer .. "\n"
-        end
-        for i, track in ipairs(metadata.tracks) do
-            if track.performer then
-                report = report .. string.format("    Trk %02d: %s\n", i, track.performer)
-            end
-        end
-    end
-
-    if metadata.album.composer or any(metadata.tracks, "composer") then
-        report = report .. "  Composer\n"
-        if metadata.album.composer then
-            report = report .. "    Album : " .. metadata.album.composer .. "\n"
-        end
-        for i, track in ipairs(metadata.tracks) do
-            if track.composer then
-                report = report .. string.format("    Trk %02d: %s\n", i, track.composer)
-            end
-        end
-    end
-
-    if metadata.album.songwriter or any(metadata.tracks, "songwriter") then
-        report = report .. "  Songwriter\n"
-        if metadata.album.songwriter then
-            report = report .. "    Album : " .. metadata.album.songwriter .. "\n"
-        end
-        for i, track in ipairs(metadata.tracks) do
-            if track.songwriter then
-                report = report .. string.format("    Trk %02d: %s\n", i, track.songwriter)
-            end
-        end
-    end
-
-    if metadata.album.arranger or any(metadata.tracks, "arranger") then
-        report = report .. "  Arranger\n"
-        if metadata.album.arranger then
-            report = report .. "    Album : " .. metadata.album.arranger .. "\n"
-        end
-        for i, track in ipairs(metadata.tracks) do
-            if track.arranger then
-                report = report .. string.format("    Trk %02d: %s\n", i, track.arranger)
-            end
-        end
-    end
-
-    if metadata.album.catalog or any(metadata.tracks, "isrc") then
-        report = report .. "  Codes\n"
-        if metadata.album.catalog then
-            report = report .. "    Album : " .. metadata.album.catalog .. "\n"
-        end
-        for i, track in ipairs(metadata.tracks) do
-            if track.isrc then
-                report = report .. string.format("    Trk %02d: %s\n", i, track.isrc)
-            end
-        end
-    end
-
-
-    if metadata.album.message or any(metadata.tracks, "message") then
-        report = report .. "  Message\n"
-        if metadata.album.message then
-            report = report .. "    Album : " .. metadata.album.message .. "\n"
-        end
-        for i, track in ipairs(metadata.tracks) do
-            if track.message then
-                report = report .. string.format("    Trk %02d: %s\n", i, track.message)
-            end
-        end
-    end
-
-    if metadata.album.genre then
-        report = report .. "  Genre\n    Detail: " .. metadata.album.genre .. "\n"
-    end
-
-    if metadata.album.identification then
-        report = report .. "  Identification\n    Album : " .. metadata.album.identification .. "\n"
-    end
-end
-
----------------------------------------------------------------------
-
-function any(tracks, field)
-    for _, track in ipairs(tracks) do
-        if track[field] then return true end
-    end
-    return false
+  return metadata, error_msg
 end
 
 ---------------------------------------------------------------------
 
 function write_rcmeta_file(metadata_file, metadata)
-    local file = io.open(metadata_file, "w")
-    if not file then return false, "Could not open file for writing" end
+  local file = io.open(metadata_file, "w")
+  if not file then return false, "Could not open file for writing" end
 
-    file:write("AMF Version         = 1.0 (Sony text file format modification)\n")
-    file:write("Remarks             = Generated by ReaClassical\n")
+  file:write("AMF Version         = 1.0 (Sony text file format modification)\n")
+  file:write("Remarks             = Generated by ReaClassical\n")
 
-    if metadata.album then
-        file:write(string.format("Album Title         = %s\n", metadata.album.title or ""))
-        file:write(string.format("Catalog Number      = %s\n", metadata.album.catalog or ""))
-        file:write(string.format("Performer           = %s\n", metadata.album.performer or ""))
-        file:write(string.format("Songwriter          = %s\n", metadata.album.songwriter or ""))
-        file:write(string.format("Composer            = %s\n", metadata.album.composer or ""))
-        file:write(string.format("Arranger            = %s\n", metadata.album.arranger or ""))
-        file:write(string.format("Album Message       = %s\n", metadata.album.message or ""))
-        file:write(string.format("Identification      = %s\n", metadata.album.identification or ""))
-        file:write(string.format("Genre Code          = %s\n", metadata.album.genre or ""))
-        file:write(string.format("Language            = %s\n", metadata.album.language or ""))
+  if metadata.album then
+    file:write(string.format("Album Title         = %s\n", metadata.album.title or ""))
+    file:write(string.format("Catalog Number      = %s\n", metadata.album.catalog or ""))
+    file:write(string.format("Performer           = %s\n", metadata.album.performer or ""))
+    file:write(string.format("Songwriter          = %s\n", metadata.album.songwriter or ""))
+    file:write(string.format("Composer            = %s\n", metadata.album.composer or ""))
+    file:write(string.format("Arranger            = %s\n", metadata.album.arranger or ""))
+    file:write(string.format("Album Message       = %s\n", metadata.album.message or ""))
+    file:write(string.format("Identification      = %s\n", metadata.album.identification or ""))
+    file:write(string.format("Genre Code          = %s\n", metadata.album.genre or ""))
+    file:write(string.format("Language            = %s\n", metadata.album.language or ""))
+  end
+
+  if metadata.tracks and #metadata.tracks > 0 then
+    -- file:write("First Track Number  = 1\n")
+    file:write(string.format("Total Tracks        = %d\n", #metadata.tracks))
+
+    for i, track in ipairs(metadata.tracks) do
+      local track_num = string.format("%02d", i)
+      file:write(string.format("Track %s Title      = %s\n", track_num, track.title or ""))
+      file:write(string.format("Track %s Performer  = %s\n", track_num, track.performer or ""))
+      file:write(string.format("Track %s Songwriter = %s\n", track_num, track.songwriter or ""))
+      file:write(string.format("Track %s Composer   = %s\n", track_num, track.composer or ""))
+      file:write(string.format("Track %s Arranger   = %s\n", track_num, track.arranger or ""))
+      file:write(string.format("Track %s Message    = %s\n", track_num, track.message or ""))
+      file:write(string.format("ISRC %s             = %s\n", track_num, track.isrc or ""))
     end
+  end
 
-    if metadata.tracks and #metadata.tracks > 0 then
-        -- file:write("First Track Number  = 1\n")
-        file:write(string.format("Total Tracks        = %d\n", #metadata.tracks))
+  file:close()
 
-        for i, track in ipairs(metadata.tracks) do
-            local track_num = string.format("%02d", i)
-            file:write(string.format("Track %s Title      = %s\n", track_num, track.title or ""))
-            file:write(string.format("Track %s Performer  = %s\n", track_num, track.performer or ""))
-            file:write(string.format("Track %s Songwriter = %s\n", track_num, track.songwriter or ""))
-            file:write(string.format("Track %s Composer   = %s\n", track_num, track.composer or ""))
-            file:write(string.format("Track %s Arranger   = %s\n", track_num, track.arranger or ""))
-            file:write(string.format("Track %s Message    = %s\n", track_num, track.message or ""))
-            file:write(string.format("ISRC %s             = %s\n", track_num, track.isrc or ""))
-        end
-    end
+  local new_checksum = checksum(metadata_file)
+  SetProjExtState(0, "ReaClassical", "MetadataChecksum", new_checksum)
 
-    file:close()
-
-    local new_checksum = checksum(metadata_file)
-    SetProjExtState(0, "ReaClassical", "MetadataChecksum", new_checksum)
-
-    return true
+  return true
 end
 
 ---------------------------------------------------------------------
 
 function get_txt_file(track_name)
-    local _, path = EnumProjects(-1)
-    local slash = package.config:sub(1, 1)
+  local _, path = EnumProjects(-1)
+  local slash = package.config:sub(1, 1)
 
-    if path == "" then
-        path = GetProjectPath()
-    else
-        local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
-        path = path:match(pattern)
-    end
+  if path == "" then
+    path = GetProjectPath()
+  else
+    local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
+    path = path:match(pattern)
+  end
 
-    -- Extract prefix before ':' in track_name
-    local prefix = track_name:match("^(.-):") .. "_"
-    if not prefix then
-        prefix = "" -- fallback if no prefix found
-    end
+  -- Extract prefix before ':' in track_name
+  local prefix = track_name:match("^(.-):") .. "_"
+  if not prefix then
+    prefix = ""     -- fallback if no prefix found
+  end
 
-    local file = path .. slash .. prefix .. 'metadata.txt'
-    return file, prefix
+  local file = path .. slash .. prefix .. 'metadata.txt'
+  return file, prefix
 end
 
 ---------------------------------------------------------------------
 
 function checksum(filename)
-    local file = io.open(filename, "rb")
-    if not file then return nil, "Cannot open file" end
+  local file = io.open(filename, "rb")
+  if not file then return nil, "Cannot open file" end
 
-    local file_checksum = 0
-    for line in file:lines() do
-        for i = 1, #line do
-            file_checksum = (file_checksum + line:byte(i)) % 0xFFFFFFFF
-        end
+  local file_checksum = 0
+  for line in file:lines() do
+    for i = 1, #line do
+      file_checksum = (file_checksum + line:byte(i)) % 0xFFFFFFFF
     end
+  end
 
-    file:close()
-    return file_checksum
+  file:close()
+  return file_checksum
 end
 
 ---------------------------------------------------------------------
 
 function get_track_color_from_marker()
-    local proj = 0
-    local marker_count = CountProjectMarkers(proj)
+  local proj = 0
+  local marker_count = CountProjectMarkers(proj)
 
-    local target_color = nil
+  local target_color = nil
 
-    -- Search markers via EnumProjectMarkers3
-    for i = 0, marker_count - 1 do
-        local retval, isrgn, _, _, name,
-        markrgnindexnumber, color =
-            EnumProjectMarkers3(proj, i)
+  -- Search markers via EnumProjectMarkers3
+  for i = 0, marker_count - 1 do
+    local retval, isrgn, _, _, name,
+    markrgnindexnumber, color =
+        EnumProjectMarkers3(proj, i)
 
-        if retval ~= 0 then
-            if not isrgn and markrgnindexnumber == 0 and name == "!" then
-                target_color = color
-                break
-            end
-        end
+    if retval ~= 0 then
+      if not isrgn and markrgnindexnumber == 0 and name == "!" then
+        target_color = color
+        break
+      end
     end
+  end
 
-    if not target_color then return nil end
+  if not target_color then return nil end
 
-    -- Find first track with matching color
-    local track_count = CountTracks(proj)
+  -- Find first track with matching color
+  local track_count = CountTracks(proj)
 
-    for i = 0, track_count - 1 do
-        local track = GetTrack(proj, i)
-        local track_color = GetTrackColor(track)
+  for i = 0, track_count - 1 do
+    local track = GetTrack(proj, i)
+    local track_color = GetTrackColor(track)
 
-        if track_color == target_color then
-            return track
-        end
+    if track_color == target_color then
+      return track
     end
+  end
 
-    return nil
+  return nil
 end
 
 ---------------------------------------------------------------------
@@ -426,29 +308,27 @@ end
 
 ----------------------------------------------------------
 
-function create_cue_entries(filename)
+function create_cue_entries(filename, metadata)
   local year = tonumber(os.date("%Y"))
   local extension = "wav"
 
   local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
   if input ~= "" then
     local prefs_table = {}
-    for entry in input:gmatch('([^,]+)') do prefs_table[#table + 1] = entry end
+    for entry in input:gmatch('([^,]+)') do prefs_table[#prefs_table + 1] = entry end
     if prefs_table[10] then year = tonumber(prefs_table[10]) end
     if prefs_table[11] then extension = tostring(prefs_table[11]) end
   end
 
-  local album_metadata = parse_markers()
-
-  if album_metadata.genre == nil then album_metadata.genre = "Unknown" end
-  if album_metadata.performer == nil then album_metadata.performer = "Unknown" end
-  if album_metadata.title == nil then album_metadata.title = "Unknown" end
+  if metadata.album.genre == nil then metadata.album.genre = "Unknown" end
+  if metadata.album.performer == nil then metadata.album.performer = "Unknown" end
+  if metadata.album.title == nil then metadata.album.title = "Unknown" end
 
   local fields = {
-    album_metadata.genre,
+    metadata.album.genre,
     year,
-    album_metadata.performer,
-    album_metadata.title,
+    metadata.album.performer,
+    metadata.album.title,
     filename .. '.' .. extension
   }
 
@@ -835,7 +715,7 @@ function add_pregaps_to_table(tracks, num_of_markers)
   for i = 0, num_of_markers - 1 do
     local _, _, raw_pos_out, _, name_out = EnumProjectMarkers2(0, i)
     if string.sub(name_out, 1, 1) == "!" then
-      formatted_pos_out = format_time(raw_pos_out)
+      local formatted_pos_out = format_time(raw_pos_out)
       local mm, ss, ff = formatted_pos_out:match("(%d+):(%d+):(%d+)")
       pregap = {
         title = "pregap",
@@ -850,38 +730,5 @@ function add_pregaps_to_table(tracks, num_of_markers)
 end
 
 -----------------------------------------------------------------
-
--- function parse_markers()
---   local num_markers = CountProjectMarkers(0)
---   local metadata = {}
-
---   -- First pass: Extract album-wide metadata
---   for i = 0, num_markers - 1 do
---     local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
---     if not isrgn then -- Only process markers
---       local album_marker = name:match("^@(.-)|")
---       if album_marker then
---         metadata = {
---           title = album_marker,
---           catalog = name:match("CATALOG=([^|]+)") or name:match("EAN=([^|]+)")
---               or name:match("UPC=([^|]+)") or nil,
---           performer = name:match("PERFORMER=([^|]+)") or nil,
---           songwriter = name:match("SONGWRITER=([^|]+)") or nil,
---           composer = name:match("COMPOSER=([^|]+)") or nil,
---           arranger = name:match("ARRANGER=([^|]+)") or nil,
---           message = name:match("MESSAGE=([^|]+)") or nil,
---           identification = name:match("IDENTIFICATION=([^|]+)") or nil,
---           genre = name:match("GENRE=([^|]+)") or nil,
---           language = name:match("LANGUAGE=([^|]+)") or nil
---         }
---         break -- Stop early after finding album metadata
---       end
---     end
---   end
-
---   return metadata
--- end
-
----------------------------------------------------------------------
 
 main()

@@ -24,12 +24,12 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_info, cd_markers, find_current_start, create_marker
 local renumber_markers, add_pregap, find_project_end, end_marker
-local frame_check, delete_markers, get_txt_file
+local frame_check, delete_markers
 local empty_items_check, return_custom_length
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
 local add_roomtone_fadeout, check_saved_state, album_item_count
-local create_metadata_report_and_cue, split_and_tag_final_item
+local split_and_tag_final_item
 local check_first_track_for_names, delete_all_markers_and_regions
 local shift_folder_items_and_markers, shift_all_markers_and_regions
 
@@ -101,9 +101,6 @@ function main()
   local names_on_first_track = check_first_track_for_names(selected_track)
   if not names_on_first_track then return end
 
-  local _, selected_track_name = GetTrackName(selected_track)
-  local _, prefix = get_txt_file(selected_track_name)
-
   SetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?", "yes")
   local success, redbook_track_length_errors, redbook_total_tracks_error, redbook_project_length = cd_markers(
     selected_track,
@@ -128,7 +125,6 @@ function main()
   PreventUIRefresh(-1)
 
   UpdateArrange()
-  create_metadata_report_and_cue()
 
   local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
   if GetToggleCommandState(ddp_editor) ~= 1 then
@@ -736,36 +732,6 @@ function album_item_count(track)
   end
 
   return count
-end
-
----------------------------------------------------------------------
-
-function get_txt_file(selected_track_name)
-  local _, path = EnumProjects(-1)
-  local slash = package.config:sub(1, 1)
-
-  if path == "" then
-    path = GetProjectPath()
-  else
-    local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
-    path = path:match(pattern)
-  end
-
-  -- Extract prefix before ':' in selected_track_name
-  local prefix = selected_track_name:match("^(.-):") .. "_"
-  if not prefix then
-    prefix = "" -- fallback if no prefix found
-  end
-
-  local file = path .. slash .. prefix .. 'metadata.txt'
-  return file, prefix
-end
-
----------------------------------------------------------------------
-
-function create_metadata_report_and_cue()
-  local metadata_report = NamedCommandLookup("_RS9dfbe237f69ecb0151b67e27e607b93a7bd0c4b4")
-  Main_OnCommand(metadata_report, 0)
 end
 
 ---------------------------------------------------------------------
