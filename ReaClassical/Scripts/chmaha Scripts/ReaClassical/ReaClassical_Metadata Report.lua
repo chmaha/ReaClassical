@@ -22,9 +22,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, parse_markers, write_rcmeta_file
-local get_txt_file, checksum, get_track_color_from_marker
+local get_txt_file, get_track_color_from_marker
 local count_markers, create_filename, create_cue_entries, create_string
-local ext_mod, save_file, format_time, parse_cue_file, create_plaintext_report
+local ext_mod, save_cue_file, format_time, parse_cue_file, create_plaintext_report
 local create_html_report, any_isrc_present, time_to_mmssff, subtract_time_strings
 local add_pregaps_to_table
 
@@ -60,7 +60,7 @@ function main()
   local fields, extension, production_year = create_cue_entries(filename, metadata)
 
   local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
-  local path, slash, cue_file = save_file(fields, string)
+  local path, slash, cue_file = save_cue_file(fields, string, prefix)
 
   local txtOutputPath = path .. slash .. prefix .. 'album_report.txt'
   local HTMLOutputPath = path .. slash .. prefix .. 'album_report.html'
@@ -198,9 +198,6 @@ function write_rcmeta_file(metadata_file, metadata)
 
   file:close()
 
-  local new_checksum = checksum(metadata_file)
-  SetProjExtState(0, "ReaClassical", "MetadataChecksum", new_checksum)
-
   return true
 end
 
@@ -225,23 +222,6 @@ function get_txt_file(track_name)
 
   local file = path .. slash .. prefix .. 'metadata.txt'
   return file, prefix
-end
-
----------------------------------------------------------------------
-
-function checksum(filename)
-  local file = io.open(filename, "rb")
-  if not file then return nil, "Cannot open file" end
-
-  local file_checksum = 0
-  for line in file:lines() do
-    for i = 1, #line do
-      file_checksum = (file_checksum + line:byte(i)) % 0xFFFFFFFF
-    end
-  end
-
-  file:close()
-  return file_checksum
 end
 
 ---------------------------------------------------------------------
@@ -430,7 +410,7 @@ end
 
 ----------------------------------------------------------
 
-function save_file(fields, out_str)
+function save_cue_file(fields, out_str, prefix)
   local _, path = EnumProjects(-1)
   local slash = package.config:sub(1, 1)
   if path == "" then
@@ -439,7 +419,7 @@ function save_file(fields, out_str)
     local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
     path = path:match(pattern)
   end
-  local file = path .. slash .. fields[5]:match('^(.+)[.].+') .. '.cue'
+  local file = path .. slash .. prefix .. fields[5]:match('^(.+)[.].+') .. '.cue'
   local f = io.open(file, 'w')
   if f then
     f:write(out_str)
