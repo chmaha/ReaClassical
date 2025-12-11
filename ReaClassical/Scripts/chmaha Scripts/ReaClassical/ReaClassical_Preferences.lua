@@ -53,14 +53,14 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local pass, input, orig_floating, new_floating, orig_color, new_color
+    local pass, input, corrected_input, orig_floating, new_floating, orig_color, new_color
     repeat
         local ret
         ret, input, orig_floating, orig_color = display_prefs()
         if not ret then return end
-        if ret then pass, new_floating, new_color = pref_check(input) end
+        if ret then pass, corrected_input, new_floating, new_color = pref_check(input) end
     until pass
-    save_prefs(input)
+    save_prefs(corrected_input)
     if new_floating ~= orig_floating and new_floating == 0 then
         move_destination_folder_to_top()
         sync_based_on_workflow(workflow)
@@ -125,12 +125,14 @@ end
 
 function pref_check(input)
     local pass = true
-    local table = {}
+    local t = {}
     local invalid_msg = ""
     local i = 0
+
+    -- Parse input
     for entry in input:gmatch("([^,]*)") do
         i = i + 1
-        table[i] = entry
+        t[i] = entry
         if entry == "" or (i ~= 11 and (tonumber(entry) == nil or tonumber(entry) < 0)) then
             pass = false
             invalid_msg = "Entries should not be strings or left empty."
@@ -140,19 +142,33 @@ function pref_check(input)
     local binary_error_msg = ""
     local ext_error_msg = ""
 
-    if #table == NUM_OF_ENTRIES then
-        local num_5 = tonumber(table[5])
-        local num_7 = tonumber(table[7])
-        local num_8 = tonumber(table[8])
-        local num_12 = tonumber(table[12])
-        local num_13 = tonumber(table[13])
-        local audio_format = tostring(table[11])
-        if (num_5 and num_5 > 1) or (num_7 and num_7 > 1)
-            or (num_8 and num_8 > 1) or (num_12 and num_12 > 1) or (num_13 and num_13 > 1) then
+    if #t == NUM_OF_ENTRIES then
+        local num_5  = tonumber(t[5])
+        local num_7  = tonumber(t[7])
+        local num_8  = tonumber(t[8])
+        local num_12 = tonumber(t[12])
+        local num_13 = tonumber(t[13])
+
+        -- normalize audio format and store it back into t[11]
+        t[11] = tostring(t[11]):upper()
+        local audio_format = t[11]
+
+        if (num_5  and num_5  > 1) or
+           (num_7  and num_7  > 1) or
+           (num_8  and num_8  > 1) or
+           (num_12 and num_12 > 1) or
+           (num_13 and num_13 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
-        local valid_formats = { WAV = true, FLAC = true, MP3 = true, AIFF = true }
+
+        local valid_formats = {
+            WAV = true,
+            FLAC = true,
+            MP3 = true,
+            AIFF = true
+        }
+
         if not valid_formats[audio_format] then
             ext_error_msg = "CUE audio format should be set to WAV, FLAC, AIFF or MP3."
             pass = false
@@ -165,8 +181,13 @@ function pref_check(input)
         MB(error_msg, "Error", 0)
     end
 
-    return pass, tonumber(table[12]), tonumber(table[5])
+    -- rebuild corrected input string
+    local corrected_input = table.concat(t, ",")
+
+    -- must return corrected input
+    return pass, corrected_input, tonumber(t[12]), tonumber(t[5])
 end
+
 
 -----------------------------------------------------------------------
 
