@@ -50,8 +50,8 @@ sleep 2
 
 # Ask user where to install
 default_install="$HOME/Desktop"
-printf "Enter the folder where you want to install ReaClassical [Default: %s]: " "$default_install"
-read -r user_input
+printf "Enter the folder where you want to install ReaClassical [Default: %s]: " "$default_install" > /dev/tty
+read -r user_input < /dev/tty
 install_dir="${user_input:-$default_install}"
 
 # Make sure the directory exists
