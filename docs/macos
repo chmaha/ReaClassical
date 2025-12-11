@@ -40,7 +40,7 @@ printf "Welcome to the ReaClassical installer...\n\n"
 sleep 2
 # === NEW: Ask user for installation directory (curl-safe interactive input) ===
 default_install="$HOME/Desktop"
-printf "Enter the folder where you want to install ReaClassical [Default: %s]: " "$default_install" > /dev/tty
+printf "Install location (press Enter for %s): " "$default_install" > /dev/tty
 read -r user_input < /dev/tty
 install_dir="${user_input:-$default_install}"
 
