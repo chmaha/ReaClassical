@@ -9,23 +9,26 @@ This means:
 
 ⚠️ Important: Don’t install ReaClassical inside an existing REAPER setup. Let the installer create its own separate ReaClassical folder.
 
+## ReaClassical 26
+
+Coming early 2026...
+
+## ReaClassical 25
+
 ## Quick Full Portable Install on Linux, MacOS & Windows (for all nine architectures supported by REAPER)
 
 ##### Windows
-Open a powershell instance, navigate to the folder where you want to download ReaClassical and paste the following:
-```sh
-irm "https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Win.ps1" | iex
-```
+Download [ReaClassical_Win64.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/v25/Installers/ReaClassical_Win64.exe) (64-bit) or [ReaClassical_Win32.exe](https://raw.githubusercontent.com/chmaha/ReaClassical/v25/Installers/ReaClassical_Win32.exe) (32-bit) where you want to install ReaClassical and double-click. The source code for the installer is [here](https://github.com/chmaha/ReaClassical/tree/v25/Installers/ReaClassical-Windows-Go-Installer).
 
 ##### MacOS
 Open a terminal, navigate to the folder where you want to download ReaClassical and paste the following:
 ``` sh
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_macOS.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/v25/Installers/ReaClassical_macOS.sh | sh
 ```
 ##### Linux (including Raspberry Pi)
 Open a terminal, navigate to the folder where you want to download ReaClassical and paste the following:
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/main/Installers/ReaClassical_Linux.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/chmaha/ReaClassical/v25/Installers/ReaClassical_Linux.sh | sh
 ```
 
 The script will pull the REAPER binary archive, resource folder base archive + appropriate userplugins and do the required magic.

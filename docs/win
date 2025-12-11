@@ -110,7 +110,7 @@ Check-Internet
 # ------------------------
 # Get tested REAPER version
 # ------------------------
-$verTxt = "https://raw.githubusercontent.com/chmaha/ReaClassical/v26/tested_reaper_ver.txt"
+$verTxt = "https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
 $verContent = Invoke-WebRequest -Uri $verTxt -UseBasicParsing | Select-Object -ExpandProperty Content
 $ver = ($verContent -split "`n" | Select-String -Pattern "====" -Context 0,1).Context.PostContext[0].Trim()
 $major = $ver.Split('.')[0]
@@ -174,8 +174,8 @@ Write-Host "Downloading ReaClassical components..."
 $resOutput = Join-Path $tempDir "Resource_Folder_Base.zip"
 $upOutput  = Join-Path $tempDir "UP_Windows-$arch.zip"
 
-Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/v26/Installers/Resource_Folder_Base.zip" -OutFile $resOutput -UseBasicParsing
-Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/v26/Installers/UserPlugins/UP_Windows-$arch.zip" -OutFile $upOutput -UseBasicParsing
+Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/main/Installers/Resource_Folder_Base.zip" -OutFile $resOutput -UseBasicParsing
+Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/UP_Windows-$arch.zip" -OutFile $upOutput -UseBasicParsing
 
 Expand-Archive -Path $resOutput -DestinationPath $tempInstallRoot -Force
 Expand-Archive -Path $upOutput  -DestinationPath (Join-Path $tempInstallRoot "UserPlugins") -Force
