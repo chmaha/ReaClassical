@@ -181,30 +181,33 @@ function cd_markers(selected_track, num_of_items, track_color)
 
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end(selected_track, num_of_items)
-  local previous_start
+  local previous_start, previous_offset
   local redbook_track_length_errors = 0
   local redbook_total_tracks_error = false
   local previous_takename
   local marker_count = 0
+  
   for i = 0, num_of_items - 1, 1 do
-    local current_start, take_name = find_current_start(selected_track, i)
+    local current_start, take_name, manual_offset = find_current_start(selected_track, i)
+    local final_offset = offset + manual_offset
     if not take_name:match("^@") then
-      local added_marker = create_marker(current_start, marker_count, take_name, offset,
+      local added_marker = create_marker(current_start, marker_count, take_name, final_offset,
         track_color)
       if added_marker then
         if take_name:match("^!") and marker_count > 0 then
-          AddProjectMarker2(0, false, frame_check(current_start - (pregap_len + offset)), 0, "!", marker_count,
+          AddProjectMarker2(0, false, frame_check(current_start - (pregap_len + final_offset)), 0, "!", marker_count,
             track_color)
         end
         if marker_count > 0 then
           if current_start - previous_start < 4 then
             redbook_track_length_errors = redbook_track_length_errors + 1
           end
-          AddProjectMarker2(0, true, frame_check(previous_start - offset), frame_check(current_start - offset),
+          AddProjectMarker2(0, true, frame_check(previous_start - previous_offset), frame_check(current_start - final_offset),
             previous_takename:match("^[!]*([^|]*)"),
             marker_count, track_color)
         end
         previous_start = current_start
+        previous_offset = final_offset
         previous_takename = take_name
         marker_count = marker_count + 1
       end
@@ -234,10 +237,23 @@ end
 function find_current_start(selected_track, i)
   local current_item = GetTrackMediaItem(selected_track, i)
   local take = GetActiveTake(current_item)
+  if not take then return nil, nil, 0 end
+
   local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-  take_name = take_name:gsub("|$", "")
+  take_name = take_name:gsub("|$", "") -- remove trailing pipe if present
+
+  -- Extract OFFSET if present
+  local offset_str = take_name:match("|OFFSET=([%d%.%-]+)")
+  local offset_val = offset_str and tonumber(offset_str) or 0
+
+  -- Ensure OFFSET stays in the name (so editing metadata won't remove it)
+  if offset_str then
+    take_name = take_name:gsub("|OFFSET=[%d%.%-]+", "|OFFSET=" .. offset_val)
+  end
   GetSetMediaItemTakeInfo_String(take, "P_NAME", take_name, true)
-  return GetMediaItemInfo_Value(current_item, "D_POSITION"), take_name
+
+  local item_pos = GetMediaItemInfo_Value(current_item, "D_POSITION")
+  return item_pos, take_name, offset_val
 end
 
 ---------------------------------------------------------------------

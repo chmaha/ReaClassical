@@ -76,6 +76,8 @@ local create_CD_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326a
 local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
 SetToggleCommandState(1, ddp_editor, 1)
 
+local first_run = true
+
 ---------------------------------------------------------------------
 
 function main()
@@ -402,7 +404,7 @@ function main()
                         ImGui.EndGroup(ctx)
                     end
 
-                    if any_changed then
+                    if any_changed or first_run then
                         local new_name = serialize_metadata(md, false)
                         GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
                         update_marker_and_region(item)
@@ -412,6 +414,7 @@ function main()
                     ImGui.Dummy(ctx, 0, 10)
                 end
             end
+            first_run = false
         else
             ImGui.Text(ctx, "No track selected. Please select a folder track to edit metadata.")
         end
@@ -445,7 +448,14 @@ function parse_item_name(name, is_album)
                 local k, v = parts[i]:match("^(%w+)=(.+)$")
                 if k and v then
                     k = k:lower()
-                    for j = 1, #keys do if k == keys[j] then data[k] = v end end
+                    -- Preserve OFFSET
+                    if k == "offset" then
+                        data._offset = v
+                    else
+                        for _, kk in ipairs(keys) do
+                            if k == kk then data[k] = v end
+                        end
+                    end
                 end
             end
         end
@@ -469,8 +479,16 @@ function serialize_metadata(data, is_album)
         end
     else
         parts[#parts + 1] = data.title or ""
+
+        -- Insert OFFSET immediately after title if present
+        if data._offset and data._offset ~= "" then
+            parts[#parts + 1] = "OFFSET=" .. data._offset
+        end
+
         for _, k in ipairs(keys) do
-            if k ~= "title" and data[k] and data[k] ~= "" then parts[#parts + 1] = k:upper() .. "=" .. data[k] end
+            if k ~= "title" and data[k] and data[k] ~= "" then
+                parts[#parts + 1] = k:upper() .. "=" .. data[k]
+            end
         end
     end
     return table.concat(parts, "|")
