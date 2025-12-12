@@ -115,6 +115,12 @@ function main()
         if selected_track and not valid_items then
             ImGui.Text(ctx, "No valid item names found for DDP metadata editing.")
         elseif selected_track then
+            local _, trigger = GetProjExtState(0, "ReaClassical", "ddp_refresh_trigger")
+            if trigger == "y" then
+                editing_track = nil
+                SetProjExtState(0, "ReaClassical", "ddp_refresh_trigger", "")
+            end
+
             if editing_track ~= selected_track then
                 editing_track = selected_track
                 Main_OnCommand(create_CD_markers, 0)
@@ -510,32 +516,43 @@ function update_marker_and_region(item)
 
     local take = GetActiveTake(item)
     if not take then return end
+
     local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
     if not item_name or item_name == "" then return end
 
+    -- Clean name (remove OFFSET)
+    local clean_name = item_name:gsub("|OFFSET=[%d%.%-]+", "")
+
     local track = GetMediaItemTrack(item)
     local track_color = GetTrackColor(track)
-    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local threshold = 0.5
 
-    local num_markers, num_regions = CountProjectMarkers(0)
+    -- Get stored marker GUID from item's P_EXT:cdmarker
+    local ok, guid = GetSetMediaItemInfo_String(item, "P_EXT:cdmarker", "", false)
+    if not ok or guid == "" then return end
 
-    for idx = 0, num_markers + num_regions - 1 do
-        local _, isrgn, pos, _, _, markrgnID, color = EnumProjectMarkers3(0, idx)
-        if not isrgn and pos <= item_pos and item_pos - pos <= threshold then
-            if track_color == color then
-                SetProjectMarkerByIndex(0, idx, false, pos, 0, markrgnID, "#" .. item_name, color)
-            end
-            break
-        end
+    -- Find marker index using GUID
+    local ok_index, mark_index_str = GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:" .. guid, "", false)
+    if not ok_index or mark_index_str == "" then return end
+
+    local mark_index = tonumber(mark_index_str)
+    if not mark_index then return end
+
+    -- Update the marker
+    local retval, isrgn, pos, rgnend, _, markrgnID, color = EnumProjectMarkers3(0, mark_index)
+    if retval and not isrgn and track_color == color then
+        SetProjectMarkerByIndex(0, mark_index, false, pos, 0, markrgnID, "#" .. clean_name, color)
     end
+
+    -- Find and update the associated region
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local num_markers, num_regions = CountProjectMarkers(0)
 
     for idx = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, rgnend, _, markrgnID, color = EnumProjectMarkers3(0, idx)
         if isrgn and pos <= item_pos and item_pos <= rgnend then
             if track_color == color then
-                SetProjectMarkerByIndex(0, idx, true, pos, rgnend, markrgnID, parse_item_name(item_name, false).title,
-                    color)
+                SetProjectMarkerByIndex(0, idx, true, pos, rgnend, markrgnID,
+                    parse_item_name(clean_name, false).title, color)
             end
             break
         end
@@ -607,8 +624,8 @@ end
 ---------------------------------------------------------------------
 
 function create_metadata_report_and_cue()
-  local metadata_report = NamedCommandLookup("_RS9dfbe237f69ecb0151b67e27e607b93a7bd0c4b4")
-  Main_OnCommand(metadata_report, 0)
+    local metadata_report = NamedCommandLookup("_RS9dfbe237f69ecb0151b67e27e607b93a7bd0c4b4")
+    Main_OnCommand(metadata_report, 0)
 end
 
 ---------------------------------------------------------------------

@@ -126,10 +126,14 @@ function main()
 
   UpdateArrange()
 
+  local _, silent = GetProjExtState(0, "ReaClassical", "ddp_silent")
+
   local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
-  if GetToggleCommandState(ddp_editor) ~= 1 then
+  if GetToggleCommandState(ddp_editor) ~= 1 and silent ~= "y" then
     Main_OnCommand(ddp_editor, 0)
   end
+
+  SetProjExtState(0, "ReaClassical", "ddp_silent", "")
 
   -- MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
   --   "Edit ISRC/UPC and other metadata by opening the DDP Metadata Editor.\n\n" ..
@@ -186,13 +190,13 @@ function cd_markers(selected_track, num_of_items, track_color)
   local redbook_total_tracks_error = false
   local previous_takename
   local marker_count = 0
-  
+
   for i = 0, num_of_items - 1, 1 do
-    local current_start, take_name, manual_offset = find_current_start(selected_track, i)
+    local current_start, take_name, manual_offset, current_item = find_current_start(selected_track, i)
     local final_offset = offset + manual_offset
     if not take_name:match("^@") then
       local added_marker = create_marker(current_start, marker_count, take_name, final_offset,
-        track_color)
+        track_color, current_item)
       if added_marker then
         if take_name:match("^!") and marker_count > 0 then
           AddProjectMarker2(0, false, frame_check(current_start - (pregap_len + final_offset)), 0, "!", marker_count,
@@ -202,7 +206,8 @@ function cd_markers(selected_track, num_of_items, track_color)
           if current_start - previous_start < 4 then
             redbook_track_length_errors = redbook_track_length_errors + 1
           end
-          AddProjectMarker2(0, true, frame_check(previous_start - previous_offset), frame_check(current_start - final_offset),
+          AddProjectMarker2(0, true, frame_check(previous_start - previous_offset),
+            frame_check(current_start - final_offset),
             previous_takename:match("^[!]*([^|]*)"),
             marker_count, track_color)
         end
@@ -219,7 +224,7 @@ function cd_markers(selected_track, num_of_items, track_color)
   if marker_count > 99 then
     redbook_total_tracks_error = true
   end
-  AddProjectMarker2(0, true, frame_check(previous_start - offset), frame_check(final_end) + postgap,
+  AddProjectMarker2(0, true, frame_check(previous_start - previous_offset), frame_check(final_end) + postgap,
     previous_takename:match("^[!]*([^|]*)"),
     marker_count, track_color)
   local redbook_project_length
@@ -253,18 +258,38 @@ function find_current_start(selected_track, i)
   GetSetMediaItemTakeInfo_String(take, "P_NAME", take_name, true)
 
   local item_pos = GetMediaItemInfo_Value(current_item, "D_POSITION")
-  return item_pos, take_name, offset_val
+  return item_pos, take_name, offset_val, current_item
 end
 
 ---------------------------------------------------------------------
 
-function create_marker(current_start, marker_count, take_name, offset, track_color)
+function create_marker(current_start, marker_count, take_name, offset, track_color, item)
   local added_marker = false
   if take_name ~= "" then
     local corrected_current_start = frame_check(current_start - offset)
-    local track_title = "#" .. take_name:match("^[!]*(.+)")
-    AddProjectMarker2(0, false, corrected_current_start, 0, track_title, marker_count + 1, track_color)
+    local clean_name = take_name:gsub("|OFFSET=[%d%.%-]+", "")
+    local track_title = "#" .. clean_name:match("^[!]*(.+)")
+
+    -- Add marker and get its marker number
+    local marker_num = AddProjectMarker2(0, false, corrected_current_start, 0, track_title, marker_count + 1, track_color)
     added_marker = true
+
+    if marker_num then
+      -- Find the enumeration index for this marker number
+      local num_m, num_r = CountProjectMarkers(0)
+      for i = 0, num_m + num_r - 1 do
+        local _, isrgn, _, _, _, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        if not isrgn and markrgnindexnumber == marker_num then
+          -- Get GUID using enumeration index
+          local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
+
+          -- Store GUID in item
+          GetSetMediaItemInfo_String(item, "P_EXT:cdmarker", guid, true)
+
+          break
+        end
+      end
+    end
   end
   return added_marker
 end
@@ -730,6 +755,8 @@ function album_item_count(track)
   local item_count = CountTrackMediaItems(track)
   if item_count == 0 then return 0 end
 
+  local first_item = GetTrackMediaItem(track, 0)
+  GetSetMediaItemInfo_String(first_item, "P_EXT:cdmarker", "", true)
   local count = 1
   local prev_item = GetTrackMediaItem(track, 0)
   local prev_end = GetMediaItemInfo_Value(prev_item, "D_POSITION") +
@@ -737,6 +764,7 @@ function album_item_count(track)
 
   for i = 1, item_count - 1 do
     local item = GetTrackMediaItem(track, i)
+    GetSetMediaItemInfo_String(item, "P_EXT:cdmarker", "", true)
     local start = GetMediaItemInfo_Value(item, "D_POSITION")
 
     if start - prev_end > 60 then -- More than 1 minute gap
