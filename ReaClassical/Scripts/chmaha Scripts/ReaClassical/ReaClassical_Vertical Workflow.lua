@@ -92,13 +92,13 @@ function main()
             if success then
                 local response1 = MB(
                     "Would you like to automatically assign panning and recording inputs based on track naming?",
-                    "Horizontal Workflow", 4)
+                    "Vertical Workflow", 4)
                 if response1 == 6 then
                     local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
                     Main_OnCommand(auto_set, 0)
                 end
                 local response2 = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
-                    "Horizontal Workflow", 4)
+                    "Vertical Workflow", 4)
                 if response2 == 6 then
                     local add_special_tracks = NamedCommandLookup("_RS9c0fa5c1aae86bf8559df83dd6516c0aa35e264f")
                     Main_OnCommand(add_special_tracks, 0)
@@ -272,7 +272,7 @@ function main()
     if check_hidden_track_items(num_of_tracks) then
         MB("Warning: Items have been pasted or recorded on hidden tracks! " ..
             "Open the Track Manager via the View menu, enable the hidden tracks on TCP then delete any items",
-            "Horizontal Workflow", 0)
+            "Vertical Workflow", 0)
     end
 
     if num_pre_selected > 0 then
@@ -1263,7 +1263,7 @@ end
 
 function get_whole_number_input()
     while true do
-        local ok, num = GetUserInputs("Horizontal Workflow", 1, "How many tracks?", "10")
+        local ok, num = GetUserInputs("Vertical Workflow", 1, "How many tracks?", "10")
         if not ok then return nil end -- User cancelled
 
         num = tonumber(num)
