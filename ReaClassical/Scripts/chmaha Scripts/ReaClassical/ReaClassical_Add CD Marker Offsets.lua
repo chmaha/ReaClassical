@@ -44,8 +44,16 @@ function main()
 
     SetProjExtState(0, "ReaClassical", "ddp_refresh_trigger", "y")
     SetProjExtState(0, "ReaClassical", "ddp_silent", "y")
-    
-    local updated = update_offsets(0.2)
+
+    local saved_offset = 0.2
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[2] then saved_offset = table[2] / 1000 end
+    end
+
+    local updated = update_offsets(saved_offset)
 
     local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
     Main_OnCommand(create_cd_markers, 0)
