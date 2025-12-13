@@ -1,4 +1,4 @@
-Version: 1.7
+Version: 1.8
 desc:ReaVision Metering Suite (chmaha)
 author: chmaha
 about:
@@ -2209,7 +2209,7 @@ old_w != gfx_w || old_h!=gfx_h? (
   gfx_x=gfx_y=0;
   gfx_rectto(gfx_w,gfx_h);
   need_button_refs=1;
-  colormap_button.init_colormap_button(gfx_w - 115, gfx_h/2 + 10, 100);
+  colormap_button.init_colormap_button(gfx_w - 0.09*gfx_w, gfx_h/2 + 10, 0.078*gfx_w);
 );
 
 use_h = small_mode ? gfx_h : (gfx_h-gfx_texth - 4);
