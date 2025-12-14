@@ -38,16 +38,36 @@ dmgtype="universal"
 
 printf "Welcome to the ReaClassical installer...\n\n"
 sleep 2
-# === NEW: Ask user for installation directory (curl-safe interactive input) ===
-default_install="$HOME/Desktop"
-printf "Install location (press Enter for %s): " "$default_install" > /dev/tty
-read -r user_input < /dev/tty
-install_dir="${user_input:-$default_install}"
 
+default_install="$HOME/Desktop"
+
+install_dir=$(osascript <<EOF
+tell application "System Events"
+    activate
+    try
+        set chosenFolder to choose folder ¬
+            with prompt "Select the installation folder for ReaClassical:" ¬
+            default location (POSIX file "$default_install")
+        return POSIX path of chosenFolder
+    on error number -128
+        return ""
+    end try
+end tell
+EOF
+)
+
+# User cancelled
+if [ -z "$install_dir" ]; then
+    echo "Installation cancelled."
+    exit 1
+fi
+
+# Ensure directory exists
 mkdir -p "$install_dir" || {
     echo "Failed to create installation directory: $install_dir"
     exit 1
 }
+
 
 rcfolder="${install_dir}/ReaClassical_${rcver}"
 
