@@ -68,6 +68,7 @@ mkdir -p "$install_dir" || {
     exit 1
 }
 
+printf "Selected installation folder: %s\n\n" "$install_dir"
 
 rcfolder="${install_dir}/ReaClassical_${rcver}"
 
