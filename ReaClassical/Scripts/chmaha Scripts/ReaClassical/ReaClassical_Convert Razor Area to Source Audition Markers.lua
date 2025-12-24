@@ -37,8 +37,11 @@ function main()
     end
 
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local moveable_dest = 0
 
+    local sai_manager = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
+    Main_OnCommand(sai_manager, 0)
+    local moveable_dest = 0
+    
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
@@ -87,7 +90,7 @@ function main()
         MB("Error: Create a razor edit area before running.", "Set Source Audition Markers", 0)
         return
     end
-
+    
     Main_OnCommand(40635, 0) -- remove time selection
     Main_OnCommand(42406, 0) -- remove razor edit areas
     PreventUIRefresh(-1)
