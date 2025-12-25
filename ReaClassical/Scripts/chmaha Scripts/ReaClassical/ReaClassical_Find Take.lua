@@ -57,29 +57,36 @@ function main()
     local found = false
     local num_of_items = CountMediaItems(0)
 
-    if find_takes_using_items == 0 then -- search using filenames
-        for i = 0, num_of_items - 1, 1 do
-            local item = GetMediaItem(0, i)
-            local take = GetActiveTake(item)
-            if take then
-                local src = GetMediaItemTake_Source(take)
-                local filename = GetMediaSourceFileName(src, "")
-                local take_capture = tonumber(
-                -- Case: (###)[chan X].wav  or  ### [chan X].wav  (with or without space)
-                    filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
-                    -- Case: (###).wav  or  ###.wav
-                    or filename:match("(%d+)%)?%.[^%.]+$")
-                )
-
+    -- FIRST: Try to find using stored P_EXT:item_take_num
+    for i = 0, num_of_items - 1 do
+        local item = GetMediaItem(0, i)
+        local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+        
+        if stored_take_num and stored_take_num ~= "" then
+            local take_num = tonumber(stored_take_num)
+            if take_num == take_choice then
+                -- Check session name if provided
                 local session_match = true
-
                 if session_name and session_name ~= "" then
-                    session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                    local take = GetActiveTake(item)
+                    if take then
+                        if find_takes_using_items == 0 then
+                            -- Check filename for session
+                            local src = GetMediaItemTake_Source(take)
+                            local filename = GetMediaSourceFileName(src, "")
+                            session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                        else
+                            -- Check take name for session
+                            local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                            session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                        end
+                    end
                 end
-
+                
+                -- Check if not an edit
                 local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
-
-                if take_capture == take_choice and session_match and not edit then
+                
+                if session_match and not edit then
                     found = true
                     local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
                     SetEditCurPos(item_start, true, false)
@@ -90,34 +97,72 @@ function main()
                 end
             end
         end
-    else -- search using take names
-        for i = 0, num_of_items - 1 do
-            local item = GetMediaItem(0, i)
-            local take = GetActiveTake(item)
-            if take then
-                local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                local session_match = true
-                if session_name and session_name ~= "" then
-                    session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
-                end
+    end
 
-                if take_name and session_match then
-                    if take_choice then
-                        local take_num = tonumber(take_name:match("(%d+)"))
-                        if take_num == take_choice then
-                            found = true
-                        end
-                    else
-                        found = true
+    -- If not found in P_EXT, fall back to original search methods
+    if not found then
+        if find_takes_using_items == 0 then -- search using filenames
+            for i = 0, num_of_items - 1, 1 do
+                local item = GetMediaItem(0, i)
+                local take = GetActiveTake(item)
+                if take then
+                    local src = GetMediaItemTake_Source(take)
+                    local filename = GetMediaSourceFileName(src, "")
+                    local take_capture = tonumber(
+                    -- Case: (###)[chan X].wav  or  ### [chan X].wav  (with or without space)
+                        filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
+                        -- Case: (###).wav  or  ###.wav
+                        or filename:match("(%d+)%)?%.[^%.]+$")
+                    )
+
+                    local session_match = true
+
+                    if session_name and session_name ~= "" then
+                        session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
                     end
 
-                    if found then
+                    local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+
+                    if take_capture == take_choice and session_match and not edit then
+                        found = true
                         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
                         SetEditCurPos(item_start, true, false)
-                        Main_OnCommand(40769, 0)
+                        Main_OnCommand(40769, 0) -- unselect all items
                         SetMediaItemSelected(item, true)
-                        Main_OnCommand(40034, 0)
+                        Main_OnCommand(40034, 0) -- select all in group
                         break
+                    end
+                end
+            end
+        else -- search using take names
+            for i = 0, num_of_items - 1 do
+                local item = GetMediaItem(0, i)
+                local take = GetActiveTake(item)
+                if take then
+                    local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    local session_match = true
+                    if session_name and session_name ~= "" then
+                        session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                    end
+
+                    if take_name and session_match then
+                        if take_choice then
+                            local take_num = tonumber(take_name:match("(%d+)"))
+                            if take_num == take_choice then
+                                found = true
+                            end
+                        else
+                            found = true
+                        end
+
+                        if found then
+                            local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                            SetEditCurPos(item_start, true, false)
+                            Main_OnCommand(40769, 0)
+                            SetMediaItemSelected(item, true)
+                            Main_OnCommand(40034, 0)
+                            break
+                        end
                     end
                 end
             end

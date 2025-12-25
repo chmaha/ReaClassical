@@ -453,7 +453,6 @@ local function main()
   window_open = open_ref
   if not opened then
     ImGui.End(ctx)
-    defer(main)
     return
   end
   refresh_tracks()

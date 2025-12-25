@@ -55,6 +55,7 @@ local MIN_H_ITEM    = 80
 local track_note    = ""
 local item_note     = ""
 local item_rank     = 9 -- Default to "No Rank"
+local item_take_num = ""
 
 local editing_track = nil
 local editing_item  = nil
@@ -72,6 +73,25 @@ local RANKS = {
     { name = "No Rank",       rgba = 0x00000000 }  -- Transparent
 }
 
+-- Extract take number from filename
+function GetTakeNumberFromFilename(item)
+    local take = GetActiveTake(item)
+    if not take then return "" end
+    
+    local src = GetMediaItemTake_Source(take)
+    local filename = GetMediaSourceFileName(src, "")
+    
+    -- Try to extract take number from filename
+    -- Case: (###)[chan X].wav or ### [chan X].wav (with or without space)
+    local take_num = tonumber(
+        filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
+        -- Case: (###).wav or ###.wav
+        or filename:match("(%d+)%)?%.[^%.]+$")
+    )
+    
+    return take_num and tostring(take_num) or ""
+end
+
 ---------------------------------------------------------------------
 
 function main()
@@ -86,6 +106,7 @@ function main()
         editing_item = nil
         item_note = ""
         item_rank = 9
+        item_take_num = ""
     end
 
     if editing_track and not ValidatePtr2(0, editing_track, "MediaTrack*") then
@@ -107,10 +128,12 @@ function main()
     end
 
     if editing_item ~= item then
+        -- Clear keyboard focus to prevent InputText from retaining old value
         ImGui.SetWindowFocus(ctx)
         if editing_item then
             GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", tostring(item_rank), true)
+            GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
         end
 
         editing_item = item
@@ -120,8 +143,14 @@ function main()
             
             local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
             item_rank = tonumber(rank_str) or 9
+            
+            -- Load take number - use stored value or default to filename
+            local _, item_take_num_stored = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+            item_take_num = item_take_num_stored ~= "" and item_take_num_stored or GetTakeNumberFromFilename(item)
         else
             item_rank = 9
+            item_take_num = ""
+            item_note = ""
         end
     end
 
@@ -134,7 +163,6 @@ function main()
         if opened then
             local avail_w, avail_h = ImGui.GetContentRegionAvail(ctx)
 
-            -- Add extra space for rank combo box
             local static_height    = 4 * ImGui.GetTextLineHeightWithSpacing(ctx) + 50
             local dynamic_h        = math.max(0, avail_h - static_height)
 
@@ -145,7 +173,6 @@ function main()
             local h_track          = math.max(MIN_H_TRACK, MIN_H_TRACK + extra * 0.4)
             local h_item           = math.max(MIN_H_ITEM, MIN_H_ITEM + extra * 0.4)
 
-            -- PROJECT NOTE
             ImGui.Text(ctx, "Project Note:")
             local changed_project
             changed_project, project_note = ImGui.InputTextMultiline(ctx, "##project_note", project_note, avail_w,
@@ -154,7 +181,6 @@ function main()
                 GetSetProjectNotes(proj, true, project_note)
             end
 
-            -- TRACK NOTE
             ImGui.Text(ctx, "Track Note:")
             local changed_track
             changed_track, track_note = ImGui.InputTextMultiline(ctx, "##track_note", track_note, avail_w, h_track)
@@ -162,11 +188,13 @@ function main()
                 GetSetMediaTrackInfo_String(editing_track, "P_EXT:track_notes", track_note, true)
             end
 
-            -- ITEM RANK (only show if item is selected)
             if editing_item then
+                local half_w = (avail_w - ImGui.GetStyleVar(ctx, ImGui.StyleVar_ItemSpacing)) / 2
+                
+                ImGui.BeginGroup(ctx)
                 ImGui.Text(ctx, "Item Rank:")
                 ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[item_rank].rgba)
-                ImGui.SetNextItemWidth(ctx, avail_w)
+                ImGui.SetNextItemWidth(ctx, half_w)
                 if ImGui.BeginCombo(ctx, "##item_rank", RANKS[item_rank].name) then
                     for i, rank in ipairs(RANKS) do
                         ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
@@ -183,14 +211,39 @@ function main()
                     ImGui.EndCombo(ctx)
                 end
                 ImGui.PopStyleColor(ctx)
+                ImGui.EndGroup(ctx)
                 
-                -- ITEM NOTE
+                ImGui.SameLine(ctx)
+                ImGui.BeginGroup(ctx)
+                ImGui.Text(ctx, "Take Number:")
+                
+                ImGui.SetNextItemWidth(ctx, half_w - 30)
+                local changed_take_num
+                local item_id = tostring(editing_item):sub(-8)
+                ImGui.PushID(ctx, item_id)
+                changed_take_num, item_take_num = ImGui.InputText(ctx, "##item_take_num", item_take_num)
+                if changed_take_num and editing_item then
+                    GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
+                end
+                
+                ImGui.SameLine(ctx)
+                if ImGui.Button(ctx, "R##reset_take", 25, 0) then
+                    item_take_num = GetTakeNumberFromFilename(editing_item)
+                    GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
+                end
+                if ImGui.IsItemHovered(ctx) then
+                    ImGui.SetTooltip(ctx, "Reset to filename take number")
+                end
+                
+                ImGui.EndGroup(ctx)
+
                 ImGui.Text(ctx, "Item Note:")
                 local changed_item
                 changed_item, item_note = ImGui.InputTextMultiline(ctx, "##item_note", item_note, avail_w, h_item)
                 if changed_item and editing_item then
                     GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
                 end
+                ImGui.PopID(ctx)
             end
 
             ImGui.End(ctx)
