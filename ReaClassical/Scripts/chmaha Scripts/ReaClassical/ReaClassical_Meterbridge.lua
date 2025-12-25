@@ -28,6 +28,8 @@ if not imgui_exists then
   return
 end
 
+set_action_options(2)
+
 package.path                         = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui                          = require 'imgui' '0.10'
 local ctx                            = ImGui.CreateContext("ReaClassical Meterbridge")
