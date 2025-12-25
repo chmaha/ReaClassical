@@ -28,8 +28,6 @@ if not imgui_exists then
     return
 end
 
-
-
 package.path           = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui            = require 'imgui' '0.10'
 
@@ -58,21 +56,135 @@ local current_sao_pos  = nil
 local last_play_pos    = -1
 local sort_mode        = "time" -- "time", "marker", or "rank"
 
+-- ExtState keys for persistent storage
+local EXT_STATE_SECTION = "ReaClassical_SAI_Manager"
+
+-- Save marker data to extended state using marker GUID
+function SaveMarkerData()
+    -- Save sort mode
+    SetExtState(EXT_STATE_SECTION, "sort_mode", sort_mode, true)
+    
+    -- First, collect all current SAI marker GUIDs
+    local current_guids = {}
+    local num_markers = CountProjectMarkers(0)
+    for i = 0, num_markers - 1 do
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        
+        if not isrgn and name:match("^%d+:SAI") then
+            local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
+            if ok and guid ~= "" then
+                current_guids[guid] = true
+                
+                -- Save data for this marker
+                if marker_data[markrgnindexnumber] then
+                    local data = marker_data[markrgnindexnumber]
+                    SetProjExtState(0, "sai_marker", guid .. "_notes", data.notes or "")
+                    SetProjExtState(0, "sai_marker", guid .. "_color", tostring(data.color_idx or 8))
+                end
+            end
+        end
+    end
+    
+    -- Clean up orphaned GUIDs (markers that no longer exist)
+    local i = 0
+    while true do
+        local ok, key, value = EnumProjExtState(0, "sai_marker", i)
+        if not ok then break end
+        
+        -- Extract GUID from key (keys are like "{GUID}_notes" or "{GUID}_color")
+        local guid = key:match("^({.+})_notes$") or key:match("^({.+})_color$")
+        if guid and not current_guids[guid] then
+            -- This GUID no longer exists, delete both keys
+            SetProjExtState(0, "sai_marker", guid .. "_notes", "")
+            SetProjExtState(0, "sai_marker", guid .. "_color", "")
+        end
+        
+        i = i + 1
+    end
+    
+    -- Mark project as dirty so changes get saved
+    MarkProjectDirty(0)
+end
+
+-- Load marker data from extended state
+function LoadMarkerData()
+    -- Load sort mode
+    if HasExtState(EXT_STATE_SECTION, "sort_mode") then
+        sort_mode = GetExtState(EXT_STATE_SECTION, "sort_mode")
+    end
+    
+    -- We'll load marker-specific data as we encounter markers in InitializeMarkerData
+end
+
+-- Clean up orphaned marker data
+function CleanupOrphanedMarkerData()
+    -- Collect all current SAI marker GUIDs
+    local current_guids = {}
+    local num_markers = CountProjectMarkers(0)
+    for i = 0, num_markers - 1 do
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        
+        if not isrgn and name:match("^%d+:SAI") then
+            local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
+            if ok and guid ~= "" then
+                current_guids[guid] = true
+            end
+        end
+    end
+    
+    -- Clean up orphaned GUIDs
+    local i = 0
+    while true do
+        local ok, key, value = EnumProjExtState(0, "sai_marker", i)
+        if not ok then break end
+        
+        -- Extract GUID from key (keys are like "{GUID}_notes" or "{GUID}_color")
+        local guid = key:match("^({.+})_notes$") or key:match("^({.+})_color$")
+        if guid and not current_guids[guid] then
+            -- This GUID no longer exists, delete both keys
+            SetProjExtState(0, "sai_marker", guid .. "_notes", "")
+            SetProjExtState(0, "sai_marker", guid .. "_color", "")
+        end
+        
+        i = i + 1
+    end
+end
+
+
+
 -- Initialize marker data with default values
 function InitializeMarkerData()
     marker_data = {}
     local num_markers = CountProjectMarkers(0)
-    local marker_idx = 0
 
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
 
         if not isrgn then -- Only process markers, not regions
             -- Check if marker name matches pattern: number(s):SAI
             if name:match("^%d+:SAI") then
-                marker_data[markrgnindexnumber] = marker_data[markrgnindexnumber] or {
-                    notes = "",
-                    color_idx = 8 -- Default color (No Rank)
+                -- Get the marker's GUID
+                local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
+                
+                local saved_notes = ""
+                local saved_color = 8
+                
+                if ok and guid ~= "" then
+                    -- Try to load saved data from P_EXT using GUID
+                    local has_notes, notes = GetProjExtState(0, "sai_marker", guid .. "_notes")
+                    local has_color, color = GetProjExtState(0, "sai_marker", guid .. "_color")
+                    
+                    if has_notes == 1 then
+                        saved_notes = notes
+                    end
+                    if has_color == 1 then
+                        saved_color = tonumber(color) or 8
+                    end
+                end
+                
+                marker_data[markrgnindexnumber] = {
+                    notes = saved_notes,
+                    color_idx = saved_color
                 }
             end
         end
@@ -85,7 +197,7 @@ function GetSAIMarkers()
     local num_markers = CountProjectMarkers(0)
 
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
 
         if not isrgn then -- Only process markers, not regions
             -- Check if marker name matches pattern: number(s):SAI
@@ -133,15 +245,16 @@ function GetSAIMarkers()
     return markers
 end
 
--- Find the corresponding SAO marker for a given track number
-function FindSAOMarker(track_num)
+-- Find the corresponding SAO marker for a given track number AFTER the SAI position
+function FindSAOMarker(track_num, sai_pos)
     local num_markers = CountProjectMarkers(0)
     local sao_pattern = "^" .. track_num .. ":SAO"
 
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
 
-        if not isrgn and name:match(sao_pattern) then
+        -- Only look for SAO markers that come AFTER the SAI marker
+        if not isrgn and pos > sai_pos and name:match(sao_pattern) then
             return pos
         end
     end
@@ -207,8 +320,8 @@ end
 function PlayFromMarker(pos, marker_name)
     local track_num = set_track_selected(marker_name)
     if track_num then
-        -- Find the corresponding SAO marker
-        current_sao_pos = FindSAOMarker(track_num)
+        -- Find the corresponding SAO marker AFTER this SAI position
+        current_sao_pos = FindSAOMarker(track_num, pos)
         if current_sao_pos then
             playback_monitor = true
             last_play_pos = pos - 1 -- Set to before start position
@@ -362,6 +475,7 @@ function Loop()
                 local marker_header = "Marker" .. (sort_mode == "marker" and " ▼" or "")
                 if ImGui.Selectable(ctx, marker_header .. "##marker_sort", false) then
                     sort_mode = "marker"
+                    SaveMarkerData() -- Save sort mode change
                 end
 
                 -- Clickable Time header to sort by timeline
@@ -369,6 +483,7 @@ function Loop()
                 local time_header = "Time" .. (sort_mode == "time" and " ▼" or "")
                 if ImGui.Selectable(ctx, time_header .. "##time_sort", false) then
                     sort_mode = "time"
+                    SaveMarkerData() -- Save sort mode change
                 end
 
                 -- Clickable Rank header to sort by rank
@@ -376,6 +491,7 @@ function Loop()
                 local rank_header = "Rank" .. (sort_mode == "rank" and " ▼" or "")
                 if ImGui.Selectable(ctx, rank_header .. "##rank_sort", false) then
                     sort_mode = "rank"
+                    SaveMarkerData() -- Save sort mode change
                 end
 
                 -- Manually draw centered header for Convert
@@ -429,6 +545,7 @@ function Loop()
                             local is_selected = (mdata.color_idx == j)
                             if ImGui.Selectable(ctx, col.name, is_selected) then
                                 mdata.color_idx = j
+                                SaveMarkerData() -- Save when rank changes
                             end
                             if is_selected then
                                 ImGui.SetItemDefaultFocus(ctx)
@@ -443,6 +560,7 @@ function Loop()
                     local rv_notes, new_notes = ImGui.InputText(ctx, '##notes' .. marker.marker_num, mdata.notes)
                     if rv_notes then
                         mdata.notes = new_notes
+                        SaveMarkerData() -- Save when notes change
                     end
 
                     -- Column 6: Convert button
@@ -467,5 +585,7 @@ function Loop()
 end
 
 -- Initialize and start
+LoadMarkerData() -- Load saved data first
+CleanupOrphanedMarkerData() -- Clean up any orphaned entries
 InitializeMarkerData()
 defer(Loop)

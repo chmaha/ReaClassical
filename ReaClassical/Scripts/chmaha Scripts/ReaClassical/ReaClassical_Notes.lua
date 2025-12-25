@@ -28,9 +28,11 @@ if not imgui_exists then
     return
 end
 
--- local profiler = dofile(GetResourcePath() ..
---   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
--- defer = profiler.defer
+local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+if workflow == "" then
+    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    return
+end
 
 package.path        = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui         = require 'imgui' '0.10'
@@ -50,9 +52,23 @@ local MIN_H_ITEM    = 80
 
 local track_note    = ""
 local item_note     = ""
+local item_rank     = 9 -- Default to "No Rank"
 
 local editing_track = nil
 local editing_item  = nil
+
+-- Rank color options (matching SAI marker manager)
+local RANKS = {
+    { name = "Excellent",     rgba = 0x39FF1499 }, -- Bright lime green
+    { name = "Very Good",     rgba = 0x32CD3299 }, -- Lime green
+    { name = "Good",          rgba = 0x00AD8399 }, -- Teal green
+    { name = "OK",            rgba = 0xFFFFAA99 }, -- Soft yellow
+    { name = "Below Average", rgba = 0xFFBF0099 }, -- Gold/amber
+    { name = "Poor",          rgba = 0xFF753899 }, -- Orange
+    { name = "Unusable",      rgba = 0xDC143C99 }, -- Crimson red
+    { name = "False Start",   rgba = 0x808080FF }, -- Grey
+    { name = "No Rank",       rgba = 0x00000000 }  -- Transparent
+}
 
 ---------------------------------------------------------------------
 
@@ -67,6 +83,7 @@ function main()
     if editing_item and not ValidatePtr2(0, editing_item, "MediaItem*") then
         editing_item = nil
         item_note = ""
+        item_rank = 9
     end
 
     if editing_track and not ValidatePtr2(0, editing_track, "MediaTrack*") then
@@ -91,12 +108,18 @@ function main()
         ImGui.SetWindowFocus(ctx)
         if editing_item then
             GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
+            GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", tostring(item_rank), true)
         end
 
         editing_item = item
         if item then
             local _, note = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
             item_note = note
+            
+            local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+            item_rank = tonumber(rank_str) or 9
+        else
+            item_rank = 9
         end
     end
 
@@ -109,7 +132,8 @@ function main()
         if opened then
             local avail_w, avail_h = ImGui.GetContentRegionAvail(ctx)
 
-            local static_height    = 3 * ImGui.GetTextLineHeightWithSpacing(ctx) + 40
+            -- Add extra space for rank combo box
+            local static_height    = 4 * ImGui.GetTextLineHeightWithSpacing(ctx) + 50
             local dynamic_h        = math.max(0, avail_h - static_height)
 
             local base_total       = MIN_H_PROJECT + MIN_H_TRACK + MIN_H_ITEM
@@ -136,13 +160,35 @@ function main()
                 GetSetMediaTrackInfo_String(editing_track, "P_EXT:track_notes", track_note, true)
             end
 
-
-            -- ITEM NOTE
-            ImGui.Text(ctx, "Item Note:")
-            local changed_item
-            changed_item, item_note = ImGui.InputTextMultiline(ctx, "##item_note", item_note, avail_w, h_item)
-            if changed_item and editing_item then
-                GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
+            -- ITEM RANK (only show if item is selected)
+            if editing_item then
+                ImGui.Text(ctx, "Item Rank:")
+                ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[item_rank].rgba)
+                ImGui.SetNextItemWidth(ctx, avail_w)
+                if ImGui.BeginCombo(ctx, "##item_rank", RANKS[item_rank].name) then
+                    for i, rank in ipairs(RANKS) do
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
+                        local is_selected = (item_rank == i)
+                        if ImGui.Selectable(ctx, rank.name, is_selected) then
+                            item_rank = i
+                            GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", tostring(item_rank), true)
+                        end
+                        if is_selected then
+                            ImGui.SetItemDefaultFocus(ctx)
+                        end
+                        ImGui.PopStyleColor(ctx)
+                    end
+                    ImGui.EndCombo(ctx)
+                end
+                ImGui.PopStyleColor(ctx)
+                
+                -- ITEM NOTE
+                ImGui.Text(ctx, "Item Note:")
+                local changed_item
+                changed_item, item_note = ImGui.InputTextMultiline(ctx, "##item_note", item_note, avail_w, h_item)
+                if changed_item and editing_item then
+                    GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
+                end
             end
 
             ImGui.End(ctx)
@@ -153,8 +199,5 @@ function main()
 end
 
 ---------------------------------------------------------------------
-
--- profiler.attachToWorld()
--- profiler.run()
 
 defer(main)
