@@ -64,42 +64,22 @@ function SaveMarkerData()
     -- Save sort mode
     SetExtState(EXT_STATE_SECTION, "sort_mode", sort_mode, true)
     
-    -- First, collect all current SAI marker GUIDs
-    local current_guids = {}
+    -- Save each marker's data using its GUID stored in P_EXT
     local num_markers = CountProjectMarkers(0)
     for i = 0, num_markers - 1 do
         local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
         
         if not isrgn and name:match("^%d+:SAI") then
+            -- Get the marker's GUID
             local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
-            if ok and guid ~= "" then
-                current_guids[guid] = true
-                
-                -- Save data for this marker
-                if marker_data[markrgnindexnumber] then
-                    local data = marker_data[markrgnindexnumber]
-                    SetProjExtState(0, "sai_marker", guid .. "_notes", data.notes or "")
-                    SetProjExtState(0, "sai_marker", guid .. "_color", tostring(data.color_idx or 8))
-                end
+            
+            if ok and guid ~= "" and marker_data[markrgnindexnumber] then
+                local data = marker_data[markrgnindexnumber]
+                -- Store data in the marker's P_EXT
+                SetProjExtState(0, "sai_marker", guid .. "_NOTES", data.notes or "")
+                SetProjExtState(0, "sai_marker", guid .. "_COLOR", tostring(data.color_idx or 8))
             end
         end
-    end
-    
-    -- Clean up orphaned GUIDs (markers that no longer exist)
-    local i = 0
-    while true do
-        local ok, key, value = EnumProjExtState(0, "sai_marker", i)
-        if not ok then break end
-        
-        -- Extract GUID from key (keys are like "{GUID}_notes" or "{GUID}_color")
-        local guid = key:match("^({.+})_notes$") or key:match("^({.+})_color$")
-        if guid and not current_guids[guid] then
-            -- This GUID no longer exists, delete both keys
-            SetProjExtState(0, "sai_marker", guid .. "_notes", "")
-            SetProjExtState(0, "sai_marker", guid .. "_color", "")
-        end
-        
-        i = i + 1
     end
     
     -- Mark project as dirty so changes get saved
@@ -132,21 +112,30 @@ function CleanupOrphanedMarkerData()
         end
     end
     
-    -- Clean up orphaned GUIDs
+    -- Collect ALL keys first (don't delete while enumerating)
+    local all_keys = {}
     local i = 0
     while true do
         local ok, key, value = EnumProjExtState(0, "sai_marker", i)
         if not ok then break end
-        
-        -- Extract GUID from key (keys are like "{GUID}_notes" or "{GUID}_color")
-        local guid = key:match("^({.+})_notes$") or key:match("^({.+})_color$")
-        if guid and not current_guids[guid] then
-            -- This GUID no longer exists, delete both keys
-            SetProjExtState(0, "sai_marker", guid .. "_notes", "")
-            SetProjExtState(0, "sai_marker", guid .. "_color", "")
-        end
-        
+        table.insert(all_keys, key)
         i = i + 1
+    end
+    
+    -- Now check which ones to delete
+    local deleted_count = 0
+    for _, key in ipairs(all_keys) do
+        -- Extract GUID from key
+        local guid = key:match("^({.+})_NOTES$") or key:match("^({.+})_COLOR$")
+        if guid and not current_guids[guid] then
+            -- Delete by setting to empty AND using DeleteExtState
+            SetProjExtState(0, "sai_marker", key, "")
+            deleted_count = deleted_count + 1
+        end
+    end
+    
+    if deleted_count > 0 then
+        MarkProjectDirty(0)
     end
 end
 
@@ -171,8 +160,8 @@ function InitializeMarkerData()
                 
                 if ok and guid ~= "" then
                     -- Try to load saved data from P_EXT using GUID
-                    local has_notes, notes = GetProjExtState(0, "sai_marker", guid .. "_notes")
-                    local has_color, color = GetProjExtState(0, "sai_marker", guid .. "_color")
+                    local has_notes, notes = GetProjExtState(0, "sai_marker", guid .. "_NOTES")
+                    local has_color, color = GetProjExtState(0, "sai_marker", guid .. "_COLOR")
                     
                     if has_notes == 1 then
                         saved_notes = notes
@@ -581,6 +570,9 @@ function Loop()
 
     if open and visible then
         defer(Loop)
+    else
+        -- Window is closing, run cleanup before exit
+        CleanupOrphanedMarkerData()
     end
 end
 
