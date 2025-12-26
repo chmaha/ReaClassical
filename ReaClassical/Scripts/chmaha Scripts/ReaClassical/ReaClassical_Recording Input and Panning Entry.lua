@@ -48,6 +48,11 @@ local TRACKS_PER_TAB = 8
 -- State storage
 local mixer_tracks = {}
 local d_tracks = {}            -- D: tracks from first folder (one per mixer)
+local aux_submix_tracks = {}   -- Aux and submix tracks
+local aux_submix_names = {}    -- Display names for aux/submix tracks
+local aux_submix_pans = {}     -- Pan values for aux/submix tracks
+local mixer_sends = {}         -- Track which aux/submix each mixer sends to
+local pending_routing_changes = {}  -- Track routing changes to apply when popup closes
 local input_channels = {}      -- Store selected input channel index
 local input_channels_mono = {} -- Remember mono selection when switching to stereo
 local input_channels_stereo = {} -- Remember stereo selection when switching to mono
@@ -56,10 +61,19 @@ local stereo_has_been_set = {} -- Track if user has manually set stereo
 local is_stereo = {}           -- Store stereo checkbox state
 local pan_values = {}          -- Store pan values for each track
 local track_names = {}         -- Store mixer track names (without M: prefix)
+local track_has_hyphen = {}    -- Track if mixer track name ends with hyphen
+local mute_states = {}         -- Mute state for mixer tracks
+local solo_states = {}         -- Solo state for mixer tracks
+local volume_values = {}       -- Volume values for mixer tracks
+local aux_mute_states = {}     -- Mute state for special tracks
+local aux_solo_states = {}     -- Solo state for special tracks
+local aux_volume_values = {}   -- Volume values for special tracks
 local current_tab = 0
 local selected_track = nil     -- Currently selected track index
 local sync_needed = false      -- Flag to trigger sync at end of frame
 local pan_reset = {}           -- Track double-click reset for pan sliders
+local show_aux_section = true  -- Show/hide aux/submix section
+local new_track_name = ""      -- Name for new mixer track
 
 -- Generate input options
 local mono_options = {}
@@ -89,6 +103,88 @@ function ResetPanOnDoubleClick(id, value, default)
     end
     
     return value
+end
+
+function GetAuxSubmixTracks()
+    local tracks = {}
+    
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        
+        if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" or live_state == "y" then
+            local track_type = "other"
+            local has_routing = false
+            
+            if aux_state == "y" then
+                track_type = "aux"
+                has_routing = true
+            elseif submix_state == "y" then
+                track_type = "submix"
+                has_routing = true
+            elseif rt_state == "y" then
+                track_type = "roomtone"
+            elseif ref_state == "y" then
+                track_type = "reference"
+            elseif live_state == "y" then
+                track_type = "live"
+            end
+            
+            local has_hyphen = string.sub(name, -1) == "-"
+            local display_name = ""
+            
+            -- Extract display name based on track type
+            if track_type == "aux" or track_type == "submix" then
+                display_name = name:gsub("^[@#]:?", ""):gsub("%-$", "")
+            elseif track_type == "reference" then
+                display_name = name:gsub("^REF:?", ""):gsub("%-$", "")
+            elseif track_type == "roomtone" then
+                -- RoomTone has no additional name
+                display_name = ""
+            elseif track_type == "live" then
+                -- LIVE has no additional name
+                display_name = ""
+            else
+                display_name = name:gsub("%-$", "")
+            end
+            
+            table.insert(tracks, {
+                track = track,
+                name = display_name,
+                full_name = name,
+                type = track_type,
+                has_hyphen = has_hyphen,
+                has_routing = has_routing,
+                index = i
+            })
+        end
+    end
+    
+    return tracks
+end
+
+function GetMixerSendsToAuxSubmix(mixer_track)
+    local sends = {}
+    local num_sends = GetTrackNumSends(mixer_track, 0)
+    
+    for i = 0, num_sends - 1 do
+        local dest_track = GetTrackSendInfo_Value(mixer_track, 0, i, "P_DESTTRACK")
+        if dest_track then
+            local _, aux_state = GetSetMediaTrackInfo_String(dest_track, "P_EXT:aux", "", false)
+            local _, submix_state = GetSetMediaTrackInfo_String(dest_track, "P_EXT:submix", "", false)
+            
+            if aux_state == "y" or submix_state == "y" then
+                sends[dest_track] = true
+            end
+        end
+    end
+    
+    return sends
 end
 
 ---------------------------------------------------------------------
@@ -195,9 +291,12 @@ function ApplyInputSelection(d_track, is_stereo_input, channel_index)
     SetMediaTrackInfo_Value(d_track, "I_RECINPUT", recInput)
 end
 
-function RenameTracksForMixer(track_info, new_name)
+function RenameTracksForMixer(track_info, new_name, add_hyphen)
+    -- Add hyphen if checkbox is checked
+    local full_name = add_hyphen and (new_name .. "-") or new_name
+    
     -- Rename mixer track with M: prefix
-    GetSetMediaTrackInfo_String(track_info.mixer_track, "P_NAME", "M:" .. new_name, true)
+    GetSetMediaTrackInfo_String(track_info.mixer_track, "P_NAME", "M:" .. full_name, true)
     
     -- Get the mixer track's position in the list (1-based)
     local mixer_position = nil
@@ -236,7 +335,7 @@ function RenameTracksForMixer(track_info, new_name)
                 end
                 
                 -- Rename the track
-                GetSetMediaTrackInfo_String(target_track, "P_NAME", prefix .. new_name, true)
+                GetSetMediaTrackInfo_String(target_track, "P_NAME", prefix .. full_name, true)
             end
         end
     end
@@ -322,10 +421,96 @@ function DeleteMixerTrack(track_info)
     InitializeState()
 end
 
-function AddMixerTrack()
-    -- Run the add mixer command
-    local add_mixer = NamedCommandLookup("_RS6b2e20ac7202f36f624ce019fce5d87f9f28489b")
-    Main_OnCommand(add_mixer, 0)
+function AddMixerTrackWithName(name)
+    if name == "" then return end
+    
+    Undo_BeginBlock()
+    
+    -- Get folder and child count
+    local num_of_tracks = CountTracks(0)
+    local folder_count = 0
+    local child_count = 0
+    
+    for i = 0, num_of_tracks - 1 do
+        local track = GetTrack(0, i)
+        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        local patterns = { "^M:", "^@", "^#", "^RCMASTER", "^RoomTone", "^REF", "^LIVE" }
+        local bus = false
+        for _, pattern in ipairs(patterns) do
+            if string.match(track_name, pattern) then
+                bus = true
+                break
+            end
+        end
+        if depth == 1 then
+            folder_count = folder_count + 1
+        elseif depth ~= 1 and folder_count == 1 and not bus then
+            child_count = child_count + 1
+        end
+    end
+    
+    if folder_count == 0 then
+        MB("Add one or more folders before running.", "Add Track To All Groups", 0)
+        Undo_EndBlock("Add Track to Folder", -1)
+        return
+    end
+    
+    -- Save all rec inputs before doing anything
+    local saved_rec_inputs = {}
+    for i = 0, num_of_tracks - 1 do
+        local track = GetTrack(0, i)
+        local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
+        local recInput = GetMediaTrackInfo_Value(track, "I_RECINPUT")
+        saved_rec_inputs[guid] = recInput
+    end
+    
+    PreventUIRefresh(1)
+    
+    -- Add new track to penultimate position
+    for i = 0, num_of_tracks - 1 + folder_count, 1 do
+        local track = GetTrack(0, i)
+        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if depth == 1 then
+            InsertTrackAtIndex(i + child_count, 1)
+        end
+        if depth == -1 then
+            -- Switch with last track in folder
+            SetOnlyTrackSelected(track)
+            ReorderSelectedTracks(i - 1, 0)
+        end
+    end
+    
+    -- Add new mixer track
+    local tracks_per_folder = child_count + 2
+    local index = (folder_count * tracks_per_folder) + tracks_per_folder - 1
+    InsertTrackAtIndex(index, 1)
+    local new_track = GetTrack(0, index)
+    GetSetMediaTrackInfo_String(new_track, "P_NAME", "M:" .. name, true)
+    GetSetMediaTrackInfo_String(new_track, "P_EXT:mix_order", index, true)
+    GetSetMediaTrackInfo_String(new_track, "P_EXT:mixer", "y", true)
+    
+    -- Run sync based on workflow
+    if folder_count > 1 then
+        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+        Main_OnCommand(F8_sync, 0)
+    else
+        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+        Main_OnCommand(F7_sync, 0)
+    end
+    
+    -- Restore rec inputs after sync
+    local new_num_tracks = CountTracks(0)
+    for i = 0, new_num_tracks - 1 do
+        local track = GetTrack(0, i)
+        local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
+        if saved_rec_inputs[guid] then
+            SetMediaTrackInfo_Value(track, "I_RECINPUT", saved_rec_inputs[guid])
+        end
+    end
+    
+    PreventUIRefresh(-1)
+    Undo_EndBlock("Add Track to Folder", -1)
     
     -- Completely reinitialize from scratch
     selected_track = nil
@@ -340,6 +525,17 @@ function InitializeState()
     
     -- Get mixer tracks
     mixer_tracks = CreateMixerTable()
+    
+    -- Get aux and submix tracks
+    aux_submix_tracks = GetAuxSubmixTracks()
+    
+    -- Initialize aux/submix names and pan values
+    aux_submix_names = {}
+    aux_submix_pans = {}
+    for i, aux_info in ipairs(aux_submix_tracks) do
+        aux_submix_names[i] = aux_info.name
+        aux_submix_pans[i] = GetMediaTrackInfo_Value(aux_info.track, "D_PAN")
+    end
     
     if #mixer_tracks == 0 then
         MB("No mixer tracks found.", "Error", 0)
@@ -364,6 +560,11 @@ function InitializeState()
     is_stereo = {}
     pan_values = {}
     track_names = {}
+    track_has_hyphen = {}
+    mixer_sends = {}
+    mute_states = {}
+    solo_states = {}
+    volume_values = {}
     
     -- Initialize by reading from D: tracks (first folder)
     for i = 1, #mixer_tracks do
@@ -388,10 +589,29 @@ function InitializeState()
         end
         
         pan_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN")
+        mute_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
+        solo_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
+        volume_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL")
         
-        -- Get mixer track name without M: prefix
+        -- Get mixer track name without M: prefix and check for hyphen
         local _, mixer_name = GetTrackName(track_info.mixer_track)
-        track_names[i] = mixer_name:gsub("^M:?", "")
+        local name_without_prefix = mixer_name:gsub("^M:?", "")
+        track_has_hyphen[i] = string.sub(name_without_prefix, -1) == "-"
+        -- Store name without hyphen for display
+        track_names[i] = name_without_prefix:gsub("%-$", "")
+        
+        -- Get sends to aux/submix
+        mixer_sends[i] = GetMixerSendsToAuxSubmix(track_info.mixer_track)
+    end
+    
+    -- Initialize special tracks mute, solo, volume
+    aux_mute_states = {}
+    aux_solo_states = {}
+    aux_volume_values = {}
+    for i, aux_info in ipairs(aux_submix_tracks) do
+        aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
+        aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
+        aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
     end
     
     return true
@@ -402,6 +622,23 @@ end
 function Loop()
     if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
         return
+    end
+    
+    -- Update all track states from REAPER (pan, volume, mute, solo)
+    -- This keeps the UI in sync if user changes things in REAPER's mixer
+    for i = 1, #mixer_tracks do
+        local track_info = mixer_tracks[i]
+        pan_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN")
+        volume_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL")
+        mute_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
+        solo_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
+    end
+    
+    for i, aux_info in ipairs(aux_submix_tracks) do
+        aux_submix_pans[i] = GetMediaTrackInfo_Value(aux_info.track, "D_PAN")
+        aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
+        aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
+        aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
     end
     
     ImGui.SetNextWindowSize(ctx, 600, 0, ImGui.Cond_FirstUseEver)
@@ -454,10 +691,78 @@ function Loop()
         -- Add mixer track button
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "+") then
-            AddMixerTrack()
+            new_track_name = ""  -- Reset the name
+            ImGui.OpenPopup(ctx, "Add Mixer Track")
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Add track to all folders")
+        end
+        
+        -- Add mixer track popup dialog
+        if ImGui.BeginPopup(ctx, "Add Mixer Track") then
+            ImGui.Text(ctx, "Enter track name:")
+            ImGui.Separator(ctx)
+            
+            ImGui.SetNextItemWidth(ctx, 200)
+            if ImGui.IsWindowAppearing(ctx) then
+                ImGui.SetKeyboardFocusHere(ctx)
+            end
+            
+            -- InputText needs the value passed in and returns the new value
+            local rv, buf = ImGui.InputText(ctx, "##trackname", new_track_name)
+            if rv then
+                new_track_name = buf
+            end
+            
+            -- Check for Enter key after editing (but before separator/buttons)
+            local enter_pressed = ImGui.IsItemDeactivatedAfterEdit(ctx)
+            
+            ImGui.Separator(ctx)
+            
+            if enter_pressed then
+                AddMixerTrackWithName(new_track_name)
+                new_track_name = ""
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            
+            if ImGui.Button(ctx, "OK", 80, 0) then
+                AddMixerTrackWithName(new_track_name)
+                new_track_name = ""
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Cancel", 80, 0) then
+                new_track_name = ""
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            
+            ImGui.EndPopup(ctx)
+        end
+        
+        -- Refresh button
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "⟳") then
+            InitializeState()
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Refresh (useful after undo)")
+        end
+        
+        -- Disconnect all from RCMASTER button
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "✕ RCM") then
+            for i = 1, #mixer_tracks do
+                if not track_has_hyphen[i] then
+                    track_has_hyphen[i] = true
+                    local track_info = mixer_tracks[i]
+                    RenameTracksForMixer(track_info, track_names[i], true)
+                end
+            end
+            sync_needed = true
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Disconnect all mixer tracks from RCMASTER")
         end
         
         -- Invisible button to fill remaining space and clear selection
@@ -466,6 +771,466 @@ function Loop()
         ImGui.InvisibleButton(ctx, "##clearselect", remaining_width, ImGui.GetTextLineHeight(ctx))
         if ImGui.IsItemClicked(ctx) then
             selected_track = nil
+        end
+        
+        -- Special Tracks section
+        if #aux_submix_tracks > 0 then
+            ImGui.Separator(ctx)
+            local expanded
+            expanded, show_aux_section = ImGui.CollapsingHeader(ctx, "Special Tracks", nil, ImGui.TreeNodeFlags_DefaultOpen)
+            
+            if expanded then
+                for idx, aux_info in ipairs(aux_submix_tracks) do
+                    ImGui.PushID(ctx, "special" .. aux_info.index)
+                    
+                    -- Track type indicator
+                    local display_prefix = ""
+                    if aux_info.type == "aux" then
+                        display_prefix = "@"
+                    elseif aux_info.type == "submix" then
+                        display_prefix = "#"
+                    elseif aux_info.type == "roomtone" then
+                        display_prefix = "RT"
+                    elseif aux_info.type == "reference" then
+                        display_prefix = "REF"
+                    elseif aux_info.type == "live" then
+                        display_prefix = "LIVE"
+                    end
+                    ImGui.Text(ctx, display_prefix)
+                    
+                    -- Track name input (only for tracks that can be renamed)
+                    local can_rename = (aux_info.type == "aux" or aux_info.type == "submix" or aux_info.type == "reference")
+                    
+                    -- Set cursor position for name input column (aligned)
+                    local name_col_x = 60
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, name_col_x)
+                    
+                    if can_rename then
+                        ImGui.SetNextItemWidth(ctx, 120)
+                        local changed_name, new_name = ImGui.InputText(ctx, "##specialname", aux_submix_names[idx])
+                        if changed_name then
+                            aux_submix_names[idx] = new_name
+                            -- Update track name with prefix and hyphen state
+                            local full_name
+                            if aux_info.type == "aux" then
+                                full_name = "@" .. new_name
+                            elseif aux_info.type == "submix" then
+                                full_name = "#" .. new_name
+                            elseif aux_info.type == "reference" and new_name ~= "" then
+                                full_name = "REF:" .. new_name
+                            elseif aux_info.type == "reference" and new_name == "" then
+                                full_name = "REF"
+                            end
+                            
+                            if aux_info.has_hyphen then
+                                full_name = full_name .. "-"
+                            end
+                            GetSetMediaTrackInfo_String(aux_info.track, "P_NAME", full_name, true)
+                            aux_info.name = new_name
+                            aux_info.full_name = full_name
+                        end
+                    else
+                        -- Add spacing to align with tracks that have name inputs
+                        ImGui.Dummy(ctx, 120, ImGui.GetTextLineHeight(ctx))
+                    end
+                    
+                    -- Set cursor position for pan slider column (aligned)
+                    local pan_col_x = name_col_x + 130
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, pan_col_x)
+                    
+                    -- Mute button (before pan)
+                    local is_muted = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
+                    if is_muted then
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFF0000FF)         -- Red when muted (RGBA)
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFF3333FF)  -- Lighter red on hover
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCC0000FF)   -- Darker red when clicked
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFFFFFFF)           -- White text
+                    end
+                    if ImGui.Button(ctx, "M##auxmute" .. idx, 25, 0) then
+                        SetMediaTrackInfo_Value(aux_info.track, "B_MUTE", is_muted and 0 or 1)
+                    end
+                    if is_muted then
+                        ImGui.PopStyleColor(ctx, 4)  -- Pop all 4 colors
+                    end
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Mute")
+                    end
+                    
+                    -- Solo button
+                    ImGui.SameLine(ctx)
+                    local is_soloed = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
+                    if is_soloed then
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)         -- Yellow when soloed (RGBA)
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF)  -- Lighter yellow on hover
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCCCC00FF)   -- Darker yellow when clicked
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)           -- Black text
+                    end
+                    if ImGui.Button(ctx, "S##auxsolo" .. idx, 25, 0) then
+                        SetMediaTrackInfo_Value(aux_info.track, "I_SOLO", is_soloed and 0 or 1)
+                    end
+                    if is_soloed then
+                        ImGui.PopStyleColor(ctx, 4)  -- Pop all 4 colors
+                    end
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Solo")
+                    end
+                    
+                    -- Pan slider
+                    ImGui.SameLine(ctx)
+                    ImGui.SetNextItemWidth(ctx, 150)
+                    local changed_pan, new_pan = ImGui.SliderDouble(ctx, "##specialpan" .. idx, aux_submix_pans[idx], -1.0, 1.0, FormatPanString(aux_submix_pans[idx]))
+                    
+                    -- Check for double-click reset to center
+                    new_pan = ResetPanOnDoubleClick("##specialpan" .. idx, new_pan, 0.0)
+                    
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Pan (double-click center, right-click to type)")
+                    end
+                    
+                    if changed_pan or new_pan ~= aux_submix_pans[idx] then
+                        aux_submix_pans[idx] = new_pan
+                        SetMediaTrackInfo_Value(aux_info.track, "D_PAN", new_pan)
+                    end
+                    
+                    -- Right-click popup for typing pan value
+                    if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+                        ImGui.OpenPopup(ctx, "auxpan_input##" .. idx)
+                    end
+                    
+                    if ImGui.BeginPopup(ctx, "auxpan_input##" .. idx) then
+                        ImGui.Text(ctx, "Enter pan (C, L, R, 45L, 34R, etc.):")
+                        ImGui.SetNextItemWidth(ctx, 100)
+                        local pan_input_buf = FormatPanString(aux_submix_pans[idx])
+                        local rv, buf = ImGui.InputText(ctx, "##auxpaninput", pan_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+                        if rv then
+                            local pan_val = 0.0
+                            local input = buf:gsub("%s+", "")  -- Remove spaces but keep original case
+                            local input_upper = input:upper()
+                            
+                            if input_upper == "C" or input == "" then
+                                pan_val = 0.0
+                            elseif input_upper == "L" then
+                                pan_val = -1.0
+                            elseif input_upper == "R" then
+                                pan_val = 1.0
+                            else
+                                -- Try to parse number followed by L or R (case insensitive)
+                                local num, side = input:match("^(%d+%.?%d*)([LlRr])$")
+                                if num and side then
+                                    local amount = tonumber(num)
+                                    if amount then
+                                        amount = math.min(100, amount) / 100
+                                        pan_val = (side == "L" or side == "l") and -amount or amount
+                                    end
+                                end
+                            end
+                            
+                            aux_submix_pans[idx] = pan_val
+                            SetMediaTrackInfo_Value(aux_info.track, "D_PAN", pan_val)
+                            ImGui.CloseCurrentPopup(ctx)
+                        end
+                        ImGui.EndPopup(ctx)
+                    end
+                    
+                    -- Volume knob
+                    ImGui.SameLine(ctx)
+                    ImGui.SetNextItemWidth(ctx, 200)
+                    -- Convert linear volume to dB for display
+                    local volume_db = 20 * math.log(aux_volume_values[idx] > 0.0000001 and aux_volume_values[idx] or 0.0000001, 10)
+                    -- Use logarithmic scale with more resolution near 0dB
+                    local fader_pos = 0.0
+                    if volume_db <= -60 then
+                        fader_pos = 0.0
+                    elseif volume_db >= 12 then
+                        fader_pos = 1.0
+                    else
+                        if volume_db < 0 then
+                            fader_pos = 0.75 * (volume_db + 60) / 60
+                        else
+                            fader_pos = 0.75 + 0.25 * (volume_db / 12)
+                        end
+                    end
+                    
+                    local changed_fader, new_fader_pos = ImGui.SliderDouble(ctx, "##auxvol" .. idx, fader_pos, 0.0, 1.0, string.format("%.1f dB", volume_db))
+                    
+                    -- Check for double-click reset to 0dB
+                    if ImGui.IsItemDeactivated(ctx) and pan_reset["auxvol" .. idx] then
+                        new_fader_pos = 0.75
+                        changed_fader = true
+                        pan_reset["auxvol" .. idx] = nil
+                    elseif ImGui.IsItemHovered(ctx) and ImGui.IsMouseDoubleClicked(ctx, 0) then
+                        pan_reset["auxvol" .. idx] = true
+                    end
+                    
+                    if changed_fader then
+                        -- Convert fader position back to dB
+                        local new_db
+                        if new_fader_pos <= 0.75 then
+                            new_db = -60 + (new_fader_pos / 0.75) * 60
+                        else
+                            new_db = ((new_fader_pos - 0.75) / 0.25) * 12
+                        end
+                        -- Convert dB to linear
+                        local new_vol = 10 ^ (new_db / 20)
+                        aux_volume_values[idx] = new_vol
+                        SetMediaTrackInfo_Value(aux_info.track, "D_VOL", new_vol)
+                    end
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Volume (double-click for 0dB, right-click to type dB)")
+                    end
+                    
+                    -- Right-click popup for typing dB value
+                    if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+                        ImGui.OpenPopup(ctx, "auxvol_input##" .. idx)
+                    end
+                    
+                    if ImGui.BeginPopup(ctx, "auxvol_input##" .. idx) then
+                        ImGui.Text(ctx, "Enter volume (dB):")
+                        ImGui.SetNextItemWidth(ctx, 100)
+                        local volume_db_current = 20 * math.log(aux_volume_values[idx] > 0.0000001 and aux_volume_values[idx] or 0.0000001, 10)
+                        local vol_input_buf = string.format("%.1f", volume_db_current)
+                        local rv, buf = ImGui.InputText(ctx, "##auxdbinput", vol_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+                        if rv then
+                            local db_val = tonumber(buf)
+                            if db_val then
+                                -- Clamp to -60 to +12 dB
+                                db_val = math.max(-60, math.min(12, db_val))
+                                local new_vol = 10 ^ (db_val / 20)
+                                aux_volume_values[idx] = new_vol
+                                SetMediaTrackInfo_Value(aux_info.track, "D_VOL", new_vol)
+                            end
+                            ImGui.CloseCurrentPopup(ctx)
+                        end
+                        ImGui.EndPopup(ctx)
+                    end
+                    
+                    -- Routing button (only for aux and submix) or disabled button for alignment
+                    ImGui.SameLine(ctx)
+                    if aux_info.has_routing then
+                        if ImGui.Button(ctx, "Routing##routing") then
+                            ImGui.OpenPopup(ctx, "special_routing_popup")
+                        end
+                        if ImGui.IsItemHovered(ctx) then
+                            ImGui.SetTooltip(ctx, "Route to RCMASTER and other Aux/Submix tracks")
+                        end
+                        
+                        -- Routing popup for this aux/submix
+                        if ImGui.BeginPopup(ctx, "special_routing_popup") then
+                            ImGui.Text(ctx, "Route " .. (aux_info.name ~= "" and aux_info.name or display_prefix) .. " to:")
+                            ImGui.Separator(ctx)
+                            
+                            -- Get current sends
+                            local aux_sends = {}
+                            local num_sends = GetTrackNumSends(aux_info.track, 0)
+                            for j = 0, num_sends - 1 do
+                                local dest_track = GetTrackSendInfo_Value(aux_info.track, 0, j, "P_DESTTRACK")
+                                if dest_track then
+                                    aux_sends[dest_track] = true
+                                end
+                            end
+                            
+                            -- Initialize pending changes if not already done
+                            local popup_id = "special_" .. aux_info.index
+                            if not pending_routing_changes[popup_id] then
+                                pending_routing_changes[popup_id] = {
+                                    rcm_changed = false,
+                                    rcm_state = not aux_info.has_hyphen,
+                                    sends = {}
+                                }
+                            end
+                            
+                            -- RCMASTER checkbox (checked when track name does NOT end with hyphen)
+                            local changed_rcm, new_rcm_state = ImGui.Checkbox(ctx, "RCMASTER", pending_routing_changes[popup_id].rcm_state)
+                            if changed_rcm then
+                                pending_routing_changes[popup_id].rcm_changed = true
+                                pending_routing_changes[popup_id].rcm_state = new_rcm_state
+                            end
+                            
+                            ImGui.Separator(ctx)
+                            
+                            -- Show checkboxes for other aux/submix tracks (only those with routing)
+                            local has_destinations = false
+                            for _, dest_aux in ipairs(aux_submix_tracks) do
+                                if dest_aux.track ~= aux_info.track and dest_aux.has_routing then
+                                    has_destinations = true
+                                    
+                                    -- Use pending state if available, otherwise current state
+                                    local current_state = pending_routing_changes[popup_id].sends[dest_aux.track]
+                                    if current_state == nil then
+                                        current_state = aux_sends[dest_aux.track] or false
+                                    end
+                                    
+                                    local changed, new_state = ImGui.Checkbox(ctx, dest_aux.full_name, current_state)
+                                    
+                                    if changed then
+                                        pending_routing_changes[popup_id].sends[dest_aux.track] = new_state
+                                    end
+                                end
+                            end
+                            
+                            if not has_destinations then
+                                ImGui.Text(ctx, "(No other Aux/Submix tracks available)")
+                            end
+                            
+                            ImGui.EndPopup(ctx)
+                        else
+                            -- Popup just closed - apply all pending changes
+                            local popup_id = "special_" .. aux_info.index
+                            if pending_routing_changes[popup_id] then
+                                local changes = pending_routing_changes[popup_id]
+                                
+                                -- Apply RCMASTER routing change
+                                if changes.rcm_changed then
+                                    local base_name = aux_info.full_name:gsub("%-$", "")
+                                    local new_name = changes.rcm_state and base_name or (base_name .. "-")
+                                    GetSetMediaTrackInfo_String(aux_info.track, "P_NAME", new_name, true)
+                                    aux_info.has_hyphen = not changes.rcm_state
+                                    aux_info.full_name = new_name
+                                    sync_needed = true
+                                end
+                                
+                                -- Apply aux/submix send changes
+                                for dest_track, new_state in pairs(changes.sends) do
+                                    -- Get current sends again
+                                    local aux_sends_now = {}
+                                    local num_sends_now = GetTrackNumSends(aux_info.track, 0)
+                                    for j = 0, num_sends_now - 1 do
+                                        local dest = GetTrackSendInfo_Value(aux_info.track, 0, j, "P_DESTTRACK")
+                                        if dest then
+                                            aux_sends_now[dest] = true
+                                        end
+                                    end
+                                    
+                                    local current_state = aux_sends_now[dest_track] or false
+                                    if new_state ~= current_state then
+                                        if new_state then
+                                            CreateTrackSend(aux_info.track, dest_track)
+                                        else
+                                            -- Remove send
+                                            for j = 0, num_sends_now - 1 do
+                                                local dest = GetTrackSendInfo_Value(aux_info.track, 0, j, "P_DESTTRACK")
+                                                if dest == dest_track then
+                                                    RemoveTrackSend(aux_info.track, 0, j)
+                                                    break
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                                
+                                -- Clear pending changes
+                                pending_routing_changes[popup_id] = nil
+                            end
+                        end
+                    else
+                        -- Disabled routing button for tracks without routing (RT, LIVE, REF)
+                        ImGui.BeginDisabled(ctx)
+                        ImGui.Button(ctx, "Routing##routing_disabled")
+                        ImGui.EndDisabled(ctx)
+                    end
+                    
+                    -- FX button
+                    ImGui.SameLine(ctx)
+                    if ImGui.Button(ctx, "FX##specialfx") then
+                        -- Open FX chain window for this track
+                        TrackFX_Show(aux_info.track, 0, 1)
+                    end
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Open FX chain")
+                    end
+                    
+                    -- Delete button
+                    ImGui.SameLine(ctx)
+                    if ImGui.Button(ctx, "✕##specialdelete") then
+                        DeleteTrack(aux_info.track)
+                        -- Reinitialize to refresh the list
+                        InitializeState()
+                        ImGui.PopID(ctx)
+                        break
+                    end
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Delete this track")
+                    end
+                    
+                    ImGui.PopID(ctx)
+                end
+            end
+        end
+        
+        -- Add special track button (always show, even if no tracks exist)
+        ImGui.Separator(ctx)
+        if ImGui.Button(ctx, "+ Add Special Track") then
+            ImGui.OpenPopup(ctx, "add_special_track_popup")
+        end
+        
+        -- Add special track popup
+        if ImGui.BeginPopup(ctx, "add_special_track_popup") then
+            ImGui.Text(ctx, "Add Special Track:")
+            ImGui.Separator(ctx)
+            
+            if ImGui.MenuItem(ctx, "Aux") then
+                local add_aux = NamedCommandLookup("_RS1938b67a195fd37423806f2647e26c3c212ce111")
+                Main_OnCommand(add_aux, 0)
+                InitializeState()
+            end
+            
+            if ImGui.MenuItem(ctx, "Submix") then
+                local add_submix = NamedCommandLookup("_RSdbfe4281d2bd56a7afc1c5e3967219c9f1c2095c")
+                Main_OnCommand(add_submix, 0)
+                InitializeState()
+            end
+            
+            -- Check if RoomTone already exists
+            local has_roomtone = false
+            for _, track_info in ipairs(aux_submix_tracks) do
+                if track_info.type == "roomtone" then
+                    has_roomtone = true
+                    break
+                end
+            end
+            
+            if not has_roomtone then
+                if ImGui.MenuItem(ctx, "Room Tone") then
+                    local add_roomtone = NamedCommandLookup("_RS3798d5ce6052ef404cd99dacf481f2befed4eacc")
+                    Main_OnCommand(add_roomtone, 0)
+                    InitializeState()
+                end
+            else
+                ImGui.BeginDisabled(ctx)
+                ImGui.MenuItem(ctx, "Room Tone (already exists)")
+                ImGui.EndDisabled(ctx)
+            end
+            
+            if ImGui.MenuItem(ctx, "Reference") then
+                local add_ref = NamedCommandLookup("_RS00c2ccc67c644739aa15a0c93eea2c755554b30d")
+                Main_OnCommand(add_ref, 0)
+                InitializeState()
+            end
+            
+            -- Check if Live already exists
+            local has_live = false
+            for _, track_info in ipairs(aux_submix_tracks) do
+                if track_info.type == "live" then
+                    has_live = true
+                    break
+                end
+            end
+            
+            if not has_live then
+                if ImGui.MenuItem(ctx, "Live Bounce") then
+                    local add_livebounce = NamedCommandLookup("_RS3f8d9e9a5731c664bc87eb08923a2450aef06537")
+                    Main_OnCommand(add_livebounce, 0)
+                    InitializeState()
+                end
+            else
+                ImGui.BeginDisabled(ctx)
+                ImGui.MenuItem(ctx, "Live Bounce (already exists)")
+                ImGui.EndDisabled(ctx)
+            end
+            
+            ImGui.EndPopup(ctx)
         end
         
         ImGui.End(ctx)
@@ -515,14 +1280,14 @@ function DrawTrackControls(start_idx, end_idx)
         local changed_name, new_name = ImGui.InputText(ctx, "##name", track_names[i])
         if changed_name then
             track_names[i] = new_name
-            RenameTracksForMixer(track_info, new_name)
+            RenameTracksForMixer(track_info, new_name, track_has_hyphen[i])
         end
         
         -- Mono/Stereo radio buttons
         ImGui.SameLine(ctx)
-        local changed_to_mono = ImGui.RadioButton(ctx, "M##mono", not is_stereo[i])
+        local changed_to_mono = ImGui.RadioButton(ctx, "Mono##mono", not is_stereo[i])
         ImGui.SameLine(ctx)
-        local changed_to_stereo = ImGui.RadioButton(ctx, "S##stereo", is_stereo[i])
+        local changed_to_stereo = ImGui.RadioButton(ctx, "Stereo##stereo", is_stereo[i])
         
         if changed_to_mono and is_stereo[i] then
             -- Save current stereo value and switch to mono
@@ -602,6 +1367,44 @@ function DrawTrackControls(start_idx, end_idx)
             end
         end
         
+        -- Mute button
+        ImGui.SameLine(ctx)
+        local is_muted = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
+        if is_muted then
+            ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFF0000FF)         -- Red when muted (RGBA)
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFF3333FF)  -- Lighter red on hover
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCC0000FF)   -- Darker red when clicked
+            ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFFFFFFF)           -- White text
+        end
+        if ImGui.Button(ctx, "M##mute" .. i, 25, 0) then
+            SetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE", is_muted and 0 or 1)
+        end
+        if is_muted then
+            ImGui.PopStyleColor(ctx, 4)  -- Pop all 4 colors
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Mute")
+        end
+        
+        -- Solo button
+        ImGui.SameLine(ctx)
+        local is_soloed = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
+        if is_soloed then
+            ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)         -- Yellow when soloed (RGBA)
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF)  -- Lighter yellow on hover
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCCCC00FF)   -- Darker yellow when clicked
+            ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)           -- Black text
+        end
+        if ImGui.Button(ctx, "S##solo" .. i, 25, 0) then
+            SetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO", is_soloed and 0 or 1)
+        end
+        if is_soloed then
+            ImGui.PopStyleColor(ctx, 4)  -- Pop all 4 colors
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Solo")
+        end
+        
         -- Pan slider
         ImGui.SameLine(ctx)
         ImGui.SetNextItemWidth(ctx, 150)
@@ -610,9 +1413,235 @@ function DrawTrackControls(start_idx, end_idx)
         -- Check for double-click reset to center
         new_pan = ResetPanOnDoubleClick("##pan" .. i, new_pan, 0.0)
         
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Pan (double-click center, right-click to type)")
+        end
+        
         if changed_pan or new_pan ~= pan_values[i] then
             pan_values[i] = new_pan
             SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", new_pan)
+        end
+        
+        -- Right-click popup for typing pan value
+        if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+            ImGui.OpenPopup(ctx, "pan_input##" .. i)
+        end
+        
+        if ImGui.BeginPopup(ctx, "pan_input##" .. i) then
+            ImGui.Text(ctx, "Enter pan (C, L, R, 45L, 34R, etc.):")
+            ImGui.SetNextItemWidth(ctx, 100)
+            local pan_input_buf = FormatPanString(pan_values[i])
+            local rv, buf = ImGui.InputText(ctx, "##paninput", pan_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+            if rv then
+                local pan_val = 0.0
+                local input = buf:gsub("%s+", "")  -- Remove spaces but keep original case
+                local input_upper = input:upper()  -- Uppercase version for comparison
+                
+                if input_upper == "C" or input == "" then
+                    pan_val = 0.0
+                elseif input_upper == "L" then
+                    pan_val = -1.0
+                elseif input_upper == "R" then
+                    pan_val = 1.0
+                else
+                    -- Try to parse number followed by L or R (case insensitive)
+                    local num, side = input:match("^(%d+%.?%d*)([LlRr])$")
+                    if num and side then
+                        local amount = tonumber(num)
+                        if amount then
+                            amount = math.min(100, amount) / 100  -- Clamp to 100 and convert to 0-1
+                            pan_val = (side == "L" or side == "l") and -amount or amount
+                        end
+                    end
+                end
+                
+                pan_values[i] = pan_val
+                SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", pan_val)
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            ImGui.EndPopup(ctx)
+        end
+        
+        -- Volume knob (as slider for now)
+        ImGui.SameLine(ctx)
+        ImGui.SetNextItemWidth(ctx, 200)
+        -- Convert linear volume to dB for display
+        local volume_db = 20 * math.log(volume_values[i] > 0.0000001 and volume_values[i] or 0.0000001, 10)
+        -- Use logarithmic scale: map -60dB to 12dB non-linearly
+        -- More resolution near 0dB (unity gain)
+        local fader_pos = 0.0
+        if volume_db <= -60 then
+            fader_pos = 0.0
+        elseif volume_db >= 12 then
+            fader_pos = 1.0
+        else
+            -- Logarithmic mapping with more resolution near 0dB
+            -- Below 0dB: spread -60 to 0 over 0.0 to 0.75
+            -- Above 0dB: spread 0 to 12 over 0.75 to 1.0
+            if volume_db < 0 then
+                fader_pos = 0.75 * (volume_db + 60) / 60
+            else
+                fader_pos = 0.75 + 0.25 * (volume_db / 12)
+            end
+        end
+        
+        local changed_fader, new_fader_pos = ImGui.SliderDouble(ctx, "##vol" .. i, fader_pos, 0.0, 1.0, string.format("%.1f dB", volume_db))
+        
+        -- Check for double-click reset to 0dB (1.0 linear)
+        if ImGui.IsItemDeactivated(ctx) and pan_reset["vol" .. i] then
+            new_fader_pos = 0.75  -- 0dB position
+            changed_fader = true
+            pan_reset["vol" .. i] = nil
+        elseif ImGui.IsItemHovered(ctx) and ImGui.IsMouseDoubleClicked(ctx, 0) then
+            pan_reset["vol" .. i] = true
+        end
+        
+        if changed_fader then
+            -- Convert fader position back to dB
+            local new_db
+            if new_fader_pos <= 0.75 then
+                -- -60dB to 0dB range
+                new_db = -60 + (new_fader_pos / 0.75) * 60
+            else
+                -- 0dB to 12dB range
+                new_db = ((new_fader_pos - 0.75) / 0.25) * 12
+            end
+            -- Convert dB to linear
+            local new_vol = 10 ^ (new_db / 20)
+            volume_values[i] = new_vol
+            SetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL", new_vol)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Volume (double-click for 0dB, right-click to type dB)")
+        end
+        
+        -- Right-click popup for typing dB value
+        if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+            ImGui.OpenPopup(ctx, "vol_input##" .. i)
+        end
+        
+        if ImGui.BeginPopup(ctx, "vol_input##" .. i) then
+            ImGui.Text(ctx, "Enter volume (dB):")
+            ImGui.SetNextItemWidth(ctx, 100)
+            local volume_db_current = 20 * math.log(volume_values[i] > 0.0000001 and volume_values[i] or 0.0000001, 10)
+            local vol_input_buf = string.format("%.1f", volume_db_current)
+            local rv, buf = ImGui.InputText(ctx, "##dbinput", vol_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+            if rv then
+                local db_val = tonumber(buf)
+                if db_val then
+                    -- Clamp to -60 to +12 dB
+                    db_val = math.max(-60, math.min(12, db_val))
+                    local new_vol = 10 ^ (db_val / 20)
+                    volume_values[i] = new_vol
+                    SetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL", new_vol)
+                end
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            ImGui.EndPopup(ctx)
+        end
+        
+        -- Aux routing button
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Routing##" .. i) then
+            ImGui.OpenPopup(ctx, "aux_routing##" .. i)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Route to RCMASTER and Aux/Submix tracks")
+        end
+        
+        -- Aux routing popup
+        if ImGui.BeginPopup(ctx, "aux_routing##" .. i) then
+            ImGui.Text(ctx, "Route " .. track_names[i] .. " to:")
+            ImGui.Separator(ctx)
+            
+            -- Initialize pending changes if not already done for this popup
+            if not pending_routing_changes[i] then
+                pending_routing_changes[i] = {
+                    rcm_changed = false,
+                    rcm_state = not track_has_hyphen[i],
+                    sends = {}
+                }
+            end
+            
+            -- RCMASTER checkbox (checked when track name does NOT end with hyphen)
+            local changed_rcm, new_rcm_state = ImGui.Checkbox(ctx, "RCMASTER", pending_routing_changes[i].rcm_state)
+            if changed_rcm then
+                pending_routing_changes[i].rcm_changed = true
+                pending_routing_changes[i].rcm_state = new_rcm_state
+            end
+            
+            ImGui.Separator(ctx)
+            
+            if #aux_submix_tracks == 0 then
+                ImGui.Text(ctx, "(No Aux/Submix tracks available)")
+            else
+                for _, aux_info in ipairs(aux_submix_tracks) do
+                    -- Only show aux/submix tracks with routing in mixer routing popups
+                    if aux_info.has_routing then
+                        -- Use pending state if available, otherwise current state
+                        local current_state = pending_routing_changes[i].sends[aux_info.track]
+                        if current_state == nil then
+                            current_state = mixer_sends[i][aux_info.track] or false
+                        end
+                        
+                        local changed, new_state = ImGui.Checkbox(ctx, aux_info.full_name .. "##aux" .. i, current_state)
+                        
+                        if changed then
+                            pending_routing_changes[i].sends[aux_info.track] = new_state
+                        end
+                    end
+                end
+            end
+            
+            ImGui.EndPopup(ctx)
+        else
+            -- Popup just closed - apply all pending changes
+            if pending_routing_changes[i] then
+                local changes = pending_routing_changes[i]
+                
+                -- Apply RCMASTER routing change
+                if changes.rcm_changed then
+                    track_has_hyphen[i] = not changes.rcm_state
+                    RenameTracksForMixer(track_info, track_names[i], track_has_hyphen[i])
+                    sync_needed = true
+                end
+                
+                -- Apply aux/submix send changes
+                for aux_track, new_state in pairs(changes.sends) do
+                    local current_state = mixer_sends[i][aux_track] or false
+                    if new_state ~= current_state then
+                        if new_state then
+                            -- Create send
+                            CreateTrackSend(track_info.mixer_track, aux_track)
+                        else
+                            -- Remove send
+                            local num_sends = GetTrackNumSends(track_info.mixer_track, 0)
+                            for j = 0, num_sends - 1 do
+                                local dest = GetTrackSendInfo_Value(track_info.mixer_track, 0, j, "P_DESTTRACK")
+                                if dest == aux_track then
+                                    RemoveTrackSend(track_info.mixer_track, 0, j)
+                                    break
+                                end
+                            end
+                        end
+                        -- Update state
+                        mixer_sends[i][aux_track] = new_state
+                    end
+                end
+                
+                -- Clear pending changes
+                pending_routing_changes[i] = nil
+            end
+        end
+        
+        -- FX button
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "FX##fx" .. i) then
+            -- Open FX chain window for this track
+            TrackFX_Show(track_info.mixer_track, 0, 1)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open FX chain")
         end
         
         -- Delete button
