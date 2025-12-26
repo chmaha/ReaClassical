@@ -227,7 +227,7 @@ function main()
                 end
                 
                 ImGui.SameLine(ctx)
-                if ImGui.Button(ctx, "R##reset_take", 25, 0) then
+                if ImGui.Button(ctx, "↻##reset_take", 25, 0) then
                     item_take_num = GetTakeNumberFromFilename(editing_item)
                     GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
                 end
