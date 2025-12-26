@@ -1,11 +1,8 @@
 --[[
 @noindex
-
 This file is a part of "ReaClassical" package.
 See "ReaClassical.lua" for more information.
-
 Copyright (C) 2022–2025 chmaha
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -22,49 +19,53 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, file_exists, get_path
-
----------------------------------------------------------------------
-
-local SWS_exists = APIExists("CF_GetSWSVersion")
-if not SWS_exists then
-    MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+local imgui_exists = APIExists("ImGui_GetVersion")
+if not imgui_exists then
+    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
     return
 end
 
-function main()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-Manual.pdf")
-    local pdf = resource_path .. relative_path
-    local bool = file_exists(pdf)
-    if bool == true then
-        CF_ShellExecute(pdf)
-    else
-        MB("Re-install ReaClassical metapackage via ReaPack first!",
-            "ReaClassical PDF Manual not found!", 0)
+package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui = require 'imgui' '0.10'
+
+---------------------------------------------------------------------
+
+local ctx = ImGui.CreateContext('ReaClassical Help')
+local window_open = true
+
+---------------------------------------------------------------------
+
+function Loop()
+    if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
+        return
+    end
+    
+    ImGui.SetNextWindowSize(ctx, 400, 100, ImGui.Cond_Always)
+    local visible, open = ImGui.Begin(ctx, 'ReaClassical Help', true)
+    
+    if visible then
+        -- Center the text both horizontally and vertically
+        local text = "ReaClassical 26 help system coming soon..."
+        local avail_w, avail_h = ImGui.GetContentRegionAvail(ctx)
+        
+        local text_width, text_height = ImGui.CalcTextSize(ctx, text)
+        
+        -- Center vertically
+        ImGui.SetCursorPosY(ctx, ImGui.GetCursorPosY(ctx) + (avail_h - text_height) * 0.5)
+        
+        -- Center horizontally
+        local cursor_start_x = ImGui.GetCursorPosX(ctx)
+        ImGui.SetCursorPosX(ctx, cursor_start_x + (avail_w - text_width) * 0.5)
+        ImGui.Text(ctx, text)
+        
+        ImGui.End(ctx)
+    end
+    
+    if open then
+        defer(Loop)
     end
 end
 
 ---------------------------------------------------------------------
 
-function file_exists(name)
-    local exists = false
-    local file = io.open(name, "r")
-    if file ~= nil then
-        io.close(file)
-        exists = true
-    end
-    return exists
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
-end
-
----------------------------------------------------------------------
-
-main()
+defer(Loop)
