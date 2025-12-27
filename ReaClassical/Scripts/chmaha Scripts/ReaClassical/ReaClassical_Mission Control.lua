@@ -887,7 +887,7 @@ function Loop()
         
         -- Disconnect all from RCMASTER button
         ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "✕ RCMASTER") then
+        if ImGui.Button(ctx, "✕ RCM") then
             for i = 1, #mixer_tracks do
                 if not track_has_hyphen[i] then
                     track_has_hyphen[i] = true
@@ -903,7 +903,7 @@ function Loop()
         
         -- Connect all to RCMASTER button
         ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "✓ RCMASTER") then
+        if ImGui.Button(ctx, "✓ RCM") then
             for i = 1, #mixer_tracks do
                 if track_has_hyphen[i] then
                     track_has_hyphen[i] = false
