@@ -88,23 +88,8 @@ function main()
             mixer()
             fold_small()
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
-            local success = show_track_name_dialog(mixer_table)
-            if success then
-                local response1 = MB(
-                    "Would you like to automatically assign panning and recording inputs based on track naming?",
-                    "Vertical Workflow", 4)
-                if response1 == 6 then
-                    local auto_set = NamedCommandLookup("_RS4e19e645166b5e512fa7b405aaa8ac97ca6843b4")
-                    Main_OnCommand(auto_set, 0)
-                end
-                local response2 = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
-                    "Vertical Workflow", 4)
-                if response2 == 6 then
-                    local add_special_tracks = NamedCommandLookup("_RS9c0fa5c1aae86bf8559df83dd6516c0aa35e264f")
-                    Main_OnCommand(add_special_tracks, 0)
-                end
-            end
-            copy_track_names(table, mixer_table)
+            local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
+            Main_OnCommand(mission_control,0)
             set_recording_to_primary_and_secondary(end_of_sources)
         end
     elseif folder_check() > 1 then
