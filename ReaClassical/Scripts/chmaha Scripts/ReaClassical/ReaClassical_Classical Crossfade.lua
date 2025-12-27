@@ -37,7 +37,7 @@ function main()
     end
     local correct_cursor_position = is_cursor_between_items()
     if not correct_cursor_position then
-        MB("Ensure the parent items on track 1 overlap and that the edit cursor " ..
+        MB("Ensure the parent items on the parent track overlap and that the edit cursor " ..
             "is positioned somewhere within the overlap.",
             "Classical Crossfade", 0)
         return
@@ -147,7 +147,7 @@ end
 ---------------------------------------------------------------------
 
 function is_cursor_between_items()
-    local track = GetTrack(0, 0)
+    local track = GetSelectedTrack(0, 0)
     if not track or IsTrackSelected(track) == false then return false end
 
     local item_count = CountTrackMediaItems(track)
