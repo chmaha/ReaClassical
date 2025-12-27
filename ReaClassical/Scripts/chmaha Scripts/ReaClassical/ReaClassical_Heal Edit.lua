@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, select_previous_and_next, heal
 local count_selected_media_items, get_selected_media_item_at
+local deselect_items_not_on_track
 
 ---------------------------------------------------------------------
 
@@ -71,6 +72,8 @@ function select_previous_and_next()
     -- Get the track of the first selected item
     local first_item = get_selected_media_item_at(0)
     local track = GetMediaItem_Track(first_item)
+
+    deselect_items_not_on_track(track)
 
     -- Check if the track is a parent (has child tracks)
     local parent_is_parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1
@@ -336,6 +339,20 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function deselect_items_not_on_track(track)
+    local num_items = CountMediaItems(0)
+    for i = 0, num_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if GetMediaItem_Track(item) ~= track then
+                SetMediaItemSelected(item, false)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------
