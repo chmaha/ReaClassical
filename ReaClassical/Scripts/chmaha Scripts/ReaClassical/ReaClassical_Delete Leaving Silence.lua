@@ -37,12 +37,6 @@ function main()
         return
     end
 
-    local first_group = dest_check()
-    if not first_group then
-        MB("Delete leaving silence can only be run on the destination folder.", "ReaClassical Error", 0)
-        return
-    end
-
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping

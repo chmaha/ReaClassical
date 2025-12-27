@@ -44,12 +44,6 @@ function main()
         return
     end
 
-    local first_group = dest_check()
-    if not first_group then
-        MB("Delete with ripple can only be run on the destination folder.", "ReaClassical Error", 0)
-        return
-    end
-
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
@@ -68,10 +62,10 @@ function main()
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
         local folder = GetSelectedTrack(0, 0)
-        if not folder or GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") ~= 1 then
+        if not folder then
             return
         end
-        if workflow == "Vertical" and GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1 then
+        if workflow == "Vertical" then
             Main_OnCommand(40310, 0) -- Set ripple-per-track
         else
             Main_OnCommand(40311, 0) -- Set ripple-all-tracks
