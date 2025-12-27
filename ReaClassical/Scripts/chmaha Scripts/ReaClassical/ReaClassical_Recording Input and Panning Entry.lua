@@ -80,6 +80,11 @@ local mono_options = {}
 local stereo_options = {}
 local track_num_format = "%d"  -- Will be set based on number of tracks
 
+-- Helper function to convert RGB to ImGui color format (RGBA)
+function ColorToNative(r, g, b)
+    return (r << 24) | (g << 16) | (b << 8) | 0xFF
+end
+
 function GenerateInputOptions()
     mono_options = {}
     stereo_options = {}
@@ -115,9 +120,10 @@ function GetAuxSubmixTracks()
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         
-        if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" or live_state == "y" then
+        if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" or live_state == "y" or rcmaster_state == "y" then
             local track_type = "other"
             local has_routing = false
             
@@ -133,6 +139,8 @@ function GetAuxSubmixTracks()
                 track_type = "reference"
             elseif live_state == "y" then
                 track_type = "live"
+            elseif rcmaster_state == "y" then
+                track_type = "rcmaster"
             end
             
             local has_hyphen = string.sub(name, -1) == "-"
@@ -149,6 +157,9 @@ function GetAuxSubmixTracks()
             elseif track_type == "live" then
                 -- LIVE has no additional name
                 display_name = ""
+            elseif track_type == "rcmaster" then
+                -- RCMASTER has no additional name
+                display_name = ""
             else
                 display_name = name:gsub("%-$", "")
             end
@@ -164,6 +175,27 @@ function GetAuxSubmixTracks()
             })
         end
     end
+    
+    -- Sort tracks by type priority: aux, submix, roomtone, rcmaster, reference, live
+    local type_priority = {
+        aux = 1,
+        submix = 2,
+        roomtone = 3,
+        rcmaster = 4,
+        live = 5,
+        reference = 6
+    }
+    
+    table.sort(tracks, function(a, b)
+        local priority_a = type_priority[a.type] or 99
+        local priority_b = type_priority[b.type] or 99
+        if priority_a ~= priority_b then
+            return priority_a < priority_b
+        else
+            -- If same type, maintain original track order
+            return a.index < b.index
+        end
+    end)
     
     return tracks
 end
@@ -783,20 +815,33 @@ function Loop()
                 for idx, aux_info in ipairs(aux_submix_tracks) do
                     ImGui.PushID(ctx, "special" .. aux_info.index)
                     
-                    -- Track type indicator
+                    -- Track type indicator with color
                     local display_prefix = ""
+                    local prefix_color = 0xFFFFFFFF  -- Default white
+                    
                     if aux_info.type == "aux" then
-                        display_prefix = "@"
+                        display_prefix = "AUX"
+                        prefix_color = ColorToNative(200, 140, 135)  -- Brightened reddish-brown
                     elseif aux_info.type == "submix" then
-                        display_prefix = "#"
+                        display_prefix = "SUB"
+                        prefix_color = ColorToNative(135, 195, 200)  -- Brightened blue-grey
                     elseif aux_info.type == "roomtone" then
                         display_prefix = "RT"
+                        prefix_color = ColorToNative(200, 160, 110)  -- Brightened tan/brown
                     elseif aux_info.type == "reference" then
                         display_prefix = "REF"
+                        prefix_color = ColorToNative(180, 180, 180)  -- Brightened grey
                     elseif aux_info.type == "live" then
                         display_prefix = "LIVE"
+                        prefix_color = ColorToNative(255, 200, 200)  -- Brightened pink
+                    elseif aux_info.type == "rcmaster" then
+                        display_prefix = "RCM"
+                        prefix_color = ColorToNative(80, 200, 80)  -- Brightened green
                     end
+                    
+                    ImGui.PushStyleColor(ctx, ImGui.Col_Text, prefix_color)
                     ImGui.Text(ctx, display_prefix)
+                    ImGui.PopStyleColor(ctx)
                     
                     -- Track name input (only for tracks that can be renamed)
                     local can_rename = (aux_info.type == "aux" or aux_info.type == "submix" or aux_info.type == "reference")
@@ -1141,17 +1186,26 @@ function Loop()
                         ImGui.SetTooltip(ctx, "Open FX chain")
                     end
                     
-                    -- Delete button
+                    -- Delete button (disabled for RCMASTER)
                     ImGui.SameLine(ctx)
-                    if ImGui.Button(ctx, "✕##specialdelete") then
-                        DeleteTrack(aux_info.track)
-                        -- Reinitialize to refresh the list
-                        InitializeState()
-                        ImGui.PopID(ctx)
-                        break
-                    end
-                    if ImGui.IsItemHovered(ctx) then
-                        ImGui.SetTooltip(ctx, "Delete this track")
+                    if aux_info.type == "rcmaster" then
+                        ImGui.BeginDisabled(ctx)
+                        ImGui.Button(ctx, "✕##specialdelete_disabled")
+                        ImGui.EndDisabled(ctx)
+                        if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+                            ImGui.SetTooltip(ctx, "RCMASTER cannot be deleted")
+                        end
+                    else
+                        if ImGui.Button(ctx, "✕##specialdelete") then
+                            DeleteTrack(aux_info.track)
+                            -- Reinitialize to refresh the list
+                            InitializeState()
+                            ImGui.PopID(ctx)
+                            break
+                        end
+                        if ImGui.IsItemHovered(ctx) then
+                            ImGui.SetTooltip(ctx, "Delete this track")
+                        end
                     end
                     
                     ImGui.PopID(ctx)
