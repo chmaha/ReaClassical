@@ -62,15 +62,15 @@ local editing_item  = nil
 
 -- Rank color options (matching SAI marker manager)
 local RANKS = {
-    { name = "Excellent",     rgba = 0x39FF1499 }, -- Bright lime green
-    { name = "Very Good",     rgba = 0x32CD3299 }, -- Lime green
-    { name = "Good",          rgba = 0x00AD8399 }, -- Teal green
-    { name = "OK",            rgba = 0xFFFFAA99 }, -- Soft yellow
-    { name = "Below Average", rgba = 0xFFBF0099 }, -- Gold/amber
-    { name = "Poor",          rgba = 0xFF753899 }, -- Orange
-    { name = "Unusable",      rgba = 0xDC143C99 }, -- Crimson red
-    { name = "False Start",   rgba = 0x808080FF }, -- Grey
-    { name = "No Rank",       rgba = 0x00000000 }  -- Transparent
+    { name = "Excellent",     rgba = 0x39FF1499, prefix = "Excellent" },
+    { name = "Very Good",     rgba = 0x32CD3299, prefix = "Very Good" },
+    { name = "Good",          rgba = 0x00AD8399, prefix = "Good" },
+    { name = "OK",            rgba = 0xFFFFAA99, prefix = "OK" },
+    { name = "Below Average", rgba = 0xFFBF0099, prefix = "Below Average" },
+    { name = "Poor",          rgba = 0xFF753899, prefix = "Poor" },
+    { name = "Unusable",      rgba = 0xDC143C99, prefix = "Unusable" },
+    { name = "False Start",   rgba = 0x000000FF, prefix = "False Start" },
+    { name = "No Rank",       rgba = 0x00000000, prefix = "" }
 }
 
 -- Extract take number from filename
@@ -90,6 +90,221 @@ function GetTakeNumberFromFilename(item)
     )
     
     return take_num and tostring(take_num) or ""
+end
+
+-- Convert RGBA to native color using ColorToNative
+function RGBAtoNative(rgba)
+    local r = (rgba >> 24) & 0xFF
+    local g = (rgba >> 16) & 0xFF
+    local b = (rgba >> 8) & 0xFF
+    -- Use REAPER's ColorToNative function
+    return ColorToNative(r, g, b)
+end
+
+-- Helper function to get color table
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local pathseparator = package.config:sub(1, 1)
+    local relative_path = table.concat({"", "Scripts", "chmaha Scripts", "ReaClassical", ""}, pathseparator)
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+-- Pastel color generator (for folder-based coloring)
+function pastel_color(index)
+    local golden_ratio_conjugate = 0.61803398875
+    local hue                    = (index * golden_ratio_conjugate) % 1.0
+
+    -- Subtle variation in saturation/lightness
+    local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
+    local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
+
+    local function h2rgb(p, q, t)
+        if t < 0 then t = t + 1 end
+        if t > 1 then t = t - 1 end
+        if t < 1 / 6 then return p + (q - p) * 6 * t end
+        if t < 1 / 2 then return q end
+        if t < 2 / 3 then return p + (q - p) * (2 / 3 - t) * 6 end
+        return p
+    end
+
+    local q = lightness < 0.5 and (lightness * (1 + saturation))
+        or (lightness + saturation - lightness * saturation)
+    local p = 2 * lightness - q
+
+    local r = h2rgb(p, q, hue + 1 / 3)
+    local g = h2rgb(p, q, hue)
+    local b = h2rgb(p, q, hue - 1 / 3)
+
+    local color_int = ColorToNative(
+        math.floor(r * 255 + 0.5),
+        math.floor(g * 255 + 0.5),
+        math.floor(b * 255 + 0.5)
+    )
+
+    return color_int | 0x1000000
+end
+
+-- Update take name with rank abbreviation
+function UpdateTakeNameWithRank(item, rank)
+    local take = GetActiveTake(item)
+    if not take then return end
+    
+    local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    
+    -- Remove any existing rank prefixes (full names)
+    local all_prefixes = {"Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start"}
+    for _, prefix in ipairs(all_prefixes) do
+        item_name = item_name:gsub("^" .. prefix .. "%-", "")
+        item_name = item_name:gsub("^" .. prefix .. "$", "")
+    end
+    
+    -- Add new rank prefix if not "No Rank"
+    if rank ~= 9 and RANKS[rank].prefix ~= "" then
+        if item_name ~= "" then
+            item_name = RANKS[rank].prefix .. "-" .. item_name
+        else
+            item_name = RANKS[rank].prefix
+        end
+    end
+    
+    GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+end
+
+-- Get color for item when no rank is set
+function GetItemColorNoRank(item)
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    local colors = get_color_table()
+    
+    -- Determine color to use
+    local color_to_use = nil
+    local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+
+    -- Check GUID first
+    if saved_guid ~= "" then
+        local referenced_item = nil
+        local total_items = CountMediaItems(0)
+        for i = 0, total_items - 1 do
+            local test_item = GetMediaItem(0, i)
+            local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
+            if test_guid == saved_guid then
+                referenced_item = test_item
+                break
+            end
+        end
+
+        if referenced_item then
+            color_to_use = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
+        end
+    end
+    
+    if workflow == "Horizontal" then
+        local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+        if saved_color ~= "" then
+            color_to_use = tonumber(saved_color)
+        else
+            color_to_use = colors.dest_items
+        end
+    -- If no GUID color, use folder-based logic
+    elseif not color_to_use then
+        local item_track = GetMediaItemTrack(item)
+        local folder_tracks = {}
+        local num_tracks = CountTracks(0)
+
+        -- Build list of folder tracks in project order
+        for t = 0, num_tracks - 1 do
+            local track = GetTrack(0, t)
+            local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if depth > 0 then
+                table.insert(folder_tracks, track)
+            end
+        end
+
+        -- Find parent folder track of the item
+        local parent_folder = nil
+        local track_idx = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
+        for t = track_idx, 0, -1 do
+            local track = GetTrack(0, t)
+            local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if depth > 0 then
+                parent_folder = track
+                break
+            end
+        end
+
+        -- Compute pastel index: second folder → index 0
+        local folder_index = 0
+
+        if parent_folder then
+            for i, track in ipairs(folder_tracks) do
+                if track == parent_folder then
+                    folder_index = i - 2 -- account for dest
+                    break
+                end
+            end
+            -- First folder special case
+            if folder_index < 0 then
+                color_to_use = colors.dest_items -- use default color for first folder
+            else
+                color_to_use = pastel_color(folder_index)
+            end
+        else
+            -- No folder: fallback to dest_items
+            color_to_use = colors.dest_items
+        end
+    end
+    
+    return color_to_use
+end
+
+-- Apply rank color to item and all items in same group
+function ApplyRankColorToItem(item, rank)
+    local color_to_use
+    
+    if rank == 9 then
+        -- No Rank selected - restore original color
+        color_to_use = GetItemColorNoRank(item)
+    else
+        -- Get the color for this rank
+        color_to_use = RGBAtoNative(RANKS[rank].rgba) | 0x1000000
+    end
+    
+    -- Apply color to the item
+    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+    
+    -- Update take name with rank abbreviation
+    UpdateTakeNameWithRank(item, rank)
+    
+    -- Get the group ID of this item
+    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+    
+    -- If item is in a group, apply color and rank to all items in the same group
+    if group_id ~= 0 then
+        local track_count = CountTracks(0)
+        for i = 0, track_count - 1 do
+            local track = GetTrack(0, i)
+            local item_count = CountTrackMediaItems(track)
+            for j = 0, item_count - 1 do
+                local current_item = GetTrackMediaItem(track, j)
+                local current_group_id = GetMediaItemInfo_Value(current_item, "I_GROUPID")
+                if current_group_id == group_id and current_item ~= item then
+                    if rank == 9 then
+                        -- No Rank - restore original color for each item in group
+                        local current_color = GetItemColorNoRank(current_item)
+                        SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", current_color)
+                    else
+                        SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", color_to_use)
+                    end
+                    -- Update take name for grouped items too
+                    UpdateTakeNameWithRank(current_item, rank)
+                    -- Store the rank for grouped items
+                    GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", tostring(rank), true)
+                end
+            end
+        end
+    end
+    
+    UpdateArrange()
 end
 
 ---------------------------------------------------------------------
@@ -202,6 +417,8 @@ function main()
                         if ImGui.Selectable(ctx, rank.name, is_selected) then
                             item_rank = i
                             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", tostring(item_rank), true)
+                            -- Apply color to item and group
+                            ApplyRankColorToItem(editing_item, item_rank)
                         end
                         if is_selected then
                             ImGui.SetItemDefaultFocus(ctx)
