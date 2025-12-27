@@ -36,12 +36,6 @@ function main()
         return
     end
 
-    -- Safety: exactly one edited item selected
-    if count_selected_media_items() ~= 1 then
-        MB("Error: Please select exactly one edited item.", "Error", 0)
-        return
-    end
-
     local edit_item = get_selected_media_item_at(0)
     local _, saved_guid = GetSetMediaItemInfo_String(edit_item, "P_EXT:src_guid", "", false)
     if saved_guid == "" then
