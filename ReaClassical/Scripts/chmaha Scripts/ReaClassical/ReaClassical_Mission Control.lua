@@ -759,12 +759,12 @@ function InitializeState()
     end
     
     -- Initialize special tracks mute, solo, volume
-    aux_mute_states = {}
-    aux_solo_states = {}
+    -- aux_mute_states = {}
+    -- aux_solo_states = {}
     aux_volume_values = {}
     for i, aux_info in ipairs(aux_submix_tracks) do
-        aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
-        aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
+        -- aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
+        -- aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
         aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
     end
     
@@ -784,15 +784,15 @@ function Loop()
         local track_info = mixer_tracks[i]
         pan_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN")
         volume_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL")
-        mute_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
-        solo_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
+        -- mute_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
+        -- solo_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
     end
     
     for i, aux_info in ipairs(aux_submix_tracks) do
         aux_submix_pans[i] = GetMediaTrackInfo_Value(aux_info.track, "D_PAN")
         aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
-        aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
-        aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
+        -- aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
+        -- aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
     end
     
     ImGui.SetNextWindowSize(ctx, 600, 0, ImGui.Cond_FirstUseEver)
@@ -905,7 +905,7 @@ function Loop()
         
         -- Disconnect all from RCMASTER button
         ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "✕ RCM") then
+        if ImGui.Button(ctx, "✕ RCMASTER") then
             for i = 1, #mixer_tracks do
                 if not track_has_hyphen[i] then
                     track_has_hyphen[i] = true
@@ -921,7 +921,7 @@ function Loop()
         
         -- Connect all to RCMASTER button
         ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "✓ RCM") then
+        if ImGui.Button(ctx, "✓ RCMASTER") then
             for i = 1, #mixer_tracks do
                 if track_has_hyphen[i] then
                     track_has_hyphen[i] = false
@@ -1524,7 +1524,7 @@ function DrawTrackControls(start_idx, end_idx)
             focus_track_input = nil
         end
         
-        local placeholder = (i == 1) and "Enter track name..." or ""
+        local placeholder = (i == 1) and "Enter track names..." or ""
         local changed_name, new_name = ImGui.InputTextWithHint(ctx, "##name" .. i, placeholder, track_names[i])
         if changed_name then
             track_names[i] = new_name
