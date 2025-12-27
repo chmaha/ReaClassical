@@ -69,7 +69,7 @@ local RANKS = {
     { name = "Below Average", rgba = 0xFFBF0099, prefix = "Below Average" },
     { name = "Poor",          rgba = 0xFF753899, prefix = "Poor" },
     { name = "Unusable",      rgba = 0xDC143C99, prefix = "Unusable" },
-    { name = "False Start",   rgba = 0x000000FF, prefix = "False Start" },
+    { name = "False Start",   rgba = 0x2A2A2AFF, prefix = "False Start" },
     { name = "No Rank",       rgba = 0x00000000, prefix = "" }
 }
 

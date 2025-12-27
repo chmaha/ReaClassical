@@ -40,7 +40,6 @@ local ImGui = require 'imgui' '0.10'
 ---------------------------------------------------------------------
 
 local ctx = ImGui.CreateContext('ReaClassical Mission Control')
-local window_open = true
 
 local MAX_INPUTS = GetNumAudioInputs()
 local TRACKS_PER_TAB = 8
@@ -64,17 +63,12 @@ local is_stereo = {}           -- Store stereo checkbox state
 local pan_values = {}          -- Store pan values for each track
 local track_names = {}         -- Store mixer track names (without M: prefix)
 local track_has_hyphen = {}    -- Track if mixer track name ends with hyphen
-local mute_states = {}         -- Mute state for mixer tracks
-local solo_states = {}         -- Solo state for mixer tracks
 local volume_values = {}       -- Volume values for mixer tracks
-local aux_mute_states = {}     -- Mute state for special tracks
-local aux_solo_states = {}     -- Solo state for special tracks
 local aux_volume_values = {}   -- Volume values for special tracks
 local current_tab = 0
 local selected_track = nil     -- Currently selected track index
 local sync_needed = false      -- Flag to trigger sync at end of frame
 local pan_reset = {}           -- Track double-click reset for pan sliders
-local show_aux_section = true  -- Show/hide aux/submix section
 local new_track_name = ""      -- Name for new mixer track
 local focus_track_input = nil  -- Track which input should get focus next frame
 local focus_special_input = nil -- Track which special track input should get focus next frame
@@ -716,8 +710,6 @@ function InitializeState()
     track_names = {}
     track_has_hyphen = {}
     mixer_sends = {}
-    mute_states = {}
-    solo_states = {}
     volume_values = {}
     
     -- Initialize by reading from D: tracks (first folder)
@@ -743,8 +735,6 @@ function InitializeState()
         end
         
         pan_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN")
-        mute_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
-        solo_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
         volume_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL")
         
         -- Get mixer track name without M: prefix and check for hyphen
@@ -758,13 +748,9 @@ function InitializeState()
         mixer_sends[i] = GetMixerSendsToAuxSubmix(track_info.mixer_track)
     end
     
-    -- Initialize special tracks mute, solo, volume
-    -- aux_mute_states = {}
-    -- aux_solo_states = {}
+    -- Initialize special tracks volume
     aux_volume_values = {}
     for i, aux_info in ipairs(aux_submix_tracks) do
-        -- aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
-        -- aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
         aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
     end
     
@@ -784,15 +770,11 @@ function Loop()
         local track_info = mixer_tracks[i]
         pan_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN")
         volume_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL")
-        -- mute_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
-        -- solo_states[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
     end
     
     for i, aux_info in ipairs(aux_submix_tracks) do
         aux_submix_pans[i] = GetMediaTrackInfo_Value(aux_info.track, "D_PAN")
         aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
-        -- aux_mute_states[i] = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
-        -- aux_solo_states[i] = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
     end
     
     ImGui.SetNextWindowSize(ctx, 600, 0, ImGui.Cond_FirstUseEver)
