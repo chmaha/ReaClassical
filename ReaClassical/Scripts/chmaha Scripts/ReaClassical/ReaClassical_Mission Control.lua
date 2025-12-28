@@ -763,7 +763,12 @@ function Loop()
     if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
         return
     end
-    
+
+    -- Validate first track is still valid
+    if not ValidatePtr(mixer_tracks[1].mixer_track, "MediaTrack*") then
+        return
+    end
+
     -- Update all track states from REAPER (pan, volume, mute, solo)
     -- This keeps the UI in sync if user changes things in REAPER's mixer
     for i = 1, #mixer_tracks do
