@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number
 local move_destination_folder, calculate_destination_info, get_tracks_per_group
-local SelectFirstRazorEditTrack
+local select_first_razor
 ---------------------------------------------------------------------
 
 function main()
@@ -66,7 +66,7 @@ function main()
     if start_time ~= end_time then
         left_pos = start_time
         right_pos = end_time
-        SelectFirstRazorEditTrack()
+        select_first_razor()
         local selected_track = GetSelectedTrack(0, 0)
         local dest_track_num = calculate_destination_info()
 
@@ -202,7 +202,7 @@ end
 
 ---------------------------------------------------------------------
 
-function SelectFirstRazorEditTrack()
+function select_first_razor()
     local trackCount = CountTracks(0)
 
     -- deselect all tracks

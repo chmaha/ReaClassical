@@ -22,6 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, format_duration, calculate
+
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
     MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
@@ -57,74 +59,7 @@ local bit_depth_names = {"16-bit", "24-bit", "32-bit float"}
 
 ---------------------------------------------------------------------
 
-function FormatDuration(seconds)
-    local hours = math.floor(seconds / 3600)
-    seconds = seconds % 3600
-    local minutes = math.floor(seconds / 60)
-    seconds = math.floor(seconds % 60)
-    return string.format("%dh %dm %ds", hours, minutes, seconds)
-end
-
-function Calculate()
-    local data_rate
-    
-    -- Calculate data rate
-    if format_type == 1 then -- MP3
-        data_rate = (bitrate_values[bitrate + 1] * 1000) / 8
-    else -- WAV
-        data_rate = sample_rate_values[sample_rate + 1] * (bit_depth_values[bit_depth + 1] / 8) * num_tracks
-    end
-    
-    local wav_overhead = 44
-    local result_text = ""
-    
-    -- Calculate based on unit type
-    if unit_type <= 2 then -- GB, MB, TB (file size input)
-        local bytes
-        
-        if unit_type == 0 then -- GB
-            bytes = input_value * 1000 * 1000 * 1000
-        elseif unit_type == 1 then -- MB
-            bytes = input_value * 1000 * 1000
-        else -- TB
-            bytes = input_value * 1000 * 1000 * 1000 * 1000
-        end
-        
-        if format_type == 0 then -- WAV
-            bytes = bytes - wav_overhead
-        end
-        
-        local duration_seconds = bytes / data_rate
-        result_text = "Duration: " .. FormatDuration(duration_seconds)
-    else -- Hours, Minutes, Seconds (duration input)
-        local duration_seconds
-        
-        if unit_type == 3 then -- Hours
-            duration_seconds = input_value * 3600
-        elseif unit_type == 4 then -- Minutes
-            duration_seconds = input_value * 60
-        else -- Seconds
-            duration_seconds = input_value
-        end
-        
-        local file_size_bytes = (duration_seconds * data_rate) + (format_type == 0 and wav_overhead or 0)
-        local file_size_mb = file_size_bytes / (1000 * 1000)
-        local file_size_gb = file_size_bytes / (1000 * 1000 * 1000)
-        
-        result_text = string.format("File size: %.2f MB (%.2f GB)", file_size_mb, file_size_gb)
-    end
-    
-    -- Add data rate info
-    local data_rate_kbps = data_rate * 8 / 1000
-    local data_rate_mbps = data_rate_kbps / 1000
-    result_text = result_text .. string.format("\nData Rate: %.2f Kbps (%.2f Mbps)", data_rate_kbps, data_rate_mbps)
-    
-    return result_text
-end
-
----------------------------------------------------------------------
-
-function Loop()
+function main()
     if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
         return
     end
@@ -218,7 +153,7 @@ function Loop()
         
         -- Result
         ImGui.Separator(ctx)
-        local result = Calculate()
+        local result = calculate()
         ImGui.PushFont(ctx, nil, 14)
         ImGui.TextWrapped(ctx, result)
         ImGui.PopFont(ctx)
@@ -226,10 +161,78 @@ function Loop()
     end
     
     if open then
-        defer(Loop)
+        defer(main)
     end
+end
+---------------------------------------------------------------------
+
+function format_duration(seconds)
+    local hours = math.floor(seconds / 3600)
+    seconds = seconds % 3600
+    local minutes = math.floor(seconds / 60)
+    seconds = math.floor(seconds % 60)
+    return string.format("%dh %dm %ds", hours, minutes, seconds)
 end
 
 ---------------------------------------------------------------------
 
-defer(Loop)
+function calculate()
+    local data_rate
+    
+    -- calculate data rate
+    if format_type == 1 then -- MP3
+        data_rate = (bitrate_values[bitrate + 1] * 1000) / 8
+    else -- WAV
+        data_rate = sample_rate_values[sample_rate + 1] * (bit_depth_values[bit_depth + 1] / 8) * num_tracks
+    end
+    
+    local wav_overhead = 44
+    local result_text = ""
+    
+    -- calculate based on unit type
+    if unit_type <= 2 then -- GB, MB, TB (file size input)
+        local bytes
+        
+        if unit_type == 0 then -- GB
+            bytes = input_value * 1000 * 1000 * 1000
+        elseif unit_type == 1 then -- MB
+            bytes = input_value * 1000 * 1000
+        else -- TB
+            bytes = input_value * 1000 * 1000 * 1000 * 1000
+        end
+        
+        if format_type == 0 then -- WAV
+            bytes = bytes - wav_overhead
+        end
+        
+        local duration_seconds = bytes / data_rate
+        result_text = "Duration: " .. format_duration(duration_seconds)
+    else -- Hours, Minutes, Seconds (duration input)
+        local duration_seconds
+        
+        if unit_type == 3 then -- Hours
+            duration_seconds = input_value * 3600
+        elseif unit_type == 4 then -- Minutes
+            duration_seconds = input_value * 60
+        else -- Seconds
+            duration_seconds = input_value
+        end
+        
+        local file_size_bytes = (duration_seconds * data_rate) + (format_type == 0 and wav_overhead or 0)
+        local file_size_mb = file_size_bytes / (1000 * 1000)
+        local file_size_gb = file_size_bytes / (1000 * 1000 * 1000)
+        
+        result_text = string.format("File size: %.2f MB (%.2f GB)", file_size_mb, file_size_gb)
+    end
+    
+    -- Add data rate info
+    local data_rate_kbps = data_rate * 8 / 1000
+    local data_rate_mbps = data_rate_kbps / 1000
+    result_text = result_text .. string.format("\nData Rate: %.2f Kbps (%.2f Mbps)", data_rate_kbps, data_rate_mbps)
+    
+    return result_text
+end
+
+---------------------------------------------------------------------
+
+defer(main)
