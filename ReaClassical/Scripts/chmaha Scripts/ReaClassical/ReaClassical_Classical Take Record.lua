@@ -191,7 +191,11 @@ function solo()
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         if IsTrackSelected(track) == false and mixer_state ~= "y" and aux_state ~= "y" and submix_state ~= "y"
-            and rt_state ~= "y" and live_state == "y" and rcmaster_state ~= "y" then
+            and rt_state ~= "y" and live_state ~= "y" and rcmaster_state ~= "y" then
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+        end
+        if live_state == "y" then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
