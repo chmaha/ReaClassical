@@ -444,103 +444,101 @@ local function display_track_row(tracks, max_channels_per_row)
 end
 
 local function main()
-  if not window_open then return end
+  if window_open then
+    -- Set window flags to auto-resize
+    local window_flags = ImGui.WindowFlags_AlwaysAutoResize
 
-  -- Set window flags to auto-resize
-  local window_flags = ImGui.WindowFlags_AlwaysAutoResize
+    local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Meterbridge", true, window_flags)
+    window_open = open_ref
+    if opened then
+      refresh_tracks()
 
-  local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Meterbridge", true, window_flags)
-  window_open = open_ref
-  if not opened then
-    ImGui.End(ctx)
-    return
-  end
-  refresh_tracks()
-
-  -- Tab bar
-  if ImGui.BeginTabBar(ctx, "MeterTabs") then
-    -- Meters tab
-    if ImGui.BeginTabItem(ctx, "Meters") then
-      -- Add clear button and meter mode checkbox
-      if ImGui.Button(ctx, "Clear All Holds") then
-        clear_all_holds()
-      end
-
-      ImGui.SameLine(ctx)
-      local changed, new_value = ImGui.Checkbox(ctx, "Graphical Meters", show_graphical_meters)
-      if changed then
-        show_graphical_meters = new_value
-      end
-
-      ImGui.Separator(ctx)
-
-      -- Determine max channels per row based on display mode
-      local max_channels_per_row = show_graphical_meters and max_channels_per_row_graphical or
-          max_channels_per_row_numeric
-
-      -- Get tracks in categorized groups
-      local rec_armed, m_tracks, other_masters = get_tracks_to_display()
-
-      -- Display rec-armed tracks (if any)
-      if #rec_armed > 0 then
-        display_track_row(rec_armed, max_channels_per_row)
-      else
-        -- Display M: tracks on first row
-        if #m_tracks > 0 then
-          display_track_row(m_tracks, max_channels_per_row)
-        end
-
-        -- Display other master tracks on second row if they exist
-        if #other_masters > 0 then
-          if #m_tracks > 0 then
-            ImGui.Dummy(ctx, 0, 10)
-            ImGui.Separator(ctx)
-            ImGui.Dummy(ctx, 0, 10)
+      -- Tab bar
+      if ImGui.BeginTabBar(ctx, "MeterTabs") then
+        -- Meters tab
+        if ImGui.BeginTabItem(ctx, "Meters") then
+          -- Add clear button and meter mode checkbox
+          if ImGui.Button(ctx, "Clear All Holds") then
+            clear_all_holds()
           end
-          display_track_row(other_masters, max_channels_per_row)
+
+          ImGui.SameLine(ctx)
+          local changed, new_value = ImGui.Checkbox(ctx, "Graphical Meters", show_graphical_meters)
+          if changed then
+            show_graphical_meters = new_value
+          end
+
+          ImGui.Separator(ctx)
+
+          -- Determine max channels per row based on display mode
+          local max_channels_per_row = show_graphical_meters and max_channels_per_row_graphical or
+              max_channels_per_row_numeric
+
+          -- Get tracks in categorized groups
+          local rec_armed, m_tracks, other_masters = get_tracks_to_display()
+
+          -- Display rec-armed tracks (if any)
+          if #rec_armed > 0 then
+            display_track_row(rec_armed, max_channels_per_row)
+          else
+            -- Display M: tracks on first row
+            if #m_tracks > 0 then
+              display_track_row(m_tracks, max_channels_per_row)
+            end
+
+            -- Display other master tracks on second row if they exist
+            if #other_masters > 0 then
+              if #m_tracks > 0 then
+                ImGui.Dummy(ctx, 0, 10)
+                ImGui.Separator(ctx)
+                ImGui.Dummy(ctx, 0, 10)
+              end
+              display_track_row(other_masters, max_channels_per_row)
+            end
+          end
+
+          ImGui.EndTabItem(ctx)
         end
-      end
 
-      ImGui.EndTabItem(ctx)
-    end
+        -- Options tab
+        if ImGui.BeginTabItem(ctx, "Options") then
+          ImGui.Text(ctx, "Color Thresholds:")
+          ImGui.Spacing(ctx)
 
-    -- Options tab
-    if ImGui.BeginTabItem(ctx, "Options") then
-      ImGui.Text(ctx, "Color Thresholds:")
-      ImGui.Spacing(ctx)
+          ImGui.PushItemWidth(ctx, 250)
+          local changed1, new_green_yellow = ImGui.SliderDouble(ctx, "Green --> Yellow (dB)",
+            threshold_green_to_yellow, -60, 0, "%.1f")
+          if changed1 then
+            threshold_green_to_yellow = new_green_yellow
+            if threshold_yellow_to_red < threshold_green_to_yellow then
+              threshold_yellow_to_red = threshold_green_to_yellow
+            end
+          end
 
-      ImGui.PushItemWidth(ctx, 250)
-      local changed1, new_green_yellow = ImGui.SliderDouble(ctx, "Green --> Yellow (dB)",
-        threshold_green_to_yellow, -60, 0, "%.1f")
-      if changed1 then
-        threshold_green_to_yellow = new_green_yellow
-        if threshold_yellow_to_red < threshold_green_to_yellow then
-          threshold_yellow_to_red = threshold_green_to_yellow
+          local changed2, new_yellow_red = ImGui.SliderDouble(ctx, "Yellow --> Red (dB)", threshold_yellow_to_red, -60, 0,
+            "%.1f")
+          if changed2 then
+            threshold_yellow_to_red = math.max(new_yellow_red, threshold_green_to_yellow)
+          end
+          ImGui.PopItemWidth(ctx)
+
+          ImGui.Spacing(ctx)
+
+          if ImGui.Button(ctx, "Reset to Defaults") then
+            threshold_green_to_yellow = default_green_to_yellow
+            threshold_yellow_to_red = default_yellow_to_red
+          end
+
+          ImGui.EndTabItem(ctx)
         end
+
+        ImGui.EndTabBar(ctx)
       end
 
-      local changed2, new_yellow_red = ImGui.SliderDouble(ctx, "Yellow --> Red (dB)", threshold_yellow_to_red, -60, 0,
-        "%.1f")
-      if changed2 then
-        threshold_yellow_to_red = math.max(new_yellow_red, threshold_green_to_yellow)
-      end
-      ImGui.PopItemWidth(ctx)
-
-      ImGui.Spacing(ctx)
-
-      if ImGui.Button(ctx, "Reset to Defaults") then
-        threshold_green_to_yellow = default_green_to_yellow
-        threshold_yellow_to_red = default_yellow_to_red
-      end
-
-      ImGui.EndTabItem(ctx)
+      ImGui.End(ctx)
     end
-
-    ImGui.EndTabBar(ctx)
+    defer(main)
   end
-
-  ImGui.End(ctx)
-  defer(main)
 end
 
 defer(main)
