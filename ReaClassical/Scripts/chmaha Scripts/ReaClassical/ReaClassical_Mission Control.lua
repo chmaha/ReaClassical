@@ -27,7 +27,8 @@ local reset_pan_on_double_click, get_special_tracks, get_mixer_sends
 local get_tracks_from_first_folder, create_mixer_table
 local get_current_input_info, apply_input_selection, rename_tracks
 local format_pan, sync, auto_assign, reorder_track, delete_mixer_track
-local add_mixer_track, init, draw_track_controls
+local add_mixer_track, init, draw_track_controls, draw_folder_browser
+local get_directories, normalize_path, get_parent_path, split_path
 
 ---------------------------------------------------------------------
 
@@ -47,6 +48,12 @@ local initial_project = EnumProjects(-1, "")
 local is_valid_project = false
 local show_hardware_names = true
 local input_dropdown_width = 80
+
+local show_folder_browser = false
+local folder_browser_type = nil -- "primary" or "secondary"
+local folder_browser_path = ""
+local folder_browser_dirs = {}
+local os_separator = package.config:sub(1, 1)
 
 package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
@@ -330,7 +337,7 @@ function main()
         local btn_label = show_hardware_names and "Ch #" or "HW"
         if ImGui.Button(ctx, btn_label) then
             show_hardware_names = not show_hardware_names
-            generate_input_options()  -- Regenerate options with new setting
+            generate_input_options() -- Regenerate options with new setting
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Toggle hardware names / channel numbers")
@@ -876,6 +883,131 @@ function main()
             ImGui.EndPopup(ctx)
         end
 
+        -- Recording Paths section
+        ImGui.Separator(ctx)
+        local expanded_paths
+        expanded_paths, show_paths_section = ImGui.CollapsingHeader(ctx, "Recording Paths", nil,
+            ImGui.TreeNodeFlags_DefaultOpen)
+
+        if expanded_paths then
+            -- Get current paths
+            local _, primary_path = GetSetProjectInfo_String(0, "RECORD_PATH", "", false)
+            local _, secondary_path = GetSetProjectInfo_String(0, "RECORD_PATH_SECONDARY", "", false)
+
+            -- Primary path
+            ImGui.Text(ctx, "Primary:")
+            ImGui.SameLine(ctx)
+            ImGui.SetCursorPosX(ctx, 100)
+            ImGui.SetNextItemWidth(ctx, 370)
+            local changed_primary, new_primary = ImGui.InputText(ctx, "##primary_path", primary_path)
+            if ImGui.IsItemDeactivatedAfterEdit(ctx) then
+                GetSetProjectInfo_String(0, "RECORD_PATH", new_primary, true)
+            end
+
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Browse##primary", 80, 0) then
+                if primary_path == "" then
+                    -- Use default recording path as starting point
+                    local _, default_path = reaper.get_config_var_string("defrecpath")
+                    folder_browser_path = default_path ~= "" and default_path or GetProjectPath("")
+                    selected_folder = nil
+                else
+                    -- Check if it's a relative path (no separator)
+                    local is_relative = not primary_path:find(os_separator, 1, true)
+
+                    if is_relative then
+                        -- For relative paths, strip it from the end of GetProjectPath
+                        local project_path = GetProjectPath("")
+                        -- Remove trailing separator and the relative folder name
+                        local pattern = os_separator .. primary_path .. "$"
+                        folder_browser_path = project_path:gsub(pattern, "")
+                        selected_folder = primary_path
+                    else
+                        -- For absolute paths, open at parent
+                        local resolved = normalize_path(primary_path)
+                        folder_browser_path = get_parent_path(resolved)
+                        -- Extract last folder name
+                        local parts = split_path(resolved)
+                        selected_folder = parts[#parts]
+                    end
+                end
+                folder_browser_dirs = get_directories(folder_browser_path)
+                folder_browser_type = "primary"
+                show_folder_browser = true
+                ImGui.OpenPopup(ctx, "Select Primary Recording Folder")
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Browse for folder")
+            end
+
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Default##primary", 80, 0) then
+                GetSetProjectInfo_String(0, "RECORD_PATH", "media", true)
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Use project directory (leave blank)")
+            end
+
+            -- Secondary path
+            ImGui.Text(ctx, "Secondary:")
+            ImGui.SameLine(ctx)
+            ImGui.SetCursorPosX(ctx, 100)
+            ImGui.SetNextItemWidth(ctx, 370)
+            local changed_secondary, new_secondary = ImGui.InputText(ctx, "##secondary_path", secondary_path)
+            if ImGui.IsItemDeactivatedAfterEdit(ctx) then
+                GetSetProjectInfo_String(0, "RECORD_PATH_SECONDARY", new_secondary, true)
+            end
+
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Browse##secondary", 80, 0) then
+                if secondary_path == "" then
+                    -- Use default recording path as starting point
+                    local _, default_path = reaper.get_config_var_string("defrecpath")
+                    folder_browser_path = default_path ~= "" and default_path or GetProjectPath("")
+                    selected_folder = nil
+                else
+                    -- Check if it's a relative path (no separator)
+                    local is_relative = not secondary_path:find(os_separator, 1, true)
+
+                    if is_relative then
+                        -- For relative paths, strip it from the end of GetProjectPath
+                        local project_path = GetProjectPath("")
+                        -- Remove trailing separator and the relative folder name
+                        local pattern = os_separator .. secondary_path .. "$"
+                        folder_browser_path = project_path:gsub(pattern, "")
+                        selected_folder = secondary_path
+                    else
+                        -- For absolute paths, open at parent
+                        local resolved = normalize_path(secondary_path)
+                        folder_browser_path = get_parent_path(resolved)
+                        -- Extract last folder name
+                        local parts = split_path(resolved)
+                        selected_folder = parts[#parts]
+                    end
+                end
+                folder_browser_dirs = get_directories(folder_browser_path)
+                folder_browser_type = "secondary"
+                show_folder_browser = true
+                ImGui.OpenPopup(ctx, "Select Secondary Recording Folder")
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Browse for folder")
+            end
+
+
+
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Clear##secondary", 80, 0) then
+                GetSetProjectInfo_String(0, "RECORD_PATH_SECONDARY", "", true)
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Clear secondary path")
+            end
+        end
+
+        -- Call folder browser dialog
+        draw_folder_browser()
+
         ImGui.End(ctx)
     end
 
@@ -903,14 +1035,14 @@ function generate_input_options()
     stereo_options = {}
     table.insert(mono_options, "None")
     table.insert(stereo_options, "None")
-    
-    local max_chars = 4  -- Start with "None" length
-    
+
+    local max_chars = 4 -- Start with "None" length
+
     -- Generate mono options
     for i = 1, MAX_INPUTS do
         local option_text
         if show_hardware_names then
-            local hw_name = GetInputChannelName(i - 1)  -- 0-indexed API
+            local hw_name = GetInputChannelName(i - 1) -- 0-indexed API
             if hw_name and hw_name ~= "" then
                 -- Show just the hardware name
                 option_text = hw_name
@@ -929,14 +1061,14 @@ function generate_input_options()
     for i = 1, MAX_INPUTS - 1 do
         local option_text
         if show_hardware_names then
-            local hw_name1 = GetInputChannelName(i - 1)  -- 0-indexed
+            local hw_name1 = GetInputChannelName(i - 1) -- 0-indexed
             local hw_name2 = GetInputChannelName(i)
-            
+
             if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
                 -- Try to detect if they're a stereo pair with matching base name
                 local base1 = hw_name1:match("^(.+)%s+%d+$") or hw_name1
                 local base2 = hw_name2:match("^(.+)%s+%d+$") or hw_name2
-                
+
                 if base1 == base2 then
                     -- Same device/interface, show single name
                     option_text = string.format("%s+%s", hw_name1, hw_name2)
@@ -954,7 +1086,7 @@ function generate_input_options()
         table.insert(stereo_options, option_text)
         max_chars = math.max(max_chars, #option_text)
     end
-    
+
     -- Calculate dropdown width based on max characters
     -- Approximate 7 pixels per character + 30 for dropdown arrow/padding
     input_dropdown_width = math.max(80, (max_chars * 7) + 30)
@@ -2097,6 +2229,459 @@ function draw_track_controls(start_idx, end_idx)
         end
 
         ImGui.PopID(ctx)
+    end
+end
+
+---------------------------------------------------------------------
+
+function get_directories(path)
+    local dirs = {}
+    local i = 0
+    repeat
+        local dir = reaper.EnumerateSubdirectories(path, i)
+        if dir and dir:sub(1, 1) ~= '.' then
+            table.insert(dirs, dir)
+        end
+        i = i + 1
+    until not dir
+    table.sort(dirs, function(a, b) return a:lower() < b:lower() end)
+    return dirs
+end
+
+---------------------------------------------------------------------
+
+function normalize_path(path)
+    -- Remove trailing slash
+    if path:sub(-1) == os_separator then
+        path = path:sub(1, -2)
+    end
+    return path
+end
+
+---------------------------------------------------------------------
+
+function get_parent_path(path)
+    path = normalize_path(path)
+    -- Build pattern dynamically based on os_separator
+    local pattern
+    if os_separator == "\\" then
+        -- On Windows, need to escape the backslash
+        pattern = "^(.+)\\[^\\]+$"
+    else
+        pattern = "^(.+)/[^/]+$"
+    end
+    local parent = path:match(pattern)
+    return parent or path
+end
+
+---------------------------------------------------------------------
+
+
+function split_path(path)
+    local parts = {}
+    local current = ""
+
+    for i = 1, #path do
+        local char = path:sub(i, i)
+        if char == os_separator then
+            if current ~= "" then
+                table.insert(parts, current)
+                current = ""
+            end
+        else
+            current = current .. char
+        end
+    end
+
+    -- Add the last part
+    if current ~= "" then
+        table.insert(parts, current)
+    end
+
+    return parts
+end
+
+---------------------------------------------------------------------
+
+function draw_folder_browser()
+    if not show_folder_browser then return end
+
+    local center_x, center_y = ImGui.Viewport_GetCenter(ImGui.GetWindowViewport(ctx))
+    ImGui.SetNextWindowPos(ctx, center_x, center_y, ImGui.Cond_Appearing, 0.5, 0.5)
+    ImGui.SetNextWindowSize(ctx, 600, 450, ImGui.Cond_Appearing)
+
+    local title = folder_browser_type == "primary" and "Select Primary Recording Folder" or
+        "Select Secondary Recording Folder"
+
+    if ImGui.BeginPopupModal(ctx, title, true, ImGui.WindowFlags_NoResize) then
+        -- Path breadcrumb buttons
+        ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0x00000000)
+
+        -- For absolute paths on Unix, add root
+        local is_absolute = folder_browser_path:sub(1, 1) == "/"
+        if is_absolute then
+            if ImGui.Button(ctx, "/" .. "##0") then
+                folder_browser_path = "/"
+                folder_browser_dirs = get_directories(folder_browser_path)
+                selected_folder = nil
+            end
+            ImGui.SameLine(ctx)
+        end
+
+        local path_parts = split_path(folder_browser_path)
+
+        for i, part in ipairs(path_parts) do
+            -- Reconstruct path up to this point
+            local new_path = ""
+            if is_absolute then
+                new_path = "/"
+            end
+
+            for j = 1, i do
+                if j > 1 or is_absolute then
+                    new_path = new_path .. path_parts[j]
+                    if j < i then
+                        new_path = new_path .. os_separator
+                    end
+                else
+                    new_path = path_parts[j]
+                end
+            end
+
+            if ImGui.Button(ctx, part .. " " .. os_separator .. "##" .. i) then
+                folder_browser_path = new_path
+                folder_browser_dirs = get_directories(folder_browser_path)
+                selected_folder = nil
+            end
+
+            if i < #path_parts then
+                ImGui.SameLine(ctx)
+            end
+        end
+        ImGui.PopStyleColor(ctx)
+
+        ImGui.Separator(ctx)
+
+        -- Folder list
+        if ImGui.BeginChild(ctx, "##folders", -1, -80) then
+            -- Parent directory option
+            local can_go_up = #path_parts > 0 and not (is_absolute and #path_parts == 0)
+            if can_go_up then
+                local is_parent_selected = selected_folder == ".."
+                if ImGui.Selectable(ctx, ".. (Parent Directory)", is_parent_selected, ImGui.SelectableFlags_AllowDoubleClick) then
+                    if ImGui.IsMouseDoubleClicked(ctx, 0) then
+                        folder_browser_path = get_parent_path(folder_browser_path)
+                        folder_browser_dirs = get_directories(folder_browser_path)
+                        selected_folder = nil
+                    else
+                        selected_folder = ".."
+                    end
+                end
+            end
+
+            -- Directory list
+            if #folder_browser_dirs > 0 then
+                ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x55D8FFFF)
+                for _, dir in ipairs(folder_browser_dirs) do
+                    local is_selected = (selected_folder == dir)
+                    if ImGui.Selectable(ctx, dir, is_selected, ImGui.SelectableFlags_AllowDoubleClick) then
+                        if ImGui.IsMouseDoubleClicked(ctx, 0) then
+                            -- Double-click: navigate into folder
+                            local base = normalize_path(folder_browser_path)
+                            if base == "" or base == "/" then
+                                folder_browser_path = "/" .. dir
+                            else
+                                folder_browser_path = base .. os_separator .. dir
+                            end
+                            folder_browser_dirs = get_directories(folder_browser_path)
+                            selected_folder = nil
+                        else
+                            -- Single-click: just select it (don't change path yet)
+                            selected_folder = dir
+                        end
+                    end
+                end
+                ImGui.PopStyleColor(ctx)
+            else
+                ImGui.TextDisabled(ctx, "(No subdirectories)")
+            end
+
+            ImGui.EndChild(ctx)
+        end
+
+        ImGui.Separator(ctx)
+
+        -- Current path display (show what will be selected)
+        local display_path = folder_browser_path
+        if selected_folder and selected_folder ~= ".." then
+            local base = normalize_path(folder_browser_path)
+            if base == "" or base == "/" then
+                display_path = "/" .. selected_folder
+            else
+                display_path = base .. os_separator .. selected_folder
+            end
+        end
+        ImGui.Text(ctx, "Selected: " .. display_path)
+
+        -- New Folder button
+        if ImGui.Button(ctx, "New Folder", 95, 0) then
+            new_folder_name = ""
+            ImGui.OpenPopup(ctx, "new_folder_popup")
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Create a new subfolder")
+        end
+
+        -- Rename button (only enabled if a folder is selected and not parent)
+        ImGui.SameLine(ctx)
+        if not selected_folder or selected_folder == ".." then
+            ImGui.BeginDisabled(ctx)
+        end
+        if ImGui.Button(ctx, "Rename", 95, 0) then
+            rename_folder_name = selected_folder or ""
+            ImGui.OpenPopup(ctx, "rename_folder_popup")
+        end
+        if not selected_folder or selected_folder == ".." then
+            ImGui.EndDisabled(ctx)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Rename selected folder")
+        end
+
+        -- Delete button (only enabled if a folder is selected and not parent and is empty)
+        ImGui.SameLine(ctx)
+        
+        -- Check if selected folder contains files
+        local folder_has_files = false
+        if selected_folder and selected_folder ~= ".." then
+            local check_path = normalize_path(folder_browser_path) .. os_separator .. selected_folder
+            local file_idx = 0
+            repeat
+                local file = reaper.EnumerateFiles(check_path, file_idx)
+                if file then
+                    folder_has_files = true
+                    break
+                end
+                file_idx = file_idx + 1
+            until not file
+        end
+        
+        local should_disable = not selected_folder or selected_folder == ".." or folder_has_files
+        
+        if should_disable then
+            ImGui.BeginDisabled(ctx)
+        end
+        
+        if ImGui.Button(ctx, "Delete", 95, 0) then
+            local delete_path = normalize_path(folder_browser_path) .. os_separator .. selected_folder
+
+            -- Use OS command to delete
+            local cmd
+            if os_separator == "\\" then
+                cmd = string.format('rmdir "%s"', delete_path)  -- No /s flag - only deletes if empty
+            else
+                cmd = string.format('rmdir "%s"', delete_path)  -- Only deletes if empty
+            end
+            os.execute(cmd)
+
+            -- Refresh directory list
+            folder_browser_dirs = get_directories(folder_browser_path)
+            selected_folder = nil
+        end
+        
+        if should_disable then
+            ImGui.EndDisabled(ctx)
+        end
+        
+        if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+            if folder_has_files then
+                ImGui.SetTooltip(ctx, "Can't delete: folder contains files")
+            elseif not selected_folder or selected_folder == ".." then
+                ImGui.SetTooltip(ctx, "Select a folder to delete")
+            else
+                ImGui.SetTooltip(ctx, "Delete empty folder")
+            end
+        end
+
+        -- New folder popup
+        if ImGui.BeginPopup(ctx, "new_folder_popup") then
+            ImGui.Text(ctx, "Create new folder in:")
+            ImGui.TextDisabled(ctx, folder_browser_path)
+            ImGui.Separator(ctx)
+
+            ImGui.Text(ctx, "Folder name:")
+            ImGui.SetNextItemWidth(ctx, 250)
+            if ImGui.IsWindowAppearing(ctx) then
+                ImGui.SetKeyboardFocusHere(ctx)
+            end
+
+            local rv, buf = ImGui.InputText(ctx, "##newfoldername", new_folder_name)
+            if rv then
+                new_folder_name = buf
+            end
+
+            local enter_pressed = ImGui.IsItemDeactivatedAfterEdit(ctx)
+
+            ImGui.Separator(ctx)
+
+            local can_create = new_folder_name ~= "" and new_folder_name:match("^[%w%s_%-]+$")
+
+            if not can_create and new_folder_name ~= "" then
+                ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFF0000FF)
+                ImGui.Text(ctx, "Invalid characters (use only letters, numbers, spaces, - and _)")
+                ImGui.PopStyleColor(ctx)
+            end
+
+            if not can_create then
+                ImGui.BeginDisabled(ctx)
+            end
+
+            if (enter_pressed or ImGui.Button(ctx, "Create", 80, 0)) and can_create then
+                -- Create the new folder
+                local new_path = normalize_path(folder_browser_path) .. os_separator .. new_folder_name
+                local success = reaper.RecursiveCreateDirectory(new_path, 0)
+                if success then
+                    -- Refresh directory list and select new folder
+                    folder_browser_dirs = get_directories(folder_browser_path)
+                    selected_folder = new_folder_name
+                    new_folder_name = ""
+                    ImGui.CloseCurrentPopup(ctx)
+                end
+            end
+
+            if not can_create then
+                ImGui.EndDisabled(ctx)
+            end
+
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Cancel", 80, 0) or ImGui.IsKeyPressed(ctx, ImGui.Key_Escape) then
+                new_folder_name = ""
+                ImGui.CloseCurrentPopup(ctx)
+            end
+
+            ImGui.EndPopup(ctx)
+        end
+
+        -- Rename folder popup
+        if ImGui.BeginPopup(ctx, "rename_folder_popup") then
+            ImGui.Text(ctx, "Rename folder:")
+            ImGui.Separator(ctx)
+
+            ImGui.SetNextItemWidth(ctx, 250)
+            if ImGui.IsWindowAppearing(ctx) then
+                ImGui.SetKeyboardFocusHere(ctx)
+            end
+
+            local rv, buf = ImGui.InputText(ctx, "##renamefoldername", rename_folder_name)
+            if rv then
+                rename_folder_name = buf
+            end
+
+            local enter_pressed = ImGui.IsItemDeactivatedAfterEdit(ctx)
+
+            ImGui.Separator(ctx)
+
+            local can_rename = rename_folder_name ~= "" and rename_folder_name:match("^[%w%s_%-]+$") and
+                rename_folder_name ~= selected_folder
+
+            if not can_rename and rename_folder_name ~= "" then
+                ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFF0000FF)
+                if rename_folder_name == selected_folder then
+                    ImGui.Text(ctx, "Name unchanged")
+                else
+                    ImGui.Text(ctx, "Invalid characters")
+                end
+                ImGui.PopStyleColor(ctx)
+            end
+
+            if not can_rename then
+                ImGui.BeginDisabled(ctx)
+            end
+
+            if (enter_pressed or ImGui.Button(ctx, "Rename", 80, 0)) and can_rename then
+                local old_path = normalize_path(folder_browser_path) .. os_separator .. selected_folder
+                local new_path = normalize_path(folder_browser_path) .. os_separator .. rename_folder_name
+
+                -- Use OS command to rename
+                local cmd
+                if os_separator == "\\" then
+                    cmd = string.format('move "%s" "%s"', old_path, new_path)
+                else
+                    cmd = string.format('mv "%s" "%s"', old_path, new_path)
+                end
+                os.execute(cmd)
+
+                -- Refresh directory list
+                folder_browser_dirs = get_directories(folder_browser_path)
+                selected_folder = rename_folder_name
+                rename_folder_name = ""
+                ImGui.CloseCurrentPopup(ctx)
+            end
+
+            if not can_rename then
+                ImGui.EndDisabled(ctx)
+            end
+
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Cancel", 80, 0) or ImGui.IsKeyPressed(ctx, ImGui.Key_Escape) then
+                rename_folder_name = ""
+                ImGui.CloseCurrentPopup(ctx)
+            end
+
+            ImGui.EndPopup(ctx)
+        end
+
+        -- Select and Cancel buttons
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Select", 95, 0) then
+            -- Use the display path (current path + selected folder if any)
+            local final_path = display_path
+
+            -- Get the actual project file directory (not recording path)
+            local retval, project_file_path = reaper.EnumProjects(-1, "")
+            local project_dir
+            if project_file_path and project_file_path ~= "" then
+                -- Extract directory from project file path using split_path
+                local parts = split_path(project_file_path)
+                -- Remove the filename (last part) to get directory
+                table.remove(parts, #parts)
+                -- Reconstruct the directory path
+                if #parts > 0 then
+                    project_dir = table.concat(parts, os_separator)
+                    -- Add leading separator for absolute paths on Unix
+                    if project_file_path:sub(1, 1) == "/" then
+                        project_dir = os_separator .. project_dir
+                    end
+                end
+            end
+
+            if project_dir then
+                local normalized_project = normalize_path(project_dir)
+                local normalized_final = normalize_path(final_path)
+
+                -- Check if final_path starts with project file directory
+                if normalized_final:sub(1, #normalized_project) == normalized_project then
+                    -- It's inside project directory - make it relative
+                    local relative_part = normalized_final:sub(#normalized_project + 1)
+                    -- Remove leading separator
+                    if relative_part:sub(1, 1) == os_separator then
+                        relative_part = relative_part:sub(2)
+                    end
+                    final_path = relative_part
+                end
+            end
+
+            if folder_browser_type == "primary" then
+                GetSetProjectInfo_String(0, "RECORD_PATH", final_path, true)
+            else
+                GetSetProjectInfo_String(0, "RECORD_PATH_SECONDARY", final_path, true)
+            end
+            show_folder_browser = false
+            selected_folder = nil
+            ImGui.CloseCurrentPopup(ctx)
+        end
+
+        ImGui.EndPopup(ctx)
     end
 end
 
