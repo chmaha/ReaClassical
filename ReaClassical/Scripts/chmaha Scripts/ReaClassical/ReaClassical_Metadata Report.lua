@@ -206,20 +206,20 @@ end
 function get_txt_file(track_name)
   local _, path = EnumProjects(-1)
   local slash = package.config:sub(1, 1)
-
   if path == "" then
     path = GetProjectPath()
   else
     local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
     path = path:match(pattern)
   end
-
+  
   -- Extract prefix before ':' in track_name
-  local prefix = track_name:match("^(.-):") .. "_"
-  if not prefix then
-    prefix = ""     -- fallback if no prefix found
+  local prefix_match = track_name:match("^(.-):")
+  local prefix = ""
+  if prefix_match then
+    prefix = prefix_match .. "_"
   end
-
+  
   local file = path .. slash .. prefix .. 'metadata.txt'
   return file, prefix
 end
