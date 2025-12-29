@@ -75,16 +75,12 @@ local manual_people_entry = manual_people_entry_str == "1"
 
 local create_CD_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
 
-local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
-SetToggleCommandState(1, ddp_editor, 1)
-
 local first_run = true
 
 ---------------------------------------------------------------------
 
 function main()
     if not window_open then
-        SetToggleCommandState(1, ddp_editor, 0)
         create_metadata_report_and_cue()
         return
     end

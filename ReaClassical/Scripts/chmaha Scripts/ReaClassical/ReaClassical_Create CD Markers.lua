@@ -129,9 +129,8 @@ function main()
   local _, silent = GetProjExtState(0, "ReaClassical", "ddp_silent")
 
   local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
-  if GetToggleCommandState(ddp_editor) ~= 1 and silent ~= "y" then
-    Main_OnCommand(ddp_editor, 0)
-  end
+  Main_OnCommand(ddp_editor, 0)
+
 
   SetProjExtState(0, "ReaClassical", "ddp_silent", "")
 
