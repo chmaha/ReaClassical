@@ -47,88 +47,84 @@ local icon_size = 128
 function main()
   if not window_open then return end
 
-  local window_flags = ImGui.WindowFlags_NoResize |
-      ImGui.WindowFlags_NoTitleBar |
-      ImGui.WindowFlags_NoScrollbar |
-      ImGui.WindowFlags_AlwaysAutoResize |
+  local window_flags = ImGui.WindowFlags_NoScrollbar |
       ImGui.WindowFlags_TopMost
+
+  -- Set minimum window size
+  ImGui.SetNextWindowSizeConstraints(ctx, 160, 175, math.huge, math.huge)
 
   local opened, open_ref = ImGui.Begin(ctx, "Recording Indicator", true, window_flags)
   window_open = open_ref
 
-  if not opened then
-    ImGui.End(ctx)
-    defer(main)
-    return
-  end
+  if opened then
+    local armed = count_rec_armed_tracks()
+    local play_state = GetPlayState()
 
-  local armed = count_rec_armed_tracks()
-  local play_state = GetPlayState()
+    local state, label
 
-  local state, label
-
-  if armed == 0 then
-    state = "idle"
-    label = "OFFLINE"
-  elseif play_state == 6 then
-    state = "paused"
-    label = "PAUSED"
-  elseif (play_state & 4) == 4 then
-    state = "recording"
-    label = "RECORDING"
-  else
-    state = "standby"
-    label = "STANDBY"
-  end
-
-  -- Reserve width (auto-scales since text is unchanged)
-  local widest = "RECORDING"
-  local max_w = select(1, ImGui.CalcTextSize(ctx, widest))
-  local target_w = math.max(icon_size, max_w + 20)
-
-  ImGui.SetNextItemWidth(ctx, target_w)
-  ImGui.Dummy(ctx, target_w, 0)
-
-  local win_w = ImGui.GetWindowWidth(ctx)
-
-  -- Center icon
-  local icon_center_x = (win_w - icon_size) * 0.5
-  ImGui.SetCursorPosX(ctx, icon_center_x)
-
-  local draw_list = ImGui.GetWindowDrawList(ctx)
-  local cursor_x, cursor_y = ImGui.GetCursorScreenPos(ctx)
-
-  draw_mic_icon(draw_list, cursor_x, cursor_y, icon_size, state)
-  ImGui.Dummy(ctx, icon_size, icon_size)
-
-  -- Text
-  if label ~= "" then
-    ImGui.Spacing(ctx)
-    local time = ImGui.GetTime(ctx)
-    local color
-
-    if state == "recording" then
-      color = ImGui.ColorConvertDouble4ToU32(1.0, 0.2, 0.2, 1.0)
-    elseif state == "paused" then
-      color = ImGui.ColorConvertDouble4ToU32(1.0, 0.85, 0.1, 1.0)
-    elseif state == "standby" then
-      local alpha = 0.5 + 0.5 * math.sin(time * 4)
-      color = ImGui.ColorConvertDouble4ToU32(0.1, 1.0, 0.1, alpha)
+    if armed == 0 then
+      state = "idle"
+      label = "OFFLINE"
+    elseif play_state == 6 then
+      state = "paused"
+      label = "PAUSED"
+    elseif (play_state & 4) == 4 then
+      state = "recording"
+      label = "RECORDING"
     else
-      color = ImGui.ColorConvertDouble4ToU32(0.6, 0.6, 0.6, 1.0)
+      state = "standby"
+      label = "STANDBY"
     end
 
-    local text_w = select(1, ImGui.CalcTextSize(ctx, label))
-    ImGui.SetCursorPosX(ctx, (win_w - text_w) * 0.5)
-    ImGui.TextColored(ctx, color, label)
+    -- Reserve width (auto-scales since text is unchanged)
+    local widest = "RECORDING"
+    local max_w = select(1, ImGui.CalcTextSize(ctx, widest))
+    local target_w = math.max(icon_size, max_w + 20)
+
+    ImGui.SetNextItemWidth(ctx, target_w)
+    ImGui.Dummy(ctx, target_w, 0)
+
+    local win_w = ImGui.GetWindowWidth(ctx)
+    local win_h = ImGui.GetWindowHeight(ctx)
+
+    -- Scale icon size based on window size (no upper limit!)
+    local available_size = math.min(win_w - 40, win_h - 80)
+    local display_icon_size = math.max(64, available_size)
+
+    -- Center icon
+    local icon_center_x = (win_w - display_icon_size) * 0.5
+    ImGui.SetCursorPosX(ctx, icon_center_x)
+
+    local draw_list = ImGui.GetWindowDrawList(ctx)
+    local cursor_x, cursor_y = ImGui.GetCursorScreenPos(ctx)
+
+    draw_mic_icon(draw_list, cursor_x, cursor_y, display_icon_size, state)
+    ImGui.Dummy(ctx, display_icon_size, display_icon_size)
+
+    -- Text
+    if label ~= "" then
+      ImGui.Spacing(ctx)
+      local time = ImGui.GetTime(ctx)
+      local color
+
+      if state == "recording" then
+        color = ImGui.ColorConvertDouble4ToU32(1.0, 0.2, 0.2, 1.0)
+      elseif state == "paused" then
+        color = ImGui.ColorConvertDouble4ToU32(1.0, 0.85, 0.1, 1.0)
+      elseif state == "standby" then
+        local alpha = 0.5 + 0.5 * math.sin(time * 4)
+        color = ImGui.ColorConvertDouble4ToU32(0.1, 1.0, 0.1, alpha)
+      else
+        color = ImGui.ColorConvertDouble4ToU32(0.6, 0.6, 0.6, 1.0)
+      end
+
+      local text_w = select(1, ImGui.CalcTextSize(ctx, label))
+      ImGui.SetCursorPosX(ctx, (win_w - text_w) * 0.5)
+      ImGui.TextColored(ctx, color, label)
+    end
+    ImGui.End(ctx)
   end
 
-  if ImGui.BeginPopupContextWindow(ctx) then
-    if ImGui.MenuItem(ctx, "Close") then window_open = false end
-    ImGui.EndPopup(ctx)
-  end
-
-  ImGui.End(ctx)
   defer(main)
 end
 
