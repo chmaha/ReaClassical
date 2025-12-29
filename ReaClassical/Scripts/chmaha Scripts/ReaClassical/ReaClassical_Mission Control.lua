@@ -45,6 +45,8 @@ end
 
 local initial_project = EnumProjects(-1, "")
 local is_valid_project = false
+local show_hardware_names = true
+local input_dropdown_width = 80
 
 package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
@@ -321,6 +323,17 @@ function main()
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx,
                 "Auto-assign inputs based on track names\n(pair/stereo = stereo, left/right = mono with pan)")
+        end
+
+        -- Hardware names toggle button
+        ImGui.SameLine(ctx)
+        local btn_label = show_hardware_names and "Ch #" or "HW"
+        if ImGui.Button(ctx, btn_label) then
+            show_hardware_names = not show_hardware_names
+            generate_input_options()  -- Regenerate options with new setting
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Toggle hardware names / channel numbers")
         end
 
         -- Invisible button to fill remaining space and clear selection
@@ -889,14 +902,62 @@ function generate_input_options()
     mono_options = {}
     stereo_options = {}
     table.insert(mono_options, "None")
-    table.insert(stereo_options, "None") -- Add None option for stereo too
+    table.insert(stereo_options, "None")
+    
+    local max_chars = 4  -- Start with "None" length
+    
+    -- Generate mono options
     for i = 1, MAX_INPUTS do
-        table.insert(mono_options, tostring(i))
+        local option_text
+        if show_hardware_names then
+            local hw_name = GetInputChannelName(i - 1)  -- 0-indexed API
+            if hw_name and hw_name ~= "" then
+                -- Show just the hardware name
+                option_text = hw_name
+            else
+                -- Fallback to just number if no name available
+                option_text = tostring(i)
+            end
+        else
+            option_text = tostring(i)
+        end
+        table.insert(mono_options, option_text)
+        max_chars = math.max(max_chars, #option_text)
     end
 
+    -- Generate stereo options
     for i = 1, MAX_INPUTS - 1 do
-        table.insert(stereo_options, string.format("%d+%d", i, i + 1))
+        local option_text
+        if show_hardware_names then
+            local hw_name1 = GetInputChannelName(i - 1)  -- 0-indexed
+            local hw_name2 = GetInputChannelName(i)
+            
+            if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
+                -- Try to detect if they're a stereo pair with matching base name
+                local base1 = hw_name1:match("^(.+)%s+%d+$") or hw_name1
+                local base2 = hw_name2:match("^(.+)%s+%d+$") or hw_name2
+                
+                if base1 == base2 then
+                    -- Same device/interface, show single name
+                    option_text = string.format("%s+%s", hw_name1, hw_name2)
+                else
+                    -- Different devices, show both names
+                    option_text = string.format("%s/%s", hw_name1, hw_name2)
+                end
+            else
+                -- Fallback to just numbers if no names available
+                option_text = string.format("%d+%d", i, i + 1)
+            end
+        else
+            option_text = string.format("%d+%d", i, i + 1)
+        end
+        table.insert(stereo_options, option_text)
+        max_chars = math.max(max_chars, #option_text)
     end
+    
+    -- Calculate dropdown width based on max characters
+    -- Approximate 7 pixels per character + 30 for dropdown arrow/padding
+    input_dropdown_width = math.max(80, (max_chars * 7) + 30)
 end
 
 ---------------------------------------------------------------------
@@ -1712,7 +1773,7 @@ function draw_track_controls(start_idx, end_idx)
 
         -- Input dropdown
         ImGui.SameLine(ctx)
-        ImGui.SetNextItemWidth(ctx, 80)
+        ImGui.SetNextItemWidth(ctx, input_dropdown_width)
         local options = is_stereo[i] and stereo_options or mono_options
         local options_str = table.concat(options, "\0") .. "\0"
         local changed_input, new_input = ImGui.Combo(ctx, "##input", input_channels[i], options_str)
