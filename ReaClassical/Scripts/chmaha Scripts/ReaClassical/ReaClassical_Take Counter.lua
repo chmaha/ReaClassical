@@ -20,12 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 -- luacheck: ignore 113
 
-
 for key in pairs(reaper) do _G[key] = reaper[key] end
-
--- local profiler = dofile(GetResourcePath() ..
---   '/Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua')
--- defer = profiler.defer
 
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
@@ -33,6 +28,12 @@ local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
   MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+  return
+end
+
+-- Check for ReaImGui
+if not reaper.ImGui_CreateContext then
+  MB('Please install ReaImGui extension before running this function', 'Error: Missing Extension', 0)
   return
 end
 
@@ -48,7 +49,6 @@ local iterated_filenames = false
 local added_take_number = false
 local rec_name_set = false
 local take_count, take_text, session_text
-local take_width, take_height
 local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
 local separator = package.config:sub(1, 1);
 
@@ -65,31 +65,30 @@ local auto_started = false
 
 if reset == "" then reset = 0 end
 
-local win
 local values = {}
 local current_time = os.time()
 
-if pos_string ~= "" then
-  for value in pos_string:gmatch("[^" .. "," .. "]+") do
-    table.insert(values, value)
-  end
-  win = {
-    width = 300,
-    height = 125,
-    xpos = values[1],
-    ypos = values[2]
-  }
-else
-  win = {
-    width = 300,
-    height = 125,
-    xpos = 0,
-    ypos = 0
-  }
-end
+-- Default window settings
+local win = {
+  width = 300,
+  height = 200,
+  xpos = nil,
+  ypos = nil
+}
 
-local old_height = win.height
-local old_width = win.width
+-- if pos_string ~= "" then
+--   for value in pos_string:gmatch("[^" .. "," .. "]+") do
+--     table.insert(values, value)
+--   end
+--   if #values >= 2 then
+--     win.xpos = tonumber(values[1])
+--     win.ypos = tonumber(values[2])
+--   end
+--   if #values >= 4 then
+--     win.width = tonumber(values[3]) or 300
+--     win.height = tonumber(values[4]) or 125
+--   end
+-- end
 
 local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
 SetToggleCommandState(1, take_counter, 1)
@@ -105,12 +104,31 @@ local recpause_color = ColorToNative(255, 255, 127) | 0x1000000
 
 local laststate
 local project_userdata, project_name
-local gfx = gfx
 
 local start_time, end_time, duration
 local run_once = false
 
 local F9_command = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+
+-- ImGui Context
+local ctx = reaper.ImGui_CreateContext('Take Counter')
+local large_font = reaper.ImGui_CreateFont('Arial', 120)
+local medium_font = reaper.ImGui_CreateFont('Arial', 50)
+local small_font = reaper.ImGui_CreateFont('Arial', 25)
+reaper.ImGui_Attach(ctx, large_font)
+reaper.ImGui_Attach(ctx, medium_font)
+reaper.ImGui_Attach(ctx, small_font)
+
+local open = true
+
+-- Popup state variables (persisted across frames)
+local popup_open = false
+local popup_take_text = nil
+local popup_session_text = nil
+local popup_reset = nil
+local popup_start_text = nil
+local popup_end_text = nil
+local popup_duration_text = nil
 
 ---------------------------------------------------------------------
 
@@ -130,7 +148,9 @@ function main()
     laststate = nil
     rec_name_set = false
   end
+  
   local playstate = GetPlayState()
+  
   if playstate == 0 or playstate == 1 then -- stopped or playing
     if auto_started then
       auto_started = false
@@ -157,112 +177,6 @@ function main()
       take_text = take_count + 1
     end
 
-    if gfx.mouse_cap & 1 == 1 then
-      laststate = nil
-      local choice = MB("Recalculate take count?", "ReaClassical Take Counter", 4)
-      if choice == 6 then
-        take_text = get_take_count(session) + 1
-        rec_name_set = false
-      end
-    elseif gfx.mouse_cap & 2 == 2 then
-      marker_actions_running = false
-      laststate = nil
-      session_text = session
-      local ret, choices = GetUserInputs(
-        'ReaClassical Take Counter', 6,
-        'Set Take Number:,Session Name:,Allow Take Number Override?:,Recording Start Time (HH:MM):,' ..
-        'Recording End Time (HH:MM):,Duration (HH:MM):',
-        table.concat({ take_text, session_text, reset, start_text, end_text, duration_text }, ',')
-      )
-
-      local take_choice, session_choice, reset_choice, start_choice, end_choice, duration_choice =
-          string.match(choices, "(.-),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)")
-
-      take_choice = tonumber(take_choice) or take_text
-      reset_choice = tonumber(reset_choice) or reset
-
-      if ret then
-        start_next_day = ""
-        end_next_day = ""
-        if start_choice ~= "" then
-          start_time = parse_time(start_choice)
-          if start_time then start_text = start_choice end
-          if start_time <= current_time then
-            start_time = start_time + 24 * 60 * 60
-            start_next_day = "*"
-          end
-        else
-          start_text, start_time = "", nil
-        end
-
-        if end_choice ~= "" then
-          end_time = parse_time(end_choice)
-          if end_time then end_text = end_choice end
-          if not start_time and end_time <= current_time then
-            end_time = end_time + 24 * 60 * 60
-            end_next_day = "*"
-          elseif start_time and end_time <= start_time then
-            end_time = end_time + 24 * 60 * 60
-            end_next_day = "*"
-          end
-        else
-          end_text, end_time = "", nil
-        end
-
-        if duration_choice ~= "" then
-          duration = parse_duration(duration_choice)
-          if duration then
-            duration_text = duration_choice
-            if start_time then
-              calc_end_time = seconds_to_hhmm(start_time + duration)
-            end
-          end
-        else
-          duration_text, duration, calc_end_time = "", nil, nil
-        end
-      else
-        start_choice, end_choice, duration_choice = start_text, end_text, duration_text
-      end
-
-      if session_choice and session_choice ~= "" then
-        session = session_choice
-        session_dir = session .. separator
-        session_suffix = session .. "_"
-      elseif ret then
-        session, session_dir, session_suffix = "", "", ""
-      end
-
-      local reset_choice_num = tonumber(reset_choice)
-      if reset_choice_num and (reset_choice_num == 0 or reset_choice_num == 1) then
-        reset = reset_choice_num
-      end
-
-      if take_choice >= take_count then
-        take_count = take_choice - 1
-        take_text = take_choice
-        rec_name_set = false
-      else
-        MB("You cannot set a take number lower than the highest found in the project path."
-          .. "\nRecalculating take count...", "ReaClassical Take Counter", 0)
-        take_text = get_take_count(session) + 1
-        rec_name_set = false
-      end
-
-      SetProjExtState(0, "ReaClassical", "TakeSessionName", session)
-      SetProjExtState(0, "ReaClassical", "TakeCounterOverride", reset)
-      SetProjExtState(0, "ReaClassical", "Recording Start", start_choice)
-      SetProjExtState(0, "ReaClassical", "Recording End", end_choice)
-      SetProjExtState(0, "ReaClassical", "Recording Duration", duration_choice)
-
-      if reset == 0 then
-        take_text = get_take_count(session) + 1
-        rec_name_set = false
-      end
-
-      set_via_right_click = true
-    end
-
-
     if not rec_name_set then
       local padded_take_text = string.format("%03d", tonumber(take_text))
       SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
@@ -272,7 +186,6 @@ function main()
 
     if laststate ~= playstate then
       laststate = playstate
-      draw(playstate)
     end
 
     if start_time then
@@ -314,8 +227,6 @@ function main()
     if laststate ~= playstate then
       laststate = playstate
 
-      draw(playstate)
-
       if start_time or end_time then
         duration = nil
         duration_text = ""
@@ -330,25 +241,11 @@ function main()
     end
   end
 
-  if old_height ~= gfx.h or old_width ~= gfx.w then
-    draw(playstate)
-    old_height = gfx.h
-    old_width = gfx.w
-  end
-
-
-  local quit_response
-  local key = gfx.getchar()
-  if key == -1 and (playstate == 5 or playstate == 6) then
-    quit_response = MB("Are you sure you want to quit the take counter window during a recording?", "Take Counter", 4)
-  end
-
-  if quit_response == 7 then
-    local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
-    gfx.init("Take Counter", gfx.w, gfx.h, 0, x, y)
-    defer(main)
-  elseif quit_response == nil and key ~= -1 then
-    defer(main)
+  -- Draw ImGui window
+  draw(playstate)
+  
+  if open then
+    reaper.defer(main)
   end
 end
 
@@ -387,9 +284,13 @@ end
 function clean_up()
   Main_OnCommand(24800, 0) -- clear any section override
   SetToggleCommandState(1, take_counter, 0)
-  local _, x, y, _, _ = gfx.dock(-1, 1, 1, 1, 1)
-  local pos = x .. "," .. y
+  
+  -- Save window position and size
+  local x, y = reaper.ImGui_GetWindowPos(ctx)
+  local w, h = reaper.ImGui_GetWindowSize(ctx)
+  local pos = x .. "," .. y .. "," .. w .. "," .. h
   SetProjExtState(0, "ReaClassical", "TakeCounterPosition", pos)
+  
   SNM_SetStringConfigVar("recfile_wildcards", prev_recfilename_value)
   SetThemeColor("ts_lane_bg", -1)
   SetThemeColor("marker_lane_bg", -1)
@@ -505,111 +406,389 @@ end
 ---------------------------------------------------------------------
 
 function draw(playstate)
-  local base_width = 300
-  local base_height = 125
-
-  local scale_x = gfx.w / base_width
-  local scale_y = gfx.h / base_height
-  local scale = math.min(scale_x, scale_y)
-
-  gfx.setfont(1, "Arial", 90 * scale, 98)
-  gfx.set(0.5, 0.8, 0.5, 1)
-  take_width, take_height = gfx.measurestr(take_text)
-  session_text = session
-
-  if playstate == 0 or playstate == 1 then
-    gfx.x = (gfx.w - take_width) / 2
-    gfx.y = (gfx.h - take_height) / 4
-    gfx.drawstr(take_text)
-
-    if session_text == "" and take_text == 1 then
-      gfx.setfont(1, "Arial", 15 * scale, 98)
-      session_text = "Right-click to set session name"
-      take_height = take_height + 75
+  -- Always set window to default size when opening (but allow user to resize)
+  if win.xpos and win.ypos then
+    reaper.ImGui_SetNextWindowPos(ctx, win.xpos, win.ypos, reaper.ImGui_Cond_FirstUseEver())
+  end
+  -- Always start at 300x125, but user can resize
+  reaper.ImGui_SetNextWindowSize(ctx, win.width, win.height, reaper.ImGui_Cond_Appearing())
+  
+  -- Set minimum and maximum size constraints to maintain aspect ratio
+  reaper.ImGui_SetNextWindowSizeConstraints(ctx, win.width, win.height, 3000,1750)
+  
+  local visible, should_close = reaper.ImGui_Begin(ctx, 'Take Counter', true, 
+    reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoScrollWithMouse())
+  
+  if not visible then
+    reaper.ImGui_End(ctx)
+    return
+  end
+  
+  if should_close == false then
+    if playstate == 5 or playstate == 6 then
+      local choice = reaper.MB("Are you sure you want to quit the take counter window during a recording?", "Take Counter", 4)
+      if choice == 6 then
+        open = false
+      end
     else
-      gfx.setfont(1, "Arial", 25 * scale, 98)
+      open = false
     end
-    local session_width, session_height = gfx.measurestr(session_text)
-    gfx.x = (gfx.w - session_width) / 2
-    gfx.y = ((gfx.h - session_height + take_height / 3) / 2)
-    gfx.set(0.8, 0.8, 0.9, 1)
-    gfx.drawstr("\n" .. session_text)
-
+  end
+  
+  local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
+  local win_w, win_h = reaper.ImGui_GetWindowSize(ctx)
+  local win_x, win_y = reaper.ImGui_GetWindowPos(ctx)
+  
+  -- Calculate scaling
+  local base_width = win.height
+  local base_height = win.width
+  local scale_x = win_w / base_width
+  local scale_y = win_h / base_height
+  local scale = math.min(scale_x, scale_y)
+  
+  session_text = session
+  
+  -- Set colors based on playstate
+  if playstate == 0 or playstate == 1 then
     SetThemeColor("ts_lane_bg", -1)
     SetThemeColor("marker_lane_bg", -1)
     SetThemeColor("region_lane_bg", -1)
-
-    if start_time or end_time or duration then
-      gfx.setfont(1, "Arial", 15 * scale, 98)
-      gfx.set(0.337, 0.627, 0.827, 1)
-      gfx.x = gfx.w - (60 * scale)
-      gfx.y = 15 * scale
-      if start_time and end_time then
-        gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. end_text .. end_next_day)
-      elseif start_time and calc_end_time then
-        gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. calc_end_time .. end_next_day)
-      elseif start_time then
-        gfx.drawstr("Start\n" .. start_text .. start_next_day)
-      elseif end_time then
-        gfx.drawstr("End\n" .. end_text .. end_next_day)
-      else
-        gfx.drawstr("Dur.\n" .. duration_text)
-      end
-    end
-  elseif playstate == 5 or playstate == 6 then
+  elseif playstate == 6 then
+    SetThemeColor("ts_lane_bg", recpause_color)
+    SetThemeColor("marker_lane_bg", recpause_color)
+    SetThemeColor("region_lane_bg", recpause_color)
+  elseif playstate == 5 then
+    SetThemeColor("ts_lane_bg", rec_color)
+    SetThemeColor("marker_lane_bg", rec_color)
+    SetThemeColor("region_lane_bg", rec_color)
+  end
+  
+  -- Draw take number (large font) - color changes based on playstate
+  reaper.ImGui_PushFont(ctx, large_font, 120 * scale)
+  local take_str = tostring(take_text)
+  local text_w, text_h = reaper.ImGui_CalcTextSize(ctx, take_str)
+  local take_x = (win_w - text_w) / 2
+  local take_y = (win_h - text_h) / 3
+  reaper.ImGui_SetCursorPos(ctx, take_x, take_y)
+  
+  -- Set color based on playstate
+  local take_color
+  if playstate == 6 then
+    take_color = 0xFFFF7FFF -- Yellow for paused
+  elseif playstate == 5 then
+    take_color = 0xFF7F7FFF -- Red for recording
+  else
+    take_color = 0x7FCC7FFF -- Green for stopped/playing
+  end
+  
+  reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), take_color)
+  reaper.ImGui_Text(ctx, take_str)
+  reaper.ImGui_PopStyleColor(ctx)
+  reaper.ImGui_PopFont(ctx)
+  
+  -- Draw recording indicator (must come after text measurement)
+  if playstate == 5 or playstate == 6 then
+    local indicator_x = win_x + 50 * scale
+    -- Align with center of take number
+    local indicator_y = win_y + take_y + (text_h / 2)
+    
     if playstate == 6 then
-      gfx.set(1, 1, 0.5, 1)
-      local pause_y = (gfx.h - take_height) / 4 + (take_height / 2) - (50 * scale) / 2
-      gfx.rect(30 * scale, pause_y, 15 * scale, 50 * scale)
-      gfx.rect(55 * scale, pause_y, 15 * scale, 50 * scale)
-      SetThemeColor("ts_lane_bg", recpause_color)
-      SetThemeColor("marker_lane_bg", recpause_color)
-      SetThemeColor("region_lane_bg", recpause_color)
+      -- Pause bars (yellow) - RGBA format
+      local bar_height = 50 * scale
+      reaper.ImGui_DrawList_AddRectFilled(draw_list, 
+        indicator_x - 20 * scale, indicator_y - bar_height / 2,
+        indicator_x - 5 * scale, indicator_y + bar_height / 2,
+        0xFFFF7FFF)
+      reaper.ImGui_DrawList_AddRectFilled(draw_list,
+        indicator_x + 5 * scale, indicator_y - bar_height / 2,
+        indicator_x + 20 * scale, indicator_y + bar_height / 2,
+        0xFFFF7FFF)
     else
-      gfx.set(1, 0.5, 0.5, 1)
-      local circle_y = (gfx.h - take_height) / 4 + (take_height / 2)
-      gfx.circle(50 * scale, circle_y, 20 * scale, 1)
-      SetThemeColor("ts_lane_bg", rec_color)
-      SetThemeColor("marker_lane_bg", rec_color)
-      SetThemeColor("region_lane_bg", rec_color)
-    end
-
-    gfx.x = (gfx.w - take_width) / 2
-    gfx.y = (gfx.h - take_height) / 4
-    gfx.drawstr(take_text)
-
-    gfx.setfont(1, "Arial", 25 * scale, 98)
-    gfx.set(0.8, 0.8, 0.9, 1)
-    local session_width, session_height = gfx.measurestr(session_text)
-    gfx.x = (gfx.w - session_width) / 2
-    gfx.y = ((gfx.h - session_height + take_height / 3) / 2)
-    gfx.drawstr("\n" .. session_text)
-
-    if start_time and start_time > current_time then
-      set_via_right_click = false
-    end
-
-    if set_via_right_click then
-      if start_time or end_time or duration then
-        gfx.setfont(1, "Arial", 15 * scale, 98)
-        gfx.set(0.337, 0.627, 0.827, 1)
-        gfx.x = gfx.w - (60 * scale)
-        gfx.y = 15 * scale
-        if start_time and end_time then
-          gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. end_text .. end_next_day)
-        elseif start_time and calc_end_time then
-          gfx.drawstr("Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. calc_end_time .. end_next_day)
-        elseif start_time then
-          gfx.drawstr("Start\n" .. start_text .. start_next_day)
-        elseif end_time then
-          gfx.drawstr("End\n" .. end_text .. end_next_day)
-        else
-          gfx.drawstr("Dur.\n" .. duration_text)
-        end
-      end
+      -- Recording circle (red) - RGBA format
+      reaper.ImGui_DrawList_AddCircleFilled(draw_list,
+        indicator_x, indicator_y,
+        20 * scale,
+        0xFF7F7FFF)
     end
   end
+  
+  -- Create invisible button over take number for click detection
+  reaper.ImGui_SetCursorPos(ctx, take_x, take_y)
+  if reaper.ImGui_InvisibleButton(ctx, "take_number_btn", text_w, text_h) then
+    laststate = nil
+    local choice = MB("Recalculate take count?", "ReaClassical Take Counter", 4)
+    if choice == 6 then
+      take_text = get_take_count(session) + 1
+      rec_name_set = false
+    end
+  end
+  
+  -- Draw session name (medium or small font) - closer to take number
+  local display_session = session_text
+  local use_small = false
+  
+  if display_session == "" and take_text == 1 then
+    display_session = "Right-click to set session name"
+    use_small = true
+  end
+  
+  if use_small then
+    reaper.ImGui_PushFont(ctx, small_font, 25 * scale)
+  else
+    reaper.ImGui_PushFont(ctx, medium_font, 50 * scale)
+  end
+  local session_w, session_h = reaper.ImGui_CalcTextSize(ctx, display_session)
+  -- Smaller gap from take number to match original
+  reaper.ImGui_SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h + (10 * scale))
+  reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xE6CCCCFF) -- Light purple (RGBA)
+  reaper.ImGui_Text(ctx, display_session)
+  reaper.ImGui_PopStyleColor(ctx)
+  reaper.ImGui_PopFont(ctx)
+  
+  -- Draw time info (small font) - with more padding from top and right
+  if (playstate == 0 or playstate == 1 or (playstate == 5 or playstate == 6) and set_via_right_click) then
+    if start_time or end_time or duration then
+      reaper.ImGui_PushFont(ctx, small_font, 25 * scale)
+      reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xD3A056FF) -- Blue tint (RGBA)
+      
+      local time_text = ""
+      if start_time and end_time then
+        time_text = "Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. end_text .. end_next_day
+      elseif start_time and calc_end_time then
+        time_text = "Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. calc_end_time .. end_next_day
+      elseif start_time then
+        time_text = "Start\n" .. start_text .. start_next_day
+      elseif end_time then
+        time_text = "End\n" .. end_text .. end_next_day
+      else
+        time_text = "Dur.\n" .. duration_text
+      end
+      
+      local time_w, time_h = reaper.ImGui_CalcTextSize(ctx, time_text)
+      -- Increased padding from top and right edges
+      reaper.ImGui_SetCursorPos(ctx, win_w - time_w - (20 * scale), take_y)
+      reaper.ImGui_Text(ctx, time_text)
+      
+      reaper.ImGui_PopStyleColor(ctx)
+      reaper.ImGui_PopFont(ctx)
+    end
+  end
+  
+  -- Handle right-click for settings popup (anywhere in window)
+  if reaper.ImGui_IsWindowHovered(ctx) and reaper.ImGui_IsMouseClicked(ctx, 1) then
+    -- Initialize popup values from current state when popup opens
+    popup_take_text = take_text
+    popup_session_text = session
+    popup_reset = reset  -- This will be 0 or 1 based on current state
+    popup_start_text = start_text
+    popup_end_text = end_text
+    popup_duration_text = duration_text
+    popup_open = true
+    reaper.ImGui_OpenPopup(ctx, "settings_popup")
+  end
+  
+  -- ImGui popup menu for settings
+  if reaper.ImGui_BeginPopup(ctx, "settings_popup") then
+    marker_actions_running = false
+    laststate = nil
+    
+    reaper.ImGui_Text(ctx, "Take Counter Settings")
+    reaper.ImGui_Separator(ctx)
+    reaper.ImGui_Spacing(ctx)
+    
+    -- Use table for aligned layout
+    if reaper.ImGui_BeginTable(ctx, "settings_table", 2, reaper.ImGui_TableFlags_SizingStretchProp()) then
+      reaper.ImGui_TableSetupColumn(ctx, "labels", reaper.ImGui_TableColumnFlags_WidthFixed(), 230)
+      reaper.ImGui_TableSetupColumn(ctx, "inputs", reaper.ImGui_TableColumnFlags_WidthFixed(), 250)
+      
+      -- Override checkbox (first so we can enable/disable take number based on it)
+      reaper.ImGui_TableNextRow(ctx)
+      reaper.ImGui_TableSetColumnIndex(ctx, 0)
+      reaper.ImGui_AlignTextToFramePadding(ctx)
+      reaper.ImGui_Text(ctx, "Allow Take Number Override:")
+      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      local override_checked = (tonumber(popup_reset) == 1)
+      local rv, val = reaper.ImGui_Checkbox(ctx, "##override", override_checked)
+      if rv then popup_reset = val and 1 or 0 end
+      
+      -- Take number input (disabled unless override is enabled)
+      reaper.ImGui_TableNextRow(ctx)
+      reaper.ImGui_TableSetColumnIndex(ctx, 0)
+      reaper.ImGui_AlignTextToFramePadding(ctx)
+      reaper.ImGui_Text(ctx, "Set Take Number:")
+      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      local take_disabled = (tonumber(popup_reset) ~= 1)
+      if take_disabled then
+        reaper.ImGui_BeginDisabled(ctx, true)
+      end
+      reaper.ImGui_SetNextItemWidth(ctx, -1)
+      local rv, val = reaper.ImGui_InputInt(ctx, "##take", popup_take_text)
+      if rv and not take_disabled then popup_take_text = val end
+      if take_disabled then
+        reaper.ImGui_EndDisabled(ctx)
+      end
+      
+      -- Session name input
+      reaper.ImGui_TableNextRow(ctx)
+      reaper.ImGui_TableSetColumnIndex(ctx, 0)
+      reaper.ImGui_AlignTextToFramePadding(ctx)
+      reaper.ImGui_Text(ctx, "Session Name:")
+      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      reaper.ImGui_SetNextItemWidth(ctx, -1)
+      local rv, val = reaper.ImGui_InputText(ctx, "##session", popup_session_text, 256)
+      if rv then popup_session_text = val end
+      
+      -- Start time input
+      reaper.ImGui_TableNextRow(ctx)
+      reaper.ImGui_TableSetColumnIndex(ctx, 0)
+      reaper.ImGui_AlignTextToFramePadding(ctx)
+      reaper.ImGui_Text(ctx, "Recording Start Time (HH:MM):")
+      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      reaper.ImGui_SetNextItemWidth(ctx, 80)
+      local rv, val = reaper.ImGui_InputText(ctx, "##start", popup_start_text, 256)
+      if rv then popup_start_text = val end
+      
+      -- End time input
+      reaper.ImGui_TableNextRow(ctx)
+      reaper.ImGui_TableSetColumnIndex(ctx, 0)
+      reaper.ImGui_AlignTextToFramePadding(ctx)
+      reaper.ImGui_Text(ctx, "Recording End Time (HH:MM):")
+      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      reaper.ImGui_SetNextItemWidth(ctx, 80)
+      local rv, val = reaper.ImGui_InputText(ctx, "##end", popup_end_text, 256)
+      if rv then popup_end_text = val end
+      
+      -- Duration input
+      reaper.ImGui_TableNextRow(ctx)
+      reaper.ImGui_TableSetColumnIndex(ctx, 0)
+      reaper.ImGui_AlignTextToFramePadding(ctx)
+      reaper.ImGui_Text(ctx, "Duration (HH:MM):")
+      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      reaper.ImGui_SetNextItemWidth(ctx, 80)
+      local rv, val = reaper.ImGui_InputText(ctx, "##duration", popup_duration_text, 256)
+      if rv then popup_duration_text = val end
+      
+      reaper.ImGui_EndTable(ctx)
+    end
+    
+    reaper.ImGui_Spacing(ctx)
+    reaper.ImGui_Separator(ctx)
+    reaper.ImGui_Spacing(ctx)
+    
+    -- Apply button
+    if reaper.ImGui_Button(ctx, "Apply", 120, 0) then
+      -- Copy popup values to main variables
+      local session_changed = (popup_session_text ~= session)
+      
+      take_text = popup_take_text
+      start_text = popup_start_text
+      end_text = popup_end_text
+      duration_text = popup_duration_text
+      reset = popup_reset
+      
+      start_next_day = ""
+      end_next_day = ""
+      
+      -- Parse start time
+      if start_text ~= "" then
+        start_time = parse_time(start_text)
+        if start_time and start_time <= current_time then
+          start_time = start_time + 24 * 60 * 60
+          start_next_day = "*"
+        end
+      else
+        start_time = nil
+      end
+      
+      -- Parse end time
+      if end_text ~= "" then
+        end_time = parse_time(end_text)
+        if end_time then
+          if not start_time and end_time <= current_time then
+            end_time = end_time + 24 * 60 * 60
+            end_next_day = "*"
+          elseif start_time and end_time <= start_time then
+            end_time = end_time + 24 * 60 * 60
+            end_next_day = "*"
+          end
+        end
+      else
+        end_time = nil
+      end
+      
+      -- Parse duration
+      if duration_text ~= "" then
+        duration = parse_duration(duration_text)
+        if duration and start_time then
+          calc_end_time = seconds_to_hhmm(start_time + duration)
+        end
+      else
+        duration = nil
+        calc_end_time = nil
+      end
+      
+      -- Apply session
+      if popup_session_text and popup_session_text ~= "" then
+        session = popup_session_text
+        session_dir = session .. separator
+        session_suffix = session .. "_"
+      else
+        session, session_dir, session_suffix = "", "", ""
+      end
+      
+      -- If session changed, recalculate take count
+      if session_changed then
+        iterated_filenames = false
+        take_text = get_take_count(session) + 1
+        rec_name_set = false
+      else
+        -- Apply take number only if session didn't change
+        local take_choice = tonumber(take_text) or take_count + 1
+        if take_choice >= take_count then
+          take_count = take_choice - 1
+          take_text = take_choice
+          rec_name_set = false
+        else
+          MB("You cannot set a take number lower than the highest found in the project path."
+            .. "\nRecalculating take count...", "ReaClassical Take Counter", 0)
+          take_text = get_take_count(session) + 1
+          rec_name_set = false
+        end
+      end
+      
+      -- Save settings
+      SetProjExtState(0, "ReaClassical", "TakeSessionName", session)
+      SetProjExtState(0, "ReaClassical", "TakeCounterOverride", reset)
+      SetProjExtState(0, "ReaClassical", "Recording Start", start_text)
+      SetProjExtState(0, "ReaClassical", "Recording End", end_text)
+      SetProjExtState(0, "ReaClassical", "Recording Duration", duration_text)
+      
+      if reset == 0 then
+        take_text = get_take_count(session) + 1
+        rec_name_set = false
+      end
+      
+      set_via_right_click = true
+      popup_open = false
+      reaper.ImGui_CloseCurrentPopup(ctx)
+    end
+    
+    reaper.ImGui_SameLine(ctx)
+    
+    -- Cancel button
+    if reaper.ImGui_Button(ctx, "Cancel", 120, 0) then
+      popup_open = false
+      reaper.ImGui_CloseCurrentPopup(ctx)
+    end
+    
+    reaper.ImGui_EndPopup(ctx)
+  else
+    popup_open = false
+  end
+  
   UpdateTimeline()
+  
+  reaper.ImGui_End(ctx)
 end
 
 ---------------------------------------------------------------------
@@ -690,9 +869,5 @@ end
 
 ---------------------------------------------------------------------
 
--- profiler.attachToWorld()
--- profiler.run()
-
-gfx.init("Take Counter", win.width, win.height, 0, win.xpos, win.ypos)
-atexit(clean_up)
+reaper.atexit(clean_up)
 main()
