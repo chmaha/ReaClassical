@@ -31,10 +31,10 @@ if not SWS_exists then
   return
 end
 
--- Check for ReaImGui
-if not reaper.ImGui_CreateContext then
-  MB('Please install ReaImGui extension before running this function', 'Error: Missing Extension', 0)
-  return
+local imgui_exists = APIExists("ImGui_GetVersion")
+if not imgui_exists then
+    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+    return
 end
 
 local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -42,6 +42,8 @@ if workflow == "" then
   MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
   return
 end
+
+set_action_options(2)
 
 ---------------------------------------------------------------------
 
@@ -68,27 +70,16 @@ if reset == "" then reset = 0 end
 local values = {}
 local current_time = os.time()
 
+package.path        = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui         = require 'imgui' '0.10'
+
 -- Default window settings
 local win = {
-  width = 300,
-  height = 200,
+  width = 350,
+  height = 480,
   xpos = nil,
   ypos = nil
 }
-
--- if pos_string ~= "" then
---   for value in pos_string:gmatch("[^" .. "," .. "]+") do
---     table.insert(values, value)
---   end
---   if #values >= 2 then
---     win.xpos = tonumber(values[1])
---     win.ypos = tonumber(values[2])
---   end
---   if #values >= 4 then
---     win.width = tonumber(values[3]) or 300
---     win.height = tonumber(values[4]) or 125
---   end
--- end
 
 local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
 SetToggleCommandState(1, take_counter, 1)
@@ -109,15 +100,17 @@ local start_time, end_time, duration
 local run_once = false
 
 local F9_command = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
+local increment_take_cmd = NamedCommandLookup("_RSbb6037bb7fbe86a2d5a3c24cda322cf422e37612")
+local next_section_cmd = NamedCommandLookup("_RSf1714b103174d14151f1b058f4defa9c6f10e1a1")
 
 -- ImGui Context
-local ctx = reaper.ImGui_CreateContext('Take Counter')
-local large_font = reaper.ImGui_CreateFont('Arial', 120)
-local medium_font = reaper.ImGui_CreateFont('Arial', 50)
-local small_font = reaper.ImGui_CreateFont('Arial', 25)
-reaper.ImGui_Attach(ctx, large_font)
-reaper.ImGui_Attach(ctx, medium_font)
-reaper.ImGui_Attach(ctx, small_font)
+local ctx = ImGui.CreateContext('Record Panel')
+local large_font = ImGui.CreateFont('Arial', 120)
+local medium_font = ImGui.CreateFont('Arial', 50)
+local small_font = ImGui.CreateFont('Arial', 25)
+ImGui.Attach(ctx, large_font)
+ImGui.Attach(ctx, medium_font)
+ImGui.Attach(ctx, small_font)
 
 local open = true
 
@@ -129,6 +122,23 @@ local popup_reset = nil
 local popup_start_text = nil
 local popup_end_text = nil
 local popup_duration_text = nil
+
+-- Recording rank and notes
+local recording_rank = 9 -- Default to "No Rank"
+local recording_note = ""
+
+-- Rank color options (matching SAI marker manager and notes app)
+local RANKS = {
+    { name = "Excellent",     rgba = 0x39FF1499, prefix = "Excellent" },
+    { name = "Very Good",     rgba = 0x32CD3299, prefix = "Very Good" },
+    { name = "Good",          rgba = 0x00AD8399, prefix = "Good" },
+    { name = "OK",            rgba = 0xFFFFAA99, prefix = "OK" },
+    { name = "Below Average", rgba = 0xFFBF0099, prefix = "Below Average" },
+    { name = "Poor",          rgba = 0xFF753899, prefix = "Poor" },
+    { name = "Unusable",      rgba = 0xDC143C99, prefix = "Unusable" },
+    { name = "False Start",   rgba = 0x2A2A2AFF, prefix = "False Start" },
+    { name = "No Rank",       rgba = 0x00000000, prefix = "" }
+}
 
 ---------------------------------------------------------------------
 
@@ -170,6 +180,13 @@ function main()
       calc_end_time = nil
       remove_markers_by_name("!1013")
       remove_markers_by_name("!" .. F9_command)
+      
+      -- Apply rank and notes to recorded items
+      apply_rank_and_notes_to_items()
+      
+      -- Reset rank and notes for next recording
+      recording_rank = 9
+      recording_note = ""
     end
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
@@ -286,8 +303,8 @@ function clean_up()
   SetToggleCommandState(1, take_counter, 0)
   
   -- Save window position and size
-  local x, y = reaper.ImGui_GetWindowPos(ctx)
-  local w, h = reaper.ImGui_GetWindowSize(ctx)
+  local x, y = ImGui.GetWindowPos(ctx)
+  local w, h = ImGui.GetWindowSize(ctx)
   local pos = x .. "," .. y .. "," .. w .. "," .. h
   SetProjExtState(0, "ReaClassical", "TakeCounterPosition", pos)
   
@@ -408,19 +425,19 @@ end
 function draw(playstate)
   -- Always set window to default size when opening (but allow user to resize)
   if win.xpos and win.ypos then
-    reaper.ImGui_SetNextWindowPos(ctx, win.xpos, win.ypos, reaper.ImGui_Cond_FirstUseEver())
+    ImGui.SetNextWindowPos(ctx, win.xpos, win.ypos, ImGui.Cond_FirstUseEver)
   end
-  -- Always start at 300x125, but user can resize
-  reaper.ImGui_SetNextWindowSize(ctx, win.width, win.height, reaper.ImGui_Cond_Appearing())
+  -- Always start at default size, but user can resize
+  ImGui.SetNextWindowSize(ctx, win.width, win.height, ImGui.Cond_Appearing)
   
-  -- Set minimum and maximum size constraints to maintain aspect ratio
-  reaper.ImGui_SetNextWindowSizeConstraints(ctx, win.width, win.height, 3000,1750)
+  -- Set minimum and maximum size constraints
+  ImGui.SetNextWindowSizeConstraints(ctx, win.width, win.height, 3000, 1750)
   
-  local visible, should_close = reaper.ImGui_Begin(ctx, 'Take Counter', true, 
-    reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoScrollWithMouse())
+  local visible, should_close = ImGui.Begin(ctx, 'Record Panel', true, 
+    ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoScrollWithMouse)
   
   if not visible then
-    reaper.ImGui_End(ctx)
+    ImGui.End(ctx)
     return
   end
   
@@ -435,13 +452,13 @@ function draw(playstate)
     end
   end
   
-  local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
-  local win_w, win_h = reaper.ImGui_GetWindowSize(ctx)
-  local win_x, win_y = reaper.ImGui_GetWindowPos(ctx)
+  local draw_list = ImGui.GetWindowDrawList(ctx)
+  local win_w, win_h = ImGui.GetWindowSize(ctx)
+  local win_x, win_y = ImGui.GetWindowPos(ctx)
   
   -- Calculate scaling
-  local base_width = win.height
-  local base_height = win.width
+  local base_width = win.width
+  local base_height = win.height
   local scale_x = win_w / base_width
   local scale_y = win_h / base_height
   local scale = math.min(scale_x, scale_y)
@@ -463,13 +480,42 @@ function draw(playstate)
     SetThemeColor("region_lane_bg", rec_color)
   end
   
+  -- Draw time info at top in single line (small font)
+  if (playstate == 0 or playstate == 1 or (playstate == 5 or playstate == 6) and set_via_right_click) then
+    if start_time or end_time or duration then
+      ImGui.PushFont(ctx, small_font, 15 * scale)
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xD3A056FF) -- Blue tint (RGBA)
+      
+      local time_text = ""
+      if start_time and end_time then
+        time_text = "Start: " .. start_text .. start_next_day .. "  |  End: " .. end_text .. end_next_day
+      elseif start_time and calc_end_time then
+        time_text = "Start: " .. start_text .. start_next_day .. "  |  End: " .. calc_end_time .. end_next_day
+      elseif start_time then
+        time_text = "Start: " .. start_text .. start_next_day
+      elseif end_time then
+        time_text = "End: " .. end_text .. end_next_day
+      else
+        time_text = "Duration: " .. duration_text
+      end
+      
+      local time_w, time_h = ImGui.CalcTextSize(ctx, time_text)
+      -- Centered at top with padding
+      ImGui.SetCursorPos(ctx, (win_w - time_w) / 2, 60 * scale)
+      ImGui.Text(ctx, time_text)
+      
+      ImGui.PopStyleColor(ctx)
+      ImGui.PopFont(ctx)
+    end
+  end
+  
   -- Draw take number (large font) - color changes based on playstate
-  reaper.ImGui_PushFont(ctx, large_font, 120 * scale)
+  ImGui.PushFont(ctx, large_font, 120 * scale)
   local take_str = tostring(take_text)
-  local text_w, text_h = reaper.ImGui_CalcTextSize(ctx, take_str)
+  local text_w, text_h = ImGui.CalcTextSize(ctx, take_str)
   local take_x = (win_w - text_w) / 2
   local take_y = (win_h - text_h) / 3
-  reaper.ImGui_SetCursorPos(ctx, take_x, take_y)
+  ImGui.SetCursorPos(ctx, take_x, take_y)
   
   -- Set color based on playstate
   local take_color
@@ -481,10 +527,10 @@ function draw(playstate)
     take_color = 0x7FCC7FFF -- Green for stopped/playing
   end
   
-  reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), take_color)
-  reaper.ImGui_Text(ctx, take_str)
-  reaper.ImGui_PopStyleColor(ctx)
-  reaper.ImGui_PopFont(ctx)
+  ImGui.PushStyleColor(ctx, ImGui.Col_Text, take_color)
+  ImGui.Text(ctx, take_str)
+  ImGui.PopStyleColor(ctx)
+  ImGui.PopFont(ctx)
   
   -- Draw recording indicator (must come after text measurement)
   if playstate == 5 or playstate == 6 then
@@ -495,17 +541,17 @@ function draw(playstate)
     if playstate == 6 then
       -- Pause bars (yellow) - RGBA format
       local bar_height = 50 * scale
-      reaper.ImGui_DrawList_AddRectFilled(draw_list, 
+      ImGui.DrawList_AddRectFilled(draw_list, 
         indicator_x - 20 * scale, indicator_y - bar_height / 2,
         indicator_x - 5 * scale, indicator_y + bar_height / 2,
         0xFFFF7FFF)
-      reaper.ImGui_DrawList_AddRectFilled(draw_list,
+      ImGui.DrawList_AddRectFilled(draw_list,
         indicator_x + 5 * scale, indicator_y - bar_height / 2,
         indicator_x + 20 * scale, indicator_y + bar_height / 2,
         0xFFFF7FFF)
     else
       -- Recording circle (red) - RGBA format
-      reaper.ImGui_DrawList_AddCircleFilled(draw_list,
+      ImGui.DrawList_AddCircleFilled(draw_list,
         indicator_x, indicator_y,
         20 * scale,
         0xFF7F7FFF)
@@ -513,8 +559,8 @@ function draw(playstate)
   end
   
   -- Create invisible button over take number for click detection
-  reaper.ImGui_SetCursorPos(ctx, take_x, take_y)
-  if reaper.ImGui_InvisibleButton(ctx, "take_number_btn", text_w, text_h) then
+  ImGui.SetCursorPos(ctx, take_x, take_y)
+  if ImGui.InvisibleButton(ctx, "take_number_btn", text_w, text_h) then
     laststate = nil
     local choice = MB("Recalculate take count?", "ReaClassical Take Counter", 4)
     if choice == 6 then
@@ -533,49 +579,108 @@ function draw(playstate)
   end
   
   if use_small then
-    reaper.ImGui_PushFont(ctx, small_font, 25 * scale)
+    ImGui.PushFont(ctx, small_font, 25 * scale)
   else
-    reaper.ImGui_PushFont(ctx, medium_font, 50 * scale)
+    ImGui.PushFont(ctx, medium_font, 50 * scale)
   end
-  local session_w, session_h = reaper.ImGui_CalcTextSize(ctx, display_session)
+  local session_w, session_h = ImGui.CalcTextSize(ctx, display_session)
   -- Smaller gap from take number to match original
-  reaper.ImGui_SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h + (10 * scale))
-  reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xE6CCCCFF) -- Light purple (RGBA)
-  reaper.ImGui_Text(ctx, display_session)
-  reaper.ImGui_PopStyleColor(ctx)
-  reaper.ImGui_PopFont(ctx)
+  ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h + (10 * scale))
+  ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple (RGBA)
+  ImGui.Text(ctx, display_session)
+  ImGui.PopStyleColor(ctx)
+  ImGui.PopFont(ctx)
   
-  -- Draw time info (small font) - with more padding from top and right
-  if (playstate == 0 or playstate == 1 or (playstate == 5 or playstate == 6) and set_via_right_click) then
-    if start_time or end_time or duration then
-      reaper.ImGui_PushFont(ctx, small_font, 25 * scale)
-      reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xD3A056FF) -- Blue tint (RGBA)
-      
-      local time_text = ""
-      if start_time and end_time then
-        time_text = "Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. end_text .. end_next_day
-      elseif start_time and calc_end_time then
-        time_text = "Start\n" .. start_text .. start_next_day .. "\nEnd\n" .. calc_end_time .. end_next_day
-      elseif start_time then
-        time_text = "Start\n" .. start_text .. start_next_day
-      elseif end_time then
-        time_text = "End\n" .. end_text .. end_next_day
-      else
-        time_text = "Dur.\n" .. duration_text
-      end
-      
-      local time_w, time_h = reaper.ImGui_CalcTextSize(ctx, time_text)
-      -- Increased padding from top and right edges
-      reaper.ImGui_SetCursorPos(ctx, win_w - time_w - (20 * scale), take_y)
-      reaper.ImGui_Text(ctx, time_text)
-      
-      reaper.ImGui_PopStyleColor(ctx)
-      reaper.ImGui_PopFont(ctx)
-    end
+  -- Transport control buttons below session name
+  local button_y = take_y + text_h + (10 * scale) + session_h + (20 * scale)
+  local button_width = 60 * scale
+  local button_height = 25 * scale
+  local button_spacing = 5 * scale
+  
+  -- Calculate total width of all buttons
+  local total_button_width = (button_width * 4) + (button_spacing * 3)
+  local buttons_start_x = (win_w - total_button_width) / 2
+  
+  -- Record/Stop button
+  ImGui.SetCursorPos(ctx, buttons_start_x, button_y)
+  local is_recording = (playstate == 5 or playstate == 6)
+  local rec_button_label = is_recording and "Stop" or "Rec"
+  if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
+    Main_OnCommand(F9_command, 0)
   end
+  
+  -- Pause button (only enabled during recording)
+  ImGui.SetCursorPos(ctx, buttons_start_x + button_width + button_spacing, button_y)
+  if not is_recording then
+    ImGui.BeginDisabled(ctx, true)
+  end
+  if ImGui.Button(ctx, "Pause", button_width, button_height) then
+    Main_OnCommand(1008, 0) -- Pause
+  end
+  if not is_recording then
+    ImGui.EndDisabled(ctx)
+  end
+  
+  -- Increment Take button (only enabled during recording)
+  ImGui.SetCursorPos(ctx, buttons_start_x + (button_width + button_spacing) * 2, button_y)
+  if not is_recording then
+    ImGui.BeginDisabled(ctx, true)
+  end
+  if ImGui.Button(ctx, "+Take", button_width, button_height) then
+    Main_OnCommand(increment_take_cmd, 0)
+  end
+  if not is_recording then
+    ImGui.EndDisabled(ctx)
+  end
+  
+  -- Set Next Recording Section button (only enabled when stopped)
+  ImGui.SetCursorPos(ctx, buttons_start_x + (button_width + button_spacing) * 3, button_y)
+  local is_stopped = (playstate == 0)
+  if not is_stopped then
+    ImGui.BeginDisabled(ctx, true)
+  end
+  if ImGui.Button(ctx, "Next", button_width, button_height) then
+    Main_OnCommand(next_section_cmd, 0)
+  end
+  if not is_stopped then
+    ImGui.EndDisabled(ctx)
+  end
+  
+  -- Rank and Notes section below buttons
+  local rank_y = button_y + button_height + (20 * scale)
+  
+  -- Rank dropdown
+  ImGui.SetCursorPos(ctx, buttons_start_x, rank_y)
+  ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[recording_rank].rgba)
+  ImGui.SetNextItemWidth(ctx, total_button_width / 2)
+  if ImGui.BeginCombo(ctx, "##recording_rank", RANKS[recording_rank].name) then
+    for i, rank in ipairs(RANKS) do
+      ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
+      local is_selected = (recording_rank == i)
+      if ImGui.Selectable(ctx, rank.name, is_selected) then
+        recording_rank = i
+      end
+      if is_selected then
+        ImGui.SetItemDefaultFocus(ctx)
+      end
+      ImGui.PopStyleColor(ctx)
+    end
+    ImGui.EndCombo(ctx)
+  end
+  ImGui.PopStyleColor(ctx)
+  
+  -- Notes input with proper scaling
+  local note_y = rank_y + (25 * scale)
+  ImGui.SetCursorPos(ctx, buttons_start_x, note_y)
+  local note_height = 40 * scale
+  local rv, val = ImGui.InputTextMultiline(ctx, "##recording_note", recording_note, total_button_width, note_height)
+  if rv then
+    recording_note = val
+  end
+  
   
   -- Handle right-click for settings popup (anywhere in window)
-  if reaper.ImGui_IsWindowHovered(ctx) and reaper.ImGui_IsMouseClicked(ctx, 1) then
+  if ImGui.IsWindowHovered(ctx) and ImGui.IsMouseClicked(ctx, 1) then
     -- Initialize popup values from current state when popup opens
     popup_take_text = take_text
     popup_session_text = session
@@ -584,99 +689,99 @@ function draw(playstate)
     popup_end_text = end_text
     popup_duration_text = duration_text
     popup_open = true
-    reaper.ImGui_OpenPopup(ctx, "settings_popup")
+    ImGui.OpenPopup(ctx, "settings_popup")
   end
   
   -- ImGui popup menu for settings
-  if reaper.ImGui_BeginPopup(ctx, "settings_popup") then
+  if ImGui.BeginPopup(ctx, "settings_popup") then
     marker_actions_running = false
     laststate = nil
     
-    reaper.ImGui_Text(ctx, "Take Counter Settings")
-    reaper.ImGui_Separator(ctx)
-    reaper.ImGui_Spacing(ctx)
+    ImGui.Text(ctx, "Take Counter Settings")
+    ImGui.Separator(ctx)
+    ImGui.Spacing(ctx)
     
     -- Use table for aligned layout
-    if reaper.ImGui_BeginTable(ctx, "settings_table", 2, reaper.ImGui_TableFlags_SizingStretchProp()) then
-      reaper.ImGui_TableSetupColumn(ctx, "labels", reaper.ImGui_TableColumnFlags_WidthFixed(), 230)
-      reaper.ImGui_TableSetupColumn(ctx, "inputs", reaper.ImGui_TableColumnFlags_WidthFixed(), 250)
+    if ImGui.BeginTable(ctx, "settings_table", 2, ImGui.TableFlags_SizingStretchProp) then
+      ImGui.TableSetupColumn(ctx, "labels", ImGui.TableColumnFlags_WidthFixed, 230)
+      ImGui.TableSetupColumn(ctx, "inputs", ImGui.TableColumnFlags_WidthFixed, 250)
       
       -- Override checkbox (first so we can enable/disable take number based on it)
-      reaper.ImGui_TableNextRow(ctx)
-      reaper.ImGui_TableSetColumnIndex(ctx, 0)
-      reaper.ImGui_AlignTextToFramePadding(ctx)
-      reaper.ImGui_Text(ctx, "Allow Take Number Override:")
-      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Allow Take Number Override:")
+      ImGui.TableSetColumnIndex(ctx, 1)
       local override_checked = (tonumber(popup_reset) == 1)
-      local rv, val = reaper.ImGui_Checkbox(ctx, "##override", override_checked)
+      local rv, val = ImGui.Checkbox(ctx, "##override", override_checked)
       if rv then popup_reset = val and 1 or 0 end
       
       -- Take number input (disabled unless override is enabled)
-      reaper.ImGui_TableNextRow(ctx)
-      reaper.ImGui_TableSetColumnIndex(ctx, 0)
-      reaper.ImGui_AlignTextToFramePadding(ctx)
-      reaper.ImGui_Text(ctx, "Set Take Number:")
-      reaper.ImGui_TableSetColumnIndex(ctx, 1)
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Set Take Number:")
+      ImGui.TableSetColumnIndex(ctx, 1)
       local take_disabled = (tonumber(popup_reset) ~= 1)
       if take_disabled then
-        reaper.ImGui_BeginDisabled(ctx, true)
+        ImGui.BeginDisabled(ctx, true)
       end
-      reaper.ImGui_SetNextItemWidth(ctx, -1)
-      local rv, val = reaper.ImGui_InputInt(ctx, "##take", popup_take_text)
+      ImGui.SetNextItemWidth(ctx, -1)
+      local rv, val = ImGui.InputInt(ctx, "##take", popup_take_text)
       if rv and not take_disabled then popup_take_text = val end
       if take_disabled then
-        reaper.ImGui_EndDisabled(ctx)
+        ImGui.EndDisabled(ctx)
       end
       
       -- Session name input
-      reaper.ImGui_TableNextRow(ctx)
-      reaper.ImGui_TableSetColumnIndex(ctx, 0)
-      reaper.ImGui_AlignTextToFramePadding(ctx)
-      reaper.ImGui_Text(ctx, "Session Name:")
-      reaper.ImGui_TableSetColumnIndex(ctx, 1)
-      reaper.ImGui_SetNextItemWidth(ctx, -1)
-      local rv, val = reaper.ImGui_InputText(ctx, "##session", popup_session_text, 256)
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Session Name:")
+      ImGui.TableSetColumnIndex(ctx, 1)
+      ImGui.SetNextItemWidth(ctx, -1)
+      local rv, val = ImGui.InputText(ctx, "##session", popup_session_text, 256)
       if rv then popup_session_text = val end
       
       -- Start time input
-      reaper.ImGui_TableNextRow(ctx)
-      reaper.ImGui_TableSetColumnIndex(ctx, 0)
-      reaper.ImGui_AlignTextToFramePadding(ctx)
-      reaper.ImGui_Text(ctx, "Recording Start Time (HH:MM):")
-      reaper.ImGui_TableSetColumnIndex(ctx, 1)
-      reaper.ImGui_SetNextItemWidth(ctx, 80)
-      local rv, val = reaper.ImGui_InputText(ctx, "##start", popup_start_text, 256)
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Recording Start Time (HH:MM):")
+      ImGui.TableSetColumnIndex(ctx, 1)
+      ImGui.SetNextItemWidth(ctx, 80)
+      local rv, val = ImGui.InputText(ctx, "##start", popup_start_text, 256)
       if rv then popup_start_text = val end
       
       -- End time input
-      reaper.ImGui_TableNextRow(ctx)
-      reaper.ImGui_TableSetColumnIndex(ctx, 0)
-      reaper.ImGui_AlignTextToFramePadding(ctx)
-      reaper.ImGui_Text(ctx, "Recording End Time (HH:MM):")
-      reaper.ImGui_TableSetColumnIndex(ctx, 1)
-      reaper.ImGui_SetNextItemWidth(ctx, 80)
-      local rv, val = reaper.ImGui_InputText(ctx, "##end", popup_end_text, 256)
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Recording End Time (HH:MM):")
+      ImGui.TableSetColumnIndex(ctx, 1)
+      ImGui.SetNextItemWidth(ctx, 80)
+      local rv, val = ImGui.InputText(ctx, "##end", popup_end_text, 256)
       if rv then popup_end_text = val end
       
       -- Duration input
-      reaper.ImGui_TableNextRow(ctx)
-      reaper.ImGui_TableSetColumnIndex(ctx, 0)
-      reaper.ImGui_AlignTextToFramePadding(ctx)
-      reaper.ImGui_Text(ctx, "Duration (HH:MM):")
-      reaper.ImGui_TableSetColumnIndex(ctx, 1)
-      reaper.ImGui_SetNextItemWidth(ctx, 80)
-      local rv, val = reaper.ImGui_InputText(ctx, "##duration", popup_duration_text, 256)
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Duration (HH:MM):")
+      ImGui.TableSetColumnIndex(ctx, 1)
+      ImGui.SetNextItemWidth(ctx, 80)
+      local rv, val = ImGui.InputText(ctx, "##duration", popup_duration_text, 256)
       if rv then popup_duration_text = val end
       
-      reaper.ImGui_EndTable(ctx)
+      ImGui.EndTable(ctx)
     end
     
-    reaper.ImGui_Spacing(ctx)
-    reaper.ImGui_Separator(ctx)
-    reaper.ImGui_Spacing(ctx)
+    ImGui.Spacing(ctx)
+    ImGui.Separator(ctx)
+    ImGui.Spacing(ctx)
     
     -- Apply button
-    if reaper.ImGui_Button(ctx, "Apply", 120, 0) then
+    if ImGui.Button(ctx, "Apply", 120, 0) then
       -- Copy popup values to main variables
       local session_changed = (popup_session_text ~= session)
       
@@ -770,25 +875,25 @@ function draw(playstate)
       
       set_via_right_click = true
       popup_open = false
-      reaper.ImGui_CloseCurrentPopup(ctx)
+      ImGui.CloseCurrentPopup(ctx)
     end
     
-    reaper.ImGui_SameLine(ctx)
+    ImGui.SameLine(ctx)
     
     -- Cancel button
-    if reaper.ImGui_Button(ctx, "Cancel", 120, 0) then
+    if ImGui.Button(ctx, "Cancel", 120, 0) then
       popup_open = false
-      reaper.ImGui_CloseCurrentPopup(ctx)
+      ImGui.CloseCurrentPopup(ctx)
     end
     
-    reaper.ImGui_EndPopup(ctx)
+    ImGui.EndPopup(ctx)
   else
     popup_open = false
   end
   
   UpdateTimeline()
   
-  reaper.ImGui_End(ctx)
+  ImGui.End(ctx)
 end
 
 ---------------------------------------------------------------------
@@ -865,6 +970,210 @@ function marker_actions()
     reset_marker_index(GetCursorPosition())
     check_next_marker()
   end
+end
+
+---------------------------------------------------------------------
+
+function rgba_to_native(rgba)
+  local r = (rgba >> 24) & 0xFF
+  local g = (rgba >> 16) & 0xFF
+  local b = (rgba >> 8) & 0xFF
+  return ColorToNative(r, g, b)
+end
+
+---------------------------------------------------------------------
+
+function update_take_name(item, rank)
+  local take = GetActiveTake(item)
+  if not take then return end
+
+  local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+
+  -- Remove any existing rank prefixes
+  local all_prefixes = { "Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start" }
+  for _, prefix in ipairs(all_prefixes) do
+    item_name = item_name:gsub("^" .. prefix .. "%-", "")
+    item_name = item_name:gsub("^" .. prefix .. "$", "")
+  end
+
+  -- Add new rank prefix if not "No Rank"
+  if rank ~= 9 and RANKS[rank].prefix ~= "" then
+    if item_name ~= "" then
+      item_name = RANKS[rank].prefix .. "-" .. item_name
+    else
+      item_name = RANKS[rank].prefix
+    end
+  end
+
+  GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+end
+
+---------------------------------------------------------------------
+
+function apply_rank_and_notes_to_items()
+  -- Get workflow to determine detection logic
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  
+  -- In Vertical workflow, find the folder ABOVE the currently rec-armed track
+  local target_folder = nil
+  if workflow == "Vertical" then
+    local rec_track = nil
+    local num_tracks = CountTracks(0)
+    
+    -- Find first rec-armed FOLDER track (parent with depth=1)
+    for i = 0, num_tracks - 1 do
+      local track = GetTrack(0, i)
+      local rec_armed = GetMediaTrackInfo_Value(track, "I_RECARM")
+      local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+      if rec_armed == 1 and depth == 1 then
+        rec_track = track
+        break
+      end
+    end
+    
+    if rec_track then
+      local rec_track_idx = GetMediaTrackInfo_Value(rec_track, "IP_TRACKNUMBER") - 1
+      
+      -- Build a list of all folder parent tracks in order
+      local folder_tracks = {}
+      for t = 0, num_tracks - 1 do
+        local track = GetTrack(0, t)
+        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if depth == 1 then
+          table.insert(folder_tracks, track)
+        end
+      end
+      
+      -- Find which folder in the list IS the rec-armed track
+      local current_folder_idx = nil
+      for idx, folder in ipairs(folder_tracks) do
+        local folder_idx = GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") - 1
+        
+        if folder_idx == rec_track_idx then
+          current_folder_idx = idx
+          break
+        end
+      end
+      
+      -- Get the folder ABOVE (previous in the list)
+      if current_folder_idx and current_folder_idx > 1 then
+        target_folder = folder_tracks[current_folder_idx - 1]
+      end
+    end
+  end
+  
+  -- Find all items from the last recording
+  local cursor_pos = GetCursorPosition()
+  local items_found = 0
+  
+  if workflow == "Vertical" then
+    -- In Vertical workflow, process all tracks within the target folder
+    if target_folder then
+      local num_tracks = CountTracks(0)
+      local target_folder_idx = GetMediaTrackInfo_Value(target_folder, "IP_TRACKNUMBER") - 1
+      
+      -- Find the range of tracks that belong to this folder
+      local folder_start = target_folder_idx
+      local folder_end = num_tracks
+      
+      -- Find where this folder ends (next folder or end of project)
+      for t = target_folder_idx + 1, num_tracks - 1 do
+        local track = GetTrack(0, t)
+        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if depth == 1 then
+          folder_end = t
+          break
+        end
+      end
+      
+      -- Process all tracks within this folder (including parent and children)
+      for t = folder_start, folder_end - 1 do
+        local track = GetTrack(0, t)
+        local item_count = CountTrackMediaItems(track)
+        
+        for j = 0, item_count - 1 do
+          local item = GetTrackMediaItem(track, j)
+          
+          local take = GetActiveTake(item)
+          if take then
+            local source = GetMediaItemTake_Source(take)
+            local source_type = GetMediaSourceType(source, "")
+            
+            if source_type == "WAVE" then
+              local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+              
+              -- Check if item start is near cursor
+              if math.abs(item_start - cursor_pos) < 0.5 then
+                items_found = items_found + 1
+                
+                -- Apply rank
+                if recording_rank ~= 9 then
+                  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", tostring(recording_rank), true)
+                  local color_to_use = rgba_to_native(RANKS[recording_rank].rgba) | 0x1000000
+                  SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+                  update_take_name(item, recording_rank)
+                end
+                
+                -- Apply notes
+                if recording_note ~= "" then
+                  GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
+                end
+                
+                -- Store take number
+                GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
+              end
+            end
+          end
+        end
+      end
+    end
+  else
+    -- Horizontal workflow - check all tracks
+    local track_count = CountTracks(0)
+    for i = 0, track_count - 1 do
+      local track = GetTrack(0, i)
+      local item_count = CountTrackMediaItems(track)
+      
+      for j = 0, item_count - 1 do
+        local item = GetTrackMediaItem(track, j)
+        
+        local take = GetActiveTake(item)
+        if take then
+          local source = GetMediaItemTake_Source(take)
+          local source_type = GetMediaSourceType(source, "")
+          
+          if source_type == "WAVE" then
+            local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
+            local item_end = item_start + item_length
+            
+            -- Check if item end is near cursor (items sequential)
+            if math.abs(item_end - cursor_pos) < 0.5 then
+              items_found = items_found + 1
+              
+              -- Apply rank
+              if recording_rank ~= 9 then
+                GetSetMediaItemInfo_String(item, "P_EXT:item_rank", tostring(recording_rank), true)
+                local color_to_use = rgba_to_native(RANKS[recording_rank].rgba) | 0x1000000
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+                update_take_name(item, recording_rank)
+              end
+              
+              -- Apply notes
+              if recording_note ~= "" then
+                GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
+              end
+              
+              -- Store take number
+              GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
+            end
+          end
+        end
+      end
+    end
+  end
+  
+  UpdateArrange()
 end
 
 ---------------------------------------------------------------------
