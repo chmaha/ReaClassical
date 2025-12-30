@@ -100,7 +100,7 @@ function main()
         local markers = get_sai()
 
         if #markers == 0 then
-            ImGui.Text(ctx, "No SAI markers found in project...")
+            ImGui.Text(ctx, "Left click drag to set a razor selection and press Z to convert to a marker pair...")
         else
             -- Create table
             if ImGui.BeginTable(ctx, 'MarkerTable', 7, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then

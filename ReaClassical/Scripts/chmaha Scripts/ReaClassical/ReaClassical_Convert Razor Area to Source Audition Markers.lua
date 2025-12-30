@@ -48,14 +48,11 @@ function main()
         if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
-    local first_run = false
+    -- local first_run = false
     local razor_enabled = GetToggleCommandState(42618) == 1
     if not razor_enabled then
         Main_OnCommand(42618, 0)
-        first_run = true
-        MB("Source Audition Marker mode activated.\n" ..
-            "Left click drag to set a razor selection and press Z to convert to a marker pair."
-            , "ReaClassical", 0)
+        -- first_run = true
     end
 
     Main_OnCommand(40635, 0) -- remove time selection
@@ -86,9 +83,9 @@ function main()
 
         AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SAI", -1, marker_color)
         AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SAO", -1, marker_color)
-    elseif not first_run then
-        MB("Error: Create a razor edit area before running.", "Set Source Audition Markers", 0)
-        return
+    -- elseif not first_run then
+    --     MB("Error: Create a razor edit area before running.", "Set Source Audition Markers", 0)
+    --     return
     end
     
     Main_OnCommand(40635, 0) -- remove time selection
