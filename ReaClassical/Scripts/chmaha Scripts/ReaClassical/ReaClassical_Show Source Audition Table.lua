@@ -39,8 +39,7 @@ package.path       = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui        = require 'imgui' '0.10'
 
 local ctx          = ImGui.CreateContext('Source Audition Marker Manag')
-local visible      = true
-local window_flags = ImGui.WindowFlags_None
+local window_open  = true
 
 set_action_options(2)
 
@@ -75,10 +74,13 @@ function main()
 
     -- Monitor playback for auto-stop at SAO markers
     monitor_playback()
-    ImGui.SetNextWindowSize(ctx, 750, 300, ImGui.Cond_FirstUseEver)
-    visible, open = ImGui.Begin(ctx, 'Source Audition Manager', true, window_flags)
+    
+    if window_open then
+        ImGui.SetNextWindowSize(ctx, 750, 300, ImGui.Cond_FirstUseEver)
+        local opened, open_ref = ImGui.Begin(ctx, 'Source Audition Manager', window_open)
+        window_open = open_ref
 
-    if visible then
+        if opened then
         -- Global stop button at the top
         if ImGui.Button(ctx, '■ Stop', 80, 0) then
             OnStopButton()
@@ -92,7 +94,7 @@ function main()
             delete_all_sai_sao_markers()
             local razor_enabled = GetToggleCommandState(42618) == 1
             if razor_enabled then Main_OnCommand(42618, 0) end
-            visible = false
+            window_open = false
         end
 
         ImGui.Separator(ctx)
@@ -294,9 +296,10 @@ function main()
         end
 
         ImGui.End(ctx)
+        end
     end
 
-    if open and visible then
+    if window_open then
         defer(main)
     else
         -- Window is closing, run cleanup before exit
