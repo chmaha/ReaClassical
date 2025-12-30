@@ -27,7 +27,6 @@ import Dependencies/svf_filter.jsfx-inc
 options:no_meter
 
 @init
-
 gfx_ext_retina=max(gfx_ext_retina,1);
 ext_nodenorm = 1;
 ext_noinit = 1;
