@@ -35,11 +35,11 @@ if not imgui_exists then
     return
 end
 
-package.path       = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui        = require 'imgui' '0.10'
+package.path      = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui       = require 'imgui' '0.10'
 
-local ctx          = ImGui.CreateContext('Source Audition Marker Manag')
-local window_open  = true
+local ctx         = ImGui.CreateContext('Source Audition Marker Manag')
+local window_open = true
 
 set_action_options(2)
 
@@ -74,228 +74,228 @@ function main()
 
     -- Monitor playback for auto-stop at SAO markers
     monitor_playback()
-    
+
     if window_open then
         ImGui.SetNextWindowSize(ctx, 750, 300, ImGui.Cond_FirstUseEver)
         local opened, open_ref = ImGui.Begin(ctx, 'Source Audition Manager', window_open)
         window_open = open_ref
 
         if opened then
-        -- Global stop button at the top
-        if ImGui.Button(ctx, '■ Stop', 80, 0) then
-            OnStopButton()
-            playback_monitor = false
-            current_sao_pos = nil
-        end
+            -- Global stop button at the top
+            if ImGui.Button(ctx, '■ Stop', 80, 0) then
+                OnStopButton()
+                playback_monitor = false
+                current_sao_pos = nil
+            end
 
-        -- Delete all markers and exit button
-        ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, 'Delete All Audition Pairs and Exit', 200, 0) then
-            delete_all_sai_sao_markers()
-            local razor_enabled = GetToggleCommandState(42618) == 1
-            if razor_enabled then Main_OnCommand(42618, 0) end
-            window_open = false
-        end
+            -- Delete all markers and exit button
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, 'Delete All Audition Pairs and Exit', 200, 0) then
+                delete_all_sai_sao_markers()
+                local razor_enabled = GetToggleCommandState(42618) == 1
+                if razor_enabled then Main_OnCommand(42618, 0) end
+                window_open = false
+            end
 
-        ImGui.Separator(ctx)
+            ImGui.Separator(ctx)
 
-        local markers = get_sai()
+            local markers = get_sai()
 
-        if #markers == 0 then
-            ImGui.Text(ctx, "Left click drag to set a razor selection and press Z to convert to a marker pair...")
-        else
-            -- Create table
-            if ImGui.BeginTable(ctx, 'MarkerTable', 7, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then
-                -- Setup columns
-                ImGui.TableSetupColumn(ctx, 'Audition',
-                    ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
-                ImGui.TableSetupColumn(ctx, 'Marker',
-                    ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
-                ImGui.TableSetupColumn(ctx, 'Time',
-                    ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
-                ImGui.TableSetupColumn(ctx, 'Rank',
-                    ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 120)
-                ImGui.TableSetupColumn(ctx, 'Notes', ImGui.TableColumnFlags_WidthStretch)
-                ImGui.TableSetupColumn(ctx, 'Convert',
-                    ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
-                ImGui.TableSetupColumn(ctx, 'Delete',
-                    ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 50)
-                ImGui.TableHeadersRow(ctx)
+            if #markers == 0 then
+                ImGui.Text(ctx, "Left click drag to set a razor selection and press Z to convert to a marker pair...")
+            else
+                -- Create table
+                if ImGui.BeginTable(ctx, 'MarkerTable', 7, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then
+                    -- Setup columns
+                    ImGui.TableSetupColumn(ctx, 'Audition',
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
+                    ImGui.TableSetupColumn(ctx, 'Marker',
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
+                    ImGui.TableSetupColumn(ctx, 'Time',
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
+                    ImGui.TableSetupColumn(ctx, 'Rank',
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 120)
+                    ImGui.TableSetupColumn(ctx, 'Notes', ImGui.TableColumnFlags_WidthStretch)
+                    ImGui.TableSetupColumn(ctx, 'Convert',
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
+                    ImGui.TableSetupColumn(ctx, 'Delete',
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 50)
+                    ImGui.TableHeadersRow(ctx)
 
-                -- Manually draw centered header for Audition
-                ImGui.TableSetColumnIndex(ctx, 0)
-                local avail = ImGui.GetContentRegionAvail(ctx)
-                local text = "Audition"
-                local text_width = ImGui.CalcTextSize(ctx, text)
-                ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
-                ImGui.Text(ctx, text)
+                    -- Manually draw centered header for Audition
+                    ImGui.TableSetColumnIndex(ctx, 0)
+                    local avail = ImGui.GetContentRegionAvail(ctx)
+                    local text = "Audition"
+                    local text_width = ImGui.CalcTextSize(ctx, text)
+                    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
+                    ImGui.Text(ctx, text)
 
-                -- Clickable Marker header to sort by marker number
-                ImGui.TableSetColumnIndex(ctx, 1)
-                local marker_header = "Marker" .. (sort_mode == "marker" and " ▼" or "")
-                if ImGui.Selectable(ctx, marker_header .. "##marker_sort", false) then
-                    sort_mode = "marker"
-                    save_marker_data() -- Save sort mode change
-                end
-
-                -- Clickable Time header to sort by timeline
-                ImGui.TableSetColumnIndex(ctx, 2)
-                local time_header = "Time" .. (sort_mode == "time" and " ▼" or "")
-                if ImGui.Selectable(ctx, time_header .. "##time_sort", false) then
-                    sort_mode = "time"
-                    save_marker_data() -- Save sort mode change
-                end
-
-                -- Clickable Rank header to sort by rank
-                ImGui.TableSetColumnIndex(ctx, 3)
-                local rank_header = "Rank" .. (sort_mode == "rank" and " ▼" or "")
-                if ImGui.Selectable(ctx, rank_header .. "##rank_sort", false) then
-                    sort_mode = "rank"
-                    save_marker_data() -- Save sort mode change
-                end
-
-                -- Manually draw centered header for Convert
-                ImGui.TableSetColumnIndex(ctx, 5)
-                avail = ImGui.GetContentRegionAvail(ctx)
-                text = "Convert"
-                text_width = ImGui.CalcTextSize(ctx, text)
-                ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
-                ImGui.Text(ctx, text)
-
-                -- Manually draw centered header for Delete
-                ImGui.TableSetColumnIndex(ctx, 6)
-                avail = ImGui.GetContentRegionAvail(ctx)
-                text = "Delete"
-                text_width = ImGui.CalcTextSize(ctx, text)
-                ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
-                ImGui.Text(ctx, text)
-
-                -- Display markers
-                for i, marker in ipairs(markers) do
-                    ImGui.TableNextRow(ctx)
-
-                    -- Get marker data
-                    local mdata = marker_data[marker.marker_num]
-                    if not mdata then
-                        mdata = { notes = "", color_idx = 8 }
-                        marker_data[marker.marker_num] = mdata
+                    -- Clickable Marker header to sort by marker number
+                    ImGui.TableSetColumnIndex(ctx, 1)
+                    local marker_header = "Marker" .. (sort_mode == "marker" and " ▼" or "")
+                    if ImGui.Selectable(ctx, marker_header .. "##marker_sort", false) then
+                        sort_mode = "marker"
+                        save_marker_data() -- Save sort mode change
                     end
 
-                    -- Apply row background color if not default
-                    if mdata.color_idx ~= 8 then
-                        local color = COLORS[mdata.color_idx].rgba
-                        ImGui.TableSetBgColor(ctx, ImGui.TableBgTarget_RowBg0, color)
+                    -- Clickable Time header to sort by timeline
+                    ImGui.TableSetColumnIndex(ctx, 2)
+                    local time_header = "Time" .. (sort_mode == "time" and " ▼" or "")
+                    if ImGui.Selectable(ctx, time_header .. "##time_sort", false) then
+                        sort_mode = "time"
+                        save_marker_data() -- Save sort mode change
                     end
 
-                    -- Column 1: Play button
-                    ImGui.TableNextColumn(ctx)
-                    local avail_width = ImGui.GetContentRegionAvail(ctx)
-                    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 30) * 0.5)
-                    if ImGui.Button(ctx, '▶##play' .. marker.marker_num, 30, 0) then
-                        play_from_marker(marker.pos, marker.name)
+                    -- Clickable Rank header to sort by rank
+                    ImGui.TableSetColumnIndex(ctx, 3)
+                    local rank_header = "Rank" .. (sort_mode == "rank" and " ▼" or "")
+                    if ImGui.Selectable(ctx, rank_header .. "##rank_sort", false) then
+                        sort_mode = "rank"
+                        save_marker_data() -- Save sort mode change
                     end
 
-                    -- Column 2: Marker name (clickable)
-                    ImGui.TableNextColumn(ctx)
-                    if ImGui.Selectable(ctx, marker.name .. '##sel' .. marker.marker_num, false) then
-                        move_to_marker(marker.pos)
-                    end
+                    -- Manually draw centered header for Convert
+                    ImGui.TableSetColumnIndex(ctx, 5)
+                    avail = ImGui.GetContentRegionAvail(ctx)
+                    text = "Convert"
+                    text_width = ImGui.CalcTextSize(ctx, text)
+                    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
+                    ImGui.Text(ctx, text)
 
-                    -- Column 3: Time
-                    ImGui.TableNextColumn(ctx)
-                    ImGui.Text(ctx, marker.time_str)
+                    -- Manually draw centered header for Delete
+                    ImGui.TableSetColumnIndex(ctx, 6)
+                    avail = ImGui.GetContentRegionAvail(ctx)
+                    text = "Delete"
+                    text_width = ImGui.CalcTextSize(ctx, text)
+                    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
+                    ImGui.Text(ctx, text)
 
-                    -- Column 4: Rank picker
-                    ImGui.TableNextColumn(ctx)
-                    ImGui.SetNextItemWidth(ctx, -1)
-                    if ImGui.BeginCombo(ctx, '##rank' .. marker.marker_num, COLORS[mdata.color_idx].name) then
-                        for j, col in ipairs(COLORS) do
-                            local is_selected = (mdata.color_idx == j)
-                            if ImGui.Selectable(ctx, col.name, is_selected) then
-                                mdata.color_idx = j
-                                save_marker_data() -- Save when rank changes
-                            end
-                            if is_selected then
-                                ImGui.SetItemDefaultFocus(ctx)
-                            end
-                        end
-                        ImGui.EndCombo(ctx)
-                    end
+                    -- Display markers
+                    for i, marker in ipairs(markers) do
+                        ImGui.TableNextRow(ctx)
 
-                    -- Column 5: Notes input
-                    ImGui.TableNextColumn(ctx)
-                    ImGui.SetNextItemWidth(ctx, -1)
-                    local rv_notes, new_notes = ImGui.InputText(ctx, '##notes' .. marker.marker_num, mdata.notes)
-                    if rv_notes then
-                        mdata.notes = new_notes
-                        save_marker_data() -- Save when notes change
-                    end
-
-                    -- Column 6: Convert button
-                    ImGui.TableNextColumn(ctx)
-                    local avail_width = ImGui.GetContentRegionAvail(ctx)
-                    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 40) * 0.5)
-                    if ImGui.Button(ctx, '⚡##convert' .. marker.marker_num, 40, 0) then
-                        convert_at_marker(marker.pos, marker.name)
-                    end
-
-                    -- Column 7: Delete button
-                    ImGui.TableNextColumn(ctx)
-                    local avail_width = ImGui.GetContentRegionAvail(ctx)
-                    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 30) * 0.5)
-                    if ImGui.Button(ctx, '✕##delete' .. marker.marker_num, 30, 0) then
-                        -- Delete this marker and its corresponding SAO marker
-                        Undo_BeginBlock()
-
-                        -- First, find the next SAI marker on the same track to establish upper bound
-                        local next_sai_pos = nil
-                        local sai_pattern = "^" .. marker.track_num .. ":SAI"
-                        local num_markers = CountProjectMarkers(0)
-
-                        for j = 0, num_markers - 1 do
-                            local ok, isrgn, pos, rgnend, name, _ = EnumProjectMarkers2(0, j)
-                            if ok and not isrgn and pos > marker.pos and name and name:match(sai_pattern) then
-                                next_sai_pos = pos
-                                break
-                            end
+                        -- Get marker data
+                        local mdata = marker_data[marker.marker_num]
+                        if not mdata then
+                            mdata = { notes = "", color_idx = 8 }
+                            marker_data[marker.marker_num] = mdata
                         end
 
-                        -- Now find the SAO marker AFTER this SAI but BEFORE the next SAI (if any)
-                        local sao_pattern = "^" .. marker.track_num .. ":SAO"
-                        local sao_idx = nil
+                        -- Apply row background color if not default
+                        if mdata.color_idx ~= 8 then
+                            local color = COLORS[mdata.color_idx].rgba
+                            ImGui.TableSetBgColor(ctx, ImGui.TableBgTarget_RowBg0, color)
+                        end
 
-                        for j = 0, num_markers - 1 do
-                            local ok, isrgn, pos, rgnend, name, _ = EnumProjectMarkers2(0, j)
-                            if ok and not isrgn and pos > marker.pos and name and name:match(sao_pattern) then
-                                -- Check if this SAO is before the next SAI (or there is no next SAI)
-                                if not next_sai_pos or pos < next_sai_pos then
-                                    sao_idx = j
+                        -- Column 1: Play button
+                        ImGui.TableNextColumn(ctx)
+                        local avail_width = ImGui.GetContentRegionAvail(ctx)
+                        ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 30) * 0.5)
+                        if ImGui.Button(ctx, '▶##play' .. marker.marker_num, 30, 0) then
+                            play_from_marker(marker.pos, marker.name)
+                        end
+
+                        -- Column 2: Marker name (clickable)
+                        ImGui.TableNextColumn(ctx)
+                        if ImGui.Selectable(ctx, marker.name .. '##sel' .. marker.marker_num, false) then
+                            move_to_marker(marker.pos)
+                        end
+
+                        -- Column 3: Time
+                        ImGui.TableNextColumn(ctx)
+                        ImGui.Text(ctx, marker.time_str)
+
+                        -- Column 4: Rank picker
+                        ImGui.TableNextColumn(ctx)
+                        ImGui.SetNextItemWidth(ctx, -1)
+                        if ImGui.BeginCombo(ctx, '##rank' .. marker.marker_num, COLORS[mdata.color_idx].name) then
+                            for j, col in ipairs(COLORS) do
+                                local is_selected = (mdata.color_idx == j)
+                                if ImGui.Selectable(ctx, col.name, is_selected) then
+                                    mdata.color_idx = j
+                                    save_marker_data() -- Save when rank changes
+                                end
+                                if is_selected then
+                                    ImGui.SetItemDefaultFocus(ctx)
+                                end
+                            end
+                            ImGui.EndCombo(ctx)
+                        end
+
+                        -- Column 5: Notes input
+                        ImGui.TableNextColumn(ctx)
+                        ImGui.SetNextItemWidth(ctx, -1)
+                        local rv_notes, new_notes = ImGui.InputText(ctx, '##notes' .. marker.marker_num, mdata.notes)
+                        if rv_notes then
+                            mdata.notes = new_notes
+                            save_marker_data() -- Save when notes change
+                        end
+
+                        -- Column 6: Convert button
+                        ImGui.TableNextColumn(ctx)
+                        local avail_width = ImGui.GetContentRegionAvail(ctx)
+                        ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 40) * 0.5)
+                        if ImGui.Button(ctx, '⚡##convert' .. marker.marker_num, 40, 0) then
+                            convert_at_marker(marker.pos, marker.name)
+                        end
+
+                        -- Column 7: Delete button
+                        ImGui.TableNextColumn(ctx)
+                        local avail_width = ImGui.GetContentRegionAvail(ctx)
+                        ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 30) * 0.5)
+                        if ImGui.Button(ctx, '✕##delete' .. marker.marker_num, 30, 0) then
+                            -- Delete this marker and its corresponding SAO marker
+                            Undo_BeginBlock()
+
+                            -- First, find the next SAI marker on the same track to establish upper bound
+                            local next_sai_pos = nil
+                            local sai_pattern = "^" .. marker.track_num .. ":SAI"
+                            local num_markers = CountProjectMarkers(0)
+
+                            for j = 0, num_markers - 1 do
+                                local ok, isrgn, pos, rgnend, name, _ = EnumProjectMarkers2(0, j)
+                                if ok and not isrgn and pos > marker.pos and name and name:match(sai_pattern) then
+                                    next_sai_pos = pos
                                     break
                                 end
                             end
+
+                            -- Now find the SAO marker AFTER this SAI but BEFORE the next SAI (if any)
+                            local sao_pattern = "^" .. marker.track_num .. ":SAO"
+                            local sao_idx = nil
+
+                            for j = 0, num_markers - 1 do
+                                local ok, isrgn, pos, rgnend, name, _ = EnumProjectMarkers2(0, j)
+                                if ok and not isrgn and pos > marker.pos and name and name:match(sao_pattern) then
+                                    -- Check if this SAO is before the next SAI (or there is no next SAI)
+                                    if not next_sai_pos or pos < next_sai_pos then
+                                        sao_idx = j
+                                        break
+                                    end
+                                end
+                            end
+
+                            -- Delete SAO first if found (so SAI index stays valid)
+                            if sao_idx then
+                                DeleteProjectMarkerByIndex(0, sao_idx)
+                            end
+
+                            -- Now delete the SAI marker
+                            DeleteProjectMarkerByIndex(0, marker.idx)
+
+                            -- Remove from marker_data
+                            marker_data[marker.marker_num] = nil
+
+                            Undo_EndBlock("Delete SAI/SAO marker pair", -1)
+                            UpdateArrange()
                         end
-
-                        -- Delete SAO first if found (so SAI index stays valid)
-                        if sao_idx then
-                            DeleteProjectMarkerByIndex(0, sao_idx)
-                        end
-
-                        -- Now delete the SAI marker
-                        DeleteProjectMarkerByIndex(0, marker.idx)
-
-                        -- Remove from marker_data
-                        marker_data[marker.marker_num] = nil
-
-                        Undo_EndBlock("Delete SAI/SAO marker pair", -1)
-                        UpdateArrange()
                     end
+
+                    ImGui.EndTable(ctx)
                 end
-
-                ImGui.EndTable(ctx)
             end
-        end
 
-        ImGui.End(ctx)
+            ImGui.End(ctx)
         end
     end
 
@@ -303,6 +303,8 @@ function main()
         defer(main)
     else
         -- Window is closing, run cleanup before exit
+        local razor_enabled = GetToggleCommandState(42618) == 1
+        if razor_enabled then Main_OnCommand(42618, 0) end
         clean_up_orphans()
     end
 end
