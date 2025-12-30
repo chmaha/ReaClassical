@@ -844,6 +844,15 @@ function main()
         end
 
         ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Notes") then
+            local notes = NamedCommandLookup("_RS45476b33951f282ccd1f1421a9615817226fc676")
+            Main_OnCommand(notes, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Notes")
+        end
+
+        ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Source Audition") then
             local source_audition = NamedCommandLookup("_RSde9495791cb6413268f7d42af6d0ca5b6923d282")
             Main_OnCommand(source_audition, 0)
