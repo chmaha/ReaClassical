@@ -175,8 +175,8 @@ function color_items(edits, color_pref)
             -- Skip group if any item is ranked = "y"
             local skip_group = false
             for _, item in ipairs(grouped_items) do
-                local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", false)
-                if ranked == "y" then
+                local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                if ranked ~= "" then
                     skip_group = true
                     break
                 end
@@ -262,11 +262,11 @@ function color_items(edits, color_pref)
             index_for_folder_pastel = index_for_folder_pastel + 1
             color_folder_children(track, folder_color)
 
-            -- Color items if not ranked = "y"
+            -- Color items if not ranked
             for i = 0, num_items - 1 do
                 local item = GetTrackMediaItem(track, i)
-                local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", false)
-                if ranked ~= "y" then
+                local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                if ranked == "" then
                     local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                     local color_val = folder_color
                     if src_guid ~= "" then
@@ -290,8 +290,8 @@ function color_items(edits, color_pref)
 
                 for i = 0, num_items - 1 do
                     local item = GetTrackMediaItem(track, i)
-                    local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:ranked", "", false)
-                    if ranked ~= "y" then
+                    local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                    if ranked == "" then
                         local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                         local color_val = folder_color
                         if src_guid ~= "" then
