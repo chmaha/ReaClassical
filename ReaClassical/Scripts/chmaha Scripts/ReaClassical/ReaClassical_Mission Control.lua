@@ -815,6 +815,61 @@ function main()
             ImGui.OpenPopup(ctx, "add_special_track_popup")
         end
 
+        -- Utility buttons
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "RC Prefs") then
+            local rc_prefs = NamedCommandLookup("_RS297f985b12528ad436bc2a06e940e9378bbd10c7")
+            Main_OnCommand(rc_prefs, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open ReaClassical Preferences")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "MeterBridge") then
+            local meterbridge = NamedCommandLookup("_RS811f88198ce41bd0c0ec7bb43673b94b4b1ae5b5")
+            Main_OnCommand(meterbridge, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open MeterBridge")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Record Panel") then
+            local record_panel = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
+            Main_OnCommand(record_panel, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Record Panel")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Source Audition") then
+            local source_audition = NamedCommandLookup("_RSde9495791cb6413268f7d42af6d0ca5b6923d282")
+            Main_OnCommand(source_audition, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Source Audition")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Metadata Editor") then
+            local metadata_edit = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
+            Main_OnCommand(metadata_edit, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Metadata Editor for selected album folder")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Help") then
+            local help = NamedCommandLookup("_RSf03944e159952885b66c7c1be2754e2b3c7d4b07")
+            Main_OnCommand(help, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open ReaClassical Help")
+        end
+
         -- Add special track popup
         if ImGui.BeginPopup(ctx, "add_special_track_popup") then
             ImGui.Text(ctx, "Add Special Track:")
@@ -2450,7 +2505,7 @@ function draw_folder_browser()
 
         -- Delete button (only enabled if a folder is selected and not parent and is empty)
         ImGui.SameLine(ctx)
-        
+
         -- Check if selected folder contains files
         local folder_has_files = false
         if selected_folder and selected_folder ~= ".." then
@@ -2465,22 +2520,22 @@ function draw_folder_browser()
                 file_idx = file_idx + 1
             until not file
         end
-        
+
         local should_disable = not selected_folder or selected_folder == ".." or folder_has_files
-        
+
         if should_disable then
             ImGui.BeginDisabled(ctx)
         end
-        
+
         if ImGui.Button(ctx, "Delete", 95, 0) then
             local delete_path = normalize_path(folder_browser_path) .. os_separator .. selected_folder
 
             -- Use OS command to delete
             local cmd
             if os_separator == "\\" then
-                cmd = string.format('rmdir "%s"', delete_path)  -- No /s flag - only deletes if empty
+                cmd = string.format('rmdir "%s"', delete_path) -- No /s flag - only deletes if empty
             else
-                cmd = string.format('rmdir "%s"', delete_path)  -- Only deletes if empty
+                cmd = string.format('rmdir "%s"', delete_path) -- Only deletes if empty
             end
             os.execute(cmd)
 
@@ -2488,11 +2543,11 @@ function draw_folder_browser()
             folder_browser_dirs = get_directories(folder_browser_path)
             selected_folder = nil
         end
-        
+
         if should_disable then
             ImGui.EndDisabled(ctx)
         end
-        
+
         if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
             if folder_has_files then
                 ImGui.SetTooltip(ctx, "Can't delete: folder contains files")
