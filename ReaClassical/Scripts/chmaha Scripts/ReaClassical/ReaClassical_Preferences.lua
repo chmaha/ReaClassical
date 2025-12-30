@@ -26,6 +26,16 @@ local main, display_prefs, load_prefs, save_prefs, pref_check
 local sync_based_on_workflow, move_destination_folder_to_top
 local prepare_takes
 
+-- Check for ReaImGui
+local imgui_exists = APIExists("ImGui_GetVersion")
+if not imgui_exists then
+    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
+package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui = require 'imgui' '0.10'
+
 local year = os.date("%Y")
 local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
@@ -45,6 +55,17 @@ local labels = {
     'Find takes using item names'
 }
 
+-- Binary option indices (1-based)
+local binary_options = {5, 7, 8, 12, 13}
+
+-- ImGui Context
+local ctx = ImGui.CreateContext('ReaClassical Preferences')
+local visible = true
+local open = true
+local apply_clicked = false
+local prefs = {}
+local error_message = "" -- Store validation error message
+
 ---------------------------------------------------------------------
 
 function main()
@@ -53,40 +74,172 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    local pass, input, corrected_input, orig_floating, new_floating, orig_color, new_color
-    repeat
-        local ret
-        ret, input, orig_floating, orig_color = display_prefs()
-        if not ret then return end
-        if ret then pass, corrected_input, new_floating, new_color = pref_check(input) end
-    until pass
-    save_prefs(corrected_input)
-    if new_floating ~= orig_floating and new_floating == 0 then
-        move_destination_folder_to_top()
-        sync_based_on_workflow(workflow)
-    elseif new_floating ~= orig_floating and new_floating == 1 then
-        MB("When the floating destination folder is active, " ..
-            "DEST-IN and DEST-OUT markers are always associated with the \"D:\" folder.", "ReaClassical", 0)
+    
+    if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
+        return
     end
-    if new_color ~= orig_color then
-        prepare_takes()
+    
+    -- Load preferences into table on first run
+    if not prefs[1] then
+        load_prefs()
+    end
+    
+    -- Run ImGui display
+    display_prefs()
+    
+    if apply_clicked then
+        -- Validate and save
+        local pass, corrected_prefs, new_floating, new_color, error_msg = pref_check()
+        
+        if pass then
+            -- Get original saved values before applying changes
+            local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
+            local saved_entries = {}
+            if saved ~= "" then
+                for entry in saved:gmatch('([^,]+)') do
+                    saved_entries[#saved_entries + 1] = entry
+                end
+            end
+            local orig_floating = tonumber(saved_entries[12]) or 0
+            local orig_color = tonumber(saved_entries[5]) or 0
+            
+            save_prefs(corrected_prefs)
+            
+            if new_floating ~= orig_floating and new_floating == 0 then
+                move_destination_folder_to_top()
+                sync_based_on_workflow(workflow)
+            elseif new_floating ~= orig_floating and new_floating == 1 then
+                MB("When the floating destination folder is active, " ..
+                    "DEST-IN and DEST-OUT markers are always associated with the \"D:\" folder.", "ReaClassical", 0)
+            end
+            if new_color ~= orig_color then
+                prepare_takes()
+            end
+            open = false -- Close window on success
+            return -- Exit after applying
+        else
+            -- Validation failed, revert to last saved values and show error
+            error_message = error_msg or "Invalid input detected."
+            load_prefs() -- Reload the last valid values
+            apply_clicked = false
+            -- Window stays open
+        end
+    end
+    
+    if open and visible then
+        defer(main)
     end
 end
 
 -----------------------------------------------------------------------
 
 function display_prefs()
-    local saved, saved_12, saved_5 = load_prefs()
-    local input_labels = table.concat(labels, ',')
-    local ret, input = GetUserInputs('ReaClassical Project Preferences', NUM_OF_ENTRIES, input_labels, saved)
-    return ret, input, tonumber(saved_12), tonumber(saved_5)
+    -- Auto-resize window to fit content
+    local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_AlwaysAutoResize
+    
+    visible, open = ImGui.Begin(ctx, 'ReaClassical Project Preferences', true, window_flags)
+    
+    if not visible then
+        ImGui.End(ctx)
+        return
+    end
+    
+    -- Create table for aligned layout
+    if ImGui.BeginTable(ctx, "prefs_table", 2, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then
+        ImGui.TableSetupColumn(ctx, "labels", ImGui.TableColumnFlags_WidthFixed, 280)
+        ImGui.TableSetupColumn(ctx, "inputs", ImGui.TableColumnFlags_WidthFixed, 80)
+        
+        for i = 1, #labels do
+            ImGui.TableNextRow(ctx)
+            ImGui.TableSetColumnIndex(ctx, 0)
+            ImGui.AlignTextToFramePadding(ctx)
+            ImGui.Text(ctx, labels[i] .. ":")
+            ImGui.TableSetColumnIndex(ctx, 1)
+            
+            -- Ensure prefs[i] exists
+            if not prefs[i] then
+                prefs[i] = 0
+            end
+            
+            -- Check if this is a binary option (checkbox)
+            local is_binary = false
+            for _, idx in ipairs(binary_options) do
+                if idx == i then
+                    is_binary = true
+                    break
+                end
+            end
+            
+            if is_binary then
+                -- Checkbox for binary options
+                local checked = (tonumber(prefs[i]) == 1)
+                local rv, val = ImGui.Checkbox(ctx, "##pref" .. i, checked)
+                if rv then
+                    prefs[i] = val and 1 or 0
+                end
+            elseif i == 11 then
+                -- CUE audio format - dropdown
+                ImGui.SetNextItemWidth(ctx, 80)
+                if ImGui.BeginCombo(ctx, "##pref" .. i, tostring(prefs[i])) then
+                    local formats = {"WAV", "FLAC", "AIFF", "MP3"}
+                    for _, format in ipairs(formats) do
+                        local is_selected = (prefs[i] == format)
+                        if ImGui.Selectable(ctx, format, is_selected) then
+                            prefs[i] = format
+                        end
+                        if is_selected then
+                            ImGui.SetItemDefaultFocus(ctx)
+                        end
+                    end
+                    ImGui.EndCombo(ctx)
+                end
+            else
+                -- Numeric input using InputText (no +/- buttons)
+                ImGui.SetNextItemWidth(ctx, 60)
+                local rv, val = ImGui.InputText(ctx, "##pref" .. i, tostring(prefs[i]))
+                if rv then
+                    -- Store the value as-is, validation happens on Apply
+                    prefs[i] = val
+                end
+            end
+        end
+        
+        ImGui.EndTable(ctx)
+    end
+    
+    ImGui.Spacing(ctx)
+    ImGui.Separator(ctx)
+    ImGui.Spacing(ctx)
+    
+    -- Display error message if validation failed
+    if error_message ~= "" then
+        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFF3333FF) -- Red text (RGBA)
+        ImGui.TextWrapped(ctx, error_message)
+        ImGui.PopStyleColor(ctx)
+        ImGui.Spacing(ctx)
+    end
+    
+    -- Buttons
+    if ImGui.Button(ctx, "Apply", 120, 0) then
+        error_message = "" -- Clear any previous error
+        apply_clicked = true
+        -- Don't set open = false here, let validation decide
+    end
+    
+    ImGui.SameLine(ctx)
+    
+    if ImGui.Button(ctx, "Cancel", 120, 0) then
+        open = false
+    end
+    
+    ImGui.End(ctx)
 end
 
 -----------------------------------------------------------------------
 
 function load_prefs()
     local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
-    if saved == "" then return default_values end
+    if saved == "" then saved = default_values end
 
     local saved_entries = {}
 
@@ -94,7 +247,7 @@ function load_prefs()
         saved_entries[#saved_entries + 1] = entry
     end
 
-    if #saved_entries < NUM_OF_ENTRIES then
+    if #saved_entries < #labels then
         local i = 1
         for entry in default_values:gmatch("([^,]+)") do
             if i == #saved_entries + 1 then
@@ -102,47 +255,81 @@ function load_prefs()
             end
             i = i + 1
         end
-    elseif #saved_entries > NUM_OF_ENTRIES then
+    elseif #saved_entries > #labels then
         local j = 1
         for entry in default_values:gmatch("([^,]+)") do
             saved_entries[j] = entry
             j = j + 1
         end
     end
-
-    saved = table.concat(saved_entries, ',')
-
-    return saved, saved_entries[12], saved_entries[5]
+    
+    -- Load into prefs table
+    for i = 1, #labels do
+        if i == 11 then
+            prefs[i] = saved_entries[i] or "WAV"
+        else
+            prefs[i] = tonumber(saved_entries[i]) or 0
+        end
+    end
 end
 
 -----------------------------------------------------------------------
 
-function save_prefs(input)
+function save_prefs(corrected_prefs)
+    -- Convert table back to comma-separated string
+    local values = {}
+    for i = 1, #labels do
+        values[i] = tostring(corrected_prefs[i])
+    end
+    local input = table.concat(values, ',')
     SetProjExtState(0, "ReaClassical", "Preferences", input)
 end
 
 -----------------------------------------------------------------------
 
-function pref_check(input)
+function pref_check()
     local pass = true
     local t = {}
     local invalid_msg = ""
-    local i = 0
 
-    -- Parse input
-    for entry in input:gmatch("([^,]*)") do
-        i = i + 1
-        t[i] = entry
-        if entry == "" or (i ~= 11 and (tonumber(entry) == nil or tonumber(entry) < 0)) then
-            pass = false
-            invalid_msg = "Entries should not be strings or left empty."
+    -- Copy prefs to t
+    for i = 1, #labels do
+        t[i] = prefs[i]
+    end
+
+    -- Validate entries
+    for i = 1, #labels do
+        if i == 11 then
+            -- Audio format - string validation
+            t[i] = tostring(t[i]):upper()
+        else
+            -- Numeric validation
+            local num = tonumber(t[i])
+            if num == nil then
+                pass = false
+                invalid_msg = "Numeric entries must be valid numbers.\n"
+                break
+            elseif num < 0 then
+                pass = false
+                invalid_msg = "Numeric entries should not be negative.\n"
+                break
+            elseif i == 3 and num < 1 then
+                pass = false
+                invalid_msg = "INDEX0 length must be greater than or equal to 1.\n"
+                break
+            elseif i ~= 9 and num ~= math.floor(num) then
+                -- All fields except #9 (Alt Audition Playback Rate) must be integers
+                pass = false
+                invalid_msg = "Numeric entries (except Alt Audition Rate) must be integers.\n"
+                break
+            end
         end
     end
 
     local binary_error_msg = ""
     local ext_error_msg = ""
 
-    if #t == NUM_OF_ENTRIES then
+    if pass then
         local num_5  = tonumber(t[5])
         local num_7  = tonumber(t[7])
         local num_8  = tonumber(t[8])
@@ -177,17 +364,9 @@ function pref_check(input)
 
     local error_msg = binary_error_msg .. invalid_msg .. ext_error_msg
 
-    if not pass then
-        MB(error_msg, "Error", 0)
-    end
-
-    -- rebuild corrected input string
-    local corrected_input = table.concat(t, ",")
-
-    -- must return corrected input
-    return pass, corrected_input, tonumber(t[12]), tonumber(t[5])
+    -- Return error message instead of showing MB dialog
+    return pass, t, tonumber(t[12]), tonumber(t[5]), error_msg
 end
-
 
 -----------------------------------------------------------------------
 
