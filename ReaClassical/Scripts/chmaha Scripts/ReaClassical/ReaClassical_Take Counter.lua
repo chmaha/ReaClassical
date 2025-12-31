@@ -24,6 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
+local get_item_color, pastel_color, get_color_table
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -75,8 +76,8 @@ local ImGui         = require 'imgui' '0.10'
 
 -- Default window settings
 local win = {
-  width = 350,
-  height = 480,
+  width = 300,
+  height = 350,
   xpos = nil,
   ypos = nil
 }
@@ -126,6 +127,10 @@ local popup_duration_text = nil
 -- Recording rank and notes
 local recording_rank = 9 -- Default to "No Rank"
 local recording_note = ""
+
+-- Track the item being edited when stopped
+local editing_item = nil
+local last_selected_item = nil
 
 -- Rank color options (matching SAI marker manager and notes app)
 local RANKS = {
@@ -187,7 +192,39 @@ function main()
       -- Reset rank and notes for next recording
       recording_rank = 9
       recording_note = ""
+      editing_item = nil
     end
+    
+    -- When stopped, check for selected item changes
+    if playstate == 0 then
+      local selected_item = GetSelectedMediaItem(0, 0)
+      
+      -- Validate that editing_item still exists
+      if editing_item and not ValidatePtr2(0, editing_item, "MediaItem*") then
+        editing_item = nil
+      end
+      
+      -- If selection changed, save previous and load new
+      if selected_item ~= last_selected_item then
+        -- Save changes to previously edited item
+        if editing_item and editing_item ~= selected_item then
+          save_item_rank_and_notes(editing_item, recording_rank, recording_note)
+        end
+        
+        -- Load new item's data
+        if selected_item then
+          load_item_rank_and_notes(selected_item)
+          editing_item = selected_item
+        else
+          recording_rank = 9
+          recording_note = ""
+          editing_item = nil
+        end
+        
+        last_selected_item = selected_item
+      end
+    end
+    
     if not iterated_filenames then
       take_text = get_take_count(session) + 1
     else
@@ -268,6 +305,78 @@ end
 
 ---------------------------------------------------------------------
 
+function load_item_rank_and_notes(item)
+  if not item then
+    recording_rank = 9
+    recording_note = ""
+    return
+  end
+  
+  local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+  recording_rank = tonumber(rank_str) or 9
+  
+  local _, note = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
+  recording_note = note
+end
+
+---------------------------------------------------------------------
+
+function save_item_rank_and_notes(item, rank, note)
+  if not item then return end
+  
+  -- Save rank
+  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", tostring(rank), true)
+  
+  -- Apply color based on rank
+  local color_to_use
+  if rank ~= 9 then
+    -- Apply rank color
+    color_to_use = rgba_to_native(RANKS[rank].rgba) | 0x1000000
+  else
+    -- No rank - restore original color
+    color_to_use = get_item_color(item)
+  end
+  
+  SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+  update_take_name(item, rank)
+  
+  -- Save notes
+  GetSetMediaItemInfo_String(item, "P_NOTES", note, true)
+  
+  -- Apply to group if item is grouped
+  local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+  if group_id ~= 0 then
+    local track_count = CountTracks(0)
+    for i = 0, track_count - 1 do
+      local track = GetTrack(0, i)
+      local item_count = CountTrackMediaItems(track)
+      for j = 0, item_count - 1 do
+        local current_item = GetTrackMediaItem(track, j)
+        local current_group_id = GetMediaItemInfo_Value(current_item, "I_GROUPID")
+        if current_group_id == group_id and current_item ~= item then
+          GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", tostring(rank), true)
+          GetSetMediaItemInfo_String(current_item, "P_NOTES", note, true)
+          
+          -- Apply color to grouped items too
+          local grouped_color
+          if rank ~= 9 then
+            grouped_color = rgba_to_native(RANKS[rank].rgba) | 0x1000000
+          else
+            -- No rank - restore original color for each grouped item
+            grouped_color = get_item_color(current_item)
+          end
+          SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", grouped_color)
+          update_take_name(current_item, rank)
+        end
+      end
+    end
+  end
+  
+  UpdateArrange()
+end
+
+---------------------------------------------------------------------
+
 function get_take_count(session_name)
   take_count = 0
 
@@ -299,6 +408,11 @@ end
 ---------------------------------------------------------------------
 
 function clean_up()
+  -- Save any pending changes to currently edited item
+  if editing_item and ValidatePtr2(0, editing_item, "MediaItem*") then
+    save_item_rank_and_notes(editing_item, recording_rank, recording_note)
+  end
+  
   Main_OnCommand(24800, 0) -- clear any section override
   SetToggleCommandState(1, take_counter, 0)
   
@@ -431,7 +545,7 @@ function draw(playstate)
   ImGui.SetNextWindowSize(ctx, win.width, win.height, ImGui.Cond_Appearing)
   
   -- Set minimum and maximum size constraints
-  ImGui.SetNextWindowSizeConstraints(ctx, win.width, win.height, 3000, 1750)
+  ImGui.SetNextWindowSizeConstraints(ctx, win.width, win.height, 3000, 3500)
   
   local visible, should_close = ImGui.Begin(ctx, 'Record Panel', true, 
     ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoScrollWithMouse)
@@ -501,7 +615,7 @@ function draw(playstate)
       
       local time_w, time_h = ImGui.CalcTextSize(ctx, time_text)
       -- Centered at top with padding
-      ImGui.SetCursorPos(ctx, (win_w - time_w) / 2, 60 * scale)
+      ImGui.SetCursorPos(ctx, (win_w - time_w) / 2, 45 * scale)
       ImGui.Text(ctx, time_text)
       
       ImGui.PopStyleColor(ctx)
@@ -510,11 +624,11 @@ function draw(playstate)
   end
   
   -- Draw take number (large font) - color changes based on playstate
-  ImGui.PushFont(ctx, large_font, 120 * scale)
+  ImGui.PushFont(ctx, large_font, 90 * scale)
   local take_str = tostring(take_text)
   local text_w, text_h = ImGui.CalcTextSize(ctx, take_str)
   local take_x = (win_w - text_w) / 2
-  local take_y = (win_h - text_h) / 3
+  local take_y = (win_h - text_h) / 3.75
   ImGui.SetCursorPos(ctx, take_x, take_y)
   
   -- Set color based on playstate
@@ -579,20 +693,20 @@ function draw(playstate)
   end
   
   if use_small then
-    ImGui.PushFont(ctx, small_font, 25 * scale)
+    ImGui.PushFont(ctx, small_font, 12 * scale)
   else
-    ImGui.PushFont(ctx, medium_font, 50 * scale)
+    ImGui.PushFont(ctx, medium_font, 25 * scale)
   end
   local session_w, session_h = ImGui.CalcTextSize(ctx, display_session)
   -- Smaller gap from take number to match original
-  ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h + (10 * scale))
+  ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h)
   ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple (RGBA)
   ImGui.Text(ctx, display_session)
   ImGui.PopStyleColor(ctx)
   ImGui.PopFont(ctx)
   
   -- Transport control buttons below session name
-  local button_y = take_y + text_h + (10 * scale) + session_h + (20 * scale)
+  local button_y = take_y + text_h + (10 * scale) + session_h + (5 * scale)
   local button_width = 60 * scale
   local button_height = 25 * scale
   local button_spacing = 5 * scale
@@ -649,16 +763,31 @@ function draw(playstate)
   -- Rank and Notes section below buttons
   local rank_y = button_y + button_height + (20 * scale)
   
+  -- Show indicator when editing a selected item (stopped mode only)
+  if playstate == 0 and editing_item then
+    ImGui.SetCursorPos(ctx, buttons_start_x, rank_y - (18 * scale))
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00FF00FF) -- Green
+    ImGui.Text(ctx, "Editing Selected Item")
+    ImGui.PopStyleColor(ctx)
+  end
+  
   -- Rank dropdown
   ImGui.SetCursorPos(ctx, buttons_start_x, rank_y)
   ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[recording_rank].rgba)
   ImGui.SetNextItemWidth(ctx, total_button_width / 2)
-  if ImGui.BeginCombo(ctx, "##recording_rank", RANKS[recording_rank].name) then
+  
+  -- Create unique ID based on editing state
+  local rank_id = editing_item and tostring(editing_item):sub(-8) or "recording"
+  if ImGui.BeginCombo(ctx, "##rank_" .. rank_id, RANKS[recording_rank].name) then
     for i, rank in ipairs(RANKS) do
       ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
       local is_selected = (recording_rank == i)
       if ImGui.Selectable(ctx, rank.name, is_selected) then
         recording_rank = i
+        -- If stopped and editing an item, save immediately
+        if playstate == 0 and editing_item then
+          save_item_rank_and_notes(editing_item, recording_rank, recording_note)
+        end
       end
       if is_selected then
         ImGui.SetItemDefaultFocus(ctx)
@@ -673,9 +802,16 @@ function draw(playstate)
   local note_y = rank_y + (25 * scale)
   ImGui.SetCursorPos(ctx, buttons_start_x, note_y)
   local note_height = 40 * scale
-  local rv, val = ImGui.InputTextMultiline(ctx, "##recording_note", recording_note, total_button_width, note_height)
+  
+  -- Create unique ID based on editing state
+  local note_id = editing_item and tostring(editing_item):sub(-8) or "recording"
+  local rv, val = ImGui.InputTextMultiline(ctx, "##note_" .. note_id, recording_note, total_button_width, note_height)
   if rv then
     recording_note = val
+    -- If stopped and editing an item, save immediately
+    if playstate == 0 and editing_item then
+      save_item_rank_and_notes(editing_item, recording_rank, recording_note)
+    end
   end
   
   
@@ -979,6 +1115,141 @@ function rgba_to_native(rgba)
   local g = (rgba >> 16) & 0xFF
   local b = (rgba >> 8) & 0xFF
   return ColorToNative(r, g, b)
+end
+
+---------------------------------------------------------------------
+
+---------------------------------------------------------------------
+
+function get_color_table()
+  local resource_path = GetResourcePath()
+  local pathseparator = package.config:sub(1, 1)
+  local relative_path = table.concat({ "", "Scripts", "chmaha Scripts", "ReaClassical", "" }, pathseparator)
+  package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+  return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function pastel_color(index)
+  local golden_ratio_conjugate = 0.61803398875
+  local hue                    = (index * golden_ratio_conjugate) % 1.0
+
+  -- Subtle variation in saturation/lightness
+  local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
+  local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
+
+  local function h2rgb(p, q, t)
+    if t < 0 then t = t + 1 end
+    if t > 1 then t = t - 1 end
+    if t < 1 / 6 then return p + (q - p) * 6 * t end
+    if t < 1 / 2 then return q end
+    if t < 2 / 3 then return p + (q - p) * (2 / 3 - t) * 6 end
+    return p
+  end
+
+  local q = lightness < 0.5 and (lightness * (1 + saturation))
+    or (lightness + saturation - lightness * saturation)
+  local p = 2 * lightness - q
+
+  local r = h2rgb(p, q, hue + 1 / 3)
+  local g = h2rgb(p, q, hue)
+  local b = h2rgb(p, q, hue - 1 / 3)
+
+  local color_int = ColorToNative(
+    math.floor(r * 255 + 0.5),
+    math.floor(g * 255 + 0.5),
+    math.floor(b * 255 + 0.5)
+  )
+
+  return color_int | 0x1000000
+end
+
+---------------------------------------------------------------------
+
+function get_item_color(item)
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  local colors = get_color_table()
+
+  -- Determine color to use
+  local color_to_use = nil
+  local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+
+  -- Check GUID first
+  if saved_guid ~= "" then
+    local referenced_item = nil
+    local total_items = CountMediaItems(0)
+    for i = 0, total_items - 1 do
+      local test_item = GetMediaItem(0, i)
+      local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
+      if test_guid == saved_guid then
+        referenced_item = test_item
+        break
+      end
+    end
+
+    if referenced_item then
+      color_to_use = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
+    end
+  end
+
+  if workflow == "Horizontal" then
+    local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
+    if saved_color ~= "" then
+      color_to_use = tonumber(saved_color)
+    else
+      color_to_use = colors.dest_items
+    end
+    -- If no GUID color, use folder-based logic
+  elseif not color_to_use then
+    local item_track = GetMediaItemTrack(item)
+    local folder_tracks = {}
+    local num_tracks = CountTracks(0)
+
+    -- Build list of folder tracks in project order
+    for t = 0, num_tracks - 1 do
+      local track = GetTrack(0, t)
+      local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+      if depth > 0 then
+        table.insert(folder_tracks, track)
+      end
+    end
+
+    -- Find parent folder track of the item
+    local parent_folder = nil
+    local track_idx = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
+    for t = track_idx, 0, -1 do
+      local track = GetTrack(0, t)
+      local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+      if depth > 0 then
+        parent_folder = track
+        break
+      end
+    end
+
+    -- Compute pastel index: second folder → index 0
+    local folder_index = 0
+
+    if parent_folder then
+      for i, track in ipairs(folder_tracks) do
+        if track == parent_folder then
+          folder_index = i - 2 -- account for dest
+          break
+        end
+      end
+      -- First folder special case
+      if folder_index < 0 then
+        color_to_use = colors.dest_items -- use default color for first folder
+      else
+        color_to_use = pastel_color(folder_index)
+      end
+    else
+      -- No folder: fallback to dest_items
+      color_to_use = colors.dest_items
+    end
+  end
+
+  return color_to_use
 end
 
 ---------------------------------------------------------------------
