@@ -62,7 +62,8 @@ function main()
         local creation_date = os.date("%Y-%m-%d %H:%M:%S", os.time())
         SetProjExtState(0, "ReaClassical", "CreationDate", creation_date)
         SetProjExtState(0, "ReaClassical", "Workflow", "")
-        local num = get_whole_number_input()
+        local _, track_count_str = GetProjExtState(0, "ReaClassical", "TrackCount")
+        local num = tonumber(track_count_str)
         if not num then return end
         local rcmaster
         if num >= 2 then
@@ -82,8 +83,8 @@ function main()
             Main_OnCommand(mission_control,0)
             set_recording_to_primary_and_secondary(mixer_track_table)
         end
+        SetProjExtState(0, "ReaClassical", "TrackCount", "")
     elseif folder_check() > 1 then
-        MB("This function only runs on projects with a single folder", "Horizontal Workflow", 0)
         return
     elseif folder_check() == 1 then
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")

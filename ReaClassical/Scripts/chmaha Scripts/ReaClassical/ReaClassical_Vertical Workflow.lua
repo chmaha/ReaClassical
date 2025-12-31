@@ -66,7 +66,8 @@ function main()
         local creation_date = os.date("%Y-%m-%d %H:%M:%S", os.time())
         SetProjExtState(0, "ReaClassical", "CreationDate", creation_date)
         SetProjExtState(0, "ReaClassical", "Workflow", "")
-        local num = get_whole_number_input()
+        local _, track_count_str = GetProjExtState(0, "ReaClassical", "TrackCount")
+        local num = tonumber(track_count_str)
         if not num then return end
         local rcmaster
         if num >= 2 then
@@ -90,9 +91,10 @@ function main()
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
             copy_track_names(table, mixer_table)
             local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
-            Main_OnCommand(mission_control,0)
+            Main_OnCommand(mission_control, 0)
             set_recording_to_primary_and_secondary(end_of_sources)
         end
+        SetProjExtState(0, "ReaClassical", "TrackCount", "")
     elseif folder_check() > 1 then
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
         if RCProject ~= "y" then
