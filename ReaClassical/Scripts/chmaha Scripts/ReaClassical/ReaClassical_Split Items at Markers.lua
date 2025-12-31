@@ -88,16 +88,37 @@ function split_items_at_markers()
     local parent_track = get_folder_parent_track(selected_track)
     local parent_track_index = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER")
 
+    -- Get the original item bounds and name for subtake numbering
+    local original_take = GetActiveTake(first_selected_item)
+    local original_item_name = ""
+    if original_take then
+        original_item_name = GetTakeName(original_take)
+    end
+    local original_item_start = GetMediaItemInfo_Value(first_selected_item, "D_POSITION")
+    local original_item_length = GetMediaItemInfo_Value(first_selected_item, "D_LENGTH")
+    local original_item_end = original_item_start + original_item_length
+
     -- Collect all regular (non-region) markers and their names
     local marker_data = {}
     local _, num_markers, _ = CountProjectMarkers(0)
+    local has_named_markers = false
+    
     for i = 0, num_markers - 1 do
         local retval, isrgn, pos, _, name, markrgnindex = EnumProjectMarkers(i)
         if retval and not isrgn then
+            if name ~= "" then
+                has_named_markers = true
+            end
             local label = name ~= "" and name or ("Marker " .. tostring(markrgnindex))
-            table.insert(marker_data, {pos = pos, name = label})
+            table.insert(marker_data, {pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex})
         end
     end
+
+    -- Sort markers by position
+    table.sort(marker_data, function(a, b) return a.pos < b.pos end)
+
+    -- Store markers to delete (those within original bounds)
+    local markers_to_delete = {}
 
     for _, marker in ipairs(marker_data) do
         SetEditCurPos(marker.pos, false, false)
@@ -116,25 +137,33 @@ function split_items_at_markers()
                 local item_end = item_pos + item_len
 
                 if marker.pos > item_pos and marker.pos < item_end then
+                    -- Mark this marker for deletion if it's within original bounds
+                    if marker.pos > original_item_start and marker.pos < original_item_end then
+                        table.insert(markers_to_delete, marker.marker_index)
+                    end
+
                     SetMediaItemSelected(item, true)
                     Main_OnCommand(40034, 0) -- Select all items in group
                     Main_OnCommand(40012, 0) -- Split at edit cursor
 
                     clear_item_names_from_selected()
 
-                    local new_item_count = CountMediaItems(0)
-                    for j = 0, new_item_count - 1 do
-                        local new_item = GetMediaItem(0, j)
-                        local new_track = GetMediaItemTrack(new_item)
-                        local new_item_parent_track = get_folder_parent_track(new_track)
-                        local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track, "IP_TRACKNUMBER")
-                        local new_item_pos = GetMediaItemInfo_Value(new_item, "D_POSITION")
+                    -- If using named markers, name the item starting at this marker
+                    if has_named_markers then
+                        local new_item_count = CountMediaItems(0)
+                        for j = 0, new_item_count - 1 do
+                            local new_item = GetMediaItem(0, j)
+                            local new_track = GetMediaItemTrack(new_item)
+                            local new_item_parent_track = get_folder_parent_track(new_track)
+                            local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track, "IP_TRACKNUMBER")
+                            local new_item_pos = GetMediaItemInfo_Value(new_item, "D_POSITION")
 
-                        if new_parent_track_index == parent_track_index and math.abs(new_item_pos - marker.pos) < 0.0001 then
-                            local take = GetActiveTake(new_item)
-                            if take then
-                                GetSetMediaItemTakeInfo_String(take, "P_NAME", marker.name, true)
-                                break
+                            if new_parent_track_index == parent_track_index and math.abs(new_item_pos - marker.pos) < 0.0001 then
+                                local take = GetActiveTake(new_item)
+                                if take then
+                                    GetSetMediaItemTakeInfo_String(take, "P_NAME", marker.name, true)
+                                    break
+                                end
                             end
                         end
                     end
@@ -144,6 +173,83 @@ function split_items_at_markers()
             end
         end
     end
+
+    -- If using subtake numbering, name only the items within original bounds
+    if not has_named_markers then
+        -- Collect all unique group IDs within the original item bounds
+        local group_positions = {}
+        local item_count = CountMediaItems(0)
+        
+        for i = 0, item_count - 1 do
+            local item = GetMediaItem(0, i)
+            local track = GetMediaItemTrack(item)
+            local track_index = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+            local item_parent_track = get_folder_parent_track(track)
+            local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
+            
+            -- Only look at parent track items within original bounds
+            if item_parent_track_index == parent_track_index and track_index == parent_track_index then
+                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                local item_end = item_pos + item_len
+                
+                -- Check if item overlaps with original bounds
+                if item_pos >= original_item_start - 0.0001 and item_pos < original_item_end + 0.0001 then
+                    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+                    if group_id > 0 then
+                        if not group_positions[group_id] then
+                            group_positions[group_id] = item_pos
+                        end
+                    end
+                end
+            end
+        end
+        
+        -- Sort groups by their position
+        local sorted_groups = {}
+        for group_id, pos in pairs(group_positions) do
+            table.insert(sorted_groups, {group_id = group_id, pos = pos})
+        end
+        table.sort(sorted_groups, function(a, b) return a.pos < b.pos end)
+        
+        -- Create mapping from group_id to suffix number
+        local group_to_suffix = {}
+        for idx, group_data in ipairs(sorted_groups) do
+            group_to_suffix[group_data.group_id] = string.format("%02d", idx)
+        end
+        
+        -- Now apply suffixes to items with these group IDs
+        for i = 0, item_count - 1 do
+            local item = GetMediaItem(0, i)
+            local track = GetMediaItemTrack(item)
+            local item_parent_track = get_folder_parent_track(track)
+            local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
+            
+            if item_parent_track_index == parent_track_index then
+                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+                
+                if group_id > 0 and group_to_suffix[group_id] then
+                    local take = GetActiveTake(item)
+                    if take then
+                        local take_name = GetTakeName(take)
+                        -- Use existing name if present, otherwise use original name
+                        local base_name = (take_name ~= "" and take_name) or original_item_name
+                        local subtake_name = base_name .. "-" .. group_to_suffix[group_id]
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", subtake_name, true)
+                    end
+                end
+            end
+        end
+    end
+
+    -- Delete markers within original bounds (in reverse order to maintain indices)
+    table.sort(markers_to_delete, function(a, b) return a > b end)
+    for _, marker_idx in ipairs(markers_to_delete) do
+        DeleteProjectMarker(0, marker_idx, false)
+    end
+
+    -- Unselect all items
+    Main_OnCommand(40289, 0)
 
     SetEditCurPos(cursor_pos, false, false) -- Restore cursor position
 end
