@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, split_items_at_markers, clear_item_names_from_selected
-local get_selected_media_item_at, count_selected_media_items
+local get_selected_media_item_at, count_selected_media_items, get_folder_parent_track
 
 ---------------------------------------------------------------------
 
@@ -34,6 +34,13 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
+    
+    -- Check if any item is selected
+    if CountSelectedMediaItems(0) == 0 then
+        MB("Please select at least one item.", "ReaClassical Error", 0)
+        return
+    end
+    
     split_items_at_markers()
     Undo_EndBlock('ReaClassical Split Items at Markers', 0)
     PreventUIRefresh(-1)
@@ -43,8 +50,43 @@ end
 
 ---------------------------------------------------------------------
 
+function get_folder_parent_track(track)
+    -- Get the folder parent track (the first track in the folder)
+    local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+    
+    -- If this track is a folder parent itself, return it
+    if track_depth == 1 then
+        return track
+    end
+    
+    -- Otherwise, walk backwards to find the folder parent
+    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+    
+    for i = track_idx - 1, 0, -1 do
+        local parent_track = GetTrack(0, i)
+        local parent_depth = GetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH")
+        
+        if parent_depth == 1 then
+            return parent_track
+        end
+    end
+    
+    -- If no folder parent found, return the original track
+    return track
+end
+
+---------------------------------------------------------------------
+
 function split_items_at_markers()
     local cursor_pos = GetCursorPosition() -- Save current edit cursor position
+
+    -- Get the first selected item and find its folder parent track
+    local first_selected_item = GetSelectedMediaItem(0, 0)
+    if not first_selected_item then return end
+    
+    local selected_track = GetMediaItemTrack(first_selected_item)
+    local parent_track = get_folder_parent_track(selected_track)
+    local parent_track_index = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER")
 
     -- Collect all regular (non-region) markers and their names
     local marker_data = {}
@@ -65,8 +107,10 @@ function split_items_at_markers()
         for i = 0, item_count - 1 do
             local item = GetMediaItem(0, i)
             local track = GetMediaItemTrack(item)
-            local track_index = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-            if track_index == 1 then
+            local item_parent_track = get_folder_parent_track(track)
+            local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
+            
+            if item_parent_track_index == parent_track_index then
                 local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
                 local item_end = item_pos + item_len
@@ -74,7 +118,7 @@ function split_items_at_markers()
                 if marker.pos > item_pos and marker.pos < item_end then
                     SetMediaItemSelected(item, true)
                     Main_OnCommand(40034, 0) -- Select all items in group
-                    Main_OnCommand(40012, 0) -- Split at timeline markers
+                    Main_OnCommand(40012, 0) -- Split at edit cursor
 
                     clear_item_names_from_selected()
 
@@ -82,10 +126,11 @@ function split_items_at_markers()
                     for j = 0, new_item_count - 1 do
                         local new_item = GetMediaItem(0, j)
                         local new_track = GetMediaItemTrack(new_item)
-                        local new_track_index = GetMediaTrackInfo_Value(new_track, "IP_TRACKNUMBER")
+                        local new_item_parent_track = get_folder_parent_track(new_track)
+                        local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track, "IP_TRACKNUMBER")
                         local new_item_pos = GetMediaItemInfo_Value(new_item, "D_POSITION")
 
-                        if new_track_index == 1 and math.abs(new_item_pos - marker.pos) < 0.0001 then
+                        if new_parent_track_index == parent_track_index and math.abs(new_item_pos - marker.pos) < 0.0001 then
                             local take = GetActiveTake(new_item)
                             if take then
                                 GetSetMediaItemTakeInfo_String(take, "P_NAME", marker.name, true)
@@ -156,4 +201,3 @@ end
 ---------------------------------------------------------------------
 
 main()
-
