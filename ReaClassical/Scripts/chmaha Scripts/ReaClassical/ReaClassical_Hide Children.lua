@@ -28,8 +28,13 @@ local main, collapse_folder
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-      return
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+      modifier = "Cmd"
+    end
+    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    return
   end
   local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
   mastering = (mastering ~= "" and tonumber(mastering)) or 0
@@ -52,15 +57,15 @@ end
 ---------------------------------------------------------------------
 
 function collapse_folder()
-    for i = 0, CountTracks(0) - 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
-            local folderDepth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            if folderDepth == 1 then -- folder start
-                SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 2)
-            end
-        end
+  for i = 0, CountTracks(0) - 1 do
+    local track = GetTrack(0, i)
+    if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
+      local folderDepth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+      if folderDepth == 1 then       -- folder start
+        SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 2)
+      end
     end
+  end
 end
 
 ---------------------------------------------------------------------

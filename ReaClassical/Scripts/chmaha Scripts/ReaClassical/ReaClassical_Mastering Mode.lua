@@ -35,7 +35,12 @@ end
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+      modifier = "Cmd"
+    end
+    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
     return
   end
   local message
@@ -58,9 +63,9 @@ function main()
     sync_based_on_workflow(workflow)
     PreventUIRefresh(-1)
     local fit_project = NamedCommandLookup("_RS63665092232578f8c8d10c5936ca5013a9ecab51")
-    Main_OnCommand(fit_project,0)
+    Main_OnCommand(fit_project, 0)
   end
-TrackList_AdjustWindows(false)
+  TrackList_AdjustWindows(false)
 end
 
 ---------------------------------------------------------------------

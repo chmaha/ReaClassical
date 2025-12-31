@@ -50,7 +50,12 @@ function main()
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
-        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
     PreventUIRefresh(1)
@@ -370,28 +375,28 @@ end
 ---------------------------------------------------------------------
 
 function select_children_of_selected_folders()
-  local track_count = CountTracks(0)
+    local track_count = CountTracks(0)
 
-  for i = 0, track_count - 1 do
-    local tr = GetTrack(0, i)
-    if IsTrackSelected(tr) then
-      local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
-      if depth == 1 then -- folder parent
-        local j = i + 1
-        while j < track_count do
-          local ch_tr = GetTrack(0, j)
-          SetTrackSelected(ch_tr, true) -- select child track
+    for i = 0, track_count - 1 do
+        local tr = GetTrack(0, i)
+        if IsTrackSelected(tr) then
+            local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+            if depth == 1 then -- folder parent
+                local j = i + 1
+                while j < track_count do
+                    local ch_tr = GetTrack(0, j)
+                    SetTrackSelected(ch_tr, true) -- select child track
 
-          local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
-          if ch_depth == -1 then
-            break -- end of folder children
-          end
+                    local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+                    if ch_depth == -1 then
+                        break -- end of folder children
+                    end
 
-          j = j + 1
+                    j = j + 1
+                end
+            end
         end
-      end
     end
-  end
 end
 
 ---------------------------------------------------------------------

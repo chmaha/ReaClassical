@@ -30,7 +30,12 @@ local main, arm_all_active_envs, fold_small
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+      modifier = "Cmd"
+    end
+    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
     return
   end
 
@@ -81,15 +86,15 @@ end
 ---------------------------------------------------------------------
 
 function fold_small()
-    for i = 0, CountTracks(0) - 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
-            local folderDepth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            if folderDepth == 1 then -- folder start
-                SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 1)
-            end
-        end
+  for i = 0, CountTracks(0) - 1 do
+    local track = GetTrack(0, i)
+    if GetMediaTrackInfo_Value(track, "I_SELECTED") == 1 then
+      local folderDepth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+      if folderDepth == 1 then       -- folder start
+        SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 1)
+      end
     end
+  end
 end
 
 ---------------------------------------------------------------------

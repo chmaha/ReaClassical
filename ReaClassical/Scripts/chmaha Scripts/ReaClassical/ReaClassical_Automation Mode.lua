@@ -33,11 +33,16 @@ if RCProject ~= "y" then
 end
 
 function main()
-  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-  if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-    return
-  end
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        return
+    end
   PreventUIRefresh(1)
   Main_OnCommand(42022, 0) -- Global automation override: All automation in latch preview mode
   local message

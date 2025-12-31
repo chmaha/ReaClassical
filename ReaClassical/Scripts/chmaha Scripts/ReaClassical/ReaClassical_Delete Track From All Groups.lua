@@ -31,8 +31,13 @@ function main()
   Undo_BeginBlock()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-      MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
-      return
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+      modifier = "Cmd"
+    end
+    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    return
   end
   local selected_tracks = CountSelectedTracks(0)
   if selected_tracks > 1 or selected_tracks == 0 then

@@ -46,7 +46,12 @@ function main()
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
-        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
 
@@ -172,8 +177,8 @@ function main()
         local item_start = GetMediaItemInfo_Value(new_last_item, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(new_last_item, "D_LENGTH")
         local end_of_new_item = item_start + item_length
-        local dest_track = GetTrack(0, dest_track_number-1)
-        add_marker(end_of_new_item,0,dest_track_number,"DEST-IN",996,GetTrackColor(dest_track))
+        local dest_track = GetTrack(0, dest_track_number - 1)
+        add_marker(end_of_new_item, 0, dest_track_number, "DEST-IN", 996, GetTrackColor(dest_track))
 
         move_to_project_tab(source_proj)
 

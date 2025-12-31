@@ -35,7 +35,12 @@ function main()
   Undo_BeginBlock()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+      modifier = "Cmd"
+    end
+    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
     return
   end
 
@@ -88,7 +93,7 @@ function parse_markers()
   -- First pass: Extract album-wide metadata
   for i = 0, num_markers - 1 do
     local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
-    if not isrgn then     -- Only process markers
+    if not isrgn then -- Only process markers
       local album_marker = name:match("^@(.-)|")
       if album_marker then
         metadata.album = {
@@ -104,7 +109,7 @@ function parse_markers()
           genre = name:match("GENRE=([^|]+)") or nil,
           language = name:match("LANGUAGE=([^|]+)") or nil
         }
-        break         -- Stop early after finding album metadata
+        break -- Stop early after finding album metadata
       end
     end
   end
@@ -112,8 +117,8 @@ function parse_markers()
   -- Second pass: Process track markers
   for i = 0, num_markers - 1 do
     local _, isrgn, _, _, name, _ = EnumProjectMarkers(i)
-    if not isrgn then                    -- Only process markers
-      if not name:match("^@") then       -- Ignore album line since it's already processed
+    if not isrgn then              -- Only process markers
+      if not name:match("^@") then -- Ignore album line since it's already processed
         local track_title = name:match("^#([^|]+)")
         if track_title then
           local track_data = {
@@ -212,14 +217,14 @@ function get_txt_file(track_name)
     local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
     path = path:match(pattern)
   end
-  
+
   -- Extract prefix before ':' in track_name
   local prefix_match = track_name:match("^(.-):")
   local prefix = ""
   if prefix_match then
     prefix = prefix_match .. "_"
   end
-  
+
   local file = path .. slash .. prefix .. 'metadata.txt'
   return file, prefix
 end
