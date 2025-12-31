@@ -53,11 +53,11 @@ local labels = {
     'CUE audio format',
     'Floating Destination Folder',
     'Find takes using item names',
-    'Item naming: Only show take numbers'
+    'Show only item take numbers'
 }
 
 -- Binary option indices (1-based)
-local binary_options = {5, 7, 8, 12, 13, 14}
+local binary_options = { 5, 7, 8, 12, 13, 14 }
 
 -- ImGui Context
 local ctx = ImGui.CreateContext('ReaClassical Preferences')
@@ -75,23 +75,23 @@ function main()
         MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
         return
     end
-    
+
     if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
         return
     end
-    
+
     -- Load preferences into table on first run
     if not prefs[1] then
         load_prefs()
     end
-    
+
     -- Run ImGui display
     display_prefs()
-    
+
     if apply_clicked then
         -- Validate and save
         local pass, corrected_prefs, new_floating, new_color, new_item_naming, error_msg = pref_check()
-        
+
         if pass then
             -- Get original saved values before applying changes
             local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -104,9 +104,9 @@ function main()
             local orig_floating = tonumber(saved_entries[12]) or 0
             local orig_color = tonumber(saved_entries[5]) or 0
             local orig_item_naming = tonumber(saved_entries[14]) or 0
-            
+
             save_prefs(corrected_prefs)
-            
+
             if new_floating ~= orig_floating and new_floating == 0 then
                 move_destination_folder_to_top()
                 sync_based_on_workflow(workflow)
@@ -121,7 +121,7 @@ function main()
                 rename_all_items(new_item_naming)
             end
             open = false -- Close window on success
-            return -- Exit after applying
+            return       -- Exit after applying
         else
             -- Validation failed, revert to last saved values and show error
             error_message = error_msg or "Invalid input detected."
@@ -130,7 +130,7 @@ function main()
             -- Window stays open
         end
     end
-    
+
     if open and visible then
         defer(main)
     end
@@ -141,31 +141,31 @@ end
 function display_prefs()
     -- Auto-resize window to fit content
     local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_AlwaysAutoResize
-    
+
     visible, open = ImGui.Begin(ctx, 'ReaClassical Project Preferences', true, window_flags)
-    
+
     if not visible then
         ImGui.End(ctx)
         return
     end
-    
+
     -- Create table for aligned layout
     if ImGui.BeginTable(ctx, "prefs_table", 2, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then
         ImGui.TableSetupColumn(ctx, "labels", ImGui.TableColumnFlags_WidthFixed, 280)
         ImGui.TableSetupColumn(ctx, "inputs", ImGui.TableColumnFlags_WidthFixed, 80)
-        
+
         for i = 1, #labels do
             ImGui.TableNextRow(ctx)
             ImGui.TableSetColumnIndex(ctx, 0)
             ImGui.AlignTextToFramePadding(ctx)
             ImGui.Text(ctx, labels[i] .. ":")
             ImGui.TableSetColumnIndex(ctx, 1)
-            
+
             -- Ensure prefs[i] exists
             if not prefs[i] then
                 prefs[i] = 0
             end
-            
+
             -- Check if this is a binary option (checkbox)
             local is_binary = false
             for _, idx in ipairs(binary_options) do
@@ -174,7 +174,7 @@ function display_prefs()
                     break
                 end
             end
-            
+
             if is_binary then
                 -- Checkbox for binary options
                 local checked = (tonumber(prefs[i]) == 1)
@@ -186,7 +186,7 @@ function display_prefs()
                 -- CUE audio format - dropdown
                 ImGui.SetNextItemWidth(ctx, 80)
                 if ImGui.BeginCombo(ctx, "##pref" .. i, tostring(prefs[i])) then
-                    local formats = {"WAV", "FLAC", "AIFF", "MP3"}
+                    local formats = { "WAV", "FLAC", "AIFF", "MP3" }
                     for _, format in ipairs(formats) do
                         local is_selected = (prefs[i] == format)
                         if ImGui.Selectable(ctx, format, is_selected) then
@@ -208,14 +208,14 @@ function display_prefs()
                 end
             end
         end
-        
+
         ImGui.EndTable(ctx)
     end
-    
+
     ImGui.Spacing(ctx)
     ImGui.Separator(ctx)
     ImGui.Spacing(ctx)
-    
+
     -- Display error message if validation failed
     if error_message ~= "" then
         ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFF3333FF) -- Red text (RGBA)
@@ -223,20 +223,20 @@ function display_prefs()
         ImGui.PopStyleColor(ctx)
         ImGui.Spacing(ctx)
     end
-    
+
     -- Buttons
     if ImGui.Button(ctx, "Apply", 120, 0) then
         error_message = "" -- Clear any previous error
         apply_clicked = true
         -- Don't set open = false here, let validation decide
     end
-    
+
     ImGui.SameLine(ctx)
-    
+
     if ImGui.Button(ctx, "Cancel", 120, 0) then
         open = false
     end
-    
+
     ImGui.End(ctx)
 end
 
@@ -267,7 +267,7 @@ function load_prefs()
             j = j + 1
         end
     end
-    
+
     -- Load into prefs table
     for i = 1, #labels do
         if i == 11 then
@@ -335,23 +335,23 @@ function pref_check()
     local ext_error_msg = ""
 
     if pass then
-        local num_5  = tonumber(t[5])
-        local num_7  = tonumber(t[7])
-        local num_8  = tonumber(t[8])
-        local num_12 = tonumber(t[12])
-        local num_13 = tonumber(t[13])
-        local num_14 = tonumber(t[14])
+        local num_5        = tonumber(t[5])
+        local num_7        = tonumber(t[7])
+        local num_8        = tonumber(t[8])
+        local num_12       = tonumber(t[12])
+        local num_13       = tonumber(t[13])
+        local num_14       = tonumber(t[14])
 
         -- normalize audio format and store it back into t[11]
-        t[11] = tostring(t[11]):upper()
+        t[11]              = tostring(t[11]):upper()
         local audio_format = t[11]
 
-        if (num_5  and num_5  > 1) or
-           (num_7  and num_7  > 1) or
-           (num_8  and num_8  > 1) or
-           (num_12 and num_12 > 1) or
-           (num_13 and num_13 > 1) or
-           (num_14 and num_14 > 1) then
+        if (num_5 and num_5 > 1) or
+            (num_7 and num_7 > 1) or
+            (num_8 and num_8 > 1) or
+            (num_12 and num_12 > 1) or
+            (num_13 and num_13 > 1) or
+            (num_14 and num_14 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
@@ -426,9 +426,12 @@ end
 
 function rename_all_items(use_take_numbers)
     Undo_BeginBlock()
-    
+
+    -- Get workflow to determine filename pattern
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+
     local item_count = CountMediaItems(0)
-    
+
     for i = 0, item_count - 1 do
         local item = GetMediaItem(0, i)
         if item then
@@ -440,24 +443,23 @@ function rename_all_items(use_take_numbers)
                     -- Extract just the filename without path and extension
                     local name = filename:match("([^/\\]+)$") or filename
                     name = name:match("(.+)%..+$") or name
-                    
+
                     if use_take_numbers == 1 then
-                        -- Use just take numbers: try to extract using various patterns
-                        -- First try ReaClassical format: sessionname_$tracknameornumber_T####
-                        local take_number = name:match("_T(%d+[^_]*)")
-                        
+                        -- Use just take numbers: look for _T#### at the end
+                        local take_number = name:match("_T(%d+[^_]*)$")
+
                         if take_number then
-                            -- Found ReaClassical format, use T + number
-                            GetSetMediaItemTakeInfo_String(take, "P_NAME", "T" .. take_number, true)
+                            -- Found ReaClassical format, use just padded number
+                            GetSetMediaItemTakeInfo_String(take, "P_NAME", take_number, true)
                         else
                             -- Try find take patterns: (###)[chan X] or ### [chan X] or (###) or ###
                             local take_num = tonumber(
                                 name:match("(%d+)%)?%s*%[chan%s*%d+%]$")
                                 or name:match("(%d+)%)?$")
                             )
-                            
+
                             if take_num then
-                                GetSetMediaItemTakeInfo_String(take, "P_NAME", "T" .. string.format("%04d", take_num), true)
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", string.format("%04d", take_num), true)
                             else
                                 -- No recognizable pattern, use full filename
                                 GetSetMediaItemTakeInfo_String(take, "P_NAME", name, true)
@@ -465,41 +467,63 @@ function rename_all_items(use_take_numbers)
                         end
                     else
                         -- Use session name + take number (or full filename if not ReaClassical)
-                        -- Try to match ReaClassical pattern: sessionname_$tracknameornumber_T####
-                        local session_name, take_number = name:match("^(.-)_[^_]+_(T%d+[^_]*)")
-                        
-                        if session_name and take_number then
-                            -- Has session name in ReaClassical format
-                            GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. "_" .. take_number, true)
-                        else
-                            -- Check if it has T#### without session name (e.g., _$track_T0001)
-                            take_number = name:match("_(T%d+[^_]*)$")
-                            if take_number then
-                                -- No session name, just T####
-                                GetSetMediaItemTakeInfo_String(take, "P_NAME", take_number, true)
+                        local session_name, take_number
+
+                        -- Detect format from filename structure
+                        -- Vertical format has D_ or S#_ pattern: session_D_trackname_T### or session_S1_trackname_T###
+                        -- Horizontal format: session_trackname_T###
+
+                        -- First check if file ends with _T###
+                        take_number = name:match("_(T%d+[^_]*)$")
+
+                        if take_number then
+                            -- It's a ReaClassical file, now determine if Vertical or Horizontal
+                            -- Check for Vertical pattern: has _D_ or _S(number)_ before the take number
+                            if name:match("_[DS]%d?_[^_]+_T%d+") then
+                                -- Vertical format: extract session before first underscore
+                                session_name = name:match("^([^_]+)_[DS]%d?_")
+                            elseif name:match("^[DS]%d?_[^_]+_T%d+") then
+                                -- Vertical format without session: starts with D_ or S#_
+                                session_name = nil
                             else
-                                -- Not ReaClassical format, try find take patterns
-                                local take_num = tonumber(
-                                    name:match("(%d+)%)?%s*%[chan%s*%d+%]$")
-                                    or name:match("(%d+)%)?$")
-                                )
-                                
-                                if take_num then
-                                    -- Found a take number at the end, extract everything before it as potential session
-                                    local prefix = name:match("^(.-)%d+%)?%s*%[?chan")
-                                        or name:match("^(.-)%d+%)?$")
-                                    
-                                    if prefix and prefix ~= "" and prefix ~= "(" then
-                                        -- Remove trailing separators/spaces from prefix
-                                        prefix = prefix:match("^(.-)[ _%-%(]+$") or prefix
-                                        GetSetMediaItemTakeInfo_String(take, "P_NAME", prefix .. "T" .. string.format("%04d", take_num), true)
-                                    else
-                                        GetSetMediaItemTakeInfo_String(take, "P_NAME", "T" .. string.format("%04d", take_num), true)
-                                    end
+                                -- Horizontal format or no session
+                                -- Use the two-underscore pattern
+                                session_name = name:match("^(.-)_[^_]+_T%d+")
+                            end
+
+                            if session_name and session_name ~= "" then
+                                -- Has session name
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. "_" .. take_number, true)
+                            else
+                                -- No session name, just padded number without T
+                                local num_only = take_number:match("T(%d+[^_]*)")
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", num_only, true)
+                            end
+                        else
+                            -- Not ReaClassical format, try find take patterns
+                            local take_num = tonumber(
+                                name:match("(%d+)%)?%s*%[chan%s*%d+%]$")
+                                or name:match("(%d+)%)?$")
+                            )
+
+                            if take_num then
+                                -- Found a take number at the end, extract everything before it as potential session
+                                local prefix = name:match("^(.-)%d+%)?%s*%[?chan")
+                                    or name:match("^(.-)%d+%)?$")
+
+                                if prefix and prefix ~= "" and prefix ~= "(" then
+                                    -- Remove trailing separators/spaces from prefix
+                                    prefix = prefix:match("^(.-)[ _%-%(]+$") or prefix
+                                    -- Has session-like prefix, add T
+                                    GetSetMediaItemTakeInfo_String(take, "P_NAME",
+                                        prefix .. "_T" .. string.format("%04d", take_num), true)
                                 else
-                                    -- No recognizable pattern, use full filename without extension
-                                    GetSetMediaItemTakeInfo_String(take, "P_NAME", name, true)
+                                    -- No prefix, just padded number
+                                    GetSetMediaItemTakeInfo_String(take, "P_NAME", string.format("%04d", take_num), true)
                                 end
+                            else
+                                -- No recognizable pattern, use full filename without extension
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", name, true)
                             end
                         end
                     end
@@ -507,7 +531,7 @@ function rename_all_items(use_take_numbers)
             end
         end
     end
-    
+
     UpdateArrange()
     Undo_EndBlock("Rename all items based on preference", -1)
 end

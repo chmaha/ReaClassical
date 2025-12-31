@@ -35,10 +35,12 @@ local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
 mastering = (mastering ~= "" and tonumber(mastering)) or 0
 local ref_is_guide = 0
+local use_only_take_num = 1
 if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
     if table[7] then ref_is_guide = tonumber(table[7]) or 0 end
+    if table[14] then use_only_take_num = tonumber(table[14]) or 0 end
 end
 
 ---------------------------------------------------------------------
@@ -108,13 +110,16 @@ function main()
         if take_number then
             --for each selected item rename take
             local padded_number = string.format("%03d", take_number)
+            local take_prefix = (session_name == "") and "" or "T"
             local num_of_selected_items = count_selected_media_items()
             for i = 0, num_of_selected_items - 1 do
                 local item = get_selected_media_item_at(i)
-                local track = GetMediaItem_Track(item)
-                local _, trackname = GetTrackName(track)
                 local take = GetActiveTake(item)
-                GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. trackname .. "_T" .. padded_number, true)
+                if use_only_take_num == 0 then
+                    GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. take_prefix .. padded_number, true)
+                else
+                    GetSetMediaItemTakeInfo_String(take, "P_NAME", padded_number, true)
+                end
             end
         end
 
@@ -142,14 +147,14 @@ function main()
             for i = current_num, num_tracks - 1, 1 do
                 local track = GetTrack(0, i)
                 if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                    Main_OnCommand(40297, 0)           -- deselect all tracks
+                    Main_OnCommand(40297, 0) -- deselect all tracks
                     SetTrackSelected(track, true)
                     select_children_of_selected_folders()
                     solo()
                     set_rec_arm_for_selected_tracks(1)
                     mixer()
                     unselect_folder_children()
-                    Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
+                    Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
                     bool = true
                     TrackList_AdjustWindows(false)
                     break
@@ -162,7 +167,7 @@ function main()
                 set_rec_arm_for_selected_tracks(1)
                 solo()
                 unselect_folder_children()
-                Main_OnCommand(40913, 0)             -- adjust scroll to selected tracks
+                Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
             end
         end
         PreventUIRefresh(-1)
@@ -387,28 +392,28 @@ end
 ---------------------------------------------------------------------
 
 function select_children_of_selected_folders()
-  local track_count = CountTracks(0)
+    local track_count = CountTracks(0)
 
-  for i = 0, track_count - 1 do
-    local tr = GetTrack(0, i)
-    if IsTrackSelected(tr) then
-      local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
-      if depth == 1 then -- folder parent
-        local j = i + 1
-        while j < track_count do
-          local ch_tr = GetTrack(0, j)
-          SetTrackSelected(ch_tr, true) -- select child track
+    for i = 0, track_count - 1 do
+        local tr = GetTrack(0, i)
+        if IsTrackSelected(tr) then
+            local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+            if depth == 1 then -- folder parent
+                local j = i + 1
+                while j < track_count do
+                    local ch_tr = GetTrack(0, j)
+                    SetTrackSelected(ch_tr, true) -- select child track
 
-          local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
-          if ch_depth == -1 then
-            break -- end of folder children
-          end
+                    local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+                    if ch_depth == -1 then
+                        break -- end of folder children
+                    end
 
-          j = j + 1
+                    j = j + 1
+                end
+            end
         end
-      end
     end
-  end
 end
 
 ---------------------------------------------------------------------
