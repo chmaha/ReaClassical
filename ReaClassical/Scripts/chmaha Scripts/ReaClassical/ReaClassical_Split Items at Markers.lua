@@ -42,7 +42,7 @@ function main()
     end
     
     split_items_at_markers()
-    Undo_EndBlock('ReaClassical Split Items at Markers', 0)
+    Undo_EndBlock('ReaClassical Split Items at Markers', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
@@ -106,12 +106,20 @@ function split_items_at_markers()
     for i = 0, num_markers - 1 do
         local retval, isrgn, pos, _, name, markrgnindex = EnumProjectMarkers(i)
         if retval and not isrgn then
-            if name ~= "" then
-                has_named_markers = true
+            -- Only include markers within the original item bounds
+            if pos > original_item_start and pos < original_item_end then
+                if name ~= "" then
+                    has_named_markers = true
+                end
+                local label = name ~= "" and name or ("Marker " .. tostring(markrgnindex))
+                table.insert(marker_data, {pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex})
             end
-            local label = name ~= "" and name or ("Marker " .. tostring(markrgnindex))
-            table.insert(marker_data, {pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex})
         end
+    end
+
+    -- If no markers within bounds, do nothing
+    if #marker_data == 0 then
+        return
     end
 
     -- Sort markers by position
@@ -137,10 +145,8 @@ function split_items_at_markers()
                 local item_end = item_pos + item_len
 
                 if marker.pos > item_pos and marker.pos < item_end then
-                    -- Mark this marker for deletion if it's within original bounds
-                    if marker.pos > original_item_start and marker.pos < original_item_end then
-                        table.insert(markers_to_delete, marker.marker_index)
-                    end
+                    -- Mark this marker for deletion
+                    table.insert(markers_to_delete, marker.marker_index)
 
                     SetMediaItemSelected(item, true)
                     Main_OnCommand(40034, 0) -- Select all items in group
@@ -193,8 +199,8 @@ function split_items_at_markers()
                 local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
                 local item_end = item_pos + item_len
                 
-                -- Check if item overlaps with original bounds
-                if item_pos >= original_item_start - 0.0001 and item_pos < original_item_end + 0.0001 then
+                -- Check if item is completely within original bounds (not extending beyond)
+                if item_pos >= original_item_start - 0.0001 and item_end <= original_item_end + 0.0001 then
                     local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
                     if group_id > 0 then
                         if not group_positions[group_id] then
