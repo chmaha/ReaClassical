@@ -719,20 +719,32 @@ function draw(playstate)
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y)
   local is_recording = (playstate == 5 or playstate == 6)
   
-  -- Check if any tracks are rec-armed
+  -- Check if any tracks are rec-armed and if selected track is rec-armed
   local any_armed = false
+  local selected_track_armed = false
   local num_tracks = CountTracks(0)
+  local selected_track = GetSelectedTrack(0, 0)
+  
   for i = 0, num_tracks - 1 do
     local track = GetTrack(0, i)
     if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
       any_armed = true
-      break
+      if selected_track and track == selected_track then
+        selected_track_armed = true
+      end
     end
   end
   
   local rec_button_label
+  local show_select_message = false
+  
   if is_recording then
     rec_button_label = "Stop"
+  elseif not selected_track and not any_armed then
+    rec_button_label = "Arm"
+    show_select_message = true
+  elseif selected_track and not selected_track_armed then
+    rec_button_label = "Arm"
   elseif any_armed then
     rec_button_label = "Rec"
   else
@@ -740,7 +752,25 @@ function draw(playstate)
   end
   
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
+    -- If pressing "Rec" and no track is selected but tracks are armed, select first armed track
+    if rec_button_label == "Rec" and not selected_track and any_armed then
+      for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+          SetOnlyTrackSelected(track)
+          break
+        end
+      end
+    end
     Main_OnCommand(F9_command, 0)
+  end
+  
+  -- Show gentle message if no track selected and no armed tracks
+  if show_select_message then
+    ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+    ImGui.TextWrapped(ctx, "Select a parent track to arm")
+    ImGui.PopStyleColor(ctx)
   end
   
   -- Pause button (only enabled during recording)
@@ -782,6 +812,11 @@ function draw(playstate)
   
   -- Rank and Notes section below buttons
   local rank_y = button_y + button_height + (20 * scale)
+  
+  -- Add extra space if showing the select message
+  if show_select_message then
+    rank_y = rank_y + ImGui.GetTextLineHeightWithSpacing(ctx)
+  end
   
   -- Show indicator when editing a selected item (stopped mode only)
   if playstate == 0 and editing_item then
