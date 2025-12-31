@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 local sync_based_on_workflow, move_destination_folder_to_top
-local prepare_takes
+local prepare_takes, rename_all_items
 
 -- Check for ReaImGui
 local imgui_exists = APIExists("ImGui_GetVersion")
@@ -37,7 +37,7 @@ package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0'
+local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade length (ms)',
@@ -52,11 +52,12 @@ local labels = {
     'Year of Production',
     'CUE audio format',
     'Floating Destination Folder',
-    'Find takes using item names'
+    'Find takes using item names',
+    'Item naming: Only show take numbers'
 }
 
 -- Binary option indices (1-based)
-local binary_options = {5, 7, 8, 12, 13}
+local binary_options = {5, 7, 8, 12, 13, 14}
 
 -- ImGui Context
 local ctx = ImGui.CreateContext('ReaClassical Preferences')
@@ -89,7 +90,7 @@ function main()
     
     if apply_clicked then
         -- Validate and save
-        local pass, corrected_prefs, new_floating, new_color, error_msg = pref_check()
+        local pass, corrected_prefs, new_floating, new_color, new_item_naming, error_msg = pref_check()
         
         if pass then
             -- Get original saved values before applying changes
@@ -102,6 +103,7 @@ function main()
             end
             local orig_floating = tonumber(saved_entries[12]) or 0
             local orig_color = tonumber(saved_entries[5]) or 0
+            local orig_item_naming = tonumber(saved_entries[14]) or 0
             
             save_prefs(corrected_prefs)
             
@@ -114,6 +116,9 @@ function main()
             end
             if new_color ~= orig_color then
                 prepare_takes()
+            end
+            if new_item_naming ~= orig_item_naming then
+                rename_all_items(new_item_naming)
             end
             open = false -- Close window on success
             return -- Exit after applying
@@ -335,6 +340,7 @@ function pref_check()
         local num_8  = tonumber(t[8])
         local num_12 = tonumber(t[12])
         local num_13 = tonumber(t[13])
+        local num_14 = tonumber(t[14])
 
         -- normalize audio format and store it back into t[11]
         t[11] = tostring(t[11]):upper()
@@ -344,7 +350,8 @@ function pref_check()
            (num_7  and num_7  > 1) or
            (num_8  and num_8  > 1) or
            (num_12 and num_12 > 1) or
-           (num_13 and num_13 > 1) then
+           (num_13 and num_13 > 1) or
+           (num_14 and num_14 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
@@ -365,7 +372,7 @@ function pref_check()
     local error_msg = binary_error_msg .. invalid_msg .. ext_error_msg
 
     -- Return error message instead of showing MB dialog
-    return pass, t, tonumber(t[12]), tonumber(t[5]), error_msg
+    return pass, t, tonumber(t[12]), tonumber(t[5]), tonumber(t[14]), error_msg
 end
 
 -----------------------------------------------------------------------
@@ -413,6 +420,96 @@ function prepare_takes()
     local prepare_takes_command = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes_command, 0)
     SetProjExtState(0, "ReaClassical", "prepare_silent", "")
+end
+
+-----------------------------------------------------------------------
+
+function rename_all_items(use_take_numbers)
+    Undo_BeginBlock()
+    
+    local item_count = CountMediaItems(0)
+    
+    for i = 0, item_count - 1 do
+        local item = GetMediaItem(0, i)
+        if item then
+            local take = GetActiveTake(item)
+            if take then
+                local source = GetMediaItemTake_Source(take)
+                if source then
+                    local filename = GetMediaSourceFileName(source, "")
+                    -- Extract just the filename without path and extension
+                    local name = filename:match("([^/\\]+)$") or filename
+                    name = name:match("(.+)%..+$") or name
+                    
+                    if use_take_numbers == 1 then
+                        -- Use just take numbers: try to extract using various patterns
+                        -- First try ReaClassical format: sessionname_$tracknameornumber_T####
+                        local take_number = name:match("_T(%d+[^_]*)")
+                        
+                        if take_number then
+                            -- Found ReaClassical format, use T + number
+                            GetSetMediaItemTakeInfo_String(take, "P_NAME", "T" .. take_number, true)
+                        else
+                            -- Try find take patterns: (###)[chan X] or ### [chan X] or (###) or ###
+                            local take_num = tonumber(
+                                name:match("(%d+)%)?%s*%[chan%s*%d+%]$")
+                                or name:match("(%d+)%)?$")
+                            )
+                            
+                            if take_num then
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", "T" .. string.format("%04d", take_num), true)
+                            else
+                                -- No recognizable pattern, use full filename
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", name, true)
+                            end
+                        end
+                    else
+                        -- Use session name + take number (or full filename if not ReaClassical)
+                        -- Try to match ReaClassical pattern: sessionname_$tracknameornumber_T####
+                        local session_name, take_number = name:match("^(.-)_[^_]+_(T%d+[^_]*)")
+                        
+                        if session_name and take_number then
+                            -- Has session name in ReaClassical format
+                            GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. "_" .. take_number, true)
+                        else
+                            -- Check if it has T#### without session name (e.g., _$track_T0001)
+                            take_number = name:match("_(T%d+[^_]*)$")
+                            if take_number then
+                                -- No session name, just T####
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", take_number, true)
+                            else
+                                -- Not ReaClassical format, try find take patterns
+                                local take_num = tonumber(
+                                    name:match("(%d+)%)?%s*%[chan%s*%d+%]$")
+                                    or name:match("(%d+)%)?$")
+                                )
+                                
+                                if take_num then
+                                    -- Found a take number at the end, extract everything before it as potential session
+                                    local prefix = name:match("^(.-)%d+%)?%s*%[?chan")
+                                        or name:match("^(.-)%d+%)?$")
+                                    
+                                    if prefix and prefix ~= "" and prefix ~= "(" then
+                                        -- Remove trailing separators/spaces from prefix
+                                        prefix = prefix:match("^(.-)[ _%-%(]+$") or prefix
+                                        GetSetMediaItemTakeInfo_String(take, "P_NAME", prefix .. "T" .. string.format("%04d", take_num), true)
+                                    else
+                                        GetSetMediaItemTakeInfo_String(take, "P_NAME", "T" .. string.format("%04d", take_num), true)
+                                    end
+                                else
+                                    -- No recognizable pattern, use full filename without extension
+                                    GetSetMediaItemTakeInfo_String(take, "P_NAME", name, true)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    UpdateArrange()
+    Undo_EndBlock("Rename all items based on preference", -1)
 end
 
 -----------------------------------------------------------------------
