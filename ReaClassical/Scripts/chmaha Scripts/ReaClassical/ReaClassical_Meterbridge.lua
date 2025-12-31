@@ -45,7 +45,7 @@ set_action_options(2)
 
 package.path                         = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui                          = require 'imgui' '0.10'
-local ctx                            = ImGui.CreateContext("ReaClassical Meterbridge")
+local ctx                            = ImGui.CreateContext("ReaClassical MeterBridge")
 local track_state                    = {}
 local window_open                    = true
 local max_channels_per_row_numeric   = 8 -- For numeric display
@@ -71,7 +71,7 @@ function main()
     -- Set window flags to auto-resize
     local window_flags = ImGui.WindowFlags_AlwaysAutoResize
 
-    local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Meterbridge", true, window_flags)
+    local opened, open_ref = ImGui.Begin(ctx, "ReaClassical MeterBridge", true, window_flags)
     window_open = open_ref
     if opened then
       refresh_tracks()
