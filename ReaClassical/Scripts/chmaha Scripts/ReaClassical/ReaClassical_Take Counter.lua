@@ -718,7 +718,27 @@ function draw(playstate)
   -- Record/Stop button
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y)
   local is_recording = (playstate == 5 or playstate == 6)
-  local rec_button_label = is_recording and "Stop" or "Rec"
+  
+  -- Check if any tracks are rec-armed
+  local any_armed = false
+  local num_tracks = CountTracks(0)
+  for i = 0, num_tracks - 1 do
+    local track = GetTrack(0, i)
+    if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+      any_armed = true
+      break
+    end
+  end
+  
+  local rec_button_label
+  if is_recording then
+    rec_button_label = "Stop"
+  elseif any_armed then
+    rec_button_label = "Rec"
+  else
+    rec_button_label = "Arm"
+  end
+  
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
     Main_OnCommand(F9_command, 0)
   end
