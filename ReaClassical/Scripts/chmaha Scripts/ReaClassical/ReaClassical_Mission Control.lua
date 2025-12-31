@@ -29,6 +29,7 @@ local get_current_input_info, apply_input_selection, rename_tracks
 local format_pan, sync, auto_assign, reorder_track, delete_mixer_track
 local add_mixer_track, init, draw_track_controls, draw_folder_browser
 local get_directories, normalize_path, get_parent_path, split_path
+local consolidate_folders_to_first
 
 ---------------------------------------------------------------------
 
@@ -237,6 +238,81 @@ function main()
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Add track to all folders")
+        end
+
+        -- Convert Workflow
+        ImGui.SameLine(ctx)
+        if workflow == "Horizontal" then
+            if ImGui.Button(ctx, "Convert") then
+                ImGui.OpenPopup(ctx, "Convert to Vertical?")
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Convert to Vertical Workflow")
+            end
+
+            if ImGui.BeginPopupModal(ctx, "Convert to Vertical?", nil, ImGui.WindowFlags_AlwaysAutoResize) then
+                ImGui.Text(ctx, "Are you sure you want to convert to Vertical workflow?")
+                ImGui.Separator(ctx)
+
+                -- Center the buttons
+                local button_width = 60
+                local spacing = 10
+                local total_width = (button_width * 2) + spacing
+                local window_width = ImGui.GetWindowWidth(ctx)
+                ImGui.SetCursorPosX(ctx, (window_width - total_width) / 2)
+
+                if ImGui.Button(ctx, "Yes", button_width, 0) then
+                    local vert_convert = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+                    Main_OnCommand(vert_convert, 0)
+                    init()
+                    local whole_view = NamedCommandLookup("_RS63665092232578f8c8d10c5936ca5013a9ecab51")
+                    Main_OnCommand(whole_view, 0)
+                    ImGui.CloseCurrentPopup(ctx)
+                end
+
+                ImGui.SameLine(ctx, 0, spacing)
+
+                if ImGui.Button(ctx, "Cancel", button_width, 0) then
+                    ImGui.CloseCurrentPopup(ctx)
+                end
+
+                ImGui.EndPopup(ctx)
+            end
+        else
+            if ImGui.Button(ctx, "Convert") then
+                ImGui.OpenPopup(ctx, "Convert to Horizontal?")
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Convert to Horizontal Workflow")
+            end
+
+            if ImGui.BeginPopupModal(ctx, "Convert to Horizontal?", nil, ImGui.WindowFlags_AlwaysAutoResize) then
+                ImGui.Text(ctx, "Are you sure you want to convert to Horizontal workflow?")
+                ImGui.Separator(ctx)
+
+                -- Center the buttons
+                local button_width = 60
+                local spacing = 10
+                local total_width = (button_width * 2) + spacing
+                local window_width = ImGui.GetWindowWidth(ctx)
+                ImGui.SetCursorPosX(ctx, (window_width - total_width) / 2)
+
+                if ImGui.Button(ctx, "Yes", button_width, 0) then
+                    consolidate_folders_to_first()
+                    local horiz_convert = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
+                    Main_OnCommand(horiz_convert, 0)
+                    init()
+                    ImGui.CloseCurrentPopup(ctx)
+                end
+
+                ImGui.SameLine(ctx, 0, spacing)
+
+                if ImGui.Button(ctx, "Cancel", button_width, 0) then
+                    ImGui.CloseCurrentPopup(ctx)
+                end
+
+                ImGui.EndPopup(ctx)
+            end
         end
 
         -- Add mixer track popup dialog
@@ -1751,8 +1827,8 @@ function init()
 
     -- Check if current project is a ReaClassical project
     local _, current_workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    workflow = current_workflow
     if current_workflow == "" then
-        workflow = ""
         is_valid_project = false
         return false
     end
@@ -2756,6 +2832,248 @@ function draw_folder_browser()
 
         ImGui.EndPopup(ctx)
     end
+end
+
+---------------------------------------------------------------------
+
+function consolidate_folders_to_first()
+    local num_tracks = CountTracks(0)
+    local folders = {}
+
+    -- Collect all folder parent tracks and their children
+    local i = 0
+    while i < num_tracks do
+        local track = GetTrack(0, i)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+        if folder_depth == 1 then
+            local folder_info = { parent = track, children = {} }
+            table.insert(folders, folder_info)
+
+            -- Collect children of this folder
+            i = i + 1
+            local current_depth = 1
+            while i < num_tracks and current_depth > 0 do
+                local child_track = GetTrack(0, i)
+                local child_depth = GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
+
+                table.insert(folder_info.children, child_track)
+                current_depth = current_depth + child_depth
+
+                if current_depth <= 0 then
+                    break
+                end
+                i = i + 1
+            end
+        end
+        i = i + 1
+    end
+
+    if #folders < 2 then return end
+
+    -- Collect items from each folder (only from tracks within folders)
+    for folder_idx, folder in ipairs(folders) do
+        local all_folder_tracks = { folder.parent }
+        for _, child in ipairs(folder.children) do
+            table.insert(all_folder_tracks, child)
+        end
+
+        local items_by_group = {}
+        local ungrouped_items = {}
+
+        for _, track in ipairs(all_folder_tracks) do
+            local item_count = CountTrackMediaItems(track)
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(track, j)
+                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+
+                if group_id > 0 then
+                    if not items_by_group[group_id] then
+                        items_by_group[group_id] = {}
+                    end
+                    table.insert(items_by_group[group_id], item)
+                else
+                    table.insert(ungrouped_items, item)
+                end
+            end
+        end
+
+        folder.items_by_group = items_by_group
+        folder.ungrouped_items = ungrouped_items
+    end
+
+    -- Find the latest item end time in first folder
+    local first_folder = folders[1]
+    local latest_end = 0
+
+    for group_id, items in pairs(first_folder.items_by_group) do
+        for _, item in ipairs(items) do
+            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+                GetMediaItemInfo_Value(item, "D_LENGTH")
+            if item_end > latest_end then
+                latest_end = item_end
+            end
+        end
+    end
+
+    for _, item in ipairs(first_folder.ungrouped_items) do
+        local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+            GetMediaItemInfo_Value(item, "D_LENGTH")
+        if item_end > latest_end then
+            latest_end = item_end
+        end
+    end
+
+    -- Get first folder's tracks for moving items to
+    local first_folder_tracks = { first_folder.parent }
+    for _, child in ipairs(first_folder.children) do
+        table.insert(first_folder_tracks, child)
+    end
+
+    -- Move items from subsequent folders to first folder
+    local current_position = latest_end + 10 -- 10 second gap between folders
+
+    for folder_idx = 2, #folders do
+        local source_folder = folders[folder_idx]
+
+        -- Find the earliest position in this entire folder to calculate offset
+        local folder_earliest = math.huge
+
+        for group_id, items in pairs(source_folder.items_by_group) do
+            for _, item in ipairs(items) do
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                if pos < folder_earliest then
+                    folder_earliest = pos
+                end
+            end
+        end
+
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if pos < folder_earliest then
+                folder_earliest = pos
+            end
+        end
+
+        -- Calculate time offset for this entire folder
+        local folder_offset = current_position - folder_earliest
+
+        -- Process grouped items - maintain their relative positions within the folder
+        for group_id, items in pairs(source_folder.items_by_group) do
+            for _, item in ipairs(items) do
+                local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local new_pos = original_pos + folder_offset
+
+                -- Find appropriate track in first folder (match relative track position)
+                local source_track = GetMediaItem_Track(item)
+
+                -- Find source track's position within its folder
+                local source_folder_tracks = { source_folder.parent }
+                for _, child in ipairs(source_folder.children) do
+                    table.insert(source_folder_tracks, child)
+                end
+
+                local source_track_pos = nil
+                for idx, folder_track in ipairs(source_folder_tracks) do
+                    if folder_track == source_track then
+                        source_track_pos = idx
+                        break
+                    end
+                end
+
+                -- Map to corresponding track in first folder
+                if source_track_pos and source_track_pos <= #first_folder_tracks then
+                    local dest_track = first_folder_tracks[source_track_pos]
+                    MoveMediaItemToTrack(item, dest_track)
+                    SetMediaItemInfo_Value(item, "D_POSITION", new_pos)
+                end
+            end
+        end
+
+        -- Process ungrouped items - maintain their relative positions within the folder
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local new_pos = original_pos + folder_offset
+
+            local source_track = GetMediaItem_Track(item)
+
+            -- Find source track's position within its folder
+            local source_folder_tracks = { source_folder.parent }
+            for _, child in ipairs(source_folder.children) do
+                table.insert(source_folder_tracks, child)
+            end
+
+            local source_track_pos = nil
+            for idx, folder_track in ipairs(source_folder_tracks) do
+                if folder_track == source_track then
+                    source_track_pos = idx
+                    break
+                end
+            end
+
+            -- Map to corresponding track in first folder
+            if source_track_pos and source_track_pos <= #first_folder_tracks then
+                local dest_track = first_folder_tracks[source_track_pos]
+                MoveMediaItemToTrack(item, dest_track)
+                SetMediaItemInfo_Value(item, "D_POSITION", new_pos)
+            end
+        end
+
+        -- Find the end of all items in this folder to set next folder's position
+        local folder_end = 0
+        for group_id, items in pairs(source_folder.items_by_group) do
+            for _, item in ipairs(items) do
+                local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+                    GetMediaItemInfo_Value(item, "D_LENGTH")
+                if item_end > folder_end then
+                    folder_end = item_end
+                end
+            end
+        end
+
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+                GetMediaItemInfo_Value(item, "D_LENGTH")
+            if item_end > folder_end then
+                folder_end = item_end
+            end
+        end
+
+        current_position = folder_end + 10 -- 10 second gap before next folder
+    end
+
+    -- Delete only empty folders (2 onwards) - check if folder has no items
+    Main_OnCommand(40297, 0) -- Unselect all
+    for folder_idx = 2, #folders do
+        local folder = folders[folder_idx]
+        local has_items = false
+
+        -- Check if folder parent has items
+        if CountTrackMediaItems(folder.parent) > 0 then
+            has_items = true
+        end
+
+        -- Check if any children have items
+        if not has_items then
+            for _, child in ipairs(folder.children) do
+                if CountTrackMediaItems(child) > 0 then
+                    has_items = true
+                    break
+                end
+            end
+        end
+
+        -- Only delete if folder is completely empty
+        if not has_items then
+            SetTrackSelected(folder.parent, true)
+            for _, child in ipairs(folder.children) do
+                SetTrackSelected(child, true)
+            end
+        end
+    end
+
+    Main_OnCommand(40005, 0) -- Remove selected tracks
+    Main_OnCommand(40297, 0) -- Unselect all
 end
 
 ---------------------------------------------------------------------

@@ -167,13 +167,6 @@ function main()
         set_recording_to_primary_and_secondary(end_of_sources)
         SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
     elseif folder_check() == 1 then
-        local convert_response = MB("Are you sure you'd like to convert to a vertical workflow?",
-            "Vertical Workflow", 4)
-        if convert_response ~= 6 then
-            local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-            Main_OnCommand(F7_sync,0)
-            return
-        end
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
         if RCProject ~= "y" then
             local _, _, _, _, mixer_tracks = create_track_table(is_empty)
