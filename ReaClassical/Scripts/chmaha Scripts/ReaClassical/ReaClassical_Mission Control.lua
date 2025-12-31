@@ -871,6 +871,15 @@ function main()
         end
 
         ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Calc") then
+            local calc = NamedCommandLookup("_RSfb6903ab56db07d4bb262cdee9c84b8bb74d101e")
+            Main_OnCommand(calc, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Metadata Editor for selected album folder")
+        end
+
+        ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Help") then
             local help = NamedCommandLookup("_RSf03944e159952885b66c7c1be2754e2b3c7d4b07")
             Main_OnCommand(help, 0)
