@@ -68,14 +68,14 @@
   [main] ReaClassical_Move to Source IN marker.lua
   [main] ReaClassical_Move to Source OUT marker.lua
   [main] ReaClassical_Notes.lua
-  [crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
-  [crossfade_editor] ReaClassical_Play Both Items of Crossfade with playrate.lua
-  [crossfade_editor] ReaClassical_Play Bottom Lane Only.lua
-  [crossfade_editor] ReaClassical_Play Left Crossfade Item.lua
-  [crossfade_editor] ReaClassical_Play Left Crossfade Item with playrate.lua
-  [crossfade_editor] ReaClassical_Play Right Crossfade Item.lua
-  [crossfade_editor] ReaClassical_Play Right Crossfade Item with playrate.lua
-  [crossfade_editor] ReaClassical_Play Top Lane Only.lua
+  [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
+  [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade with playrate.lua
+  [main=crossfade_editor] ReaClassical_Play Bottom Lane Only.lua
+  [main=crossfade_editor] ReaClassical_Play Left Crossfade Item.lua
+  [main=crossfade_editor] ReaClassical_Play Left Crossfade Item with playrate.lua
+  [main=crossfade_editor] ReaClassical_Play Right Crossfade Item.lua
+  [main=crossfade_editor] ReaClassical_Play Right Crossfade Item with playrate.lua
+  [main=crossfade_editor] ReaClassical_Play Top Lane Only.lua
   [main] ReaClassical_Preferences.lua
   [main] ReaClassical_Prepare Takes.lua
   [main] ReaClassical_Previous Item or Fade.lua
