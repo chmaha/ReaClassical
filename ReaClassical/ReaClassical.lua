@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.0beta9
+@version 26.0test1
 @changelog
   Welcome to ReaClassical 26
 @metapackage

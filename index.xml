@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="9182c1e68f1742acdfe6b9a166ffe872cef568a2">
+<index version="1" name="chmaha Scripts" commit="e5d3564605862ea1381f5e5ec5ad360e0e0e2b93">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <version name="1.16" author="chmaha" time="2025-08-24T16:35:28Z">
@@ -43,19 +43,6 @@
         <source file="RCReverb_Send.jsfx">https://github.com/chmaha/ReaClassical/raw/7cc4a4291a63efae431967987b156494fcefd2e3/RCPlugs/RCReverb_Send.jsfx</source>
         <source file="RCModulator.jsfx">https://github.com/chmaha/ReaClassical/raw/7cc4a4291a63efae431967987b156494fcefd2e3/RCPlugs/RCModulator.jsfx</source>
       </version>
-    </reapack>
-  </category>
-  <category name="ReaClassical">
-    <reapack name="ReaClassical.lua" type="script" desc="ReaClassical">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.\par}
-}
-]]></description>
-      </metadata>
     </reapack>
   </category>
   <category name="ReaClassicalCore">
