@@ -45,8 +45,9 @@ Effects/ReJJ/
 Effects/chmaha Scripts/
 Effects/chmaha airwindows JSFX Ports
 MenuSets/
+ReaPack/
 ProjectTemplates/ReaClassical.RPP
-ProjectTemplates/Room_Tone_Generation.RPP
+ProjectTemplates/Room_Tone_Gen.RPP
 Scripts/ReaTeam Scripts/Development/cfillion_Interactive ReaScript.lua
 Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua
 Scripts/ReaTeam Extensions/API/
@@ -75,7 +76,10 @@ echo "$files" | while IFS= read -r item; do
 
         if [ -d "$src_path" ]; then
             # Copy directory, overwrite files if needed, delete extraneous files
-            rsync -a --delete "$src_path/" "$dest_path/"
+            rsync -a \
+            --delete \
+            --exclude='ReaClassical.lua' \
+            "$src_path/" "$dest_path/"
         else
             # Copy file, overwrite if content differs
             rsync -a --checksum "$src_path" "$dest_path"
@@ -106,6 +110,10 @@ cp $dir/reaper-menu.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-m
 
 cp $dir/reaper-render.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
 cp $dir/reaper-render.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
+
+cp "$dir/ColorThemes/"*.ReaperThemeZip "$dir/Scripts/chmaha Scripts/ReaClassical"
+cp "$dir/ProjectTemplates/ReaClassical.RPP" "$dir/Scripts/chmaha Scripts/ReaClassical"
+cp "$dir/ProjectTemplates/Room_Tone_Gen.RPP" "$dir/Scripts/chmaha Scripts/ReaClassical"
 
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
