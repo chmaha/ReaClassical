@@ -1,0 +1,1802 @@
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" name="chmaha airwindows JSFX Ports" commit="827025ff06877804e696c26a8d8426931912b402">
+  <category name="Consoles">
+    <reapack name="Analog-a-licious.jsfx" type="effect" desc="Analog-a-licious Console Colors (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Desk", "TransDesk" and "TubeDeck" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Deck (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TransDeck (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TubeDeck (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Analog-a-licious.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="ChloeConsoleColors.jsfx" type="effect" desc="Chloe Console Colors (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "BussColors4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BussColors4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-03T14:16:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/25eb2ee7018be94ba68221649673f969e64f4d5f/Consoles/ChloeConsoleColors.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="CoraMeta.jsfx" type="effect" desc="Cora Analog Circuitry (chmaha)">
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <changelog><![CDATA[Fix desc in templates]]></changelog>
+        <source file="Cora.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Cora.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Cora.RPP</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <changelog><![CDATA[Remove UINT32_MAX references]]></changelog>
+        <source file="Cora.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Cora.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Cora.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/ReaClassical_Cora.RPP</source>
+      </version>
+    </reapack>
+    <reapack name="desk-a-docious.jsfx" type="effect" desc="Desk-a-docious Console Colors (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Desk4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Desk4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/desk-a-docious.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Elsa.jsfx" type="effect" desc="ELSA: Extremely Light Saturation Applier (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestDrive" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestDrive (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Elsa.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Elsa.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Em-See-Eye_Console.jsfx" type="effect" desc="Em-See-Eye Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx analog console emulation plugins use DSP from airwindows ConsoleMD\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-24T20:10:58Z">
+        <source file="Em-See-Eye_Channel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/deb904aa16abdbeacb32ed62ef2912eecff36fd3/Consoles/Em-See-Eye_Channel.jsfx</source>
+        <source file="Em-See-Eye_Bus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/deb904aa16abdbeacb32ed62ef2912eecff36fd3/Consoles/Em-See-Eye_Bus.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Eurydice.jsfx" type="effect" desc="Eurydice Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx digital console emulation plugins use DSP from airwindows PurestConsole2. Also included is the Eurydice project template with plugins already in place (requires ELSA and RCGain to be installed)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <changelog><![CDATA[Fix desc in templates]]></changelog>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Eurydice_Channel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Eurydice_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Eurydice_B.RPP</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <changelog><![CDATA[Replace M_PI references with $pi]]></changelog>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Eurydice_Channel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/ReaClassical_Eurydice_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/ReaClassical_Eurydice_B.RPP</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <changelog><![CDATA[Remove UINT32_MAX references]]></changelog>
+        <source file="Eurydice_Bus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Eurydice_Bus.jsfx</source>
+        <source file="Eurydice_Channel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Eurydice_Channel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/ReaClassical_Eurydice_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Eurydice_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/ReaClassical_Eurydice_B.RPP</source>
+      </version>
+    </reapack>
+    <reapack name="Genesis.jsfx" type="effect" desc="Genesis Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx analog console emulation plugins use DSP from airwindows Console0.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <changelog><![CDATA[Add airwindows changes to Console0BussProc.cpp]]></changelog>
+        <source file="GenesisBus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/GenesisBus.jsfx</source>
+        <source file="GenesisChannel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/GenesisChannel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Genesis_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Genesis_B.RPP</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-05-22T13:01:27Z">
+        <changelog><![CDATA[Add further airwindows changes to Console0BussProc.cpp]]></changelog>
+        <source file="GenesisBus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/55227fa50d19d2612bd208a22e6a2be8da61fc75/Consoles/GenesisBus.jsfx</source>
+        <source file="GenesisChannel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/55227fa50d19d2612bd208a22e6a2be8da61fc75/Consoles/GenesisChannel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/55227fa50d19d2612bd208a22e6a2be8da61fc75/Consoles/ReaClassical_Genesis_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/55227fa50d19d2612bd208a22e6a2be8da61fc75/Consoles/ReaClassical_Genesis_B.RPP</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-05-23T07:26:43Z">
+        <changelog><![CDATA[Add trim controls]]></changelog>
+        <source file="GenesisBus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/6aeaed46abb8a0ea235f074442bcc6aef8fb5fd5/Consoles/GenesisBus.jsfx</source>
+        <source file="GenesisChannel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/6aeaed46abb8a0ea235f074442bcc6aef8fb5fd5/Consoles/GenesisChannel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/6aeaed46abb8a0ea235f074442bcc6aef8fb5fd5/Consoles/ReaClassical_Genesis_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/6aeaed46abb8a0ea235f074442bcc6aef8fb5fd5/Consoles/ReaClassical_Genesis_B.RPP</source>
+      </version>
+      <version name="1.5" author="chmaha" time="2024-01-29T13:08:16Z">
+        <changelog><![CDATA[Use bitshift for fader and pan in line with airwindows original]]></changelog>
+        <source file="GenesisBus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/945b48ff69d3c236e4ba342aa1830effd4c21bf5/Consoles/GenesisBus.jsfx</source>
+        <source file="GenesisChannel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/945b48ff69d3c236e4ba342aa1830effd4c21bf5/Consoles/GenesisChannel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/945b48ff69d3c236e4ba342aa1830effd4c21bf5/Consoles/ReaClassical_Genesis_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/945b48ff69d3c236e4ba342aa1830effd4c21bf5/Consoles/ReaClassical_Genesis_B.RPP</source>
+      </version>
+      <version name="1.6" author="chmaha" time="2024-01-29T13:18:43Z">
+        <changelog><![CDATA[Use discrete slider values as in QuantumGain/Pan]]></changelog>
+        <source file="GenesisBus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/65568ec471d2cc83480a73e580ad33031855cd9a/Consoles/GenesisBus.jsfx</source>
+        <source file="GenesisChannel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/65568ec471d2cc83480a73e580ad33031855cd9a/Consoles/GenesisChannel.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/65568ec471d2cc83480a73e580ad33031855cd9a/Consoles/ReaClassical_Genesis_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Genesis_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/65568ec471d2cc83480a73e580ad33031855cd9a/Consoles/ReaClassical_Genesis_B.RPP</source>
+      </version>
+    </reapack>
+    <reapack name="Horizon.jsfx" type="effect" desc="Horizon Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This jsfx analog circuitry emulation uses DSP from airwindows Interstage. Also included is the Cora project template with plugins already in place (requires ELSA and RCGain to be installed)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-04T10:26:04Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source file="HorizonChannel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/7e3dfc32ed3b066f3567fc537047fc49a479ff06/Consoles/HorizonChannel.jsfx</source>
+        <source file="HorizonBuss.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/7e3dfc32ed3b066f3567fc537047fc49a479ff06/Consoles/HorizonBuss.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="MagicFairyDust.jsfx" type="effect" desc="MagicFairyDust Console Saturation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Channel9" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Channel9 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/MagicFairyDust.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/MagicFairyDust.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Octo4_Console.jsfx" type="effect" desc="Octo4 Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx analog console emulation plugins use DSP from airwindows ConsoleLA\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-25T09:41:15Z">
+        <source file="Octo4Channel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/2d59097866e5898793192f0298620b93a1cecefc/Consoles/Octo4Channel.jsfx</source>
+        <source file="Octo4Bus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/2d59097866e5898793192f0298620b93a1cecefc/Consoles/Octo4Bus.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus.jsfx" type="effect" desc="Orpheus Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx analog console emulation plugins use DSP from airwindows Console8. Also included is the Orpheus project template with plugins already in place (requires MagicFairyDust and RCGain to be installed)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <changelog><![CDATA[Fix desc in templates]]></changelog>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Orpheus_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Orpheus_B.RPP</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-13T17:53:00Z">
+        <changelog><![CDATA[Fix desc in templates]]></changelog>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/ReaClassical_Orpheus_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/cb6ebd9739ef52bd00df630e1d39730403f61218/Consoles/ReaClassical_Orpheus_B.RPP</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T11:55:20Z">
+        <changelog><![CDATA[Replace M_PI references with $pi]]></changelog>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/ReaClassical_Orpheus_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Consoles/ReaClassical_Orpheus_B.RPP</source>
+      </version>
+      <version name="1.5" author="chmaha" time="2023-04-14T12:05:59Z">
+        <changelog><![CDATA[Remove UINT32_MAX references]]></changelog>
+        <source file="Orpheus_Bus_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Bus_In.jsfx</source>
+        <source file="Orpheus_Bus_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Bus_Out.jsfx</source>
+        <source file="Orpheus_Channel_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Channel_In.jsfx</source>
+        <source file="Orpheus_Channel_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Channel_Out.jsfx</source>
+        <source file="Orpheus_Sub_In.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Sub_In.jsfx</source>
+        <source file="Orpheus_Sub_Out.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Sub_Out.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/ReaClassical_Orpheus_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/ReaClassical_Orpheus_B.RPP</source>
+      </version>
+    </reapack>
+    <reapack name="Orpheus_Lite.jsfx" type="effect" desc="Orpheus Lite Console (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 These jsfx analog console emulation plugins use DSP from airwindows Console8Lite. Also included is the Orpheus Lite project template with plugins already in place (requires MagicFairyDust and RCGain to be installed)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.3" author="chmaha" time="2023-04-13T17:50:54Z">
+        <changelog><![CDATA[Fix routing issue in B template]]></changelog>
+        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Lite_Channel.jsfx</source>
+        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Orpheus_Lite_Bus.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <changelog><![CDATA[Remove UINT32_MAX references]]></changelog>
+        <source file="Orpheus_Lite_Channel.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Lite_Channel.jsfx</source>
+        <source file="Orpheus_Lite_Bus.jsfx">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Orpheus_Lite_Bus.jsfx</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_A.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/ReaClassical_Orpheus_Lite_A.RPP</source>
+        <source type="projecttpl" file="ReaClassical_Orpheus_Lite_B.RPP">https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/ReaClassical_Orpheus_Lite_B.RPP</source>
+      </version>
+    </reapack>
+    <reapack name="Seattlety.jsfx" type="effect" desc="Seattlety (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Mackity" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Mackity (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-03-18T08:09:30Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/474edb089e3301c4b9b196b33e5d21ee61fcfb0d/Consoles/Seattlety.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Sororium.jsfx" type="effect" desc="Sororium Consoles (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "EveryConsole" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/EveryConsole (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-06T17:13:40Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/b2fe50135c1c1af60d698db1d8dd263a35b1cf51/Consoles/Sororium.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Supersonic.jsfx" type="effect" desc="Supersonic Filter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "HyperSonic" and "Ultrasonic" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/HyperSonic (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/UltraSonic (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Consoles/Supersonic.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Consoles/Supersonic.jsfx</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Dithers">
+    <reapack name="EssenzaDither.jsfx" type="effect" desc="Essenza Dither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "RawTimbers" and "RawGlitters" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/RawTimbers (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/RawGlitters (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/EssenzaDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="GroovyDither.jsfx" type="effect" desc="GroovyDither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "VinylDither" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/VinylDither (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/GroovyDither.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Dithers/GroovyDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="LucidityDither.jsfx" type="effect" desc="Lucidity Dither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SpatializeDither" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SpatializeDither (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-22T10:26:29Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/d95b6f50ee393de142c7a44e53f3b7fbc9c1e305/Dithers/LucidityDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Nintenda.jsfx" type="effect" desc="Nintenda Dither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses "Nine Tens into Dark" DSP from airwindows "Monitoring3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/Nintenda.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="PirateDither.jsfx" type="effect" desc="PirateDither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "DitherMeTimbers" and "DitherMeDiskers" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DitherMeTimbers (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DitherMeDiskers (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/PirateDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="ReelDither.jsfx" type="effect" desc="ReelDither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "TapeDither" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TapeDither (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/ReelDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="ScottyDither.jsfx" type="effect" desc="Scotty Dither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Beam" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Beam (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-24T10:36:05Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1fd97589a7839f3f7de2367c7d68f151c263568a/Dithers/ScottyDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="six-dither_sid.jsfx" type="effect" desc="Six-Dither Sid (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows 3 "Monitoring" plugins by Chris Johnson Names: Avant-garde = NJAD, Twilight = Dark, Nintenda = Nine Tens into Dark https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/six-dither_sid.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Stan.jsfx" type="effect" desc="Stan Dither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "StudioTan" plugin by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/StudioTan (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/Stan.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Twilight.jsfx" type="effect" desc="Twilight Dither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses "Dark" DSP from airwindows "Monitoring2" plugin by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/Twilight.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="WTFDither.jsfx" type="effect" desc="WTFDither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 "Wipe The Floor" Triangular Dither Uses DSP from airwindows "TPDFDither" and "TPDFWide" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TPDFDither (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TPDFWide (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/WTFDither.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Xonnos Dither.jsfx" type="effect" desc="Xonnos Dither (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PaulDither" & "DoublePaul" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PaulDither (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DoublePaul (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Dithers/Xonnos%20Dither.jsfx</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Reverbs">
+    <reapack name="Bricastic.jsfx" type="effect" desc="Bricastic Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Verbity" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Verbity (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Reverbs/Bricastic.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Reverbs/Bricastic.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Bricastic2.jsfx" type="effect" desc="Bricastic2 Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Verbity2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Verbity2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Reverbs/Bricastic2.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Interstellar.jsfx" type="effect" desc="Interstellar Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Galactic" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Galactic (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Reverbs/Interstellar.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Reverbs/Interstellar.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="NW8BPlateReverb.jsfx" type="effect" desc="NW8 &quot;B&quot; Plate Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "kPlateB" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kPlateB (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Reverbs/NW8BPlateReverb.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="NW8CPlateReverb.jsfx" type="effect" desc="NW8 &quot;C&quot; Plate Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "kPlateC" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kPlateC (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-18T15:13:22Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/2c7f87946e1429bbf1d364f1bba30f8b979fabb7/Reverbs/NW8CPlateReverb.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="NW8DPlateReverb.jsfx" type="effect" desc="NW8 &quot;D&quot; Plate Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "kPlateD" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kPlateD (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-24T11:08:09Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/a13769ec0935310d69b7a9e97dec86d0f5b197f5/Reverbs/NW8DPlateReverb.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="NW8PlateReverb.jsfx" type="effect" desc="NW8 &quot;A&quot; Plate Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "kPlateA" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kPlateA (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.1" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Reverbs/NW8PlateReverb.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="PhiVerb.jsfx" type="effect" desc="PhiVerb Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Chamber2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Chamber2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Reverbs/PhiVerb.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Reverbs/PhiVerb.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="SonataReverb.jsfx" type="effect" desc="Sonata Reverb (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "kBeyond" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kBeyond (MIT License) Extra tonal shaping, modulation, and phase DSP by chmaha JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-07-11T19:59:01Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/e7332b7191398b94ac7f5eb4f5d5c4b9a04a4b8a/Reverbs/SonataReverb.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-08-24T02:53:35Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/63f0554f5ba7d573f9c4bc330c2b492af54b6639/Reverbs/SonataReverb.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2025-08-24T17:20:05Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/860b95de34d7d4e866115279e005ac234337cd80/Reverbs/SonataReverb.jsfx</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Various">
+    <reapack name="78SlewClipper.jsfx" type="effect" desc="78 Slew Clipper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PlatinumSlew" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PlatinumSlew (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-24T11:58:11Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/d2367441b025f2ae135cd734306d9047acc99e8f/Various/78SlewClipper.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2024-01-24T12:31:02Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1fa1813e660f4e072f8b5d04e7649d01854f29ea/Various/78SlewClipper.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="A-coo-sticks.jsfx" type="effect" desc="A-coo-sticks tape delay echo (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "TapeDelay2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TapeDelay2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/A-coo-sticks.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="AllEars.jsfx" type="effect" desc="All Ears Monitoring Utility (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Monitoring3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/AllEars.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Altitude.jsfx" type="effect" desc="Altitude Brightness EQ (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SlewSonic" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SlewSonic (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.1" author="chmaha" time="2023-04-13T17:50:54Z">
+        <changelog><![CDATA[Update according to airwindows commit 09cdb13]]></changelog>
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Altitude.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Ambrosia.jsfx" type="effect" desc="Ambrosia Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Tape" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Tape (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Ambrosia.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Amphitrite.jsfx" type="effect" desc="Amphitrite Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestSquish" and "SurgeTide" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSquish (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SurgeTide (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Amphitrite.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/Amphitrite.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Amphitrite.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Aurora.jsfx" type="effect" desc="Aurora Exciter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Dubly" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Aurora.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/Aurora.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Aurora.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Biased.jsfx" type="effect" desc="Biased Tape (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Sinew" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Sinew (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-03-19T11:53:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/6d20f6f14741ddad919684741bb41817991ea2f6/Various/Biased.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Biquadicus.jsfx" type="effect" desc="Biquadicus Biquad Filters (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Biquad", "BiquadDouble" & "BiquadTriple" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Biquad (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Biquad(MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BiquadTriple (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Biquadicus.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Buttress.jsfx" type="effect" desc="Buttress Bass (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "BassKit" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BassKit (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Buttress.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/Buttress.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="CataclysmicClipper.jsfx" type="effect" desc="Cataclysmic Clipper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ADClip8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ADClip8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-02-29T19:13:14Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/690f09a383cff3e013c80649a1b0f079d8c1471e/Various/CataclysmicClipper.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="ChannelTwister.jsfx" type="effect" desc="Channel Twister (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "MSFlipTimer","LRFlipTimer", "LeftoMono" & "RightoMono" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/MSFlipTimer (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/LRFlipTimer (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/LeftoMono (MIT License) https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/RightoMono (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-29T16:50:37Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/2c6bded83391733d219e6bc11e709619d923d268/Various/ChannelTwister.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="ClippySquish.jsfx" type="effect" desc="ClippySquish Compressor Soft Clipper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Compresaturator" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Compresaturator (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/ClippySquish.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Convolvulus.jsfx" type="effect" desc="Convolvulus (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "LRConvolve2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/LRConvolve2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-07T10:39:38Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/da0670699f400f836e8f33716dc866f466a7cb59/Various/Convolvulus.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-02-21T09:31:47Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/8dcf1cf1c5334dff7ab1c9195dba281582bcfd9b/Various/Convolvulus.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2025-03-04T15:39:16Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/274932f362154ea8393b317b229e610fe75ca0ba/Various/Convolvulus.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="CoralBones.jsfx" type="effect" desc="Coral Bones Bass (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "FathomFive" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/FathomFive (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/CoralBones.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/CoralBones.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Discordia.jsfx" type="effect" desc="Discordia Distortion (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Distortion" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Distortion (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Discordia.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Discordia.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2024-01-19T17:10:04Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/340cbc25a38e70f35b5d04fbd29be3a7480af770/Various/Discordia.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Dolbify.jsfx" type="effect" desc="Dolbify Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Dubly3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dubly3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-03T11:07:38Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/c312b07f1c40e24a007cca82ecf8962dce443115/Various/Dolbify.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Domar.jsfx" type="effect" desc="Domar Brightness Acceleration Limiter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Acceleration2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Acceleration2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Domar.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="EdgeFilter.jsfx" type="effect" desc="EdgeFilter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "BiquadHiLo" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BiquadHiLo (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-01-31T13:03:06Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/94b1734edb0760ef670feec1eacedb365ed9b080/Various/EdgeFilter.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Elemental.jsfx" type="effect" desc="Elemental Mastering (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Mastering" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Mastering2(MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-01-29T14:54:46Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/b1ff3e2cf7ffc9b15b153b1e54eeb735e9803251/Various/Elemental.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-01-29T15:01:42Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/dafeada6727c70f841d3118aaff64e86a27e46b8/Various/Elemental.jsfx</source>
+      </version>
+      <version name="2.0" author="chmaha" time="2025-11-25T00:03:09Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/62a78270c9ab77387448cb80bd8873fe42f26af7/Various/Elemental.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Enyo.jsfx" type="effect" desc="Enyo Noise Oscillator (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Noise" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Noise (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-25T15:09:19Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/10b2621ec3a03441b555f44ca65a4ea7c06959da/Various/Enyo.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Eris.jsfx" type="effect" desc="Eris Distortion (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Focus" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Focus (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Eris.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Eris.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Evolution.jsfx" type="effect" desc="Evolution Channel Strip (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "CStrip2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/CStrip2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Evolution.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="FILM.jsfx" type="effect" desc="FILM: Flippin' Incredible Loudness Maximizer (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "NC-17" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/NCSeventeen (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/FILM.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="flattop.jsfx" type="effect" desc="Flattop Clipper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ClipOnly2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipOnly2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/flattop.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Flutternutter.jsfx" type="effect" desc="Flutternutter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Flutter" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Flutter (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Flutternutter.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="FlutterNutter2.jsfx" type="effect" desc="FlutterNutter 2 (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Flutter2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Flutter2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-02T13:04:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/9073ed3b8dcb287ee00e51f0e464556d61daee0d/Various/FlutterNutter2.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="FrostHype.jsfx" type="effect" desc="FrostHype Soft Clipper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Hypersoft" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Hypersoft (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-02T17:13:51Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/aec0822f6a0d1a8301d71bc52fccccd0547a882a/Various/FrostHype.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="GrooveLens.jsfx" type="effect" desc="GrooveLens Metronome (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SoftClock" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SoftClock (MIT License) Further additions such as beat display and various improvements by chmaha JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-08-25T16:42:16Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/032900df279a8d9df01b16ace59a749f8a516228/Various/GrooveLens.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-08-25T16:52:12Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/51463638ddd40ea15f94c45fa6da9380f67da7da/Various/GrooveLens.jsfx</source>
+      </version>
+      <version name="1.2" author="chmaha" time="2025-08-25T17:19:12Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/4be350cf47970acc24de7281353262cb1585c070/Various/GrooveLens.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="GrooveLens2.jsfx" type="effect" desc="GrooveLens 2 Metronome (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SoftClock2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SoftClock2 (MIT License) Further additions such as beat display and various improvements by chmaha JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-11-14T15:12:12Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/fd0fb30f45fe30ba96c863c888dcd6dff1cd01c5/Various/GrooveLens2.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Heft.jsfx" type="effect" desc="Heft Bass (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Weight" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Weight (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Heft.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Heft.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Hippity Hoppity.jsfx" type="effect" desc="Hippity Hoppity Lo-Fi (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pockey2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pockey2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Hippity%20Hoppity.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="LonelyCurve.jsfx" type="effect" desc="LonelyCurve EQ (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "BiquadStack" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BiquadStack (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-01T14:32:01Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/92648d0e56e0a14fec34bfdde92b99e72feb534b/Various/LonelyCurve.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Luminator.jsfx" type="effect" desc="Luminator Waveshaper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Inflamer" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Inflamer (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-07T12:09:31Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/998fa9802e496c094f6f19584e3f591a702c2e67/Various/Luminator.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="LunaEQ.jsfx" type="effect" desc="Luna EQ (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Baxandall2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-19T18:00:16Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/c19e7f37835b3f5d7d780e4b8c2ed2b532407117/Various/LunaEQ.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Lyra.jsfx" type="effect" desc="Lyra Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ButterComp2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ButterComp2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Lyra.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/Lyra.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Lyra.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="MadHatter.jsfx" type="effect" desc="Mad Hatter Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pop2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pop2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/MadHatter.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="MadHatter2.jsfx" type="effect" desc="Mad Hatter 2 Compressor/Gate (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pop3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pop3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-02T17:47:37Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/ab03cdfc1b8652e814bae937ac1ec0afc87497cf/Various/MadHatter2.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-03-05T22:10:31Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/5fd00e2a0025d2f33768a4d69a6cdc1781d58b12/Various/MadHatter2.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Magnetica.jsfx" type="effect" desc="Magnetica Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "TapeHack" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/TapeHack (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-08-23T23:01:46Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/ab3a734ba5402185910c307f42b4b892da311a6f/Various/Magnetica.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-08-23T23:10:36Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/f7becae3a6d17efde1f1f785d3c4eedddfe0df64/Various/Magnetica.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Magnetique.jsfx" type="effect" desc="Magnétique Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToTape6" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToTape6 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Magnetique.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/Magnetique.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Millie.jsfx" type="effect" desc="Millie Brightness EQ (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestAir" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestAir (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Millie.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="multisine.jsfx" type="effect" desc="Multisine Chebyshev Filter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pafnuty2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pafnuty2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/multisine.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="MuTube.jsfx" type="effect" desc="MuTube Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "VariMu" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/VariMu (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/MuTube.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/MuTube.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/MuTube.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="NogginKnock.jsfx" type="effect" desc="Noggin Knock Head Bump (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "DubSub2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DubSub2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-02T11:44:27Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/975ce55d68496c33f7ae6d6c087dc908b205b9b0/Various/NogginKnock.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Oxonia.jsfx" type="effect" desc="Oxonia Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Logical4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Logical4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Oxonia.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Oxonia.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Pascal.jsfx" type="effect" desc="Pascal Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pressure5" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pressure5 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Pascal.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Pascal.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Phasity.jsfx" type="effect" desc="Phasity Delay Timing Tool (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SampleDelay" by Chris Johnson with adaptation by chmaha https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SampleDelay (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Phasity.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="port-and-lemon.jsfx" type="effect" desc="Port-and-Lemon Compressor / Gate (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Compressor and Gate Uses DSP from airwindows "Dynamics" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Dynamics (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/port-and-lemon.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/port-and-lemon.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/port-and-lemon.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Possessed.jsfx" type="effect" desc="Possessed Waveshaper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "mojo" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/mojo (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-11-26T15:56:12Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/5eb4d0203aa7005d62b72a28499ee98f9723550a/Various/Possessed.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="PrimalOvertones.jsfx" type="effect" desc="Primal Overtones Waveshaper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ShortBuss" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ShortBuss (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-02-19T16:00:27Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/f964690cc7c62d408d9b818b5e6fd556b1877ad8/Various/PrimalOvertones.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="QuantumGain.jsfx" type="effect" desc="Quantum Gain (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "BitShiftGain" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BitShiftGain (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-19T10:10:37Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/a47cf7bfe49d6cfcfe03caaabb9974164c9fc5d8/Various/QuantumGain.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="QuantumPan.jsfx" type="effect" desc="Quantum Pan (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "BitShiftPan" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/BitShiftPan (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-19T12:52:46Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/43742e4c1c501d1329e0fead54367f247e805d18/Various/QuantumPan.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="ReelDeel.jsfx" type="effect" desc="ReelDeel Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToTape8" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToTape8 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-01-30T11:17:51Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/b273832b6f963026469e1de18358029d70b2c368/Various/ReelDeel.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-01-30T12:40:22Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/65150403f2e9f0e8cfcb7ba22fc297418d1efe29/Various/ReelDeel.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Reelism.jsfx" type="effect" desc="Reelism Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToTape7" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToTape7 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-07T16:17:52Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/22a7a3e9c5a0574b332a7b27d8f4ab3db210de97/Various/Reelism.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Reelty.jsfx" type="effect" desc="Reelty Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "FromTape" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/FromTape (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Reelty.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Saccharine.jsfx" type="effect" desc="Saccharine Distortion (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Sweeten" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Sweeten (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-07T13:29:46Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/ded5deee6a7f00bfd83bfccf619706f874d3503c/Various/Saccharine.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="SAW3.jsfx" type="effect" desc="SAW3 — Seriously Amazing Widener 3 (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Srsly3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Srsly3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-03T12:48:40Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/4048a53238c01bee75fdeb0cf6b674b9a3737eb9/Various/SAW3.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="SeriouslyAmazingWidener.jsfx" type="effect" desc="SAW — Seriously Amazing Widener (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Srsly" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Srsly (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/SeriouslyAmazingWidener.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="SeriouslyAmazingWidener2.jsfx" type="effect" desc="SAW2 — Seriously Amazing Widener 2 (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 SAW2 - Seriously Amazing Widener 2. Uses DSP from airwindows "Srsly2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Srsly2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.3" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/SeriouslyAmazingWidener2.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/SeriouslyAmazingWidener2.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Sillons.jsfx" type="effect" desc="Sillons Vinyl Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ToVinyl4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ToVinyl4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Sillons.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T11:55:20Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/875c6e2277a5df0e51ef2bbf4bfc69dd1c43f09f/Various/Sillons.jsfx</source>
+      </version>
+      <version name="1.4" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Sillons.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="SineGlow.jsfx" type="effect" desc="SineGlow Saturation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "PurestSaturation" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestSaturation (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-12-01T13:21:49Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/827025ff06877804e696c26a8d8426931912b402/Various/SineGlow.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Snippity.jsfx" type="effect" desc="Snippity Soft Clipper (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ClipSoftly" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ClipSoftly (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Snippity.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Solar_Wind.jsfx" type="effect" desc="Solar Wind Aural Exciter (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Hype" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Hype (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Solar_Wind.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Solar_Wind.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Squishmallow.jsfx" type="effect" desc="Squishmallow Compressor (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Pressure6" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pressure6 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-11-15T19:18:53Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0165e9fab17bab79e61f114a5392cf83cb2d8c32/Various/Squishmallow.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Stratos.jsfx" type="effect" desc="Stratos Brightness Control (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Air4" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Air4 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-01-31T09:39:32Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/85f1129983ef8ba8353ad6408bd2a77334241def/Various/Stratos.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="StudioSphere.jsfx" type="effect" desc="StudioSphere Room Simulator (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Cans" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Cans (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-01T16:15:28Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/ac931c5f815c559dc4a04235813564b4ca6a0707/Various/StudioSphere.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Titan.jsfx" type="effect" desc="Titan Capacitor Distortion (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Capacitor2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Capacitor2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.2" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Titan.jsfx</source>
+      </version>
+      <version name="1.3" author="chmaha" time="2023-04-14T12:05:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/0a01e9723d498308910ba0723037f7e705f78c67/Various/Titan.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="TOED.jsfx" type="effect" desc="TOED - Transformer Overdrive Emulator Distortion (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Coils2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Coils2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-03-19T12:09:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/bc2a0d756858f03479dfefa4e5248075f1471521/Various/TOED.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="TripleCurve.jsfx" type="effect" desc="TripleCurve EQ (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Parametric" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Parametric (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-01T12:55:22Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/5ead5267bc639893264f061004f6d3260af6e8f1/Various/TripleCurve.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Typhon.jsfx" type="effect" desc="Typhon Saturation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Creature" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Creature (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-01-22T11:12:59Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/d59635b62a7fde67f2bf3d0bed5fc7b6e0b20e08/Various/Typhon.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Valvity.jsfx" type="effect" desc="Valvity Tube Saturation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "Tube2" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Tube2 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2023-04-13T17:50:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/1befb663e2faf08e585b227d0c30549eaf23f2a4/Various/Valvity.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="VelvetEQ.jsfx" type="effect" desc="VelvetEQ (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SmoothEQ3" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SmoothEQ3 (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-11-14T18:41:09Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/ea06a6b755085c10ffaf12401c6d272f5a47e325/Various/VelvetEQ.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="Walkety.jsfx" type="effect" desc="Walkety Tape Emulation (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "ChromeOxide" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ChromeOxide (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2024-03-19T11:53:54Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/6d20f6f14741ddad919684741bb41817991ea2f6/Various/Walkety.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="WideAlchemy.jsfx" type="effect" desc="Wide Alchemy (chmaha)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uses DSP from airwindows "SweetWide" by Chris Johnson https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SweetWide (MIT License) JSFX version released under GPLv3 license\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="chmaha" time="2025-02-07T10:39:38Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/da0670699f400f836e8f33716dc866f466a7cb59/Various/WideAlchemy.jsfx</source>
+      </version>
+      <version name="1.1" author="chmaha" time="2025-02-21T09:31:47Z">
+        <source>https://github.com/chmaha/airwindows-JSFX-ports/raw/c8aa8a1ad65527ddf9b51884bc9e38e3bdb2717c/Various/WideAlchemy.jsfx</source>
+      </version>
+    </reapack>
+  </category>
+</index>
