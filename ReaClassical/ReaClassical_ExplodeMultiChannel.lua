@@ -174,12 +174,6 @@ function main()
     show_track_name_dialog(mixer_tracks)
 
     PreventUIRefresh(-1)
-    local response = MB("Would you like to add any special tracks (aux, submix, room tone, reference)?",
-        "Explode Multi-Channel", 4)
-    if response == 6 then
-        local add_special_tracks = NamedCommandLookup("_RS9c0fa5c1aae86bf8559df83dd6516c0aa35e264f")
-        Main_OnCommand(add_special_tracks, 0)
-    end
 
     if updated_folders == 1 then -- run F7 again
         Main_OnCommand(F7_sync, 0)
@@ -192,6 +186,9 @@ function main()
 
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
+
+    local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
+    Main_OnCommand(mission_control, 0)
 
     Undo_EndBlock("Explode Multi-channel", 0)
 end
