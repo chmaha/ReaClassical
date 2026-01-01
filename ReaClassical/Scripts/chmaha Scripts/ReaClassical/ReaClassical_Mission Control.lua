@@ -961,6 +961,15 @@ function main()
         end
 
         ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Statistics") then
+            local stats = NamedCommandLookup("_RScc9d70f4ec5aeb05f992cbe0686cfe1ad6ff5c1d")
+            Main_OnCommand(stats, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Project Statistics")
+        end
+
+        ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Help") then
             local help = NamedCommandLookup("_RSf03944e159952885b66c7c1be2754e2b3c7d4b07")
             Main_OnCommand(help, 0)
