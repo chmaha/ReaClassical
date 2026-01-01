@@ -82,7 +82,7 @@ local ImGui        = require 'imgui' '0.10'
 -- Default window settings
 local win          = {
   width = 300,
-  height = 425,
+  height = 440,
   xpos = nil,
   ypos = nil
 }
@@ -705,7 +705,7 @@ function draw(playstate)
   end
   local session_w, session_h = ImGui.CalcTextSize(ctx, display_session)
   -- Smaller gap from take number to match original
-  ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h)
+  ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h*0.95)
   ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple (RGBA)
   ImGui.Text(ctx, display_session)
   ImGui.PopStyleColor(ctx)
@@ -822,12 +822,7 @@ end
   end
 
   -- Rank and Notes section below buttons
-  local rank_y = button_y + button_height + (20 * scale)
-
-  -- Add extra space if showing the select message
-  if show_select_message then
-    rank_y = rank_y + ImGui.GetTextLineHeightWithSpacing(ctx)
-  end
+  local rank_y = button_y + button_height + (30 * scale)
 
   -- Show indicator when editing a selected item (stopped mode only)
   if playstate == 0 and editing_item then
