@@ -18,6 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+-- Folder browser section builds upon Sexan's ImGui FileManager
+-- Original: https://github.com/GoranKovac/ReaScripts/blob/master/ImGui_Tools/FileManager.lua
+-- Extended with folder creation/deletion/rename for recording path management
+-- License: GPL v3
+
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
