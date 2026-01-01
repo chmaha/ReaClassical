@@ -42,12 +42,14 @@ local ImGui = require 'imgui' '0.10'
 local ctx = ImGui.CreateContext('Workflow Selector')
 local window_open = true
 
-local WINDOW_W = 350
-local WINDOW_H = 200
+local WINDOW_W = 300
+local WINDOW_H = 225
 
 local track_count = 10
 local workflow_type = 0 -- 0 = Horizontal, 1 = Vertical
 local first_frame = true
+local show_min_message = false
+local message_timer = 0
 
 ---------------------------------------------------------------------
 
@@ -64,29 +66,46 @@ local function main()
             first_frame = false
         end
 
-        ImGui.SetNextWindowSize(ctx, WINDOW_W, WINDOW_H, ImGui.Cond_FirstUseEver)
-        local opened, open_ref = ImGui.Begin(ctx, "Create ReaClassical Project", window_open)
+        -- Update message timer
+        if show_min_message then
+            message_timer = message_timer + 1
+            if message_timer > 120 then -- Hide after ~2 seconds (at 60fps)
+                show_min_message = false
+                message_timer = 0
+            end
+        end
+
+        ImGui.SetNextWindowSize(ctx, WINDOW_W, WINDOW_H, ImGui.Cond_Always)
+        local window_flags = ImGui.WindowFlags_NoResize
+        local opened, open_ref = ImGui.Begin(ctx, "Create ReaClassical Project", window_open, window_flags)
         window_open = open_ref
 
         if opened then
             local avail_w = ImGui.GetContentRegionAvail(ctx)
 
             -- Number of tracks section
-            ImGui.Text(ctx, "Number of Tracks:")
+            ImGui.Text(ctx, "Number of tracks per folder:")
             ImGui.SameLine(ctx)
 
             -- Minus button
             if ImGui.Button(ctx, "-", 30, 0) then
-                track_count = math.max(1, track_count - 1)
+                track_count = math.max(2, track_count - 1)
             end
 
             ImGui.SameLine(ctx)
 
             -- Track count input
-            ImGui.SetNextItemWidth(ctx, 80)
+            ImGui.SetNextItemWidth(ctx, 40)
             local changed, new_count = ImGui.InputInt(ctx, "##track_count", track_count, 0, 0)
             if changed then
-                track_count = math.max(1, new_count)
+                if new_count < 2 then
+                    track_count = 2
+                    show_min_message = true
+                    message_timer = 0
+                else
+                    track_count = new_count
+                    show_min_message = false
+                end
             end
 
             ImGui.SameLine(ctx)
@@ -94,9 +113,18 @@ local function main()
             -- Plus button
             if ImGui.Button(ctx, "+", 30, 0) then
                 track_count = track_count + 1
+                show_min_message = false
             end
 
-            ImGui.Spacing(ctx)
+            -- Show gentle message if minimum not met (fixed space to prevent resizing)
+            if show_min_message then
+                ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+                ImGui.Text(ctx, "Minimum of 2 tracks per folder required")
+                ImGui.PopStyleColor(ctx)
+            else
+                ImGui.Dummy(ctx, 0, ImGui.GetTextLineHeight(ctx)) -- Reserve space for message
+            end
+
             ImGui.Spacing(ctx)
 
             -- Workflow type section
@@ -124,10 +152,7 @@ local function main()
             -- OK and Cancel buttons
             local button_w = 100
             local button_spacing = 10
-            local total_button_w = (button_w * 2) + button_spacing
-            local button_x = (avail_w - total_button_w) / 2
 
-            ImGui.SetCursorPosX(ctx, button_x)
             if ImGui.Button(ctx, "OK", button_w, 30) then
                 -- Store track count in project extended state
                 SetProjExtState(0, "ReaClassical", "TrackCount", tostring(track_count))
