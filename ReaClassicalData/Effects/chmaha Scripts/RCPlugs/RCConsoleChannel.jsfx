@@ -1,0 +1,98 @@
+NoIndex: true
+desc:RCConsoleChannel (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Desk" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Deck (MIT License)
+  JSFX version released under GPLv3 license
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+freemem = 0;
+dL = freemem; freemem+=5000;
+dR = freemem; freemem+=5000;
+
+@slider
+
+@block
+
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+gain = 0.135;
+slewgain = 0.208;
+prevslew = 0.333;
+
+balanceB = 0.0001;
+slewgain *= overallscale;
+prevslew *= overallscale;
+balanceB /= overallscale;
+balanceA = 1.0 - balanceB;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+slew = inputSampleL - lastSampleL;
+lastSampleL = inputSampleL;
+
+bridgerectifier = abs(slew*slewgain);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+(slew > 0) ? slew = bridgerectifier/slewgain
+: slew = -(bridgerectifier/slewgain);
+
+inputSampleL = (lastOutSampleL*balanceA) + (lastSampleL*balanceB) + slew;
+lastOutSampleL = inputSampleL;
+
+combsample = abs(drySampleL*lastSampleL);
+(combsample > 1.0) ? combsample = 1.0;
+inputSampleL -= (lastSlewL * combsample * prevslew);
+lastSlewL = slew;
+
+inputSampleL *= gain;
+bridgerectifier = abs(inputSampleL);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+
+(inputSampleL > 0) ? inputSampleL = bridgerectifier
+: inputSampleL = -bridgerectifier;
+inputSampleL /= gain;
+
+slew = inputSampleR - lastSampleR;
+lastSampleR = inputSampleR;
+
+bridgerectifier = abs(slew*slewgain);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+(slew > 0) ? slew = bridgerectifier/slewgain
+: slew = -(bridgerectifier/slewgain);
+
+inputSampleR = (lastOutSampleR*balanceA) + (lastSampleR*balanceB) + slew;
+lastOutSampleR = inputSampleR;
+
+combsample = abs(drySampleR*lastSampleR);
+(combsample > 1.0) ? combsample = 1.0;
+inputSampleR -= (lastSlewR * combsample * prevslew);
+lastSlewR = slew;
+
+inputSampleR *= gain;
+bridgerectifier = abs(inputSampleR);
+(bridgerectifier > 1.57079633) ? bridgerectifier = 1.0
+: bridgerectifier = sin(bridgerectifier);
+
+(inputSampleR > 0) ? inputSampleR = bridgerectifier
+: inputSampleR = -bridgerectifier;
+inputSampleR /= gain;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

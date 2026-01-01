@@ -1,0 +1,197 @@
+Version: 1.2
+desc:GrooveLens Metronome (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "SoftClock" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SoftClock (MIT License)
+  Further additions such as beat display and various improvements by chmaha
+  JSFX version released under GPLv3 license
+
+// Sliders
+slider1:80<40,241,1>Tempo
+slider2:4<0,32,1{off,1,2,3,4,5 (3+2),6 (3+3),7 (4+3),8 (2*4),9 (3+3+3),10 (5+5),11 (3+3+3+2),11 (4+4+3),11 (5+5+1),11 (6+5),13 (3+3+3+4),16 (2*8),13 (4+4+5),13 (5+5+3),17 (4+4+4+4+1),17 (5+5+5+2),17 (7+7+3),17 (8+8+1),19 (4+4+4+4+3),24 (3*8),19 (5+5+5+4),19 (7+7+5),19 (8+8+3),23 (4+4+4+4+4+3),23 (5+5+5+8),23 (7+7+7+2),23 (8+8+7),32 (4*8)}>Numerator
+slider3:4<0,17,1>Denominator
+slider4:0<0,1,0.01>Swing
+slider5:0<0,1,0.01>BigBeat
+slider6:0.5<0,1,0.01>Accents
+slider7:0.5<0,1,0.01>Boost
+slider8:0.5<0,1,0.01>Speed
+slider9:0<0,3,1{Sound and Display ON,Sound ON | Display OFF,Sound OFF | Display ON}>Audiovisuals
+
+@init
+
+freemem = 0;
+beatAccent = freemem; freemem += 35;
+beatSwing  = freemem; freemem += 35;
+beatTable  = freemem; freemem += 35;
+
+beatTable[0]=0; beatTable[1]=1; beatTable[2]=2; beatTable[3]=3;
+beatTable[4]=4; beatTable[5]=5; beatTable[6]=6; beatTable[7]=7;
+beatTable[8]=8; beatTable[9]=9; beatTable[10]=10; beatTable[11]=11;
+beatTable[12]=11; beatTable[13]=11; beatTable[14]=11; beatTable[15]=13;
+beatTable[16]=16; beatTable[17]=13; beatTable[18]=13; beatTable[19]=17;
+beatTable[20]=17; beatTable[21]=17; beatTable[22]=17; beatTable[23]=19;
+beatTable[24]=24; beatTable[25]=19; beatTable[26]=19; beatTable[27]=19;
+beatTable[28]=23; beatTable[29]=23; beatTable[30]=23; beatTable[31]=23;
+beatTable[32]=32; beatTable[33]=32; beatTable[34]=32;
+
+prevB = 0;  // track previous numerator
+lastVolume = 1; // initialize previous strong beat volume
+
+@slider
+A = (slider1-40)/200.99;
+B_new = slider2/32.99;
+
+(B_new != prevB) ? (
+    beatPos = 1;
+    barPos = 0;
+    prevB = B_new;
+    lastVolume = 1;
+    beatColor = 1;
+);
+B = B_new;  // now assign B for calculations
+
+C = slider3/16.99;
+D = slider4;
+E = slider5;
+F = slider6;
+G = slider7;
+H = slider8;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+bpm = floor((A*200.99)+40);
+beatCode = floor(B*32.99);
+notes = max(floor(C*16.99)/4,0.125);
+
+bpmTarget = (srate*60)/(bpm*notes);
+swing = D*bpmTarget*0.66666;
+bigbeat = E*bpmTarget*0.33333;
+
+beatMax = beatTable[beatCode];
+
+x=0;
+while (x <= beatMax) (
+    beatAccent[x] = abs(beatMax-(x*2))/(beatMax*1.618033988749894);
+    beatSwing[x] = (x%2 > 0) ? 0 : swing;
+    x+=1;
+);
+
+(beatCode > 0) ? (
+    beatAccent[1] = 1;
+    beatSwing[1] = 0;
+);
+
+(beatCode == 4)  ? (beatAccent[3]=0.9; beatSwing[3]=bigbeat;);
+(beatCode == 5)  ? (beatAccent[4]=0.9; beatSwing[4]=bigbeat;);
+(beatCode == 6)  ? (beatAccent[4]=0.9; beatSwing[4]=bigbeat;);
+(beatCode == 7)  ? (beatAccent[5]=0.9; beatSwing[5]=bigbeat;);
+(beatCode == 8)  ? (beatAccent[5]=0.9; beatSwing[5]=bigbeat;);
+(beatCode == 9)  ? (beatAccent[4]=0.9; beatAccent[7]=0.8;
+                    beatSwing[4]=bigbeat; beatSwing[7]=bigbeat;);
+(beatCode == 10) ? (beatAccent[6]=0.9; beatSwing[6]=bigbeat;);
+(beatCode == 11) ? (beatAccent[4]=0.9; beatAccent[7]=0.8; beatAccent[10]=0.7;
+                    beatSwing[4]=bigbeat; beatSwing[7]=bigbeat; beatSwing[10]=bigbeat;);
+(beatCode == 12) ? (beatAccent[5]=0.9; beatAccent[9]=0.8;
+                    beatSwing[5]=bigbeat; beatSwing[9]=bigbeat;);
+(beatCode == 13) ? (beatAccent[6]=0.9; beatAccent[11]=0.8;
+                    beatSwing[6]=bigbeat; beatSwing[11]=bigbeat;);
+(beatCode == 14) ? (beatAccent[7]=0.9; beatSwing[7]=bigbeat;);
+(beatCode == 15) ? (beatAccent[4]=0.9; beatAccent[7]=0.8; beatAccent[10]=0.7;
+                    beatSwing[4]=bigbeat; beatSwing[7]=bigbeat; beatSwing[10]=bigbeat;);
+(beatCode == 16) ? (beatAccent[9]=0.9; beatSwing[9]=bigbeat;);
+(beatCode == 17) ? (beatAccent[5]=0.9; beatAccent[9]=0.8;
+                    beatSwing[5]=bigbeat; beatSwing[9]=bigbeat;);
+(beatCode == 18) ? (beatAccent[6]=0.9; beatAccent[11]=0.8;
+                    beatSwing[6]=bigbeat; beatSwing[11]=bigbeat;);
+(beatCode == 19) ? (beatAccent[5]=0.9; beatAccent[9]=0.85; beatAccent[13]=0.8; beatAccent[17]=0.75;
+                    beatSwing[5]=bigbeat; beatSwing[9]=bigbeat; beatSwing[13]=bigbeat; beatSwing[17]=bigbeat;);
+(beatCode == 20) ? (beatAccent[6]=0.9; beatAccent[11]=0.8; beatAccent[16]=0.7;
+                    beatSwing[6]=bigbeat; beatSwing[11]=bigbeat; beatSwing[16]=bigbeat;);
+(beatCode == 21) ? (beatAccent[8]=0.9; beatAccent[15]=0.8;
+                    beatSwing[8]=bigbeat; beatSwing[15]=bigbeat;);
+(beatCode == 22) ? (beatAccent[9]=0.9; beatAccent[17]=0.8;
+                    beatSwing[9]=bigbeat; beatSwing[17]=bigbeat;);
+(beatCode == 23) ? (beatAccent[5]=0.9; beatAccent[9]=0.85; beatAccent[13]=0.8; beatAccent[17]=0.75;
+                    beatSwing[5]=bigbeat; beatSwing[9]=bigbeat; beatSwing[13]=bigbeat; beatSwing[17]=bigbeat;);
+(beatCode == 24) ? (beatAccent[9]=0.9; beatAccent[17]=0.8;
+                    beatSwing[9]=bigbeat; beatSwing[17]=bigbeat;);
+(beatCode == 25) ? (beatAccent[6]=0.9; beatAccent[11]=0.8; beatAccent[16]=0.7;
+                    beatSwing[6]=bigbeat; beatSwing[11]=bigbeat; beatSwing[16]=bigbeat;);
+(beatCode == 26) ? (beatAccent[8]=0.9; beatAccent[15]=0.8;
+                    beatSwing[8]=bigbeat; beatSwing[15]=bigbeat;);
+(beatCode == 27) ? (beatAccent[9]=0.9; beatAccent[17]=0.8;
+                    beatSwing[9]=bigbeat; beatSwing[17]=bigbeat;);
+(beatCode == 28) ? (beatAccent[5]=0.9; beatAccent[9]=0.85; beatAccent[13]=0.8; beatAccent[17]=0.75; beatAccent[21]=0.7;
+                    beatSwing[5]=bigbeat; beatSwing[9]=bigbeat; beatSwing[13]=bigbeat; beatSwing[17]=bigbeat; beatSwing[21]=bigbeat;);
+(beatCode == 29) ? (beatAccent[6]=0.9; beatAccent[11]=0.8; beatAccent[16]=0.7;
+                    beatSwing[6]=bigbeat; beatSwing[11]=bigbeat; beatSwing[16]=bigbeat;);
+(beatCode == 30) ? (beatAccent[8]=0.9; beatAccent[15]=0.8; beatAccent[22]=0.7;
+                    beatSwing[8]=bigbeat; beatSwing[15]=bigbeat; beatSwing[22]=bigbeat;);
+(beatCode == 31) ? (beatAccent[9]=0.9; beatAccent[17]=0.8;
+                    beatSwing[9]=bigbeat; beatSwing[17]=bigbeat;);
+(beatCode == 32) ? (beatAccent[9]=0.9; beatAccent[17]=0.8; beatAccent[25]=0.7;
+                    beatSwing[9]=bigbeat; beatSwing[17]=bigbeat; beatSwing[25]=bigbeat;);
+
+accent = 1-(1-F)^2;
+chaseSpeed = ((H*0.00016)+0.000016)/overallscale;
+rootSpeed = 1-(chaseSpeed*((1-H)+0.5)*4);
+pulseWidth = ((G*0.2)-((1-H)*0.03))/chaseSpeed;
+
+@sample
+barPos += 1;
+(barPos > bpmTarget) ? (
+    barPos=0;
+    beatPos+=1;
+    (beatPos > beatMax) ? beatPos=1;
+
+    curVol = beatAccent[beatPos];
+    (curVol == 1) ? (
+            beatColor = 1; // green
+            lastVolume = 1;
+        ) : ((lastVolume - curVol == 0.1) ? (
+            beatColor = 2; // yellow
+            lastVolume = curVol;
+        ) : (
+            beatColor = 0; // white
+        ));
+);
+
+cond = (barPos < (pulseWidth+beatSwing[beatPos])) && (barPos > beatSwing[beatPos]);
+(cond) ? (
+    inc = (((beatAccent[beatPos]*accent)+(1-accent))*chaseSpeed)+(inc*(1-chaseSpeed));
+) : (
+    inc *= rootSpeed;
+);
+
+sinePos += inc;
+(sinePos > $pi*2) ? sinePos -= $pi*2;
+
+(beatCode == 0 || slider9 == 2) ? (
+    // plugin disabled
+    spl0 = 0;
+    spl1 = 0;
+) : (
+spl0 = sin(sin(sinePos)*inc*8);
+spl1 = spl0;
+);
+
+@gfx
+showGraphics = (slider9 == 0 || slider9 == 2) && (beatCode > 0);
+
+gfx_setfont(1,"Arial",25);
+gfx_x = 170;
+gfx_y = 35;
+
+(showGraphics) ? (
+    // Set color based on beat
+    (beatColor == 1) ? (gfx_r=0; gfx_g=1; gfx_b=0;)
+    : (beatColor == 2) ? (gfx_r=1; gfx_g=0.8; gfx_b=0;)
+    : (gfx_r=0.6; gfx_g=0.6; gfx_b=0;)
+) : (
+    gfx_r = gfx_g = gfx_b = 0;
+);
+
+gfx_printf("Beat Position: %d / %d", beatPos, beatMax);

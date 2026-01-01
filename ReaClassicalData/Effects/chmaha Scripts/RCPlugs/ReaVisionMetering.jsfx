@@ -1,0 +1,2462 @@
+Version: 1.8
+desc:ReaVision Metering Suite (chmaha)
+author: chmaha
+about:
+  Released under GPLv3 license
+  Includes DSP (LGPL) from:
+  Cockos Loudness Meter Copyright (C) 2021 and later Cockos Incorporated
+  Cockos Bit Meter Copyright (C) 2020 and later Cockos Incorporated
+  Spectrograph Meter Copyright (C) 2007 Cockos Incorporated
+  https://www.gnu.org/licenses/lgpl-3.0.html
+  Includes DSP (MIT License) from:
+  ReJJ ReSpectrum Copyright (c) 2021 Justin Johnson
+  https://github.com/Justin-Johnson/ReJJ/tree/master/ReSpectrum
+
+
+slider1:k_system_mode=0<0,2,1>-k-meter type
+slider2:gonio_gain_state=0<0,2,1>-gonio boost
+slider3:Spectrum_Mode=0<0,6,1>-spectrum mode
+slider4:Tilt_Value=3<0,4,1>-spectrum tilt
+slider5:Show_Peaks=0<0,1,1>-spectrum peaks
+slider6:current_colormap=0<0,10,1>-spectro colors
+slider7:freq_zoom_factor=1<1,10,0.01>-spectrum zoom
+
+import Dependencies/chmaha_spectrum.jsfx-inc
+import Dependencies/svf_filter.jsfx-inc
+
+options:no_meter
+
+@init
+gfx_ext_retina=max(gfx_ext_retina,1);
+ext_nodenorm = 1;
+ext_noinit = 1;
+
+//==================================================================================
+// K-meter init
+//==================================================================================
+
+function init_k_system_button(xpos, ypos, buttonwidth) instance (x, y, width, pressed) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+  pressed = 0;
+);
+
+k_system_button.init_k_system_button(0, 0, 0); 
+
+// K-20 meter init
+k20_l.z1 = k20_l.z2 = k20_l.rms = k20_l.peak = 0;
+k20_l.cnt = k20_l.fpp = 0;
+k20_r.z1 = k20_r.z2 = k20_r.rms = k20_r.peak = 0;
+k20_r.cnt = k20_r.fpp = 0;
+
+function k20_init() (
+  this.hold_samples = (0.5 * srate + 0.5)|0;  // 0.5 second hold
+  this.omega = 9.72 / srate;  // Ballistic filter coefficient
+  this.z1 = this.z2 = this.rms = this.peak = 0;
+  this.cnt = 0;
+  this.fall = 1;
+);
+
+function k20_process(sample) local(s, t) (
+  s = sample * sample;
+  
+  // Update ballistic filters
+  this.z1 += this.omega * (s - this.z1);
+  this.z2 += this.omega * (this.z1 - this.z2);
+  
+  // Clamp filter states
+  this.z1 = max(0, min(50, this.z1));
+  this.z2 = max(0, min(50, this.z2));
+  
+  // RMS from second filter
+  this.rms = sqrt(2.0 * this.z2);
+  
+  // Digital peak tracking
+  t = abs(sample);
+  t >= this.peak ? (
+    this.peak = t;
+    this.cnt = this.hold_samples;
+  ) : this.cnt > 0 ? (
+    this.cnt -= 1;
+  ) : (
+    this.peak *= this.fall;
+    this.peak += 1*10^-10;
+  );
+);
+
+k20_l.k20_init();
+k20_r.k20_init();
+
+//==================================================================================
+// Spectrogram init
+//==================================================================================
+
+gfx_clear=-1;
+windowtype=-1;
+over24=1/24;
+first_load = 1; 
+
+lrecpos=0;
+
+fftsize=1024;
+histsize=fftsize*4;
+minvol=10^(-180/20*2); // squared
+freq_scale=0;
+islogmode=freq_scale>0.0;
+g_logscale=pow(10.0,(freq_scale<1 ? freq_scale: freq_scale*4.0-3.0));
+pixels_per_frame = 1;
+need_button_refs=1;
+rec_write_pos = 0;
+
+/*
+ * Initialise the colormap button
+ */
+function init_colormap_button(xpos, ypos, buttonwidth) instance (x, y, width) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+);
+
+/*
+ * Draw the colormap button
+ */
+function draw_colormap_button() instance (x, y, width, height) 
+local(w, h, a, label) ( 
+  // Only show when hovering over spectrogram
+  mouse_x >= gfx_w/2 && mouse_x < gfx_w && mouse_y >= gfx_h/2 && mouse_y < gfx_h ? (
+    // Set label based on current colormap
+    current_colormap == 0 ? label = "Dark" :
+    current_colormap == 1 ? label = "Rooster" :
+    current_colormap == 2 ? label = "Viridis" :
+    current_colormap == 3 ? label = "Magma" :
+    current_colormap == 4 ? label = "Plasma" :
+    current_colormap == 5 ? label = "Inferno" :
+    current_colormap == 6 ? label = "Cividis" :
+    current_colormap == 7 ? label = "Mako" :
+    current_colormap == 8 ? label = "Rocket" :
+    current_colormap == 9 ? label = "Turbo" :
+    current_colormap == 10 ? label = "Parula" : label = "Dark";
+
+    gfx_a = 1;
+    gfx_measurestr(label, w, h);
+    height = h + 8;
+    
+    // Hover highlight
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.6;
+    ) : (
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.4;
+    );
+    
+    gfx_rect(x, y, width, h+9, 1);
+    
+    // Text color
+    gfx_r = (114 / 255);
+    gfx_g = (215 / 255);
+    gfx_b = (253 / 255);
+    gfx_a = 1;
+    gfx_x = x + (width / 2) - (w / 2);
+    gfx_y = y + 4;
+    gfx_drawstr(label);
+  );
+);
+
+/*
+ * Handle clicking the colormap button
+ */
+function handle_colormap_button() instance (x, y, width, height, pressed)
+(
+  mouse_cap & 1 && !pressed ? (
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      pressed = 1;
+      current_colormap = (current_colormap + 1) % 11;
+    ) : pressed = 0;
+  ) : ( 
+    !(mouse_cap & 1) ? pressed = 0;
+  );
+);
+
+function calc_color(mv, col*, current_colormap) globals(over24)
+(
+  col.r = col.g = col.b = 0; // start black
+  
+  current_colormap == 0 ? (
+    // Original Dark
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.b = (mv+168)*over24*0.1; col.r = (mv+168)*over24*0.02 ) :
+        mv <= -120 ? ( col.b = 0.1 + (mv+144)*over24*0.12; col.r = 0.02 + (mv+144)*over24*0.04 ) :
+                     ( col.r = (mv+120)*over24*0.08; col.b = 0.2 + (mv+120)*over24*0.12 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = (mv+96)*over24*0.3; col.b = 0.5 + (mv+96)*over24*0.25 ) :
+      mv <= -48 ? ( col.r = 0.3 + (mv+72)*over24*0.25; col.b = 0.7 + (mv+72)*over24*0.15 ) :
+      mv <= -24 ? ( col.r = 0.55 + (mv+48)*over24*0.2; col.b = 0.85 - (mv+48)*over24*0.1 ) :
+      mv <= 0   ? ( col.r = 0.7 + (mv+24)*over24*0.15; col.b = 0.75 + (mv+24)*over24*0.1 ) :
+                  ( col.r = 0.85; col.b = 0.85 )
+    );
+  ) :
+  
+  current_colormap == 1 ? (
+    // Original Cockos
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.b = (mv+168)*over24*0.25 ) :
+        mv <= -120 ? ( col.g = (mv+144)*over24*0.25; col.b = 0.25 ) :
+                     ( col.g = 0.25+(mv+120)*over24*0.5; col.b = 0.25-(mv+120)*over24*0.25 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = (mv+96)*over24; col.g = 0.75 ) :
+      mv <= -48 ? ( col.r = 1; col.g = 0.75-(mv+72)*over24*0.75 ) :
+      mv <= -24 ? ( col.r = 1; col.b = (mv+48)*over24 ) :
+      mv <= 0   ? ( col.r = col.b = 1; col.g = (mv+24)*over24 ) :
+                  ( col.r = col.g = col.b = 1 )
+    );
+  ) :
+  
+  current_colormap == 2 ? (
+    // Viridis (purple->blue->green->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.27 + (mv+168)*over24*0.02; col.g = 0.00 + (mv+168)*over24*0.05; col.b = 0.33 + (mv+168)*over24*0.08 ) :
+        mv <= -120 ? ( col.r = 0.29 + (mv+144)*over24*0.03; col.g = 0.05 + (mv+144)*over24*0.10; col.b = 0.41 + (mv+144)*over24*0.08 ) :
+                     ( col.r = 0.32 - (mv+120)*over24*0.10; col.g = 0.15 + (mv+120)*over24*0.15; col.b = 0.49 + (mv+120)*over24*0.05 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.22 - (mv+96)*over24*0.10; col.g = 0.30 + (mv+96)*over24*0.20; col.b = 0.54 - (mv+96)*over24*0.09 ) :
+      mv <= -48 ? ( col.r = 0.12 + (mv+72)*over24*0.10; col.g = 0.50 + (mv+72)*over24*0.18; col.b = 0.45 - (mv+72)*over24*0.12 ) :
+      mv <= -24 ? ( col.r = 0.22 + (mv+48)*over24*0.33; col.g = 0.68 + (mv+48)*over24*0.15; col.b = 0.33 - (mv+48)*over24*0.13 ) :
+      mv <= 0   ? ( col.r = 0.55 + (mv+24)*over24*0.38; col.g = 0.83 + (mv+24)*over24*0.10; col.b = 0.20 - (mv+24)*over24*0.07 ) :
+                  ( col.r = 0.93; col.g = 0.93; col.b = 0.13 )
+    );
+  ) :
+  
+  current_colormap == 3 ? (
+    // Magma (black->purple->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.00 + (mv+168)*over24*0.03; col.g = 0.00 + (mv+168)*over24*0.01; col.b = 0.02 + (mv+168)*over24*0.05 ) :
+        mv <= -120 ? ( col.r = 0.03 + (mv+144)*over24*0.10; col.g = 0.01 + (mv+144)*over24*0.02; col.b = 0.07 + (mv+144)*over24*0.15 ) :
+                     ( col.r = 0.13 + (mv+120)*over24*0.25; col.g = 0.03 + (mv+120)*over24*0.05; col.b = 0.22 + (mv+120)*over24*0.20 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.38 + (mv+96)*over24*0.32; col.g = 0.08 + (mv+96)*over24*0.12; col.b = 0.42 + (mv+96)*over24*0.08 ) :
+      mv <= -48 ? ( col.r = 0.70 + (mv+72)*over24*0.20; col.g = 0.20 + (mv+72)*over24*0.25; col.b = 0.50 - (mv+72)*over24*0.12 ) :
+      mv <= -24 ? ( col.r = 0.90 + (mv+48)*over24*0.05; col.g = 0.45 + (mv+48)*over24*0.30; col.b = 0.38 - (mv+48)*over24*0.13 ) :
+      mv <= 0   ? ( col.r = 0.95 + (mv+24)*over24*0.03; col.g = 0.75 + (mv+24)*over24*0.20; col.b = 0.25 - (mv+24)*over24*0.12 ) :
+                  ( col.r = 0.99; col.g = 0.95; col.b = 0.13 )
+    );
+  ) :
+  
+  current_colormap == 4 ? (
+    // Plasma (purple->pink->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.05 + (mv+168)*over24*0.15; col.g = 0.03 + (mv+168)*over24*0.00; col.b = 0.53 - (mv+168)*over24*0.03 ) :
+        mv <= -120 ? ( col.r = 0.20 + (mv+144)*over24*0.20; col.g = 0.03 + (mv+144)*over24*0.03; col.b = 0.50 - (mv+144)*over24*0.05 ) :
+                     ( col.r = 0.40 + (mv+120)*over24*0.20; col.g = 0.06 + (mv+120)*over24*0.09; col.b = 0.45 - (mv+120)*over24*0.08 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.60 + (mv+96)*over24*0.20; col.g = 0.15 + (mv+96)*over24*0.20; col.b = 0.37 - (mv+96)*over24*0.15 ) :
+      mv <= -48 ? ( col.r = 0.80 + (mv+72)*over24*0.10; col.g = 0.35 + (mv+72)*over24*0.25; col.b = 0.22 - (mv+72)*over24*0.10 ) :
+      mv <= -24 ? ( col.r = 0.90 + (mv+48)*over24*0.05; col.g = 0.60 + (mv+48)*over24*0.20; col.b = 0.12 - (mv+48)*over24*0.05 ) :
+      mv <= 0   ? ( col.r = 0.95 + (mv+24)*over24*0.03; col.g = 0.80 + (mv+24)*over24*0.15; col.b = 0.07 + (mv+24)*over24*0.13 ) :
+                  ( col.r = 0.98; col.g = 0.95; col.b = 0.20 )
+    );
+  ) :
+  
+  current_colormap == 5 ? (
+    // Inferno (black->purple->red->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.00 + (mv+168)*over24*0.04; col.g = 0.00 + (mv+168)*over24*0.01; col.b = 0.01 + (mv+168)*over24*0.05 ) :
+        mv <= -120 ? ( col.r = 0.04 + (mv+144)*over24*0.16; col.g = 0.01 + (mv+144)*over24*0.02; col.b = 0.06 + (mv+144)*over24*0.16 ) :
+                     ( col.r = 0.20 + (mv+120)*over24*0.30; col.g = 0.03 + (mv+120)*over24*0.07; col.b = 0.22 + (mv+120)*over24*0.18 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.50 + (mv+96)*over24*0.30; col.g = 0.10 + (mv+96)*over24*0.15; col.b = 0.40 - (mv+96)*over24*0.10 ) :
+      mv <= -48 ? ( col.r = 0.80 + (mv+72)*over24*0.12; col.g = 0.25 + (mv+72)*over24*0.30; col.b = 0.30 - (mv+72)*over24*0.15 ) :
+      mv <= -24 ? ( col.r = 0.92 + (mv+48)*over24*0.04; col.g = 0.55 + (mv+48)*over24*0.25; col.b = 0.15 - (mv+48)*over24*0.05 ) :
+      mv <= 0   ? ( col.r = 0.96 + (mv+24)*over24*0.02; col.g = 0.80 + (mv+24)*over24*0.15; col.b = 0.10 + (mv+24)*over24*0.15 ) :
+                  ( col.r = 0.99; col.g = 0.95; col.b = 0.25 )
+    );
+  ) :
+  
+  current_colormap == 6 ? (
+    // Cividis (blue->yellow, colorblind optimized)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.00 + (mv+168)*over24*0.12; col.g = 0.13 + (mv+168)*over24*0.07; col.b = 0.30 + (mv+168)*over24*0.08 ) :
+        mv <= -120 ? ( col.r = 0.12 + (mv+144)*over24*0.13; col.g = 0.20 + (mv+144)*over24*0.10; col.b = 0.38 + (mv+144)*over24*0.05 ) :
+                     ( col.r = 0.25 + (mv+120)*over24*0.15; col.g = 0.30 + (mv+120)*over24*0.12; col.b = 0.43 + (mv+120)*over24*0.00 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.40 + (mv+96)*over24*0.15; col.g = 0.42 + (mv+96)*over24*0.12; col.b = 0.43 - (mv+96)*over24*0.08 ) :
+      mv <= -48 ? ( col.r = 0.55 + (mv+72)*over24*0.15; col.g = 0.54 + (mv+72)*over24*0.13; col.b = 0.35 - (mv+72)*over24*0.10 ) :
+      mv <= -24 ? ( col.r = 0.70 + (mv+48)*over24*0.15; col.g = 0.67 + (mv+48)*over24*0.13; col.b = 0.25 - (mv+48)*over24*0.08 ) :
+      mv <= 0   ? ( col.r = 0.85 + (mv+24)*over24*0.10; col.g = 0.80 + (mv+24)*over24*0.15; col.b = 0.17 - (mv+24)*over24*0.05 ) :
+                  ( col.r = 0.95; col.g = 0.95; col.b = 0.12 )
+    );
+  ) :
+  
+  current_colormap == 7 ? (
+    // Mako (black->teal->cyan->blue)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.04 + (mv+168)*over24*0.02; col.g = 0.09 + (mv+168)*over24*0.06; col.b = 0.12 + (mv+168)*over24*0.08 ) :
+        mv <= -120 ? ( col.r = 0.06 + (mv+144)*over24*0.03; col.g = 0.15 + (mv+144)*over24*0.12; col.b = 0.20 + (mv+144)*over24*0.10 ) :
+                     ( col.r = 0.09 + (mv+120)*over24*0.05; col.g = 0.27 + (mv+120)*over24*0.15; col.b = 0.30 + (mv+120)*over24*0.12 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.14 + (mv+96)*over24*0.11; col.g = 0.42 + (mv+96)*over24*0.18; col.b = 0.42 + (mv+96)*over24*0.13 ) :
+      mv <= -48 ? ( col.r = 0.25 + (mv+72)*over24*0.20; col.g = 0.60 + (mv+72)*over24*0.15; col.b = 0.55 + (mv+72)*over24*0.15 ) :
+      mv <= -24 ? ( col.r = 0.45 + (mv+48)*over24*0.25; col.g = 0.75 + (mv+48)*over24*0.10; col.b = 0.70 + (mv+48)*over24*0.15 ) :
+      mv <= 0   ? ( col.r = 0.70 + (mv+24)*over24*0.20; col.g = 0.85 + (mv+24)*over24*0.10; col.b = 0.85 + (mv+24)*over24*0.10 ) :
+                  ( col.r = 0.90; col.g = 0.95; col.b = 0.95 )
+    );
+  ) :
+  
+  current_colormap == 8 ? (
+    // Rocket (black->red->pink->white)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.02 + (mv+168)*over24*0.04; col.g = 0.01 + (mv+168)*over24*0.01; col.b = 0.02 + (mv+168)*over24*0.03 ) :
+        mv <= -120 ? ( col.r = 0.06 + (mv+144)*over24*0.12; col.g = 0.02 + (mv+144)*over24*0.02; col.b = 0.05 + (mv+144)*over24*0.05 ) :
+                     ( col.r = 0.18 + (mv+120)*over24*0.22; col.g = 0.04 + (mv+120)*over24*0.06; col.b = 0.10 + (mv+120)*over24*0.08 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.40 + (mv+96)*over24*0.25; col.g = 0.10 + (mv+96)*over24*0.15; col.b = 0.18 + (mv+96)*over24*0.15 ) :
+      mv <= -48 ? ( col.r = 0.65 + (mv+72)*over24*0.15; col.g = 0.25 + (mv+72)*over24*0.25; col.b = 0.33 + (mv+72)*over24*0.22 ) :
+      mv <= -24 ? ( col.r = 0.80 + (mv+48)*over24*0.10; col.g = 0.50 + (mv+48)*over24*0.25; col.b = 0.55 + (mv+48)*over24*0.25 ) :
+      mv <= 0   ? ( col.r = 0.90 + (mv+24)*over24*0.08; col.g = 0.75 + (mv+24)*over24*0.20; col.b = 0.80 + (mv+24)*over24*0.15 ) :
+                  ( col.r = 0.98; col.g = 0.95; col.b = 0.95 )
+    );
+  ) :
+  
+  current_colormap == 9 ? (
+    // Turbo (blue->cyan->green->yellow->orange->red)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.19 + (mv+168)*over24*0.05; col.g = 0.07 + (mv+168)*over24*0.15; col.b = 0.48 + (mv+168)*over24*0.15 ) :
+        mv <= -120 ? ( col.r = 0.24 + (mv+144)*over24*0.01; col.g = 0.22 + (mv+144)*over24*0.20; col.b = 0.63 + (mv+144)*over24*0.10 ) :
+                     ( col.r = 0.25 - (mv+120)*over24*0.08; col.g = 0.42 + (mv+120)*over24*0.23; col.b = 0.73 + (mv+120)*over24*0.05 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.17 + (mv+96)*over24*0.10; col.g = 0.65 + (mv+96)*over24*0.20; col.b = 0.78 - (mv+96)*over24*0.15 ) :
+      mv <= -48 ? ( col.r = 0.27 + (mv+72)*over24*0.38; col.g = 0.85 + (mv+72)*over24*0.08; col.b = 0.63 - (mv+72)*over24*0.25 ) :
+      mv <= -24 ? ( col.r = 0.65 + (mv+48)*over24*0.28; col.g = 0.93 - (mv+48)*over24*0.20; col.b = 0.38 - (mv+48)*over24*0.18 ) :
+      mv <= 0   ? ( col.r = 0.93 + (mv+24)*over24*0.05; col.g = 0.73 - (mv+24)*over24*0.33; col.b = 0.20 - (mv+24)*over24*0.10 ) :
+                  ( col.r = 0.98; col.g = 0.40; col.b = 0.10 )
+    );
+  ) :
+current_colormap == 10 ? (
+    // Parula (deep blue->cyan->teal->orange->yellow)
+    mv <= -96 ? (
+      mv > -168 ? (
+        mv <= -144 ? ( col.r = 0.15 + (mv+168)*over24*0.08; col.g = 0.10 + (mv+168)*over24*0.12; col.b = 0.55 + (mv+168)*over24*0.20 ) :
+        mv <= -120 ? ( col.r = 0.23 + (mv+144)*over24*0.02; col.g = 0.22 + (mv+144)*over24*0.18; col.b = 0.75 + (mv+144)*over24*0.10 ) :
+                     ( col.r = 0.25 - (mv+120)*over24*0.05; col.g = 0.40 + (mv+120)*over24*0.18; col.b = 0.85 - (mv+120)*over24*0.02 )
+      );
+    ) : (
+      mv <= -72 ? ( col.r = 0.20 + (mv+96)*over24*0.08; col.g = 0.58 + (mv+96)*over24*0.14; col.b = 0.83 - (mv+96)*over24*0.18 ) :
+      mv <= -48 ? ( col.r = 0.28 + (mv+72)*over24*0.22; col.g = 0.72 + (mv+72)*over24*0.08; col.b = 0.65 - (mv+72)*over24*0.20 ) :
+      mv <= -24 ? ( col.r = 0.50 + (mv+48)*over24*0.25; col.g = 0.80 + (mv+48)*over24*0.08; col.b = 0.45 - (mv+48)*over24*0.22 ) :
+      mv <= 0   ? ( col.r = 0.75 + (mv+24)*over24*0.21; col.g = 0.88 + (mv+24)*over24*0.08; col.b = 0.23 - (mv+24)*over24*0.15 ) :
+                  ( col.r = 0.96; col.g = 0.96; col.b = 0.08 )
+    );
+  );
+);
+
+
+
+
+//==================================================================================
+// Spectrum analyzer init
+//==================================================================================
+
+Display_Mode=0;
+Ceiling_Value=0;
+Floor_Value=0;
+Type_Value=1;
+Block_Value=2;
+
+prev_mode_label = "";
+spectrum.mem_index = 0;
+
+/*
+ * Round number up or down
+ */
+function round(in) (
+  floor(in + 0.5 * sign(in));
+);
+
+/*
+ * Standard log2
+ */
+function log2(x) ( 
+  log(x) / log(2);
+);
+
+/*
+ * Return string of integer
+ */
+function int2str(intIn) local (outStr) (
+  strcpy(outStr=#,"");
+  sprintf(outStr,"%d",intIn);
+  outStr;
+);
+
+/*
+ * Update the state of any changes
+ */
+function update_state() local (blocks) (
+  spectrum.ceiling = Ceiling_Value == 0 ? 0 : Ceiling_Value == 1 ? 20 : Ceiling_Value == 2 ? 40;
+  spectrum.noise_floor = Floor_Value == 0 ? -90 : Floor_Value == 1 ? -140 : Floor_Value == 2 ? -200;
+  spectrum.noise_floor = Floor_Value == 0 ? -90 : Floor_Value == 1 ? -140 : Floor_Value == 2 ? -200;
+  spectrum.tilt = Tilt_Value == 0 ? 0 : Tilt_Value == 1 ? 1.5 : Tilt_Value == 2 ? 3 : Tilt_Value == 3 ? 4.5 :
+                  Tilt_Value == 4 ? 6;
+
+  spectrum.windowtype != Type_Value+1 ? spectrum.set_type(Type_Value+1);
+
+  blocks = (2 ^ (Block_Value+1)) * 1024;
+
+  spectrum.windowsize != blocks ? spectrum.set_block_size(blocks);
+
+  Display_Mode == 0 ? (
+    fill_r = 0 / 255;
+    fill_g = 153 / 255;
+    fill_b = 255 / 255;
+    fill_a = 0.5;
+    spectrum.set_fill(0, 1);
+    spectrum.set_color(0, fill_r, fill_g, fill_b, fill_a);
+    fill_r =  0 / 255;
+    fill_g = 255 / 255;
+    fill_b = 255 / 255;
+    fill_a = 0.5;
+    spectrum.set_fill(1, 1); 
+    spectrum.set_color(1, fill_r, fill_g, fill_b, fill_a);
+  ) : Display_Mode == 1 ? (
+    line_a=1.0;
+    line_r = 0 / 255; line_g = 153 / 255; line_b = 255 / 255;;
+    spectrum.set_fill(0, 0);
+    spectrum.set_color(0, line_r, line_g, line_b, line_a);
+    line_r = 253 / 255; line_g = 185 / 255; line_b = 21 / 255;;
+    spectrum.set_fill(1, 0);
+    spectrum.set_color(1, line_r, line_g, line_b, line_a);
+  );
+);
+
+/*
+ * Draw a crosshair where the mouse is
+ */
+function draw_mouse_crosshair() (
+  mouse_x >= 0 && mouse_x > gfx_w/2 && mouse_y >=0 && mouse_y < gfx_h/2-16 ? (
+    gfx_set(1.0, 1.0, 1.0, 0.3);
+    gfx_line(gfx_w/2,mouse_y,gfx_w,mouse_y,1);
+    gfx_line(mouse_x,0,mouse_x,gfx_h/2-16,1);
+  );
+);
+
+/*
+ * Draw a round cornered rectangle
+ */
+function draw_filled_rect(x, y, w, h, rad, alias) ( 
+    gfx_circle(x+rad, y+rad, rad, 1, alias);
+    gfx_circle(x+w-rad-1, y+rad, rad, 1, alias);
+    gfx_circle(x+w-rad-1, y+h-rad-1, rad, 1, alias);
+    gfx_circle(x+rad, y+h-rad-1, rad, 1, alias);
+
+    gfx_rect(x, y+rad, rad*2, h-rad*2, alias);
+    gfx_rect(x+w-rad*2, y+rad, rad*2, h-rad*2, alias);
+    gfx_rect(x+rad, y, w-rad*2, rad*2, alias);
+    gfx_rect(x+rad, y+h-rad*2, w-rad*2, rad*2, alias);
+
+    gfx_rect(x+rad, y+rad, w-rad*2, h-rad*2, alias);
+);
+
+/*
+ * Draw the info panel showing frequency, note, cent and dB
+ */
+function draw_info_panel(note_select)
+  local(read_freq, read_amp, q, band, C0, semi, octave, note, cent, keys, nn, note_freq, centstr, width, xpos, xpos2, ypos)
+ (
+  mouse_x >= gfx_w/2 && mouse_x < gfx_w && mouse_y >= 0 && mouse_y < gfx_h/2 ? (
+    gfx_set(0, 0.5, 1);
+    read_freq = note_select == 0 ? spectrum.x_to_freq(mouse_x) : note_select;
+    read_amp = spectrum.y_to_db(mouse_y);
+    
+    // Position in lower corner of upper right quadrant
+    width = 130;
+    gfx_ext_retina != 2 ? width -= 40;
+    
+    xpos = gfx_w/2 + 10;
+    xpos2 = xpos + 55;
+    gfx_ext_retina != 2 ? xpos2 -= 15;
+    ypos = 20;  // Bottom of upper half, minus panel height and margin
+    
+    gfx_x = xpos;
+    gfx_y = ypos;
+    
+    // Black background with transparency
+    gfx_r = 0; gfx_g = 0; gfx_b = 0; gfx_a = 0.7;
+    gfx_rect(gfx_x-5, gfx_y-5, width, gfx_texth*4, 1);
+    
+    // Blue border with transparency
+    gfx_r = (0 / 255); gfx_g = (153 / 255); gfx_b = (255 / 255); gfx_a = 0.5;
+    gfx_rect(gfx_x-10, gfx_y-10, width, gfx_texth*4, 1);
+    
+    // Light blue text
+    gfx_r = 114 / 255; gfx_g = 215 / 255; gfx_b = 253 / 255; gfx_a = 1.0;
+    gfx_ext_retina != 2 ? gfx_y -= 8;
+    
+    read_freq < 100 ? ( gfx_drawstr(sprintf(#,"%.1f Hz", read_freq)) ) :
+      (read_freq < 1000 ? ( gfx_drawstr(sprintf(#,"%.0f Hz", read_freq)) ) : ( 
+        (read_freq < 10000 ? ( gfx_drawstr(sprintf(#,"%.2f kHz", read_freq/1000)) ) : ( 
+          gfx_drawstr(sprintf(#,"%.1f kHz", read_freq/1000));
+        )
+      )
+    ));
+    
+    // 440Hz is A4, get C0 as offset from that
+    C0 = 440 * pow(2, -4.75);
+    // Get seminotes (note number), octave and note within octave
+    semi = round(12 * log2(read_freq / C0));
+    octave = floor(semi / 12);
+    note = (semi % 12);
+    // Calculate cents
+    note_freq = C0 * 2.71828 ^ (0.0577623 * semi);
+    cent = floor(1200 * log2(read_freq / note_freq));
+    // The above math goes a bit screwy for our -1 lowest octave.
+    // We get a kind of inverse reflection.  This fixes it up.
+    octave == -1 ? (
+      note = (13 - (-(semi))) % 12;
+      cent = -(99 - cent);
+    );
+    // Display it all
+    keys="CCDDEFFGGAAB";
+    strcpy_substr(nn=#,keys,note,1);
+    note==1 || note==3 || note==6 || note==8 || note==10 ? strcat(nn,"#");
+    strcat(nn, int2str(octave));
+    cent < 0 ? strcpy(centstr=#,"-") : strcpy(centstr=#,"+");
+    abs(cent) <= 9 ? strcat(centstr, "0");
+    strcat(centstr, sprintf(#, "%d", abs(cent)));
+    
+    gfx_x = xpos;
+    gfx_y += gfx_texth+2;
+    gfx_drawstr(nn);
+    gfx_x = xpos2;
+    gfx_drawstr(centstr);
+    gfx_x = xpos;
+    gfx_y += gfx_texth+2;
+    gfx_drawstr(sprintf(#,"%.1f DB", read_amp));
+  );
+);
+
+/*
+ * Initialize the mode button
+ */
+function init_mode_button(xpos, ypos, buttonwidth) instance (x, y, width, label) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+  label = "Full";
+);
+
+/*
+ * Initialize the channel button (appears when in Mid/Side or Left-Right mode)
+ */
+function init_channel_button(xpos, ypos, buttonwidth) instance (x, y, width, label) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+  label = "Mid+Side";
+);
+
+/*
+ * Draw the mode button
+ */
+function draw_mode_button() instance (x, y, width, label, height) local(w, h, a) ( 
+  mouse_x >= gfx_w/2 && mouse_x < gfx_w && mouse_y >= 0 && mouse_y < gfx_h/2 ? (
+    gfx_a = 1;
+    gfx_measurestr(label, w, h);
+    height = h + 8;
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.6;
+    ) : (
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.4;
+    );
+    gfx_rect(x, y, width, h+9, 1);
+    
+    gfx_r = (114 / 255);
+    gfx_g = (215 / 255);
+    gfx_b = (253 / 255);
+    gfx_a = 1;
+    gfx_x = x + (width / 2) - (w / 2);
+    gfx_y = y + 4;
+    gfx_drawstr(label);
+  );
+);
+
+/*
+ * Draw the channel button (only visible in Mid/Side or Left-Right mode)
+ */
+function draw_channel_button() instance (x, y, width, label, height) local(w, h, a) ( 
+  mouse_x >= gfx_w/2 && mouse_x < gfx_w && mouse_y >= 0 && mouse_y < gfx_h/2 ? (
+    gfx_a = 1;
+    gfx_measurestr(label, w, h);
+    height = h + 8;
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.6;
+    ) : (
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.4;
+    );
+    gfx_rect(x, y, width, h+9, 1);
+    
+    gfx_r = (114 / 255);
+    gfx_g = (215 / 255);
+    gfx_b = (253 / 255);
+    gfx_a = 1;
+    gfx_x = x + (width / 2) - (w / 2);
+    gfx_y = y + 4;
+    gfx_drawstr(label);
+  );
+);
+
+/*
+ * Handle clicking the mode button (Full -> Mid/Side -> Left-Right -> Full)
+ */
+function handle_mode_button() instance (x, y, width, label, pressed, height)
+  local ()
+(
+  mouse_cap & 1 && !pressed ? (
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      pressed = 1;
+      
+      // Cycle through modes
+      strcmp(label, "Full") == 0 ? (
+        label = "Mid/Side";
+        Spectrum_Mode = 3;  // Default to Mid+Side when entering Mid/Side mode
+      ) : strcmp(label, "Mid/Side") == 0 ? (
+        label = "Left/Right";
+        Spectrum_Mode = 6;  // Default to Left+Right when entering Left-Right mode
+      ) : strcmp(label, "Left/Right") == 0 ? (
+        label = "Full";
+        Spectrum_Mode = 0;
+      );
+    spectrum.reset_buffers()
+    ) : pressed = 0;
+  ) : ( 
+    !(mouse_cap & 1) ? pressed = 0;
+  );
+);
+
+/*
+ * Handle clicking the channel button (cycles through options based on current mode)
+ */
+function handle_channel_button(mode_label) instance (x, y, width, label, pressed, height)
+  local ()
+(
+  mouse_cap & 1 && !pressed ? (
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      pressed = 1;
+      
+      // Cycle based on current mode
+      strcmp(mode_label, "Mid/Side") == 0 ? (
+        // Mid/Side mode: Mid+Side -> Mid -> Side -> Mid+Side
+        strcmp(label, "Mid+Side") == 0 ? (
+          label = "Mid";
+          Spectrum_Mode = 1;
+        ) : strcmp(label, "Mid") == 0 ? (
+          label = "Side";
+          Spectrum_Mode = 2;
+        ) : strcmp(label, "Side") == 0 ? (
+          label = "Mid+Side";
+          Spectrum_Mode = 3;
+        );
+      ) : strcmp(mode_label, "Left/Right") == 0 ? (
+        // Left-Right mode: Left+Right -> Left -> Right -> Left+Right
+        strcmp(label, "Left+Right") == 0 ? (
+          label = "Left";
+          Spectrum_Mode = 4;
+        ) : strcmp(label, "Left") == 0 ? (
+          label = "Right";
+          Spectrum_Mode = 5;
+        ) : strcmp(label, "Right") == 0 ? (
+          label = "Left+Right";
+          Spectrum_Mode = 6;
+        );
+      );
+    spectrum.reset_buffers()
+    ) : pressed = 0;
+  ) : ( 
+    !(mouse_cap & 1) ? pressed = 0;
+  );
+);
+
+/*
+ * Initialise the peaks button
+ */
+function init_peak_button(xpos, ypos, buttonwidth) instance (x, y, width, label) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+  label = "Peaks";
+);
+
+/*
+ * Draw the peaks toggle button
+ */
+function draw_peak_button() instance (x, y, width, menutext, label, pressed, height, label) local(w, h, a) ( 
+  mouse_x >= gfx_w/2 && mouse_x < gfx_w && mouse_y >= 0 && mouse_y < gfx_h/2 ? (
+  gfx_a = 1;
+  gfx_measurestr(label, w, h);
+  height = h + 8;
+  mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+    gfx_r = (0 / 255);
+    gfx_g = (153 / 255);
+    gfx_b = (255 / 255);
+    gfx_a = 0.6;
+  ) : (
+    Show_Peaks ? a = 0.6 : a = 0.4;
+    gfx_r = (0 / 255);
+    gfx_g = (153 / 255);
+    gfx_b = (255 / 255);
+    gfx_a = a;
+  );
+  gfx_rect(x, y, width, h+9, 1);
+  
+  Show_Peaks ? (
+    gfx_r = (114 / 255);
+    gfx_g = (215 / 255);
+    gfx_b = (253 / 255);
+  ) : ( 
+    gfx_r = (114 / 300);
+    gfx_g = (215 / 300);
+    gfx_b = (253 / 300);    
+  );
+  gfx_a = 1;
+  gfx_x = x + (width / 2) - (w / 2);
+  gfx_y = y + 4;
+  gfx_drawstr(label);
+  );
+);
+
+/*
+ * Handle clicking the peaks button
+ */
+function handle_peak_button() instance (x, y, width, label, pressed, height, label)
+  local (last_clicked_item)
+(
+  last_clicked_item = 0;
+  mouse_cap & 1 && !pressed ? (
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      pressed = 1;
+
+      Show_Peaks = Show_Peaks ? Show_Peaks = 0 : 1;
+
+      spectrum.set_show_peaks(Show_Peaks);
+
+    ) : pressed = 0;
+  ) : ( 
+    !(mouse_cap & 1) ? pressed = 0;
+  );
+);
+
+/*
+ * Initialise the tilt button
+ */
+function init_tilt_button(xpos, ypos, buttonwidth) instance (x, y, width, label) (
+  x = xpos;
+  y = ypos;
+  width = buttonwidth;
+  label = "Tilt";
+);
+
+/*
+ * Draw the tilt toggle button
+ */
+function draw_tilt_button() instance (x, y, width, menutext, label, pressed, height, label) local(w, h, display_label) ( 
+  mouse_x >= gfx_w/2 && mouse_x < gfx_w && mouse_y >= 0 && mouse_y < gfx_h/2 ? (
+    gfx_a = 1;
+    // Create label with current tilt value based on index
+    Tilt_Value == 0 ? display_label = "Tilt: 0dB" :
+    Tilt_Value == 1 ? display_label = "Tilt: 1.5dB" :
+    Tilt_Value == 2 ? display_label = "Tilt: 3dB" :
+    Tilt_Value == 3 ? display_label = "Tilt: 4.5dB" :
+    Tilt_Value == 4 ? display_label = "Tilt: 6dB" :
+    display_label = "Tilt: 3dB";
+    
+    gfx_measurestr(display_label, w, h);
+    height = h + 8;
+    
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.6;
+    ) : (
+      gfx_r = (0 / 255);
+      gfx_g = (153 / 255);
+      gfx_b = (255 / 255);
+      gfx_a = 0.4;
+    );
+    
+    gfx_rect(x, y, width, h+9, 1);
+    
+    gfx_r = (114 / 255);
+    gfx_g = (215 / 255);
+    gfx_b = (253 / 255);
+    gfx_a = 1;
+    gfx_x = x + (width / 2) - (w / 2);
+    gfx_y = y + 4;
+    gfx_drawstr(display_label);
+  );
+);
+
+/*
+ * Handle clicking the tilt button
+ */
+function handle_tilt_button() instance (x, y, width, label, pressed, height, label)
+local (last_clicked_item)
+(
+  last_clicked_item = 0;
+  mouse_cap & 1 && !pressed ? (
+    mouse_x >= x && mouse_x <= x+width && mouse_y >= y && mouse_y <= y + height ? ( 
+      pressed = 1;
+      // Cycle through tilt indices: 0 -> 1 -> 2 -> 3 -> 4 -> 0
+      Tilt_Value = (Tilt_Value + 1) % 5;
+      update_state();
+    ) : pressed = 0;
+  ) : ( 
+    !(mouse_cap & 1) ? pressed = 0;
+  );
+);
+
+filter.svf_set_sample_rate(srate);
+
+gfx_ext_retina == 2 ? (
+  peaks.init_peak_button(gfx_w - 150, 10, 100);
+  mode_button.init_mode_button(gfx_w - 400, 10, 120);
+  channel_button.init_channel_button(gfx_w - 280, 10, 120);
+  tilt_button.init_tilt_button(gfx_w - 150, 10, 100)
+) : ( 
+  peaks.init_peak_button(gfx_w - 100, 10, 60);
+  mode_button.init_mode_button(gfx_w - 280, 10, 80);
+  channel_button.init_channel_button(gfx_w - 200, 10, 80);
+  tilt_button.init_tilt_button(gfx_w - 100, 10, 60)
+);
+
+spectrum.set_show_peaks(Show_Peaks);
+
+//==================================================================================
+// Loudness, Gonio, Correl inits
+//==================================================================================
+
+function draw_text(x, y, text)
+(
+  // Save current color for text
+  r_txt = gfx_r;
+  g_txt = gfx_g;
+  b_txt = gfx_b;
+
+  // Save starting coordinates
+  tx = x;
+  ty = y;
+
+  // Measure text
+  gfx_measurestr(text, tw, th);
+
+  // Rectangle dimensions
+  rx = tx - 4;
+  ry = ty - 4;
+  rw = tw + 4;
+  rh = th + 4;
+
+  // Draw black background
+  gfx_r = 0; gfx_g = 0; gfx_b = 0;
+  gfx_rect(rx, ry, rw, rh, 1);  // filled
+
+  // Restore text color
+  gfx_r = r_txt; gfx_g = g_txt; gfx_b = b_txt;
+
+  // Draw text
+  gfx_x = tx;
+  gfx_y = ty;
+  gfx_drawstr(text);
+);
+
+<?
+  nch = max(max_nch,64); // maximum channel count
+  sinc_sz = 32; // true peak interpolation size
+  use_mem_sinc = sinc_sz>32;
+
+  printf("sinc_sz = %d;\n",sinc_sz);
+
+ function do_all_channels(fmt) local(p x c) global(nch) (
+   p=x=0;
+   while (x < nch) (
+     p+=1;
+     x>0 ? printf("num_ch > %d ? ( ",x);
+     c = x>=24 ? 8 : x>=8 ? 4 : 2;
+     loop(c, printf(fmt,x,x); x+=1);
+     printf("\n");
+   );
+   loop(p-1,printf(")"));
+ );
+?>
+
+// Constants
+WANT_INTEGRATED_ALWAYS=0;
+PEAK_METER_DECAY=0.150;
+LOUD_METER_UPDATE=0.100;
+LOUD_METER_SPEED=0.075;
+NUM_BINS=1024;
+BINS_PER_DB=10;
+DB_PER_BIN=1/BINS_PER_DB;
+cfg_peak = 1;
+ext_noinit=1;
+gfx_clear=-1;
+ext_nodenorm=1;
+cfg_reinit=1;
+attackms=50.0;
+decayms=300.0;
+mv=pow(2,63);
+
+// Memory allocation
+function alloc(sz) (
+  memset((alloc.top += sz) - sz, 0, sz);
+);
+
+function alloc(sz) global()
+(
+  memset((this.top+=sz)-sz,0,sz);
+);
+
+// sinc filter for true peak
+function sinc_gen_val() global(srate sinc_sz) local(sincpos windowpos) instance(slice_pos) (
+  windowpos = (2.0 * $pi / sinc_sz) * slice_pos;
+  sincpos = $pi * (slice_pos - sinc_sz * .5);
+  slice_pos += 1;
+  (0.53836 - cos(windowpos)*0.46164) * sin(sincpos) / sincpos;
+);
+
+function sinc_gen_slice(cs, o*) instance(sinc_gen_val slice_pos) local(x) global(sinc_sz) (
+  slice_pos = cs;
+<?
+  use_mem_sinc ? (
+    printf("o.v = alloc(sinc_sz);  loop(x=0;sinc_sz, o.v[x] = sinc_gen_val(); x+=1); ");
+  ) : (
+    loop(x=0;sinc_sz, printf("o.v%02d = sinc_gen_val();%s",x,(x&3)==3?"\n": " "); x += 1)
+  );
+?>
+);
+
+function sinc_init() global(srate) instance(sinc_gen_slice) (
+  sinc_gen_slice(srate < 96000 ? .25 : .5,this.s1);
+  srate < 96000 ? (
+    sinc_gen_slice(.5, this.s2);
+    sinc_gen_slice(.75, this.s3);
+  );
+);
+
+<?
+ function emit_sinc(hist, t) (
+   use_mem_sinc ? (
+    printf("abs(mem_multiply_sum(%s.v,%s.h,sinc_sz))",t,hist);
+   ) : (
+     printf("abs(");
+     loop(x=0;sinc_sz, printf("%s.h%02d * %s.v%02d%s",hist,x,t,x,x==sinc_sz-1?"":(x&3)==3?" +\n":" + "); x+=1);
+     printf(")");
+   );
+ );
+?>
+
+function init(chidx)
+(
+  this.chan=chidx;
+  this.wt = chidx < 3 || num_ch < 6 ? 1 : chidx == 3 ? 0 : sqrt(2);
+  this.f1p1=this.f1p2=this.f2p1=this.f2p2=0;
+  this.pkval=this.hipkval=this.clips=0;
+  this.ch_lufs_sum=this.ch_rms_sum=0;
+  <?
+    use_mem_sinc ? (
+      printf("this.h = alloc(sinc_sz);\n");
+    ) : (
+      loop(x=0;sinc_sz, printf("this.h%02d =%s",x,x==sinc_sz-1 ? " 0" : (x&7)==7 ? "\n" : " "); x+=1);
+    );
+  ?>
+);
+
+function decay()
+(
+  this.pkval *= pk_decay;
+);
+
+function copypks() global(pk hipk clip_cnt) (
+  pk[this.chan] = this.pkval;
+  hipk[this.chan] = this.hipkval;
+  clip_cnt[this.chan] = this.clips;
+);
+
+function proc(lspl)
+  local(pspl f1p0 f2p0)
+  instance(wt ch_rms_sum ch_lufs_sum pkval hipkval clips
+           f1p1 f1p2 f2p1 f2p2)
+  global(f1a1 f1a2 f1b0 f1b1 f1b2
+         f2a1 f2a2 f2b0 f2b1 f2b2
+         srate cfg_peak
+         lval rval win_pos global_peak sinc_sz
+         sinc.s1* sinc.s2* sinc.s3*
+         )
+(
+  cfg_peak == 1 || cfg_peak == 2 ? (
+    <?
+      use_mem_sinc ? (
+        printf("mem_insert_shuffle(this.h, sinc_sz, lspl);");
+      ) : (
+        loop(x=sinc_sz-1;sinc_sz-1, printf("this.h%02d = this.h%02d;%s",x,x-1, (x&3)==0 ? "\n" : " "); x-= 1; );
+        printf(" this.h00 = lspl;");
+      );
+    ?>
+    pspl = max(
+        abs(this.h<? printf(use_mem_sinc ? "[%d]" : "%02d",sinc_sz/2) ?> ),
+        <? emit_sinc("this","sinc.s1") ?>
+       );
+    srate < 96000 ? pspl = max(pspl,max( <? emit_sinc("this","sinc.s2") ?>,  <? emit_sinc("this","sinc.s3") ?>));
+  ) :
+  cfg_peak == 3 || cfg_peak == 4 ? (
+    pspl=abs(lspl);
+  );
+  cfg_peak ? (
+    pspl > pkval ? (
+      pkval=pspl;
+      pspl > hipkval ? (
+        hipkval=pspl;
+        global_peak = max(global_peak,pspl);
+      );
+    );
+    pspl > 1.0 ? clips += 1;
+  );
+
+  win_pos == 0 ? ch_rms_sum=ch_lufs_sum=0;
+
+  rval += (ch_rms_sum += lspl*lspl);
+
+  lspl *= wt;
+
+  f1p0=lspl-f1a1*f1p1-f1a2*f1p2;
+  lspl=f1b0*f1p0+f1b1*f1p1+f1b2*f1p2;
+  f1p2=f1p1;
+  f1p1=f1p0;
+
+  f2p0=lspl-f2a1*f2p1-f2a2*f2p2;
+  lspl=f2b0*f2p0+f2b1*f2p1+f2b2*f2p2;
+  f2p2=f2p1;
+  f2p1=f2p0;
+
+  lval += (ch_lufs_sum += lspl*lspl);
+);
+
+function init_lufs_filters()
+  local(Vh Vb db f0 Q K a0)
+  global(f1a1 f1a2 f1b0 f1b1 f1b2
+         f2a1 f2a2 f2b0 f2b1 f2b2 srate)
+(
+  // f1,f2 could be combined into a 5th order filter
+
+  db=3.999843853973347;
+  f0=1681.974450955533;
+  Q=0.7071752369554196;
+  K=tan($pi*f0/srate);
+  Vh=pow(10, db/20);
+  Vb=pow(Vh, 0.4996667741545416);
+  a0=1+K/Q+K*K;
+  f1a1=2*(K*K-1)/a0;
+  f1a2=(1-K/Q+K*K)/a0;
+  f1b0=(Vh+Vb*K/Q+K*K)/a0;
+  f1b1=2*(K*K-Vh)/a0;
+  f1b2=(Vh-Vb*K/Q+K*K)/a0;
+
+  f0=38.13547087602444;
+  Q=0.5003270373238773;
+  K=tan($pi*f0/srate);
+  f2a1=2*(K*K-1)/(1+K/Q+K*K);
+  f2a2=(1-K/Q+K*K)/(1+K/Q+K*K);
+  f2b0=1;
+  f2b1=-2;
+  f2b2=1;
+);
+
+spectrum.init();
+spectrum_mem_end = spectrum.mem_index;
+alloc.top = spectrum_mem_end;
+recpos = alloc(histsize);
+fftworkspace = alloc(fftsize*2);
+window = alloc(fftsize);
+
+// recpos[histsize - 1] = 0;
+// fftworkspace[fftsize*2 - 1] = 0;
+// window[fftsize - 1] = 0;
+
+// snapshot the new end of static region
+static_mem_end = alloc.top;
+
+function Reset() (
+  alloc.top = static_mem_end;
+  init_lufs_filters();
+  pk=alloc(<?printf("%d",nch)?>);
+  hipk=alloc(<?printf("%d",nch)?>);
+  clip_cnt=alloc(<?printf("%d",nch)?>);
+  sinc.sinc_init();
+
+  m_win_cnt=0.4/LOUD_METER_UPDATE;
+  s_win_cnt=3/LOUD_METER_UPDATE;
+
+  win_pos=0;
+  win_cnt=0;
+  win_len=(LOUD_METER_UPDATE*srate)|0;
+  i_win_len=1/(m_win_cnt*win_len);
+  i_win_len2=1/(s_win_cnt*win_len);
+
+  rms_m_sum=0;
+  rms_m_db=-100;
+  rms_m_db_max=-100;
+  rms_i_sum=0;
+  rms_i_sum_cnt=0;
+  rms_i_db=-100;
+
+  lufs_m_sum=0;
+  lufs_m_sum_max=0;
+  lufs_m_db=-100;
+  lufs_s_sum=0;
+  lufs_s_sum_max=0;
+  lufs_s_db=-100;
+  lufs_a_sum=0;
+  lufs_a_sum_cnt=0;
+  lufs_b_sum=0;
+  lufs_b_sum_cnt=0;
+  lra_db_diff = 0;
+  lra_db_hi = lra_db_lo = lufs_i_db = lufs_m_db = lufs_s_db = -100;
+
+  last_t=0;
+  th_lufs_i=th_lufs_s=th_lufs_m=th_rms_i=th_rms_m=0;
+
+  cur_buf=0;
+  cur_buf2=0;
+  rms_buf=alloc(m_win_cnt);
+  lufs_buf=alloc(m_win_cnt);
+  lufs_buf2=alloc(s_win_cnt);
+  lufs_a_hist=alloc(2*NUM_BINS);
+  lufs_b_hist=alloc(NUM_BINS);
+  db_hist=alloc(75);
+  db_hist_max=0;
+
+  global_peak = 0;
+
+  <? do_all_channels("ch%d.init(%d); "); ?>;
+
+  gonio_size = 4800;
+  gonio_buffer_L = alloc(gonio_size);
+  gonio_buffer_R = alloc(gonio_size);
+  gonio_pos = 0;
+
+  corr_LR_sum = 0;
+  corr_LL_sum = 0;
+  corr_RR_sum = 0;
+  corr_count = 0;
+
+bitbuf_len = 64;
+
+bbuf = alloc(bitbuf_len);
+tbuf = alloc(bitbuf_len);
+
+memset(bbuf, 0, bitbuf_len);
+memset(tbuf, 0, bitbuf_len);
+
+);
+
+Reset();
+
+@slider
+
+update_state();
+
+@block
+
+// K-20 fallback calculation
+k20_tme = samplesblock / srate;
+k20_fall_rate = pow(10.0, -0.05 * 15.0 * k20_tme);
+k20_l.fall = k20_fall_rate;
+k20_r.fall = k20_fall_rate;
+
+// Detect transport restart
+!(last_play_state & 1) && (play_state & 1) ? (
+  need_clear_spectro = 1;
+);
+last_play_state = play_state;
+
+(num_ch > 0 && num_ch != last_nch) || srate != last_sr ? Reset();
+last_nch = num_ch;
+last_sr = srate;
+
+cfg_reinit && (play_state&1) ? (
+  abs(play_position-last_play_pos) > 0.1 ? Reset();
+  last_play_pos=play_position+samplesblock/srate;
+);
+
+pk_decay=pow(0.5, samplesblock/srate/PEAK_METER_DECAY);
+
+<? do_all_channels("ch%d.decay(); "); ?>;
+
+dv=1.0/(sqrt(num_ch)*samplesblock);
+attack=exp(-log(2.0)*samplesblock/(srate*attackms*0.001));
+decay=exp(-log(2.0)*samplesblock/(srate*decayms*0.001));
+
+bat=0;
+loop
+(
+  64,
+  bbuf[bat] *= decay;
+  v=sqrt(min(tbuf[bat],1.0));
+  v > bbuf[bat] ?
+  (
+    bbuf[bat]=bbuf[bat]*attack+v*(1.0-attack);
+  ) : (
+    bbuf[bat] < 0.001 ? bbuf[bat]=0.0;
+  );
+  tbuf[bat]=0.0;
+  bat += 1;
+);
+
+@sample
+
+// Mid/Side encode
+mid = (spl0 + spl1) * 0.5;
+side = (spl0 - spl1) * 0.5;
+
+// Feed the correct buffers depending on spectrum modes
+Spectrum_Mode == 0 ? spectrum.sample0(spl0 + spl1) :
+Spectrum_Mode == 1 ? spectrum.sample0(mid) :
+Spectrum_Mode == 2 ? spectrum.sample0(side) :
+Spectrum_Mode == 3 ? (spectrum.sample0(mid); spectrum.sample1(side)) :
+Spectrum_Mode == 4 ? spectrum.sample0(spl0) :
+Spectrum_Mode == 5 ? spectrum.sample0(spl1) :
+Spectrum_Mode == 6 ? (spectrum.sample0(spl0); spectrum.sample1(spl1));
+
+rval=lval=0;
+
+<? do_all_channels("ch%d.proc(spl%d); "); ?>;
+
+(win_pos += 1) >= win_len ? (
+  win_pos=0;
+  win_cnt += 1;
+
+  prev_rval=rms_buf[cur_buf];
+  rms_buf[cur_buf]=rval;
+
+  prev_lval=lufs_buf[cur_buf];
+  lufs_buf[cur_buf]=lval;
+
+  prev_lval2=lufs_buf2[cur_buf2];
+  lufs_buf2[cur_buf2]=lval;
+
+  (cur_buf += 1) >= m_win_cnt ? cur_buf=0;
+  (cur_buf2 += 1) >= s_win_cnt ? cur_buf2=0;
+
+  rms_m_sum += (rval-prev_rval)*i_win_len;
+  lufs_m_sum += (lval-prev_lval)*i_win_len;
+  lufs_s_sum += (lval-prev_lval2)*i_win_len2;
+
+  WANT_INTEGRATED_ALWAYS || (play_state&1) ? (
+    rms_i_sum += rms_m_sum;
+    rms_i_sum_cnt += 1;
+    rms_i_sum > 0 && rms_i_sum_cnt >= m_win_cnt ? (
+      rms_i_db=log(rms_i_sum/rms_i_sum_cnt)*10/log(10);
+    ) : (
+      rms_i_db=-100;
+    );
+  );
+
+  rms_m_sum > 0 && win_cnt >= m_win_cnt ? (
+    rms_m_db=log(rms_m_sum)*10/log(10);
+    rms_m_db > rms_m_db_max ? rms_m_db_max=rms_m_db;
+  ) : (
+    rms_m_db=-100;
+  );
+
+  lufs_m_sum > 0 && win_cnt >= m_win_cnt ? (
+    lufs_m_sum > lufs_m_sum_max ? lufs_m_sum_max=lufs_m_sum;
+    lufs_m_db=-0.691+log(lufs_m_sum)*10/log(10);
+
+    a = WANT_INTEGRATED_ALWAYS || (play_state&1) ? ((lufs_m_db+70)*BINS_PER_DB)|0 : -1;
+    a >= 0 ? (
+      a >= NUM_BINS ? a=NUM_BINS-1;
+      lufs_a_sum += lufs_m_sum;
+      lufs_a_sum_cnt += 1;
+      lufs_a_hist[2*a] += 1;
+      lufs_a_hist[2*a+1] += lufs_m_sum;
+      db_hist_max = max(db_hist_max,db_hist[min(a*DB_PER_BIN,74)] += 1);
+
+      lufs_a_db=-0.691+log(lufs_a_sum/lufs_a_sum_cnt)*10/log(10);
+      lufs_a_gate=((lufs_a_db-10+70)*BINS_PER_DB)|0;
+      lufs_i_sum=0;
+      lufs_i_cnt=0;
+      bin=max(lufs_a_gate,0);
+      loop(NUM_BINS-bin,
+        lufs_i_cnt += lufs_a_hist[2*bin];
+        lufs_i_sum += lufs_a_hist[2*bin+1];
+        bin += 1;
+      );
+      lufs_i_db=lufs_i_sum > 0 ? -0.691+log(lufs_i_sum/lufs_i_cnt)*10/log(10) : -100;
+    );
+  ) : (
+    lufs_m_db=-100;
+  );
+
+  lufs_s_sum > 0 && win_cnt >= s_win_cnt ? (
+    lufs_s_sum > lufs_s_sum_max ? lufs_s_sum_max=lufs_s_sum;
+    lufs_s_db=-0.691+log(lufs_s_sum)*10/log(10);
+
+    b = WANT_INTEGRATED_ALWAYS || (play_state&1) ? ((lufs_s_db+70)*BINS_PER_DB)|0 : -1;
+    b >= 0 ? (
+      b >= NUM_BINS ? b=NUM_BINS-1;
+      lufs_b_sum += lufs_s_sum;
+      lufs_b_sum_cnt += 1;
+      lufs_b_hist[b] += 1;
+
+      lufs_b_db=-0.691+log(lufs_b_sum/lufs_b_sum_cnt)*10/log(10);
+      lufs_b_gate=((lufs_b_db-20+70)*BINS_PER_DB)|0;
+
+      lra_cnt=0;
+      bin=max(lufs_b_gate,0);
+      loop(NUM_BINS-bin,
+        lra_cnt += lufs_b_hist[bin];
+        bin += 1;
+      );
+      lra_cnt >= 20 ? (
+        lra_cnt_lo=lra_cnt_hi=0;
+        bin=lufs_b_gate;
+        while(bin < NUM_BINS && lra_cnt_lo < lra_cnt*0.10)
+        (
+          lra_cnt_lo += lufs_b_hist[bin];
+          bin += 1;
+        );
+        bin_lo=bin-1;
+        bin=NUM_BINS-1;
+        while(bin >= lufs_b_gate && lra_cnt_hi < lra_cnt*0.05)
+        (
+          lra_cnt_hi += lufs_b_hist[bin];
+          bin -= 1;
+        );
+        bin_hi=bin+1;
+        lra_db_lo=bin_lo*DB_PER_BIN-70;
+        lra_db_hi=bin_hi*DB_PER_BIN-70;
+        lra_db_diff = lra_db_hi-lra_db_lo;
+      );
+    );
+  ) : (
+    lufs_s_db=-100;
+  );
+);
+
+tp_l_db = hipk[0] > 0 ? 20.0 * log(hipk[0]) / log(10) : -200.0;
+tp_r_db = num_ch > 1 && hipk[1] > 0 ? 20.0 * log(hipk[1]) / log(10) : -200.0;
+
+// Phase correlation
+corr_LR_sum += spl0 * spl1;
+corr_LL_sum += spl0 * spl0;
+corr_RR_sum += spl1 * spl1;
+
+(corr_count += 1) > 50000 ? (
+    corr_LR_sum *= 0.5;
+    corr_LL_sum *= 0.5;
+    corr_RR_sum *= 0.5;
+    corr_count = 25000;
+);
+
+den = sqrt(corr_LL_sum * corr_RR_sum);
+phase_correlation = den > 0 ? (corr_LR_sum / den) : 0;
+phase_correlation = min(max(phase_correlation, -1), 1);
+
+// Goniometer
+gonio_buffer_L[gonio_pos] = spl0;
+gonio_buffer_R[gonio_pos] = spl1;
+gonio_pos += 1;
+gonio_pos >= gonio_size ? gonio_pos = 0;
+
+c=0;
+loop
+(
+  num_ch,
+  v=abs(spl(c))*mv;
+  bat=0;
+  v > 0.0 ? loop
+  (
+    64,
+    nv=floor(v*0.5);
+    nv*2.0 != v ? tbuf[bat] += dv;
+    v=nv;
+    bat += 1;
+  );
+  c += 1;
+);
+
+recpos[rec_write_pos]=(spl0+spl1);
+rec_write_pos+=1;
+reccnt+=1;
+rec_write_pos >= histsize ? rec_write_pos=0;
+
+// K-20 processing
+k20_l.k20_process(spl0);
+num_ch > 1 ? k20_r.k20_process(spl1);
+
+//==================================================================================
+// gfx section start
+//==================================================================================
+
+@gfx 1280 625
+
+gfx_min_w = 987;
+gfx_min_h = 538;
+gfx_w < gfx_min_w ? gfx_w = gfx_min_w;
+gfx_h < gfx_min_h ? gfx_h = gfx_min_h;
+
+<? do_all_channels("ch%d.copypks(); ");?>;
+
+t=time_precise();
+speed = last_t ? 1.0-pow(0.5, (t-last_t)/LOUD_METER_SPEED) : 1;
+last_t=t;
+
+nch = cfg_mono ? 1 : max(num_ch,2);
+
+// Font sizing like Cockos loudness meter
+FONT_SZ_MIN = 12;
+FONT_SZ_MAX = 22;
+FONT_SZ_MIN_NORMAL = 10;
+FONT_SZ_MAX_NORMAL = 18;
+
+// Calculate font sizes based on window width (tuned for 18/14 at 1280 width)
+fsz_title = FONT_SZ_MIN + min(gfx_w/213, FONT_SZ_MAX - FONT_SZ_MIN);  // 12 + 6 at 1280 = 18
+fsz_normal = FONT_SZ_MIN_NORMAL + min(gfx_w/320, FONT_SZ_MAX_NORMAL - FONT_SZ_MIN_NORMAL);  // 10 + 4 at 1280 = 14
+
+// Scale for retina
+gfx_ext_retina > 1 ? (
+  fsz_title *= 1.5;
+  fsz_normal *= 1.5;
+);
+
+// Set fonts
+gfx_setfont(1, "Arial", fsz_title);
+font_normal = fsz_normal;
+
+// Goniometer - scale with window size (percentage based)
+gonio_x = gfx_w * 0.039;  // ~50 at 1280 width
+gonio_y = gfx_h * 0.432;  // ~270 at 625 height
+gonio_size_display = min(gfx_w * 0.141, gfx_h * 0.288);  // ~180 at default size, scales proportionally
+gonio_half = gonio_size_display / 2;
+
+//Clear text areas
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_rect(0, 0, gfx_w/2, gfx_h * 0.4);  // EBU section
+gfx_rect(gfx_w/2 - gfx_w * 0.039, 0, gfx_w, gfx_h/2);  // Spectrum Analyzer
+
+
+//Title
+gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y = 10;
+gfx_drawstr("ReaVision Metering Suite");
+
+gfx_setfont(1, "Arial", font_normal);
+
+//LUFS Display
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.08;
+gfx_drawstr("LUFS Integrated:");
+gfx_x = gfx_w*0.1367;
+sprintf(#str, "%.1f LUFS", lufs_i_db);
+lufs_i_db > -100 ? (
+gfx_drawstr(#str);
+) : (
+gfx_drawstr("---")
+);
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.128;
+gfx_drawstr("LUFS Short-term:");
+gfx_x = gfx_w*0.1367;
+sprintf(#str, "%.1f LUFS", lufs_s_db);
+lufs_s_db > -100 ? (
+gfx_drawstr(#str);
+) : (
+gfx_drawstr("---")
+);
+gfx_x = gfx_w*0.225;
+gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
+sprintf(#str, "(max: %.1f)", -0.691+log(lufs_s_sum_max)*10/log(10));
+gfx_drawstr(#str);
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.176;
+gfx_drawstr("LUFS Momentary:");
+gfx_x = gfx_w*0.1367;
+sprintf(#str, "%.1f LUFS", lufs_m_db);
+lufs_m_db > -100 ? (
+gfx_drawstr(#str);
+) : (
+gfx_drawstr("---")
+);
+gfx_x = gfx_w*0.225;
+gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
+sprintf(#str, "(max: %.1f)", -0.691+log(lufs_m_sum_max)*10/log(10));
+gfx_drawstr(#str);
+
+// LRA Display
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.224;
+gfx_drawstr("Loudness Range:");
+gfx_x = gfx_w*0.1367;
+lra_db_diff > 0 ? (
+  sprintf(#str, "%.1f LU", lra_db_diff+0.01);
+  gfx_drawstr(#str);
+) : (
+  gfx_drawstr("---");
+);
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y =  gfx_h*0.272;
+gfx_drawstr("True Peak L:");
+gfx_x = gfx_w*0.1367;
+sprintf(#str, "%.2f dBTP", tp_l_db);
+tp_l_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
+tp_l_db > -150 ? (
+gfx_drawstr(#str);
+) : (
+gfx_drawstr("---")
+);
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.32;
+gfx_drawstr("True Peak R:");
+gfx_x = gfx_w*0.1367;
+sprintf(#str, "%.2f dBTP", tp_r_db);
+tp_r_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
+tp_r_db > -150 ? (
+gfx_drawstr(#str);
+) : (
+gfx_drawstr("---")
+);
+
+// Fade for goniometer trail
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_a = 0.025;
+gfx_circle(gonio_x + gonio_half, gonio_y + gonio_half, gonio_half+5, 1,0);
+gfx_a = 1;
+
+// Line width for retina
+line_width = gfx_ext_retina > 1 ? 2 : 1;
+
+gonio_pos > 0 ? (
+
+gfx_r = 0.15; gfx_g = 0.15; gfx_b = 0.15;
+gfx_circle(gonio_x + gonio_half, gonio_y + gonio_half, gonio_half, 0);
+
+gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+gfx_line(gonio_x + gonio_half*0.5, gonio_y + gonio_half*0.5,
+         gonio_x + gonio_half*1.5, gonio_y + gonio_half*1.5);
+gfx_line(gonio_x + gonio_half*0.5, gonio_y + gonio_half*1.5,
+         gonio_x + gonio_half*1.5, gonio_y + gonio_half*0.5);
+
+gfx_r = 0.25; gfx_g = 0.25; gfx_b = 0.25;
+gfx_line(gonio_x + gonio_half, gonio_y, gonio_x + gonio_half, gonio_y + gonio_size_display);
+gfx_line(gonio_x, gonio_y + gonio_half, gonio_x + gonio_size_display, gonio_y + gonio_half);
+
+gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+gfx_a = 0.6;
+i = 0;
+rot = -45 * 0.017453292;
+samples_to_draw = gonio_pos;
+loop(samples_to_draw,
+  idx = i;
+  L = gonio_buffer_L[idx];
+  R = gonio_buffer_R[idx];
+  
+  // Apply visual gain boost
+  gonio_gain_state == 1 ? (
+    L *= 2.0;  // +6dB = 2x
+    R *= 2.0;
+  ) : gonio_gain_state == 2 ? (
+    L *= 4.0;  // +12dB = 4x
+    R *= 4.0;
+  );
+  
+  // --- Keep plot inside circle by normalizing the radius ---
+  radius = sqrt(L*L + R*R);
+  radius > 1 ? (
+    L /= radius;
+    R /= radius;
+  );
+
+  s0 = sign(L);
+  s1 = sign(R);
+  // ... rest of your angle calculation ...
+  radius = sqrt(L*L + R*R);  // Final radius for plotting
+
+  s0 = sign(L);
+  s1 = sign(R);
+  R != 0 ? angle = atan(L / R) : (L > 0 ? angle = 1.570796327 : angle = 4.71238898);
+  (s0 == 1 && s1 == -1) || (s0 == -1 && s1 == -1) ? angle += 3.141592654;
+  s0 == -1 && s1 == 1 ? angle += 6.283185307;
+  L == 0 ? (R > 0 ? angle = 0 : angle = 3.141592654);
+
+  radius = sqrt(L*L + R*R);
+  angle -= rot;
+
+  vert = cos(angle) * radius;
+  horiz = sin(angle) * radius;
+
+  plot_x = gonio_x + gonio_half + vert * gonio_half * 0.95;
+  plot_y = gonio_y + gonio_half - horiz * gonio_half * 0.95;
+
+  i > 0 ? (
+    gfx_line(last_x, last_y, plot_x, plot_y);
+  );
+
+  last_x = plot_x;
+  last_y = plot_y;
+
+  i += 1;
+);
+
+gfx_a = 1;
+gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+gfx_x = gonio_x; gfx_y = gonio_y+15;
+gfx_setfont(1, "Arial", 10);
+draw_text(gfx_x, gfx_y,"L");
+gfx_x = gonio_x + gonio_size_display*0.95; gfx_y = gonio_y+15;
+draw_text(gfx_x, gfx_y,"R");
+// Center "M" label at top
+gfx_measurestr("M", tw, th);
+gfx_x = gonio_x + gonio_half - tw/2; gfx_y = gonio_y - gfx_h * 0.03;
+draw_text(gfx_x, gfx_y,"M");
+gfx_x = gonio_x-25; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
+draw_text(gfx_x, gfx_y,"+S");
+gfx_x = gonio_x + gonio_size_display+10; gfx_y = gonio_y + gonio_half - gfx_h * 0.008;
+draw_text(gfx_x, gfx_y,"-S");
+
+gonio_pos = 0;
+
+);
+
+gfx_setfont(1, "Arial", fsz_normal);
+// Center "Goniometer" label - make it clickable
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_measurestr("Goniometer", tw, th);
+label_x = gonio_x + gonio_half - tw/2;
+label_y = gonio_y + gonio_size_display + gfx_h * 0.016;
+
+// Check for click on label
+
+mouse_cap == 1 && !last_mouse_cap ? (
+  mouse_x >= label_x && mouse_x <= label_x + tw &&
+  mouse_y >= label_y && mouse_y <= label_y + th ? (
+    gonio_gain_state = (gonio_gain_state + 1) % 3;
+  );
+);
+
+// Clear the label area first
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_measurestr("Goniometer (+12dB)", tw_max, th);  // Measure longest text
+gfx_rect(label_x - 2, label_y - 2, tw_max + 4, th + 4);
+
+// Draw label with gain indicator
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+mouse_x >= label_x && mouse_x <= label_x + tw &&
+mouse_y >= label_y && mouse_y <= label_y + th ? (
+  gfx_r = 0; gfx_g = 0.8; gfx_b = 1;
+);
+gonio_gain_state == 1 ? (
+  draw_text(label_x, label_y, "Goniometer (+6dB)");
+) : gonio_gain_state == 2 ? (
+  draw_text(label_x, label_y, "Goniometer (+12dB)");
+) : (
+  draw_text(label_x, label_y, "Goniometer");
+);
+
+last_mouse_cap = mouse_cap;
+
+//set up bitmeter dimensions here
+mtstart     = gfx_texth * 3;
+mtrange     = gfx_w * 0.4;  // Proportional to width
+mtvalstart  = gfx_h * 0.85;  // Proportional to height (85% down)
+mtvalrange  = gfx_h * 0.6;   // Proportional to height
+
+// Phase Meter - scale with window size
+phase_meter_x = gfx_w * 0.23;
+phase_meter_y = gonio_y + gonio_half*1.65; 
+phase_meter_w = (mtstart + mtrange)-phase_meter_x;
+phase_meter_h = gfx_h * 0.048;
+
+// gfx_rect(mtstart, mtvalstart - 2 - mtvalrange*0.1, mtrange, 2 + mtvalrange*0.1);
+
+gfx_r = 0.1; gfx_g = 0.1; gfx_b = 0.1;
+gfx_rect(phase_meter_x, phase_meter_y, phase_meter_w, phase_meter_h);
+
+gfx_r = 0.5; gfx_g = 0.5; gfx_b = 0.5;
+gfx_line(phase_meter_x + phase_meter_w/2, phase_meter_y, phase_meter_x + phase_meter_w/2, phase_meter_y + phase_meter_h);
+
+phase_pos = phase_meter_x + phase_meter_w/2 + (phase_correlation * phase_meter_w/2);
+indicator_width = 4 * gfx_ext_retina;  // Scale indicator width for retina
+phase_correlation < 0 ? (
+  gfx_r = 1; gfx_g = 0.6; gfx_b = 0;
+) : (
+  gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+);
+gfx_rect(phase_pos - indicator_width/2, phase_meter_y, indicator_width, phase_meter_h);
+
+gfx_r = 0.8; gfx_g = 0.8; gfx_b = 0.8;
+draw_text(phase_meter_x,phase_meter_y + phase_meter_h + gfx_h * 0.008,"-1");
+gfx_measurestr("+1", tw, th);
+draw_text(phase_meter_x + phase_meter_w - tw, phase_meter_y + phase_meter_h + gfx_h * 0.008,"+1");
+gfx_measurestr("0", tw, th);
+draw_text(phase_meter_x + phase_meter_w/2 - tw/2, phase_meter_y + phase_meter_h + gfx_h * 0.008,"0");
+
+// Center-align phase correlation label and value above meter
+sprintf(#str, "%.2f ", phase_correlation);
+gfx_measurestr("Phase Correlation: ", label_w, th);
+gfx_measurestr(#str, value_w, th);
+total_w = label_w + value_w;
+start_x = phase_meter_x + phase_meter_w/2 - total_w/2;
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+draw_text(start_x, phase_meter_y - gfx_h * 0.05, "Phase Correlation: ");
+phase_correlation < 0 ? (gfx_r = 1; gfx_g = 0.5; gfx_b = 0;);
+draw_text(start_x + label_w, phase_meter_y - gfx_h * 0.05, #str);
+
+// Clear the area of the meter every frame
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_rect(mtstart, mtvalstart - 2 - mtvalrange*0.1, mtrange, 2 + mtvalrange*0.1);
+
+i = 0;
+loop(65,
+  x = mtstart + mtrange*(i-1)/64;
+  y = mtvalstart;
+  tick = !(i&7);
+  tick ?
+  (
+    sprintf(#txt, "%d", i);
+    gfx_measurestr(#txt, tw, th);
+    gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+    draw_text(x - tw*0.5, y + gfx_texth, #txt);
+  );
+  i > 0 ?
+  (
+    val = bbuf[64-i];
+    val > 0.0 ?
+    (
+      gfx_r = 0; gfx_g = tick ? 1.0 : 0.625; gfx_b = 1;
+    ) : (
+      gfx_r = gfx_g = gfx_b = tick ? 0.75 : 0.5;
+    );
+    gfx_x = x;
+    gfx_y = y;
+    gfx_lineto(x, y - 2 - mtvalrange*0.1*val);
+  );
+  i += 1;
+);
+
+mouse_cap && mouse_x >= mtstart && mouse_x <= mtstart+mtrange &&
+mouse_y >= mtvalstart - 2 - mtvalrange*0.1 && mouse_y <= mtvalstart ?
+(
+  memset(tbuf, 0, 64);
+  memset(bbuf, 0, 64);
+);
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_setfont(1, "Arial", font_normal);
+draw_text(mtstart + mtrange * 0.44, gfx_h * 0.93, "Bitmeter");  // Proportional label position
+
+// ==================================================================================
+// K-System Meter (K-20, K-14, K-12)
+// ==================================================================================
+
+// K-meter positioning - proportional to window size
+
+// Set font for scale markings - proportional sizing
+gfx_ext_retina > 1 ? (
+  gfx_setfont(2, "Arial", gfx_h * 0.018);
+) : (
+  gfx_setfont(2, "Arial", gfx_h * 0.012);   
+);
+
+gfx_measurestr("Max: -100dB)", tw, th);
+tw /= gfx_ext_retina;  // scale text width back to logical pixels
+gfx_measurestr("Max: -100dB)", tw, th);
+k20_x = max(gfx_w * 0.36, gfx_w*0.225+tw);  // Original proportion but capped to avoid overlap
+k20_y = gfx_h * 0.05;
+k20_w = gfx_w * 0.05;
+
+// Calculate phase correlation label position (from phase meter code)
+phase_meter_label_y = phase_meter_y - gfx_h * 0.05;
+
+// Calculate available space and cap K-meter height to stay clear
+min_spacing = gfx_h * 0.03;  // Minimum 3% spacing between elements
+max_k20_h = phase_meter_label_y - k20_y - min_spacing;
+k20_h = min(gfx_h * 0.5, max_k20_h);  // Original proportion but capped to avoid overlap
+
+gfx_measurestr("-60", label_w, label_h);
+bg_padding = label_w + gfx_w * 0.005; 
+
+gfx_r = 0; gfx_g = 0; gfx_b = 0;
+gfx_rect(k20_x - bg_padding, k20_y - label_h, k20_w + bg_padding, k20_h + label_h * 2, 1);
+
+// Get RMS and peak in dBFS
+k20_l_rms_dbfs = k20_l.rms > 0 ? 20.0 * log(k20_l.rms) / log(10) : -100;
+k20_r_rms_dbfs = num_ch > 1 && k20_r.rms > 0 ? 20.0 * log(k20_r.rms) / log(10) : -100;
+k20_l_peak_dbfs = k20_l.peak > 0 ? 20.0 * log(k20_l.peak) / log(10) : -100;
+k20_r_peak_dbfs = k20_r.peak > 0 ? 20.0 * log(k20_r.peak) / log(10) : -100;
+
+k_system_mode == 0 ? (
+  k_ref_level = -20;  // K-20
+  k_max = 20;
+) : k_system_mode == 1 ? (
+  k_ref_level = -14;  // K-14
+  k_max = 14;
+) : (
+  k_ref_level = -12;  // K-12
+  k_max = 12;
+);
+
+k_range = 60 + k_max;
+
+k20_l_rms_k = k20_l_rms_dbfs - k_ref_level;
+k20_r_rms_k = k20_r_rms_dbfs - k_ref_level;
+k20_l_peak_k = k20_l_peak_dbfs - k_ref_level;
+k20_r_peak_k = k20_r_peak_dbfs - k_ref_level;
+
+function k_to_y(k_db, base_y, height) local(normalized) (
+  k_db = max(-60, min(k_db, k_max));
+  normalized = (k_db + 60) / k_range;
+  floor(base_y + height * (1 - normalized) + 0.5)  // Round to nearest pixel
+);
+
+zone_x = k20_x;
+zone_w = k20_w * 0.55;
+
+// Draw color zones with no gaps
+blue_top = k_to_y(0, k20_y, k20_h);
+blue_bottom = k20_y + k20_h;
+gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+gfx_a = 0.5;
+gfx_rect(zone_x, blue_top, zone_w, blue_bottom - blue_top + 1, 1);  // +1 to ensure no gap
+
+cyan_top = k_to_y(4, k20_y, k20_h);
+cyan_bottom = blue_top + 1;  // +1 overlap to prevent gap
+gfx_r = 0; gfx_g = 1; gfx_b = 1;
+gfx_a = 0.5;
+gfx_rect(zone_x, cyan_top, zone_w, cyan_bottom - cyan_top, 1);
+
+purple_top = k20_y;
+purple_bottom = cyan_top + 1;  // +1 overlap to prevent gap
+gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+gfx_a = 0.5;
+gfx_rect(zone_x, purple_top, zone_w, purple_bottom - purple_top, 1);
+
+// Draw vertical divider line in the middle
+divider_x = zone_x + zone_w * 0.5;
+divider_width = max(1, gfx_w * 0.001);  // Proportional width with minimum of 1px
+gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+gfx_a = 0.6;
+gfx_rect(divider_x - divider_width * 0.5, k20_y, divider_width, k20_h, 1);
+
+// Draw scale markings
+gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
+gfx_a = 1;
+
+k20_marks = -60;
+mark_step = 4;
+tick_count = 0;
+
+num_ticks = k_system_mode == 1 ? (60 + 8)/4 + 1 : (60 + k_max)/4 + 1;
+
+loop(num_ticks,
+  
+  // Draw tick line - proportional size
+  mark_y = k_to_y(k20_marks, k20_y, k20_h);
+  tick_length = gfx_w * 0.002;
+  gfx_line(zone_x - tick_length, mark_y, zone_x, mark_y);
+  gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + tick_length, mark_y);
+
+  // Decide label
+  should_label = 0;
+  k20_marks < 0 ? ( ((k20_marks + 60) % 8 == 0) ? should_label = 1 : 0 ) : ( (k20_marks % 4 == 0) ? should_label = 1 : 0 );
+  k_system_mode == 1 && k20_marks == 12 ? should_label = 0 : 0;  // skip +12
+  k20_marks == k_max ? should_label = 1 : 0;
+
+  should_label ? (
+    k20_marks == 0 ? ( gfx_r = 0; gfx_g = 0.6; gfx_b = 1; sprintf(#k20_str, "0"); ) :
+    k20_marks > 0 ? ( sprintf(#k20_str, "+%d", k20_marks); ) :
+    ( sprintf(#k20_str, "%d", k20_marks); );
+    
+    gfx_measurestr(#k20_str, tw, th);
+    gfx_x = zone_x - tw - gfx_w * 0.003;
+    gfx_y = mark_y - gfx_texth * 0.5;
+    gfx_drawstr(#k20_str);
+    
+    gfx_x = zone_x + zone_w + gfx_w * 0.003;
+    gfx_y = mark_y - gfx_texth * 0.5;
+    gfx_drawstr(#k20_str);
+    
+    k20_marks == 0 ? ( gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7; ) : 0;
+  ) : 0;
+
+  k20_marks += mark_step;
+  tick_count += 1;
+);
+
+// Add final K-14 tick at +14
+k_system_mode == 1 ? (
+  k20_marks = 14;
+  mark_y = k_to_y(k20_marks, k20_y, k20_h);
+  tick_length = gfx_w * 0.002;
+  gfx_line(zone_x - tick_length, mark_y, zone_x, mark_y);
+  gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + tick_length, mark_y);
+
+  // Label +14
+  gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
+  sprintf(#k20_str, "+14");
+  gfx_measurestr(#k20_str, tw, th);
+  gfx_x = zone_x - tw - gfx_w * 0.003; 
+  gfx_y = mark_y - gfx_texth * 0.5; 
+  gfx_drawstr(#k20_str);
+  gfx_x = zone_x + zone_w + gfx_w * 0.003; 
+  gfx_y = mark_y - gfx_texth * 0.5; 
+  gfx_drawstr(#k20_str);
+) : 0;
+
+gfx_setfont(1, "Arial", font_normal);
+
+bar_w = zone_w * 0.5;
+
+// Left channel RMS bar
+k20_l_rms_k > -100 ? (
+  bar_top = k_to_y(k20_l_rms_k, k20_y, k20_h);
+  bar_bottom = k20_y + k20_h;
+  bar_height = bar_bottom - bar_top;
+  
+  // Only draw if height is at least 1 pixel to prevent wobble
+  bar_height >= 1 ? (
+    k20_l_rms_k >= 4 ? (
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+    ) : k20_l_rms_k >= 0 ? (
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
+    ) : (
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+    );
+    gfx_a = 0.8;
+    gfx_rect(zone_x, bar_top, bar_w, bar_height, 1);
+  );
+  
+  k20_l_peak_k > -100 ? (
+    peak_y = k_to_y(k20_l_peak_k, k20_y, k20_h);
+    peak_height = max(1, gfx_h * 0.0025);  // Proportional peak indicator height with minimum
+    k20_l_peak_k >= 4 ? (
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+    ) : k20_l_peak_k >= 0 ? (
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
+    ) : (
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+    );
+    gfx_a = 0.9;
+    gfx_rect(zone_x, peak_y - peak_height, bar_w, peak_height * 2, 1);
+  );
+);
+
+// Right channel RMS bar
+num_ch > 1 && k20_r_rms_k > -100 ? (
+  bar_top = k_to_y(k20_r_rms_k, k20_y, k20_h);
+  bar_bottom = k20_y + k20_h;
+  bar_height = bar_bottom - bar_top;
+  
+  // Only draw if height is at least 1 pixel to prevent wobble
+  bar_height >= 1 ? (
+    k20_r_rms_k >= 4 ? (
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+    ) : k20_r_rms_k >= 0 ? (
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
+    ) : (
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+    );
+    gfx_a = 0.8;
+    gfx_rect(zone_x + bar_w, bar_top, bar_w, bar_height, 1);
+  );
+  
+  k20_r_peak_k > -100 ? (
+    peak_y = k_to_y(k20_r_peak_k, k20_y, k20_h);
+    peak_height = max(1, gfx_h * 0.0025);  // Proportional peak indicator height with minimum
+    k20_r_peak_k >= 4 ? (
+      gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
+    ) : k20_r_peak_k >= 0 ? (
+      gfx_r = 0; gfx_g = 1; gfx_b = 1;
+    ) : (
+      gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
+    );
+    gfx_a = 0.9;
+    gfx_rect(zone_x + bar_w, peak_y - peak_height, bar_w, peak_height * 2, 1);
+  );
+);
+
+
+// Draw vertical divider on top of meter bars
+divider_x = zone_x + zone_w * 0.5;
+divider_width = max(1, gfx_w * 0.001);  // Proportional width with minimum of 1px
+gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+gfx_a = 0.6;
+gfx_rect(divider_x - divider_width * 0.5, k20_y, divider_width, k20_h, 1);
+
+// Draw clickable K-System label
+k_system_mode == 0 ? sprintf(#k_label, "K-20") :
+k_system_mode == 1 ? sprintf(#k_label, "K-14") :
+sprintf(#k_label, "K-12");
+
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_measurestr(#k_label, tw, th);
+label_x = zone_x + zone_w * 0.5 - tw * 0.5;
+label_y = k20_y - gfx_h * 0.032;
+
+// Update button position for click detection - proportional padding
+button_padding = gfx_w * 0.003;
+k_system_button.x = label_x - button_padding;
+k_system_button.y = label_y - button_padding;
+k_system_button.width = tw + button_padding * 2;
+k_system_button.height = th + button_padding * 2;
+
+// Highlight on hover
+mouse_x >= k_system_button.x && mouse_x <= k_system_button.x + k_system_button.width &&
+mouse_y >= k_system_button.y && mouse_y <= k_system_button.y + k_system_button.height ? (
+  gfx_r = 0; gfx_g = 0.8; gfx_b = 1;
+);
+
+draw_text(label_x, label_y, #k_label);
+
+// stripe_count_per_tick = 4;
+
+// gfx_r = 0; gfx_g = 0; gfx_b = 0;
+// gfx_a = 1;
+
+// db = -60;
+// while(db < k_max)(
+//     top_y = k_to_y(db + 4, k20_y, k20_h);
+//     bottom_y = k_to_y(db, k20_y, k20_h);
+//     tick_height = bottom_y - top_y;
+
+//     actual_count = min(stripe_count_per_tick, max(1, floor(tick_height)));
+
+//     stripe_height = tick_height / actual_count;
+//     y_pos = top_y;
+//     loop(actual_count,
+//         line_height = max(1, floor(stripe_height/4));
+//         (y_pos + line_height > bottom_y) ? line_height = bottom_y - y_pos;
+//         gfx_rect(zone_x, y_pos, zone_w, line_height, 1);
+//         y_pos += stripe_height;
+//     );
+
+//     db += 4;
+// );
+
+
+// Handle clicking to cycle K-System modes
+mouse_cap & 1 && !k_system_button.pressed ? (
+  mouse_x >= k_system_button.x && mouse_x <= k_system_button.x + k_system_button.width &&
+  mouse_y >= k_system_button.y && mouse_y <= k_system_button.y + k_system_button.height ? (
+    k_system_button.pressed = 1;
+    k_system_mode = (k_system_mode + 1) % 3;
+  );
+) : !(mouse_cap & 1) ? (
+  k_system_button.pressed = 0;
+);
+
+// ==================================================================================
+
+gfx_ext_retina > 1 ? (
+  gfx_setfont(1,"Arial",20,'b');
+) : (
+  gfx_setfont(1,"Arial",12,'b');
+);
+
+spectrum.bottom_margin = gfx_h/2;
+spectrum.left_margin = gfx_w/2+gfx_w*0.0312;
+spectrum.top_margin = 20;
+spectrum.right_margin= 20;
+
+Display_Mode < 2 ? (
+  spectrum.draw(0);
+  Spectrum_Mode == 3 || Spectrum_Mode == 6 ? spectrum.draw(1);
+);
+
+ht = (gfx_h/2 - spectrum.bottom_margin - gfx_texth) + 2;
+dst_a = 0.55 / ht;
+gfx_gradrect(0, ht/2, gfx_w, ht/2, 0,0,0,0,    0, 0, 0, 0, 0, 0, 0, dst_a*2); 
+
+!((very_compact_width) | (very_compact_height)) ? (
+  spectrum.draw_grid(0);
+);
+
+chr = gfx_getchar();
+draw_info_panel(note_select);
+
+note_select == 0 ? (
+  draw_mouse_crosshair();
+); 
+
+!((very_compact_width) | (very_compact_height)) ? (
+  gfx_ext_retina == 2 ? (
+    peaks.x = gfx_w - 150; 
+    peaks.width = 100;
+    tilt_button.x = gfx_w - 300;
+    tilt_button.width = 130;
+    mode_button.x = gfx_w - 550; 
+    mode_button.width = 120;
+    channel_button.x = gfx_w - 430; 
+    channel_button.width = 120;
+  ) : (
+    peaks.x = gfx_w - 100; 
+    peaks.width = 60;
+    tilt_button.x = gfx_w - 180;
+    tilt_button.width = 75;
+    mode_button.x = gfx_w - 360; 
+    mode_button.width = 80;
+    channel_button.x = gfx_w - 280; 
+    channel_button.width = 80;
+  );
+  
+  mode_button.draw_mode_button();
+  mode_button.handle_mode_button();
+  
+  // Only draw channel button if not in Full mode
+  strcmp(mode_button.label, prev_mode_label) != 0 ? (
+    strcmp(mode_button.label, "Mid/Side") == 0 ? (
+      channel_button.label = "Mid+Side";
+      Spectrum_Mode = 3;
+    );
+    strcmp(mode_button.label, "Left/Right") == 0 ? (
+      channel_button.label = "Left+Right";
+      Spectrum_Mode = 6;
+    );
+    // Update previous mode
+    prev_mode_label = mode_button.label;
+  );
+  
+  // Draw + handle channel button only if not Full mode
+  strcmp(mode_button.label, "Full") != 0 ? (
+    channel_button.draw_channel_button();
+    channel_button.handle_channel_button(mode_button.label);
+  );
+  
+  tilt_button.draw_tilt_button();
+  tilt_button.handle_tilt_button();
+  
+  peaks.draw_peak_button();
+  peaks.handle_peak_button();
+);
+
+//==================================================================================
+// Spectrogram gfx
+//==================================================================================
+
+need_clear_spectro ? (
+  need_clear_spectro = 0;
+  cur_xpos = 0;
+  
+  // Clear the spectrogram area (bottom-right quadrant)
+  gfx_r = gfx_g = gfx_b = 0;
+  gfx_a = 1;
+  gfx_x = gfx_w/2;
+  gfx_y = gfx_h/2;
+  gfx_rectto(gfx_w, gfx_h);
+);
+
+gfx_ext_retina>1 ? gfx_setfont(1,"Arial",16*gfx_ext_retina,'b') : gfx_setfont(0);
+
+// Initialize frequency zoom if not set
+!freq_zoom_factor ? freq_zoom_factor = 1.0;
+
+old_w != gfx_w || old_h!=gfx_h? (
+  small_mode = gfx_w<200*gfx_ext_retina || gfx_h<200*gfx_ext_retina;
+  cur_xpos=0;
+  old_w=gfx_w; old_h=gfx_h;
+  
+  gfx_r=gfx_g=gfx_b=0; gfx_a=1;
+  gfx_x=gfx_y=0;
+  gfx_rectto(gfx_w,gfx_h);
+  need_button_refs=1;
+  colormap_button.init_colormap_button(gfx_w - 0.09*gfx_w, gfx_h/2 + 10, 0.078*gfx_w);
+);
+
+use_h = small_mode ? gfx_h : (gfx_h-gfx_texth - 4);
+
+// Handle mouse wheel for frequency zoom in spectrogram area
+mouse_x >= gfx_w/2 && mouse_x < gfx_w - 20 &&
+mouse_y >= gfx_h/2 && mouse_y < use_h ? (
+  mouse_wheel ? (
+    // Mouse wheel zoom
+    wheel_sensitivity = 0.0002;
+    freq_zoom_factor = max(1, min(10.0, freq_zoom_factor + mouse_wheel * wheel_sensitivity));
+    mouse_wheel = 0;
+  );
+  
+  // Ctrl + Left click = reset zoom
+  mouse_cap & 1 && mouse_cap & 4 ? (
+    !freq_reset_handled ? (
+      freq_zoom_factor = 1.0;
+      freq_reset_handled = 1;
+    );
+  ) : (
+    freq_reset_handled = 0;
+  );
+) : (
+  freq_reset_handled = 0;
+);
+
+reccnt>0 ? (
+    amt = min(reccnt,histsize*2);
+    reccnt=0;
+    drecpos = amt/pixels_per_frame;
+    lrecpos = rec_write_pos - amt;
+    draw_pos=0;
+
+    loop(pixels_per_frame,
+
+        windowsize != fftsize || windowtype != 2 ? (
+            windowtype=2; 
+            windowsize=fftsize;
+            i=0;
+            dwindowpos = $pi*2/fftsize;
+            windowpos=0;
+            pwr=0;
+            loop(fftsize*.5+1,
+                pwr += (window[i] =  (
+                    windowtype==1 ? 0.53836 - cos(windowpos)*0.46164 :
+                    windowtype==2 ? 0.35875 - 0.48829 * cos(windowpos) + 0.14128 * cos(2*windowpos) - 0.01168 * cos(3*windowpos) :
+                    windowtype==3 ? 0.42 - 0.50 * cos(windowpos) + 0.08 * cos(2.0*windowpos) :
+                    1.0));
+                windowpos+=dwindowpos;
+                i+=1;
+            );
+            pwr=1.0/(pwr*2-window[i-1]);
+            loop(fftsize,window[i-=1]*=pwr; );
+        );
+
+        lrecpos += drecpos;
+
+        buf1=(lrecpos|0)-fftsize;
+        buf1<0 ? buf1+=histsize;
+        buf2=window;
+        buf3=fftworkspace;
+        loop(fftsize*.5+1,
+            buf3[] = recpos[buf1]*buf2[];
+            buf3[1]=0;
+            buf3+=2;
+
+            buf2+=1;
+            (buf1+=1) >= histsize ? buf1 -= histsize;
+        );
+        buf2-=1;
+        loop(fftsize*.5-1,
+            buf3[] = recpos[buf1]*(buf2-=1)[];
+            buf3[1]=0;
+            buf3+=2;
+
+            (buf1+=1) >= histsize ? buf1 -= histsize;
+        );
+        fft(fftworkspace,fftsize);
+        fft_permute(fftworkspace,fftsize);
+
+        lfftpos=0;
+        i=0;
+        lscale=10/log(10);
+        scroll=0;
+        !(mouse_cap&1) || cap_mode>0 ? (
+            scroll ? (
+                gfx_a=1;
+                cur_xpos = gfx_w/2 - 1 - pixels_per_frame + draw_pos;
+                draw_pos==0 ? (
+                    gfx_blit(
+                        -1,
+                        pixels_per_frame, 0,
+                        pixels_per_frame, 0,
+                        gfx_w/2 - pixels_per_frame + gfx_w/2,  // x offset into bottom-right
+                        gfx_h/2,                                // y offset into bottom-right
+                        0, 0,
+                        gfx_w/2 - pixels_per_frame,
+                        gfx_h/2
+                    );
+                ) : 0;
+            ) : (
+                // Fade mode: dark rectangle
+                gfx_a = 0.1;
+                gfx_r = gfx_g = gfx_b = 0 ;
+
+                fade_width = 15;
+                gfx_x = gfx_w/2 + cur_xpos; // bottom-right quadrant start
+                gfx_y = gfx_h/2;            // vertical start
+
+                end_x = gfx_x + fade_width;
+                end_y = gfx_h;
+
+                end_x > gfx_w ? end_x = gfx_w : 0;
+
+                gfx_rectto(end_x, end_y);
+            );
+
+            uselm = islogmode;
+            sc = (uselm ? (1.0/log(1+g_logscale)) : (1.0/(gfx_h/2-20))) * 0.5*fftsize;
+            sc2=g_logscale/(gfx_h/2-20);
+
+            loop(gfx_h/2-20,
+                // Apply frequency zoom factor to the position calculation
+                zoomed_i = i / freq_zoom_factor;
+                tpos = (uselm ? ((fftsize*0.5 - 1 - log(1+(gfx_h/2-20-1-zoomed_i)*sc2)*sc)) : zoomed_i*sc)|0;
+                tpos >= fftsize*0.5 ? tpos=fftsize*0.5;
+                lfftpos >= tpos ? ( lfftpos=tpos-1; );
+                spectro_mv=0;
+                
+                loop(tpos-lfftpos,
+                    usei = max(lfftpos,0)*2;
+                    aa=fftworkspace[usei]; 
+                    bb=fftworkspace[usei+1];
+                    spectro_dv=aa*aa+bb*bb;
+                    spectro_dv < 1.0*10^-20 ? spectro_dv = 1.0*10^-20 : 0;
+                    spectro_dv>spectro_mv ? spectro_mv=spectro_dv;
+
+                    lfftpos+=1;
+                );
+                spectro_mv=spectro_mv <= minvol ? -200 : log(spectro_mv)*lscale;
+
+                // Draw pixels in bottom-right quadrant
+                gfx_x = gfx_w/2 + cur_xpos;
+                gfx_y = use_h - (i+1);  // bottom half
+                gfx_a = 1;
+
+                calc_color(spectro_mv, drawc, current_colormap);
+                gfx_setpixel(drawc.r, drawc.g, drawc.b);
+
+                i+=1;
+            );
+
+            cur_xpos+=1;
+            cur_xpos >= gfx_w/2 - 15 ? cur_xpos=0;
+            draw_pos+=1;
+        );
+    );
+);
+
+gfx_x=gfx_w/2;
+gfx_y=use_h;
+gfx_r=gfx_g=gfx_b=0;
+gfx_a=1;
+gfx_rectto(gfx_w,gfx_h);
+
+// Draw and handle colormap button
+colormap_button.draw_colormap_button();
+colormap_button.handle_colormap_button();
+
+mouse_x >= gfx_w/2 && mouse_x < gfx_w - 20 &&
+mouse_y >= gfx_h/2 && mouse_y < gfx_h ?
+  !(mouse_cap&1) ? (  // Show info when not clicking
+    mb=-169;
+    bla=0;
+    loop(9,
+      gfx_x=mouse_x - 1 + (bla%3); 
+      gfx_y=mouse_y - 1 + (bla/3);
+      gfx_getpixel(r,g,b); 
+
+      r||g||b ? 
+      ( 
+        val = i = -169;
+        bestdist = 10000000000;
+        while (i<=0)
+        (        
+          calc_color(i,tmp, current_colormap);
+          dist = sqr(tmp.r-r)+sqr(tmp.g-g)+sqr(tmp.b-b);
+          dist < bestdist ? ( val=i; bestdist=dist; );
+          i+=1;
+        );
+        mb = max(mb,val);
+      );
+      bla+=1;
+    );
+    (
+
+    // Top and bottom of the spectrogram in pixels
+    top_pixel    = gfx_h/2 - 20;
+    bottom_pixel = use_h;
+    // Clamp mouse_y to the visible spectrogram area
+    clamped_y = max(top_pixel, min(mouse_y, bottom_pixel-1));
+    // Compute pixel index (bottom-up, matches gfx_y = use_h - (i+1))
+    i = bottom_pixel - 1 - clamped_y;
+    // Apply zoom factor to frequency calculation
+    zoomed_i = i / freq_zoom_factor;
+    // Map pixel index to FFT bin
+    bin_index = zoomed_i * (0.5 * fftsize) / (gfx_h/2-20);
+    // Convert FFT bin to Hz
+    converted_hz = bin_index * srate / fftsize;
+
+
+    // converted_hz=(1-disp_hz)*srate*0.5;
+    sprintf(#infostr,"%.0fHz",converted_hz);
+    
+    mb > -168 ? (
+     sprintf(#infostr, "%s %.1fdB",#infostr,mb);
+    ) : (
+     #infostr += " -oodB";
+    );
+    
+    // Add zoom level indicator
+    freq_zoom_factor != 1.0 ? (
+      sprintf(#infostr, "%s (%.2fx)",#infostr, freq_zoom_factor);
+    );
+    
+    gfx_measurestr(#infostr,wid,0);
+    gfx_x=max((gfx_w-15)-wid,g_button_right_extent+4);
+    gfx_y=use_h + 2;
+    gfx_r=gfx_g=gfx_b=1;
+    mouse_x > gfx_w/2 && mouse_y > (gfx_h/2) && converted_hz >= 0 ? (gfx_drawstr(#infostr));
+  );
+);
+
+// Draw "Spectrograph" placeholder when no data
+first_load == 1 ? (
+  gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+  gfx_a = 1;
+  gfx_setfont(1, "Arial", font_normal);
+  gfx_measurestr("Spectrograph", tw, th);
+  gfx_x = gfx_w/2 + (gfx_w/2 - tw) / 2;  // Center in bottom-right quadrant
+  gfx_y = gfx_h/2 + (gfx_h/2 - th) / 2;  // Center vertically
+  draw_text(gfx_x, gfx_y, "Spectrograph");
+  play_state != 0 ? first_load = 0;
+);
+
+//==================================================================================
+
+has_click = (mouse_cap&1 && !last_cap) ? 1 : 0;
+has_click && mouse_x < gfx_w*0.225 && mouse_y < gfx_h*0.4 ? Reset();
+last_cap = mouse_cap;

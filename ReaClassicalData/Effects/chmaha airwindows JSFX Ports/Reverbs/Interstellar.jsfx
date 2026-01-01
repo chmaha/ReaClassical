@@ -1,0 +1,299 @@
+Version: 1.3
+desc:Interstellar Reverb (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Galactic" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Galactic (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Replace
+slider2:0.5<0,1,0.01>Brightness
+slider3:0.5<0,1,0.01>Detune
+slider4:1<0,1,0.01>Bigness
+slider5:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+
+aIL = freemem; freemem += 6480;
+aJL = freemem; freemem += 3660;
+aKL = freemem; freemem += 1720;
+aLL = freemem; freemem += 680;
+
+aAL = freemem; freemem += 9700;
+aBL = freemem; freemem += 6000;
+aCL = freemem; freemem += 2320;
+aDL = freemem; freemem += 940;
+
+aEL = freemem; freemem += 15220;
+aFL = freemem; freemem += 8460;
+aGL = freemem; freemem += 4540;
+aHL = freemem; freemem += 3200;
+
+aML = freemem; freemem += 3111;
+aMR = freemem; freemem += 3111;
+
+lastRefL = freemem; freemem += 7;
+
+aIR = freemem; freemem += 6480;
+aJR = freemem; freemem += 3660;
+aKR = freemem; freemem += 1720;
+aLR = freemem; freemem += 680;
+
+aAR = freemem; freemem += 9700;
+aBR = freemem; freemem += 6000;
+aCR = freemem; freemem += 2320;
+aDR = freemem; freemem += 940;
+
+aER = freemem; freemem += 15220;
+aFR = freemem; freemem += 8460;
+aGR = freemem; freemem += 4540;
+aHR = freemem; freemem += 3200;
+
+lastRefR = freemem; freemem += 7;
+
+
+UINT32_MAX = 4294967295;
+
+countI = 1;
+countJ = 1;
+countK = 1;
+countL = 1;
+
+countA = 1;
+countB = 1;
+countC = 1;
+countD = 1;  
+
+countE = 1;
+countF = 1;
+countG = 1;
+countH = 1;
+countM = 1;
+
+vibM = 3.0;
+
+oldfpd = 429496.7295;
+
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+E = slider5;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+cycleEnd = floor(overallscale) | 0;
+(cycleEnd < 1) ? cycleEnd = 1;
+(cycleEnd > 4) ? cycleEnd = 4;
+
+(cycle > cycleEnd-1) ? cycle = cycleEnd-1; 
+
+regen = 0.0625+((1.0-A)*0.0625);
+attenuate = (1.0 - (regen / 0.125))*1.333;
+lowpass = pow(1.00001-(1.0-B),2.0)/sqrt(overallscale);
+drift = pow(C,3)*0.001;
+size = (D*1.77)+0.1;
+wet = 1.0-(pow(1.0-E,3));
+
+delayI = 3407.0*size | 0;
+delayJ = 1823.0*size | 0;
+delayK = 859.0*size | 0;
+delayL = 331.0*size | 0;
+delayA = 4801.0*size | 0;
+delayB = 2909.0*size | 0;
+delayC = 1153.0*size | 0;
+delayD = 461.0*size | 0;
+delayE = 7607.0*size | 0;
+delayF = 4217.0*size | 0;
+delayG = 2269.0*size | 0;
+delayH = 1597.0*size | 0;
+delayM = 256;
+
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+vibM += (oldfpd*drift);
+(vibM > (3.141592653589793238*2.0)) ? (
+  vibM = 0.0;
+  oldfpd = 0.4294967295+(fpdL*0.0000000000618);
+);
+
+aML[countM] = inputSampleL * attenuate;
+aMR[countM] = inputSampleR * attenuate;
+countM+=1; (countM < 0 || countM > delayM) ? countM = 0;
+
+offsetML = (sin(vibM)+1.0)*127;
+offsetMR = (sin(vibM+(3.141592653589793238/2.0))+1.0)*127;
+workingML = countM + offsetML | 0;
+workingMR = countM + offsetMR | 0;
+interpolML = (aML[workingML-((workingML > delayM)?delayM+1:0)] * (1-(offsetML-floor(offsetML))));
+interpolML += (aML[workingML+1-((workingML+1 > delayM)?delayM+1:0)] * ((offsetML-floor(offsetML))) );
+interpolMR = (aMR[workingMR-((workingMR > delayM)?delayM+1:0)] * (1-(offsetMR-floor(offsetMR))));
+interpolMR += (aMR[workingMR+1-((workingMR+1 > delayM)?delayM+1:0)] * ((offsetMR-floor(offsetMR))) );
+inputSampleL = interpolML;
+inputSampleR = interpolMR;
+
+
+iirAL = (iirAL*(1.0-lowpass))+(inputSampleL*lowpass); inputSampleL = iirAL;
+iirAR = (iirAR*(1.0-lowpass))+(inputSampleR*lowpass); inputSampleR = iirAR;
+
+
+cycle+=1;
+(cycle == cycleEnd) ? ( 
+  aIL[countI] = inputSampleL + (feedbackAR * regen);
+  aJL[countJ] = inputSampleL + (feedbackBR * regen);
+  aKL[countK] = inputSampleL + (feedbackCR * regen);
+  aLL[countL] = inputSampleL + (feedbackDR * regen);
+  aIR[countI] = inputSampleR + (feedbackAL * regen);
+  aJR[countJ] = inputSampleR + (feedbackBL * regen);
+  aKR[countK] = inputSampleR + (feedbackCL * regen);
+  aLR[countL] = inputSampleR + (feedbackDL * regen);
+  
+  countI+=1; (countI < 0 || countI > delayI) ? countI = 0;
+  countJ+=1; (countJ < 0 || countJ > delayJ) ? countJ = 0;
+  countK+=1; (countK < 0 || countK > delayK) ? countK = 0;
+  countL+=1; (countL < 0 || countL > delayL) ? countL = 0;
+  
+  outIL = aIL[countI-((countI > delayI)?delayI+1:0)];
+  outJL = aJL[countJ-((countJ > delayJ)?delayJ+1:0)];
+  outKL = aKL[countK-((countK > delayK)?delayK+1:0)];
+  outLL = aLL[countL-((countL > delayL)?delayL+1:0)];
+  outIR = aIR[countI-((countI > delayI)?delayI+1:0)];
+  outJR = aJR[countJ-((countJ > delayJ)?delayJ+1:0)];
+  outKR = aKR[countK-((countK > delayK)?delayK+1:0)];
+  outLR = aLR[countL-((countL > delayL)?delayL+1:0)];
+  
+  aAL[countA] = (outIL - (outJL + outKL + outLL));
+  aBL[countB] = (outJL - (outIL + outKL + outLL));
+  aCL[countC] = (outKL - (outIL + outJL + outLL));
+  aDL[countD] = (outLL - (outIL + outJL + outKL));
+  aAR[countA] = (outIR - (outJR + outKR + outLR));
+  aBR[countB] = (outJR - (outIR + outKR + outLR));
+  aCR[countC] = (outKR - (outIR + outJR + outLR));
+  aDR[countD] = (outLR - (outIR + outJR + outKR));
+  
+  countA+=1; (countA < 0 || countA > delayA) ? countA = 0;
+  countB+=1; (countB < 0 || countB > delayB) ? countB = 0;
+  countC+=1; (countC < 0 || countC > delayC) ? countC = 0;
+  countD+=1; (countD < 0 || countD > delayD) ? countD = 0;
+  
+  outAL = aAL[countA-((countA > delayA)?delayA+1:0)];
+  outBL = aBL[countB-((countB > delayB)?delayB+1:0)];
+  outCL = aCL[countC-((countC > delayC)?delayC+1:0)];
+  outDL = aDL[countD-((countD > delayD)?delayD+1:0)];
+  outAR = aAR[countA-((countA > delayA)?delayA+1:0)];
+  outBR = aBR[countB-((countB > delayB)?delayB+1:0)];
+  outCR = aCR[countC-((countC > delayC)?delayC+1:0)];
+  outDR = aDR[countD-((countD > delayD)?delayD+1:0)];
+  
+  aEL[countE] = (outAL - (outBL + outCL + outDL));
+  aFL[countF] = (outBL - (outAL + outCL + outDL));
+  aGL[countG] = (outCL - (outAL + outBL + outDL));
+  aHL[countH] = (outDL - (outAL + outBL + outCL));
+  aER[countE] = (outAR - (outBR + outCR + outDR));
+  aFR[countF] = (outBR - (outAR + outCR + outDR));
+  aGR[countG] = (outCR - (outAR + outBR + outDR));
+  aHR[countH] = (outDR - (outAR + outBR + outCR));
+  
+  countE+=1; (countE < 0 || countE > delayE) ? countE = 0;
+  countF+=1; (countF < 0 || countF > delayF) ? countF = 0;
+  countG+=1; (countG < 0 || countG > delayG) ? countG = 0;
+  countH+=1; (countH < 0 || countH > delayH) ? countH = 0;
+  
+  outEL = aEL[countE-((countE > delayE)?delayE+1:0)];
+  outFL = aFL[countF-((countF > delayF)?delayF+1:0)];
+  outGL = aGL[countG-((countG > delayG)?delayG+1:0)];
+  outHL = aHL[countH-((countH > delayH)?delayH+1:0)];
+  outER = aER[countE-((countE > delayE)?delayE+1:0)];
+  outFR = aFR[countF-((countF > delayF)?delayF+1:0)];
+  outGR = aGR[countG-((countG > delayG)?delayG+1:0)];
+  outHR = aHR[countH-((countH > delayH)?delayH+1:0)];
+  
+  feedbackAL = (outEL - (outFL + outGL + outHL));
+  feedbackBL = (outFL - (outEL + outGL + outHL));
+  feedbackCL = (outGL - (outEL + outFL + outHL));
+  feedbackDL = (outHL - (outEL + outFL + outGL));
+  feedbackAR = (outER - (outFR + outGR + outHR));
+  feedbackBR = (outFR - (outER + outGR + outHR));
+  feedbackCR = (outGR - (outER + outFR + outHR));
+  feedbackDR = (outHR - (outER + outFR + outGR));
+  
+  inputSampleL = (outEL + outFL + outGL + outHL)/8.0;
+  inputSampleR = (outER + outFR + outGR + outHR)/8.0;
+  
+  (cycleEnd == 4) ? (
+    lastRefL[0] = lastRefL[4]; 
+    lastRefL[2] = (lastRefL[0] + inputSampleL)/2; 
+    lastRefL[1] = (lastRefL[0] + lastRefL[2])/2; 
+    lastRefL[3] = (lastRefL[2] + inputSampleL)/2; 
+    lastRefL[4] = inputSampleL; 
+    lastRefR[0] = lastRefR[4]; 
+    lastRefR[2] = (lastRefR[0] + inputSampleR)/2; 
+    lastRefR[1] = (lastRefR[0] + lastRefR[2])/2; 
+    lastRefR[3] = (lastRefR[2] + inputSampleR)/2; 
+    lastRefR[4] = inputSampleR; 
+  );
+  (cycleEnd == 3) ? (
+    lastRefL[0] = lastRefL[3]; 
+    lastRefL[2] = (lastRefL[0]+lastRefL[0]+inputSampleL)/3; 
+    lastRefL[1] = (lastRefL[0]+inputSampleL+inputSampleL)/3; 
+    lastRefL[3] = inputSampleL; 
+    lastRefR[0] = lastRefR[3]; 
+    lastRefR[2] = (lastRefR[0]+lastRefR[0]+inputSampleR)/3; 
+    lastRefR[1] = (lastRefR[0]+inputSampleR+inputSampleR)/3; 
+    lastRefR[3] = inputSampleR; 
+  );
+  (cycleEnd == 2) ? (
+    lastRefL[0] = lastRefL[2]; 
+    lastRefL[1] = (lastRefL[0] + inputSampleL)/2; 
+    lastRefL[2] = inputSampleL; 
+    lastRefR[0] = lastRefR[2];
+    lastRefR[1] = (lastRefR[0] + inputSampleR)/2; 
+    lastRefR[2] = inputSampleR; 
+  );
+  (cycleEnd == 1) ? (
+    lastRefL[0] = inputSampleL;
+    lastRefR[0] = inputSampleR;
+  );
+  cycle = 0; 
+  inputSampleL = lastRefL[cycle];
+  inputSampleR = lastRefR[cycle];
+) : (
+  inputSampleL = lastRefL[cycle];
+  inputSampleR = lastRefR[cycle];
+);
+
+iirBL = (iirBL*(1.0-lowpass))+(inputSampleL*lowpass); inputSampleL = iirBL;
+iirBR = (iirBR*(1.0-lowpass))+(inputSampleR*lowpass); inputSampleR = iirBR;
+
+(wet < 1.0) ? (
+  inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0-wet));
+  inputSampleR = (inputSampleR * wet) + (drySampleR * (1.0-wet));
+);
+
+fpdL = rand(UINT32_MAX);
+fpdR = rand(UINT32_MAX); 
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

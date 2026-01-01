@@ -5,7 +5,7 @@
 
 # Copyright (C) 2022–2025 chmaha
 
-rcver="26~beta7"
+rcver="26~beta8"
 
 cleanup() {
     if [ -n "$temp_dir" ] && [ -d "$temp_dir" ]; then

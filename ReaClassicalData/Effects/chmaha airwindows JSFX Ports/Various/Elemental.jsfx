@@ -1,0 +1,324 @@
+Version: 2.0
+desc:Elemental Mastering (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Mastering" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Mastering2(MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,100,0.1>Nihilum
+slider2:0<0,100,0.1>Water
+slider3:50<0,100,0.1>Air
+slider4:50<0,100,0.1>Fire
+slider5:50<0,100,0.1>Earth
+slider6:50<0,100,0.1>Aether
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+air = freemem; freemem=freemem+35;
+kalM = freemem; freemem=freemem+30;
+kalS = freemem; freemem=freemem+30;
+intermediateL = freemem; freemem=freemem+16;
+intermediateR = freemem; freemem=freemem+16;
+
+@slider
+
+A = slider1/100;
+B = slider2/100;
+C = slider3/100;
+D = slider4/100;
+E = slider5/100;
+F = slider6/100;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+iirSide = pow(A,3) * (0.1 / overallscale);
+
+threshSinew = (0.25+((1.0-B)*0.333))/overallscale;
+depthSinew = 1.0-pow(1.0-B,2.0);
+
+trebleZoom = C-0.5;
+trebleGain = (trebleZoom*abs(trebleZoom))+1.0;
+(trebleGain > 1.0) ? trebleGain = pow(trebleGain,3.0+sqrt(overallscale));
+
+midZoom = D-0.5;
+midGain = (midZoom*abs(midZoom))+1.0;
+kalMid = 0.35-(D*0.25);
+kalSub = 0.45+(D*0.25);
+
+bassZoom = (E*0.5)-0.25;
+bassGain = (-bassZoom*abs(bassZoom))+1.0;
+subGain = ((E*0.25)-0.125)+1.0;
+(subGain < 1.0) ?subGain = 1.0;
+
+driveIn = (F-0.5)+1.0;
+driveOut = (-(F-0.5)*abs(F-0.5))+1.0;
+
+spacing = floor(overallscale); 
+(spacing < 1) ? spacing = 1; (spacing > 16) ? spacing = 16;
+depth = (17.0*overallscale) | 0;
+(depth < 3) ? depth = 3; (depth > 98) ? depth = 98;
+
+fpFlip = 1;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+inputSampleL *= driveIn;
+inputSampleR *= driveIn;
+
+mid = inputSampleL + inputSampleR;
+side = inputSampleL - inputSampleR;
+temp = side;
+
+(fpFlip) ? (
+    iirA = (iirA * (1.0 - iirSide)) + (temp * iirSide); temp = iirA;
+) : (
+    iirB = (iirB * (1.0 - iirSide)) + (temp * iirSide); temp = iirB;
+);
+iirC = (iirC * (1.0 - iirSide)) + (temp * iirSide); temp = iirC;
+
+side -= sin(temp);
+fpFlip = !fpFlip;
+
+inputSampleL = (mid+side)/2.0;
+inputSampleR = (mid-side)/2.0;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+air[13] = air[12] - air[9]; air[10] = air[9] - air[5];
+air[6] = air[5] - air[1]; air[2] = air[1] - inputSampleL;
+air[11] = air[13] - air[10]; air[7] = air[10] - air[6];
+air[3] = air[6] - air[2];
+air[8] = air[11] - air[7]; air[4] = air[7] - air[3];    
+air[15] = -(air[1] + air[10] + air[8] - ((air[8] + air[4])*0.5));
+air[16] *= 0.5; air[16] += abs(drySampleL-air[15])*0.5;
+(air[16] > 0.3*sqrt(overallscale)) ? air[16] = 0.3*sqrt(overallscale);
+air[12] = air[9]; air[9] = air[5];
+air[5] = air[1]; air[1] = (air[16] * air[15]) + drySampleL;
+midL = drySampleL - ((air[15]*0.5)+(drySampleL*(0.457-(0.017*overallscale))));
+temp = (midL + air[gndavgL])*0.5; air[gndavgL] = midL; midL = temp;
+trebleL = drySampleL-midL;
+
+air[29] = air[28] - air[25]; air[26] = air[25] - air[21];
+air[22] = air[21] - air[17]; air[18] = air[17] - inputSampleR;
+air[27] = air[29] - air[26]; air[23] = air[26] - air[22];
+air[19] = air[22] - air[18];
+air[24] = air[27] - air[23]; air[20] = air[23] - air[19];    
+air[31] = -(air[17] + air[26] + air[24] - ((air[24] + air[20])*0.5));
+air[32] *= 0.5; air[32] += abs(drySampleR-air[31])*0.5;
+(air[32] > 0.3*sqrt(overallscale)) ? air[32] = 0.3*sqrt(overallscale);
+air[28] = air[25]; air[25] = air[21];
+air[21] = air[17]; air[17] = (air[32] * air[31]) + drySampleR;
+midR = drySampleR - ((air[31]*0.5)+(drySampleR*(0.457-(0.017*overallscale))));
+temp = (midR + air[30])*0.5; air[30] = midR; midR = temp;
+trebleR = drySampleR-midR;
+
+temp = midL;
+kalM[8] += kalM[7] - kalM[4]; kalM[8] *= 0.5;
+kalM[5] += kalM[4] - kalM[1]; kalM[5] *= 0.5;
+kalM[2] += kalM[1] - midL; kalM[2] *= 0.5;
+
+kalM[6] += kalM[8] - kalM[5]; kalM[6] *= 0.5;
+kalM[3] += kalM[5] - kalM[2]; kalM[3] *= 0.5;
+kalM[9] += (kalM[6] - kalM[3]); kalM[9] *= 0.5;
+kalM[11] += kalM[1] + kalM[5] + kalM[9]; kalM[11] *= 0.5;
+
+kalM[10] += abs(temp-kalM[11])*kalMid*8.0; kalM[10] *= 0.5;
+(kalM[10] > kalMid*0.5) ? kalM[10] = kalMid*0.5;
+kalM[11] += (temp*(1.0-(0.68+(kalMid*0.157))));  
+kalM[7] = kalM[4]; kalM[4] = kalM[1];
+kalM[1] = (kalM[10] * kalM[11]) + ((1.0-kalM[10])*temp);
+bassL = (kalM[11]+kalM[12])*0.5;
+kalM[12] = kalM[11];
+midL -= bassL;
+
+temp = midR;
+kalM[20] += kalM[19] - kalM[16]; kalM[20] *= 0.5;
+kalM[17] += kalM[16] - kalM[13]; kalM[17] *= 0.5;
+kalM[14] += kalM[13] - midR; kalM[14] *= 0.5;
+kalM[18] += kalM[20] - kalM[17]; kalM[18] *= 0.5;
+kalM[15] += kalM[17] - kalM[14]; kalM[15] *= 0.5;
+kalM[21] += (kalM[18] - kalM[15]); kalM[21] *= 0.5;
+kalM[23] += kalM[13] + kalM[17] + kalM[21]; kalM[23] *= 0.5;
+
+kalM[22] += abs(temp-kalM[23])*kalMid*8.0; kalM[22] *= 0.5;
+(kalM[22] > kalMid*0.5) ? kalM[22] = kalMid*0.5;
+kalM[23] += (temp*(1.0-(0.68+(kalMid*0.157))));  
+kalM[19] = kalM[16]; kalM[16] = kalM[13];
+kalM[13] = (kalM[22] * kalM[23]) + ((1.0-kalM[22])*temp);
+bassR = (kalM[23]+kalM[24])*0.5;
+kalM[24] = kalM[23];
+midR -= bassR;
+
+temp = bassL;
+kalS[8] += kalS[7] - kalS[4]; kalS[8] *= 0.5;
+kalS[5] += kalS[4] - kalS[1]; kalS[5] *= 0.5;
+kalS[2] += kalS[1] - bassL; kalS[2] *= 0.5;
+kalS[6] += kalS[8] - kalS[5]; kalS[6] *= 0.5;
+kalS[3] += kalS[5] - kalS[2]; kalS[3] *= 0.5;
+kalS[9] += (kalS[6] - kalS[3]); kalS[9] *= 0.5;
+kalS[11] += kalS[1] + kalS[5] + kalS[9]; kalS[11] *= 0.5;
+kalS[10] += abs(temp-kalS[11])*kalSub*8.0; kalS[10] *= 0.5;
+(kalS[10] > kalSub*0.5) ? kalS[10] = kalSub*0.5;
+kalS[11] += (temp*(1.0-(0.68+(kalSub*0.157))));  
+kalS[7] = kalS[4]; kalS[4] = kalS[1];
+kalS[1] = (kalS[10] * kalS[11]) + ((1.0-kalS[10])*temp);
+subL = (kalS[11]+kalS[12])*0.5;
+kalS[12] = kalS[11];
+bassL -= subL;
+
+temp = bassR;
+kalS[20] += kalS[19] - kalS[16]; kalS[20] *= 0.5;
+kalS[17] += kalS[16] - kalS[13]; kalS[17] *= 0.5;
+kalS[14] += kalS[13] - bassR; kalS[14] *= 0.5;
+kalS[18] += kalS[20] - kalS[17]; kalS[18] *= 0.5;
+kalS[15] += kalS[17] - kalS[14]; kalS[15] *= 0.5;
+kalS[21] += (kalS[18] - kalS[15]); kalS[21] *= 0.5;
+kalS[23] += kalS[13] + kalS[17] + kalS[21]; kalS[23] *= 0.5;
+kalS[22] += abs(temp-kalS[23])*kalSub*8.0; kalS[22] *= 0.5;
+(kalS[22] > kalSub*0.5) ? kalS[22] = kalSub*0.5;
+kalS[23] += (temp*(1.0-(0.68+(kalSub*0.157))));  
+kalS[19] = kalS[16]; kalS[16] = kalS[13];
+kalS[13] = (kalS[22] * kalS[23]) + ((1.0-kalS[22])*temp);
+subR = (kalS[23]+kalS[24])*0.5;
+kalS[24] = kalS[23];
+bassR -= subR;
+
+inputSampleL = (subL*subGain);
+inputSampleR = (subR*subGain);
+
+(bassZoom > 0.0) ? (
+  closer = bassL * 1.57079633;
+  (closer > 1.57079633) ? closer = 1.57079633;
+  (closer < -1.57079633) ? closer = -1.57079633;
+  bassL = (bassL*(1.0-bassZoom))+(sin(closer)*bassZoom);
+  closer = bassR * 1.57079633;
+  (closer > 1.57079633) ? closer = 1.57079633;
+  (closer < -1.57079633) ? closer = -1.57079633;
+  bassR = (bassR*(1.0-bassZoom))+(sin(closer)*bassZoom);
+);
+(bassZoom < 0.0) ? (
+  farther = abs(bassL) * 1.57079633;
+  (farther > 1.57079633) ? farther = 1.0
+  : farther = 1.0-cos(farther);
+  (bassL > 0.0) ? bassL = (bassL*(1.0+bassZoom))-(farther*bassZoom*1.57079633);
+  (bassL < 0.0) ? bassL = (bassL*(1.0+bassZoom))+(farther*bassZoom*1.57079633);      
+  farther = abs(bassR) * 1.57079633;
+  (farther > 1.57079633) ? farther = 1.0
+  : farther = 1.0-cos(farther);
+  (bassR > 0.0) ? bassR = (bassR*(1.0+bassZoom))-(farther*bassZoom*1.57079633);
+  (bassR < 0.0) ? bassR = (bassR*(1.0+bassZoom))+(farther*bassZoom*1.57079633);      
+);
+inputSampleL += (bassL*bassGain);
+inputSampleR += (bassR*bassGain);
+
+(midZoom > 0.0) ? (
+  closer = midL * 1.57079633;
+  (closer > 1.57079633) ? closer = 1.57079633;
+  (closer < -1.57079633) ? closer = -1.57079633;
+  midL = (midL*(1.0-midZoom))+(sin(closer)*midZoom);
+  closer = midR * 1.57079633;
+  (closer > 1.57079633) ? closer = 1.57079633;
+  (closer < -1.57079633) ? closer = -1.57079633;
+  midR = (midR*(1.0-midZoom))+(sin(closer)*midZoom);
+);
+(midZoom < 0.0) ? (
+  farther = abs(midL) * 1.57079633;
+  (farther > 1.57079633) ? farther = 1.0
+  : farther = 1.0-cos(farther);
+  (midL > 0.0) ? midL = (midL*(1.0+midZoom))-(farther*midZoom*1.57079633);
+  (midL < 0.0) ? midL = (midL*(1.0+midZoom))+(farther*midZoom*1.57079633);      
+  farther = abs(midR) * 1.57079633;
+  (farther > 1.57079633) ? farther = 1.0
+  : farther = 1.0-cos(farther);
+  (midR > 0.0) ? midR = (midR*(1.0+midZoom))-(farther*midZoom*1.57079633);
+  (midR < 0.0) ? midR = (midR*(1.0+midZoom))+(farther*midZoom*1.57079633);      
+);
+inputSampleL += (midL*midGain);
+inputSampleR += (midR*midGain);
+(trebleZoom > 0.0) ? (
+  closer = trebleL * 1.57079633;
+  (closer > 1.57079633) ? closer = 1.57079633;
+  (closer < -1.57079633) ? closer = -1.57079633;
+  trebleL = (trebleL*(1.0-trebleZoom))+(sin(closer)*trebleZoom);
+  closer = trebleR * 1.57079633;
+  (closer > 1.57079633) ? closer = 1.57079633;
+  (closer < -1.57079633) ? closer = -1.57079633;
+  trebleR = (trebleR*(1.0-trebleZoom))+(sin(closer)*trebleZoom);
+);
+(trebleZoom < 0.0) ? (
+  farther = abs(trebleL) * 1.57079633;
+  (farther > 1.57079633) ? farther = 1.0
+  : farther = 1.0-cos(farther);
+  (trebleL > 0.0) ? trebleL = (trebleL*(1.0+trebleZoom))-(farther*trebleZoom*1.57079633);
+  (trebleL < 0.0) ? trebleL = (trebleL*(1.0+trebleZoom))+(farther*trebleZoom*1.57079633);      
+  farther = abs(trebleR) * 1.57079633;
+  (farther > 1.57079633) ? farther = 1.0
+  : farther = 1.0-cos(farther);
+  (trebleR > 0.0) ? trebleR = (trebleR*(1.0+trebleZoom))-(farther*trebleZoom*1.57079633);
+  (trebleR < 0.0) ? trebleR = (trebleR*(1.0+trebleZoom))+(farther*trebleZoom*1.57079633);      
+);
+inputSampleL += (trebleL*trebleGain);
+inputSampleR += (trebleR*trebleGain);
+
+inputSampleL *= driveOut;
+inputSampleR *= driveOut;
+
+(inputSampleL > 4.0) ? inputSampleL = 4.0; (inputSampleL < -4.0) ? inputSampleL = -4.0;
+(wasPosClipL == 1) ? (
+  (inputSampleL<lastSampleL) ? lastSampleL=0.7058208+(inputSampleL*0.2609148)
+  : lastSampleL = 0.2491717+(lastSampleL*0.7390851);
+); wasPosClipL = 0;
+(inputSampleL>0.9549925859)? (wasPosClipL=1;inputSampleL=0.7058208+(lastSampleL*0.2609148));
+(wasNegClipL == 1) ? (
+  (inputSampleL > lastSampleL) ? lastSampleL=-0.7058208+(inputSampleL*0.2609148)
+  : lastSampleL=-0.2491717+(lastSampleL*0.7390851);
+); wasNegClipL = 0;
+(inputSampleL<-0.9549925859) ? (wasNegClipL=1;inputSampleL=-0.7058208+(lastSampleL*0.2609148));
+intermediateL[spacing] = inputSampleL;
+    inputSampleL = lastSampleL;
+x = spacing; while (x > 0) (intermediateL[x-1] = intermediateL[x]; x=x-1);
+lastSampleL = intermediateL[0];
+
+(inputSampleR > 4.0) ? inputSampleR = 4.0; (inputSampleR < -4.0) ? inputSampleR = -4.0;
+(wasPosClipR == 1) ? (
+  (inputSampleR<lastSampleR) ? lastSampleR=0.7058208+(inputSampleR*0.2609148)
+  : lastSampleR = 0.2491717+(lastSampleR*0.7390851);
+); wasPosClipR = 0;
+(inputSampleR>0.9549925859) ? (wasPosClipR=1;inputSampleR=0.7058208+(lastSampleR*0.2609148));
+(wasNegClipR == 1) ? (
+  (inputSampleR > lastSampleR) ? lastSampleR=-0.7058208+(inputSampleR*0.2609148)
+  : lastSampleR=-0.2491717+(lastSampleR*0.7390851);
+); wasNegClipR = 0;
+(inputSampleR<-0.9549925859) ? (wasNegClipR=1;inputSampleR=-0.7058208+(lastSampleR*0.2609148));
+intermediateR[spacing] = inputSampleR;
+    inputSampleR = lastSampleR;
+x = spacing; while (x > 0) (intermediateR[x-1] = intermediateR[x]; x=x-1);
+lastSampleR = intermediateR[0]; 
+
+temp = inputSampleL;
+sinew = threshSinew * cos(lastSinewL*lastSinewL);
+(inputSampleL - lastSinewL > sinew) ? temp = lastSinewL + sinew;
+(-(inputSampleL - lastSinewL) > sinew) ? temp = lastSinewL - sinew;
+lastSinewL = temp;
+inputSampleL = (inputSampleL * (1.0-depthSinew))+(lastSinewL*depthSinew);
+temp = inputSampleR;
+sinew = threshSinew * cos(lastSinewR*lastSinewR);
+(inputSampleR - lastSinewR > sinew) ? temp = lastSinewR + sinew;
+(-(inputSampleR - lastSinewR) > sinew) ? temp = lastSinewR - sinew;
+lastSinewR = temp;
+inputSampleR = (inputSampleR * (1.0-depthSinew))+(lastSinewR*depthSinew);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

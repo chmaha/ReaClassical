@@ -17,7 +17,7 @@
 $ErrorActionPreference = "Stop"
 
 # Version
-$rcver = "26~beta7"
+$rcver = "26~beta8"
 $tempDir = $null
 
 # ------------------------

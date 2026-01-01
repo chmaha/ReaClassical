@@ -1,0 +1,128 @@
+Version: 1.2
+desc:Twilight Dither (chmaha)
+author: chmaha
+about:
+  Uses "Dark" DSP from airwindows "Monitoring2" plugin by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Monitoring2 (MIT License)
+  JSFX version released under GPLv3 license
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+slider1:bitdepth=0<0,1,1{Twilight 16-bit,Twilight 24-bit}>Bitdepth
+
+@init
+freemem = 0;
+darkSampleL = freemem; freemem+=100;
+darkSampleR = freemem; freemem+=100;
+
+
+noiseShapingL = 0.0;
+noiseShapingR = 0.0;
+
+
+NSOddL = 0.0; NSEvenL = 0.0; prevShapeL = 0.0;
+NSOddR = 0.0; NSEvenR = 0.0; prevShapeR = 0.0;
+
+count = 0; loop(98, darkSampleL[count] = 0; darkSampleR[count] = 0; count+=1;);
+
+UINT32_MAX = 4294967295;
+
+A = 0.0;
+fpdL = 1.0; while (fpdL < 16386) (fpdL = rand()*UINT32_MAX);
+fpdR = 1.0; while (fpdR < 16386) (fpdR = rand()*UINT32_MAX);
+
+@slider
+
+@block
+
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+depth = (17.0*overallscale) | 0;
+(depth < 3) ? depth = 3;
+(depth > 98) ? depth = 98; //for Dark
+
+@sample
+
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+
+fpdL ~= fpdL << 13; fpdL ~= fpdL >> 17; fpdL ~= fpdL << 5;
+(fpdL < 0) ? fpdL += UINT32_MAX;
+
+fpdR ~= fpdR << 13; fpdR ~= fpdR >> 17; fpdR ~= fpdR << 5;
+(fpdR < 0) ? fpdR += UINT32_MAX;
+
+(bitdepth == 0) ? (
+  inputSampleL = inputSampleL * 32768.0; //16-bit
+  inputSampleR = inputSampleR * 32768.0;
+) : (
+  inputSampleL = inputSampleL * 8388608.0; //24-bit
+  inputSampleR = inputSampleR * 8388608.0;
+);
+
+//begin left
+    quantA = floor(inputSampleL);
+    quantB = floor(inputSampleL+1.0);
+
+    expectedSlew = 0;
+    x = 0; while(x < depth)(
+      expectedSlew += (darkSampleL[x+1] - darkSampleL[x]);
+      x+=1;
+    );
+    expectedSlew /= depth;
+
+    testA = abs((darkSampleL[0] - quantA) - expectedSlew);
+    testB = abs((darkSampleL[0] - quantB) - expectedSlew);
+
+    (testA < testB) ? inputSampleL = quantA
+    : inputSampleL = quantB;
+
+    x = depth; while(x >=0) (
+      darkSampleL[x+1] = darkSampleL[x];
+      x-=1;
+    );
+    darkSampleL[0] = inputSampleL;
+    //end Dark left
+
+    //begin right
+
+    quantA = floor(inputSampleR);
+    quantB = floor(inputSampleR+1.0);
+    
+    expectedSlew = 0;
+    x = 0; while(x < depth)(
+      expectedSlew += (darkSampleR[x+1] - darkSampleR[x]);
+      x+=1;
+    );
+    expectedSlew /= depth;
+
+    testA = abs((darkSampleR[0] - quantA) - expectedSlew);
+    testB = abs((darkSampleR[0] - quantB) - expectedSlew);
+
+    (testA < testB) ? inputSampleR = quantA
+    : inputSampleR = quantB;
+
+    x = depth; while(x >=0) (
+      darkSampleR[x+1] = darkSampleR[x];
+      x-=1;
+    );
+    darkSampleR[0] = inputSampleR;
+    //end Dark right
+
+   (bitdepth == 0 ) ? (
+      inputSampleL /= 32768.0;
+      inputSampleR /= 32768.0;
+    ) : (
+      inputSampleL /= 8388608.0;
+      inputSampleR /= 8388608.0;
+    );
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+

@@ -1,0 +1,295 @@
+NoIndex: true
+desc:Em-See-Eye Console Channel (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "ConsoleMDChannel" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/ConsoleMDChannel (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Treble
+slider2:0.25<0,1,0.01>MidFreq
+slider3:0<0,1,0.01>MidPeak
+slider4:0.5<0,1,0.01>Bass
+slider5:0.5<0,1,0.01>Pan
+slider6:0.5<0,1,0.01>Fader
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+pearA = freemem; freemem+=18;
+pearB = freemem; freemem+=22;
+mpkL = freemem; freemem+=2005;
+mpkR = freemem; freemem+=2005;
+f = freemem; freemem+=66;
+
+prevfreqMPeak = -1;
+prevamountMPeak = -1;
+mpc = 1;  
+gainA = gainB = 1.0;  
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+E = slider5;
+G = slider6; // avoid clash with lowercase f in @init
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+cycleEnd = floor(overallscale);
+(cycleEnd < 1) ? cycleEnd = 1;
+(cycleEnd > 3) ? cycleEnd = 3;
+
+fatTreble = (A*6.0)-3.0;
+bassA = bassB;
+bassB = (D*6.0)-3.0;
+
+(fatTreble < 0.0) ? fatTreble /= 3.0;
+(bassB < 0.0) ? bassB /= 3.0;
+
+freqTreble = 0.853;
+freqMid = 0.026912;
+
+cycleEnd == 2 ? (
+    freqTreble = 0.4265;
+    freqMid = 0.013456;
+)
+: cycleEnd == 3 ? (
+    freqTreble = 0.21325;
+    freqMid = 0.006728;
+);
+
+
+freqMPeak = pow(B+0.16,3);
+amountMPeak = pow(C,2);
+maxMPeak = (amountMPeak*63.0)+1 | 0;
+((freqMPeak != prevfreqMPeak)||(amountMPeak != prevamountMPeak)) ? (
+  x = 0; while(x < maxMPeak) (
+    ((x*freqMPeak) < ($pi/4)) ? f[x] = sin((x*freqMPeak)*4.0)*freqMPeak*sin(((maxMPeak-x)/maxMPeak)*($pi/2))
+    : f[x] = cos(x*freqMPeak)*freqMPeak*sin(((maxMPeak-x)/maxMPeak)*($pi/2));
+    x+=1;
+  );
+  prevfreqMPeak = freqMPeak; prevamountMPeak = amountMPeak;
+);
+
+bitshiftL = 0;
+bitshiftR = 0;
+panControl = (E*2.0)-1.0;
+panAttenuation = (1.0-abs(panControl));
+panBits = 20;
+(panAttenuation > 0.0) ? panBits = floor(1.0 / panAttenuation);
+(panControl > 0.25) ? bitshiftL += panBits;
+(panControl < -0.25) ? bitshiftR += panBits;
+(bitshiftL < 0) ? bitshiftL = 0; (bitshiftL > 17) ? bitshiftL = 17;
+(bitshiftR < 0) ? bitshiftR = 0; (bitshiftR > 17) ? bitshiftR = 17;
+gainL = 1.0;
+gainR = 1.0;
+
+gainL = (bitshiftL == 17) ? 0.0 :
+        (bitshiftL == 16) ? 0.0000152587890625 :
+        (bitshiftL == 15) ? 0.000030517578125 :
+        (bitshiftL == 14) ? 0.00006103515625 :
+        (bitshiftL == 13) ? 0.0001220703125 :
+        (bitshiftL == 12) ? 0.000244140625 :
+        (bitshiftL == 11) ? 0.00048828125 :
+        (bitshiftL == 10) ? 0.0009765625 :
+        (bitshiftL == 9)  ? 0.001953125 :
+        (bitshiftL == 8)  ? 0.00390625 :
+        (bitshiftL == 7)  ? 0.0078125 :
+        (bitshiftL == 6)  ? 0.015625 :
+        (bitshiftL == 5)  ? 0.03125 :
+        (bitshiftL == 4)  ? 0.0625 :
+        (bitshiftL == 3)  ? 0.125 :
+        (bitshiftL == 2)  ? 0.25 :
+        (bitshiftL == 1)  ? 0.5 : 1;
+        
+gainR = (bitshiftR == 17) ? 0.0 :
+        (bitshiftR == 16) ? 0.0000152587890625 :
+        (bitshiftR == 15) ? 0.000030517578125 :
+        (bitshiftR == 14) ? 0.00006103515625 :
+        (bitshiftR == 13) ? 0.0001220703125 :
+        (bitshiftR == 12) ? 0.000244140625 :
+        (bitshiftR == 11) ? 0.00048828125 :
+        (bitshiftR == 10) ? 0.0009765625 :
+        (bitshiftR == 9)  ? 0.001953125 :
+        (bitshiftR == 8)  ? 0.00390625 :
+        (bitshiftR == 7)  ? 0.0078125 :
+        (bitshiftR == 6)  ? 0.015625 :
+        (bitshiftR == 5)  ? 0.03125 :
+        (bitshiftR == 4)  ? 0.0625 :
+        (bitshiftR == 3)  ? 0.125 :
+        (bitshiftR == 2)  ? 0.25 :
+        (bitshiftR == 1)  ? 0.5 : 1;
+
+gainA = gainB;
+gainB = G*2.0;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+gain = G*2;
+bass = (D*6.0)-3.0;
+inputSampleL *= gain;
+inputSampleR *= gain;
+
+bassL = inputSampleL;
+bassR = inputSampleR;
+slew = ((bassL - pearA[0]) + pearA[1])*freqTreble*0.5;
+pearA[0] = bassL = (freqTreble * bassL) + ((1.0-freqTreble) * (pearA[0] + pearA[1]));
+pearA[1] = slew; slew = ((bassR - pearA[2]) + pearA[3])*freqTreble*0.5;
+pearA[2] = bassR = (freqTreble * bassR) + ((1.0-freqTreble) * (pearA[2] + pearA[3]));
+pearA[3] = slew; slew = ((bassL - pearA[4]) + pearA[5])*freqTreble*0.5;
+pearA[4] = bassL = (freqTreble * bassL) + ((1.0-freqTreble) * (pearA[4] + pearA[5]));
+pearA[5] = slew; slew = ((bassR - pearA[6]) + pearA[7])*freqTreble*0.5;
+pearA[6] = bassR = (freqTreble * bassR) + ((1.0-freqTreble) * (pearA[6] + pearA[7]));
+pearA[7] = slew; slew = ((bassL - pearA[8]) + pearA[9])*freqTreble*0.5;
+pearA[8] = bassL = (freqTreble * bassL) + ((1.0-freqTreble) * (pearA[8] + pearA[9]));
+pearA[9] = slew; slew = ((bassR - pearA[10]) + pearA[11])*freqTreble*0.5;
+pearA[10] = bassR = (freqTreble * bassR) + ((1.0-freqTreble) * (pearA[10] + pearA[11]));
+pearA[11] = slew; slew = ((bassL - pearA[12]) + pearA[13])*freqTreble*0.5;
+pearA[12] = bassL = (freqTreble * bassL) + ((1.0-freqTreble) * (pearA[12] + pearA[13]));
+pearA[13] = slew; slew = ((bassR - pearA[14]) + pearA[15])*freqTreble*0.5;
+pearA[14] = bassR = (freqTreble * bassR) + ((1.0-freqTreble) * (pearA[14] + pearA[15]));
+pearA[15] = slew;
+    
+trebleL = inputSampleL - bassL; inputSampleL = bassL;
+trebleR = inputSampleR - bassR; inputSampleR = bassR;
+
+slew = ((bassL - pearB[0]) + pearB[1])*freqMid*0.5;
+pearB[0] = bassL = (freqMid * bassL) + ((1.0-freqMid) * (pearB[0] + pearB[1]));
+pearB[1] = slew; slew = ((bassR - pearB[2]) + pearB[3])*freqMid*0.5;
+pearB[2] = bassR = (freqMid * bassR) + ((1.0-freqMid) * (pearB[2] + pearB[3]));
+pearB[3] = slew; slew = ((bassL - pearB[4]) + pearB[5])*freqMid*0.5;
+pearB[4] = bassL = (freqMid * bassL) + ((1.0-freqMid) * (pearB[4] + pearB[5]));
+pearB[5] = slew; slew = ((bassR - pearB[6]) + pearB[7])*freqMid*0.5;
+pearB[6] = bassR = (freqMid * bassR) + ((1.0-freqMid) * (pearB[6] + pearB[7]));
+pearB[7] = slew; slew = ((bassL - pearB[8]) + pearB[9])*freqMid*0.5;
+pearB[8] = bassL = (freqMid * bassL) + ((1.0-freqMid) * (pearB[8] + pearB[9]));
+pearB[9] = slew; slew = ((bassR - pearB[10]) + pearB[11])*freqMid*0.5;
+pearB[10] = bassR = (freqMid * bassR) + ((1.0-freqMid) * (pearB[10] + pearB[11]));
+pearB[11] = slew; slew = ((bassL - pearB[12]) + pearB[13])*freqMid*0.5;
+pearB[12] = bassL = (freqMid * bassL) + ((1.0-freqMid) * (pearB[12] + pearB[13]));
+pearB[13] = slew; slew = ((bassR - pearB[14]) + pearB[15])*freqMid*0.5;
+pearB[14] = bassR = (freqMid * bassR) + ((1.0-freqMid) * (pearB[14] + pearB[15]));
+pearB[15] = slew; slew = ((bassL - pearB[16]) + pearB[17])*freqMid*0.5;
+pearB[16] = bassL = (freqMid * bassL) + ((1.0-freqMid) * (pearB[16] + pearB[17]));
+pearB[17] = slew; slew = ((bassR - pearB[18]) + pearB[19])*freqMid*0.5;
+pearB[18] = bassR = (freqMid * bassR) + ((1.0-freqMid) * (pearB[18] + pearB[19]));
+pearB[19] = slew;
+midL = inputSampleL - bassL;
+midR = inputSampleR - bassR;
+
+w = 0.0;
+(fatTreble > 0.0) ? (
+  w = fatTreble; (w > 1.0) ? w = 1.0;
+  trebleL = (trebleL*(1.0-w)) + (sin(trebleL*($pi/2))*w);
+  trebleR = (trebleR*(1.0-w)) + (sin(trebleR*($pi/2))*w);
+  (fatTreble > 1.0) ? (
+    w = fatTreble-1.0; (w > 1.0) ? w = 1.0;
+    trebleL = (trebleL*(1.0-w)) + (sin(trebleL*($pi/2))*w);
+    trebleR = (trebleR*(1.0-w)) + (sin(trebleR*($pi/2))*w);
+    (fatTreble > 2.0) ? (
+      w = fatTreble-2.0;
+      trebleL = (trebleL*(1.0-w)) + (sin(trebleL*($pi/2))*w);
+      trebleR = (trebleR*(1.0-w)) + (sin(trebleR*($pi/2))*w);
+    )
+  )
+);
+(fatTreble < 0.0) ? (
+  (trebleL > 1.0) ? trebleL = 1.0; (trebleL < -1.0) ? trebleL = -1.0;
+  (trebleR > 1.0) ? trebleR = 1.0; (trebleR < -1.0) ? trebleR = -1.0;
+  w = -fatTreble; (w > 1.0) ? w = 1.0;
+  (trebleL > 0) ? trebleL = (trebleL*(1.0-w))+((1.0-cos(trebleL))*sin(w))
+  : trebleL = (trebleL*(1.0-w))+((-1.0+cos(-trebleL))*sin(w));
+  (trebleR > 0) ? trebleR = (trebleR*(1.0-w))+((1.0-cos(trebleR))*sin(w))
+  : trebleR = (trebleR*(1.0-w))+((-1.0+cos(-trebleR))*sin(w));
+);
+
+mpc+=1; (mpc < 1 || mpc > 2001) ? mpc = 1;
+mpkL[mpc] = midL;
+mpkR[mpc] = midR;
+midMPeakL = 0.0;
+midMPeakR = 0.0;
+x=0; while (x < maxMPeak) (
+y = x*cycleEnd;
+cycleEnd == 1 ? (
+      midMPeakL += (mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x]);
+      midMPeakR += (mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x]);
+  ) :
+    cycleEnd == 2 ? (
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.5);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.5); y-=1;
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.5);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.5);
+  ) :
+    cycleEnd == 3 ? (
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.333);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.333); y-=1;
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.333);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.333); y-=1;
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.333);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.333);
+    ) : 
+    cycleEnd == 4 ? (
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25); y-=1;
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25); y-=1;
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25); y-=1;
+      midMPeakL += ((mpkL[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25);
+      midMPeakR += ((mpkR[(mpc-y)+((mpc-y < 1)?2001:0)] * f[x])*0.25);
+  );
+  x+=1;
+);
+
+midL = (midMPeakL*amountMPeak)+((1.5-amountMPeak>1.0)?midL:midL*(1.5-amountMPeak));
+midR = (midMPeakR*amountMPeak)+((1.5-amountMPeak>1.0)?midR:midR*(1.5-amountMPeak));
+
+(bassL > 1.0) ? bassL = 1.0; (bassL < -1.0) ? bassL = -1.0;
+(bassR > 1.0) ? bassR = 1.0; (bassR < -1.0) ? bassR = -1.0;
+(bass > 0.0) ? (
+  w = bass; (w > 1.0) ? w = 1.0;
+  bassL = (bassL*(1.0-w)) + (sin(bassL*($pi/2))*w*1.6);
+  bassR = (bassR*(1.0-w)) + (sin(bassR*($pi/2))*w*1.6);
+  (bass > 1.0) ? (
+    w = bass-1.0; (w > 1.0) ? w = 1.0;
+    bassL = (bassL*(1.0-w)) + (sin(bassL*($pi/2))*w*1.4);
+    bassR = (bassR*(1.0-w)) + (sin(bassR*($pi/2))*w*1.4);
+    (bass > 2.0) ? (
+      w = bass-2.0;
+      bassL = (bassL*(1.0-w)) + (sin(bassL*($pi/2))*w*1.2);
+      bassR = (bassR*(1.0-w)) + (sin(bassR*($pi/2))*w*1.2);
+    )
+  )
+);
+(bass < 0.0) ? (
+  w = -bass; (w > 1.0) ? w = 1.0;  
+  (bassL > 0) ? bassL = (bassL*(1.0-w))+((1.0-cos(bassL))*sin(w))
+  : bassL = (bassL*(1.0-w))+((-1.0+cos(-bassL))*sin(w));
+  (bassR > 0) ? bassR = (bassR*(1.0-w))+((1.0-cos(bassR))*sin(w))
+  : bassR = (bassR*(1.0-w))+((-1.0+cos(-bassR))*sin(w));
+);
+    
+inputSampleL = (bassL + midL + trebleL)*gainL;
+inputSampleR = (bassR + midR + trebleR)*gainR;
+
+(inputSampleL > 1.57079633) ? inputSampleL = 1.57079633;
+(inputSampleL < -1.57079633) ? inputSampleL = -1.57079633;
+(inputSampleR > 1.57079633) ? inputSampleR = 1.57079633;
+(inputSampleR < -1.57079633) ? inputSampleR = -1.57079633;
+inputSampleL = sin(inputSampleL);
+inputSampleR = sin(inputSampleR);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

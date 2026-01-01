@@ -1,0 +1,771 @@
+Version: 1.0
+desc:NW8 "B" Plate Reverb (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "kPlateB" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/kPlateB (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:1<0,1,0.01>Input Pad
+slider2:0.5<0,1,0.01>Damping
+slider3:1<0,1,0.01>Low Cut
+slider4:0<0,1,0.01>Predelay
+slider5:0.25<0,1,0.01>Wetness
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+earlyA = 97; earlyB = 1123; earlyC = 379; earlyD = 619; earlyE = 1187; earlyF = 757; earlyG = 1151; earlyH = 13; earlyI = 1093; predelay = 24010;
+delayA = 631; delayB = 251; delayC = 137; delayD = 673; delayE = 293; delayF = 163; delayG = 389; delayH = 37; delayI = 641; delayJ = 661; delayK = 17; delayL = 719; delayM = 787; delayN = 31; delayO = 83; delayP = 823; delayQ = 127; delayR = 653; delayS = 3; delayT = 613; delayU = 857; delayV = 431; delayW = 53; delayX = 607; delayY = 193;
+
+freemem = 0;
+
+eAL = freemem; freemem += earlyA+5;
+eBL = freemem; freemem += earlyB+5;
+eCL = freemem; freemem += earlyC+5;
+eDL = freemem; freemem += earlyD+5;
+eEL = freemem; freemem += earlyE+5; 
+eFL = freemem; freemem += earlyF+5;
+eGL = freemem; freemem += earlyG+5;
+eHL = freemem; freemem += earlyH+5;
+eIL = freemem; freemem += earlyI+5;
+
+eAR = freemem; freemem += earlyA+5;
+eBR = freemem; freemem += earlyB+5;
+eCR = freemem; freemem += earlyC+5;
+eDR = freemem; freemem += earlyD+5;
+eER = freemem; freemem += earlyE+5;
+eFR = freemem; freemem += earlyF+5;
+eGR = freemem; freemem += earlyG+5;
+eHR = freemem; freemem += earlyH+5;
+eIR = freemem; freemem += earlyI+5;
+
+aAL = freemem; freemem += delayA+5;
+aBL = freemem; freemem += delayB+5;
+aCL = freemem; freemem += delayC+5;
+aDL = freemem; freemem += delayD+5;
+aEL = freemem; freemem += delayE+5;
+aFL = freemem; freemem += delayF+5;
+aGL = freemem; freemem += delayG+5;
+aHL = freemem; freemem += delayH+5;
+aIL = freemem; freemem += delayI+5;
+aJL = freemem; freemem += delayJ+5;
+aKL = freemem; freemem += delayK+5;
+aLL = freemem; freemem += delayL+5;
+aML = freemem; freemem += delayM+5;
+aNL = freemem; freemem += delayN+5;
+aOL = freemem; freemem += delayO+5;
+aPL = freemem; freemem += delayP+5;
+aQL = freemem; freemem += delayQ+5;
+aRL = freemem; freemem += delayR+5;
+aSL = freemem; freemem += delayS+5;
+aTL = freemem; freemem += delayT+5;
+aUL = freemem; freemem += delayU+5;
+aVL = freemem; freemem += delayV+5;
+aWL = freemem; freemem += delayW+5;
+aXL = freemem; freemem += delayX+5;
+aYL = freemem; freemem += delayY+5;
+
+aAR = freemem; freemem += delayA+5;
+aBR = freemem; freemem += delayB+5;
+aCR = freemem; freemem += delayC+5;
+aDR = freemem; freemem += delayD+5;
+aER = freemem; freemem += delayE+5;
+aFR = freemem; freemem += delayF+5;
+aGR = freemem; freemem += delayG+5;
+aHR = freemem; freemem += delayH+5;
+aIR = freemem; freemem += delayI+5;
+aJR = freemem; freemem += delayJ+5;
+aKR = freemem; freemem += delayK+5;
+aLR = freemem; freemem += delayL+5;
+aMR = freemem; freemem += delayM+5;
+aNR = freemem; freemem += delayN+5;
+aOR = freemem; freemem += delayO+5;
+aPR = freemem; freemem += delayP+5;
+aQR = freemem; freemem += delayQ+5;
+aRR = freemem; freemem += delayR+5;
+aSR = freemem; freemem += delayS+5;
+aTR = freemem; freemem += delayT+5;
+aUR = freemem; freemem += delayU+5;
+aVR = freemem; freemem += delayV+5;
+aWR = freemem; freemem += delayW+5;
+aXR = freemem; freemem += delayX+5;
+aYR = freemem; freemem += delayY+5;
+
+aZL = freemem; freemem += predelay+5;
+aZR = freemem; freemem += predelay+5;
+
+lastRefL = freemem; freemem += 7;
+
+lastRefR = freemem; freemem += 7;
+
+fixA = freemem; freemem += 11;
+fixB = freemem; freemem += 11;
+fixC = freemem; freemem += 11;
+fixD = freemem; freemem += 11;
+
+gainIn = gainOutL = gainOutR = 1.0;
+
+earlyAL = 1;
+earlyBL = 1;
+earlyCL = 1;
+earlyDL = 1;
+earlyEL = 1;
+earlyFL = 1;
+earlyGL = 1;
+earlyHL = 1;
+earlyIL = 1;
+
+earlyAR = 1;
+earlyBR = 1;
+earlyCR = 1;
+earlyDR = 1;
+earlyER = 1;
+earlyFR = 1;
+earlyGR = 1;
+earlyHR = 1;
+earlyIR = 1;
+
+countAL = 1;
+countBL = 1;
+countCL = 1;
+countDL = 1;
+countEL = 1;
+countFL = 1;
+countGL = 1;
+countHL = 1;
+countIL = 1;
+countJL = 1;
+countKL = 1;
+countLL = 1;
+countML = 1;
+countNL = 1;
+countOL = 1;
+countPL = 1;
+countQL = 1;
+countRL = 1;
+countSL = 1;
+countTL = 1;
+countUL = 1;
+countVL = 1;
+countWL = 1;
+countXL = 1;
+countYL = 1;
+
+countAR = 1;
+countBR = 1;
+countCR = 1;
+countDR = 1;  
+countER = 1;
+countFR = 1;
+countGR = 1;
+countHR = 1;
+countIR = 1;
+countJR = 1;
+countKR = 1;
+countLR = 1;
+countMR = 1;
+countNR = 1;
+countOR = 1;
+countPR = 1;
+countQR = 1;
+countRR = 1;
+countSR = 1;
+countTR = 1;
+countUR = 1;
+countVR = 1;
+countWR = 1;
+countXR = 1;
+countYR = 1;
+
+countZ = 1;
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+E = slider5;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+cycleEnd = floor(overallscale);
+(cycleEnd < 1) ? cycleEnd = 1;
+(cycleEnd > 4) ? cycleEnd = 4;
+(cycle > cycleEnd-1) ? cycle = cycleEnd-1;
+
+downRate = srate/cycleEnd;
+
+inputPad = A;
+regen = (B*0.415)+0.1;
+regen = (regen*0.0001)+0.00024;
+iirAmount = (C*0.3)+0.04;
+iirAmount = (iirAmount*1000.0)/downRate;
+earlyVolume = pow(D,2)*0.5;
+adjPredelay = (downRate * earlyVolume) | 0;
+wet = E*2.0;
+dry = 2.0 - wet;
+(wet > 1.0) ? wet = 1.0;
+(wet < 0.0) ? wet = 0.0;
+(dry > 1.0) ? dry = 1.0;
+(dry < 0.0) ? dry = 0.0;
+
+fixA[0] = 12.0/downRate;
+fixA[1] = 0.0015625;	
+fixD[0] = 26.0/downRate;
+fixD[1] = 0.0003025;
+fixB[0] = (fixA[0] + fixA[0] + fixD[0]) / 3.0;
+fixB[1] = 0.0011425;
+fixC[0] = (fixA[0] + fixD[0] + fixD[0]) / 3.0;
+fixC[1] = 0.0007225;
+K = tan($pi * fixA[0]);
+norm = 1.0 / (1.0 + K / fixA[1] + K * K);
+fixA[2] = K / fixA[1] * norm;
+fixA[3] = 0.0;
+fixA[4] = -fixA[2];
+fixA[5] = 2.0 * (K * K - 1.0) * norm;
+fixA[6] = (1.0 - K / fixA[1] + K * K) * norm;
+
+K = tan($pi * fixB[0]);
+norm = 1.0 / (1.0 + K / fixB[1] + K * K);
+fixB[2] = K / fixB[1] * norm;
+fixB[3] = 0.0;
+fixB[4] = -fixB[2];
+fixB[5] = 2.0 * (K * K - 1.0) * norm;
+fixB[6] = (1.0 - K / fixB[1] + K * K) * norm;
+
+K = tan($pi * fixC[0]);
+norm = 1.0 / (1.0 + K / fixC[1] + K * K);
+fixC[2] = K / fixC[1] * norm;
+fixC[3] = 0.0;
+fixC[4] = -fixC[2];
+fixC[5] = 2.0 * (K * K - 1.0) * norm;
+fixC[6] = (1.0 - K / fixC[1] + K * K) * norm;
+
+K = tan($pi * fixD[0]);
+norm = 1.0 / (1.0 + K / fixD[1] + K * K);
+fixD[2] = K / fixD[1] * norm;
+fixD[3] = 0.0;
+fixD[4] = -fixD[2];
+fixD[5] = 2.0 * (K * K - 1.0) * norm;
+fixD[6] = (1.0 - K / fixD[1] + K * K) * norm;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+cycle+=1;
+(cycle == cycleEnd) ? ( //hit the end point and we do a reverb sample
+  (inputPad < 1.0) ? (
+    inputSampleL *= inputPad;
+    inputSampleR *= inputPad;
+  );
+  outSample;
+outSample = (inputSampleL + prevInCL)*0.5;
+prevInCL = inputSampleL; inputSampleL = outSample;
+outSample = (inputSampleR + prevInCR)*0.5;
+prevInCR = inputSampleR; inputSampleR = outSample;
+outSample = (inputSampleL + prevInDL)*0.5;
+prevInDL = inputSampleL; inputSampleL = outSample;
+outSample = (inputSampleR + prevInDR)*0.5;
+prevInDR = inputSampleR; inputSampleR = outSample;
+  //10k filter on input
+  
+  iirAL = (iirAL * (1.0 - iirAmount)) + (inputSampleL * iirAmount);
+  inputSampleL = inputSampleL - iirAL;
+  iirAR = (iirAR * (1.0 - iirAmount)) + (inputSampleR * iirAmount);
+  inputSampleR = inputSampleR - iirAR;
+  //600hz highpass on input
+  
+  inputSampleL *= 0.25; inputSampleR *= 0.25;
+  (gainIn < 0.0078125) ? gainIn = 0.0078125; (gainIn > 1.0) ? gainIn = 1.0;
+
+  inputSampleL *= gainIn; inputSampleR *= gainIn;
+  gainIn += sin((abs(inputSampleL*4)>1)?4:abs(inputSampleL*4))*pow(inputSampleL,4);
+  gainIn += sin((abs(inputSampleR*4)>1)?4:abs(inputSampleR*4))*pow(inputSampleR,4);
+  inputSampleL *= 2.0; inputSampleR *= 2.0;
+  //begin overdrive
+  (inputSampleL > 1.4137166941154) ? inputSampleL = 1.4137166941154;
+  (inputSampleL < -1.4137166941154) ? inputSampleL = -1.4137166941154;
+  (inputSampleL > 0.0) ? inputSampleL = (inputSampleL/2.0)*(2.8274333882308-inputSampleL)
+  : inputSampleL = -(inputSampleL/-2.0)*(2.8274333882308+inputSampleL);
+  //BigFastSin channel stage
+  (inputSampleR > 1.4137166941154) ? inputSampleR = 1.4137166941154;
+  (inputSampleR < -1.4137166941154) ? inputSampleR = -1.4137166941154;
+  (inputSampleR > 0.0) ? inputSampleR = (inputSampleR/2.0)*(2.8274333882308-inputSampleR)
+  : inputSampleR = -(inputSampleR/-2.0)*(2.8274333882308+inputSampleR);
+  //end overdrive
+  
+  iirBL = (iirBL * (1.0 - iirAmount)) + (inputSampleL * iirAmount);
+  inputSampleL = inputSampleL - iirBL;
+  iirBR = (iirBR * (1.0 - iirAmount)) + (inputSampleR * iirAmount);
+  inputSampleR = inputSampleR - iirBR;
+  //600hz highpass on input
+  
+  outSample = (inputSampleL + prevInEL)*0.5;
+  prevInEL = inputSampleL; inputSampleL = outSample;
+  outSample = (inputSampleR + prevInER)*0.5;
+  prevInER = inputSampleR; inputSampleR = outSample;
+  //10k filter on input
+  
+  //begin allpasses
+  oeAL = inputSampleL - (eAL[(earlyAL+1)-((earlyAL+1 > earlyA)?earlyA+1:0)]*0.5);
+  oeBL = inputSampleL - (eBL[(earlyBL+1)-((earlyBL+1 > earlyB)?earlyB+1:0)]*0.5);
+  oeCL = inputSampleL - (eCL[(earlyCL+1)-((earlyCL+1 > earlyC)?earlyC+1:0)]*0.5);
+  oeCR = inputSampleR - (eCR[(earlyCR+1)-((earlyCR+1 > earlyC)?earlyC+1:0)]*0.5);
+  oeFR = inputSampleR - (eFR[(earlyFR+1)-((earlyFR+1 > earlyF)?earlyF+1:0)]*0.5);
+  oeIR = inputSampleR - (eIR[(earlyIR+1)-((earlyIR+1 > earlyI)?earlyI+1:0)]*0.5);
+  
+  eAL[earlyAL] = oeAL; oeAL *= 0.5;
+  eBL[earlyBL] = oeBL; oeBL *= 0.5;
+  eCL[earlyCL] = oeCL; oeCL *= 0.5;
+  eCR[earlyCR] = oeCR; oeCR *= 0.5;
+  eFR[earlyFR] = oeFR; oeFR *= 0.5;
+  eIR[earlyIR] = oeIR; oeIR *= 0.5;
+  
+  earlyAL+=1; (earlyAL < 0 || earlyAL > earlyA) ? earlyAL = 0;
+  earlyBL+=1; (earlyBL < 0 || earlyBL > earlyB) ? earlyBL = 0;
+  earlyCL+=1; (earlyCL < 0 || earlyCL > earlyC) ? earlyCL = 0;
+  earlyCR+=1; (earlyCR < 0 || earlyCR > earlyC) ? earlyCR = 0;
+  earlyFR+=1; (earlyFR < 0 || earlyFR > earlyF) ? earlyFR = 0;
+  earlyIR+=1; (earlyIR < 0 || earlyIR > earlyI) ? earlyIR = 0;
+  
+  oeAL += eAL[earlyAL-((earlyAL > earlyA)?earlyA+1:0)];
+  oeBL += eBL[earlyBL-((earlyBL > earlyB)?earlyB+1:0)];
+  oeCL += eCL[earlyCL-((earlyCL > earlyC)?earlyC+1:0)];
+  oeCR += eCR[earlyCR-((earlyCR > earlyC)?earlyC+1:0)];
+  oeFR += eFR[earlyFR-((earlyFR > earlyF)?earlyF+1:0)];
+  oeIR += eIR[earlyIR-((earlyIR > earlyI)?earlyI+1:0)];
+  
+  oeDL = ((oeBL+oeCL)-oeAL) - (eDL[(earlyDL+1)-((earlyDL+1 > earlyD)?earlyD+1:0)]*0.5);
+  oeEL = ((oeAL+oeCL)-oeBL) - (eEL[(earlyEL+1)-((earlyEL+1 > earlyE)?earlyE+1:0)]*0.5);
+  oeFL = ((oeAL+oeBL)-oeCL) - (eFL[(earlyFL+1)-((earlyFL+1 > earlyF)?earlyF+1:0)]*0.5);
+  oeBR = ((oeFR+oeIR)-oeCR) - (eBR[(earlyBR+1)-((earlyBR+1 > earlyB)?earlyB+1:0)]*0.5);
+  oeER = ((oeCR+oeIR)-oeFR) - (eER[(earlyER+1)-((earlyER+1 > earlyE)?earlyE+1:0)]*0.5);
+  oeHR = ((oeCR+oeFR)-oeIR) - (eHR[(earlyHR+1)-((earlyHR+1 > earlyH)?earlyH+1:0)]*0.5);
+  
+  eDL[earlyDL] = oeDL; oeDL *= 0.5;
+  eEL[earlyEL] = oeEL; oeEL *= 0.5;
+  eFL[earlyFL] = oeFL; oeFL *= 0.5;
+  eBR[earlyBR] = oeBR; oeBR *= 0.5;
+  eER[earlyER] = oeER; oeER *= 0.5;
+  eHR[earlyHR] = oeHR; oeHR *= 0.5;
+  
+  earlyDL+=1; (earlyDL < 0 || earlyDL > earlyD) ? earlyDL = 0;
+  earlyEL+=1; (earlyEL < 0 || earlyEL > earlyE) ? earlyEL = 0;
+  earlyFL+=1; (earlyFL < 0 || earlyFL > earlyF) ? earlyFL = 0;
+  earlyBR+=1; (earlyBR < 0 || earlyBR > earlyB) ? earlyBR = 0;
+  earlyER+=1; (earlyER < 0 || earlyER > earlyE) ? earlyER = 0;
+  earlyHR+=1; (earlyHR < 0 || earlyHR > earlyH) ? earlyHR = 0;
+  
+  oeDL += eDL[earlyDL-((earlyDL > earlyD)?earlyD+1:0)];
+  oeEL += eEL[earlyEL-((earlyEL > earlyE)?earlyE+1:0)];
+  oeFL += eFL[earlyFL-((earlyFL > earlyF)?earlyF+1:0)];
+  oeBR += eBR[earlyBR-((earlyBR > earlyB)?earlyB+1:0)];
+  oeER += eER[earlyER-((earlyER > earlyE)?earlyE+1:0)];
+  oeHR += eHR[earlyHR-((earlyHR > earlyH)?earlyH+1:0)];
+  
+  oeGL = ((oeEL + oeFL) - oeDL) - (eGL[(earlyGL+1)-((earlyGL+1 > earlyG)?earlyG+1:0)]*0.5);
+  oeHL = ((oeDL + oeFL) - oeEL) - (eHL[(earlyHL+1)-((earlyHL+1 > earlyH)?earlyH+1:0)]*0.5);
+  oeIL = ((oeDL + oeEL) - oeFL) - (eIL[(earlyIL+1)-((earlyIL+1 > earlyI)?earlyI+1:0)]*0.5);
+  oeAR = ((oeER + oeHR) - oeBR) - (eAR[(earlyAR+1)-((earlyAR+1 > earlyA)?earlyA+1:0)]*0.5);
+  oeDR = ((oeBR + oeHR) - oeER) - (eDR[(earlyDR+1)-((earlyDR+1 > earlyD)?earlyD+1:0)]*0.5);
+  oeGR = ((oeBR + oeER) - oeHR) - (eGR[(earlyGR+1)-((earlyGR+1 > earlyG)?earlyG+1:0)]*0.5);
+  
+  eGL[earlyGL] = oeGL; oeGL *= 0.5;
+  eHL[earlyHL] = oeHL; oeHL *= 0.5;
+  eIL[earlyIL] = oeIL; oeIL *= 0.5;
+  eAR[earlyAR] = oeAR; oeAR *= 0.5;
+  eDR[earlyDR] = oeDR; oeDR *= 0.5;
+  eGR[earlyGR] = oeGR; oeGR *= 0.5;
+  
+  earlyGL+=1; (earlyGL < 0 || earlyGL > earlyG) ? earlyGL = 0;
+  earlyHL+=1; (earlyHL < 0 || earlyHL > earlyH) ? earlyHL = 0;
+  earlyIL+=1; (earlyIL < 0 || earlyIL > earlyI) ? earlyIL = 0;
+  earlyAR+=1; (earlyAR < 0 || earlyAR > earlyA) ? earlyAR = 0;
+  earlyDR+=1; (earlyDR < 0 || earlyDR > earlyD) ? earlyDR = 0;
+  earlyGR+=1; (earlyGR < 0 || earlyGR > earlyG) ? earlyGR = 0;
+  
+  oeGL += eGL[earlyGL-((earlyGL > earlyG)?earlyG+1:0)];
+  oeHL += eHL[earlyHL-((earlyHL > earlyH)?earlyH+1:0)];
+  oeIL += eIL[earlyIL-((earlyIL > earlyI)?earlyI+1:0)];
+  oeAR += eAR[earlyAR-((earlyAR > earlyA)?earlyA+1:0)];
+  oeDR += eDR[earlyDR-((earlyDR > earlyD)?earlyD+1:0)];
+  oeGR += eGR[earlyGR-((earlyGR > earlyG)?earlyG+1:0)];
+  
+  //allpasses predelay
+  aZL[countZ] = (oeGL + oeHL + oeIL)*0.25;
+  aZR[countZ] = (oeAR + oeDR + oeGR)*0.25;
+  countZ+=1; (countZ < 0 || countZ > adjPredelay) ? countZ = 0;
+  inputSampleL = aZL[countZ-((countZ > adjPredelay)?adjPredelay+1:0)];
+  inputSampleR = aZR[countZ-((countZ > adjPredelay)?adjPredelay+1:0)];
+  //end allpasses
+  
+  aAL[countAL] = inputSampleL + (feedbackAL * regen);
+  aBL[countBL] = inputSampleL + (feedbackBL * regen);
+  aCL[countCL] = inputSampleL + (feedbackCL * regen);
+  aDL[countDL] = inputSampleL + (feedbackDL * regen);
+  aEL[countEL] = inputSampleL + (feedbackEL * regen);
+  
+  aER[countER] = inputSampleR + (feedbackER * regen);
+  aJR[countJR] = inputSampleR + (feedbackJR * regen);
+  aOR[countOR] = inputSampleR + (feedbackOR * regen);
+  aTR[countTR] = inputSampleR + (feedbackTR * regen);
+  aYR[countYR] = inputSampleR + (feedbackYR * regen);
+  
+  countAL+=1; (countAL < 0 || countAL > delayA) ? countAL = 0;
+  countBL+=1; (countBL < 0 || countBL > delayB) ? countBL = 0;
+  countCL+=1; (countCL < 0 || countCL > delayC) ? countCL = 0;
+  countDL+=1; (countDL < 0 || countDL > delayD) ? countDL = 0;
+  countEL+=1; (countEL < 0 || countEL > delayE) ? countEL = 0;
+  
+  countER+=1; (countER < 0 || countER > delayE) ? countER = 0;
+  countJR+=1; (countJR < 0 || countJR > delayJ) ? countJR = 0;
+  countOR+=1; (countOR < 0 || countOR > delayO) ? countOR = 0;
+  countTR+=1; (countTR < 0 || countTR > delayT) ? countTR = 0;
+  countYR+=1; (countYR < 0 || countYR > delayY) ? countYR = 0;
+  
+  outAL = aAL[countAL-((countAL > delayA)?delayA+1:0)];
+  outBL = aBL[countBL-((countBL > delayB)?delayB+1:0)];
+  outCL = aCL[countCL-((countCL > delayC)?delayC+1:0)];
+  outDL = aDL[countDL-((countDL > delayD)?delayD+1:0)];
+  outEL = aEL[countEL-((countEL > delayE)?delayE+1:0)];
+  
+  outER = aER[countER-((countER > delayE)?delayE+1:0)];
+  outJR = aJR[countJR-((countJR > delayJ)?delayJ+1:0)];
+  outOR = aOR[countOR-((countOR > delayO)?delayO+1:0)];
+  outTR = aTR[countTR-((countTR > delayT)?delayT+1:0)];
+  outYR = aYR[countYR-((countYR > delayY)?delayY+1:0)];
+  
+  //-------- one
+  
+  outSample = (outAL * fixA[2]) + fixA[7];
+  fixA[7] = (outAL * fixA[3]) - (outSample * fixA[5]) + fixA[8];
+  fixA[8] = (outAL * fixA[4]) - (outSample * fixA[6]);
+  outAL = outSample; //fixed biquad
+  
+  outSample = (outER * fixA[2]) + fixA[9];
+  fixA[9] = (outER * fixA[3]) - (outSample * fixA[5]) + fixA[10];
+  fixA[10] = (outER * fixA[4]) - (outSample * fixA[6]);
+  outER = outSample; //fixed biquad
+  
+  //-------- filtered (one path in five, feeding the rest of the matrix
+  
+  aFL[countFL] = ((outAL*3.0) - ((outBL + outCL + outDL + outEL)*2.0));
+  aGL[countGL] = ((outBL*3.0) - ((outAL + outCL + outDL + outEL)*2.0));
+  aHL[countHL] = ((outCL*3.0) - ((outAL + outBL + outDL + outEL)*2.0));
+  aIL[countIL] = ((outDL*3.0) - ((outAL + outBL + outCL + outEL)*2.0));
+  aJL[countJL] = ((outEL*3.0) - ((outAL + outBL + outCL + outDL)*2.0));
+  
+  aDR[countDR] = ((outER*3.0) - ((outJR + outOR + outTR + outYR)*2.0));
+  aIR[countIR] = ((outJR*3.0) - ((outER + outOR + outTR + outYR)*2.0));
+  aNR[countNR] = ((outOR*3.0) - ((outER + outJR + outTR + outYR)*2.0));
+  aSR[countSR] = ((outTR*3.0) - ((outER + outJR + outOR + outYR)*2.0));
+  aXR[countXR] = ((outYR*3.0) - ((outER + outJR + outOR + outTR)*2.0));
+  
+  countFL+=1; (countFL < 0 || countFL > delayF) ? countFL = 0;
+  countGL+=1; (countGL < 0 || countGL > delayG) ? countGL = 0;
+  countHL+=1; (countHL < 0 || countHL > delayH) ? countHL = 0;
+  countIL+=1; (countIL < 0 || countIL > delayI) ? countIL = 0;
+  countJL+=1; (countJL < 0 || countJL > delayJ) ? countJL = 0;
+  
+  countDR+=1; (countDR < 0 || countDR > delayD) ? countDR = 0;
+  countIR+=1; (countIR < 0 || countIR > delayI) ? countIR = 0;
+  countNR+=1; (countNR < 0 || countNR > delayN) ? countNR = 0;
+  countSR+=1; (countSR < 0 || countSR > delayS) ? countSR = 0;
+  countXR+=1; (countXR < 0 || countXR > delayX) ? countXR = 0;
+  
+  outFL = aFL[countFL-((countFL > delayF)?delayF+1:0)];
+  outGL = aGL[countGL-((countGL > delayG)?delayG+1:0)];
+  outHL = aHL[countHL-((countHL > delayH)?delayH+1:0)];
+  outIL = aIL[countIL-((countIL > delayI)?delayI+1:0)];
+  outJL = aJL[countJL-((countJL > delayJ)?delayJ+1:0)];
+  
+  outDR = aDR[countDR-((countDR > delayD)?delayD+1:0)];
+  outIR = aIR[countIR-((countIR > delayI)?delayI+1:0)];
+  outNR = aNR[countNR-((countNR > delayN)?delayN+1:0)];
+  outSR = aSR[countSR-((countSR > delayS)?delayS+1:0)];
+  outXR = aXR[countXR-((countXR > delayX)?delayX+1:0)];
+  
+  //-------- mulch
+  
+  outSample = (outFL * fixB[2]) + fixB[7];
+  fixB[7] = (outFL * fixB[3]) - (outSample * fixB[5]) + fixB[8];
+  fixB[8] = (outFL * fixB[4]) - (outSample * fixB[6]);
+  outFL = outSample; //fixed biquad
+  
+  outSample = (outDR * fixB[2]) + fixB[9];
+  fixB[9] = (outDR * fixB[3]) - (outSample * fixB[5]) + fixB[10];
+  fixB[10] = (outDR * fixB[4]) - (outSample * fixB[6]);
+  outDR = outSample; //fixed biquad      
+  
+  outSample = (outGL + prevMulchBL)*0.5;
+  prevMulchBL = outGL; outGL = outSample;
+  outSample = (outIR + prevMulchBR)*0.5;
+  prevMulchBR = outIR; outIR = outSample;
+  
+  //-------- two
+  
+  aKL[countKL] = ((outFL*3.0) - ((outGL + outHL + outIL + outJL)*2.0));
+  aLL[countLL] = ((outGL*3.0) - ((outFL + outHL + outIL + outJL)*2.0));
+  aML[countML] = ((outHL*3.0) - ((outFL + outGL + outIL + outJL)*2.0));
+  aNL[countNL] = ((outIL*3.0) - ((outFL + outGL + outHL + outJL)*2.0));
+  aOL[countOL] = ((outJL*3.0) - ((outFL + outGL + outHL + outIL)*2.0));
+  
+  aCR[countCR] = ((outDR*3.0) - ((outIR + outNR + outSR + outXR)*2.0));
+  aHR[countHR] = ((outIR*3.0) - ((outDR + outNR + outSR + outXR)*2.0));
+  aMR[countMR] = ((outNR*3.0) - ((outDR + outIR + outSR + outXR)*2.0));
+  aRR[countRR] = ((outSR*3.0) - ((outDR + outIR + outNR + outXR)*2.0));
+  aWR[countWR] = ((outXR*3.0) - ((outDR + outIR + outNR + outSR)*2.0));
+  
+  countKL+=1; (countKL < 0 || countKL > delayK) ? countKL = 0;
+  countLL+=1; (countLL < 0 || countLL > delayL) ? countLL = 0;
+  countML+=1; (countML < 0 || countML > delayM) ? countML = 0;
+  countNL+=1; (countNL < 0 || countNL > delayN) ? countNL = 0;
+  countOL+=1; (countOL < 0 || countOL > delayO) ? countOL = 0;
+  
+  countCR+=1; (countCR < 0 || countCR > delayC) ? countCR = 0;
+  countHR+=1; (countHR < 0 || countHR > delayH) ? countHR = 0;
+  countMR+=1; (countMR < 0 || countMR > delayM) ? countMR = 0;
+  countRR+=1; (countRR < 0 || countRR > delayR) ? countRR = 0;
+  countWR+=1; (countWR < 0 || countWR > delayW) ? countWR = 0;
+  
+  outKL = aKL[countKL-((countKL > delayK)?delayK+1:0)];
+  outLL = aLL[countLL-((countLL > delayL)?delayL+1:0)];
+  outML = aML[countML-((countML > delayM)?delayM+1:0)];
+  outNL = aNL[countNL-((countNL > delayN)?delayN+1:0)];
+  outOL = aOL[countOL-((countOL > delayO)?delayO+1:0)];
+  
+  outCR = aCR[countCR-((countCR > delayC)?delayC+1:0)];
+  outHR = aHR[countHR-((countHR > delayH)?delayH+1:0)];
+  outMR = aMR[countMR-((countMR > delayM)?delayM+1:0)];
+  outRR = aRR[countRR-((countRR > delayR)?delayR+1:0)];
+  outWR = aWR[countWR-((countWR > delayW)?delayW+1:0)];
+  
+  //-------- mulch
+  
+  outSample = (outKL * fixC[2]) + fixC[7];
+  fixC[7] = (outKL * fixC[3]) - (outSample * fixC[5]) + fixC[8];
+  fixC[8] = (outKL * fixC[4]) - (outSample * fixC[6]);
+  outKL = outSample; //fixed biquad
+  
+  outSample = (outCR * fixC[2]) + fixC[9];
+  fixC[9] = (outCR * fixC[3]) - (outSample * fixC[5]) + fixC[10];
+  fixC[10] = (outCR * fixC[4]) - (outSample * fixC[6]);
+  outCR = outSample; //fixed biquad      
+  
+  outSample = (outLL + prevMulchCL)*0.5;
+  prevMulchCL = outLL; outLL = outSample;
+  outSample = (outHR + prevMulchCR)*0.5;
+  prevMulchCR = outHR; outHR = outSample;
+  
+  //-------- three
+  
+  aPL[countPL] = ((outKL*3.0) - ((outLL + outML + outNL + outOL)*2.0));
+  aQL[countQL] = ((outLL*3.0) - ((outKL + outML + outNL + outOL)*2.0));
+  aRL[countRL] = ((outML*3.0) - ((outKL + outLL + outNL + outOL)*2.0));
+  aSL[countSL] = ((outNL*3.0) - ((outKL + outLL + outML + outOL)*2.0));
+  aTL[countTL] = ((outOL*3.0) - ((outKL + outLL + outML + outNL)*2.0));
+  
+  aBR[countBR] = ((outCR*3.0) - ((outHR + outMR + outRR + outWR)*2.0));
+  aGR[countGR] = ((outHR*3.0) - ((outCR + outMR + outRR + outWR)*2.0));
+  aLR[countLR] = ((outMR*3.0) - ((outCR + outHR + outRR + outWR)*2.0));
+  aQR[countQR] = ((outRR*3.0) - ((outCR + outHR + outMR + outWR)*2.0));
+  aVR[countVR] = ((outWR*3.0) - ((outCR + outHR + outMR + outRR)*2.0));
+  
+  countPL+=1; (countPL < 0 || countPL > delayP) ? countPL = 0;
+  countQL+=1; (countQL < 0 || countQL > delayQ) ? countQL = 0;
+  countRL+=1; (countRL < 0 || countRL > delayR) ? countRL = 0;
+  countSL+=1; (countSL < 0 || countSL > delayS) ? countSL = 0;
+  countTL+=1; (countTL < 0 || countTL > delayT) ? countTL = 0;
+  
+  countBR+=1; (countBR < 0 || countBR > delayB) ? countBR = 0;
+  countGR+=1; (countGR < 0 || countGR > delayG) ? countGR = 0;
+  countLR+=1; (countLR < 0 || countLR > delayL) ? countLR = 0;
+  countQR+=1; (countQR < 0 || countQR > delayQ) ? countQR = 0;
+  countVR+=1; (countVR < 0 || countVR > delayV) ? countVR = 0;
+  
+  outPL = aPL[countPL-((countPL > delayP)?delayP+1:0)];
+  outQL = aQL[countQL-((countQL > delayQ)?delayQ+1:0)];
+  outRL = aRL[countRL-((countRL > delayR)?delayR+1:0)];
+  outSL = aSL[countSL-((countSL > delayS)?delayS+1:0)];
+  outTL = aTL[countTL-((countTL > delayT)?delayT+1:0)];
+  
+  outBR = aBR[countBR-((countBR > delayB)?delayB+1:0)];
+  outGR = aGR[countGR-((countGR > delayG)?delayG+1:0)];
+  outLR = aLR[countLR-((countLR > delayL)?delayL+1:0)];
+  outQR = aQR[countQR-((countQR > delayQ)?delayQ+1:0)];
+  outVR = aVR[countVR-((countVR > delayV)?delayV+1:0)];
+  
+  //-------- mulch
+  
+  outSample = (outPL * fixD[2]) + fixD[7];
+  fixD[7] = (outPL * fixD[3]) - (outSample * fixD[5]) + fixD[8];
+  fixD[8] = (outPL * fixD[4]) - (outSample * fixD[6]);
+  outPL = outSample; //fixed biquad
+  
+  outSample = (outBR * fixD[2]) + fixD[9];
+  fixD[9] = (outBR * fixD[3]) - (outSample * fixD[5]) + fixD[10];
+  fixD[10] = (outBR * fixD[4]) - (outSample * fixD[6]);
+  outBR = outSample; //fixed biquad      
+  
+  outSample = (outQL + prevMulchDL)*0.5;
+  prevMulchDL = outQL; outQL = outSample;
+  outSample = (outGR + prevMulchDR)*0.5;
+  prevMulchDR = outGR; outGR = outSample;
+  
+  //-------- four
+  
+  aUL[countUL] = ((outPL*3.0) - ((outQL + outRL + outSL + outTL)*2.0));
+  aVL[countVL] = ((outQL*3.0) - ((outPL + outRL + outSL + outTL)*2.0));
+  aWL[countWL] = ((outRL*3.0) - ((outPL + outQL + outSL + outTL)*2.0));
+  aXL[countXL] = ((outSL*3.0) - ((outPL + outQL + outRL + outTL)*2.0));
+  aYL[countYL] = ((outTL*3.0) - ((outPL + outQL + outRL + outSL)*2.0));
+  
+  aAR[countAR] = ((outBR*3.0) - ((outGR + outLR + outQR + outVR)*2.0));
+  aFR[countFR] = ((outGR*3.0) - ((outBR + outLR + outQR + outVR)*2.0));
+  aKR[countKR] = ((outLR*3.0) - ((outBR + outGR + outQR + outVR)*2.0));
+  aPR[countPR] = ((outQR*3.0) - ((outBR + outGR + outLR + outVR)*2.0));
+  aUR[countUR] = ((outVR*3.0) - ((outBR + outGR + outLR + outQR)*2.0));
+  
+  countUL+=1; (countUL < 0 || countUL > delayU) ? countUL = 0;
+  countVL+=1; (countVL < 0 || countVL > delayV) ? countVL = 0;
+  countWL+=1; (countWL < 0 || countWL > delayW) ? countWL = 0;
+  countXL+=1; (countXL < 0 || countXL > delayX) ? countXL = 0;
+  countYL+=1; (countYL < 0 || countYL > delayY) ? countYL = 0;
+  
+  countAR+=1; (countAR < 0 || countAR > delayA) ? countAR = 0;
+  countFR+=1; (countFR < 0 || countFR > delayF) ? countFR = 0;
+  countKR+=1; (countKR < 0 || countKR > delayK) ? countKR = 0;
+  countPR+=1; (countPR < 0 || countPR > delayP) ? countPR = 0;
+  countUR+=1; (countUR < 0 || countUR > delayU) ? countUR = 0;
+  
+  outUL = aUL[countUL-((countUL > delayU)?delayU+1:0)];
+  outVL = aVL[countVL-((countVL > delayV)?delayV+1:0)];
+  outWL = aWL[countWL-((countWL > delayW)?delayW+1:0)];
+  outXL = aXL[countXL-((countXL > delayX)?delayX+1:0)];
+  outYL = aYL[countYL-((countYL > delayY)?delayY+1:0)];
+  
+  outAR = aAR[countAR-((countAR > delayA)?delayA+1:0)];
+  outFR = aFR[countFR-((countFR > delayF)?delayF+1:0)];
+  outKR = aKR[countKR-((countKR > delayK)?delayK+1:0)];
+  outPR = aPR[countPR-((countPR > delayP)?delayP+1:0)];
+  outUR = aUR[countUR-((countUR > delayU)?delayU+1:0)];
+  
+  //-------- mulch
+  outSample = (outVL + prevMulchEL)*0.5;
+  prevMulchEL = outVL; outVL = outSample;
+  outSample = (outFR + prevMulchER)*0.5;
+  prevMulchER = outFR; outFR = outSample;
+  //-------- five
+  
+  feedbackER = ((outUL*3.0) - ((outVL + outWL + outXL + outYL)*2.0));
+  feedbackAL = ((outAR*3.0) - ((outFR + outKR + outPR + outUR)*2.0));
+  feedbackJR = ((outVL*3.0) - ((outUL + outWL + outXL + outYL)*2.0));
+  feedbackBL = ((outFR*3.0) - ((outAR + outKR + outPR + outUR)*2.0));
+  feedbackOR = ((outWL*3.0) - ((outUL + outVL + outXL + outYL)*2.0));
+  feedbackCL = ((outKR*3.0) - ((outAR + outFR + outPR + outUR)*2.0));
+  feedbackDL = ((outXL*3.0) - ((outUL + outVL + outWL + outYL)*2.0));
+  feedbackTR = ((outPR*3.0) - ((outAR + outFR + outKR + outUR)*2.0));
+  feedbackEL = ((outYL*3.0) - ((outUL + outVL + outWL + outXL)*2.0));
+  feedbackYR = ((outUR*3.0) - ((outAR + outFR + outKR + outPR)*2.0));
+  //which we need to feed back into the input again, a bit
+  
+  inputSampleL = (outUL + outVL + outWL + outXL + outYL)*0.0016;
+  inputSampleR = (outAR + outFR + outKR + outPR + outUR)*0.0016;
+  //and take the final combined sum of outputs, corrected for Householder gain
+  
+  inputSampleL *= 0.5; inputSampleR *= 0.5;
+  (gainOutL < 0.0078125) ? gainOutL = 0.0078125; (gainOutL > 1.0) ? gainOutL = 1.0;
+  (gainOutR < 0.0078125) ? gainOutR = 0.0078125; (gainOutR > 1.0) ? gainOutR = 1.0;
+  //gain of 1,0 gives you a super-clean one, gain of 2 is obviously compressing
+  //smaller number is maximum clamping, if too small it'll take a while to bounce back
+  inputSampleL *= gainOutL; inputSampleR *= gainOutR;
+  gainOutL += sin((abs(inputSampleL*4)>1)?4:abs(inputSampleL*4))*pow(inputSampleL,4);
+  gainOutR += sin((abs(inputSampleR*4)>1)?4:abs(inputSampleR*4))*pow(inputSampleR,4);
+  //4.71239 radians sined will turn to -1 which is the maximum gain reduction speed
+  inputSampleL *= 2.0; inputSampleR *= 2.0;
+  //curve! To get a compressed effect that matches a certain other plugin
+  //that is too overprocessed for its own good :)      
+  
+  outSample = (inputSampleL + prevOutAL)*0.5;
+  prevOutAL = inputSampleL; inputSampleL = outSample;
+  outSample = (inputSampleR + prevOutAR)*0.5;
+  prevOutAR = inputSampleR; inputSampleR = outSample;
+  outSample = (inputSampleL + prevOutBL)*0.5;
+  prevOutBL = inputSampleL; inputSampleL = outSample;
+  outSample = (inputSampleR + prevOutBR)*0.5;
+  prevOutBR = inputSampleR; inputSampleR = outSample;
+  outSample = (inputSampleL + prevOutCL)*0.5;
+  prevOutCL = inputSampleL; inputSampleL = outSample;
+  outSample = (inputSampleR + prevOutCR)*0.5;
+  prevOutCR = inputSampleR; inputSampleR = outSample;
+  
+  (cycleEnd == 4) ? (
+    lastRefL[0] = lastRefL[4]; //start from previous last
+    lastRefL[2] = (lastRefL[0] + inputSampleL)/2; //half
+    lastRefL[1] = (lastRefL[0] + lastRefL[2])/2; //one quarter
+    lastRefL[3] = (lastRefL[2] + inputSampleL)/2; //three quarters
+    lastRefL[4] = inputSampleL; //full
+    lastRefR[0] = lastRefR[4]; //start from previous last
+    lastRefR[2] = (lastRefR[0] + inputSampleR)/2; //half
+    lastRefR[1] = (lastRefR[0] + lastRefR[2])/2; //one quarter
+    lastRefR[3] = (lastRefR[2] + inputSampleR)/2; //three quarters
+    lastRefR[4] = inputSampleR; //full
+  );
+  (cycleEnd == 3) ? (
+    lastRefL[0] = lastRefL[3]; //start from previous last
+    lastRefL[2] = (lastRefL[0]+lastRefL[0]+inputSampleL)/3; //third
+    lastRefL[1] = (lastRefL[0]+inputSampleL+inputSampleL)/3; //two thirds
+    lastRefL[3] = inputSampleL; //full
+    lastRefR[0] = lastRefR[3]; //start from previous last
+    lastRefR[2] = (lastRefR[0]+lastRefR[0]+inputSampleR)/3; //third
+    lastRefR[1] = (lastRefR[0]+inputSampleR+inputSampleR)/3; //two thirds
+    lastRefR[3] = inputSampleR; //full
+  );
+  (cycleEnd == 2) ? (
+    lastRefL[0] = lastRefL[2];
+    lastRefL[1] = (lastRefL[0] + inputSampleL)/2;
+    lastRefL[2] = inputSampleL;
+    lastRefR[0] = lastRefR[2]; 
+    lastRefR[1] = (lastRefR[0] + inputSampleR)/2;
+    lastRefR[2] = inputSampleR; 
+  );
+  (cycleEnd == 1) ? (
+    lastRefL[0] = inputSampleL;
+    lastRefR[0] = inputSampleR;
+  );
+  cycle = 0;
+  inputSampleL = lastRefL[cycle];
+  inputSampleR = lastRefR[cycle];
+) : (
+  inputSampleL = lastRefL[cycle];
+  inputSampleR = lastRefR[cycle];
+);
+
+(inputSampleL > 2.8) ? inputSampleL = 2.8;
+(inputSampleL < -2.8) ? inputSampleL = -2.8;
+(inputSampleR > 2.8) ? inputSampleR = 2.8;
+(inputSampleR < -2.8) ? inputSampleR = -2.8;
+(inputSampleL > 0.0) ? inputSampleL = (inputSampleL*2.0)/(2.8274333882308-inputSampleL)
+: inputSampleL = -(inputSampleL*-2.0)/(2.8274333882308+inputSampleL);
+(inputSampleR > 0.0) ? inputSampleR = (inputSampleR*2.0)/(2.8274333882308-inputSampleR)
+: inputSampleR = -(inputSampleR*-2.0)/(2.8274333882308+inputSampleR);
+
+(wet < 1.0) ? (inputSampleL *= wet; inputSampleR *= wet;);
+(dry < 1.0) ? (drySampleL *= dry; drySampleR *= dry;);
+inputSampleL += drySampleL; inputSampleR += drySampleR;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

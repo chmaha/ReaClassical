@@ -1,0 +1,122 @@
+Version: 1.0
+desc:Stratos Brightness Control (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Air4" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Air4 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.5<0,1,0.01>Air
+slider2:0.5<0,1,0.01>Ground
+slider3:0.52<0,1,0.01>Dark Filter
+slider4:0<0,1,0.01>Ratio
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+air = freemem; freemem += 35;
+
+pvAL1 = 1;pvSL1 = 2;accSL1 = 3;acc2SL1 = 4;pvAL2 = 5;pvSL2 = 6;
+accSL2 = 7;acc2SL2 = 8;pvAL3 = 9;pvSL3 = 10;accSL3 = 11;pvAL4 = 12;
+pvSL4 = 13;gndavgL = 14;outAL = 15;gainAL = 16;lastSL = 17;pvAR1 = 18;
+pvSR1 = 19;accSR1 = 20;acc2SR1 = 21;pvAR2 = 22;pvSR2 = 23;accSR2 = 24;
+acc2SR2 = 25;pvAR3 = 26;pvSR3 = 27;accSR3 = 28;pvAR4 = 29;pvSR4 = 30;
+gndavgR = 31;outAR = 32;gainAR = 33;lastSR = 34;
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+airGain = A*2.0;
+(airGain > 1.0) ? airGain = pow(airGain,3.0+sqrt(overallscale));
+gndGain = B*2.0;
+threshSinew = pow(C,2)/overallscale;
+depthSinew = D;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+air[pvSL4] = air[pvAL4] - air[pvAL3];
+air[pvSL3] = air[pvAL3] - air[pvAL2];
+air[pvSL2] = air[pvAL2] - air[pvAL1];
+air[pvSL1] = air[pvAL1] - inputSampleL;
+
+air[accSL3] = air[pvSL4] - air[pvSL3];
+air[accSL2] = air[pvSL3] - air[pvSL2];
+air[accSL1] = air[pvSL2] - air[pvSL1];
+
+air[acc2SL2] = air[accSL3] - air[accSL2];
+air[acc2SL1] = air[accSL2] - air[accSL1];    
+
+air[outAL] = -(air[pvAL1] + air[pvSL3] + air[acc2SL2] - ((air[acc2SL2] + air[acc2SL1])*0.5));
+
+air[gainAL] *= 0.5; 
+air[gainAL] += abs(drySampleL-air[outAL])*0.5;
+(air[gainAL] > 0.3*sqrt(overallscale)) ? air[gainAL] = 0.3*sqrt(overallscale);
+air[pvAL4] = air[pvAL3];
+air[pvAL3] = air[pvAL2];
+air[pvAL2] = air[pvAL1];    
+air[pvAL1] = (air[gainAL] * air[outAL]) + drySampleL;
+
+gnd = drySampleL - ((air[outAL]*0.5)+(drySampleL*(0.457-(0.017*overallscale))));
+temp = (gnd + air[gndavgL])*0.5; air[gndavgL] = gnd; gnd = temp;
+inputSampleL = ((drySampleL-gnd)*airGain)+(gnd*gndGain);
+
+air[pvSR4] = air[pvAR4] - air[pvAR3];
+air[pvSR3] = air[pvAR3] - air[pvAR2];
+air[pvSR2] = air[pvAR2] - air[pvAR1];
+air[pvSR1] = air[pvAR1] - inputSampleR;
+
+air[accSR3] = air[pvSR4] - air[pvSR3];
+air[accSR2] = air[pvSR3] - air[pvSR2];
+air[accSR1] = air[pvSR2] - air[pvSR1];
+
+air[acc2SR2] = air[accSR3] - air[accSR2];
+air[acc2SR1] = air[accSR2] - air[accSR1];    
+
+air[outAR] = -(air[pvAR1] + air[pvSR3] + air[acc2SR2] - ((air[acc2SR2] + air[acc2SR1])*0.5));
+
+air[gainAR] *= 0.5; 
+air[gainAR] += abs(drySampleR-air[outAR])*0.5;
+(air[gainAR] > 0.3*sqrt(overallscale)) ? air[gainAR] = 0.3*sqrt(overallscale);
+air[pvAR4] = air[pvAR3];
+air[pvAR3] = air[pvAR2];
+air[pvAR2] = air[pvAR1];    
+air[pvAR1] = (air[gainAR] * air[outAR]) + drySampleR;
+
+gnd = drySampleR - ((air[outAR]*0.5)+(drySampleR*(0.457-(0.017*overallscale))));
+temp = (gnd + air[gndavgR])*0.5; air[gndavgR] = gnd; gnd = temp;
+inputSampleR = ((drySampleR-gnd)*airGain)+(gnd*gndGain);
+
+temp = inputSampleL; (temp > 1.0) ? temp = 1.0; (temp < -1.0) ? temp = -1.0;
+sinew = threshSinew * cos(air[lastSL]*air[lastSL]);
+(temp - air[lastSL] > sinew) ? temp = air[lastSL] + sinew;
+(-(temp - air[lastSL]) > sinew) ? temp = air[lastSL] - sinew;
+air[lastSL] = temp;
+inputSampleL = (inputSampleL * (1.0-depthSinew))+(air[lastSL]*depthSinew);    
+temp = inputSampleR; (temp > 1.0) ? temp = 1.0; (temp < -1.0) ? temp = -1.0;
+sinew = threshSinew * cos(air[lastSR]*air[lastSR]);
+(temp - air[lastSR] > sinew) ? temp = air[lastSR] + sinew;
+(-(temp - air[lastSR]) > sinew) ? temp = air[lastSR] - sinew;
+air[lastSR] = temp;
+inputSampleR = (inputSampleR * (1.0-depthSinew))+(air[lastSR]*depthSinew);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+

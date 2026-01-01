@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" name="ReaTeam Themes" commit="645fb029da2b9db192cf1654e05cd06f8c38b50d">
+  <category name="Mods">
+    <reapack name="cfillion_Default v4.0 + width.theme" type="theme" desc="Default v4.0 theme + width knob">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This is a modification of the default REAPER v4.0 theme to enable the width knob in the "Stereo balance" pan mode.\par}
+}
+]]></description>
+        <link rel="website" href="http://forum.cockos.com/showthread.php?t=175565">Forum Thread</link>
+        <link rel="website" href="http://stash.reaper.fm/theme/1777/Default_4.0_width.ReaperThemeZip">Stash Page</link>
+        <link rel="screenshot">https://i.imgur.com/irCO9qZ.png</link>
+      </metadata>
+      <version name="1.0" author="cfillion" time="2016-10-22T00:44:50Z">
+        <source file="Default_4.0 + width.ReaperThemeZip">http://stash.reaper.fm/27310/Default_4.0_width.ReaperThemeZip</source>
+      </version>
+    </reapack>
+    <reapack name="Lokasenna_Default_5.0_Nitpicky_Edition.theme" type="theme" desc="Default 5.0 Nitpicky Edition">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Fixes and tiny improvements for the default Reaper 5.0 theme.\par}
+}
+]]></description>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?t=165040">Forum Thread</link>
+        <link rel="screenshot">https://i.imgur.com/irCO9qZ.png</link>
+      </metadata>
+      <version name="15" author="Lokasenna" time="2018-06-23T18:48:32Z">
+        <source file="Default 5.0 Nitpicky Edition.ReaperThemeZip">https://stash.reaper.fm/24878/Default%205.0%20Nitpicky%20Edition.ReaperThemeZip</source>
+      </version>
+      <version name="15.01" author="Lokasenna" time="2018-06-24T12:29:09Z">
+        <changelog><![CDATA[Hosting on Dropbox because the Stash is limited to 2mb]]></changelog>
+        <source file="Default 5.0 Nitpicky Edition.ReaperThemeZip">https://www.dropbox.com/s/pqkb6kv8qomi3to/Default%205.0%20Nitpicky%20Edition.ReaperThemeZip?dl=1</source>
+      </version>
+    </reapack>
+    <reapack name="oleggoryachev_RADO-V5-ARTEK.theme" type="theme" desc="RADO-V5-ARTEK">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Hello everybody! I present #RADO-V5-ARTEK theme! I modified the famous #RADO-V4 (by Nick Mortiz), trying to make the most convenient environment for my eyes. After 26 years making music it dawned on me that saving eyesight is the most important thing! Download, drag the theme into your Reaper main window. Enjoy! Note for Linux users: you have to install "Comic Sans" and "Calibri" fonts on your operation system. Anyway you can change any font in Reaper, and adjust everything you want. Best regards, Oleg Goryachev. oleg-artek-music@yandex.ru https://www.youtube.com/user/ogsmaker/\par}
+}
+]]></description>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/01.%20Main%20Window.png">Main Window</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/02.%20Piano%20Roll%20Editor.png">Piano Roll Editor</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/03.%20Mixer.png">Mixer</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/04.%20Waveform.png">Waveform</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/05.%20Automation.png">Automation</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/06.%20Folder%20Tracks.png">Folder Tracks</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/07.%20Musical%20Notation.png">Musical Notation</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/08.%20FX%20Brousing.png">Plugin Brouser</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/09.%20Envelopes.png">Envelopes</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/10.%20Preview%20Global%20Automation.png">Global Automation</link>
+        <link rel="screenshot" href="https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/master/11.%20Routing.png">Routing</link>
+      </metadata>
+      <version name="1" author="Oleg Goryachev" time="2019-09-04T14:32:29Z">
+        <changelog><![CDATA[Changed colors and fonts, replaced and tuned some png files. Added "Preview" Global knob.]]></changelog>
+        <source file="RADO-V5-ARTEK.ReaperThemeZip">https://github.com/Oleg-Artek-Music/Reaper-Daw/raw/989f3cee00084865ae6a0a35eba70902e706f35b/RADO-V5-ARTEK.ReaperThemeZip</source>
+      </version>
+    </reapack>
+    <reapack name="Pet_Default_v5_Dark.theme" type="theme" desc="Default v5 Dark Theme">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This is my dark version of the v5 default theme. It has the same functionality as the original theme and includes all layouts. The colors you choose for your tracks are more visible. If you want it pastel-colored or saturated colors, it looks more like you've chosen it . But its overall appearance is dark.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 There are some differences I want to mention:\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 This has changed:\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab if you use the "Dual Pan"-Mode, the color of the right channel is red, the left channel is blue, according to the other pan colors\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab the Transport Play/Pause buttons: if stopped, they are "unlit", if on/pause is active, they are "lit"\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab the meters are 3-color-style (green/yellow/red)\sa180\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 This has been added:\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab a layout named "Standard bottom" for the Transport Bar, which can be useful when you have the Transport Bar docked at the bottom of the main window. This layout adds a little space below the Play Buttons.\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab a drum toolbar button for the MIDI Editor. If you use the "Named Notes Mode" for drums and want a drum icon there, you can take this one. There's actually a drum icon in the default theme, but in the MIDI Editor there is now a nice frame around these four Mode-Icons. I added this frame to that toolbar icon.\sa180\par}
+}
+]]></description>
+        <link rel="website" href="http://forum.cockos.com/showthread.php?t=172024">Forum Thread</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29517/Default%20v5%20Dark%20Overview%20HiRes.PNG">Overview</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29516/Default%20v5%20Dark%20Mixer%20HiRes.png">Mixer</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29518/Default%20v5%20Dark%20tcp%20and%20Arrange%20HiRes.PNG">Arrange and TCP with "Standard bottom"</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29515/Default%20v5%20Dark%20Midi%20Editor%20HiRes.PNG">MIDI Editor</link>
+      </metadata>
+      <version name="1.2" author="Pet" time="2017-08-28T21:52:00Z">
+        <changelog><![CDATA[- "Record Arm" buttons in TrackControlPanel adapted to other record buttons
+- Fixed "Record Arm" button shadow in tcp-small layouts 
+- Fader buttons in mixer reworked  ]]></changelog>
+        <source file="Default_5_Dark.ReaperThemeZip">http://stash.reaper.fm/29513/Default_5_Dark.ReaperThemeZip</source>
+      </version>
+      <version name="1.3" author="Pet" time="2017-12-20T00:40:14Z">
+        <changelog><![CDATA[- Midi Editor colors for musical notation mode attuned
+- some images corrected ]]></changelog>
+        <source file="Default_5_Dark.ReaperThemeZip">http://stash.reaper.fm/29513/Default_5_Dark.ReaperThemeZip</source>
+      </version>
+    </reapack>
+    <reapack name="Pet_Default_v5_Dark_Extended.theme" type="theme" desc="Default v5 Dark Extended Theme">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This is the extended version of my Default 5 Dark Theme, a darker version of the original default theme with more layouts. (see the thread in the forum)\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 There are some differences I want to mention:\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 This has changed:\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab if you use the "Dual Pan"-Mode, the color of the right channel is red, the left channel is blue, according to the other pan colors\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab the Transport Play/Pause buttons: if stopped, they are "unlit", if on/pause is active, they are "lit"\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab the meters are 3-color-style (green/yellow/red)\sa180\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 This has been added:\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab a layout named "Standard bottom" for the Transport Bar, which can be useful when you have the Transport Bar docked at the bottom of the main window. This layout adds a little space below the Play Buttons.\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab a drum toolbar button for the MIDI Editor. If you use the "Named Notes Mode" for drums and want a drum icon there, you can take this one. There's actually a drum icon in the default theme, but in the MIDI Editor there is a small frame around these four Mode-Icons. I added this frame to that toolbar icon.\sa180\par}
+}
+]]></description>
+        <link rel="website" href="http://forum.cockos.com/showthread.php?t=172024">Forum Thread</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29517/Default%20v5%20Dark%20Overview%20HiRes.PNG">Overview</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29516/Default%20v5%20Dark%20Mixer%20HiRes.png">Mixer</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29518/Default%20v5%20Dark%20tcp%20and%20Arrange%20HiRes.PNG">Arrange and TCP with "Standard bottom"</link>
+        <link rel="screenshot" href="http://stash.reaper.fm/29515/Default%20v5%20Dark%20Midi%20Editor%20HiRes.PNG">MIDI Editor</link>
+      </metadata>
+      <version name="1.1" author="Pet" time="2017-08-28T21:52:12Z">
+        <changelog><![CDATA[- "Record Arm" buttons in TrackControlPanel adapted to other record buttons
+- Fixed "Record Arm" button shadow in tcp-small layouts  
+- Fader buttons in mixer reworked   ]]></changelog>
+        <source file="Default_5_Dark_Extended.ReaperThemeZip">http://stash.reaper.fm/30492/Default_5_Dark_Extended.ReaperThemeZip</source>
+      </version>
+      <version name="2.0" author="Pet" time="2017-12-20T01:15:10Z">
+        <changelog><![CDATA[- Horizontal Meter Layouts added in TCP
+- "Foldermeter" for minimized folder child tracks added
+- "Automation Record Arm" buttons reworked
+- Midi Editor colors for musical notation mode attuned]]></changelog>
+        <source file="Default_5_Dark_Extended.ReaperThemeZip">http://stash.reaper.fm/30492/Default_5_Dark_Extended.ReaperThemeZip</source>
+      </version>
+    </reapack>
+  </category>
+  <metadata>
+    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaTeam Theme Repository\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 {\cf1 [image: https://github.com/ReaTeam/Themes/workflows/check/badge.svg]\cf0}\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Community-maintained collection of themes for REAPER.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Installation\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Copy and paste this URL in Extensions > ReaPack > Import a repository:\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 https://github.com/ReaTeam/Themes/raw/master/index.xml\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Contributing\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Use {\field{\*\fldinst{HYPERLINK "https://reapack.com/upload/theme"}}{\fldrslt{\ul
+https://reapack.com/upload/theme
+}}}
+ to publish your REAPER theme on this repository.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Have a question? Come discuss in the {\field{\*\fldinst{HYPERLINK "https://forum.cockos.com/showthread.php?t=169127"}}{\fldrslt{\ul
+development thread
+}}}
+.\par}
+}
+]]></description>
+  </metadata>
+</index>

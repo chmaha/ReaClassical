@@ -1,0 +1,108 @@
+version: 1.0
+desc:Scotty Dither (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Beam" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Beam (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,1,1{16-bit,24-bit}>Bitdepth
+slider2:0.5<0,1,0.01>Focus
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+lastSampleL = freemem; freemem+=100;
+lastSampleR = freemem; freemem+=100;
+
+@slider
+
+A = slider1;
+B = slider2;
+
+@block
+
+(A == 1) ? scaleFactor = 8388608.0 : scaleFactor = 32768.0;
+sonority = B * 1.618033988749894848204586;
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+depth = (17.0*overallscale) | 0;
+(depth < 3) ? depth = 3;
+(depth > 98) ? depth = 98;
+
+@sample
+
+play_state == 1 || playstate == 5 ? (
+
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+inputSampleL *= scaleFactor;
+inputSampleR *= scaleFactor;
+
+quantA = floor(inputSampleL);
+quantB = floor(inputSampleL+1.0);
+
+expectedSlewA = 0;
+x = 0; while (x < depth) (
+  expectedSlewA += (lastSampleL[x+1] - lastSampleL[x]);
+  x+=1;
+);
+expectedSlewB = expectedSlewA;
+expectedSlewA += (lastSampleL[0] - quantA);
+expectedSlewB += (lastSampleL[0] - quantB);
+
+clamp = sonority;
+(abs(inputSampleL) < sonority) ? clamp = abs(inputSampleL);
+
+testA = abs(abs(expectedSlewA)-clamp);
+testB = abs(abs(expectedSlewB)-clamp);
+
+(testA < testB) ? inputSampleL = quantA : inputSampleL = quantB;
+
+x = depth; while(x >=0) (
+  lastSampleL[x+1] = lastSampleL[x];
+  x-=1;
+);
+lastSampleL[0] = inputSampleL;
+
+quantA = floor(inputSampleR);
+quantB = floor(inputSampleR+1.0);
+
+expectedSlewA = 0;
+x = 0; while(x < depth) (
+  expectedSlewA += (lastSampleR[x+1] - lastSampleR[x]);
+  x+=1;
+);
+expectedSlewB = expectedSlewA;
+expectedSlewA += (lastSampleR[0] - quantA);
+expectedSlewB += (lastSampleR[0] - quantB);
+
+clamp = sonority;
+(abs(inputSampleR) < sonority) ? clamp = abs(inputSampleR);
+
+testA = abs(abs(expectedSlewA)-clamp);
+testB = abs(abs(expectedSlewB)-clamp);
+
+(testA < testB) ? inputSampleR = quantA : inputSampleR = quantB;
+
+x = depth; while(x >=0) (
+  lastSampleR[x+1] = lastSampleR[x];
+  x-=1;
+);
+lastSampleR[0] = inputSampleR;
+
+inputSampleL /= scaleFactor;
+inputSampleR /= scaleFactor;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+
+);
+
+

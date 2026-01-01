@@ -1,0 +1,68 @@
+version: 1.0
+desc:Typhon Saturation (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Creature" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Creature (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0.26<0,1,0.01>Drive
+slider2:0.26<0,1,0.01>Depth
+slider3:1<0,1,0.01>Inv/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+slewL = freemem; freemem+=102;
+slewR = freemem; freemem+=102;
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+source = 1.0-pow(1.0-A,5);
+stages = (pow(B,2)*32.0*sqrt(overallscale))+1 | 0;
+wet = (C*2.0)-1.0; 
+dry = 2.0-(C*2.0);
+(dry > 1.0) ? dry = 1.0;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+x = 0; while (x < stages) (
+  inputSampleL = (slewL[x]+(sin(slewL[x]-inputSampleL)*0.5))*source;
+  slewL[x] = inputSampleL*0.5;
+  inputSampleR = (slewR[x]+(sin(slewR[x]-inputSampleR)*0.5))*source;
+  slewR[x] = inputSampleR*0.5;
+  x +=1;
+);
+
+(stages % 2 > 0) ? (
+  inputSampleL = -inputSampleL;
+  inputSampleR = -inputSampleR;
+);
+
+inputSampleL *= wet;
+inputSampleR *= wet;
+drySampleL *= dry;
+drySampleR *= dry;
+inputSampleL += drySampleL;
+inputSampleR += drySampleR;
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

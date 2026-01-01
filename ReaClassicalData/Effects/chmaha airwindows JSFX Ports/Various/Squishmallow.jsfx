@@ -1,0 +1,74 @@
+Version: 1.0
+desc: Squishmallow Compressor (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Pressure6" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Pressure6 (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,1,0.01>Compress
+slider2:1<0,1,0.01>Ratio
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+muComp = 1.0;
+muSpd = 100.0;
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+E = slider5;
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+threshold = 1.0-pow(A*0.9,3.0);
+adjSpd = ((A*92.0)+92.0)*overallscale;
+wet = B*0.9;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+inputSample = abs(inputSampleL);
+(abs(inputSampleR) > inputSample) ? inputSample = abs(inputSampleR);
+
+inputSample *= (muComp/threshold);
+inputSampleL *= (muComp/threshold);
+inputSampleR *= (muComp/threshold);
+(abs(inputSample) > threshold) ? (
+    muComp *= muSpd;
+    (threshold/abs(inputSample) < threshold) ? muComp += threshold*abs(inputSample)
+    : muComp -= threshold/abs(inputSample);
+    muComp /= muSpd;
+) : (
+    muComp *= (muSpd*muSpd);
+    muComp += ((1.1+threshold)-abs(inputSample));
+    muComp /= (muSpd*muSpd);
+);
+
+muComp = max(min(muComp,1.0),threshold);
+inputSample *= (muComp*muComp);
+inputSampleL *= (muComp*muComp);
+inputSampleR *= (muComp*muComp);
+muSpd = max(min(((muSpd*(muSpd-1.0))+(abs(inputSample*adjSpd)))/muSpd,adjSpd*2.0),adjSpd);
+
+inputSampleL = (drySampleL*(1.0-(wet*1.1)))+(sin(max(min(inputSampleL*wet,$pi/2),-$pi/2))*wet);
+inputSampleR = (drySampleR*(1.0-(wet*1.1)))+(sin(max(min(inputSampleR*wet,$pi/2),-$pi/2))*wet);
+
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

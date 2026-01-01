@@ -1,0 +1,95 @@
+Version: 1.3
+desc:Coral Bones Bass (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "FathomFive" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/FathomFive (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:1<0,1,0.01>Root Note
+slider2:0<0,1,0.01>Sub Octave
+slider3:0.5<0,1,0.01>Frequency
+slider4:1<0,1,0.01>Dry/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+
+A = slider1;
+B = slider2;
+C = slider3;
+D = slider4;
+
+
+@block
+EQ = 0.01+((pow(C,4)/srate)*32000.0);
+dcblock = EQ / 320.0;
+wet = D*2.0;
+dry = 2.0 - wet;
+basstrim = (0.01/EQ)+1.0;
+(wet > 1.0) ? wet = 1.0;
+(dry > 1.0) ? dry = 1.0;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+
+(inputSampleL > 0) ?
+(
+  (WasNegativeL) ? (SubOctaveL = !SubOctaveL; WasNegativeL = 0;)
+  : WasNegativeL = 1;
+);
+
+(inputSampleR > 0) ?
+(
+  (WasNegativeR) ? (SubOctaveR = !SubOctaveR; WasNegativeR = 0;)
+  : WasNegativeR = 1;
+);
+
+iirSampleLD = (iirSampleLD * (1 - EQ)) + (inputSampleL * EQ);
+bridgerectifier = abs(iirSampleLD);
+(SubOctaveL) ? tempL = bridgerectifier*B
+: tempL = -bridgerectifier*B;
+iirSampleRD = (iirSampleRD * (1 - EQ)) + (inputSampleR * EQ);
+bridgerectifier = abs(iirSampleRD);
+(SubOctaveR) ? tempR = bridgerectifier*B
+: tempR = -bridgerectifier*B;
+
+tempL += (inputSampleL*A);
+tempR += (inputSampleR*A);
+
+iirSampleLA += (tempL * EQ);
+iirSampleLA -= (iirSampleLA * iirSampleLA * iirSampleLA * EQ);
+(iirSampleLA > 0) ? iirSampleLA -= dcblock
+: iirSampleLA += dcblock;
+tempL = iirSampleLA*basstrim;
+
+iirSampleRA += (tempR * EQ);
+iirSampleRA -= (iirSampleRA * iirSampleRA * iirSampleRA * EQ);
+(iirSampleRA > 0) ? iirSampleRA -= dcblock
+: iirSampleRA += dcblock;
+tempR = iirSampleRA*basstrim;
+
+iirSampleLB = (iirSampleLB * (1 - EQ)) + (tempL * EQ);
+tempL = iirSampleLB;
+iirSampleRB = (iirSampleRB * (1 - EQ)) + (tempR * EQ);
+tempR = iirSampleRB;
+
+iirSampleLC = (iirSampleLC * (1 - EQ)) + (tempL * EQ);
+tempL = iirSampleLC;
+iirSampleRC = (iirSampleRC * (1 - EQ)) + (tempR * EQ);
+tempR = iirSampleRC;
+
+inputSampleL = (inputSampleL*dry) + (tempL*wet);
+inputSampleR = (inputSampleR*dry) + (tempR*wet);
+
+
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;

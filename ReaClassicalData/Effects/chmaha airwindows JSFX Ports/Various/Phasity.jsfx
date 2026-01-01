@@ -1,0 +1,73 @@
+Version: 1.2
+desc:Phasity Delay Timing Tool (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "SampleDelay" by Chris Johnson with adaptation by chmaha
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SampleDelay (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<0,20,0.01>Horizontal Spot to Main Pair (m)
+slider2:0<0,10,0.01>Differential Height of Main Pair (m)
+slider3:0<0,10,0.01>Samples
+slider4:0<0,1,0.01>Subsample
+slider5:1<-1,1,0.01>Inv/Wet
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+freemem = 0;
+pL = freemem; freemem +=16386;
+pR = freemem; freemem +=16386;
+
+@slider
+
+A = sqrt(sqr(slider1) + sqr(slider2))/343*1000
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+coarse = (A/100) * (4410.0*overallscale);
+fine = slider3;
+subsample = slider4;
+offset = floor(coarse + fine);
+(offset > 16380) ? offset = 16380;
+maxtime = 16384;
+phase = slider5;
+dryLevel = 1.0-abs(phase);
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+(gcount < 0 || gcount > maxtime) ? gcount = maxtime;
+count = gcount;
+pL[count] = inputSampleL;
+pR[count] = inputSampleR;
+count += offset;
+inputSampleL = pL[count-((count > maxtime)?maxtime+1:0)]*(1.0 - subsample);
+inputSampleR = pR[count-((count > maxtime)?maxtime+1:0)]*(1.0 - subsample);
+inputSampleL += pL[count+1-((count+1 > maxtime)?maxtime+1:0)]*subsample;
+inputSampleR += pR[count+1-((count+1 > maxtime)?maxtime+1:0)]*subsample;
+gcount-=1;
+
+(phase < 1.0) ? (
+  inputSampleL *= phase;
+  inputSampleR *= phase;
+);
+
+(dryLevel > 0.0) ? (
+  inputSampleL += (drySampleL * dryLevel);
+  inputSampleR += (drySampleR * dryLevel);
+);
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
+

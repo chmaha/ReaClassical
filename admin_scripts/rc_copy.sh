@@ -4,7 +4,7 @@
 #
 # by chmaha (November 2025)
 
-dir="$HOME/code/chmaha/ReaClassical/ReaClassical/"
+dir="$HOME/code/chmaha/ReaClassical/ReaClassicalData/"
 mkdir -p "$dir"
 
 # Source directory
@@ -52,6 +52,7 @@ Scripts/ReaTeam Scripts/Development/cfillion_Interactive ReaScript.lua
 Scripts/ReaTeam Scripts/Development/cfillion_Lua profiler.lua
 Scripts/ReaTeam Extensions/API/
 Scripts/chmaha Scripts/
+reapack.ini
 reaper-convertmetadata.ini
 reaper-fxfolders.ini
 reaper-hwoutfx.ini

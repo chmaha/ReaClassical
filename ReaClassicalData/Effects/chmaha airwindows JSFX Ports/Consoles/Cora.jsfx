@@ -1,0 +1,85 @@
+NoIndex: true
+desc:Cora Analog Circuitry (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "Interstage" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Interstage (MIT License)
+  JSFX version released under GPLv3 license
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+flip = 1;
+
+@slider
+
+
+@block
+overallscale = 1.0;
+overallscale /= 44100.0;
+overallscale *= srate;
+
+firstStage = 0.381966011250105 / overallscale;
+iirAmount = 0.00295 / overallscale;
+threshold = 0.381966011250105;
+
+@sample
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+
+drySampleL = inputSampleL;
+drySampleR = inputSampleR;
+
+inputSampleL = (inputSampleL+lastSampleL)*0.5;
+inputSampleR = (inputSampleR+lastSampleR)*0.5; 
+
+(flip) ? (
+  iirSampleAL = (iirSampleAL * (1 - firstStage)) + (inputSampleL * firstStage); inputSampleL = iirSampleAL;
+  iirSampleCL = (iirSampleCL * (1 - iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleCL;
+  iirSampleEL = (iirSampleEL * (1 - iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleEL;
+  inputSampleL = drySampleL - inputSampleL;
+  
+  (inputSampleL - iirSampleAL > threshold) ? inputSampleL = iirSampleAL + threshold;
+  (inputSampleL - iirSampleAL < -threshold) ? inputSampleL = iirSampleAL - threshold;
+  
+  iirSampleAR = (iirSampleAR * (1 - firstStage)) + (inputSampleR * firstStage); inputSampleR = iirSampleAR;
+  iirSampleCR = (iirSampleCR * (1 - iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleCR;
+  iirSampleER = (iirSampleER * (1 - iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleER;
+  inputSampleR = drySampleR - inputSampleR;
+
+  (inputSampleR - iirSampleAR > threshold) ? inputSampleR = iirSampleAR + threshold;
+  (inputSampleR - iirSampleAR < -threshold) ? inputSampleR = iirSampleAR - threshold;
+
+) : (
+  iirSampleBL = (iirSampleBL * (1 - firstStage)) + (inputSampleL * firstStage); inputSampleL = iirSampleBL;
+  iirSampleDL = (iirSampleDL * (1 - iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleDL;
+  iirSampleFL = (iirSampleFL * (1 - iirAmount)) + (inputSampleL * iirAmount); inputSampleL = iirSampleFL;
+  inputSampleL = drySampleL - inputSampleL;
+
+  (inputSampleL - iirSampleBL > threshold) ? inputSampleL = iirSampleBL + threshold;
+  (inputSampleL - iirSampleBL < -threshold) ? inputSampleL = iirSampleBL - threshold;
+
+  
+  iirSampleBR = (iirSampleBR * (1 - firstStage)) + (inputSampleR * firstStage); inputSampleR = iirSampleBR;
+  iirSampleDR = (iirSampleDR * (1 - iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleDR;
+  iirSampleFR = (iirSampleFR * (1 - iirAmount)) + (inputSampleR * iirAmount); inputSampleR = iirSampleFR;
+  inputSampleR = drySampleR - inputSampleR;
+
+  (inputSampleR - iirSampleBR > threshold) ? inputSampleR = iirSampleBR + threshold;
+  (inputSampleR - iirSampleBR < -threshold) ? inputSampleR = iirSampleBR - threshold;
+
+);
+flip = !flip;
+lastSampleL = inputSampleL;
+lastSampleR = inputSampleR;
+
+
+ 
+
+spl0 = inputSampleL;
+spl1 = inputSampleR;
