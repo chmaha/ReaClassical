@@ -922,7 +922,7 @@ function main()
 
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Record Panel") then
-            local record_panel = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
+            local record_panel = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
             Main_OnCommand(record_panel, 0)
         end
         if ImGui.IsItemHovered(ctx) then

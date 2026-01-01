@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.0test3
+@version 26.0test4
 @changelog
   Welcome to ReaClassical 26
 @metapackage
@@ -44,6 +44,7 @@
   [main] ReaClassical_Duplicate folder (No items).lua
   [main] ReaClassical_Exclusive Audition.lua
   [main] ReaClassical_ExplodeMultiChannel.lua
+  [main] ReaClassical_Factory Reset.lua
   [main] ReaClassical_Find Source Material.lua
   [main] ReaClassical_Find Take.lua
   [main] ReaClassical_Heal Edit.lua
@@ -86,7 +87,6 @@
   [main] ReaClassical_Remove All Item Fades.lua
   [main] ReaClassical_Remove Take Names.lua
   [main] ReaClassical_Reposition_Album_Tracks.lua
-  [main] ReaClassical_Factory Reset.lua
   [main] ReaClassical_S-D Edit.lua
   [main] ReaClassical_Set Dest Project Marker.lua
   [main] ReaClassical_Set Next Recording Section.lua

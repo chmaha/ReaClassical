@@ -82,7 +82,7 @@ local ImGui        = require 'imgui' '0.10'
 -- Default window settings
 local win          = {
   width = 300,
-  height = 350,
+  height = 425,
   xpos = nil,
   ypos = nil
 }
@@ -630,7 +630,7 @@ function draw(playstate)
   end
 
   -- Draw take number (large font) - color changes based on playstate
-  ImGui.PushFont(ctx, large_font, 90 * scale)
+  ImGui.PushFont(ctx, large_font, 175 * scale)
   local take_str = tostring(take_text)
   local text_w, text_h = ImGui.CalcTextSize(ctx, take_str)
   local take_x = (win_w - text_w) / 2
@@ -771,13 +771,18 @@ function draw(playstate)
     Main_OnCommand(F9_command, 0)
   end
 
-  -- Show gentle message if no track selected and no armed tracks
-  if show_select_message then
-    ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
-    ImGui.TextWrapped(ctx, "Select a parent track to arm")
-    ImGui.PopStyleColor(ctx)
-  end
+-- Show gentle message if no track selected and no armed tracks (reserve space to prevent layout shift)
+ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
+if show_select_message then
+  ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+  ImGui.TextWrapped(ctx, "Select a parent track to arm")
+  ImGui.PopStyleColor(ctx)
+else
+  -- Invisible placeholder to maintain spacing
+  ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000) -- Fully transparent
+  ImGui.TextWrapped(ctx, "Select a parent track to arm")
+  ImGui.PopStyleColor(ctx)
+end
 
   -- Pause button (only enabled during recording)
   ImGui.SetCursorPos(ctx, buttons_start_x + button_width + button_spacing, button_y)
