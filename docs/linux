@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-rcver="26~beta8"
+rcver="26"
 
 cleanup() {
     if [ -n "$temp_dir" ] && [ -d "$temp_dir" ]; then

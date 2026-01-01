@@ -4,6 +4,8 @@
 #
 # by chmaha (November 2025)
 
+sh "$(dirname "$0")/copy_lua.sh"
+
 dir="$HOME/code/chmaha/ReaClassical/ReaClassicalData/"
 mkdir -p "$dir"
 

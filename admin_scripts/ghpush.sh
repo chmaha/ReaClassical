@@ -16,7 +16,7 @@ if git diff --quiet index.xml && git diff --cached --quiet index.xml; then
 fi
 
 echo "Pruning index.xml..."
-ruby scripts/prune_index.rb || error_exit "prune_index.rb"
+ruby admin_scripts/prune_index.rb || error_exit "prune_index.rb"
 
 echo "Adding index.xml to git..."
 git add index.xml || error_exit "git add"
@@ -28,6 +28,6 @@ echo "Pushing to GitHub..."
 git push || error_exit "git push"
 
 echo "Updating changelog..."
-ruby scripts/changelog-update.rb || error_exit "changelog-update.rb"
+ruby admin_scripts/changelog-update.rb || error_exit "changelog-update.rb"
 
 echo "All done!"
