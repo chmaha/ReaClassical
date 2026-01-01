@@ -108,7 +108,7 @@
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [rpp] ReaClassical.RPP
-  [rpp] Room_Tone_Generation.RPP
+  [rpp] Room_Tone_Gen.RPP
   [theme] ReaClassical.ReaperThemeZip
   [theme] ReaClassical Light.ReaperThemeZip
   [theme] ReaClassical WaveColors Dark.ReaperThemeZip
