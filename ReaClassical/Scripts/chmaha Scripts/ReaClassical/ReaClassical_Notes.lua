@@ -63,6 +63,7 @@ local track_note    = ""
 local item_note     = ""
 local item_rank     = 9 -- Default to "No Rank"
 local item_take_num = ""
+local item_name     = ""
 
 local editing_track = nil
 local editing_item  = nil
@@ -95,6 +96,7 @@ function main()
         item_note = ""
         item_rank = 9
         item_take_num = ""
+        item_name = ""
     end
 
     if editing_track and not ValidatePtr2(0, editing_track, "MediaTrack*") then
@@ -122,6 +124,11 @@ function main()
             GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", tostring(item_rank), true)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
+            -- Save item name
+            local take = GetActiveTake(editing_item)
+            if take then
+                GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+            end
         end
 
         editing_item = item
@@ -135,10 +142,20 @@ function main()
             -- Load take number - use stored value or default to filename
             local _, item_take_num_stored = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
             item_take_num = item_take_num_stored ~= "" and item_take_num_stored or get_take_number(item)
+            
+            -- Load item name from active take
+            local take = GetActiveTake(item)
+            if take then
+                local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                item_name = name
+            else
+                item_name = ""
+            end
         else
             item_rank = 9
             item_take_num = ""
             item_note = ""
+            item_name = ""
         end
     end
 
@@ -151,7 +168,7 @@ function main()
         if opened then
             local avail_w, avail_h = ImGui.GetContentRegionAvail(ctx)
 
-            local static_height    = 4 * ImGui.GetTextLineHeightWithSpacing(ctx) + 50
+            local static_height    = 5 * ImGui.GetTextLineHeightWithSpacing(ctx) + 60
             local dynamic_h        = math.max(0, avail_h - static_height)
 
             local base_total       = MIN_H_PROJECT + MIN_H_TRACK + MIN_H_ITEM
@@ -177,6 +194,21 @@ function main()
             end
 
             if editing_item then
+                local item_id = tostring(editing_item):sub(-8)
+                ImGui.PushID(ctx, item_id)
+                
+                -- Item Name input (full width)
+                ImGui.Text(ctx, "Item Name:")
+                ImGui.SetNextItemWidth(ctx, avail_w)
+                local changed_name
+                changed_name, item_name = ImGui.InputText(ctx, "##item_name", item_name)
+                if changed_name and editing_item then
+                    local take = GetActiveTake(editing_item)
+                    if take then
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+                    end
+                end
+
                 local half_w = (avail_w - ImGui.GetStyleVar(ctx, ImGui.StyleVar_ItemSpacing)) / 2
 
                 ImGui.BeginGroup(ctx)
@@ -209,8 +241,6 @@ function main()
 
                 ImGui.SetNextItemWidth(ctx, half_w - 30)
                 local changed_take_num
-                local item_id = tostring(editing_item):sub(-8)
-                ImGui.PushID(ctx, item_id)
                 changed_take_num, item_take_num = ImGui.InputText(ctx, "##item_take_num", item_take_num)
                 if changed_take_num and editing_item then
                     GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
