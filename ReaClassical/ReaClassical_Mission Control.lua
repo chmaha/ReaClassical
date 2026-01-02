@@ -499,7 +499,7 @@ function main()
                             aux_submix_names[idx])
                         if changed_name then
                             aux_submix_names[idx] = new_name
-                            -- Update track name with prefix and hyphen state
+                            -- Update track name with prefix
                             local full_name
                             if aux_info.type == "aux" then
                                 full_name = "@" .. new_name
@@ -511,9 +511,6 @@ function main()
                                 full_name = "REF"
                             end
 
-                            if aux_info.has_hyphen then
-                                full_name = full_name .. "-"
-                            end
                             GetSetMediaTrackInfo_String(aux_info.track, "P_NAME", full_name, true)
                             aux_info.name = new_name
                             aux_info.full_name = full_name
@@ -743,26 +740,31 @@ function main()
 
                         -- Routing popup for this aux/submix
                         if ImGui.BeginPopup(ctx, "special_routing_popup") then
-                            ImGui.Text(ctx,
-                                "Route " .. (aux_info.name ~= "" and aux_info.name or display_prefix) .. " to:")
-                            ImGui.Separator(ctx)
+                            -- Read fresh P_EXT state when popup opens
+                            local _, rcm_disconnect = GetSetMediaTrackInfo_String(aux_info.track, "P_EXT:rcm_disconnect",
+                                "", false)
+                            local current_rcm_state = (rcm_disconnect ~= "y") -- Convert to boolean
 
-                            -- Get current sends
-                            local aux_sends = {}
+                            -- Get fresh sends
+                            local fresh_aux_sends = {}
                             local num_sends = GetTrackNumSends(aux_info.track, 0)
                             for j = 0, num_sends - 1 do
                                 local dest_track = GetTrackSendInfo_Value(aux_info.track, 0, j, "P_DESTTRACK")
                                 if dest_track then
-                                    aux_sends[dest_track] = true
+                                    fresh_aux_sends[dest_track] = true
                                 end
                             end
 
-                            -- Initialize pending changes if not already done
+                            ImGui.Text(ctx,
+                                "Route " .. (aux_info.name ~= "" and aux_info.name or display_prefix) .. " to:")
+                            ImGui.Separator(ctx)
+
+                            -- Initialize pending changes with FRESH data ONLY on first open
                             local popup_id = "special_" .. aux_info.index
                             if not pending_routing_changes[popup_id] then
                                 pending_routing_changes[popup_id] = {
                                     rcm_changed = false,
-                                    rcm_state = not aux_info.has_hyphen,
+                                    rcm_state = current_rcm_state,
                                     sends = {}
                                 }
                             end
@@ -783,10 +785,10 @@ function main()
                                 if dest_aux.track ~= aux_info.track and dest_aux.has_routing then
                                     has_destinations = true
 
-                                    -- Use pending state if available, otherwise current state
+                                    -- Use pending state if available, otherwise FRESH state
                                     local current_state = pending_routing_changes[popup_id].sends[dest_aux.track]
                                     if current_state == nil then
-                                        current_state = aux_sends[dest_aux.track] or false
+                                        current_state = fresh_aux_sends[dest_aux.track] or false -- Fresh data
                                     end
 
                                     local changed, new_state = ImGui.Checkbox(ctx, dest_aux.full_name, current_state)
@@ -810,9 +812,16 @@ function main()
 
                                 -- Apply RCMASTER routing change
                                 if changes.rcm_changed then
+                                    -- Update P_EXT state
+                                    GetSetMediaTrackInfo_String(aux_info.track, "P_EXT:rcm_disconnect",
+                                        changes.rcm_state and "" or "y", true)
+
+                                    -- Remove trailing hyphen from name if present
+                                    -- Update track name with or without hyphen based on connection state
                                     local base_name = aux_info.full_name:gsub("%-$", "")
                                     local new_name = changes.rcm_state and base_name or (base_name .. "-")
                                     GetSetMediaTrackInfo_String(aux_info.track, "P_NAME", new_name, true)
+
                                     aux_info.has_hyphen = not changes.rcm_state
                                     aux_info.full_name = new_name
                                     sync_needed = true
@@ -820,17 +829,17 @@ function main()
 
                                 -- Apply aux/submix send changes
                                 for dest_track, new_state in pairs(changes.sends) do
-                                    -- Get current sends again
-                                    local aux_sends_now = {}
+                                    -- Get FRESH sends again to compare
+                                    local fresh_aux_sends_now = {}
                                     local num_sends_now = GetTrackNumSends(aux_info.track, 0)
                                     for j = 0, num_sends_now - 1 do
                                         local dest = GetTrackSendInfo_Value(aux_info.track, 0, j, "P_DESTTRACK")
                                         if dest then
-                                            aux_sends_now[dest] = true
+                                            fresh_aux_sends_now[dest] = true
                                         end
                                     end
 
-                                    local current_state = aux_sends_now[dest_track] or false
+                                    local current_state = fresh_aux_sends_now[dest_track] or false
                                     if new_state ~= current_state then
                                         if new_state then
                                             CreateTrackSend(aux_info.track, dest_track)
@@ -945,6 +954,15 @@ function main()
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Open Source Audition")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Mixer Snapshots") then
+            local snapshots = NamedCommandLookup("_RS631257e69658396cd29f22227a610c8f5a8f8e06")
+            Main_OnCommand(snapshots, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Metadata Editor for selected album folder")
         end
 
         ImGui.SameLine(ctx)
@@ -1308,7 +1326,10 @@ function get_special_tracks()
                 track_type = "rcmaster"
             end
 
-            local has_hyphen = string.sub(name, -1) == "-"
+            -- Get RCMASTER connection state from P_EXT
+            local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
+            local has_hyphen = (rcm_disconnect == "y")
+
             local display_name = ""
 
             -- Extract display name based on track type
@@ -1498,12 +1519,15 @@ end
 
 ---------------------------------------------------------------------
 
-function rename_tracks(track_info, new_name, add_hyphen)
-    -- Add hyphen if checkbox is checked
-    local full_name = add_hyphen and (new_name .. "-") or new_name
+function rename_tracks(track_info, new_name, disconnect_rcm)
+    -- Store RCMASTER disconnect state in P_EXT
+    GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect", disconnect_rcm and "y" or "", true)
 
-    -- Rename mixer track with M: prefix
-    GetSetMediaTrackInfo_String(track_info.mixer_track, "P_NAME", "M:" .. full_name, true)
+    -- Remove any trailing hyphen from the name (we no longer use it)
+    local clean_name = new_name:gsub("%-$", "")
+
+    -- Rename mixer track with M: prefix (no hyphen)
+    GetSetMediaTrackInfo_String(track_info.mixer_track, "P_NAME", "M:" .. clean_name, true)
 
     -- Get the mixer track's position in the list (1-based)
     local mixer_position = nil
@@ -1533,6 +1557,9 @@ function rename_tracks(track_info, new_name, add_hyphen)
             local target_track = GetTrack(0, track_index)
 
             if target_track then
+                -- Store RCMASTER disconnect state in P_EXT for this track too
+                GetSetMediaTrackInfo_String(target_track, "P_EXT:rcm_disconnect", disconnect_rcm and "y" or "", true)
+
                 -- Determine prefix based on workflow and folder number
                 local prefix = ""
                 if workflow == "Vertical" then
@@ -1543,8 +1570,8 @@ function rename_tracks(track_info, new_name, add_hyphen)
                     end
                 end
 
-                -- Rename the track (with or without prefix depending on workflow)
-                GetSetMediaTrackInfo_String(target_track, "P_NAME", prefix .. full_name, true)
+                -- Rename the track without hyphen
+                GetSetMediaTrackInfo_String(target_track, "P_NAME", prefix .. clean_name, true)
             end
         end
     end
@@ -1921,12 +1948,15 @@ function init()
         pan_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN")
         volume_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL")
 
-        -- Get mixer track name without M: prefix and check for hyphen
+        -- Get mixer track name without M: prefix and remove any trailing hyphen
         local _, mixer_name = GetTrackName(track_info.mixer_track)
-        local name_without_prefix = mixer_name:gsub("^M:?", "")
-        track_has_hyphen[i] = string.sub(name_without_prefix, -1) == "-"
-        -- Store name without hyphen for display
-        track_names[i] = name_without_prefix:gsub("%-$", "")
+        local name_without_prefix = mixer_name:gsub("^M:?", ""):gsub("%-$", "")
+
+        -- Read RCMASTER connection state from P_EXT instead of checking hyphen
+        local _, rcm_disconnect = GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect", "", false)
+        track_has_hyphen[i] = (rcm_disconnect == "y")
+
+        track_names[i] = name_without_prefix
 
         -- Get sends to aux/submix
         mixer_sends[i] = get_mixer_sends(track_info.mixer_track)
@@ -2283,14 +2313,22 @@ function draw_track_controls(start_idx, end_idx)
 
         -- Aux routing popup
         if ImGui.BeginPopup(ctx, "aux_routing##" .. i) then
+            -- Read fresh P_EXT state when popup opens
+            local _, rcm_disconnect = GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect", "",
+                false)
+            local current_rcm_state = (rcm_disconnect ~= "y") -- Convert to boolean (true = connected)
+
+            -- Get fresh sends data
+            local fresh_sends = get_mixer_sends(track_info.mixer_track)
+
             ImGui.Text(ctx, "Route " .. track_names[i] .. " to:")
             ImGui.Separator(ctx)
 
-            -- Initialize pending changes if not already done for this popup
+            -- Initialize pending changes with FRESH data ONLY on first open
             if not pending_routing_changes[i] then
                 pending_routing_changes[i] = {
                     rcm_changed = false,
-                    rcm_state = not track_has_hyphen[i],
+                    rcm_state = current_rcm_state,
                     sends = {}
                 }
             end
@@ -2310,10 +2348,10 @@ function draw_track_controls(start_idx, end_idx)
                 for _, aux_info in ipairs(aux_submix_tracks) do
                     -- Only show aux/submix tracks with routing in mixer routing popups
                     if aux_info.has_routing then
-                        -- Use pending state if available, otherwise current state
+                        -- Use pending state if available, otherwise FRESH state
                         local current_state = pending_routing_changes[i].sends[aux_info.track]
                         if current_state == nil then
-                            current_state = mixer_sends[i][aux_info.track] or false
+                            current_state = fresh_sends[aux_info.track] or false -- Use fresh data
                         end
 
                         local changed, new_state = ImGui.Checkbox(ctx, aux_info.full_name .. "##aux" .. i, current_state)
@@ -2333,6 +2371,10 @@ function draw_track_controls(start_idx, end_idx)
 
                 -- Apply RCMASTER routing change
                 if changes.rcm_changed then
+                    -- Update P_EXT state
+                    GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect",
+                        changes.rcm_state and "" or "y", true)
+
                     track_has_hyphen[i] = not changes.rcm_state
                     rename_tracks(track_info, track_names[i], track_has_hyphen[i])
                     sync_needed = true
@@ -2340,7 +2382,9 @@ function draw_track_controls(start_idx, end_idx)
 
                 -- Apply aux/submix send changes
                 for aux_track, new_state in pairs(changes.sends) do
-                    local current_state = mixer_sends[i][aux_track] or false
+                    -- Get FRESH sends again to compare
+                    local fresh_sends_now = get_mixer_sends(track_info.mixer_track)
+                    local current_state = fresh_sends_now[aux_track] or false
                     if new_state ~= current_state then
                         if new_state then
                             -- Create send

@@ -38,20 +38,43 @@ local last_play_pos = -1
 local last_edit_pos = -1
 local is_playing = false
 local snapshot_counter = 0
+local current_bank = "A" -- Current active bank (A, B, C, or D)
 
 -- UI state
 local show_window = true
 local editing_row = nil
 local editing_column = nil
 local edit_buffer = ""
-local sort_mode = 0  -- 0=marker position, 1=name, 2=time
-local sort_direction = nil  -- Will be set to ascending after context is created
+local sort_mode = 0        -- 0=marker position, 1=name, 2=time
+local sort_direction = nil -- Will be set to ascending after context is created
 local jump_to_marker = false
 
+-- New feature flags
+local disable_auto_recall = false
+local hide_markers = false
+
+-- Selective parameter recall flags (all enabled by default)
+local recall_volume = true
+local recall_pan = true
+local recall_mute = true
+local recall_solo = true
+local recall_phase = true
+local recall_fx = true
+local recall_sends = true
+local recall_routing = true
+
 -- Column widths (swapped Name and Position)
-local col_widths = {35, 200, 80, 140, 300}
+local col_widths = { 35, 200, 80, 140, 300 }
 
 -- Helper Functions
+local function IsSpecialTrack(track)
+  local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+  local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+  local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+  
+  return mixer_state == "y" or aux_state == "y" or submix_state == "y"
+end
+
 local function GetTrackState(track)
   local state = {}
   state.volume = GetMediaTrackInfo_Value(track, "D_VOL")
@@ -60,7 +83,7 @@ local function GetTrackState(track)
   state.solo = GetMediaTrackInfo_Value(track, "I_SOLO")
   state.phase = GetMediaTrackInfo_Value(track, "B_PHASE")
   state.guid = GetTrackGUID(track)
-  
+
   -- Store FX chain state
   state.fx_chain = {}
   local fx_count = TrackFX_GetCount(track)
@@ -68,18 +91,18 @@ local function GetTrackState(track)
     local fx = {}
     fx.enabled = TrackFX_GetEnabled(track, i)
     fx.name = select(2, TrackFX_GetFXName(track, i, ""))
-    
+
     -- Store FX parameters
     fx.params = {}
     local param_count = TrackFX_GetNumParams(track, i)
     for p = 0, param_count - 1 do
       fx.params[p] = TrackFX_GetParam(track, i, p)
     end
-    
+
     state.fx_chain[i] = fx
   end
-  
-  -- Store sends
+
+  -- Store sends (routing)
   state.sends = {}
   local send_count = GetTrackNumSends(track, 0)
   for i = 0, send_count - 1 do
@@ -90,7 +113,19 @@ local function GetTrackState(track)
     send.dest_guid = GetTrackGUID(BR_GetMediaTrackSendInfo_Track(track, 0, i, 1))
     state.sends[i] = send
   end
-  
+
+  -- Store hardware outputs (routing)
+  state.hw_outs = {}
+  local hw_out_count = GetTrackNumSends(track, 1) -- 1 = hardware outputs
+  for i = 0, hw_out_count - 1 do
+    local hw_out = {}
+    hw_out.volume = GetTrackSendInfo_Value(track, 1, i, "D_VOL")
+    hw_out.pan = GetTrackSendInfo_Value(track, 1, i, "D_PAN")
+    hw_out.mute = GetTrackSendInfo_Value(track, 1, i, "B_MUTE")
+    hw_out.channel = GetTrackSendInfo_Value(track, 1, i, "I_DSTCHAN")
+    state.hw_outs[i] = hw_out
+  end
+
   return state
 end
 
@@ -106,40 +141,123 @@ end
 
 local function ApplyTrackState(track, state)
   if not track then return end
-  
-  SetMediaTrackInfo_Value(track, "D_VOL", state.volume)
-  SetMediaTrackInfo_Value(track, "D_PAN", state.pan)
-  SetMediaTrackInfo_Value(track, "B_MUTE", state.mute)
-  SetMediaTrackInfo_Value(track, "I_SOLO", state.solo)
-  SetMediaTrackInfo_Value(track, "B_PHASE", state.phase)
-  
+
+  -- Apply parameters based on selective recall flags
+  if recall_volume then
+    SetMediaTrackInfo_Value(track, "D_VOL", state.volume)
+  end
+
+  if recall_pan then
+    SetMediaTrackInfo_Value(track, "D_PAN", state.pan)
+  end
+
+  if recall_mute then
+    SetMediaTrackInfo_Value(track, "B_MUTE", state.mute)
+  end
+
+  if recall_solo then
+    SetMediaTrackInfo_Value(track, "I_SOLO", state.solo)
+  end
+
+  if recall_phase then
+    SetMediaTrackInfo_Value(track, "B_PHASE", state.phase)
+  end
+
   -- Apply FX chain
-  for fx_idx, fx in pairs(state.fx_chain) do
-    if TrackFX_GetCount(track) > fx_idx then
-      TrackFX_SetEnabled(track, fx_idx, fx.enabled)
-      
-      -- Apply FX parameters
-      for param_idx, value in pairs(fx.params) do
-        TrackFX_SetParam(track, fx_idx, param_idx, value)
+  if recall_fx then
+    for fx_idx, fx in pairs(state.fx_chain) do
+      if TrackFX_GetCount(track) > fx_idx then
+        TrackFX_SetEnabled(track, fx_idx, fx.enabled)
+
+        -- Apply FX parameters
+        for param_idx, value in pairs(fx.params) do
+          TrackFX_SetParam(track, fx_idx, param_idx, value)
+        end
       end
     end
   end
-  
-  -- Apply sends
-  for send_idx, send in pairs(state.sends) do
-    if GetTrackNumSends(track, 0) > send_idx then
-      SetTrackSendInfo_Value(track, 0, send_idx, "D_VOL", send.volume)
-      SetTrackSendInfo_Value(track, 0, send_idx, "D_PAN", send.pan)
-      SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", send.mute)
+
+  -- Apply sends (volume/pan/mute only, not routing)
+  if recall_sends then
+    for send_idx, send in pairs(state.sends) do
+      if GetTrackNumSends(track, 0) > send_idx then
+        SetTrackSendInfo_Value(track, 0, send_idx, "D_VOL", send.volume)
+        SetTrackSendInfo_Value(track, 0, send_idx, "D_PAN", send.pan)
+        SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", send.mute)
+      end
+    end
+  end
+
+  -- Apply routing (recreate sends to match snapshot)
+  if recall_routing and state.sends then
+    -- First, remove all existing sends
+    local current_send_count = GetTrackNumSends(track, 0)
+    for i = current_send_count - 1, 0, -1 do
+      RemoveTrackSend(track, 0, i)
+    end
+
+    local rcmaster_guid = nil
+
+    local track_count = CountTracks(0)
+    for i = 0, track_count - 1 do
+      local tr = GetTrack(0, i)
+      local _, rcmaster_state = GetSetMediaTrackInfo_String(tr, "P_EXT:rcmaster", "", false)
+      if rcmaster_state == "y" then
+        rcmaster_guid = GetTrackGUID(tr)
+        break
+      end
+    end
+
+    local has_rcmaster_connection = false
+
+    for _, send in pairs(state.sends) do
+      local dest_track = FindTrackByGUID(send.dest_guid)
+      if dest_track then
+        local new_send_idx = CreateTrackSend(track, dest_track)
+        if new_send_idx >= 0 then
+          SetTrackSendInfo_Value(track, 0, new_send_idx, "D_VOL", send.volume)
+          SetTrackSendInfo_Value(track, 0, new_send_idx, "D_PAN", send.pan)
+          SetTrackSendInfo_Value(track, 0, new_send_idx, "B_MUTE", send.mute)
+
+          if rcmaster_guid and send.dest_guid == rcmaster_guid then
+            has_rcmaster_connection = true
+          end
+        end
+      end
+    end
+
+    -- Only set rcm_disconnect for special tracks (mixer, aux, submix)
+    if IsSpecialTrack(track) then
+      if has_rcmaster_connection then
+        -- connection exists → NOT disconnected
+        GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", true)
+      else
+        -- no connection → disconnected
+        GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "y", true)
+      end
+    end
+
+    -- Apply hardware outputs
+    if state.hw_outs then
+      -- Note: This is a simplified approach - full hardware output restoration
+      -- would need to handle all channels. For now, just restore volume/pan/mute
+      local hw_out_count = GetTrackNumSends(track, 1)
+      for i = 0, math.min(hw_out_count - 1, #state.hw_outs) do
+        if state.hw_outs[i] then
+          SetTrackSendInfo_Value(track, 1, i, "D_VOL", state.hw_outs[i].volume)
+          SetTrackSendInfo_Value(track, 1, i, "D_PAN", state.hw_outs[i].pan)
+          SetTrackSendInfo_Value(track, 1, i, "B_MUTE", state.hw_outs[i].mute)
+        end
+      end
     end
   end
 end
 
 local function CreateSnapshot(name, notes, start_pos, end_pos, prev_snapshot)
   local snapshot = {}
-  snapshot_counter = snapshot_counter + 1  -- Increment first
+  snapshot_counter = snapshot_counter + 1            -- Increment first
   snapshot.name = name or ("RCmix" .. snapshot_counter)
-  snapshot.marker_name = "RCmix" .. snapshot_counter  -- Always use RCmix prefix
+  snapshot.marker_name = "RCmix" .. snapshot_counter -- Always use RCmix prefix
   snapshot.date = os.date("%Y-%m-%d")
   snapshot.time = os.date("%H:%M:%S")
   snapshot.notes = notes or ""
@@ -147,25 +265,27 @@ local function CreateSnapshot(name, notes, start_pos, end_pos, prev_snapshot)
   snapshot.marker_pos = start_pos or GetCursorPosition()
   snapshot.is_region = (end_pos ~= nil)
   snapshot.region_end = end_pos
-  snapshot.prev_tracks = prev_snapshot and prev_snapshot.tracks or nil  -- Store previous settings
-  
+  snapshot.prev_tracks = prev_snapshot and prev_snapshot.tracks or nil -- Store previous settings
+
   -- Store all track states (current mixer settings)
   for i = 0, CountTracks(0) - 1 do
     local track = GetTrack(0, i)
     snapshot.tracks[i] = GetTrackState(track)
   end
-  
-  -- Create marker or region
-  if snapshot.is_region then
-    -- Create a region
-    local marker_idx = AddProjectMarker(0, true, snapshot.marker_pos, end_pos, snapshot.marker_name, -1)
-    snapshot.marker_idx = marker_idx
-  else
-    -- Create a regular marker
-    local marker_idx = AddProjectMarker(0, false, snapshot.marker_pos, 0, snapshot.marker_name, -1)
-    snapshot.marker_idx = marker_idx
+
+  -- Create marker or region only if not hiding markers
+  if not hide_markers then
+    if snapshot.is_region then
+      -- Create a region
+      local marker_idx = AddProjectMarker(0, true, snapshot.marker_pos, end_pos, snapshot.marker_name, -1)
+      snapshot.marker_idx = marker_idx
+    else
+      -- Create a regular marker
+      local marker_idx = AddProjectMarker(0, false, snapshot.marker_pos, 0, snapshot.marker_name, -1)
+      snapshot.marker_idx = marker_idx
+    end
   end
-  
+
   return snapshot
 end
 
@@ -194,34 +314,74 @@ local function FindPreviousRCmixMarker(cursor_pos)
   local prev_marker_name = nil
   local prev_marker_pos = -1
   local prev_is_region = false
-  
+
   local num_markers, num_regions = CountProjectMarkers(0)
+  
+  -- First pass: look for regions containing the cursor
   for i = 0, num_markers + num_regions - 1 do
     local retval, isrgn, pos, rgnend, marker_name, markrgnindexnumber = EnumProjectMarkers(i)
     -- Match both "RCmix#" and "RCmix-*" formats
-    if (marker_name:match("^RCmix%d+$") or marker_name:match("^RCmix%-")) and pos <= cursor_pos then
-      -- For regions, check if cursor is actually inside the region
-      if isrgn then
-        if cursor_pos >= pos and cursor_pos < rgnend then
-          -- Inside this region - prefer innermost (most recent) region
-          if pos > prev_marker_pos then
-            prev_marker_pos = pos
-            prev_marker_name = marker_name
-            prev_is_region = true
-          end
-        end
-      else
-        -- Regular marker - only consider if we haven't found a region
-        if not prev_is_region and pos > prev_marker_pos then
+    if (marker_name:match("^RCmix%d+$") or marker_name:match("^RCmix%-")) and isrgn then
+      -- Check if cursor is inside this region
+      if cursor_pos >= pos and cursor_pos < rgnend then
+        -- Inside this region - prefer innermost (most recent) region
+        if pos > prev_marker_pos then
           prev_marker_pos = pos
           prev_marker_name = marker_name
-          prev_is_region = false
+          prev_is_region = true
         end
       end
     end
   end
-  
+
+  -- If we found a region containing the cursor, return it
+  if prev_is_region then
+    return prev_marker_name
+  end
+
+  -- Second pass: if no region found, look for the previous marker
+  for i = 0, num_markers + num_regions - 1 do
+    local retval, isrgn, pos, rgnend, marker_name, markrgnindexnumber = EnumProjectMarkers(i)
+    -- Match both "RCmix#" and "RCmix-*" formats
+    if (marker_name:match("^RCmix%d+$") or marker_name:match("^RCmix%-")) and not isrgn then
+      -- Regular marker - find the one closest before cursor
+      if pos <= cursor_pos and pos > prev_marker_pos then
+        prev_marker_pos = pos
+        prev_marker_name = marker_name
+      end
+    end
+  end
+
   return prev_marker_name
+end
+
+-- Find snapshot by position (when markers are hidden)
+local function FindSnapshotByPosition(cursor_pos)
+  local prev_snapshot = nil
+  local prev_pos = -1
+
+  for i, snap in ipairs(snapshots) do
+    if snap.marker_pos <= cursor_pos then
+      -- For regions, check if cursor is inside
+      if snap.is_region and snap.region_end then
+        if cursor_pos >= snap.marker_pos and cursor_pos < snap.region_end then
+          -- Inside region - prefer innermost
+          if snap.marker_pos > prev_pos then
+            prev_pos = snap.marker_pos
+            prev_snapshot = snap
+          end
+        end
+      else
+        -- Regular marker - only if no region found
+        if (not prev_snapshot or not prev_snapshot.is_region) and snap.marker_pos > prev_pos then
+          prev_pos = snap.marker_pos
+          prev_snapshot = snap
+        end
+      end
+    end
+  end
+
+  return prev_snapshot
 end
 
 local function DeleteMarkerByName(marker_name)
@@ -236,12 +396,37 @@ local function DeleteMarkerByName(marker_name)
   end
 end
 
+local function DeleteAllRCmixMarkers()
+  -- Delete all RCmix markers/regions from timeline
+  local num_markers, num_regions = CountProjectMarkers(0)
+  for i = num_markers + num_regions - 1, 0, -1 do
+    local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers(i)
+    if name:match("^RCmix%d+$") or name:match("^RCmix%-") then
+      DeleteProjectMarker(0, markrgnindexnumber, isrgn)
+    end
+  end
+end
+
+local function RestoreAllRCmixMarkers()
+  -- Recreate all markers/regions from snapshot data
+  for i, snap in ipairs(snapshots) do
+    if snap.is_region and snap.region_end then
+      AddProjectMarker(0, true, snap.marker_pos, snap.region_end, snap.marker_name, -1)
+    else
+      AddProjectMarker(0, false, snap.marker_pos, 0, snap.marker_name, -1)
+    end
+  end
+end
+
 local function EnsureMarkerExists(snapshot)
   if not snapshot then return end
-  
+
+  -- Don't create markers if hide_markers is enabled
+  if hide_markers then return end
+
   -- Check if marker/region exists
   local marker_pos, marker_idx = FindMarkerByName(snapshot.marker_name)
-  
+
   if not marker_pos then
     -- Marker/region doesn't exist, create it
     if snapshot.is_region and snapshot.region_end then
@@ -254,15 +439,17 @@ end
 
 local function RecallSnapshot(snapshot, should_jump)
   if not snapshot then return end
-  
-  -- Ensure marker exists
-  EnsureMarkerExists(snapshot)
-  
+
+  -- Ensure marker exists (unless hiding or disabled)
+  if not disable_auto_recall and not hide_markers then
+    EnsureMarkerExists(snapshot)
+  end
+
   -- Jump to just right of marker if requested
   if should_jump and jump_to_marker then
-    SetEditCurPos(snapshot.marker_pos + 0.001, true, true)  -- Move slightly right of marker
+    SetEditCurPos(snapshot.marker_pos + 0.001, true, true) -- Move slightly right of marker
   end
-  
+
   -- Apply all track states
   for i = 0, CountTracks(0) - 1 do
     local track = GetTrack(0, i)
@@ -270,7 +457,7 @@ local function RecallSnapshot(snapshot, should_jump)
       ApplyTrackState(track, snapshot.tracks[i])
     end
   end
-  
+
   UpdateArrange()
   TrackList_AdjustWindows(false)
 end
@@ -280,12 +467,12 @@ local function SerializeTable(tbl, indent)
   indent = indent or 0
   local result = {}
   local prefix = string.rep("  ", indent)
-  
+
   table.insert(result, "{\n")
-  
+
   for k, v in pairs(tbl) do
     local key_str = type(k) == "number" and ("[" .. k .. "]") or ('["' .. tostring(k) .. '"]')
-    
+
     if type(v) == "table" then
       table.insert(result, prefix .. "  " .. key_str .. " = " .. SerializeTable(v, indent + 1) .. ",\n")
     elseif type(v) == "string" then
@@ -294,7 +481,7 @@ local function SerializeTable(tbl, indent)
       table.insert(result, prefix .. "  " .. key_str .. " = " .. tostring(v) .. ",\n")
     end
   end
-  
+
   table.insert(result, prefix .. "}")
   return table.concat(result)
 end
@@ -314,7 +501,19 @@ local function SaveSnapshotsToProject()
   local data = {}
   data.counter = snapshot_counter
   data.snapshots = {}
-  
+
+  -- Save feature flags
+  data.disable_auto_recall = disable_auto_recall
+  data.hide_markers = hide_markers
+  data.recall_volume = recall_volume
+  data.recall_pan = recall_pan
+  data.recall_mute = recall_mute
+  data.recall_solo = recall_solo
+  data.recall_phase = recall_phase
+  data.recall_fx = recall_fx
+  data.recall_sends = recall_sends
+  data.recall_routing = recall_routing
+
   for i, snap in ipairs(snapshots) do
     -- Create a serializable version
     local s = {
@@ -331,38 +530,116 @@ local function SaveSnapshotsToProject()
     }
     table.insert(data.snapshots, s)
   end
-  
+
   local serialized = SerializeTable(data)
-  SetProjExtState(0, "MixerSnapshots", "data", serialized)
+  -- Save with bank-specific key
+  SetProjExtState(0, "MixerSnapshots", "data_" .. current_bank, serialized)
 end
 
 local function LoadSnapshotsFromProject()
-  local retval, serialized = GetProjExtState(0, "MixerSnapshots", "data")
+  -- Load from current bank
+  local retval, serialized = GetProjExtState(0, "MixerSnapshots", "data_" .. current_bank)
   if retval > 0 and serialized ~= "" then
     local data = DeserializeTable(serialized)
     if data then
       snapshot_counter = data.counter or 0
       snapshots = {}
-      
+
+      -- Load feature flags (with defaults)
+      disable_auto_recall = data.disable_auto_recall or false
+      hide_markers = data.hide_markers or false
+      recall_volume = data.recall_volume ~= false -- Default true
+      recall_pan = data.recall_pan ~= false
+      recall_mute = data.recall_mute ~= false
+      recall_solo = data.recall_solo ~= false
+      recall_phase = data.recall_phase ~= false
+      recall_fx = data.recall_fx ~= false
+      recall_sends = data.recall_sends ~= false
+      recall_routing = data.recall_routing ~= false
+
       for i, s in ipairs(data.snapshots or {}) do
         table.insert(snapshots, s)
       end
-      
-      -- Ensure all markers exist when loading
-      for i, snap in ipairs(snapshots) do
-        EnsureMarkerExists(snap)
+
+      -- Ensure all markers exist when loading (unless hiding)
+      if not hide_markers then
+        for i, snap in ipairs(snapshots) do
+          EnsureMarkerExists(snap)
+        end
+      end
+    end
+  else
+    -- No data for this bank yet - initialize empty
+    snapshot_counter = 0
+    snapshots = {}
+    selected_snapshot = nil
+  end
+end
+
+local function CopyFromBank(source_bank)
+  if source_bank == current_bank then return end
+
+  -- Load data from source bank
+  local retval, serialized = GetProjExtState(0, "MixerSnapshots", "data_" .. source_bank)
+  if retval > 0 and serialized ~= "" then
+    local data = DeserializeTable(serialized)
+    if data then
+      -- Copy counter and snapshots
+      snapshot_counter = data.counter or 0
+      snapshots = {}
+
+      for i, s in ipairs(data.snapshots or {}) do
+        table.insert(snapshots, s)
+      end
+
+      -- Save to current bank
+      SaveSnapshotsToProject()
+
+      -- Recreate markers if not hiding
+      if not hide_markers and not disable_auto_recall then
+        RestoreAllRCmixMarkers()
       end
     end
   end
 end
 
+local function ClearCurrentBank()
+  -- Delete all markers first
+  DeleteAllRCmixMarkers()
+
+  -- Clear in-memory data
+  snapshots = {}
+  snapshot_counter = 0
+  selected_snapshot = nil
+
+  -- Save empty state to project
+  SaveSnapshotsToProject()
+end
+
+local function SwitchToBank(new_bank)
+  if new_bank == current_bank then return end
+
+  -- Save current bank data
+  SaveSnapshotsToProject()
+
+  -- Delete markers from old bank
+  DeleteAllRCmixMarkers()
+
+  -- Switch to new bank
+  current_bank = new_bank
+  selected_snapshot = nil
+
+  -- Load new bank data
+  LoadSnapshotsFromProject()
+end
+
 -- UI Drawing
 local function SortSnapshots()
   local ascending = (sort_direction == ImGui_SortDirection_Ascending())
-  
+
   if sort_mode == 0 then
     -- Sort by marker position
-    table.sort(snapshots, function(a, b) 
+    table.sort(snapshots, function(a, b)
       if ascending then
         return a.marker_pos < b.marker_pos
       else
@@ -380,7 +657,7 @@ local function SortSnapshots()
     end)
   elseif sort_mode == 2 then
     -- Sort by time (combine date and time)
-    table.sort(snapshots, function(a, b) 
+    table.sort(snapshots, function(a, b)
       local a_datetime = a.date .. " " .. a.time
       local b_datetime = b.date .. " " .. b.time
       if ascending then
@@ -394,9 +671,8 @@ end
 
 local function DrawTable()
   SortSnapshots()
-  
+
   if ImGui_BeginTable(ctx, "SnapshotsTable", 5, ImGui_TableFlags_Borders() | ImGui_TableFlags_RowBg() | ImGui_TableFlags_Resizable()) then
-    
     -- Setup columns with widths (Name before Position)
     ImGui_TableSetupColumn(ctx, "#", ImGui_TableColumnFlags_WidthFixed(), col_widths[1])
     ImGui_TableSetupColumn(ctx, "Name", ImGui_TableColumnFlags_WidthFixed(), col_widths[2])
@@ -404,12 +680,12 @@ local function DrawTable()
     ImGui_TableSetupColumn(ctx, "Date/Time", ImGui_TableColumnFlags_WidthFixed(), col_widths[4])
     ImGui_TableSetupColumn(ctx, "Notes", ImGui_TableColumnFlags_WidthStretch())
     ImGui_TableHeadersRow(ctx)
-    
+
     -- Draw rows
     for i, snap in ipairs(snapshots) do
       ImGui_TableNextRow(ctx)
       ImGui_PushID(ctx, i)
-      
+
       -- Column 0: Index
       ImGui_TableSetColumnIndex(ctx, 0)
       ImGui_PushID(ctx, "index_sel")
@@ -418,34 +694,34 @@ local function DrawTable()
         RecallSnapshot(snap, true)
       end
       ImGui_PopID(ctx)
-      
+
       -- Column 1: Name (editable, selectable)
       ImGui_TableSetColumnIndex(ctx, 1)
-      
+
       if editing_row == i and editing_column == 1 then
         ImGui_SetKeyboardFocusHere(ctx)
         ImGui_PushID(ctx, "edit_name")
         local rv, new_text = ImGui_InputText(ctx, "##edit", edit_buffer, ImGui_InputTextFlags_EnterReturnsTrue())
         ImGui_PopID(ctx)
-        
+
         -- Update buffer as user types
         if rv then
           edit_buffer = new_text
         end
-        
+
         -- Check if user pressed ESC to cancel
         if ImGui_IsKeyPressed(ctx, ImGui_Key_Escape()) then
           editing_row = nil
           editing_column = nil
-        -- Check if user pressed Enter or clicked away
+          -- Check if user pressed Enter or clicked away
         elseif ImGui_IsItemDeactivatedAfterEdit(ctx) then
           if edit_buffer ~= snap.name then
             -- Delete old marker/region
             DeleteMarkerByName(snap.marker_name)
-            
+
             -- Update display name
             snap.name = edit_buffer
-            
+
             -- Update marker name with RCmix- prefix if name was changed from default
             if edit_buffer:match("^RCmix%d+$") then
               -- Keep original marker name if it's still the default format
@@ -454,12 +730,14 @@ local function DrawTable()
               -- Add RCmix- prefix for custom names
               snap.marker_name = "RCmix-" .. edit_buffer
             end
-            
-            -- Create new marker or region with updated name
-            if snap.is_region and snap.region_end then
-              AddProjectMarker(0, true, snap.marker_pos, snap.region_end, snap.marker_name, -1)
-            else
-              AddProjectMarker(0, false, snap.marker_pos, 0, snap.marker_name, -1)
+
+            -- Create new marker or region with updated name (unless hiding)
+            if not hide_markers then
+              if snap.is_region and snap.region_end then
+                AddProjectMarker(0, true, snap.marker_pos, snap.region_end, snap.marker_name, -1)
+              else
+                AddProjectMarker(0, false, snap.marker_pos, 0, snap.marker_name, -1)
+              end
             end
             SaveSnapshotsToProject()
           end
@@ -470,10 +748,10 @@ local function DrawTable()
         ImGui_PushID(ctx, "name_sel")
         if ImGui_Selectable(ctx, snap.name, selected_snapshot == snap) then
           selected_snapshot = snap
-          RecallSnapshot(snap, true)  -- Allow jump to marker on user selection
+          RecallSnapshot(snap, true) -- Allow jump to marker on user selection
         end
         ImGui_PopID(ctx)
-        
+
         -- Double-click to edit
         if ImGui_IsItemHovered(ctx) and ImGui_IsMouseDoubleClicked(ctx, 0) then
           editing_row = i
@@ -481,7 +759,7 @@ local function DrawTable()
           edit_buffer = snap.name
         end
       end
-      
+
       -- Column 2: Position (timeline position in format m:ss.ms)
       ImGui_TableSetColumnIndex(ctx, 2)
       local minutes = math.floor(snap.marker_pos / 60)
@@ -492,7 +770,7 @@ local function DrawTable()
         RecallSnapshot(snap, true)
       end
       ImGui_PopID(ctx)
-      
+
       -- Column 3: Date/Time (combined)
       ImGui_TableSetColumnIndex(ctx, 3)
       ImGui_PushID(ctx, "time_sel")
@@ -501,27 +779,27 @@ local function DrawTable()
         RecallSnapshot(snap, true)
       end
       ImGui_PopID(ctx)
-      
+
       -- Column 4: Notes (editable)
       ImGui_TableSetColumnIndex(ctx, 4)
-      
+
       if editing_row == i and editing_column == 4 then
         ImGui_SetKeyboardFocusHere(ctx)
         ImGui_PushID(ctx, "edit_notes")
-        ImGui_SetNextItemWidth(ctx, -1)  -- Fill available width
+        ImGui_SetNextItemWidth(ctx, -1) -- Fill available width
         local rv, new_text = ImGui_InputText(ctx, "##edit", edit_buffer, ImGui_InputTextFlags_EnterReturnsTrue())
         ImGui_PopID(ctx)
-        
+
         -- Update buffer as user types
         if rv then
           edit_buffer = new_text
         end
-        
+
         -- Check if user pressed ESC to cancel
         if ImGui_IsKeyPressed(ctx, ImGui_Key_Escape()) then
           editing_row = nil
           editing_column = nil
-        -- Check if user pressed Enter or clicked away
+          -- Check if user pressed Enter or clicked away
         elseif ImGui_IsItemDeactivatedAfterEdit(ctx) then
           if edit_buffer ~= snap.notes then
             snap.notes = edit_buffer
@@ -537,7 +815,7 @@ local function DrawTable()
           RecallSnapshot(snap, true)
         end
         ImGui_PopID(ctx)
-        
+
         -- Double-click to edit
         if ImGui_IsItemHovered(ctx) and ImGui_IsMouseDoubleClicked(ctx, 0) then
           editing_row = i
@@ -545,42 +823,127 @@ local function DrawTable()
           edit_buffer = snap.notes
         end
       end
-      
+
       ImGui_PopID(ctx)
     end
-    
+
     ImGui_EndTable(ctx)
   end
 end
 
 local function DrawUI()
   ImGui_SetNextWindowSize(ctx, 900, 0, ImGui_Cond_FirstUseEver())
-  
+
   local visible, open = ImGui_Begin(ctx, script_name, true)
   if visible then
-    
+    -- Bank tabs
+    if ImGui_BeginTabBar(ctx, "Banks") then
+      if ImGui_BeginTabItem(ctx, "     A     ") then
+        if current_bank ~= "A" then
+          SwitchToBank("A")
+        end
+        ImGui_EndTabItem(ctx)
+      end
+
+      if ImGui_BeginTabItem(ctx, "     B     ") then
+        if current_bank ~= "B" then
+          SwitchToBank("B")
+        end
+        ImGui_EndTabItem(ctx)
+      end
+
+      if ImGui_BeginTabItem(ctx, "     C     ") then
+        if current_bank ~= "C" then
+          SwitchToBank("C")
+        end
+        ImGui_EndTabItem(ctx)
+      end
+
+      if ImGui_BeginTabItem(ctx, "     D     ") then
+        if current_bank ~= "D" then
+          SwitchToBank("D")
+        end
+        ImGui_EndTabItem(ctx)
+      end
+
+      ImGui_EndTabBar(ctx)
+    end
+
+    -- Copy from other banks button
+    ImGui_Text(ctx, "Copy from:")
+    ImGui_SameLine(ctx)
+
+    -- Show copy buttons for other banks
+    local banks = { "A", "B", "C", "D" }
+    for _, bank in ipairs(banks) do
+      if bank ~= current_bank then
+        ImGui_SameLine(ctx)
+        if ImGui_Button(ctx, bank) then
+          CopyFromBank(bank)
+        end
+        if ImGui_IsItemHovered(ctx) then
+          ImGui_SetTooltip(ctx, "Copy all snapshots from bank " .. bank)
+        end
+      end
+    end
+
+    -- Clear current bank button
+    ImGui_SameLine(ctx)
+    ImGui_Dummy(ctx, 20, 0)
+    ImGui_SameLine(ctx)
+    if ImGui_Button(ctx, "Clear Bank " .. current_bank) then
+      ImGui_OpenPopup(ctx, "confirm_clear")
+    end
+    if ImGui_IsItemHovered(ctx) then
+      ImGui_SetTooltip(ctx, "Delete all snapshots in current bank")
+    end
+
+    -- Confirmation popup for clearing bank
+    if ImGui_BeginPopupModal(ctx, "confirm_clear", true, ImGui_WindowFlags_AlwaysAutoResize()) then
+      ImGui_Text(ctx, "Are you sure you want to clear all snapshots in Bank " .. current_bank .. "?")
+      ImGui_Text(ctx, "This cannot be undone.")
+      ImGui_Separator(ctx)
+
+      if ImGui_Button(ctx, "Yes, Clear Bank", 120, 0) then
+        ClearCurrentBank()
+        ImGui_CloseCurrentPopup(ctx)
+      end
+
+      ImGui_SameLine(ctx)
+      if ImGui_Button(ctx, "Cancel", 120, 0) then
+        ImGui_CloseCurrentPopup(ctx)
+      end
+
+      ImGui_EndPopup(ctx)
+    end
+
+    ImGui_Separator(ctx)
+
     -- Buttons
     local start_time, end_time = GetSet_LoopTimeRange(false, false, 0, 0, false)
     local has_time_sel = (end_time - start_time) > 0.001
     local button_label = has_time_sel and "New snapshot in time selection" or "New snapshot at edit cursor"
-    
+
     if ImGui_Button(ctx, button_label) then
       Undo_BeginBlock()
-      
+
       if has_time_sel then
         -- Find the previous RCmix marker/region before the START of time selection
-        local prev_marker_name = FindPreviousRCmixMarker(start_time)
-        local prev_snapshot = nil
-        
-        if prev_marker_name then
-          prev_snapshot = FindSnapshotByMarkerName(prev_marker_name)
+        local prev_snapshot
+        if hide_markers then
+          prev_snapshot = FindSnapshotByPosition(start_time)
+        else
+          local prev_marker_name = FindPreviousRCmixMarker(start_time)
+          if prev_marker_name then
+            prev_snapshot = FindSnapshotByMarkerName(prev_marker_name)
+          end
         end
-        
+
         -- Create a region snapshot with previous settings stored
         local snap = CreateSnapshot(nil, nil, start_time, end_time, prev_snapshot)
         table.insert(snapshots, snap)
         selected_snapshot = snap
-        
+
         -- Clear the time selection
         GetSet_LoopTimeRange(true, false, 0, 0, false)
       else
@@ -589,13 +952,13 @@ local function DrawUI()
         table.insert(snapshots, snap)
         selected_snapshot = snap
       end
-      
+
       SaveSnapshotsToProject()
       Undo_EndBlock("Create Mixer Snapshot", -1)
     end
-    
+
     ImGui_SameLine(ctx)
-    
+
     if ImGui_Button(ctx, "Update Selected") then
       if selected_snapshot then
         Undo_BeginBlock()
@@ -611,13 +974,13 @@ local function DrawUI()
         Undo_EndBlock("Update Mixer Snapshot", -1)
       end
     end
-    
+
     ImGui_SameLine(ctx)
-    
+
     if ImGui_Button(ctx, "Duplicate Selected") then
       if selected_snapshot then
         Undo_BeginBlock()
-        
+
         -- Create a new snapshot with the same track states
         snapshot_counter = snapshot_counter + 1
         local new_snap = {}
@@ -626,8 +989,8 @@ local function DrawUI()
         new_snap.date = os.date("%Y-%m-%d")
         new_snap.time = os.date("%H:%M:%S")
         new_snap.notes = selected_snapshot.notes
-        new_snap.marker_pos = GetCursorPosition()  -- Use current edit cursor position
-        
+        new_snap.marker_pos = GetCursorPosition() -- Use current edit cursor position
+
         -- Deep copy the track states from selected snapshot
         new_snap.tracks = {}
         for i, track_state in pairs(selected_snapshot.tracks) do
@@ -659,24 +1022,26 @@ local function DrawUI()
             end
           end
         end
-        
-        -- Create marker at edit cursor
-        AddProjectMarker(0, false, new_snap.marker_pos, 0, new_snap.marker_name, -1)
-        
+
+        -- Create marker at edit cursor (unless hiding)
+        if not hide_markers then
+          AddProjectMarker(0, false, new_snap.marker_pos, 0, new_snap.marker_name, -1)
+        end
+
         table.insert(snapshots, new_snap)
         selected_snapshot = new_snap
         SaveSnapshotsToProject()
         Undo_EndBlock("Duplicate Mixer Snapshot", -1)
       end
     end
-    
+
     ImGui_SameLine(ctx)
-    
+
     if ImGui_Button(ctx, "Delete Selected") then
       if selected_snapshot then
         Undo_BeginBlock()
         DeleteMarkerByName(selected_snapshot.marker_name)
-        
+
         for i, snap in ipairs(snapshots) do
           if snap == selected_snapshot then
             table.remove(snapshots, i)
@@ -684,14 +1049,14 @@ local function DrawUI()
             break
           end
         end
-        
+
         SaveSnapshotsToProject()
         Undo_EndBlock("Delete Mixer Snapshot", -1)
       end
     end
-    
+
     ImGui_Separator(ctx)
-    
+
     -- Sort controls
     ImGui_Text(ctx, "Sort by:")
     ImGui_SameLine(ctx)
@@ -700,130 +1065,303 @@ local function DrawUI()
     if ImGui_RadioButton(ctx, "Name", sort_mode == 1) then sort_mode = 1 end
     ImGui_SameLine(ctx)
     if ImGui_RadioButton(ctx, "Time", sort_mode == 2) then sort_mode = 2 end
-    
+
     ImGui_SameLine(ctx)
     ImGui_Dummy(ctx, 20, 0)
     ImGui_SameLine(ctx)
-    
+
     -- Sort direction toggle
     local dir_label = sort_direction == ImGui_SortDirection_Ascending() and "Ascending ▲" or "Descending ▼"
     if ImGui_Button(ctx, dir_label) then
-      sort_direction = sort_direction == ImGui_SortDirection_Ascending() and ImGui_SortDirection_Descending() or ImGui_SortDirection_Ascending()
+      sort_direction = sort_direction == ImGui_SortDirection_Ascending() and ImGui_SortDirection_Descending() or
+          ImGui_SortDirection_Ascending()
     end
-    
+
     ImGui_SameLine(ctx)
     ImGui_Dummy(ctx, 20, 0)
     ImGui_SameLine(ctx)
-    
+
     -- Jump to marker checkbox
     local rv, new_val = ImGui_Checkbox(ctx, "Jump to marker on recall", jump_to_marker)
     if rv then jump_to_marker = new_val end
-    
+
+    ImGui_SameLine(ctx)
+    ImGui_Dummy(ctx, 20, 0)
+    ImGui_SameLine(ctx)
+
+    -- Disable auto-recall checkbox
+    local rv_disable, new_disable = ImGui_Checkbox(ctx, "Disable auto-recall", disable_auto_recall)
+    if rv_disable then
+      disable_auto_recall = new_disable
+      -- If disabling, delete all markers
+      if disable_auto_recall then
+        DeleteAllRCmixMarkers()
+        hide_markers = false -- Reset hide_markers when disabling
+      else
+        -- If re-enabling, restore all markers (unless hide is checked)
+        if not hide_markers then
+          RestoreAllRCmixMarkers()
+        end
+      end
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    ImGui_Dummy(ctx, 10, 0)
+    ImGui_SameLine(ctx)
+
+    -- Hide markers checkbox (disabled when auto-recall is disabled)
+    if disable_auto_recall then
+      ImGui_BeginDisabled(ctx)
+    end
+
+    local rv_hide, new_hide = ImGui_Checkbox(ctx, "Hide markers", hide_markers)
+    if rv_hide then
+      hide_markers = new_hide
+      if hide_markers then
+        -- Delete all markers
+        DeleteAllRCmixMarkers()
+      else
+        -- Restore all markers
+        RestoreAllRCmixMarkers()
+      end
+      SaveSnapshotsToProject()
+    end
+
+    if disable_auto_recall then
+      ImGui_EndDisabled(ctx)
+    end
+
     ImGui_Separator(ctx)
-    
+
     -- Table
     DrawTable()
-    
+
+    ImGui_Separator(ctx)
+
+    -- Selective parameter recall checkboxes
+    ImGui_Text(ctx, "Recall:")
+    ImGui_SameLine(ctx)
+
+    local rv_vol, new_vol = ImGui_Checkbox(ctx, "Volume", recall_volume)
+    if rv_vol then
+      recall_volume = new_vol
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    local rv_pan, new_pan = ImGui_Checkbox(ctx, "Pan", recall_pan)
+    if rv_pan then
+      recall_pan = new_pan
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    local rv_mute, new_mute = ImGui_Checkbox(ctx, "Mute", recall_mute)
+    if rv_mute then
+      recall_mute = new_mute
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    local rv_solo, new_solo = ImGui_Checkbox(ctx, "Solo", recall_solo)
+    if rv_solo then
+      recall_solo = new_solo
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    local rv_phase, new_phase = ImGui_Checkbox(ctx, "Phase", recall_phase)
+    if rv_phase then
+      recall_phase = new_phase
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    local rv_fx, new_fx = ImGui_Checkbox(ctx, "FX", recall_fx)
+    if rv_fx then
+      recall_fx = new_fx
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    local rv_sends, new_sends = ImGui_Checkbox(ctx, "Send Levels", recall_sends)
+    if rv_sends then
+      recall_sends = new_sends
+      SaveSnapshotsToProject()
+    end
+
+    ImGui_SameLine(ctx)
+    local rv_routing, new_routing = ImGui_Checkbox(ctx, "Send Routing", recall_routing)
+    if rv_routing then
+      recall_routing = new_routing
+      SaveSnapshotsToProject()
+    end
+
     ImGui_End(ctx)
   end
-  
+
   return open
 end
 
 -- Check for marker-based auto-recall
 local function CheckAutoRecall()
+  -- Skip if auto-recall is disabled
+  if disable_auto_recall then return end
+
   local play_state = GetPlayState()
   local current_playing = (play_state & 1) == 1
-  
+
   -- Transport is playing
   if current_playing then
     local play_pos = GetPlayPosition()
-    
+
     -- Check if we crossed a marker/region
     if last_play_pos >= 0 and play_pos ~= last_play_pos then
-      local num_markers, num_regions = CountProjectMarkers(0)
-      
-      for i = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, pos, rgnend, marker_name, markrgnindexnumber = EnumProjectMarkers(i)
-        
-        -- Match both "RCmix#" and "RCmix-*" formats
-        if (marker_name:match("^RCmix%d+$") or marker_name:match("^RCmix%-")) then
-          if isrgn then
-            -- Region: check if we entered it
-            if last_play_pos < pos and play_pos >= pos then
-              local snap = FindSnapshotByMarkerName(marker_name)
-              if snap then
-                RecallSnapshot(snap, false)
-                selected_snapshot = snap
-              end
-            -- Check if we exited the region
-            elseif last_play_pos < rgnend and play_pos >= rgnend then
-              local snap = FindSnapshotByMarkerName(marker_name)
-              if snap and snap.prev_tracks then
-                -- Restore previous settings when exiting region
-                for j = 0, CountTracks(0) - 1 do
-                  local track = GetTrack(0, j)
-                  if snap.prev_tracks[j] then
-                    ApplyTrackState(track, snap.prev_tracks[j])
+      if hide_markers then
+        -- Use position-based lookup
+        local snap = FindSnapshotByPosition(play_pos)
+        if snap and snap ~= selected_snapshot then
+          RecallSnapshot(snap, false)
+          selected_snapshot = snap
+        end
+      else
+        -- Use marker-based lookup
+        local num_markers, num_regions = CountProjectMarkers(0)
+
+        for i = 0, num_markers + num_regions - 1 do
+          local retval, isrgn, pos, rgnend, marker_name, markrgnindexnumber = EnumProjectMarkers(i)
+
+          -- Match both "RCmix#" and "RCmix-*" formats
+          if (marker_name:match("^RCmix%d+$") or marker_name:match("^RCmix%-")) then
+            if isrgn then
+              -- Region: check if we entered it
+              if last_play_pos < pos and play_pos >= pos then
+                local snap = FindSnapshotByMarkerName(marker_name)
+                if snap then
+                  -- Store the currently selected snapshot before entering region
+                  snap.prev_selected_snapshot = selected_snapshot
+                  RecallSnapshot(snap, false)
+                  selected_snapshot = snap
+                end
+                -- Check if we exited the region
+              elseif last_play_pos < rgnend and play_pos >= rgnend then
+                local snap = FindSnapshotByMarkerName(marker_name)
+                if snap and snap.prev_tracks then
+                  -- Restore previous settings when exiting region
+                  for j = 0, CountTracks(0) - 1 do
+                    local track = GetTrack(0, j)
+                    if snap.prev_tracks[j] then
+                      ApplyTrackState(track, snap.prev_tracks[j])
+                    end
+                  end
+                  UpdateArrange()
+                  TrackList_AdjustWindows(false)
+                  -- Restore the previously selected snapshot in the table
+                  if snap.prev_selected_snapshot then
+                    selected_snapshot = snap.prev_selected_snapshot
+                  else
+                    selected_snapshot = nil
                   end
                 end
-                UpdateArrange()
-                TrackList_AdjustWindows(false)
               end
-            end
-          else
-            -- Regular marker
-            if last_play_pos < pos and play_pos >= pos then
-              local snap = FindSnapshotByMarkerName(marker_name)
-              if snap then
-                RecallSnapshot(snap, false)
-                selected_snapshot = snap
+            else
+              -- Regular marker
+              if last_play_pos < pos and play_pos >= pos then
+                local snap = FindSnapshotByMarkerName(marker_name)
+                if snap then
+                  RecallSnapshot(snap, false)
+                  selected_snapshot = snap
+                end
               end
             end
           end
         end
       end
     end
-    
+
     last_play_pos = play_pos
     is_playing = true
   else
-    -- Transport stopped - just check current cursor position
+    -- Transport stopped
+    -- When transport first stops, just flag it and wait for next frame
     if is_playing then
       is_playing = false
       last_play_pos = -1
+      last_edit_pos = -1  -- Reset so next frame will check the edit cursor
+      return  -- Exit early, check edit cursor on next frame
     end
     
-    -- Check edit cursor position
+    -- Now check edit cursor position (this runs after the stop transition)
     local edit_pos = GetCursorPosition()
+
+    -- Check if edit position changed
     if edit_pos ~= last_edit_pos then
       last_edit_pos = edit_pos
-      
-      -- Use the improved FindPreviousRCmixMarker which handles regions properly
-      local marker_name = FindPreviousRCmixMarker(edit_pos)
-      if marker_name then
-        local snap = FindSnapshotByMarkerName(marker_name)
+
+      if hide_markers then
+        -- Use position-based lookup
+        local snap = FindSnapshotByPosition(edit_pos)
         if snap and snap ~= selected_snapshot then
           RecallSnapshot(snap, false)
           selected_snapshot = snap
+        end
+      else
+        -- Use marker-based lookup
+        local marker_name = FindPreviousRCmixMarker(edit_pos)
+        if marker_name then
+          local snap = FindSnapshotByMarkerName(marker_name)
+          if snap and snap ~= selected_snapshot then
+            RecallSnapshot(snap, false)
+            selected_snapshot = snap
+          end
         end
       end
     end
   end
 end
 
+local function HandleProjectChange()
+  local current_project = EnumProjects(-1)
+
+  if current_project ~= last_project then
+    last_project = current_project
+
+    -- Clear UI + runtime state
+    snapshots = {}
+    selected_snapshot = nil
+    snapshot_counter = 0
+
+    editing_row = nil
+    editing_column = nil
+    edit_buffer = ""
+
+    last_play_pos = -1
+    last_edit_pos = -1
+    is_playing = false
+
+    -- IMPORTANT: reload data for THIS project
+    LoadSnapshotsFromProject()
+
+    -- Force UI refresh
+    TrackList_AdjustWindows(false)
+    UpdateArrange()
+  end
+end
+
 -- Main Loop
 local function Main()
+  HandleProjectChange()
   CheckAutoRecall()
-  
+
   local open = DrawUI()
-  
+
   if open then
     defer(Main)
   end
 end
 
 -- Initialize
-sort_direction = ImGui_SortDirection_Ascending()  -- Default to ascending sort
+sort_direction = ImGui_SortDirection_Ascending() -- Default to ascending sort
 LoadSnapshotsFromProject()
 defer(Main)
