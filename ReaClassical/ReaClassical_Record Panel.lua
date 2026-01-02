@@ -286,6 +286,17 @@ function main()
     if laststate ~= playstate then
       laststate = playstate
 
+      if editing_item and ValidatePtr2(0, editing_item, "MediaItem*") then
+        -- Save pending edits
+        save_item_rank_and_notes(editing_item, recording_rank, recording_note)
+
+        -- Clear editing context for new recording
+        editing_item = nil
+        last_selected_item = nil
+        recording_rank = 9
+        recording_note = ""
+      end
+
       if start_time or end_time then
         duration = nil
         duration_text = ""
@@ -705,7 +716,7 @@ function draw(playstate)
   end
   local session_w, session_h = ImGui.CalcTextSize(ctx, display_session)
   -- Smaller gap from take number to match original
-  ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h*0.95)
+  ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h * 0.95)
   ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple (RGBA)
   ImGui.Text(ctx, display_session)
   ImGui.PopStyleColor(ctx)
@@ -771,18 +782,18 @@ function draw(playstate)
     Main_OnCommand(F9_command, 0)
   end
 
--- Show gentle message if no track selected and no armed tracks (reserve space to prevent layout shift)
-ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
-if show_select_message then
-  ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
-  ImGui.TextWrapped(ctx, "Select a parent track to arm")
-  ImGui.PopStyleColor(ctx)
-else
-  -- Invisible placeholder to maintain spacing
-  ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000) -- Fully transparent
-  ImGui.TextWrapped(ctx, "Select a parent track to arm")
-  ImGui.PopStyleColor(ctx)
-end
+  -- Show gentle message if no track selected and no armed tracks (reserve space to prevent layout shift)
+  ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
+  if show_select_message then
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+    ImGui.TextWrapped(ctx, "Select a parent track to arm")
+    ImGui.PopStyleColor(ctx)
+  else
+    -- Invisible placeholder to maintain spacing
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000) -- Fully transparent
+    ImGui.TextWrapped(ctx, "Select a parent track to arm")
+    ImGui.PopStyleColor(ctx)
+  end
 
   -- Pause button (only enabled during recording)
   ImGui.SetCursorPos(ctx, buttons_start_x + button_width + button_spacing, button_y)
