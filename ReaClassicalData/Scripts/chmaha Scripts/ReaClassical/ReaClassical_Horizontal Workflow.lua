@@ -80,7 +80,7 @@ function main()
             remove_spacers(rcmaster_index)
             SetProjExtState(0, "ReaClassical", "Workflow", "Horizontal")
             local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
-            Main_OnCommand(mission_control,0)
+            Main_OnCommand(mission_control, 0)
             set_recording_to_primary_and_secondary(mixer_track_table)
         end
         SetProjExtState(0, "ReaClassical", "TrackCount", "")
@@ -556,7 +556,9 @@ function route_tracks(rcmaster, track_table, end_of_sources)
     for i = 0, num_of_tracks - 1, 1 do
         local track = GetTrack(0, i)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-        if name:sub(-1) ~= '-' then
+        local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect",
+            "", false)
+        if rcm_disconnect ~= "y" then
             if name:match("^@") or name:match("^#") or name:match("^RoomTone") or name:match("^M:") then
                 route_to_track(track, rcmaster)
             end
