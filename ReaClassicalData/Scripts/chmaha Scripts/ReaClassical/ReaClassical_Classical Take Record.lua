@@ -81,10 +81,10 @@ function main()
     Main_OnCommand(40339, 0) --unmute all tracks
 
     if GetPlayState() == 0 then
-        local take_counter = NamedCommandLookup("_RSac9d8eec87fd6c1d70abfe3dcc57849e2aac0bdc")
-        local state = GetToggleCommandState(take_counter)
+        local record_panel = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
+        local state = GetToggleCommandState(record_panel)
         if state ~= 1 then
-            Main_OnCommand(take_counter, 0)
+            Main_OnCommand(record_panel, 0)
         end
         select_children_of_selected_folders()
         mixer()

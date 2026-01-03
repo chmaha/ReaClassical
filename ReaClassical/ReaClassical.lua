@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.0beta11
+@version 26.0beta13
 @changelog
   Welcome to ReaClassical 26
 @metapackage
@@ -42,6 +42,7 @@
   [main] ReaClassical_Delete With Ripple.lua
   [main] ReaClassical_Destination Markers to Item Edge.lua
   [main] ReaClassical_Duplicate folder (No items).lua
+  [main] ReaClassical_Editing Toolbar.lua
   [main] ReaClassical_Exclusive Audition.lua
   [main] ReaClassical_ExplodeMultiChannel.lua
   [main] ReaClassical_Factory Reset.lua
@@ -60,6 +61,7 @@
   [main] ReaClassical_Metadata Report.lua
   [main] ReaClassical_Meterbridge.lua
   [main] ReaClassical_Microphone Indicator.lua
+  [main] ReaClassical_Mixer Snapshots.lua
   [main] ReaClassical_Mission Control.lua
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Move to Destination IN marker.lua

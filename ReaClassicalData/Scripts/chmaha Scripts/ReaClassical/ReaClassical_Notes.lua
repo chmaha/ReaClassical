@@ -61,7 +61,7 @@ local MIN_H_ITEM    = 80
 
 local track_note    = ""
 local item_note     = ""
-local item_rank     = 9 -- Default to "No Rank"
+local item_rank     = "" -- Default to "No Rank"
 local item_take_num = ""
 local item_name     = ""
 
@@ -94,7 +94,7 @@ function main()
     if editing_item and not ValidatePtr2(0, editing_item, "MediaItem*") then
         editing_item = nil
         item_note = ""
-        item_rank = 9
+        item_rank = ""
         item_take_num = ""
         item_name = ""
     end
@@ -122,7 +122,8 @@ function main()
         ImGui.SetWindowFocus(ctx)
         if editing_item then
             GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
-            GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", tostring(item_rank), true)
+            -- Save rank (empty string if No Rank to delete P_EXT state)
+            GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", item_rank, true)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
             -- Save item name
             local take = GetActiveTake(editing_item)
@@ -137,7 +138,13 @@ function main()
             item_note = note
 
             local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-            item_rank = tonumber(rank_str) or 9
+            -- Convert numeric string to index, default to "" for No Rank
+            if rank_str ~= "" then
+                local rank_num = tonumber(rank_str)
+                item_rank = (rank_num and rank_num >= 1 and rank_num <= 9) and tostring(rank_num) or ""
+            else
+                item_rank = ""
+            end
 
             -- Load take number - use stored value or default to filename
             local _, item_take_num_stored = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
@@ -152,7 +159,7 @@ function main()
                 item_name = ""
             end
         else
-            item_rank = 9
+            item_rank = ""
             item_take_num = ""
             item_note = ""
             item_name = ""
@@ -213,15 +220,20 @@ function main()
 
                 ImGui.BeginGroup(ctx)
                 ImGui.Text(ctx, "Item Rank:")
-                ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[item_rank].rgba)
+                
+                -- Determine display index (1-9) for combo
+                local display_index = item_rank == "" and 9 or tonumber(item_rank)
+                
+                ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[display_index].rgba)
                 ImGui.SetNextItemWidth(ctx, half_w)
-                if ImGui.BeginCombo(ctx, "##item_rank", RANKS[item_rank].name) then
+                if ImGui.BeginCombo(ctx, "##item_rank", RANKS[display_index].name) then
                     for i, rank in ipairs(RANKS) do
                         ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
-                        local is_selected = (item_rank == i)
+                        local is_selected = (display_index == i)
                         if ImGui.Selectable(ctx, rank.name, is_selected) then
-                            item_rank = i
-                            GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", tostring(item_rank), true)
+                            -- Store as string "1"-"8" or "" for No Rank
+                            item_rank = (i == 9) and "" or tostring(i)
+                            GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", item_rank, true)
                             -- Apply color to item and group
                             apply_rank_color(editing_item, item_rank)
                         end
@@ -364,12 +376,15 @@ function update_take_name(item, rank)
         item_name = item_name:gsub("^" .. prefix .. "$", "")
     end
 
-    -- Add new rank prefix if not "No Rank"
-    if rank ~= 9 and RANKS[rank].prefix ~= "" then
-        if item_name ~= "" then
-            item_name = RANKS[rank].prefix .. "-" .. item_name
-        else
-            item_name = RANKS[rank].prefix
+    -- Add new rank prefix if not "No Rank" (empty string)
+    if rank ~= "" then
+        local rank_index = tonumber(rank)
+        if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
+            if item_name ~= "" then
+                item_name = RANKS[rank_index].prefix .. "-" .. item_name
+            else
+                item_name = RANKS[rank_index].prefix
+            end
         end
     end
 
@@ -468,12 +483,18 @@ end
 function apply_rank_color(item, rank)
     local color_to_use
 
-    if rank == 9 then
+    if rank == "" then
         -- No Rank selected - restore original color
         color_to_use = get_item_color(item)
     else
         -- Get the color for this rank
-        color_to_use = rgba_to_native(RANKS[rank].rgba) | 0x1000000
+        local rank_index = tonumber(rank)
+        if rank_index and RANKS[rank_index] then
+            color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+        else
+            -- Fallback if invalid rank
+            color_to_use = get_item_color(item)
+        end
     end
 
     -- Apply color to the item
@@ -495,7 +516,7 @@ function apply_rank_color(item, rank)
                 local current_item = GetTrackMediaItem(track, j)
                 local current_group_id = GetMediaItemInfo_Value(current_item, "I_GROUPID")
                 if current_group_id == group_id and current_item ~= item then
-                    if rank == 9 then
+                    if rank == "" then
                         -- No Rank - restore original color for each item in group
                         local current_color = get_item_color(current_item)
                         SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", current_color)
@@ -504,8 +525,8 @@ function apply_rank_color(item, rank)
                     end
                     -- Update take name for grouped items too
                     update_take_name(current_item, rank)
-                    -- Store the rank for grouped items
-                    GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", tostring(rank), true)
+                    -- Store the rank for grouped items (empty string deletes P_EXT state)
+                    GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", rank, true)
                 end
             end
         end

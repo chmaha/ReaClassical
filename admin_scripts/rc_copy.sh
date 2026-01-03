@@ -4,7 +4,7 @@
 #
 # by chmaha (November 2025)
 
-sh "$(dirname "$0")/copy_lua.sh"
+# sh "$(dirname "$0")/copy_lua.sh"
 
 dir="$HOME/code/chmaha/ReaClassical/ReaClassicalData/"
 mkdir -p "$dir"
@@ -38,7 +38,6 @@ Data/toolbar_icons/animation_toolbar_armed.png
 Data/toolbar_icons/animation_toolbar_highlight.png
 Data/toolbar_icons/copy_dest_material.png
 Data/toolbar_icons/move_dest_material.png
-Data/toolbar_icons/Reverse SD Edit.png
 Data/toolbar_icons/assembly.png
 Data/toolbar_icons/promote to dest.png
 Data/toolbar_icons/toolbar_tool_erase_delete_remove.png
@@ -121,7 +120,7 @@ cp "$dir/ProjectTemplates/Room_Tone_Gen.RPP" "$dir/Scripts/chmaha Scripts/ReaCla
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 
-src="ReaClassical"
+src="ReaClassicalData"
 zip_file="Resource_Folder_Base.zip"
 installer_dir="Installers"
 
