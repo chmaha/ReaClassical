@@ -42,6 +42,11 @@ function main()
     end
 
     local edit_item = get_selected_media_item_at(0)
+    if not edit_item then
+        MB("No items selected.", "Error", 0)
+        return
+    end
+
     local _, saved_guid = GetSetMediaItemInfo_String(edit_item, "P_EXT:src_guid", "", false)
     if saved_guid == "" then
         MB("Error: No source GUID stored for this item.", "Error", 0)
@@ -142,7 +147,7 @@ end
 
 function get_item_by_guid(project, guid)
     if not guid or guid == "" then return nil end
-    project = project or 0  -- default to current project if nil
+    project = project or 0 -- default to current project if nil
 
     local numItems = reaper.CountMediaItems(project)
     for i = 0, numItems - 1 do
@@ -153,7 +158,7 @@ function get_item_by_guid(project, guid)
         end
     end
 
-    return nil  -- not found
+    return nil -- not found
 end
 
 ---------------------------------------------------------------------
