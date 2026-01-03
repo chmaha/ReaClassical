@@ -81,7 +81,7 @@ local ImGui        = require 'imgui' '0.10'
 
 -- Default window settings
 local win          = {
-  width = 300,
+  width = 350,
   height = 440,
   xpos = nil,
   ypos = nil
@@ -130,7 +130,7 @@ local popup_end_text = nil
 local popup_duration_text = nil
 
 -- Recording rank and notes
-local recording_rank = 9 -- Default to "No Rank"
+local recording_rank = "" -- Default to "No Rank"
 local recording_note = ""
 
 -- Track the item being edited when stopped
@@ -195,7 +195,7 @@ function main()
       apply_rank_and_notes_to_items()
 
       -- Reset rank and notes for next recording
-      recording_rank = 9
+      recording_rank = ""
       recording_note = ""
       editing_item = nil
     end
@@ -221,7 +221,7 @@ function main()
           load_item_rank_and_notes(selected_item)
           editing_item = selected_item
         else
-          recording_rank = 9
+          recording_rank = ""
           recording_note = ""
           editing_item = nil
         end
@@ -293,7 +293,7 @@ function main()
         -- Clear editing context for new recording
         editing_item = nil
         last_selected_item = nil
-        recording_rank = 9
+        recording_rank = ""
         recording_note = ""
       end
 
@@ -323,13 +323,19 @@ end
 
 function load_item_rank_and_notes(item)
   if not item then
-    recording_rank = 9
+    recording_rank = ""
     recording_note = ""
     return
   end
 
   local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-  recording_rank = tonumber(rank_str) or 9
+  -- Convert numeric string to string "1"-"8" or "" for No Rank
+  if rank_str ~= "" then
+    local rank_num = tonumber(rank_str)
+    recording_rank = (rank_num and rank_num >= 1 and rank_num <= 9) and tostring(rank_num) or ""
+  else
+    recording_rank = ""
+  end
 
   local _, note = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
   recording_note = note
@@ -340,14 +346,20 @@ end
 function save_item_rank_and_notes(item, rank, note)
   if not item then return end
 
-  -- Save rank
-  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", tostring(rank), true)
+  -- Save rank (empty string deletes P_EXT state)
+  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", rank, true)
 
   -- Apply color based on rank
   local color_to_use
-  if rank ~= 9 then
+  if rank ~= "" then
     -- Apply rank color
-    color_to_use = rgba_to_native(RANKS[rank].rgba) | 0x1000000
+    local rank_index = tonumber(rank)
+    if rank_index and RANKS[rank_index] then
+      color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+    else
+      -- Fallback if invalid rank
+      color_to_use = get_item_color(item)
+    end
   else
     -- No rank - restore original color
     color_to_use = get_item_color(item)
@@ -370,13 +382,18 @@ function save_item_rank_and_notes(item, rank, note)
         local current_item = GetTrackMediaItem(track, j)
         local current_group_id = GetMediaItemInfo_Value(current_item, "I_GROUPID")
         if current_group_id == group_id and current_item ~= item then
-          GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", tostring(rank), true)
+          GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", rank, true)
           GetSetMediaItemInfo_String(current_item, "P_NOTES", note, true)
 
           -- Apply color to grouped items too
           local grouped_color
-          if rank ~= 9 then
-            grouped_color = rgba_to_native(RANKS[rank].rgba) | 0x1000000
+          if rank ~= "" then
+            local rank_index = tonumber(rank)
+            if rank_index and RANKS[rank_index] then
+              grouped_color = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+            else
+              grouped_color = get_item_color(current_item)
+            end
           else
             -- No rank - restore original color for each grouped item
             grouped_color = get_item_color(current_item)
@@ -845,17 +862,22 @@ function draw(playstate)
 
   -- Rank dropdown
   ImGui.SetCursorPos(ctx, buttons_start_x, rank_y)
-  ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[recording_rank].rgba)
+  
+  -- Determine display index (1-9) for combo
+  local display_index = recording_rank == "" and 9 or tonumber(recording_rank)
+  
+  ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[display_index].rgba)
   ImGui.SetNextItemWidth(ctx, total_button_width / 2)
 
   -- Create unique ID based on editing state
   local rank_id = editing_item and tostring(editing_item):sub(-8) or "recording"
-  if ImGui.BeginCombo(ctx, "##rank_" .. rank_id, RANKS[recording_rank].name) then
+  if ImGui.BeginCombo(ctx, "##rank_" .. rank_id, RANKS[display_index].name) then
     for i, rank in ipairs(RANKS) do
       ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
-      local is_selected = (recording_rank == i)
+      local is_selected = (display_index == i)
       if ImGui.Selectable(ctx, rank.name, is_selected) then
-        recording_rank = i
+        -- Store as string "1"-"8" or "" for No Rank
+        recording_rank = (i == 9) and "" or tostring(i)
         -- If stopped and editing an item, save immediately
         if playstate == 0 and editing_item then
           save_item_rank_and_notes(editing_item, recording_rank, recording_note)
@@ -1339,12 +1361,15 @@ function update_take_name(item, rank)
     item_name = item_name:gsub("^" .. prefix .. "$", "")
   end
 
-  -- Add new rank prefix if not "No Rank"
-  if rank ~= 9 and RANKS[rank].prefix ~= "" then
-    if item_name ~= "" then
-      item_name = RANKS[rank].prefix .. "-" .. item_name
-    else
-      item_name = RANKS[rank].prefix
+  -- Add new rank prefix if not "No Rank" (empty string)
+  if rank ~= "" then
+    local rank_index = tonumber(rank)
+    if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
+      if item_name ~= "" then
+        item_name = RANKS[rank_index].prefix .. "-" .. item_name
+      else
+        item_name = RANKS[rank_index].prefix
+      end
     end
   end
 
@@ -1449,12 +1474,21 @@ function apply_rank_and_notes_to_items()
               if math.abs(item_start - cursor_pos) < 0.5 then
                 items_found = items_found + 1
 
-                -- Apply rank
-                if recording_rank ~= 9 then
-                  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", tostring(recording_rank), true)
-                  local color_to_use = rgba_to_native(RANKS[recording_rank].rgba) | 0x1000000
+                -- Apply rank (empty string deletes P_EXT state)
+                if recording_rank ~= "" then
+                  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
+                  local rank_index = tonumber(recording_rank)
+                  if rank_index and RANKS[rank_index] then
+                    local color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+                    update_take_name(item, recording_rank)
+                  end
+                else
+                  -- No rank - delete P_EXT state and restore original color
+                  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
+                  local color_to_use = get_item_color(item)
                   SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
-                  update_take_name(item, recording_rank)
+                  update_take_name(item, "")
                 end
 
                 -- Apply notes
@@ -1494,12 +1528,21 @@ function apply_rank_and_notes_to_items()
             if math.abs(item_end - cursor_pos) < 0.5 then
               items_found = items_found + 1
 
-              -- Apply rank
-              if recording_rank ~= 9 then
-                GetSetMediaItemInfo_String(item, "P_EXT:item_rank", tostring(recording_rank), true)
-                local color_to_use = rgba_to_native(RANKS[recording_rank].rgba) | 0x1000000
+              -- Apply rank (empty string deletes P_EXT state)
+              if recording_rank ~= "" then
+                GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
+                local rank_index = tonumber(recording_rank)
+                if rank_index and RANKS[rank_index] then
+                  local color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+                  SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+                  update_take_name(item, recording_rank)
+                end
+              else
+                -- No rank - delete P_EXT state and restore original color
+                GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
+                local color_to_use = get_item_color(item)
                 SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
-                update_take_name(item, recording_rank)
+                update_take_name(item, "")
               end
 
               -- Apply notes
