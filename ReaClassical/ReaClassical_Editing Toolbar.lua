@@ -28,6 +28,17 @@ local main, load_icon, run_action
 
 set_action_options(2)
 
+local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+if workflow == "" then
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+        modifier = "Cmd"
+    end
+    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    return
+end
+
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
     MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
