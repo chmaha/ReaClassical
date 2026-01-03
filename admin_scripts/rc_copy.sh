@@ -4,7 +4,7 @@
 #
 # by chmaha (November 2025)
 
-# sh "$(dirname "$0")/copy_lua.sh"
+sh "$(dirname "$0")/copy_lua.sh"
 
 dir="$HOME/code/chmaha/ReaClassical/ReaClassicalData/"
 mkdir -p "$dir"
@@ -41,6 +41,7 @@ Data/toolbar_icons/move_dest_material.png
 Data/toolbar_icons/assembly.png
 Data/toolbar_icons/promote to dest.png
 Data/toolbar_icons/toolbar_tool_erase_delete_remove.png
+Data/toolbar_icons/toolbar_zoom_selected.png
 Data/reaper_imgui_doc.html
 Effects/ReJJ/
 Effects/chmaha Scripts/
