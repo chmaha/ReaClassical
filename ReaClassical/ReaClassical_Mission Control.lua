@@ -975,6 +975,14 @@ function main()
         end
 
         ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Render") then
+            Main_OnCommand(40015, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open Render dialog")
+        end
+
+        ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Calc") then
             local calc = NamedCommandLookup("_RSfb6903ab56db07d4bb262cdee9c84b8bb74d101e")
             Main_OnCommand(calc, 0)
