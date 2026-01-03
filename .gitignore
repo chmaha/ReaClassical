@@ -1,24 +1,2 @@
 # Ignore generated changelog HTML
-admin_scripts/ReaClassical_Changelog_Formatter.html
-
-# === Installers ===
-# Top-level installers
-Installers/**/*.run
-Installers/**/*.exe
-Installers/src/linux/*.so
-Installers/src/macos/*.dylib
-Installers/src/windows/*.dll
-
-# Windows GO installer - ignore all zips and exes except specific ones
-Installers/src/windows/*.zip
-!Installers/src/windows/7zip.zip
-!Installers/src/windows/7zip32.zip
-
-# Makeself builds
-Installers/src/linux/*.zip
-Installers/src/linux/*.tar.xz
-Installers/src/macos/*.zip
-Installers/src/macos/*.dmg
-
-# === Resource folders ===
-Resource\ Folder/Resource_Folder_Base.zip
+admin_scripts/rc_changelog.html
