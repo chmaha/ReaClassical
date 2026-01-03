@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
-local get_item_color, pastel_color, get_color_table
+local get_item_color, pastel_color, get_color_table, extract_take_from_filename
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -220,19 +220,31 @@ function main()
         if selected_item then
           load_item_rank_and_notes(selected_item)
           editing_item = selected_item
+
+          -- Try to extract take number from filename
+          local extracted_take = extract_take_from_filename(selected_item)
+          if extracted_take then
+            take_text = extracted_take
+          end
         else
+          -- No item selected - restore take count
           recording_rank = ""
           recording_note = ""
           editing_item = nil
+          if not iterated_filenames then
+            take_text = get_take_count(session) + 1
+          else
+            take_text = take_count + 1
+          end
         end
 
         last_selected_item = selected_item
       end
     end
 
-    if not iterated_filenames then
+    if not iterated_filenames and not editing_item then
       take_text = get_take_count(session) + 1
-    else
+    elseif not editing_item then
       take_text = take_count + 1
     end
 
@@ -657,7 +669,7 @@ function draw(playstate)
     end
   end
 
-  -- Draw take number (large font) - color changes based on playstate
+  -- Draw take number (large font) - color changes based on playstate and editing state
   ImGui.PushFont(ctx, large_font, 175 * scale)
   local take_str = tostring(take_text)
   local text_w, text_h = ImGui.CalcTextSize(ctx, take_str)
@@ -665,9 +677,11 @@ function draw(playstate)
   local take_y = (win_h - text_h) / 3.75
   ImGui.SetCursorPos(ctx, take_x, take_y)
 
-  -- Set color based on playstate
+  -- Set color based on playstate and editing state
   local take_color
-  if playstate == 6 then
+  if playstate == 0 and editing_item then
+    take_color = 0x4B9CD3FF -- Carolina blue (RGB: 75, 156, 211 in RGBA format)
+  elseif playstate == 6 then
     take_color = 0xFFFF7FFF -- Yellow for paused
   elseif playstate == 5 then
     take_color = 0xFF7F7FFF -- Red for recording
@@ -855,17 +869,17 @@ function draw(playstate)
   -- Show indicator when editing a selected item (stopped mode only)
   if playstate == 0 and editing_item then
     ImGui.SetCursorPos(ctx, buttons_start_x, rank_y - (18 * scale))
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00FF00FF) -- Green
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF) -- Carolina blue
     ImGui.Text(ctx, "Editing Selected Item")
     ImGui.PopStyleColor(ctx)
   end
 
   -- Rank dropdown
   ImGui.SetCursorPos(ctx, buttons_start_x, rank_y)
-  
+
   -- Determine display index (1-9) for combo
   local display_index = recording_rank == "" and 9 or tonumber(recording_rank)
-  
+
   ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[display_index].rgba)
   ImGui.SetNextItemWidth(ctx, total_button_width / 2)
 
@@ -1560,6 +1574,31 @@ function apply_rank_and_notes_to_items()
   end
 
   UpdateArrange()
+end
+
+---------------------------------------------------------------------
+
+function extract_take_from_filename(item)
+  local take = GetActiveTake(item)
+  if not take then return nil end
+  
+  local source = GetMediaItemTake_Source(take)
+  if not source then return nil end
+  
+  local filename = GetMediaSourceFileName(source, "")
+  if not filename then return nil end
+  
+  -- Extract just the filename from the full path
+  local file_only = filename:match("([^/\\]+)$")
+  if not file_only then return nil end
+  
+  -- Use the same pattern as get_take_count
+  local take_num = file_only:match(".*[^%d](%d+)%)?%.%a+$")
+  if take_num then
+    return tonumber(take_num)
+  end
+  
+  return nil
 end
 
 ---------------------------------------------------------------------
