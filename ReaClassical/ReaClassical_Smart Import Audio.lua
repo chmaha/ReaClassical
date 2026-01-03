@@ -171,11 +171,10 @@ function main()
 
     Undo_EndBlock("Import Audio", -1)
 
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
     -- Prepare Takes
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
+    
     PreventUIRefresh(-1)
     -- Zoom to all items horizontally
     local zoom_horizontally = NamedCommandLookup("_RSe4ae3f4797f2fb7f209512fc22ad6ef9854ca770")

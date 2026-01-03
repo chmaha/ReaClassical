@@ -53,13 +53,6 @@ function main()
         return
     end
 
-    local _, prepared = GetProjExtState(0, "ReaClassical", "PreparedTakes")
-    if prepared == "" then
-        MB("Please run ReaClassical Prepare Takes (T) once before running a source-destination edit function.",
-            "ReaClassical Core Error", 0)
-        return
-    end
-
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local moveable_dest = 0
     if input ~= "" then

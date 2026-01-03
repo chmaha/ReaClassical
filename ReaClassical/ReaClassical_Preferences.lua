@@ -421,10 +421,8 @@ end
 -----------------------------------------------------------------------
 
 function prepare_takes()
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
     local prepare_takes_command = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes_command, 0)
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
 end
 
 -----------------------------------------------------------------------

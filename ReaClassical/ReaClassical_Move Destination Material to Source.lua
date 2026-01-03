@@ -43,10 +43,8 @@ function main()
     sync_based_on_workflow(workflow)
 
     -- Prepare Takes
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "y")
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
-    SetProjExtState(0, "ReaClassical", "prepare_silent", "")
 
     SetOnlyTrackSelected(first_track)
     solo()
