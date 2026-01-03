@@ -62,7 +62,6 @@ function main()
     local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, false)
     local num_of_project_items = CountMediaItems(0)
     if num_of_project_items == 0 then
-        MB("Please add your takes before running...", "Prepare Takes", 0)
         return
     end
     local empty_count = empty_items_check(num_of_project_items)
@@ -121,14 +120,6 @@ function main()
         end
     end
 
-    local _, silent = GetProjExtState(0, "ReaClassical", "prepare_silent")
-    if silent ~= "y" then
-        MB("Project takes have been prepared! " ..
-            "You can run again if you import or record more material..."
-            , "ReaClassical", 0)
-    end
-
-    SetProjExtState(0, "ReaClassical", "PreparedTakes", "y")
     Undo_EndBlock('Prepare Takes', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
