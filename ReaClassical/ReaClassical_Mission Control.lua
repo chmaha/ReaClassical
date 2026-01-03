@@ -948,6 +948,15 @@ function main()
         end
 
         ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "S-D Editing Toolbar") then
+            local editing = NamedCommandLookup("_RSdcbfd5e17e15e31f892e3fefdb1969b81d22b6df")
+            Main_OnCommand(editing, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Open S-D Editing Toolbar")
+        end
+
+        ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Source Audition") then
             local source_audition = NamedCommandLookup("_RSde9495791cb6413268f7d42af6d0ca5b6923d282")
             Main_OnCommand(source_audition, 0)
