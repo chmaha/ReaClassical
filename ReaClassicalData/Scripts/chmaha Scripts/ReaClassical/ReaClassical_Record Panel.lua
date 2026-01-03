@@ -136,6 +136,7 @@ local recording_note = ""
 -- Track the item being edited when stopped
 local editing_item = nil
 local last_selected_item = nil
+local take_extracted = false -- Track if current take_text was extracted from filename
 
 -- Rank color options (matching SAI marker manager and notes app)
 local RANKS = {
@@ -225,12 +226,22 @@ function main()
           local extracted_take = extract_take_from_filename(selected_item)
           if extracted_take then
             take_text = extracted_take
+            take_extracted = true
+          else
+            -- Couldn't extract - recalculate next take
+            if not iterated_filenames then
+              take_text = get_take_count(session) + 1
+            else
+              take_text = take_count + 1
+            end
+            take_extracted = false
           end
         else
           -- No item selected - restore take count
           recording_rank = ""
           recording_note = ""
           editing_item = nil
+          take_extracted = false
           if not iterated_filenames then
             take_text = get_take_count(session) + 1
           else
@@ -679,7 +690,7 @@ function draw(playstate)
 
   -- Set color based on playstate and editing state
   local take_color
-  if playstate == 0 and editing_item then
+  if playstate == 0 and editing_item and take_extracted then
     take_color = 0x4B9CD3FF -- Carolina blue (RGB: 75, 156, 211 in RGBA format)
   elseif playstate == 6 then
     take_color = 0xFFFF7FFF -- Yellow for paused
