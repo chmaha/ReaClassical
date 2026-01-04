@@ -51,6 +51,7 @@ function main()
     end
 
     if next(track_markers) == nil then
+        Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40172, 0)
         return
     end
