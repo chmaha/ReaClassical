@@ -33,7 +33,7 @@ function main()
         MB("This is already a ReaClassical project.", "ReaClassical Conversion", 0)
         return
     end
-
+    PreventUIRefresh(1)
     local ret = duplicate_project_in_new_tab()
     if ret == -1 then return end
     flatten_all_folders()
@@ -46,13 +46,16 @@ function main()
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
     Main_SaveProject(0, false)
+    PreventUIRefresh(-1)
     MB("Your project has been converted.\n\n"
-        .. "Any folders have been flattened, empty tracks removed"
+        .. "Any folders have been flattened, empty tracks removed "
         .. "and a single folder created for horizontal workflow.\n"
-        .. "Any regular track FX from your original project have been"
+        .. "Any regular track FX from your original project have been "
         .. "placed onto the ReaClassical mixer tracks.\n"
-        .. "Recreate any custom routing and bus FX using ReaClassical special tracks via # shortcut."
+        .. "Recreate any custom routing and bus FX using ReaClassical's Mission Control."
         , "ReaClassical Conversion", 0)
+    local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
+    Main_OnCommand(mission_control, 0)
 end
 
 ---------------------------------------------------------------------

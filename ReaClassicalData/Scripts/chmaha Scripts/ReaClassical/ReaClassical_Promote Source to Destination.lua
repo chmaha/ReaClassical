@@ -39,6 +39,10 @@ function main()
         return
     end
 
+    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    Main_OnCommand(prepare_takes, 0)
+
+
     swap_selected_source_with_destination()
 
     Undo_EndBlock('Make Source Group Destination', 0)

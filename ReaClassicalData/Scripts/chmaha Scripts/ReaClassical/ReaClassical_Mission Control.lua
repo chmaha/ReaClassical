@@ -130,6 +130,9 @@ local mono_options = {}
 local stereo_options = {}
 local track_num_format = "%d" -- Will be set based on number of tracks
 
+local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+Main_OnCommand(prepare_takes, 0)
+
 ---------------------------------------------------------------------
 
 function main()
@@ -910,6 +913,11 @@ function main()
             ImGui.OpenPopup(ctx, "add_special_track_popup")
         end
 
+        local system = GetOS()
+        local is_mac = string.find(system, "^OSX") or string.find(system, "^macOS")
+        local ctrl_key = is_mac and "Cmd" or "Ctrl"
+        local alt_key = is_mac and "Opt" or "Alt"
+
         -- Utility buttons
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "RC Prefs") then
@@ -917,7 +925,7 @@ function main()
             Main_OnCommand(rc_prefs, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open ReaClassical Preferences")
+            ImGui.SetTooltip(ctx, "Open ReaClassical Preferences (F5)")
         end
 
         ImGui.SameLine(ctx)
@@ -926,7 +934,7 @@ function main()
             Main_OnCommand(meterbridge, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open MeterBridge")
+            ImGui.SetTooltip(ctx, "Open MeterBridge (B)")
         end
 
         ImGui.SameLine(ctx)
@@ -935,7 +943,7 @@ function main()
             Main_OnCommand(record_panel, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Record Panel")
+            ImGui.SetTooltip(ctx, "Open Record Panel (" .. ctrl_key .. "+Enter)")
         end
 
         ImGui.SameLine(ctx)
@@ -944,7 +952,7 @@ function main()
             Main_OnCommand(notes, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Notes")
+            ImGui.SetTooltip(ctx, "Open Notes (N)")
         end
 
         ImGui.SameLine(ctx)
@@ -953,7 +961,7 @@ function main()
             Main_OnCommand(editing, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open S-D Editing Toolbar")
+            ImGui.SetTooltip(ctx, "Open S-D Editing Toolbar (F6)")
         end
 
         ImGui.SameLine(ctx)
@@ -962,7 +970,7 @@ function main()
             Main_OnCommand(source_audition, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Source Audition")
+            ImGui.SetTooltip(ctx, "Open Source Audition (Z)")
         end
 
         ImGui.SameLine(ctx)
@@ -971,7 +979,7 @@ function main()
             Main_OnCommand(snapshots, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Metadata Editor for selected album folder")
+            ImGui.SetTooltip(ctx, "Open Mixer Snapshots (Shift+M)")
         end
 
         ImGui.SameLine(ctx)
@@ -980,7 +988,7 @@ function main()
             Main_OnCommand(metadata_edit, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Metadata Editor for selected album folder")
+            ImGui.SetTooltip(ctx, "Open Metadata Editor for selected album folder (Y)")
         end
 
         ImGui.SameLine(ctx)
@@ -988,7 +996,7 @@ function main()
             Main_OnCommand(40015, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Render dialog")
+            ImGui.SetTooltip(ctx, "Open Render dialog (R)")
         end
 
         ImGui.SameLine(ctx)
@@ -997,7 +1005,7 @@ function main()
             Main_OnCommand(calc, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Metadata Editor for selected album folder")
+            ImGui.SetTooltip(ctx, "Open Calculator (Shift+H)")
         end
 
         ImGui.SameLine(ctx)
@@ -1006,7 +1014,7 @@ function main()
             Main_OnCommand(stats, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open Project Statistics")
+            ImGui.SetTooltip(ctx, "Open Project Statistics (F1)")
         end
 
         ImGui.SameLine(ctx)
@@ -1015,7 +1023,7 @@ function main()
             Main_OnCommand(help, 0)
         end
         if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Open ReaClassical Help")
+            ImGui.SetTooltip(ctx, "Open ReaClassical Help (H)")
         end
 
         -- Add special track popup

@@ -34,6 +34,9 @@ if not SWS_exists then
     return
 end
 
+local editing_toolbar = NamedCommandLookup("_RSdcbfd5e17e15e31f892e3fefdb1969b81d22b6df")
+Main_OnCommand(editing_toolbar, 0)
+
 function main()
     PreventUIRefresh(1)
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")

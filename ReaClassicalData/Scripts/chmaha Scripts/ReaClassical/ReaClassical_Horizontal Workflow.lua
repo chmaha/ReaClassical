@@ -178,16 +178,6 @@ function main()
     end
 
     PreventUIRefresh(-1)
-    local _, converted = GetProjExtState(0, "ReaClassical", "Converted")
-    if not rcmaster_exists and converted ~= "y" then
-        MB("Your project has been upgraded"
-            .. " to use a single mixer set routed to RCMASTER bus. "
-            .. "You can now move the parent fader without affecting the volume of child tracks.\n"
-            .. "All groups are routed to the single mixer set visible in the mixer panel "
-            .. "and all volume, panning, fx etc should be controlled there.\n"
-            .. "If you delete any of these special busses by accident, simply run F8 again."
-            , "Horizontal Workflow", 0)
-    end
 
     Undo_EndBlock('Horizontal Workflow', 0)
     UpdateArrange()
