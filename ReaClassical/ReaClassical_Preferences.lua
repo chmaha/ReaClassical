@@ -40,20 +40,20 @@ local year = os.date("%Y")
 local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
-    'S-D Crossfade length (ms)',
-    'CD track offset (ms)',
-    'INDEX0 length (s) (>= 1)',
-    'Album lead-out time (s)',
-    'Ranked Items keep folder color',
+    'S-D Crossfade Length (ms)',
+    'CD Track Offset (ms)',
+    'INDEX0 Length (s) (>= 1)',
+    'Album Lead-out Time (s)',
+    'Unedited Items = Default Color',
     'S-D Marker Check (ms)',
     'REF = Overdub Guide',
     'Add S-D Markers at Mouse Hover',
     'Alt Audition Playback Rate',
     'Year of Production',
-    'CUE audio format',
+    'CUE Audio Format',
     'Floating Destination Folder',
-    'Find takes using item names',
-    'Show only item take numbers'
+    'Find Takes Using Item Names',
+    'Show Only Item Take Numbers'
 }
 
 -- Binary option indices (1-based)
@@ -158,7 +158,7 @@ function display_prefs()
 
     -- Create table for aligned layout
     if ImGui.BeginTable(ctx, "prefs_table", 2, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then
-        ImGui.TableSetupColumn(ctx, "labels", ImGui.TableColumnFlags_WidthFixed, 280)
+        ImGui.TableSetupColumn(ctx, "labels", ImGui.TableColumnFlags_WidthFixed, 200)
         ImGui.TableSetupColumn(ctx, "inputs", ImGui.TableColumnFlags_WidthFixed, 80)
 
         for i = 1, #labels do

@@ -22,6 +22,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local main, is_special_track, calc_curve_val, interpolate_val, get_track_state
+local find_track_by_GUID, apply_track_state, create_snapshot, get_morph_in_name
+local delete_user_markers, find_marker_by_name, find_snapshot_by_marker_name, find_prev_rcmix
+local find_snapshot_by_pos, del_marker_by_name, del_all_rcmix, restore_all_rcmix
+local ensure_marker_exists, recall_snapshot, serialize_table, deserialize_table, save_snapshots_to_project
+local load_snapshots_from_project, copy_from_bank, clear_bank, switch_to_bank
+local sync_marker_pos, sort_snapshots, draw_table, find_active_and_morph, draw_UI
+local check_auto_recall, handle_project_change, get_morph_out_name
+
 local script_name = "Mixer Snapshots"
 
 -- Check for ReaImGui
@@ -83,20 +92,16 @@ local col_widths = { 35, 180, 80, 40, 60, 100, 40, 60, 100, 140, 250 }
 local curve_types = { "Linear", "Slow", "Fast Start", "Fast End", "Bezier" }
 local curve_suffixes = { "", "s", "f", "e", "b" }
 
-local main, is_special_track, calc_curve_val, interpolate_val, get_track_state
-local find_track_by_GUID, apply_track_state, create_snapshot, get_morph_in_name
-local delete_user_markers, find_marker_by_name, find_snapshot_by_marker_name, find_prev_rcmix
-local find_snapshot_by_pos, del_marker_by_name, del_all_rcmix, restore_all_rcmix
-local ensure_marker_exists, recall_snapshot, serialize_table, deserialize_table, save_snapshots_to_project
-local load_snapshots_from_project, copy_from_bank, clear_bank, switch_to_bank
-local sync_marker_pos, sort_snapshots, draw_table, find_active_and_morph, draw_UI
-local check_auto_recall, handle_project_change, get_morph_out_name
+---------------------------------------------------------------------
 
 function main()
   handle_project_change()
   check_auto_recall()
   local open = draw_UI()
-  if open then defer(main) end
+  if open then defer(main) 
+  else
+    del_all_rcmix()
+  end
 end
 
 ---------------------------------------------------------------------
