@@ -35,7 +35,7 @@ local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
 mastering = (mastering ~= "" and tonumber(mastering)) or 0
 local ref_is_guide = 0
-local use_only_take_num = 1
+local use_only_take_num = 0
 if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
