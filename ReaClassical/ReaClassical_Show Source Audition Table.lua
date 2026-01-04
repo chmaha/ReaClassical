@@ -65,6 +65,9 @@ local sort_mode         = "time" -- "time", "marker", or "rank"
 -- ExtState keys for persistent storage
 local EXT_STATE_SECTION = "ReaClassical_SAI_Manager"
 
+local prepare_takes     = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+Main_OnCommand(prepare_takes, 0)
+
 ---------------------------------------------------------------------
 
 function main()

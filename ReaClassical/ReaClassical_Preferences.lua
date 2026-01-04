@@ -85,6 +85,8 @@ function main()
         return
     end
 
+    prepare_takes()
+
     -- Load preferences into table on first run
     if not prefs[1] then
         load_prefs()
