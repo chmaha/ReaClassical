@@ -24,6 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_number, rgba_to_native, get_color_table
 local pastel_color, update_take_name, get_item_color, apply_rank_color
+local strip_rank_prefix
 
 ---------------------------------------------------------------------
 
@@ -42,6 +43,14 @@ if workflow == "" then
     end
     MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
     return
+end
+
+local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+local color_pref = 0
+if input ~= "" then
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[5] then color_pref = tonumber(table[5]) or 0 end
 end
 
 set_action_options(2)
@@ -80,6 +89,22 @@ local RANKS         = {
     { name = "False Start",   rgba = 0x2A2A2AFF, prefix = "False Start" },
     { name = "No Rank",       rgba = 0x00000000, prefix = "" }
 }
+
+---------------------------------------------------------------------
+
+function strip_rank_prefix(name)
+    -- Remove any existing rank prefixes from name
+    local all_prefixes = { "Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start" }
+    for _, prefix in ipairs(all_prefixes) do
+        -- First check if name is exactly the prefix (no base name)
+        if name == prefix then
+            return ""
+        end
+        -- Then check for prefix with hyphen
+        name = name:gsub("^" .. prefix .. "%-", "")
+    end
+    return name
+end
 
 ---------------------------------------------------------------------
 
@@ -125,10 +150,25 @@ function main()
             -- Save rank (empty string if No Rank to delete P_EXT state)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", item_rank, true)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
-            -- Save item name
+            -- Save item name with rank prefix applied (using current item_name which is clean)
             local take = GetActiveTake(editing_item)
             if take then
-                GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+                local base_name = item_name -- Already clean, no prefix
+                local final_name = base_name
+
+                -- Add rank prefix if not "No Rank"
+                if item_rank ~= "" then
+                    local rank_index = tonumber(item_rank)
+                    if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
+                        if base_name ~= "" then
+                            final_name = RANKS[rank_index].prefix .. "-" .. base_name
+                        else
+                            final_name = RANKS[rank_index].prefix
+                        end
+                    end
+                end
+
+                GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
             end
         end
 
@@ -149,12 +189,13 @@ function main()
             -- Load take number - use stored value or default to filename
             local _, item_take_num_stored = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
             item_take_num = item_take_num_stored ~= "" and item_take_num_stored or get_take_number(item)
-            
-            -- Load item name from active take
+
+            -- Load item name from active take (strip rank prefix for display)
             local take = GetActiveTake(item)
             if take then
                 local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                item_name = name
+                -- Remove any rank prefixes for display only
+                item_name = strip_rank_prefix(name)
             else
                 item_name = ""
             end
@@ -203,7 +244,7 @@ function main()
             if editing_item then
                 local item_id = tostring(editing_item):sub(-8)
                 ImGui.PushID(ctx, item_id)
-                
+
                 -- Item Name input (full width)
                 ImGui.Text(ctx, "Item Name:")
                 ImGui.SetNextItemWidth(ctx, avail_w)
@@ -212,7 +253,22 @@ function main()
                 if changed_name and editing_item then
                     local take = GetActiveTake(editing_item)
                     if take then
-                        GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+                        local base_name = item_name -- Already clean, no prefix
+                        local final_name = base_name
+
+                        -- Add rank prefix if not "No Rank"
+                        if item_rank ~= "" then
+                            local rank_index = tonumber(item_rank)
+                            if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
+                                if base_name ~= "" then
+                                    final_name = RANKS[rank_index].prefix .. "-" .. base_name
+                                else
+                                    final_name = RANKS[rank_index].prefix
+                                end
+                            end
+                        end
+
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
                     end
                 end
 
@@ -220,10 +276,10 @@ function main()
 
                 ImGui.BeginGroup(ctx)
                 ImGui.Text(ctx, "Item Rank:")
-                
+
                 -- Determine display index (1-9) for combo
                 local display_index = item_rank == "" and 9 or tonumber(item_rank)
-                
+
                 ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[display_index].rgba)
                 ImGui.SetNextItemWidth(ctx, half_w)
                 if ImGui.BeginCombo(ctx, "##item_rank", RANKS[display_index].name) then
@@ -367,28 +423,23 @@ function update_take_name(item, rank)
     local take = GetActiveTake(item)
     if not take then return end
 
-    local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-
-    -- Remove any existing rank prefixes (full names)
-    local all_prefixes = { "Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start" }
-    for _, prefix in ipairs(all_prefixes) do
-        item_name = item_name:gsub("^" .. prefix .. "%-", "")
-        item_name = item_name:gsub("^" .. prefix .. "$", "")
-    end
+    -- Use the global item_name which is already stripped of rank prefixes
+    local base_name = item_name
 
     -- Add new rank prefix if not "No Rank" (empty string)
+    local final_name = base_name
     if rank ~= "" then
         local rank_index = tonumber(rank)
         if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
-            if item_name ~= "" then
-                item_name = RANKS[rank_index].prefix .. "-" .. item_name
+            if base_name ~= "" then
+                final_name = RANKS[rank_index].prefix .. "-" .. base_name
             else
-                item_name = RANKS[rank_index].prefix
+                final_name = RANKS[rank_index].prefix
             end
         end
     end
 
-    GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
+    GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
 end
 
 ---------------------------------------------------------------------
@@ -483,7 +534,7 @@ end
 function apply_rank_color(item, rank)
     local color_to_use
 
-    if rank == "" then
+    if rank == "" or color_pref == 1 then
         -- No Rank selected - restore original color
         color_to_use = get_item_color(item)
     else
@@ -500,8 +551,26 @@ function apply_rank_color(item, rank)
     -- Apply color to the item
     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
 
-    -- Update take name with rank abbreviation
-    update_take_name(item, rank)
+    -- Update take name with rank prefix
+    local take = GetActiveTake(item)
+    if take then
+        local base_name = item_name -- Already clean, no prefix
+        local final_name = base_name
+
+        -- Add rank prefix if not "No Rank"
+        if rank ~= "" then
+            local rank_index = tonumber(rank)
+            if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
+                if base_name ~= "" then
+                    final_name = RANKS[rank_index].prefix .. "-" .. base_name
+                else
+                    final_name = RANKS[rank_index].prefix
+                end
+            end
+        end
+
+        GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
+    end
 
     -- Get the group ID of this item
     local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
@@ -523,8 +592,29 @@ function apply_rank_color(item, rank)
                     else
                         SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", color_to_use)
                     end
-                    -- Update take name for grouped items too
-                    update_take_name(current_item, rank)
+
+                    -- Update take name for grouped items
+                    local grouped_take = GetActiveTake(current_item)
+                    if grouped_take then
+                        local _, grouped_name = GetSetMediaItemTakeInfo_String(grouped_take, "P_NAME", "", false)
+                        local grouped_base_name = strip_rank_prefix(grouped_name)
+                        local grouped_final_name = grouped_base_name
+
+                        -- Add rank prefix if not "No Rank"
+                        if rank ~= "" then
+                            local rank_index = tonumber(rank)
+                            if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
+                                if grouped_base_name ~= "" then
+                                    grouped_final_name = RANKS[rank_index].prefix .. "-" .. grouped_base_name
+                                else
+                                    grouped_final_name = RANKS[rank_index].prefix
+                                end
+                            end
+                        end
+
+                        GetSetMediaItemTakeInfo_String(grouped_take, "P_NAME", grouped_final_name, true)
+                    end
+
                     -- Store the rank for grouped items (empty string deletes P_EXT state)
                     GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", rank, true)
                 end
