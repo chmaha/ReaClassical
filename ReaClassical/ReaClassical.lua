@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.0beta103
+@version 26.0beta104
 @changelog
   Welcome to ReaClassical 26
 @metapackage
@@ -66,8 +66,8 @@
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Move to Destination IN marker.lua
   [main] ReaClassical_Move to Destination OUT marker.lua
-  [main] ReaClassical_Move to Next SAI.lua
-  [main] ReaClassical_Move to Previous SAI.lua
+  [main] ReaClassical_Move to Next Marker.lua
+  [main] ReaClassical_Move to Previous Marker.lua
   [main] ReaClassical_Move to Source IN marker.lua
   [main] ReaClassical_Move to Source OUT marker.lua
   [main] ReaClassical_Notes.lua
