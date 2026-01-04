@@ -44,7 +44,7 @@ local labels = {
     'CD track offset (ms)',
     'INDEX0 length (s) (>= 1)',
     'Album lead-out time (s)',
-    'Unedited Items = Default Color',
+    'Ranked Items keep folder color',
     'S-D Marker Check (ms)',
     'REF = Overdub Guide',
     'Add S-D Markers at Mouse Hover',

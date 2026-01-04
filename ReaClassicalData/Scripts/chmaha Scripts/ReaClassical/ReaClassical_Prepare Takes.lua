@@ -30,7 +30,21 @@ local delete_empty_items, pastel_color, nudge_right
 local color_group_items, color_folder_children, scroll_to_first_track
 local select_children_of_selected_folders, select_next_folder
 local select_all_parents, select_item_under_cursor_on_selected_track
-local get_item_by_guid
+local get_item_by_guid, rgba_to_native, get_rank_color
+
+-- Rank color options (matching Notes Dialog)
+local RANKS = {
+    { name = "Excellent",     rgba = 0x39FF1499, prefix = "Excellent" },
+    { name = "Very Good",     rgba = 0x32CD3299, prefix = "Very Good" },
+    { name = "Good",          rgba = 0x00AD8399, prefix = "Good" },
+    { name = "OK",            rgba = 0xFFFFAA99, prefix = "OK" },
+    { name = "Below Average", rgba = 0xFFBF0099, prefix = "Below Average" },
+    { name = "Poor",          rgba = 0xFF753899, prefix = "Poor" },
+    { name = "Unusable",      rgba = 0xDC143C99, prefix = "Unusable" },
+    { name = "False Start",   rgba = 0x2A2A2AFF, prefix = "False Start" },
+    { name = "No Rank",       rgba = 0x00000000, prefix = "" }
+}
+
 ---------------------------------------------------------------------
 
 function main()
@@ -136,12 +150,34 @@ end
 
 ---------------------------------------------------------------------
 
-function color_items(edits, color_pref)
-    local unedited_color = 0
-    local colors = get_color_table()
-    if color_pref == 0 then
-        unedited_color = colors.dest_items
+function rgba_to_native(rgba)
+    local r = (rgba >> 24) & 0xFF
+    local g = (rgba >> 16) & 0xFF
+    local b = (rgba >> 8) & 0xFF
+    return ColorToNative(r, g, b)
+end
+
+---------------------------------------------------------------------
+
+function get_rank_color(rank_str)
+    if not rank_str or rank_str == "" then
+        return nil
     end
+    
+    local rank_index = tonumber(rank_str)
+    if rank_index and rank_index >= 1 and rank_index <= 8 then
+        return rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+    end
+    
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function color_items(edits, color_pref)
+    local colors = get_color_table()
+    local unedited_color = colors.dest_items
+
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
     if workflow == "Horizontal" and not edits then
@@ -168,21 +204,37 @@ function color_items(edits, color_pref)
         for _, gid in ipairs(sorted_group_ids) do
             local grouped_items = groups[gid]
 
-            -- Skip group if any item is ranked = "y"
-            local skip_group = false
+            -- Check if any item is ranked and color_pref is 0
+            local has_rank = false
+            local rank_color = nil
             for _, item in ipairs(grouped_items) do
                 local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-                if ranked ~= "" then
-                    skip_group = true
+                if ranked ~= "" and color_pref == 0 then
+                    has_rank = true
+                    rank_color = get_rank_color(ranked)
                     break
                 end
             end
-            if skip_group then
+            
+            if has_rank and rank_color then
+                -- Apply rank color to all items in group
+                for _, item in ipairs(grouped_items) do
+                    color_group_items(item, rank_color)
+                    GetSetMediaItemInfo_String(item, "P_EXT:saved_color", rank_color, true)
+                end
+                
+                -- Color the track of first item
+                local first_track = GetMediaItem_Track(grouped_items[1])
+                if first_track then
+                    SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", unedited_color)
+                    color_folder_children(first_track, unedited_color)
+                end
+                
                 color_index = color_index + 1
                 goto continue_group
             end
 
-            -- Determine group color
+            -- Determine group color (original logic for non-ranked items)
             local group_color = nil
             for _, item in ipairs(grouped_items) do
                 local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -258,11 +310,18 @@ function color_items(edits, color_pref)
             index_for_folder_pastel = index_for_folder_pastel + 1
             color_folder_children(track, folder_color)
 
-            -- Color items if not ranked
+            -- Color items
             for i = 0, num_items - 1 do
                 local item = GetTrackMediaItem(track, i)
                 local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-                if ranked == "" then
+                
+                -- If ranked and color_pref is 0, use rank color
+                if ranked ~= "" and color_pref == 0 then
+                    local rank_color = get_rank_color(ranked)
+                    if rank_color then
+                        color_group_items(item, rank_color)
+                    end
+                elseif ranked == "" or color_pref == 1 then
                     local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                     local color_val = folder_color
                     if src_guid ~= "" then
@@ -287,7 +346,14 @@ function color_items(edits, color_pref)
                 for i = 0, num_items - 1 do
                     local item = GetTrackMediaItem(track, i)
                     local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-                    if ranked == "" then
+                    
+                    -- If ranked and color_pref is 0, use rank color
+                    if ranked ~= "" and color_pref == 0 then
+                        local rank_color = get_rank_color(ranked)
+                        if rank_color then
+                            color_group_items(item, rank_color)
+                        end
+                    elseif ranked == "" or color_pref == 1 then
                         local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                         local color_val = folder_color
                         if src_guid ~= "" then

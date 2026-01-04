@@ -49,6 +49,14 @@ if workflow == "" then
   return
 end
 
+local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+local color_pref = 0
+if input ~= "" then
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[5] then color_pref = tonumber(table[5]) or 0 end
+end
+
 set_action_options(2)
 
 ---------------------------------------------------------------------
@@ -377,7 +385,7 @@ function save_item_rank_and_notes(item, rank, note)
   if rank ~= "" then
     -- Apply rank color
     local rank_index = tonumber(rank)
-    if rank_index and RANKS[rank_index] then
+    if rank_index and RANKS[rank_index] and color_pref == 0 then
       color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
     else
       -- Fallback if invalid rank
@@ -412,7 +420,7 @@ function save_item_rank_and_notes(item, rank, note)
           local grouped_color
           if rank ~= "" then
             local rank_index = tonumber(rank)
-            if rank_index and RANKS[rank_index] then
+            if rank_index and RANKS[rank_index] and color_pref == 0 then
               grouped_color = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
             else
               grouped_color = get_item_color(current_item)
