@@ -746,9 +746,9 @@ function draw(playstate)
   local display_session = session_text
   local use_small = false
 
-  if display_session == "" and take_text == 1 then
-    display_session = "Right-click to set session name"
-    use_small = true
+  if display_session == "" and take_count == 0 then
+    display_session = "Right-click for options"
+    -- use_small = true
   end
 
   if use_small then
