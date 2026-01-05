@@ -50,6 +50,7 @@ local workflow_type = 0 -- 0 = Horizontal, 1 = Vertical
 local first_frame = true
 local show_min_message = false
 local message_timer = 0
+local should_focus_input = true
 
 ---------------------------------------------------------------------
 
@@ -95,6 +96,11 @@ local function main()
             ImGui.SameLine(ctx)
 
             -- Track count input
+            if should_focus_input then
+                ImGui.SetKeyboardFocusHere(ctx)
+                should_focus_input = false
+            end
+            
             ImGui.SetNextItemWidth(ctx, 40)
             local changed, new_count = ImGui.InputInt(ctx, "##track_count", track_count, 0, 0)
             if changed then
