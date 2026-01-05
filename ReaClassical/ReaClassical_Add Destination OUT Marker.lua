@@ -33,8 +33,13 @@ if not SWS_exists then
     return
 end
 
-local editing_toolbar = NamedCommandLookup("_RSdcbfd5e17e15e31f892e3fefdb1969b81d22b6df")
-Main_OnCommand(editing_toolbar, 0)
+local _, opened_string = GetProjExtState(0, "ReaClassical", "toolbaropened")
+
+if opened_string ~= "y" then
+    local editing_toolbar = reaper.NamedCommandLookup("_RSdcbfd5e17e15e31f892e3fefdb1969b81d22b6df")
+    Main_OnCommand(editing_toolbar, 0)
+    SetProjExtState(0, "ReaClassical", "toolbaropened", "y")
+end
 
 function main()
     PreventUIRefresh(1)
