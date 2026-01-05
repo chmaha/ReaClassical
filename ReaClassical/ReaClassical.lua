@@ -115,12 +115,12 @@
   [theme] ReaClassical Light.ReaperThemeZip
   [theme] ReaClassical WaveColors Dark.ReaperThemeZip
   [theme] ReaClassical WaveColors Light.ReaperThemeZip
-  ReaClassical_Colors_Table.lua > ReaClassical_Colors_Table.lua
-  ReaClassical.ini > ReaClassical.ini
-  ReaClassical-kb.ini > ReaClassical-kb.ini
-  ReaClassical-menu.ini > ReaClassical-menu.ini
-  ReaClassical-render.ini > ReaClassical-render.ini
-  reaclassical-splash.png > reaclassical-splash.png
+  ReaClassical_Colors_Table.lua
+  ReaClassical.ini
+  ReaClassical-kb.ini
+  ReaClassical-menu.ini
+  ReaClassical-render.ini
+  reaclassical-splash.png
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
