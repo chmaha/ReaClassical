@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 1.17
+@version 2.0
 @changelog
-  Add RCModulator plugin
+  Add ReaVision Metering Suite
 @metapackage
 @provides
   RCComp.jsfx
@@ -23,6 +23,7 @@
   RCReverb_Insert.jsfx
   RCReverb_Send.jsfx
   RCModulator.jsfx
-
+  ReaVisionMetering.jsfx
+  Dependencies/*.jsfx-inc
 @about
   These plugins are suitable for classical music mixing and mastering.
