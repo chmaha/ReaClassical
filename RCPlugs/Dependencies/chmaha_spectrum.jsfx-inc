@@ -610,6 +610,10 @@ function spectrum.draw(bufindex)
   lx = -1;
   ipnt = 0;
 
+  // Initialize fill variables
+  fill_slast = -1;
+  fill_slmin = bottom;
+
   loop(num_bins, (
       tx = spectrum.freq_to_x(spectrum.bin_freq[ipnt]);
       ty = spectrum.magnitude_to_01(spectrum.bin_mag[ipnt], spectrum.bin_freq[ipnt]);

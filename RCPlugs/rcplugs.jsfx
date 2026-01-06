@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 2.0
+@version 2.1
 @changelog
-  Add ReaVision Metering Suite
+  Initialize spectrum drawing variables
 @metapackage
 @provides
   RCComp.jsfx
