@@ -608,11 +608,7 @@ function spectrum.draw(bufindex)
 
   ly = 0;
   lx = -1;
-  ipnt = 0;
-
-  // Initialize fill variables
-  fill_slast = -1;
-  fill_slmin = bottom;
+  ipnt = 1;
 
   loop(num_bins, (
       tx = spectrum.freq_to_x(spectrum.bin_freq[ipnt]);
