@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 2.1
+@version 2.2
 @changelog
-  Initialize spectrum drawing variables
+  Try setting spectrum ipnt value the same as for peak hold
 @metapackage
 @provides
   RCComp.jsfx
