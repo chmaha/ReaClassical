@@ -2,7 +2,7 @@
 
 [![Discord](https://img.shields.io/discord/1289215811613102207.svg?label=Discord&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Gu2m9ccHGS)
 
-Everything you need to do professional classical music recording, editing, mixing and mastering in REAPER for free. Please begin by visiting the [website](https://reaclassical.org), [online manual](https://reaclassical.org/manual) and latest [release notes](https://reaclassical.org/new_in_rc.html).
+Everything you need to do professional classical music recording, editing, mixing and mastering in REAPER for free. Please begin by visiting the [website](https://reaclassical.org), [online manual](https://reaclassical.org/manual) and latest [release notes](https://github.com/chmaha/ReaClassical/blob/main/new_in_rc.md).
 
 For a full ReaClassical experience read the [Installation guide](https://github.com/chmaha/ReaClassical/blob/main/install_instructions.md).
 

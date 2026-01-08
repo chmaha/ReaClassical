@@ -1,1 +1,1 @@
-For new features in ReaClassical 26 see http://reaclassical.org/new_in_rc.html[here, window=_blank]
+For new features in ReaClassical 26 see https://github.com/chmaha/ReaClassical/blob/main/new_in_rc.md[here, window=_blank]
