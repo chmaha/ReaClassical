@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_info, cd_markers, find_current_start, create_marker
 local renumber_markers, add_pregap, find_project_end, end_marker
-local frame_check, delete_markers
+local frame_check, delete_markers, remove_negative_position_items_from_folder
 local empty_items_check, return_custom_length
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
@@ -102,6 +102,11 @@ function main()
   if empty_count > 0 then
     MB("Error: Empty items found on first track. Delete them to continue.", "Create CD Markers", 0)
     return
+  end
+
+  local removed = remove_negative_position_items_from_folder(selected_track)
+  if removed > 0 then
+    ShowConsoleMsg("Cleaned up " .. removed .. " invalid item(s) from folder.\n")
   end
 
   local names_on_first_track = check_first_track_for_names(selected_track)
@@ -1048,6 +1053,42 @@ function shift_all_markers_and_regions(shift_amount)
     end
   end
 end
+
+---------------------------------------------------------------------
+
+function remove_negative_position_items_from_folder(parent_track)
+if not parent_track then return 0 end
+
+  local tracks_to_clean = { parent_track }
+  local folder_depth = GetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH")
+
+  -- Collect all tracks in folder
+  if folder_depth == 1 then
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local depth = 1
+    for i = parent_idx + 1, num_tracks - 1 do
+      local tr = GetTrack(0, i)
+      depth = depth + GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+      table.insert(tracks_to_clean, tr)
+      if depth <= 0 then break end
+        end
+        end
+
+        local removed_count = 0
+        for _, track in ipairs(tracks_to_clean) do
+          for j = CountTrackMediaItems(track) - 1, 0, -1 do
+            local item = GetTrackMediaItem(track, j)
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if pos < 0 then
+              DeleteTrackMediaItem(track, item)
+              removed_count = removed_count + 1
+              end
+              end
+              end
+
+              return removed_count
+              end
 
 ---------------------------------------------------------------------
 
