@@ -1,0 +1,22 @@
+== Welcome
+____
+Thank you for your interest in ReaClassical. This project is driven by a passion to create a flexible tool for musicians, composers, and sound engineers. Your support and feedback are essential for its improvement.
+
+Whether you are new to ReaClassical or have used it from the start, your trust inspires continued innovation. I hope it enhances your classical music production and supports your creative vision.
+
+image::chmaha.png[role=right]
+____
+
+=== Introduction
+
+If you already own REAPER then the world of classical editing including source-destination editing (aka 2-, 3-, and-4-point editing), crossfade editing and more are available at no extra cost to you via the freely available ReaClassical system. There's no need to spend any of your hard-earned money on Sequoia, Pyramix or SaDiE in order to make editing precise and efficient. As a classical engineer myself, I can say with certainty that what I am about to share with you covers all my recording, editing and mastering needs. Indeed, I couldn't return to the old way of working at this point. Your mileage may vary and I'd love to hear from you if there are functions that you feel might be missing.
+
+=== Documentation
+
+This online manual, located at https://reaclassical.org/manual, serves as the official documentation for ReaClassical. It is also available as an offline PDF from within ReaClassical by pressing kbd:[H] (for _help_). The benefit of the offline version is that it is always in sync with the version of the tools you are using. The structure of the manual is designed to take the user through preliminary remarks, install and update procedures for both ReaClassical and REAPER then a detailed look at workflows from creating a project through to final render. After some brief closing remarks, there follows the appendices (descriptions of all the ReaClassical functions, keyboard shortcut guide, recommended free mastering-grade plugins, system tweaks for all three major OSes, and, finally, a manual install guide mainly for academic purposes). I highly recommend doing a complete read of the manual and becoming very familiar with appendices A and B.
+
+This manual is released under the GNU Free Documentation License v1.3. See https://www.gnu.org/licenses/fdl-1.3-standalone.html.
+
+=== Website
+
+The website https://reaclassical.org[reaclassical.org] serves as the entry point for new users. From here you can read about key features, donate to the cause, read this manual, installation instructions, navigate to the ReaClassical community thread and more.

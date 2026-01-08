@@ -1,0 +1,11 @@
+== Getting Started
+
+include::installation.adoc[]
+
+include::project_setup.adoc[]
+
+include::updating.adoc[]
+
+include::converting.adoc[]
+
+include::tldr.adoc[]

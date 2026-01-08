@@ -1,0 +1,24 @@
+=== Install
+
+==== Easy Complete Portable Installation (official method)
+Copy the command for your operating system into either your terminal (MacOS and Linux) or PowerShell (Windows).
+
+MacOS:
+[source,bash]
+----
+curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.org/macos | sh
+----
+
+Linux:
+[source,bash]
+----
+curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.org/linux | sh
+----
+
+Windows:
+[source,powershell]
+----
+irm "https://reaclassical.org/win" | iex
+----
+
+Note that if the ReaClassical folder already exists, the installer will automatically add a unique suffix to ensure nothing is overwritten.

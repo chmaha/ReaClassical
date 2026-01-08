@@ -1,0 +1,5 @@
+=== Thanks
+
+I am appreciative of the collective contributions of the REAPER community with regards the early source-destination actions (Pelleke, in particular), MPL, X-Raym, BirdBird, RCJacH, Sai'ke, Meo-Ada Mespotine, cfillion and many more. Finally, many thanks to Justin and Schwa for such an amazingly versatile DAW.
+
+Thanks to all the ReaClassical users who make development so worthwhile.

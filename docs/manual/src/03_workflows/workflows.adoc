@@ -1,0 +1,24 @@
+[[workflows]]
+== Workflows
+
+Once you are familiar with the basics of REAPER and have set up your first ReaClassical project, if you don't have a lot of time before your first project, read <<tldr>>. Otherwise, it's time to dive deeper into what is possible with ReaClassical.
+
+Coming Soon...
+
+include::recording.adoc[]
+
+include::importing.adoc[]
+
+include::navigation.adoc[]
+
+include::management.adoc[]
+
+include::editing.adoc[]
+
+include::mixing.adoc[]
+
+include::mastering.adoc[]
+
+include::rendering.adoc[]
+
+include::video.adoc[]

@@ -1,0 +1,23 @@
+=== Compatibility
+
+ReaClassical runs on any system that is compatible with REAPER (nine architectures!). This includes 64-bit and 32-bit versions of Windows, MacOS and Linux (including Raspberry Pi).
+
+=== Source Code
+
+The source code for ReaClassical, the mastering grade ReaClassical plugins, this manual and the website can all be found https://github.com/chmaha/ReaClassical[here]. ReaClassical is https://www.gnu.org/licenses/gpl-3.0.html[GPL-3.0] licensed.
+
+=== Development Style
+
+Due to working on GitHub and releasing the functions via ReaPack, I have the ability to push bugfixes and new features very quickly into an existing ReaClassical install. Often bugfixes happen within minutes or hours of receiving the report. When I dream up new features, the development often happens in rapid fashion over the course of a few days. However, now that ReaClassical has what I consider a mature feature set, I foresee maintenance and occasional bugfixes becoming more central to the process. This will give me more opportunity to work on this documentation, a complete video tutorial series etc. Part of development is also ensuring that ReaClassical continues to operate as expected with the latest REAPER versions. That's not to say there won't be new features appearing! As the REAPER developers add more new features, I will always check to see what might be useful for ReaClassical. 
+
+=== Versioning Style
+
+ReaClassical currently uses YY.M.MICRO versioning (where M is a non-padded month) to accurately reflect how current the software is. For example, 26.3.2 would indicate a March 2026 release with 2 further updates which might include new features, improvements to existing functions, or bugfixes.
+
+=== Tools and Languages
+
+ReaClassical works on top of https://www.reaper.fm/[REAPER], the digital audio workstation and utilizes https://reapack.com/[ReaPack], https://www.sws-extension.org/index.php[SWS Extensions] and https://github.com/cfillion/reaimgui[ReaImgui]. ReaClassical functions are coded using https://www.lua.org/[Lua]. The installers for all operating systems are shell scripts. The ReaClassical website uses http://getskeleton.com/[Skeleton]. All coding is done either in REAPER's ReaScript Development Environment, https://code.visualstudio.com/[vscode] or https://apps.kde.org/kate/[kate] on Linux. The online manual is written in https://asciidoc.org/[AsciiDoc]. The ReaClassical splash screen and banner are created in https://www.gimp.org/[GIMP].
+
+=== Changelog
+
+The changelog for ReaClassical functions can be found by double-clicking on the ReaClassical package in ReaPack and navigating to the `History` tab. Whenever you sync ReaPack via menu:Extensions[ReaPack > Synchronize packages] or the _ReaClassical Updater_ function, this information should also appear automatically. For all updates including those not related to the functions themselves, a changelog can be found in the https://github.com/chmaha/ReaClassical/raw/main/release_notes.pdf[release notes].

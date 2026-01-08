@@ -1,0 +1,15 @@
+=== Donate
+
+I welcome monetary donations. You can use https://www.paypal.com/donate/?hosted_button_id=DHA5C96L6W8VN[PayPal] to do so. A good reference point for one-off donations per major release is the cost equivalent of a commercial REAPER license or higher. For monthly donations perhaps gauge how much it costs for you to go out for a restaurant meal or do groceries in your own country.
+
+=== Other Ways to Contribute
+
+In many ways, the most important way users can contribute to the development of ReaClassical is to actually use the tools! It makes me happy to know that engineers can make whole professional-sounding and technically accurate masters from ReaClassical. Another is to suggest features or let me know about bugs. You can either do this on the https://forum.cockos.com/showthread.php?t=265145[thread] or via the https://github.com/chmaha/ReaClassical/issues[Issues] page on the ReaClassical GitHub. 
+
+=== Spread the Word!
+
+If you've enjoyed using ReaClassical in your projects, I'd be incredibly grateful if you could mention it in your album booklets, social media video descriptions, or anywhere you typically include session details. A simple acknowledgment alongside your usual credits helps spread the word and supports the continued development of the tool.
+
+=== Buy ReaClassical Merch
+
+Get print-on-demand ReaClassical merch like shirts, mugs, totes, pins, stickers and more through my https://www.teepublic.com/user/reaclassical[TeePublic store]!

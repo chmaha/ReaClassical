@@ -1,0 +1,15 @@
+=== Keyboard Shortcuts
+
+When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut kbd:[?] or by navigating to menu:Actions[Show action list...] to see the current assignments. For reference (from REAPER's own user guide), here is a table of equivalent modifier keys:
+
+[.center, width="75%",cols="^,^"]
+.Shortcut Equivalents
+|===
+|*PC (Windows or Linux) Key*|*Mac (MacOS) Key Equivalent*
+|Shift|Shift
+|Control (Ctrl)|Command (Cmd)
+|Alt|Option
+|Windows|Control
+|===
+
+The best way of becoming familiar with ReaClassical keyboard shortcuts is to hover over buttons in Mission Control kbd:[C] and the S-D editing toolbar kbd:[F6], but most of all, explore the top "ReaClassical" menu inbetween "Options" and "Extensions".

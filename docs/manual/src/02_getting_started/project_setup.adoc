@@ -1,0 +1,37 @@
+=== Project Setup
+
+1. Press kbd:[Ctrl+N]
+2. Select the number of tracks you want per folder
+3. Select a horizontal or vertical workflow
+
+==== Notes
+
+===== Track Count
+
+A folder requires at least two tracks. If you really only need a single microphone pair for audio capture, consider 1) either having left and right on separate channels or 2) Having an empty second track that you can easily hide via a dedicated shortcut.
+
+===== Workflow Choice
+
+A _horizontal_ workflow approach means that recorded or imported takes are arranged left-to-right in a single folder. A _vertical_ workflow approach is designed for recorded takes of similar material to be stacked vertically.
+
+==== Mission Control
+
+As soon as you press `OK`, you will see the Mission Control window. Use this dialog to: 
+
+- Name or rename tracks 
+- Set recording inputs manually or automatically based on track naming
+- Set routing
+- Add a track to all folders
+- Delete a track from all folders
+- Re-order tracks in all folders
+- Convert between horizontal and vertical workflows
+- Add "special" tracks such as aux, submix, room tone, live bounce and reference tracks
+
+WARNING: Do not attempt to complete any of the above actions outside of Mission Control!
+
+Additionally you can use Mission Control to optionally: 
+
+- Reach other important ReaClassical windows via a button click
+- Add FX, set volume, panning, mute/solo
+- Set primary and secondary recording paths
+

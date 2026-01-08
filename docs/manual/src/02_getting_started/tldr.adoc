@@ -1,0 +1,75 @@
+[[tldr]]
+=== Too Long; Didn't Read
+
+I highly encourage the user to read the full <<workflows>> documentation for the best chance of becoming an expert in ReaClassical. However, if time is short and you have an upcoming project for which you need to learn just enough to become dangerous, read the following quick workflow summaries.
+
+==== Create a ReaClassical project
+
+If not done already, create a new reaClassical project via kbd:[Ctrl+N]. The number of tracks should equal the combined number of stereo and mono microphone channels. If in doubt, pick a _horizontal_ workflow.
+
+==== Quick Setup
+
+1. Open Mission Control via kbd:[C]
+2. Name your tracks. Use suffixes like "left", "R", "Pair" etc so the automatic record input button can make intelligent decisions
+3. If planning to record, manually or automatically set your record inputs
+
+IMPORTANT: Save your project before continuing with other workflows.
+
+==== Recording
+
+1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]
+2. Select a parent track of a folder
+3. Press Arm and monitor your signal
+4. Use the buttons in the panel to control recording, pausing and stopping
+5. Add ranking and notes while recording or after the fact by clicking on a previously-recorded item
+6. Once all recording is completed, close the record panel (automatically disengages record-armed tracks).
+
+==== Importing
+
+While it is always better to record in ReaClassical, occasionally you might need to use audio recorded by other engineers who used a different DAW.
+
+===== Smart Import
+
+Assuming that the filenaming contains at least a take number as a suffix along with channel descriptions:
+
+1. Copy or move source material into the media subfolder inside your ReaClassical project folder. 
+2. Ensure that track names match any channel text in the filenames
+3. If your filenames also contain a session name, add some markers kbd:[Ctrl+M] and name them accordingly.
+4. Via the top ReaClassical menu, click on menu:Project Setup[Smart Audio Import]
+5. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
+
+===== Manual Import by Dragging
+
+1. In your source folder, select items that should be aligned vertically (for example, every channel for particular take) and drag into the ReaClassical project being sure to drop onto one of the folders created by ReaClassical with a track count that matches the number of files you selected. Choose the option "Same time position on separate tracks"
+2. Continue as above for each take
+3. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
+
+==== Auditioning
+
+Audition your material via mouse hover + kbd:[A] on parent or child tracks. Use mixer mute and solo buttons to further customize what you hear.
+
+==== Editing
+
+1. Set destination IN and OUT markers via kbd:[1] and kbd:[2]
+2. Set source IN and OUT markers via kbd:[3] and kbd:[4]
+3. Press kbd:[5] to make the source-destination edit (2-, 3- or 4-point edit depending on how many markers you set), or kbd:[F4] to make a time-stretched S-D edit (requires all 4 markers), or if only using destination IN marker and both source markers, kbd:[F3] for an "assembly" or 3-point "insert" edit
+4. To finesse the edit, click on the right item of a crossfade pair and press kbd:[F]
+
+==== Mixing
+
+1. Add FX, change routing, and optionally adjust volume, panning etc via Mission Control kbd:[C]
+2. Open Mixing Snapshot Manager via kbd:[Shift+M]
+3. Create mixer snapshots at edit cursor or inside time selection
+
+==== Mastering
+
+1. Choose a folder to be the basis of an album (you can create multi-disc productions!)
+2. Remove all names from items on the parent track aside from those you want to be track starts. You can clear all items on the folder track via kbd:[Ctrl+T]
+3. Enter track start names via the Notes window kbd:[N]
+4. Press kbd:[Y] to open the metadata editor
+
+==== Rendering
+
+1. Press kbd:[R] to open the REAPER render dialog
+2. Select an option from menu:Presets[All Settings]
+3. Make any tweaks to dither, post-processing etc.  and press btn:[Render]. Alternatively first press btn:[Dry Run] to quickly evaluate loudess and peak values.

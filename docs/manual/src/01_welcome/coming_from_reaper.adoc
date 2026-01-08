@@ -1,0 +1,20 @@
+=== Coming from Standard REAPER
+
+It is a very good idea to have a basic fluency in how REAPER works. However, much of ReaClassical relies on different workflows than you will be used to. So, with that in mind,
+
+==== Do
+
+- Learn how items are dragged and trimmed in REAPER
+- Continue using REAPER's mixer to set faders, panning, mute, solo (if you wish)
+- Set up a ReaClassical project by first running kbd:[Ctrl+N]
+
+==== Don't
+
+- Engage in any track and folder management (naming & renaming, creating, deleting, reordering etc) outside of Mission Control 
+- Set recording inputs outside of Mission Control
+- Create custom track routing outside of Mission Control
+- Create custom item groupings
+
+==== Avoid
+
+- Using regular transport controls for recording or playback

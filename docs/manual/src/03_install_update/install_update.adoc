@@ -1,5 +1,0 @@
-== Installation & Updates
-
-include::install.adoc[]
-
-include::update.adoc[]

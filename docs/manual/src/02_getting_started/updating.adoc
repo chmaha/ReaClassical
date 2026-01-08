@@ -1,0 +1,15 @@
+=== Update
+
+==== Updating an Existing ReaClassical Portable Install
+
+Use menu:Extensions[ReaPack > Synchronize packages] or press kbd:[Shift+U]. This will sync ReaPack to get the latest ReaClassical functions.
+
+==== Factory Reset
+
+In the ReaClassical top menu, click on ReaClassical Factory Reset to return most settings back to those presented at first install.
+
+==== Updating REAPER
+
+It is highly advisable to use the version of REAPER that ships with ReaClassical. Due to potential incompatibility issues, for ReaClassical 26 onwards, the third-party REAPER update utility has been removed from the install package.
+
+

@@ -1,0 +1,5 @@
+=== ReaClassical Community
+
+The https://forum.cockos.com/showthread.php?t=265145[community thread] plays an important role in the development of ReaClassical. Not only is it a place for users to suggest feature requests and point out bugs but also discuss more general classical music recording, mixing and mastering techniques. It also serves as something of a development blog as I not only announce the regular releases but also document the under-the-surface details for those that are interested.
+
+Relatively new is the https://discord.gg/Gu2m9ccHGS[ReaClassical Discord server]. This is a great place for live support, general chat, proposing feature requests, workflow discussion, and letting the community know about albums or individual pieces you have created with the help of ReaClassical.
