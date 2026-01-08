@@ -3,6 +3,8 @@
 @version 26.0rc1
 @changelog
   Welcome to ReaClassical 26
+  Disengage rec-arm tracks when exiting record panel
+  Add new marker shortcut (Ctrl+M)
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
