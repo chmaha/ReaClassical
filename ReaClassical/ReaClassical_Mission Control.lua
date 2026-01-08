@@ -245,12 +245,21 @@ function main()
 
         -- Add mixer track button
         ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "+") then
+        if ImGui.Button(ctx, "Add Track") then
             new_track_name = "" -- Reset the name
             ImGui.OpenPopup(ctx, "Add Mixer Track")
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Add track to all folders")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Add Empty Folder") then
+            local calc = NamedCommandLookup("_RS2c6e13d20ab617b8de2c95a625d6df2fde4265ff")
+            Main_OnCommand(calc, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Add Empty Folder")
         end
 
         -- Convert Workflow
@@ -372,7 +381,7 @@ function main()
 
         -- Refresh button
         ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "⟳") then
+        if ImGui.Button(ctx, "Refresh") then
             init()
         end
         if ImGui.IsItemHovered(ctx) then
@@ -413,7 +422,7 @@ function main()
 
         -- Auto assign inputs button
         ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "Auto") then
+        if ImGui.Button(ctx, "Auto Rec Inputs") then
             auto_assign()
         end
         if ImGui.IsItemHovered(ctx) then
@@ -3165,7 +3174,7 @@ function consolidate_folders_to_first()
 end
 
 ---------------------------------------------------------------------
-
+sync()
 if init() then
     defer(main)
 end
