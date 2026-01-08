@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
 local get_item_color, pastel_color, get_color_table, extract_take_from_filename
+local disarm_all_tracks
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -492,6 +493,7 @@ function clean_up()
   SetThemeColor("region_lane_bg", -1)
   remove_markers_by_name("!1013")
   remove_markers_by_name("!" .. F9_command)
+  disarm_all_tracks()
   UpdateTimeline()
 end
 
@@ -1622,5 +1624,24 @@ end
 
 ---------------------------------------------------------------------
 
-reaper.atexit(clean_up)
+function disarm_all_tracks()
+  local playstate = GetPlayState()
+  -- Only disarm if not recording (playstate 5 or 6)
+  if playstate == 5 or playstate == 6 then
+    return
+  end
+  
+  local num_tracks = CountTracks(0)
+  for i = 0, num_tracks - 1 do
+    local track = GetTrack(0, i)
+    local is_rec_armed = GetMediaTrackInfo_Value(track, "I_RECARM")
+    if is_rec_armed == 1 then
+      SetMediaTrackInfo_Value(track, "I_RECARM", 0)
+    end
+  end
+end
+
+---------------------------------------------------------------------
+
+atexit(clean_up)
 main()
