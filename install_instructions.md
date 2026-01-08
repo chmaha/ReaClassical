@@ -11,7 +11,23 @@ This means:
 
 ## ReaClassical 26
 
-Coming early 2026...
+##### MacOS
+Open a terminal and paste the following:
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.org/macos | sh
+```
+
+##### Windows
+Open a PowerShell instance and paste the following:
+```powershell
+irm "https://reaclassical.org/win" | iex
+```
+
+##### Linux (including Raspberry Pi)
+Open a terminal and paste the following:
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.org/linux | sh
+```
 
 ## ReaClassical 25
 
