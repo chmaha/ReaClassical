@@ -95,7 +95,7 @@ local TOOLBAR_ITEMS = {
     { icon = "Delete SD Project Markers.png",        action = "_RS27a4866ba0d3ed7cb29468e052abaab4bd53054b", tooltip = "Delete S-D Project Markers (Shift+Delete)" },
     { icon = "copy_dest_material.png",               action = "_RS85774ff66e984d0643de45016ab3e056823661a8", tooltip = "Copy Destination Material to Source (" .. ctrl_key .. "+" .. alt_key .. "+C)" },
     { icon = "move_dest_material.png",               action = "_RS4556a37485a2e4b6cd5a0b2d8b1f9126b2f6f4ff", tooltip = "Move Destination Material to Source (" .. ctrl_key .. "+" .. alt_key .. "+M)" },
-    { icon = "promote to dest.png",                  action = "_RSa7237af01802429b3a0036fef9ca05429a16f43c", tooltip = "Promote Source to Destination (" .. ctrl_key .. "+" .. alt_key .. "+P)" },
+    { icon = "promote to dest.png",                  action = "_RSa7237af01802429b3a0036fef9ca05429a16f33c", tooltip = "Promote Source to Destination (" .. ctrl_key .. "+" .. alt_key .. "+P)" },
     { icon = "toolbar_zoom_selected.png",            action = "_RSdd8eb28df48002e61663cce1f177c24df69f581b", tooltip = "Find Source Material (" .. ctrl_key .. "+F)" },
 }
 

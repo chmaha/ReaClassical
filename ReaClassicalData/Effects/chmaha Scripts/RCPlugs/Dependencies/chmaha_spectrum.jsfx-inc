@@ -608,7 +608,7 @@ function spectrum.draw(bufindex)
 
   ly = 0;
   lx = -1;
-  ipnt = 0;
+  ipnt = 1;
 
   loop(num_bins, (
       tx = spectrum.freq_to_x(spectrum.bin_freq[ipnt]);

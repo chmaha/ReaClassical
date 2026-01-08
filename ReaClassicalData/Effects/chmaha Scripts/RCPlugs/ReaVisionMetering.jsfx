@@ -1,4 +1,4 @@
-Version: 1.8
+NoIndex: true
 desc:ReaVision Metering Suite (chmaha)
 author: chmaha
 about:
@@ -27,6 +27,7 @@ import Dependencies/svf_filter.jsfx-inc
 options:no_meter
 
 @init
+
 gfx_ext_retina=max(gfx_ext_retina,1);
 ext_nodenorm = 1;
 ext_noinit = 1;
@@ -492,11 +493,11 @@ function draw_info_panel(note_select)
     read_freq = note_select == 0 ? spectrum.x_to_freq(mouse_x) : note_select;
     read_amp = spectrum.y_to_db(mouse_y);
     
-    // Position in lower corner of upper right quadrant
+    // Position in corner of upper left quadrant
     width = 130;
     gfx_ext_retina != 2 ? width -= 40;
     
-    xpos = gfx_w/2 + 10;
+    xpos = gfx_w/2 + 20;
     xpos2 = xpos + 55;
     gfx_ext_retina != 2 ? xpos2 -= 15;
     ypos = 20;  // Bottom of upper half, minus panel height and margin
@@ -1256,10 +1257,10 @@ side = (spl0 - spl1) * 0.5;
 // Feed the correct buffers depending on spectrum modes
 Spectrum_Mode == 0 ? spectrum.sample0(spl0 + spl1) :
 Spectrum_Mode == 1 ? spectrum.sample0(mid) :
-Spectrum_Mode == 2 ? spectrum.sample0(side) :
+Spectrum_Mode == 2 ? spectrum.sample1(side) :
 Spectrum_Mode == 3 ? (spectrum.sample0(mid); spectrum.sample1(side)) :
 Spectrum_Mode == 4 ? spectrum.sample0(spl0) :
-Spectrum_Mode == 5 ? spectrum.sample0(spl1) :
+Spectrum_Mode == 5 ? spectrum.sample1(spl1) :
 Spectrum_Mode == 6 ? (spectrum.sample0(spl0); spectrum.sample1(spl1));
 
 rval=lval=0;
@@ -1435,8 +1436,15 @@ num_ch > 1 ? k20_r.k20_process(spl1);
 
 @gfx 1280 625
 
-gfx_min_w = 987;
-gfx_min_h = 538;
+// Scale minimum dimensions for retina
+gfx_ext_retina > 1 ? (
+  gfx_min_w = 1480;
+  gfx_min_h = 855;
+) : (
+  gfx_min_w = 987;
+  gfx_min_h = 538;
+);
+
 gfx_w < gfx_min_w ? gfx_w = gfx_min_w;
 gfx_h < gfx_min_h ? gfx_h = gfx_min_h;
 
@@ -1448,20 +1456,20 @@ last_t=t;
 
 nch = cfg_mono ? 1 : max(num_ch,2);
 
-// Font sizing like Cockos loudness meter
+// Font sizing - improved retina scaling
 FONT_SZ_MIN = 12;
 FONT_SZ_MAX = 22;
 FONT_SZ_MIN_NORMAL = 10;
 FONT_SZ_MAX_NORMAL = 18;
 
-// Calculate font sizes based on window width (tuned for 18/14 at 1280 width)
-fsz_title = FONT_SZ_MIN + min(gfx_w/213, FONT_SZ_MAX - FONT_SZ_MIN);  // 12 + 6 at 1280 = 18
-fsz_normal = FONT_SZ_MIN_NORMAL + min(gfx_w/320, FONT_SZ_MAX_NORMAL - FONT_SZ_MIN_NORMAL);  // 10 + 4 at 1280 = 14
+// Calculate font sizes based on window width
+fsz_title = FONT_SZ_MIN + min(gfx_w/213, FONT_SZ_MAX - FONT_SZ_MIN);
+fsz_normal = FONT_SZ_MIN_NORMAL + min(gfx_w/320, FONT_SZ_MAX_NORMAL - FONT_SZ_MIN_NORMAL);
 
-// Scale for retina
+// Better retina scaling
 gfx_ext_retina > 1 ? (
-  fsz_title *= 1.5;
-  fsz_normal *= 1.5;
+  fsz_title *= 1.65;  // Increased from 1.5
+  fsz_normal *= 1.65; // Increased from 1.5
 );
 
 // Set fonts
@@ -1469,16 +1477,16 @@ gfx_setfont(1, "Arial", fsz_title);
 font_normal = fsz_normal;
 
 // Goniometer - scale with window size (percentage based)
-gonio_x = gfx_w * 0.039;  // ~50 at 1280 width
-gonio_y = gfx_h * 0.432;  // ~270 at 625 height
-gonio_size_display = min(gfx_w * 0.141, gfx_h * 0.288);  // ~180 at default size, scales proportionally
+gonio_x = gfx_w * 0.039;
+// Push down on retina for better spacing from loudness/K-meter
+gonio_y = gfx_ext_retina > 1 ? gfx_h * 0.48 : gfx_h * 0.432;
+gonio_size_display = min(gfx_w * 0.141, gfx_h * 0.288);
 gonio_half = gonio_size_display / 2;
 
 //Clear text areas
 gfx_r = 0; gfx_g = 0; gfx_b = 0;
 gfx_rect(0, 0, gfx_w/2, gfx_h * 0.4);  // EBU section
 gfx_rect(gfx_w/2 - gfx_w * 0.039, 0, gfx_w, gfx_h/2);  // Spectrum Analyzer
-
 
 //Title
 gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
@@ -1487,53 +1495,68 @@ gfx_drawstr("ReaVision Metering Suite");
 
 gfx_setfont(1, "Arial", font_normal);
 
-//LUFS Display
-gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.08;
-gfx_drawstr("LUFS Integrated:");
-gfx_x = gfx_w*0.1367;
-sprintf(#str, "%.1f LUFS", lufs_i_db);
-lufs_i_db > -100 ? (
-gfx_drawstr(#str);
-) : (
-gfx_drawstr("---")
-);
+// Calculate dynamic column width based on font size and retina
+gfx_measurestr("LUFS Integrated:  ", label_width, label_height);
+gfx_measurestr("-100.0 LUFS", value_width, value_height);
+column_offset = label_width + gfx_w * (gfx_ext_retina > 1 ? 0.01 : 0.005);
+
+//LUFS Display - improved spacing
+base_y = gfx_h*0.08;
+line_spacing = label_height * (gfx_ext_retina > 1 ? 1.8 : 1.5);
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.128;
+gfx_x = gfx_w*0.0202; gfx_y = base_y;
+gfx_drawstr("LUFS Integrated:");
+gfx_x = gfx_w*0.0202 + column_offset;
+sprintf(#str, "%.1f LUFS", lufs_i_db);
+lufs_i_db > -100 ? (
+  gfx_drawstr(#str);
+) : (
+  gfx_drawstr("---")
+);
+
+base_y += line_spacing;
+gfx_r = 1; gfx_g = 1; gfx_b = 1;
+gfx_x = gfx_w*0.0202; gfx_y = base_y;
 gfx_drawstr("LUFS Short-term:");
-gfx_x = gfx_w*0.1367;
+gfx_x = gfx_w*0.0202 + column_offset;
 sprintf(#str, "%.1f LUFS", lufs_s_db);
 lufs_s_db > -100 ? (
-gfx_drawstr(#str);
+  gfx_drawstr(#str);
 ) : (
-gfx_drawstr("---")
+  gfx_drawstr("---")
 );
-gfx_x = gfx_w*0.225;
+// Max value with better spacing
+gfx_measurestr("-100.0 LUFS", tw, th);
+gfx_x = gfx_w*0.0202 + column_offset + tw + gfx_w * (gfx_ext_retina > 1 ? 0.015 : 0.01);
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 sprintf(#str, "(max: %.1f)", -0.691+log(lufs_s_sum_max)*10/log(10));
 gfx_drawstr(#str);
 
+base_y += line_spacing;
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.176;
+gfx_x = gfx_w*0.0202; gfx_y = base_y;
 gfx_drawstr("LUFS Momentary:");
-gfx_x = gfx_w*0.1367;
+gfx_x = gfx_w*0.0202 + column_offset;
 sprintf(#str, "%.1f LUFS", lufs_m_db);
 lufs_m_db > -100 ? (
-gfx_drawstr(#str);
+  gfx_drawstr(#str);
 ) : (
-gfx_drawstr("---")
+  gfx_drawstr("---")
 );
-gfx_x = gfx_w*0.225;
+
+gfx_measurestr("-100.0 LUFS", tw, th);
+gfx_x = gfx_w*0.0202 + column_offset + tw + gfx_w * (gfx_ext_retina > 1 ? 0.015 : 0.01);
 gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
 sprintf(#str, "(max: %.1f)", -0.691+log(lufs_m_sum_max)*10/log(10));
 gfx_drawstr(#str);
 
 // LRA Display
+base_y += line_spacing;
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.224;
+gfx_x = gfx_w*0.0202; gfx_y = base_y;
 gfx_drawstr("Loudness Range:");
-gfx_x = gfx_w*0.1367;
+gfx_x = gfx_w*0.0202 + column_offset;
 lra_db_diff > 0 ? (
   sprintf(#str, "%.1f LU", lra_db_diff+0.01);
   gfx_drawstr(#str);
@@ -1541,28 +1564,30 @@ lra_db_diff > 0 ? (
   gfx_drawstr("---");
 );
 
+base_y += line_spacing;
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gfx_w*0.0202; gfx_y =  gfx_h*0.272;
+gfx_x = gfx_w*0.0202; gfx_y = base_y;
 gfx_drawstr("True Peak L:");
-gfx_x = gfx_w*0.1367;
+gfx_x = gfx_w*0.0202 + column_offset;
 sprintf(#str, "%.2f dBTP", tp_l_db);
 tp_l_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
 tp_l_db > -150 ? (
-gfx_drawstr(#str);
+  gfx_drawstr(#str);
 ) : (
-gfx_drawstr("---")
+  gfx_drawstr("---")
 );
 
+base_y += line_spacing;
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
-gfx_x = gfx_w*0.0202; gfx_y = gfx_h*0.32;
+gfx_x = gfx_w*0.0202; gfx_y = base_y;
 gfx_drawstr("True Peak R:");
-gfx_x = gfx_w*0.1367;
+gfx_x = gfx_w*0.0202 + column_offset;
 sprintf(#str, "%.2f dBTP", tp_r_db);
 tp_r_db > -1 ? (gfx_r = 1; gfx_g = 0; gfx_b = 0;);
 tp_r_db > -150 ? (
-gfx_drawstr(#str);
+  gfx_drawstr(#str);
 ) : (
-gfx_drawstr("---")
+  gfx_drawstr("---")
 );
 
 // Fade for goniometer trail
@@ -1617,7 +1642,6 @@ loop(samples_to_draw,
 
   s0 = sign(L);
   s1 = sign(R);
-  // ... rest of your angle calculation ...
   radius = sqrt(L*L + R*R);  // Final radius for plotting
 
   s0 = sign(L);
@@ -1648,8 +1672,12 @@ loop(samples_to_draw,
 
 gfx_a = 1;
 gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
+
+// Goniometer labels - improved retina sizing
+gonio_label_size = gfx_ext_retina > 1 ? 14 : 10;
+gfx_setfont(1, "Arial", gonio_label_size);
+
 gfx_x = gonio_x; gfx_y = gonio_y+15;
-gfx_setfont(1, "Arial", 10);
 draw_text(gfx_x, gfx_y,"L");
 gfx_x = gonio_x + gonio_size_display*0.95; gfx_y = gonio_y+15;
 draw_text(gfx_x, gfx_y,"R");
@@ -1674,7 +1702,6 @@ label_x = gonio_x + gonio_half - tw/2;
 label_y = gonio_y + gonio_size_display + gfx_h * 0.016;
 
 // Check for click on label
-
 mouse_cap == 1 && !last_mouse_cap ? (
   mouse_x >= label_x && mouse_x <= label_x + tw &&
   mouse_y >= label_y && mouse_y <= label_y + th ? (
@@ -1705,17 +1732,15 @@ last_mouse_cap = mouse_cap;
 
 //set up bitmeter dimensions here
 mtstart     = gfx_texth * 3;
-mtrange     = gfx_w * 0.4;  // Proportional to width
-mtvalstart  = gfx_h * 0.85;  // Proportional to height (85% down)
-mtvalrange  = gfx_h * 0.6;   // Proportional to height
+mtrange     = gfx_w * 0.4;
+mtvalstart  = gfx_h * 0.85;
+mtvalrange  = gfx_h * 0.6;
 
 // Phase Meter - scale with window size
 phase_meter_x = gfx_w * 0.23;
 phase_meter_y = gonio_y + gonio_half*1.65; 
 phase_meter_w = (mtstart + mtrange)-phase_meter_x;
 phase_meter_h = gfx_h * 0.048;
-
-// gfx_rect(mtstart, mtvalstart - 2 - mtvalrange*0.1, mtrange, 2 + mtvalrange*0.1);
 
 gfx_r = 0.1; gfx_g = 0.1; gfx_b = 0.1;
 gfx_rect(phase_meter_x, phase_meter_y, phase_meter_w, phase_meter_h);
@@ -1724,7 +1749,7 @@ gfx_r = 0.5; gfx_g = 0.5; gfx_b = 0.5;
 gfx_line(phase_meter_x + phase_meter_w/2, phase_meter_y, phase_meter_x + phase_meter_w/2, phase_meter_y + phase_meter_h);
 
 phase_pos = phase_meter_x + phase_meter_w/2 + (phase_correlation * phase_meter_w/2);
-indicator_width = 4 * gfx_ext_retina;  // Scale indicator width for retina
+indicator_width = 4 * gfx_ext_retina;
 phase_correlation < 0 ? (
   gfx_r = 1; gfx_g = 0.6; gfx_b = 0;
 ) : (
@@ -1792,35 +1817,37 @@ mouse_y >= mtvalstart - 2 - mtvalrange*0.1 && mouse_y <= mtvalstart ?
 
 gfx_r = 1; gfx_g = 1; gfx_b = 1;
 gfx_setfont(1, "Arial", font_normal);
-draw_text(mtstart + mtrange * 0.44, gfx_h * 0.93, "Bitmeter");  // Proportional label position
+draw_text(mtstart + mtrange * 0.44, gfx_h * 0.93, "Bitmeter");
 
 // ==================================================================================
 // K-System Meter (K-20, K-14, K-12)
 // ==================================================================================
 
-// K-meter positioning - proportional to window size
-
-// Set font for scale markings - proportional sizing
+// Set font for scale markings - improved retina sizing
 gfx_ext_retina > 1 ? (
-  gfx_setfont(2, "Arial", gfx_h * 0.018);
+  gfx_setfont(2, "Arial", gfx_h * 0.022);  // Increased from 0.018
 ) : (
   gfx_setfont(2, "Arial", gfx_h * 0.012);   
 );
 
 gfx_measurestr("Max: -100dB)", tw, th);
-tw /= gfx_ext_retina;  // scale text width back to logical pixels
-gfx_measurestr("Max: -100dB)", tw, th);
-k20_x = max(gfx_w * 0.36, gfx_w*0.225+tw);  // Original proportion but capped to avoid overlap
+tw /= gfx_ext_retina; 
+
+gfx_ext_retina > 1 ? (
+  k20_x = max(gfx_w * 0.39, gfx_w*0.225+tw);  // Retina: 42%
+) : (
+  k20_x = max(gfx_w * 0.36, gfx_w*0.225+tw);  // Non-retina: 36%
+);
 k20_y = gfx_h * 0.05;
 k20_w = gfx_w * 0.05;
 
-// Calculate phase correlation label position (from phase meter code)
+// Calculate phase correlation label position
 phase_meter_label_y = phase_meter_y - gfx_h * 0.05;
 
-// Calculate available space and cap K-meter height to stay clear
-min_spacing = gfx_h * 0.03;  // Minimum 3% spacing between elements
+// Calculate available space and cap K-meter height
+min_spacing = gfx_h * 0.03;
 max_k20_h = phase_meter_label_y - k20_y - min_spacing;
-k20_h = min(gfx_h * 0.5, max_k20_h);  // Original proportion but capped to avoid overlap
+k20_h = min(gfx_h * 0.5, max_k20_h);
 
 gfx_measurestr("-60", label_w, label_h);
 bg_padding = label_w + gfx_w * 0.005; 
@@ -1835,13 +1862,13 @@ k20_l_peak_dbfs = k20_l.peak > 0 ? 20.0 * log(k20_l.peak) / log(10) : -100;
 k20_r_peak_dbfs = k20_r.peak > 0 ? 20.0 * log(k20_r.peak) / log(10) : -100;
 
 k_system_mode == 0 ? (
-  k_ref_level = -20;  // K-20
+  k_ref_level = -20;
   k_max = 20;
 ) : k_system_mode == 1 ? (
-  k_ref_level = -14;  // K-14
+  k_ref_level = -14;
   k_max = 14;
 ) : (
-  k_ref_level = -12;  // K-12
+  k_ref_level = -12;
   k_max = 12;
 );
 
@@ -1855,34 +1882,34 @@ k20_r_peak_k = k20_r_peak_dbfs - k_ref_level;
 function k_to_y(k_db, base_y, height) local(normalized) (
   k_db = max(-60, min(k_db, k_max));
   normalized = (k_db + 60) / k_range;
-  floor(base_y + height * (1 - normalized) + 0.5)  // Round to nearest pixel
+  floor(base_y + height * (1 - normalized) + 0.5)
 );
 
 zone_x = k20_x;
 zone_w = k20_w * 0.55;
 
-// Draw color zones with no gaps
+// Draw color zones
 blue_top = k_to_y(0, k20_y, k20_h);
 blue_bottom = k20_y + k20_h;
 gfx_r = 0; gfx_g = 0.6; gfx_b = 1;
 gfx_a = 0.5;
-gfx_rect(zone_x, blue_top, zone_w, blue_bottom - blue_top + 1, 1);  // +1 to ensure no gap
+gfx_rect(zone_x, blue_top, zone_w, blue_bottom - blue_top + 1, 1);
 
 cyan_top = k_to_y(4, k20_y, k20_h);
-cyan_bottom = blue_top + 1;  // +1 overlap to prevent gap
+cyan_bottom = blue_top + 1;
 gfx_r = 0; gfx_g = 1; gfx_b = 1;
 gfx_a = 0.5;
 gfx_rect(zone_x, cyan_top, zone_w, cyan_bottom - cyan_top, 1);
 
 purple_top = k20_y;
-purple_bottom = cyan_top + 1;  // +1 overlap to prevent gap
+purple_bottom = cyan_top + 1;
 gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
 gfx_a = 0.5;
 gfx_rect(zone_x, purple_top, zone_w, purple_bottom - purple_top, 1);
 
-// Draw vertical divider line in the middle
+// Draw vertical divider
 divider_x = zone_x + zone_w * 0.5;
-divider_width = max(1, gfx_w * 0.001);  // Proportional width with minimum of 1px
+divider_width = max(1, gfx_w * 0.001);
 gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
 gfx_a = 0.6;
 gfx_rect(divider_x - divider_width * 0.5, k20_y, divider_width, k20_h, 1);
@@ -1898,17 +1925,14 @@ tick_count = 0;
 num_ticks = k_system_mode == 1 ? (60 + 8)/4 + 1 : (60 + k_max)/4 + 1;
 
 loop(num_ticks,
-  
-  // Draw tick line - proportional size
   mark_y = k_to_y(k20_marks, k20_y, k20_h);
   tick_length = gfx_w * 0.002;
   gfx_line(zone_x - tick_length, mark_y, zone_x, mark_y);
   gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + tick_length, mark_y);
 
-  // Decide label
   should_label = 0;
   k20_marks < 0 ? ( ((k20_marks + 60) % 8 == 0) ? should_label = 1 : 0 ) : ( (k20_marks % 4 == 0) ? should_label = 1 : 0 );
-  k_system_mode == 1 && k20_marks == 12 ? should_label = 0 : 0;  // skip +12
+  k_system_mode == 1 && k20_marks == 12 ? should_label = 0 : 0;
   k20_marks == k_max ? should_label = 1 : 0;
 
   should_label ? (
@@ -1940,7 +1964,6 @@ k_system_mode == 1 ? (
   gfx_line(zone_x - tick_length, mark_y, zone_x, mark_y);
   gfx_line(zone_x + zone_w, mark_y, zone_x + zone_w + tick_length, mark_y);
 
-  // Label +14
   gfx_r = 0.7; gfx_g = 0.7; gfx_b = 0.7;
   sprintf(#k20_str, "+14");
   gfx_measurestr(#k20_str, tw, th);
@@ -1962,7 +1985,6 @@ k20_l_rms_k > -100 ? (
   bar_bottom = k20_y + k20_h;
   bar_height = bar_bottom - bar_top;
   
-  // Only draw if height is at least 1 pixel to prevent wobble
   bar_height >= 1 ? (
     k20_l_rms_k >= 4 ? (
       gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
@@ -1977,7 +1999,7 @@ k20_l_rms_k > -100 ? (
   
   k20_l_peak_k > -100 ? (
     peak_y = k_to_y(k20_l_peak_k, k20_y, k20_h);
-    peak_height = max(1, gfx_h * 0.0025);  // Proportional peak indicator height with minimum
+    peak_height = max(1, gfx_h * 0.0025);
     k20_l_peak_k >= 4 ? (
       gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
     ) : k20_l_peak_k >= 0 ? (
@@ -1996,7 +2018,6 @@ num_ch > 1 && k20_r_rms_k > -100 ? (
   bar_bottom = k20_y + k20_h;
   bar_height = bar_bottom - bar_top;
   
-  // Only draw if height is at least 1 pixel to prevent wobble
   bar_height >= 1 ? (
     k20_r_rms_k >= 4 ? (
       gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
@@ -2011,7 +2032,7 @@ num_ch > 1 && k20_r_rms_k > -100 ? (
   
   k20_r_peak_k > -100 ? (
     peak_y = k_to_y(k20_r_peak_k, k20_y, k20_h);
-    peak_height = max(1, gfx_h * 0.0025);  // Proportional peak indicator height with minimum
+    peak_height = max(1, gfx_h * 0.0025);
     k20_r_peak_k >= 4 ? (
       gfx_r = 0.714; gfx_g = 0; gfx_b = 0.847;
     ) : k20_r_peak_k >= 0 ? (
@@ -2024,10 +2045,9 @@ num_ch > 1 && k20_r_rms_k > -100 ? (
   );
 );
 
-
-// Draw vertical divider on top of meter bars
+// Draw vertical divider on top
 divider_x = zone_x + zone_w * 0.5;
-divider_width = max(1, gfx_w * 0.001);  // Proportional width with minimum of 1px
+divider_width = max(1, gfx_w * 0.001);
 gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
 gfx_a = 0.6;
 gfx_rect(divider_x - divider_width * 0.5, k20_y, divider_width, k20_h, 1);
@@ -2042,7 +2062,6 @@ gfx_measurestr(#k_label, tw, th);
 label_x = zone_x + zone_w * 0.5 - tw * 0.5;
 label_y = k20_y - gfx_h * 0.032;
 
-// Update button position for click detection - proportional padding
 button_padding = gfx_w * 0.003;
 k_system_button.x = label_x - button_padding;
 k_system_button.y = label_y - button_padding;
@@ -2056,32 +2075,6 @@ mouse_y >= k_system_button.y && mouse_y <= k_system_button.y + k_system_button.h
 );
 
 draw_text(label_x, label_y, #k_label);
-
-// stripe_count_per_tick = 4;
-
-// gfx_r = 0; gfx_g = 0; gfx_b = 0;
-// gfx_a = 1;
-
-// db = -60;
-// while(db < k_max)(
-//     top_y = k_to_y(db + 4, k20_y, k20_h);
-//     bottom_y = k_to_y(db, k20_y, k20_h);
-//     tick_height = bottom_y - top_y;
-
-//     actual_count = min(stripe_count_per_tick, max(1, floor(tick_height)));
-
-//     stripe_height = tick_height / actual_count;
-//     y_pos = top_y;
-//     loop(actual_count,
-//         line_height = max(1, floor(stripe_height/4));
-//         (y_pos + line_height > bottom_y) ? line_height = bottom_y - y_pos;
-//         gfx_rect(zone_x, y_pos, zone_w, line_height, 1);
-//         y_pos += stripe_height;
-//     );
-
-//     db += 4;
-// );
-
 
 // Handle clicking to cycle K-System modes
 mouse_cap & 1 && !k_system_button.pressed ? (
@@ -2108,8 +2101,9 @@ spectrum.top_margin = 20;
 spectrum.right_margin= 20;
 
 Display_Mode < 2 ? (
-  spectrum.draw(0);
-  Spectrum_Mode == 3 || Spectrum_Mode == 6 ? spectrum.draw(1);
+  (Spectrum_Mode == 0 || Spectrum_Mode == 1 || Spectrum_Mode == 4) ? spectrum.draw(0);
+  (Spectrum_Mode == 2 || Spectrum_Mode == 5) ? spectrum.draw(1);
+  (Spectrum_Mode == 3 || Spectrum_Mode == 6) ? (spectrum.draw(0);spectrum.draw(1));
 );
 
 ht = (gfx_h/2 - spectrum.bottom_margin - gfx_texth) + 2;
@@ -2129,29 +2123,46 @@ note_select == 0 ? (
 
 !((very_compact_width) | (very_compact_height)) ? (
   gfx_ext_retina == 2 ? (
-    peaks.x = gfx_w - 150; 
-    peaks.width = 100;
-    tilt_button.x = gfx_w - 300;
-    tilt_button.width = 130;
-    mode_button.x = gfx_w - 550; 
-    mode_button.width = 120;
-    channel_button.x = gfx_w - 430; 
-    channel_button.width = 120;
+    // Improved button spacing for retina to prevent overlap
+    mode_button.x = gfx_w - 490;
+    mode_button.width = 140;
+    mode_button.y = 10;  // Align with spectrum.top_margin
+    
+    // Channel button positioned underneath mode button
+    channel_button.x = gfx_w - 490;  // Same X as mode button
+    channel_button.width = 140;
+    channel_button.y = 50;  // Below mode button
+    
+    tilt_button.x = gfx_w - 340;
+    tilt_button.width = 140;
+    tilt_button.y = 10;  // Align with spectrum.top_margin
+    
+    peaks.x = gfx_w - 190;
+    peaks.width = 120;
+    peaks.y = 10;  // Align with spectrum.top_margin
   ) : (
-    peaks.x = gfx_w - 100; 
-    peaks.width = 60;
-    tilt_button.x = gfx_w - 180;
-    tilt_button.width = 75;
-    mode_button.x = gfx_w - 360; 
+    mode_button.x = gfx_w - 270; 
     mode_button.width = 80;
-    channel_button.x = gfx_w - 280; 
+    mode_button.y = 10;  // Align with spectrum.top_margin
+    
+    // Channel button positioned underneath mode button
+    channel_button.x = gfx_w - 270;  // Same X as mode button
     channel_button.width = 80;
+    channel_button.y = 37;  // Below mode button
+    
+    tilt_button.x = gfx_w - 185;
+    tilt_button.width = 75;
+    tilt_button.y = 10;  // Align with spectrum.top_margin
+    
+    peaks.x = gfx_w - 105; 
+    peaks.width = 60;
+    peaks.y = 10;  // Align with spectrum.top_margin
+    
   );
   
   mode_button.draw_mode_button();
   mode_button.handle_mode_button();
   
-  // Only draw channel button if not in Full mode
   strcmp(mode_button.label, prev_mode_label) != 0 ? (
     strcmp(mode_button.label, "Mid/Side") == 0 ? (
       channel_button.label = "Mid+Side";
@@ -2161,11 +2172,9 @@ note_select == 0 ? (
       channel_button.label = "Left+Right";
       Spectrum_Mode = 6;
     );
-    // Update previous mode
     prev_mode_label = mode_button.label;
   );
   
-  // Draw + handle channel button only if not Full mode
   strcmp(mode_button.label, "Full") != 0 ? (
     channel_button.draw_channel_button();
     channel_button.handle_channel_button(mode_button.label);
@@ -2186,7 +2195,6 @@ need_clear_spectro ? (
   need_clear_spectro = 0;
   cur_xpos = 0;
   
-  // Clear the spectrogram area (bottom-right quadrant)
   gfx_r = gfx_g = gfx_b = 0;
   gfx_a = 1;
   gfx_x = gfx_w/2;
@@ -2196,7 +2204,6 @@ need_clear_spectro ? (
 
 gfx_ext_retina>1 ? gfx_setfont(1,"Arial",16*gfx_ext_retina,'b') : gfx_setfont(0);
 
-// Initialize frequency zoom if not set
 !freq_zoom_factor ? freq_zoom_factor = 1.0;
 
 old_w != gfx_w || old_h!=gfx_h? (
@@ -2208,22 +2215,26 @@ old_w != gfx_w || old_h!=gfx_h? (
   gfx_x=gfx_y=0;
   gfx_rectto(gfx_w,gfx_h);
   need_button_refs=1;
-  colormap_button.init_colormap_button(gfx_w - 0.09*gfx_w, gfx_h/2 + 10, 0.078*gfx_w);
+  
+  // Improved colormap button sizing for retina
+  gfx_ext_retina > 1 ? (
+    colormap_button.init_colormap_button(gfx_w - 0.11*gfx_w, gfx_h/2 + 15, 0.09*gfx_w);
+  ) : (
+    colormap_button.init_colormap_button(gfx_w - 0.09*gfx_w, gfx_h/2 + 10, 0.078*gfx_w);
+  );
 );
 
 use_h = small_mode ? gfx_h : (gfx_h-gfx_texth - 4);
 
-// Handle mouse wheel for frequency zoom in spectrogram area
+// Handle mouse wheel for frequency zoom
 mouse_x >= gfx_w/2 && mouse_x < gfx_w - 20 &&
 mouse_y >= gfx_h/2 && mouse_y < use_h ? (
   mouse_wheel ? (
-    // Mouse wheel zoom
     wheel_sensitivity = 0.0002;
     freq_zoom_factor = max(1, min(10.0, freq_zoom_factor + mouse_wheel * wheel_sensitivity));
     mouse_wheel = 0;
   );
   
-  // Ctrl + Left click = reset zoom
   mouse_cap & 1 && mouse_cap & 4 ? (
     !freq_reset_handled ? (
       freq_zoom_factor = 1.0;
@@ -2303,21 +2314,20 @@ reccnt>0 ? (
                         -1,
                         pixels_per_frame, 0,
                         pixels_per_frame, 0,
-                        gfx_w/2 - pixels_per_frame + gfx_w/2,  // x offset into bottom-right
-                        gfx_h/2,                                // y offset into bottom-right
+                        gfx_w/2 - pixels_per_frame + gfx_w/2,
+                        gfx_h/2,
                         0, 0,
                         gfx_w/2 - pixels_per_frame,
                         gfx_h/2
                     );
                 ) : 0;
             ) : (
-                // Fade mode: dark rectangle
                 gfx_a = 0.1;
                 gfx_r = gfx_g = gfx_b = 0 ;
 
                 fade_width = 15;
-                gfx_x = gfx_w/2 + cur_xpos; // bottom-right quadrant start
-                gfx_y = gfx_h/2;            // vertical start
+                gfx_x = gfx_w/2 + cur_xpos;
+                gfx_y = gfx_h/2;
 
                 end_x = gfx_x + fade_width;
                 end_y = gfx_h;
@@ -2332,7 +2342,6 @@ reccnt>0 ? (
             sc2=g_logscale/(gfx_h/2-20);
 
             loop(gfx_h/2-20,
-                // Apply frequency zoom factor to the position calculation
                 zoomed_i = i / freq_zoom_factor;
                 tpos = (uselm ? ((fftsize*0.5 - 1 - log(1+(gfx_h/2-20-1-zoomed_i)*sc2)*sc)) : zoomed_i*sc)|0;
                 tpos >= fftsize*0.5 ? tpos=fftsize*0.5;
@@ -2351,9 +2360,8 @@ reccnt>0 ? (
                 );
                 spectro_mv=spectro_mv <= minvol ? -200 : log(spectro_mv)*lscale;
 
-                // Draw pixels in bottom-right quadrant
                 gfx_x = gfx_w/2 + cur_xpos;
-                gfx_y = use_h - (i+1);  // bottom half
+                gfx_y = use_h - (i+1);
                 gfx_a = 1;
 
                 calc_color(spectro_mv, drawc, current_colormap);
@@ -2381,7 +2389,7 @@ colormap_button.handle_colormap_button();
 
 mouse_x >= gfx_w/2 && mouse_x < gfx_w - 20 &&
 mouse_y >= gfx_h/2 && mouse_y < gfx_h ?
-  !(mouse_cap&1) ? (  // Show info when not clicking
+  !(mouse_cap&1) ? (
     mb=-169;
     bla=0;
     loop(9,
@@ -2406,22 +2414,14 @@ mouse_y >= gfx_h/2 && mouse_y < gfx_h ?
     );
     (
 
-    // Top and bottom of the spectrogram in pixels
     top_pixel    = gfx_h/2 - 20;
     bottom_pixel = use_h;
-    // Clamp mouse_y to the visible spectrogram area
     clamped_y = max(top_pixel, min(mouse_y, bottom_pixel-1));
-    // Compute pixel index (bottom-up, matches gfx_y = use_h - (i+1))
     i = bottom_pixel - 1 - clamped_y;
-    // Apply zoom factor to frequency calculation
     zoomed_i = i / freq_zoom_factor;
-    // Map pixel index to FFT bin
     bin_index = zoomed_i * (0.5 * fftsize) / (gfx_h/2-20);
-    // Convert FFT bin to Hz
     converted_hz = bin_index * srate / fftsize;
 
-
-    // converted_hz=(1-disp_hz)*srate*0.5;
     sprintf(#infostr,"%.0fHz",converted_hz);
     
     mb > -168 ? (
@@ -2430,7 +2430,6 @@ mouse_y >= gfx_h/2 && mouse_y < gfx_h ?
      #infostr += " -oodB";
     );
     
-    // Add zoom level indicator
     freq_zoom_factor != 1.0 ? (
       sprintf(#infostr, "%s (%.2fx)",#infostr, freq_zoom_factor);
     );
@@ -2443,14 +2442,14 @@ mouse_y >= gfx_h/2 && mouse_y < gfx_h ?
   );
 );
 
-// Draw "Spectrograph" placeholder when no data
+// Draw "Spectrograph" placeholder
 first_load == 1 ? (
   gfx_r = 0.3; gfx_g = 0.3; gfx_b = 0.3;
   gfx_a = 1;
   gfx_setfont(1, "Arial", font_normal);
   gfx_measurestr("Spectrograph", tw, th);
-  gfx_x = gfx_w/2 + (gfx_w/2 - tw) / 2;  // Center in bottom-right quadrant
-  gfx_y = gfx_h/2 + (gfx_h/2 - th) / 2;  // Center vertically
+  gfx_x = gfx_w/2 + (gfx_w/2 - tw) / 2;
+  gfx_y = gfx_h/2 + (gfx_h/2 - th) / 2;
   draw_text(gfx_x, gfx_y, "Spectrograph");
   play_state != 0 ? first_load = 0;
 );
