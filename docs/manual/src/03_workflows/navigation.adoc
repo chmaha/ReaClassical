@@ -57,7 +57,7 @@ To adjust the visual zoom of wave peaks, use kbd:[Ctrl+{cursorup}] and kbd:[Ctrl
 .S-D Editing Toolbar
 image::editing_toolbar.png[S-D Editing Toolbar]
 
-While I designed ReaClassical to be used efficiently with keyboard shortcuts, there is a custom S-D editing toolbar for those that prefer it. However I do highly recommend learning the key strokes as you will find your editing speeds improve dramatically. The floating toolbar can be opened via kbd:[F6] but will automatically open once when you start source-destination editing.
+While I designed ReaClassical to be used efficiently with keyboard shortcuts, there is a custom S-D editing toolbar for those that prefer it. However I do highly recommend learning the key strokes as you will find your editing speeds improve dramatically. The floating toolbar can be opened via kbd:[F6] but will automatically open once when you start source-destination editing. Right-click to set a different icon layout and/or zoom.
 
 Hover over the icons to discover what is available.
 
