@@ -55,7 +55,7 @@ TIP: This works at any point in the editing process and isn't restricted to the 
 
 ===== Finding Source Material
 
-The items representing a S-D edit are colored according to the source material. However, you can also easily locate source material by clicking on an edited item and pressing kbd;[Ctrl+F]. A color-coordinated source IN and OUT marker pair are placed at the source location and in vertical workflow mode, the associated folder is selected.
+The items representing a S-D edit are colored according to the source material. However, you can also easily locate source material by clicking on an edited item and pressing kbd:[Ctrl+F]. A color-coordinated source IN and OUT marker pair are placed at the source location and in vertical workflow mode, the associated folder is selected.
 
 ===== Marking Edits on your Scores
 

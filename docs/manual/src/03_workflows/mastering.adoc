@@ -55,3 +55,7 @@ The other situation is when you want to start with uniform gaps between a series
 
 In terms of loudness, I personally aim for about -18 LUFS Integrated for my classical albums though it can be as high as -16 LUFS and as low as -20 LUFS. The new loudness JSFX meter in REAPER and my own ReaVision Metering Suite along with the normalization of loudness and true-peak limiting in the render dialog are priceless. It's another reason I couldn't go back to the other classical DAWs at this point.
 
+===== Further information on DDP
+
+For more information about DDP metadata see https://raw.githubusercontent.com/chmaha/ReaClassical/refs/heads/main/docs/manual/src/assets/ddp_info[here, window=_blank] (also available via the Render dialog via menu:Format[DDP] and clicking on btn:[Help]).
+
