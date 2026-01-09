@@ -1,0 +1,21 @@
+=== ReaClassical Preferences
+
+Open via kbd:[F5] or via Mission Control kbd:[C]. Here is a brief description for each one:
+
+.ReaClassical Preferences
+image::rc_prefs.png[ReaClassical Preferences]
+
+S-D Crossfade Length (ms):: The xfade length for all S-D edit functions. Default = 35ms.
+CD Track Offset (ms):: The negative offset where CD markers are placed to the left of item starts. This is really for old CD players that could not process quick enough and skipped the start of audio. Default = 200ms.
+INDEX0 Length (s) (>= 1):: If you add an exclamation mark to your CD track name in the metadata editor window, a countdown of this set length will visually appear on some CD Players. Default = 3 seconds.
+Album Lead-out Time (s):: The amount of silence automatically set at the end of the album. Default = 7 seconds.
+Ranked Items keep folder color:: To only show the ranking as a item name prefix without color, set to checked. Default = unchecked.
+S-D Marker Check (ms):: When placing destination markers, a check occurs to see if the marker would be placed close to an existing crossfade. This prevents unnecessary "sliver" edits. Set to 0 to disable. Default = 500ms.
+REF = Overdub Guide:: By default, the reference track acts as a way to A/B project material with an external reference audio file. To use as an overdub track see <<overdub>>. Default = unchecked.
+Add S-D Markers at Mouse Hover:: To avoid needing the track to be selected before placing S-D markers, set to checked. This also allows for opening the fade editor kbd:[F] by hover. Default = unchecked.
+Alt Audition Playback Rate:: The playrate used when using kbd:[Shift+A] etc. Default = x0.75.
+Year of Production:: Default = The year the project was created.
+CUE Audio Format:: The audio format that will be rendered to pair with the CUE file. Default = WAV.
+Floating Destination Folder:: For users who wish to always use the top folder as destination, this visually moves the destination folder just above the placement of source markers, making working in vertical workflow even easier without need for manual vertical scrolling. Note that when checked, the new S-D editing anywhere to anywhere is disabled and destination markers are always associated with the first folder. Default = unchecked.
+Find Takes Using Item Names:: If the audio material was not recorded in ReaClassical and the filenaming does not include a take number as a suffix, you can find takes based on item names instead by checking the option. Default = unchecked.
+Show Only Item Take Numbers:: By default, the item names show both session name (if present) and take numbers. For quicker visual location, set to checked to only show padded take numbers. Default = unchecked.

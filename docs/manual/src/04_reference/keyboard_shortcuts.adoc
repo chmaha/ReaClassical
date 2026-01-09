@@ -1,6 +1,6 @@
 === Keyboard Shortcuts
 
-When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut kbd:[?] or by navigating to menu:Actions[Show action list...] to see the current assignments. For reference (from REAPER's own user guide), here is a table of equivalent modifier keys:
+When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut kbd:[?] or explore the top "ReaClassical" menu to see the current assignments. For reference (from REAPER's own user guide), here is a table of equivalent modifier keys:
 
 [.center, width="75%",cols="^,^"]
 .Shortcut Equivalents

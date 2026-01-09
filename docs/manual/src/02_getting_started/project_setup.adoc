@@ -4,11 +4,14 @@
 2. Select the number of tracks you want per folder
 3. Select a horizontal or vertical workflow
 
+.New ReaClassical Project
+image::new_rc_project.png[New ReaClassical Project]
+
 ==== Notes
 
 ===== Track Count
 
-A folder requires at least two tracks. If you really only need a single microphone pair for audio capture, consider 1) either having left and right on separate channels or 2) Having an empty second track that you can easily hide via a dedicated shortcut.
+A folder requires at least two tracks. If you really only need a single microphone pair for audio capture, consider 1) having left and right on separate channels, or 2) Having an empty second track that you can easily hide via a dedicated shortcut.
 
 ===== Workflow Choice
 
@@ -16,7 +19,12 @@ A _horizontal_ workflow approach means that recorded or imported takes are arran
 
 ==== Mission Control
 
-As soon as you press `OK`, you will see the Mission Control window. Use this dialog to: 
+As soon as you press `OK`, you will see the Mission Control window.
+
+.Mission Control
+image::mission_control.png[Mission Control]
+
+Use this dialog to: 
 
 - Name or rename tracks 
 - Set recording inputs manually or automatically based on track naming

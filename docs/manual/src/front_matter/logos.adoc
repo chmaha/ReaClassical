@@ -1,3 +1,3 @@
-image::reaclassical_os.png[width=75%,align="center"]
+image::reaclassical_os.png[ReaClassical Logo, width=75%,align="center"]
 [.text-center]
 _As featured in_ https://www.soundonsound.com/techniques/source-destination-editing-reaclassical[image:sos.jpg[Sound-on-Sound,300]]

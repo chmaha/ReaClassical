@@ -1,0 +1,23 @@
+=== Importing
+
+While it is always better to record in ReaClassical for traditional recording sessions, you may prefer using a portable recorder for live performances. Further, you might need to import audio recorded by other engineers who used a different DAW.
+
+==== Importing Audio from a Portable Recorder
+
+If you use a portable recorder such as a MixPre, you might have a multi-channel combined file. ReaClassical includes a special function for converting these into a stereo pair + mono track set. Import your multi-channel media using a single regular track (for a horizontal workflow) or multiple regular tracks (for a vertical workflow). Press kbd:[F10] (no need to select the items). Answer btn:[yes] to the prompt that appears if the first two channels should be treated as stereo interleaved (i.e. they represent your main pair). Depending on the choice made, the number of tracks in the resulting folder(s) will adjust accordingly. You are then given the opportunity to name your tracks in Mission Control. Obviously if you decide to move to a vertical workflow after exploding using a single track, you can always use Mission Control to convert. If you need to bring in new takes after running this function, simply open an empty project tab, import additional media then run the function there. Afterwards, copy or cut the exploded items into the original project tab to the desired locations.
+
+==== Smart Import
+
+Assuming that the filenaming contains at least a take number as a suffix along with channel descriptions:
+
+1. Copy or move source material into the media subfolder inside your ReaClassical project folder. 
+2. Ensure that track names match any channel text in the filenames
+3. If your filenames also contain a session name, add some markers kbd:[Ctrl+M] and name them accordingly.
+4. Via the top ReaClassical menu, click on menu:Project Setup[Smart Audio Import]
+5. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
+
+==== Manual Import by Dragging
+
+1. In your source folder, select items that should be aligned vertically (for example, every channel for particular take) and drag into the ReaClassical project being sure to drop onto one of the folders created by ReaClassical with a track count that matches the number of files you selected. Choose the option "Same time position on separate tracks"
+2. Continue as above for each take
+3. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.

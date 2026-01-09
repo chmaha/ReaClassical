@@ -1,5 +1,9 @@
 === Install
 
+For the complete and recommended experience on Linux, macOS, and Windows, run the single install script provided below. 
+
+IMPORTANT: You do not need to download or install REAPER separately and you shouldn't try to install ReaClassical inside an existing REAPER setup — ReaClassical comes bundled with its own fully-configured REAPER environment.
+
 ==== Easy Complete Portable Installation (official method)
 Copy the command for your operating system into either your terminal (MacOS and Linux) or PowerShell (Windows).
 
@@ -21,4 +25,4 @@ Windows:
 irm "https://reaclassical.org/win" | iex
 ----
 
-Note that if the ReaClassical folder already exists, the installer will automatically add a unique suffix to ensure nothing is overwritten.
+TIP: Note that if the ReaClassical folder already exists, the installer will automatically add a unique suffix to ensure nothing is overwritten.

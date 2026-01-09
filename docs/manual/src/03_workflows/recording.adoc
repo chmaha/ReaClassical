@@ -1,0 +1,92 @@
+=== Recording
+
+Now that you have decided on a workflow, we can start recording!
+
+==== Manually Setting Inputs
+
+Use Mission Control kbd:[C] to set recording inputs and panning manually or automatically based on track name. For automatic assignment, add text like "Left", "R", "Pair", "2ch" etc. as a suffix and press btn:[Auto Rec Inputs].
+
+==== Easy Steps to Record
+
+1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]
+2. Select a parent track of a folder
+3. Press Arm and monitor your signal
+4. Use the left-most buttons in the panel to control recording, pausing and stopping
+5. Add ranking and notes while recording or after the fact by clicking on a previously-recorded item
+6. Once all recording is completed, close the record panel (automatically disengages record-armed tracks).
+
+.Record Panel
+image::record_panel.png[Record Panel]
+
+==== Additional Notes on Record Panel
+
+===== Other Buttons in the Main Window
+
+Use btn:[+Take] to quickly increase the take number (useful for a false start, for example). press btn:[Next] to start a new recording section. This means that in vertical workflow the first source folder is rec-armed and in both workflows, the edit cursor is placed 5 seconds after the final item in the project.
+
+===== Record Panel Right-Click Options
+
+.Record Panel Options
+image::record_panel_options.png[Record Panel Options]
+
+====== Scheduled Recording
+
+To start (and optionally end) a recording at specific times or manually start a recording to end at a certain time or after a certain duration, right-click on the Record Panel window and add the appropriate entry or entries in HH:MM format. After pressing btn:[OK], the Record Panel window will display information above the take number. If you enter a start or end time earlier or equal to the current time, the function will assume a next day schedule and will annotate the time with an asterisk (*). Likewise, with both a start and end time, if the end time is earlier than or equal to start, it will assume a time 24 hours later. Don't forget to arm your tracks before walking away!
+
+====== Overriding Take Numbers
+
+You shouldn't need to use this but there are cases where you might want to start a new ReaClassical project but continue from the previous day's last take number. To do so, check the "Allow Take Number Override" option and set a new take number. Note that it will not allow you to set a number lower than already used. 
+
+==== Meterbridge
+
+.Meterbridge
+image::meterbridge.png[Meterbridge]
+
+Use kbd:[B] to open the Meterbridge. The default view shows numeric peak holds. When tracks are record-armed, the main window displays recording inputs. During auditioning of material, the top rows show mixer tracks and the bottom any special tracks including RCMASTER and Master tracks.
+
+To switch to graphical meters, check the "Graphical Meters" option. Under the options tab, you can set color thresholds for yellow and red.
+
+==== Recording Indicator
+
+.Recording Indicator
+image::rec_indicator.png[Recording Indicator]
+
+The recording indicator kbd:[Alt+R] is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active. 
+
+==== Headroom
+
+Again, I refer you to the books on classical music production but in general I suggest aiming for around -12dB peaks on the meters. 24-bit recording allows for a lot of headroom so there's no need to push close to 0dB. Adjust the individual mixer track faders to balance. When using a 32-bit float device with dual AD converters as an interface (such as the Zoom F-series), ensure that the recording file format is switched to 32-bit float via project preferences kbd:[P]. The recorded levels might seem too low or too high during recording, but they can be easily adjusted afterward in ReaClassical without introducing any extra noise or distortion.
+
+==== Recording Safety
+
+When using the Record Panel for recording (essential!), there is increased safety when using classical take recording via the automatic switch to a restricted set of keyboard shortcuts. In addition to using the record panel, you can also access various non-disruptive functions like zooming.
+
+[[overdub]]
+==== Overdub Recording
+
+To record additional material after the fact (say a separate narration track or an organ part in a church after the main recording session in a concert hall), edit the orchestral material as usual and use a mixdown as a guide track in a new project (or new project tab). To achieve this, use a vertical workflow (convert if necessary via Mission Control kbd:[C]), add a Reference track also via Mission Control and set the ReaClassical Project Preferences option `REF = Overdub Guide` to checked (kbd:[F5]). With this setting, audio on the guide track will be audible during take recording and auditioning of folders. Use Classical Take Recording via the Record Panel as normal. You can then S-D edit and mix the overdub material to fit with the orchestral mixdown or, if further mixing and mastering work is required on the original multi-track material, bring the organ part into that project as a new track in the folders (see below).
+
+==== Manipulating Tracks During a Recording Session
+
+===== Disabling Channels
+
+In a typical recording session, the musicians with the least to record are often allowed to leave the session early once their work is completed. If they were individually recorded using a spot microphone, it wouldn't make sense to continue recording on that channel. In ReaClassical there are two main ways to disable a channel. In a horizontal workflow using a single folder, it is no hassle to simply un-arm the desired track(s). For a vertical workflow with multiple folders, the task could end up being time-consuming with potential for error. So, the recommended ReaClassical way, both easy and visually obvious, is to set the rec input for the channel(s) to "None" via Mission Control.
+
+===== Adding a New Microphone Mid-Recording Session
+
+You can add a track to all folders in the project at once via Mission Control. It will prompt you for a name and then add a new track with that name to the end of each folder. This also works for a single folder while working in a horizontal workflow.
+
+===== Deleting tracks
+
+In both horizontal and vertical workflows, you can use Mission Control to quickly delete child tracks from all folders of the project.
+
+===== Re-ordering tracks
+
+In both horizontal and vertical workflows, you can re-order the mixer tracks by selecting the track in Mission Control and using the arrow buttons. This also moves all audio and assigned recording inputs.
+
+==== Audio Calculator
+
+.Audio Calculator
+image::calc.png[Audio Calculator]
+
+To figure out required disk space for a duration of audio or vice versa to figure out maximum duration of audio you can record based on available disk space, use kbd:[Shift+H] to open a calculator. You can set units, channel count, samplerate, bit depth and format (WAV or MP3 at various bitrates).

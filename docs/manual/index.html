@@ -463,13 +463,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_getting_started">Getting Started</a>
 <ul class="sectlevel2">
 <li><a href="#_install">Install</a></li>
-<li><a href="#_project_setup">Project Setup</a></li>
 <li><a href="#_update">Update</a></li>
+<li><a href="#_project_setup">Project Setup</a></li>
 <li><a href="#_converting_a_standard_reaper_project">Converting a Standard REAPER Project</a></li>
+<li><a href="#_reaclassical_preferences">ReaClassical Preferences</a></li>
 <li><a href="#tldr">Too Long; Didn&#8217;t Read</a></li>
 </ul>
 </li>
-<li><a href="#workflows">Workflows</a></li>
+<li><a href="#workflows">Workflows</a>
+<ul class="sectlevel2">
+<li><a href="#_recording_2">Recording</a></li>
+<li><a href="#_importing_2">Importing</a></li>
+<li><a href="#_navigating_a_project">Navigating a Project</a></li>
+<li><a href="#_project_management">Project Management</a></li>
+<li><a href="#_auditioning_playback">Auditioning (Playback)</a></li>
+<li><a href="#_editing_2">Editing</a></li>
+<li><a href="#_mixing_2">Mixing</a></li>
+<li><a href="#_mastering_2">Mastering</a></li>
+<li><a href="#_rendering_2">Rendering</a></li>
+<li><a href="#_collaborating_with_video_editors">Collaborating with Video Editors</a></li>
+</ul>
+</li>
 <li><a href="#_reference">Reference</a>
 <ul class="sectlevel2">
 <li><a href="#_keyboard_shortcuts">Keyboard Shortcuts</a></li>
@@ -532,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <div class="imageblock text-center">
 <div class="content">
-<img src="src/assets/reaclassical_os.png" alt="reaclassical os" width="75%">
+<img src="src/assets/reaclassical_os.png" alt="ReaClassical Logo" width="75%">
 </div>
 </div>
 <div class="paragraph text-center">
@@ -546,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-01-08 21:53:19 UTC</code></p>
+<p><code>Updated: 2026-01-09 16:41:43 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -571,7 +585,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 </div>
 <div class="imageblock right">
 <div class="content">
-<img src="src/assets/chmaha.png" alt="chmaha">
+<img src="src/assets/chmaha.png" alt="Signature">
 </div>
 </div>
 </blockquote>
@@ -733,6 +747,21 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_install">Install</h3>
+<div class="paragraph">
+<p>For the complete and recommended experience on Linux, macOS, and Windows, run the single install script provided below.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+You do not need to download or install REAPER separately and you shouldn&#8217;t try to install ReaClassical inside an existing REAPER setup — ReaClassical comes bundled with its own fully-configured REAPER environment.
+</td>
+</tr>
+</table>
+</div>
 <div class="sect3">
 <h4 id="_easy_complete_portable_installation_official_method">Easy Complete Portable Installation (official method)</h4>
 <div class="paragraph">
@@ -762,8 +791,38 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <pre class="highlight"><code class="language-powershell" data-lang="powershell">irm "https://reaclassical.org/win" | iex</code></pre>
 </div>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Note that if the ReaClassical folder already exists, the installer will automatically add a unique suffix to ensure nothing is overwritten.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update">Update</h3>
+<div class="sect3">
+<h4 id="_updating_an_existing_reaclassical_portable_install">Updating an Existing ReaClassical Portable Install</h4>
 <div class="paragraph">
-<p>Note that if the ReaClassical folder already exists, the installer will automatically add a unique suffix to ensure nothing is overwritten.</p>
+<p>Use <span class="menuseq"><b class="menu">Extensions</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">ReaPack</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Synchronize packages</b></span> or press <span class="keyseq"><kbd>Shift</kbd>+<kbd>U</kbd></span>. This will sync ReaPack to get the latest ReaClassical functions.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_factory_reset">Factory Reset</h4>
+<div class="paragraph">
+<p>In the ReaClassical top menu, click on ReaClassical Factory Reset to return most settings back to those presented at first install.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_updating_reaper">Updating REAPER</h4>
+<div class="paragraph">
+<p>It is highly advisable to use the version of REAPER that ships with ReaClassical. Due to potential incompatibility issues, for ReaClassical 26 onwards, the third-party REAPER update utility has been removed from the install package.</p>
 </div>
 </div>
 </div>
@@ -782,12 +841,18 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 </li>
 </ol>
 </div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/new_rc_project.png" alt="New ReaClassical Project">
+</div>
+<div class="title">Figure 1. New ReaClassical Project</div>
+</div>
 <div class="sect3">
 <h4 id="_notes">Notes</h4>
 <div class="sect4">
 <h5 id="_track_count">Track Count</h5>
 <div class="paragraph">
-<p>A folder requires at least two tracks. If you really only need a single microphone pair for audio capture, consider 1) either having left and right on separate channels or 2) Having an empty second track that you can easily hide via a dedicated shortcut.</p>
+<p>A folder requires at least two tracks. If you really only need a single microphone pair for audio capture, consider 1) having left and right on separate channels, or 2) Having an empty second track that you can easily hide via a dedicated shortcut.</p>
 </div>
 </div>
 <div class="sect4">
@@ -800,7 +865,16 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <div class="sect3">
 <h4 id="_mission_control">Mission Control</h4>
 <div class="paragraph">
-<p>As soon as you press <code>OK</code>, you will see the Mission Control window. Use this dialog to:</p>
+<p>As soon as you press <code>OK</code>, you will see the Mission Control window.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/mission_control.png" alt="Mission Control">
+</div>
+<div class="title">Figure 2. Mission Control</div>
+</div>
+<div class="paragraph">
+<p>Use this dialog to:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -861,27 +935,6 @@ Do not attempt to complete any of the above actions outside of Mission Control!
 </div>
 </div>
 <div class="sect2">
-<h3 id="_update">Update</h3>
-<div class="sect3">
-<h4 id="_updating_an_existing_reaclassical_portable_install">Updating an Existing ReaClassical Portable Install</h4>
-<div class="paragraph">
-<p>Use <span class="menuseq"><b class="menu">Extensions</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">ReaPack</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Synchronize packages</b></span> or press <span class="keyseq"><kbd>Shift</kbd>+<kbd>U</kbd></span>. This will sync ReaPack to get the latest ReaClassical functions.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_factory_reset">Factory Reset</h4>
-<div class="paragraph">
-<p>In the ReaClassical top menu, click on ReaClassical Factory Reset to return most settings back to those presented at first install.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_updating_reaper">Updating REAPER</h4>
-<div class="paragraph">
-<p>It is highly advisable to use the version of REAPER that ships with ReaClassical. Due to potential incompatibility issues, for ReaClassical 26 onwards, the third-party REAPER update utility has been removed from the install package.</p>
-</div>
-</div>
-</div>
-<div class="sect2">
 <h3 id="_converting_a_standard_reaper_project">Converting a Standard REAPER Project</h3>
 <div class="paragraph">
 <p>ReaClassical has the ability to import any REAPER project (available in the top ReaClassical menu via <span class="menuseq"><b class="menu">Project Setup</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Convert REAPER Project</b></span>). Because of the dizzying amount of custom routing and folder hierachy that is possible inside a standard REAPER project, the following occurs during conversion:</p>
@@ -910,6 +963,78 @@ Do not attempt to complete any of the above actions outside of Mission Control!
 </div>
 <div class="paragraph">
 <p>At this point, a horizontal workflow is set up and all that is left for the engineer to do is recreate any custom routing using Mission Control. For example, if the original REAPER project used folders to organize orchestral section microphone channels, this would be recreated by clicking on the appropriate routing buttons to disconnect from RCMaster and instead route to one or more newly-created submix tracks.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reaclassical_preferences">ReaClassical Preferences</h3>
+<div class="paragraph">
+<p>Open via <kbd>F5</kbd> or via Mission Control <kbd>C</kbd>. Here is a brief description for each one:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/rc_prefs.png" alt="ReaClassical Preferences">
+</div>
+<div class="title">Figure 3. ReaClassical Preferences</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">S-D Crossfade Length (ms)</dt>
+<dd>
+<p>The xfade length for all S-D edit functions. Default = 35ms.</p>
+</dd>
+<dt class="hdlist1">CD Track Offset (ms)</dt>
+<dd>
+<p>The negative offset where CD markers are placed to the left of item starts. This is really for old CD players that could not process quick enough and skipped the start of audio. Default = 200ms.</p>
+</dd>
+<dt class="hdlist1">INDEX0 Length (s) (&gt;= 1)</dt>
+<dd>
+<p>If you add an exclamation mark to your CD track name in the metadata editor window, a countdown of this set length will visually appear on some CD Players. Default = 3 seconds.</p>
+</dd>
+<dt class="hdlist1">Album Lead-out Time (s)</dt>
+<dd>
+<p>The amount of silence automatically set at the end of the album. Default = 7 seconds.</p>
+</dd>
+<dt class="hdlist1">Ranked Items keep folder color</dt>
+<dd>
+<p>To only show the ranking as a item name prefix without color, set to checked. Default = unchecked.</p>
+</dd>
+<dt class="hdlist1">S-D Marker Check (ms)</dt>
+<dd>
+<p>When placing destination markers, a check occurs to see if the marker would be placed close to an existing crossfade. This prevents unnecessary "sliver" edits. Set to 0 to disable. Default = 500ms.</p>
+</dd>
+<dt class="hdlist1">REF = Overdub Guide</dt>
+<dd>
+<p>By default, the reference track acts as a way to A/B project material with an external reference audio file. To use as an overdub track see <a href="#overdub">Overdub Recording</a>. Default = unchecked.</p>
+</dd>
+<dt class="hdlist1">Add S-D Markers at Mouse Hover</dt>
+<dd>
+<p>To avoid needing the track to be selected before placing S-D markers, set to checked. This also allows for opening the fade editor <kbd>F</kbd> by hover. Default = unchecked.</p>
+</dd>
+<dt class="hdlist1">Alt Audition Playback Rate</dt>
+<dd>
+<p>The playrate used when using <span class="keyseq"><kbd>Shift</kbd>+<kbd>A</kbd></span> etc. Default = x0.75.</p>
+</dd>
+<dt class="hdlist1">Year of Production</dt>
+<dd>
+<p>Default = The year the project was created.</p>
+</dd>
+<dt class="hdlist1">CUE Audio Format</dt>
+<dd>
+<p>The audio format that will be rendered to pair with the CUE file. Default = WAV.</p>
+</dd>
+<dt class="hdlist1">Floating Destination Folder</dt>
+<dd>
+<p>For users who wish to always use the top folder as destination, this visually moves the destination folder just above the placement of source markers, making working in vertical workflow even easier without need for manual vertical scrolling. Note that when checked, the new S-D editing anywhere to anywhere is disabled and destination markers are always associated with the first folder. Default = unchecked.</p>
+</dd>
+<dt class="hdlist1">Find Takes Using Item Names</dt>
+<dd>
+<p>If the audio material was not recorded in ReaClassical and the filenaming does not include a take number as a suffix, you can find takes based on item names instead by checking the option. Default = unchecked.</p>
+</dd>
+<dt class="hdlist1">Show Only Item Take Numbers</dt>
+<dd>
+<p>By default, the item names show both session name (if present) and take numbers. For quicker visual location, set to checked to only show padded take numbers. Default = unchecked.</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect2">
@@ -965,7 +1090,7 @@ Save your project before continuing with other workflows.
 <p>Press Arm and monitor your signal</p>
 </li>
 <li>
-<p>Use the buttons in the panel to control recording, pausing and stopping</p>
+<p>Use the left-most buttons in the panel to control recording, pausing and stopping</p>
 </li>
 <li>
 <p>Add ranking and notes while recording or after the fact by clicking on a previously-recorded item</p>
@@ -1108,8 +1233,857 @@ Save your project before continuing with other workflows.
 <div class="paragraph">
 <p>Once you are familiar with the basics of REAPER and have set up your first ReaClassical project, if you don&#8217;t have a lot of time before your first project, read <a href="#tldr">Too Long; Didn&#8217;t Read</a>. Otherwise, it&#8217;s time to dive deeper into what is possible with ReaClassical.</p>
 </div>
+<div class="sect2">
+<h3 id="_recording_2">Recording</h3>
+<div class="paragraph">
+<p>Now that you have decided on a workflow, we can start recording!</p>
+</div>
+<div class="sect3">
+<h4 id="_manually_setting_inputs">Manually Setting Inputs</h4>
+<div class="paragraph">
+<p>Use Mission Control <kbd>C</kbd> to set recording inputs and panning manually or automatically based on track name. For automatic assignment, add text like "Left", "R", "Pair", "2ch" etc. as a suffix and press <b class="button">Auto Rec Inputs</b>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_easy_steps_to_record">Easy Steps to Record</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Open ReaClassical Record Panel via <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span></p>
+</li>
+<li>
+<p>Select a parent track of a folder</p>
+</li>
+<li>
+<p>Press Arm and monitor your signal</p>
+</li>
+<li>
+<p>Use the left-most buttons in the panel to control recording, pausing and stopping</p>
+</li>
+<li>
+<p>Add ranking and notes while recording or after the fact by clicking on a previously-recorded item</p>
+</li>
+<li>
+<p>Once all recording is completed, close the record panel (automatically disengages record-armed tracks).</p>
+</li>
+</ol>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/record_panel.png" alt="Record Panel">
+</div>
+<div class="title">Figure 4. Record Panel</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_additional_notes_on_record_panel">Additional Notes on Record Panel</h4>
+<div class="sect4">
+<h5 id="_other_buttons_in_the_main_window">Other Buttons in the Main Window</h5>
+<div class="paragraph">
+<p>Use <b class="button">+Take</b> to quickly increase the take number (useful for a false start, for example). press <b class="button">Next</b> to start a new recording section. This means that in vertical workflow the first source folder is rec-armed and in both workflows, the edit cursor is placed 5 seconds after the final item in the project.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_record_panel_right_click_options">Record Panel Right-Click Options</h5>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/record_panel_options.png" alt="Record Panel Options">
+</div>
+<div class="title">Figure 5. Record Panel Options</div>
+</div>
+<div class="sect5">
+<h6 id="_scheduled_recording">Scheduled Recording</h6>
+<div class="paragraph">
+<p>To start (and optionally end) a recording at specific times or manually start a recording to end at a certain time or after a certain duration, right-click on the Record Panel window and add the appropriate entry or entries in HH:MM format. After pressing <b class="button">OK</b>, the Record Panel window will display information above the take number. If you enter a start or end time earlier or equal to the current time, the function will assume a next day schedule and will annotate the time with an asterisk (*). Likewise, with both a start and end time, if the end time is earlier than or equal to start, it will assume a time 24 hours later. Don&#8217;t forget to arm your tracks before walking away!</p>
+</div>
+</div>
+<div class="sect5">
+<h6 id="_overriding_take_numbers">Overriding Take Numbers</h6>
+<div class="paragraph">
+<p>You shouldn&#8217;t need to use this but there are cases where you might want to start a new ReaClassical project but continue from the previous day&#8217;s last take number. To do so, check the "Allow Take Number Override" option and set a new take number. Note that it will not allow you to set a number lower than already used.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_meterbridge">Meterbridge</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/meterbridge.png" alt="Meterbridge">
+</div>
+<div class="title">Figure 6. Meterbridge</div>
+</div>
+<div class="paragraph">
+<p>Use <kbd>B</kbd> to open the Meterbridge. The default view shows numeric peak holds. When tracks are record-armed, the main window displays recording inputs. During auditioning of material, the top rows show mixer tracks and the bottom any special tracks including RCMASTER and Master tracks.</p>
+</div>
+<div class="paragraph">
+<p>To switch to graphical meters, check the "Graphical Meters" option. Under the options tab, you can set color thresholds for yellow and red.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_recording_indicator">Recording Indicator</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/rec_indicator.png" alt="Recording Indicator">
+</div>
+<div class="title">Figure 7. Recording Indicator</div>
+</div>
+<div class="paragraph">
+<p>The recording indicator <span class="keyseq"><kbd>Alt</kbd>+<kbd>R</kbd></span> is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_headroom">Headroom</h4>
+<div class="paragraph">
+<p>Again, I refer you to the books on classical music production but in general I suggest aiming for around -12dB peaks on the meters. 24-bit recording allows for a lot of headroom so there&#8217;s no need to push close to 0dB. Adjust the individual mixer track faders to balance. When using a 32-bit float device with dual AD converters as an interface (such as the Zoom F-series), ensure that the recording file format is switched to 32-bit float via project preferences <kbd>P</kbd>. The recorded levels might seem too low or too high during recording, but they can be easily adjusted afterward in ReaClassical without introducing any extra noise or distortion.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_recording_safety">Recording Safety</h4>
+<div class="paragraph">
+<p>When using the Record Panel for recording (essential!), there is increased safety when using classical take recording via the automatic switch to a restricted set of keyboard shortcuts. In addition to using the record panel, you can also access various non-disruptive functions like zooming.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="overdub">Overdub Recording</h4>
+<div class="paragraph">
+<p>To record additional material after the fact (say a separate narration track or an organ part in a church after the main recording session in a concert hall), edit the orchestral material as usual and use a mixdown as a guide track in a new project (or new project tab). To achieve this, use a vertical workflow (convert if necessary via Mission Control <kbd>C</kbd>), add a Reference track also via Mission Control and set the ReaClassical Project Preferences option <code>REF = Overdub Guide</code> to checked (<kbd>F5</kbd>). With this setting, audio on the guide track will be audible during take recording and auditioning of folders. Use Classical Take Recording via the Record Panel as normal. You can then S-D edit and mix the overdub material to fit with the orchestral mixdown or, if further mixing and mastering work is required on the original multi-track material, bring the organ part into that project as a new track in the folders (see below).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_manipulating_tracks_during_a_recording_session">Manipulating Tracks During a Recording Session</h4>
+<div class="sect4">
+<h5 id="_disabling_channels">Disabling Channels</h5>
+<div class="paragraph">
+<p>In a typical recording session, the musicians with the least to record are often allowed to leave the session early once their work is completed. If they were individually recorded using a spot microphone, it wouldn&#8217;t make sense to continue recording on that channel. In ReaClassical there are two main ways to disable a channel. In a horizontal workflow using a single folder, it is no hassle to simply un-arm the desired track(s). For a vertical workflow with multiple folders, the task could end up being time-consuming with potential for error. So, the recommended ReaClassical way, both easy and visually obvious, is to set the rec input for the channel(s) to "None" via Mission Control.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_adding_a_new_microphone_mid_recording_session">Adding a New Microphone Mid-Recording Session</h5>
+<div class="paragraph">
+<p>You can add a track to all folders in the project at once via Mission Control. It will prompt you for a name and then add a new track with that name to the end of each folder. This also works for a single folder while working in a horizontal workflow.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_deleting_tracks">Deleting tracks</h5>
+<div class="paragraph">
+<p>In both horizontal and vertical workflows, you can use Mission Control to quickly delete child tracks from all folders of the project.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_re_ordering_tracks">Re-ordering tracks</h5>
+<div class="paragraph">
+<p>In both horizontal and vertical workflows, you can re-order the mixer tracks by selecting the track in Mission Control and using the arrow buttons. This also moves all audio and assigned recording inputs.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_audio_calculator">Audio Calculator</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/calc.png" alt="Audio Calculator">
+</div>
+<div class="title">Figure 8. Audio Calculator</div>
+</div>
+<div class="paragraph">
+<p>To figure out required disk space for a duration of audio or vice versa to figure out maximum duration of audio you can record based on available disk space, use <span class="keyseq"><kbd>Shift</kbd>+<kbd>H</kbd></span> to open a calculator. You can set units, channel count, samplerate, bit depth and format (WAV or MP3 at various bitrates).</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_importing_2">Importing</h3>
+<div class="paragraph">
+<p>While it is always better to record in ReaClassical for traditional recording sessions, you may prefer using a portable recorder for live performances. Further, you might need to import audio recorded by other engineers who used a different DAW.</p>
+</div>
+<div class="sect3">
+<h4 id="_importing_audio_from_a_portable_recorder">Importing Audio from a Portable Recorder</h4>
+<div class="paragraph">
+<p>If you use a portable recorder such as a MixPre, you might have a multi-channel combined file. ReaClassical includes a special function for converting these into a stereo pair + mono track set. Import your multi-channel media using a single regular track (for a horizontal workflow) or multiple regular tracks (for a vertical workflow). Press <kbd>F10</kbd> (no need to select the items). Answer <b class="button">yes</b> to the prompt that appears if the first two channels should be treated as stereo interleaved (i.e. they represent your main pair). Depending on the choice made, the number of tracks in the resulting folder(s) will adjust accordingly. You are then given the opportunity to name your tracks in Mission Control. Obviously if you decide to move to a vertical workflow after exploding using a single track, you can always use Mission Control to convert. If you need to bring in new takes after running this function, simply open an empty project tab, import additional media then run the function there. Afterwards, copy or cut the exploded items into the original project tab to the desired locations.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_smart_import_2">Smart Import</h4>
+<div class="paragraph">
+<p>Assuming that the filenaming contains at least a take number as a suffix along with channel descriptions:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Copy or move source material into the media subfolder inside your ReaClassical project folder.</p>
+</li>
+<li>
+<p>Ensure that track names match any channel text in the filenames</p>
+</li>
+<li>
+<p>If your filenames also contain a session name, add some markers <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>M</kbd></span> and name them accordingly.</p>
+</li>
+<li>
+<p>Via the top ReaClassical menu, click on <span class="menuseq"><b class="menu">Project Setup</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Smart Audio Import</b></span></p>
+</li>
+<li>
+<p>Open Mission Control <kbd>C</kbd> to add special tracks such as aux &amp; submix, make routing adjustments etc.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_manual_import_by_dragging_2">Manual Import by Dragging</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In your source folder, select items that should be aligned vertically (for example, every channel for particular take) and drag into the ReaClassical project being sure to drop onto one of the folders created by ReaClassical with a track count that matches the number of files you selected. Choose the option "Same time position on separate tracks"</p>
+</li>
+<li>
+<p>Continue as above for each take</p>
+</li>
+<li>
+<p>Open Mission Control <kbd>C</kbd> to add special tracks such as aux &amp; submix, make routing adjustments etc.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_navigating_a_project">Navigating a Project</h3>
+<div class="paragraph">
+<p>In addition to built-in REAPER functions, ReaClassical uses a series of shortcuts to help you easily navigate your classical project. Important: I always make some dedicated time post-recording to get an overview of the recorded material, tidy up the digital notes I took during the session and perform a backup on an external drive as soon as possible.</p>
+</div>
+<div class="sect3">
+<h4 id="_whole_project">Whole Project</h4>
+<div class="paragraph">
+<p>Use <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8594;</kbd></span> to see the whole project horizontally and/or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>&#8595;</kbd></span> to see everything vertically. If you want to zoom both horizontally and vertically at the same time, use <kbd>`</kbd> (backtick). You can also go to the start or end of the project by pressing the <kbd>Home</kbd> or <kbd>End</kbd> key respectively.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_finding_takes">Finding Takes</h4>
+<div class="paragraph">
+<p>Use <kbd>Enter</kbd> on the main keyboard or numpad to quickly search for a take based on the underlying filename of the media item. This will work for any file-naming system that uses numbers before the file extension such as <em>main_pair-T04.wav</em>, <em>cello-spot-take_23.flac</em> or even <em>ortf_pair(04).wav</em> such as created by Presonus Studio One. Note that if the imported or recorded files have zero-padding that is not a problem. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.</p>
+</div>
+<div class="paragraph">
+<p>In <kbd>F5</kbd> preferences, you can set to search by item name instead. In the ReaClassical Notes app <kbd>N</kbd>, you can override and reset take numbers. These take priority in the search.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_jump_to_time">Jump to Time</h4>
+<div class="paragraph">
+<p>Press <kbd>TAB</kbd> to jump to a specific absolute or relative time using right-aligned logic, similar to video editing applications. This can be an absolute time within the project or an relative position inside a selected item or a set of consecutive crossfaded items. Prefix with + or - to make relative jumps. Once you get the hang of using this input logic, moving to any position is extremely quick!</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p><strong>Some Right-Aligned Logic Examples:</strong></p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Input</th>
+<th class="tableblock halign-left valign-top">Meaning (based on project frame rate)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>100524</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Move to absolute position 10m 5s 24f</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1141711</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Move to absolute position 1h 14m 17s 11f</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>+8</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jump forward by 8 frames</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>-1015</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jump backward by 10s 15f</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>+23000</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jump forward by 2m 30s (and 0 frames)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_items_markers">Items &amp; Markers</h4>
+<div class="paragraph">
+<p>You can easily shuffle back and forth between item edges by using the <kbd>Q</kbd> and <kbd>W</kbd> keys. You can move between markers by using the <kbd>,</kbd> and <kbd>.</kbd> keys (by design given on my keyboard they are the same keys that have <kbd>&lt;</kbd> and <kbd>&gt;</kbd>).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_parents_children">Parents &amp; Children</h4>
+<div class="paragraph">
+<p>ReaClassical can hide or show children of track folders. This means that editing multi-track classical music can be as easy as editing a stereo track. Making an edit to the parent track automatically makes the same one to all the children too. To show hidden children select the parent track and press <kbd>D</kbd> (for <em>display</em>). To hide, select the parent track and press <kbd>E</kbd> (for <em><a href="https://www.merriam-webster.com/dictionary/ensconce">ensconce</a></em>). The other benefit is that a whole set of takes can be displayed vertically in the main editing window without too much effort.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_peaks_display">Peaks Display</h4>
+<div class="paragraph">
+<p>To adjust the visual zoom of wave peaks, use <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>&#8593;</kbd></span> and <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>&#8595;</kbd></span>. This is purely visual and allows for easier editing of quieter sections.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_reaclassical_s_d_editing_toolbar">ReaClassical S-D Editing Toolbar</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/editing_toolbar.png" alt="S-D Editing Toolbar">
+</div>
+<div class="title">Figure 9. S-D Editing Toolbar</div>
+</div>
+<div class="paragraph">
+<p>While I designed ReaClassical to be used efficiently with keyboard shortcuts, there is a custom S-D editing toolbar for those that prefer it. However I do highly recommend learning the key strokes as you will find your editing speeds improve dramatically. The floating toolbar can be opened via <kbd>F6</kbd> but will automatically open once when you start source-destination editing.</p>
+</div>
+<div class="paragraph">
+<p>Hover over the icons to discover what is available.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_reaclassical_top_menu">ReaClassical Top Menu</h4>
+<div class="paragraph">
+<p>At the top of the arrange window, you will see a dedicated ReaClassical menu (in between <code>Options</code> and <code>Extensions</code>). While not intended to be used as the primary way of running ReaClassical functions, it is an organized way of discovering the individual available functions and learning the keyboard shortcuts.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_summary_of_track_types_in_reaclassical">Summary of Track Types in ReaClassical</h4>
+<div class="paragraph">
+<p>While some of these will be covered later in the manual, it is useful to give a summary of track types you can currently use in ReaClassical. First, we have the <em>regular</em> folder or folder of tracks shown in the arrange window. These are where you record or import takes. Second, we have the mixer tracks designated via <code>M:</code> prefix. These tracks shown only in the mixer are where you adjust the usual track controls such as names, pan, volume, phase, add FX etc. Their names are synced across the project via when added or renamed via Mission Control. Third, we have aux busses designated via <code>@</code> prefix. You can route mixer tracks to these to use as a reverb bus etc. Fourth, we have submix busses designated via <em>#</em> prefix. You can route mixer tracks to these as a way to collect together microphones from the same orchestral section etc. Fifth, we have a dedicated room tone track where you can place recorded or generated room tone (more on this in the mastering section). Sixth, we have the <em>RCMASTER</em> bus which leads directly to the master REAPER bus. Here you can gain stage into the master bus, add FX etc. Seventh, we have reference tracks which lie outside of the RCMASTER structure thereby allowing the user to quickly make comparisons with other imported material via the audition shortcuts. Next, have the possibility of a live bounce track. This also lies outside of the RCMASTER structure and is a way to capture a live stereo mix from the RCMASTER track. Finally, the master bus itself where again you can set final levels, add FX etc. As mentioned elsewhere, try not to delete the mixer tracks or RCMASTER. But, even if you do by accident, open Mission Control <kbd>C</kbd> to recreate them.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+A reminder to do all track management in Mission Control!
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_project_management">Project Management</h3>
+<div class="sect3">
+<h4 id="_statistics">Statistics</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/stats.png" alt="Statistics">
+</div>
+<div class="title">Figure 10. Statistics</div>
+</div>
+<div class="paragraph">
+<p>For a complete set of statistics on the ReaClassical project, either for your own information or to assist with billing a client, go to <span class="menuseq"><b class="menu">ReaClassical</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">Utilities</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Show Statistics</b></span> or use the shortcut <kbd>F1</kbd>. For example, you might have a billing system that charges clients based on number of source-destination edits, or mixing/mastering based on the final length of the album. Information includes: final album length, number of CD markers, project age, total project length, total length of source material, total number of items, number of track folders, number of tracks per folder, number of <em>special</em> tracks, number of regions, number of destination S-D edits, number of destination item splits, FX count and number of automation lanes.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_typing_notes">Typing Notes</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/notes.png" alt="ReaClassical Notes">
+</div>
+<div class="title">Figure 11. ReaClassical Notes</div>
+</div>
+<div class="paragraph">
+<p>Add project, track, item notes and item ranking using ReaClassical&#8217;s Notes window <kbd>N</kbd>. The window can also be used to name or rename items.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_folder_structure">Folder Structure</h4>
+<div class="paragraph">
+<p>ReaClassical defaults to placing media and exports into appropriately subfolders making project file navigation easier. Also, ReaClassical defaults to separate folders for automatic backups and auto-saves.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_automatic_backups">Automatic Backups</h4>
+<div class="paragraph">
+<p>REAPER allows for powerful and complex backup routines. ReaClassical defaults to 10 time-stamped backups and 10 auto-saves every 15 minutes when not recording. Feel free to modify for your own way of working including switching to backups and auto saves for a number of unique days.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_cleaning">Cleaning</h4>
+<div class="paragraph">
+<p>If in doubt, keep everything! Otherwise, the <span class="menuseq"><b class="menu">File</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Clean currrent project directory</b></span> is an excellent way to reduce the size of your projects. Note that when assigning a session name via the Record Panel Window, currently the above REAPER menu item doesn&#8217;t search recursively. In a way, this reduces the chances of accidentally deleting precious takes. You can always manually delete but, from experience, it is <em>much</em> better to simply keep everything.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_archiving">Archiving</h4>
+<div class="paragraph">
+<p>There are various ways to archive classical music projects. First, you can access the Project Bay by <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>B</kbd></span> shortcut. You can then ensure that all media used in the project is contained within the project folder itself. If not, you can select as many as necessary, right click and move/copy into the project folder. After this, you can simply compress the folder as a zip and store on an external drive. A further step to guaranteeing ability to open in the future is to freeze tracks so that plugin effects are baked in (with ability to unfreeze later if possible). Alternatively you can save a copy of the project via <span class="menuseq"><b class="menu">File</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Save project as&#8230;&#8203;</b></span>, converting to a format like FLAC and trimming the media as you wish. Finally, one to look out for in the future is <a href="https://forum.cockos.com/showthread.php?t=280150">Project Archiver</a>. However, I don&#8217;t believe it is quite ready for prime-time yet and recommend using one of the other methods for now.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_auditioning_playback">Auditioning (Playback)</h3>
+<div class="paragraph">
+<p>Audition your material via mouse hover + <kbd>A</kbd> on parent or child tracks. Use hover + <span class="keyseq"><kbd>Shift</kbd>+<kbd>A</kbd></span>  to playback at a custom rate set via ReaClassical Preferences <kbd>F5</kbd>. Use mixer mute and solo buttons to further customize what you hear.</p>
+</div>
+<div class="paragraph">
+<p>Hover over a reference track for easy A/Bing between your audio production and one or more reference audio files.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_editing_2">Editing</h3>
+<div class="paragraph">
+<p>In ReaClassical 26 and following, source-destination editing is truly anywhere to anywhere. This means you can place your source and destination marker pairs on <em>any</em> folder. It opens the door to multi-disc album projects and more!</p>
+</div>
+<div class="sect3">
+<h4 id="_editing_step_by_step">Editing Step-by-Step</h4>
+<div class="paragraph">
+<p>Ensure that the folder where you want to place the marker pair is selected. The best way to do this is to click on the item where you want the marker. Note that in <kbd>F5</kbd> preferences you can set placement at mouse hover meaning that the desired folder is chosen based on hover position.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Set destination IN and OUT markers via <kbd>1</kbd> and <kbd>2</kbd></p>
+</li>
+<li>
+<p>Set source IN and OUT markers via <kbd>3</kbd> and <kbd>4</kbd></p>
+</li>
+<li>
+<p>Press <kbd>5</kbd> to make the source-destination edit (2-, 3- or 4-point edit depending on how many markers you set), or <kbd>F4</kbd> to make a time-stretched S-D edit (requires all 4 markers), or if only using destination IN marker and both source markers, <kbd>F3</kbd> for an "assembly" or 3-point "insert" edit</p>
+</li>
+<li>
+<p>To finesse the edit, click on the right item of a crossfade pair and press <kbd>F</kbd></p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_crossfade_editor">Crossfade Editor</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/xfade_window.png" alt="Crossfade Editor">
+</div>
+<div class="title">Figure 12. Crossfade Editor</div>
+</div>
+<div class="paragraph">
+<p>Since v7.40, REAPER includes an excellent professional two-lane crossfade editor similar in nature to the specialist classical DAWs such as Sequoia and Pyramix. With the improved crossfade editor, users can see the continued "ghost" waveforms of the items beyond the crossfade they enter and likewise the previous waveforms of the items that exit the crossfade. The ability to visually align transients and then position the crossfade just before it is absolutely critical (and fun when you have the tools to do it!). Select the right-hand item of a fade (or hover over the item if <code>Add S-D Markers at Mouse Hover</code> is set to checked in ReaClassical Project Preferences <kbd>F5</kbd>), press <kbd>F</kbd> and you are moved into crossfade editor mode. Note also that you are automatically centered on the crossfade and can use the mouse wheel to zoom in and out. Press <kbd>F</kbd> again and you exit that mode.</p>
+</div>
+<div class="paragraph">
+<p>So, now you are in the crossfade editor mode, my own preferred method of getting the perfect crossfade is to move the transient I want on the left (upper) item to just after the crossfade by dragging on the ghost waveform. Then I drag the "ghost" waveform of my right (lower) item so that the two transients align. That&#8217;s it! Drag on the active part of the waveform to also move the location of the crossfade. You can just move or resize the crossfade by hovering directly over the lower portion of the crossfade and dragging either the edge or the shaded rectangle. Be aware that markers are not rippled in ripple-per-track mode (but with the introduction of the Create CD Markers, I highly recommend not bothering to create any markers at this point).</p>
+</div>
+<div class="paragraph">
+<p>In reality, this process can be just a few seconds to achieve the perfect edit. To ensure that previous xfades are unaffected, make sure that <em>Lock left-hand start</em> is checked:</p>
+</div>
+<div class="paragraph">
+<p>To audition material, hover the mouse inside the crossfade window and:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>press <kbd>A</kbd> to audition the crossfade with mirrored pre/post roll based on mouse cursor location</p>
+</li>
+<li>
+<p>press <kbd>S</kbd> to audition just the left item based on mouse cursor location or its mirrored position</p>
+</li>
+<li>
+<p>press <kbd>D</kbd> to audition just the right item based on mouse cursor location or its mirrored position</p>
+</li>
+<li>
+<p>press <kbd>E</kbd> to audition just the top lane based on mouse cursor location or its mirrored position</p>
+</li>
+<li>
+<p>press <kbd>C</kbd> to audition just the bottom lane based on mouse cursor location or its mirrored position</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Use <span class="keyseq"><kbd>Shift</kbd>+<kbd>A</kbd></span>, <span class="keyseq"><kbd>Shift</kbd>+<kbd>S</kbd></span> or <span class="keyseq"><kbd>Shift</kbd>+<kbd>D</kbd></span> to do the equivalent but with a custom playrate as set in <kbd>F5</kbd> preferences.</p>
+</div>
+<div class="paragraph">
+<p>You can shuttle between crossfades using the <kbd>Q</kbd> and <kbd>W</kbd> shortcuts. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_source_audition_manager">Source Audition Manager</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/source_audition.png" alt="Source Audition Manager">
+</div>
+<div class="title">Figure 13. Source Audition Manager</div>
+</div>
+<div class="paragraph">
+<p>When making a source-destination edit, you may not have a list or annotated score from the musicians or producer showing preferred edits. If the decision is left to the audio engineer, this process is now very straightforward in ReaClassical 26 via the Source Audition Manager. You can open via Mission Control or <kbd>Z</kbd> shortcut.</p>
+</div>
+<div class="paragraph">
+<p>When the window opens, you will also note that razor selection is enabled. To set up all the source audition pairs, drag on the desired parent items and press <kbd>Z</kbd> again to create an audition pair and add to the window.</p>
+</div>
+<div class="paragraph">
+<p>Use the controls to audition, rank and add notes. Once you have settled on a best take, press the convert button to delete all marker pairs and replace with a single set of actual source IN and OUT markers. Assuming one or more destination markers are already set, you can press <kbd>5</kbd>, <kbd>F3</kbd> or <kbd>F4</kbd> to make the desired edit. During auditioning, you can delete individual pairs via the <b class="button">X</b> on the specific table row, as well as abandon the whole process by clicking <b class="button">Delete All Audition Pairs…</b>.Just closing the window automatically disables razor selection mode but maintains any existing source audition pairs.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_other_editing_tips">Other Editing Tips</h4>
+<div class="sect4">
+<h5 id="_marking_edits_on_your_scores">Marking Edits on your Scores</h5>
+<div class="paragraph">
+<p>This is best done using a physical, photocopied score by the conductor or lead musician. I advocate for a “T” system where a large T is inserted into the score at the intended edit point. Either side of the T stem, and under the crossbar, the outgoing and incoming take numbers are written. A wavy crossbar indicates some leeway for where the edit point can be placed. Further notes can be attached underneath the T such as directions for tightening the gap etc.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/score-edits.png" alt="Score Edits">
+</div>
+<div class="title">Figure 14. Editing a physical score</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_preparing_takes">Preparing Takes</h5>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In ReaClassical 26 this is handled on behalf of the user as much as possible including when opening Mission Control, placing your first source-destination marker and opening <kbd>F5</kbd> Preferences.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Whether working horizontally or vertically, you can use the Prepare Takes function. It is intelligent enough to figure out which workflow you are using. Just press <kbd>T</kbd> (for <em>Takes</em>). Super simple! Every item comprising the same take are now grouped together.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_multi_project_tab_s_d_editing">Multi-Project Tab S-D Editing</h5>
+<div class="paragraph">
+<p>If you&#8217;d like to S-D edit between various open project tabs you can set both the source and destination <em>project</em> markers via <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd></span> (or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>2</kbd></span>) for destination and <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>3</kbd></span> (or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>4</kbd></span>) for source (essentially the same numbers associated with regular S-D markers). The markers can exist anywhere on the tab&#8217;s timeline but perhaps the very beginning or end would be good to keep them out of the way. The S-D editing itself then works just as for a single tab other than any source markers that are set are not deleted to aid quickly undoing in the destination tab and being ready to reapply the edit. The only rule when using S-D project markers is to ensure that source or destination markers should be paired with the corresponding source or destination project marker. This workflow would, for example, allow you to have multiple project tabs (perhaps one for each symphony movement plus a final <em>destination</em> tab), allowing for both internal editing per tab but after setting the S-D project markers compiling the final edit in the <em>destination</em> tab. To delete all the S-D project markers press <span class="keyseq"><kbd>Shift</kbd>+<kbd>Delete</kbd></span>. Also, in multi-tab S-D editing, when regular markers are placed, any other existing versions in other tabs are automatically deleted to ensure that only one version of the marker exists at a time across all open project tabs.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_delete_delete_with_ripple">Delete / Delete with Ripple</h5>
+<div class="paragraph">
+<p>While perhaps not used as often as 3- and 4-point edits, I have created two functions for deletion of material. Delete &amp; Ripple <kbd>Backspace</kbd> will delete the material between source IN and OUT markers and ripple material to the right backwards with a short crossfade. Delete Leaving Silence <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Backspace</kbd></span> will also delete but maintain the silence without rippling backwards.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_copymove_destination_material_to_source">Copy/Move Destination Material to Source</h5>
+<div class="paragraph">
+<p>Run either the copy <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd></span> or move <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>M</kbd></span> version of the function from the ReaClassical toolbar (no need to ensure the first track is selected) and the function will copy or move all items and edits from the destination folder directly below to a newly created source folder with Eastern Blue color for identification purposes. This allows for saving versions of finished edits either via iteration (<em>copying</em> so you can continue to make further edits) or fresh (<em>moving</em> so you can compile an alternate version of a best take from scratch). These different edits can then be easily auditioned via <kbd>A</kbd> the shortcut. This is similar to a Pyramix-style iterative editing method while still maintaining the destination folder as the uppermost folder.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_promote_source_to_destination">Promote Source to Destination</h5>
+<div class="paragraph">
+<p>Select a source folder and press the "promote" icon in the toolbar or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd></span> to promote the source folder to the top "destination" position.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_add_s_d_markers_to_edges_of_items_or_time_selection">Add S-D Markers to Edges of Item(s) or Time Selection</h5>
+<div class="paragraph">
+<p>Used in combination with Delete / Delete with Ripple (<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Backspace</kbd></span>/<kbd>Backspace</kbd>), you can quickly set both source markers to the edges of one or more selected items on a parent track or time selection via <kbd>F12</kbd>. This is a time-saver when dealing with potential <em>sliver</em> edits i.e. small unneeded leftover edits as a result of multiple rounds of zoomed-out S-D editing. Note that the built-in checks when manually placing destination markers should go some way to alleviating this issue which can easily go unnoticed in other classical music DAWs. Likewise you can use <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>F12</kbd></span> to set destination markers (selected items must be in the destination folder). Note that if using time selection for placing source markers, as for S-D marker placement via <kbd>3</kbd> or <kbd>4</kbd>, make sure you first have the desired source folder track selected before pressing the shortcut (a good way to do this is to first click on the item involved). You may prefer to set both source and destination markers this way over the more traditional number key shortcuts acting as a sort of hybrid between S-D and razor editing. Also note that if both selected items and a time selection exist, the time selection takes precedence.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_move_zoom_to_s_d_markers">Move / Zoom to S-D markers</h5>
+<div class="paragraph">
+<p>To move to any existing S-D markers use <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>1</kbd></span>, <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>2</kbd></span>, <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>3</kbd></span> or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>4</kbd></span>. To zoom to any of the S-D markers for more fine-grained placement, use <span class="keyseq"><kbd>Alt</kbd>+<kbd>1</kbd></span>, <span class="keyseq"><kbd>Alt</kbd>+<kbd>2</kbd></span>, <span class="keyseq"><kbd>Alt</kbd>+<kbd>3</kbd></span> or <span class="keyseq"><kbd>Alt</kbd>+<kbd>4</kbd></span>. If you have multi-tab S-D editing set up, these shortcuts will also automatically move focus to the correct project tab.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_delete_s_d_markers">Delete S-D markers</h5>
+<div class="paragraph">
+<p>To delete all regular S-D markers, press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Delete</kbd></span>.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_floating_destination_folder">Floating Destination Folder</h5>
+<div class="paragraph">
+<p>The floating destination folder feature enhances vertical workflow efficiency by dynamically positioning the destination folder just above the selected source folder. This reduces unnecessary vertical scrolling when setting IN and OUT markers for destination and source folders that are far apart in the project. Additionally, this feature is fully compatible with mouse hover S-D editing and when setting source markers to item edges (<kbd>F12</kbd>).</p>
+</div>
+<div class="paragraph">
+<p>To enable the floating destination folder, open ReaClassical Project Preferences (<kbd>F5</kbd>) and set the corresponding line to checked.</p>
+</div>
+<div class="paragraph">
+<p>For example, with floating destination enabled, place a source IN marker (via <kbd>3</kbd>) on any source folder. The destination folder will reposition itself just above the selected source folder. Add the remaining S-D markers as required. Perform any S-D edits via <kbd>5</kbd>, <kbd>F4</kbd>, or <kbd>F3</kbd>. Select another source parent and place another marker (<kbd>3</kbd>). The destination folder will continue adjusting dynamically.</p>
+</div>
+<div class="paragraph">
+<p>It is worth noting that if the destination folder moves above a source folder, the source marker track number correctly updates to reflect the new order.</p>
+</div>
+<div class="paragraph">
+<p>To disable floating mode, re-open ReaClassical Project Preferences and set <code>Floating Destination Folder</code> unchecked. This will also automatically move the destination folder back to the top of the project.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_razor_editing">Razor Editing</h5>
+<div class="paragraph">
+<p>Because of the potential for visual overlap of markers, I much prefer the REAPER razor edit functionality for vertical take work. It works a lot like the process shown in this Pyramix <a href="https://www.youtube.com/watch?v=wQXwnvITQCQ">video</a>.</p>
+</div>
+<div class="paragraph">
+<p>While Pyramix also has additional source-destination marker workflows, I couldn&#8217;t help but feel that for professional ensembles that manage a high degree of tempo regularity between takes, this method can be extremely efficient. This isn&#8217;t the document to introduce REAPER razor edits as there are plenty of resources online if you do a simple search. Here we are only concerning ourselves with creation of the razor area across all our pairs and spot mics (REAPER&#8217;s default shortcut is the rather uninspiring Alt+Right drag). Thankfully, it can become the default editing mode by selecting the razor edit mode on the main toolbar and left-click dragging.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mixing_2">Mixing</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add FX, change routing, and optionally adjust volume, panning etc via Mission Control <kbd>C</kbd></p>
+</li>
+<li>
+<p>Open Mixing Snapshot Manager via <span class="keyseq"><kbd>Shift</kbd>+<kbd>M</kbd></span></p>
+</li>
+<li>
+<p>Create automatically-recalled mixer snapshots at edit cursor or inside time selection</p>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="_mixer_snapshot_manager_in_detail">Mixer Snapshot Manager in Detail</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/mixer_snapshots.png" alt="Mixer Snapshot Manager">
+</div>
+<div class="title">Figure 15. Mixer Snapshot Manager</div>
+</div>
 <div class="paragraph">
 <p>Coming Soon&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mastering_2">Mastering</h3>
+<div class="paragraph">
+<p>Mastering in ReaClassical is game-changing. Many features described here are not available in any other classical DAW. I hope that the <em>ReaClassical</em> way saves you much time and helps you look forward to the mastering phase of the project. While automatic DDP generation, automatic room tone function, and professional album reports are the main features here, you will probably find the revolutionary mixer snapshot manager is an extremely efficient way to add auto-recall mixer scenes across your production as well enjoying the ability to quickly reorder album tracks via a simple keyboard shortcuts.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If working in horizontal workflow, ensure that there is over a minute&#8217;s worth of empty timeline between the end of the proposed album and any other source material. Instead, you can also choose to convert to a vertical workflow via Mission Control <kbd>C</kbd>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_basic_mastering_workflow">Basic Mastering Workflow</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Choose a folder to be the basis of an album (you can create multi-disc productions!)</p>
+</li>
+<li>
+<p>Remove all names from items on the parent track aside from those you want to be track starts. You can clear all items on the folder track via <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>T</kbd></span></p>
+</li>
+<li>
+<p>Enter track start names via the Notes window <kbd>N</kbd></p>
+</li>
+<li>
+<p>Press <kbd>Y</kbd> to open the metadata editor</p>
+</li>
+<li>
+<p>Once happy, head to the Render <kbd>R</kbd> window.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In order to make the process as streamlined as possible for the user before the metadata editor window opens, on first run generic albumwide metadata (the name starts with "@") is added to an unnamed item on the parent folder. If that is not possible, a transparent split is made on the final item of the album.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_metadata_editor_in_detail">Metadata Editor in Detail</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/metadata_editor.png" alt="Metadata Editor">
+</div>
+<div class="title">Figure 16. Metadata Editor</div>
+</div>
+<div class="paragraph">
+<p>The metadata window allows you to enter all track and album metadata in a single place including automatic ISRC values based on the first track entry, and automatic album-wide performer, songwriter, composer and arranger values based on one or more entries in the track table. These can be overridden via the checkboxes.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Add a exclamation mark ("!") to the start of CD track names that you would like to have a visual countdown (length set in <kbd>F5</kbd> prefs). This feature is not available in all CD players.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_other_mastering_tips">Other Mastering Tips</h4>
+<div class="sect4">
+<h5 id="_cue_file_and_reports">CUE File and Reports</h5>
+<div class="paragraph">
+<p>In your project folder you will see an automatically-generated CUE file (for use with a subsequently rendered gapless audio file) along with HTML and plaintext album listings and a complete technical metadata file (useful for sending to a duplication/replication factory). For multi-disc albums, each fileset has a prefix associated with the project folder.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/html_album_report.png" alt="Example of HTML Album Report">
+</div>
+<div class="title">Figure 17. Example of HTML Album Report</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_marker_offsets">Marker Offsets</h5>
+<div class="paragraph">
+<p>There may be instances when an audience member coughs right before a downbeat or a violinist hits strings before the first note of an otherwise excellent performance. The Add Marker Offset function allows you to adjust the start accordingly (assuming you have some nice recorded or generated roomtone on the dedicated roomtone track).</p>
+</div>
+<div class="paragraph">
+<p>To use, manually drag one or more CD markers to where you want them and then run the function via shortcut <span class="keyseq"><kbd>Shift</kbd>+<kbd>O</kbd></span>. It adds the correct offset(s) to the item name(s) automatically and refreshes the album metadata editor. Now, adjustments to an item position followed by a press of <kbd>Y</kbd>, maintains the relative CD marker offset to the item start.</p>
+</div>
+<div class="paragraph">
+<p>To clear all offsets, run <span class="keyseq"><kbd>Alt</kbd>+<kbd>O</kbd></span>.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_bincue_set">BIN+CUE set</h5>
+<div class="paragraph">
+<p>Create a BIN/CUE pair (either select <code>regions define tracks</code> and render the whole project or select <code>use only # markers</code> and render by time selection if you don&#8217;t want the first pre-gap as actual silence at the start of track 1).</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_repositioning_tracks_in_an_album">Repositioning Tracks in an Album</h5>
+<div class="paragraph">
+<p>There are two functions which help with reordering or repositioning tracks. First, and perhaps most useful for producing a classical album, is if you decide that you need to reorder one or tracks. Simply select the track you want to move and press either <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>&#8592;</kbd></span> or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>&#8594;</kbd></span> to switch with the track immediately to the left or right. Note that gaps are preserved too.</p>
+</div>
+<div class="paragraph">
+<p>The other situation is when you want to start with uniform gaps between a series of short separate pieces. Use the <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Y</kbd></span> shortcut and enter a value in seconds. Your pieces are then automatically spaced and items crossfaded are left intact.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_loudness">Loudness</h5>
+<div class="paragraph">
+<p>In terms of loudness, I personally aim for about -18 LUFS Integrated for my classical albums though it can be as high as -16 LUFS and as low as -20 LUFS. The new loudness JSFX meter in REAPER and my own ReaVision Metering Suite along with the normalization of loudness and true-peak limiting in the render dialog are priceless. It&#8217;s another reason I couldn&#8217;t go back to the other classical DAWs at this point.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_rendering_2">Rendering</h3>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/render.png" alt="Render Window">
+</div>
+<div class="title">Figure 18. Render Window</div>
+</div>
+<div class="sect3">
+<h4 id="_presets">Presets</h4>
+<div class="paragraph">
+<p>ReaClassical includes various rendering presets to make rendering extremely quick and easy. In the Render dialog <kbd>R</kbd>, click on the presets button then <code>All Settings</code>. The preset names are self-explanatory. The first four entries are for exporting a whole album as a single audio file. The remaining use the automatically created regions after using the Create CD Markers function <kbd>Y</kbd> to create automatically named folders of audio files, one per CD track. After selecting a preset, you should feel free to change any render settings and perhaps save as a new preset for future use. By default, the presets use the built-in REAPER standard triangular dither.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_samplerate">Samplerate</h4>
+<div class="paragraph">
+<p>Now that r8brain free has been introduced as the best quality resampler available in REAPER (I highly recommend double-checking that it is selected when resampling at render time) I feel I can do everything, including DDP creation, without leaving my favorite DAW. However, generating a CUE file via the Create CD Markers function is still useful for all sorts of things and I often create FLAC + CUE for album playback in my media player or WAV + CUE to easily burn a CD at home.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dither">Dither</h4>
+<div class="paragraph">
+<p>Use either the built-in REAPER dither options or RCDither as the last plugin on the master chain. If using RCDither or any other 3rd-party dither be sure to keep the master fader at unity and disable all REAPER dither checkboxes.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_loudness_limiting">Loudness &amp; Limiting</h4>
+<div class="paragraph">
+<p>REAPER has a fantastic rendering feature which allows the user to set a desired loudness and peak / true peak setting. For quick exports that need to meet certain targets (i.e. streaming) this makes things extremely efficient and is very transparent when not set to extreme values.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dry_run_rendering">Dry-run Rendering</h4>
+<div class="paragraph">
+<p>Another REAPER feature that is outstanding is the dry-run render function which allows for very quick offline loudness and peak checks and much faster than using REAPER&#8217;s included realtime loudness meter. It is therefore extremely easy to set up compressors, limiters etc in the project and make small adjustments based on the dry-run values and maintain complete control over the process.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_other_rendering_tips">Other Rendering Tips</h4>
+<div class="paragraph">
+<p>Not necessarily obvious to new REAPER users are the special =START and =END markers (make your markers in the usual way and label them accordingly) that constrain the length of the project. Rather than rely on extended silence at the end of items or time selections, the =END marker is a great way to ensure you have the exact amount of lead-out you want at the end of the disc. Positioning both special markers is great way to generate files for multi-disc releases without having to rely on multiple projects.</p>
+</div>
+<div class="paragraph">
+<p>You will hopefully notice I have included various shortcuts for manually creating regions (single or multiple) from items and time selection (great for quickly generating demo snippets). Also worth noting is that you can still do some (or all!) of your source-destination editing with your track markers in place as the S/D markers have IDs far higher than any classical CD would have and are automatically deleted after a successful edit. As long as you have your ripple-per-track mode engaged, all your existing marker placements and carefully crafted edits will remain intact. But, again, don&#8217;t manually create CD markers at this point as I include a very powerful tool to make light work of that side of mastering.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_collaborating_with_video_editors">Collaborating with Video Editors</h3>
+<div class="paragraph">
+<p>When working on projects that combine audio and video, the audio engineer must ensure that high-resolution audio edits remain synchronized with the final assembled video.</p>
+</div>
+<div class="paragraph">
+<p>Several approaches exist:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>No audio edits required</strong> – The simplest case. The video editor is free to select camera angles without concerns about audio sync.</p>
+</li>
+<li>
+<p><strong>Post-edited audio with playback</strong> – The promotional video is recorded after the audio has been edited, with musicians miming or playing along to playback via loudspeaker. The video editor has complete freedom to cut between angles without sync issues. This method isn’t always feasible.</p>
+</li>
+<li>
+<p><strong>Minor edits in live-recorded video</strong> – When video and audio are recorded simultaneously and only minor edits are needed, the video editor can use a zoomed-out shot of the concert hall, a musician’s face, or another visual to mask a slight time-stretch while preserving timecode accuracy.</p>
+</li>
+<li>
+<p><strong>Multiple synchronized takes</strong> – The most complex scenario. Both video and audio are recorded in multiple takes and synchronized via a timeclock. This is the focus of the following discussion.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>ReaClassical provides tools to generate an edit list for video editors. Rather than a file for direct import, this list serves as a manual reference. For all recordings, but especially those synchronized to a timeclock, REAPER/ReaClassical retains the timeline start position from the recording. This ensures that absolute in/out source positions can be retrieved even after extensive audio edits.</p>
+</div>
+<div class="paragraph">
+<p>To create an edit list:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Perform source-destination edits as usual.</p>
+</li>
+<li>
+<p>Set the desired project framerate in the video tab of Project Settings via <kbd>P</kbd>.</p>
+</li>
+<li>
+<p>Export the edit list via <span class="menuseq"><b class="menu">ReaClassical</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">Utilities</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Build Edit List</b></span>:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Select <em>using BWF start offset</em> for timeclock-synced projects.</p>
+</li>
+<li>
+<p>Choose <em>using source file timing</em> to reference internal source audio positions. In this case, the audio engineer should provide a a single channel of audio to help the video editor locate edit points.</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The resulting HTML table includes a <code>Done</code> column for tracking progress. Additionally, when using <em>Build Edit List (using BWF Start Offset)</em>, an optional offset can be applied to correct slight constant audio-video misalignment.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/build_edit_list.png" alt="Build Edit List">
+</div>
+<div class="title">Figure 19. An example edit list</div>
+</div>
 </div>
 </div>
 </div>
@@ -1119,7 +2093,7 @@ Save your project before continuing with other workflows.
 <div class="sect2">
 <h3 id="_keyboard_shortcuts">Keyboard Shortcuts</h3>
 <div class="paragraph">
-<p>When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut <kbd>?</kbd> or by navigating to <span class="menuseq"><b class="menu">Actions</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Show action list&#8230;&#8203;</b></span> to see the current assignments. For reference (from REAPER&#8217;s own user guide), here is a table of equivalent modifier keys:</p>
+<p>When providing keyboard shortcuts, this manual assumes Windows or Linux as the operating system when modifier keys are used. MacOS users should use the typical standard substitutions. If in doubt, open up the actions menu via keyboard shortcut <kbd>?</kbd> or explore the top "ReaClassical" menu to see the current assignments. For reference (from REAPER&#8217;s own user guide), here is a table of equivalent modifier keys:</p>
 </div>
 <table class="tableblock frame-all grid-all center" style="width: 75%;">
 <caption class="title">Table 1. Shortcut Equivalents</caption>

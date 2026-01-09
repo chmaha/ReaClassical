@@ -1,0 +1,12 @@
+=== Mixing
+
+1. Add FX, change routing, and optionally adjust volume, panning etc via Mission Control kbd:[C]
+2. Open Mixing Snapshot Manager via kbd:[Shift+M]
+3. Create automatically-recalled mixer snapshots at edit cursor or inside time selection
+
+==== Mixer Snapshot Manager in Detail
+
+.Mixer Snapshot Manager
+image::mixer_snapshots.png[Mixer Snapshot Manager]
+
+Coming Soon...

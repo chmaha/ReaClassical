@@ -2,10 +2,12 @@
 
 include::installation.adoc[]
 
-include::project_setup.adoc[]
-
 include::updating.adoc[]
 
+include::project_setup.adoc[]
+
 include::converting.adoc[]
+
+include::preferences.adoc[]
 
 include::tldr.adoc[]

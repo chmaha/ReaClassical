@@ -4,7 +4,7 @@ Thank you for your interest in ReaClassical. This project is driven by a passion
 
 Whether you are new to ReaClassical or have used it from the start, your trust inspires continued innovation. I hope it enhances your classical music production and supports your creative vision.
 
-image::chmaha.png[role=right]
+image::chmaha.png[Signature, role=right]
 ____
 
 === Introduction

@@ -1,0 +1,5 @@
+=== Auditioning (Playback)
+
+Audition your material via mouse hover + kbd:[A] on parent or child tracks. Use hover + kbd:[Shift+A]  to playback at a custom rate set via ReaClassical Preferences kbd:[F5]. Use mixer mute and solo buttons to further customize what you hear.
+
+Hover over a reference track for easy A/Bing between your audio production and one or more reference audio files. 

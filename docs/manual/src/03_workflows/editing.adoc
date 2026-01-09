@@ -1,0 +1,107 @@
+=== Editing
+
+In ReaClassical 26 and following, source-destination editing is truly anywhere to anywhere. This means you can place your source and destination marker pairs on _any_ folder. It opens the door to multi-disc album projects and more!
+
+==== Editing Step-by-Step
+
+Ensure that the folder where you want to place the marker pair is selected. The best way to do this is to click on the item where you want the marker. Note that in kbd:[F5] preferences you can set placement at mouse hover meaning that the desired folder is chosen based on hover position.
+
+1. Set destination IN and OUT markers via kbd:[1] and kbd:[2]
+2. Set source IN and OUT markers via kbd:[3] and kbd:[4]
+3. Press kbd:[5] to make the source-destination edit (2-, 3- or 4-point edit depending on how many markers you set), or kbd:[F4] to make a time-stretched S-D edit (requires all 4 markers), or if only using destination IN marker and both source markers, kbd:[F3] for an "assembly" or 3-point "insert" edit
+4. To finesse the edit, click on the right item of a crossfade pair and press kbd:[F]
+
+==== Crossfade Editor
+
+.Crossfade Editor
+image::xfade_window.png[Crossfade Editor]
+
+Since v7.40, REAPER includes an excellent professional two-lane crossfade editor similar in nature to the specialist classical DAWs such as Sequoia and Pyramix. With the improved crossfade editor, users can see the continued "ghost" waveforms of the items beyond the crossfade they enter and likewise the previous waveforms of the items that exit the crossfade. The ability to visually align transients and then position the crossfade just before it is absolutely critical (and fun when you have the tools to do it!). Select the right-hand item of a fade (or hover over the item if `Add S-D Markers at Mouse Hover` is set to checked in ReaClassical Project Preferences kbd:[F5]), press kbd:[F] and you are moved into crossfade editor mode. Note also that you are automatically centered on the crossfade and can use the mouse wheel to zoom in and out. Press kbd:[F] again and you exit that mode.
+
+So, now you are in the crossfade editor mode, my own preferred method of getting the perfect crossfade is to move the transient I want on the left (upper) item to just after the crossfade by dragging on the ghost waveform. Then I drag the "ghost" waveform of my right (lower) item so that the two transients align. That's it! Drag on the active part of the waveform to also move the location of the crossfade. You can just move or resize the crossfade by hovering directly over the lower portion of the crossfade and dragging either the edge or the shaded rectangle. Be aware that markers are not rippled in ripple-per-track mode (but with the introduction of the Create CD Markers, I highly recommend not bothering to create any markers at this point).
+
+In reality, this process can be just a few seconds to achieve the perfect edit. To ensure that previous xfades are unaffected, make sure that _Lock left-hand start_ is checked:
+
+To audition material, hover the mouse inside the crossfade window and:
+
+. press kbd:[A] to audition the crossfade with mirrored pre/post roll based on mouse cursor location
+. press kbd:[S] to audition just the left item based on mouse cursor location or its mirrored position
+. press kbd:[D] to audition just the right item based on mouse cursor location or its mirrored position
+. press kbd:[E] to audition just the top lane based on mouse cursor location or its mirrored position
+. press kbd:[C] to audition just the bottom lane based on mouse cursor location or its mirrored position
+
+Use kbd:[Shift+A], kbd:[Shift+S] or kbd:[Shift+D] to do the equivalent but with a custom playrate as set in kbd:[F5] preferences.
+
+You can shuttle between crossfades using the kbd:[Q] and kbd:[W] shortcuts. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.
+
+==== Source Audition Manager
+
+.Source Audition Manager
+image::source_audition.png[Source Audition Manager]
+
+When making a source-destination edit, you may not have a list or annotated score from the musicians or producer showing preferred edits. If the decision is left to the audio engineer, this process is now very straightforward in ReaClassical 26 via the Source Audition Manager. You can open via Mission Control or kbd:[Z] shortcut.
+
+When the window opens, you will also note that razor selection is enabled. To set up all the source audition pairs, drag on the desired parent items and press kbd:[Z] again to create an audition pair and add to the window. 
+
+Use the controls to audition, rank and add notes. Once you have settled on a best take, press the convert button to delete all marker pairs and replace with a single set of actual source IN and OUT markers. Assuming one or more destination markers are already set, you can press kbd:[5], kbd:[F3] or kbd:[F4] to make the desired edit. During auditioning, you can delete individual pairs via the btn:[X] on the specific table row, as well as abandon the whole process by clicking btn:[Delete All Audition Pairs…].Just closing the window automatically disables razor selection mode but maintains any existing source audition pairs.
+
+==== Other Editing Tips
+
+===== Marking Edits on your Scores
+
+This is best done using a physical, photocopied score by the conductor or lead musician. I advocate for a “T” system where a large T is inserted into the score at the intended edit point. Either side of the T stem, and under the crossbar, the outgoing and incoming take numbers are written. A wavy crossbar indicates some leeway for where the edit point can be placed. Further notes can be attached underneath the T such as directions for tightening the gap etc.
+
+.Editing a physical score
+image::score-edits.png[Score Edits]
+
+===== Preparing Takes
+
+NOTE: In ReaClassical 26 this is handled on behalf of the user as much as possible including when opening Mission Control, placing your first source-destination marker and opening kbd:[F5] Preferences. 
+
+Whether working horizontally or vertically, you can use the Prepare Takes function. It is intelligent enough to figure out which workflow you are using. Just press kbd:[T] (for _Takes_). Super simple! Every item comprising the same take are now grouped together.
+
+===== Multi-Project Tab S-D Editing
+
+If you'd like to S-D edit between various open project tabs you can set both the source and destination _project_ markers via kbd:[Ctrl+Alt+1] (or kbd:[Ctrl+Alt+2]) for destination and kbd:[Ctrl+Alt+3] (or kbd:[Ctrl+Alt+4]) for source (essentially the same numbers associated with regular S-D markers). The markers can exist anywhere on the tab's timeline but perhaps the very beginning or end would be good to keep them out of the way. The S-D editing itself then works just as for a single tab other than any source markers that are set are not deleted to aid quickly undoing in the destination tab and being ready to reapply the edit. The only rule when using S-D project markers is to ensure that source or destination markers should be paired with the corresponding source or destination project marker. This workflow would, for example, allow you to have multiple project tabs (perhaps one for each symphony movement plus a final _destination_ tab), allowing for both internal editing per tab but after setting the S-D project markers compiling the final edit in the _destination_ tab. To delete all the S-D project markers press kbd:[Shift+Delete]. Also, in multi-tab S-D editing, when regular markers are placed, any other existing versions in other tabs are automatically deleted to ensure that only one version of the marker exists at a time across all open project tabs.
+
+===== Delete / Delete with Ripple
+
+While perhaps not used as often as 3- and 4-point edits, I have created two functions for deletion of material. Delete & Ripple kbd:[Backspace] will delete the material between source IN and OUT markers and ripple material to the right backwards with a short crossfade. Delete Leaving Silence kbd:[Ctrl+Backspace] will also delete but maintain the silence without rippling backwards.
+
+===== Copy/Move Destination Material to Source
+
+Run either the copy kbd:[Ctrl+Alt+C] or move kbd:[Ctrl+Alt+M] version of the function from the ReaClassical toolbar (no need to ensure the first track is selected) and the function will copy or move all items and edits from the destination folder directly below to a newly created source folder with Eastern Blue color for identification purposes. This allows for saving versions of finished edits either via iteration (_copying_ so you can continue to make further edits) or fresh (_moving_ so you can compile an alternate version of a best take from scratch). These different edits can then be easily auditioned via kbd:[A] the shortcut. This is similar to a Pyramix-style iterative editing method while still maintaining the destination folder as the uppermost folder.
+
+===== Promote Source to Destination
+
+Select a source folder and press the "promote" icon in the toolbar or kbd:[Ctrl+Alt+P] to promote the source folder to the top "destination" position.
+
+===== Add S-D Markers to Edges of Item(s) or Time Selection
+
+Used in combination with Delete / Delete with Ripple (kbd:[Ctrl+Backspace]/kbd:[Backspace]), you can quickly set both source markers to the edges of one or more selected items on a parent track or time selection via kbd:[F12]. This is a time-saver when dealing with potential _sliver_ edits i.e. small unneeded leftover edits as a result of multiple rounds of zoomed-out S-D editing. Note that the built-in checks when manually placing destination markers should go some way to alleviating this issue which can easily go unnoticed in other classical music DAWs. Likewise you can use kbd:[Ctrl+F12] to set destination markers (selected items must be in the destination folder). Note that if using time selection for placing source markers, as for S-D marker placement via kbd:[3] or kbd:[4], make sure you first have the desired source folder track selected before pressing the shortcut (a good way to do this is to first click on the item involved). You may prefer to set both source and destination markers this way over the more traditional number key shortcuts acting as a sort of hybrid between S-D and razor editing. Also note that if both selected items and a time selection exist, the time selection takes precedence.
+
+===== Move / Zoom to S-D markers
+
+To move to any existing S-D markers use kbd:[Ctrl+1], kbd:[Ctrl+2], kbd:[Ctrl+3] or kbd:[Ctrl+4]. To zoom to any of the S-D markers for more fine-grained placement, use kbd:[Alt+1], kbd:[Alt+2], kbd:[Alt+3] or kbd:[Alt+4]. If you have multi-tab S-D editing set up, these shortcuts will also automatically move focus to the correct project tab.
+
+===== Delete S-D markers
+
+To delete all regular S-D markers, press kbd:[Ctrl+Delete].
+
+===== Floating Destination Folder
+
+The floating destination folder feature enhances vertical workflow efficiency by dynamically positioning the destination folder just above the selected source folder. This reduces unnecessary vertical scrolling when setting IN and OUT markers for destination and source folders that are far apart in the project. Additionally, this feature is fully compatible with mouse hover S-D editing and when setting source markers to item edges (kbd:[F12]).
+
+To enable the floating destination folder, open ReaClassical Project Preferences (kbd:[F5]) and set the corresponding line to checked.
+
+For example, with floating destination enabled, place a source IN marker (via kbd:[3]) on any source folder. The destination folder will reposition itself just above the selected source folder. Add the remaining S-D markers as required. Perform any S-D edits via kbd:[5], kbd:[F4], or kbd:[F3]. Select another source parent and place another marker (kbd:[3]). The destination folder will continue adjusting dynamically.
+
+It is worth noting that if the destination folder moves above a source folder, the source marker track number correctly updates to reflect the new order.
+
+To disable floating mode, re-open ReaClassical Project Preferences and set `Floating Destination Folder` unchecked. This will also automatically move the destination folder back to the top of the project.
+
+===== Razor Editing
+
+Because of the potential for visual overlap of markers, I much prefer the REAPER razor edit functionality for vertical take work. It works a lot like the process shown in this Pyramix https://www.youtube.com/watch?v=wQXwnvITQCQ[video].
+
+While Pyramix also has additional source-destination marker workflows, I couldn't help but feel that for professional ensembles that manage a high degree of tempo regularity between takes, this method can be extremely efficient. This isn't the document to introduce REAPER razor edits as there are plenty of resources online if you do a simple search. Here we are only concerning ourselves with creation of the razor area across all our pairs and spot mics (REAPER's default shortcut is the rather uninspiring Alt+Right drag). Thankfully, it can become the default editing mode by selecting the razor edit mode on the main toolbar and left-click dragging.

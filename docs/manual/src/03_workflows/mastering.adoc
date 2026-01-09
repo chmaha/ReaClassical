@@ -1,0 +1,57 @@
+=== Mastering
+
+Mastering in ReaClassical is game-changing. Many features described here are not available in any other classical DAW. I hope that the _ReaClassical_ way saves you much time and helps you look forward to the mastering phase of the project. While automatic DDP generation, automatic room tone function, and professional album reports are the main features here, you will probably find the revolutionary mixer snapshot manager is an extremely efficient way to add auto-recall mixer scenes across your production as well enjoying the ability to quickly reorder album tracks via a simple keyboard shortcuts.
+
+TIP: If working in horizontal workflow, ensure that there is over a minute's worth of empty timeline between the end of the proposed album and any other source material. Instead, you can also choose to convert to a vertical workflow via Mission Control kbd:[C].
+
+==== Basic Mastering Workflow
+
+1. Choose a folder to be the basis of an album (you can create multi-disc productions!)
+2. Remove all names from items on the parent track aside from those you want to be track starts. You can clear all items on the folder track via kbd:[Ctrl+T]
+3. Enter track start names via the Notes window kbd:[N]
+4. Press kbd:[Y] to open the metadata editor
+5. Once happy, head to the Render kbd:[R] window.
+
+NOTE: In order to make the process as streamlined as possible for the user before the metadata editor window opens, on first run generic albumwide metadata (the name starts with "@") is added to an unnamed item on the parent folder. If that is not possible, a transparent split is made on the final item of the album.
+
+==== Metadata Editor in Detail
+
+.Metadata Editor
+image::metadata_editor.png[Metadata Editor]
+
+The metadata window allows you to enter all track and album metadata in a single place including automatic ISRC values based on the first track entry, and automatic album-wide performer, songwriter, composer and arranger values based on one or more entries in the track table. These can be overridden via the checkboxes.
+
+TIP: Add a exclamation mark ("!") to the start of CD track names that you would like to have a visual countdown (length set in kbd:[F5] prefs). This feature is not available in all CD players. 
+
+==== Other Mastering Tips
+
+===== CUE File and Reports
+
+In your project folder you will see an automatically-generated CUE file (for use with a subsequently rendered gapless audio file) along with HTML and plaintext album listings and a complete technical metadata file (useful for sending to a duplication/replication factory). For multi-disc albums, each fileset has a prefix associated with the project folder.
+
+.Example of HTML Album Report
+image::html_album_report.png[Example of HTML Album Report]
+
+===== Marker Offsets
+
+There may be instances when an audience member coughs right before a downbeat or a violinist hits strings before the first note of an otherwise excellent performance. The Add Marker Offset function allows you to adjust the start accordingly (assuming you have some nice recorded or generated roomtone on the dedicated roomtone track).
+
+To use, manually drag one or more CD markers to where you want them and then run the function via shortcut kbd:[Shift+O]. It adds the correct offset(s) to the item name(s) automatically and refreshes the album metadata editor. Now, adjustments to an item position followed by a press of kbd:[Y], maintains the relative CD marker offset to the item start. 
+
+To clear all offsets, run kbd:[Alt+O].
+
+===== BIN+CUE set
+
+Create a BIN/CUE pair (either select `regions define tracks` and render the whole project or select `use only # markers` and render by time selection if you don't want the first pre-gap as actual silence at the start of track 1).
+
+
+===== Repositioning Tracks in an Album
+
+There are two functions which help with reordering or repositioning tracks. First, and perhaps most useful for producing a classical album, is if you decide that you need to reorder one or tracks. Simply select the track you want to move and press either kbd:[Ctrl+{cursorleft}] or kbd:[Ctrl+{cursorright}] to switch with the track immediately to the left or right. Note that gaps are preserved too.
+
+The other situation is when you want to start with uniform gaps between a series of short separate pieces. Use the kbd:[Ctrl+Y] shortcut and enter a value in seconds. Your pieces are then automatically spaced and items crossfaded are left intact.
+
+===== Loudness
+
+In terms of loudness, I personally aim for about -18 LUFS Integrated for my classical albums though it can be as high as -16 LUFS and as low as -20 LUFS. The new loudness JSFX meter in REAPER and my own ReaVision Metering Suite along with the normalization of loudness and true-peak limiting in the render dialog are priceless. It's another reason I couldn't go back to the other classical DAWs at this point.
+

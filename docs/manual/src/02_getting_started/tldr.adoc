@@ -20,7 +20,7 @@ IMPORTANT: Save your project before continuing with other workflows.
 1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]
 2. Select a parent track of a folder
 3. Press Arm and monitor your signal
-4. Use the buttons in the panel to control recording, pausing and stopping
+4. Use the left-most buttons in the panel to control recording, pausing and stopping
 5. Add ranking and notes while recording or after the fact by clicking on a previously-recorded item
 6. Once all recording is completed, close the record panel (automatically disengages record-armed tracks).
 
