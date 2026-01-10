@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, count_rec_armed_tracks, draw_mic_icon
+local save_colors_to_project, load_colors_from_project
 
 ---------------------------------------------------------------------
 
@@ -42,6 +43,89 @@ local window_open = true
 -- Mic icon size (DOUBLED)
 local icon_size = 128
 
+-- Color settings with defaults
+local colors = {
+  offline = {0.6, 0.6, 0.6, 1.0},
+  standby = {0.1, 1.0, 0.1, 1.0},
+  recording = {0.9, 0.1, 0.1, 1.0},
+  paused = {1.0, 0.85, 0.1, 1.0}
+}
+
+-- Text colors (slightly different from icon colors)
+local text_colors = {
+  offline = {0.6, 0.6, 0.6, 1.0},
+  standby = {0.1, 1.0, 0.1, 1.0}, -- alpha will be animated
+  recording = {1.0, 0.2, 0.2, 1.0},
+  paused = {1.0, 0.85, 0.1, 1.0}
+}
+
+-- Project state key
+local EXT_KEY = "recording_indicator_colors"
+
+---------------------------------------------------------------------
+
+function save_colors_to_project()
+  -- Serialize colors to a single string
+  local data = string.format(
+    "offline:%.3f,%.3f,%.3f,%.3f|standby:%.3f,%.3f,%.3f,%.3f|recording:%.3f,%.3f,%.3f,%.3f|paused:%.3f,%.3f,%.3f,%.3f",
+    colors.offline[1], colors.offline[2], colors.offline[3], colors.offline[4],
+    colors.standby[1], colors.standby[2], colors.standby[3], colors.standby[4],
+    colors.recording[1], colors.recording[2], colors.recording[3], colors.recording[4],
+    colors.paused[1], colors.paused[2], colors.paused[3], colors.paused[4]
+  )
+  
+  SetProjExtState(0, EXT_KEY, "colors", data)
+end
+
+---------------------------------------------------------------------
+
+function load_colors_from_project()
+  local retval, data = GetProjExtState(0, EXT_KEY, "colors")
+  
+  if retval == 0 or data == "" then
+    return -- No saved data, use defaults
+  end
+  
+  -- Parse the data
+  local states = {}
+  for state_data in data:gmatch("([^|]+)") do
+    local state_name, values = state_data:match("([^:]+):(.+)")
+    if state_name and values then
+      local nums = {}
+      for num in values:gmatch("([^,]+)") do
+        table.insert(nums, tonumber(num))
+      end
+      if #nums == 4 then
+        states[state_name] = nums
+      end
+    end
+  end
+  
+  -- Update colors if valid data was found
+  if states.offline then colors.offline = states.offline end
+  if states.standby then colors.standby = states.standby end
+  if states.recording then colors.recording = states.recording end
+  if states.paused then colors.paused = states.paused end
+  
+  -- Update text colors to match
+  if states.offline then text_colors.offline = {states.offline[1], states.offline[2], states.offline[3], states.offline[4]} end
+  if states.standby then text_colors.standby = {states.standby[1], states.standby[2], states.standby[3], states.standby[4]} end
+  if states.recording then 
+    text_colors.recording = {
+      math.min(1.0, states.recording[1] + 0.1),
+      math.min(1.0, states.recording[2] + 0.1),
+      math.min(1.0, states.recording[3] + 0.1),
+      states.recording[4]
+    }
+  end
+  if states.paused then text_colors.paused = {states.paused[1], states.paused[2], states.paused[3], states.paused[4]} end
+end
+
+---------------------------------------------------------------------
+
+-- Load colors on startup
+load_colors_from_project()
+
 ---------------------------------------------------------------------
 
 function main()
@@ -57,6 +141,101 @@ function main()
   window_open = open_ref
 
   if opened then
+    -- Right-click context menu with direct color pickers
+    if ImGui.BeginPopupContextWindow(ctx) then
+      ImGui.Text(ctx, "Color Settings")
+      ImGui.Separator(ctx)
+      ImGui.Spacing(ctx)
+
+      local colors_changed = false
+      local label_width = 80 -- Fixed width for alignment
+
+      -- Offline color
+      ImGui.Text(ctx, "Offline:")
+      ImGui.SameLine(ctx, label_width)
+      local col = ImGui.ColorConvertDouble4ToU32(colors.offline[1], colors.offline[2], colors.offline[3], colors.offline[4])
+      local changed, new_col = ImGui.ColorEdit4(ctx, "##offline", col, ImGui.ColorEditFlags_NoInputs)
+      if changed then
+        local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
+        colors.offline = {r, g, b, a}
+        text_colors.offline = {r, g, b, a}
+        colors_changed = true
+      end
+
+      ImGui.Spacing(ctx)
+
+      -- Standby color
+      ImGui.Text(ctx, "Standby:")
+      ImGui.SameLine(ctx, label_width)
+      col = ImGui.ColorConvertDouble4ToU32(colors.standby[1], colors.standby[2], colors.standby[3], colors.standby[4])
+      changed, new_col = ImGui.ColorEdit4(ctx, "##standby", col, ImGui.ColorEditFlags_NoInputs)
+      if changed then
+        local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
+        colors.standby = {r, g, b, a}
+        text_colors.standby = {r, g, b, a}
+        colors_changed = true
+      end
+
+      ImGui.Spacing(ctx)
+
+      -- Recording color
+      ImGui.Text(ctx, "Recording:")
+      ImGui.SameLine(ctx, label_width)
+      col = ImGui.ColorConvertDouble4ToU32(colors.recording[1], colors.recording[2], colors.recording[3], colors.recording[4])
+      changed, new_col = ImGui.ColorEdit4(ctx, "##recording", col, ImGui.ColorEditFlags_NoInputs)
+      if changed then
+        local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
+        colors.recording = {r, g, b, a}
+        text_colors.recording = {
+          math.min(1.0, r + 0.1),
+          math.min(1.0, g + 0.1),
+          math.min(1.0, b + 0.1),
+          a
+        }
+        colors_changed = true
+      end
+
+      ImGui.Spacing(ctx)
+
+      -- Paused color
+      ImGui.Text(ctx, "Paused:")
+      ImGui.SameLine(ctx, label_width)
+      col = ImGui.ColorConvertDouble4ToU32(colors.paused[1], colors.paused[2], colors.paused[3], colors.paused[4])
+      changed, new_col = ImGui.ColorEdit4(ctx, "##paused", col, ImGui.ColorEditFlags_NoInputs)
+      if changed then
+        local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
+        colors.paused = {r, g, b, a}
+        text_colors.paused = {r, g, b, a}
+        colors_changed = true
+      end
+
+      -- Save to project state when colors change
+      if colors_changed then
+        save_colors_to_project()
+      end
+
+      ImGui.Spacing(ctx)
+      ImGui.Separator(ctx)
+      ImGui.Spacing(ctx)
+
+      -- Reset button
+      if ImGui.MenuItem(ctx, "Reset to Defaults") then
+        colors.offline = {0.6, 0.6, 0.6, 1.0}
+        colors.standby = {0.1, 1.0, 0.1, 1.0}
+        colors.recording = {0.9, 0.1, 0.1, 1.0}
+        colors.paused = {1.0, 0.85, 0.1, 1.0}
+        
+        text_colors.offline = {0.6, 0.6, 0.6, 1.0}
+        text_colors.standby = {0.1, 1.0, 0.1, 1.0}
+        text_colors.recording = {1.0, 0.2, 0.2, 1.0}
+        text_colors.paused = {1.0, 0.85, 0.1, 1.0}
+        
+        save_colors_to_project()
+      end
+
+      ImGui.EndPopup(ctx)
+    end
+
     local armed = count_rec_armed_tracks()
     local play_state = GetPlayState()
 
@@ -108,14 +287,34 @@ function main()
       local color
 
       if state == "recording" then
-        color = ImGui.ColorConvertDouble4ToU32(1.0, 0.2, 0.2, 1.0)
+        color = ImGui.ColorConvertDouble4ToU32(
+          text_colors.recording[1],
+          text_colors.recording[2],
+          text_colors.recording[3],
+          text_colors.recording[4]
+        )
       elseif state == "paused" then
-        color = ImGui.ColorConvertDouble4ToU32(1.0, 0.85, 0.1, 1.0)
+        color = ImGui.ColorConvertDouble4ToU32(
+          text_colors.paused[1],
+          text_colors.paused[2],
+          text_colors.paused[3],
+          text_colors.paused[4]
+        )
       elseif state == "standby" then
         local alpha = 0.5 + 0.5 * math.sin(time * 4)
-        color = ImGui.ColorConvertDouble4ToU32(0.1, 1.0, 0.1, alpha)
+        color = ImGui.ColorConvertDouble4ToU32(
+          text_colors.standby[1],
+          text_colors.standby[2],
+          text_colors.standby[3],
+          alpha
+        )
       else
-        color = ImGui.ColorConvertDouble4ToU32(0.6, 0.6, 0.6, 1.0)
+        color = ImGui.ColorConvertDouble4ToU32(
+          text_colors.offline[1],
+          text_colors.offline[2],
+          text_colors.offline[3],
+          text_colors.offline[4]
+        )
       end
 
       local text_w = select(1, ImGui.CalcTextSize(ctx, label))
@@ -146,16 +345,20 @@ end
 ---------------------------------------------------------------------
 
 function draw_mic_icon(draw_list, x, y, size, state)
-  -- Determine color based on state
+  -- Determine color based on state using custom colors
   local mic_color
   if state == "recording" then
-    mic_color = ImGui.ColorConvertDouble4ToU32(0.9, 0.1, 0.1, 1.0)
+    mic_color = ImGui.ColorConvertDouble4ToU32(
+      colors.recording[1], colors.recording[2], colors.recording[3], colors.recording[4])
   elseif state == "paused" then
-    mic_color = ImGui.ColorConvertDouble4ToU32(1.0, 0.85, 0.1, 1.0)
+    mic_color = ImGui.ColorConvertDouble4ToU32(
+      colors.paused[1], colors.paused[2], colors.paused[3], colors.paused[4])
   elseif state == "standby" then
-    mic_color = ImGui.ColorConvertDouble4ToU32(0.1, 0.9, 0.1, 1.0)
+    mic_color = ImGui.ColorConvertDouble4ToU32(
+      colors.standby[1], colors.standby[2], colors.standby[3], colors.standby[4])
   else
-    mic_color = ImGui.ColorConvertDouble4ToU32(0.6, 0.6, 0.6, 1.0)
+    mic_color = ImGui.ColorConvertDouble4ToU32(
+      colors.offline[1], colors.offline[2], colors.offline[3], colors.offline[4])
   end
 
   local center_x = x + size / 2
@@ -210,11 +413,14 @@ function draw_mic_icon(draw_list, x, y, size, state)
 
     local glow_color
     if state == "recording" then
-      glow_color = ImGui.ColorConvertDouble4ToU32(1.0, 0.0, 0.0, glow_alpha)
+      glow_color = ImGui.ColorConvertDouble4ToU32(
+        colors.recording[1], colors.recording[2], colors.recording[3], glow_alpha)
     elseif state == "paused" then
-      glow_color = ImGui.ColorConvertDouble4ToU32(1.0, 0.85, 0.1, glow_alpha)
+      glow_color = ImGui.ColorConvertDouble4ToU32(
+        colors.paused[1], colors.paused[2], colors.paused[3], glow_alpha)
     elseif state == "standby" then
-      glow_color = ImGui.ColorConvertDouble4ToU32(0.1, 1.0, 0.1, glow_alpha)
+      glow_color = ImGui.ColorConvertDouble4ToU32(
+        colors.standby[1], colors.standby[2], colors.standby[3], glow_alpha)
     end
 
     -- Outer glow
