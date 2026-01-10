@@ -86,6 +86,12 @@ function main()
         if state ~= 1 then
             Main_OnCommand(record_panel, 0)
         end
+
+        -- Keep only the first selected track
+        local first_selected_track = GetSelectedTrack(0, 0)
+        Main_OnCommand(40297, 0) -- deselect all tracks
+        SetTrackSelected(first_selected_track, true)
+
         select_children_of_selected_folders()
         mixer()
         local selected = solo()
