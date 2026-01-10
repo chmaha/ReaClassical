@@ -229,7 +229,7 @@ function main()
 
     local _, FLT_MAX = ImGui.NumericLimits_Float()
     -- local album_total_width = 900
-    ImGui.SetNextWindowSizeConstraints(ctx, 1000, 500, FLT_MAX, FLT_MAX)
+    ImGui.SetNextWindowSizeConstraints(ctx, 1100, 500, FLT_MAX, FLT_MAX)
     local opened, open_ref = ImGui.Begin(ctx, "ReaClassical DDP Metadata Editor", window_open)
     window_open = open_ref
 
@@ -393,7 +393,7 @@ function main()
                     local key = album_keys_line2[j]
                     local changed
                     local albumkeys2_widget_id = "##album_" .. key .. "_" .. tostring(selected_track)
-                    
+
                     if key == "genre" then
                         -- Genre dropdown
                         local current_genre = album_metadata.genre or ""
@@ -471,8 +471,11 @@ function main()
             if ImGui.Button(ctx, "Add Marker Offsets") then
                 Main_OnCommand(add_marker_offsets, 0)
             end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Manually move CD markers to desired start times then press this button...")
+            end
             ImGui.SameLine(ctx)
-            if ImGui.Button(ctx, "Remove Marker Offsets") then
+            if ImGui.Button(ctx, "Remove All Marker Offsets") then
                 Main_OnCommand(remove_marker_offsets, 0)
             end
 
@@ -503,6 +506,23 @@ function main()
 
             local track_number_w, _ = ImGui.CalcTextSize(ctx, "00")
             track_number_w = track_number_w + spacing
+
+            -- Add "!" header above checkbox column with tooltip, centered over checkboxes
+            local checkbox_w = ImGui.GetFrameHeight(ctx)
+            local exclaim_text_w = ImGui.CalcTextSize(ctx, "!")
+            local center_offset = (checkbox_w - exclaim_text_w) / 2
+
+            ImGui.BeginGroup(ctx)
+            ImGui.Dummy(ctx, checkbox_w, 0)
+            ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + center_offset)
+            ImGui.AlignTextToFramePadding(ctx)
+            ImGui.Text(ctx, "!")
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Enable visual countdown")
+            end
+            ImGui.EndGroup(ctx)
+            ImGui.SameLine(ctx, 0, spacing)
+
             ImGui.Dummy(ctx, track_number_w, 0)
             ImGui.SameLine(ctx, 0, spacing)
             for j = 1, #keys do
@@ -533,6 +553,49 @@ function main()
                 local take = GetActiveTake(item)
                 local md = track_items_metadata[i]
                 if md then
+                    -- Only show checkbox for tracks after the first one (i > 0)
+                    if i > 0 then
+                        -- Check if the actual item name has ! prefix
+                        local _, actual_item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                        local has_exclamation = actual_item_name:match("^!")
+                        local checkbox_state = has_exclamation ~= nil
+                        local checkbox_changed
+                        local checkbox_id = "##checkbox_" .. i .. "_" .. tostring(selected_track)
+                        checkbox_changed, checkbox_state = ImGui.Checkbox(ctx, checkbox_id, checkbox_state)
+
+                        if checkbox_changed then
+                            -- Get current item name
+                            local _, current_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                            local new_name
+
+                            if checkbox_state then
+                                -- Add ! prefix if not present
+                                if not current_name:match("^!") then
+                                    new_name = "!" .. current_name
+                                end
+                            else
+                                -- Remove ! prefix if present
+                                if current_name:match("^!") then
+                                    new_name = current_name:gsub("^!", "")
+                                end
+                            end
+
+                            -- Update item name if changed
+                            if new_name then
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
+                                -- Recalculate CD markers
+                                Main_OnCommand(create_CD_markers, 0)
+                            end
+                        end
+
+                        ImGui.SameLine(ctx, 0, spacing)
+                    else
+                        -- For first track, add empty space where checkbox would be
+                        local checkbox_w = ImGui.GetFrameHeight(ctx)
+                        ImGui.Dummy(ctx, checkbox_w, 0)
+                        ImGui.SameLine(ctx, 0, spacing)
+                    end
+
                     ImGui.BeginGroup(ctx)
                     local track_number_str = string.format("%02d", track_number_counter)
                     ImGui.AlignTextToFramePadding(ctx)
@@ -599,7 +662,17 @@ function main()
                     end
 
                     if any_changed or first_run then
+                        -- Get the original item name to check for ! prefix
+                        local _, original_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                        local has_exclamation = original_name:match("^!")
+
                         local new_name = serialize_metadata(md, false)
+
+                        -- Preserve ! prefix if it was there
+                        if has_exclamation then
+                            new_name = "!" .. new_name
+                        end
+
                         GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name, true)
                         update_marker_and_region(item)
                     end
@@ -640,7 +713,9 @@ function parse_item_name(name, is_album)
                 end
             end
         else
-            data.title = parts[1] or name
+            -- Strip ! prefix from title for display purposes
+            local title_part = parts[1] or name
+            data.title = title_part:gsub("^!", "")
             for i = 2, #parts do
                 local k, v = parts[i]:match("^(%w+)=(.+)$")
                 if k and v then
@@ -657,7 +732,7 @@ function parse_item_name(name, is_album)
             end
         end
     else
-        data.title = name:gsub("^@", "")
+        data.title = name:gsub("^@", ""):gsub("^!", "")
         -- Set defaults for genre and language when creating new album metadata
         if is_album then
             data.genre = "Classical"
