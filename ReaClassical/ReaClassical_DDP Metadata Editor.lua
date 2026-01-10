@@ -79,6 +79,8 @@ local _, manual_people_entry_str = GetProjExtState(0, "ReaClassical", "manual_pe
 local manual_people_entry = manual_people_entry_str == "1"
 
 local create_CD_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
+local add_marker_offsets = NamedCommandLookup("_RS65a051a97f34fadc9634caba5c969f1806c59d15")
+local remove_marker_offsets = NamedCommandLookup("_RSf14f3ed014dba3bb83124c6f48361ff0187ef84d")
 
 local first_run = true
 
@@ -292,12 +294,25 @@ function main()
             ImGui.Text(ctx, "Track Metadata:")
             ImGui.Separator(ctx)
 
-            -- right-align the whole group
+            -- Left-side buttons for marker offsets
+            if ImGui.Button(ctx, "Add Marker Offsets") then
+                Main_OnCommand(add_marker_offsets, 0)
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Manually position CD markers then click this button")
+            end
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Remove All Marker Offsets") then
+                Main_OnCommand(remove_marker_offsets, 0)
+            end
+
+            -- right-align the checkbox group
+            ImGui.SameLine(ctx)
             local avail = select(1, ImGui.GetContentRegionAvail(ctx))
             local text_w = ImGui.CalcTextSize(ctx, "Manual ISRC entry")
             local checkbox_w = ImGui.GetFrameHeight(ctx)
 
-            ImGui.SetCursorPosX(ctx, avail - (text_w + checkbox_w + 8))
+            ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + avail - (text_w + checkbox_w + 8))
 
             ImGui.Text(ctx, "Manual ISRC entry")
             ImGui.SameLine(ctx)
