@@ -8,7 +8,7 @@ Use Mission Control kbd:[C] to set recording inputs and panning manually or auto
 
 ==== Easy Steps to Record
 
-1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]
+1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]. Optionally set a session name by right-clicking on the window.
 2. Select a parent track of a folder
 3. Press Arm and monitor your signal
 4. Use the left-most buttons in the panel to control recording, pausing and stopping
@@ -19,6 +19,10 @@ Use Mission Control kbd:[C] to set recording inputs and panning manually or auto
 image::record_panel.png[Record Panel]
 
 ==== Additional Notes on Record Panel
+
+===== Session Names and Take Numbers
+
+Note that if you create a new session name, the take number will automatically be reset to 1. If you switch to an existing session name with recorded takes, the take number will be calculated accordingly.
 
 ===== Other Buttons in the Main Window
 
