@@ -107,7 +107,7 @@ function main()
                 SetProjExtState(0, "ReaClassical", "RCProject", "y")
             end
         end
-        reorder_special_tracks()
+
         local is_empty = false
         rcmaster_exists = special_check()
 
@@ -142,6 +142,8 @@ function main()
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
+
+        reorder_special_tracks()
 
         copy_track_names(table, mixer_tracks)
 

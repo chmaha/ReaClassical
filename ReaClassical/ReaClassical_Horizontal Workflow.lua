@@ -98,7 +98,7 @@ function main()
                 SetProjExtState(0, "ReaClassical", "RCProject", "y")
             end
         end
-        reorder_special_tracks()
+
         local is_empty = false
         SetCursorContext(1, nil)
         remove_track_groups()
@@ -126,7 +126,8 @@ function main()
             -- write settings to mixer tracks
             write_to_mixer(end_of_sources, tracks_per_group, controls, sends)
         end
-
+        
+        reorder_special_tracks()
         copy_track_names(track_table, mixer_tracks)
 
         local success, is_sequential, current_order = check_mixer_order(mixer_tracks)
