@@ -65,6 +65,141 @@ local album_labels_line1 = { "Album Title", "Performer", "Songwriter", "Composer
 local album_keys_line2 = { "genre", "identification", "language", "catalog", "message" }
 local album_labels_line2 = { "Genre", "Identification", "Language", "Catalog", "Message" }
 
+local genre_list = {
+    "Adult Contemporary",
+    "Alternative Rock",
+    "Childrens Music",
+    "Classical",
+    "Contemporary Christian",
+    "Country",
+    "Dance",
+    "Easy Listening",
+    "Erotic",
+    "Folk",
+    "Gospel",
+    "Hip Hop",
+    "Jazz",
+    "Latin",
+    "Musical",
+    "New Age",
+    "Opera",
+    "Operetta",
+    "Pop",
+    "Rap",
+    "Reggae",
+    "Rock Music",
+    "Rhythm & Blues",
+    "Sound Effects",
+    "Soundtrack",
+    "Spoken Word",
+    "World Music"
+}
+
+local language_list = {
+    "Albanian",
+    "Amharic",
+    "Arabic",
+    "Armenian",
+    "Assamese",
+    "Azerbaijani",
+    "Bambora",
+    "Basque",
+    "Bengali",
+    "Bielorussian",
+    "Breton",
+    "Bulgarian",
+    "Burmese",
+    "Catalan",
+    "Chinese",
+    "Churash",
+    "Croatian",
+    "Czech",
+    "Danish",
+    "Dari",
+    "Dutch",
+    "English",
+    "Esperanto",
+    "Estonian",
+    "Faroese",
+    "Finnish",
+    "Flemish",
+    "French",
+    "Frisian",
+    "Fulani",
+    "Gaelic",
+    "Galician",
+    "Georgian",
+    "German",
+    "Greek",
+    "Gujurati",
+    "Gurani",
+    "Hausa",
+    "Hebrew",
+    "Hindi",
+    "Hungarian",
+    "Icelandic",
+    "Indonesian",
+    "Irish",
+    "Italian",
+    "Japanese",
+    "Kannada",
+    "Kazakh",
+    "Khmer",
+    "Korean",
+    "Laotian",
+    "Lappish",
+    "Latin",
+    "Latvian",
+    "Lithuanian",
+    "Luxembourgian",
+    "Macedonian",
+    "Malagasay",
+    "Malaysian",
+    "Maltese",
+    "Marathi",
+    "Moldavian",
+    "Ndebele",
+    "Nepali",
+    "Norwegian",
+    "Occitan",
+    "Oriya",
+    "Papamiento",
+    "Persian",
+    "Polish",
+    "Portugese",
+    "Punjabi",
+    "Pushtu",
+    "Quechua",
+    "Romanian",
+    "Romansh",
+    "Russian",
+    "Ruthenian",
+    "Serbian",
+    "Serbo-croat",
+    "Shona",
+    "Sinhalese",
+    "Slovak",
+    "Slovenian",
+    "Somali",
+    "Spanish",
+    "SrananTongo",
+    "Swahili",
+    "Swedish",
+    "Tadzhik",
+    "Tamil",
+    "Tatar",
+    "Telugu",
+    "Thai",
+    "Turkish",
+    "Ukrainian",
+    "Urdu",
+    "Uzbek",
+    "Vietnamese",
+    "Wallon",
+    "Welsh",
+    "Zulu"
+}
+
 local isrc_pattern = "^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$"
 
 local editing_track
@@ -177,7 +312,7 @@ function main()
 
                 -- Units remain the same, only width calculation changes
                 local line1_units = { 2, 1, 1, 1, 1 }
-                local line2_units = { 0.5, 1, 0.5, 0.5, 2 }
+                local line2_units = { 1, 1, 0.75, 0.6, 2 }
 
                 -- Total horizontal space available *right now*
                 local avail_w = select(1, ImGui.GetContentRegionAvail(ctx))
@@ -258,12 +393,50 @@ function main()
                     local key = album_keys_line2[j]
                     local changed
                     local albumkeys2_widget_id = "##album_" .. key .. "_" .. tostring(selected_track)
-                    changed, album_metadata[key] = ImGui.InputText(
-                        ctx,
-                        albumkeys2_widget_id,
-                        album_metadata[key] or "",
-                        128
-                    )
+                    
+                    if key == "genre" then
+                        -- Genre dropdown
+                        local current_genre = album_metadata.genre or ""
+                        local preview_value = current_genre
+                        if ImGui.BeginCombo(ctx, albumkeys2_widget_id, preview_value) then
+                            for _, genre in ipairs(genre_list) do
+                                local is_selected = (current_genre == genre)
+                                if ImGui.Selectable(ctx, genre, is_selected) then
+                                    album_metadata.genre = genre
+                                    changed = true
+                                end
+                                if is_selected then
+                                    ImGui.SetItemDefaultFocus(ctx)
+                                end
+                            end
+                            ImGui.EndCombo(ctx)
+                        end
+                    elseif key == "language" then
+                        -- Language dropdown
+                        local current_language = album_metadata.language or ""
+                        local preview_value = current_language
+                        if ImGui.BeginCombo(ctx, albumkeys2_widget_id, preview_value) then
+                            for _, language in ipairs(language_list) do
+                                local is_selected = (current_language == language)
+                                if ImGui.Selectable(ctx, language, is_selected) then
+                                    album_metadata.language = language
+                                    changed = true
+                                end
+                                if is_selected then
+                                    ImGui.SetItemDefaultFocus(ctx)
+                                end
+                            end
+                            ImGui.EndCombo(ctx)
+                        end
+                    else
+                        -- Regular text input for other fields
+                        changed, album_metadata[key] = ImGui.InputText(
+                            ctx,
+                            albumkeys2_widget_id,
+                            album_metadata[key] or "",
+                            128
+                        )
+                    end
 
                     ImGui.PopItemWidth(ctx)
                     ImGui.EndGroup(ctx)
@@ -298,11 +471,8 @@ function main()
             if ImGui.Button(ctx, "Add Marker Offsets") then
                 Main_OnCommand(add_marker_offsets, 0)
             end
-            if ImGui.IsItemHovered(ctx) then
-                ImGui.SetTooltip(ctx, "Manually position CD markers then click this button")
-            end
             ImGui.SameLine(ctx)
-            if ImGui.Button(ctx, "Remove All Marker Offsets") then
+            if ImGui.Button(ctx, "Remove Marker Offsets") then
                 Main_OnCommand(remove_marker_offsets, 0)
             end
 
@@ -458,6 +628,9 @@ function parse_item_name(name, is_album)
     if #parts > 0 then
         if is_album then
             data.title = parts[1]:gsub("^@", "")
+            -- Set defaults for genre and language
+            data.genre = "Classical"
+            data.language = "English"
             for i = 2, #parts do
                 local k, v = parts[i]:match("^(%w+)=(.+)$")
                 if k and v then
@@ -485,6 +658,11 @@ function parse_item_name(name, is_album)
         end
     else
         data.title = name:gsub("^@", "")
+        -- Set defaults for genre and language when creating new album metadata
+        if is_album then
+            data.genre = "Classical"
+            data.language = "English"
+        end
     end
     return data
 end
