@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, get_take_count, clean_up, parse_time, parse_duration, check_time, remove_markers_by_name
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
 local get_item_color, pastel_color, get_color_table, extract_take_from_filename
-local disarm_all_tracks
+local disarm_all_tracks, extract_session_from_filename, is_folder_parent_or_child
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -146,6 +146,7 @@ local recording_note = ""
 local editing_item = nil
 local last_selected_item = nil
 local take_extracted = false -- Track if current take_text was extracted from filename
+local session_extracted = false -- Track if current session was extracted from filename
 
 -- Rank color options (matching SAI marker manager and notes app)
 local RANKS = {
@@ -245,12 +246,24 @@ function main()
             end
             take_extracted = false
           end
+          
+          -- Try to extract session name from filename
+          local extracted_session = extract_session_from_filename(selected_item)
+          if extracted_session then
+            session_text = extracted_session
+            session_extracted = true
+          else
+            session_text = session
+            session_extracted = false
+          end
         else
-          -- No item selected - restore take count
+          -- No item selected - restore take count and session
           recording_rank = ""
           recording_note = ""
           editing_item = nil
           take_extracted = false
+          session_extracted = false
+          session_text = session
           if not iterated_filenames then
             take_text = get_take_count(session) + 1
           else
@@ -266,6 +279,11 @@ function main()
       take_text = get_take_count(session) + 1
     elseif not editing_item then
       take_text = take_count + 1
+    end
+    
+    -- Reset session_text if not editing an item
+    if not editing_item and not session_extracted then
+      session_text = session
     end
 
     if not rec_name_set then
@@ -327,6 +345,8 @@ function main()
         last_selected_item = nil
         recording_rank = ""
         recording_note = ""
+        session_extracted = false
+        session_text = session
       end
 
       if start_time or end_time then
@@ -602,6 +622,41 @@ end
 
 ---------------------------------------------------------------------
 
+function is_folder_parent_or_child()
+  local selected_track = GetSelectedTrack(0, 0)
+  if not selected_track then
+    return false
+  end
+  
+  local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+  
+  -- Check if it's a folder parent
+  if depth == 1 then
+    return true
+  end
+  
+  -- Check if it's a child of a folder
+  local track_idx = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
+  
+  -- Look backwards for a parent folder
+  for i = track_idx - 1, 0, -1 do
+    local track = GetTrack(0, i)
+    local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+    
+    if track_depth == 1 then
+      -- Found a parent folder, so selected track is a child
+      return true
+    elseif track_depth < 0 then
+      -- Reached the end of a folder group
+      break
+    end
+  end
+  
+  return false
+end
+
+---------------------------------------------------------------------
+
 function draw(playstate)
   -- Always set window to default size when opening (but allow user to resize)
   if win.xpos and win.ypos then
@@ -643,8 +698,6 @@ function draw(playstate)
   local scale_x = win_w / base_width
   local scale_y = win_h / base_height
   local scale = math.min(scale_x, scale_y)
-
-  session_text = session
 
   -- Set colors based on playstate
   if playstate == 0 or playstate == 1 then
@@ -769,7 +822,13 @@ function draw(playstate)
   local session_w, session_h = ImGui.CalcTextSize(ctx, display_session)
   -- Smaller gap from take number to match original
   ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h * 0.95)
-  ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple (RGBA)
+  
+  -- Color session text carolina blue if extracted from item
+  if playstate == 0 and editing_item and session_extracted then
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF) -- Carolina blue
+  else
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple (RGBA)
+  end
   ImGui.Text(ctx, display_session)
   ImGui.PopStyleColor(ctx)
   ImGui.PopFont(ctx)
@@ -793,6 +852,7 @@ function draw(playstate)
   local selected_track_armed = false
   local num_tracks = CountTracks(0)
   local selected_track = GetSelectedTrack(0, 0)
+  local is_valid_selection = is_folder_parent_or_child()
 
   for i = 0, num_tracks - 1 do
     local track = GetTrack(0, i)
@@ -806,12 +866,17 @@ function draw(playstate)
 
   local rec_button_label
   local show_select_message = false
+  local button_disabled = false
 
   if is_recording then
     rec_button_label = "Stop"
   elseif not selected_track and not any_armed then
     rec_button_label = "Arm"
     show_select_message = true
+    button_disabled = true  -- Disable if no track selected and no armed tracks
+  elseif selected_track and not is_valid_selection then
+    rec_button_label = "Arm"
+    button_disabled = true  -- Disable if selected track is not a folder parent or child
   elseif selected_track and not selected_track_armed then
     rec_button_label = "Arm"
   elseif any_armed then
@@ -820,6 +885,10 @@ function draw(playstate)
     rec_button_label = "Arm"
   end
 
+  if button_disabled then
+    ImGui.BeginDisabled(ctx, true)
+  end
+  
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
     -- If pressing "Rec" and no track is selected but tracks are armed, select first armed track
     if rec_button_label == "Rec" and not selected_track and any_armed then
@@ -833,15 +902,31 @@ function draw(playstate)
     end
     Main_OnCommand(F9_command, 0)
   end
+  
+  if button_disabled then
+    ImGui.EndDisabled(ctx)
+  end
 
   -- Show gentle message if no track selected and no armed tracks (reserve space to prevent layout shift)
+  -- Don't show message when editing a selected item
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
-  if show_select_message then
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
-    ImGui.TextWrapped(ctx, "Select a parent track to arm")
-    ImGui.PopStyleColor(ctx)
+  if not editing_item then
+    if show_select_message then
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+      ImGui.TextWrapped(ctx, "Select a parent track to arm")
+      ImGui.PopStyleColor(ctx)
+    elseif selected_track and not is_valid_selection then
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+      ImGui.TextWrapped(ctx, "Select a folder parent or child")
+      ImGui.PopStyleColor(ctx)
+    else
+      -- Invisible placeholder to maintain spacing
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000) -- Fully transparent
+      ImGui.TextWrapped(ctx, "Select a parent track to arm")
+      ImGui.PopStyleColor(ctx)
+    end
   else
-    -- Invisible placeholder to maintain spacing
+    -- Invisible placeholder to maintain spacing when editing
     ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000) -- Fully transparent
     ImGui.TextWrapped(ctx, "Select a parent track to arm")
     ImGui.PopStyleColor(ctx)
@@ -1111,6 +1196,8 @@ function draw(playstate)
         iterated_filenames = false
         take_text = get_take_count(session) + 1
         rec_name_set = false
+        session_text = session
+        session_extracted = false
       else
         -- Apply take number only if session didn't change
         local take_choice = tonumber(take_text) or take_count + 1
@@ -1617,6 +1704,48 @@ function extract_take_from_filename(item)
   local take_num = file_only:match(".*[^%d](%d+)%)?%.%a+$")
   if take_num then
     return tonumber(take_num)
+  end
+  
+  return nil
+end
+
+---------------------------------------------------------------------
+
+function extract_session_from_filename(item)
+  local take = GetActiveTake(item)
+  if not take then return nil end
+  
+  local source = GetMediaItemTake_Source(take)
+  if not source then return nil end
+  
+  local filename = GetMediaSourceFileName(source, "")
+  if not filename then return nil end
+  
+  -- Extract just the filename from the full path
+  local file_only = filename:match("([^/\\]+)$")
+  if not file_only then return nil end
+  
+  -- Pattern: SessionName_T001 or SessionName_TrackName_T001
+  -- Match everything before _T followed by digits
+  local session_name = file_only:match("^(.+)_T%d+")
+  
+  if session_name then
+    -- Remove track name if present (pattern: SessionName_TrackName)
+    -- Keep only the first part before the last underscore if there are multiple parts
+    local parts = {}
+    for part in session_name:gmatch("[^_]+") do
+      table.insert(parts, part)
+    end
+    
+    -- If we have multiple parts, assume the last one might be a track name
+    -- But if we only have one part, that's the session name
+    if #parts > 1 then
+      -- Remove the last part (potential track name)
+      table.remove(parts)
+      return table.concat(parts, "_")
+    else
+      return session_name
+    end
   end
   
   return nil
