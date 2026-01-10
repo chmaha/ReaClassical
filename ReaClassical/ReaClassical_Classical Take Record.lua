@@ -29,6 +29,7 @@ local get_selected_media_item_at, count_selected_media_items
 local clear_all_rec_armed_except_live, get_item_guid
 local select_children_of_selected_folders
 local unselect_folder_children, set_rec_arm_for_selected_tracks
+local find_mixer_track_for_track, is_mixer_disabled
 ---------------------------------------------------------------------
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -463,6 +464,40 @@ end
 
 ---------------------------------------------------------------------
 
+function find_mixer_track_for_track(track)
+    -- Find the mixer track that this track sends to
+    -- Each track should send to exactly one mixer track
+    
+    local num_sends = GetTrackNumSends(track, 0) -- 0 = sends (not receives)
+    
+    for i = 0, num_sends - 1 do
+        local dest_track = GetTrackSendInfo_Value(track, 0, i, "P_DESTTRACK")
+        if dest_track then
+            -- Check if destination is a mixer track
+            local _, mixer_state = GetSetMediaTrackInfo_String(dest_track, "P_EXT:mixer", "", false)
+            if mixer_state == "y" then
+                return dest_track
+            end
+        end
+    end
+    
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function is_mixer_disabled(mixer_track)
+    -- Check if a mixer track has the disabled flag set
+    if not mixer_track then
+        return false
+    end
+    
+    local _, disabled_state = GetSetMediaTrackInfo_String(mixer_track, "P_EXT:input_disabled", "", false)
+    return (disabled_state == "y")
+end
+
+---------------------------------------------------------------------
+
 function set_rec_arm_for_selected_tracks(state)
     -- state: 0 = disarm, 1 = arm
     local num_tracks = CountTracks(0)
@@ -470,7 +505,16 @@ function set_rec_arm_for_selected_tracks(state)
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         if IsTrackSelected(track) then
-            SetMediaTrackInfo_Value(track, "I_RECARM", state)
+            -- Check if this track feeds a disabled mixer
+            local mixer_track = find_mixer_track_for_track(track)
+            
+            if state == 1 and is_mixer_disabled(mixer_track) then
+                -- Don't arm this track - its mixer is disabled
+                SetMediaTrackInfo_Value(track, "I_RECARM", 0)
+            else
+                -- Normal arming/disarming
+                SetMediaTrackInfo_Value(track, "I_RECARM", state)
+            end
         end
     end
 

@@ -90,6 +90,7 @@ local input_channels_stereo = {}   -- Remember stereo selection when switching t
 local mono_has_been_set = {}       -- Track if user has manually set mono
 local stereo_has_been_set = {}     -- Track if user has manually set stereo
 local is_stereo = {}               -- Store stereo checkbox state
+local input_disabled = {}          -- store if channel is disabled
 local pan_values = {}              -- Store pan values for each track
 local track_names = {}             -- Store mixer track names (without M: prefix)
 local track_has_hyphen = {}        -- Track if mixer track name ends with hyphen
@@ -1951,6 +1952,7 @@ function init()
     mono_has_been_set = {}
     stereo_has_been_set = {}
     is_stereo = {}
+    input_disabled = {}
     pan_values = {}
     track_names = {}
     track_has_hyphen = {}
@@ -1965,6 +1967,10 @@ function init()
         local ch, stereo = get_current_input_info(d_track)
         input_channels[i] = ch
         is_stereo[i] = stereo
+
+        -- Read disabled state from P_EXT on MIXER track
+        local _, disabled_state = GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:input_disabled", "", false)
+        input_disabled[i] = (disabled_state == "y")
 
         -- Initialize both mono and stereo memory
         if stereo then
@@ -2159,6 +2165,17 @@ function draw_track_controls(start_idx, end_idx)
             if workflow == "Vertical" then
                 sync_needed = true
             end
+        end
+
+        ImGui.SameLine(ctx)
+        local changed_disabled, new_disabled = ImGui.Checkbox(ctx, "Rec Disabled##disabled" .. i, input_disabled[i])
+        if changed_disabled then
+            input_disabled[i] = new_disabled
+            -- Save to P_EXT on MIXER track
+            GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:input_disabled", new_disabled and "y" or "", true)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "When checked, this track will not be rec-armed")
         end
 
         -- Mute button

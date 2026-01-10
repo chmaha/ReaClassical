@@ -26,6 +26,7 @@ local main, get_take_count, clean_up, parse_time, parse_duration, check_time, re
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
 local get_item_color, pastel_color, get_color_table, extract_take_from_filename
 local disarm_all_tracks, extract_session_from_filename, is_folder_parent_or_child
+local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -856,6 +857,17 @@ function draw(playstate)
   local selected_track = GetSelectedTrack(0, 0)
   local is_valid_selection = is_folder_parent_or_child()
 
+  -- Check folder arm status if selected track is a folder parent (only when not recording)
+  local folder_status = nil
+  local is_recording = (playstate == 5 or playstate == 6)
+
+  if selected_track and not is_recording then
+    local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+    if depth == 1 then
+      folder_status = get_folder_arm_status(selected_track)
+    end
+  end
+
   for i = 0, num_tracks - 1 do
     local track = GetTrack(0, i)
     if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
@@ -908,6 +920,34 @@ function draw(playstate)
   if button_disabled then
     ImGui.EndDisabled(ctx)
   end
+
+  -- Show warning indicator to the LEFT of rec button (only when not recording)
+  if not is_recording and folder_status and (folder_status == "partial" or folder_status == "has_disabled") then
+    -- Position warning symbol to the left of the rec button
+    local warning_x = buttons_start_x - (10 * scale) -- 10 pixels to the left of rec button
+    ImGui.SetCursorPos(ctx, warning_x, button_y)
+
+    ImGui.PushFont(ctx, medium_font, 25 * scale)          -- Use medium font for larger symbol
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAA00FF) -- Orange/amber warning color
+
+    local warning_symbol = "!"                            -- ASCII-safe exclamation mark
+
+    ImGui.Text(ctx, warning_symbol)
+    ImGui.PopStyleColor(ctx)
+    ImGui.PopFont(ctx)
+
+    if ImGui.IsItemHovered(ctx) then
+      local tooltip_text = ""
+      if folder_status == "has_disabled" then
+        tooltip_text = "Some tracks disabled in Mission Control"
+      end
+      ImGui.SetTooltip(ctx, tooltip_text)
+    end
+  end
+
+  -- Show gentle message if no track selected... (existing code continues)
+
+  -- Show gentle message if no track selected... (existing code continues)
 
   -- Show gentle message if no track selected and no armed tracks (reserve space to prevent layout shift)
   -- Don't show message when editing a selected item
@@ -1770,6 +1810,99 @@ function disarm_all_tracks()
       SetMediaTrackInfo_Value(track, "I_RECARM", 0)
     end
   end
+end
+
+---------------------------------------------------------------------
+
+function get_folder_arm_status(folder_track)
+  -- Returns: "all", "partial", "none", "has_disabled"
+  -- Shows warning if ANY track feeds a disabled mixer OR if not all tracks are armed
+
+  local num_tracks = CountTracks(0)
+  local folder_idx = GetMediaTrackInfo_Value(folder_track, "IP_TRACKNUMBER") - 1
+
+  -- Find all tracks in this folder (including the parent)
+  local folder_tracks = { folder_track } -- Start with the parent folder track itself
+  local i = folder_idx + 1
+  local depth = 1
+
+  while i < num_tracks and depth > 0 do
+    local track = GetTrack(0, i)
+    local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+    table.insert(folder_tracks, track)
+    depth = depth + track_depth
+
+    if depth <= 0 then
+      break
+    end
+    i = i + 1
+  end
+
+  if #folder_tracks == 0 then
+    return "none"
+  end
+
+  -- Check each track's rec-arm status and disabled status
+  local armed_count = 0
+  local has_any_disabled = false
+
+  for _, track in ipairs(folder_tracks) do
+    local is_armed = GetMediaTrackInfo_Value(track, "I_RECARM") == 1
+
+    -- Check if this track feeds a disabled mixer
+    local mixer_track = find_mixer_for_track(track)
+    local is_disabled = is_mixer_disabled(mixer_track)
+
+    if is_disabled then
+      has_any_disabled = true
+    end
+
+    if is_armed then
+      armed_count = armed_count + 1
+    end
+  end
+
+  -- Return status - show warning if ANY track is disabled OR not all are armed
+  if has_any_disabled then
+    return "has_disabled"
+  elseif armed_count > 0 and armed_count < #folder_tracks then
+    return "partial"
+  elseif armed_count == 0 then
+    return "none"
+  else
+    return "all"
+  end
+end
+
+---------------------------------------------------------------------
+
+function find_mixer_for_track(track)
+  -- Find the mixer track that this track sends to
+  local num_sends = GetTrackNumSends(track, 0)
+
+  for i = 0, num_sends - 1 do
+    local dest_track = GetTrackSendInfo_Value(track, 0, i, "P_DESTTRACK")
+    if dest_track then
+      local _, mixer_state = GetSetMediaTrackInfo_String(dest_track, "P_EXT:mixer", "", false)
+      if mixer_state == "y" then
+        return dest_track
+      end
+    end
+  end
+
+  return nil
+end
+
+---------------------------------------------------------------------
+
+function is_mixer_disabled(mixer_track)
+  if not mixer_track then
+    return false
+  end
+
+  local _, disabled_state = GetSetMediaTrackInfo_String(mixer_track, "P_EXT:input_disabled", "", false)
+  return (disabled_state == "y")
 end
 
 ---------------------------------------------------------------------
