@@ -53,9 +53,9 @@ end
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local color_pref = 0
 if input ~= "" then
-    local table = {}
-    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[5] then color_pref = tonumber(table[5]) or 0 end
+  local table = {}
+  for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+  if table[5] then color_pref = tonumber(table[5]) or 0 end
 end
 
 set_action_options(2)
@@ -145,7 +145,7 @@ local recording_note = ""
 -- Track the item being edited when stopped
 local editing_item = nil
 local last_selected_item = nil
-local take_extracted = false -- Track if current take_text was extracted from filename
+local take_extracted = false    -- Track if current take_text was extracted from filename
 local session_extracted = false -- Track if current session was extracted from filename
 
 -- Rank color options (matching SAI marker manager and notes app)
@@ -174,6 +174,8 @@ function main()
       session_suffix = session .. "_"
     else
       session = ""
+      session_dir = ""
+      session_suffix = ""
     end
     iterated_filenames = false
     laststate = nil
@@ -246,7 +248,7 @@ function main()
             end
             take_extracted = false
           end
-          
+
           -- Try to extract session name from filename
           local extracted_session = extract_session_from_filename(selected_item)
           if extracted_session then
@@ -280,7 +282,7 @@ function main()
     elseif not editing_item then
       take_text = take_count + 1
     end
-    
+
     -- Reset session_text if not editing an item
     if not editing_item and not session_extracted then
       session_text = session
@@ -627,22 +629,22 @@ function is_folder_parent_or_child()
   if not selected_track then
     return false
   end
-  
+
   local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
-  
+
   -- Check if it's a folder parent
   if depth == 1 then
     return true
   end
-  
+
   -- Check if it's a child of a folder
   local track_idx = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
-  
+
   -- Look backwards for a parent folder
   for i = track_idx - 1, 0, -1 do
     local track = GetTrack(0, i)
     local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-    
+
     if track_depth == 1 then
       -- Found a parent folder, so selected track is a child
       return true
@@ -651,7 +653,7 @@ function is_folder_parent_or_child()
       break
     end
   end
-  
+
   return false
 end
 
@@ -822,7 +824,7 @@ function draw(playstate)
   local session_w, session_h = ImGui.CalcTextSize(ctx, display_session)
   -- Smaller gap from take number to match original
   ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h * 0.95)
-  
+
   -- Color session text carolina blue if extracted from item
   if playstate == 0 and editing_item and session_extracted then
     ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF) -- Carolina blue
@@ -873,10 +875,10 @@ function draw(playstate)
   elseif not selected_track and not any_armed then
     rec_button_label = "Arm"
     show_select_message = true
-    button_disabled = true  -- Disable if no track selected and no armed tracks
+    button_disabled = true -- Disable if no track selected and no armed tracks
   elseif selected_track and not is_valid_selection then
     rec_button_label = "Arm"
-    button_disabled = true  -- Disable if selected track is not a folder parent or child
+    button_disabled = true -- Disable if selected track is not a folder parent or child
   elseif selected_track and not selected_track_armed then
     rec_button_label = "Arm"
   elseif any_armed then
@@ -888,7 +890,7 @@ function draw(playstate)
   if button_disabled then
     ImGui.BeginDisabled(ctx, true)
   end
-  
+
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
     -- If pressing "Rec" and no track is selected but tracks are armed, select first armed track
     if rec_button_label == "Rec" and not selected_track and any_armed then
@@ -902,7 +904,7 @@ function draw(playstate)
     end
     Main_OnCommand(F9_command, 0)
   end
-  
+
   if button_disabled then
     ImGui.EndDisabled(ctx)
   end
@@ -1689,23 +1691,23 @@ end
 function extract_take_from_filename(item)
   local take = GetActiveTake(item)
   if not take then return nil end
-  
+
   local source = GetMediaItemTake_Source(take)
   if not source then return nil end
-  
+
   local filename = GetMediaSourceFileName(source, "")
   if not filename then return nil end
-  
+
   -- Extract just the filename from the full path
   local file_only = filename:match("([^/\\]+)$")
   if not file_only then return nil end
-  
+
   -- Use the same pattern as get_take_count
   local take_num = file_only:match(".*[^%d](%d+)%)?%.%a+$")
   if take_num then
     return tonumber(take_num)
   end
-  
+
   return nil
 end
 
@@ -1714,21 +1716,21 @@ end
 function extract_session_from_filename(item)
   local take = GetActiveTake(item)
   if not take then return nil end
-  
+
   local source = GetMediaItemTake_Source(take)
   if not source then return nil end
-  
+
   local filename = GetMediaSourceFileName(source, "")
   if not filename then return nil end
-  
+
   -- Extract just the filename from the full path
   local file_only = filename:match("([^/\\]+)$")
   if not file_only then return nil end
-  
+
   -- Pattern: SessionName_T001 or SessionName_TrackName_T001
   -- Match everything before _T followed by digits
   local session_name = file_only:match("^(.+)_T%d+")
-  
+
   if session_name then
     -- Remove track name if present (pattern: SessionName_TrackName)
     -- Keep only the first part before the last underscore if there are multiple parts
@@ -1736,7 +1738,7 @@ function extract_session_from_filename(item)
     for part in session_name:gmatch("[^_]+") do
       table.insert(parts, part)
     end
-    
+
     -- If we have multiple parts, assume the last one might be a track name
     -- But if we only have one part, that's the session name
     if #parts > 1 then
@@ -1747,7 +1749,7 @@ function extract_session_from_filename(item)
       return session_name
     end
   end
-  
+
   return nil
 end
 
@@ -1759,7 +1761,7 @@ function disarm_all_tracks()
   if playstate == 5 or playstate == 6 then
     return
   end
-  
+
   local num_tracks = CountTracks(0)
   for i = 0, num_tracks - 1 do
     local track = GetTrack(0, i)
