@@ -4,7 +4,7 @@
 This file is a part of "ReaClassical" package.
 See "ReaClassical.lua" for more information.
 
-Copyright (C) 2022–2025 chmaha
+Copyright (C) 2022–2026 chmaha
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, display_prefs, load_prefs, save_prefs, pref_check
 local sync_based_on_workflow, move_destination_folder_to_top
-local prepare_takes, rename_all_items
+local prepare_takes, rename_all_items, load_defaults
 
 -- Check for ReaImGui
 local imgui_exists = APIExists("ImGui_GetVersion")
@@ -64,6 +64,7 @@ local ctx = ImGui.CreateContext('ReaClassical Preferences')
 local visible = true
 local open = true
 local apply_clicked = false
+local reset_clicked = false
 local prefs = {}
 local error_message = "" -- Store validation error message
 
@@ -85,11 +86,17 @@ function main()
         return
     end
 
-    prepare_takes()
-
     -- Load preferences into table on first run
     if not prefs[1] then
         load_prefs()
+    end
+
+    -- Handle reset button
+    if reset_clicked then
+        load_defaults()
+        error_message = "" -- Clear any error message
+        reset_clicked = false
+        -- Don't close window, stay open to show reset values
     end
 
     -- Run ImGui display
@@ -121,12 +128,10 @@ function main()
                 MB("When the floating destination folder is active, " ..
                     "DEST-IN and DEST-OUT markers are always associated with the \"D:\" folder.", "ReaClassical", 0)
             end
-            if new_color ~= orig_color then
-                prepare_takes()
-            end
             if new_item_naming ~= orig_item_naming then
                 rename_all_items(new_item_naming)
             end
+            prepare_takes()
             open = false -- Close window on success
             return       -- Exit after applying
         else
@@ -140,6 +145,8 @@ function main()
 
     if open and visible then
         defer(main)
+    else
+        prepare_takes()
     end
 end
 
@@ -232,7 +239,7 @@ function display_prefs()
     end
 
     -- Buttons
-    if ImGui.Button(ctx, "Apply", 120, 0) then
+    if ImGui.Button(ctx, "Apply", 80, 0) then
         error_message = "" -- Clear any previous error
         apply_clicked = true
         -- Don't set open = false here, let validation decide
@@ -240,7 +247,14 @@ function display_prefs()
 
     ImGui.SameLine(ctx)
 
-    if ImGui.Button(ctx, "Cancel", 120, 0) then
+    if ImGui.Button(ctx, "Reset", 80, 0) then
+        error_message = "" -- Clear any error
+        reset_clicked = true
+    end
+
+    ImGui.SameLine(ctx)
+
+    if ImGui.Button(ctx, "Cancel", 80, 0) then
         open = false
     end
 
@@ -281,6 +295,25 @@ function load_prefs()
             prefs[i] = saved_entries[i] or "WAV"
         else
             prefs[i] = tonumber(saved_entries[i]) or 0
+        end
+    end
+end
+
+-----------------------------------------------------------------------
+
+function load_defaults()
+    -- Load default values into prefs table
+    local default_entries = {}
+    
+    for entry in default_values:gmatch('([^,]+)') do
+        default_entries[#default_entries + 1] = entry
+    end
+    
+    for i = 1, #labels do
+        if i == 11 then
+            prefs[i] = default_entries[i] or "WAV"
+        else
+            prefs[i] = tonumber(default_entries[i]) or 0
         end
     end
 end
