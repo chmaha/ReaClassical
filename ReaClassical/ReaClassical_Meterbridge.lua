@@ -56,6 +56,7 @@ local window_open                    = true
 local max_channels_per_row_numeric   = 8 -- For numeric display
 local max_channels_per_row_graphical = 8 -- For graphical display (reduced since we show L+R)
 local show_graphical_meters          = false
+local show_hardware_names            = true -- New: toggle for hardware names
 
 -- Color threshold settings (in dB)
 local threshold_green_to_yellow      = -18
@@ -96,14 +97,38 @@ function main()
             show_graphical_meters = new_value
           end
 
+          -- Get tracks to check if we have rec-armed tracks
+          local rec_armed, m_tracks, other_masters = get_tracks_to_display()
+          local has_rec_armed = #rec_armed > 0
+
+          -- Add hardware names checkbox (greyed out if no rec-armed tracks)
+          ImGui.SameLine(ctx)
+          if not has_rec_armed then
+            ImGui.BeginDisabled(ctx)
+          end
+          local changed_hw, new_hw_value = ImGui.Checkbox(ctx, "Show Hardware Names", show_hardware_names)
+          if changed_hw then
+            show_hardware_names = new_hw_value
+            -- Force refresh of all track labels
+            for guid, st in pairs(track_state) do
+              local tr = st.track
+              if tr then
+                local is_rec_armed = GetMediaTrackInfo_Value(tr, "I_RECARM") == 1
+                if is_rec_armed then
+                  st.input_label = get_input_label(tr)
+                end
+              end
+            end
+          end
+          if not has_rec_armed then
+            ImGui.EndDisabled(ctx)
+          end
+
           ImGui.Separator(ctx)
 
           -- Determine max channels per row based on display mode
           local max_channels_per_row = show_graphical_meters and max_channels_per_row_graphical or
               max_channels_per_row_numeric
-
-          -- Get tracks in categorized groups
-          local rec_armed, m_tracks, other_masters = get_tracks_to_display()
 
           -- Display rec-armed tracks (if any)
           if #rec_armed > 0 then
@@ -295,16 +320,59 @@ function get_input_label(tr)
   -- Convert from 0-based to 1-based for display
   local first_input = start_channel + 1
 
-  if is_stereo then
-    -- Stereo input
-    return string.format("%d-%d", first_input, first_input + 1)
-  elseif is_multichannel then
-    -- Multichannel - get track channel count
-    local num_channels = math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN"))
-    return string.format("%d-%d", first_input, first_input + num_channels - 1)
+  -- Handle hardware names mode
+  if show_hardware_names then
+    local hw_name1 = GetInputChannelName(start_channel)
+    
+    if is_stereo then
+      local hw_name2 = GetInputChannelName(start_channel + 1)
+      
+      if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
+        -- Try to detect if they're a stereo pair with matching base name
+        local base1 = hw_name1:match("^(.+)%s+%d+$") or hw_name1
+        local base2 = hw_name2:match("^(.+)%s+%d+$") or hw_name2
+        
+        if base1 == base2 then
+          -- Same device/interface, show combined name
+          return string.format("%s+%s", hw_name1, hw_name2)
+        else
+          -- Different devices, show both names separated
+          return string.format("%s/%s", hw_name1, hw_name2)
+        end
+      else
+        -- Fallback to numeric if names not available
+        return string.format("%d-%d", first_input, first_input + 1)
+      end
+    elseif is_multichannel then
+      -- For multichannel, show first hardware name or range
+      if hw_name1 and hw_name1 ~= "" then
+        local num_channels = math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN"))
+        return string.format("%s+%d", hw_name1, num_channels - 1)
+      else
+        local num_channels = math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN"))
+        return string.format("%d-%d", first_input, first_input + num_channels - 1)
+      end
+    else
+      -- Mono input
+      if hw_name1 and hw_name1 ~= "" then
+        return hw_name1
+      else
+        return string.format("%d", first_input)
+      end
+    end
   else
-    -- Mono input
-    return string.format("%d", first_input)
+    -- Numeric mode (original behavior)
+    if is_stereo then
+      -- Stereo input
+      return string.format("%d-%d", first_input, first_input + 1)
+    elseif is_multichannel then
+      -- Multichannel - get track channel count
+      local num_channels = math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN"))
+      return string.format("%d-%d", first_input, first_input + num_channels - 1)
+    else
+      -- Mono input
+      return string.format("%d", first_input)
+    end
   end
 end
 
