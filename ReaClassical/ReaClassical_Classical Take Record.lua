@@ -146,7 +146,7 @@ function main()
         if workflow == "Vertical" then
             select_children_of_selected_folders()
             local ret, cursor_pos = load_prefs()
-            if ret then
+            if ret == 1 then
                 SetEditCurPos(cursor_pos, true, false)
                 SetProjExtState(0, "ReaClassical", "ClassicalTakeRecordCurPos", "")
             end
