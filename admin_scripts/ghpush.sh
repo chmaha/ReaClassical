@@ -7,7 +7,7 @@ error_exit() {
 }
 
 echo "Running ReaPack index update..."
-reapack-index -i ReaClassicalData || error_exit "reapack-index"
+reapack-index || error_exit "reapack-index"
 
 # Check if index.xml has changes
 if git diff --quiet index.xml && git diff --cached --quiet index.xml; then
