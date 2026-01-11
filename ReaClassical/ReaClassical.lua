@@ -1,10 +1,19 @@
 @description ReaClassical
 @author chmaha
-@version 26.0rc1
+@version 26.0
 @changelog
   Welcome to ReaClassical 26
-  Disengage rec-arm tracks when exiting record panel
-  Add new marker shortcut (Ctrl+M)
+  Prepare Takes: Run automatically at various points
+  Record Panel: Show previous session name for selected item
+  Meterbridge: Allow for hardware names
+  Recording Indicator: Custom colors via right-click
+  Metadata Editor: Add offset marker buttons
+  Metadata Editor: Make genre and language drop-downs
+  Metadata Editor: Add visual countdown checkboxes
+  Record Panel: Only use first selected item for arming
+  Record Panel: Fix session name hangover when changing project tabs
+  Mission Control: Add rec disable input checkboxes
+  Sync: reorder special tracks after all tracks in place
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
