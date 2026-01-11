@@ -19,7 +19,7 @@ A _horizontal_ workflow approach means that recorded or imported takes are arran
 
 ==== Mission Control
 
-As soon as you press `OK`, you will see the Mission Control window.
+As soon as you press btn:[OK], you will see the Mission Control window.
 
 .Mission Control
 image::mission_control.png[Mission Control]
