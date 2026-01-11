@@ -6,8 +6,9 @@
 
 sh "$(dirname "$0")/copy_lua.sh"
 
-dir="$HOME/code/chmaha/ReaClassical/ReaClassicalData/"
-mkdir -p "$dir"
+# Use Linux temp directory for collection
+dir=$(mktemp -d)
+echo "Using temporary directory: $dir"
 
 # Source directory
 src="$HOME/Desktop/ReaClassical_26/"
@@ -77,16 +78,8 @@ echo "$files" | while IFS= read -r item; do
         # Create destination directory if it doesn't exist
         mkdir -p "$(dirname "$dest_path")"
 
-        if [ -d "$src_path" ]; then
-            # Copy directory, overwrite files if needed, delete extraneous files
-            rsync -a \
-            --delete \
-            --exclude='ReaClassical.lua' \
-            "$src_path/" "$dest_path/"
-        else
-            # Copy file, overwrite if content differs
-            rsync -a --checksum "$src_path" "$dest_path"
-        fi
+        # Simple copy
+        cp -r "$src_path" "$dest_path"
     else
         echo "Warning: $src_path does not exist"
     fi
@@ -121,13 +114,17 @@ cp "$dir/ProjectTemplates/Room_Tone_Gen.RPP" "$dir/Scripts/chmaha Scripts/ReaCla
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 
-src="ReaClassicalData"
+# Create zip in final location
 zip_file="Resource_Folder_Base.zip"
-installer_dir="Installers"
+installer_dir="$HOME/code/chmaha/ReaClassical/Installers"
+mkdir -p "$installer_dir"
 
 (
-  cd "$src" || exit 1
-  zip -rq "$OLDPWD/$installer_dir/$zip_file" .
+  cd "$dir" || exit 1
+  zip -rq "$installer_dir/$zip_file" .
 )
 
-echo "Done!"
+# Clean up temp directory
+rm -rf "$dir"
+
+echo "Done! Zip created at: $installer_dir/$zip_file"
