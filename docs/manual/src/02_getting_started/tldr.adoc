@@ -17,7 +17,7 @@ IMPORTANT: Save your project before continuing with other workflows.
 
 ==== Recording
 
-1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]
+1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]. Optionally set a session name by right-clicking on the window.
 2. Select a parent track of a folder
 3. Press Arm and monitor your signal
 4. Use the left-most buttons in the panel to control recording, pausing and stopping
