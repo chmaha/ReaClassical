@@ -111,7 +111,7 @@ function main()
 
         local cursor_pos = GetCursorPosition()
         save_prefs(cursor_pos)
-
+        PreventUIRefresh(-1)
         Main_OnCommand(1013, 0) -- Transport: Record
         Undo_EndBlock('Classical Take Record', 0)
     else
@@ -187,7 +187,6 @@ function main()
         PreventUIRefresh(-1)
         Undo_EndBlock('Classical Take Record Stop', 0)
     end
-    
     UpdateArrange()
     UpdateTimeline()
 end
@@ -467,9 +466,9 @@ end
 function find_mixer_track_for_track(track)
     -- Find the mixer track that this track sends to
     -- Each track should send to exactly one mixer track
-    
+
     local num_sends = GetTrackNumSends(track, 0) -- 0 = sends (not receives)
-    
+
     for i = 0, num_sends - 1 do
         local dest_track = GetTrackSendInfo_Value(track, 0, i, "P_DESTTRACK")
         if dest_track then
@@ -480,7 +479,7 @@ function find_mixer_track_for_track(track)
             end
         end
     end
-    
+
     return nil
 end
 
@@ -491,7 +490,7 @@ function is_mixer_disabled(mixer_track)
     if not mixer_track then
         return false
     end
-    
+
     local _, disabled_state = GetSetMediaTrackInfo_String(mixer_track, "P_EXT:input_disabled", "", false)
     return (disabled_state == "y")
 end
@@ -507,7 +506,7 @@ function set_rec_arm_for_selected_tracks(state)
         if IsTrackSelected(track) then
             -- Check if this track feeds a disabled mixer
             local mixer_track = find_mixer_track_for_track(track)
-            
+
             if state == 1 and is_mixer_disabled(mixer_track) then
                 -- Don't arm this track - its mixer is disabled
                 SetMediaTrackInfo_Value(track, "I_RECARM", 0)
