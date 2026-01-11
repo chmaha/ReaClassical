@@ -21,7 +21,13 @@ image::metadata_editor.png[Metadata Editor]
 
 The metadata window allows you to enter all track and album metadata in a single place including automatic ISRC values based on the first track entry, and automatic album-wide performer, songwriter, composer and arranger values based on one or more entries in the track table. These can be overridden via the checkboxes.
 
-TIP: Add a exclamation mark ("!") to the start of CD track names that you would like to have a visual countdown (length set in kbd:[F5] prefs). This feature is not available in all CD players. 
+TIP: Check the "!" box for CD tracks that you would like to have a visual countdown (length set in kbd:[F5] prefs). This feature is not available in all CD players. 
+
+===== Marker Offsets
+
+There may be instances when an audience member coughs right before a downbeat or a violinist hits strings before the first note of an otherwise excellent performance. The Add Marker Offset function allows you to adjust the start accordingly (assuming you have some nice recorded or generated roomtone on the dedicated roomtone track).
+
+To use, manually drag one or more CD markers to where you want them and then click btn:[Add Marker Offsets]. It adds the correct offset(s) to the item name(s) automatically and refreshes the album metadata editor. Now, adjustments to an item position followed by a press of kbd:[Y], maintains the relative CD marker offset to the item start. To remove all marker offsets, click btn:[Remove All Marker Offsets].
 
 ==== Other Mastering Tips
 
@@ -32,11 +38,7 @@ In your project folder you will see an automatically-generated CUE file (for use
 .Example of HTML Album Report
 image::html_album_report.png[Example of HTML Album Report]
 
-===== Marker Offsets
 
-There may be instances when an audience member coughs right before a downbeat or a violinist hits strings before the first note of an otherwise excellent performance. The Add Marker Offset function allows you to adjust the start accordingly (assuming you have some nice recorded or generated roomtone on the dedicated roomtone track).
-
-To use, manually drag one or more CD markers to where you want them and then run the function via shortcut kbd:[Shift+O]. It adds the correct offset(s) to the item name(s) automatically and refreshes the album metadata editor. Now, adjustments to an item position followed by a press of kbd:[Y], maintains the relative CD marker offset to the item start. 
 
 To clear all offsets, run kbd:[Alt+O].
 

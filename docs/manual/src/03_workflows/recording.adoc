@@ -48,14 +48,14 @@ image::meterbridge.png[Meterbridge]
 
 Use kbd:[B] to open the Meterbridge. The default view shows numeric peak holds. When tracks are record-armed, the main window displays recording inputs. During auditioning of material, the top rows show mixer tracks and the bottom any special tracks including RCMASTER and Master tracks.
 
-To switch to graphical meters, check the "Graphical Meters" option. Under the options tab, you can set color thresholds for yellow and red.
+To switch to graphical meters, check the "Graphical Meters" option. Under the options tab, you can set color thresholds for yellow and red. To switch to channel numbers instead of hardware names, uncheck the option while tracks are rec-armed.
 
 ==== Recording Indicator
 
 .Recording Indicator
 image::rec_indicator.png[Recording Indicator]
 
-The recording indicator kbd:[Alt+R] is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active. 
+The recording indicator kbd:[Alt+R] is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active. Right-click to set custom colors for offline, standby, recording and pause.
 
 ==== Headroom
 
@@ -74,7 +74,7 @@ To record additional material after the fact (say a separate narration track or 
 
 ===== Disabling Channels
 
-In a typical recording session, the musicians with the least to record are often allowed to leave the session early once their work is completed. If they were individually recorded using a spot microphone, it wouldn't make sense to continue recording on that channel. In ReaClassical there are two main ways to disable a channel. In a horizontal workflow using a single folder, it is no hassle to simply un-arm the desired track(s). For a vertical workflow with multiple folders, the task could end up being time-consuming with potential for error. So, the recommended ReaClassical way, both easy and visually obvious, is to set the rec input for the channel(s) to "None" via Mission Control.
+In a typical recording session, the musicians with the least to record are often allowed to leave the session early once their work is completed. If they were individually recorded using a spot microphone, it wouldn't make sense to continue recording on that channel. The ReaClassical way, both easy and visually obvious, is to open Mission Control kbd:[C] and check "Rec Disabled" for the particular channel(s). When arming and recording, these channels will now be excluded. This allows the user to maintain hardware connections that were originally set up with the ability to quickly bring the microphone back in as required.
 
 ===== Adding a New Microphone Mid-Recording Session
 

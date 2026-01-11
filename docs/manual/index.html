@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-01-10 13:44:14 UTC</code></p>
+<p><code>Updated: 2026-01-11 14:43:22 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1323,7 +1323,7 @@ Save your project before continuing with other workflows.
 <p>Use <kbd>B</kbd> to open the Meterbridge. The default view shows numeric peak holds. When tracks are record-armed, the main window displays recording inputs. During auditioning of material, the top rows show mixer tracks and the bottom any special tracks including RCMASTER and Master tracks.</p>
 </div>
 <div class="paragraph">
-<p>To switch to graphical meters, check the "Graphical Meters" option. Under the options tab, you can set color thresholds for yellow and red.</p>
+<p>To switch to graphical meters, check the "Graphical Meters" option. Under the options tab, you can set color thresholds for yellow and red. To switch to channel numbers instead of hardware names, uncheck the option while tracks are rec-armed.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1335,7 +1335,7 @@ Save your project before continuing with other workflows.
 <div class="title">Figure 7. Recording Indicator</div>
 </div>
 <div class="paragraph">
-<p>The recording indicator <span class="keyseq"><kbd>Alt</kbd>+<kbd>R</kbd></span> is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active.</p>
+<p>The recording indicator <span class="keyseq"><kbd>Alt</kbd>+<kbd>R</kbd></span> is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active. Right-click to set custom colors for offline, standby, recording and pause.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1361,7 +1361,7 @@ Save your project before continuing with other workflows.
 <div class="sect4">
 <h5 id="_disabling_channels">Disabling Channels</h5>
 <div class="paragraph">
-<p>In a typical recording session, the musicians with the least to record are often allowed to leave the session early once their work is completed. If they were individually recorded using a spot microphone, it wouldn&#8217;t make sense to continue recording on that channel. In ReaClassical there are two main ways to disable a channel. In a horizontal workflow using a single folder, it is no hassle to simply un-arm the desired track(s). For a vertical workflow with multiple folders, the task could end up being time-consuming with potential for error. So, the recommended ReaClassical way, both easy and visually obvious, is to set the rec input for the channel(s) to "None" via Mission Control.</p>
+<p>In a typical recording session, the musicians with the least to record are often allowed to leave the session early once their work is completed. If they were individually recorded using a spot microphone, it wouldn&#8217;t make sense to continue recording on that channel. The ReaClassical way, both easy and visually obvious, is to open Mission Control <kbd>C</kbd> and check "Rec Disabled" for the particular channel(s). When arming and recording, these channels will now be excluded. This allows the user to maintain hardware connections that were originally set up with the ability to quickly bring the microphone back in as required.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1949,10 +1949,19 @@ In order to make the process as streamlined as possible for the user before the 
 <div class="title">Tip</div>
 </td>
 <td class="content">
-Add a exclamation mark ("!") to the start of CD track names that you would like to have a visual countdown (length set in <kbd>F5</kbd> prefs). This feature is not available in all CD players.
+Check the "!" box for CD tracks that you would like to have a visual countdown (length set in <kbd>F5</kbd> prefs). This feature is not available in all CD players.
 </td>
 </tr>
 </table>
+</div>
+<div class="sect4">
+<h5 id="_marker_offsets">Marker Offsets</h5>
+<div class="paragraph">
+<p>There may be instances when an audience member coughs right before a downbeat or a violinist hits strings before the first note of an otherwise excellent performance. The Add Marker Offset function allows you to adjust the start accordingly (assuming you have some nice recorded or generated roomtone on the dedicated roomtone track).</p>
+</div>
+<div class="paragraph">
+<p>To use, manually drag one or more CD markers to where you want them and then click <b class="button">Add Marker Offsets</b>. It adds the correct offset(s) to the item name(s) automatically and refreshes the album metadata editor. Now, adjustments to an item position followed by a press of <kbd>Y</kbd>, maintains the relative CD marker offset to the item start. To remove all marker offsets, click <b class="button">Remove All Marker Offsets</b>.</p>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -1967,15 +1976,6 @@ Add a exclamation mark ("!") to the start of CD track names that you would like 
 <img src="src/assets/html_album_report.png" alt="Example of HTML Album Report">
 </div>
 <div class="title">Figure 17. Example of HTML Album Report</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_marker_offsets">Marker Offsets</h5>
-<div class="paragraph">
-<p>There may be instances when an audience member coughs right before a downbeat or a violinist hits strings before the first note of an otherwise excellent performance. The Add Marker Offset function allows you to adjust the start accordingly (assuming you have some nice recorded or generated roomtone on the dedicated roomtone track).</p>
-</div>
-<div class="paragraph">
-<p>To use, manually drag one or more CD markers to where you want them and then run the function via shortcut <span class="keyseq"><kbd>Shift</kbd>+<kbd>O</kbd></span>. It adds the correct offset(s) to the item name(s) automatically and refreshes the album metadata editor. Now, adjustments to an item position followed by a press of <kbd>Y</kbd>, maintains the relative CD marker offset to the item start.</p>
 </div>
 <div class="paragraph">
 <p>To clear all offsets, run <span class="keyseq"><kbd>Alt</kbd>+<kbd>O</kbd></span>.</p>
