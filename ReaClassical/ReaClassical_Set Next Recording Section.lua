@@ -74,7 +74,7 @@ function main()
         MB("No media items in project. Not setting new edit cursor position.", "Set up next recording section", 0)
         return
     end
-    local new_pos = last_end + 5.0 -- Move edit cursor to 5 seconds after the last item end
+    local new_pos = last_end + 1.0 -- Move edit cursor 1 second after the last item end
     SetEditCurPos(new_pos, true, false)
 
     TrackList_AdjustWindows(false)
