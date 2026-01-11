@@ -22,8 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_color_table, get_path
-local get_selected_media_item_at, count_selected_media_items
+local main, get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 function main()
@@ -38,57 +37,26 @@ function main()
         MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
-    local left_pos, right_pos, selected
+    local left_pos, right_pos
     local start_time, end_time = GetSet_LoopTimeRange(false, false, 0, 0, false)
     if start_time ~= end_time then
         left_pos = start_time
         right_pos = end_time
     else
-        local parent_track = GetTrack(0, 0)
-        selected = count_selected_media_items()
-
-        if selected == 0 then
+        local num = count_selected_media_items()
+        if num == 0 then
             MB(
                 "Please select one or more consecutive media items " ..
-                "in the first folder or make a time selection before running the function.",
+                "or make a time selection before running the function.",
                 "Destination Markers to Item Edge / Time Selection: Error", 0)
             return
         end
 
-        local folder_tracks = {}
-        local num_tracks = CountTracks(0)
-
-        for i = 0, num_tracks - 1 do
-            local track = GetTrack(0, i)
-            if i == 0 or GetParentTrack(track) == parent_track then
-                table.insert(folder_tracks, track)
-            else
-                break
-            end
-        end
-        for i = 0, selected - 1 do
-            local item = get_selected_media_item_at(i)
-            local item_track = GetMediaItem_Track(item)
-
-            local found = false
-            for _, folder_track in ipairs(folder_tracks) do
-                if item_track == folder_track then
-                    found = true
-                    break
-                end
-            end
-
-            if not found then
-                MB("Any selected items should be in the first folder.", "Error", 0)
-                return
-            end
-        end
-        -- Set marker positions
         local first_item = get_selected_media_item_at(0)
         left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
         local last_item
-        if selected > 1 then
-            last_item = get_selected_media_item_at(selected - 1)
+        if num > 1 then
+            last_item = get_selected_media_item_at(num - 1)
             local start = GetMediaItemInfo_Value(last_item, "D_POSITION")
             local length = GetMediaItemInfo_Value(last_item, "D_LENGTH")
             right_pos = start + length
@@ -112,29 +80,15 @@ function main()
         i = i + 1
     end
 
-    -- Get color table and add new markers
-    local colors = get_color_table()
-    AddProjectMarker2(0, false, left_pos, 0, "DEST-IN", 996, colors.dest_marker)
-    AddProjectMarker2(0, false, right_pos, 0, "DEST-OUT", 997, colors.dest_marker)
+    -- Get selected track for color or default to track 0
+    local selected_track = GetSelectedTrack(0, 0)
+    local color_track = selected_track or GetTrack(0, 0)
+    local marker_color = color_track and GetTrackColor(color_track) or 0
+    
+    AddProjectMarker2(0, false, left_pos, 0, "DEST-IN", 996, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, "DEST-OUT", 997, marker_color)
 
     Undo_EndBlock("Destination Markers to Item Edge", 0)
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
