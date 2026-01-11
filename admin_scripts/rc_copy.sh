@@ -4,7 +4,7 @@
 #
 # by chmaha (November 2025)
 
-sh "$(dirname "$0")/copy_lua.sh"
+# sh "$(dirname "$0")/copy_lua.sh"
 
 # Use Linux temp directory for collection
 dir=$(mktemp -d)
