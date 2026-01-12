@@ -604,6 +604,8 @@ function xfade_check()
     local first_track = GetTrack(0, 0)
     local num_of_items = CountTrackMediaItems(first_track)
     local xfade = false
+    local tolerance = 0.001
+
     for i = 0, num_of_items - 2 do
         local item1 = GetTrackMediaItem(first_track, i)
         local item2 = GetTrackMediaItem(first_track, i + 1)
@@ -611,7 +613,7 @@ function xfade_check()
         local pos2 = GetMediaItemInfo_Value(item2, "D_POSITION")
         local len1 = GetMediaItemInfo_Value(item1, "D_LENGTH")
         local end1 = pos1 + len1
-        if end1 > pos2 then
+        if end1 > (pos2 + tolerance) then
             xfade = true
             break
         end
