@@ -24,10 +24,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, shift, color_items, vertical_razor, group_items
-local vertical_group, horizontal, vertical, get_color_table
+local main, color_items, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
-local trackname_check, delete_empty_items, pastel_color, nudge_right
+local trackname_check, delete_empty_items, pastel_color
 local color_group_items, color_folder_children, scroll_to_first_track
 local select_children_of_selected_folders, select_next_folder
 local select_all_parents, get_item_by_guid, rgba_to_native, get_rank_color
@@ -100,12 +99,6 @@ function main()
 
     Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
     local folders = folder_check()
-
-    local first_item = GetMediaItem(0, 0)
-    local position = GetMediaItemInfo_Value(first_item, "D_POSITION")
-    if position == 0.0 then
-        shift()
-    end
 
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local color_pref = 0
@@ -386,14 +379,6 @@ function get_folder_children(parent_track)
     end
     
     return children
-end
-
----------------------------------------------------------------------
-
-function shift()
-    Main_OnCommand(40182, 0) -- select all items
-    nudge_right(1)
-    Main_OnCommand(40289, 0) -- unselect all items
 end
 
 ---------------------------------------------------------------------
@@ -806,26 +791,6 @@ function color_folder_children(parent_track, folder_color)
         end
 
         idx = idx + 1
-    end
-end
-
----------------------------------------------------------------------
-
-function nudge_right(nudgeSamples)
-    local sampleRate = GetSetProjectInfo(0, "PROJECT_SRATE", 0, false)
-    local nudgeAmount = nudgeSamples / sampleRate
-
-    local numTracks = CountTracks(0)
-    for i = 0, numTracks - 1 do
-        local track = GetTrack(0, i)
-        local itemCount = CountTrackMediaItems(track)
-        for j = 0, itemCount - 1 do
-            local item = GetTrackMediaItem(track, j)
-            if IsMediaItemSelected(item) then
-                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                SetMediaItemInfo_Value(item, "D_POSITION", pos + nudgeAmount)
-            end
-        end
     end
 end
 
