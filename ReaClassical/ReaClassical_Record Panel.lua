@@ -146,8 +146,8 @@ local recording_note = ""
 -- Track the item being edited when stopped
 local editing_item = nil
 local last_selected_item = nil
-local take_extracted = false    -- Track if current take_text was extracted from filename
-local session_extracted = false -- Track if current session was extracted from filename
+local take_extracted = false    -- Track if current take_text was extracted from take name
+local session_extracted = false -- Track if current session was extracted from take name
 
 -- Rank color options (matching SAI marker manager and notes app)
 local RANKS = {
@@ -231,11 +231,11 @@ function main()
         end
 
         -- Load new item's data
-        if selected_item then
+        if selected_item and ValidatePtr2(0, selected_item, "MediaItem*") then
           load_item_rank_and_notes(selected_item)
           editing_item = selected_item
 
-          -- Try to extract take number from filename
+          -- Try to extract take number from take name
           local extracted_take = extract_take_from_filename(selected_item)
           if extracted_take then
             take_text = extracted_take
@@ -250,7 +250,7 @@ function main()
             take_extracted = false
           end
 
-          -- Try to extract session name from filename
+          -- Try to extract session name from take name
           local extracted_session = extract_session_from_filename(selected_item)
           if extracted_session then
             session_text = extracted_session
@@ -948,10 +948,6 @@ function draw(playstate)
     end
   end
 
-  -- Show gentle message if no track selected... (existing code continues)
-
-  -- Show gentle message if no track selected... (existing code continues)
-
   -- Show gentle message if no track selected and no armed tracks (reserve space to prevent layout shift)
   -- Don't show message when editing a selected item
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
@@ -1380,8 +1376,6 @@ end
 
 ---------------------------------------------------------------------
 
----------------------------------------------------------------------
-
 function get_color_table()
   local resource_path = GetResourcePath()
   local pathseparator = package.config:sub(1, 1)
@@ -1673,6 +1667,7 @@ function apply_rank_and_notes_to_items()
     end
   else
     -- Horizontal workflow - check all tracks
+    local colors = get_color_table()
     local track_count = CountTracks(0)
     for i = 0, track_count - 1 do
       local track = GetTrack(0, i)
@@ -1699,15 +1694,26 @@ function apply_rank_and_notes_to_items()
               if recording_rank ~= "" then
                 GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
                 local rank_index = tonumber(recording_rank)
-                if rank_index and RANKS[rank_index] then
+                if rank_index and RANKS[rank_index] and color_pref == 0 then
                   local color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
                   SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
                   update_take_name(item, recording_rank)
                 end
               else
-                -- No rank - delete P_EXT state and restore original color
+                -- No rank - delete P_EXT state and color based on take number
                 GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
-                local color_to_use = get_item_color(item)
+                local color_to_use
+                local take_num = tonumber(take_text)
+                if take_num and take_num == 1 then
+                  -- First take uses dest_items color
+                  color_to_use = colors.dest_items
+                elseif take_num and take_num > 1 then
+                  -- Subsequent takes use pastel_color starting at index 0 (take_num - 2)
+                  color_to_use = pastel_color(take_num - 2)
+                else
+                  -- Fallback to get_item_color if take_num is invalid
+                  color_to_use = get_item_color(item)
+                end
                 SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
                 update_take_name(item, "")
               end
@@ -1735,18 +1741,17 @@ function extract_take_from_filename(item)
   local take = GetActiveTake(item)
   if not take then return nil end
 
-  local source = GetMediaItemTake_Source(take)
-  if not source then return nil end
+  local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+  if not take_name or take_name == "" then return nil end
 
-  local filename = GetMediaSourceFileName(source, "")
-  if not filename then return nil end
+  -- Pattern 1: SessionName_T002 format - extract the number after _T
+  local take_num = take_name:match("_T(%d+)$")
+  if take_num then
+    return tonumber(take_num)
+  end
 
-  -- Extract just the filename from the full path
-  local file_only = filename:match("([^/\\]+)$")
-  if not file_only then return nil end
-
-  -- Use the same pattern as get_take_count
-  local take_num = file_only:match(".*[^%d](%d+)%)?%.%a+$")
+  -- Pattern 2: Just padded number like "025"
+  take_num = take_name:match("^(%d+)$")
   if take_num then
     return tonumber(take_num)
   end
@@ -1760,37 +1765,18 @@ function extract_session_from_filename(item)
   local take = GetActiveTake(item)
   if not take then return nil end
 
-  local source = GetMediaItemTake_Source(take)
-  if not source then return nil end
+  local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+  if not take_name or take_name == "" then return nil end
 
-  local filename = GetMediaSourceFileName(source, "")
-  if not filename then return nil end
-
-  -- Extract just the filename from the full path
-  local file_only = filename:match("([^/\\]+)$")
-  if not file_only then return nil end
-
-  -- Pattern: SessionName_T001 or SessionName_TrackName_T001
-  -- Match everything before _T followed by digits
-  local session_name = file_only:match("^(.+)_T%d+")
-
+  -- Pattern 1: SessionName_T002 format
+  local session_name = take_name:match("^(.+)_T%d+")
   if session_name then
-    -- Remove track name if present (pattern: SessionName_TrackName)
-    -- Keep only the first part before the last underscore if there are multiple parts
-    local parts = {}
-    for part in session_name:gmatch("[^_]+") do
-      table.insert(parts, part)
-    end
+    return session_name
+  end
 
-    -- If we have multiple parts, assume the last one might be a track name
-    -- But if we only have one part, that's the session name
-    if #parts > 1 then
-      -- Remove the last part (potential track name)
-      table.remove(parts)
-      return table.concat(parts, "_")
-    else
-      return session_name
-    end
+  -- Pattern 2: Just padded number like "025" - no session
+  if take_name:match("^%d+$") then
+    return nil
   end
 
   return nil

@@ -414,7 +414,6 @@ function color_items(edits, color_pref, group_map)
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
     if workflow == "Horizontal" and not edits then
-        local color_index = 0
         local num_items = CountMediaItems(0)
 
         -- Collect items by group ID
@@ -432,9 +431,15 @@ function color_items(edits, color_pref, group_map)
         table.sort(sorted_group_ids)
 
         -- Color each group
-        local first_group = true
         for _, gid in ipairs(sorted_group_ids) do
             local grouped_items = groups[gid]
+
+            -- Extract take number from first item in group
+            local take_number = nil
+            local _, take_num_str = GetSetMediaItemInfo_String(grouped_items[1], "P_EXT:item_take_num", "", false)
+            if take_num_str ~= "" then
+                take_number = tonumber(take_num_str)
+            end
 
             -- Check if any item is ranked and color_pref is 0
             local has_rank = false
@@ -461,11 +466,10 @@ function color_items(edits, color_pref, group_map)
                     color_folder_children(first_track, unedited_color)
                 end
                 
-                color_index = color_index + 1
                 goto continue_group
             end
 
-            -- Determine group color (original logic for non-ranked items)
+            -- Determine group color (based on take number)
             local group_color = nil
             for _, item in ipairs(grouped_items) do
                 local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -479,12 +483,14 @@ function color_items(edits, color_pref, group_map)
             end
 
             if not group_color then
-                if first_group then
+                if take_number and take_number == 1 then
                     group_color = unedited_color
-                    first_group = false
+                elseif take_number and take_number > 1 then
+                    -- Use pastel_color starting at index 0 for take 2 (take_number - 2)
+                    group_color = pastel_color(take_number - 2)
                 else
-                    group_color = pastel_color(color_index)
-                    color_index = color_index + 1
+                    -- Fallback if no take number stored
+                    group_color = unedited_color
                 end
             end
 
