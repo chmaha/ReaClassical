@@ -131,9 +131,7 @@ function main()
             if new_item_naming ~= orig_item_naming then
                 rename_all_items(new_item_naming)
             end
-            prepare_takes()
             open = false -- Close window on success
-            return       -- Exit after applying
         else
             -- Validation failed, revert to last saved values and show error
             error_message = error_msg or "Invalid input detected."

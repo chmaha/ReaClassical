@@ -132,7 +132,7 @@ local stereo_options = {}
 local track_num_format = "%d" -- Will be set based on number of tracks
 
 local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-Main_OnCommand(prepare_takes, 0)
+-- Main_OnCommand(prepare_takes, 0)
 
 ---------------------------------------------------------------------
 
@@ -956,6 +956,15 @@ function main()
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Open Record Panel (" .. ctrl_key .. "+Enter)")
+        end
+
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Prepare Takes") then
+            local notes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+            Main_OnCommand(notes, 0)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Prepare Takes for Editing (T)")
         end
 
         ImGui.SameLine(ctx)
@@ -3027,7 +3036,7 @@ function consolidate_folders_to_first()
         for _, item in ipairs(items) do
             local pos = GetMediaItemInfo_Value(item, "D_POSITION")
             local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
-            
+
             if pos < first_folder_earliest then
                 first_folder_earliest = pos
             end
@@ -3040,7 +3049,7 @@ function consolidate_folders_to_first()
     for _, item in ipairs(first_folder.ungrouped_items) do
         local pos = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
-        
+
         if pos < first_folder_earliest then
             first_folder_earliest = pos
         end
@@ -3052,7 +3061,7 @@ function consolidate_folders_to_first()
     -- If first folder doesn't start at 0, shift all its items to start at 0
     if first_folder_earliest ~= 0 and first_folder_earliest ~= math.huge then
         local shift_amount = -first_folder_earliest
-        
+
         for group_id, items in pairs(first_folder.items_by_group) do
             for _, item in ipairs(items) do
                 local pos = GetMediaItemInfo_Value(item, "D_POSITION")
@@ -3064,7 +3073,7 @@ function consolidate_folders_to_first()
             local pos = GetMediaItemInfo_Value(item, "D_POSITION")
             SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
         end
-        
+
         -- Adjust latest_end accordingly
         latest_end = latest_end + shift_amount
     end
