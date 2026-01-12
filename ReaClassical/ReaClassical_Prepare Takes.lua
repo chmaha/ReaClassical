@@ -6,8 +6,6 @@ See "ReaClassical.lua" for more information.
 
 Copyright (C) 2022–2026 chmaha
 
-OPTIMIZED VERSION - Performance improvements for large projects
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -32,7 +30,7 @@ local select_children_of_selected_folders, select_next_folder
 local select_all_parents, get_item_by_guid, rgba_to_native, get_rank_color
 local build_group_map, horizontal_fast, vertical_fast
 local find_items_at_position, find_items_at_position_on_selected_tracks
-local group_items_fast, get_folder_children
+local group_items_fast, get_folder_children, is_item_colorized
 
 -- Rank color options (matching Notes Dialog)
 local RANKS = {
@@ -46,6 +44,13 @@ local RANKS = {
     { name = "False Start",   rgba = 0x2A2A2AFF, prefix = "False Start" },
     { name = "No Rank",       rgba = 0x00000000, prefix = "" }
 }
+
+---------------------------------------------------------------------
+
+function is_item_colorized(item)
+    local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
+    return colorized == "y"
+end
 
 ---------------------------------------------------------------------
 
@@ -445,19 +450,23 @@ function color_items(edits, color_pref, group_map)
             local has_rank = false
             local rank_color = nil
             for _, item in ipairs(grouped_items) do
-                local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-                if ranked ~= "" and color_pref == 0 then
-                    has_rank = true
-                    rank_color = get_rank_color(ranked)
-                    break
+                if not is_item_colorized(item) then
+                    local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                    if ranked ~= "" and color_pref == 0 then
+                        has_rank = true
+                        rank_color = get_rank_color(ranked)
+                        break
+                    end
                 end
             end
             
             if has_rank and rank_color then
                 -- Apply rank color using optimized function
                 for _, item in ipairs(grouped_items) do
-                    color_group_items(item, rank_color, group_map)
-                    GetSetMediaItemInfo_String(item, "P_EXT:saved_color", rank_color, true)
+                    if not is_item_colorized(item) then
+                        color_group_items(item, rank_color, group_map)
+                        GetSetMediaItemInfo_String(item, "P_EXT:saved_color", rank_color, true)
+                    end
                 end
                 
                 local first_track = GetMediaItem_Track(grouped_items[1])
@@ -483,22 +492,22 @@ function color_items(edits, color_pref, group_map)
             end
 
             if not group_color then
-                if take_number and take_number == 1 then
-                    group_color = unedited_color
-                elseif take_number and take_number > 1 then
-                    -- Use pastel_color starting at index 0 for take 2 (take_number - 2)
-                    group_color = pastel_color(take_number - 2)
+                if take_number then
+                    -- Use pastel_color starting at index 0 for take 2 (take_number - 1)
+                    group_color = pastel_color(take_number - 1)
                 else
                     -- Fallback if no take number stored
-                    group_color = unedited_color
+                    group_color = 0
                 end
             end
 
             -- Apply color using optimized function
             for _, item in ipairs(grouped_items) do
-                color_group_items(item, group_color, group_map)
-                local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
-                GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
+                if not is_item_colorized(item) then
+                    color_group_items(item, group_color, group_map)
+                    local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+                    GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
+                end
             end
 
             local first_track = GetMediaItem_Track(grouped_items[1])
@@ -549,37 +558,8 @@ function color_items(edits, color_pref, group_map)
             -- Color items
             for i = 0, num_items - 1 do
                 local item = GetTrackMediaItem(track, i)
-                local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
                 
-                if ranked ~= "" and color_pref == 0 then
-                    local rank_color = get_rank_color(ranked)
-                    if rank_color then
-                        color_group_items(item, rank_color, group_map)
-                    end
-                elseif ranked == "" or color_pref == 1 then
-                    local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
-                    local color_val = folder_color
-                    if src_guid ~= "" then
-                        local src_item = get_item_by_guid(0, src_guid)
-                        if src_item then
-                            color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
-                        end
-                    end
-                    color_group_items(item, color_val, group_map)
-                end
-            end
-        end
-
-        -- Third pass: dest folders
-        for _ = 1, 2 do
-            for _, track in ipairs(dest_folders) do
-                local num_items = CountTrackMediaItems(track)
-                local folder_color = unedited_color
-                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", colors.dest_items)
-                color_folder_children(track, colors.dest_items)
-
-                for i = 0, num_items - 1 do
-                    local item = GetTrackMediaItem(track, i)
+                if not is_item_colorized(item) then
                     local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
                     
                     if ranked ~= "" and color_pref == 0 then
@@ -597,6 +577,41 @@ function color_items(edits, color_pref, group_map)
                             end
                         end
                         color_group_items(item, color_val, group_map)
+                    end
+                end
+            end
+        end
+
+        -- Third pass: dest folders
+        for _ = 1, 2 do
+            for _, track in ipairs(dest_folders) do
+                local num_items = CountTrackMediaItems(track)
+                local folder_color = unedited_color
+                SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", colors.dest_items)
+                color_folder_children(track, colors.dest_items)
+
+                for i = 0, num_items - 1 do
+                    local item = GetTrackMediaItem(track, i)
+                    
+                    if not is_item_colorized(item) then
+                        local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                        
+                        if ranked ~= "" and color_pref == 0 then
+                            local rank_color = get_rank_color(ranked)
+                            if rank_color then
+                                color_group_items(item, rank_color, group_map)
+                            end
+                        elseif ranked == "" or color_pref == 1 then
+                            local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                            local color_val = folder_color
+                            if src_guid ~= "" then
+                                local src_item = get_item_by_guid(0, src_guid)
+                                if src_item then
+                                    color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                                end
+                            end
+                            color_group_items(item, color_val, group_map)
+                        end
                     end
                 end
             end
@@ -747,6 +762,10 @@ end
 ---------------------------------------------------------------------
 
 function color_group_items(item, color_val, group_map)
+    if is_item_colorized(item) then
+        return
+    end
+    
     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_val)
     
     if not group_map then
@@ -757,7 +776,9 @@ function color_group_items(item, color_val, group_map)
             for j = 0, total - 1 do
                 local other = GetMediaItem(0, j)
                 if GetMediaItemInfo_Value(other, "I_GROUPID") == group then
-                    SetMediaItemInfo_Value(other, "I_CUSTOMCOLOR", color_val)
+                    if not is_item_colorized(other) then
+                        SetMediaItemInfo_Value(other, "I_CUSTOMCOLOR", color_val)
+                    end
                 end
             end
         end
@@ -766,7 +787,9 @@ function color_group_items(item, color_val, group_map)
         local group = GetMediaItemInfo_Value(item, "I_GROUPID")
         if group > 0 and group_map[group] then
             for _, other in ipairs(group_map[group]) do
-                SetMediaItemInfo_Value(other, "I_CUSTOMCOLOR", color_val)
+                if not is_item_colorized(other) then
+                    SetMediaItemInfo_Value(other, "I_CUSTOMCOLOR", color_val)
+                end
             end
         end
     end
