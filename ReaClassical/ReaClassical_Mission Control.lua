@@ -960,8 +960,7 @@ function main()
 
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Prepare Takes") then
-            local notes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-            Main_OnCommand(notes, 0)
+            Main_OnCommand(prepare_takes, 0)
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Prepare Takes for Editing (T)")
