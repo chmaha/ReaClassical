@@ -1,11 +1,16 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.1
+@version 26.1.2
 @changelog
-  Mission Control: Run Prepare Takes when converting workflow
-  Prepare Takes: Remove unnecessary shift() functions
-  Prepare Takes: Add small tolerance for edit checks
-  Recording: Revert running prepare takes every rec-stop
+  Mission Control: Stop auto call to prepare takes
+  Mission Control: Add Prepare Takes button
+  Preferences: Remove unnecessary return call
+  Record Panel: Color items by take number in horizontal workflow
+  Find Source Material: Fallback to source file search if no matching GUID
+  Colorize: New reaimgui-based window
+  Prepare Takes: Avoid coloring already colorized items
+  Record Panel: Work alongside colorized items
+  Record Panel: Remove Prepare Takes call on window close
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
