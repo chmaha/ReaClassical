@@ -1453,7 +1453,7 @@ function get_item_color(item)
     if saved_color ~= "" then
       color_to_use = tonumber(saved_color)
     else
-      color_to_use = colors.dest_items
+      color_to_use = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
     end
     -- If no GUID color, use folder-based logic
   elseif not color_to_use then
