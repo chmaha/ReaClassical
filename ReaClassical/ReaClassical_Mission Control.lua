@@ -291,6 +291,7 @@ function main()
                     local whole_view = NamedCommandLookup("_RS63665092232578f8c8d10c5936ca5013a9ecab51")
                     Main_OnCommand(whole_view, 0)
                     ImGui.CloseCurrentPopup(ctx)
+                    Main_OnCommand(prepare_takes, 0)
                 end
 
                 ImGui.SameLine(ctx, 0, spacing)
@@ -326,6 +327,7 @@ function main()
                     Main_OnCommand(horiz_convert, 0)
                     init()
                     ImGui.CloseCurrentPopup(ctx)
+                    Main_OnCommand(prepare_takes, 0)
                 end
 
                 ImGui.SameLine(ctx, 0, spacing)
