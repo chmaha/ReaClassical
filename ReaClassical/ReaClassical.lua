@@ -1,12 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 26.1
+@version 26.1.1
 @changelog
-  Classical Take Record: Allow UI refresh before recording begins (fixes message to Arduino red light!)
-  Record Panel: Set next recording section 1 second after last item in project
-  Classical Take Record: check for empty saved cursor in vertical workflow
-  Set Destination Markers to Item Edge: Allow for use on any folder
-  Prepare Takes: Massively increase efficiency (Big O to quadratic to linear)
+  Mission Control: Run Prepare Takes when converting workflow
+  Prepare Takes: Remove unnecessary shift() functions
+  Prepare Takes: Add small tolerance for edit checks
+  Recording: Revert running prepare takes every rec-stop
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
