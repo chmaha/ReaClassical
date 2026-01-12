@@ -538,6 +538,7 @@ function apply_rank_color(item, rank)
         -- No Rank selected - restore original color
         color_to_use = get_item_color(item)
     else
+        GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
         -- Get the color for this rank
         local rank_index = tonumber(rank)
         if rank_index and RANKS[rank_index] then
@@ -617,6 +618,7 @@ function apply_rank_color(item, rank)
 
                     -- Store the rank for grouped items (empty string deletes P_EXT state)
                     GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", rank, true)
+                    GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
                 end
             end
         end
