@@ -3018,14 +3018,19 @@ function consolidate_folders_to_first()
         folder.ungrouped_items = ungrouped_items
     end
 
-    -- Find the latest item end time in first folder
+    -- Find the earliest and latest item positions in first folder
     local first_folder = folders[1]
+    local first_folder_earliest = math.huge
     local latest_end = 0
 
     for group_id, items in pairs(first_folder.items_by_group) do
         for _, item in ipairs(items) do
-            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
-                GetMediaItemInfo_Value(item, "D_LENGTH")
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
+            
+            if pos < first_folder_earliest then
+                first_folder_earliest = pos
+            end
             if item_end > latest_end then
                 latest_end = item_end
             end
@@ -3033,11 +3038,35 @@ function consolidate_folders_to_first()
     end
 
     for _, item in ipairs(first_folder.ungrouped_items) do
-        local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
-            GetMediaItemInfo_Value(item, "D_LENGTH")
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
+        
+        if pos < first_folder_earliest then
+            first_folder_earliest = pos
+        end
         if item_end > latest_end then
             latest_end = item_end
         end
+    end
+
+    -- If first folder doesn't start at 0, shift all its items to start at 0
+    if first_folder_earliest ~= 0 and first_folder_earliest ~= math.huge then
+        local shift_amount = -first_folder_earliest
+        
+        for group_id, items in pairs(first_folder.items_by_group) do
+            for _, item in ipairs(items) do
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
+            end
+        end
+
+        for _, item in ipairs(first_folder.ungrouped_items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
+        end
+        
+        -- Adjust latest_end accordingly
+        latest_end = latest_end + shift_amount
     end
 
     -- Get first folder's tracks for moving items to
@@ -3047,7 +3076,8 @@ function consolidate_folders_to_first()
     end
 
     -- Move items from subsequent folders to first folder
-    local current_position = latest_end + 10 -- 10 second gap between folders
+    -- If first folder is empty (latest_end is 0), start at 0, otherwise add 10 second gap
+    local current_position = (latest_end > 0) and (latest_end + 10) or 0
 
     for folder_idx = 2, #folders do
         local source_folder = folders[folder_idx]

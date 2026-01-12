@@ -182,8 +182,6 @@ function main()
                 Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
             end
         end
-        local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-        Main_OnCommand(prepare_takes, 0)
         PreventUIRefresh(-1)
         Undo_EndBlock('Classical Take Record Stop', 0)
     end
