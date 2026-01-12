@@ -6,6 +6,8 @@ See "ReaClassical.lua" for more information.
 
 Copyright (C) 2022–2026 chmaha
 
+OPTIMIZED VERSION - Performance improvements for large projects
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -25,12 +27,13 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, shift, color_items, vertical_razor, group_items
 local vertical_group, horizontal, vertical, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
-local trackname_check, get_selected_media_item_at, count_selected_media_items
-local delete_empty_items, pastel_color, nudge_right
+local trackname_check, delete_empty_items, pastel_color, nudge_right
 local color_group_items, color_folder_children, scroll_to_first_track
 local select_children_of_selected_folders, select_next_folder
-local select_all_parents, select_item_under_cursor_on_selected_track
-local get_item_by_guid, rgba_to_native, get_rank_color
+local select_all_parents, get_item_by_guid, rgba_to_native, get_rank_color
+local build_group_map, horizontal_fast, vertical_fast
+local find_items_at_position, find_items_at_position_on_selected_tracks
+local group_items_fast, get_folder_children
 
 -- Rank color options (matching Notes Dialog)
 local RANKS = {
@@ -86,6 +89,7 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
+    -- Clear all group IDs in one pass
     for track_idx = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, track_idx)
         for item_idx = 0, CountTrackMediaItems(track) - 1 do
@@ -113,12 +117,16 @@ function main()
 
     local edits = false
     if folders == 0 or folders == 1 then
-        edits = horizontal()
+        edits = horizontal_fast()  -- Use optimized version
     else
-        vertical()
+        vertical_fast()  -- Use optimized version
     end
+    
+    -- Build group map once for all coloring operations
+    local group_map = build_group_map()
+    
     PreventUIRefresh(-1)
-    color_items(edits, color_pref)
+    color_items(edits, color_pref, group_map)
     PreventUIRefresh(1)
 
     GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
@@ -138,6 +146,246 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+end
+
+---------------------------------------------------------------------
+
+function build_group_map()
+    local groups = {}
+    local num_items = CountMediaItems(0)
+    
+    for i = 0, num_items - 1 do
+        local item = GetMediaItem(0, i)
+        local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+        
+        if group_id > 0 then
+            if not groups[group_id] then
+                groups[group_id] = {}
+            end
+            table.insert(groups[group_id], item)
+        end
+    end
+    
+    return groups
+end
+
+---------------------------------------------------------------------
+
+function find_items_at_position(position, tolerance)
+    tolerance = tolerance or 0.0001
+    local items = {}
+    local num_tracks = CountTracks(0)
+    
+    for t = 0, num_tracks - 1 do
+        local track = GetTrack(0, t)
+        local num_items = CountTrackMediaItems(track)
+        
+        for i = 0, num_items - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            local item_end = item_pos + item_len
+            
+            -- Check if position falls within item
+            if position >= (item_pos - tolerance) and position <= (item_end + tolerance) then
+                table.insert(items, item)
+            end
+        end
+    end
+    
+    return items
+end
+
+---------------------------------------------------------------------
+
+function find_items_at_position_on_selected_tracks(position, tolerance)
+    tolerance = tolerance or 0.0001
+    local items = {}
+    local num_tracks = CountTracks(0)
+    
+    for t = 0, num_tracks - 1 do
+        local track = GetTrack(0, t)
+        -- Only check selected tracks
+        if IsTrackSelected(track) then
+            local num_items = CountTrackMediaItems(track)
+            
+            for i = 0, num_items - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                local item_end = item_pos + item_len
+                
+                -- Check if position falls within item
+                if position >= (item_pos - tolerance) and position <= (item_end + tolerance) then
+                    table.insert(items, item)
+                end
+            end
+        end
+    end
+    
+    return items
+end
+
+---------------------------------------------------------------------
+
+function group_items_fast(items, group_id)
+    for _, item in ipairs(items) do
+        SetMediaItemInfo_Value(item, "I_GROUPID", group_id)
+    end
+end
+
+---------------------------------------------------------------------
+
+function horizontal_fast()
+    local edits = xfade_check()
+    local first_track = GetTrack(0, 0)
+    if not first_track then return edits end
+    
+    local num_items = CountTrackMediaItems(first_track)
+    if num_items == 0 then return edits end
+    
+    -- Select all tracks first (like original does)
+    Main_OnCommand(40296, 0) -- Track: Select all tracks
+    
+    local group = 1
+    
+    -- Iterate through items on first track to establish grouping positions
+    for i = 0, num_items - 1 do
+        local item = GetTrackMediaItem(first_track, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local mid_point = pos + (len / 2)
+        
+        -- Find all items on SELECTED tracks at this mid-point position
+        local items_to_group = find_items_at_position_on_selected_tracks(mid_point)
+        
+        -- Assign group ID to all found items
+        group_items_fast(items_to_group, group)
+        
+        group = group + 1
+    end
+    
+    -- Create track media/razor editing group
+    Main_OnCommand(42579, 0) -- Remove from all groups
+    Main_OnCommand(42578, 0) -- Create new group
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    
+    return edits
+end
+
+---------------------------------------------------------------------
+
+function vertical_fast()
+    -- Get all folder parent tracks
+    local folder_tracks = {}
+    local num_tracks = CountTracks(0)
+    
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if depth == 1 then
+            table.insert(folder_tracks, track)
+        end
+    end
+    
+    if #folder_tracks == 0 then return end
+    
+    local first_folder = folder_tracks[1]
+    local first_folder_children = get_folder_children(first_folder)
+    
+    -- Select first folder and its children
+    SetOnlyTrackSelected(first_folder)
+    for _, child in ipairs(first_folder_children) do
+        SetTrackSelected(child, true)
+    end
+    
+    -- Process first folder (horizontal grouping like original)
+    local num_items = CountTrackMediaItems(first_folder)
+    local group = 1
+    
+    for i = 0, num_items - 1 do
+        local item = GetTrackMediaItem(first_folder, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local mid_point = pos + (len / 2)
+        
+        -- Find items at this position on selected tracks (folder + children)
+        local items_to_group = find_items_at_position_on_selected_tracks(mid_point)
+        
+        group_items_fast(items_to_group, group)
+        group = group + 1
+    end
+    
+    -- Create track media/razor editing group for first folder
+    Main_OnCommand(42579, 0) -- Remove from all groups
+    Main_OnCommand(42578, 0) -- Create new group
+    Main_OnCommand(40421, 0) -- Select all items in track
+    
+    -- Process remaining folders (vertical grouping)
+    for f = 2, #folder_tracks do
+        local folder = folder_tracks[f]
+        local folder_children = get_folder_children(folder)
+        
+        -- Select this folder and its children
+        SetOnlyTrackSelected(folder)
+        for _, child in ipairs(folder_children) do
+            SetTrackSelected(child, true)
+        end
+        
+        -- Create track media/razor editing group
+        Main_OnCommand(42579, 0)
+        Main_OnCommand(42578, 0)
+        Main_OnCommand(40421, 0) -- Select all items in track
+        
+        -- For each item on the folder track, group vertically
+        local folder_items = CountTrackMediaItems(folder)
+        for i = 0, folder_items - 1 do
+            local item = GetTrackMediaItem(folder, i)
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            local mid_point = pos + (len / 2)
+            
+            -- Find items at this position on selected tracks
+            local items_to_group = find_items_at_position_on_selected_tracks(mid_point)
+            
+            group_items_fast(items_to_group, group)
+            group = group + 1
+        end
+    end
+    
+    Main_OnCommand(40289, 0) -- Unselect all items
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+end
+
+---------------------------------------------------------------------
+
+function get_folder_children(parent_track)
+    local children = {}
+    if not parent_track then return children end
+    
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local idx = parent_idx + 1
+    local depth = 1
+    
+    while idx < num_tracks and depth > 0 do
+        local tr = GetTrack(0, idx)
+        if not tr then break end
+        
+        local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+        
+        if depth > 0 then
+            table.insert(children, tr)
+        end
+        
+        depth = depth + folder_depth
+        
+        if depth <= 0 then break end
+        
+        idx = idx + 1
+    end
+    
+    return children
 end
 
 ---------------------------------------------------------------------
@@ -174,7 +422,7 @@ end
 
 ---------------------------------------------------------------------
 
-function color_items(edits, color_pref)
+function color_items(edits, color_pref, group_map)
     local colors = get_color_table()
     local unedited_color = colors.dest_items
 
@@ -182,10 +430,9 @@ function color_items(edits, color_pref)
 
     if workflow == "Horizontal" and not edits then
         local color_index = 0
-
         local num_items = CountMediaItems(0)
 
-        -- Step 1: Collect items by group ID
+        -- Collect items by group ID
         local groups = {}
         for i = 0, num_items - 1 do
             local item = GetMediaItem(0, i)
@@ -194,12 +441,12 @@ function color_items(edits, color_pref)
             table.insert(groups[group_id], item)
         end
 
-        -- Step 2: Sort group IDs
+        -- Sort group IDs
         local sorted_group_ids = {}
         for gid in pairs(groups) do table.insert(sorted_group_ids, gid) end
         table.sort(sorted_group_ids)
 
-        -- Step 3: Color each group
+        -- Color each group
         local first_group = true
         for _, gid in ipairs(sorted_group_ids) do
             local grouped_items = groups[gid]
@@ -217,13 +464,12 @@ function color_items(edits, color_pref)
             end
             
             if has_rank and rank_color then
-                -- Apply rank color to all items in group
+                -- Apply rank color using optimized function
                 for _, item in ipairs(grouped_items) do
-                    color_group_items(item, rank_color)
+                    color_group_items(item, rank_color, group_map)
                     GetSetMediaItemInfo_String(item, "P_EXT:saved_color", rank_color, true)
                 end
                 
-                -- Color the track of first item
                 local first_track = GetMediaItem_Track(grouped_items[1])
                 if first_track then
                     SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", unedited_color)
@@ -257,14 +503,13 @@ function color_items(edits, color_pref)
                 end
             end
 
-            -- Apply color to all items in group
+            -- Apply color using optimized function
             for _, item in ipairs(grouped_items) do
-                color_group_items(item, group_color)
+                color_group_items(item, group_color, group_map)
                 local color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
                 GetSetMediaItemInfo_String(item, "P_EXT:saved_color", color, true)
             end
 
-            -- Color the track of first item
             local first_track = GetMediaItem_Track(grouped_items[1])
             if first_track then
                 SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", unedited_color)
@@ -315,11 +560,10 @@ function color_items(edits, color_pref)
                 local item = GetTrackMediaItem(track, i)
                 local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
                 
-                -- If ranked and color_pref is 0, use rank color
                 if ranked ~= "" and color_pref == 0 then
                     local rank_color = get_rank_color(ranked)
                     if rank_color then
-                        color_group_items(item, rank_color)
+                        color_group_items(item, rank_color, group_map)
                     end
                 elseif ranked == "" or color_pref == 1 then
                     local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -330,7 +574,7 @@ function color_items(edits, color_pref)
                             color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                         end
                     end
-                    color_group_items(item, color_val)
+                    color_group_items(item, color_val, group_map)
                 end
             end
         end
@@ -347,11 +591,10 @@ function color_items(edits, color_pref)
                     local item = GetTrackMediaItem(track, i)
                     local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
                     
-                    -- If ranked and color_pref is 0, use rank color
                     if ranked ~= "" and color_pref == 0 then
                         local rank_color = get_rank_color(ranked)
                         if rank_color then
-                            color_group_items(item, rank_color)
+                            color_group_items(item, rank_color, group_map)
                         end
                     elseif ranked == "" or color_pref == 1 then
                         local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -362,146 +605,12 @@ function color_items(edits, color_pref)
                                 color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                             end
                         end
-                        color_group_items(item, color_val)
+                        color_group_items(item, color_val, group_map)
                     end
                 end
             end
         end
     end
-end
-
----------------------------------------------------------------------
-
-function vertical_razor()
-    Main_OnCommand(40042, 0)           -- Transport: Go to start of project
-    select_children_of_selected_folders()
-    Main_OnCommand(42579, 0)           -- Track: Remove selected tracks from all track media/razor editing groups
-    Main_OnCommand(42578, 0)           -- Track: Create new track media/razor editing group from selected tracks
-    Main_OnCommand(40421, 0)           -- Item: Select all items in trac
-end
-
----------------------------------------------------------------------
-
-function group_items(string, group)
-    if string == "horizontal" then
-        Main_OnCommand(40296, 0) -- Track: Select all tracks
-    else
-        select_children_of_selected_folders()
-    end
-
-    local selected = get_selected_media_item_at(0)
-    local start = GetMediaItemInfo_Value(selected, "D_POSITION")
-    local length = GetMediaItemInfo_Value(selected, "D_LENGTH")
-    SetEditCurPos(start + (length / 2), false, false) -- move to middle of item
-    select_item_under_cursor_on_selected_track()
-
-    local num_selected_items = count_selected_media_items()
-    for i = 0, num_selected_items - 1 do
-        local item = get_selected_media_item_at(i)
-        if item then
-            SetMediaItemInfo_Value(item, "I_GROUPID", group)
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function vertical_group(length, group)
-    local track = GetSelectedTrack(0, 0)
-    local item = AddMediaItemToTrack(track)
-    SetMediaItemPosition(item, length + 1, false)
-
-    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    repeat
-        local selected = get_selected_media_item_at(0)
-        local start = GetMediaItemInfo_Value(selected, "D_POSITION")
-        local item_length = GetMediaItemInfo_Value(selected, "D_LENGTH")
-        SetEditCurPos(start + (item_length / 2), false, false) -- move to middle of item
-        select_item_under_cursor_on_selected_track()
-
-        local num_selected_items = count_selected_media_items()
-        for i = 0, num_selected_items - 1 do
-            local selected_item = get_selected_media_item_at(i)
-            if selected_item then
-                SetMediaItemInfo_Value(selected_item, "I_GROUPID", group)
-            end
-        end
-        group = group + 1
-        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    until IsMediaItemSelected(item) == true
-
-    DeleteTrackMediaItem(track, item)
-    return group
-end
-
----------------------------------------------------------------------
-
-function horizontal()
-    local edits = xfade_check()
-    local length = GetProjectLength(0)
-    local first_track = GetTrack(0, 0)
-    local new_item = AddMediaItemToTrack(first_track)
-    SetMediaItemPosition(new_item, length + 1, false)
-
-    if first_track then
-        SetOnlyTrackSelected(first_track) -- Select only the first track
-    end
-    SetEditCurPos(0, false, false)
-
-    local workflow = "horizontal"
-    local group = 1
-    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    repeat
-        group_items(workflow, group)
-        group = group + 1
-        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    until IsMediaItemSelected(new_item) == true
-
-    DeleteTrackMediaItem(first_track, new_item)
-    SelectAllMediaItems(0, false)
-    Main_OnCommand(42579, 0) -- Track: Remove selected tracks from all track media/razor editing groups
-    Main_OnCommand(42578, 0) -- Track: Create new track media/razor editing group from selected tracks
-    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-    SetEditCurPos(0, false, false)
-    return edits
-end
-
----------------------------------------------------------------------
-
-function vertical()
-    select_all_parents()
-    local num_of_folders = CountSelectedTracks(0)
-    local length = GetProjectLength(0)
-    local first_track = GetTrack(0, 0)
-
-    local new_item = AddMediaItemToTrack(first_track)
-    SetMediaItemPosition(new_item, length + 1, false)
-    local group = 1
-    SetOnlyTrackSelected(first_track)
-
-    SetEditCurPos(0, false, false)
-    local workflow = "vertical"
-    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    repeat
-        group_items(workflow, group)
-        group = group + 1
-        Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    until IsMediaItemSelected(new_item) == true
-
-    DeleteTrackMediaItem(first_track, new_item)
-    local start = 2
-    select_next_folder()
-
-    for _ = start, num_of_folders, 1 do
-        vertical_razor()
-        local next_group = vertical_group(length, group)
-        select_next_folder()
-        group = next_group
-    end
-
-    SelectAllMediaItems(0, false)
-    Main_OnCommand(40297, 0) -- Track: Unselect (clear selection of) all tracks
-    SetEditCurPos(0, false, false)
 end
 
 ---------------------------------------------------------------------
@@ -596,41 +705,6 @@ end
 
 ---------------------------------------------------------------------
 
-function count_selected_media_items()
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            selected_count = selected_count + 1
-        end
-    end
-
-    return selected_count
-end
-
----------------------------------------------------------------------
-
-function get_selected_media_item_at(index)
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            if selected_count == index then
-                return item
-            end
-            selected_count = selected_count + 1
-        end
-    end
-
-    return nil
-end
-
----------------------------------------------------------------------
-
 function delete_empty_items(num_of_project_items)
     for i = num_of_project_items - 1, 0, -1 do
         local item = GetMediaItem(0, i)
@@ -648,7 +722,6 @@ function pastel_color(index)
     local golden_ratio_conjugate = 0.61803398875
     local hue                    = (index * golden_ratio_conjugate) % 1.0
 
-    -- Subtle variation in saturation/lightness
     local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
     local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
 
@@ -680,14 +753,26 @@ end
 
 ---------------------------------------------------------------------
 
-function color_group_items(item, color_val)
+function color_group_items(item, color_val, group_map)
     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_val)
-    local group = GetMediaItemInfo_Value(item, "I_GROUPID")
-    if group > 0 then
-        local total = CountMediaItems(0)
-        for j = 0, total - 1 do
-            local other = GetMediaItem(0, j)
-            if GetMediaItemInfo_Value(other, "I_GROUPID") == group then
+    
+    if not group_map then
+        -- Fallback to original method if no group_map provided
+        local group = GetMediaItemInfo_Value(item, "I_GROUPID")
+        if group > 0 then
+            local total = CountMediaItems(0)
+            for j = 0, total - 1 do
+                local other = GetMediaItem(0, j)
+                if GetMediaItemInfo_Value(other, "I_GROUPID") == group then
+                    SetMediaItemInfo_Value(other, "I_CUSTOMCOLOR", color_val)
+                end
+            end
+        end
+    else
+        -- Use pre-built group map for O(1) lookup
+        local group = GetMediaItemInfo_Value(item, "I_GROUPID")
+        if group > 0 and group_map[group] then
+            for _, other in ipairs(group_map[group]) do
                 SetMediaItemInfo_Value(other, "I_CUSTOMCOLOR", color_val)
             end
         end
@@ -699,11 +784,8 @@ end
 function color_folder_children(parent_track, folder_color)
     if not parent_track or not folder_color then return end
 
-    -- get parent index
     local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
     local num_tracks = CountTracks(0)
-
-    -- start from next track
     local idx = parent_idx + 1
     local depth = 1
 
@@ -713,15 +795,14 @@ function color_folder_children(parent_track, folder_color)
 
         local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
 
-        -- color current track if still inside folder
         if depth > 0 then
             SetMediaTrackInfo_Value(tr, "I_CUSTOMCOLOR", folder_color)
         end
 
-        depth = depth + folder_depth -- update folder depth AFTER coloring
+        depth = depth + folder_depth
 
         if depth <= 0 then
-            break -- folder closed
+            break
         end
 
         idx = idx + 1
@@ -731,9 +812,7 @@ end
 ---------------------------------------------------------------------
 
 function nudge_right(nudgeSamples)
-    -- get project sample rate using GetSetProjectInfo
     local sampleRate = GetSetProjectInfo(0, "PROJECT_SRATE", 0, false)
-
     local nudgeAmount = nudgeSamples / sampleRate
 
     local numTracks = CountTracks(0)
@@ -753,55 +832,50 @@ end
 ---------------------------------------------------------------------
 
 function scroll_to_first_track()
-  local track1 = GetTrack(0, 0)
-  if not track1 then return end
+    local track1 = GetTrack(0, 0)
+    if not track1 then return end
 
-  -- Save current selected tracks to restore later
-  local saved_sel = {}
-  local count_sel = CountSelectedTracks(0)
-  for i = 0, count_sel - 1 do
-    saved_sel[i+1] = GetSelectedTrack(0, i)
-  end
+    local saved_sel = {}
+    local count_sel = CountSelectedTracks(0)
+    for i = 0, count_sel - 1 do
+        saved_sel[i+1] = GetSelectedTrack(0, i)
+    end
 
-  -- Select only Track 1
-  Main_OnCommand(40297, 0) -- Unselect all tracks
-  SetTrackSelected(track1, true)
+    Main_OnCommand(40297, 0)
+    SetTrackSelected(track1, true)
+    Main_OnCommand(40913, 0)
 
-  -- Scroll Track 1 into view (vertically)
-  Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
-
-  -- Restore previous selection
-  Main_OnCommand(40297, 0) -- Unselect all tracks
-  for _, tr in ipairs(saved_sel) do
-    SetTrackSelected(tr, true)
-  end
+    Main_OnCommand(40297, 0)
+    for _, tr in ipairs(saved_sel) do
+        SetTrackSelected(tr, true)
+    end
 end
 
 ---------------------------------------------------------------------
 
 function select_children_of_selected_folders()
-  local track_count = CountTracks(0)
+    local track_count = CountTracks(0)
 
-  for i = 0, track_count - 1 do
-    local tr = GetTrack(0, i)
-    if IsTrackSelected(tr) then
-      local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
-      if depth == 1 then -- folder parent
-        local j = i + 1
-        while j < track_count do
-          local ch_tr = GetTrack(0, j)
-          SetTrackSelected(ch_tr, true) -- select child track
+    for i = 0, track_count - 1 do
+        local tr = GetTrack(0, i)
+        if IsTrackSelected(tr) then
+            local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+            if depth == 1 then
+                local j = i + 1
+                while j < track_count do
+                    local ch_tr = GetTrack(0, j)
+                    SetTrackSelected(ch_tr, true)
 
-          local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
-          if ch_depth == -1 then
-            break -- end of folder children
-          end
+                    local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+                    if ch_depth == -1 then
+                        break
+                    end
 
-          j = j + 1
+                    j = j + 1
+                end
+            end
         end
-      end
     end
-  end
 end
 
 ---------------------------------------------------------------------
@@ -816,23 +890,19 @@ function select_next_folder()
         local folder_change = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
 
         if target_depth ~= -1 then
-            -- We're in search mode for the next folder at the same depth
             if depth == target_depth and folder_change == 1 then
-                Main_OnCommand(40297, 0) -- Unselect all
+                Main_OnCommand(40297, 0)
                 SetTrackSelected(tr, true)
                 return
             elseif depth < target_depth then
-                -- Gone out of that folder level, stop searching
                 target_depth = -1
             end
         else
-            -- Look for the selected folder
             if IsTrackSelected(tr) and folder_change == 1 then
                 target_depth = depth
             end
         end
 
-        -- Update depth for next iteration
         depth = depth + folder_change
     end
 end
@@ -856,34 +926,9 @@ end
 
 ---------------------------------------------------------------------
 
-function select_item_under_cursor_on_selected_track()
-  Main_OnCommand(40289, 0) -- Unselect all items
-
-  local curpos = GetCursorPosition()
-  local item_count = CountMediaItems(0)
-
-  for i = 0, item_count - 1 do
-    local item = GetMediaItem(0, i)
-    local track = GetMediaItem_Track(item)
-    local track_sel = IsTrackSelected(track)
-
-    if track_sel then
-      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-      local item_end = item_pos + item_len
-
-      if curpos >= item_pos and curpos <= item_end then
-        SetMediaItemInfo_Value(item, "B_UISEL", 1) -- Select this item
-      end
-    end
-  end
-end
-
----------------------------------------------------------------------
-
 function get_item_by_guid(project, guid)
     if not guid or guid == "" then return nil end
-    project = project or 0  -- default to current project if nil
+    project = project or 0
 
     local numItems = reaper.CountMediaItems(project)
     for i = 0, numItems - 1 do
@@ -894,7 +939,7 @@ function get_item_by_guid(project, guid)
         end
     end
 
-    return nil  -- not found
+    return nil
 end
 
 ---------------------------------------------------------------------
