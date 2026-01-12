@@ -1,19 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 26.0
+@version 26.1
 @changelog
-  Welcome to ReaClassical 26
-  Prepare Takes: Run automatically at various points
-  Record Panel: Show previous session name for selected item
-  Meterbridge: Allow for hardware names
-  Recording Indicator: Custom colors via right-click
-  Metadata Editor: Add offset marker buttons
-  Metadata Editor: Make genre and language drop-downs
-  Metadata Editor: Add visual countdown checkboxes
-  Record Panel: Only use first selected item for arming
-  Record Panel: Fix session name hangover when changing project tabs
-  Mission Control: Add rec disable input checkboxes
-  Sync: reorder special tracks after all tracks in place
+  Classical Take Record: Allow UI refresh before recording begins (fixes message to Arduino red light!)
+  Record Panel: Set next recording section 1 second after last item in project
+  Classical Take Record: check for empty saved cursor in vertical workflow
+  Set Destination Markers to Item Edge: Allow for use on any folder
+  Prepare Takes: Massively increase efficiency (Big O to quadratic to linear)
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
