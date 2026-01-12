@@ -3,6 +3,7 @@
 This file is a part of "ReaClassical" package.
 See "ReaClassical.lua" for more information.
 Copyright (C) 2022–2026 chmaha
+MODIFIED VERSION - Ensures all items with same group ID are colored together
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_selected_media_item_at, count_selected_media_items
-local apply_color_to_items, remove_custom_coloring
+local apply_color_to_items, remove_custom_coloring, get_all_items_in_groups
 
 ---------------------------------------------------------------------
 
@@ -92,11 +93,50 @@ end
 
 ---------------------------------------------------------------------
 
+-- NEW FUNCTION: Get all items that share group IDs with selected items
+function get_all_items_in_groups()
+    local group_ids = {}
+    local items_to_process = {}
+    local processed = {}
+    
+    -- First pass: collect all group IDs from selected items
+    local sel_count = count_selected_media_items()
+    for i = 0, sel_count - 1 do
+        local item = get_selected_media_item_at(i)
+        if item then
+            local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+            if group_id > 0 then
+                group_ids[group_id] = true
+            end
+            -- Also include the selected item itself (even if no group)
+            processed[item] = true
+            table.insert(items_to_process, item)
+        end
+    end
+    
+    -- Second pass: collect all items that belong to these groups
+    if next(group_ids) then
+        local total_items = CountMediaItems(0)
+        for i = 0, total_items - 1 do
+            local item = GetMediaItem(0, i)
+            if not processed[item] then
+                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+                if group_id > 0 and group_ids[group_id] then
+                    processed[item] = true
+                    table.insert(items_to_process, item)
+                end
+            end
+        end
+    end
+    
+    return items_to_process
+end
+
+---------------------------------------------------------------------
+
 function apply_color_to_items(color)
     Undo_BeginBlock()
     PreventUIRefresh(1)
-    
-    Main_OnCommand(40034, 0) -- select all in group
     
     local sel_count = count_selected_media_items()
     if sel_count == 0 then
@@ -106,9 +146,18 @@ function apply_color_to_items(color)
         return
     end
     
+    -- MODIFIED: Get all items including grouped items
+    local items_to_color = get_all_items_in_groups()
+    
+    if #items_to_color == 0 then
+        PreventUIRefresh(-1)
+        message_text = "No items to process."
+        message_timer = ImGui.GetTime(ctx)
+        return
+    end
+    
     -- Save original colors and apply new color
-    for i = 0, sel_count - 1 do
-        local item = get_selected_media_item_at(i)
+    for _, item in ipairs(items_to_color) do
         if item then
             -- Save original color if not already saved
             local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
@@ -120,18 +169,12 @@ function apply_color_to_items(color)
             -- Apply new color
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
             
-            -- Mark as colorized if on folder track
-            local track = GetMediaItemTrack(item)
-            if track then
-                local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-                if folder_depth > 0 then
-                    GetSetMediaItemInfo_String(item, "P_EXT:colorized", "y", true)
-                end
-            end
+            -- Mark as colorized
+            GetSetMediaItemInfo_String(item, "P_EXT:colorized", "y", true)
         end
     end
 
-    message_text = string.format("Applied color to %d item(s).", sel_count)
+    message_text = string.format("Applied color to %d item(s).", #items_to_color)
     message_timer = ImGui.GetTime(ctx)
     
     UpdateArrange()
@@ -145,8 +188,6 @@ function remove_custom_coloring()
     Undo_BeginBlock()
     PreventUIRefresh(1)
     
-    Main_OnCommand(40034, 0) -- select all in group
-    
     local sel_count = count_selected_media_items()
     if sel_count == 0 then
         PreventUIRefresh(-1)
@@ -155,11 +196,20 @@ function remove_custom_coloring()
         return
     end
     
+    -- MODIFIED: Get all items including grouped items
+    local items_to_restore = get_all_items_in_groups()
+    
+    if #items_to_restore == 0 then
+        PreventUIRefresh(-1)
+        message_text = "No items to process."
+        message_timer = ImGui.GetTime(ctx)
+        return
+    end
+    
     local restored_count = 0
     
     -- Restore original colors
-    for i = 0, sel_count - 1 do
-        local item = get_selected_media_item_at(i)
+    for _, item in ipairs(items_to_restore) do
         if item then
             local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
             if saved_color ~= "" then
