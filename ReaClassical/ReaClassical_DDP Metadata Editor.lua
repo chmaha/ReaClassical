@@ -495,20 +495,29 @@ function main()
 
             local item_count = CountTrackMediaItems(selected_track)
             local spacing = 5
-            local padding_right = 15
 
             local track_number_counter = 1
-            local avail_w, _ = ImGui.GetContentRegionAvail(ctx)
+            
+            -- Calculate fixed widths for checkbox and track number
+            local checkbox_w = ImGui.GetFrameHeight(ctx)
+            local track_number_w = ImGui.CalcTextSize(ctx, "00")
+            
+            -- Get total available width
+            local avail_w = select(1, ImGui.GetContentRegionAvail(ctx))
+            
+            -- Calculate space available for metadata boxes after accounting for fixed elements
+            local fixed_width = checkbox_w + spacing + track_number_w + spacing
+            local metadata_width = avail_w - fixed_width - spacing * #keys
+            
+            -- Distribute width among metadata boxes (title gets 2 units, others get 1)
             local normal_boxes = #keys - 1
-            local normal_box_w = (avail_w - padding_right - spacing * (#keys)) / (normal_boxes + 2)
+            local total_units = normal_boxes + 2  -- 6 normal boxes + 2 units for title
+            local normal_box_w = metadata_width / total_units
             local title_box_w = 2 * normal_box_w
+            
             local first_isrc = nil
 
-            local track_number_w, _ = ImGui.CalcTextSize(ctx, "00")
-            track_number_w = track_number_w + spacing
-
             -- Add "!" header above checkbox column with tooltip, centered over checkboxes
-            local checkbox_w = ImGui.GetFrameHeight(ctx)
             local exclaim_text_w = ImGui.CalcTextSize(ctx, "!")
             local center_offset = (checkbox_w - exclaim_text_w) / 2
 
@@ -591,7 +600,6 @@ function main()
                         ImGui.SameLine(ctx, 0, spacing)
                     else
                         -- For first track, add empty space where checkbox would be
-                        local checkbox_w = ImGui.GetFrameHeight(ctx)
                         ImGui.Dummy(ctx, checkbox_w, 0)
                         ImGui.SameLine(ctx, 0, spacing)
                     end
