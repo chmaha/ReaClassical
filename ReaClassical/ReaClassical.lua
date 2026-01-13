@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.3
+@version 26.1.4
 @changelog
-  Destination Markers to Item Edge: Add track number suffix to match source equivalent
+  Metadata Editor: Fix ISRC box padding
+  Source Audition: Allow for keeping unconverted pairs after conversion
+  Source Audition: Allow setting at edit cursor with Z
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
