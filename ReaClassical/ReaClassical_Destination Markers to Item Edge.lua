@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_selected_media_item_at, count_selected_media_items
+local folder_check, get_track_number
 ---------------------------------------------------------------------
 
 function main()
@@ -80,15 +81,46 @@ function main()
         i = i + 1
     end
 
+    -- Get track number
+    local track_number = math.floor(get_track_number())
+
     -- Get selected track for color or default to track 0
     local selected_track = GetSelectedTrack(0, 0)
     local color_track = selected_track or GetTrack(0, 0)
     local marker_color = color_track and GetTrackColor(color_track) or 0
     
-    AddProjectMarker2(0, false, left_pos, 0, "DEST-IN", 996, marker_color)
-    AddProjectMarker2(0, false, right_pos, 0, "DEST-OUT", 997, marker_color)
+    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":DEST-IN", 996, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
 
     Undo_EndBlock("Destination Markers to Item Edge", 0)
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
+function get_track_number()
+    local selected = GetSelectedTrack(0, 0)
+    if folder_check() == 0 or selected == nil then
+        return 1
+    elseif GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
+        return GetMediaTrackInfo_Value(selected, "IP_TRACKNUMBER")
+    else
+        local folder = GetParentTrack(selected)
+        return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
+    end
 end
 
 ---------------------------------------------------------------------
