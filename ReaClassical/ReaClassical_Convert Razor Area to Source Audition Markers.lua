@@ -23,8 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, folder_check, get_track_number
-local move_destination_folder, calculate_destination_info, get_tracks_per_group
-local select_first_razor
+local move_destination_folder_to_top, select_first_razor
 ---------------------------------------------------------------------
 
 function main()
@@ -41,20 +40,11 @@ function main()
         return
     end
 
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    move_destination_folder_to_top()
 
     local sai_manager = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
     Main_OnCommand(sai_manager, 0)
     
-    local moveable_dest = 0
-
-    if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
-    end
-
-
     local value = GetExtState("ReaClassical_SAI_Manager", "set_pairs_at_cursor")
     local set_pairs_at_cursor = (value == "true")
 
@@ -69,44 +59,37 @@ function main()
         local selected_track = GetSelectedTrack(0, 0)
         
         if selected_track then
-            local dest_track_num = calculate_destination_info()
             local track_number = math.floor(get_track_number())
-
-            if moveable_dest == 1 then
-                move_destination_folder(track_number)
-            end
-
-            if dest_track_num and dest_track_num > track_number then
-                track_number = track_number + get_tracks_per_group()
-            end
 
             SetOnlyTrackSelected(selected_track)
             local marker_color = GetTrackColor(selected_track)
 
-            -- Find the most recent marker for this track (SAI or SAO)
+            -- Find the closest marker BEFORE the cursor for this track (SAI or SAO)
             local marker_count = CountProjectMarkers(0)
             local last_marker_type = nil
-            local last_marker_pos = -1
+            local closest_marker_pos = -1
             
-            for i = marker_count - 1, 0, -1 do
+            for i = 0, marker_count - 1 do
                 local _, isrgn, pos, _, name = EnumProjectMarkers(i)
-                if not isrgn then
+                if not isrgn and pos < cursor_pos then
                     local num, suffix = name:match("^(%d+):%s*(%S+)")
                     if num and tonumber(num) == track_number then
-                        if suffix:match("^SAI") then
-                            last_marker_type = "SAI"
-                            last_marker_pos = pos
-                            break
-                        elseif suffix:match("^SAO") then
-                            last_marker_type = "SAO"
-                            last_marker_pos = pos
-                            break
+                        if suffix:match("^SAI") or suffix:match("^SAO") then
+                            -- This marker is before cursor and closer than previous best
+                            if pos > closest_marker_pos then
+                                closest_marker_pos = pos
+                                if suffix:match("^SAI") then
+                                    last_marker_type = "SAI"
+                                else
+                                    last_marker_type = "SAO"
+                                end
+                            end
                         end
                     end
                 end
             end
             
-            -- Decide whether to add SAI or SAO based on the last marker
+            -- Decide whether to add SAI or SAO based on the closest marker before cursor
             local marker_suffix = "SAI"
             if last_marker_type == "SAI" then
                 marker_suffix = "SAO"
@@ -130,17 +113,8 @@ function main()
         right_pos = end_time
         select_first_razor()
         local selected_track = GetSelectedTrack(0, 0)
-        local dest_track_num = calculate_destination_info()
 
         local track_number = math.floor(get_track_number())
-
-        if moveable_dest == 1 then
-            move_destination_folder(track_number)
-        end
-
-        if dest_track_num and dest_track_num > track_number then
-            track_number = track_number + get_tracks_per_group()
-        end
 
         if selected_track then SetOnlyTrackSelected(selected_track) end
 
@@ -148,9 +122,6 @@ function main()
 
         AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SAI", -1, marker_color)
         AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SAO", -1, marker_color)
-        -- elseif not first_run then
-        --     MB("Error: Create a razor edit area before running.", "Set Source Audition Markers", 0)
-        --     return
     end
 
     Main_OnCommand(40635, 0) -- remove time selection
@@ -189,10 +160,11 @@ end
 
 ---------------------------------------------------------------------
 
-function move_destination_folder(track_number)
+function move_destination_folder_to_top()
     local destination_folder = nil
     local track_count = CountTracks(0)
 
+    -- Find the first folder with a parent that has the "Destination" extstate set to "y"
     for i = 0, track_count - 1 do
         local track = GetTrack(0, i)
         if track then
@@ -204,62 +176,14 @@ function move_destination_folder(track_number)
         end
     end
 
-    if not destination_folder then return end
+    if not destination_folder then return end -- No matching folder found
 
-    local target_track = GetTrack(0, track_number - 1)
-    if not target_track then return end
-
+    -- Move the folder to the top
     local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
-    local target_index = track_number - 1
-
-    if destination_index ~= target_index then
+    if destination_index > 0 then
         SetOnlyTrackSelected(destination_folder)
-        ReorderSelectedTracks(target_index, 0)
+        ReorderSelectedTracks(0, 0)
     end
-end
-
----------------------------------------------------------------------
-
-function calculate_destination_info()
-    local track_count = CountTracks(0)
-    local destination_folder = GetTrack(0, 0)
-    for i = 0, track_count - 1 do
-        local track = GetTrack(0, i)
-        if track then
-            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                destination_folder = track
-                break
-            end
-        end
-    end
-    local dest_track_num = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER")
-    return dest_track_num
-end
-
----------------------------------------------------------------------
-
-function get_tracks_per_group()
-    local track_count = CountTracks(0)
-    if track_count == 0 then return 0 end
-
-    local tracks_per_group = 1
-    local first_track = GetTrack(0, 0)
-    if not first_track or GetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH") ~= 1 then
-        return 0 -- No valid parent folder
-    end
-
-    for i = 1, track_count - 1 do
-        local track = GetTrack(0, i)
-        if track then
-            local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            if depth == 1 then
-                break -- New parent folder found, stop counting
-            end
-            tracks_per_group = tracks_per_group + 1
-        end
-    end
-    return tracks_per_group
 end
 
 ---------------------------------------------------------------------
