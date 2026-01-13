@@ -19,22 +19,11 @@ Delete All S-D markers
 Delete Leaving Silence
 Delete S-D Project Markers
 Delete With Ripple
-Destination Markers to Item Edge
-Find Take
 Insert with timestretching
-Move to Destination IN marker
-Move to Destination OUT marker
-Move to Source IN marker
-Move to Source OUT marker
 Prepare Takes
 S-D Edit
 Set Dest Project Marker
 Set Source Project Marker
-Source Markers to Item Edge
-Zoom to Destination IN marker
-Zoom to Destination OUT marker
-Zoom to Source IN marker
-Zoom to Source OUT marker
 "
 
 # Use a while read loop to handle spaces correctly
