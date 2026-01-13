@@ -55,6 +55,7 @@ function convert_audition_markers()
     local markerCount = CountProjectMarkers(0)
     local start_pos, end_pos, start_tracknum, sai_color
     local marker_type = nil  -- "SAI" or "SAO"
+    local sai_idx, sao_idx = nil, nil
 
     -- 2. Find SAI or SAO marker under edit cursor
     for i = 0, markerCount - 1 do
@@ -67,11 +68,13 @@ function convert_audition_markers()
                     start_tracknum = tonumber(number)
                     start_pos = pos
                     sai_color = color or 0
+                    sai_idx = i
                 elseif suffix:match("^SAO") then
                     marker_type = "SAO"
                     start_tracknum = tonumber(number)
                     end_pos = pos
                     sai_color = color or 0
+                    sao_idx = i
                 end
             end
             break
@@ -90,6 +93,7 @@ function convert_audition_markers()
             if not isrgn and num and tonumber(num) == start_tracknum then
                 if pos > start_pos and suffix:match("^SAO") then
                     end_pos = pos
+                    sao_idx = i
                     break
                 end
             end
@@ -102,6 +106,7 @@ function convert_audition_markers()
             if not isrgn and num and tonumber(num) == start_tracknum then
                 if pos < end_pos and suffix:match("^SAI") then
                     start_pos = pos
+                    sai_idx = i
                     break
                 end
             end
@@ -114,24 +119,59 @@ function convert_audition_markers()
     -- 4. Create time selection between SAI and SAO
     GetSet_LoopTimeRange(true, false, start_pos, end_pos, false)
 
-    -- 5. Delete all "SAI"/"SAO" markers
-    for i = markerCount - 1, 0, -1 do
-        local _, isrgn, _, _, name = EnumProjectMarkers(i)
-        if not isrgn and (name:find("SAI") or name:find("SAO")) then
-            DeleteProjectMarkerByIndex(0, i)
+    -- 5. Check if we should keep remaining markers
+    local keep_remaining = false
+    if HasExtState("ReaClassical_SAI_Manager", "keep_markers_after_conversion") then
+        local value = GetExtState("ReaClassical_SAI_Manager", "keep_markers_after_conversion")
+        keep_remaining = (value == "true")
+    end
+
+    -- 6. Delete markers based on checkbox state
+    if keep_remaining then
+        -- Only delete the current SAI/SAO pair
+        if sao_idx and sai_idx then
+            -- Delete in reverse order to maintain indices
+            if sao_idx > sai_idx then
+                DeleteProjectMarkerByIndex(0, sao_idx)
+                DeleteProjectMarkerByIndex(0, sai_idx)
+            else
+                DeleteProjectMarkerByIndex(0, sai_idx)
+                DeleteProjectMarkerByIndex(0, sao_idx)
+            end
+        end
+    else
+        -- Delete all "SAI"/"SAO" markers (original behavior)
+        for i = markerCount - 1, 0, -1 do
+            local _, isrgn, _, _, name = EnumProjectMarkers(i)
+            if not isrgn and (name:find("SAI") or name:find("SAO")) then
+                DeleteProjectMarkerByIndex(0, i)
+            end
         end
     end
 
-    -- 6. Create SOURCE-IN and SOURCE-OUT markers using SAI color
+    -- 7. Delete any existing SOURCE-IN (998) and SOURCE-OUT (999) markers before creating new ones
+    local i = 0
+    while true do
+        local project, _ = EnumProjects(i)
+        if project == nil then
+            break
+        else
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
+        end
+        i = i + 1
+    end
+
+    -- 8. Create SOURCE-IN and SOURCE-OUT markers using SAI color
     AddProjectMarker2(0, false, start_pos, 0, start_tracknum .. ":SOURCE-IN", 998, sai_color)
     AddProjectMarker2(0, false, end_pos, 0, start_tracknum .. ":SOURCE-OUT", 999, sai_color)
     Main_OnCommand(40635, 0) -- remove time selection
 
-    -- 7. Disable razor selection
+    -- 9. Disable razor selection
     local razor_enabled = GetToggleCommandState(42618) == 1
     if razor_enabled then Main_OnCommand(42618, 0) end
 
-    -- 8. Clear arrange window override
+    -- 10. Clear arrange window override
     Main_OnCommand(42621, 0)
 
     return true

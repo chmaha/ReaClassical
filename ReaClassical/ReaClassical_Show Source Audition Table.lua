@@ -44,7 +44,7 @@ local window_open = true
 set_action_options(2)
 
 -- Rank color options (slightly desaturated for better readability)
-local COLORS            = {
+local COLORS                        = {
     { name = "Excellent",     rgba = 0x39FF1499 }, -- Bright lime green
     { name = "Very Good",     rgba = 0x32CD3299 }, -- Lime green
     { name = "Good",          rgba = 0x00AD8399 }, -- Teal green
@@ -56,17 +56,22 @@ local COLORS            = {
 }
 
 -- Storage for marker data
-local marker_data       = {}
-local playback_monitor  = false
-local current_sao_pos   = nil
-local last_play_pos     = -1
-local sort_mode         = "time" -- "time", "marker", or "rank"
+local marker_data                   = {}
+local playback_monitor              = false
+local current_sao_pos               = nil
+local last_play_pos                 = -1
+local sort_mode                     = "time" -- "time", "marker", or "rank"
+local keep_markers_after_conversion = true -- New checkbox state
+local set_pairs_at_cursor           = false -- New checkbox for setting pairs at edit cursor instead of razor
 
 -- ExtState keys for persistent storage
-local EXT_STATE_SECTION = "ReaClassical_SAI_Manager"
+local EXT_STATE_SECTION             = "ReaClassical_SAI_Manager"
 
-local prepare_takes     = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+local prepare_takes                 = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
 Main_OnCommand(prepare_takes, 0)
+
+local audition_manager = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
+SetToggleCommandState(1, audition_manager, 1)
 
 ---------------------------------------------------------------------
 
@@ -77,6 +82,8 @@ function main()
 
     -- Monitor playback for auto-stop at SAO markers
     monitor_playback()
+
+
 
     if window_open then
         ImGui.SetNextWindowSize(ctx, 750, 300, ImGui.Cond_FirstUseEver)
@@ -93,11 +100,41 @@ function main()
 
             -- Delete all markers and exit button
             ImGui.SameLine(ctx)
-            if ImGui.Button(ctx, 'Delete All Audition Pairs and Exit', 200, 0) then
+            if ImGui.Button(ctx, 'Delete All Audition Pairs and Exit', 220, 0) then
                 delete_all_sai_sao_markers()
                 local razor_enabled = GetToggleCommandState(42618) == 1
                 if razor_enabled then Main_OnCommand(42618, 0) end
                 window_open = false
+            end
+
+            -- Keep markers after conversion checkbox
+            ImGui.SameLine(ctx)
+            local rv, new_val = ImGui.Checkbox(ctx, 'Keep unconverted pairs', keep_markers_after_conversion)
+            if rv then
+                keep_markers_after_conversion = new_val
+                save_marker_data() -- Save checkbox state
+            end
+
+            -- Set pairs at cursor checkbox
+            ImGui.SameLine(ctx)
+            local rv2, new_val2 = ImGui.Checkbox(ctx, 'Set audition pairs at edit cursor', set_pairs_at_cursor)
+            if rv2 then
+                set_pairs_at_cursor = new_val2
+                save_marker_data() -- Save checkbox state
+
+                -- Toggle razor edit mode based on checkbox state
+                local razor_enabled = GetToggleCommandState(42618) == 1
+                if set_pairs_at_cursor then
+                    -- Checkbox enabled: disable razor edit if it's on
+                    if razor_enabled then
+                        Main_OnCommand(42618, 0) -- Toggle off razor edit
+                    end
+                else
+                    -- Checkbox disabled: enable razor edit if it's off
+                    if not razor_enabled then
+                        Main_OnCommand(42618, 0) -- Toggle on razor edit
+                    end
+                end
             end
 
             ImGui.Separator(ctx)
@@ -105,7 +142,11 @@ function main()
             local markers = get_sai()
 
             if #markers == 0 then
-                ImGui.Text(ctx, "Left click drag to set a razor selection and press Z to convert to a marker pair...")
+                if set_pairs_at_cursor then
+                    ImGui.Text(ctx, "Press Z at the edit cursor to set an audition pair...")
+                else
+                    ImGui.Text(ctx, "Left click drag to set a razor selection and press Z to convert to a marker pair...")
+                end
             else
                 -- Create table
                 if ImGui.BeginTable(ctx, 'MarkerTable', 7, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then
@@ -309,6 +350,7 @@ function main()
         local razor_enabled = GetToggleCommandState(42618) == 1
         if razor_enabled then Main_OnCommand(42618, 0) end
         clean_up_orphans()
+        SetToggleCommandState(1, audition_manager, 0)
     end
 end
 
@@ -348,6 +390,12 @@ function save_marker_data()
     -- Save sort mode
     SetExtState(EXT_STATE_SECTION, "sort_mode", sort_mode, true)
 
+    -- Save keep_markers_after_conversion checkbox state
+    SetExtState(EXT_STATE_SECTION, "keep_markers_after_conversion", tostring(keep_markers_after_conversion), true)
+
+    -- Save set_pairs_at_cursor checkbox state
+    SetExtState(EXT_STATE_SECTION, "set_pairs_at_cursor", tostring(set_pairs_at_cursor), true)
+
     -- Save each marker's data using its GUID stored in P_EXT
     local num_markers = CountProjectMarkers(0)
     for i = 0, num_markers - 1 do
@@ -376,6 +424,26 @@ function load_marker_data()
     -- Load sort mode
     if HasExtState(EXT_STATE_SECTION, "sort_mode") then
         sort_mode = GetExtState(EXT_STATE_SECTION, "sort_mode")
+    end
+
+    -- Load keep_markers_after_conversion checkbox state
+    if HasExtState(EXT_STATE_SECTION, "keep_markers_after_conversion") then
+        local value = GetExtState(EXT_STATE_SECTION, "keep_markers_after_conversion")
+        keep_markers_after_conversion = (value == "true")
+    end
+
+    -- Load set_pairs_at_cursor checkbox state
+    if HasExtState(EXT_STATE_SECTION, "set_pairs_at_cursor") then
+        local value = GetExtState(EXT_STATE_SECTION, "set_pairs_at_cursor")
+        set_pairs_at_cursor = (value == "true")
+
+        -- Disable razor edit mode if checkbox was enabled
+        if set_pairs_at_cursor then
+            local razor_enabled = GetToggleCommandState(42618) == 1
+            if razor_enabled then
+                Main_OnCommand(42618, 0) -- Toggle off razor edit
+            end
+        end
     end
 
     -- We'll load marker-specific data as we encounter markers in init_marker_data
