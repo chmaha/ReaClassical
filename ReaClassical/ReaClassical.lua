@@ -1,16 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.2
+@version 26.1.3
 @changelog
-  Mission Control: Stop auto call to prepare takes
-  Mission Control: Add Prepare Takes button
-  Preferences: Remove unnecessary return call
-  Record Panel: Color items by take number in horizontal workflow
-  Find Source Material: Fallback to source file search if no matching GUID
-  Colorize: New reaimgui-based window
-  Prepare Takes: Avoid coloring already colorized items
-  Record Panel: Work alongside colorized items
-  Record Panel: Remove Prepare Takes call on window close
+  Destination Markers to Item Edge: Add track number suffix to match source equivalent
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
