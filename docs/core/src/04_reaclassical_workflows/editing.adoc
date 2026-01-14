@@ -1,30 +1,17 @@
-=== Preparing Takes
-
-After importing audio, you should use the Prepare Takes function. It is far more robust than the built-in REAPER auto-grouping. Every set of items comprising a take is now grouped. Prepare Takes can be re-run at any point (useful if you subsequently record some extra patches).
-
 === Ready…Steady…Go!
 
-Once you have recorded or imported your classical music audio and prepared takes, you are ready to start editing the raw material! Here we talk about the meat and potatoes of the classical editing workflows. If you have followed the importing audio section, you will have all your takes lined up in a row horizontally. In summary, place your source in and out markers, destination in and out markers, then run one of the S-D edit functions to achieve your 2-, 3- or 4-point edit.
+_Listed keyboard shortcuts are suggestions based on the full ReaClassical key map._
 
-=== Finding Takes
+1. Set destination IN and OUT markers (kbd:[1] and kbd:[2])
+2. Set source IN and OUT markers (kbd:[3] and kbd:[4])
+3. Run the S-D Edit function (kbd:[5]) to make the source-destination edit (2-, 3- or 4-point edit depending on how many markers you set), or make a time-stretched S-D edit (kbd:[F4]) (requires all 4 markers), or if only using destination IN marker and both source markers, an "assembly" or 3-point "insert" edit (kbd:[F3])
+4. To finesse the edit, open the REAPER crossfade editor (kbd:[F])
 
-Use the ReaClassical Core_Find Take function to locate a take number (and optional session name) by number in an underlying media filename. If the function can't find a media item with that take number and optional session name, it will let you know and offer to try again with a different number or session name. This will work for any file-naming system that uses numbers before the file extension such as _mvt1_main_pair-T04.wav_ or _beethoven_cello-take_23.flac_. Note that if the imported or recorded files have zero-padding that is not a problem as the function strips these away. The session name search can be used to find any text in the filename and allows for partial searches. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.
-
-=== Source-Destination Editing
-
-You set your in and out points using special colored labeled markers. Simply run the S-D edit function make the 2-, 3- or 4-point edit. depending on how many markers you set. If you attempt to set one of the destination markers inside of an existing crossfade or within 500ms of a crossfade or item edge, the function will alert you (pressing btn:[OK] places the marker anyway). This helps avoid awkward _sliver_ edits that can happen especially if you are zoomed out and placing markers by ear. You can customize the check range via ReaClassical Core Preferences. The check range (in milliseconds) is the distance beyond an item edge, fade or crossfade. For example, setting to 0 would only check for placement _inside_ a fade or crossfade.
-
-It's worth pointing out that my S/D and classical crossfade functions place the crossfade immediately before the entry and exit points of the pasted audio. The crossfade length and other values can be set on a per-project basis via ReaClassical Core Project Preferences. In practice this means that if you visually set a marker (or edit cursor in the case of the classical crossfade function) immediately before a transient, said transient will sound post-crossfade which is what we generally desire. Often, given this important detail, I don't even need to visit the crossfade editor view.
-
-When using a vertical workflow, make sure you have the source folder selected before you create the source IN and OUT markers. You can do so by clicking on the item at the locations you want to set the markers. This adds the folder number as a prefix to the source marker labels. The various functions will then use this label to know which folder to copy from. This is really useful if you undo the edit in order to tweak the markers by dragging them. It doesn't matter if you then select other folders/tracks. In the event you use two different folders for the source IN and OUT markers, the functions will prefer the source IN label.
-
-The downside to this workflow when using a vertical approach is that the source and destination markers can get in each other's way visually if the takes aren't somewhat staggered, however the process still works as expected. See below for a razor editing alternative.
-
-TIP: If you are worried about accidentally moving markers and items during precise S-D or assembly editing, engage the padlock icon in the top-left of the REAPER window selecting the option to prevent manual left/right item movement and marker dragging (while still allowing for S-D editing with ripple). Even though you can't move S-D markers by dragging with this lock mode engaged, you can still use the S-D edit functions to change S-D marker location. Just remember to disengage lock mode when you enter the fade editor or else you won't be able to move the items of the crossfade!
-
-==== Multi-Project Tab S-D Editing
+=== Multi-Project Tab S-D Editing
 
 If you'd like to S-D edit between various open project tabs you can set both the source and destination _project_ markers. The markers can exist anywhere on the tab's timeline but perhaps the very beginning or end would be good to keep them out of the way. The S-D editing itself then works just as for a single tab other than any source markers that are set are not deleted to aid quickly undoing in the destination tab and being ready to reapply the edit. The only rule when using S-D project markers is to ensure that source or destination markers should be paired with the corresponding source or destination project marker. This workflow would, for example, allow you to have multiple project tabs (perhaps one for each symphony movement plus a final _destination_ tab), allowing for both internal editing per tab but after setting the S-D project markers compiling the final edit in the _destination_ tab. To delete all the S-D project markers run the Delete S-D Project Markers function. Also, in multi-tab S-D editing, when regular markers are placed, any other existing versions in other tabs are automatically deleted to ensure that only one version of the marker exists at a time across all open project tabs.
+
+=== Further Source-Destination Insights
 
 ==== 4-Point Editing
 
@@ -38,27 +25,17 @@ For this operation, set any combination of three markers. Again, run the regular
 
 For this operation, there are two possibilities: 1) Set one source marker and one destination marker. Make the edit with the regular ReaClassical Core S-D edit function. Any missing IN markers are set to the beginning of the timeline and any missing OUT markers are set to the end of the source or destination material. 2) Set both source markers and no destination markers. Make the edit with . Here, the destination markers are set at the exact same positions on the timeline as the source markers. Obviously this operation is only useful in a vertical editing workflow when you can select source material from a different track group. The usefulness of this second option is further reduced if the takes are not vertically aligned and not virtually identical in tempo. On the other hand, it could be an incredibly quick method for editing takes of a hybrid classical piece that is performed to a click track or other recorded steady beat.
 
-=== Other SD Functions
-
 ==== Insert with Time-Stretching
 
 Using the ReaClassical Core_Insert with time-stretching function, you can complete a 4-point edit where the material between the source markers is time-stretched to fit the length of time between the destination markers. This is really useful when the source material has to fit the destination span exactly, for example when working with visual cues. The time-stretch algorithm used will be the one set in REAPER project settings. When there are multiple items in between the source markers, the function will glue the items together before time-stretching. Note that this function can also be used in multi-tab S-D editing mode (see above).
 
-==== Assembly Line Editing
+==== 3-point Insert "Assembly Line" Editing
 
 Sometimes you don't necessarily have a best overall take and it is desirable to build the perfect performance linearly, section by section, measure by measure. In this case, set the destination IN markerand set both source markers. Run the ReaClassical_Core 3-point Insert Edit function. A 3-point insert operation will occur and the destination IN marker will jump to the end of the pasted item, ready for the next edit. This means that in order to compile further sections, you now only need set the source markers. If you accidentally move the location of the destination IN marker in the middle of assembly line editing, the function will let you know and offer to move the marker back to the right edge of the latest item in the edit. This will even allow you to do some regular 3- or 4-point editing earlier in the sequence before continuing with the assembly line edits. Just place the destination IN marker anywhere in the project and answer btn:[No] when the message box appears. Note that this function can also be used in multi-tab S-D editing mode (see above).
 
 ==== Delete / Delete with Ripple
 
-While perhaps not used as often as 3- and 4-point edits, I have created two functions for deletion of material. Delete & Ripple will delete the material between source IN and OUT markers and ripple material to the right backwards with a short crossfade. Delete Leaving Silence will also delete but maintain the silence without rippling backwards.
-
-==== Add Source/Destination S-D Markers to Edges of Item(s) or Time Selection
-
-Used in combination with Delete / Delete with Ripple, you can quickly set source or destination markers to the edges of one or more selected items on the first track or time selection. This is a time-saver when dealing with potential _sliver_ edits i.e. small unneeded leftover edits as a result of multiple rounds of zoomed-out S-D editing. Note that the built-in checks when manually placing destination markers should go some way to alleviating this issue which can easily go unnoticed in other classical music DAWs. Likewise you can use ReaClassical_Core Destination Markers to Item Edge function to set destination markers (selected items must be in the destination folder). You may prefer to set both source and destination markers this way over the more traditional number key shortcuts acting as a sort of hybrid between S-D and razor editing. Also note that if both selected items and a time selection exist, the time selection takes precedence.
-
-==== Move / Zoom to S-D markers
-
-Move or move and zoom to any existing S-D markers. If you have multi-tab S-D editing set up, these shortcuts will also automatically move focus to the correct project tab.
+While perhaps not used as often as 3- and 4-point edits, I have created two functions for deletion of material. Delete & Ripple will delete the material between source IN and OUT markers and ripple material to the right backwards with a short crossfade (kbd:[backspace]). Delete Leaving Silence will also delete but maintain the silence without rippling backwards (kbd:[ctrl+backspace]).
 
 ==== Delete S-D markers
 

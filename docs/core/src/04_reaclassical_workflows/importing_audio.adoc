@@ -4,6 +4,5 @@ Read this section if you or someone else recorded using a different DAW or porta
 
 Either drag the audio into the REAPER window or select menu:Insert[Media file...].
 
-For classical music editing purposes outside of the full ReaClassical ecosystem, you should choose a _horizontal_ approach by inserting all the takes of a particular channel sequentially on its own track. It makes sense to have the main stereo pair(s) at the top of the project followed by any section pairs and individual spots. You can create groups from any number of tracks as you can in REAPER (for example, it might be useful to group various orchestral sections).
-
+For classical music editing purposes outside of the full ReaClassical ecosystem, you should choose a _horizontal_ approach by inserting all the takes of a particular channel sequentially on its own track. It makes sense to have the main stereo pair(s) at the top of the project followed by any section pairs and individual spots.
 

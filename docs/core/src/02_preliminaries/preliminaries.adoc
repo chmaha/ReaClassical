@@ -16,7 +16,7 @@ This online manual, located at https://reaclassical.org/core, serves as the offi
 
 This manual is released under the GNU Free Documentation License v1.3. See https://www.gnu.org/licenses/fdl-1.3-standalone.html.
 
-=== REAPER Community
+=== ReaClassical Community
 
 The https://forum.cockos.com/showthread.php?t=265145[community thread] plays an important role in the development of ReaClassical. Not only is it a place for users to suggest feature requests and point out bugs but also discuss more general classical music recording, mixing and mastering techniques. It also serves as something of a development blog as I not only announce the regular releases but also document the under-the-surface details for those that are interested.
 

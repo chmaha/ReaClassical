@@ -2,23 +2,11 @@
 
 _Preliminary Note:_ I include the default ReaClassical keyboard shortcuts as recommendations.
 
-*Prepare Takes* kbd:[T]
-
-_Description:_ Intelligently prepares recorded or imported takes for source-destination editing.
-
-_Notes:_ Groups items in a more robust way than REAPER's auto-grouping. The function allows for takes that don't start or end exactly at the same time (this can happen if you receive pre-edited materials). The end result is if you drag one item of a take group, every other item will move in sync. NOTE: The function was designed for use after initial recording or importing of media but will work at any point during editing (for example after importing a patch recording). A reminder that the REAPER native grouping (with "automatically group all tracks…" enabled) works for 99% of situations but for takes that don't potentially start or end at quite the same point Prepare Takes is a must. The function is required to have run at least once before any S-D edits can occur.
-
 *ReaClassical Core Project Preferences* kbd:[F5]
 
 _Description:_ Set S-D crossfade length, S-D Destination Marker Check Range (ms), Add S-D Markers at Mouse Hover.
 
 _Notes:_ The user can change the checking range (distance beyond an item edge/fade or crossfade) when placing destination IN and OUT markers. Setting to 0 would just check if the marker would be placed _inside_ a item fade or crossfade. You can also choose to add S-D markers at the mouse hover position vs edit cursor.
-
-*Find Take (based on filename)* kbd:[Enter]
-
-_Description:_ Enter a take number based on the numerical suffixes at the end of filenames and optional session name to quickly jump to that media item.
-
-_Notes:_ If the function can't find a media item with that take number and optional session name, it will let you know and offer to try again with a different number or session name. This will work for any file-naming system that uses numbers before the file extension such as _mvt1_main_pair-T04.wav_ or _beethoven_cello-take_23.flac_. Note that if the imported or recorded files have zero-padding that is not a problem as the function strips these away. The session name search can be used to find any text in the filename and allows for partial searches. If you have used an item to create an S-D edit, searching for a take will ignore these items and move directly to the original sources.
 
 *Source-Destination Markers* kbd:[1], kbd:[2], kbd:[3], kbd:[4]
 
