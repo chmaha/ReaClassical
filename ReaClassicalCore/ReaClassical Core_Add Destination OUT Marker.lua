@@ -4,7 +4,7 @@
 This file is a part of "ReaClassical Core" package.
 See "ReaClassicalCore.lua" for more information.
 
-Copyright (C) 2022–2025 chmaha
+Copyright (C) 2022–2026 chmaha
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,8 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_color_table, get_path, edge_check, return_check_length
-local get_track_number, folder_check, other_dest_marker_check
+local main, edge_check, return_check_length
 
 ---------------------------------------------------------------------
 
@@ -33,21 +32,27 @@ if not SWS_exists then
     return
 end
 
+local dest_marker = ColorToNative(23,203,223) | 0x1000000
+
 function main()
     PreventUIRefresh(1)
     local workflow = "Horizontal"
     if workflow == "" then
-        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+                MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.",
+            "ReaClassical Error", 0)
         return
     end
     local _, input = GetProjExtState(0, "ReaClassical Core", "Preferences")
     local sdmousehover = 0
-    local moveable_dest = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[8] then sdmousehover = tonumber(table[8]) or 0 end
-        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+        if table[3] then sdmousehover = tonumber(table[3]) or 0 end
     end
 
     local selected_track = GetSelectedTrack(0, 0)
@@ -73,9 +78,6 @@ function main()
             i = i + 1
         end
 
-        local track_number = math.floor(get_track_number(track))
-        local other_dest_marker = other_dest_marker_check()
-
         if selected_track then SetOnlyTrackSelected(selected_track) end
 
         local final_track = track or selected_track
@@ -87,44 +89,10 @@ function main()
             if response ~= 6 then return end
         end
 
-        local colors = get_color_table()
+        AddProjectMarker2(0, false, cur_pos, 0, "DEST-OUT", 997, dest_marker)
 
-        -- Force dest marker color for Horizontal workflow
-        local marker_color
-        if workflow == "Horizontal" then
-            marker_color = colors.dest_marker
-        else
-            marker_color = final_track and GetTrackColor(final_track) or colors.dest_marker
-        end
-
-        if moveable_dest == 1 then
-            track_number = 1
-            marker_color = colors.dest_items
-        end
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
-
-        if other_dest_marker and other_dest_marker ~= track_number then
-            MB("Warning: Dest OUT marker group does not match Dest IN!", "Add Dest Marker OUT", 0)
-        end
     end
     PreventUIRefresh(-1)
-end
-
----------------------------------------------------------------------
-
-function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
@@ -164,57 +132,9 @@ function return_check_length()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[6] then check_length = table[6] / 1000 end
+        if table[2] then check_length = table[2] / 1000 end
     end
     return check_length
-end
-
----------------------------------------------------------------------
-
-function get_track_number(track)
-    if not track then track = GetSelectedTrack(0, 0) end
-    if folder_check() == 0 or track == nil then
-        return 1
-    elseif GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-        return GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-    else
-        local folder = GetParentTrack(track)
-        return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
-    end
-end
-
----------------------------------------------------------------------
-
-function folder_check()
-    local folders = 0
-    local total_tracks = CountTracks(0)
-    for i = 0, total_tracks - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-            folders = folders + 1
-        end
-    end
-    return folders
-end
-
----------------------------------------------------------------------
-
-function other_dest_marker_check()
-    local proj = EnumProjects(-1) -- Get the active project
-    if not proj then return nil end
-
-    local _, num_markers, num_regions = CountProjectMarkers(proj)
-
-    for i = 0, num_markers + num_regions - 1 do
-        local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-        local number, label = raw_label:match("(%d+):(.+)") -- Extract number and label
-
-        if label and (label == "DEST-IN" or label == "DEST-OUT") then
-            return tonumber(number) -- Convert track number to a number and return
-        end
-    end
-
-    return nil -- Return nil if no marker is found
 end
 
 ---------------------------------------------------------------------

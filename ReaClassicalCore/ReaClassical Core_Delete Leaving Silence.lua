@@ -4,7 +4,7 @@
 This file is a part of "ReaClassical Core" package.
 See "ReaClassicalCore.lua" for more information.
 
-Copyright (C) 2022–2025 chmaha
+Copyright (C) 2022–2026 chmaha
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,8 +22,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, select_matching_folder, dest_check
+local main, source_markers
 local adaptive_delete, count_selected_media_items, get_selected_media_item_at
+local select_items_containing_midpoint
 
 ---------------------------------------------------------------------
 
@@ -33,19 +34,14 @@ function main()
 
     local workflow = "Horizontal"
     if workflow == "" then
-        MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+                MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.",
+            "ReaClassical Error", 0)
         return
-    end
-
-    local first_group = dest_check()
-    if not first_group then
-        MB("Delete leaving silence can only be run on the destination folder.", "ReaClassical Error", 0)
-        return
-    end
-
-    local group_state = GetToggleCommandState(1156)
-    if group_state ~= 1 then
-        Main_OnCommand(1156, 0) -- Enable item grouping
     end
 
     if source_markers() == 2 then
@@ -53,12 +49,11 @@ function main()
         Main_OnCommand(40310, 0) -- Set ripple per-track
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         GoToMarker(0, 998, false)
-        select_matching_folder()
         Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 999, false)
         Main_OnCommand(40626, 0)  -- Time Selection: Set end point
         Main_OnCommand(40718, 0)  -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0)  -- Item Grouping: Select all items in group(s)
+        select_items_containing_midpoint()
         Main_OnCommand(41990, 0)  -- Toggle ripple per-track (off)
         adaptive_delete()
         Main_OnCommand(40630, 0)  -- Go to start of time selection
@@ -83,52 +78,11 @@ function source_markers()
     local exists = 0
     for i = 0, num_markers + num_regions - 1, 1 do
         local _, _, _, _, label, _ = EnumProjectMarkers(i)
-        if string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
+        if string.match(label, "SOURCE[-]IN") or string.match(label, "SOURCE[-]OUT") then
             exists = exists + 1
         end
     end
     return exists
-end
-
----------------------------------------------------------------------
-
-function select_matching_folder()
-    local cursor = GetCursorPosition()
-    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
-    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
-    local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
-    for i = 0, CountTracks(0) - 1, 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
-            SetOnlyTrackSelected(track)
-            break
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function dest_check()
-    -- Get first selected item
-    local item = get_selected_media_item_at(0)
-    if not item then
-        return
-    end
-
-    -- Find its track
-    local track = GetMediaItem_Track(item)
-    if not track then
-        return
-    end
-
-    -- Walk upward to the topmost parent (folder) track
-    local folder = track
-    while GetParentTrack(folder) do
-        folder = GetParentTrack(folder)
-    end
-
-    -- Check if that folder is the first track
-    return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1
 end
 
 ---------------------------------------------------------------------
@@ -212,6 +166,41 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function select_items_containing_midpoint()
+    local num_sel = CountSelectedMediaItems(0)
+    if num_sel == 0 then return end
+
+    -- Collect selected items' midpoints
+    local positions_to_check = {}
+    for i = 0, num_sel - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local mid = pos + (len / 2)
+        table.insert(positions_to_check, mid)
+    end
+
+    local tolerance = 0.0001
+    local num_items = CountMediaItems(0)
+
+    -- For each midpoint position, select all items that contain it
+    for _, check_pos in ipairs(positions_to_check) do
+        for i = 0, num_items - 1 do
+            local item = GetMediaItem(0, i)
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            local item_end = item_pos + item_len
+
+            -- Select if this item's span contains the check position
+            if check_pos >= (item_pos - tolerance) and check_pos <= (item_end + tolerance) then
+                SetMediaItemSelected(item, true)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

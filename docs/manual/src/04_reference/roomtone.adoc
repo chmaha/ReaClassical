@@ -9,4 +9,4 @@ To create endless room tone based on the venue you recorded:
 . Adjust the length of the included region to the length of your live album
 . Render using menu:Bounds[All project regions]
 
-Then drop the resulting file into your ReaClassical album project on a dedicated Room Tone track (create via kbd:[#]) and run Create CD Markers via kbd:[Y]. You will see that automation-based fades are added to coincide with opposite fade types on the first track thereby creating perfect crossfades into room tone and back without any fuss. 
+Then drop the resulting file into your ReaClassical album project on a dedicated Room Tone track (add via Mission Control) and run Create CD Markers via kbd:[Y]. You will see that automation-based fades are added to coincide with opposite fade types on the first track thereby creating perfect crossfades into room tone and back without any fuss. 

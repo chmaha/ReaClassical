@@ -4,7 +4,7 @@
 This file is a part of "ReaClassical Core" package.
 See "ReaClassicalCore.lua" for more information.
 
-Copyright (C) 2022–2025 chmaha
+Copyright (C) 2022–2026 chmaha
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,9 +29,16 @@ local main
 function main()
   local workflow = "Horizontal"
   if workflow == "" then
-    MB("Please create a ReaClassical project using F7 or F8 to use this function.", "ReaClassical Error", 0)
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+      modifier = "Cmd"
+    end
+            MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.",
+            "ReaClassical Error", 0)
     return
   end
+
   local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
   local i = 0;
   while true do
