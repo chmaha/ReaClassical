@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-01-13 18:25:32 UTC</code></p>
+<p><code>Updated: 2026-01-15 19:50:29 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1603,7 +1603,7 @@ A reminder to do all track management in Mission Control!
 <div class="sect3">
 <h4 id="_manually_coloring_items">Manually Coloring Items</h4>
 <div class="paragraph">
-<p>Use the Colorize function <kbd>K</kbd> to set a custom color (or remove it) for all items in group. The custom color is respected by Prepare Takes and Record Panel.</p>
+<p>Use the Colorize function <kbd>K</kbd> to set a custom color (or remove it) for all items in group.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1770,21 +1770,24 @@ This works at any point in the editing process and isn&#8217;t restricted to the
 </div>
 </div>
 <div class="sect4">
-<h5 id="_preparing_takes">Preparing Takes</h5>
-<div class="admonitionblock note">
+<h5 id="_when_to_prepare_takes">When to Prepare Takes</h5>
+<div class="paragraph">
+<p>Although ReaClassical v26 no longer relies on REAPER’s item grouping for S-D editing and other functions, the Prepare Takes function is still essential when working with inherited or pre-edited projects. Some projects arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc.</p>
+</div>
+<div class="admonitionblock tip">
 <table>
 <tr>
 <td class="icon">
-<div class="title">Note</div>
+<div class="title">Tip</div>
 </td>
 <td class="content">
-In ReaClassical 26 this is handled on behalf of the user as much as possible including when opening Mission Control, placing your first source-destination marker and opening <kbd>F5</kbd> Preferences.
+If items that should move, split, or fade together do not do so reliably, run Prepare Takes first.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Whether working horizontally or vertically, you can use the Prepare Takes function. It is intelligent enough to figure out which workflow you are using. Just press <kbd>T</kbd> (for <em>Takes</em>). Super simple! Every item comprising the same take are now grouped together.</p>
+<p>Prepare Takes is intelligent enough to figure out which workflow you are using. Just press <kbd>T</kbd> (for <em>Takes</em>) or press the dedicated button in Mission Control. Every item comprising the same take are now grouped together no matter whether they share a common item start or end time.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2317,7 +2320,7 @@ Check the "!" box for CD tracks that you would like to have a visual countdown (
 </ol>
 </div>
 <div class="paragraph">
-<p>Then drop the resulting file into your ReaClassical album project on a dedicated Room Tone track (create via <kbd>#</kbd>) and run Create CD Markers via <kbd>Y</kbd>. You will see that automation-based fades are added to coincide with opposite fade types on the first track thereby creating perfect crossfades into room tone and back without any fuss.</p>
+<p>Then drop the resulting file into your ReaClassical album project on a dedicated Room Tone track (add via Mission Control) and run Create CD Markers via <kbd>Y</kbd>. You will see that automation-based fades are added to coincide with opposite fade types on the first track thereby creating perfect crossfades into room tone and back without any fuss.</p>
 </div>
 </div>
 <div class="sect2">

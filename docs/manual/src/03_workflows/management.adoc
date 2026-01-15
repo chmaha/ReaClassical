@@ -16,7 +16,7 @@ Add project, track, item notes and item ranking using ReaClassical's Notes windo
 
 ==== Manually Coloring Items
 
-Use the Colorize function kbd:[K] to set a custom color (or remove it) for all items in group. The custom color is respected by Prepare Takes and Record Panel.
+Use the Colorize function kbd:[K] to set a custom color (or remove it) for all items in group. 
 
 ==== Folder Structure
 
