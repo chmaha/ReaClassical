@@ -22,8 +22,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_grouped_items, copy_shift, empty_items_check
-local get_selected_media_item_at, count_selected_media_items
+local main, empty_items_check
+local get_cd_track_groups, get_items_containing_midpoint
+local get_parent_folder, get_folder_children
 ---------------------------------------------------------------------
 
 function main()
@@ -38,16 +39,39 @@ function main()
         MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
-    local first_track = GetTrack(0, 0)
-    local num_of_items = 0
-    if first_track then num_of_items = CountTrackMediaItems(first_track) end
-    if not first_track or num_of_items == 0 then
-        MB("Error: No media items found.", "Reposition Album Tracks", 0)
+    
+    -- Get the currently selected track
+    local selected_track = GetSelectedTrack(0, 0)
+    if not selected_track then
+        MB("Error: No track selected. Please select a folder track or a track within a folder.", "Reposition Tracks", 0)
         return
     end
-    local empty_count = empty_items_check(first_track, num_of_items)
+    
+    -- Check if it's a folder, if not try to find parent folder
+    local folder_depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+    local folder_track = nil
+    
+    if folder_depth == 1 then
+        -- It's a folder
+        folder_track = selected_track
+    else
+        -- Not a folder, try to find parent folder
+        folder_track = get_parent_folder(selected_track)
+        if not folder_track then
+            MB("Error: Selected track is not in a folder. Please select a folder track or a track within a folder.", "Reposition Tracks", 0)
+            return
+        end
+    end
+    
+    local num_of_items = CountTrackMediaItems(folder_track)
+    if num_of_items == 0 then
+        MB("Error: No media items found on folder track.", "Reposition Album Tracks", 0)
+        return
+    end
+    
+    local empty_count = empty_items_check(folder_track, num_of_items)
     if empty_count > 0 then
-        MB("Error: Empty items found on first track. Delete them to continue.", "Reposition Tracks", 0)
+        MB("Error: Empty items found on folder track. Delete them to continue.", "Reposition Tracks", 0)
         return
     end
 
@@ -59,42 +83,52 @@ function main()
         MB("Please enter a number!", "Reposition Album Tracks", 0)
         return
     else
-        local track = GetTrack(0, 0)
-        local track_items = {}
-        local item_count = CountTrackMediaItems(track)
-        for i = 0, item_count - 1 do
-            track_items[i] = GetTrackMediaItem(track, i)
-        end
-        local shift = 0;
-        local num_tracks = 0
-        for i = 1, item_count - 1, 1 do
-            local prev_item = track_items[i - 1]
-            local prev_item_start = GetMediaItemInfo_Value(prev_item, "D_POSITION")
-            local prev_length = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
-            local prev_end = prev_item_start + prev_length
-            local current_item = track_items[i]
-            local current_item_start = GetMediaItemInfo_Value(current_item, "D_POSITION")
-            local take = GetActiveTake(current_item)
-            local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-            local new_pos
-            local grouped_items = get_grouped_items(current_item)
-            local epsilon = 1e-7
-            if take_name ~= "" and (current_item_start + shift > prev_end - epsilon) then
-                new_pos = prev_end + gap
-                SetMediaItemInfo_Value(current_item, "D_POSITION", new_pos)
-                num_tracks = num_tracks + 1
-            else
-                new_pos = current_item_start + shift
-                SetMediaItemInfo_Value(current_item, "D_POSITION", new_pos)
-            end
-            shift = new_pos - current_item_start
-            copy_shift(grouped_items, shift)
-        end
-        if num_tracks == 0 then
-            MB("No item take names found.", "Reposition Album Tracks", 0)
+        -- Get all CD track groups from the folder
+        local cd_track_groups = get_cd_track_groups(folder_track)
+        
+        if #cd_track_groups == 0 then
+            MB("No named items found on parent track.", "Reposition Tracks", 0)
             return
         end
+        
+        -- Store original positions of ALL items before moving anything
+        local original_positions = {}
+        for _, group in ipairs(cd_track_groups) do
+            for _, item in ipairs(group.all_items) do
+                if not original_positions[item] then
+                    original_positions[item] = GetMediaItemInfo_Value(item, "D_POSITION")
+                end
+            end
+        end
+        
+        -- Position each CD track group
+        local previous_end_position = nil
+        
+        for i, group in ipairs(cd_track_groups) do
+            local new_start_position
+            
+            if i == 1 then
+                -- First group stays where it is
+                new_start_position = group.start_position
+            else
+                -- Subsequent groups: position gap seconds after previous group ends
+                new_start_position = previous_end_position + gap
+            end
+            
+            -- Calculate shift for this group
+            local shift = new_start_position - group.start_position
+            
+            -- Move ALL items in this group by the same shift
+            for _, item in ipairs(group.all_items) do
+                local original_pos = original_positions[item]
+                SetMediaItemInfo_Value(item, "D_POSITION", original_pos + shift)
+            end
+            
+            -- Calculate where this group ends (after shifting)
+            previous_end_position = group.end_position + shift
+        end
     end
+    
     local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
     local _, run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
     if run == "yes" then Main_OnCommand(create_cd_markers, 0) end
@@ -103,37 +137,199 @@ end
 
 ---------------------------------------------------------------------
 
-function get_grouped_items(item)
-    Main_OnCommand(40289, 0) -- unselect all items
-    SetMediaItemSelected(item, true)
-    Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
-
-    local selected_item_count = count_selected_media_items()
-
-    local selected_items = {}
-
-    for i = 1, selected_item_count - 1 do
-        selected_items[i] = get_selected_media_item_at(i)
+function get_cd_track_groups(parent_track)
+    local item_count = CountTrackMediaItems(parent_track)
+    local groups = {}
+    local i = 0
+    
+    while i < item_count do
+        local item = GetTrackMediaItem(parent_track, i)
+        local take = GetActiveTake(item)
+        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        
+        -- Treat "@" prefix items as unnamed
+        local is_named = take_name ~= "" and not take_name:match("^@")
+        
+        -- Only start a group if this item has a name (is a CD track start)
+        if is_named then
+            local all_items_in_group = {}
+            local all_items_hash = {}
+            local parent_track_items = {}
+            
+            -- Add the named item
+            table.insert(parent_track_items, item)
+            i = i + 1
+            
+            -- Continue adding unnamed items from parent track until we hit another named item or end
+            while i < item_count do
+                local next_item = GetTrackMediaItem(parent_track, i)
+                local next_take = GetActiveTake(next_item)
+                local _, next_name = GetSetMediaItemTakeInfo_String(next_take, "P_NAME", "", false)
+                
+                -- Check if next item is a named CD track (not "@" prefix)
+                local next_is_named = next_name ~= "" and not next_name:match("^@")
+                
+                if next_is_named then
+                    -- Hit another named item - stop here, don't increment i (next iteration will process it)
+                    break
+                else
+                    -- Unnamed item - add to this group
+                    table.insert(parent_track_items, next_item)
+                    i = i + 1
+                end
+            end
+            
+            -- Now for EACH parent item, get items from lower tracks whose range contains the parent item's midpoint
+            for _, parent_item in ipairs(parent_track_items) do
+                -- Add the parent item itself
+                if not all_items_hash[parent_item] then
+                    all_items_hash[parent_item] = true
+                    table.insert(all_items_in_group, parent_item)
+                end
+                
+                -- Get items from other tracks in folder that contain this parent item's midpoint
+                local overlapping = get_items_containing_midpoint(parent_item)
+                for _, overlap_item in ipairs(overlapping) do
+                    if not all_items_hash[overlap_item] then
+                        all_items_hash[overlap_item] = true
+                        table.insert(all_items_in_group, overlap_item)
+                    end
+                end
+            end
+            
+            -- Calculate start and end positions
+            local start_pos = GetMediaItemInfo_Value(parent_track_items[1], "D_POSITION")
+            local max_end = 0
+            for _, grp_item in ipairs(all_items_in_group) do
+                local pos = GetMediaItemInfo_Value(grp_item, "D_POSITION")
+                local len = GetMediaItemInfo_Value(grp_item, "D_LENGTH")
+                max_end = math.max(max_end, pos + len)
+            end
+            
+            local group = {
+                all_items = all_items_in_group,
+                start_position = start_pos,
+                end_position = max_end
+            }
+            
+            table.insert(groups, group)
+        else
+            -- Unnamed item at start - skip it (shouldn't happen based on requirements)
+            i = i + 1
+        end
     end
-    return selected_items
+    
+    return groups
 end
 
 ---------------------------------------------------------------------
 
-function copy_shift(grouped_items, shift)
-    for _, v in pairs(grouped_items) do
-        local start = GetMediaItemInfo_Value(v, "D_POSITION")
-        SetMediaItemInfo_Value(v, "D_POSITION", start + shift)
+function get_items_containing_midpoint(item)
+    -- Returns all items (in folder hierarchy) whose range contains this item's midpoint
+    local results = {}
+    
+    local track = GetMediaItemTrack(item)
+    local folder = get_parent_folder(track)
+    
+    -- Get all tracks to check
+    local tracks_to_check = {}
+    if folder then
+        local children = get_folder_children(folder)
+        tracks_to_check[folder] = true
+        for _, child in ipairs(children) do
+            tracks_to_check[child] = true
+        end
+    else
+        tracks_to_check[track] = true
     end
-    Main_OnCommand(40289, 0) -- unselect all items
+    
+    -- Calculate this item's midpoint
+    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+    local mid = pos + (len / 2)
+    local tolerance = 0.0001
+    
+    -- Find all items whose range contains this midpoint
+    for check_track, _ in pairs(tracks_to_check) do
+        local num_items = CountTrackMediaItems(check_track)
+        for i = 0, num_items - 1 do
+            local check_item = GetTrackMediaItem(check_track, i)
+            if check_item ~= item then
+                local item_pos = GetMediaItemInfo_Value(check_item, "D_POSITION")
+                local item_len = GetMediaItemInfo_Value(check_item, "D_LENGTH")
+                local item_end = item_pos + item_len
+                
+                -- Does this item's range contain the midpoint?
+                if mid >= (item_pos - tolerance) and mid <= (item_end + tolerance) then
+                    table.insert(results, check_item)
+                end
+            end
+        end
+    end
+    
+    return results
 end
 
 ---------------------------------------------------------------------
 
-function empty_items_check(first_track, num_of_items)
+function get_parent_folder(track)
+    -- Returns the parent folder track, or nil if track is not in a folder
+    if not track then return nil end
+
+    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+
+    -- Walk backwards to find parent folder
+    for i = track_idx, 0, -1 do
+        local t = GetTrack(0, i)
+        if not t then break end
+
+        local depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
+        if depth == 1 then
+            return t
+        end
+    end
+
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function get_folder_children(parent_track)
+    -- Returns all child tracks of a folder
+    local children = {}
+    if not parent_track then return children end
+
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local idx = parent_idx + 1
+    local depth = 1
+
+    while idx < num_tracks and depth > 0 do
+        local tr = GetTrack(0, idx)
+        if not tr then break end
+
+        local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if depth > 0 then
+            table.insert(children, tr)
+        end
+
+        depth = depth + folder_depth
+
+        if depth <= 0 then break end
+
+        idx = idx + 1
+    end
+
+    return children
+end
+
+---------------------------------------------------------------------
+
+function empty_items_check(track, num_of_items)
     local count = 0
     for i = 0, num_of_items - 1, 1 do
-        local current_item = GetTrackMediaItem(first_track, i)
+        local current_item = GetTrackMediaItem(track, i)
         local take = GetActiveTake(current_item)
         if not take then
             count = count + 1
@@ -141,42 +337,6 @@ function empty_items_check(first_track, num_of_items)
     end
     return count
 end
-
----------------------------------------------------------------------
-
-function count_selected_media_items()
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            selected_count = selected_count + 1
-        end
-    end
-
-    return selected_count
-end
-
----------------------------------------------------------------------
-
-function get_selected_media_item_at(index)
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            if selected_count == index then
-                return item
-            end
-            selected_count = selected_count + 1
-        end
-    end
-
-    return nil
-end
-
 
 ---------------------------------------------------------------------
 
