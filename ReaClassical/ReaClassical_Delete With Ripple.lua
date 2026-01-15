@@ -144,6 +144,7 @@ end
 
 function xfade(xfade_len)
     select_item_under_cursor_on_selected_track()
+    select_items_containing_midpoint()
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(40625, 0)        -- Time selection: Set start point
     MoveEditCursor(xfade_len, false)
@@ -152,6 +153,7 @@ function xfade(xfade_len)
     Main_OnCommand(40635, 0)        -- Time selection: Remove time selection
     MoveEditCursor(0.001, false)
     select_item_under_cursor_on_selected_track()
+    select_items_containing_midpoint()
     MoveEditCursor(-0.001, false)
 end
 
