@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, takename_check, check_position, get_track_info
 local select_CD_track_items, next_track, switch_highlight
 local is_item_start_crossfaded, pos_check, get_selected_media_item_at
+local is_folder_track, is_in_child_track, get_parent_folder
 
 ---------------------------------------------------------------------
 
@@ -45,14 +46,22 @@ function main()
         MB('Please select an item that starts a CD track', "Select CD track start", 0)
         return
     end
+    
+    local selected_track = GetMediaItemTrack(selected_item)
 
-    local item_start_crossfaded, first_track, num_of_items, item_number, count = pos_check(selected_item)
+    -- Check if selected item is in a child track
+    if is_in_child_track(selected_item) or not is_folder_track(selected_track) then
+        MB('Please select an item on a parent folder track.', "Select CD track start", 0)
+        return
+    end
+
+    local item_start_crossfaded, folder_track, num_of_items, item_number, count = pos_check(selected_item)
 
     if item_start_crossfaded then
         Main_OnCommand(40769, 0) -- unselect all
         SetMediaItemSelected(selected_item, true)
         MB('The selected track start is crossfaded' ..
-            'and therefore cannot be moved', "Select CD track start", 0)
+            ' and therefore cannot be moved', "Select CD track start", 0)
         return
     end
 
@@ -65,7 +74,7 @@ function main()
 
     PreventUIRefresh(1)
 
-    next_track(first_track, item_number, count)
+    next_track(folder_track, item_number, count)
 
     local ReaClassical_TrackLeft = NamedCommandLookup("_RS18fe066cb8806e30b0371fc30a79c67ce2b807f1")
     Main_OnCommand(ReaClassical_TrackLeft, 0)
@@ -73,6 +82,53 @@ function main()
     switch_highlight(selected_item)
     PreventUIRefresh(-1)
     Undo_EndBlock("Move Track Right", -1)
+end
+
+---------------------------------------------------------------------
+
+function is_folder_track(track)
+    if not track then return false end
+    local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+    return folder_depth == 1
+end
+
+---------------------------------------------------------------------
+
+function is_in_child_track(item)
+    if not item then return false end
+    local track = GetMediaItemTrack(item)
+    if not track then return false end
+    
+    -- Check if this track is a folder parent
+    if is_folder_track(track) then
+        return false
+    end
+    
+    -- Check if this track has a parent folder
+    local parent = get_parent_folder(track)
+    return parent ~= nil
+end
+
+---------------------------------------------------------------------
+
+function get_parent_folder(track)
+    -- Returns the parent folder track, or nil if track is not in a folder
+    if not track then return nil end
+
+    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+
+    -- Walk backwards to find parent folder
+    for i = track_idx - 1, 0, -1 do
+        local t = GetTrack(0, i)
+        if not t then break end
+
+        local depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
+        if depth == 1 then
+            return t
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -97,9 +153,9 @@ end
 
 ---------------------------------------------------------------------
 
-function get_track_info()
-    local first_track = GetTrack(0, 0)
-    return first_track, GetTrackNumMediaItems(first_track)
+function get_track_info(item)
+    local folder_track = GetMediaItemTrack(item)
+    return folder_track, GetTrackNumMediaItems(folder_track)
 end
 
 ---------------------------------------------------------------------
@@ -129,9 +185,9 @@ end
 
 ---------------------------------------------------------------------
 
-function next_track(first_track, item_number, count)
+function next_track(folder_track, item_number, count)
     Main_OnCommand(40769, 0) -- unselect all
-    local next_track_item = GetTrackMediaItem(first_track, item_number + count + 1)
+    local next_track_item = GetTrackMediaItem(folder_track, item_number + count + 1)
     SetMediaItemSelected(next_track_item, true)
 end
 
@@ -145,21 +201,21 @@ end
 ---------------------------------------------------------------------
 
 function pos_check(selected_item)
-    local first_track, num_of_items = get_track_info()
+    local folder_track, num_of_items = get_track_info(selected_item)
     local item_number = check_position(selected_item)
-    local item_start_crossfaded = is_item_start_crossfaded(first_track, item_number)
-    local count = select_CD_track_items(item_number, num_of_items, first_track)
+    local item_start_crossfaded = is_item_start_crossfaded(folder_track, item_number)
+    local count = select_CD_track_items(item_number, num_of_items, folder_track)
     Main_OnCommand(40769, 0) -- unselect all
     SetMediaItemSelected(selected_item, true)
-    return item_start_crossfaded, first_track, num_of_items, item_number, count
+    return item_start_crossfaded, folder_track, num_of_items, item_number, count
 end
 
 ---------------------------------------------------------------------
 
-function is_item_start_crossfaded(first_track, item_number)
-    local item = GetTrackMediaItem(first_track, item_number)
+function is_item_start_crossfaded(folder_track, item_number)
+    local item = GetTrackMediaItem(folder_track, item_number)
     local next_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local prev_item = GetTrackMediaItem(first_track, item_number - 1)
+    local prev_item = GetTrackMediaItem(folder_track, item_number - 1)
     if prev_item then
         local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
         local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")

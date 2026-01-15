@@ -26,6 +26,8 @@ local main, takename_check, check_position, get_track_info, paste
 local select_and_cut, go_to_previous, shift, select_CD_track_items
 local calc_postgap, is_item_start_crossfaded
 local get_selected_media_item_at, count_selected_media_items
+local select_items_containing_midpoint, get_folder_children, get_parent_folder
+local is_folder_track
 ---------------------------------------------------------------------
 
 function main()
@@ -46,6 +48,13 @@ function main()
         return
     end
 
+    -- Verify the selected item is on a folder parent track
+    local selected_track = GetMediaItemTrack(selected_item)
+    if not is_folder_track(selected_track) then
+        MB('Please select an item on a parent folder track', "Select CD track start", 0)
+        return
+    end
+
     local ret, item_number = check_position(selected_item)
     if ret then
         MB('The selected track is already in first position', "Select CD track start", 0)
@@ -53,9 +62,9 @@ function main()
     end
 
     PreventUIRefresh(1)
-    local first_track, num_of_items = get_track_info()
+    local folder_track, num_of_items = get_track_info(selected_item)
 
-    local item_start_crossfaded = is_item_start_crossfaded(first_track, item_number)
+    local item_start_crossfaded = is_item_start_crossfaded(folder_track, item_number)
     if item_start_crossfaded then
         Main_OnCommand(40769, 0) -- unselect all
         SetMediaItemSelected(selected_item, true)
@@ -64,31 +73,39 @@ function main()
         return
     end
 
-    local count = select_CD_track_items(item_number, num_of_items, first_track)
+    local count = select_CD_track_items(item_number, num_of_items, folder_track)
 
 
 
-    local new_track_item, postgap = calc_postgap(count, num_of_items, first_track, selected_item)
+    local new_track_item, postgap = calc_postgap(count, num_of_items, folder_track, selected_item)
 
     select_and_cut()
 
     -- shift all future tracks back length of selected track postgap
     if item_number + count ~= num_of_items - 1 then
-        shift(first_track, new_track_item, postgap, 0, "left")
+        shift(folder_track, new_track_item, postgap, 0, "left")
     end
 
-    go_to_previous(item_number, first_track)
+    go_to_previous(item_number, folder_track)
     paste()
 
     selected_item = get_selected_media_item_at(0)
 
     -- shift forward all future tracks the length of track postgap
-    shift(first_track, selected_item, postgap, count, "right")
+    shift(folder_track, selected_item, postgap, count, "right")
 
     Main_OnCommand(40769, 0) -- unselect all
     SetMediaItemSelected(selected_item, true)
     PreventUIRefresh(-1)
     Undo_EndBlock("Move Track Left", -1)
+end
+
+---------------------------------------------------------------------
+
+function is_folder_track(track)
+    if not track then return false end
+    local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+    return folder_depth == 1
 end
 
 ---------------------------------------------------------------------
@@ -113,9 +130,9 @@ end
 
 ---------------------------------------------------------------------
 
-function get_track_info()
-    local first_track = GetTrack(0, 0)
-    return first_track, GetTrackNumMediaItems(first_track)
+function get_track_info(item)
+    local folder_track = GetMediaItemTrack(item)
+    return folder_track, GetTrackNumMediaItems(folder_track)
 end
 
 ---------------------------------------------------------------------
@@ -127,7 +144,7 @@ end
 ---------------------------------------------------------------------
 
 function select_and_cut()
-    Main_OnCommand(40034, 0) -- select all items in groups
+    select_items_containing_midpoint()
     Main_OnCommand(40699, 0) -- paste items
 end
 
@@ -173,7 +190,7 @@ function shift(track, item, shift_amount, items_in_track, direction)
     for i = item_number, num_of_items - 1, 1 do
         local track_item = GetTrackMediaItem(track, i)
         SetMediaItemSelected(track_item, true)
-        Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
+        select_items_containing_midpoint()
     end
     local selected_item_count = count_selected_media_items()
     for i = 0, selected_item_count - 1 do
@@ -285,6 +302,115 @@ function get_selected_media_item_at(index)
     return nil
 end
 
+
+---------------------------------------------------------------------
+
+function select_items_containing_midpoint()
+    local num_sel = CountSelectedMediaItems(0)
+    if num_sel == 0 then return end
+
+    -- Get the folder track for the first selected item
+    local first_item = GetSelectedMediaItem(0, 0)
+    local first_track = GetMediaItemTrack(first_item)
+    local folder_track = first_track
+    
+    -- If it's not a folder track, this shouldn't happen due to validation
+    if not is_folder_track(folder_track) then
+        return
+    end
+
+    -- Get all tracks within this specific folder only
+    local tracks_to_check = {}
+    tracks_to_check[folder_track] = true -- Include folder track itself
+    local children = get_folder_children(folder_track)
+    for _, child in ipairs(children) do
+        tracks_to_check[child] = true
+    end
+
+    -- Collect selected items' midpoints
+    local positions_to_check = {}
+    for i = 0, num_sel - 1 do
+        local item = GetSelectedMediaItem(0, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local mid = pos + (len / 2)
+        table.insert(positions_to_check, mid)
+    end
+
+    local tolerance = 0.0001
+
+    -- For each midpoint position, select items in folder that contain it
+    for _, check_pos in ipairs(positions_to_check) do
+        for track, _ in pairs(tracks_to_check) do
+            local num_items = CountTrackMediaItems(track)
+            for i = 0, num_items - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                local item_end = item_pos + item_len
+
+                -- Select if this item's span contains the check position
+                if check_pos >= (item_pos - tolerance) and check_pos <= (item_end + tolerance) then
+                    SetMediaItemSelected(item, true)
+                end
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function get_parent_folder(track)
+    -- Returns the parent folder track, or nil if track is not in a folder
+    if not track then return nil end
+
+    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+
+    -- Walk backwards to find parent folder
+    for i = track_idx - 1, 0, -1 do
+        local t = GetTrack(0, i)
+        if not t then break end
+
+        local depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
+        if depth == 1 then
+            return t
+        end
+    end
+
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function get_folder_children(parent_track)
+    -- Returns all child tracks of a folder
+    local children = {}
+    if not parent_track then return children end
+
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local idx = parent_idx + 1
+    local depth = 1
+
+    while idx < num_tracks and depth > 0 do
+        local tr = GetTrack(0, idx)
+        if not tr then break end
+
+        local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+
+        if depth > 0 then
+            table.insert(children, tr)
+        end
+
+        depth = depth + folder_depth
+
+        if depth <= 0 then break end
+
+        idx = idx + 1
+    end
+
+    return children
+end
 
 ---------------------------------------------------------------------
 
