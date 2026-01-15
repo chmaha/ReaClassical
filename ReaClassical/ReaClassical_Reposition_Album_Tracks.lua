@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, empty_items_check
 local get_cd_track_groups, get_items_containing_midpoint
 local get_parent_folder, get_folder_children
+local items_overlap
 ---------------------------------------------------------------------
 
 function main()
@@ -137,6 +138,24 @@ end
 
 ---------------------------------------------------------------------
 
+function items_overlap(item1, item2)
+    -- Check if two items overlap
+    local pos1 = GetMediaItemInfo_Value(item1, "D_POSITION")
+    local len1 = GetMediaItemInfo_Value(item1, "D_LENGTH")
+    local end1 = pos1 + len1
+    
+    local pos2 = GetMediaItemInfo_Value(item2, "D_POSITION")
+    local len2 = GetMediaItemInfo_Value(item2, "D_LENGTH")
+    local end2 = pos2 + len2
+    
+    local tolerance = 0.0001
+    
+    -- Items overlap if one starts before the other ends (with tolerance)
+    return (pos1 < end2 + tolerance) and (pos2 < end1 + tolerance)
+end
+
+---------------------------------------------------------------------
+
 function get_cd_track_groups(parent_track)
     local item_count = CountTrackMediaItems(parent_track)
     local groups = {}
@@ -152,9 +171,32 @@ function get_cd_track_groups(parent_track)
         
         -- Only start a group if this item has a name (is a CD track start)
         if is_named then
+            -- Check if this named item overlaps with any item from the previous group
+            local should_merge_with_previous = false
+            if #groups > 0 then
+                local prev_group = groups[#groups]
+                -- Check if current item overlaps with any item in previous group
+                for _, prev_item in ipairs(prev_group.all_items) do
+                    if items_overlap(item, prev_item) then
+                        should_merge_with_previous = true
+                        break
+                    end
+                end
+            end
+            
+            local parent_track_items = {}
             local all_items_in_group = {}
             local all_items_hash = {}
-            local parent_track_items = {}
+            
+            if should_merge_with_previous then
+                -- Merge with previous group instead of creating new one
+                local prev_group = groups[#groups]
+                all_items_in_group = prev_group.all_items
+                all_items_hash = {}
+                for _, existing_item in ipairs(all_items_in_group) do
+                    all_items_hash[existing_item] = true
+                end
+            end
             
             -- Add the named item
             table.insert(parent_track_items, item)
@@ -170,8 +212,23 @@ function get_cd_track_groups(parent_track)
                 local next_is_named = next_name ~= "" and not next_name:match("^@")
                 
                 if next_is_named then
-                    -- Hit another named item - stop here, don't increment i (next iteration will process it)
-                    break
+                    -- Check if this next named item overlaps with current group
+                    local overlaps_current = false
+                    for _, current_item in ipairs(parent_track_items) do
+                        if items_overlap(next_item, current_item) then
+                            overlaps_current = true
+                            break
+                        end
+                    end
+                    
+                    if overlaps_current then
+                        -- Include this overlapping named item in current group
+                        table.insert(parent_track_items, next_item)
+                        i = i + 1
+                    else
+                        -- Hit a non-overlapping named item - stop here
+                        break
+                    end
                 else
                     -- Unnamed item - add to this group
                     table.insert(parent_track_items, next_item)
@@ -198,21 +255,32 @@ function get_cd_track_groups(parent_track)
             end
             
             -- Calculate start and end positions
-            local start_pos = GetMediaItemInfo_Value(parent_track_items[1], "D_POSITION")
+            local start_pos = nil
             local max_end = 0
             for _, grp_item in ipairs(all_items_in_group) do
                 local pos = GetMediaItemInfo_Value(grp_item, "D_POSITION")
                 local len = GetMediaItemInfo_Value(grp_item, "D_LENGTH")
+                if start_pos == nil or pos < start_pos then
+                    start_pos = pos
+                end
                 max_end = math.max(max_end, pos + len)
             end
             
-            local group = {
-                all_items = all_items_in_group,
-                start_position = start_pos,
-                end_position = max_end
-            }
-            
-            table.insert(groups, group)
+            if should_merge_with_previous then
+                -- Update the previous group
+                local prev_group = groups[#groups]
+                prev_group.all_items = all_items_in_group
+                prev_group.start_position = start_pos
+                prev_group.end_position = max_end
+            else
+                -- Create new group
+                local group = {
+                    all_items = all_items_in_group,
+                    start_position = start_pos,
+                    end_position = max_end
+                }
+                table.insert(groups, group)
+            end
         else
             -- Unnamed item at start - skip it (shouldn't happen based on requirements)
             i = i + 1
