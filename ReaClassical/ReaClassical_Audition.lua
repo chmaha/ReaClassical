@@ -65,109 +65,19 @@ function main()
     end
     CSurf_OnPlayRateChange(1)
     local colors = get_color_table()
-    local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
-    local fade_editor_state = GetToggleCommandState(fade_editor_toggle)
-    if fade_editor_state ~= 1 then
-        local pos = BR_PositionAtMouseCursor(false)
-        local screen_x, screen_y = GetMousePosition()
-        local track = GetTrackFromPoint(screen_x, screen_y)
-        if track then
-            SetOnlyTrackSelected(track)
-            solo()
-            select_children_of_selected_folders()
-            mixer(colors)
-            unselect_folder_children()
-            SetEditCurPos(pos, 0, 0)
-            OnPlayButton()
-            PreventUIRefresh(-1)
-            Undo_EndBlock('Audition', 0)
-            UpdateArrange()
-            UpdateTimeline()
-            TrackList_AdjustWindows(false)
-        end
-    else
-        DeleteProjectMarker(nil, 1016, false)
-        BR_GetMouseCursorContext()
-        local hover_item = BR_GetMouseCursorContext_Item()
-        if hover_item ~= nil then
-            SetMediaItemSelected(hover_item, 1)
-            UpdateArrange()
-        end
-        local item_one = get_selected_media_item_at(0)
-        local item_two = get_selected_media_item_at(1)
-        if not item_one and not item_two then
-            MB("Please select at least one of the items involved in the crossfade", "Audition", 0)
-            return
-        elseif item_one and not item_two then
-            local color = GetMediaItemInfo_Value(item_one, "I_CUSTOMCOLOR")
-            if color == colors.xfade_green then
-                item_two = item_one
-                select_prev_item(true)
-                item_one = get_selected_media_item_at(0)
-            else
-                select_next_item(true)
-                item_two = get_selected_media_item_at(0)
-            end
-        end
-
-        Main_OnCommand(41185, 0) -- unsolo all
-        local item_one_muted = GetMediaItemInfo_Value(item_one, "B_MUTE")
-        local item_two_muted = GetMediaItemInfo_Value(item_two, "B_MUTE")
-
-        local one_pos = GetMediaItemInfo_Value(item_one, "D_POSITION")
-        local one_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
-        local two_pos = GetMediaItemInfo_Value(item_two, "D_POSITION")
-        Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
-        BR_GetMouseCursorContext()
-        local mouse_pos = BR_GetMouseCursorContext_Position()
-        local item_hover = BR_GetMouseCursorContext_Item()
-        local end_of_one = one_pos + one_length
-        local overlap = end_of_one - two_pos
-        local mouse_to_item_two = two_pos - mouse_pos
-        if item_hover == item_one then
-            local item_length = GetMediaItemInfo_Value(item_one, "D_LENGTH")
-            SetMediaItemSelected(item_hover, true)
-            Main_OnCommand(40034, 0)     -- Item Grouping: Select all items in group(s)
-            if item_one_muted == 0 then
-                Main_OnCommand(41559, 0) -- Item properties: Solo
-            end
-            AddProjectMarker2(0, false, one_pos + item_length, 0, "!1016", 1016, colors.audition)
-            SetEditCurPos(mouse_pos, false, false)
-            OnPlayButton() -- play until end of item_hover (one_pos + item_length)
-        elseif item_hover == item_two then
-            SetMediaItemSelected(item_hover, true)
-            Main_OnCommand(40034, 0)     -- Item Grouping: Select all items in group(s)
-            if item_two_muted == 0 then
-                Main_OnCommand(41559, 0) -- Item properties: Solo
-            end
-            SetEditCurPos(two_pos, false, false)
-            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1016, colors.audition)
-            OnPlayButton() -- play until mouse cursor
-        elseif not item_hover and mouse_pos < two_pos then
-            local total_time = 2 * mouse_to_item_two + overlap
-            AddProjectMarker2(0, false, mouse_pos + total_time, 0, "!1016", 1016,
-                colors.audition)
-            SetEditCurPos(mouse_pos, false, false)
-            OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
-        else
-            local mouse_to_item_one = mouse_pos - end_of_one
-            local mirrored_total_time = 2 * mouse_to_item_one + overlap
-            AddProjectMarker2(0, false, mouse_pos, 0, "!1016", 1016,
-                colors.audition)
-            AddProjectMarker2(0, false, mouse_pos - mirrored_total_time, 0, "START", 1111,
-                colors.audition)
-            GoToMarker(0, 1111, false)
-            OnPlayButton() -- play from mouse_pos to same distance after end_of_one (mirrored)
-            DeleteProjectMarker(nil, 1111, false)
-        end
-        Main_OnCommand(40289, 0) -- Item: Unselect (clear selection of) all items
-        SetMediaItemSelected(item_one, false)
-        SetMediaItemSelected(item_two, true)
-
-        SetEditCurPos(two_pos + (overlap / 2), false, false)
-        on_stop()
-        Undo_EndBlock('Audition', 0)
+    local pos = BR_PositionAtMouseCursor(false)
+    local screen_x, screen_y = GetMousePosition()
+    local track = GetTrackFromPoint(screen_x, screen_y)
+    if track then
+        SetOnlyTrackSelected(track)
+        solo()
+        select_children_of_selected_folders()
+        mixer(colors)
+        unselect_folder_children()
+        SetEditCurPos(pos, 0, 0)
+        OnPlayButton()
         PreventUIRefresh(-1)
+        Undo_EndBlock('Audition', 0)
         UpdateArrange()
         UpdateTimeline()
         TrackList_AdjustWindows(false)
