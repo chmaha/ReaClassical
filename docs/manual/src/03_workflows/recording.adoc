@@ -57,6 +57,10 @@ image::rec_indicator.png[Recording Indicator]
 
 The recording indicator kbd:[Alt+R] is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active. Right-click to set custom colors for offline, standby, recording and pause.
 
+==== Splitting items into subtakes
+
+To split a selected item into numbered subtakes, add generic markers via kbd:[M] at the desired locations and press kbd:[Shift+S] to split. Add named markers via kbd:[Ctrl+M] to use those names instead of subtake numbering.
+
 ==== Headroom
 
 Again, I refer you to the books on classical music production but in general I suggest aiming for around -12dB peaks on the meters. 24-bit recording allows for a lot of headroom so there's no need to push close to 0dB. Adjust the individual mixer track faders to balance. When using a 32-bit float device with dual AD converters as an interface (such as the Zoom F-series), ensure that the recording file format is switched to 32-bit float via project preferences kbd:[P]. The recorded levels might seem too low or too high during recording, but they can be easily adjusted afterward in ReaClassical without introducing any extra noise or distortion.
