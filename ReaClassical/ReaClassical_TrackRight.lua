@@ -80,6 +80,7 @@ function main()
     Main_OnCommand(ReaClassical_TrackLeft, 0)
 
     switch_highlight(selected_item)
+    SetOnlyTrackSelected(folder_track)
     PreventUIRefresh(-1)
     Undo_EndBlock("Move Track Right", -1)
 end
@@ -195,6 +196,7 @@ end
 
 function switch_highlight(item)
     Main_OnCommand(40769, 0) -- unselect all
+
     SetMediaItemSelected(item, true)
 end
 

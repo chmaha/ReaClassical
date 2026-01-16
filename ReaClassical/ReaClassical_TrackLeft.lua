@@ -95,6 +95,7 @@ function main()
     shift(folder_track, selected_item, postgap, count, "right")
 
     Main_OnCommand(40769, 0) -- unselect all
+    SetOnlyTrackSelected(folder_track)
     SetMediaItemSelected(selected_item, true)
     PreventUIRefresh(-1)
     Undo_EndBlock("Move Track Left", -1)
