@@ -74,6 +74,10 @@ local ctx = ImGui.CreateContext('ReaClassical Mission Control')
 local MAX_INPUTS = GetNumAudioInputs()
 local TRACKS_PER_TAB = 8
 
+local aux_submix_tcp_visible = {}
+local folder_tracks = {}
+local folder_tcp_visible = {}
+
 set_action_options(2)
 
 -- State storage
@@ -106,7 +110,7 @@ local focus_special_input = nil    -- Track which special track input should get
 
 -- Word lists for auto input assignment
 local pair_words = {
-    "2ch", "pair", "paire", "paar", "coppia", "par", "пара", "对", "ペア",
+    "2ch", "pair", "paire", "paar", "coppia", "par", "para", "пара", "对", "ペア",
     "쌍", "زوج", "pari", "пар", "πάρoς", "двойка", "קבוצה", "çift",
     "pár", "pāris", "pora", "jozi", "जोड़ी", "คู่", "pasang", "cặp",
     "stereo", "stéréo", "estéreo", "立体声", "ステレオ", "스테레오",
@@ -117,13 +121,13 @@ local pair_words = {
 local left_words = {
     "l", "left", "gauche", "sinistra", "izquierda", "esquerda", "ліворуч", "слева", "vlevo", "balra", "vänster",
     "vasakule", "venstre", "vänstra", "levý", "левый", "lijevo", "stânga", "sol", "kushoto", "ซ้าย", "बाएँ", "बायां",
-    "links", "linke"
+    "links", "linke", "lewa", "lewy", "lewe", "lewo"
 }
 
 local right_words = {
     "r", "right", "droite", "destra", "derecha", "direita", "праворуч", "справа", "vpravo", "jobbra", "höger",
     "paremale", "høyre", "högra", "pravý", "правый", "desno", "dreapta", "sağ", "kulia", "ขวา", "दाएँ", "दायां",
-    "rechts", "rechte"
+    "rechts", "rechte", "prawa", "prawy", "prawe", "prawo"
 }
 
 -- Generate input options
@@ -444,6 +448,61 @@ function main()
             ImGui.SetTooltip(ctx, "Toggle hardware names / channel numbers")
         end
 
+        -- Folders visibility button (only in Vertical workflow)
+        if workflow == "Vertical" and #folder_tracks > 0 then
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Folder Visibility") then
+                ImGui.OpenPopup(ctx, "folders_visibility_popup")
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Show/hide folders in TCP")
+            end
+
+            -- Folders visibility popup
+            if ImGui.BeginPopup(ctx, "folders_visibility_popup") then
+                ImGui.Text(ctx, "Show folders in TCP:")
+                ImGui.Separator(ctx)
+
+                for i, folder_info in ipairs(folder_tracks) do
+                    local changed, new_state = ImGui.Checkbox(ctx, folder_info.prefix, folder_tcp_visible[i])
+
+                    if changed then
+                        folder_tcp_visible[i] = new_state
+
+                        -- Show/hide the folder parent track in TCP
+                        SetMediaTrackInfo_Value(folder_info.track, "B_SHOWINTCP", new_state and 1 or 0)
+
+                        -- Show/hide all child tracks in this folder
+                        local folder_idx = folder_info.index
+                        local child_idx = folder_idx + 1
+                        local depth = 1
+
+                        while child_idx < CountTracks(0) and depth > 0 do
+                            local child_track = GetTrack(0, child_idx)
+                            local child_depth = GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
+
+                            -- Set visibility for this child track
+                            SetMediaTrackInfo_Value(child_track, "B_SHOWINTCP", new_state and 1 or 0)
+
+                            -- Update depth counter
+                            depth = depth + child_depth
+                            child_idx = child_idx + 1
+                        end
+
+                        -- Force REAPER to update the track display
+                        TrackList_AdjustWindows(false)
+                        UpdateArrange()
+
+                        -- Save to project ext state
+                        SetProjExtState(0, "ReaClassical_MissionControl", "folder_tcp_visible_" .. folder_info.guid,
+                            new_state and "1" or "0")
+                    end
+                end
+
+                ImGui.EndPopup(ctx)
+            end
+        end
+
         -- Invisible button to fill remaining space and clear selection
         ImGui.SameLine(ctx)
         local remaining_width = ImGui.GetContentRegionAvail(ctx)
@@ -741,6 +800,25 @@ function main()
                             ImGui.CloseCurrentPopup(ctx)
                         end
                         ImGui.EndPopup(ctx)
+                    end
+
+                    -- TCP visibility checkbox - placed just before Routing button
+                    ImGui.SameLine(ctx)
+                    local changed_tcp, new_tcp = ImGui.Checkbox(ctx, "TCP##tcp" .. idx, aux_submix_tcp_visible[idx])
+                    if changed_tcp then
+                        aux_submix_tcp_visible[idx] = new_tcp
+
+                        -- Actually show/hide the track in TCP
+                        SetMediaTrackInfo_Value(aux_info.track, "B_SHOWINTCP", new_tcp and 1 or 0)
+
+                        TrackList_AdjustWindows(false)
+                        UpdateArrange()
+                        -- Save to project ext state for persistence
+                        SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. aux_guid,
+                            new_tcp and "1" or "0")
+                    end
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Show in TCP")
                     end
 
                     -- Routing button (only for aux and submix) or disabled button for alignment
@@ -1933,12 +2011,58 @@ function init()
     -- Get aux and submix tracks
     aux_submix_tracks = get_special_tracks()
 
-    -- Initialize aux/submix names and pan values
+    -- Initialize aux/submix names, pan values, and TCP visibility
     aux_submix_names = {}
     aux_submix_pans = {}
+    aux_submix_tcp_visible = {}
     for i, aux_info in ipairs(aux_submix_tracks) do
         aux_submix_names[i] = aux_info.name
         aux_submix_pans[i] = GetMediaTrackInfo_Value(aux_info.track, "D_PAN")
+
+        -- Read current TCP visibility state from the track itself
+        local current_tcp_state = GetMediaTrackInfo_Value(aux_info.track, "B_SHOWINTCP")
+        aux_submix_tcp_visible[i] = (current_tcp_state == 1)
+
+        -- Also save to project ext state for your audition functions
+        local _, guid = GetSetMediaTrackInfo_String(aux_info.track, "GUID", "", false)
+        SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. guid, (current_tcp_state == 1) and "1" or "0")
+    end
+
+    -- Collect folder parent tracks (only in Vertical workflow)
+    folder_tracks = {}
+    folder_tcp_visible = {}
+    if workflow == "Vertical" then
+        local folder_count = 0
+        for i = 0, CountTracks(0) - 1 do
+            local track = GetTrack(0, i)
+            local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+            if folder_depth == 1 then
+                folder_count = folder_count + 1
+                local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+                local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
+
+                -- Extract prefix (D:, S1:, S2:, etc.)
+                local prefix = track_name:match("^([^:]+):")
+                if not prefix then prefix = "Folder " .. folder_count end
+
+                -- Read current TCP visibility
+                local current_tcp_state = GetMediaTrackInfo_Value(track, "B_SHOWINTCP")
+
+                table.insert(folder_tracks, {
+                    track = track,
+                    prefix = prefix,
+                    guid = guid,
+                    index = i
+                })
+
+                table.insert(folder_tcp_visible, current_tcp_state == 1)
+
+                -- Save to project ext state
+                SetProjExtState(0, "ReaClassical_MissionControl", "folder_tcp_visible_" .. guid,
+                    (current_tcp_state == 1) and "1" or "0")
+            end
+        end
     end
 
     if #mixer_tracks == 0 then
