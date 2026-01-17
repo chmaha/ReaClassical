@@ -1,8 +1,8 @@
 @description ReaClassical Core
 @author chmaha
-@version 2.0
+@version 2.1
 @changelog
-  Remove need for preparing takes
+  Add midpoint logic during xfading
 @metapackage
 @provides
   [main] ReaClassical Core_Add Destination IN marker.lua
