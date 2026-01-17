@@ -1,10 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.4
+@version 26.1.5
 @changelog
-  Metadata Editor: Fix ISRC box padding
-  Source Audition: Allow for keeping unconverted pairs after conversion
-  Source Audition: Allow setting at edit cursor with Z
+  Reposition Album Tracks: Allow for use on any folder
+  Album Track Left/Right: Allow for use on any folder
+  S-D Edit Functions: Remove reliance on grouped items
+  Audition Functions: Remove old xfade editor logic
+  Mission Control: Add ability to hide/show folders and special tracks
+  Metadata Editor: Add buttons to reposition and rearrange album tracks
+  Documentation: Various changes
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -45,7 +49,6 @@
   [main] ReaClassical_Destination Markers to Item Edge.lua
   [main] ReaClassical_Duplicate folder (No items).lua
   [main] ReaClassical_Editing Toolbar.lua
-  [main] ReaClassical_Exclusive Audition.lua
   [main] ReaClassical_ExplodeMultiChannel.lua
   [main] ReaClassical_Factory Reset.lua
   [main] ReaClassical_Find Source Material.lua
