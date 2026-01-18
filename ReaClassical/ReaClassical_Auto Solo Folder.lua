@@ -60,8 +60,25 @@ function main()
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
-    local track = GetSelectedTrack(0,0)
+    
+    -- Store the previously selected track before the command
+    local prev_track = GetSelectedTrack(0, 0)
+    
+    -- Get mouse cursor context BEFORE running the command
+    local window, segment, details = reaper.BR_GetMouseCursorContext()
+    local mouse_item = reaper.BR_GetMouseCursorContext_Item()
+    
+    Main_OnCommand(41110, 0)
+    
+    local track = GetSelectedTrack(0, 0)
     if track then
+        -- Unselect all items if:
+        -- 1. Mouse is over TCP (clicked track control panel), OR
+        -- 2. Mouse is in arrange window but NOT over an item (clicked empty space)
+        if window == "tcp" or (window == "arrange" and not mouse_item) then
+            Main_OnCommand(40289, 0) -- Unselect all items
+        end
+        
         SetOnlyTrackSelected(track)
         solo()
         select_children_of_selected_folders()
