@@ -93,30 +93,6 @@ echo "Removing references to chmaha and plugin search history..."
 
 sed -i '/home\/chmaha/d;/media\/chmaha/d;/Users\\xxx/d;/Users\\chmaha/d;/^RecentFX/d;/\/mnt\//d;/\/tmp/d;/^Count=/d;/^autonbworkerthreads/d;/^workthreads/d;\|D:/|d' $dir/reaper.ini
 
-# echo "Copying keymap, menu, project template and theme files..."
-
-# cp $dir/reaper.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
-# cp $dir/reaper.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
-#
-# cp $dir/reaper-kb.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
-# cp $dir/reaper-kb.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-kb.ini"
-#
-# cp $dir/reaper-mouse.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-mouse.ini"
-# cp $dir/reaper-mouse.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-mouse.ini"
-#
-# cp $dir/reaper-menu.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-menu.ini"
-# cp $dir/reaper-menu.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-menu.ini"
-#
-# cp $dir/reaper-render.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
-# cp $dir/reaper-render.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-render.ini"
-#
-# cp "$dir/ColorThemes/"*.ReaperThemeZip "$dir/Scripts/chmaha Scripts/ReaClassical"
-# cp "$dir/ProjectTemplates/ReaClassical.RPP" "$dir/Scripts/chmaha Scripts/ReaClassical"
-# cp "$dir/ProjectTemplates/Room_Tone_Gen.RPP" "$dir/Scripts/chmaha Scripts/ReaClassical"
-#
-# cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
-# cp ~/code/chmaha/ReaClassical/PDF-Manual/ReaClassical-Manual.pdf "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
-
 # Create zip in final location
 zip_file="Resource_Folder_Base.zip"
 installer_dir="$HOME/code/chmaha/ReaClassical/Installers"
