@@ -1,14 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.5
+@version 26.1.6
 @changelog
-  Reposition Album Tracks: Allow for use on any folder
-  Album Track Left/Right: Allow for use on any folder
-  S-D Edit Functions: Remove reliance on grouped items
-  Audition Functions: Remove old xfade editor logic
-  Mission Control: Add ability to hide/show folders and special tracks
-  Metadata Editor: Add buttons to reposition and rearrange album tracks
-  Documentation: Various changes
+  Add mouse settings to factory reset
+  Documentation: Add updated Metadata Editor and Mission Control info
+  Add optional mouse modifier function to assign to item/track left-click
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -26,6 +22,7 @@
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Audition.lua
   [main] ReaClassical_Audition_with_playrate.lua
+  [main] ReaClassical_Auto Solo Folder.lua
   [main] ReaClassical_Automation Mode.lua
   [main] ReaClassical_Build Edit List.lua
   [main] ReaClassical_Build Edit List using BWF offset.lua
@@ -123,6 +120,7 @@
   ReaClassical_Colors_Table.lua
   ReaClassical.ini
   ReaClassical-kb.ini
+  ReaClassical-mouse.ini
   ReaClassical-menu.ini
   ReaClassical-render.ini
   reaclassical-splash.png
