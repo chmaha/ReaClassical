@@ -4,6 +4,7 @@ SRC="$HOME/Desktop/ReaClassical_26"
 DEST="$HOME/code/chmaha/ReaClassical/ReaClassical"
 
 rsync -av --delete --exclude='ReaClassical.lua' "$SRC/Scripts/chmaha Scripts/ReaClassical/" "$DEST/"
+
 cp "$SRC/ColorThemes/"* "$DEST"
 cp "$SRC/ProjectTemplates/ReaClassical.RPP" "$DEST"
 cp "$SRC/ProjectTemplates/Room_Tone_Gen.RPP" "$DEST"

@@ -94,7 +94,7 @@ echo "Removing references to chmaha and plugin search history..."
 sed -i '/home\/chmaha/d;/media\/chmaha/d;/Users\\xxx/d;/Users\\chmaha/d;/^RecentFX/d;/\/mnt\//d;/\/tmp/d;/^Count=/d;/^autonbworkerthreads/d;/^workthreads/d;\|D:/|d' $dir/reaper.ini
 
 # echo "Copying keymap, menu, project template and theme files..."
-#
+
 # cp $dir/reaper.ini "$dir/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
 # cp $dir/reaper.ini "$src/Scripts/chmaha Scripts/ReaClassical/ReaClassical.ini"
 #
