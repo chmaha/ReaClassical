@@ -28,9 +28,33 @@ local trackname_check, delete_empty_items, pastel_color
 local color_group_items, color_folder_children, scroll_to_first_track
 local select_children_of_selected_folders, select_next_folder
 local select_all_parents, get_item_by_guid, rgba_to_native, get_rank_color
-local build_group_map, horizontal_fast, vertical_fast
-local find_items_at_position, find_items_at_position_on_selected_tracks
-local group_items_fast, get_folder_children, is_item_colorized
+local build_unified_index, build_spatial_index, update_group_map
+local find_items_at_position_spatial
+local horizontal_fast_unified, vertical_fast_unified
+local get_folder_children, is_item_colorized, group_items_fast
+local update_progress, do_processing_step
+
+-- Check for ReaImGui
+local imgui_exists = APIExists("ImGui_GetVersion")
+if not imgui_exists then
+  MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+  return
+end
+
+set_action_options(2)
+
+package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui = require 'imgui' '0.10'
+local ctx = nil
+local window_open = true
+local window_width = 0
+local window_height = 0
+local progress_stage = ""
+local progress_percent = 0.0
+local progress_details = ""
+local processing_complete = false
+local auto_close_timer = 0
+local auto_close_delay = 1.0 -- seconds before auto-close
 
 -- Rank color options (matching Notes Dialog)
 local RANKS = {
@@ -47,6 +71,17 @@ local RANKS = {
 
 ---------------------------------------------------------------------
 
+function update_progress(stage, percent, details)
+    progress_stage = stage
+    progress_percent = percent
+    progress_details = details or ""
+end
+
+---------------------------------------------------------------------
+
+
+---------------------------------------------------------------------
+
 function is_item_colorized(item)
     local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
     return colorized == "y"
@@ -54,174 +89,115 @@ end
 
 ---------------------------------------------------------------------
 
-function main()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        local modifier = "Ctrl"
-        local system = GetOS()
-        if string.find(system, "^OSX") or string.find(system, "^macOS") then
-            modifier = "Cmd"
-        end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
-        return
-    end
-    local group_state = GetToggleCommandState(1156)
-    if group_state ~= 1 then
-        Main_OnCommand(1156, 0) -- Enable item grouping
-    end
-
-    local num_pre_selected = CountSelectedTracks(0)
-    local pre_selected = {}
-    if num_pre_selected > 0 then
-        for i = 0, num_pre_selected - 1, 1 do
-            local track = GetSelectedTrack(0, i)
-            table.insert(pre_selected, track)
-        end
-    end
-
-    local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
-    local start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, false)
-    local num_of_project_items = CountMediaItems(0)
-    if num_of_project_items == 0 then
-        return
-    end
-    local empty_count = empty_items_check(num_of_project_items)
-    if empty_count > 0 then
-        delete_empty_items(num_of_project_items)
-    end
-
-    PreventUIRefresh(1)
-    Undo_BeginBlock()
-
-    -- Clear all group IDs in one pass
-    for track_idx = 0, CountTracks(0) - 1 do
-        local track = GetTrack(0, track_idx)
-        for item_idx = 0, CountTrackMediaItems(track) - 1 do
-            local item = GetTrackMediaItem(track, item_idx)
-            SetMediaItemInfo_Value(item, "I_GROUPID", 0)
-        end
-    end
-
-    Main_OnCommand(40769, 0) -- Unselect (clear selection of) all tracks/items/envelope points
-    local folders = folder_check()
-
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local color_pref = 0
-    if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[5] then color_pref = tonumber(table[5]) or 0 end
-    end
-
-    local edits = false
-    if folders == 0 or folders == 1 then
-        edits = horizontal_fast()  -- Use optimized version
-    else
-        vertical_fast()  -- Use optimized version
-    end
+function build_unified_index()
+    local group_map = {}
+    local items_by_track = {}
+    local all_items = {}
     
-    -- Build group map once for all coloring operations
-    local group_map = build_group_map()
-    
-    PreventUIRefresh(-1)
-    color_items(edits, color_pref, group_map)
-    PreventUIRefresh(1)
-
-    GetSet_ArrangeView2(0, true, 0, 0, start_time, end_time)
-    SetEditCurPos(cur_pos, 0, 0)
-
-    scroll_to_first_track()
-
-    if num_pre_selected > 0 then
-        Main_OnCommand(40297, 0) --unselect_all
-        SetOnlyTrackSelected(pre_selected[1])
-        for _, track in ipairs(pre_selected) do
-            if pcall(IsTrackSelected, track) then SetTrackSelected(track, 1) end
-        end
-    end
-
-    Undo_EndBlock('Prepare Takes', 0)
-    PreventUIRefresh(-1)
-    UpdateArrange()
-    UpdateTimeline()
-end
-
----------------------------------------------------------------------
-
-function build_group_map()
-    local groups = {}
-    local num_items = CountMediaItems(0)
-    
-    for i = 0, num_items - 1 do
-        local item = GetMediaItem(0, i)
-        local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-        
-        if group_id > 0 then
-            if not groups[group_id] then
-                groups[group_id] = {}
-            end
-            table.insert(groups[group_id], item)
-        end
-    end
-    
-    return groups
-end
-
----------------------------------------------------------------------
-
-function find_items_at_position(position, tolerance)
-    tolerance = tolerance or 0.0001
-    local items = {}
     local num_tracks = CountTracks(0)
     
     for t = 0, num_tracks - 1 do
         local track = GetTrack(0, t)
-        local num_items = CountTrackMediaItems(track)
+        items_by_track[track] = {}
         
+        local num_items = CountTrackMediaItems(track)
         for i = 0, num_items - 1 do
             local item = GetTrackMediaItem(track, i)
-            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-            local item_end = item_pos + item_len
             
-            -- Check if position falls within item
-            if position >= (item_pos - tolerance) and position <= (item_end + tolerance) then
-                table.insert(items, item)
-            end
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            
+            local item_data = {
+                item = item,
+                track = track,
+                position = pos,
+                length = len,
+                item_end = pos + len
+            }
+            
+            table.insert(all_items, item_data)
+            table.insert(items_by_track[track], item_data)
         end
     end
     
-    return items
+    local spatial_buckets, bucket_size = build_spatial_index(all_items)
+    
+    return {
+        group_map = group_map,
+        items_by_track = items_by_track,
+        all_items = all_items,
+        spatial_buckets = spatial_buckets,
+        bucket_size = bucket_size
+    }
 end
 
 ---------------------------------------------------------------------
 
-function find_items_at_position_on_selected_tracks(position, tolerance)
+function build_spatial_index(all_items, bucket_size)
+    bucket_size = bucket_size or 0.1
+    local buckets = {}
+    
+    for idx, item_data in ipairs(all_items) do
+        local start_bucket = math.floor(item_data.position / bucket_size)
+        local end_bucket = math.floor(item_data.item_end / bucket_size)
+        
+        for bucket_id = start_bucket, end_bucket do
+            if not buckets[bucket_id] then
+                buckets[bucket_id] = {}
+            end
+            table.insert(buckets[bucket_id], item_data)
+        end
+    end
+    
+    return buckets, bucket_size
+end
+
+---------------------------------------------------------------------
+
+function find_items_at_position_spatial(spatial_buckets, bucket_size, position, selected_tracks, tolerance)
     tolerance = tolerance or 0.0001
     local items = {}
-    local num_tracks = CountTracks(0)
+    local seen = {}
     
-    for t = 0, num_tracks - 1 do
-        local track = GetTrack(0, t)
-        -- Only check selected tracks
-        if IsTrackSelected(track) then
-            local num_items = CountTrackMediaItems(track)
-            
-            for i = 0, num_items - 1 do
-                local item = GetTrackMediaItem(track, i)
-                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                local item_end = item_pos + item_len
-                
-                -- Check if position falls within item
-                if position >= (item_pos - tolerance) and position <= (item_end + tolerance) then
-                    table.insert(items, item)
+    local bucket_id = math.floor(position / bucket_size)
+    
+    for bid = bucket_id - 1, bucket_id + 1 do
+        local bucket = spatial_buckets[bid]
+        if bucket then
+            for _, item_data in ipairs(bucket) do
+                if selected_tracks[item_data.track] and not seen[item_data.item] then
+                    local item_pos = item_data.position
+                    local item_end = item_data.item_end
+                    
+                    if position >= (item_pos - tolerance) and position <= (item_end + tolerance) then
+                        table.insert(items, item_data.item)
+                        seen[item_data.item] = true
+                    end
                 end
             end
         end
     end
     
     return items
+end
+
+---------------------------------------------------------------------
+
+function update_group_map(unified_index)
+    local group_map = {}
+    
+    for _, item_data in ipairs(unified_index.all_items) do
+        local group_id = GetMediaItemInfo_Value(item_data.item, "I_GROUPID")
+        
+        if group_id > 0 then
+            if not group_map[group_id] then
+                group_map[group_id] = {}
+            end
+            table.insert(group_map[group_id], item_data.item)
+        end
+    end
+    
+    unified_index.group_map = group_map
 end
 
 ---------------------------------------------------------------------
@@ -234,7 +210,7 @@ end
 
 ---------------------------------------------------------------------
 
-function horizontal_fast()
+function horizontal_fast_unified(unified_index)
     local edits = xfade_check()
     local first_track = GetTrack(0, 0)
     if not first_track then return edits end
@@ -242,39 +218,43 @@ function horizontal_fast()
     local num_items = CountTrackMediaItems(first_track)
     if num_items == 0 then return edits end
     
-    -- Select all tracks first (like original does)
-    Main_OnCommand(40296, 0) -- Track: Select all tracks
+    Main_OnCommand(40296, 0)
+    
+    local selected_tracks = {}
+    local num_tracks = CountSelectedTracks(0)
+    for i = 0, num_tracks - 1 do
+        selected_tracks[GetSelectedTrack(0, i)] = true
+    end
     
     local group = 1
     
-    -- Iterate through items on first track to establish grouping positions
     for i = 0, num_items - 1 do
         local item = GetTrackMediaItem(first_track, i)
         local pos = GetMediaItemInfo_Value(item, "D_POSITION")
         local len = GetMediaItemInfo_Value(item, "D_LENGTH")
         local mid_point = pos + (len / 2)
         
-        -- Find all items on SELECTED tracks at this mid-point position
-        local items_to_group = find_items_at_position_on_selected_tracks(mid_point)
+        local items_to_group = find_items_at_position_spatial(
+            unified_index.spatial_buckets,
+            unified_index.bucket_size,
+            mid_point,
+            selected_tracks
+        )
         
-        -- Assign group ID to all found items
         group_items_fast(items_to_group, group)
-        
         group = group + 1
     end
     
-    -- Create track media/razor editing group
-    Main_OnCommand(42579, 0) -- Remove from all groups
-    Main_OnCommand(42578, 0) -- Create new group
-    Main_OnCommand(40297, 0) -- Unselect all tracks
+    Main_OnCommand(42579, 0)
+    Main_OnCommand(42578, 0)
+    Main_OnCommand(40297, 0)
     
     return edits
 end
 
 ---------------------------------------------------------------------
 
-function vertical_fast()
-    -- Get all folder parent tracks
+function vertical_fast_unified(unified_index)
     local folder_tracks = {}
     local num_tracks = CountTracks(0)
     
@@ -291,13 +271,16 @@ function vertical_fast()
     local first_folder = folder_tracks[1]
     local first_folder_children = get_folder_children(first_folder)
     
-    -- Select first folder and its children
     SetOnlyTrackSelected(first_folder)
     for _, child in ipairs(first_folder_children) do
         SetTrackSelected(child, true)
     end
     
-    -- Process first folder (horizontal grouping like original)
+    local selected_tracks = {[first_folder] = true}
+    for _, child in ipairs(first_folder_children) do
+        selected_tracks[child] = true
+    end
+    
     local num_items = CountTrackMediaItems(first_folder)
     local group = 1
     
@@ -307,35 +290,39 @@ function vertical_fast()
         local len = GetMediaItemInfo_Value(item, "D_LENGTH")
         local mid_point = pos + (len / 2)
         
-        -- Find items at this position on selected tracks (folder + children)
-        local items_to_group = find_items_at_position_on_selected_tracks(mid_point)
+        local items_to_group = find_items_at_position_spatial(
+            unified_index.spatial_buckets,
+            unified_index.bucket_size,
+            mid_point,
+            selected_tracks
+        )
         
         group_items_fast(items_to_group, group)
         group = group + 1
     end
     
-    -- Create track media/razor editing group for first folder
-    Main_OnCommand(42579, 0) -- Remove from all groups
-    Main_OnCommand(42578, 0) -- Create new group
-    Main_OnCommand(40421, 0) -- Select all items in track
+    Main_OnCommand(42579, 0)
+    Main_OnCommand(42578, 0)
+    Main_OnCommand(40421, 0)
     
-    -- Process remaining folders (vertical grouping)
     for f = 2, #folder_tracks do
         local folder = folder_tracks[f]
         local folder_children = get_folder_children(folder)
         
-        -- Select this folder and its children
         SetOnlyTrackSelected(folder)
         for _, child in ipairs(folder_children) do
             SetTrackSelected(child, true)
         end
         
-        -- Create track media/razor editing group
+        selected_tracks = {[folder] = true}
+        for _, child in ipairs(folder_children) do
+            selected_tracks[child] = true
+        end
+        
         Main_OnCommand(42579, 0)
         Main_OnCommand(42578, 0)
-        Main_OnCommand(40421, 0) -- Select all items in track
+        Main_OnCommand(40421, 0)
         
-        -- For each item on the folder track, group vertically
         local folder_items = CountTrackMediaItems(folder)
         for i = 0, folder_items - 1 do
             local item = GetTrackMediaItem(folder, i)
@@ -343,16 +330,20 @@ function vertical_fast()
             local len = GetMediaItemInfo_Value(item, "D_LENGTH")
             local mid_point = pos + (len / 2)
             
-            -- Find items at this position on selected tracks
-            local items_to_group = find_items_at_position_on_selected_tracks(mid_point)
+            local items_to_group = find_items_at_position_spatial(
+                unified_index.spatial_buckets,
+                unified_index.bucket_size,
+                mid_point,
+                selected_tracks
+            )
             
             group_items_fast(items_to_group, group)
             group = group + 1
         end
     end
     
-    Main_OnCommand(40289, 0) -- Unselect all items
-    Main_OnCommand(40297, 0) -- Unselect all tracks
+    Main_OnCommand(40289, 0)
+    Main_OnCommand(40297, 0)
 end
 
 ---------------------------------------------------------------------
@@ -385,6 +376,822 @@ function get_folder_children(parent_track)
     
     return children
 end
+
+---------------------------------------------------------------------
+
+local processing_step = 0
+local workflow = ""
+local group_state = 0
+local num_pre_selected = 0
+local pre_selected = {}
+local cur_pos = 0
+local start_time = 0
+local end_time = 0
+local num_of_project_items = 0
+local empty_count = 0
+local folders = 0
+local color_pref = 0
+local unified_index = nil
+local edits = false
+local frame_count = 0
+
+-- Incremental processing state
+local current_item_index = 0
+local total_items_to_process = 0
+local selected_tracks = {}
+local group_counter = 1
+local folder_tracks = {}
+local current_folder_index = 1
+local first_folder_children = {}
+local items_per_batch = 100  -- Process 100 items per frame
+local groups_per_batch = 50  -- Process 50 groups per frame
+
+-- Coloring state
+local sorted_group_ids = {}
+local current_group_index = 0
+local groups = {}
+local colors = nil
+local unedited_color = nil
+
+function do_processing_step()
+    -- Give the UI a few frames to render before starting
+    if frame_count < 3 then
+        frame_count = frame_count + 1
+        return false
+    end
+    
+    if processing_step == 0 then
+        update_progress("Checking Items", 5, "Checking for empty items...")
+        processing_step = 1
+        return false
+    elseif processing_step == 1 then
+        empty_count = empty_items_check(num_of_project_items)
+        if empty_count > 0 then
+            delete_empty_items(num_of_project_items)
+        end
+        processing_step = 2
+        return false
+    elseif processing_step == 2 then
+        PreventUIRefresh(1)
+        Undo_BeginBlock()
+        update_progress("Clearing Groups", 8, "Clearing existing group IDs...")
+        processing_step = 3
+        return false
+    elseif processing_step == 3 then
+        for track_idx = 0, CountTracks(0) - 1 do
+            local track = GetTrack(0, track_idx)
+            for item_idx = 0, CountTrackMediaItems(track) - 1 do
+                local item = GetTrackMediaItem(track, item_idx)
+                SetMediaItemInfo_Value(item, "I_GROUPID", 0)
+            end
+        end
+        Main_OnCommand(40769, 0)
+        processing_step = 4
+        return false
+    elseif processing_step == 4 then
+        folders = folder_check()
+        local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+        color_pref = 0
+        if input ~= "" then
+            local table = {}
+            for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+            if table[5] then color_pref = tonumber(table[5]) or 0 end
+        end
+        processing_step = 5
+        return false
+    elseif processing_step == 5 then
+        unified_index = build_unified_index()
+        unified_index.group_map = {}  -- Initialize group_map here
+        processing_step = 6
+        return false
+        
+    -- HORIZONTAL WORKFLOW - BATCH ITEM PROCESSING
+    elseif processing_step == 6 then
+        edits = false
+        if folders == 0 or folders == 1 then
+            -- Start horizontal workflow
+            edits = xfade_check()
+            local first_track = GetTrack(0, 0)
+            if not first_track then 
+                processing_step = 100  -- Skip to finalization
+                return false
+            end
+            
+            total_items_to_process = CountTrackMediaItems(first_track)
+            if total_items_to_process == 0 then 
+                processing_step = 100  -- Skip to finalization
+                return false
+            end
+            
+            Main_OnCommand(40296, 0)  -- Select all tracks
+            
+            selected_tracks = {}
+            local num_tracks = CountSelectedTracks(0)
+            for i = 0, num_tracks - 1 do
+                selected_tracks[GetSelectedTrack(0, i)] = true
+            end
+            
+            current_item_index = 0
+            group_counter = 1
+            update_progress("Grouping Items", 30, string.format("Processing items (0/%d)", total_items_to_process))
+            processing_step = 7  -- Go to horizontal processing loop
+        else
+            -- Start vertical workflow
+            folder_tracks = {}
+            local num_tracks = CountTracks(0)
+            
+            for i = 0, num_tracks - 1 do
+                local track = GetTrack(0, i)
+                local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                if depth == 1 then
+                    table.insert(folder_tracks, track)
+                end
+            end
+            
+            if #folder_tracks == 0 then
+                processing_step = 100  -- Skip to finalization
+                return false
+            end
+            
+            local first_folder = folder_tracks[1]
+            first_folder_children = get_folder_children(first_folder)
+            
+            SetOnlyTrackSelected(first_folder)
+            for _, child in ipairs(first_folder_children) do
+                SetTrackSelected(child, true)
+            end
+            
+            selected_tracks = {[first_folder] = true}
+            for _, child in ipairs(first_folder_children) do
+                selected_tracks[child] = true
+            end
+            
+            total_items_to_process = CountTrackMediaItems(first_folder)
+            current_item_index = 0
+            group_counter = 1
+            current_folder_index = 1
+            
+            update_progress("Grouping Items", 30, string.format("Folder 1 (0/%d items)", total_items_to_process))
+            processing_step = 20  -- Go to vertical processing loop
+        end
+        return false
+        
+    -- HORIZONTAL WORKFLOW - PROCESS BATCH OF ITEMS PER FRAME
+    elseif processing_step == 7 then
+        local first_track = GetTrack(0, 0)
+        if current_item_index < total_items_to_process then
+            -- Process a batch of items
+            local batch_end = math.min(current_item_index + items_per_batch, total_items_to_process)
+            
+            for i = current_item_index, batch_end - 1 do
+                local item = GetTrackMediaItem(first_track, i)
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                local mid_point = pos + (len / 2)
+                
+                local items_to_group = find_items_at_position_spatial(
+                    unified_index.spatial_buckets,
+                    unified_index.bucket_size,
+                    mid_point,
+                    selected_tracks
+                )
+                
+                group_items_fast(items_to_group, group_counter)
+                
+                -- Build group_map as we go
+                if not unified_index.group_map[group_counter] then
+                    unified_index.group_map[group_counter] = {}
+                end
+                for _, grouped_item in ipairs(items_to_group) do
+                    table.insert(unified_index.group_map[group_counter], grouped_item)
+                end
+                
+                group_counter = group_counter + 1
+            end
+            
+            current_item_index = batch_end
+            
+            local progress = 30 + (current_item_index / total_items_to_process * 30)
+            update_progress("Grouping Items", progress, 
+                          string.format("Processing items (%d/%d)", current_item_index, total_items_to_process))
+            return false
+        else
+            -- Finished horizontal grouping
+            Main_OnCommand(42579, 0)
+            Main_OnCommand(42578, 0)
+            Main_OnCommand(40297, 0)
+            processing_step = 101  -- Go directly to coloring
+            return false
+        end
+        
+    -- VERTICAL WORKFLOW - PROCESS BATCH OF ITEMS PER FRAME (FIRST FOLDER)
+    elseif processing_step == 20 then
+        local first_folder = folder_tracks[1]
+        if current_item_index < total_items_to_process then
+            -- Process a batch of items
+            local batch_end = math.min(current_item_index + items_per_batch, total_items_to_process)
+            
+            for i = current_item_index, batch_end - 1 do
+                local item = GetTrackMediaItem(first_folder, i)
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                local mid_point = pos + (len / 2)
+                
+                local items_to_group = find_items_at_position_spatial(
+                    unified_index.spatial_buckets,
+                    unified_index.bucket_size,
+                    mid_point,
+                    selected_tracks
+                )
+                
+                group_items_fast(items_to_group, group_counter)
+                
+                -- Build group_map as we go
+                if not unified_index.group_map[group_counter] then
+                    unified_index.group_map[group_counter] = {}
+                end
+                for _, grouped_item in ipairs(items_to_group) do
+                    table.insert(unified_index.group_map[group_counter], grouped_item)
+                end
+                
+                group_counter = group_counter + 1
+            end
+            
+            current_item_index = batch_end
+            
+            local progress = 30 + (current_item_index / total_items_to_process * 15)
+            update_progress("Grouping Items", progress,
+                          string.format("Folder 1 (%d/%d items)", current_item_index, total_items_to_process))
+            return false
+        else
+            -- Finished first folder
+            Main_OnCommand(42579, 0)
+            Main_OnCommand(42578, 0)
+            Main_OnCommand(40421, 0)
+            
+            current_folder_index = 2
+            processing_step = 21  -- Go to remaining folders
+            return false
+        end
+        
+    -- VERTICAL WORKFLOW - PROCESS REMAINING FOLDERS
+    elseif processing_step == 21 then
+        update_progress("Debug", 45, string.format("Step 21 START - folder_index=%d, total=%d", current_folder_index, #folder_tracks))
+        
+        if current_folder_index <= #folder_tracks then
+            local folder = folder_tracks[current_folder_index]
+            local folder_children = get_folder_children(folder)
+            
+            SetOnlyTrackSelected(folder)
+            for _, child in ipairs(folder_children) do
+                SetTrackSelected(child, true)
+            end
+            
+            selected_tracks = {[folder] = true}
+            for _, child in ipairs(folder_children) do
+                selected_tracks[child] = true
+            end
+            
+            Main_OnCommand(42579, 0)
+            Main_OnCommand(42578, 0)
+            Main_OnCommand(40421, 0)
+            
+            total_items_to_process = CountTrackMediaItems(folder)
+            current_item_index = 0
+            
+            update_progress("Grouping Items", 45 + (current_folder_index / #folder_tracks * 15),
+                          string.format("Folder %d/%d (0/%d items)", current_folder_index, #folder_tracks, total_items_to_process))
+            processing_step = 22  -- Process items in this folder
+            return false
+        else
+            -- All folders done
+            Main_OnCommand(40289, 0)
+            Main_OnCommand(40297, 0)
+            processing_step = 101  -- Go directly to coloring
+            return false
+        end
+        
+    -- VERTICAL WORKFLOW - PROCESS BATCH OF ITEMS IN CURRENT FOLDER
+    elseif processing_step == 22 then
+        local folder = folder_tracks[current_folder_index]
+        if current_item_index < total_items_to_process then
+            -- Process a batch of items
+            local batch_end = math.min(current_item_index + items_per_batch, total_items_to_process)
+            
+            for i = current_item_index, batch_end - 1 do
+                local item = GetTrackMediaItem(folder, i)
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                local mid_point = pos + (len / 2)
+                
+                local items_to_group = find_items_at_position_spatial(
+                    unified_index.spatial_buckets,
+                    unified_index.bucket_size,
+                    mid_point,
+                    selected_tracks
+                )
+                
+                group_items_fast(items_to_group, group_counter)
+                
+                -- Build group_map as we go
+                if not unified_index.group_map[group_counter] then
+                    unified_index.group_map[group_counter] = {}
+                end
+                for _, grouped_item in ipairs(items_to_group) do
+                    table.insert(unified_index.group_map[group_counter], grouped_item)
+                end
+                
+                group_counter = group_counter + 1
+            end
+            
+            current_item_index = batch_end
+            
+            local base_progress = 45 + ((current_folder_index - 2) / (#folder_tracks - 1) * 15)
+            local item_progress = (current_item_index / total_items_to_process) * (15 / (#folder_tracks - 1))
+            update_progress("Grouping Items", base_progress + item_progress,
+                          string.format("Folder %d (%d/%d items)", 
+                                      current_folder_index, current_item_index, total_items_to_process))
+            return false
+        else
+            -- Finished this folder, move to next
+            current_folder_index = current_folder_index + 1
+            processing_step = 21
+            return false
+        end
+        
+    -- FINALIZATION - Skip directly to coloring preparation
+    elseif processing_step == 101 then
+        local _, workflow_check = GetProjExtState(0, "ReaClassical", "Workflow")
+        
+        if workflow_check == "Horizontal" and not edits then
+            -- Prepare for coloring
+            update_progress("Preparing Colors", 65, "Setting up color data...")
+            colors = get_color_table()
+            unedited_color = colors.dest_items
+            
+            -- Initialize state for incremental group building
+            groups = {}
+            current_item_index = 0
+            total_items_to_process = CountMediaItems(0)
+            processing_step = 101.5  -- Go to incremental group building
+        else
+            -- Vertical workflow - skip coloring here, do it after window closes
+            update_progress("Finalizing", 90, "Preparing to finalize...")
+            processing_step = 110  -- Skip to finalization
+        end
+        return false
+        
+    -- BUILD GROUPS TABLE INCREMENTALLY
+    elseif processing_step == 101.5 then
+        if current_item_index < total_items_to_process then
+            -- Process a batch of items
+            local batch_end = math.min(current_item_index + items_per_batch, total_items_to_process)
+            
+            for i = current_item_index, batch_end - 1 do
+                local item = GetMediaItem(0, i)
+                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID") or 0
+                if not groups[group_id] then groups[group_id] = {} end
+                table.insert(groups[group_id], item)
+            end
+            
+            current_item_index = batch_end
+            
+            local progress = 65 + (current_item_index / total_items_to_process * 5)
+            update_progress("Preparing Colors", progress,
+                          string.format("Building color groups (%d/%d items)", current_item_index, total_items_to_process))
+            return false
+        else
+            -- Done building groups, prepare to color
+            sorted_group_ids = {}
+            for gid in pairs(groups) do table.insert(sorted_group_ids, gid) end
+            table.sort(sorted_group_ids)
+            
+            current_group_index = 1
+            update_progress("Coloring Items", 70, string.format("Starting to color (%d groups)", #sorted_group_ids))
+            processing_step = 102  -- Go to incremental coloring
+            return false
+        end
+        
+    -- HORIZONTAL WORKFLOW - COLOR BATCH OF GROUPS PER FRAME
+    elseif processing_step == 102 then
+        if current_group_index <= #sorted_group_ids then
+            -- Process a batch of groups
+            local batch_end = math.min(current_group_index + groups_per_batch, #sorted_group_ids + 1)
+            
+            for i = current_group_index, batch_end - 1 do
+                local gid = sorted_group_ids[i]
+                local grouped_items = groups[gid]
+                
+                -- Extract take number from first item in group
+                local take_number = nil
+                local _, take_num_str = GetSetMediaItemInfo_String(grouped_items[1], "P_EXT:item_take_num", "", false)
+                if take_num_str ~= "" then
+                    take_number = tonumber(take_num_str)
+                end
+
+                -- Check if any item is ranked and color_pref is 0
+                local has_rank = false
+                local rank_color = nil
+                for _, item in ipairs(grouped_items) do
+                    if not is_item_colorized(item) then
+                        local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                        if ranked ~= "" and color_pref == 0 then
+                            has_rank = true
+                            rank_color = get_rank_color(ranked)
+                            break
+                        end
+                    end
+                end
+                
+                local final_color
+                if has_rank and rank_color then
+                    final_color = rank_color
+                else
+                    -- Determine group color (based on take number)
+                    local group_color = nil
+                    for _, item in ipairs(grouped_items) do
+                        local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                        if src_guid ~= "" then
+                            local src_item = get_item_by_guid(0, src_guid)
+                            if src_item then
+                                group_color = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                                break
+                            end
+                        end
+                    end
+
+                    if not group_color then
+                        if take_number then
+                            group_color = pastel_color(take_number - 1)
+                        else
+                            group_color = 0
+                        end
+                    end
+                    final_color = group_color
+                end
+                
+                -- Apply color to all items in group (optimized - use group_map)
+                local group_id = GetMediaItemInfo_Value(grouped_items[1], "I_GROUPID")
+                if group_id > 0 and unified_index.group_map[group_id] then
+                    -- Use pre-built group map for O(1) lookup
+                    for _, item in ipairs(unified_index.group_map[group_id]) do
+                        if not is_item_colorized(item) then
+                            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", final_color)
+                            GetSetMediaItemInfo_String(item, "P_EXT:saved_color", final_color, true)
+                        end
+                    end
+                else
+                    -- Fallback for ungrouped items
+                    for _, item in ipairs(grouped_items) do
+                        if not is_item_colorized(item) then
+                            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", final_color)
+                            GetSetMediaItemInfo_String(item, "P_EXT:saved_color", final_color, true)
+                        end
+                    end
+                end
+            end
+            
+            current_group_index = batch_end
+            
+            local progress = 70 + ((current_group_index - 1) / #sorted_group_ids * 20)
+            update_progress("Coloring Items", progress,
+                          string.format("Coloring groups (%d/%d)", current_group_index - 1, #sorted_group_ids))
+            return false
+        else
+            -- Done coloring groups, now color tracks
+            processing_step = 103
+            return false
+        end
+        
+    elseif processing_step == 103 then
+        update_progress("Coloring Items", 90, "Coloring tracks...")
+        -- Color all tracks at once at the end
+        for _, gid in ipairs(sorted_group_ids) do
+            local grouped_items = groups[gid]
+            if grouped_items and #grouped_items > 0 then
+                local first_track = GetMediaItem_Track(grouped_items[1])
+                if first_track then
+                    SetMediaTrackInfo_Value(first_track, "I_CUSTOMCOLOR", unedited_color)
+                    color_folder_children(first_track, unedited_color)
+                end
+            end
+        end
+        processing_step = 110
+        return false
+        
+    elseif processing_step == 110 then
+        update_progress("Preparing Colors", 90, "Setting up for coloring...")
+        
+        local _, workflow_check = GetProjExtState(0, "ReaClassical", "Workflow")
+        if workflow_check == "Vertical" or workflow_check ~= "Horizontal" then
+            -- Prepare vertical coloring
+            colors = get_color_table()
+            unedited_color = colors.dest_items
+            
+            -- Build ALL folder lists (both pastel and dest)
+            local num_tracks = CountTracks(0)
+            local first_folder_done = false
+            local pastel_folders = {}
+            local dest_folders = {}
+            
+            for t = 0, num_tracks - 1 do
+                local track = GetTrack(0, t)
+                local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                if depth == 1 then
+                    if not first_folder_done then
+                        table.insert(dest_folders, track)
+                        first_folder_done = true
+                    else
+                        table.insert(pastel_folders, track)
+                    end
+                end
+            end
+            
+            -- Combine all folders for processing
+            local all_folders = {}
+            for _, f in ipairs(pastel_folders) do table.insert(all_folders, {folder=f, is_dest=false}) end
+            for _, f in ipairs(dest_folders) do table.insert(all_folders, {folder=f, is_dest=true}) end
+            
+            -- Store for processing
+            _G.all_folders = all_folders
+            _G.index_for_folder_pastel = 0
+            current_folder_index = 0
+            _G.color_pass = 1  -- Pass 1: color all items, Pass 2: recolor edits with source colors
+            
+            processing_step = 110.1  -- Go to pass 1
+        else
+            processing_step = 111  -- Skip to coloring message for horizontal
+        end
+        return false
+        
+    -- VERTICAL WORKFLOW - PASS 1: Color all folders and items
+    elseif processing_step == 110.1 then
+        if current_folder_index < #_G.all_folders then
+            current_folder_index = current_folder_index + 1
+            local folder_info = _G.all_folders[current_folder_index]
+            local track = folder_info.folder
+            local is_dest = folder_info.is_dest
+            
+            -- Set folder color
+            local folder_color
+            if is_dest then
+                folder_color = colors.dest_items
+            else
+                folder_color = pastel_color(_G.index_for_folder_pastel)
+                _G.index_for_folder_pastel = _G.index_for_folder_pastel + 1
+            end
+            
+            SetMediaTrackInfo_Value(track, "I_CUSTOMCOLOR", folder_color)
+            color_folder_children(track, folder_color)
+            
+            -- ONLY process items on the parent folder track (first track)
+            -- These are the "parent" items that represent each group
+            local num_items = CountTrackMediaItems(track)
+            for i = 0, num_items - 1 do
+                local item = GetTrackMediaItem(track, i)
+                
+                -- Skip if this parent item is manually colorized
+                if not is_item_colorized(item) then
+                    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+                    
+                    if group_id > 0 and unified_index.group_map[group_id] then
+                        local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                        
+                        local color_to_use
+                        if ranked ~= "" and color_pref == 0 then
+                            color_to_use = get_rank_color(ranked)
+                        else
+                            -- Pass 1: just use folder color, ignore src_guid
+                            color_to_use = folder_color
+                        end
+                        
+                        if color_to_use then
+                            -- Color all items in this group (skip individual checks for speed)
+                            for _, grouped_item in ipairs(unified_index.group_map[group_id]) do
+                                SetMediaItemInfo_Value(grouped_item, "I_CUSTOMCOLOR", color_to_use)
+                            end
+                        end
+                    end
+                end
+            end
+            
+            local progress = 90 + (current_folder_index / (#_G.all_folders * 2) * 8)
+            update_progress("Coloring Items (Pass 1)", progress,
+                          string.format("Initial coloring: folder %d of %d", current_folder_index, #_G.all_folders))
+            return false
+        else
+            -- Pass 1 done, build GUID lookup table for pass 2
+            update_progress("Coloring Items", 94, "Building GUID lookup table...")
+            
+            -- Build a lookup table: guid -> item for fast O(1) lookups in pass 2
+            _G.guid_lookup = {}
+            for _, item_data in ipairs(unified_index.all_items) do
+                local _, guid = GetSetMediaItemInfo_String(item_data.item, "GUID", "", false)
+                if guid ~= "" then
+                    _G.guid_lookup[guid] = item_data.item
+                end
+            end
+            
+            current_folder_index = 0
+            processing_step = 110.2
+            return false
+        end
+        
+    -- VERTICAL WORKFLOW - PASS 2: Recolor items with src_guid to get source colors
+    elseif processing_step == 110.2 then
+        if current_folder_index < #_G.all_folders then
+            current_folder_index = current_folder_index + 1
+            local folder_info = _G.all_folders[current_folder_index]
+            local track = folder_info.folder
+            
+            -- ONLY process items on the parent folder track (first track)
+            local num_items = CountTrackMediaItems(track)
+            for i = 0, num_items - 1 do
+                local item = GetTrackMediaItem(track, i)
+                
+                -- Skip if this parent item is manually colorized
+                if not is_item_colorized(item) then
+                    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+                    
+                    if group_id > 0 and unified_index.group_map[group_id] then
+                        local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                        
+                        -- Only process non-ranked items with src_guid
+                        if (ranked == "" or color_pref == 1) then
+                            local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                            if src_guid ~= "" then
+                                -- Use O(1) lookup instead of O(n) get_item_by_guid
+                                local src_item = _G.guid_lookup[src_guid]
+                                if src_item then
+                                    local color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                                    
+                                    -- Color all items in this group (skip individual checks for speed)
+                                    for _, grouped_item in ipairs(unified_index.group_map[group_id]) do
+                                        SetMediaItemInfo_Value(grouped_item, "I_CUSTOMCOLOR", color_val)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            
+            local progress = 90 + ((#_G.all_folders + current_folder_index) / (#_G.all_folders * 2) * 8)
+            update_progress("Coloring Items (Pass 2)", progress,
+                          string.format("Coloring edits: folder %d of %d", current_folder_index, #_G.all_folders))
+            return false
+        else
+            -- Done coloring
+            processing_step = 112  -- Skip to selection restoration
+            return false
+        end
+        
+    elseif processing_step == 111 then
+        -- Horizontal workflow coloring message
+        update_progress("Coloring Items", 95, "Applying colors - this will take a moment...")
+        processing_step = 111.5
+        return false
+    elseif processing_step == 111.5 then
+        -- Horizontal workflow only - vertical already done incrementally
+        local _, workflow_check = GetProjExtState(0, "ReaClassical", "Workflow")
+        if workflow_check == "Horizontal" and not edits then
+            -- Horizontal coloring already happens incrementally in earlier steps
+            -- This is just in case we need to do any final cleanup
+        end
+        
+        Undo_EndBlock('Prepare Takes', 0)
+        processing_step = 112
+        return false
+    elseif processing_step == 112 then
+        -- Restore selections AFTER coloring
+        update_progress("Finalizing", 98, "Restoring selections...")
+        if num_pre_selected > 0 then
+            Main_OnCommand(40297, 0)
+            if pre_selected[1] and pcall(SetOnlyTrackSelected, pre_selected[1]) then
+                for i = 2, #pre_selected do
+                    if pre_selected[i] then
+                        pcall(SetTrackSelected, pre_selected[i], true)
+                    end
+                end
+            end
+        end
+        
+        UpdateArrange()
+        UpdateTimeline()
+        update_progress("Complete", 100, "All done!")
+        return true -- Processing complete
+    end
+    
+    return false
+end
+
+function main()
+    if window_open and not processing_complete then
+        local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoResize
+        
+        -- Center window on first display and set fixed size
+        if frame_count == 0 then
+            local viewport_center_x, viewport_center_y = ImGui.Viewport_GetCenter(ImGui.GetMainViewport(ctx))
+            ImGui.SetNextWindowPos(ctx, viewport_center_x, viewport_center_y, ImGui.Cond_Appearing, 0.5, 0.5)
+        end
+        
+        -- Fixed size
+        ImGui.SetNextWindowSize(ctx, 420, 120, ImGui.Cond_Always)
+        
+        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical - Preparing Takes", true, window_flags)
+        window_open = open_ref
+        
+        if opened then
+            ImGui.Text(ctx, progress_stage)
+            ImGui.Spacing(ctx)
+            
+            ImGui.PushItemWidth(ctx, 400)
+            ImGui.ProgressBar(ctx, progress_percent / 100.0, 0, 0)
+            ImGui.PopItemWidth(ctx)
+            
+            if progress_details ~= "" then
+                ImGui.Spacing(ctx)
+                ImGui.TextWrapped(ctx, progress_details)
+            end
+            
+            ImGui.End(ctx)
+        end
+        
+        -- Process one step per frame
+        processing_complete = do_processing_step()
+        
+        defer(main)
+    elseif processing_complete then
+        -- Show completion message
+        local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoResize
+        
+        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical - Preparing Takes", true, window_flags)
+        window_open = open_ref
+        
+        if opened then
+            ImGui.Text(ctx, "✓ Processing Complete")
+            ImGui.Spacing(ctx)
+            
+            -- Keep progress bar at 100% to maintain layout
+            ImGui.PushItemWidth(ctx, 400)
+            ImGui.ProgressBar(ctx, 1.0, 0, 0)
+            ImGui.PopItemWidth(ctx)
+            
+            ImGui.Spacing(ctx)
+            ImGui.Text(ctx, "Takes prepared successfully!")
+            
+            ImGui.End(ctx)
+        end
+        
+        auto_close_timer = auto_close_timer + 1
+        if auto_close_timer > (auto_close_delay * 30) then -- ~30 fps
+            window_open = false
+            return
+        end
+        
+        defer(main)
+    end
+end
+
+-- Initialize and validate
+local _, workflow_check = GetProjExtState(0, "ReaClassical", "Workflow")
+if workflow_check == "" then
+    local modifier = "Ctrl"
+    local system = GetOS()
+    if string.find(system, "^OSX") or string.find(system, "^macOS") then
+        modifier = "Cmd"
+    end
+    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    return
+end
+
+workflow = workflow_check
+group_state = GetToggleCommandState(1156)
+if group_state ~= 1 then
+    Main_OnCommand(1156, 0)
+end
+
+num_pre_selected = CountSelectedTracks(0)
+if num_pre_selected > 0 then
+    for i = 0, num_pre_selected - 1, 1 do
+        local track = GetSelectedTrack(0, i)
+        table.insert(pre_selected, track)
+    end
+end
+
+cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+start_time, end_time = GetSet_ArrangeView2(0, false, 0, 0, 0, false)
+num_of_project_items = CountMediaItems(0)
+if num_of_project_items == 0 then
+    MB("No items in project.", "ReaClassical", 0)
+    return
+end
+
+-- Initialize ImGui context and start
+ctx = ImGui.CreateContext("ReaClassical Prepare Takes")
+update_progress("Initializing", 0, "Starting preparation...")
+
+defer(main)
 
 ---------------------------------------------------------------------
 
@@ -421,7 +1228,6 @@ function color_items(edits, color_pref, group_map)
     if workflow == "Horizontal" and not edits then
         local num_items = CountMediaItems(0)
 
-        -- Collect items by group ID
         local groups = {}
         for i = 0, num_items - 1 do
             local item = GetMediaItem(0, i)
@@ -430,23 +1236,19 @@ function color_items(edits, color_pref, group_map)
             table.insert(groups[group_id], item)
         end
 
-        -- Sort group IDs
         local sorted_group_ids = {}
         for gid in pairs(groups) do table.insert(sorted_group_ids, gid) end
         table.sort(sorted_group_ids)
 
-        -- Color each group
-        for _, gid in ipairs(sorted_group_ids) do
+        for idx, gid in ipairs(sorted_group_ids) do
             local grouped_items = groups[gid]
 
-            -- Extract take number from first item in group
             local take_number = nil
             local _, take_num_str = GetSetMediaItemInfo_String(grouped_items[1], "P_EXT:item_take_num", "", false)
             if take_num_str ~= "" then
                 take_number = tonumber(take_num_str)
             end
 
-            -- Check if any item is ranked and color_pref is 0
             local has_rank = false
             local rank_color = nil
             for _, item in ipairs(grouped_items) do
@@ -461,7 +1263,6 @@ function color_items(edits, color_pref, group_map)
             end
             
             if has_rank and rank_color then
-                -- Apply rank color using optimized function
                 for _, item in ipairs(grouped_items) do
                     if not is_item_colorized(item) then
                         color_group_items(item, rank_color, group_map)
@@ -478,7 +1279,6 @@ function color_items(edits, color_pref, group_map)
                 goto continue_group
             end
 
-            -- Determine group color (based on take number)
             local group_color = nil
             for _, item in ipairs(grouped_items) do
                 local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -493,15 +1293,12 @@ function color_items(edits, color_pref, group_map)
 
             if not group_color then
                 if take_number then
-                    -- Use pastel_color starting at index 0 for take 2 (take_number - 1)
                     group_color = pastel_color(take_number - 1)
                 else
-                    -- Fallback if no take number stored
                     group_color = 0
                 end
             end
 
-            -- Apply color using optimized function
             for _, item in ipairs(grouped_items) do
                 if not is_item_colorized(item) then
                     color_group_items(item, group_color, group_map)
@@ -516,6 +1313,10 @@ function color_items(edits, color_pref, group_map)
                 color_folder_children(first_track, unedited_color)
             end
 
+            if idx % 10 == 0 then
+                -- Progress updates handled by incremental coloring
+            end
+
             ::continue_group::
         end
     elseif workflow == "Vertical" then
@@ -526,7 +1327,6 @@ function color_items(edits, color_pref, group_map)
         local pastel_folders = {}
         local dest_folders = {}
 
-        -- First pass: categorize folders
         for t = 0, num_tracks - 1 do
             local track = GetTrack(0, t)
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
@@ -547,7 +1347,6 @@ function color_items(edits, color_pref, group_map)
             end
         end
 
-        -- Second pass: pastel folders
         for _, track in ipairs(pastel_folders) do
             local num_items = CountTrackMediaItems(track)
             local folder_color = pastel_color(index_for_folder_pastel)
@@ -555,7 +1354,6 @@ function color_items(edits, color_pref, group_map)
             index_for_folder_pastel = index_for_folder_pastel + 1
             color_folder_children(track, folder_color)
 
-            -- Color items
             for i = 0, num_items - 1 do
                 local item = GetTrackMediaItem(track, i)
                 
@@ -565,7 +1363,8 @@ function color_items(edits, color_pref, group_map)
                     if ranked ~= "" and color_pref == 0 then
                         local rank_color = get_rank_color(ranked)
                         if rank_color then
-                            color_group_items(item, rank_color, group_map)
+                            -- Direct color set instead of color_group_items
+                            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", rank_color)
                         end
                     elseif ranked == "" or color_pref == 1 then
                         local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -576,13 +1375,13 @@ function color_items(edits, color_pref, group_map)
                                 color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                             end
                         end
-                        color_group_items(item, color_val, group_map)
+                        -- Direct color set instead of color_group_items
+                        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_val)
                     end
                 end
             end
         end
 
-        -- Third pass: dest folders
         for _ = 1, 2 do
             for _, track in ipairs(dest_folders) do
                 local num_items = CountTrackMediaItems(track)
@@ -599,7 +1398,8 @@ function color_items(edits, color_pref, group_map)
                         if ranked ~= "" and color_pref == 0 then
                             local rank_color = get_rank_color(ranked)
                             if rank_color then
-                                color_group_items(item, rank_color, group_map)
+                                -- Direct color set instead of color_group_items
+                                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", rank_color)
                             end
                         elseif ranked == "" or color_pref == 1 then
                             local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -610,7 +1410,8 @@ function color_items(edits, color_pref, group_map)
                                     color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                                 end
                             end
-                            color_group_items(item, color_val, group_map)
+                            -- Direct color set instead of color_group_items
+                            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_val)
                         end
                     end
                 end
@@ -728,10 +1529,10 @@ end
 
 function pastel_color(index)
     local golden_ratio_conjugate = 0.61803398875
-    local hue                    = (index * golden_ratio_conjugate) % 1.0
+    local hue = (index * golden_ratio_conjugate) % 1.0
 
-    local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
-    local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
+    local saturation = 0.45 + 0.15 * math.sin(index * 1.7)
+    local lightness = 0.70 + 0.1 * math.cos(index * 1.1)
 
     local function h2rgb(p, q, t)
         if t < 0 then t = t + 1 end
@@ -769,7 +1570,6 @@ function color_group_items(item, color_val, group_map)
     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_val)
     
     if not group_map then
-        -- Fallback to original method if no group_map provided
         local group = GetMediaItemInfo_Value(item, "I_GROUPID")
         if group > 0 then
             local total = CountMediaItems(0)
@@ -783,7 +1583,6 @@ function color_group_items(item, color_val, group_map)
             end
         end
     else
-        -- Use pre-built group map for O(1) lookup
         local group = GetMediaItemInfo_Value(item, "I_GROUPID")
         if group > 0 and group_map[group] then
             for _, other in ipairs(group_map[group]) do
@@ -939,5 +1738,3 @@ function get_item_by_guid(project, guid)
 end
 
 ---------------------------------------------------------------------
-
-main()
