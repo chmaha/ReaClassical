@@ -5,6 +5,7 @@
   Add mouse settings to factory reset
   Documentation: Add updated Metadata Editor and Mission Control info
   Add optional mouse modifier function to assign to item/track left-click
+  Auto solo: Do not run on projects with zero folders
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
