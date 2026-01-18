@@ -28,12 +28,14 @@ Use this dialog to:
 
 - Name or rename tracks 
 - Set recording inputs manually or automatically based on track naming
+- Temporarily disable recording of a channel
 - Set routing
+- Add "special" tracks such as aux, submix, room tone, live bounce and reference tracks
+- Change visibility of folders and special tracks in the arrange window
 - Add a track to all folders
 - Delete a track from all folders
 - Re-order tracks in all folders
 - Convert between horizontal and vertical workflows
-- Add "special" tracks such as aux, submix, room tone, live bounce and reference tracks
 
 WARNING: Do not attempt to complete any of the above actions outside of Mission Control!
 

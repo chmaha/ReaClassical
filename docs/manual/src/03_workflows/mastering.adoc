@@ -23,6 +23,12 @@ The metadata window allows you to enter all track and album metadata in a single
 
 TIP: Check the "!" box for CD tracks that you would like to have a visual countdown (length set in kbd:[F5] prefs). This feature is not available in all CD players. 
 
+===== Repositioning and Re-arranging Album Tracks
+
+There are two functions which help with reordering or repositioning tracks. First, and perhaps most useful for producing a classical album, is if you decide that you need to reorder one or more tracks. Select the named item you want to move either in the arrange window or metadata editor (by clicking on the track number) and press btn:[Move Album Track Up] or btn:[Move Album Track Down] to switch with the track immediately above or below it in the list. Note that gaps are preserved too.
+
+The other situation is when you want to start with uniform gaps between a series of short separate pieces. Use btn:[Reposition Album Tracks] and enter a value in seconds. Your pieces are then automatically spaced and items crossfaded are left intact.
+
 ===== Marker Offsets
 
 There may be instances when an audience member coughs right before a downbeat or a violinist hits strings before the first note of an otherwise excellent performance. The Add Marker Offset function allows you to adjust the start accordingly (assuming you have some nice recorded or generated roomtone on the dedicated roomtone track).
@@ -45,13 +51,6 @@ To clear all offsets, run kbd:[Alt+O].
 ===== BIN+CUE set
 
 Create a BIN/CUE pair (either select `regions define tracks` and render the whole project or select `use only # markers` and render by time selection if you don't want the first pre-gap as actual silence at the start of track 1).
-
-
-===== Repositioning Tracks in an Album
-
-There are two functions which help with reordering or repositioning tracks. First, and perhaps most useful for producing a classical album, is if you decide that you need to reorder one or tracks. Simply select the track you want to move and press either kbd:[Ctrl+{cursorleft}] or kbd:[Ctrl+{cursorright}] to switch with the track immediately to the left or right. Note that gaps are preserved too.
-
-The other situation is when you want to start with uniform gaps between a series of short separate pieces. Use the kbd:[Ctrl+Y] shortcut and enter a value in seconds. Your pieces are then automatically spaced and items crossfaded are left intact.
 
 ===== Loudness
 
