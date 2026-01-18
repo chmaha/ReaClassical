@@ -45,42 +45,39 @@ end
 
 function main()
     Undo_BeginBlock()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        local modifier = "Ctrl"
-        local system = GetOS()
-        if string.find(system, "^OSX") or string.find(system, "^macOS") then
-            modifier = "Cmd"
-        end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
-        return
-    end
     PreventUIRefresh(1)
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
-    
-    -- Store the previously selected track before the command
-    local prev_track = GetSelectedTrack(0, 0)
-    
-    -- Get mouse cursor context BEFORE running the command
-    local window, segment, details = reaper.BR_GetMouseCursorContext()
-    local mouse_item = reaper.BR_GetMouseCursorContext_Item()
-    
+
+    local window = BR_GetMouseCursorContext()
+    local mouse_item = BR_GetMouseCursorContext_Item()
+
     Main_OnCommand(41110, 0)
-    
+
     local track = GetSelectedTrack(0, 0)
     if track then
-        -- Unselect all items if:
-        -- 1. Mouse is over TCP (clicked track control panel), OR
-        -- 2. Mouse is in arrange window but NOT over an item (clicked empty space)
         if window == "tcp" or (window == "arrange" and not mouse_item) then
             Main_OnCommand(40289, 0) -- Unselect all items
         end
-        
+
         SetOnlyTrackSelected(track)
-        solo()
+
+        local has_folders = false
+        for i = 0, CountTracks(0) - 1 do
+            local check_track = GetTrack(0, i)
+            local folder_depth = GetMediaTrackInfo_Value(check_track, "I_FOLDERDEPTH")
+            if folder_depth == 1 then
+                has_folders = true
+                break
+            end
+        end
+
+        if has_folders then
+            solo()
+        end
+
         select_children_of_selected_folders()
         unselect_folder_children()
         PreventUIRefresh(-1)
