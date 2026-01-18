@@ -25,7 +25,6 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, return_xfade_length, is_cursor_between_items
 local get_selected_media_item_at, count_selected_media_items
 local select_item_under_cursor_on_selected_track
-local select_items_containing_midpoint, get_parent_folder, get_folder_children
 ---------------------------------------------------------------------
 
 function main()
@@ -52,7 +51,6 @@ function main()
     local fade_editor_toggle = NamedCommandLookup("_RScc8cfd9f58e03fed9f8f467b7dae42089b826067")
     local state = GetToggleCommandState(fade_editor_toggle)
     select_item_under_cursor_on_selected_track()
-    select_items_containing_midpoint()
     Main_OnCommand(40297, 0)        -- Track: Unselect (clear selection of) all tracks
 
     MoveEditCursor(-xfade_len, false)
@@ -109,7 +107,7 @@ function main()
         if item1_orig_offset ~= "" and math.abs(offset_amount) > 1e-10 then
             Main_OnCommand(40289, 0)                     -- unselect all items
             SetMediaItemSelected(item1, true)
-            select_items_containing_midpoint()
+            Main_OnCommand(40034, 0)                     -- Item Grouping: Select all items in group(s)
             local num_items = count_selected_media_items() -- Get the number of selected items
             for i = 0, num_items - 1 do
                 local item = get_selected_media_item_at(i)  -- Get the selected media item
@@ -244,118 +242,6 @@ function select_item_under_cursor_on_selected_track()
       end
     end
   end
-end
-
----------------------------------------------------------------------
-
-function select_items_containing_midpoint()
-    local num_sel = CountSelectedMediaItems(0)
-    if num_sel == 0 then return end
-
-    -- Get the folder tracks for all selected items
-    local folder_tracks = {}
-    for i = 0, num_sel - 1 do
-        local item = GetSelectedMediaItem(0, i)
-        local track = GetMediaItemTrack(item)
-        local folder = get_parent_folder(track)
-        if folder then
-            folder_tracks[folder] = true
-        end
-    end
-
-    -- Get all tracks within the relevant folders
-    local tracks_to_check = {}
-    for folder, _ in pairs(folder_tracks) do
-        local children = get_folder_children(folder)
-        tracks_to_check[folder] = true -- Include folder track itself
-        for _, child in ipairs(children) do
-            tracks_to_check[child] = true
-        end
-    end
-
-    -- Collect selected items' midpoints
-    local positions_to_check = {}
-    for i = 0, num_sel - 1 do
-        local item = GetSelectedMediaItem(0, i)
-        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-        local mid = pos + (len / 2)
-        table.insert(positions_to_check, mid)
-    end
-
-    local tolerance = 0.0001
-
-    -- For each midpoint position, select items in folder that contain it
-    for _, check_pos in ipairs(positions_to_check) do
-        for track, _ in pairs(tracks_to_check) do
-            local num_items = CountTrackMediaItems(track)
-            for i = 0, num_items - 1 do
-                local item = GetTrackMediaItem(track, i)
-                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                local item_end = item_pos + item_len
-
-                -- Select if this item's span contains the check position
-                if check_pos >= (item_pos - tolerance) and check_pos <= (item_end + tolerance) then
-                    SetMediaItemSelected(item, true)
-                end
-            end
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function get_parent_folder(track)
-    -- Returns the parent folder track, or nil if track is not in a folder
-    if not track then return nil end
-
-    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
-
-    -- Walk backwards to find parent folder
-    for i = track_idx, 0, -1 do
-        local t = GetTrack(0, i)
-        if not t then break end
-
-        local depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
-        if depth == 1 then
-            return t
-        end
-    end
-
-    return nil
-end
-
----------------------------------------------------------------------
-
-function get_folder_children(parent_track)
-    -- Returns all child tracks of a folder
-    local children = {}
-    if not parent_track then return children end
-
-    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
-    local num_tracks = CountTracks(0)
-    local idx = parent_idx + 1
-    local depth = 1
-
-    while idx < num_tracks and depth > 0 do
-        local tr = GetTrack(0, idx)
-        if not tr then break end
-
-        local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
-
-        if depth > 0 then
-            table.insert(children, tr)
-        end
-
-        depth = depth + folder_depth
-
-        if depth <= 0 then break end
-
-        idx = idx + 1
-    end
-
-    return children
 end
 
 ---------------------------------------------------------------------
