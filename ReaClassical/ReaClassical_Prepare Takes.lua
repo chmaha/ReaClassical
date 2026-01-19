@@ -981,7 +981,6 @@ end
 
 num_of_project_items = CountMediaItems(0)
 if num_of_project_items == 0 then
-    MB("No items in project.", "ReaClassical", 0)
     return
 end
 
