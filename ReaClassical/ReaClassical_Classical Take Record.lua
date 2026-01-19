@@ -40,8 +40,8 @@ local use_only_take_num = 0
 if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[7] then ref_is_guide = tonumber(table[7]) or 0 end
-    if table[14] then use_only_take_num = tonumber(table[14]) or 0 end
+    if table[8] then ref_is_guide = tonumber(table[8]) or 0 end
+    if table[15] then use_only_take_num = tonumber(table[15]) or 0 end
 end
 
 ---------------------------------------------------------------------

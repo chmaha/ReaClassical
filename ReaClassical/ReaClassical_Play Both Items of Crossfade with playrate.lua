@@ -30,7 +30,7 @@ local audition_speed = 0.75
 if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[9] then audition_speed = tonumber(table[9]) or 0.75 end
+    if table[10] then audition_speed = tonumber(table[10]) or 0.75 end
 end
 
 function main()

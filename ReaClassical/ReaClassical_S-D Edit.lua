@@ -66,7 +66,7 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+        if table[13] then moveable_dest = tonumber(table[13]) or 0 end
     end
 
     if moveable_dest == 1 then move_destination_folder_to_top() end

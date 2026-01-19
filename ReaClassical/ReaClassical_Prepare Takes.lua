@@ -222,7 +222,8 @@ local pre_selected = {}
 local num_of_project_items = 0
 local empty_count = 0
 local folders = 0
-local color_pref = 0
+local auto_color_pref = 0
+local ranking_color_pref = 0
 local unified_index = nil
 local edits = false
 local frame_count = 0
@@ -286,11 +287,13 @@ function do_processing_step()
     elseif processing_step == 4 then
         folders = folder_check()
         local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-        color_pref = 0
+        auto_color_pref = 0
+        ranking_color_pref = 0
         if input ~= "" then
             local table = {}
             for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-            if table[5] then color_pref = tonumber(table[5]) or 0 end
+            if table[5] then auto_color_pref = tonumber(table[5]) or 0 end
+            if table[6] then ranking_color_pref = tonumber(table[6]) or 0 end
         end
         processing_step = 5
         return false
@@ -603,13 +606,13 @@ function do_processing_step()
                     take_number = tonumber(take_num_str)
                 end
 
-                -- Check if any item is ranked and color_pref is 0
+                -- Check if any item is ranked and ranking_color_pref is 0
                 local has_rank = false
                 local rank_color = nil
                 for _, item in ipairs(grouped_items) do
                     if not is_item_colorized(item) then
                         local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-                        if ranked ~= "" and color_pref == 0 then
+                        if ranked ~= "" and ranking_color_pref == 0 then
                             has_rank = true
                             rank_color = get_rank_color(ranked)
                             break
@@ -627,7 +630,7 @@ function do_processing_step()
                         local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
                         if src_guid ~= "" then
                             local src_item = get_item_by_guid(0, src_guid)
-                            if src_item and color_pref == 0 then
+                            if src_item and auto_color_pref == 0 then
                                 group_color = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
                                 break
                             end
@@ -635,7 +638,7 @@ function do_processing_step()
                     end
 
                     if not group_color then
-                        if take_number and color_pref == 0 then
+                        if take_number and auto_color_pref == 0 then
                             group_color = pastel_color(take_number - 1)
                         else
                             group_color = 0
@@ -766,10 +769,10 @@ function do_processing_step()
                         local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
 
                         local color_to_use
-                        if ranked ~= "" and color_pref == 0 then
+                        if ranked ~= "" and ranking_color_pref == 0 then
                             color_to_use = get_rank_color(ranked)
-                        elseif color_pref == 1 then
-                            -- When color_pref == 1, use default REAPER color (0)
+                        elseif auto_color_pref == 1 then
+                            -- When auto_color_pref == 1, use default REAPER color (0)
                             color_to_use = 0
                         else
                             -- Pass 1: just use folder color, ignore src_guid
@@ -827,10 +830,10 @@ function do_processing_step()
                     if group_id > 0 and unified_index.group_map[group_id] then
                         local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
 
-                        -- Only process non-ranked items with src_guid (unless color_pref == 1)
-                        if (ranked == "" or color_pref == 1) then
+                        -- Only process non-ranked items with src_guid (unless auto_color_pref == 1 or ranking_color_pref == 1)
+                        if (ranked == "" or ranking_color_pref == 1) then
                             local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
-                            if src_guid ~= "" and color_pref ~= 1 then
+                            if src_guid ~= "" and auto_color_pref ~= 1 then
                                 -- Use O(1) lookup instead of O(n) get_item_by_guid
                                 local src_item = guid_lookup[src_guid]
                                 if src_item then

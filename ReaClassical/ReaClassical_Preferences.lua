@@ -37,14 +37,15 @@ package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,500,0,0,0.75,' .. year .. ',WAV,0,0,0'
+local default_values = '35,200,3,7,0,0,500,0,0,0.75,' .. year .. ',WAV,0,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade Length (ms)',
     'CD Track Offset (ms)',
     'INDEX0 Length (s) (>= 1)',
     'Album Lead-out Time (s)',
-    'No Item Coloring',
+    'No Auto Item Coloring',
+    'No Ranking Color',
     'S-D Marker Check (ms)',
     'REF = Overdub Guide',
     'Add S-D Markers at Mouse Hover',
@@ -57,7 +58,7 @@ local labels = {
 }
 
 -- Binary option indices (1-based)
-local binary_options = { 5, 7, 8, 12, 13, 14 }
+local binary_options = { 5, 6, 8, 9, 13, 14, 15 }
 
 -- ImGui Context
 local ctx = ImGui.CreateContext('ReaClassical Preferences')
@@ -104,7 +105,7 @@ function main()
 
     if apply_clicked then
         -- Validate and save
-        local pass, corrected_prefs, new_floating, new_color, new_item_naming, error_msg = pref_check()
+        local pass, corrected_prefs, new_floating, new_color, new_ranking_color, new_item_naming, error_msg = pref_check()
 
         if pass then
             -- Get original saved values before applying changes
@@ -115,13 +116,17 @@ function main()
                     saved_entries[#saved_entries + 1] = entry
                 end
             end
-            local orig_floating = tonumber(saved_entries[12]) or 0
+            local orig_floating = tonumber(saved_entries[13]) or 0
             local orig_color = tonumber(saved_entries[5]) or 0
-            local orig_item_naming = tonumber(saved_entries[14]) or 0
+            local orig_ranking_color = tonumber(saved_entries[6]) or 0
+            local orig_item_naming = tonumber(saved_entries[15]) or 0
 
             save_prefs(corrected_prefs)
 
             if new_color ~= orig_color then
+                prepare_takes()
+            end
+            if new_ranking_color ~= orig_ranking_color then
                 prepare_takes()
             end
             if new_floating ~= orig_floating and new_floating == 0 then
@@ -195,7 +200,7 @@ function display_prefs()
                 if rv then
                     prefs[i] = val and 1 or 0
                 end
-            elseif i == 11 then
+            elseif i == 12 then
                 -- CUE audio format - dropdown
                 ImGui.SetNextItemWidth(ctx, 80)
                 if ImGui.BeginCombo(ctx, "##pref" .. i, tostring(prefs[i])) then
@@ -290,7 +295,7 @@ function load_prefs()
 
     -- Load into prefs table
     for i = 1, #labels do
-        if i == 11 then
+        if i == 12 then
             prefs[i] = saved_entries[i] or "WAV"
         else
             prefs[i] = tonumber(saved_entries[i]) or 0
@@ -309,7 +314,7 @@ function load_defaults()
     end
     
     for i = 1, #labels do
-        if i == 11 then
+        if i == 12 then
             prefs[i] = default_entries[i] or "WAV"
         else
             prefs[i] = tonumber(default_entries[i]) or 0
@@ -343,7 +348,7 @@ function pref_check()
 
     -- Validate entries
     for i = 1, #labels do
-        if i == 11 then
+        if i == 12 then
             -- Audio format - string validation
             t[i] = tostring(t[i]):upper()
         else
@@ -361,8 +366,8 @@ function pref_check()
                 pass = false
                 invalid_msg = "INDEX0 length must be greater than or equal to 1.\n"
                 break
-            elseif i ~= 9 and num ~= math.floor(num) then
-                -- All fields except #9 (Alt Audition Playback Rate) must be integers
+            elseif i ~= 10 and num ~= math.floor(num) then
+                -- All fields except #10 (Alt Audition Playback Rate) must be integers
                 pass = false
                 invalid_msg = "Numeric entries (except Alt Audition Rate) must be integers.\n"
                 break
@@ -375,22 +380,24 @@ function pref_check()
 
     if pass then
         local num_5        = tonumber(t[5])
-        local num_7        = tonumber(t[7])
+        local num_6        = tonumber(t[6])
         local num_8        = tonumber(t[8])
-        local num_12       = tonumber(t[12])
+        local num_9        = tonumber(t[9])
         local num_13       = tonumber(t[13])
         local num_14       = tonumber(t[14])
+        local num_15       = tonumber(t[15])
 
-        -- normalize audio format and store it back into t[11]
-        t[11]              = tostring(t[11]):upper()
-        local audio_format = t[11]
+        -- normalize audio format and store it back into t[12]
+        t[12]              = tostring(t[12]):upper()
+        local audio_format = t[12]
 
         if (num_5 and num_5 > 1) or
-            (num_7 and num_7 > 1) or
+            (num_6 and num_6 > 1) or
             (num_8 and num_8 > 1) or
-            (num_12 and num_12 > 1) or
+            (num_9 and num_9 > 1) or
             (num_13 and num_13 > 1) or
-            (num_14 and num_14 > 1) then
+            (num_14 and num_14 > 1) or
+            (num_15 and num_15 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
@@ -411,7 +418,7 @@ function pref_check()
     local error_msg = binary_error_msg .. invalid_msg .. ext_error_msg
 
     -- Return error message instead of showing MB dialog
-    return pass, t, tonumber(t[12]), tonumber(t[5]), tonumber(t[14]), error_msg
+    return pass, t, tonumber(t[13]), tonumber(t[5]), tonumber(t[6]), tonumber(t[15]), error_msg
 end
 
 -----------------------------------------------------------------------

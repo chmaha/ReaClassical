@@ -46,11 +46,11 @@ if workflow == "" then
 end
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-local color_pref = 0
+local ranking_color_pref = 0
 if input ~= "" then
-    local table = {}
-    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[5] then color_pref = tonumber(table[5]) or 0 end
+  local table = {}
+  for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+  if table[6] then ranking_color_pref = tonumber(table[6]) or 0 end
 end
 
 set_action_options(2)
@@ -534,7 +534,7 @@ end
 function apply_rank_color(item, rank)
     local color_to_use
 
-    if rank == "" or color_pref == 1 then
+    if rank == "" or ranking_color_pref == 1 then
         -- No Rank selected - restore original color
         color_to_use = get_item_color(item)
     else

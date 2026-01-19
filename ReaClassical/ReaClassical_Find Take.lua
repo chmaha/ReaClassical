@@ -43,7 +43,7 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[13] then find_takes_using_items = tonumber(table[13]) or 0 end
+        if table[14] then find_takes_using_items = tonumber(table[14]) or 0 end
     end
 
     local take_choice

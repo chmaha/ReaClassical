@@ -301,8 +301,8 @@ function create_cue_entries(filename, metadata)
   if input ~= "" then
     local prefs_table = {}
     for entry in input:gmatch('([^,]+)') do prefs_table[#prefs_table + 1] = entry end
-    if prefs_table[10] then year = tonumber(prefs_table[10]) end
-    if prefs_table[11] then extension = tostring(prefs_table[11]) end
+    if prefs_table[11] then year = tonumber(prefs_table[11]) end
+    if prefs_table[12] then extension = tostring(prefs_table[12]) end
   end
 
   if metadata.album.genre == nil then metadata.album.genre = "Unknown" end

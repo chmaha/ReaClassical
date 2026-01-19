@@ -59,8 +59,8 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[8] then sdmousehover = tonumber(table[8]) or 0 end
-        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
+        if table[9] then sdmousehover = tonumber(table[9]) or 0 end
+        if table[13] then moveable_dest = tonumber(table[13]) or 0 end
     end
 
     local selected_track = GetSelectedTrack(0, 0)
@@ -177,7 +177,7 @@ function return_check_length()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[6] then check_length = table[6] / 1000 end
+        if table[7] then check_length = table[7] / 1000 end
     end
     return check_length
 end

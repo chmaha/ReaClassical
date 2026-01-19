@@ -43,11 +43,11 @@ function main()
     end
 
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local color_pref = 0
+    local auto_color_pref = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[5] then color_pref = tonumber(table[5]) or 0 end
+        if table[5] then auto_color_pref = tonumber(table[5]) or 0 end
     end
 
     local edit_item = get_selected_media_item_at(0)
@@ -111,7 +111,7 @@ function main()
 
         -- Set color and GUID for the edit item
 
-        if color_pref == 0 then
+        if auto_color_pref == 0 then
             SetMediaItemInfo_Value(edit_item, "I_CUSTOMCOLOR", source_color)
         end
         GetSetMediaItemInfo_String(edit_item, "P_EXT:src_guid", source_guid, true)

@@ -42,7 +42,7 @@ local ref_is_guide = 0
 if input ~= "" then
     local table = {}
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[7] then ref_is_guide = tonumber(table[7]) or 0 end
+    if table[8] then ref_is_guide = tonumber(table[8]) or 0 end
 end
 
 
