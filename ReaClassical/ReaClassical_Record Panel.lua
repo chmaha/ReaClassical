@@ -378,10 +378,7 @@ function main()
   draw(playstate)
 
   if open then
-    reaper.defer(main)
-  else
-    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-    Main_OnCommand(prepare_takes, 0)
+    defer(main)
   end
 end
 
@@ -772,7 +769,7 @@ function draw(playstate)
 
   if should_close == false then
     if playstate == 5 or playstate == 6 then
-      local choice = reaper.MB("Are you sure you want to quit the take counter window during a recording?",
+      local choice = MB("Are you sure you want to quit the take counter window during a recording?",
         "Take Counter", 4)
       if choice == 6 then
         open = false
@@ -1735,7 +1732,7 @@ function apply_rank_and_notes_to_items()
                   end
 
                   GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
-                  
+
                   -- Apply rank color ONLY if color_pref == 0
                   if color_pref == 0 then
                     local rank_index = tonumber(recording_rank)
@@ -1805,7 +1802,7 @@ function apply_rank_and_notes_to_items()
                 end
 
                 GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
-                
+
                 -- Apply rank color ONLY if color_pref == 0
                 if color_pref == 0 then
                   local rank_index = tonumber(recording_rank)
