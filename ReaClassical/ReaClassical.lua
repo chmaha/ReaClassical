@@ -1,11 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.6
+@version 26.1.7
 @changelog
-  Add mouse settings to factory reset
-  Documentation: Add updated Metadata Editor and Mission Control info
-  Add optional mouse modifier function to assign to item/track left-click
-  Auto solo: Do not run on projects with zero folders
+  S-D editing functions: Revert to using grouping
+  Prepare Takes: Use reaimgui window to track progress
+  Preferences: No item coloring option
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
