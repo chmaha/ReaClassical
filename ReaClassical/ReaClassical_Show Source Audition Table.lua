@@ -67,9 +67,6 @@ local set_pairs_at_cursor           = false -- New checkbox for setting pairs at
 -- ExtState keys for persistent storage
 local EXT_STATE_SECTION             = "ReaClassical_SAI_Manager"
 
-local prepare_takes                 = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-Main_OnCommand(prepare_takes, 0)
-
 local audition_manager = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
 SetToggleCommandState(1, audition_manager, 1)
 

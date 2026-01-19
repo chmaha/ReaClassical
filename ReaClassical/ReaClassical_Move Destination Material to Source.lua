@@ -208,7 +208,6 @@ function set_first_folder_items_color()
         for j = 0, num_items - 1 do
             local item = GetTrackMediaItem(track, j)
             SetMediaItemSelected(item, true)
-            -- SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", colors.edited_material)
         end
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") < 0 then break end
     end

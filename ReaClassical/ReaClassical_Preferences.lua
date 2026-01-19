@@ -44,7 +44,7 @@ local labels = {
     'CD Track Offset (ms)',
     'INDEX0 Length (s) (>= 1)',
     'Album Lead-out Time (s)',
-    'Ranked Items keep folder color',
+    'No Item Coloring',
     'S-D Marker Check (ms)',
     'REF = Overdub Guide',
     'Add S-D Markers at Mouse Hover',
@@ -121,6 +121,9 @@ function main()
 
             save_prefs(corrected_prefs)
 
+            if new_color ~= orig_color then
+                prepare_takes()
+            end
             if new_floating ~= orig_floating and new_floating == 0 then
                 move_destination_folder_to_top()
                 sync_based_on_workflow(workflow)
@@ -143,8 +146,6 @@ function main()
 
     if open and visible then
         defer(main)
-    else
-        prepare_takes()
     end
 end
 

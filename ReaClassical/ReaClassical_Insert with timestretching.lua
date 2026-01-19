@@ -55,9 +55,11 @@ function main()
 
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local moveable_dest = 0
+    local color_pref = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[5] then color_pref = tonumber(table[5]) or 0 end
         if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
@@ -157,7 +159,9 @@ function main()
         local num_of_selected = count_selected_media_items()
         for i = 0, num_of_selected - 1, 1 do
             local item = get_selected_media_item_at(i)
-            SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", item_color)
+            if color_pref == 0 then
+                SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", item_color)
+            end
         end
 
         state = GetToggleCommandState(1156)

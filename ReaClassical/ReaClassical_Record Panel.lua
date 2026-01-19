@@ -231,7 +231,7 @@ function main()
           -- Check if rank or notes actually changed from what was stored
           local _, stored_rank = GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", "", false)
           local _, stored_notes = GetSetMediaItemInfo_String(editing_item, "P_NOTES", "", false)
-          
+
           -- Only save if something actually changed
           if recording_rank ~= stored_rank or recording_note ~= stored_notes then
             save_item_rank_and_notes(editing_item, recording_rank, recording_note)
@@ -379,6 +379,9 @@ function main()
 
   if open then
     reaper.defer(main)
+  else
+    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    Main_OnCommand(prepare_takes, 0)
   end
 end
 
@@ -423,38 +426,42 @@ function save_item_rank_and_notes(item, rank, note)
     if is_colorized then
       GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
     end
-    
-    -- Apply rank color
-    local rank_index = tonumber(rank)
-    if rank_index and RANKS[rank_index] and color_pref == 0 then
-      color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
-    else
-      -- Fallback if invalid rank
-      color_to_use = get_item_color(item)
+
+    -- Apply rank color ONLY if color_pref == 0
+    if color_pref == 0 then
+      local rank_index = tonumber(rank)
+      if rank_index and RANKS[rank_index] then
+        color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+      else
+        -- Fallback if invalid rank
+        color_to_use = get_item_color(item)
+      end
     end
   else
     -- No rank selected - this is deliberate user action, so clear colorized flag
     if is_colorized then
       GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
     end
-    -- Restore original color based on workflow
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "Horizontal" then
-      -- In horizontal workflow, use pastel color based on stored take number
-      local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
-      if stored_take_num ~= "" then
-        local take_num = tonumber(stored_take_num)
-        if take_num then
-          color_to_use = pastel_color(take_num - 1)
+    -- Restore original color based on workflow ONLY if color_pref == 0
+    if color_pref == 0 then
+      local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+      if workflow == "Horizontal" then
+        -- In horizontal workflow, use pastel color based on stored take number
+        local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+        if stored_take_num ~= "" then
+          local take_num = tonumber(stored_take_num)
+          if take_num then
+            color_to_use = pastel_color(take_num - 1)
+          else
+            color_to_use = get_item_color(item)
+          end
         else
           color_to_use = get_item_color(item)
         end
       else
+        -- Vertical workflow uses get_item_color
         color_to_use = get_item_color(item)
       end
-    else
-      -- Vertical workflow uses get_item_color
-      color_to_use = get_item_color(item)
     end
   end
 
@@ -463,7 +470,7 @@ function save_item_rank_and_notes(item, rank, note)
     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
     UpdateItemInProject(item)
   end
-  
+
   update_take_name(item, rank)
 
   -- Save notes
@@ -494,45 +501,50 @@ function save_item_rank_and_notes(item, rank, note)
             if grouped_is_colorized then
               GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", true)
             end
-            
-            local rank_index = tonumber(rank)
-            if rank_index and RANKS[rank_index] and color_pref == 0 then
-              grouped_color = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
-            else
-              grouped_color = get_item_color(current_item)
+
+            -- Apply rank color ONLY if color_pref == 0
+            if color_pref == 0 then
+              local rank_index = tonumber(rank)
+              if rank_index and RANKS[rank_index] then
+                grouped_color = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+              else
+                grouped_color = get_item_color(current_item)
+              end
             end
           else
             -- No rank selected - this is deliberate user action, so clear colorized flag
             if grouped_is_colorized then
               GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", true)
             end
-            -- Restore original color based on workflow
-            local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-            if workflow == "Horizontal" then
-              -- In horizontal workflow, use pastel color based on stored take number
-              local _, stored_take_num = GetSetMediaItemInfo_String(current_item, "P_EXT:item_take_num", "", false)
-              if stored_take_num ~= "" then
-                local take_num = tonumber(stored_take_num)
-                if take_num then
-                  grouped_color = pastel_color(take_num - 1)
+            -- Restore original color based on workflow ONLY if color_pref == 0
+            if color_pref == 0 then
+              local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+              if workflow == "Horizontal" then
+                -- In horizontal workflow, use pastel color based on stored take number
+                local _, stored_take_num = GetSetMediaItemInfo_String(current_item, "P_EXT:item_take_num", "", false)
+                if stored_take_num ~= "" then
+                  local take_num = tonumber(stored_take_num)
+                  if take_num then
+                    grouped_color = pastel_color(take_num - 1)
+                  else
+                    grouped_color = get_item_color(current_item)
+                  end
                 else
                   grouped_color = get_item_color(current_item)
                 end
               else
+                -- Vertical workflow uses get_item_color
                 grouped_color = get_item_color(current_item)
               end
-            else
-              -- Vertical workflow uses get_item_color
-              grouped_color = get_item_color(current_item)
             end
           end
-          
+
           -- Only set color if we determined one to use
           if grouped_color then
             SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", grouped_color)
             UpdateItemInProject(current_item)
           end
-          
+
           update_take_name(current_item, rank)
         end
       end
@@ -1721,18 +1733,22 @@ function apply_rank_and_notes_to_items()
                   if is_colorized then
                     GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
                   end
-                  
+
                   GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
-                  local rank_index = tonumber(recording_rank)
-                  if rank_index and RANKS[rank_index] then
-                    local color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
-                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
-                    update_take_name(item, recording_rank)
+                  
+                  -- Apply rank color ONLY if color_pref == 0
+                  if color_pref == 0 then
+                    local rank_index = tonumber(recording_rank)
+                    if rank_index and RANKS[rank_index] then
+                      local color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+                      SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+                    end
                   end
+                  update_take_name(item, recording_rank)
                 else
-                  -- No rank - delete P_EXT state and only restore original color if NOT colorized
+                  -- No rank - delete P_EXT state and only restore original color if NOT colorized AND color_pref == 0
                   GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
-                  if not is_colorized then
+                  if not is_colorized and color_pref == 0 then
                     local color_to_use = get_item_color(item)
                     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
                   end
@@ -1787,18 +1803,22 @@ function apply_rank_and_notes_to_items()
                 if is_colorized then
                   GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
                 end
-                
+
                 GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
-                local rank_index = tonumber(recording_rank)
-                if rank_index and RANKS[rank_index] and color_pref == 0 then
-                  local color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
-                  SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
-                  update_take_name(item, recording_rank)
+                
+                -- Apply rank color ONLY if color_pref == 0
+                if color_pref == 0 then
+                  local rank_index = tonumber(recording_rank)
+                  if rank_index and RANKS[rank_index] then
+                    local color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+                  end
                 end
+                update_take_name(item, recording_rank)
               else
-                -- No rank - delete P_EXT state and only apply color if NOT colorized
+                -- No rank - delete P_EXT state and only apply color if NOT colorized AND color_pref == 0
                 GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
-                if not is_colorized then
+                if not is_colorized and color_pref == 0 then
                   local color_to_use
                   local take_num = tonumber(take_text)
                   if take_num then

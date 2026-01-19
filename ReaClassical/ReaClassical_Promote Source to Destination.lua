@@ -45,7 +45,7 @@ function main()
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
 
-    Undo_EndBlock('Make Source Group Destination', 0)
+    Undo_EndBlock('Make Source Group Destination', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
