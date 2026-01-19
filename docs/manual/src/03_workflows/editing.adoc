@@ -2,6 +2,16 @@
 
 In ReaClassical 26 and following, source-destination editing is truly anywhere to anywhere. This means you can place your source and destination marker pairs on _any_ folder. It opens the door to multi-disc album projects and more!
 
+==== Preparing Takes
+
+The Prepare Takes function is essential when working with inherited or pre-edited projects. Some projects also arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc. In addition, certain advanced ReaClassical functions like healing edits, rely on correct item grouping.
+
+IMPORTANT: Once all your takes are in the project, run Prepare Takes before starting to work with your audio.
+
+Prepare Takes is intelligent enough to figure out which workflow you are using. Just press kbd:[T] (for _Takes_) or press the dedicated button in Mission Control. Every item comprising the same take are now grouped together no matter whether they share a common item start or end time.
+
+TIP: Prepare Takes will automatically run on placing the first S-D marker in the project.
+
 ==== Editing Step-by-Step
 
 Ensure that the folder where you want to place the marker pair is selected. The best way to do this is to click on the item where you want the marker. Note that in kbd:[F5] preferences you can set placement at mouse hover meaning that the desired folder is chosen based on hover position.
@@ -63,14 +73,6 @@ This is best done using a physical, photocopied score by the conductor or lead m
 
 .Editing a physical score
 image::score-edits.png[Score Edits]
-
-===== When to Prepare Takes
-
-Although ReaClassical v26 no longer relies on REAPER’s item grouping for S-D editing and other functions, the Prepare Takes function is still essential when working with inherited or pre-edited projects. Some projects arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc.
-
-TIP: If items that should move, split, or fade together do not do so reliably, run Prepare Takes first.
-
-Prepare Takes is intelligent enough to figure out which workflow you are using. Just press kbd:[T] (for _Takes_) or press the dedicated button in Mission Control. Every item comprising the same take are now grouped together no matter whether they share a common item start or end time.
 
 ===== Multi-Project Tab S-D Editing
 
