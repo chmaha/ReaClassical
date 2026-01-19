@@ -900,7 +900,7 @@ function do_processing_step()
             -- This is just in case we need to do any final cleanup
         end
         
-        Undo_EndBlock('Prepare Takes', 0)
+        Undo_EndBlock('Prepare Takes', -1)
         processing_step = 112
         return false
     elseif processing_step == 112 then

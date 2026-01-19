@@ -50,7 +50,7 @@ function main()
     solo()
     Main_OnCommand(40289, 0) -- unselect all items
 
-    Undo_EndBlock('Move Destination Material to Source', 0)
+    Undo_EndBlock('Move Destination Material to Source', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
