@@ -41,6 +41,15 @@ if workflow == "" then
     return
 end
 
+-- Read preferences for auto_color_pref
+local auto_color_pref = 0
+local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+if input ~= "" then
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[5] then auto_color_pref = tonumber(table[5]) or 0 end
+end
+
 set_action_options(2)
 
 package.path = ImGui_GetBuiltinPath() .. '/?.lua'
@@ -301,7 +310,17 @@ function remove_custom_coloring()
         if item then
             local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
             if saved_color ~= "" then
-                local original_color = tonumber(saved_color) or 0
+                local original_color
+                
+                -- Check auto_color_pref setting
+                if auto_color_pref == 1 then
+                    -- When auto_color_pref is enabled, restore to default color (0)
+                    original_color = 0
+                else
+                    -- When auto_color_pref is disabled, restore to saved color
+                    original_color = tonumber(saved_color) or 0
+                end
+                
                 SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", original_color)
 
                 -- Clear saved color
