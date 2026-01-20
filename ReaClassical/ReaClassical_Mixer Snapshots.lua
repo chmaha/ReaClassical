@@ -67,8 +67,8 @@ local last_sort_direction     = nil
 local disable_auto_recall     = false
 local switch_mid_gap          = true -- Switch snapshots in the middle of gaps
 
--- Track restriction per bank
-local bank_track_guid         = nil -- Each bank is restricted to one track
+-- Track restriction per bank - REMOVED (now supports multiple tracks)
+local bank_track_guid         = nil -- Deprecated but kept for backwards compatibility
 
 -- Selective parameter recall flags (all enabled by default)
 local recall_volume           = true
@@ -294,29 +294,34 @@ function find_snapshot_with_gap_logic(cursor_pos)
     return find_snapshot_at_cursor(cursor_pos)
   end
 
-  -- Find all items on the bank's track sorted by position
-  local items = {}
+  -- Build list of ALL items in project (for gap calculation)
+  local all_items = {}
   for i = 0, CountMediaItems(0) - 1 do
     local item = GetMediaItem(0, i)
-    local item_track = GetMediaItem_Track(item)
-    local item_track_guid = GetTrackGUID(item_track)
+    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+    local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+    table.insert(all_items, { start = item_start, end_pos = item_end })
+  end
+  table.sort(all_items, function(a, b) return a.start < b.start end)
 
-    -- Only consider items on the bank's track
-    if not bank_track_guid or item_track_guid == bank_track_guid then
-      local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-      local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
-      local take = GetActiveTake(item)
-      local name = ""
-      if take then
-        _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-      end
-      table.insert(items, { item = item, start = item_start, end_pos = item_end, name = name })
+  -- Build list of items WITH snapshots (for snapshot lookup)
+  local snapshot_items = {}
+  for i = 0, CountMediaItems(0) - 1 do
+    local item = GetMediaItem(0, i)
+    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+    local take = GetActiveTake(item)
+    local name = ""
+    if take then
+      _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    end
+    if name and name ~= "" and find_snapshot_by_item_name(name) then
+      table.insert(snapshot_items, { item = item, start = item_start, name = name })
     end
   end
-  table.sort(items, function(a, b) return a.start < b.start end)
+  table.sort(snapshot_items, function(a, b) return a.start < b.start end)
 
-  -- Check if cursor is ON any item first
-  for _, item_data in ipairs(items) do
+  -- Check if cursor is ON any item (project-wide)
+  for _, item_data in ipairs(all_items) do
     if cursor_pos >= item_data.start and cursor_pos < item_data.end_pos then
       -- Cursor is on an item - use normal logic
       return find_snapshot_at_cursor(cursor_pos)
@@ -324,39 +329,61 @@ function find_snapshot_with_gap_logic(cursor_pos)
   end
 
   -- Cursor is in a GAP (not on any item)
-  -- Find the next item with a snapshot
+  -- Find the next snapshot item
   local next_snap = nil
-  local next_item_start = math.huge
-  for _, item_data in ipairs(items) do
-    if item_data.start > cursor_pos and item_data.name and item_data.name ~= "" then
-      local snap = find_snapshot_by_item_name(item_data.name)
+  local next_snap_item_start = math.huge
+  for _, snap_data in ipairs(snapshot_items) do
+    if snap_data.start > cursor_pos then
+      local snap = find_snapshot_by_item_name(snap_data.name)
       if snap then
         next_snap = snap
-        next_item_start = item_data.start
+        next_snap_item_start = snap_data.start
         break
       end
     end
   end
 
-  -- Find the end of the last item (any item) before cursor
-  local prev_item_end = -1
-  for i = #items, 1, -1 do
-    if items[i].end_pos <= cursor_pos then
-      prev_item_end = items[i].end_pos
+  -- Find the PREVIOUS snapshot item and its track
+  local prev_snap_track_guid = nil
+  for i = #snapshot_items, 1, -1 do
+    if snapshot_items[i].start <= cursor_pos then
+      local prev_snap = find_snapshot_by_item_name(snapshot_items[i].name)
+      local prev_item = get_item_by_guid(prev_snap.item_guid)
+      if prev_item then
+        local prev_track = GetMediaItem_Track(prev_item)
+        prev_snap_track_guid = GetTrackGUID(prev_track)
+      end
       break
     end
   end
 
-  -- Debug: print gap info
-  if next_snap and prev_item_end >= 0 then
-    local gap_mid = prev_item_end + (next_item_start - prev_item_end) / 2
+  -- Find the end of the LAST item on the same track as the previous snapshot
+  local prev_track_last_item_end = -1
+  if prev_snap_track_guid then
+    for i = 0, CountMediaItems(0) - 1 do
+      local item = GetMediaItem(0, i)
+      local item_track = GetMediaItem_Track(item)
+      local item_track_guid = GetTrackGUID(item_track)
+      
+      if item_track_guid == prev_snap_track_guid then
+        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local item_end = item_start + item_length
+        
+        -- Only consider items that end before the next snapshot starts
+        if item_end < next_snap_item_start and item_end > prev_track_last_item_end then
+          prev_track_last_item_end = item_end
+        end
+      end
+    end
   end
 
   -- If we have both a gap and a next snapshot, check midpoint
-  if next_snap and prev_item_end >= 0 and prev_item_end < next_item_start then
-    local gap_mid = prev_item_end + (next_item_start - prev_item_end) / 2
+  if next_snap and prev_track_last_item_end >= 0 and prev_track_last_item_end < next_snap_item_start then
+    local gap_mid = prev_track_last_item_end + (next_snap_item_start - prev_track_last_item_end) / 2
 
-    if cursor_pos >= gap_mid then
+    -- Only switch to next snapshot if cursor is past midpoint AND before the next snapshot item
+    if cursor_pos >= gap_mid and cursor_pos < next_snap_item_start then
       return next_snap
     end
   end
@@ -702,6 +729,14 @@ function draw_table()
       if ImGui.Selectable(ctx, tostring(i), selected_snapshot == snap) then
         selected_snapshot = snap
         recall_snapshot(snap)
+        -- FEATURE 2: Move edit cursor to item start if auto-recall is enabled
+        if not disable_auto_recall then
+          local item = get_item_by_guid(snap.item_guid)
+          if item then
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetEditCurPos(item_pos, true, true)
+          end
+        end
       end
       ImGui.PopID(ctx)
 
@@ -716,6 +751,14 @@ function draw_table()
       if ImGui.Selectable(ctx, display_name, selected_snapshot == snap) then
         selected_snapshot = snap
         recall_snapshot(snap)
+        -- FEATURE 2: Move edit cursor to item start if auto-recall is enabled
+        if not disable_auto_recall then
+          local item = get_item_by_guid(snap.item_guid)
+          if item then
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetEditCurPos(item_pos, true, true)
+          end
+        end
       end
       ImGui.PopID(ctx)
 
@@ -725,6 +768,14 @@ function draw_table()
       if ImGui.Selectable(ctx, snap.date .. " " .. snap.time, selected_snapshot == snap) then
         selected_snapshot = snap
         recall_snapshot(snap)
+        -- FEATURE 2: Move edit cursor to item start if auto-recall is enabled
+        if not disable_auto_recall then
+          local item = get_item_by_guid(snap.item_guid)
+          if item then
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetEditCurPos(item_pos, true, true)
+          end
+        end
       end
       ImGui.PopID(ctx)
 
@@ -751,6 +802,14 @@ function draw_table()
         if ImGui.Selectable(ctx, snap.notes, selected_snapshot == snap) then
           selected_snapshot = snap
           recall_snapshot(snap)
+          -- FEATURE 2: Move edit cursor to item start if auto-recall is enabled
+          if not disable_auto_recall then
+            local item = get_item_by_guid(snap.item_guid)
+            if item then
+              local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+              SetEditCurPos(item_pos, true, true)
+            end
+          end
         end
         ImGui.PopID(ctx)
         if ImGui.IsItemHovered(ctx) and ImGui.IsMouseDoubleClicked(ctx, 0) then
@@ -863,22 +922,9 @@ function draw_UI()
 
     if ImGui.Button(ctx, button_label) then
       if can_create then
-        -- Get the track of the selected item
+        -- FEATURE 3: Removed track restriction - items can be on any track
         local selected_item = GetSelectedMediaItem(0, 0)
         if selected_item then
-          local item_track = GetMediaItem_Track(selected_item)
-          local item_track_guid = GetTrackGUID(item_track)
-
-          -- Check if this is the first snapshot in the bank
-          if #snapshots == 0 then
-            bank_track_guid = item_track_guid
-          elseif bank_track_guid and bank_track_guid ~= item_track_guid then
-            -- Item is on wrong track
-            ShowMessageBox("All snapshots in a bank must be on the same track.\nThis item is on a different track.",
-              "Wrong Track", 0)
-            goto skip_snapshot_creation
-          end
-
           Undo_BeginBlock()
           local existing_snap = find_snapshot_by_item_name(item_name)
           if existing_snap then
@@ -904,9 +950,7 @@ function draw_UI()
           end
           save_snapshots_to_project()
           Undo_EndBlock("Set Mixer Snapshot", -1)
-
-          ::skip_snapshot_creation::
-        end -- close if selected_item
+        end
       end
     end
     if not can_create then ImGui.EndDisabled(ctx) end
@@ -941,10 +985,18 @@ function draw_UI()
       save_snapshots_to_project()
     end
     ImGui.SameLine(ctx); ImGui.Dummy(ctx, 10, 0); ImGui.SameLine(ctx)
+    
+    -- FEATURE 1: Grey out mid-gap checkbox when auto-recall is disabled
+    if disable_auto_recall then
+      ImGui.BeginDisabled(ctx)
+    end
     local rv_gap, new_gap = ImGui.Checkbox(ctx, "Switch mid-gap during playback", switch_mid_gap)
     if rv_gap then
       switch_mid_gap = new_gap
       save_snapshots_to_project()
+    end
+    if disable_auto_recall then
+      ImGui.EndDisabled(ctx)
     end
 
     ImGui.Separator(ctx)
