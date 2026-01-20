@@ -269,28 +269,20 @@ end
 
 function load_prefs()
     local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
-    if saved == "" then saved = default_values end
-
-    local saved_entries = {}
-
-    for entry in saved:gmatch('([^,]+)') do
-        saved_entries[#saved_entries + 1] = entry
+    
+    -- Reset to defaults if count mismatch or empty
+    if saved ~= "" then
+        local count = select(2, saved:gsub(",", ",")) + 1
+        if count ~= NUM_OF_ENTRIES then
+            saved = default_values
+        end
+    else
+        saved = default_values
     end
 
-    if #saved_entries < #labels then
-        local i = 1
-        for entry in default_values:gmatch("([^,]+)") do
-            if i == #saved_entries + 1 then
-                saved_entries[i] = entry
-            end
-            i = i + 1
-        end
-    elseif #saved_entries > #labels then
-        local j = 1
-        for entry in default_values:gmatch("([^,]+)") do
-            saved_entries[j] = entry
-            j = j + 1
-        end
+    local saved_entries = {}
+    for entry in saved:gmatch('([^,]+)') do
+        saved_entries[#saved_entries + 1] = entry
     end
 
     -- Load into prefs table
