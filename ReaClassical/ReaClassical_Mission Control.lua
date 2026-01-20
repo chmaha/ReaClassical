@@ -179,8 +179,12 @@ function main()
             aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
         end
     end
-    ImGui.SetNextWindowSize(ctx, 600, 0, ImGui.Cond_FirstUseEver)
-    local visible, open = ImGui.Begin(ctx, 'ReaClassical Mission Control', true, ImGui.WindowFlags_AlwaysAutoResize)
+    
+    local flags =
+  ImGui.WindowFlags_AlwaysAutoResize |
+  ImGui.WindowFlags_NoDocking
+
+    local visible, open = ImGui.Begin(ctx, 'ReaClassical Mission Control', true, flags)
 
     if visible then
         if not is_valid_project then
