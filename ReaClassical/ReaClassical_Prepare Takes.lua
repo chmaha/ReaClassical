@@ -949,6 +949,7 @@ function main()
         auto_close_timer = auto_close_timer + 1
         if auto_close_timer > (auto_close_delay * 30) then -- ~30 fps
             window_open = false
+            SetProjExtState(0, "ReaClassical", "Prepared_Takes", "y")
             return
         end
 

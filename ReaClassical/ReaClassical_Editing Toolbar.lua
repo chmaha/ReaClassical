@@ -204,8 +204,11 @@ function main()
     end
 end
 
-local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-Main_OnCommand(prepare_takes, 0)
+local _, prepared = GetProjExtState(0, "ReaClassical", "Prepared_Takes")
+if prepared == "" then
+    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    Main_OnCommand(prepare_takes, 0)
+end
 
 ---------------------------------------------------------------------
 
