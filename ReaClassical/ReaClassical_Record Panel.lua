@@ -26,7 +26,7 @@ local main, get_take_count, clean_up, parse_time, parse_duration, check_time, re
 local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
 local get_item_color, pastel_color, get_color_table, extract_take_from_filename
 local disarm_all_tracks, extract_session_from_filename, is_folder_parent_or_child
-local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled
+local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled, check_prefs
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -51,15 +51,20 @@ if workflow == "" then
   return
 end
 
-local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local auto_color_pref = 0
 local ranking_color_pref = 0
-if input ~= "" then
-  local table = {}
-  for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-  if table[5] then auto_color_pref = tonumber(table[5]) or 0 end
-  if table[6] then ranking_color_pref = tonumber(table[6]) or 0 end
+
+function check_prefs()
+  local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+  if input ~= "" then
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[5] then auto_color_pref = tonumber(table[5]) or 0 end
+    if table[6] then ranking_color_pref = tonumber(table[6]) or 0 end
+  end
 end
+
+check_prefs()
 
 set_action_options(2)
 
@@ -1000,6 +1005,7 @@ function draw(playstate)
   end
 
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
+    check_prefs()
     -- If pressing "Rec" and no track is selected but tracks are armed, select first armed track
     if rec_button_label == "Rec" and not selected_track and any_armed then
       for i = 0, num_tracks - 1 do
