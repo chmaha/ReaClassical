@@ -1,18 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.8
+@version 26.1.9
 @changelog
-  Preferences: Add extra coloring option
-  Preferences: Revise number of options check
-  Prepare Takes: Save run in project state
-  Editing toolbar: Only runs Prepare Takes if it has not been run already
-  Mission Control: Disable docking
-  Mixer Snapshots: Use named items as basis and remove unnecessary functionality
-  Automation: Complete rewrite of insert automation functionality
-  Mission Control: Allow mixer tracks to have direct connections to hardware outputs
-  RCPlugs: Add RCFader plugin
-  Mission Control: Add button to add/mirror fader values to RCFader (Fiedler Atmos helper)
-  Documentation: Various updates
+  Mission Control: Add Disable Atmos button to deactivate RCFader and Beam
+  Mission Control: Hide Atmos buttons if Beam plugin not installed on system
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
