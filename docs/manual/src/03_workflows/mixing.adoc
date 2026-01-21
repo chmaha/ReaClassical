@@ -34,7 +34,7 @@ image::automation.png[Automation Dialog]
 
 ==== Mixing for Dolby Atmos Using Fiedler Plugins
 
-Use the Mission Control btn:[Atmos Helper] to add RCFader plugins and Fiedler Beam plugins to every Mixer track as necessary. This will also pass the current mixer fader values to the RCFader plugin. Subsequent presses of the button will check presence of RCFader and Fiedler plugins, and relative position between them, and synchronize fader values. 
+If you have the Fiedler Beam plugin on your system, use the Mission Control btn:[Enable Atmos] that appears to add RCFader plugins and Fiedler Beam plugins to every Mixer track as necessary. This will also pass the current mixer fader values to the RCFader plugin. Subsequent presses of the button will check presence of RCFader and Fiedler plugins, and relative position between them, and synchronize fader values. Use btn:[Disable Atmos] to deactivate both RCFader and Fiedler Beam plugins on every mixer track.
 
 ==== Mixing with Outboard Gear
 
