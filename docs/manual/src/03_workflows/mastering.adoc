@@ -1,3 +1,4 @@
+[[mastering]]
 === Mastering
 
 Mastering in ReaClassical is game-changing. Many features described here are not available in any other classical DAW. I hope that the _ReaClassical_ way saves you much time and helps you look forward to the mastering phase of the project. While automatic DDP generation, automatic room tone function, and professional album reports are the main features here, you will probably find the revolutionary mixer snapshot manager is an extremely efficient way to add auto-recall mixer scenes across your production as well enjoying the ability to quickly reorder album tracks via a simple keyboard shortcuts.

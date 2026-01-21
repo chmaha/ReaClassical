@@ -9,7 +9,8 @@ S-D Crossfade Length (ms):: The xfade length for all S-D edit functions. Default
 CD Track Offset (ms):: The negative offset where CD markers are placed to the left of item starts. This is really for old CD players that could not process quick enough and skipped the start of audio. Default = 200ms.
 INDEX0 Length (s) (>= 1):: If you add an exclamation mark to your CD track name in the metadata editor window, a countdown of this set length will visually appear on some CD Players. Default = 3 seconds.
 Album Lead-out Time (s):: The amount of silence automatically set at the end of the album. Default = 7 seconds.
-No Item Coloring:: To remove all automatic coloring of items, set to checked. You can still color items manually via the Colorize function kbd:[K]. Default = unchecked.
+No Auto Item Coloring:: To remove all automatic coloring of items, set to checked. You can still color items manually via the Colorize function kbd:[K] or add ranking colors via Record Panel or Notes. Default = unchecked.
+No Ranking Color:: To remove all ranking colors, set to checked. You can still color items manually via the Colorize function kbd:[K]. Default = unchecked.
 S-D Marker Check (ms):: When placing destination markers, a check occurs to see if the marker would be placed close to an existing crossfade. This prevents unnecessary "sliver" edits. Set to 0 to disable. Default = 500ms.
 REF = Overdub Guide:: By default, the reference track acts as a way to A/B project material with an external reference audio file. To use as an overdub track see <<overdub>>. Default = unchecked.
 Add S-D Markers at Mouse Hover:: To avoid needing the track to be selected before placing S-D markers, set to checked. This also allows for opening the fade editor kbd:[F] by hover. Default = unchecked.

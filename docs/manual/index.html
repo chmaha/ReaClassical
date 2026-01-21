@@ -479,7 +479,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_auditioning_playback">Auditioning (Playback)</a></li>
 <li><a href="#_editing_2">Editing</a></li>
 <li><a href="#_mixing_2">Mixing</a></li>
-<li><a href="#_mastering_2">Mastering</a></li>
+<li><a href="#mastering">Mastering</a></li>
 <li><a href="#_rendering_2">Rendering</a></li>
 <li><a href="#_collaborating_with_video_editors">Collaborating with Video Editors</a></li>
 </ul>
@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-01-19 05:58:59 UTC</code></p>
+<p><code>Updated: 2026-01-21 19:08:10 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -908,6 +908,9 @@ Note that if the ReaClassical folder already exists, the installer will automati
 <li>
 <p>Convert between horizontal and vertical workflows</p>
 </li>
+<li>
+<p>Give mixer tracks direct connections to hardware outputs (if mixing using external gear)</p>
+</li>
 </ul>
 </div>
 <div class="admonitionblock warning">
@@ -1000,9 +1003,13 @@ Do not attempt to complete any of the above actions outside of Mission Control!
 <dd>
 <p>The amount of silence automatically set at the end of the album. Default = 7 seconds.</p>
 </dd>
-<dt class="hdlist1">No Item Coloring</dt>
+<dt class="hdlist1">No Auto Item Coloring</dt>
 <dd>
-<p>To remove all automatic coloring of items, set to checked. You can still color items manually via the Colorize function <kbd>K</kbd>. Default = unchecked.</p>
+<p>To remove all automatic coloring of items, set to checked. You can still color items manually via the Colorize function <kbd>K</kbd> or add ranking colors via Record Panel or Notes. Default = unchecked.</p>
+</dd>
+<dt class="hdlist1">No Ranking Color</dt>
+<dd>
+<p>To remove all ranking colors, set to checked. You can still color items manually via the Colorize function <kbd>K</kbd>. Default = unchecked.</p>
 </dd>
 <dt class="hdlist1">S-D Marker Check (ms)</dt>
 <dd>
@@ -1660,7 +1667,7 @@ A reminder to do all track management in Mission Control!
 <div class="sect3">
 <h4 id="_preparing_takes">Preparing Takes</h4>
 <div class="paragraph">
-<p>The Prepare Takes function is essential when working with inherited or pre-edited projects. Some projects also arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc. In addition, certain advanced ReaClassical functions like healing edits, rely on correct item grouping.</p>
+<p>The Prepare Takes function is essential when working with imported material. Additionally, some projects also arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc. In addition, certain advanced ReaClassical functions like healing edits, rely on correct item grouping.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -1684,7 +1691,7 @@ Once all your takes are in the project, run Prepare Takes before starting to wor
 <div class="title">Tip</div>
 </td>
 <td class="content">
-Prepare Takes will automatically run on placing the first S-D marker in the project.
+Prepare Takes will automatically run on placing the first S-D marker in the project if it hasn&#8217;t already been run once.
 </td>
 </tr>
 </table>
@@ -1887,21 +1894,23 @@ This works at any point in the editing process and isn&#8217;t restricted to the
 </div>
 <div class="sect2">
 <h3 id="_mixing_2">Mixing</h3>
+<div class="sect3">
+<h4 id="_mixing_scenes">Mixing Scenes</h4>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
 <p>Add FX, change routing, and optionally adjust volume, panning etc via Mission Control <kbd>C</kbd></p>
 </li>
 <li>
-<p>Open Mixing Snapshot Manager via <span class="keyseq"><kbd>Shift</kbd>+<kbd>M</kbd></span></p>
+<p>Open Mixer Snapshot Manager via <span class="keyseq"><kbd>Shift</kbd>+<kbd>M</kbd></span></p>
 </li>
 <li>
-<p>Create automatically-recalled mixer snapshots at edit cursor or inside time selection</p>
+<p>Create automatically-recalled mixer snapshots tied to named items (see the <a href="#mastering">Mastering</a> section for details of setting up album tracks)</p>
 </li>
 </ol>
 </div>
-<div class="sect3">
-<h4 id="_mixer_snapshot_manager_in_detail">Mixer Snapshot Manager in Detail</h4>
+<div class="sect4">
+<h5 id="_mixer_snapshot_manager_in_detail">Mixer Snapshot Manager in Detail</h5>
 <div class="imageblock">
 <div class="content">
 <img src="src/assets/mixer_snapshots.png" alt="Mixer Snapshot Manager">
@@ -1913,8 +1922,69 @@ This works at any point in the editing process and isn&#8217;t restricted to the
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_volume_automation">Volume Automation</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Ensure one or more "Destination" or "Source" folder tracks are selected</p>
+</li>
+<li>
+<p>Position edit cursor or create a time selection and press <kbd>I</kbd>. Edit cursor mode affects the time line position and everything following. Time selection mode is limited to the time selection bounds.</p>
+</li>
+<li>
+<p>Set volume level and optional ramp in/out lengths and click <b class="button">Apply Automation</b></p>
+</li>
+</ol>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/automation.png" alt="Automation Dialog">
+</div>
+<div class="title">Figure 16. Automation Dialog</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_general_mixing_workflow_suggestions">General Mixing Workflow Suggestions</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Set piece-by-piece "scenes" using the Mixer Snapshots Manager</p>
+</li>
+<li>
+<p>Make temporary volume adjustments to spot microphones etc via the automation function <kbd>I</kbd></p>
+</li>
+<li>
+<p>For spot microphones that should be otherwise muted, use mixer scenes to mute and for pieces that require some fader riding, unmute for those pieces:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Use a time selection + <kbd>I</kbd> to reduce to lowest value (-150dB/-inf) for the whole piece</p>
+</li>
+<li>
+<p>Use further time selections + <kbd>I</kbd> to set required values and any ramping in and out.</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_mixing_for_dolby_atmos_using_fiedler_plugins">Mixing for Dolby Atmos Using Fiedler Plugins</h4>
+<div class="paragraph">
+<p>Use the Mission Control <b class="button">RCFader Helper</b> to add RCFader plugins to every Mixer track just before any Fiedler Beam Plugins. This will also pass the current mixer fader values to the RCFader plugin. Subsequent presses of the button will check presence of RCFaders and relative position to the Fiedler plugin and synchronize fader values.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_mixing_with_outboard_gear">Mixing with Outboard Gear</h4>
+<div class="paragraph">
+<p>Use the Mission Control <b class="button">HW Outputs</b> to set direct connections to hardware either automatically or manually. If you do not need connections to RCMASTER, disable using the dedicated button in the main Mission Control window.</p>
+</div>
+</div>
+</div>
 <div class="sect2">
-<h3 id="_mastering_2">Mastering</h3>
+<h3 id="mastering">Mastering</h3>
 <div class="paragraph">
 <p>Mastering in ReaClassical is game-changing. Many features described here are not available in any other classical DAW. I hope that the <em>ReaClassical</em> way saves you much time and helps you look forward to the mastering phase of the project. While automatic DDP generation, automatic room tone function, and professional album reports are the main features here, you will probably find the revolutionary mixer snapshot manager is an extremely efficient way to add auto-recall mixer scenes across your production as well enjoying the ability to quickly reorder album tracks via a simple keyboard shortcuts.</p>
 </div>
@@ -1970,7 +2040,7 @@ In order to make the process as streamlined as possible for the user before the 
 <div class="content">
 <img src="src/assets/metadata_editor.png" alt="Metadata Editor">
 </div>
-<div class="title">Figure 16. Metadata Editor</div>
+<div class="title">Figure 17. Metadata Editor</div>
 </div>
 <div class="paragraph">
 <p>The metadata window allows you to enter all track and album metadata in a single place including automatic ISRC values based on the first track entry, and automatic album-wide performer, songwriter, composer and arranger values based on one or more entries in the track table. These can be overridden via the checkboxes.</p>
@@ -2017,7 +2087,7 @@ Check the "!" box for CD tracks that you would like to have a visual countdown (
 <div class="content">
 <img src="src/assets/html_album_report.png" alt="Example of HTML Album Report">
 </div>
-<div class="title">Figure 17. Example of HTML Album Report</div>
+<div class="title">Figure 18. Example of HTML Album Report</div>
 </div>
 <div class="paragraph">
 <p>To clear all offsets, run <span class="keyseq"><kbd>Alt</kbd>+<kbd>O</kbd></span>.</p>
@@ -2049,7 +2119,7 @@ Check the "!" box for CD tracks that you would like to have a visual countdown (
 <div class="content">
 <img src="src/assets/render.png" alt="Render Window">
 </div>
-<div class="title">Figure 18. Render Window</div>
+<div class="title">Figure 19. Render Window</div>
 </div>
 <div class="sect3">
 <h4 id="_presets">Presets</h4>
@@ -2151,7 +2221,7 @@ Check the "!" box for CD tracks that you would like to have a visual countdown (
 <div class="content">
 <img src="src/assets/build_edit_list.png" alt="Build Edit List">
 </div>
-<div class="title">Figure 19. An example edit list</div>
+<div class="title">Figure 20. An example edit list</div>
 </div>
 </div>
 </div>

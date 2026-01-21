@@ -1,12 +1,39 @@
 === Mixing
 
-1. Add FX, change routing, and optionally adjust volume, panning etc via Mission Control kbd:[C]
-2. Open Mixing Snapshot Manager via kbd:[Shift+M]
-3. Create automatically-recalled mixer snapshots at edit cursor or inside time selection
+==== Mixing Scenes
 
-==== Mixer Snapshot Manager in Detail
+1. Add FX, change routing, and optionally adjust volume, panning etc via Mission Control kbd:[C]
+2. Open Mixer Snapshot Manager via kbd:[Shift+M]
+3. Create automatically-recalled mixer snapshots tied to named items (see the <<mastering>> section for details of setting up album tracks)
+
+===== Mixer Snapshot Manager in Detail
 
 .Mixer Snapshot Manager
 image::mixer_snapshots.png[Mixer Snapshot Manager]
 
 Coming Soon...
+
+==== Volume Automation
+
+1. Ensure one or more "Destination" or "Source" folder tracks are selected
+2. Position edit cursor or create a time selection and press kbd:[I]. Edit cursor mode affects the time line position and everything following. Time selection mode is limited to the time selection bounds.
+3. Set volume level and optional ramp in/out lengths and click btn:[Apply Automation]
+
+.Automation Dialog
+image::automation.png[Automation Dialog]
+
+==== General Mixing Workflow Suggestions
+
+- Set piece-by-piece "scenes" using the Mixer Snapshots Manager
+- Make temporary volume adjustments to spot microphones etc via the automation function kbd:[I]
+- For spot microphones that should be otherwise muted, use mixer scenes to mute and for pieces that require some fader riding, unmute for those pieces:
+    1. Use a time selection + kbd:[I] to reduce to lowest value (-150dB/-inf) for the whole piece
+    2. Use further time selections + kbd:[I] to set required values and any ramping in and out.
+
+==== Mixing for Dolby Atmos Using Fiedler Plugins
+
+Use the Mission Control btn:[RCFader Helper] to add RCFader plugins to every Mixer track just before any Fiedler Beam Plugins. This will also pass the current mixer fader values to the RCFader plugin. Subsequent presses of the button will check presence of RCFaders and relative position to the Fiedler plugin and synchronize fader values. 
+
+==== Mixing with Outboard Gear
+
+Use the Mission Control btn:[HW Outputs] to set direct connections to hardware either automatically or manually. If you do not need connections to RCMASTER, disable using the dedicated button in the main Mission Control window.

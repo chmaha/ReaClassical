@@ -4,13 +4,13 @@ In ReaClassical 26 and following, source-destination editing is truly anywhere t
 
 ==== Preparing Takes
 
-The Prepare Takes function is essential when working with inherited or pre-edited projects. Some projects also arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc. In addition, certain advanced ReaClassical functions like healing edits, rely on correct item grouping.
+The Prepare Takes function is essential when working with imported material. Additionally, some projects also arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc. In addition, certain advanced ReaClassical functions like healing edits, rely on correct item grouping.
 
 IMPORTANT: Once all your takes are in the project, run Prepare Takes before starting to work with your audio.
 
 Prepare Takes is intelligent enough to figure out which workflow you are using. Just press kbd:[T] (for _Takes_) or press the dedicated button in Mission Control. Every item comprising the same take are now grouped together no matter whether they share a common item start or end time.
 
-TIP: Prepare Takes will automatically run on placing the first S-D marker in the project.
+TIP: Prepare Takes will automatically run on placing the first S-D marker in the project if it hasn't already been run once.
 
 ==== Editing Step-by-Step
 

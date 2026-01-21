@@ -36,6 +36,7 @@ Use this dialog to:
 - Delete a track from all folders
 - Re-order tracks in all folders
 - Convert between horizontal and vertical workflows
+- Give mixer tracks direct connections to hardware outputs (if mixing using external gear)
 
 WARNING: Do not attempt to complete any of the above actions outside of Mission Control!
 
