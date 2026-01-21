@@ -35,6 +35,7 @@ local format_pan, sync, auto_assign, reorder_track, delete_mixer_track
 local add_mixer_track, init, draw_track_controls, draw_folder_browser
 local get_directories, normalize_path, get_parent_path, split_path
 local consolidate_folders_to_first, get_hardware_outputs
+local check_dolby_atmos_beam_available
 
 ---------------------------------------------------------------------
 
@@ -79,6 +80,8 @@ local folder_tracks = {}
 local folder_tcp_visible = {}
 local hardware_outputs = {}
 local pending_hw_routing_changes = {}
+local has_dolby_atmos_beam = false
+
 
 set_action_options(2)
 
@@ -796,132 +799,159 @@ function main()
             end
         end
 
-        -- Fiedler button (ensures RCFader and Fiedler are in correct order and syncs values)
-        ImGui.SameLine(ctx)
-        if ImGui.Button(ctx, "Atmos Helper") then
-            -- Process each track: ensure RCFader is before Fiedler
-            for i = 1, #mixer_tracks do
-                local track_info = mixer_tracks[i]
-                local track = track_info.mixer_track
+        -- Atmos Helper button (ensures RCFader and Fiedler are in correct order, syncs values, and enables them)
+        if has_dolby_atmos_beam then
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Enable Atmos") then
+                -- Process each track: ensure RCFader is before Fiedler
+                for i = 1, #mixer_tracks do
+                    local track_info = mixer_tracks[i]
+                    local track = track_info.mixer_track
 
-                local fx_count = TrackFX_GetCount(track)
-                local rcfader_idx = nil
-                local fiedler_idx = nil
+                    local fx_count = TrackFX_GetCount(track)
+                    local rcfader_idx = nil
+                    local fiedler_idx = nil
 
-                -- Find both plugins
-                for fx_idx = 0, fx_count - 1 do
-                    local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
-                    if fx_name:match("RCFader") then
-                        rcfader_idx = fx_idx
-                    elseif fx_name:match("VST3: Dolby Atmos Beam") then
-                        fiedler_idx = fx_idx
-                    end
-                end
-
-                -- Handle RCFader positioning
-                local needs_rcfader_action = false
-                if not rcfader_idx then
-                    -- RCFader doesn't exist - need to add it
-                    needs_rcfader_action = true
-                elseif fiedler_idx and rcfader_idx > fiedler_idx then
-                    -- RCFader exists but is AFTER Fiedler - need to move it
-                    needs_rcfader_action = true
-                    -- Delete the misplaced RCFader first
-                    TrackFX_Delete(track, rcfader_idx)
-                end
-
-                if needs_rcfader_action then
-                    -- Refresh count after potential deletion
-                    fx_count = TrackFX_GetCount(track)
-                    fiedler_idx = nil
-
-                    -- Find Fiedler again
+                    -- Find both plugins
                     for fx_idx = 0, fx_count - 1 do
                         local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
-                        if fx_name:match("VST3: Dolby Atmos Beam") then
+                        if fx_name:match("RCFader") then
+                            rcfader_idx = fx_idx
+                        elseif fx_name:match("VST3: Dolby Atmos Beam") then
                             fiedler_idx = fx_idx
-                            break
                         end
                     end
 
-                    -- Add RCFader
-                    if fiedler_idx then
-                        -- Insert before Fiedler
-                        TrackFX_AddByName(track, "JS:RCFader", false, -1000 - fiedler_idx)
-                    else
-                        -- Add at end if no Fiedler found (we'll add Fiedler next)
-                        TrackFX_AddByName(track, "JS:RCFader", false, -1)
+                    -- Handle RCFader positioning
+                    local needs_rcfader_action = false
+                    if not rcfader_idx then
+                        -- RCFader doesn't exist - need to add it
+                        needs_rcfader_action = true
+                    elseif fiedler_idx and rcfader_idx > fiedler_idx then
+                        -- RCFader exists but is AFTER Fiedler - need to move it
+                        needs_rcfader_action = true
+                        -- Delete the misplaced RCFader first
+                        TrackFX_Delete(track, rcfader_idx)
                     end
-                end
 
-                -- Now ensure Fiedler exists and is after RCFader
-                fx_count = TrackFX_GetCount(track)
-                rcfader_idx = nil
-                fiedler_idx = nil
+                    if needs_rcfader_action then
+                        -- Refresh count after potential deletion
+                        fx_count = TrackFX_GetCount(track)
+                        fiedler_idx = nil
 
-                -- Find both plugins again
-                for fx_idx = 0, fx_count - 1 do
-                    local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
-                    if fx_name:match("RCFader") then
-                        rcfader_idx = fx_idx
-                    elseif fx_name:match("VST3: Dolby Atmos Beam") then
-                        fiedler_idx = fx_idx
-                    end
-                end
+                        -- Find Fiedler again
+                        for fx_idx = 0, fx_count - 1 do
+                            local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+                            if fx_name:match("VST3: Dolby Atmos Beam") then
+                                fiedler_idx = fx_idx
+                                break
+                            end
+                        end
 
-                -- Add Fiedler if missing
-                if not fiedler_idx then
-                    if rcfader_idx then
-                        -- Add Fiedler right after RCFader
-                        TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false, -1000 - (rcfader_idx + 1))
-                    else
-                        -- This shouldn't happen, but add at end as fallback
-                        TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false, -1)
-                    end
-                end
-            end
-
-            -- ALWAYS sync values after ensuring correct positioning
-            for i = 1, #mixer_tracks do
-                local track_info = mixer_tracks[i]
-                local track = track_info.mixer_track
-
-                -- Find RCFader
-                local fx_count = TrackFX_GetCount(track)
-                for fx_idx = 0, fx_count - 1 do
-                    local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
-                    if fx_name:match("RCFader") then
-                        -- Get track volume in dB
-                        local vol_linear = GetMediaTrackInfo_Value(track, "D_VOL")
-                        local vol_db
-
-                        -- Handle -inf (very small linear values)
-                        if vol_linear < 0.00000001 then
-                            vol_db = -150 -- Set to minimum
+                        -- Add RCFader
+                        if fiedler_idx then
+                            -- Insert before Fiedler
+                            TrackFX_AddByName(track, "JS:RCFader", false, -1000 - fiedler_idx)
                         else
-                            vol_db = 20 * math.log(vol_linear, 10)
+                            -- Add at end if no Fiedler found (we'll add Fiedler next)
+                            TrackFX_AddByName(track, "JS:RCFader", false, -1)
                         end
+                    end
 
-                        -- Clamp to RCFader's range (-150dB to +12dB)
-                        vol_db = math.max(-150, math.min(12, vol_db))
+                    -- Now ensure Fiedler exists and is after RCFader
+                    fx_count = TrackFX_GetCount(track)
+                    rcfader_idx = nil
+                    fiedler_idx = nil
 
-                        -- Round to 0.01 dB (RCFader's step)
-                        vol_db = math.floor(vol_db * 100 + 0.5) / 100
+                    -- Find both plugins again
+                    for fx_idx = 0, fx_count - 1 do
+                        local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+                        if fx_name:match("RCFader") then
+                            rcfader_idx = fx_idx
+                        elseif fx_name:match("VST3: Dolby Atmos Beam") then
+                            fiedler_idx = fx_idx
+                        end
+                    end
 
-                        -- Set the parameter directly with the dB value
-                        TrackFX_SetParam(track, fx_idx, 0, vol_db)
+                    -- Add Fiedler if missing
+                    if not fiedler_idx then
+                        if rcfader_idx then
+                            -- Add Fiedler right after RCFader
+                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false,
+                                -1000 - (rcfader_idx + 1))
+                        else
+                            -- This shouldn't happen, but add at end as fallback
+                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false, -1)
+                        end
+                    end
+                end
 
-                        break
+                -- ALWAYS sync values and enable plugins after ensuring correct positioning
+                for i = 1, #mixer_tracks do
+                    local track_info = mixer_tracks[i]
+                    local track = track_info.mixer_track
+
+                    -- Find RCFader and Dolby Atmos Beam to sync and enable
+                    local fx_count = TrackFX_GetCount(track)
+                    for fx_idx = 0, fx_count - 1 do
+                        local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+
+                        if fx_name:match("RCFader") then
+                            -- Get track volume in dB
+                            local vol_linear = GetMediaTrackInfo_Value(track, "D_VOL")
+                            local vol_db
+
+                            -- Handle -inf (very small linear values)
+                            if vol_linear < 0.00000001 then
+                                vol_db = -150 -- Set to minimum
+                            else
+                                vol_db = 20 * math.log(vol_linear, 10)
+                            end
+
+                            -- Clamp to RCFader's range (-150dB to +12dB)
+                            vol_db = math.max(-150, math.min(12, vol_db))
+
+                            -- Round to 0.01 dB (RCFader's step)
+                            vol_db = math.floor(vol_db * 100 + 0.5) / 100
+
+                            -- Set the parameter directly with the dB value
+                            TrackFX_SetParam(track, fx_idx, 0, vol_db)
+
+                            -- Enable RCFader
+                            TrackFX_SetEnabled(track, fx_idx, true)
+                        elseif fx_name:match("VST3: Dolby Atmos Beam") then
+                            -- Enable Dolby Atmos Beam
+                            TrackFX_SetEnabled(track, fx_idx, true)
+                        end
+                    end
+                end
+
+                sync_needed = true
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Setup RCFader→Dolby Atmos Beam, sync fader values, and enable plugins")
+            end
+
+            -- Disable Atmos button
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Disable Atmos") then
+                for i = 1, #mixer_tracks do
+                    local track = mixer_tracks[i].mixer_track
+                    local fx_count = TrackFX_GetCount(track)
+
+                    -- Find and disable both RCFader and Dolby Atmos Beam
+                    for fx_idx = 0, fx_count - 1 do
+                        local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+                        if fx_name:match("RCFader") or fx_name:match("VST3: Dolby Atmos Beam") then
+                            TrackFX_SetEnabled(track, fx_idx, false)
+                        end
                     end
                 end
             end
-
-            sync_needed = true
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Disable RCFader and Dolby Atmos Beam on all mixer tracks")
+            end
         end
-        if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Ensure RCFader→Dolby Atmos Beam order and sync fader values")
-        end
-
         -- Hardware names toggle button
         ImGui.SameLine(ctx)
         local btn_label = show_hardware_names and "Ch #" or "HW"
@@ -2628,6 +2658,7 @@ function init()
         aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
     end
     is_valid_project = true
+    has_dolby_atmos_beam = check_dolby_atmos_beam_available()
     return true
 end
 
@@ -3855,6 +3886,32 @@ function get_hardware_outputs(mixer_track)
     end
 
     return outputs
+end
+
+---------------------------------------------------------------------
+
+function check_dolby_atmos_beam_available()
+    -- Get REAPER resource path
+    local resource_path = GetResourcePath()
+    local ini_file = resource_path .. os_separator .. "reaper-vstplugins64.ini"
+
+    -- Try to open the file
+    local file = io.open(ini_file, "r")
+    if not file then
+        return false
+    end
+
+    -- Search for the plugin
+    local found = false
+    for line in file:lines() do
+        if line:match("Dolby Atmos Beam") then
+            found = true
+            break
+        end
+    end
+
+    file:close()
+    return found
 end
 
 ---------------------------------------------------------------------
