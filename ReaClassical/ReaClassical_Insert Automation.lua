@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, apply_volume_automation, linear_to_db, db_to_linear, get_envelope_value_at_time
-local format_time
+local format_time, get_selected_tracks
 
 ---------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ local window_open         = true
 local DEFAULT_W           = 400
 local DEFAULT_H           = 180
 
-local selected_track      = nil
+local selected_tracks     = {}
 local volume_db           = 0.0
 local ramp_in             = 0.0
 local ramp_out            = 0.0
@@ -67,9 +67,21 @@ local end_time            = 0
 local last_cursor_pos     = nil
 local last_time_sel_start = nil
 local last_time_sel_end   = nil
+local last_track_count    = 0
 
 -- Reset flag for double-click
 local volume_reset        = false
+
+---------------------------------------------------------------------
+
+function get_selected_tracks()
+  local tracks = {}
+  local count = CountSelectedTracks(0)
+  for i = 0, count - 1 do
+    tracks[#tracks + 1] = GetSelectedTrack(0, i)
+  end
+  return tracks
+end
 
 ---------------------------------------------------------------------
 
@@ -117,16 +129,7 @@ end
 ---------------------------------------------------------------------
 
 function apply_volume_automation()
-  if not selected_track then return end
-
-  -- Get or create volume envelope
-  local vol_env = GetTrackEnvelopeByName(selected_track, "Volume")
-  if not vol_env then
-    -- Create volume envelope if it doesn't exist
-    Main_OnCommand(40406, 0)     -- Track: Toggle track volume envelope visible
-    vol_env = GetTrackEnvelopeByName(selected_track, "Volume")
-    if not vol_env then return end
-  end
+  if #selected_tracks == 0 then return end
 
   -- Convert dB to linear
   local vol_linear = db_to_linear(volume_db)
@@ -134,145 +137,165 @@ function apply_volume_automation()
   -- Scale to envelope mode for insertion
   local vol_scaled = ScaleToEnvelopeMode(1, vol_linear)
 
-  if has_time_sel and (start_time ~= end_time) then
-    -- Time selection mode with ramps OUTSIDE the selection
-    local actual_start = start_time
-    local actual_end = end_time
+  -- Apply to each selected track
+  for _, track in ipairs(selected_tracks) do
+    -- Get or create volume envelope
+    local vol_env = GetTrackEnvelopeByName(track, "Volume")
+    if not vol_env then
+      -- Create volume envelope if it doesn't exist
+      SetOnlyTrackSelected(track)
+      Main_OnCommand(40406, 0)     -- Track: Toggle track volume envelope visible
+      vol_env = GetTrackEnvelopeByName(track, "Volume")
+      if not vol_env then goto continue end
+    end
 
-    -- Calculate ramp start/end times OUTSIDE the time selection
-    local ramp_in_start = actual_start - ramp_in
-    local ramp_out_end = actual_end + ramp_out
+    if has_time_sel and (start_time ~= end_time) then
+      -- Time selection mode with ramps OUTSIDE the selection
+      local actual_start = start_time
+      local actual_end = end_time
 
-    -- Get volume values at boundaries BEFORE deleting anything
-    local vol_before, vol_after
+      -- Calculate ramp start/end times OUTSIDE the time selection
+      local ramp_in_start = actual_start - ramp_in
+      local ramp_out_end = actual_end + ramp_out
 
-    if ramp_in > 0 then
-      vol_before = get_envelope_value_at_time(vol_env, ramp_in_start)
-      if not vol_before or vol_before <= 0 then
-        vol_before = GetMediaTrackInfo_Value(selected_track, "D_VOL")
+      -- Get volume values at boundaries BEFORE deleting anything
+      local vol_before, vol_after
+
+      if ramp_in > 0 then
+        vol_before = get_envelope_value_at_time(vol_env, ramp_in_start)
+        if not vol_before or vol_before <= 0 then
+          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        end
+      else
+        -- No ramp in - get value just before selection start for sudden dip
+        vol_before = get_envelope_value_at_time(vol_env, actual_start - 0.001)
+        if not vol_before or vol_before <= 0 then
+          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        end
+      end
+
+      if ramp_out > 0 then
+        vol_after = get_envelope_value_at_time(vol_env, ramp_out_end)
+        if not vol_after or vol_after <= 0 then
+          vol_after = GetMediaTrackInfo_Value(track, "D_VOL")
+        end
+      else
+        -- No ramp out - get value just after selection end for sudden dip
+        vol_after = get_envelope_value_at_time(vol_env, actual_end + 0.001)
+        if not vol_after or vol_after <= 0 then
+          vol_after = GetMediaTrackInfo_Value(track, "D_VOL")
+        end
+      end
+
+      -- Scale the before/after values for insertion
+      local vol_before_scaled = ScaleToEnvelopeMode(1, vol_before)
+      local vol_after_scaled = ScaleToEnvelopeMode(1, vol_after)
+
+      -- Clear existing points in the entire range including ramps
+      local clear_start = ramp_in > 0 and ramp_in_start or (actual_start - 0.002)
+      local clear_end = ramp_out > 0 and ramp_out_end or (actual_end + 0.002)
+      DeleteEnvelopePointRange(vol_env, clear_start - 0.001, clear_end + 0.001)
+
+      -- Add points based on ramp settings (using scaled values)
+      if ramp_in > 0 then
+        -- Gradual ramp in
+        InsertEnvelopePoint(vol_env, ramp_in_start, vol_before_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(vol_env, actual_start, vol_scaled, 0, 0, false, true)
+      else
+        -- Sudden dip - add point just before to maintain previous value
+        InsertEnvelopePoint(vol_env, actual_start - 0.001, vol_before_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(vol_env, actual_start, vol_scaled, 0, 0, false, true)
+      end
+
+      if ramp_out > 0 then
+        -- Gradual ramp out
+        InsertEnvelopePoint(vol_env, actual_end, vol_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(vol_env, ramp_out_end, vol_after_scaled, 0, 0, false, true)
+      else
+        -- Sudden rise - add point just after to return to previous value
+        InsertEnvelopePoint(vol_env, actual_end, vol_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(vol_env, actual_end + 0.001, vol_after_scaled, 0, 0, false, true)
       end
     else
-      -- No ramp in - get value just before selection start for sudden dip
-      vol_before = get_envelope_value_at_time(vol_env, actual_start - 0.001)
-      if not vol_before or vol_before <= 0 then
-        vol_before = GetMediaTrackInfo_Value(selected_track, "D_VOL")
+      -- Edit cursor mode with optional ramp in
+      local cursor_pos = GetCursorPosition()
+
+      -- Calculate ramp start time BEFORE cursor
+      local ramp_start = cursor_pos - ramp_in
+
+      -- Get volume value BEFORE deleting anything
+      local vol_before
+      if ramp_in > 0 then
+        vol_before = get_envelope_value_at_time(vol_env, ramp_start)
+        if not vol_before or vol_before <= 0 then
+          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        end
+      else
+        -- No ramp - get value just before cursor for sudden dip
+        vol_before = get_envelope_value_at_time(vol_env, cursor_pos - 0.001)
+        if not vol_before or vol_before <= 0 then
+          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        end
+      end
+
+      -- Scale the before value for insertion
+      local vol_before_scaled = ScaleToEnvelopeMode(1, vol_before)
+
+      -- Delete existing points from ramp start (or just before cursor) onwards
+      local num_points = CountEnvelopePoints(vol_env)
+      local delete_from = ramp_in > 0 and ramp_start or (cursor_pos - 0.002)
+      for i = num_points - 1, 0, -1 do
+        local retval, time = GetEnvelopePoint(vol_env, i)
+        if time >= delete_from then
+          DeleteEnvelopePointEx(vol_env, -1, i)
+        end
+      end
+
+      -- Insert new points (using scaled values)
+      if ramp_in > 0 then
+        -- Gradual ramp in before cursor
+        InsertEnvelopePoint(vol_env, ramp_start, vol_before_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(vol_env, cursor_pos, vol_scaled, 0, 0, false, true)
+      else
+        -- Sudden dip - add point just before cursor to maintain previous value
+        InsertEnvelopePoint(vol_env, cursor_pos - 0.001, vol_before_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(vol_env, cursor_pos, vol_scaled, 0, 0, false, true)
       end
     end
 
-    if ramp_out > 0 then
-      vol_after = get_envelope_value_at_time(vol_env, ramp_out_end)
-      if not vol_after or vol_after <= 0 then
-        vol_after = GetMediaTrackInfo_Value(selected_track, "D_VOL")
-      end
-    else
-      -- No ramp out - get value just after selection end for sudden dip
-      vol_after = get_envelope_value_at_time(vol_env, actual_end + 0.001)
-      if not vol_after or vol_after <= 0 then
-        vol_after = GetMediaTrackInfo_Value(selected_track, "D_VOL")
-      end
-    end
-
-    -- Scale the before/after values for insertion
-    local vol_before_scaled = ScaleToEnvelopeMode(1, vol_before)
-    local vol_after_scaled = ScaleToEnvelopeMode(1, vol_after)
-
-    -- Clear existing points in the entire range including ramps
-    local clear_start = ramp_in > 0 and ramp_in_start or (actual_start - 0.002)
-    local clear_end = ramp_out > 0 and ramp_out_end or (actual_end + 0.002)
-    DeleteEnvelopePointRange(vol_env, clear_start - 0.001, clear_end + 0.001)
-
-    -- Add points based on ramp settings (using scaled values)
-    if ramp_in > 0 then
-      -- Gradual ramp in
-      InsertEnvelopePoint(vol_env, ramp_in_start, vol_before_scaled, 0, 0, false, true)
-      InsertEnvelopePoint(vol_env, actual_start, vol_scaled, 0, 0, false, true)
-    else
-      -- Sudden dip - add point just before to maintain previous value
-      InsertEnvelopePoint(vol_env, actual_start - 0.001, vol_before_scaled, 0, 0, false, true)
-      InsertEnvelopePoint(vol_env, actual_start, vol_scaled, 0, 0, false, true)
-    end
-
-    if ramp_out > 0 then
-      -- Gradual ramp out
-      InsertEnvelopePoint(vol_env, actual_end, vol_scaled, 0, 0, false, true)
-      InsertEnvelopePoint(vol_env, ramp_out_end, vol_after_scaled, 0, 0, false, true)
-    else
-      -- Sudden rise - add point just after to return to previous value
-      InsertEnvelopePoint(vol_env, actual_end, vol_scaled, 0, 0, false, true)
-      InsertEnvelopePoint(vol_env, actual_end + 0.001, vol_after_scaled, 0, 0, false, true)
-    end
-  else
-    -- Edit cursor mode with optional ramp in
-    local cursor_pos = GetCursorPosition()
-
-    -- Calculate ramp start time BEFORE cursor
-    local ramp_start = cursor_pos - ramp_in
-
-    -- Get volume value BEFORE deleting anything
-    local vol_before
-    if ramp_in > 0 then
-      vol_before = get_envelope_value_at_time(vol_env, ramp_start)
-      if not vol_before or vol_before <= 0 then
-        vol_before = GetMediaTrackInfo_Value(selected_track, "D_VOL")
-      end
-    else
-      -- No ramp - get value just before cursor for sudden dip
-      vol_before = get_envelope_value_at_time(vol_env, cursor_pos - 0.001)
-      if not vol_before or vol_before <= 0 then
-        vol_before = GetMediaTrackInfo_Value(selected_track, "D_VOL")
-      end
-    end
-
-    -- Scale the before value for insertion
-    local vol_before_scaled = ScaleToEnvelopeMode(1, vol_before)
-
-    -- Delete existing points from ramp start (or just before cursor) onwards
-    local num_points = CountEnvelopePoints(vol_env)
-    local delete_from = ramp_in > 0 and ramp_start or (cursor_pos - 0.002)
-    for i = num_points - 1, 0, -1 do
-      local retval, time = GetEnvelopePoint(vol_env, i)
-      if time >= delete_from then
-        DeleteEnvelopePointEx(vol_env, -1, i)
-      end
-    end
-
-    -- Insert new points (using scaled values)
-    if ramp_in > 0 then
-      -- Gradual ramp in before cursor
-      InsertEnvelopePoint(vol_env, ramp_start, vol_before_scaled, 0, 0, false, true)
-      InsertEnvelopePoint(vol_env, cursor_pos, vol_scaled, 0, 0, false, true)
-    else
-      -- Sudden dip - add point just before cursor to maintain previous value
-      InsertEnvelopePoint(vol_env, cursor_pos - 0.001, vol_before_scaled, 0, 0, false, true)
-      InsertEnvelopePoint(vol_env, cursor_pos, vol_scaled, 0, 0, false, true)
-    end
+    Envelope_SortPoints(vol_env)
+    
+    ::continue::
   end
-
-  Envelope_SortPoints(vol_env)
+  
   UpdateArrange()
 end
 
 ---------------------------------------------------------------------
 
 function main()
-  -- Check for selected track
-  local track = GetSelectedTrack(0, 0)
+  -- Get currently selected tracks
+  local tracks = get_selected_tracks()
+  local track_count = #tracks
 
   -- Get current cursor and time selection
   local current_cursor = GetCursorPosition()
   local ts_start, ts_end = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
   local current_has_time_sel = (ts_start ~= ts_end)
 
-  -- Detect if track changed
-  if track ~= selected_track then
-    selected_track = track
+  -- Detect if track selection changed
+  if track_count ~= last_track_count or 
+     (track_count > 0 and tracks[1] ~= selected_tracks[1]) then
+    selected_tracks = tracks
+    last_track_count = track_count
     last_cursor_pos = current_cursor
     last_time_sel_start = ts_start
     last_time_sel_end = ts_end
 
-    if track then
-      -- Get current volume at cursor or time selection start
-      local vol_env = GetTrackEnvelopeByName(track, "Volume")
+    if track_count > 0 then
+      -- Get current volume at cursor or time selection start from first track
+      local first_track = tracks[1]
+      local vol_env = GetTrackEnvelopeByName(first_track, "Volume")
       local query_time = current_has_time_sel and ts_start or current_cursor
 
       if vol_env then
@@ -280,24 +303,25 @@ function main()
         if env_val and env_val > 0 then
           volume_db = linear_to_db(env_val)
         else
-          local vol = GetMediaTrackInfo_Value(track, "D_VOL")
+          local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
           volume_db = linear_to_db(vol)
         end
       else
-        local vol = GetMediaTrackInfo_Value(track, "D_VOL")
+        local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
         volume_db = linear_to_db(vol)
       end
     end
     -- Detect if cursor or time selection changed
-  elseif track and (current_cursor ~= last_cursor_pos or
+  elseif track_count > 0 and (current_cursor ~= last_cursor_pos or
         ts_start ~= last_time_sel_start or
         ts_end ~= last_time_sel_end) then
     last_cursor_pos = current_cursor
     last_time_sel_start = ts_start
     last_time_sel_end = ts_end
 
-    -- Update volume based on new position
-    local vol_env = GetTrackEnvelopeByName(track, "Volume")
+    -- Update volume based on new position from first track
+    local first_track = tracks[1]
+    local vol_env = GetTrackEnvelopeByName(first_track, "Volume")
     local query_time = current_has_time_sel and ts_start or current_cursor
 
     if vol_env then
@@ -305,11 +329,11 @@ function main()
       if env_val and env_val > 0 then
         volume_db = linear_to_db(env_val)
       else
-        local vol = GetMediaTrackInfo_Value(track, "D_VOL")
+        local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
         volume_db = linear_to_db(vol)
       end
     else
-      local vol = GetMediaTrackInfo_Value(track, "D_VOL")
+      local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
       volume_db = linear_to_db(vol)
     end
   end
@@ -325,16 +349,36 @@ function main()
     window_open = open_ref
 
     if opened then
-      if not selected_track then
-        ImGui.TextWrapped(ctx, "Please select a track to apply volume automation.")
+      if #selected_tracks == 0 then
+        ImGui.TextWrapped(ctx, "Please select one or more tracks to apply volume automation.")
       else
-        local _, track_name = GetSetMediaTrackInfo_String(selected_track, "P_NAME", "", false)
-        if track_name == "" then
-          local track_num = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER")
-          track_name = "Track " .. math.floor(track_num)
+        -- Display selected tracks
+        if #selected_tracks == 1 then
+          local _, track_name = GetSetMediaTrackInfo_String(selected_tracks[1], "P_NAME", "", false)
+          if track_name == "" then
+            local track_num = GetMediaTrackInfo_Value(selected_tracks[1], "IP_TRACKNUMBER")
+            track_name = "Track " .. math.floor(track_num)
+          end
+          ImGui.Text(ctx, "Selected Track: " .. track_name)
+        else
+          ImGui.Text(ctx, "Selected Tracks: " .. #selected_tracks)
+          if ImGui.IsItemHovered(ctx) then
+            -- Build tooltip with track names
+            local tooltip = ""
+            for i, track in ipairs(selected_tracks) do
+              local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+              if track_name == "" then
+                local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+                track_name = "Track " .. math.floor(track_num)
+              end
+              tooltip = tooltip .. track_name
+              if i < #selected_tracks then
+                tooltip = tooltip .. "\n"
+              end
+            end
+            ImGui.SetTooltip(ctx, tooltip)
+          end
         end
-
-        ImGui.Text(ctx, "Selected Track: " .. track_name)
         ImGui.Separator(ctx)
 
         -- Volume slider
