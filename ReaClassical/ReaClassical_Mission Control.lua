@@ -34,7 +34,7 @@ local get_current_input_info, apply_input_selection, rename_tracks
 local format_pan, sync, auto_assign, reorder_track, delete_mixer_track
 local add_mixer_track, init, draw_track_controls, draw_folder_browser
 local get_directories, normalize_path, get_parent_path, split_path
-local consolidate_folders_to_first
+local consolidate_folders_to_first, get_hardware_outputs
 
 ---------------------------------------------------------------------
 
@@ -77,6 +77,8 @@ local TRACKS_PER_TAB = 8
 local aux_submix_tcp_visible = {}
 local folder_tracks = {}
 local folder_tcp_visible = {}
+local hardware_outputs = {}
+local pending_hw_routing_changes = {}
 
 set_action_options(2)
 
@@ -179,10 +181,10 @@ function main()
             aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
         end
     end
-    
+
     local flags =
-  ImGui.WindowFlags_AlwaysAutoResize |
-  ImGui.WindowFlags_NoDocking
+        ImGui.WindowFlags_AlwaysAutoResize |
+        ImGui.WindowFlags_NoDocking
 
     local visible, open = ImGui.Begin(ctx, 'ReaClassical Mission Control', true, flags)
 
@@ -438,6 +440,360 @@ function main()
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx,
                 "Auto-assign inputs based on track names\n(pair/stereo = stereo, left/right = mono with pan)")
+        end
+
+        -- Auto assign hardware outputs button
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "HW Outputs") then
+            ImGui.OpenPopup(ctx, "HW Outputs Selection")
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Route mixer tracks directly to hardware outputs")
+        end
+
+        -- Hardware outputs popup
+        if ImGui.BeginPopupModal(ctx, "HW Outputs Selection", true, ImGui.WindowFlags_AlwaysAutoResize) then
+            ImGui.Text(ctx, "Route mixer tracks directly to hardware outputs:")
+            ImGui.Separator(ctx)
+
+            local max_hw_outs = GetNumAudioOutputs()
+
+            -- Initialize pending changes if needed
+            if not pending_hw_routing_changes.manual then
+                pending_hw_routing_changes.manual = {}
+                pending_hw_routing_changes.current_tab = 0 -- Track current tab
+                for i = 1, #mixer_tracks do
+                    local fresh_hw = get_hardware_outputs(mixer_tracks[i].mixer_track)
+                    pending_hw_routing_changes.manual[i] = {
+                        hw_channel = -1 -- -1 means none
+                    }
+                    -- Get current hardware output if any
+                    for hw_out, _ in pairs(fresh_hw) do
+                        -- Remove the mono flag (1024) if present to get the actual channel
+                        if hw_out >= 1024 then
+                            pending_hw_routing_changes.manual[i].hw_channel = hw_out - 1024
+                        else
+                            pending_hw_routing_changes.manual[i].hw_channel = hw_out
+                        end
+                        break
+                    end
+                end
+            end
+
+            -- Count non-disabled tracks for tabs
+            local non_disabled_tracks = {}
+            for i = 1, #mixer_tracks do
+                if not input_disabled[i] then
+                    table.insert(non_disabled_tracks, i)
+                end
+            end
+
+            local num_tabs = math.ceil(#non_disabled_tracks / TRACKS_PER_TAB)
+
+            -- Display tabs if more than 8 tracks
+            if num_tabs > 1 then
+                if ImGui.BeginTabBar(ctx, "##hw_tabs") then
+                    for tab = 0, num_tabs - 1 do
+                        local start_idx = tab * TRACKS_PER_TAB + 1
+                        local end_idx = math.min(start_idx + TRACKS_PER_TAB - 1, #non_disabled_tracks)
+                        local tab_label = string.format("Tracks %d-%d",
+                            non_disabled_tracks[start_idx],
+                            non_disabled_tracks[end_idx])
+
+                        if ImGui.BeginTabItem(ctx, tab_label) then
+                            pending_hw_routing_changes.current_tab = tab
+
+                            -- Display tracks for this tab
+                            for idx = start_idx, end_idx do
+                                local i = non_disabled_tracks[idx]
+                                ImGui.PushID(ctx, "hw_out_" .. i)
+
+                                -- Track number and name
+                                ImGui.Text(ctx, string.format(track_num_format .. ": %s", i, track_names[i]))
+                                ImGui.SameLine(ctx)
+
+                                -- Show track type
+                                local type_label = is_stereo[i] and "[Stereo]" or "[Mono]"
+                                ImGui.TextColored(ctx, 0xAAAAAAAA, type_label)
+
+                                ImGui.SameLine(ctx)
+                                ImGui.SetCursorPosX(ctx, 350)
+
+                                -- Build options based on track mono/stereo
+                                local options = { "None" }
+                                local current_selection = 0 -- None
+
+                                if is_stereo[i] then
+                                    -- Stereo pairs - need consecutive pairs
+                                    for ch = 0, max_hw_outs - 2, 2 do
+                                        local label
+                                        if show_hardware_names then
+                                            local hw1 = GetOutputChannelName(ch)
+                                            local hw2 = GetOutputChannelName(ch + 1)
+                                            if hw1 and hw1 ~= "" and hw2 and hw2 ~= "" then
+                                                label = string.format("%s+%s", hw1, hw2)
+                                            else
+                                                label = string.format("%d+%d", ch + 1, ch + 2)
+                                            end
+                                        else
+                                            label = string.format("%d+%d", ch + 1, ch + 2)
+                                        end
+                                        table.insert(options, label)
+
+                                        -- Check if this is the current selection
+                                        if pending_hw_routing_changes.manual[i].hw_channel == ch then
+                                            current_selection = #options - 1
+                                        end
+                                    end
+                                else
+                                    -- Mono channels
+                                    for ch = 0, max_hw_outs - 1 do
+                                        local label
+                                        if show_hardware_names then
+                                            label = GetOutputChannelName(ch)
+                                            if not label or label == "" then
+                                                label = tostring(ch + 1)
+                                            end
+                                        else
+                                            label = tostring(ch + 1)
+                                        end
+                                        table.insert(options, label)
+
+                                        -- Check if this is the current selection
+                                        if pending_hw_routing_changes.manual[i].hw_channel == ch then
+                                            current_selection = #options - 1
+                                        end
+                                    end
+                                end
+
+                                ImGui.SetNextItemWidth(ctx, 200)
+                                local options_str = table.concat(options, "\0") .. "\0"
+                                local changed, new_selection = ImGui.Combo(ctx, "##hw_combo", current_selection,
+                                    options_str)
+
+                                if changed then
+                                    if new_selection == 0 then
+                                        -- None selected
+                                        pending_hw_routing_changes.manual[i].hw_channel = -1
+                                    else
+                                        -- Calculate actual hardware channel
+                                        if is_stereo[i] then
+                                            -- For stereo, selection 1 = channels 0+1, selection 2 = channels 2+3, etc.
+                                            pending_hw_routing_changes.manual[i].hw_channel = (new_selection - 1) * 2
+                                        else
+                                            -- For mono, selection 1 = channel 0, selection 2 = channel 1, etc.
+                                            pending_hw_routing_changes.manual[i].hw_channel = new_selection - 1
+                                        end
+                                    end
+                                end
+
+                                ImGui.PopID(ctx)
+                            end
+
+                            ImGui.EndTabItem(ctx)
+                        end
+                    end
+                    ImGui.EndTabBar(ctx)
+                end
+            else
+                -- No tabs needed, display all tracks
+                for idx = 1, #non_disabled_tracks do
+                    local i = non_disabled_tracks[idx]
+                    ImGui.PushID(ctx, "hw_out_" .. i)
+
+                    -- Track number and name
+                    ImGui.Text(ctx, string.format(track_num_format .. ": %s", i, track_names[i]))
+                    ImGui.SameLine(ctx)
+
+                    -- Show track type
+                    local type_label = is_stereo[i] and "[Stereo]" or "[Mono]"
+                    ImGui.TextColored(ctx, 0xAAAAAAAA, type_label)
+
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, 350)
+
+                    -- Build options based on track mono/stereo
+                    local options = { "None" }
+                    local current_selection = 0 -- None
+
+                    if is_stereo[i] then
+                        -- Stereo pairs - need consecutive pairs
+                        for ch = 0, max_hw_outs - 2, 2 do
+                            local label
+                            if show_hardware_names then
+                                local hw1 = GetOutputChannelName(ch)
+                                local hw2 = GetOutputChannelName(ch + 1)
+                                if hw1 and hw1 ~= "" and hw2 and hw2 ~= "" then
+                                    label = string.format("%s+%s", hw1, hw2)
+                                else
+                                    label = string.format("%d+%d", ch + 1, ch + 2)
+                                end
+                            else
+                                label = string.format("%d+%d", ch + 1, ch + 2)
+                            end
+                            table.insert(options, label)
+
+                            -- Check if this is the current selection
+                            if pending_hw_routing_changes.manual[i].hw_channel == ch then
+                                current_selection = #options - 1
+                            end
+                        end
+                    else
+                        -- Mono channels
+                        for ch = 0, max_hw_outs - 1 do
+                            local label
+                            if show_hardware_names then
+                                label = GetOutputChannelName(ch)
+                                if not label or label == "" then
+                                    label = tostring(ch + 1)
+                                end
+                            else
+                                label = tostring(ch + 1)
+                            end
+                            table.insert(options, label)
+
+                            -- Check if this is the current selection
+                            if pending_hw_routing_changes.manual[i].hw_channel == ch then
+                                current_selection = #options - 1
+                            end
+                        end
+                    end
+
+                    ImGui.SetNextItemWidth(ctx, 200)
+                    local options_str = table.concat(options, "\0") .. "\0"
+                    local changed, new_selection = ImGui.Combo(ctx, "##hw_combo", current_selection, options_str)
+
+                    if changed then
+                        if new_selection == 0 then
+                            -- None selected
+                            pending_hw_routing_changes.manual[i].hw_channel = -1
+                        else
+                            -- Calculate actual hardware channel
+                            if is_stereo[i] then
+                                -- For stereo, selection 1 = channels 0+1, selection 2 = channels 2+3, etc.
+                                pending_hw_routing_changes.manual[i].hw_channel = (new_selection - 1) * 2
+                            else
+                                -- For mono, selection 1 = channel 0, selection 2 = channel 1, etc.
+                                pending_hw_routing_changes.manual[i].hw_channel = new_selection - 1
+                            end
+                        end
+                    end
+
+                    ImGui.PopID(ctx)
+                end
+            end
+
+            ImGui.Separator(ctx)
+
+            -- Auto Assign button
+            if ImGui.Button(ctx, "Auto Assign", 120, 0) then
+                -- Track which channels are used
+                local used_channels = {}
+
+                -- Process tracks in order
+                for i = 1, #mixer_tracks do
+                    if not input_disabled[i] then
+                        local assigned = false
+
+                        if is_stereo[i] then
+                            -- Find next available stereo pair (must be even-numbered channel)
+                            for ch = 0, max_hw_outs - 2, 2 do
+                                if not used_channels[ch] and not used_channels[ch + 1] then
+                                    pending_hw_routing_changes.manual[i].hw_channel = ch
+                                    used_channels[ch] = true
+                                    used_channels[ch + 1] = true
+                                    assigned = true
+                                    break
+                                end
+                            end
+                        else
+                            -- Mono - find next available channel
+                            for ch = 0, max_hw_outs - 1 do
+                                if not used_channels[ch] then
+                                    pending_hw_routing_changes.manual[i].hw_channel = ch
+                                    used_channels[ch] = true
+                                    assigned = true
+                                    break
+                                end
+                            end
+                        end
+
+                        -- If no channels available, set to None
+                        if not assigned then
+                            pending_hw_routing_changes.manual[i].hw_channel = -1
+                        end
+                    end
+                end
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Auto-assign all tracks to hardware outputs in order")
+            end
+
+            -- Clear All button
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Clear All", 120, 0) then
+                for i = 1, #mixer_tracks do
+                    pending_hw_routing_changes.manual[i].hw_channel = -1
+                end
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Clear all hardware output assignments")
+            end
+
+            -- Apply button
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Apply", 120, 0) then
+                for i = 1, #mixer_tracks do
+                    local track_info = mixer_tracks[i]
+                    local changes = pending_hw_routing_changes.manual[i]
+
+                    -- Remove existing hardware sends
+                    local num_hw_sends = GetTrackNumSends(track_info.mixer_track, 1)
+                    for j = num_hw_sends - 1, 0, -1 do
+                        RemoveTrackSend(track_info.mixer_track, 1, j)
+                    end
+
+                    -- Add new hardware send if channel is assigned
+                    if changes.hw_channel >= 0 then
+                        -- Create hardware output send (category 1)
+                        local send_idx = CreateTrackSend(track_info.mixer_track, nil)
+
+                        if is_stereo[i] then
+                            -- Stereo: send both L+R to hardware pair
+                            SetTrackSendInfo_Value(track_info.mixer_track, 1, send_idx, "I_DSTCHAN",
+                                changes.hw_channel)
+                            SetTrackSendInfo_Value(track_info.mixer_track, 1, send_idx, "I_SRCCHAN", 0)
+                        else
+                            -- Mono: send single channel
+                            SetTrackSendInfo_Value(track_info.mixer_track, 1, send_idx, "I_DSTCHAN",
+                                changes.hw_channel | 1024)
+                            SetTrackSendInfo_Value(track_info.mixer_track, 1, send_idx, "I_SRCCHAN", 0)
+                        end
+                    end
+                end
+
+                sync_needed = true
+                pending_hw_routing_changes.manual = nil
+                init()
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Apply changes and close")
+            end
+
+            -- Cancel button
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Cancel", 120, 0) then
+                pending_hw_routing_changes.manual = nil
+                ImGui.CloseCurrentPopup(ctx)
+            end
+
+            ImGui.EndPopup(ctx)
+        else
+            -- Popup closed without Apply (X button or ESC) - discard changes
+            if pending_hw_routing_changes.manual then
+                pending_hw_routing_changes.manual = nil
+            end
         end
 
         -- Hardware names toggle button
@@ -2137,6 +2493,7 @@ function init()
 
         -- Get sends to aux/submix
         mixer_sends[i] = get_mixer_sends(track_info.mixer_track)
+        hardware_outputs[i] = get_hardware_outputs(track_info.mixer_track)
     end
 
     -- Initialize special tracks volume
@@ -3358,6 +3715,24 @@ function consolidate_folders_to_first()
 end
 
 ---------------------------------------------------------------------
+
+function get_hardware_outputs(mixer_track)
+    local outputs = {}
+    local num_hw_sends = GetTrackNumSends(mixer_track, 1) -- 1 = hardware outputs
+
+    for i = 0, num_hw_sends - 1 do
+        local hw_out = GetTrackSendInfo_Value(mixer_track, 1, i, "I_DSTCHAN")
+        if hw_out >= 0 then
+            -- Store the raw value (with or without 1024 flag)
+            outputs[hw_out] = true
+        end
+    end
+
+    return outputs
+end
+
+---------------------------------------------------------------------
+
 sync()
 if init() then
     defer(main)
