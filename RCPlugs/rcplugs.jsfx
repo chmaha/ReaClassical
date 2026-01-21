@@ -2,7 +2,7 @@
 @author chmaha
 @version 2.3
 @changelog
-  Add Fader plugin
+  Add Fader plugin that matches limits of REAPER fader
 @metapackage
 @provides
   RCComp.jsfx
