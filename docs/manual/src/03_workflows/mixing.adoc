@@ -13,6 +13,8 @@ image::mixer_snapshots.png[Mixer Snapshot Manager]
 
 Coming Soon...
 
+IMPORTANT: For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must remain open.
+
 ==== Volume Automation
 
 1. Ensure one or more "Destination" or "Source" folder tracks are selected
