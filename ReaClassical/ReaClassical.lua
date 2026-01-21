@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.8pre
+@version 26.1.8
 @changelog
   Preferences: Add extra coloring option
   Preferences: Revise number of options check
