@@ -1,10 +1,18 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.7
+@version 26.1.8pre
 @changelog
-  S-D editing functions: Revert to using grouping
-  Prepare Takes: Use reaimgui window to track progress
-  Preferences: No item coloring option
+  Preferences: Add extra coloring option
+  Preferences: Revise number of options check
+  Prepare Takes: Save run in project state
+  Editing toolbar: Only runs Prepare Takes if it has not been run already
+  Mission Control: Disable docking
+  Mixer Snapshots: Use named items as basis and remove unnecessary functionality
+  Automation: Complete rewrite of insert automation functionality
+  Mission Control: Allow mixer tracks to have direct connections to hardware outputs
+  RCPlugs: Add RCFader plugin
+  Mission Control: Add button to add/mirror fader values to RCFader (Fiedler Atmos helper)
+  Documentation: Various updates
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -18,12 +26,10 @@
   [main] ReaClassical_Add Source IN marker.lua
   [main] ReaClassical_Add Source OUT marker.lua
   [main] ReaClassical_Add Submix.lua
-  [main] ReaClassical_Add Track To All Groups.lua
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Audition.lua
   [main] ReaClassical_Audition_with_playrate.lua
   [main] ReaClassical_Auto Solo Folder.lua
-  [main] ReaClassical_Automation Mode.lua
   [main] ReaClassical_Build Edit List.lua
   [main] ReaClassical_Build Edit List using BWF offset.lua
   [main] ReaClassical_Classical Crossfade.lua
@@ -59,7 +65,6 @@
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Insert with timestretching.lua
   [main] ReaClassical_Jump To Time.lua
-  [main] ReaClassical_Mastering Mode.lua
   [main] ReaClassical_Metadata Report.lua
   [main] ReaClassical_Meterbridge.lua
   [main] ReaClassical_Microphone Indicator.lua
