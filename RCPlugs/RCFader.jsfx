@@ -1,0 +1,36 @@
+NoIndex: true
+desc:RCFader (chmaha)
+author: chmaha
+about:
+  Uses DSP from airwindows "PurestGain" by Chris Johnson
+  https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestGain (MIT License)
+  JSFX version released under GPLv3 license
+
+slider1:0<-150,20,0.01>Gain (dB)
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+
+@slider
+
+@block
+
+@sample
+
+inputSampleL = spl0;
+inputSampleR = spl1;
+
+outputgain = pow(10.0,slider1/20.0);
+
+(outputgain != 1.0) ?
+(
+  inputSampleL *= outputgain;
+  inputSampleR *= outputgain;
+
+  spl0 = inputSampleL;
+  spl1 = inputSampleR;
+);
