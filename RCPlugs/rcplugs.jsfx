@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 2.2
+@version 2.3
 @changelog
-  Try setting spectrum ipnt value the same as for peak hold
+  Add Fader plugin
 @metapackage
 @provides
   RCComp.jsfx
@@ -24,6 +24,7 @@
   RCReverb_Send.jsfx
   RCModulator.jsfx
   ReaVisionMetering.jsfx
+  RCFader.jsfx
   Dependencies/*.jsfx-inc
 @about
   These plugins are suitable for classical music mixing and mastering.
