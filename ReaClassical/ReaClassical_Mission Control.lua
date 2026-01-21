@@ -796,6 +796,110 @@ function main()
             end
         end
 
+        -- Fiedler button (dual purpose: add RCGain or sync if already present)
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "RCGain Helper") then
+            -- First check if all tracks already have RCGain
+            local all_have_rcgain = true
+            for i = 1, #mixer_tracks do
+                local track = mixer_tracks[i].mixer_track
+                local has_rcgain = false
+                local fx_count = TrackFX_GetCount(track)
+                for fx_idx = 0, fx_count - 1 do
+                    local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+                    if fx_name:match("RCGain") then
+                        has_rcgain = true
+                        break
+                    end
+                end
+                if not has_rcgain then
+                    all_have_rcgain = false
+                    break
+                end
+            end
+
+            if not all_have_rcgain then
+                -- Some tracks missing RCGain - Add mode first
+                for i = 1, #mixer_tracks do
+                    local track_info = mixer_tracks[i]
+                    local track = track_info.mixer_track
+
+                    -- Check if RCGain already exists
+                    local has_rcgain = false
+                    local fx_count = TrackFX_GetCount(track)
+                    for fx_idx = 0, fx_count - 1 do
+                        local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+                        if fx_name:match("RCGain") then
+                            has_rcgain = true
+                            break
+                        end
+                    end
+
+                    if not has_rcgain then
+                        -- Find Fiedler plugin position
+                        local fiedler_idx = nil
+                        fx_count = TrackFX_GetCount(track) -- Refresh count
+                        for fx_idx = 0, fx_count - 1 do
+                            local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+                            if fx_name:match("Fiedler") then
+                                fiedler_idx = fx_idx
+                                break
+                            end
+                        end
+
+                        -- Add RCGain
+                        if fiedler_idx then
+                            -- Insert before Fiedler
+                            TrackFX_AddByName(track, "JS:RCGain", false, -1000 - fiedler_idx)
+                        else
+                            -- Add at end if no Fiedler found
+                            TrackFX_AddByName(track, "JS:RCGain", false, -1)
+                        end
+                    end
+                end
+            end
+
+            -- ALWAYS sync values (whether we just added plugins or they already existed)
+            for i = 1, #mixer_tracks do
+                local track_info = mixer_tracks[i]
+                local track = track_info.mixer_track
+
+                -- Find RCGain
+                local fx_count = TrackFX_GetCount(track)
+                for fx_idx = 0, fx_count - 1 do
+                    local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+                    if fx_name:match("RCGain") then
+                        -- Get track volume in dB
+                        local vol_linear = GetMediaTrackInfo_Value(track, "D_VOL")
+                        local vol_db
+
+                        -- Handle -inf (very small linear values)
+                        if vol_linear < 0.00000001 then
+                            vol_db = -150 -- Set to minimum
+                        else
+                            vol_db = 20 * math.log(vol_linear, 10)
+                        end
+
+                        -- Clamp to RCGain's range (-150dB to +12dB)
+                        vol_db = math.max(-150, math.min(12, vol_db))
+
+                        -- Round to 0.01 dB (RCGain's step)
+                        vol_db = math.floor(vol_db * 100 + 0.5) / 100
+
+                        -- Set the parameter directly with the dB value
+                        TrackFX_SetParam(track, fx_idx, 0, vol_db)
+
+                        break
+                    end
+                end
+            end
+
+            sync_needed = true
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Add RCGain before Fiedler plugin and sync fader values")
+        end
+
         -- Hardware names toggle button
         ImGui.SameLine(ctx)
         local btn_label = show_hardware_names and "Ch #" or "HW"
