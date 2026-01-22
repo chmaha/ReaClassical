@@ -977,7 +977,6 @@ function main()
             ImGui.Separator(ctx)
 
             -- Clear All button
-            ImGui.SameLine(ctx)
             if ImGui.Button(ctx, "Clear All", 120, 0) then
                 -- Clear mixer tracks
                 for i = 1, #mixer_tracks do
