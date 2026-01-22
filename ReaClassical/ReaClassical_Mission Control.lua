@@ -35,7 +35,8 @@ local format_pan, sync, auto_assign, reorder_track, delete_mixer_track
 local add_mixer_track, init, draw_track_controls, draw_folder_browser
 local get_directories, normalize_path, get_parent_path, split_path
 local consolidate_folders_to_first, get_hardware_outputs
-local check_dolby_atmos_beam_available
+local check_dolby_atmos_beam_available, get_track_num_channels
+local calculate_combo_width
 
 ---------------------------------------------------------------------
 
@@ -461,9 +462,98 @@ function main()
 
             local max_hw_outs = GetNumAudioOutputs()
 
+            local max_hw_outs = GetNumAudioOutputs()
+
+            -- Calculate maximum dropdown width needed for consistent appearance
+            local max_dropdown_width = 100 -- Start with minimum width
+
+            -- Function to estimate width of a dropdown option
+            local function estimate_option_width(text)
+                return (#text * 7) + 30 -- ~7 pixels per char + padding
+            end
+
+            -- Check mono options
+            for ch = 0, max_hw_outs - 1 do
+                local label
+                if show_hardware_names then
+                    label = GetOutputChannelName(ch)
+                    if not label or label == "" then
+                        label = tostring(ch + 1)
+                    end
+                else
+                    label = tostring(ch + 1)
+                end
+                max_dropdown_width = math.max(max_dropdown_width, estimate_option_width(label))
+            end
+
+            -- Check stereo options
+            for ch = 0, max_hw_outs - 2, 2 do
+                local label
+                if show_hardware_names then
+                    local hw1 = GetOutputChannelName(ch)
+                    local hw2 = GetOutputChannelName(ch + 1)
+                    if hw1 and hw1 ~= "" and hw2 and hw2 ~= "" then
+                        label = string.format("%s+%s", hw1, hw2)
+                    else
+                        label = string.format("%d+%d", ch + 1, ch + 2)
+                    end
+                else
+                    label = string.format("%d+%d", ch + 1, ch + 2)
+                end
+                max_dropdown_width = math.max(max_dropdown_width, estimate_option_width(label))
+            end
+
+            -- Check special tracks multi-channel options
+            for idx, aux_info in ipairs(aux_submix_tracks) do
+                if aux_info.type == "aux" or aux_info.type == "submix" or
+                    aux_info.type == "roomtone" or aux_info.type == "reference" or
+                    aux_info.type == "rcmaster" or aux_info.type == "live" then
+                    local num_channels = get_track_num_channels(aux_info.track)
+
+                    for ch = 0, max_hw_outs - num_channels, num_channels do
+                        local label
+                        if show_hardware_names then
+                            local hw_names = {}
+                            local all_have_names = true
+                            for c = ch, ch + num_channels - 1 do
+                                local hw_name = GetOutputChannelName(c)
+                                if hw_name and hw_name ~= "" then
+                                    table.insert(hw_names, hw_name)
+                                else
+                                    all_have_names = false
+                                    break
+                                end
+                            end
+
+                            if all_have_names then
+                                if num_channels == 2 then
+                                    label = string.format("%s+%s", hw_names[1], hw_names[2])
+                                else
+                                    label = string.format("%s-%s", hw_names[1], hw_names[num_channels])
+                                end
+                            else
+                                if num_channels == 2 then
+                                    label = string.format("%d+%d", ch + 1, ch + 2)
+                                else
+                                    label = string.format("%d-%d", ch + 1, ch + num_channels)
+                                end
+                            end
+                        else
+                            if num_channels == 2 then
+                                label = string.format("%d+%d", ch + 1, ch + 2)
+                            else
+                                label = string.format("%d-%d", ch + 1, ch + num_channels)
+                            end
+                        end
+                        max_dropdown_width = math.max(max_dropdown_width, estimate_option_width(label))
+                    end
+                end
+            end
+
             -- Initialize pending changes if needed
             if not pending_hw_routing_changes.manual then
                 pending_hw_routing_changes.manual = {}
+                pending_hw_routing_changes.special = {}
                 pending_hw_routing_changes.current_tab = 0 -- Track current tab
                 for i = 1, #mixer_tracks do
                     local fresh_hw = get_hardware_outputs(mixer_tracks[i].mixer_track)
@@ -479,6 +569,28 @@ function main()
                             pending_hw_routing_changes.manual[i].hw_channel = hw_out
                         end
                         break
+                    end
+                end
+                for idx, aux_info in ipairs(aux_submix_tracks) do
+                    if aux_info.type == "aux" or aux_info.type == "submix" or
+                        aux_info.type == "roomtone" or aux_info.type == "reference" or
+                        aux_info.type == "rcmaster" or aux_info.type == "live" then
+                        local fresh_hw = get_hardware_outputs(aux_info.track)
+                        local num_channels = get_track_num_channels(aux_info.track)
+
+                        pending_hw_routing_changes.special[idx] = {
+                            hw_channel = -1,
+                            num_channels = num_channels
+                        }
+
+                        for hw_out, _ in pairs(fresh_hw) do
+                            if hw_out >= 1024 then
+                                pending_hw_routing_changes.special[idx].hw_channel = hw_out - 1024
+                            else
+                                pending_hw_routing_changes.special[idx].hw_channel = hw_out
+                            end
+                            break
+                        end
                     end
                 end
             end
@@ -568,8 +680,7 @@ function main()
                                         end
                                     end
                                 end
-
-                                ImGui.SetNextItemWidth(ctx, 200)
+                                ImGui.SetNextItemWidth(ctx, max_dropdown_width) -- Changed from 200
                                 local options_str = table.concat(options, "\0") .. "\0"
                                 local changed, new_selection = ImGui.Combo(ctx, "##hw_combo", current_selection,
                                     options_str)
@@ -662,7 +773,7 @@ function main()
                         end
                     end
 
-                    ImGui.SetNextItemWidth(ctx, 200)
+                    ImGui.SetNextItemWidth(ctx, max_dropdown_width) -- Changed from 200
                     local options_str = table.concat(options, "\0") .. "\0"
                     local changed, new_selection = ImGui.Combo(ctx, "##hw_combo", current_selection, options_str)
 
@@ -689,7 +800,7 @@ function main()
             ImGui.Separator(ctx)
 
             -- Auto Assign button
-            if ImGui.Button(ctx, "Auto Assign", 120, 0) then
+            if ImGui.Button(ctx, "Auto Assign Mixer Tracks", 180, 0) then
                 -- Track which channels are used
                 local used_channels = {}
 
@@ -729,14 +840,154 @@ function main()
                 end
             end
             if ImGui.IsItemHovered(ctx) then
-                ImGui.SetTooltip(ctx, "Auto-assign all tracks to hardware outputs in order")
+                ImGui.SetTooltip(ctx, "Auto-assign mixer tracks to hardware outputs in order")
             end
+
+            ImGui.Separator(ctx)
+
+            -- Special Tracks Section
+            ImGui.Text(ctx, "Special Tracks:")
+
+            -- Display special tracks (aux, submix, roomtone, ref)
+            for idx, aux_info in ipairs(aux_submix_tracks) do
+                if aux_info.type == "aux" or aux_info.type == "submix" or
+                    aux_info.type == "roomtone" or aux_info.type == "reference" or
+                    aux_info.type == "rcmaster" or aux_info.type == "live" then
+                    ImGui.PushID(ctx, "hw_special_" .. idx)
+
+                    -- Track type indicator with color
+                    local display_prefix = ""
+                    local prefix_color = 0xFFFFFFFF
+
+                    if aux_info.type == "aux" then
+                        display_prefix = "@"
+                        prefix_color = color_to_native(200, 140, 135)
+                    elseif aux_info.type == "submix" then
+                        display_prefix = "#"
+                        prefix_color = color_to_native(135, 195, 200)
+                    elseif aux_info.type == "roomtone" then
+                        display_prefix = "RT"
+                        prefix_color = color_to_native(200, 160, 110)
+                    elseif aux_info.type == "reference" then
+                        display_prefix = "REF"
+                        prefix_color = color_to_native(180, 180, 180)
+                    elseif aux_info.type == "rcmaster" then
+                        display_prefix = "RCM"
+                        prefix_color = color_to_native(80, 200, 80)
+                    elseif aux_info.type == "live" then
+                        display_prefix = "LIVE"
+                        prefix_color = color_to_native(255, 200, 200)
+                    end
+
+                    -- Prefix with fixed width
+                    ImGui.PushStyleColor(ctx, ImGui.Col_Text, prefix_color)
+                    ImGui.Text(ctx, display_prefix)
+                    ImGui.PopStyleColor(ctx)
+
+                    -- Track name - aligned at column position
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, 60)
+                    ImGui.Text(ctx, aux_info.name ~= "" and aux_info.name or display_prefix)
+
+                    -- Get the number of channels for this track
+                    local num_channels = pending_hw_routing_changes.special[idx].num_channels
+
+                    -- Channel count - aligned at column position
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, 240)
+                    local channel_label = string.format("[%dch]", num_channels)
+                    ImGui.TextColored(ctx, 0xAAAAAAAA, channel_label)
+
+                    -- Hardware output dropdown - aligned at column position
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, 350)
+
+                    -- Build channel pair options based on track's channel count
+                    local options = { "None" }
+                    local current_selection = 0
+
+                    -- Generate options for channel pairs matching the track's channel count
+                    -- For 2ch: 1+2, 3+4, 5+6, etc.
+                    -- For 4ch: 1-4, 5-8, 9-12, etc.
+                    -- For 8ch: 1-8, 9-16, etc.
+                    for ch = 0, max_hw_outs - num_channels, num_channels do
+                        local label
+                        if show_hardware_names then
+                            -- Build label with hardware names
+                            local hw_names = {}
+                            local all_have_names = true
+                            for c = ch, ch + num_channels - 1 do
+                                local hw_name = GetOutputChannelName(c)
+                                if hw_name and hw_name ~= "" then
+                                    table.insert(hw_names, hw_name)
+                                else
+                                    all_have_names = false
+                                    break
+                                end
+                            end
+
+                            if all_have_names then
+                                if num_channels == 2 then
+                                    label = string.format("%s+%s", hw_names[1], hw_names[2])
+                                else
+                                    label = string.format("%s-%s", hw_names[1], hw_names[num_channels])
+                                end
+                            else
+                                -- Fallback to channel numbers
+                                if num_channels == 2 then
+                                    label = string.format("%d+%d", ch + 1, ch + 2)
+                                else
+                                    label = string.format("%d-%d", ch + 1, ch + num_channels)
+                                end
+                            end
+                        else
+                            -- Just use channel numbers
+                            if num_channels == 2 then
+                                label = string.format("%d+%d", ch + 1, ch + 2)
+                            else
+                                label = string.format("%d-%d", ch + 1, ch + num_channels)
+                            end
+                        end
+                        table.insert(options, label)
+
+                        if pending_hw_routing_changes.special[idx] and
+                            pending_hw_routing_changes.special[idx].hw_channel == ch then
+                            current_selection = #options - 1
+                        end
+                    end
+
+                    ImGui.SetNextItemWidth(ctx, max_dropdown_width) -- Changed from 200
+                    local options_str = table.concat(options, "\0") .. "\0"
+                    local changed, new_selection = ImGui.Combo(ctx, "##hw_special_combo", current_selection,
+                        options_str)
+
+                    if changed then
+                        if new_selection == 0 then
+                            pending_hw_routing_changes.special[idx].hw_channel = -1
+                        else
+                            -- Calculate the starting channel based on track's channel count
+                            pending_hw_routing_changes.special[idx].hw_channel = (new_selection - 1) * num_channels
+                        end
+                    end
+
+                    ImGui.PopID(ctx)
+                end
+            end
+
+            ImGui.Separator(ctx)
 
             -- Clear All button
             ImGui.SameLine(ctx)
             if ImGui.Button(ctx, "Clear All", 120, 0) then
+                -- Clear mixer tracks
                 for i = 1, #mixer_tracks do
                     pending_hw_routing_changes.manual[i].hw_channel = -1
+                end
+                -- Clear ALL special tracks
+                for idx, aux_info in ipairs(aux_submix_tracks) do
+                    if pending_hw_routing_changes.special[idx] then
+                        pending_hw_routing_changes.special[idx].hw_channel = -1
+                    end
                 end
             end
             if ImGui.IsItemHovered(ctx) then
@@ -775,6 +1026,27 @@ function main()
                     end
                 end
 
+                for idx, aux_info in ipairs(aux_submix_tracks) do
+                    if pending_hw_routing_changes.special[idx] then
+                        local changes = pending_hw_routing_changes.special[idx]
+                        local num_channels = changes.num_channels
+
+                        -- Remove existing hardware sends
+                        local num_hw_sends = GetTrackNumSends(aux_info.track, 1)
+                        for j = num_hw_sends - 1, 0, -1 do
+                            RemoveTrackSend(aux_info.track, 1, j)
+                        end
+
+                        -- Add new hardware send if channel is assigned
+                        if changes.hw_channel >= 0 then
+                            local send_idx = CreateTrackSend(aux_info.track, nil)
+
+                            SetTrackSendInfo_Value(aux_info.track, 1, send_idx, "I_DSTCHAN",
+                                changes.hw_channel)
+                            SetTrackSendInfo_Value(aux_info.track, 1, send_idx, "I_SRCCHAN", 0)
+                        end
+                    end
+                end
                 sync_needed = true
                 pending_hw_routing_changes.manual = nil
                 init()
@@ -788,14 +1060,16 @@ function main()
             ImGui.SameLine(ctx)
             if ImGui.Button(ctx, "Cancel", 120, 0) then
                 pending_hw_routing_changes.manual = nil
+                pending_hw_routing_changes.special = nil
                 ImGui.CloseCurrentPopup(ctx)
             end
 
             ImGui.EndPopup(ctx)
         else
             -- Popup closed without Apply (X button or ESC) - discard changes
-            if pending_hw_routing_changes.manual then
+            if pending_hw_routing_changes.manual or pending_hw_routing_changes.special then
                 pending_hw_routing_changes.manual = nil
+                pending_hw_routing_changes.special = nil
             end
         end
 
@@ -3912,6 +4186,40 @@ function check_dolby_atmos_beam_available()
 
     file:close()
     return found
+end
+
+---------------------------------------------------------------------
+
+function get_track_num_channels(track)
+    local num_channels = GetMediaTrackInfo_Value(track, "I_NCHAN")
+    if num_channels == 0 then
+        num_channels = 2
+    end
+    return num_channels
+end
+
+---------------------------------------------------------------------
+
+function calculate_combo_width(options)
+    -- Calculate the width needed for a combo box based on its options
+    -- Returns width in pixels
+    local max_chars = 0
+
+    for _, option in ipairs(options) do
+        local len = #option
+        if len > max_chars then
+            max_chars = len
+        end
+    end
+
+    -- Approximate 7 pixels per character + 40 for dropdown arrow and padding
+    local width = (max_chars * 7) + 40
+
+    -- Set minimum and maximum bounds
+    width = math.max(120, width) -- Minimum 120 pixels
+    width = math.min(400, width) -- Maximum 400 pixels
+
+    return width
 end
 
 ---------------------------------------------------------------------
