@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.9
+@version 26.1.10
 @changelog
-  Mission Control: Add Disable Atmos button to deactivate RCFader and Beam
-  Mission Control: Hide Atmos buttons if Beam plugin not installed on system
+  Mission Control: Add special tracks to HW Outputs dialog
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
