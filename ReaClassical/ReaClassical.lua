@@ -3,6 +3,7 @@
 @version 26.1.10
 @changelog
   Mission Control: Add special tracks to HW Outputs dialog
+  HW Outputs dialog: Remove ImGui.SameLine(ctx) before bottom buttons
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
