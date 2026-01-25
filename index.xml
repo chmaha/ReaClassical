@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="8b2b78222b895bb5737d19801f239f7ecadfdaf7">
+<index version="1" name="chmaha Scripts" commit="15d2a773162c369245df7a3562c13e1bab60d0f1">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -109,6 +109,31 @@ Rename Output Mix slider for Insert version]]></changelog>
         <source file="RCFader.jsfx">https://github.com/chmaha/ReaClassical/raw/8b2b78222b895bb5737d19801f239f7ecadfdaf7/RCPlugs/RCFader.jsfx</source>
         <source file="Dependencies/chmaha_spectrum.jsfx-inc">https://github.com/chmaha/ReaClassical/raw/8b2b78222b895bb5737d19801f239f7ecadfdaf7/RCPlugs/Dependencies/chmaha_spectrum.jsfx-inc</source>
         <source file="Dependencies/svf_filter.jsfx-inc">https://github.com/chmaha/ReaClassical/raw/8b2b78222b895bb5737d19801f239f7ecadfdaf7/RCPlugs/Dependencies/svf_filter.jsfx-inc</source>
+      </version>
+      <version name="2.5" author="chmaha" time="2026-01-25T20:58:38Z">
+        <changelog><![CDATA[Fix small typo]]></changelog>
+        <source file="RCComp.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCComp.jsfx</source>
+        <source file="RCDeEss.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCDeEss.jsfx</source>
+        <source file="RCDeEss_Advanced.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCDeEss_Advanced.jsfx</source>
+        <source file="RCDither.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCDither.jsfx</source>
+        <source file="RCChannelEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCChannelEQ.jsfx</source>
+        <source file="RCGain.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCGain.jsfx</source>
+        <source file="RCLimiter.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCLimiter.jsfx</source>
+        <source file="RCParallelK.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCParallelK.jsfx</source>
+        <source file="RCMasteringEQ.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCMasteringEQ.jsfx</source>
+        <source file="RCInflator.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCInflator.jsfx</source>
+        <source file="RCTimePhase.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCTimePhase.jsfx</source>
+        <source file="RCConsoleBus.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCConsoleBus.jsfx</source>
+        <source file="RCConsoleChannel.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCConsoleChannel.jsfx</source>
+        <source file="RCConsoleFinalizer.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCConsoleFinalizer.jsfx</source>
+        <source file="RCMidSide.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCMidSide.jsfx</source>
+        <source file="RCReverb_Insert.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCReverb_Insert.jsfx</source>
+        <source file="RCReverb_Send.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCReverb_Send.jsfx</source>
+        <source file="RCModulator.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCModulator.jsfx</source>
+        <source file="ReaVisionMetering.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/ReaVisionMetering.jsfx</source>
+        <source file="RCFader.jsfx">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/RCFader.jsfx</source>
+        <source file="Dependencies/chmaha_spectrum.jsfx-inc">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/Dependencies/chmaha_spectrum.jsfx-inc</source>
+        <source file="Dependencies/svf_filter.jsfx-inc">https://github.com/chmaha/ReaClassical/raw/15d2a773162c369245df7a3562c13e1bab60d0f1/RCPlugs/Dependencies/svf_filter.jsfx-inc</source>
       </version>
     </reapack>
   </category>
