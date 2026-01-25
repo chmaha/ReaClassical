@@ -1,9 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 2.4
+@version 2.5
 @changelog
-  Revise RCVerb with zita-rev1 port
-  Rename Output Mix slider for Insert version
+  Fix small typo
 @metapackage
 @provides
   RCComp.jsfx

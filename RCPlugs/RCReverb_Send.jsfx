@@ -7,7 +7,7 @@ desc:RCReverb Send
 
 slider1:40<20,100,1>Delay (ms)
 slider2:200<50,1000,1>XOver (Hz)
-slider3:1.5<0.5,2,0.1>Bass Multipler
+slider3:1.5<0.5,2,0.1>Bass Multiplier
 slider4:2.0<1,8,0.1>RT Mid (s)
 slider5:6000<1500,24000,100>F Damp (Hz)
 slider6:160<40,2500,1>EQ1 Freq (Hz)
