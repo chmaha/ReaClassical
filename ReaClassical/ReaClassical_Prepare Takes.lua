@@ -584,12 +584,12 @@ function do_processing_step()
             table.sort(sorted_group_ids)
 
             current_group_index = 1
-            update_progress("Coloring Items", 70, string.format("Starting to color (%d groups)", #sorted_group_ids))
-            processing_step = 102 -- Go to incremental coloring
+            update_progress("Coloring Items (Pass 1)", 70, string.format("Starting initial coloring (%d groups)", #sorted_group_ids))
+            processing_step = 102 -- Go to pass 1 coloring
             return false
         end
 
-        -- HORIZONTAL WORKFLOW - COLOR BATCH OF GROUPS PER FRAME
+        -- HORIZONTAL WORKFLOW - PASS 1: COLOR BY RANK OR TAKE NUMBER
     elseif processing_step == 102 then
         if current_group_index <= #sorted_group_ids then
             -- Process a batch of groups
@@ -620,32 +620,18 @@ function do_processing_step()
                     end
                 end
 
+                -- Pass 1: Color by rank or take number (ignore src_guid for now)
                 local final_color
                 if has_rank and rank_color then
                     final_color = rank_color
+                elseif auto_color_pref == 1 then
+                    final_color = 0
+                elseif take_number then
+                    final_color = pastel_color(take_number - 1)
                 else
-                    -- Determine group color (based on take number)
-                    local group_color = nil
-                    for _, item in ipairs(grouped_items) do
-                        local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
-                        if src_guid ~= "" then
-                            local src_item = get_item_by_guid(0, src_guid)
-                            if src_item and auto_color_pref == 0 then
-                                group_color = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
-                                break
-                            end
-                        end
-                    end
-
-                    if not group_color then
-                        if take_number and auto_color_pref == 0 then
-                            group_color = pastel_color(take_number - 1)
-                        else
-                            group_color = 0
-                        end
-                    end
-                    final_color = group_color
+                    final_color = 0
                 end
+
                 -- Apply color to all items in group (optimized - use group_map)
                 local group_id = GetMediaItemInfo_Value(grouped_items[1], "I_GROUPID")
                 if group_id > 0 and unified_index.group_map[group_id] then
@@ -669,9 +655,72 @@ function do_processing_step()
 
             current_group_index = batch_end
 
-            local progress = 70 + ((current_group_index - 1) / #sorted_group_ids * 20)
-            update_progress("Coloring Items", progress,
-                string.format("Coloring groups (%d/%d)", current_group_index - 1, #sorted_group_ids))
+            local progress = 70 + ((current_group_index - 1) / #sorted_group_ids * 10)
+            update_progress("Coloring Items (Pass 1)", progress,
+                string.format("Initial coloring (%d/%d groups)", current_group_index - 1, #sorted_group_ids))
+            return false
+        else
+            -- Done with pass 1, build GUID lookup for pass 2
+            update_progress("Coloring Items", 80, "Building GUID lookup table...")
+            
+            -- Build a lookup table: guid -> item for fast O(1) lookups in pass 2
+            guid_lookup = {}
+            for _, item_data in ipairs(unified_index.all_items) do
+                local _, guid = GetSetMediaItemInfo_String(item_data.item, "GUID", "", false)
+                if guid ~= "" then
+                    guid_lookup[guid] = item_data.item
+                end
+            end
+            
+            -- Reset for Pass 2: iterate through all items
+            current_item_index = 0
+            total_items_to_process = CountMediaItems(0)
+            processing_step = 102.5 -- Go to pass 2
+            return false
+        end
+        
+        -- HORIZONTAL WORKFLOW - PASS 2: RECOLOR ITEMS WITH SRC_GUID (like vertical workflow)
+    elseif processing_step == 102.5 then
+        if current_item_index < total_items_to_process then
+            -- Process a batch of items
+            local batch_end = math.min(current_item_index + items_per_batch, total_items_to_process)
+
+            for i = current_item_index, batch_end - 1 do
+                local item = GetMediaItem(0, i)
+                
+                -- Skip if this item is manually colorized
+                if not is_item_colorized(item) then
+                    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
+                    
+                    if group_id > 0 and unified_index.group_map[group_id] then
+                        local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+                        
+                        -- Only process non-ranked items with src_guid (unless auto_color_pref == 1 or ranking_color_pref == 1)
+                        if (ranked == "" or ranking_color_pref == 1) then
+                            local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
+                            if src_guid ~= "" and auto_color_pref ~= 1 then
+                                -- Use O(1) lookup instead of O(n) get_item_by_guid
+                                local src_item = guid_lookup[src_guid]
+                                if src_item then
+                                    local color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
+                                    
+                                    -- Color all items in this group (skip individual checks for speed)
+                                    for _, grouped_item in ipairs(unified_index.group_map[group_id]) do
+                                        SetMediaItemInfo_Value(grouped_item, "I_CUSTOMCOLOR", color_val)
+                                        GetSetMediaItemInfo_String(grouped_item, "P_EXT:saved_color", color_val, true)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+
+            current_item_index = batch_end
+
+            local progress = 80 + (current_item_index / total_items_to_process * 10)
+            update_progress("Coloring Items (Pass 2)", progress,
+                string.format("Coloring edits (%d/%d items)", current_item_index, total_items_to_process))
             return false
         else
             -- Done coloring groups, now color tracks
@@ -691,7 +740,7 @@ function do_processing_step()
                 end
             end
         end
-        processing_step = 110
+        processing_step = 110 -- Go to finalization
         return false
     elseif processing_step == 110 then
         update_progress("Preparing Colors", 90, "Setting up for coloring...")
