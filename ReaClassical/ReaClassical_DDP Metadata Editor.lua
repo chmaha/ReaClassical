@@ -631,7 +631,7 @@ function main()
                 ImGui.SetTooltip(ctx, "Enable visual countdown")
             end
             ImGui.EndGroup(ctx)
-            ImGui.SameLine(ctx, 0, spacing)
+            ImGui.SameLine(ctx, 0, spacing + 12)
 
             ImGui.Dummy(ctx, track_number_w, 0)
             ImGui.SameLine(ctx, 0, spacing)
