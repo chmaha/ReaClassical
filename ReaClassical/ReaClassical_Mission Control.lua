@@ -53,7 +53,8 @@ if workflow == "" then
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
         modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+        .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -79,10 +80,14 @@ local TRACKS_PER_TAB = 8
 local aux_submix_tcp_visible = {}
 local folder_tracks = {}
 local folder_tcp_visible = {}
+local mixer_tcp_visible = {}
 local hardware_outputs = {}
 local pending_hw_routing_changes = {}
 local has_dolby_atmos_beam = false
 
+local selected_folder
+local new_folder_name
+local rename_folder_name
 
 set_action_options(2)
 
@@ -2863,6 +2868,21 @@ function init()
         return false
     end
 
+    -- Initialize mixer TCP visibility
+    mixer_tcp_visible = {}
+    for i = 1, #mixer_tracks do
+        local track_info = mixer_tracks[i]
+        local _, guid = GetSetMediaTrackInfo_String(track_info.mixer_track, "GUID", "", false)
+
+        -- Read current TCP visibility state from the track itself
+        local current_tcp_state = GetMediaTrackInfo_Value(track_info.mixer_track, "B_SHOWINTCP")
+        mixer_tcp_visible[i] = (current_tcp_state == 1)
+
+        -- Save to project ext state for persistence
+        SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. guid,
+            (current_tcp_state == 1) and "1" or "0")
+    end
+
     -- Calculate zero padding for track numbers
     local num_digits = #tostring(#mixer_tracks)
     track_num_format = "%0" .. num_digits .. "d"
@@ -3275,6 +3295,26 @@ function draw_track_controls(start_idx, end_idx)
                 ImGui.CloseCurrentPopup(ctx)
             end
             ImGui.EndPopup(ctx)
+        end
+
+        -- TCP visibility checkbox - placed just before Routing button
+        ImGui.SameLine(ctx)
+        local _, track_guid = GetSetMediaTrackInfo_String(track_info.mixer_track, "GUID", "", false)
+        local changed_tcp, new_tcp = ImGui.Checkbox(ctx, "TCP##tcp" .. i, mixer_tcp_visible[i])
+        if changed_tcp then
+            mixer_tcp_visible[i] = new_tcp
+
+            -- Actually show/hide the track in TCP
+            SetMediaTrackInfo_Value(track_info.mixer_track, "B_SHOWINTCP", new_tcp and 1 or 0)
+
+            TrackList_AdjustWindows(false)
+            UpdateArrange()
+            -- Save to project ext state for persistence
+            SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. track_guid,
+                new_tcp and "1" or "0")
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Show in TCP")
         end
 
         -- Aux routing button
@@ -3945,7 +3985,7 @@ function consolidate_folders_to_first()
     local first_folder_earliest = math.huge
     local latest_end = 0
 
-    for group_id, items in pairs(first_folder.items_by_group) do
+    for _, items in pairs(first_folder.items_by_group) do
         for _, item in ipairs(items) do
             local pos = GetMediaItemInfo_Value(item, "D_POSITION")
             local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
@@ -3975,7 +4015,7 @@ function consolidate_folders_to_first()
     if first_folder_earliest ~= 0 and first_folder_earliest ~= math.huge then
         local shift_amount = -first_folder_earliest
 
-        for group_id, items in pairs(first_folder.items_by_group) do
+        for _, items in pairs(first_folder.items_by_group) do
             for _, item in ipairs(items) do
                 local pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
@@ -4007,7 +4047,7 @@ function consolidate_folders_to_first()
         -- Find the earliest position in this entire folder to calculate offset
         local folder_earliest = math.huge
 
-        for group_id, items in pairs(source_folder.items_by_group) do
+        for _, items in pairs(source_folder.items_by_group) do
             for _, item in ipairs(items) do
                 local pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 if pos < folder_earliest then
@@ -4027,7 +4067,7 @@ function consolidate_folders_to_first()
         local folder_offset = current_position - folder_earliest
 
         -- Process grouped items - maintain their relative positions within the folder
-        for group_id, items in pairs(source_folder.items_by_group) do
+        for _, items in pairs(source_folder.items_by_group) do
             for _, item in ipairs(items) do
                 local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 local new_pos = original_pos + folder_offset
@@ -4089,7 +4129,7 @@ function consolidate_folders_to_first()
 
         -- Find the end of all items in this folder to set next folder's position
         local folder_end = 0
-        for group_id, items in pairs(source_folder.items_by_group) do
+        for _, items in pairs(source_folder.items_by_group) do
             for _, item in ipairs(items) do
                 local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
                     GetMediaItemInfo_Value(item, "D_LENGTH")
