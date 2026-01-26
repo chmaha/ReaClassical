@@ -127,7 +127,11 @@ Open via Ctrl+Enter or F9. The take counter has been upgraded to include transpo
 
 ## Mixer Snapshots Manager
 
-Shift+M. The very latest addition to ReaClassical 26. Mixer scenes and automation for humans! Set snaphots at edit cursor or time selection with auto recall during playback and changing edit cursor position during transport stop. 4 independent banks with copy between functionality. Disable auto-recall to turn the manager into a simple manual recall by clicking on a table row. Hide markers to declutter the timeline but still allow for auto recall.
+Shift+M. The very latest addition to ReaClassical 26. Mixer scenes for humans! Set snaphots on named items (aka album track starts) with auto recall during playback and changing edit cursor position during transport stop. 4 independent banks with copy between functionality. Disable auto-recall to turn the manager into a simple manual recall by clicking on a table row.
+
+## Quick and Easy Volume Automation
+
+I. Add quick volume automation with optional ramps at edit cursor or within time selection. 
 
 Plus many more small fixes/improvements...
 
