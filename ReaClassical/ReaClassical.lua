@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.10
+@version 26.1.11
 @changelog
-  Mission Control: Add special tracks to HW Outputs dialog
-  HW Outputs dialog: Remove ImGui.SameLine(ctx) before bottom buttons
+  Prepare Takes: Improve horizontal coloring
+  Item naming with session name: Use lazy regex match
+  Metadata Editor: Fix alignment of header text
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
