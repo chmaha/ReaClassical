@@ -517,7 +517,7 @@ function rename_all_items(use_take_numbers)
                             -- Check for Vertical pattern: has _D_ or _S(number)_ before the take number
                             if name:match("_[DS]%d?_[^_]+_T%d+") then
                                 -- Vertical format: extract session before first underscore
-                                session_name = name:match("^([^_]+)_[DS]%d?_")
+                                session_name = name:match("^(.-)_[DS]%d?_")
                             elseif name:match("^[DS]%d?_[^_]+_T%d+") then
                                 -- Vertical format without session: starts with D_ or S#_
                                 session_name = nil
