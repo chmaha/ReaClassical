@@ -2,6 +2,8 @@
 
 ==== Updating an Existing ReaClassical Portable Install
 
+WARNING: If coming from ReaClassical 25, do not update but download a fresh copy of version 26.
+
 Use menu:Extensions[ReaPack > Synchronize packages] or press kbd:[Shift+U]. This will sync ReaPack to get the latest ReaClassical functions.
 
 ==== Factory Reset
