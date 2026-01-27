@@ -30,11 +30,13 @@ image::automation.png[Automation Dialog]
 
 ==== General Mixing Workflow Suggestions
 
-- Set piece-by-piece "scenes" using the Mixer Snapshots Manager
-- Make temporary adjustments (for example, volume of spot microphones etc) via the automation function kbd:[I]
-- For spot microphones that should be otherwise muted, use mixer scenes to mute and for pieces that require some fader riding, unmute for those pieces:
-    1. Use a time selection + kbd:[I] to reduce to lowest value (-150dB/-inf) for the whole piece
+- Set piece-by-piece "scenes" using the Mixer Snapshots Manager adjusting mixer tracks, aux and submix controls and any FX parameters. 
+- Make temporary adjustments (for example, volume of spot microphones etc) via the automation function kbd:[I] on tracks with items or visible mixer tracks.
+- For spot microphones that should be mostly muted:
+    1. Use a time selection + kbd:[I] to reduce to lowest value (-150dB/-inf) for the whole piece or use edit cursor + kbd:[I] at the beginning of the timeline to affect the whole project.
     2. Use further time selections + kbd:[I] to set required values and any ramping in and out.
+
+TIP: Remember that the mixer tracks (the ones starting "M:") are fed by the destination and source folders you see in the arrange window. In other words, any automation you add to destination or source tracks will be filtered through the mixer track state. As an example, if your violin spot microphone channel is set at -5dB via automation but the violin spot mixer track fader is at -40dB, the actual output will be -45dB.
 
 ==== Mixing for Dolby Atmos Using Fiedler Plugins
 
