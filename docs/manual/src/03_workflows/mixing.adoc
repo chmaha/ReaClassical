@@ -17,9 +17,13 @@ IMPORTANT: For auto recall of mixer snapshots to work, the Mixer Snapshots Manag
 
 ==== Volume Automation
 
-1. Ensure one or more "Destination" or "Source" folder tracks are selected
+1. Ensure that a "Destination" or "Source" track is selected.
 2. Position edit cursor or create a time selection and press kbd:[I]. Edit cursor mode affects the time line position and everything following. Time selection mode is limited to the time selection bounds.
 3. Set volume level and optional ramp in/out lengths and click btn:[Apply Automation]
+
+==== More Advanced Automation
+
+Turn on advanced mode to gain access to all envelopes associated with the track including FX parameters. If you also need to automate various aspects of the mixer tracks or special tracks, first make them visible in the track control panel by checking the box on the desired track row in Mission Control. Use kbd:[I] as before.
 
 .Automation Dialog
 image::automation.png[Automation Dialog]
@@ -27,14 +31,10 @@ image::automation.png[Automation Dialog]
 ==== General Mixing Workflow Suggestions
 
 - Set piece-by-piece "scenes" using the Mixer Snapshots Manager
-- Make temporary volume adjustments to spot microphones etc via the automation function kbd:[I]
+- Make temporary adjustments (for example, volume of spot microphones etc) via the automation function kbd:[I]
 - For spot microphones that should be otherwise muted, use mixer scenes to mute and for pieces that require some fader riding, unmute for those pieces:
     1. Use a time selection + kbd:[I] to reduce to lowest value (-150dB/-inf) for the whole piece
     2. Use further time selections + kbd:[I] to set required values and any ramping in and out.
-
-==== More Advanced Automation
-
-If you also need to automate various aspects of the mixer tracks or special tracks, make them visible in the track control panel by checking the box on the desired track row in Mission Control. Then, use kbd:[I] for ReaClassical volume automation or, for everything else, follow standard REAPER automation workflows.
 
 ==== Mixing for Dolby Atmos Using Fiedler Plugins
 
