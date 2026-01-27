@@ -32,6 +32,10 @@ image::automation.png[Automation Dialog]
     1. Use a time selection + kbd:[I] to reduce to lowest value (-150dB/-inf) for the whole piece
     2. Use further time selections + kbd:[I] to set required values and any ramping in and out.
 
+==== More Advanced Automation
+
+If you also need to automate various aspects of the mixer tracks or special tracks, make them visible in the track control panel by checking the box on the desired track row in Mission Control. Then, use kbd:[I] for ReaClassical volume automation or, for everything else, follow standard REAPER automation workflows.
+
 ==== Mixing for Dolby Atmos Using Fiedler Plugins
 
 If you have the Fiedler Beam plugin on your system, use the Mission Control btn:[Enable Atmos] that appears to add RCFader plugins and Fiedler Beam plugins to every Mixer track as necessary. This will also pass the current mixer fader values to the RCFader plugin. Subsequent presses of the button will check presence of RCFader and Fiedler plugins, and relative position between them, and synchronize fader values. Use btn:[Disable Atmos] to deactivate both RCFader and Fiedler Beam plugins on every mixer track.
