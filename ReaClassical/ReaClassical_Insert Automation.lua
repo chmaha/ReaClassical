@@ -22,8 +22,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, apply_volume_automation, linear_to_db, db_to_linear, get_envelope_value_at_time
-local format_time, get_selected_tracks
+local main, apply_automation, linear_to_db, db_to_linear, get_envelope_value_at_time
+local format_time, get_selected_tracks, get_track_envelopes, get_track_fx_params
+local normalize_value, denormalize_value
 
 ---------------------------------------------------------------------
 
@@ -73,6 +74,18 @@ local last_track_count    = 0
 -- Reset flag for double-click
 local volume_reset        = false
 
+-- Advanced mode variables
+local advanced_mode       = false
+local selected_envelope   = nil
+local envelope_value      = 0.0
+local track_envelopes     = {}
+local fx_params           = {}
+local current_tab         = 0 -- 0 = Track, 1 = FX
+local keep_window_open    = false
+
+-- Track last FX count to detect changes
+local last_fx_count       = 0
+
 ---------------------------------------------------------------------
 
 function get_selected_tracks()
@@ -82,6 +95,71 @@ function get_selected_tracks()
     tracks[#tracks + 1] = GetSelectedTrack(0, i)
   end
   return tracks
+end
+
+---------------------------------------------------------------------
+
+function get_track_envelopes(track)
+  local envelopes = {}
+  
+  -- Standard track envelopes
+  local standard_envs = {
+    {name = "Volume", display = "Volume"},
+    {name = "Pan", display = "Pan"},
+    {name = "Width", display = "Width"},
+    {name = "Volume (Pre-FX)", display = "Volume (Pre-FX)"},
+    {name = "Pan (Pre-FX)", display = "Pan (Pre-FX)"},
+    {name = "Width (Pre-FX)", display = "Width (Pre-FX)"},
+    {name = "Trim Volume", display = "Trim Volume"},
+    {name = "Mute", display = "Mute"},
+  }
+  
+  for _, env_info in ipairs(standard_envs) do
+    table.insert(envelopes, {
+      type = "track",
+      name = env_info.name,
+      display = env_info.display,
+      track = track
+    })
+  end
+  
+  return envelopes
+end
+
+---------------------------------------------------------------------
+
+function get_track_fx_params(track)
+  local params = {}
+  local fx_count = TrackFX_GetCount(track)
+  
+  for fx_idx = 0, fx_count - 1 do
+    local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
+    local param_count = TrackFX_GetNumParams(track, fx_idx)
+    
+    local fx_params_list = {}
+    for param_idx = 0, param_count - 1 do
+      local _, param_name = TrackFX_GetParamName(track, fx_idx, param_idx, "")
+      table.insert(fx_params_list, {
+        type = "fx",
+        fx_idx = fx_idx,
+        param_idx = param_idx,
+        name = param_name,
+        display = param_name,
+        track = track,
+        fx_name = fx_name
+      })
+    end
+    
+    if #fx_params_list > 0 then
+      table.insert(params, {
+        fx_name = fx_name,
+        fx_idx = fx_idx,
+        params = fx_params_list
+      })
+    end
+  end
+  
+  return params
 end
 
 ---------------------------------------------------------------------
@@ -115,6 +193,56 @@ end
 
 ---------------------------------------------------------------------
 
+function normalize_value(envelope_info, raw_value)
+  -- Normalize envelope value to a displayable range
+  if not envelope_info then return 0 end
+  
+  if envelope_info.type == "track" then
+    if envelope_info.name == "Volume" or envelope_info.name == "Volume (Pre-FX)" or envelope_info.name == "Trim Volume" then
+      return linear_to_db(raw_value)
+    elseif envelope_info.name == "Pan" or envelope_info.name == "Pan (Pre-FX)" then
+      return raw_value -- Keep as -1 to +1
+    elseif envelope_info.name == "Width" or envelope_info.name == "Width (Pre-FX)" then
+      return raw_value -- Keep as -1 to +1
+    elseif envelope_info.name == "Mute" then
+      return raw_value -- 0 or 1
+    end
+  elseif envelope_info.type == "fx" then
+    -- For FX parameters, return the raw 0-1 normalized value
+    -- We'll use TrackFX_GetFormattedParamValue for display
+    return raw_value
+  end
+  
+  return raw_value
+end
+
+---------------------------------------------------------------------
+
+function denormalize_value(envelope_info, display_value)
+  -- Convert display value back to envelope value
+  if not envelope_info then return 0 end
+  
+  if envelope_info.type == "track" then
+    if envelope_info.name == "Volume" or envelope_info.name == "Volume (Pre-FX)" or envelope_info.name == "Trim Volume" then
+      return db_to_linear(display_value)
+    elseif envelope_info.name == "Pan" or envelope_info.name == "Pan (Pre-FX)" then
+      return display_value -- Already in -1 to +1 range
+    elseif envelope_info.name == "Width" or envelope_info.name == "Width (Pre-FX)" then
+      return display_value -- Already in -1 to +1 range
+    elseif envelope_info.name == "Mute" then
+      return display_value
+    end
+  elseif envelope_info.type == "fx" then
+    -- For FX parameters, the envelope stores values in the actual parameter range
+    -- So we just return the display value as-is
+    return display_value
+  end
+  
+  return display_value
+end
+
+---------------------------------------------------------------------
+
 function get_envelope_value_at_time(envelope, time)
   -- Use BR_EnvValueAtPos to get the envelope value at a time
   -- This returns the actual linear value
@@ -129,26 +257,110 @@ end
 
 ---------------------------------------------------------------------
 
-function apply_volume_automation()
+function get_fx_param_range(track, fx_idx, param_idx)
+  -- Get actual parameter range for the FX parameter
+  -- Returns min, max, current_value_in_range, is_normalized
+  local current_val, min_val, max_val = reaper.TrackFX_GetParam(track, fx_idx, param_idx)
+  
+  -- Ensure min is always less than max
+  if min_val > max_val then
+    min_val, max_val = max_val, min_val
+  end
+  
+  -- Check if this is a normalized 0-1 parameter (most VST/VST3)
+  -- or if it has a custom range (JSFX, some LV2)
+  if math.abs(min_val - 0.0) < 0.001 and math.abs(max_val - 1.0) < 0.001 then
+    -- Standard normalized parameter - current value is already in 0-1 range
+    return 0.0, 1.0, current_val, true
+  else
+    -- Custom range parameter (JSFX, LV2, etc.)
+    -- current_val is already in the actual range!
+    return min_val, max_val, current_val, false
+  end
+end
+
+---------------------------------------------------------------------
+
+function get_default_track_value(track, envelope_info)
+  -- Get the default track value for a given envelope type when no envelope exists
+  if envelope_info.type == "track" then
+    if envelope_info.name == "Volume" or envelope_info.name == "Volume (Pre-FX)" or envelope_info.name == "Trim Volume" then
+      return GetMediaTrackInfo_Value(track, "D_VOL")
+    elseif envelope_info.name == "Pan" or envelope_info.name == "Pan (Pre-FX)" then
+      return GetMediaTrackInfo_Value(track, "D_PAN")
+    elseif envelope_info.name == "Width" or envelope_info.name == "Width (Pre-FX)" then
+      return GetMediaTrackInfo_Value(track, "D_WIDTH")
+    elseif envelope_info.name == "Mute" then
+      return GetMediaTrackInfo_Value(track, "B_MUTE")
+    end
+  elseif envelope_info.type == "fx" then
+    return TrackFX_GetParam(track, envelope_info.fx_idx, envelope_info.param_idx)
+  end
+  return 1.0 -- Default fallback
+end
+
+---------------------------------------------------------------------
+
+function apply_automation()
   if #selected_tracks == 0 then return end
 
-  -- Convert dB to linear
-  local vol_linear = db_to_linear(volume_db)
+  local target_envelope_info = advanced_mode and selected_envelope or {
+    type = "track",
+    name = "Volume",
+    display = "Volume"
+  }
+  
+  if not target_envelope_info then return end
 
-  -- Scale to envelope mode for insertion
-  local vol_scaled = ScaleToEnvelopeMode(1, vol_linear)
+  -- Convert value based on envelope type
+  local target_value
+  if advanced_mode then
+    target_value = denormalize_value(target_envelope_info, envelope_value)
+  else
+    target_value = db_to_linear(volume_db)
+  end
 
   -- Apply to each selected track
   for _, track in ipairs(selected_tracks) do
-    -- Get or create volume envelope
-    local vol_env = GetTrackEnvelopeByName(track, "Volume")
-    if not vol_env then
-      -- Create volume envelope if it doesn't exist
-      SetOnlyTrackSelected(track)
-      Main_OnCommand(40406, 0) -- Track: Toggle track volume envelope visible
-      vol_env = GetTrackEnvelopeByName(track, "Volume")
-      if not vol_env then goto continue end
+    -- Get or create envelope
+    local env
+    
+    if target_envelope_info.type == "track" then
+      env = GetTrackEnvelopeByName(track, target_envelope_info.name)
+      if not env then
+        -- Create envelope if it doesn't exist
+        SetOnlyTrackSelected(track)
+        -- Show envelope based on type
+        if target_envelope_info.name == "Volume" then
+          Main_OnCommand(40406, 0)
+        elseif target_envelope_info.name == "Pan" then
+          Main_OnCommand(40407, 0)
+        elseif target_envelope_info.name == "Width" then
+          Main_OnCommand(41991, 0)
+        elseif target_envelope_info.name == "Mute" then
+          Main_OnCommand(40867, 0)
+        elseif target_envelope_info.name == "Volume (Pre-FX)" then
+          Main_OnCommand(41865, 0)
+        elseif target_envelope_info.name == "Pan (Pre-FX)" then
+          Main_OnCommand(41866, 0)
+        elseif target_envelope_info.name == "Width (Pre-FX)" then
+          Main_OnCommand(41867, 0)
+        elseif target_envelope_info.name == "Trim Volume" then
+          Main_OnCommand(41612, 0)
+        end
+        env = GetTrackEnvelopeByName(track, target_envelope_info.name)
+        if not env then goto continue end
+      end
+    elseif target_envelope_info.type == "fx" then
+      env = GetFXEnvelope(track, target_envelope_info.fx_idx, target_envelope_info.param_idx, true)
+      if not env then goto continue end
     end
+
+    -- Determine if we need to scale values (only for volume envelopes)
+    local needs_scaling = target_envelope_info.type == "track" and 
+                         (target_envelope_info.name == "Volume" or 
+                          target_envelope_info.name == "Volume (Pre-FX)" or 
+                          target_envelope_info.name == "Trim Volume")
 
     if has_time_sel and (start_time ~= end_time) then
       -- Time selection mode with ramps OUTSIDE the selection
@@ -159,122 +371,126 @@ function apply_volume_automation()
       local ramp_in_start = actual_start - ramp_in
       local ramp_out_end = actual_end + ramp_out
 
-      -- Get volume values at boundaries BEFORE deleting anything
-      local vol_before, vol_after
+      -- Get values at boundaries BEFORE deleting anything
+      local val_before, val_after
 
       if ramp_in > 0 then
-        vol_before = get_envelope_value_at_time(vol_env, ramp_in_start)
-        if not vol_before or vol_before <= 0 then
-          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        val_before = get_envelope_value_at_time(env, ramp_in_start)
+        if not val_before then
+          val_before = get_default_track_value(track, target_envelope_info)
         end
       else
-        -- No ramp in - get value just before selection start for sudden dip
-        vol_before = get_envelope_value_at_time(vol_env, actual_start - 0.001)
-        if not vol_before or vol_before <= 0 then
-          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        val_before = get_envelope_value_at_time(env, actual_start - 0.001)
+        if not val_before then
+          val_before = get_default_track_value(track, target_envelope_info)
         end
       end
 
       if ramp_out > 0 then
-        vol_after = get_envelope_value_at_time(vol_env, ramp_out_end)
-        if not vol_after or vol_after <= 0 then
-          vol_after = GetMediaTrackInfo_Value(track, "D_VOL")
+        val_after = get_envelope_value_at_time(env, ramp_out_end)
+        if not val_after then
+          val_after = get_default_track_value(track, target_envelope_info)
         end
       else
-        -- No ramp out - get value just after selection end for sudden dip
-        vol_after = get_envelope_value_at_time(vol_env, actual_end + 0.001)
-        if not vol_after or vol_after <= 0 then
-          vol_after = GetMediaTrackInfo_Value(track, "D_VOL")
+        val_after = get_envelope_value_at_time(env, actual_end + 0.001)
+        if not val_after then
+          val_after = get_default_track_value(track, target_envelope_info)
         end
       end
-
-      -- Scale the before/after values for insertion
-      local vol_before_scaled = ScaleToEnvelopeMode(1, vol_before)
-      local vol_after_scaled = ScaleToEnvelopeMode(1, vol_after)
 
       -- Clear existing points in the entire range including ramps
       local clear_start = ramp_in > 0 and ramp_in_start or (actual_start - 0.002)
       local clear_end = ramp_out > 0 and ramp_out_end or (actual_end + 0.002)
-      DeleteEnvelopePointRange(vol_env, clear_start - 0.001, clear_end + 0.001)
+      DeleteEnvelopePointRange(env, clear_start - 0.001, clear_end + 0.001)
 
-      -- Add points based on ramp settings (using scaled values)
+      -- Scale values if needed (only for volume envelopes)
+      local target_val_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
+      local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
+      local val_after_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_after) or val_after
+
+      -- Add points based on ramp settings
       if ramp_in > 0 then
-        -- Gradual ramp in
-        InsertEnvelopePoint(vol_env, ramp_in_start, vol_before_scaled, 0, 0, false, true)
-        InsertEnvelopePoint(vol_env, actual_start, vol_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(env, ramp_in_start, val_before_to_insert, 0, 0, false, true)
+        InsertEnvelopePoint(env, actual_start, target_val_to_insert, 0, 0, false, true)
       else
-        -- Sudden dip - add point just before to maintain previous value
-        InsertEnvelopePoint(vol_env, actual_start - 0.001, vol_before_scaled, 0, 0, false, true)
-        InsertEnvelopePoint(vol_env, actual_start, vol_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(env, actual_start - 0.001, val_before_to_insert, 0, 0, false, true)
+        InsertEnvelopePoint(env, actual_start, target_val_to_insert, 0, 0, false, true)
       end
 
       if ramp_out > 0 then
-        -- Gradual ramp out
-        InsertEnvelopePoint(vol_env, actual_end, vol_scaled, 0, 0, false, true)
-        InsertEnvelopePoint(vol_env, ramp_out_end, vol_after_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(env, actual_end, target_val_to_insert, 0, 0, false, true)
+        InsertEnvelopePoint(env, ramp_out_end, val_after_to_insert, 0, 0, false, true)
       else
-        -- Sudden rise - add point just after to return to previous value
-        InsertEnvelopePoint(vol_env, actual_end, vol_scaled, 0, 0, false, true)
-        InsertEnvelopePoint(vol_env, actual_end + 0.001, vol_after_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(env, actual_end, target_val_to_insert, 0, 0, false, true)
+        InsertEnvelopePoint(env, actual_end + 0.001, val_after_to_insert, 0, 0, false, true)
       end
     else
       -- Edit cursor mode with optional ramp in
       local cursor_pos = GetCursorPosition()
-
-      -- Calculate ramp start time BEFORE cursor
       local ramp_start = cursor_pos - ramp_in
 
-      -- Get volume value BEFORE deleting anything
-      local vol_before
+      -- Get value BEFORE deleting anything
+      local val_before
       if ramp_in > 0 then
-        vol_before = get_envelope_value_at_time(vol_env, ramp_start)
-        if not vol_before or vol_before <= 0 then
-          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        val_before = get_envelope_value_at_time(env, ramp_start)
+        if not val_before then
+          val_before = get_default_track_value(track, target_envelope_info)
         end
       else
-        -- No ramp - get value just before cursor for sudden dip
-        vol_before = get_envelope_value_at_time(vol_env, cursor_pos - 0.001)
-        if not vol_before or vol_before <= 0 then
-          vol_before = GetMediaTrackInfo_Value(track, "D_VOL")
+        val_before = get_envelope_value_at_time(env, cursor_pos - 0.001)
+        if not val_before then
+          val_before = get_default_track_value(track, target_envelope_info)
         end
       end
 
-      -- Scale the before value for insertion
-      local vol_before_scaled = ScaleToEnvelopeMode(1, vol_before)
-
-      -- Delete existing points from ramp start (or just before cursor) onwards
-      local num_points = CountEnvelopePoints(vol_env)
+      -- Delete existing points from ramp start onwards
+      local num_points = CountEnvelopePoints(env)
       local delete_from = ramp_in > 0 and ramp_start or (cursor_pos - 0.002)
       for i = num_points - 1, 0, -1 do
-        local _, time = GetEnvelopePoint(vol_env, i)
+        local _, time = GetEnvelopePoint(env, i)
         if time >= delete_from then
-          DeleteEnvelopePointEx(vol_env, -1, i)
+          DeleteEnvelopePointEx(env, -1, i)
         end
       end
 
-      -- Insert new points (using scaled values)
+      -- Scale values if needed (only for volume envelopes)
+      local target_val_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
+      local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
+
+      -- Insert new points
       if ramp_in > 0 then
-        -- Gradual ramp in before cursor
-        InsertEnvelopePoint(vol_env, ramp_start, vol_before_scaled, 0, 0, false, true)
-        InsertEnvelopePoint(vol_env, cursor_pos, vol_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(env, ramp_start, val_before_to_insert, 0, 0, false, true)
+        InsertEnvelopePoint(env, cursor_pos, target_val_to_insert, 0, 0, false, true)
       else
-        -- Sudden dip - add point just before cursor to maintain previous value
-        InsertEnvelopePoint(vol_env, cursor_pos - 0.001, vol_before_scaled, 0, 0, false, true)
-        InsertEnvelopePoint(vol_env, cursor_pos, vol_scaled, 0, 0, false, true)
+        InsertEnvelopePoint(env, cursor_pos - 0.001, val_before_to_insert, 0, 0, false, true)
+        InsertEnvelopePoint(env, cursor_pos, target_val_to_insert, 0, 0, false, true)
       end
     end
 
-    Envelope_SortPoints(vol_env)
+    Envelope_SortPoints(env)
 
     ::continue::
   end
 
   UpdateArrange()
+  
+  -- Only close window if keep_window_open is false
+  if not keep_window_open then
+    window_open = false
+  end
 end
 
 ---------------------------------------------------------------------
 
 function main()
+  -- Load advanced mode state from project
+  local _, adv_mode_str = GetProjExtState(0, "ReaClassical", "AdvancedAutomationMode")
+  if adv_mode_str == "1" then
+    advanced_mode = true
+  else
+    advanced_mode = false
+  end
+
   -- Get currently selected tracks
   local tracks = get_selected_tracks()
   local track_count = #tracks
@@ -283,6 +499,16 @@ function main()
   local current_cursor = GetCursorPosition()
   local ts_start, ts_end = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
   local current_has_time_sel = (ts_start ~= ts_end)
+  
+  -- Check if FX count changed (to refresh FX list)
+  local current_fx_count = 0
+  if track_count > 0 then
+    current_fx_count = TrackFX_GetCount(tracks[1])
+  end
+  local fx_count_changed = (current_fx_count ~= last_fx_count)
+  if fx_count_changed then
+    last_fx_count = current_fx_count
+  end
 
   -- Detect if track selection changed
   if track_count ~= last_track_count or
@@ -292,13 +518,87 @@ function main()
     last_cursor_pos = current_cursor
     last_time_sel_start = ts_start
     last_time_sel_end = ts_end
+    last_fx_count = current_fx_count
 
     if track_count > 0 then
-      -- Get current volume at cursor or time selection start from first track
+      -- Refresh envelope lists for advanced mode
+      if advanced_mode then
+        track_envelopes = get_track_envelopes(tracks[1])
+        fx_params = get_track_fx_params(tracks[1])
+      end
+      
+      -- Get current value at cursor or time selection start from first track
       local first_track = tracks[1]
-      local vol_env = GetTrackEnvelopeByName(first_track, "Volume")
       local query_time = current_has_time_sel and ts_start or current_cursor
 
+      if advanced_mode and selected_envelope then
+        local env
+        if selected_envelope.type == "track" then
+          env = GetTrackEnvelopeByName(first_track, selected_envelope.name)
+        elseif selected_envelope.type == "fx" then
+          env = GetFXEnvelope(first_track, selected_envelope.fx_idx, selected_envelope.param_idx, false)
+        end
+        
+        if env then
+          local env_val = get_envelope_value_at_time(env, query_time)
+          if env_val then
+            if selected_envelope.type == "track" then
+              envelope_value = normalize_value(selected_envelope, env_val)
+            else
+              -- FX parameters: envelope stores values in actual parameter range
+              envelope_value = env_val
+            end
+          end
+        end
+      else
+        -- Standard volume mode
+        local vol_env = GetTrackEnvelopeByName(first_track, "Volume")
+        if vol_env then
+          local env_val = get_envelope_value_at_time(vol_env, query_time)
+          if env_val and env_val > 0 then
+            volume_db = linear_to_db(env_val)
+          else
+            local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
+            volume_db = linear_to_db(vol)
+          end
+        else
+          local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
+          volume_db = linear_to_db(vol)
+        end
+      end
+    end
+  elseif track_count > 0 and (current_cursor ~= last_cursor_pos or
+        ts_start ~= last_time_sel_start or
+        ts_end ~= last_time_sel_end) then
+    last_cursor_pos = current_cursor
+    last_time_sel_start = ts_start
+    last_time_sel_end = ts_end
+
+    -- Update value based on new position from first track
+    local first_track = tracks[1]
+    local query_time = current_has_time_sel and ts_start or current_cursor
+
+    if advanced_mode and selected_envelope then
+      local env
+      if selected_envelope.type == "track" then
+        env = GetTrackEnvelopeByName(first_track, selected_envelope.name)
+      elseif selected_envelope.type == "fx" then
+        env = GetFXEnvelope(first_track, selected_envelope.fx_idx, selected_envelope.param_idx, false)
+      end
+      
+      if env then
+        local env_val = get_envelope_value_at_time(env, query_time)
+        if env_val then
+          if selected_envelope.type == "track" then
+            envelope_value = normalize_value(selected_envelope, env_val)
+          else
+            -- FX parameters: envelope stores values in actual parameter range
+            envelope_value = env_val
+          end
+        end
+      end
+    else
+      local vol_env = GetTrackEnvelopeByName(first_track, "Volume")
       if vol_env then
         local env_val = get_envelope_value_at_time(vol_env, query_time)
         if env_val and env_val > 0 then
@@ -311,31 +611,6 @@ function main()
         local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
         volume_db = linear_to_db(vol)
       end
-    end
-    -- Detect if cursor or time selection changed
-  elseif track_count > 0 and (current_cursor ~= last_cursor_pos or
-        ts_start ~= last_time_sel_start or
-        ts_end ~= last_time_sel_end) then
-    last_cursor_pos = current_cursor
-    last_time_sel_start = ts_start
-    last_time_sel_end = ts_end
-
-    -- Update volume based on new position from first track
-    local first_track = tracks[1]
-    local vol_env = GetTrackEnvelopeByName(first_track, "Volume")
-    local query_time = current_has_time_sel and ts_start or current_cursor
-
-    if vol_env then
-      local env_val = get_envelope_value_at_time(vol_env, query_time)
-      if env_val and env_val > 0 then
-        volume_db = linear_to_db(env_val)
-      else
-        local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
-        volume_db = linear_to_db(vol)
-      end
-    else
-      local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
-      volume_db = linear_to_db(vol)
     end
   end
 
@@ -351,7 +626,7 @@ function main()
 
     if opened then
       if #selected_tracks == 0 then
-        ImGui.TextWrapped(ctx, "Please select one or more tracks to apply volume automation.")
+        ImGui.TextWrapped(ctx, "Please select one or more tracks to apply automation.")
       else
         -- Display selected tracks
         if #selected_tracks == 1 then
@@ -364,7 +639,6 @@ function main()
         else
           ImGui.Text(ctx, "Selected Tracks: " .. #selected_tracks)
           if ImGui.IsItemHovered(ctx) then
-            -- Build tooltip with track names
             local tooltip = ""
             for i, track in ipairs(selected_tracks) do
               local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
@@ -380,47 +654,288 @@ function main()
             ImGui.SetTooltip(ctx, tooltip)
           end
         end
+        
+        -- Advanced mode checkbox
+        local changed_adv, new_adv = ImGui.Checkbox(ctx, "Advanced Mode", advanced_mode)
+        if changed_adv then
+          advanced_mode = new_adv
+          SetProjExtState(0, "ReaClassical", "AdvancedAutomationMode", advanced_mode and "1" or "0")
+          
+          if advanced_mode and #selected_tracks > 0 then
+            track_envelopes = get_track_envelopes(selected_tracks[1])
+            fx_params = get_track_fx_params(selected_tracks[1])
+          end
+        end
+        
         ImGui.Separator(ctx)
 
-        -- Volume slider
-        ImGui.Text(ctx, "Volume (dB):")
-        ImGui.SetNextItemWidth(ctx, -1)
-        local changed_vol, new_vol = ImGui.SliderDouble(ctx, "##volume", volume_db, -150.0, 12.0, "%.1f dB")
-
-        -- Check for double-click reset to 0dB
-        if ImGui.IsItemDeactivated(ctx) and volume_reset then
-          volume_db = 0.0
-          volume_reset = false
-        elseif ImGui.IsItemHovered(ctx) and ImGui.IsMouseDoubleClicked(ctx, 0) then
-          volume_reset = true
-        end
-
-        if changed_vol then
-          volume_db = new_vol
-        end
-
-        if ImGui.IsItemHovered(ctx) then
-          ImGui.SetTooltip(ctx, "Double-click to reset to 0dB, right-click to type value")
-        end
-
-        -- Right-click popup for typing dB value
-        if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-          ImGui.OpenPopup(ctx, "vol_input")
-        end
-
-        if ImGui.BeginPopup(ctx, "vol_input") then
-          ImGui.Text(ctx, "Enter volume (dB):")
-          ImGui.SetNextItemWidth(ctx, 100)
-          local vol_input_buf = string.format("%.1f", volume_db)
-          local rv, buf = ImGui.InputText(ctx, "##dbinput", vol_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
-          if rv then
-            local db_val = tonumber(buf)
-            if db_val then
-              volume_db = math.max(-150, math.min(12, db_val))
+        if advanced_mode then
+          -- Advanced mode: Show tabs for track and FX envelopes
+          if ImGui.BeginTabBar(ctx, "EnvelopeTabs") then
+            if ImGui.BeginTabItem(ctx, "Track Envelopes") then
+              if current_tab ~= 0 then
+                current_tab = 0
+              end
+              
+              ImGui.Text(ctx, "Select Envelope:")
+              -- Calculate height needed for all track envelopes (8 items)
+              -- Each item needs more space - using 24 pixels per item plus padding
+              local track_env_height = #track_envelopes * 21 + 16
+              ImGui.BeginChild(ctx, "TrackEnvList", 0, track_env_height, ImGui.ChildFlags_Borders)
+              
+              for i, env_info in ipairs(track_envelopes) do
+                local is_selected = selected_envelope and 
+                                   selected_envelope.type == "track" and 
+                                   selected_envelope.name == env_info.name
+                
+                if ImGui.Selectable(ctx, env_info.display, is_selected) then
+                  selected_envelope = env_info
+                  
+                  -- Update value for newly selected envelope
+                  local first_track = selected_tracks[1]
+                  local query_time = has_time_sel and start_time or GetCursorPosition()
+                  local env = GetTrackEnvelopeByName(first_track, env_info.name)
+                  
+                  if env then
+                    local env_val = get_envelope_value_at_time(env, query_time)
+                    if env_val then
+                      envelope_value = normalize_value(env_info, env_val)
+                    else
+                      envelope_value = 0
+                    end
+                  else
+                    -- Get default track value when no envelope exists
+                    if env_info.name == "Volume" or env_info.name == "Volume (Pre-FX)" or env_info.name == "Trim Volume" then
+                      local vol = GetMediaTrackInfo_Value(first_track, "D_VOL")
+                      envelope_value = linear_to_db(vol)
+                    elseif env_info.name == "Pan" or env_info.name == "Pan (Pre-FX)" then
+                      envelope_value = GetMediaTrackInfo_Value(first_track, "D_PAN")
+                    elseif env_info.name == "Width" or env_info.name == "Width (Pre-FX)" then
+                      envelope_value = GetMediaTrackInfo_Value(first_track, "D_WIDTH")
+                    elseif env_info.name == "Mute" then
+                      envelope_value = GetMediaTrackInfo_Value(first_track, "B_MUTE")
+                    else
+                      envelope_value = 0
+                    end
+                  end
+                end
+              end
+              
+              ImGui.EndChild(ctx)
+              ImGui.EndTabItem(ctx)
             end
-            ImGui.CloseCurrentPopup(ctx)
+            
+            if ImGui.BeginTabItem(ctx, "FX Parameters") then
+              -- Refresh FX list when switching to this tab or when FX count changed
+              if current_tab ~= 1 or fx_count_changed then
+                current_tab = 1
+                if #selected_tracks > 0 then
+                  fx_params = get_track_fx_params(selected_tracks[1])
+                end
+              end
+              
+              ImGui.Text(ctx, "Select FX Parameter:")
+              ImGui.BeginChild(ctx, "FXParamList", 0, 150, ImGui.ChildFlags_Borders)
+              
+              if #fx_params == 0 then
+                ImGui.TextWrapped(ctx, "No FX on selected track")
+              else
+                for _, fx_info in ipairs(fx_params) do
+                  if ImGui.TreeNode(ctx, fx_info.fx_name) then
+                    for _, param_info in ipairs(fx_info.params) do
+                      local is_selected = selected_envelope and 
+                                         selected_envelope.type == "fx" and 
+                                         selected_envelope.fx_idx == param_info.fx_idx and
+                                         selected_envelope.param_idx == param_info.param_idx
+                      
+                      if ImGui.Selectable(ctx, param_info.display, is_selected) then
+                        selected_envelope = param_info
+                        
+                        -- Update value for newly selected parameter
+                        local first_track = selected_tracks[1]
+                        local query_time = has_time_sel and start_time or GetCursorPosition()
+                        local env = GetFXEnvelope(first_track, param_info.fx_idx, param_info.param_idx, false)
+                        
+                        if env then
+                          local env_val = get_envelope_value_at_time(env, query_time)
+                          if env_val then
+                            -- Envelope stores values in actual parameter range
+                            envelope_value = env_val
+                          else
+                            envelope_value = 0
+                          end
+                        else
+                          -- Get current parameter value (in actual parameter range)
+                          local _, _, current_val, _ = get_fx_param_range(first_track, param_info.fx_idx, param_info.param_idx)
+                          envelope_value = current_val
+                        end
+                      end
+                    end
+                    ImGui.TreePop(ctx)
+                  end
+                end
+              end
+              
+              ImGui.EndChild(ctx)
+              ImGui.EndTabItem(ctx)
+            end
+            
+            ImGui.EndTabBar(ctx)
           end
-          ImGui.EndPopup(ctx)
+          
+          ImGui.Separator(ctx)
+          
+          if selected_envelope then
+            -- Show value control for selected envelope
+            ImGui.Text(ctx, "Selected: " .. selected_envelope.display)
+            
+            local min_val, max_val, format_str, label
+            
+            if selected_envelope.type == "track" then
+              if selected_envelope.name == "Volume" or selected_envelope.name == "Volume (Pre-FX)" or selected_envelope.name == "Trim Volume" then
+                min_val, max_val = -150.0, 12.0
+                format_str = "%.1f dB"
+                label = "Value (dB):"
+              elseif selected_envelope.name == "Pan" or selected_envelope.name == "Pan (Pre-FX)" then
+                min_val, max_val = -1.0, 1.0
+                format_str = "%.2f"
+                label = "Value (L=-1, C=0, R=+1):"
+              elseif selected_envelope.name == "Width" or selected_envelope.name == "Width (Pre-FX)" then
+                min_val, max_val = -1.0, 1.0
+                format_str = "%.2f"
+                label = "Value:"
+              elseif selected_envelope.name == "Mute" then
+                min_val, max_val = 0.0, 1.0
+                format_str = "%.0f"
+                label = "Value (0=Unmuted, 1=Muted):"
+              else
+                min_val, max_val = 0.0, 100.0
+                format_str = "%.1f"
+                label = "Value:"
+              end
+              
+              ImGui.Text(ctx, label)
+              ImGui.SetNextItemWidth(ctx, -1)
+              local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val, format_str)
+              
+              if changed_val then
+                envelope_value = new_val
+              end
+              
+              if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "Right-click to type value")
+              end
+              
+              -- Right-click popup for typing value
+              if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+                ImGui.OpenPopup(ctx, "env_value_input")
+              end
+              
+              if ImGui.BeginPopup(ctx, "env_value_input") then
+                ImGui.Text(ctx, "Enter value:")
+                ImGui.SetNextItemWidth(ctx, 100)
+                local val_input_buf = string.format("%.2f", envelope_value)
+                local rv, buf = ImGui.InputText(ctx, "##envinput", val_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+                if rv then
+                  local val = tonumber(buf)
+                  if val then
+                    envelope_value = math.max(min_val, math.min(max_val, val))
+                  end
+                  ImGui.CloseCurrentPopup(ctx)
+                end
+                ImGui.EndPopup(ctx)
+              end
+              
+            elseif selected_envelope.type == "fx" then
+              -- FX parameters: get actual range (normalized 0-1 or custom range for JSFX/LV2)
+              local param_min, param_max, _, is_normalized = get_fx_param_range(
+                selected_envelope.track,
+                selected_envelope.fx_idx,
+                selected_envelope.param_idx
+              )
+              
+              min_val, max_val = param_min, param_max
+              label = is_normalized and "Value (normalized):" or "Value:"
+              
+              ImGui.Text(ctx, label)
+              
+              -- Get formatted parameter value for display based on current envelope_value
+              -- Temporarily set the param to get its formatted value
+              local old_val = reaper.TrackFX_GetParam(selected_envelope.track, 
+                                                      selected_envelope.fx_idx, 
+                                                      selected_envelope.param_idx)
+              reaper.TrackFX_SetParam(selected_envelope.track, 
+                                     selected_envelope.fx_idx, 
+                                     selected_envelope.param_idx, 
+                                     envelope_value)
+              local _, formatted_val = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track, 
+                                                                    selected_envelope.fx_idx, 
+                                                                    selected_envelope.param_idx, "")
+              reaper.TrackFX_SetParam(selected_envelope.track, 
+                                     selected_envelope.fx_idx, 
+                                     selected_envelope.param_idx, 
+                                     old_val)
+              
+              ImGui.SetNextItemWidth(ctx, -1)
+              local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val, formatted_val)
+              
+              if changed_val then
+                envelope_value = new_val
+              end
+              
+              if ImGui.IsItemHovered(ctx) then
+                local tooltip = "Drag to adjust. Current: " .. formatted_val
+                if not is_normalized then
+                  tooltip = tooltip .. string.format("\nRange: %.2f to %.2f", min_val, max_val)
+                end
+                ImGui.SetTooltip(ctx, tooltip)
+              end
+            end
+          else
+            ImGui.TextWrapped(ctx, "Please select an envelope from the tabs above")
+          end
+          
+        else
+          -- Standard mode: Volume only
+          ImGui.Text(ctx, "Volume (dB):")
+          ImGui.SetNextItemWidth(ctx, -1)
+          local changed_vol, new_vol = ImGui.SliderDouble(ctx, "##volume", volume_db, -150.0, 12.0, "%.1f dB")
+
+          -- Check for double-click reset to 0dB
+          if ImGui.IsItemDeactivated(ctx) and volume_reset then
+            volume_db = 0.0
+            volume_reset = false
+          elseif ImGui.IsItemHovered(ctx) and ImGui.IsMouseDoubleClicked(ctx, 0) then
+            volume_reset = true
+          end
+
+          if changed_vol then
+            volume_db = new_vol
+          end
+
+          if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Double-click to reset to 0dB, right-click to type value")
+          end
+
+          -- Right-click popup for typing dB value
+          if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+            ImGui.OpenPopup(ctx, "vol_input")
+          end
+
+          if ImGui.BeginPopup(ctx, "vol_input") then
+            ImGui.Text(ctx, "Enter volume (dB):")
+            ImGui.SetNextItemWidth(ctx, 100)
+            local vol_input_buf = string.format("%.1f", volume_db)
+            local rv, buf = ImGui.InputText(ctx, "##dbinput", vol_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+            if rv then
+              local db_val = tonumber(buf)
+              if db_val then
+                volume_db = math.max(-150, math.min(12, db_val))
+              end
+              ImGui.CloseCurrentPopup(ctx)
+            end
+            ImGui.EndPopup(ctx)
+          end
         end
 
         ImGui.Separator(ctx)
@@ -444,7 +959,6 @@ function main()
             ImGui.SetTooltip(ctx, "Right-click to type value")
           end
 
-          -- Right-click popup for ramp in
           if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
             ImGui.OpenPopup(ctx, "ramp_in_input")
           end
@@ -475,7 +989,6 @@ function main()
             ImGui.SetTooltip(ctx, "Right-click to type value")
           end
 
-          -- Right-click popup for ramp out
           if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
             ImGui.OpenPopup(ctx, "ramp_out_input")
           end
@@ -513,7 +1026,6 @@ function main()
             ImGui.SetTooltip(ctx, "Right-click to type value")
           end
 
-          -- Right-click popup for ramp in
           if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
             ImGui.OpenPopup(ctx, "ramp_in_cursor_input")
           end
@@ -539,12 +1051,34 @@ function main()
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
 
+        -- Keep window open checkbox
+        local changed_keep, new_keep = ImGui.Checkbox(ctx, "Keep window open after applying", keep_window_open)
+        if changed_keep then
+          keep_window_open = new_keep
+        end
+
+        ImGui.Spacing(ctx)
+
         -- Apply button
+        local can_apply = true
+        if advanced_mode and not selected_envelope then
+          can_apply = false
+        end
+        
+        if not can_apply then
+          ImGui.BeginDisabled(ctx)
+        end
+        
         local avail_w_button = ImGui.GetContentRegionAvail(ctx)
         if ImGui.Button(ctx, "Apply Automation", avail_w_button, 30) then
-          apply_volume_automation()
-          window_open = false      -- Close window after applying
-          Main_OnCommand(40635, 0) -- remove time selection if present
+          apply_automation()
+          if not keep_window_open then
+            Main_OnCommand(40635, 0) -- remove time selection if present
+          end
+        end
+        
+        if not can_apply then
+          ImGui.EndDisabled(ctx)
         end
       end
 
