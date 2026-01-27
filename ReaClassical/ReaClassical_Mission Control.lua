@@ -36,7 +36,6 @@ local add_mixer_track, init, draw_track_controls, draw_folder_browser
 local get_directories, normalize_path, get_parent_path, split_path
 local consolidate_folders_to_first, get_hardware_outputs
 local check_dolby_atmos_beam_available, get_track_num_channels
-local calculate_combo_width
 
 ---------------------------------------------------------------------
 
@@ -81,7 +80,6 @@ local aux_submix_tcp_visible = {}
 local folder_tracks = {}
 local folder_tcp_visible = {}
 local mixer_tcp_visible = {}
-local hardware_outputs = {}
 local pending_hw_routing_changes = {}
 local has_dolby_atmos_beam = false
 
@@ -97,7 +95,6 @@ local d_tracks = {}                -- D: tracks from first folder (one per mixer
 local aux_submix_tracks = {}       -- Aux and submix tracks
 local aux_submix_names = {}        -- Display names for aux/submix tracks
 local aux_submix_pans = {}         -- Pan values for aux/submix tracks
-local mixer_sends = {}             -- Track which aux/submix each mixer sends to
 local pending_routing_changes = {} -- Track routing changes to apply when popup closes
 local input_channels = {}          -- Store selected input channel index
 local input_channels_mono = {}     -- Remember mono selection when switching to stereo
@@ -467,8 +464,6 @@ function main()
 
             local max_hw_outs = GetNumAudioOutputs()
 
-            local max_hw_outs = GetNumAudioOutputs()
-
             -- Calculate maximum dropdown width needed for consistent appearance
             local max_dropdown_width = 100 -- Start with minimum width
 
@@ -509,7 +504,7 @@ function main()
             end
 
             -- Check special tracks multi-channel options
-            for idx, aux_info in ipairs(aux_submix_tracks) do
+            for _, aux_info in ipairs(aux_submix_tracks) do
                 if aux_info.type == "aux" or aux_info.type == "submix" or
                     aux_info.type == "roomtone" or aux_info.type == "reference" or
                     aux_info.type == "rcmaster" or aux_info.type == "live" then
@@ -566,9 +561,10 @@ function main()
                         hw_channel = -1 -- -1 means none
                     }
                     -- Get current hardware output if any
-                    for hw_out, _ in pairs(fresh_hw) do
+                    local first_hw = next(fresh_hw)
+                    if first_hw then
                         -- Remove the mono flag (1024) if present to get the actual channel
-                        if hw_out >= 1024 then
+                        if first_hw >= 1024 then
                             pending_hw_routing_changes.manual[i].hw_channel = hw_out - 1024
                         else
                             pending_hw_routing_changes.manual[i].hw_channel = hw_out
@@ -587,9 +583,9 @@ function main()
                             hw_channel = -1,
                             num_channels = num_channels
                         }
-
-                        for hw_out, _ in pairs(fresh_hw) do
-                            if hw_out >= 1024 then
+                        local first_hw = next(fresh_hw)
+                        if first_hw then
+                            if first_hw >= 1024 then
                                 pending_hw_routing_changes.special[idx].hw_channel = hw_out - 1024
                             else
                                 pending_hw_routing_changes.special[idx].hw_channel = hw_out
@@ -988,7 +984,7 @@ function main()
                     pending_hw_routing_changes.manual[i].hw_channel = -1
                 end
                 -- Clear ALL special tracks
-                for idx, aux_info in ipairs(aux_submix_tracks) do
+                for idx in ipairs(aux_submix_tracks) do
                     if pending_hw_routing_changes.special[idx] then
                         pending_hw_routing_changes.special[idx].hw_channel = -1
                     end
@@ -1033,7 +1029,6 @@ function main()
                 for idx, aux_info in ipairs(aux_submix_tracks) do
                     if pending_hw_routing_changes.special[idx] then
                         local changes = pending_hw_routing_changes.special[idx]
-                        local num_channels = changes.num_channels
 
                         -- Remove existing hardware sends
                         local num_hw_sends = GetTrackNumSends(aux_info.track, 1)
@@ -1308,7 +1303,7 @@ function main()
         if #aux_submix_tracks > 0 then
             ImGui.Separator(ctx)
             local expanded
-            expanded, show_aux_section = ImGui.CollapsingHeader(ctx, "Special Tracks", nil,
+            expanded = ImGui.CollapsingHeader(ctx, "Special Tracks", nil,
                 ImGui.TreeNodeFlags_DefaultOpen)
 
             if expanded then
@@ -1526,7 +1521,7 @@ function main()
                     local volume_db = 20 *
                         math.log(aux_volume_values[idx] > 0.0000001 and aux_volume_values[idx] or 0.0000001, 10)
                     -- Use logarithmic scale with more resolution near 0dB
-                    local fader_pos = 0.0
+                    local fader_pos
                     if volume_db <= -60 then
                         fader_pos = 0.0
                     elseif volume_db >= 12 then
@@ -1799,7 +1794,6 @@ function main()
         local system = GetOS()
         local is_mac = string.find(system, "^OSX") or string.find(system, "^macOS")
         local ctrl_key = is_mac and "Cmd" or "Ctrl"
-        local alt_key = is_mac and "Opt" or "Alt"
 
         -- Utility buttons
         ImGui.SameLine(ctx)
@@ -1988,7 +1982,7 @@ function main()
         -- Recording Paths section
         ImGui.Separator(ctx)
         local expanded_paths
-        expanded_paths, show_paths_section = ImGui.CollapsingHeader(ctx, "Recording Paths", nil,
+        expanded_paths = ImGui.CollapsingHeader(ctx, "Recording Paths", nil,
             ImGui.TreeNodeFlags_DefaultOpen)
 
         if expanded_paths then
@@ -2001,7 +1995,7 @@ function main()
             ImGui.SameLine(ctx)
             ImGui.SetCursorPosX(ctx, 100)
             ImGui.SetNextItemWidth(ctx, 370)
-            local changed_primary, new_primary = ImGui.InputText(ctx, "##primary_path", primary_path)
+            local _, new_primary = ImGui.InputText(ctx, "##primary_path", primary_path)
             if ImGui.IsItemDeactivatedAfterEdit(ctx) then
                 GetSetProjectInfo_String(0, "RECORD_PATH", new_primary, true)
             end
@@ -2055,7 +2049,7 @@ function main()
             ImGui.SameLine(ctx)
             ImGui.SetCursorPosX(ctx, 100)
             ImGui.SetNextItemWidth(ctx, 370)
-            local changed_secondary, new_secondary = ImGui.InputText(ctx, "##secondary_path", secondary_path)
+            local _, new_secondary = ImGui.InputText(ctx, "##secondary_path", secondary_path)
             if ImGui.IsItemDeactivatedAfterEdit(ctx) then
                 GetSetProjectInfo_String(0, "RECORD_PATH_SECONDARY", new_secondary, true)
             end
@@ -2246,7 +2240,7 @@ function get_special_tracks()
             local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
             local has_hyphen = (rcm_disconnect == "y")
 
-            local display_name = ""
+            local display_name
 
             -- Extract display name based on track type
             if track_type == "aux" or track_type == "submix" then
@@ -2388,8 +2382,8 @@ end
 
 function get_current_input_info(d_track)
     local recInput = GetMediaTrackInfo_Value(d_track, "I_RECINPUT")
-    local is_stereo_input = false
-    local channel_index = 0
+    local is_stereo_input
+    local channel_index
 
     if recInput < 0 then
         -- None
@@ -2898,7 +2892,6 @@ function init()
     pan_values = {}
     track_names = {}
     track_has_hyphen = {}
-    mixer_sends = {}
     volume_values = {}
 
     -- Initialize by reading from D: tracks (first folder)
@@ -2939,10 +2932,6 @@ function init()
         track_has_hyphen[i] = (rcm_disconnect == "y")
 
         track_names[i] = name_without_prefix
-
-        -- Get sends to aux/submix
-        mixer_sends[i] = get_mixer_sends(track_info.mixer_track)
-        hardware_outputs[i] = get_hardware_outputs(track_info.mixer_track)
     end
 
     -- Initialize special tracks volume
@@ -3225,7 +3214,7 @@ function draw_track_controls(start_idx, end_idx)
         local volume_db = 20 * math.log(volume_values[i] > 0.0000001 and volume_values[i] or 0.0000001, 10)
         -- Use logarithmic scale: map -60dB to 12dB non-linearly
         -- More resolution near 0dB (unity gain)
-        local fader_pos = 0.0
+        local fader_pos
         if volume_db <= -60 then
             fader_pos = 0.0
         elseif volume_db >= 12 then
@@ -3415,8 +3404,6 @@ function draw_track_controls(start_idx, end_idx)
                                 end
                             end
                         end
-                        -- Update state
-                        mixer_sends[i][aux_track] = new_state
                     end
                 end
 
@@ -3865,7 +3852,7 @@ function draw_folder_browser()
             local final_path = display_path
 
             -- Get the actual project file directory (not recording path)
-            local retval, project_file_path = reaper.EnumProjects(-1, "")
+            local _ , project_file_path = reaper.EnumProjects(-1, "")
             local project_dir
             if project_file_path and project_file_path ~= "" then
                 -- Extract directory from project file path using split_path
@@ -3950,7 +3937,7 @@ function consolidate_folders_to_first()
     if #folders < 2 then return end
 
     -- Collect items from each folder (only from tracks within folders)
-    for folder_idx, folder in ipairs(folders) do
+    for _, folder in ipairs(folders) do
         local all_folder_tracks = { folder.parent }
         for _, child in ipairs(folder.children) do
             table.insert(all_folder_tracks, child)
@@ -4235,30 +4222,6 @@ function get_track_num_channels(track)
         num_channels = 2
     end
     return num_channels
-end
-
----------------------------------------------------------------------
-
-function calculate_combo_width(options)
-    -- Calculate the width needed for a combo box based on its options
-    -- Returns width in pixels
-    local max_chars = 0
-
-    for _, option in ipairs(options) do
-        local len = #option
-        if len > max_chars then
-            max_chars = len
-        end
-    end
-
-    -- Approximate 7 pixels per character + 40 for dropdown arrow and padding
-    local width = (max_chars * 7) + 40
-
-    -- Set minimum and maximum bounds
-    width = math.max(120, width) -- Minimum 120 pixels
-    width = math.min(400, width) -- Maximum 400 pixels
-
-    return width
 end
 
 ---------------------------------------------------------------------

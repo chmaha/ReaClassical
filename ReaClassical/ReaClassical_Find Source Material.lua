@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, count_selected_media_items, get_selected_media_item_at
+local main, get_selected_media_item_at
 local get_item_by_guid, find_item_by_source_file
 
 
@@ -38,7 +38,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
 
@@ -179,22 +180,6 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
-end
-
----------------------------------------------------------------------
-
-function count_selected_media_items()
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local edit_item = GetMediaItem(0, i)
-        if IsMediaItemSelected(edit_item) then
-            selected_count = selected_count + 1
-        end
-    end
-
-    return selected_count
 end
 
 ---------------------------------------------------------------------

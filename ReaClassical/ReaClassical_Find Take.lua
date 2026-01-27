@@ -34,7 +34,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
 
@@ -66,7 +67,7 @@ function main()
     for i = 0, num_of_items - 1 do
         local item = GetMediaItem(0, i)
         local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
-        
+
         if stored_take_num and stored_take_num ~= "" then
             local take_num = tonumber(stored_take_num)
             if take_num == take_choice then
@@ -79,18 +80,20 @@ function main()
                             -- Check filename for session
                             local src = GetMediaItemTake_Source(take)
                             local filename = GetMediaSourceFileName(src, "")
-                            session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                            session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~=
+                            nil
                         else
                             -- Check take name for session
                             local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                            session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                            session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~=
+                            nil
                         end
                     end
                 end
-                
+
                 -- Check if not an edit
                 local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
-                
+
                 if session_match and not edit then
                     found = true
                     local item_start = GetMediaItemInfo_Value(item, "D_POSITION")

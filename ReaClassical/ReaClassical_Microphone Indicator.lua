@@ -45,18 +45,18 @@ local icon_size = 128
 
 -- Color settings with defaults
 local colors = {
-  offline = {0.6, 0.6, 0.6, 1.0},
-  standby = {0.1, 1.0, 0.1, 1.0},
-  recording = {0.9, 0.1, 0.1, 1.0},
-  paused = {1.0, 0.85, 0.1, 1.0}
+  offline = { 0.6, 0.6, 0.6, 1.0 },
+  standby = { 0.1, 1.0, 0.1, 1.0 },
+  recording = { 0.9, 0.1, 0.1, 1.0 },
+  paused = { 1.0, 0.85, 0.1, 1.0 }
 }
 
 -- Text colors (slightly different from icon colors)
 local text_colors = {
-  offline = {0.6, 0.6, 0.6, 1.0},
-  standby = {0.1, 1.0, 0.1, 1.0}, -- alpha will be animated
-  recording = {1.0, 0.2, 0.2, 1.0},
-  paused = {1.0, 0.85, 0.1, 1.0}
+  offline = { 0.6, 0.6, 0.6, 1.0 },
+  standby = { 0.1, 1.0, 0.1, 1.0 }, -- alpha will be animated
+  recording = { 1.0, 0.2, 0.2, 1.0 },
+  paused = { 1.0, 0.85, 0.1, 1.0 }
 }
 
 -- Project state key
@@ -73,7 +73,7 @@ function save_colors_to_project()
     colors.recording[1], colors.recording[2], colors.recording[3], colors.recording[4],
     colors.paused[1], colors.paused[2], colors.paused[3], colors.paused[4]
   )
-  
+
   SetProjExtState(0, EXT_KEY, "colors", data)
 end
 
@@ -81,11 +81,11 @@ end
 
 function load_colors_from_project()
   local retval, data = GetProjExtState(0, EXT_KEY, "colors")
-  
+
   if retval == 0 or data == "" then
     return -- No saved data, use defaults
   end
-  
+
   -- Parse the data
   local states = {}
   for state_data in data:gmatch("([^|]+)") do
@@ -100,17 +100,19 @@ function load_colors_from_project()
       end
     end
   end
-  
+
   -- Update colors if valid data was found
   if states.offline then colors.offline = states.offline end
   if states.standby then colors.standby = states.standby end
   if states.recording then colors.recording = states.recording end
   if states.paused then colors.paused = states.paused end
-  
+
   -- Update text colors to match
-  if states.offline then text_colors.offline = {states.offline[1], states.offline[2], states.offline[3], states.offline[4]} end
-  if states.standby then text_colors.standby = {states.standby[1], states.standby[2], states.standby[3], states.standby[4]} end
-  if states.recording then 
+  if states.offline then text_colors.offline = { states.offline[1], states.offline[2], states.offline[3], states.offline
+        [4] } end
+  if states.standby then text_colors.standby = { states.standby[1], states.standby[2], states.standby[3], states.standby
+        [4] } end
+  if states.recording then
     text_colors.recording = {
       math.min(1.0, states.recording[1] + 0.1),
       math.min(1.0, states.recording[2] + 0.1),
@@ -118,7 +120,7 @@ function load_colors_from_project()
       states.recording[4]
     }
   end
-  if states.paused then text_colors.paused = {states.paused[1], states.paused[2], states.paused[3], states.paused[4]} end
+  if states.paused then text_colors.paused = { states.paused[1], states.paused[2], states.paused[3], states.paused[4] } end
 end
 
 ---------------------------------------------------------------------
@@ -153,12 +155,13 @@ function main()
       -- Offline color
       ImGui.Text(ctx, "Offline:")
       ImGui.SameLine(ctx, label_width)
-      local col = ImGui.ColorConvertDouble4ToU32(colors.offline[1], colors.offline[2], colors.offline[3], colors.offline[4])
+      local col = ImGui.ColorConvertDouble4ToU32(colors.offline[1], colors.offline[2], colors.offline[3],
+        colors.offline[4])
       local changed, new_col = ImGui.ColorEdit4(ctx, "##offline", col, ImGui.ColorEditFlags_NoInputs)
       if changed then
         local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
-        colors.offline = {r, g, b, a}
-        text_colors.offline = {r, g, b, a}
+        colors.offline = { r, g, b, a }
+        text_colors.offline = { r, g, b, a }
         colors_changed = true
       end
 
@@ -171,8 +174,8 @@ function main()
       changed, new_col = ImGui.ColorEdit4(ctx, "##standby", col, ImGui.ColorEditFlags_NoInputs)
       if changed then
         local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
-        colors.standby = {r, g, b, a}
-        text_colors.standby = {r, g, b, a}
+        colors.standby = { r, g, b, a }
+        text_colors.standby = { r, g, b, a }
         colors_changed = true
       end
 
@@ -181,11 +184,12 @@ function main()
       -- Recording color
       ImGui.Text(ctx, "Recording:")
       ImGui.SameLine(ctx, label_width)
-      col = ImGui.ColorConvertDouble4ToU32(colors.recording[1], colors.recording[2], colors.recording[3], colors.recording[4])
+      col = ImGui.ColorConvertDouble4ToU32(colors.recording[1], colors.recording[2], colors.recording[3],
+        colors.recording[4])
       changed, new_col = ImGui.ColorEdit4(ctx, "##recording", col, ImGui.ColorEditFlags_NoInputs)
       if changed then
         local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
-        colors.recording = {r, g, b, a}
+        colors.recording = { r, g, b, a }
         text_colors.recording = {
           math.min(1.0, r + 0.1),
           math.min(1.0, g + 0.1),
@@ -204,8 +208,8 @@ function main()
       changed, new_col = ImGui.ColorEdit4(ctx, "##paused", col, ImGui.ColorEditFlags_NoInputs)
       if changed then
         local r, g, b, a = ImGui.ColorConvertU32ToDouble4(new_col)
-        colors.paused = {r, g, b, a}
-        text_colors.paused = {r, g, b, a}
+        colors.paused = { r, g, b, a }
+        text_colors.paused = { r, g, b, a }
         colors_changed = true
       end
 
@@ -220,16 +224,16 @@ function main()
 
       -- Reset button
       if ImGui.MenuItem(ctx, "Reset to Defaults") then
-        colors.offline = {0.6, 0.6, 0.6, 1.0}
-        colors.standby = {0.1, 1.0, 0.1, 1.0}
-        colors.recording = {0.9, 0.1, 0.1, 1.0}
-        colors.paused = {1.0, 0.85, 0.1, 1.0}
-        
-        text_colors.offline = {0.6, 0.6, 0.6, 1.0}
-        text_colors.standby = {0.1, 1.0, 0.1, 1.0}
-        text_colors.recording = {1.0, 0.2, 0.2, 1.0}
-        text_colors.paused = {1.0, 0.85, 0.1, 1.0}
-        
+        colors.offline = { 0.6, 0.6, 0.6, 1.0 }
+        colors.standby = { 0.1, 1.0, 0.1, 1.0 }
+        colors.recording = { 0.9, 0.1, 0.1, 1.0 }
+        colors.paused = { 1.0, 0.85, 0.1, 1.0 }
+
+        text_colors.offline = { 0.6, 0.6, 0.6, 1.0 }
+        text_colors.standby = { 0.1, 1.0, 0.1, 1.0 }
+        text_colors.recording = { 1.0, 0.2, 0.2, 1.0 }
+        text_colors.paused = { 1.0, 0.85, 0.1, 1.0 }
+
         save_colors_to_project()
       end
 

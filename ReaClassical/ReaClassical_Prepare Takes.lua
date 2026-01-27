@@ -26,7 +26,7 @@ local main, get_color_table
 local xfade_check, empty_items_check, get_path, folder_check
 local trackname_check, delete_empty_items, pastel_color
 local color_folder_children
-local get_item_by_guid, rgba_to_native, get_rank_color
+local rgba_to_native, get_rank_color
 local build_unified_index, build_spatial_index
 local find_items_at_position_spatial
 local get_folder_children, is_item_colorized, group_items_fast
@@ -130,7 +130,7 @@ function build_spatial_index(all_items, bucket_size)
     bucket_size = bucket_size or 0.1
     local buckets = {}
 
-    for idx, item_data in ipairs(all_items) do
+    for _, item_data in ipairs(all_items) do
         local start_bucket = math.floor(item_data.position / bucket_size)
         local end_bucket = math.floor(item_data.item_end / bucket_size)
 
@@ -216,7 +216,7 @@ end
 ---------------------------------------------------------------------
 
 local processing_step = 0
-local group_state = 0
+local group_state
 local num_pre_selected = 0
 local pre_selected = {}
 local num_of_project_items = 0
@@ -225,7 +225,6 @@ local folders = 0
 local auto_color_pref = 0
 local ranking_color_pref = 0
 local unified_index = nil
-local edits = false
 local frame_count = 0
 
 -- Incremental processing state
@@ -305,10 +304,9 @@ function do_processing_step()
 
         -- HORIZONTAL WORKFLOW - BATCH ITEM PROCESSING
     elseif processing_step == 6 then
-        edits = false
         if folders == 0 or folders == 1 then
             -- Start horizontal workflow
-            edits = xfade_check()
+            xfade_check()
             local first_track = GetTrack(0, 0)
             if not first_track then
                 processing_step = 100 -- Skip to finalization
@@ -584,7 +582,8 @@ function do_processing_step()
             table.sort(sorted_group_ids)
 
             current_group_index = 1
-            update_progress("Coloring Items (Pass 1)", 70, string.format("Starting initial coloring (%d groups)", #sorted_group_ids))
+            update_progress("Coloring Items (Pass 1)", 70,
+                string.format("Starting initial coloring (%d groups)", #sorted_group_ids))
             processing_step = 102 -- Go to pass 1 coloring
             return false
         end
@@ -662,7 +661,7 @@ function do_processing_step()
         else
             -- Done with pass 1, build GUID lookup for pass 2
             update_progress("Coloring Items", 80, "Building GUID lookup table...")
-            
+
             -- Build a lookup table: guid -> item for fast O(1) lookups in pass 2
             guid_lookup = {}
             for _, item_data in ipairs(unified_index.all_items) do
@@ -671,14 +670,14 @@ function do_processing_step()
                     guid_lookup[guid] = item_data.item
                 end
             end
-            
+
             -- Reset for Pass 2: iterate through all items
             current_item_index = 0
             total_items_to_process = CountMediaItems(0)
             processing_step = 102.5 -- Go to pass 2
             return false
         end
-        
+
         -- HORIZONTAL WORKFLOW - PASS 2: RECOLOR ITEMS WITH SRC_GUID (like vertical workflow)
     elseif processing_step == 102.5 then
         if current_item_index < total_items_to_process then
@@ -687,14 +686,14 @@ function do_processing_step()
 
             for i = current_item_index, batch_end - 1 do
                 local item = GetMediaItem(0, i)
-                
+
                 -- Skip if this item is manually colorized
                 if not is_item_colorized(item) then
                     local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-                    
+
                     if group_id > 0 and unified_index.group_map[group_id] then
                         local _, ranked = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-                        
+
                         -- Only process non-ranked items with src_guid (unless auto_color_pref == 1 or ranking_color_pref == 1)
                         if (ranked == "" or ranking_color_pref == 1) then
                             local _, src_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
@@ -703,7 +702,7 @@ function do_processing_step()
                                 local src_item = guid_lookup[src_guid]
                                 if src_item then
                                     local color_val = GetMediaItemInfo_Value(src_item, "I_CUSTOMCOLOR")
-                                    
+
                                     -- Color all items in this group (skip individual checks for speed)
                                     for _, grouped_item in ipairs(unified_index.group_map[group_id]) do
                                         SetMediaItemInfo_Value(grouped_item, "I_CUSTOMCOLOR", color_val)
@@ -1014,11 +1013,11 @@ if workflow_check == "" then
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
         modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
-workflow = workflow_check
 group_state = GetToggleCommandState(1156)
 if group_state ~= 1 then
     Main_OnCommand(1156, 0)
@@ -1236,24 +1235,6 @@ function color_folder_children(parent_track, folder_color)
 
         idx = idx + 1
     end
-end
-
----------------------------------------------------------------------
-
-function get_item_by_guid(project, guid)
-    if not guid or guid == "" then return nil end
-    project = project or 0
-
-    local numItems = reaper.CountMediaItems(project)
-    for i = 0, numItems - 1 do
-        local item = reaper.GetMediaItem(project, i)
-        local retval, itemGUID = reaper.GetSetMediaItemInfo_String(item, "GUID", "", false)
-        if retval and itemGUID == guid then
-            return item
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------

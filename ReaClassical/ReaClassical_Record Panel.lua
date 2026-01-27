@@ -27,6 +27,8 @@ local seconds_to_hhmm, find_first_rec_enabled_parent, draw, marker_actions
 local get_item_color, pastel_color, get_color_table, extract_take_from_filename
 local disarm_all_tracks, extract_session_from_filename, is_folder_parent_or_child
 local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled, check_prefs
+local load_item_rank_and_notes, save_item_rank_and_notes, rgba_to_native, update_take_name
+local apply_rank_and_notes_to_items
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -47,7 +49,8 @@ if workflow == "" then
   if string.find(system, "^OSX") or string.find(system, "^macOS") then
     modifier = "Cmd"
   end
-  MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+  MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
   return
 end
 
@@ -77,7 +80,6 @@ local take_count, take_text, session_text
 local _, prev_recfilename_value = get_config_var_string("recfile_wildcards")
 local separator = package.config:sub(1, 1);
 
-local _, pos_string = GetProjExtState(0, "ReaClassical", "TakeCounterPosition")
 local _, reset = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
 local _, start_text = GetProjExtState(0, "ReaClassical", "Recording Start")
 local _, end_text = GetProjExtState(0, "ReaClassical", "Recording End")
@@ -89,8 +91,6 @@ local set_via_right_click = false
 local auto_started = false
 
 if reset == "" then reset = 0 end
-
-local values       = {}
 local current_time = os.time()
 
 package.path       = ImGui_GetBuiltinPath() .. '/?.lua'
@@ -138,7 +138,6 @@ ImGui.Attach(ctx, small_font)
 local open = true
 
 -- Popup state variables (persisted across frames)
-local popup_open = false
 local popup_take_text = nil
 local popup_session_text = nil
 local popup_reset = nil
@@ -824,7 +823,7 @@ function draw(playstate)
       ImGui.PushFont(ctx, small_font, 15 * scale)
       ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xD3A056FF) -- Blue tint (RGBA)
 
-      local time_text = ""
+      local time_text
       if start_time and end_time then
         time_text = "Start: " .. start_text .. start_next_day .. "  |  End: " .. end_text .. end_next_day
       elseif start_time and calc_end_time then
@@ -837,7 +836,7 @@ function draw(playstate)
         time_text = "Duration: " .. duration_text
       end
 
-      local time_w, time_h = ImGui.CalcTextSize(ctx, time_text)
+      local time_w = ImGui.CalcTextSize(ctx, time_text)
       -- Centered at top with padding
       ImGui.SetCursorPos(ctx, (win_w - time_w) / 2, 45 * scale)
       ImGui.Text(ctx, time_text)
@@ -949,7 +948,6 @@ function draw(playstate)
 
   -- Record/Stop button
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y)
-  local is_recording = (playstate == 5 or playstate == 6)
 
   -- Check if any tracks are rec-armed and if selected track is rec-armed
   local any_armed = false
@@ -1178,7 +1176,6 @@ function draw(playstate)
     popup_start_text = start_text
     popup_end_text = end_text
     popup_duration_text = duration_text
-    popup_open = true
     ImGui.OpenPopup(ctx, "settings_popup")
   end
 
@@ -1366,7 +1363,6 @@ function draw(playstate)
       end
 
       set_via_right_click = true
-      popup_open = false
       ImGui.CloseCurrentPopup(ctx)
     end
 
@@ -1374,13 +1370,10 @@ function draw(playstate)
 
     -- Cancel button
     if ImGui.Button(ctx, "Cancel", 120, 0) then
-      popup_open = false
       ImGui.CloseCurrentPopup(ctx)
     end
 
     ImGui.EndPopup(ctx)
-  else
-    popup_open = false
   end
 
   UpdateTimeline()
@@ -1784,7 +1777,6 @@ function apply_rank_and_notes_to_items()
     end
   else
     -- Horizontal workflow - check all tracks
-    local colors = get_color_table()
     local track_count = CountTracks(0)
     for i = 0, track_count - 1 do
       local track = GetTrack(0, i)

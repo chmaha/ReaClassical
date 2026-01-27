@@ -35,7 +35,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
     local folders, _, _, live_count = folder_check()

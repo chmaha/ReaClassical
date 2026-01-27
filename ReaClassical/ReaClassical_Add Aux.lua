@@ -35,7 +35,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
     local folders = folder_check()
@@ -153,28 +154,28 @@ end
 ---------------------------------------------------------------------
 
 function scroll_to_first_track()
-  local track1 = GetTrack(0, 0)
-  if not track1 then return end
+    local track1 = GetTrack(0, 0)
+    if not track1 then return end
 
-  -- Save current selected tracks to restore later
-  local saved_sel = {}
-  local count_sel = CountSelectedTracks(0)
-  for i = 0, count_sel - 1 do
-    saved_sel[i+1] = GetSelectedTrack(0, i)
-  end
+    -- Save current selected tracks to restore later
+    local saved_sel = {}
+    local count_sel = CountSelectedTracks(0)
+    for i = 0, count_sel - 1 do
+        saved_sel[i + 1] = GetSelectedTrack(0, i)
+    end
 
-  -- Select only Track 1
-  Main_OnCommand(40297, 0) -- Unselect all tracks
-  SetTrackSelected(track1, true)
+    -- Select only Track 1
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    SetTrackSelected(track1, true)
 
-  -- Scroll Track 1 into view (vertically)
-  Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
+    -- Scroll Track 1 into view (vertically)
+    Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
 
-  -- Restore previous selection
-  Main_OnCommand(40297, 0) -- Unselect all tracks
-  for _, tr in ipairs(saved_sel) do
-    SetTrackSelected(tr, true)
-  end
+    -- Restore previous selection
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    for _, tr in ipairs(saved_sel) do
+        SetTrackSelected(tr, true)
+    end
 end
 
 ---------------------------------------------------------------------

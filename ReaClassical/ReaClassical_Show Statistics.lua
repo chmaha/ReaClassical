@@ -39,7 +39,8 @@ if workflow == "" then
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
         modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -220,17 +221,18 @@ function main()
         local viewport = ImGui.GetMainViewport(ctx)
         local work_x, work_y = ImGui.Viewport_GetWorkPos(viewport)
         local work_w, work_h = ImGui.Viewport_GetWorkSize(viewport)
-        
+
         -- Estimate window size for centering
         local estimated_w = 200
         local estimated_h = 500
-        
+
         local center_x = work_x + (work_w - estimated_w) / 2
         local center_y = work_y + (work_h - estimated_h) / 2
-        
+
         ImGui.SetNextWindowPos(ctx, center_x, center_y, ImGui.Cond_Once)
 
-        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Project Statistics", window_open, ImGui.WindowFlags_AlwaysAutoResize)
+        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Project Statistics", window_open,
+            ImGui.WindowFlags_AlwaysAutoResize)
         window_open = open_ref
 
         if opened then

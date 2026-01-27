@@ -36,7 +36,8 @@ if workflow == "" then
   if string.find(system, "^OSX") or string.find(system, "^macOS") then
     modifier = "Cmd"
   end
-  MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+  MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
   return
 end
 
@@ -53,8 +54,8 @@ local ImGui                          = require 'imgui' '0.10'
 local ctx                            = ImGui.CreateContext("ReaClassical MeterBridge")
 local track_state                    = {}
 local window_open                    = true
-local max_channels_per_row_numeric   = 8 -- For numeric display
-local max_channels_per_row_graphical = 8 -- For graphical display (reduced since we show L+R)
+local max_channels_per_row_numeric   = 8    -- For numeric display
+local max_channels_per_row_graphical = 8    -- For graphical display (reduced since we show L+R)
 local show_graphical_meters          = false
 local show_hardware_names            = true -- New: toggle for hardware names
 
@@ -110,7 +111,7 @@ function main()
           if changed_hw then
             show_hardware_names = new_hw_value
             -- Force refresh of all track labels
-            for guid, st in pairs(track_state) do
+            for _, st in pairs(track_state) do
               local tr = st.track
               if tr then
                 local is_rec_armed = GetMediaTrackInfo_Value(tr, "I_RECARM") == 1
@@ -323,15 +324,15 @@ function get_input_label(tr)
   -- Handle hardware names mode
   if show_hardware_names then
     local hw_name1 = GetInputChannelName(start_channel)
-    
+
     if is_stereo then
       local hw_name2 = GetInputChannelName(start_channel + 1)
-      
+
       if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
         -- Try to detect if they're a stereo pair with matching base name
         local base1 = hw_name1:match("^(.+)%s+%d+$") or hw_name1
         local base2 = hw_name2:match("^(.+)%s+%d+$") or hw_name2
-        
+
         if base1 == base2 then
           -- Same device/interface, show combined name
           return string.format("%s+%s", hw_name1, hw_name2)

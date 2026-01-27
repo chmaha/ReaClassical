@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, source_markers, dest_check, adaptive_delete
+local main, source_markers, adaptive_delete
 local ripple_lock_mode, return_xfade_length, xfade
 local select_item_under_cursor_on_selected_track
 local count_selected_media_items , get_selected_media_item_at
@@ -45,7 +45,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
 
@@ -151,31 +152,6 @@ function xfade(xfade_len)
     MoveEditCursor(0.001, false)
     select_item_under_cursor_on_selected_track()
     MoveEditCursor(-0.001, false)
-end
-
----------------------------------------------------------------------
-
-function dest_check()
-    -- Get first selected item
-    local item = get_selected_media_item_at(0)
-    if not item then
-        return
-    end
-
-    -- Find its track
-    local track = GetMediaItem_Track(item)
-    if not track then
-        return
-    end
-
-    -- Walk upward to the topmost parent (folder) track
-    local folder = track
-    while GetParentTrack(folder) do
-        folder = GetParentTrack(folder)
-    end
-
-    -- Check if that folder is the first track
-    return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") == 1
 end
 
 ---------------------------------------------------------------------

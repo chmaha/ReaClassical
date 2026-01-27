@@ -26,7 +26,7 @@ local main, takename_check, check_position, get_track_info, paste
 local select_and_cut, go_to_previous, shift, select_CD_track_items
 local calc_postgap, is_item_start_crossfaded
 local get_selected_media_item_at, count_selected_media_items
-local select_items_containing_midpoint, get_folder_children, get_parent_folder
+local select_items_containing_midpoint, get_folder_children
 local is_folder_track
 ---------------------------------------------------------------------
 
@@ -39,7 +39,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
     local take_name, selected_item = takename_check()
@@ -303,7 +304,6 @@ function get_selected_media_item_at(index)
     return nil
 end
 
-
 ---------------------------------------------------------------------
 
 function select_items_containing_midpoint()
@@ -314,7 +314,7 @@ function select_items_containing_midpoint()
     local first_item = GetSelectedMediaItem(0, 0)
     local first_track = GetMediaItemTrack(first_item)
     local folder_track = first_track
-    
+
     -- If it's not a folder track, this shouldn't happen due to validation
     if not is_folder_track(folder_track) then
         return
@@ -357,28 +357,6 @@ function select_items_containing_midpoint()
             end
         end
     end
-end
-
----------------------------------------------------------------------
-
-function get_parent_folder(track)
-    -- Returns the parent folder track, or nil if track is not in a folder
-    if not track then return nil end
-
-    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
-
-    -- Walk backwards to find parent folder
-    for i = track_idx - 1, 0, -1 do
-        local t = GetTrack(0, i)
-        if not t then break end
-
-        local depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
-        if depth == 1 then
-            return t
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------

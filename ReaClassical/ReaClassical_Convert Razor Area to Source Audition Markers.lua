@@ -36,7 +36,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
 
@@ -44,7 +45,7 @@ function main()
 
     local sai_manager = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
     Main_OnCommand(sai_manager, 0)
-    
+
     local value = GetExtState("ReaClassical_SAI_Manager", "set_pairs_at_cursor")
     local set_pairs_at_cursor = (value == "true")
 
@@ -57,7 +58,7 @@ function main()
     if set_pairs_at_cursor then
         local cursor_pos = GetCursorPosition()
         local selected_track = GetSelectedTrack(0, 0)
-        
+
         if selected_track then
             local track_number = math.floor(get_track_number())
 
@@ -68,7 +69,7 @@ function main()
             local marker_count = CountProjectMarkers(0)
             local last_marker_type = nil
             local closest_marker_pos = -1
-            
+
             for i = 0, marker_count - 1 do
                 local _, isrgn, pos, _, name = EnumProjectMarkers(i)
                 if not isrgn and pos < cursor_pos then
@@ -88,16 +89,16 @@ function main()
                     end
                 end
             end
-            
+
             -- Decide whether to add SAI or SAO based on the closest marker before cursor
             local marker_suffix = "SAI"
             if last_marker_type == "SAI" then
                 marker_suffix = "SAO"
             end
-            
+
             AddProjectMarker2(0, false, cursor_pos, 0, track_number .. ":" .. marker_suffix, -1, marker_color)
         end
-        
+
         PreventUIRefresh(-1)
         Undo_EndBlock("Add " .. (marker_suffix or "SAI") .. " marker at edit cursor", 0)
         return

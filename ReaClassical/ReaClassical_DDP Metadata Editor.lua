@@ -39,7 +39,8 @@ if workflow == "" then
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
         modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+        .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -265,7 +266,7 @@ function main()
                 editing_track = nil
                 SetProjExtState(0, "ReaClassical", "ddp_refresh_trigger", "")
             end
-            
+
             -- Handle pending re-init from move operations BEFORE checking editing_track
             if pending_reinit then
                 editing_track = nil
@@ -275,15 +276,15 @@ function main()
             if editing_track ~= selected_track then
                 -- Check if we're actually switching to a different track (not just re-initing)
                 local is_track_switch = (editing_track ~= nil)
-                
+
                 editing_track = selected_track
                 selected_track_row = nil -- Reset selection when switching tracks
-                
+
                 -- Only clear stored GUID if actually switching tracks
                 if is_track_switch then
                     SetProjExtState(0, "ReaClassical", "ddp_selected_item_guid", "")
                 end
-                
+
                 Main_OnCommand(create_CD_markers, 0)
                 create_metadata_report_and_cue()
                 album_metadata, album_item = nil, nil
@@ -308,7 +309,7 @@ function main()
                         track_items_metadata[i] = parse_item_name(name, false)
                     end
                 end
-                
+
                 -- Restore selection from stored GUID after re-init
                 local _, stored_guid = GetProjExtState(0, "ReaClassical", "ddp_selected_item_guid")
                 if stored_guid ~= "" then
@@ -528,9 +529,9 @@ function main()
             if ImGui.Button(ctx, "Reposition Album Tracks") then
                 Main_OnCommand(reposition_album_tracks, 0)
             end
-            
+
             local item_count = CountTrackMediaItems(selected_track)
-            
+
             -- Check if we should show move buttons (non-album item selected)
             local show_move_buttons = false
             if selected_track_row ~= nil then
@@ -550,7 +551,7 @@ function main()
                     end
                 end
             end
-            
+
             -- Show move buttons on same line if appropriate
             if show_move_buttons then
                 ImGui.SameLine(ctx)
@@ -559,10 +560,10 @@ function main()
                     local item = GetTrackMediaItem(selected_track, selected_track_row)
                     local _, item_guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
                     SetProjExtState(0, "ReaClassical", "ddp_selected_item_guid", item_guid)
-                    
+
                     -- Execute move
                     Main_OnCommand(move_album_track_up, 0)
-                    
+
                     -- Schedule re-init for next frame
                     pending_reinit = true
                 end
@@ -572,10 +573,10 @@ function main()
                     local item = GetTrackMediaItem(selected_track, selected_track_row)
                     local _, item_guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
                     SetProjExtState(0, "ReaClassical", "ddp_selected_item_guid", item_guid)
-                    
+
                     -- Execute move
                     Main_OnCommand(move_album_track_down, 0)
-                    
+
                     -- Schedule re-init for next frame
                     pending_reinit = true
                 end
@@ -596,26 +597,26 @@ function main()
             SetProjExtState(0, "ReaClassical", "manual_isrc_entry", manual_isrc_entry and "1" or "0")
 
             local spacing = 5
-            
+
             local track_number_counter = 1
-            
+
             -- Calculate fixed widths for checkbox and track number
-            local checkbox_w = ImGui.GetFrameHeight(ctx)
+            checkbox_w = ImGui.GetFrameHeight(ctx)
             local track_number_w = ImGui.CalcTextSize(ctx, "00")
-            
+
             -- Get total available width
             local avail_w = select(1, ImGui.GetContentRegionAvail(ctx))
-            
+
             -- Calculate space available for metadata boxes after accounting for fixed elements
             local fixed_width = checkbox_w + spacing + track_number_w + spacing
             local metadata_width = avail_w - fixed_width - spacing * #keys
-            
+
             -- Distribute width among metadata boxes (title gets 2 units, others get 1)
             local normal_boxes = #keys - 1
-            local total_units = normal_boxes + 2  -- 6 normal boxes + 2 units for title
+            local total_units = normal_boxes + 2 -- 6 normal boxes + 2 units for title
             local normal_box_w = metadata_width / total_units
             local title_box_w = 2 * normal_box_w
-            
+
             local first_isrc = nil
 
             -- Add "!" header above checkbox column with tooltip, centered over checkboxes
@@ -657,7 +658,7 @@ function main()
 
             local any_changed = false
             local changed
-            
+
             -- Reset selection and check for exactly one selected item
             selected_track_row = nil
             local selected_count = 0
@@ -676,10 +677,10 @@ function main()
                     end
                 end
             end
-            
+
             -- Store selected item GUID when selection changes (don't force restore every frame)
             local _, stored_guid = GetProjExtState(0, "ReaClassical", "ddp_selected_item_guid")
-            
+
             if current_selected_item then
                 local _, item_guid = GetSetMediaItemInfo_String(current_selected_item, "GUID", "", false)
                 if item_guid ~= stored_guid then
@@ -741,14 +742,14 @@ function main()
 
                     -- Track number with clickable selection
                     local track_number_str = string.format("%02d", track_number_counter)
-                    
+
                     -- Check if this row is selected
                     local is_selected_row = (selected_track_row == i)
-                    
+
                     -- Save cursor position
                     local cursor_x_before = ImGui.GetCursorPosX(ctx)
                     local cursor_y_before = ImGui.GetCursorPosY(ctx)
-                    
+
                     -- Draw track number text with color based on selection
                     if is_selected_row then
                         -- Carolina blue: RGB(86, 160, 211) in RGBA format with full alpha
@@ -759,11 +760,11 @@ function main()
                     if is_selected_row then
                         ImGui.PopStyleColor(ctx)
                     end
-                    
+
                     -- Create clickable area over the track number
                     ImGui.SetCursorPos(ctx, cursor_x_before, cursor_y_before)
                     ImGui.InvisibleButton(ctx, "##tracknum_" .. i, track_number_w + 10, ImGui.GetTextLineHeight(ctx))
-                    
+
                     -- Check if clicked
                     if ImGui.IsItemClicked(ctx) then
                         -- Deselect all items first
@@ -777,9 +778,9 @@ function main()
                         -- Track the selected row
                         selected_track_row = i
                     end
-                    
+
                     ImGui.SameLine(ctx, 0, spacing)
-                    
+
                     local original_title = md.title
                     ImGui.PushItemWidth(ctx, title_box_w)
                     local title_widget_id = "##" .. i .. "_title_" .. tostring(selected_track)
@@ -987,7 +988,7 @@ function update_marker_and_region(item)
     if not mark_index then return end
 
     -- Update the marker
-    local retval, isrgn, pos, rgnend, _, markrgnID, color = EnumProjectMarkers3(0, mark_index)
+    local retval, isrgn, pos, _, _, markrgnID, color = EnumProjectMarkers3(0, mark_index)
     if retval and not isrgn and track_color == color then
         SetProjectMarkerByIndex(0, mark_index, false, pos, 0, markrgnID, "#" .. clean_name, color)
     end

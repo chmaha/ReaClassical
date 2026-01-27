@@ -82,8 +82,6 @@ local function main()
         window_open = open_ref
 
         if opened then
-            local avail_w = ImGui.GetContentRegionAvail(ctx)
-
             -- Number of tracks section
             ImGui.Text(ctx, "Number of tracks per folder:")
             ImGui.SameLine(ctx)
@@ -100,7 +98,7 @@ local function main()
                 ImGui.SetKeyboardFocusHere(ctx)
                 should_focus_input = false
             end
-            
+
             ImGui.SetNextItemWidth(ctx, 40)
             local changed, new_count = ImGui.InputInt(ctx, "##track_count", track_count, 0, 0)
             if changed then

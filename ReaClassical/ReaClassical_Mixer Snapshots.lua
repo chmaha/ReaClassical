@@ -27,7 +27,8 @@ local create_snapshot, serialize_table, deserialize_table, save_snapshots_to_pro
 local load_snapshots_from_project, copy_from_bank, clear_bank, switch_to_bank
 local sort_snapshots, draw_table, draw_UI, handle_project_change
 local get_selected_item_name, recall_snapshot, check_auto_recall
-local find_snapshot_by_item_name, get_item_by_guid
+local find_snapshot_by_item_name, get_item_by_guid, refresh_snapshot_items
+local get_item_position, find_snapshot_with_gap_logic, find_snapshot_at_cursor
 
 local script_name = "Mixer Snapshot Manager"
 
@@ -54,7 +55,6 @@ local last_play_pos           = -1
 local is_playing              = false
 
 -- UI state
-local show_window             = true
 local editing_row             = nil
 local editing_column          = nil
 local edit_buffer             = ""
@@ -82,6 +82,8 @@ local recall_routing          = true
 
 -- Column widths: #, Item Name, Date/Time, Notes, Delete
 local col_widths              = { 35, 250, 140, 350, 60 }
+
+local last_project
 
 ---------------------------------------------------------------------
 
@@ -310,7 +312,7 @@ function find_snapshot_with_gap_logic(cursor_pos)
     local item = GetMediaItem(0, i)
     local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
     local take = GetActiveTake(item)
-    local name = ""
+    local _, name
     if take then
       _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
     end
@@ -364,12 +366,12 @@ function find_snapshot_with_gap_logic(cursor_pos)
       local item = GetMediaItem(0, i)
       local item_track = GetMediaItem_Track(item)
       local item_track_guid = GetTrackGUID(item_track)
-      
+
       if item_track_guid == prev_snap_track_guid then
         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
         local item_end = item_start + item_length
-        
+
         -- Only consider items that end before the next snapshot starts
         if item_end < next_snap_item_start and item_end > prev_track_last_item_end then
           prev_track_last_item_end = item_end
@@ -484,7 +486,6 @@ end
 function refresh_snapshot_items()
   -- Update each snapshot's item_guid by finding the current item with that name
   for _, snap in ipairs(snapshots) do
-    local found = false
     for i = 0, CountMediaItems(0) - 1 do
       local item = GetMediaItem(0, i)
       local take = GetActiveTake(item)
@@ -492,13 +493,9 @@ function refresh_snapshot_items()
         local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
         if name == snap.item_name then
           snap.item_guid = BR_GetMediaItemGUID(item)
-          found = true
           break
         end
       end
-    end
-    if not found then
-      -- Item no longer exists or was renamed, keep old GUID
     end
   end
 
@@ -549,7 +546,7 @@ end
 
 function deserialize_table(str)
   if not str or str == "" then return nil end
-  local func, err = load("return " .. str)
+  local func = load("return " .. str)
   if func then return func() else return nil end
 end
 
@@ -571,7 +568,7 @@ function save_snapshots_to_project()
   data.recall_sends = recall_sends
   data.recall_routing = recall_routing
 
-  for i, snap in ipairs(snapshots) do
+  for _, snap in ipairs(snapshots) do
     local s = {
       item_name = snap.item_name,
       item_guid = snap.item_guid,
@@ -608,7 +605,7 @@ function load_snapshots_from_project()
       recall_sends = data.recall_sends ~= false
       recall_routing = data.recall_routing ~= false
 
-      for i, s in ipairs(data.snapshots or {}) do
+      for _, s in ipairs(data.snapshots or {}) do
         table.insert(snapshots, s)
       end
 
@@ -635,7 +632,7 @@ function copy_from_bank(source_bank)
     if data then
       snapshot_counter = data.counter or 0
       snapshots = {}
-      for i, s in ipairs(data.snapshots or {}) do
+      for _, s in ipairs(data.snapshots or {}) do
         table.insert(snapshots, s)
       end
       save_snapshots_to_project()
@@ -985,7 +982,7 @@ function draw_UI()
       save_snapshots_to_project()
     end
     ImGui.SameLine(ctx); ImGui.Dummy(ctx, 10, 0); ImGui.SameLine(ctx)
-    
+
     -- FEATURE 1: Grey out mid-gap checkbox when auto-recall is disabled
     if disable_auto_recall then
       ImGui.BeginDisabled(ctx)

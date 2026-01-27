@@ -36,16 +36,17 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
-    
+
     -- Check if any item is selected
     if CountSelectedMediaItems(0) == 0 then
         MB("Please select at least one item.", "ReaClassical Error", 0)
         return
     end
-    
+
     split_items_at_markers()
     Undo_EndBlock('ReaClassical Split Items at Markers', -1)
     PreventUIRefresh(-1)
@@ -58,24 +59,24 @@ end
 function get_folder_parent_track(track)
     -- Get the folder parent track (the first track in the folder)
     local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-    
+
     -- If this track is a folder parent itself, return it
     if track_depth == 1 then
         return track
     end
-    
+
     -- Otherwise, walk backwards to find the folder parent
     local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
-    
+
     for i = track_idx - 1, 0, -1 do
         local parent_track = GetTrack(0, i)
         local parent_depth = GetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH")
-        
+
         if parent_depth == 1 then
             return parent_track
         end
     end
-    
+
     -- If no folder parent found, return the original track
     return track
 end
@@ -88,7 +89,7 @@ function split_items_at_markers()
     -- Get the first selected item and find its folder parent track
     local first_selected_item = GetSelectedMediaItem(0, 0)
     if not first_selected_item then return end
-    
+
     local selected_track = GetMediaItemTrack(first_selected_item)
     local parent_track = get_folder_parent_track(selected_track)
     local parent_track_index = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER")
@@ -107,7 +108,7 @@ function split_items_at_markers()
     local marker_data = {}
     local _, num_markers, _ = CountProjectMarkers(0)
     local has_named_markers = false
-    
+
     for i = 0, num_markers - 1 do
         local retval, isrgn, pos, _, name, markrgnindex = EnumProjectMarkers(i)
         if retval and not isrgn then
@@ -117,7 +118,7 @@ function split_items_at_markers()
                     has_named_markers = true
                 end
                 local label = name ~= "" and name or ("Marker " .. tostring(markrgnindex))
-                table.insert(marker_data, {pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex})
+                table.insert(marker_data, { pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex })
             end
         end
     end
@@ -143,7 +144,7 @@ function split_items_at_markers()
             local track = GetMediaItemTrack(item)
             local item_parent_track = get_folder_parent_track(track)
             local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
-            
+
             if item_parent_track_index == parent_track_index then
                 local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
@@ -166,7 +167,8 @@ function split_items_at_markers()
                             local new_item = GetMediaItem(0, j)
                             local new_track = GetMediaItemTrack(new_item)
                             local new_item_parent_track = get_folder_parent_track(new_track)
-                            local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track, "IP_TRACKNUMBER")
+                            local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track,
+                                "IP_TRACKNUMBER")
                             local new_item_pos = GetMediaItemInfo_Value(new_item, "D_POSITION")
 
                             if new_parent_track_index == parent_track_index and math.abs(new_item_pos - marker.pos) < 0.0001 then
@@ -190,20 +192,20 @@ function split_items_at_markers()
         -- Collect all unique group IDs within the original item bounds
         local group_positions = {}
         local item_count = CountMediaItems(0)
-        
+
         for i = 0, item_count - 1 do
             local item = GetMediaItem(0, i)
             local track = GetMediaItemTrack(item)
             local track_index = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
             local item_parent_track = get_folder_parent_track(track)
             local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
-            
+
             -- Only look at parent track items within original bounds
             if item_parent_track_index == parent_track_index and track_index == parent_track_index then
                 local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
                 local item_end = item_pos + item_len
-                
+
                 -- Check if item is completely within original bounds (not extending beyond)
                 if item_pos >= original_item_start - 0.0001 and item_end <= original_item_end + 0.0001 then
                     local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
@@ -215,30 +217,30 @@ function split_items_at_markers()
                 end
             end
         end
-        
+
         -- Sort groups by their position
         local sorted_groups = {}
         for group_id, pos in pairs(group_positions) do
-            table.insert(sorted_groups, {group_id = group_id, pos = pos})
+            table.insert(sorted_groups, { group_id = group_id, pos = pos })
         end
         table.sort(sorted_groups, function(a, b) return a.pos < b.pos end)
-        
+
         -- Create mapping from group_id to suffix number
         local group_to_suffix = {}
         for idx, group_data in ipairs(sorted_groups) do
             group_to_suffix[group_data.group_id] = string.format("%02d", idx)
         end
-        
+
         -- Now apply suffixes to items with these group IDs
         for i = 0, item_count - 1 do
             local item = GetMediaItem(0, i)
             local track = GetMediaItemTrack(item)
             local item_parent_track = get_folder_parent_track(track)
             local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
-            
+
             if item_parent_track_index == parent_track_index then
                 local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-                
+
                 if group_id > 0 and group_to_suffix[group_id] then
                     local take = GetActiveTake(item)
                     if take then

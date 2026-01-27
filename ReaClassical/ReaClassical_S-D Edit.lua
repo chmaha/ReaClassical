@@ -51,7 +51,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
 
@@ -304,7 +305,7 @@ function markers()
     if dest_proj and ((din and din ~= dest_proj) or (dout and dout ~= dest_proj)) then
         proj_marker_count = -1
     end
-    
+
     return proj_marker_count, source_proj, dest_proj, dest_in, dest_out, dest_count,
         source_in, source_out, source_count, pos_table, src_track_number, dest_track_number
 end
@@ -905,24 +906,24 @@ end
 function select_matching_dest_folder()
     GoToMarker(0, 996, false)
     local cursor = GetCursorPosition()
-    
+
     -- Search through all markers to find DEST marker at cursor position
     local dest_label
     local _, num_markers, num_regions = CountProjectMarkers(0)
-    
+
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, name, _, _ = EnumProjectMarkers3(0, i)
-        
+
         -- Check if it's a marker (not region) at cursor position with DEST in label
         if not isrgn and math.abs(pos - cursor) < 0.0001 and string.match(name, ":DEST") then
             dest_label = name
             break
         end
     end
-    
+
     -- Extract folder number from DEST marker
     local folder_number = tonumber(string.match(dest_label, "(%d*):DEST*"))
-    
+
     -- Select the matching track
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)

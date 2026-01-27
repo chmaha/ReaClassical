@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_number, rgba_to_native, get_color_table
-local pastel_color, update_take_name, get_item_color, apply_rank_color
+local pastel_color, get_item_color, apply_rank_color
 local strip_rank_prefix
 
 ---------------------------------------------------------------------
@@ -41,7 +41,8 @@ if workflow == "" then
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
         modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -415,31 +416,6 @@ function pastel_color(index)
     )
 
     return color_int | 0x1000000
-end
-
----------------------------------------------------------------------
-
-function update_take_name(item, rank)
-    local take = GetActiveTake(item)
-    if not take then return end
-
-    -- Use the global item_name which is already stripped of rank prefixes
-    local base_name = item_name
-
-    -- Add new rank prefix if not "No Rank" (empty string)
-    local final_name = base_name
-    if rank ~= "" then
-        local rank_index = tonumber(rank)
-        if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
-            if base_name ~= "" then
-                final_name = RANKS[rank_index].prefix .. "-" .. base_name
-            else
-                final_name = RANKS[rank_index].prefix
-            end
-        end
-    end
-
-    GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
 end
 
 ---------------------------------------------------------------------

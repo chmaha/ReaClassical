@@ -35,7 +35,8 @@ if workflow == "" then
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
         modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -102,7 +103,6 @@ local TOOLBAR_ITEMS = {
 -- Cache for loaded textures
 local textures = {}
 local BUTTON_SIZE = 32
-local BUTTON_SPACING = 4 -- Space between buttons
 
 function main()
     if window_open then
@@ -111,9 +111,6 @@ function main()
         window_open = open_ref
 
         if opened then
-            local style_padding = ImGui.GetStyleVar(ctx, ImGui.StyleVar_WindowPadding)
-            local item_spacing = ImGui.GetStyleVar(ctx, ImGui.StyleVar_ItemSpacing)
-
             -- Use selected layout
             local buttons_per_row = layout_options[selected_layout].cols
 

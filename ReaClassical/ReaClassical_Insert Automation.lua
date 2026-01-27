@@ -40,7 +40,8 @@ if workflow == "" then
   if string.find(system, "^OSX") or string.find(system, "^macOS") then
     modifier = "Cmd"
   end
-  MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+  MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
   return
 end
 
@@ -96,7 +97,7 @@ end
 function linear_to_db(val)
   -- Convert linear volume value to dB
   -- REAPER uses: 1.0 = 0dB, 0 = -inf dB
-  if val <= 0.0000000298023223876953125 then   -- -150 dB
+  if val <= 0.0000000298023223876953125 then -- -150 dB
     return -150.0
   end
   return 20 * math.log(val, 10)
@@ -144,7 +145,7 @@ function apply_volume_automation()
     if not vol_env then
       -- Create volume envelope if it doesn't exist
       SetOnlyTrackSelected(track)
-      Main_OnCommand(40406, 0)     -- Track: Toggle track volume envelope visible
+      Main_OnCommand(40406, 0) -- Track: Toggle track volume envelope visible
       vol_env = GetTrackEnvelopeByName(track, "Volume")
       if not vol_env then goto continue end
     end
@@ -245,7 +246,7 @@ function apply_volume_automation()
       local num_points = CountEnvelopePoints(vol_env)
       local delete_from = ramp_in > 0 and ramp_start or (cursor_pos - 0.002)
       for i = num_points - 1, 0, -1 do
-        local retval, time = GetEnvelopePoint(vol_env, i)
+        local _, time = GetEnvelopePoint(vol_env, i)
         if time >= delete_from then
           DeleteEnvelopePointEx(vol_env, -1, i)
         end
@@ -264,10 +265,10 @@ function apply_volume_automation()
     end
 
     Envelope_SortPoints(vol_env)
-    
+
     ::continue::
   end
-  
+
   UpdateArrange()
 end
 
@@ -284,8 +285,8 @@ function main()
   local current_has_time_sel = (ts_start ~= ts_end)
 
   -- Detect if track selection changed
-  if track_count ~= last_track_count or 
-     (track_count > 0 and tracks[1] ~= selected_tracks[1]) then
+  if track_count ~= last_track_count or
+      (track_count > 0 and tracks[1] ~= selected_tracks[1]) then
     selected_tracks = tracks
     last_track_count = track_count
     last_cursor_pos = current_cursor
@@ -542,8 +543,8 @@ function main()
         local avail_w_button = ImGui.GetContentRegionAvail(ctx)
         if ImGui.Button(ctx, "Apply Automation", avail_w_button, 30) then
           apply_volume_automation()
-          window_open = false               -- Close window after applying
-          Main_OnCommand(40635, 0)          -- remove time selection if present
+          window_open = false      -- Close window after applying
+          Main_OnCommand(40635, 0) -- remove time selection if present
         end
       end
 

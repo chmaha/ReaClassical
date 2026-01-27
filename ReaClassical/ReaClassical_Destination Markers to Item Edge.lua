@@ -35,7 +35,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
     local left_pos, right_pos
@@ -88,7 +89,7 @@ function main()
     local selected_track = GetSelectedTrack(0, 0)
     local color_track = selected_track or GetTrack(0, 0)
     local marker_color = color_track and GetTrackColor(color_track) or 0
-    
+
     AddProjectMarker2(0, false, left_pos, 0, track_number .. ":DEST-IN", 996, marker_color)
     AddProjectMarker2(0, false, right_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
 
@@ -157,7 +158,6 @@ function get_selected_media_item_at(index)
 
     return nil
 end
-
 
 ---------------------------------------------------------------------
 

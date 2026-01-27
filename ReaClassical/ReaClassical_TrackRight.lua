@@ -38,7 +38,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
     local take_name, selected_item = takename_check()
@@ -46,7 +47,7 @@ function main()
         MB('Please select an item that starts a CD track', "Select CD track start", 0)
         return
     end
-    
+
     local selected_track = GetMediaItemTrack(selected_item)
 
     -- Check if selected item is in a child track
@@ -99,12 +100,12 @@ function is_in_child_track(item)
     if not item then return false end
     local track = GetMediaItemTrack(item)
     if not track then return false end
-    
+
     -- Check if this track is a folder parent
     if is_folder_track(track) then
         return false
     end
-    
+
     -- Check if this track has a parent folder
     local parent = get_parent_folder(track)
     return parent ~= nil
@@ -247,7 +248,6 @@ function get_selected_media_item_at(index)
 
     return nil
 end
-
 
 ---------------------------------------------------------------------
 

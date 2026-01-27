@@ -79,7 +79,8 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
 
@@ -269,7 +270,7 @@ end
 
 function load_prefs()
     local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
-    
+
     -- Reset to defaults if count mismatch or empty
     if saved ~= "" then
         local count = select(2, saved:gsub(",", ",")) + 1
@@ -300,11 +301,11 @@ end
 function load_defaults()
     -- Load default values into prefs table
     local default_entries = {}
-    
+
     for entry in default_values:gmatch('([^,]+)') do
         default_entries[#default_entries + 1] = entry
     end
-    
+
     for i = 1, #labels do
         if i == 12 then
             prefs[i] = default_entries[i] or "WAV"
@@ -462,9 +463,6 @@ end
 
 function rename_all_items(use_take_numbers)
     Undo_BeginBlock()
-
-    -- Get workflow to determine filename pattern
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
     local item_count = CountMediaItems(0)
 

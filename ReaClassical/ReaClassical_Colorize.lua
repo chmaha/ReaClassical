@@ -37,7 +37,8 @@ if workflow == "" then
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
         modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+        .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -93,7 +94,7 @@ function main()
 
             -- ColorPicker4 with NoAlpha flag to show full picker immediately (uses 0xXXRRGGBB format)
             local flags = ImGui.ColorEditFlags_NoAlpha | ImGui.ColorEditFlags_PickerHueWheel |
-            ImGui.ColorEditFlags_DisplayRGB
+                ImGui.ColorEditFlags_DisplayRGB
             local changed, new_color = ImGui.ColorPicker4(ctx, '##color', selected_color_rgb, flags)
 
             if changed then
@@ -311,7 +312,7 @@ function remove_custom_coloring()
             local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
             if saved_color ~= "" then
                 local original_color
-                
+
                 -- Check auto_color_pref setting
                 if auto_color_pref == 1 then
                     -- When auto_color_pref is enabled, restore to default color (0)
@@ -320,7 +321,7 @@ function remove_custom_coloring()
                     -- When auto_color_pref is disabled, restore to saved color
                     original_color = tonumber(saved_color) or 0
                 end
-                
+
                 SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", original_color)
 
                 -- Clear saved color

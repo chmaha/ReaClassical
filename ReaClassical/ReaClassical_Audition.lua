@@ -332,7 +332,8 @@ function mixer()
             -- Now handle the track based on whether it's a folder parent or child
             if folder_depth == 1 then
                 -- This is a folder parent track - check Mission Control visibility
-                local _, folder_vis_str = GetProjExtState(0, "ReaClassical_MissionControl", "folder_tcp_visible_" .. guid)
+                local _, folder_vis_str = GetProjExtState(0, "ReaClassical_MissionControl",
+                    "folder_tcp_visible_" .. guid)
 
                 if folder_vis_str ~= "" then
                     local should_show = (folder_vis_str == "1")

@@ -61,13 +61,13 @@ local playback_monitor              = false
 local current_sao_pos               = nil
 local last_play_pos                 = -1
 local sort_mode                     = "time" -- "time", "marker", or "rank"
-local keep_markers_after_conversion = true -- New checkbox state
-local set_pairs_at_cursor           = false -- New checkbox for setting pairs at edit cursor instead of razor
+local keep_markers_after_conversion = true   -- New checkbox state
+local set_pairs_at_cursor           = false  -- New checkbox for setting pairs at edit cursor instead of razor
 
 -- ExtState keys for persistent storage
 local EXT_STATE_SECTION             = "ReaClassical_SAI_Manager"
 
-local audition_manager = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
+local audition_manager              = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
 SetToggleCommandState(1, audition_manager, 1)
 
 ---------------------------------------------------------------------
@@ -142,7 +142,8 @@ function main()
                 if set_pairs_at_cursor then
                     ImGui.Text(ctx, "Press Z at the edit cursor to set an audition pair...")
                 else
-                    ImGui.Text(ctx, "Left click drag to set a razor selection and press Z to convert to a marker pair...")
+                    ImGui.Text(ctx,
+                        "Left click drag to set a razor selection and press Z to convert to a marker pair...")
                 end
             else
                 -- Create table
@@ -212,7 +213,7 @@ function main()
                     ImGui.Text(ctx, text)
 
                     -- Display markers
-                    for i, marker in ipairs(markers) do
+                    for _, marker in ipairs(markers) do
                         ImGui.TableNextRow(ctx)
 
                         -- Get marker data
@@ -294,7 +295,7 @@ function main()
                             local num_markers = CountProjectMarkers(0)
 
                             for j = 0, num_markers - 1 do
-                                local ok, isrgn, pos, rgnend, name, _ = EnumProjectMarkers2(0, j)
+                                local ok, isrgn, pos, _, name, _ = EnumProjectMarkers2(0, j)
                                 if ok and not isrgn and pos > marker.pos and name and name:match(sai_pattern) then
                                     next_sai_pos = pos
                                     break
@@ -306,7 +307,7 @@ function main()
                             local sao_idx = nil
 
                             for j = 0, num_markers - 1 do
-                                local ok, isrgn, pos, rgnend, name, _ = EnumProjectMarkers2(0, j)
+                                local ok, isrgn, pos, _, name, _ = EnumProjectMarkers2(0, j)
                                 if ok and not isrgn and pos > marker.pos and name and name:match(sao_pattern) then
                                     -- Check if this SAO is before the next SAI (or there is no next SAI)
                                     if not next_sai_pos or pos < next_sai_pos then
@@ -396,7 +397,7 @@ function save_marker_data()
     -- Save each marker's data using its GUID stored in P_EXT
     local num_markers = CountProjectMarkers(0)
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        local _, isrgn, _, _, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
 
         if not isrgn and name:match("^%d+:SAI") then
             -- Get the marker's GUID
@@ -453,7 +454,7 @@ function clean_up_orphans()
     local current_guids = {}
     local num_markers = CountProjectMarkers(0)
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        local _, isrgn, _, _, name = EnumProjectMarkers3(0, i)
 
         if not isrgn and name:match("^%d+:SAI") then
             local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
@@ -467,7 +468,7 @@ function clean_up_orphans()
     local all_keys = {}
     local i = 0
     while true do
-        local ok, key, value = EnumProjExtState(0, "sai_marker", i)
+        local ok, key = EnumProjExtState(0, "sai_marker", i)
         if not ok then break end
         table.insert(all_keys, key)
         i = i + 1
@@ -497,7 +498,7 @@ function init_marker_data()
     local num_markers = CountProjectMarkers(0)
 
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        local _, isrgn, _, _, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
 
         if not isrgn then -- Only process markers, not regions
             -- Check if marker name matches pattern: number(s):SAI
@@ -537,7 +538,7 @@ function get_sai()
     local num_markers = CountProjectMarkers(0)
 
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        local _, isrgn, pos, _, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
 
         if not isrgn then -- Only process markers, not regions
             -- Check if marker name matches pattern: number(s):SAI
@@ -571,7 +572,6 @@ function get_sai()
     elseif sort_mode == "marker" then
         table.sort(markers, function(a, b) return a.track_num < b.track_num end)
     elseif sort_mode == "rank" then
-        -- Rank order: Excellent (1) -> Very Good (2) -> Good (3) -> OK (4) -> Below Average (5) -> Poor (6) -> Unusable (7) -> No Rank (8)
         table.sort(markers, function(a, b)
             if a.color_idx == b.color_idx then
                 return a.pos < b.pos                  -- Secondary sort by time
@@ -592,7 +592,7 @@ function find_sao(track_num, sai_pos)
     local sao_pattern = "^" .. track_num .. ":SAO"
 
     for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+        local _, isrgn, pos, _, name = EnumProjectMarkers3(0, i)
 
         -- Only look for SAO markers that come AFTER the SAI marker
         if not isrgn and pos > sai_pos and name:match(sao_pattern) then

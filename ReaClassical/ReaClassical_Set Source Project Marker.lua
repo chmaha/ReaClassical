@@ -34,10 +34,11 @@ function main()
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
       modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
     return
   end
-  
+
   local cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
   local i = 0;
   while true do

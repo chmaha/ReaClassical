@@ -28,12 +28,12 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, add_spacer, copy_track_names, get_path
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_name, reset_spacers, sync, show_track_name_dialog
+local process_name, reset_spacers, sync
 local save_track_settings, reset_track_settings, write_to_mixer
 local check_mixer_order, rearrange_tracks, reset_mixer_order
 local copy_track_names_from_dest, process_dest, move_items_to_first_source_group
 local check_hidden_track_items, move_destination_folder_to_top
-local get_whole_number_input, set_recording_to_primary_and_secondary
+local set_recording_to_primary_and_secondary
 local reorder_special_tracks, select_children_of_selected_folders
 local select_next_folder, collapse_folder, fold_small, make_folder
 local select_all_parents
@@ -72,7 +72,6 @@ function main()
         local rcmaster
         if num >= 2 then
             rcmaster = create_destination_group(num)
-            rcmaster_exists = true
         else
             return
         end
@@ -1076,53 +1075,6 @@ end
 
 ---------------------------------------------------------------------
 
-function show_track_name_dialog(mixer_track_table)
-    local max_inputs_per_dialog = 8
-    local success = true
-    local track_names = {}
-
-    -- Loop to handle all tracks in chunks
-    for start_track = 1, #mixer_track_table, max_inputs_per_dialog do
-        local end_track = math.min(start_track + max_inputs_per_dialog - 1, #mixer_track_table)
-        local input_string = ""
-
-        for i = start_track, end_track do
-            input_string = input_string .. "Track " .. i .. " :,"
-        end
-
-        local ret, input = GetUserInputs("Enter Track Names " .. start_track .. "-" .. end_track,
-            end_track - start_track + 1,
-            input_string .. ",extrawidth=100", "")
-        if not ret then
-            return false
-        end
-
-        local inputs_track_table = {}
-        for input_value in string.gmatch(input, "[^,]+") do
-            table.insert(inputs_track_table, input_value:match("^%s*(.-)%s*$"))
-        end
-
-        for i = 1, #inputs_track_table do
-            track_names[start_track + i - 1] = inputs_track_table[i]
-        end
-    end
-
-    for i, track in ipairs(mixer_track_table) do
-        if track then
-            local ret = GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. (track_names[i] or ""), true)
-            if not ret then
-                success = false
-            end
-        else
-            success = false
-        end
-    end
-
-    return success
-end
-
----------------------------------------------------------------------
-
 function check_mixer_order(mixer_table)
     local current_order = {}
     local is_sequential = true
@@ -1330,23 +1282,6 @@ function move_destination_folder_to_top()
 end
 
 -----------------------------------------------------------------------
-
-function get_whole_number_input()
-    while true do
-        local ok, num = GetUserInputs("Vertical Workflow", 1, "How many tracks?", "10")
-        if not ok then return nil end -- User cancelled
-
-        num = tonumber(num)
-
-        if num and num == math.floor(num) and num > 1 then
-            return num
-        else
-            MB("Please enter a valid number. You need 2 or more tracks to make a folder!", "Invalid Input", 0)
-        end
-    end
-end
-
----------------------------------------------------------------------
 
 function set_recording_to_primary_and_secondary(end_of_sources)
     Main_OnCommand(40297, 0) -- Unselect all tracks

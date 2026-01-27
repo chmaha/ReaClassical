@@ -54,7 +54,8 @@ function main()
     if string.find(system, "^OSX") or string.find(system, "^macOS") then
       modifier = "Cmd"
     end
-    MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.", "ReaClassical Error", 0)
+    MB("Please create a ReaClassical project via " .. modifier
+      .. "+N to use this function.", "ReaClassical Error", 0)
     return
   end
 
@@ -137,20 +138,9 @@ function main()
 
   UpdateArrange()
 
-  local _, silent = GetProjExtState(0, "ReaClassical", "ddp_silent")
-
   local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
   Main_OnCommand(ddp_editor, 0)
   restore_RCMix()
-
-
-  SetProjExtState(0, "ReaClassical", "ddp_silent", "")
-
-  -- MB("DDP Markers and regions have been successfully added to the project.\n\n" ..
-  --   "Edit ISRC/UPC and other metadata by opening the DDP Metadata Editor.\n\n" ..
-  --   "Create the DDP fileset, matching audio for the generated CUE,\n" ..
-  --   "and/or individual files via the ReaClassical 'All Settings' presets\nin the Render dialog.\n\n" ..
-  --   "The album reports, CUE file and metadata report have been written to:\n" .. path, "Create CD Markers", 0)
 
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
@@ -282,7 +272,8 @@ function create_marker(current_start, marker_count, take_name, offset, track_col
     local track_title = "#" .. clean_name:match("^[!]*(.+)")
 
     -- Add marker and get its marker number
-    local marker_num = AddProjectMarker2(0, false, corrected_current_start, 0, track_title, marker_count + 1, track_color)
+    local marker_num = AddProjectMarker2(0, false, corrected_current_start, 0, track_title,
+      marker_count + 1, track_color)
     added_marker = true
 
     if marker_num then
@@ -292,7 +283,7 @@ function create_marker(current_start, marker_count, take_name, offset, track_col
         local _, isrgn, _, _, _, markrgnindexnumber = EnumProjectMarkers3(0, i)
         if not isrgn and markrgnindexnumber == marker_num then
           -- Get GUID using enumeration index
-          local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
+          local _, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
 
           -- Store GUID in item
           GetSetMediaItemInfo_String(item, "P_EXT:cdmarker", guid, true)
@@ -1057,7 +1048,7 @@ end
 ---------------------------------------------------------------------
 
 function remove_negative_position_items_from_folder(parent_track)
-if not parent_track then return 0 end
+  if not parent_track then return 0 end
 
   local tracks_to_clean = { parent_track }
   local folder_depth = GetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH")
@@ -1072,23 +1063,23 @@ if not parent_track then return 0 end
       depth = depth + GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
       table.insert(tracks_to_clean, tr)
       if depth <= 0 then break end
-        end
-        end
+    end
+  end
 
-        local removed_count = 0
-        for _, track in ipairs(tracks_to_clean) do
-          for j = CountTrackMediaItems(track) - 1, 0, -1 do
-            local item = GetTrackMediaItem(track, j)
-            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            if pos < 0 then
-              DeleteTrackMediaItem(track, item)
-              removed_count = removed_count + 1
-              end
-              end
-              end
+  local removed_count = 0
+  for _, track in ipairs(tracks_to_clean) do
+    for j = CountTrackMediaItems(track) - 1, 0, -1 do
+      local item = GetTrackMediaItem(track, j)
+      local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      if pos < 0 then
+        DeleteTrackMediaItem(track, item)
+        removed_count = removed_count + 1
+      end
+    end
+  end
 
-              return removed_count
-              end
+  return removed_count
+end
 
 ---------------------------------------------------------------------
 
