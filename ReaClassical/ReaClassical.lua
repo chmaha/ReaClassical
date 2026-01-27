@@ -3,6 +3,8 @@
 @version 26.1.12
 @changelog
   Mission Control: Add ability to show mixer tracks in TCP
+  Automation: Add advanced mode
+  Automation: Allow window to remain open
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
