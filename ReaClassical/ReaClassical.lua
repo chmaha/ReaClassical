@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.11
+@version 26.1.12
 @changelog
-  Prepare Takes: Improve horizontal coloring
-  Item naming with session name: Use lazy regex match
-  Metadata Editor: Fix alignment of header text
+  Mission Control: Add ability to show mixer tracks in TCP
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
