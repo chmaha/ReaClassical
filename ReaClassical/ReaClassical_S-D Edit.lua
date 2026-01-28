@@ -93,7 +93,7 @@ function main()
     end
 
     ripple_lock_mode()
-
+    
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
         local distance
         local pos
@@ -205,7 +205,7 @@ function main()
             "Please add at least 2 valid source-destination markers: \n" ..
             "2-point edit: Either 1 DEST and 1 SOURCE marker (any combination) " ..
             "or both SOURCE markers (when not in multi-tab mode)\n" ..
-            "3-point edit: Any combination of 3 markers \n 4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
+            "3-point edit: Any combination of 3 markers \n4-point edit: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT"
             , "Source-Destination Edit", 0)
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
@@ -312,10 +312,10 @@ end
 
 ---------------------------------------------------------------------
 
-function add_marker(pos, distance, src_track_number, label, num)
+function add_marker(pos, distance, track_number, label, num)
     local colors = get_color_table()
     DeleteProjectMarker(nil, num, false)
-    AddProjectMarker2(0, false, pos + distance, 0, src_track_number .. ":" .. label, num, colors.source_marker)
+    AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, colors.source_marker)
 end
 
 ---------------------------------------------------------------------
