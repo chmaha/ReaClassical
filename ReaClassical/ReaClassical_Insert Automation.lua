@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, apply_automation, linear_to_db, db_to_linear, get_envelope_value_at_time
 local format_time, get_selected_tracks, get_track_envelopes, get_track_fx_params
 local normalize_value, denormalize_value, get_default_track_value
-local get_fx_param_range
+local get_fx_param_range, is_toggle_parameter
 
 ---------------------------------------------------------------------
 
@@ -86,6 +86,8 @@ local keep_window_open    = false
 
 -- Track last FX count to detect changes
 local last_fx_count       = 0
+
+local create_auto_item    = true
 
 ---------------------------------------------------------------------
 
@@ -473,6 +475,34 @@ function apply_automation()
     ::continue::
   end
 
+  -- Create automation items if requested
+  if create_auto_item then
+    for _, track in ipairs(selected_tracks) do
+      local env
+      if target_envelope_info.type == "track" then
+        env = GetTrackEnvelopeByName(track, target_envelope_info.name)
+      elseif target_envelope_info.type == "fx" then
+        env = GetFXEnvelope(track, target_envelope_info.fx_idx, target_envelope_info.param_idx, false)
+      end
+
+      if env then
+        local item_start, item_end
+        if has_time_sel and (start_time ~= end_time) then
+          -- Use time selection range (including ramps if any)
+          item_start = ramp_in > 0 and (start_time - ramp_in) or (start_time - 0.002)
+          item_end = ramp_out > 0 and (end_time + ramp_out) or (end_time + 0.002)
+        else
+          -- Use cursor to end of project
+          item_start = ramp_in > 0 and (GetCursorPosition() - ramp_in) or (GetCursorPosition() - 0.002)
+          item_end = GetProjectLength(0)
+        end
+
+        -- Create automation item
+        InsertAutomationItem(env, -1, item_start, item_end - item_start)
+      end
+    end
+  end
+
   UpdateArrange()
 
   -- Only close window if keep_window_open is false
@@ -742,14 +772,14 @@ function main()
                 ImGui.TextWrapped(ctx, "No FX on selected track")
               else
                 for _, fx_info in ipairs(fx_params) do
-                  if ImGui.TreeNode(ctx, fx_info.fx_name) then
+                  if ImGui.TreeNode(ctx, fx_info.fx_name .. "##fx" .. fx_info.fx_idx) then
                     for _, param_info in ipairs(fx_info.params) do
                       local is_selected = selected_envelope and
                           selected_envelope.type == "fx" and
                           selected_envelope.fx_idx == param_info.fx_idx and
                           selected_envelope.param_idx == param_info.param_idx
 
-                      if ImGui.Selectable(ctx, param_info.display, is_selected) then
+                      if ImGui.Selectable(ctx, param_info.display .. "##" .. param_info.fx_idx .. "_" .. param_info.param_idx, is_selected) then
                         selected_envelope = param_info
 
                         -- Update value for newly selected parameter
@@ -950,6 +980,20 @@ function main()
           ImGui.Spacing(ctx)
 
           -- Ramp controls (outside the time selection)
+          local is_toggle = false
+          if advanced_mode and selected_envelope then
+            if selected_envelope.type == "track" then
+              is_toggle = is_toggle_parameter(selected_tracks[1], nil, nil, selected_envelope)
+            elseif selected_envelope.type == "fx" then
+              is_toggle = is_toggle_parameter(selected_tracks[1], selected_envelope.fx_idx, selected_envelope.param_idx,
+                selected_envelope)
+            end
+          end
+
+          if is_toggle then
+            ImGui.BeginDisabled(ctx)
+          end
+
           ImGui.Text(ctx, "Ramp In (seconds before selection):")
           ImGui.SetNextItemWidth(ctx, -1)
           local changed_in, new_in = ImGui.SliderDouble(ctx, "##ramp_in", ramp_in, 0.0, 10.0, "%.2f sec")
@@ -980,6 +1024,7 @@ function main()
             ImGui.EndPopup(ctx)
           end
 
+
           ImGui.Text(ctx, "Ramp Out (seconds after selection):")
           ImGui.SetNextItemWidth(ctx, -1)
           local changed_out, new_out = ImGui.SliderDouble(ctx, "##ramp_out", ramp_out, 0.0, 10.0, "%.2f sec")
@@ -1009,6 +1054,9 @@ function main()
             end
             ImGui.EndPopup(ctx)
           end
+          if is_toggle then
+            ImGui.EndDisabled(ctx)
+          end
         else
           ImGui.Text(ctx, "Mode: Edit Cursor to End")
           local cursor_pos = GetCursorPosition()
@@ -1016,6 +1064,19 @@ function main()
 
           ImGui.Spacing(ctx)
 
+          local is_toggle = false
+          if advanced_mode and selected_envelope then
+            if selected_envelope.type == "track" then
+              is_toggle = is_toggle_parameter(selected_tracks[1], nil, nil, selected_envelope)
+            elseif selected_envelope.type == "fx" then
+              is_toggle = is_toggle_parameter(selected_tracks[1], selected_envelope.fx_idx, selected_envelope.param_idx,
+                selected_envelope)
+            end
+          end
+
+          if is_toggle then
+            ImGui.BeginDisabled(ctx)
+          end
           -- Ramp in control for cursor mode
           ImGui.Text(ctx, "Ramp In (seconds before cursor):")
           ImGui.SetNextItemWidth(ctx, -1)
@@ -1047,11 +1108,20 @@ function main()
             end
             ImGui.EndPopup(ctx)
           end
+          if is_toggle then
+            ImGui.EndDisabled(ctx)
+          end
         end
 
         ImGui.Spacing(ctx)
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
+
+        -- Create automation item checkbox
+        local changed_auto_item, new_auto_item = ImGui.Checkbox(ctx, "Create automation item", create_auto_item)
+        if changed_auto_item then
+          create_auto_item = new_auto_item
+        end
 
         -- Keep window open checkbox
         local changed_keep, new_keep = ImGui.Checkbox(ctx, "Keep window open after applying", keep_window_open)
@@ -1089,6 +1159,42 @@ function main()
 
     defer(main)
   end
+end
+
+---------------------------------------------------------------------
+
+function is_toggle_parameter(track, fx_idx, param_idx, envelope_info)
+  -- Check if parameter is a toggle (on/off only)
+  if envelope_info and envelope_info.type == "track" and envelope_info.name == "Mute" then
+    return true
+  end
+
+  if envelope_info and envelope_info.type == "fx" and fx_idx ~= nil and param_idx ~= nil then
+    -- Save current value
+    local current_val = reaper.TrackFX_GetParam(track, fx_idx, param_idx)
+
+    -- Test min value (0)
+    reaper.TrackFX_SetParam(track, fx_idx, param_idx, 0)
+    local _, val_at_0 = reaper.TrackFX_GetFormattedParamValue(track, fx_idx, param_idx, "")
+
+    -- Test max value (1)
+    reaper.TrackFX_SetParam(track, fx_idx, param_idx, 1)
+    local _, val_at_1 = reaper.TrackFX_GetFormattedParamValue(track, fx_idx, param_idx, "")
+
+    -- Test middle value (0.5)
+    reaper.TrackFX_SetParam(track, fx_idx, param_idx, 0.5)
+    local _, val_at_mid = reaper.TrackFX_GetFormattedParamValue(track, fx_idx, param_idx, "")
+
+    -- Restore original value
+    reaper.TrackFX_SetParam(track, fx_idx, param_idx, current_val)
+
+    -- If middle value equals one of the extremes, it's likely a toggle
+    if val_at_mid == val_at_0 or val_at_mid == val_at_1 then
+      return true
+    end
+  end
+
+  return false
 end
 
 ---------------------------------------------------------------------
