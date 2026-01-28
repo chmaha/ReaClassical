@@ -109,6 +109,19 @@ sleep 2
 unzip -q "$temp_dir/Resource_Folder_Base.zip" -d "${rcfolder}/"
 unzip -q "$temp_dir/UP_Linux-${arch}.zip" -d "${rcfolder}/UserPlugins/"
 
+# Copy Effects from InstallData
+echo "Copying Effects from InstallData..."
+sleep 1
+if [ -d "${rcfolder}/InstallData/Effects" ]; then
+    mkdir -p "${rcfolder}/Effects"
+    cp -r "${rcfolder}/InstallData/Effects/"* "${rcfolder}/Effects/" 2>/dev/null || \
+        echo "Warning: No files found in InstallData/Effects or copy failed"
+    echo "Removing InstallData folder..."
+    rm -rf "${rcfolder}/InstallData"
+else
+    echo "Warning: InstallData/Effects directory not found"
+fi
+
 # Get the realpath of $rcfolder
 rcfolder_path=$(realpath "${rcfolder}")
 sleep 2
