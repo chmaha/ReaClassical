@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.13
+@version 26.1.14
 @changelog
-  Automation: Fix inverted mute values
-  Automation: Use correct command ID to show trim envelope
+  Automation: Default to adding automation as item
+  Automation: Add right-click edit for advanced mode
+  Metadata Editor: Add digital release only option
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
