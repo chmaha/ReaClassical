@@ -69,6 +69,8 @@ local reset_clicked = false
 local prefs = {}
 local error_message = "" -- Store validation error message
 
+set_action_options(2)
+
 ---------------------------------------------------------------------
 
 function main()
