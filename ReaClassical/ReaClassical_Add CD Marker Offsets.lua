@@ -59,18 +59,25 @@ function main()
         if table[2] then saved_offset = table[2] / 1000 end
     end
 
+    -- Override offset if digital release only is enabled
+    local _, digital_release_str = GetProjExtState(0, "ReaClassical", "digital_release_only")
+    local digital_release_only = digital_release_str == "1"
+    if digital_release_only then
+        saved_offset = 0
+    end
+
     local updated = update_offsets(saved_offset)
 
     local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
     Main_OnCommand(create_cd_markers, 0)
 
-    if updated > 0 then
-        MB(string.format("Updated %d item offset(s)", updated), "", 0)
-        -- ShowConsoleMsg(string.format("Updated %d item offset(s)\n", updated))
-    else
-        MB("No offsets changed", "", 0)
-        -- ShowConsoleMsg("No items needed OFFSET update\n")
-    end
+    -- if updated > 0 then
+    --     MB(string.format("Updated %d item offset(s)", updated), "", 0)
+    --     -- ShowConsoleMsg(string.format("Updated %d item offset(s)\n", updated))
+    -- else
+    --     MB("No offsets changed", "", 0)
+    --     -- ShowConsoleMsg("No items needed OFFSET update\n")
+    -- end
 
     Undo_EndBlock('Add CD Marker Offsets', 0)
     PreventUIRefresh(-1)

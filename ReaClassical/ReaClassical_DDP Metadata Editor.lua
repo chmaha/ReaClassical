@@ -225,6 +225,9 @@ local first_run = true
 local selected_track_row = nil
 local pending_reinit = false
 
+local _, digital_release_str = GetProjExtState(0, "ReaClassical", "digital_release_only")
+local digital_release_only = digital_release_str == "1"
+
 ---------------------------------------------------------------------
 
 function main()
@@ -344,12 +347,25 @@ function main()
 
                 local spacing = 5
 
-                -- right-align the whole group
+                -- Left-align Digital Release Only checkbox
+                ImGui.Text(ctx, "Digital Release Only")
+                ImGui.SameLine(ctx)
+                local digital_changed
+                digital_changed, digital_release_only = ImGui.Checkbox(ctx, "##digital_release_chk", digital_release_only)
+                if digital_changed then
+                    SetProjExtState(0, "ReaClassical", "digital_release_only", digital_release_only and "1" or "0")
+                    editing_track = nil
+                    -- Re-run Create CD Markers
+                    Main_OnCommand(create_CD_markers, 0)
+                end
+
+                -- Right-align Manual Contributors Entry checkbox
+                ImGui.SameLine(ctx)
                 local avail = select(1, ImGui.GetContentRegionAvail(ctx))
                 local text_w = ImGui.CalcTextSize(ctx, "Manual Contributors Entry")
                 local checkbox_w = ImGui.GetFrameHeight(ctx)
 
-                ImGui.SetCursorPosX(ctx, avail - (text_w + checkbox_w + 8))
+                ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + avail - (text_w + checkbox_w + 8))
 
                 ImGui.Text(ctx, "Manual Contributors Entry")
                 ImGui.SameLine(ctx)
@@ -512,6 +528,30 @@ function main()
             end
             ImGui.Dummy(ctx, 0, 10)
             ImGui.Text(ctx, "Track Metadata:")
+
+            -- Check if any items have offsets and show indicator
+            local has_offsets = false
+            if selected_track then
+                for i = 0, CountTrackMediaItems(selected_track) - 1 do
+                    local item = GetTrackMediaItem(selected_track, i)
+                    local take = GetActiveTake(item)
+                    if take then
+                        local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                        if name and name:match("|OFFSET=") then
+                            has_offsets = true
+                            break
+                        end
+                    end
+                end
+            end
+
+            if has_offsets then
+                ImGui.SameLine(ctx)
+                ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x56A0D3FF) -- Carolina blue
+                ImGui.Text(ctx, "(marker offsets active)")
+                ImGui.PopStyleColor(ctx)
+            end
+
             ImGui.Separator(ctx)
 
             -- Left-side buttons for marker offsets

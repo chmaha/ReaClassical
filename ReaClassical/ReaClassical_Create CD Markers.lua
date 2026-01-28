@@ -45,6 +45,9 @@ if not SWS_exists then
   return
 end
 
+local _, digital_release_str = GetProjExtState(0, "ReaClassical", "digital_release_only")
+local digital_release_only = digital_release_str == "1"
+
 function main()
   Undo_BeginBlock()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -183,6 +186,10 @@ function cd_markers(selected_track, num_of_items, track_color)
   Main_OnCommand(40754, 0) -- enable snap to grid
 
   local pregap_len, offset, postgap = return_custom_length()
+
+  if digital_release_only then
+    offset = 0 -- Override offset for digital releases
+  end
 
   if tonumber(pregap_len) < 1 then pregap_len = 1 end
   local final_end = find_project_end(selected_track, num_of_items)
@@ -364,6 +371,10 @@ end
 ---------------------------------------------------------------------
 
 function frame_check(pos)
+  if digital_release_only then
+    return pos -- No frame snapping for digital releases
+  end
+
   local cd_fps = 75
 
   -- nearest CD frame

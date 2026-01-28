@@ -3,7 +3,7 @@ include::logos.adoc[]
 
 include::copyright.adoc[]
 [.text-center]
-`Updated: 2026-01-27 23:42:20 UTC`
+`Updated: 2026-01-28 19:14:46 UTC`
 [.text-center]
 ****
 Download a printable PDF of this manual https://github.com/chmaha/ReaClassical/raw/main/PDF-Manual/ReaClassical-Manual.pdf[here]

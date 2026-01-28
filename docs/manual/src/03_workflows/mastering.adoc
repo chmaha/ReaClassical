@@ -24,6 +24,12 @@ The metadata window allows you to enter all track and album metadata in a single
 
 TIP: Check the "!" box for CD tracks that you would like to have a visual countdown (length set in kbd:[F5] prefs). This feature is not available in all CD players. 
 
+===== Digital Release Only
+
+For those wanting to export individual media files only, check the "Digital Release Only" checkbox to ignore the CD offset value set in kbd:[F5] preferences as well as disable the automatic snapping of markers and regions to CD frames. Render using one of the ReaClassical "All Settings" presets.
+
+NOTE: When this mode is enabled, you can still set manual marker offsets using the buttons in the metadata editor.
+
 ===== Repositioning and Re-arranging Album Tracks
 
 There are two functions which help with reordering or repositioning tracks. First, and perhaps most useful for producing a classical album, is if you decide that you need to reorder one or more tracks. Select the named item you want to move either in the arrange window or metadata editor (by clicking on the track number) and press btn:[Move Album Track Up] or btn:[Move Album Track Down] to switch with the track immediately above or below it in the list. Note that gaps are preserved too.
