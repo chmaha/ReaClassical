@@ -47,7 +47,6 @@ Data/reaper_imgui_doc.html
 Effects/ReJJ/
 Effects/chmaha Scripts/
 Effects/chmaha airwindows JSFX Ports
-MenuSets/
 ReaPack/
 ProjectTemplates/ReaClassical.RPP
 ProjectTemplates/Room_Tone_Gen.RPP
