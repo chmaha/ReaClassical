@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.12
+@version 26.1.13
 @changelog
-  Mission Control: Add ability to show mixer tracks in TCP
-  Automation: Add advanced mode
-  Automation: Allow window to remain open
+  Automation: Fix inverted mute values
+  Automation: Use correct command ID to show trim envelope
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
