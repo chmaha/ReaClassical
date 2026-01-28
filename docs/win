@@ -181,6 +181,22 @@ Expand-Archive -Path $resOutput -DestinationPath $tempInstallRoot -Force
 Expand-Archive -Path $upOutput  -DestinationPath (Join-Path $tempInstallRoot "UserPlugins") -Force
 
 # ------------------------
+# Copy Effects from InstallData
+# ------------------------
+Write-Host "Copying Effects from InstallData..."
+$installDataPath = Join-Path $tempInstallRoot "`$INSTDIR`$_8_"
+$installDataEffects = Join-Path $installDataPath "Effects"
+if (Test-Path $installDataEffects) {
+    $effectsFolder = Join-Path $tempInstallRoot "Effects"
+    New-Item -Path $effectsFolder -ItemType Directory -Force | Out-Null
+    Copy-Item -Path "$installDataEffects\*" -Destination $effectsFolder -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "Removing InstallData folder..."
+    Remove-Item -Path $installDataPath -Recurse -Force -ErrorAction SilentlyContinue
+} else {
+    Write-Host "Warning: InstallData\Effects directory not found"
+}
+
+# ------------------------
 # Modify reaper.ini
 # ------------------------
 $iniPath = Join-Path $tempInstallRoot "reaper.ini"
