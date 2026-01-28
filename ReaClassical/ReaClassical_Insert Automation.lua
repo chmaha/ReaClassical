@@ -921,7 +921,53 @@ function main()
                 if not is_normalized then
                   tooltip = tooltip .. string.format("\nRange: %.2f to %.2f", min_val, max_val)
                 end
+                tooltip = tooltip .. "\nRight-click to type value"
                 ImGui.SetTooltip(ctx, tooltip)
+              end
+
+              -- Right-click popup for typing value
+              if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+                ImGui.OpenPopup(ctx, "fx_value_input")
+              end
+
+              if ImGui.BeginPopup(ctx, "fx_value_input") then
+                ImGui.Text(ctx, "Enter value:")
+                ImGui.SetNextItemWidth(ctx, 100)
+                -- Extract numeric value from formatted string (e.g., "-6.1" from "-6.1 dB")
+                local display_val = formatted_val:match("[-+]?[0-9]*%.?[0-9]+") or string.format("%.2f", envelope_value)
+                local rv, buf = ImGui.InputText(ctx, "##fxinput", display_val, ImGui.InputTextFlags_EnterReturnsTrue)
+                if rv then
+                  local input_num = tonumber(buf)
+                  if input_num then
+                    -- Search for normalized value that produces this formatted output
+                    local best_val = envelope_value
+                    local best_diff = math.huge
+
+                    for i = 0, 200 do
+                      local test_val = i / 200
+                      reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx,
+                        selected_envelope.param_idx, test_val)
+                      local _, test_str = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track,
+                        selected_envelope.fx_idx, selected_envelope.param_idx, "")
+                      local test_num = tonumber(test_str:match("[-+]?[0-9]*%.?[0-9]+"))
+
+                      if test_num then
+                        local diff = math.abs(test_num - input_num)
+                        if diff < best_diff then
+                          best_diff = diff
+                          best_val = test_val
+                        end
+                        if diff < 0.01 then break end -- Close enough
+                      end
+                    end
+
+                    reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx,
+                      selected_envelope.param_idx, old_val)
+                    envelope_value = best_val
+                  end
+                  ImGui.CloseCurrentPopup(ctx)
+                end
+                ImGui.EndPopup(ctx)
               end
             end
           else
