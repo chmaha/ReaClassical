@@ -38,6 +38,10 @@ if not SWS_exists then
     return
 end
 
+local _, scrubmode = get_config_var_string("scrubmode")
+scrubmode = tonumber(scrubmode) or 0
+SNM_SetIntConfigVar("scrubmode", 0)
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -48,7 +52,7 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-                MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.",
+        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.",
             "ReaClassical Error", 0)
         return
     end
@@ -151,7 +155,7 @@ function main()
             "Insert with timestretching",
             0)
     end
-
+    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Insert with timestretching', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

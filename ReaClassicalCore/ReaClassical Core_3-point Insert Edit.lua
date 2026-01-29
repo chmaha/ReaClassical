@@ -42,6 +42,10 @@ if not SWS_exists then
     return
 end
 
+local _, scrubmode = get_config_var_string("scrubmode")
+scrubmode = tonumber(scrubmode) or 0
+SNM_SetIntConfigVar("scrubmode", 0)
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -52,7 +56,7 @@ function main()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-                MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.",
+        MB("Please create a ReaClassical project via " .. modifier .. "+N to use this function.",
             "ReaClassical Error", 0)
         return
     end
@@ -60,7 +64,7 @@ function main()
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
 
     local proj_marker_count, source_proj, dest_proj, dest_in, _, _, source_in,
-    source_out, source_count, pos_table  = markers()
+    source_out, source_count, pos_table = markers()
     if proj_marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
@@ -175,7 +179,7 @@ function main()
     else
         return
     end
-
+    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

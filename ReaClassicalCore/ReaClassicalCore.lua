@@ -1,8 +1,8 @@
 @description ReaClassical Core
 @author chmaha
-@version 2.1
+@version 2.2
 @changelog
-  Add midpoint logic during xfading
+  Disable (then re-enable) scrubbing when moving edit cursor as part of action
 @metapackage
 @provides
   [main] ReaClassical Core_Add Destination IN marker.lua

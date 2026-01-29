@@ -40,6 +40,10 @@ if not SWS_exists then
     return
 end
 
+local _, scrubmode = get_config_var_string("scrubmode")
+scrubmode = tonumber(scrubmode) or 0
+SNM_SetIntConfigVar("scrubmode", 0)
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -191,7 +195,7 @@ function main()
             , "Source-Destination Edit", 0)
         return
     end
-
+    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('S-D Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
