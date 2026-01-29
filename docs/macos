@@ -129,19 +129,6 @@ sleep 2
 unzip -q "$res_output" -d "$rcfolder/"
 unzip -q "$up_output" -d "$rcfolder/UserPlugins/"
 
-# Copy Effects from InstallData
-echo "Copying Effects from InstallData..."
-sleep 1
-if [ -d "${rcfolder}/InstallData/Effects" ]; then
-    mkdir -p "${rcfolder}/Effects"
-    cp -r "${rcfolder}/InstallData/Effects/"* "${rcfolder}/Effects/" 2>/dev/null || \
-        echo "Warning: No files found in InstallData/Effects or copy failed"
-    echo "Removing InstallData folder..."
-    rm -rf "${rcfolder}/InstallData"
-else
-    echo "Warning: InstallData/Effects directory not found"
-fi
-
 echo "Adding splash screen and theme references..."
 sleep 2
 abspath=$(cd "$rcfolder" && pwd)
@@ -155,6 +142,19 @@ splashimage=${abspath}\/Scripts\/chmaha Scripts\/ReaClassical\/reaclassical-spla
 echo "Copying REAPER.app into ReaClassical folder..."
 sleep 2
 cp -R "$temp_dir/reaper_temp/REAPER.app" "$rcfolder/"
+
+# Copy Effects from InstallFiles inside REAPER.app
+echo "Copying Effects from InstallFiles..."
+sleep 1
+if [ -d "${rcfolder}/REAPER.app/Contents/InstallFiles/Effects" ]; then
+    mkdir -p "${rcfolder}/Effects"
+    cp -r "${rcfolder}/REAPER.app/Contents/InstallFiles/Effects/"* "${rcfolder}/Effects/" 2>/dev/null || \
+        echo "Warning: No files found in InstallFiles/Effects or copy failed"
+    echo "Removing InstallFiles folder..."
+    rm -rf "${rcfolder}/REAPER.app/Contents/InstallFiles"
+else
+    echo "Warning: InstallFiles/Effects directory not found"
+fi
 
 echo "Unmounting image and cleaning up..."
 sleep 2
