@@ -99,7 +99,7 @@ mkdir -p "$installer_dir"
 
 (
   cd "$dir" || exit 1
-  zip -rq "$installer_dir/$zip_file" .
+  zip -FSrq "$installer_dir/$zip_file" .
 )
 
 # Clean up temp directory
