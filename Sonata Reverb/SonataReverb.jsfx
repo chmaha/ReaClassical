@@ -1,7 +1,7 @@
-Version: 1.0
+Version: 1.1
 desc: Sonata Reverb (chmaha)
-// Fons Adriaensen's Zita-Rev1 Reverb Algorithm
-// Original: Fons Adriaensen (Kokkini Zita)
+author: chmaha
+// Using Fons Adriaensen's Zita-Rev1 Reverb Algorithm
 // Source: https://kokkinizita.linuxaudio.org/linuxaudio/downloads/index.html
 // License: GNU General Public License version 3
 
