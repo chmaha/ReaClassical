@@ -4,7 +4,9 @@
 
 1. Add FX, change routing, and optionally adjust volume, panning etc via Mission Control kbd:[C]
 2. Open Mixer Snapshot Manager via kbd:[Shift+M]
-3. Create automatically-recalled mixer snapshots tied to named items (see the <<mastering>> section for details of setting up album tracks)
+3. Create automatically-recalled mixer snapshots tied to items.
+
+NOTE: If setting a snapshot tied to an unnamed item, the first part of the item's ID will be used as the identifier in the table row.
 
 ===== Mixer Snapshot Manager in Detail
 
