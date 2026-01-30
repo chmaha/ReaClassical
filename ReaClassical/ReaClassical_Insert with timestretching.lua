@@ -54,6 +54,10 @@ function main()
         return
     end
 
+    local _, scrubmode = get_config_var_string("scrubmode")
+    scrubmode = tonumber(scrubmode) or 0
+    SNM_SetIntConfigVar("scrubmode", 0)
+
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local moveable_dest = 0
     local auto_color_pref = 0
@@ -181,7 +185,7 @@ function main()
             0)
         if moveable_dest == 1 then move_destination_folder(track_number) end
     end
-
+    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Insert with timestretching', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

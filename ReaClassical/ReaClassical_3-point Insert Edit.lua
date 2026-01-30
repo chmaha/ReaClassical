@@ -62,6 +62,10 @@ function main()
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
 
+    local _, scrubmode = get_config_var_string("scrubmode")
+    scrubmode = tonumber(scrubmode) or 0
+    SNM_SetIntConfigVar("scrubmode", 0)
+
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local moveable_dest = 0
     if input ~= "" then
@@ -193,7 +197,7 @@ function main()
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
-
+    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

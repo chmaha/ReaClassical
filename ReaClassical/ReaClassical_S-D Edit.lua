@@ -62,6 +62,10 @@ function main()
         Main_OnCommand(1156, 0) -- Enable item grouping
     end
 
+    local _, scrubmode = get_config_var_string("scrubmode")
+    scrubmode = tonumber(scrubmode) or 0
+    SNM_SetIntConfigVar("scrubmode", 0)
+
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local moveable_dest = 0
     if input ~= "" then
@@ -93,7 +97,7 @@ function main()
     end
 
     ripple_lock_mode()
-    
+
     if dest_count + source_count == 3 and pos_table ~= nil then -- add one extra marker for 3-point editing
         local distance
         local pos
@@ -210,7 +214,7 @@ function main()
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
-
+    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('S-D Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
