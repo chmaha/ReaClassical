@@ -1,10 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.14
+@version 26.1.15
 @changelog
-  Automation: Default to adding automation as item
-  Automation: Add right-click edit for advanced mode
-  Metadata Editor: Add digital release only option
+  Create CD Markers: Allow first item to be anywhere on timeline
+  Various: Move automation and automation items as part of shifting item location
+  Mixer Snapshot Manager: Allow setting on any item (named or unnamed)
+  Mixer Snapshot Manager: Auto-update renamed items in table
+  S-D edit functions: Set then restore scrubmode
+  Documentation: Various updates
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
