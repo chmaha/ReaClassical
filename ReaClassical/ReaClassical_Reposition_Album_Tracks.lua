@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, empty_items_check
 local get_cd_track_groups, get_items_containing_midpoint
 local get_parent_folder, get_folder_children
-local items_overlap
+local items_overlap, shift_track_automation
 ---------------------------------------------------------------------
 
 function main()
@@ -104,6 +104,20 @@ function main()
             end
         end
 
+        -- Collect all tracks that need automation shifted
+        local all_tracks = {}
+        local track_hash = {}
+        
+        for _, group in ipairs(cd_track_groups) do
+            for _, item in ipairs(group.all_items) do
+                local track = GetMediaItemTrack(item)
+                if not track_hash[track] then
+                    track_hash[track] = true
+                    table.insert(all_tracks, track)
+                end
+            end
+        end
+
         -- Position each CD track group
         local previous_end_position = nil
 
@@ -121,10 +135,21 @@ function main()
             -- Calculate shift for this group
             local shift = new_start_position - group.start_position
 
-            -- Move ALL items in this group by the same shift
-            for _, item in ipairs(group.all_items) do
-                local original_pos = original_positions[item]
-                SetMediaItemInfo_Value(item, "D_POSITION", original_pos + shift)
+            if shift ~= 0 then
+                -- Determine time range for this group
+                local group_start = group.start_position
+                local group_end = group.end_position
+                
+                -- Shift automation for all tracks within this group's time range
+                for _, track in ipairs(all_tracks) do
+                    shift_track_automation(track, group_start, group_end, shift)
+                end
+
+                -- Move ALL items in this group by the same shift
+                for _, item in ipairs(group.all_items) do
+                    local original_pos = original_positions[item]
+                    SetMediaItemInfo_Value(item, "D_POSITION", original_pos + shift)
+                end
             end
 
             -- Calculate where this group ends (after shifting)
@@ -136,6 +161,61 @@ function main()
     local _, run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
     if run == "yes" then Main_OnCommand(create_cd_markers, 0) end
     Undo_EndBlock("Reposition Tracks", 0)
+end
+
+---------------------------------------------------------------------
+
+function shift_track_automation(track, start_time, end_time, shift_amount)
+    -- Shift all automation (points and automation items) within the time range
+    local num_envs = CountTrackEnvelopes(track)
+    
+    for e = 0, num_envs - 1 do
+        local env = GetTrackEnvelope(track, e)
+        
+        -- Shift regular envelope points within the time range
+        local num_points = CountEnvelopePoints(env)
+        local points_to_shift = {}
+        
+        for p = 0, num_points - 1 do
+            local retval, time, value, shape, tension, selected = GetEnvelopePoint(env, p)
+            if time >= start_time and time <= end_time then
+                table.insert(points_to_shift, {
+                    index = p,
+                    time = time,
+                    new_time = time + shift_amount,
+                    value = value,
+                    shape = shape,
+                    tension = tension,
+                    selected = selected
+                })
+            end
+        end
+        
+        -- Delete and recreate shifted points
+        for i = #points_to_shift, 1, -1 do
+            local pt = points_to_shift[i]
+            DeleteEnvelopePointRange(env, pt.time - 0.0001, pt.time + 0.0001)
+        end
+        
+        for _, pt in ipairs(points_to_shift) do
+            InsertEnvelopePoint(env, pt.new_time, pt.value, pt.shape, pt.tension, pt.selected, true)
+        end
+        
+        Envelope_SortPoints(env)
+        
+        -- Shift automation items within the time range
+        local num_ai = CountAutomationItems(env)
+        for ai = 0, num_ai - 1 do
+            local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
+            local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
+            local ai_end = ai_pos + ai_len
+            
+            -- If automation item overlaps with the time range, shift it
+            if ai_pos < end_time and ai_end > start_time then
+                GetSetAutomationItemInfo(env, ai, "D_POSITION", ai_pos + shift_amount, true)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

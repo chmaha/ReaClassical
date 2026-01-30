@@ -990,7 +990,44 @@ function shift_folder_items_and_markers(parent_track, shift_amount)
     end
   end
 
-  -- Collect all items in all tracks first
+  -- Shift all track envelope points AND automation items
+  for _, tr in ipairs(tracks_to_shift) do
+    local num_envs = CountTrackEnvelopes(tr)
+    for e = 0, num_envs - 1 do
+      local env = GetTrackEnvelope(tr, e)
+      
+      -- Shift regular envelope points
+      local num_points = CountEnvelopePoints(env)
+      local points_data = {}
+      for p = 0, num_points - 1 do
+        local retval, time, value, shape, tension, selected = GetEnvelopePoint(env, p)
+        table.insert(points_data, {
+          time = time + shift_amount,
+          value = value,
+          shape = shape,
+          tension = tension,
+          selected = selected
+        })
+      end
+      
+      DeleteEnvelopePointRange(env, -1000000, 1000000)
+      
+      for _, pt in ipairs(points_data) do
+        InsertEnvelopePoint(env, pt.time, pt.value, pt.shape, pt.tension, pt.selected, true)
+      end
+      
+      Envelope_SortPoints(env)
+      
+      -- Shift automation items
+      local num_ai = CountAutomationItems(env)
+      for ai = 0, num_ai - 1 do
+        local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
+        GetSetAutomationItemInfo(env, ai, "D_POSITION", ai_pos + shift_amount, true)
+      end
+    end
+  end
+
+  -- Collect all items in all tracks
   local folder_items = {}
   for _, tr in ipairs(tracks_to_shift) do
     local num_items = CountTrackMediaItems(tr)
