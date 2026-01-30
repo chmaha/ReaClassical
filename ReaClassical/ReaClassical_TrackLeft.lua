@@ -27,7 +27,7 @@ local select_and_cut, go_to_previous, shift, select_CD_track_items
 local calc_postgap, is_item_start_crossfaded
 local get_selected_media_item_at, count_selected_media_items
 local select_items_containing_midpoint, get_folder_children
-local is_folder_track
+local is_folder_track, shift_track_automation
 ---------------------------------------------------------------------
 
 function main()
@@ -180,6 +180,61 @@ end
 
 ---------------------------------------------------------------------
 
+function shift_track_automation(track, start_time, end_time, shift_amount)
+    -- Shift all automation (points and automation items) within the time range
+    local num_envs = CountTrackEnvelopes(track)
+    
+    for e = 0, num_envs - 1 do
+        local env = GetTrackEnvelope(track, e)
+        
+        -- Shift regular envelope points within the time range
+        local num_points = CountEnvelopePoints(env)
+        local points_to_shift = {}
+        
+        for p = 0, num_points - 1 do
+            local retval, time, value, shape, tension, selected = GetEnvelopePoint(env, p)
+            if time >= start_time and time <= end_time then
+                table.insert(points_to_shift, {
+                    index = p,
+                    time = time,
+                    new_time = time + shift_amount,
+                    value = value,
+                    shape = shape,
+                    tension = tension,
+                    selected = selected
+                })
+            end
+        end
+        
+        -- Delete and recreate shifted points
+        for i = #points_to_shift, 1, -1 do
+            local pt = points_to_shift[i]
+            DeleteEnvelopePointRange(env, pt.time - 0.0001, pt.time + 0.0001)
+        end
+        
+        for _, pt in ipairs(points_to_shift) do
+            InsertEnvelopePoint(env, pt.new_time, pt.value, pt.shape, pt.tension, pt.selected, true)
+        end
+        
+        Envelope_SortPoints(env)
+        
+        -- Shift automation items within the time range
+        local num_ai = CountAutomationItems(env)
+        for ai = 0, num_ai - 1 do
+            local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
+            local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
+            local ai_end = ai_pos + ai_len
+            
+            -- If automation item overlaps with the time range, shift it
+            if ai_pos < end_time and ai_end > start_time then
+                GetSetAutomationItemInfo(env, ai, "D_POSITION", ai_pos + shift_amount, true)
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
 function shift(track, item, shift_amount, items_in_track, direction)
     local num_of_items = GetTrackNumMediaItems(track)
     local item_number = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
@@ -198,6 +253,33 @@ function shift(track, item, shift_amount, items_in_track, direction)
     for i = 0, selected_item_count - 1 do
         items_to_move[#items_to_move + 1] = get_selected_media_item_at(i)
     end
+    
+    -- Calculate time range for automation shifting
+    local min_pos = nil
+    local max_end = 0
+    for _, v in pairs(items_to_move) do
+        local item_pos = GetMediaItemInfo_Value(v, "D_POSITION")
+        local item_len = GetMediaItemInfo_Value(v, "D_LENGTH")
+        if min_pos == nil or item_pos < min_pos then
+            min_pos = item_pos
+        end
+        max_end = math.max(max_end, item_pos + item_len)
+    end
+    
+    -- Collect all unique tracks
+    local tracks_hash = {}
+    for _, v in pairs(items_to_move) do
+        local item_track = GetMediaItemTrack(v)
+        tracks_hash[item_track] = true
+    end
+    
+    -- Shift automation for all affected tracks
+    if min_pos then
+        for item_track, _ in pairs(tracks_hash) do
+            shift_track_automation(item_track, min_pos, max_end, -shift_amount)
+        end
+    end
+    
     Main_OnCommand(40289, 0) -- unselect all items
     for _, v in pairs(items_to_move) do
         local item_pos = GetMediaItemInfo_Value(v, "D_POSITION")
