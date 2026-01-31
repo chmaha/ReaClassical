@@ -27,6 +27,10 @@ IMPORTANT: For auto recall of mixer snapshots to work, the Mixer Snapshots Manag
 
 Turn on advanced mode to gain access to all envelopes associated with the track including FX parameters. If you also need to automate various aspects of the mixer tracks or special tracks, first make them visible in the track control panel by checking the box on the desired track row in Mission Control. Use kbd:[I] as before.
 
+==== Editing Automation Items
+
+Right-click on an automation item to edit middle value and optional ramp in and out values. You can adjust the positioning by left-click dragging on the item itself. Adjust the middle value length by alt/opt-click dragging on automation item edges.
+
 .Automation Dialog
 image::automation.png[Automation Dialog]
 
