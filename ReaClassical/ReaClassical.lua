@@ -1,13 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.15
+@version 26.1.16
 @changelog
-  Create CD Markers: Allow first item to be anywhere on timeline
-  Various: Move automation and automation items as part of shifting item location
-  Mixer Snapshot Manager: Allow setting on any item (named or unnamed)
-  Mixer Snapshot Manager: Auto-update renamed items in table
-  S-D edit functions: Set then restore scrubmode
-  Documentation: Various updates
+  Automation Items: Add right-click edit functionality
+  Insert Automation: Disable automation item when creating at edit cursor
+  Insert Automation: Remember keep window open preference
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
