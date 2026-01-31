@@ -514,6 +514,15 @@ function main()
   else
     advanced_mode = false
   end
+  
+  -- Load keep window open state from project
+  local _, keep_open_str = GetProjExtState(0, "ReaClassical", "KeepAutomationWindowOpen")
+  if keep_open_str == "1" then
+    keep_window_open = true
+  elseif keep_open_str == "0" then
+    keep_window_open = false
+  end
+  -- If empty string (first run), keep_window_open retains its default value of false
 
   -- Get currently selected tracks
   local tracks = get_selected_tracks()
@@ -1173,10 +1182,12 @@ function main()
           end
         end
 
-        -- Keep window open checkbox
+        -- Keep window open checkbox with persistence
         local changed_keep, new_keep = ImGui.Checkbox(ctx, "Keep window open after applying", keep_window_open)
         if changed_keep then
           keep_window_open = new_keep
+          -- Save to project extended state
+          SetProjExtState(0, "ReaClassical", "KeepAutomationWindowOpen", keep_window_open and "1" or "0")
         end
 
         ImGui.Spacing(ctx)
