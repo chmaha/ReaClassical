@@ -59,11 +59,8 @@ local ramp_in = 0.0
 local ramp_out = 0.0
 local original_ramp_in = 0.0
 local original_ramp_out = 0.0
-local track_envelopes = {}
-local fx_params = {}
-local current_tab = 0
-local keep_window_open = false
-local create_auto_item = true
+local original_val_before = nil
+local original_val_after = nil
 
 ---------------------------------------------------------------------
 
@@ -157,70 +154,6 @@ end
 
 ---------------------------------------------------------------------
 
-function get_track_envelopes(track)
-  local envelopes = {}
-
-  local standard_envs = {
-    { name = "Volume",          display = "Volume" },
-    { name = "Pan",             display = "Pan" },
-    { name = "Width",           display = "Width" },
-    { name = "Volume (Pre-FX)", display = "Volume (Pre-FX)" },
-    { name = "Pan (Pre-FX)",    display = "Pan (Pre-FX)" },
-    { name = "Width (Pre-FX)",  display = "Width (Pre-FX)" },
-    { name = "Trim Volume",     display = "Trim Volume" },
-    { name = "Mute",            display = "Mute" },
-  }
-
-  for _, env_info in ipairs(standard_envs) do
-    table.insert(envelopes, {
-      type = "track",
-      name = env_info.name,
-      display = env_info.display,
-      track = track
-    })
-  end
-
-  return envelopes
-end
-
----------------------------------------------------------------------
-
-function get_track_fx_params(track)
-  local params = {}
-  local fx_count = TrackFX_GetCount(track)
-
-  for fx_idx = 0, fx_count - 1 do
-    local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
-    local param_count = TrackFX_GetNumParams(track, fx_idx)
-
-    local fx_params_list = {}
-    for param_idx = 0, param_count - 1 do
-      local _, param_name = TrackFX_GetParamName(track, fx_idx, param_idx, "")
-      table.insert(fx_params_list, {
-        type = "fx",
-        fx_idx = fx_idx,
-        param_idx = param_idx,
-        name = param_name,
-        display = param_name,
-        track = track,
-        fx_name = fx_name
-      })
-    end
-
-    if #fx_params_list > 0 then
-      table.insert(params, {
-        fx_name = fx_name,
-        fx_idx = fx_idx,
-        params = fx_params_list
-      })
-    end
-  end
-
-  return params
-end
-
----------------------------------------------------------------------
-
 function format_time(time_seconds)
   local time_str = format_timestr_pos(time_seconds, "", 5)
   return time_str
@@ -276,55 +209,9 @@ function apply_automation()
   local middle_start = editing_ai.start + original_ramp_in
   local middle_end = editing_ai.start + editing_ai.length - original_ramp_out
 
-  -- Get values at boundaries BEFORE deleting anything
-  -- Get these from OUTSIDE the original automation item range
-  local br_env = BR_EnvAlloc(env, false)
-  
-  -- Value before the ORIGINAL item (not the new position)
-  local val_before = BR_EnvValueAtPos(br_env, editing_ai.start - 0.001)
-  if not val_before then
-    if selected_envelope.type == "track" then
-      if selected_envelope.name == "Volume" or selected_envelope.name == "Volume (Pre-FX)" or selected_envelope.name == "Trim Volume" then
-        val_before = GetMediaTrackInfo_Value(track, "D_VOL")
-      elseif selected_envelope.name == "Pan" or selected_envelope.name == "Pan (Pre-FX)" then
-        val_before = GetMediaTrackInfo_Value(track, "D_PAN")
-      elseif selected_envelope.name == "Width" or selected_envelope.name == "Width (Pre-FX)" then
-        val_before = GetMediaTrackInfo_Value(track, "D_WIDTH")
-      elseif selected_envelope.name == "Mute" then
-        val_before = 1 - GetMediaTrackInfo_Value(track, "B_MUTE")
-      else
-        val_before = 1.0
-      end
-    elseif selected_envelope.type == "fx" then
-      val_before = TrackFX_GetParam(track, selected_envelope.fx_idx, selected_envelope.param_idx)
-    else
-      val_before = 1.0
-    end
-  end
-  
-  -- Value after the ORIGINAL item (not the new position)
-  local val_after = BR_EnvValueAtPos(br_env, editing_ai.start + editing_ai.length + 0.001)
-  if not val_after then
-    if selected_envelope.type == "track" then
-      if selected_envelope.name == "Volume" or selected_envelope.name == "Volume (Pre-FX)" or selected_envelope.name == "Trim Volume" then
-        val_after = GetMediaTrackInfo_Value(track, "D_VOL")
-      elseif selected_envelope.name == "Pan" or selected_envelope.name == "Pan (Pre-FX)" then
-        val_after = GetMediaTrackInfo_Value(track, "D_PAN")
-      elseif selected_envelope.name == "Width" or selected_envelope.name == "Width (Pre-FX)" then
-        val_after = GetMediaTrackInfo_Value(track, "D_WIDTH")
-      elseif selected_envelope.name == "Mute" then
-        val_after = 1 - GetMediaTrackInfo_Value(track, "B_MUTE")
-      else
-        val_after = 1.0
-      end
-    elseif selected_envelope.type == "fx" then
-      val_after = TrackFX_GetParam(track, selected_envelope.fx_idx, selected_envelope.param_idx)
-    else
-      val_after = 1.0
-    end
-  end
-  
-  BR_EnvFree(br_env, false)
+  -- Use the STORED original boundary values (from initialization)
+  local val_before = original_val_before
+  local val_after = original_val_after
 
   -- Select the automation item and delete it
   GetSetAutomationItemInfo(env, editing_ai.ai_idx, "D_UISEL", 1, true)
@@ -350,16 +237,18 @@ function apply_automation()
     InsertEnvelopePoint(env, new_start, val_before_to_insert, 0, 0, false, true)
     InsertEnvelopePoint(env, middle_start, target_val_to_insert, 0, 0, false, true)
   else
-    InsertEnvelopePoint(env, middle_start - 0.001, val_before_to_insert, 0, 0, false, true)
-    InsertEnvelopePoint(env, middle_start, target_val_to_insert, 0, 0, false, true)
+    -- When ramp_in is 0, create step transition just inside the automation item
+    InsertEnvelopePoint(env, middle_start, val_before_to_insert, 0, 0, false, true)
+    InsertEnvelopePoint(env, middle_start + 0.001, target_val_to_insert, 0, 0, false, true)
   end
 
   if ramp_out > 0 then
     InsertEnvelopePoint(env, middle_end, target_val_to_insert, 0, 0, false, true)
     InsertEnvelopePoint(env, new_end, val_after_to_insert, 0, 0, false, true)
   else
-    InsertEnvelopePoint(env, middle_end, target_val_to_insert, 0, 0, false, true)
-    InsertEnvelopePoint(env, middle_end + 0.001, val_after_to_insert, 0, 0, false, true)
+    -- When ramp_out is 0, create step transition just inside the automation item
+    InsertEnvelopePoint(env, middle_end - 0.001, target_val_to_insert, 0, 0, false, true)
+    InsertEnvelopePoint(env, middle_end, val_after_to_insert, 0, 0, false, true)
   end
 
   Envelope_SortPoints(env)
@@ -368,10 +257,6 @@ function apply_automation()
   InsertAutomationItem(env, -1, new_start, new_length)
 
   UpdateArrange()
-
-  if not keep_window_open then
-    window_open = false
-  end
 end
 
 ---------------------------------------------------------------------
@@ -383,10 +268,10 @@ function initialize_from_automation_item()
     MB("Please select an envelope with an automation item", "Error", 0)
     return false
   end
-
+  
   local ai_count = CountAutomationItems(env)
   local selected_ai_idx = -1
-
+  
   for i = 0, ai_count - 1 do
     local selected = GetSetAutomationItemInfo(env, i, "D_UISEL", 0, false)
     if selected > 0 then
@@ -394,31 +279,31 @@ function initialize_from_automation_item()
       break
     end
   end
-
+  
   if selected_ai_idx == -1 then
     MB("Please select an automation item on the selected envelope", "Error", 0)
     return false
   end
-
+  
   -- Get automation item properties
   local ai_pos = GetSetAutomationItemInfo(env, selected_ai_idx, "D_POSITION", 0, false)
   local ai_len = GetSetAutomationItemInfo(env, selected_ai_idx, "D_LENGTH", 0, false)
-
+  
   -- Get track from envelope
   local track = Envelope_GetParentTrack(env)
   if not track then
     MB("Could not get track from envelope", "Error", 0)
     return false
   end
-
+  
   -- Determine envelope type
   local env_info = nil
-
+  
   local standard_envs = {
-    "Volume", "Pan", "Width", "Volume (Pre-FX)",
+    "Volume", "Pan", "Width", "Volume (Pre-FX)", 
     "Pan (Pre-FX)", "Width (Pre-FX)", "Trim Volume", "Mute"
   }
-
+  
   for _, name in ipairs(standard_envs) do
     if GetTrackEnvelopeByName(track, name) == env then
       env_info = {
@@ -430,7 +315,7 @@ function initialize_from_automation_item()
       break
     end
   end
-
+  
   if not env_info then
     local fx_count = TrackFX_GetCount(track)
     for fx_idx = 0, fx_count - 1 do
@@ -455,52 +340,96 @@ function initialize_from_automation_item()
       if env_info then break end
     end
   end
-
+  
   if not env_info then
     MB("Could not determine envelope type", "Error", 0)
     return false
   end
-
+  
   -- Get the value at the exact middle of the automation item (in project time)
   local middle_time = ai_pos + (ai_len / 2)
   local br_env = BR_EnvAlloc(env, false)
   local middle_value = BR_EnvValueAtPos(br_env, middle_time)
+  
+  -- Store original boundary values (BEFORE any edits)
+  original_val_before = BR_EnvValueAtPos(br_env, ai_pos - 0.001)
+  if not original_val_before then
+    if env_info.type == "track" then
+      if env_info.name == "Volume" or env_info.name == "Volume (Pre-FX)" or env_info.name == "Trim Volume" then
+        original_val_before = GetMediaTrackInfo_Value(track, "D_VOL")
+      elseif env_info.name == "Pan" or env_info.name == "Pan (Pre-FX)" then
+        original_val_before = GetMediaTrackInfo_Value(track, "D_PAN")
+      elseif env_info.name == "Width" or env_info.name == "Width (Pre-FX)" then
+        original_val_before = GetMediaTrackInfo_Value(track, "D_WIDTH")
+      elseif env_info.name == "Mute" then
+        original_val_before = 1 - GetMediaTrackInfo_Value(track, "B_MUTE")
+      else
+        original_val_before = 1.0
+      end
+    elseif env_info.type == "fx" then
+      original_val_before = TrackFX_GetParam(track, env_info.fx_idx, env_info.param_idx)
+    else
+      original_val_before = 1.0
+    end
+  end
+  
+  original_val_after = BR_EnvValueAtPos(br_env, ai_pos + ai_len + 0.001)
+  if not original_val_after then
+    if env_info.type == "track" then
+      if env_info.name == "Volume" or env_info.name == "Volume (Pre-FX)" or env_info.name == "Trim Volume" then
+        original_val_after = GetMediaTrackInfo_Value(track, "D_VOL")
+      elseif env_info.name == "Pan" or env_info.name == "Pan (Pre-FX)" then
+        original_val_after = GetMediaTrackInfo_Value(track, "D_PAN")
+      elseif env_info.name == "Width" or env_info.name == "Width (Pre-FX)" then
+        original_val_after = GetMediaTrackInfo_Value(track, "D_WIDTH")
+      elseif env_info.name == "Mute" then
+        original_val_after = 1 - GetMediaTrackInfo_Value(track, "B_MUTE")
+      else
+        original_val_after = 1.0
+      end
+    elseif env_info.type == "fx" then
+      original_val_after = TrackFX_GetParam(track, env_info.fx_idx, env_info.param_idx)
+    else
+      original_val_after = 1.0
+    end
+  end
+  
   BR_EnvFree(br_env, false)
-
+  
   if not middle_value then
     MB("Could not read automation item value", "Error", 0)
     return false
   end
-
+  
   -- Analyze automation item points to detect ramps
   local point_count = CountEnvelopePointsEx(env, selected_ai_idx)
-
+  
   local detected_ramp_in = 0
   local detected_ramp_out = 0
-
+  
   if point_count >= 2 then
     local points = {}
     for i = 0, point_count - 1 do
       local _, time, value, shape, tension = GetEnvelopePointEx(env, selected_ai_idx, i)
       -- IMPORTANT: time is in ABSOLUTE PROJECT TIME, need to convert to relative
       local relative_time = time - ai_pos
-
+      
       local point_val = value
       -- For volume envelopes, unscale to compare
-      if env_info.type == "track" and
-          (env_info.name == "Volume" or env_info.name == "Volume (Pre-FX)" or env_info.name == "Trim Volume") then
+      if env_info.type == "track" and 
+         (env_info.name == "Volume" or env_info.name == "Volume (Pre-FX)" or env_info.name == "Trim Volume") then
         point_val = ScaleFromEnvelopeMode(1, point_val)
       end
-      table.insert(points, { time = relative_time, value = point_val })
+      table.insert(points, {time = relative_time, value = point_val})
     end
-
+    
     table.sort(points, function(a, b) return a.time < b.time end)
-
+    
     -- Find when the middle value is first reached and last maintained
     local tolerance = 0.001 -- Tolerance for floating point comparison
     local first_middle_time = nil
     local last_middle_time = nil
-
+    
     for i, point in ipairs(points) do
       if math.abs(point.value - middle_value) < tolerance then
         if not first_middle_time then
@@ -509,44 +438,41 @@ function initialize_from_automation_item()
         last_middle_time = point.time
       end
     end
-
+    
     -- Ramp in: left edge (0) to first time middle value is reached
     if first_middle_time then
-      detected_ramp_in = first_middle_time -- from left edge (0) to first middle value
+      detected_ramp_in = first_middle_time  -- from left edge (0) to first middle value
     end
-
+    
     -- Ramp out: last time middle value exists to right edge (ai_len)
     if last_middle_time then
-      detected_ramp_out = ai_len - last_middle_time -- from last middle value to right edge
+      detected_ramp_out = ai_len - last_middle_time  -- from last middle value to right edge
     end
   end
-
+  
   -- Set up editing state
   editing_ai.env = env
   editing_ai.ai_idx = selected_ai_idx
   editing_ai.start = ai_pos
   editing_ai.length = ai_len
   editing_ai.track = track
-
+  
   selected_envelope = env_info
-
+  
   -- Normalize the middle value for display
   if env_info.type == "track" then
     envelope_value = normalize_value(env_info, middle_value)
   else
     envelope_value = middle_value
   end
-
+  
   ramp_in = detected_ramp_in
   ramp_out = detected_ramp_out
-
+  
   -- Store the original detected ramps
   original_ramp_in = detected_ramp_in
   original_ramp_out = detected_ramp_out
-
-  track_envelopes = get_track_envelopes(track)
-  fx_params = get_track_fx_params(track)
-
+  
   return true
 end
 
@@ -554,6 +480,20 @@ end
 
 function main()
   if window_open then
+    -- Check if automation item still exists and if it has moved
+    if editing_ai.env and editing_ai.ai_idx >= 0 then
+      local current_pos = GetSetAutomationItemInfo(editing_ai.env, editing_ai.ai_idx, "D_POSITION", 0, false)
+      local current_len = GetSetAutomationItemInfo(editing_ai.env, editing_ai.ai_idx, "D_LENGTH", 0, false)
+      
+      -- If position or length has changed, re-initialize
+      if current_pos ~= editing_ai.start or current_len ~= editing_ai.length then
+        if not initialize_from_automation_item() then
+          window_open = false
+          return
+        end
+      end
+    end
+    
     local _, FLT_MAX = ImGui.NumericLimits_Float()
     ImGui.SetNextWindowSizeConstraints(ctx, DEFAULT_W, DEFAULT_H, FLT_MAX, FLT_MAX)
     local opened, open_ref = ImGui.Begin(ctx, "Edit Automation Item", window_open, ImGui.WindowFlags_AlwaysAutoResize)
@@ -569,88 +509,16 @@ function main()
       ImGui.Text(ctx, "Track: " .. track_name)
       ImGui.Text(ctx, string.format("Position: %s", format_time(editing_ai.start)))
       ImGui.Text(ctx, string.format("Length: %s", format_time(editing_ai.length)))
-
-      ImGui.Separator(ctx)
-
-      -- Show envelope selection tabs
-      if ImGui.BeginTabBar(ctx, "EnvelopeTabs") then
-        if ImGui.BeginTabItem(ctx, "Track Envelopes") then
-          current_tab = 0
-
-          ImGui.Text(ctx, "Select Envelope:")
-          local track_env_height = #track_envelopes * 21 + 16
-          ImGui.BeginChild(ctx, "TrackEnvList", 0, track_env_height, ImGui.ChildFlags_Borders)
-
-          for _, env_info in ipairs(track_envelopes) do
-            local is_selected = selected_envelope and
-                selected_envelope.type == "track" and
-                selected_envelope.name == env_info.name
-
-            if ImGui.Selectable(ctx, env_info.display, is_selected) then
-              selected_envelope = env_info
-
-              -- Update value for newly selected envelope
-              local env = GetTrackEnvelopeByName(editing_ai.track, env_info.name)
-              if env then
-                local env_val = get_envelope_value_at_time(env, editing_ai.start)
-                if env_val then
-                  envelope_value = normalize_value(env_info, env_val)
-                end
-              end
-            end
-          end
-
-          ImGui.EndChild(ctx)
-          ImGui.EndTabItem(ctx)
-        end
-
-        if ImGui.BeginTabItem(ctx, "FX Parameters") then
-          current_tab = 1
-
-          ImGui.Text(ctx, "Select FX Parameter:")
-          ImGui.BeginChild(ctx, "FXParamList", 0, 150, ImGui.ChildFlags_Borders)
-
-          if #fx_params == 0 then
-            ImGui.TextWrapped(ctx, "No FX on selected track")
-          else
-            for _, fx_info in ipairs(fx_params) do
-              if ImGui.TreeNode(ctx, fx_info.fx_name .. "##fx" .. fx_info.fx_idx) then
-                for _, param_info in ipairs(fx_info.params) do
-                  local is_selected = selected_envelope and
-                      selected_envelope.type == "fx" and
-                      selected_envelope.fx_idx == param_info.fx_idx and
-                      selected_envelope.param_idx == param_info.param_idx
-
-                  if ImGui.Selectable(ctx, param_info.display .. "##" .. param_info.fx_idx .. "_" .. param_info.param_idx, is_selected) then
-                    selected_envelope = param_info
-
-                    local env = GetFXEnvelope(editing_ai.track, param_info.fx_idx, param_info.param_idx, false)
-                    if env then
-                      local env_val = get_envelope_value_at_time(env, editing_ai.start)
-                      if env_val then
-                        envelope_value = env_val
-                      end
-                    end
-                  end
-                end
-                ImGui.TreePop(ctx)
-              end
-            end
-          end
-
-          ImGui.EndChild(ctx)
-          ImGui.EndTabItem(ctx)
-        end
-
-        ImGui.EndTabBar(ctx)
-      end
-
+      
       ImGui.Separator(ctx)
 
       if selected_envelope then
-        -- Show value control
-        ImGui.Text(ctx, "Selected: " .. selected_envelope.display)
+        -- Show parameter name
+        ImGui.Text(ctx, "Parameter: " .. selected_envelope.display)
+        
+        ImGui.Separator(ctx)
 
+        -- Show value control
         local min_val, max_val, format_str, label
 
         if selected_envelope.type == "track" then
@@ -682,6 +550,30 @@ function main()
           if changed_val then
             envelope_value = new_val
           end
+
+          if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Right-click to type value")
+          end
+
+          if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+            ImGui.OpenPopup(ctx, "env_value_input")
+          end
+
+          if ImGui.BeginPopup(ctx, "env_value_input") then
+            ImGui.Text(ctx, "Enter value:")
+            ImGui.SetNextItemWidth(ctx, 100)
+            local val_input_buf = string.format("%.2f", envelope_value)
+            local rv, buf = ImGui.InputText(ctx, "##envinput", val_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+            if rv then
+              local val = tonumber(buf)
+              if val then
+                envelope_value = math.max(min_val, math.min(max_val, val))
+              end
+              ImGui.CloseCurrentPopup(ctx)
+            end
+            ImGui.EndPopup(ctx)
+          end
+
         elseif selected_envelope.type == "fx" then
           local param_min, param_max, _, is_normalized = get_fx_param_range(
             selected_envelope.track,
@@ -694,19 +586,63 @@ function main()
 
           ImGui.Text(ctx, label)
 
-          local old_val = reaper.TrackFX_GetParam(selected_envelope.track, selected_envelope.fx_idx,
-            selected_envelope.param_idx)
-          reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx,
-            envelope_value)
-          local _, formatted_val = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track,
-            selected_envelope.fx_idx, selected_envelope.param_idx, "")
+          local old_val = reaper.TrackFX_GetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx)
+          reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, envelope_value)
+          local _, formatted_val = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, "")
           reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, old_val)
 
           ImGui.SetNextItemWidth(ctx, -1)
-          local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val,
-            formatted_val)
+          local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val, formatted_val)
           if changed_val then
             envelope_value = new_val
+          end
+
+          if ImGui.IsItemHovered(ctx) then
+            local tooltip = "Drag to adjust. Current: " .. formatted_val
+            if not is_normalized then
+              tooltip = tooltip .. string.format("\nRange: %.2f to %.2f", min_val, max_val)
+            end
+            tooltip = tooltip .. "\nRight-click to type value"
+            ImGui.SetTooltip(ctx, tooltip)
+          end
+
+          if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+            ImGui.OpenPopup(ctx, "fx_value_input")
+          end
+
+          if ImGui.BeginPopup(ctx, "fx_value_input") then
+            ImGui.Text(ctx, "Enter value:")
+            ImGui.SetNextItemWidth(ctx, 100)
+            local display_val = formatted_val:match("[-+]?[0-9]*%.?[0-9]+") or string.format("%.2f", envelope_value)
+            local rv, buf = ImGui.InputText(ctx, "##fxinput", display_val, ImGui.InputTextFlags_EnterReturnsTrue)
+            if rv then
+              local input_num = tonumber(buf)
+              if input_num then
+                local best_val = envelope_value
+                local best_diff = math.huge
+
+                for i = 0, 200 do
+                  local test_val = i / 200
+                  reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, test_val)
+                  local _, test_str = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, "")
+                  local test_num = tonumber(test_str:match("[-+]?[0-9]*%.?[0-9]+"))
+
+                  if test_num then
+                    local diff = math.abs(test_num - input_num)
+                    if diff < best_diff then
+                      best_diff = diff
+                      best_val = test_val
+                    end
+                    if diff < 0.01 then break end
+                  end
+                end
+
+                reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, old_val)
+                envelope_value = best_val
+              end
+              ImGui.CloseCurrentPopup(ctx)
+            end
+            ImGui.EndPopup(ctx)
           end
         end
 
@@ -717,8 +653,7 @@ function main()
         if selected_envelope.type == "track" then
           is_toggle = is_toggle_parameter(editing_ai.track, nil, nil, selected_envelope)
         elseif selected_envelope.type == "fx" then
-          is_toggle = is_toggle_parameter(editing_ai.track, selected_envelope.fx_idx, selected_envelope.param_idx,
-            selected_envelope)
+          is_toggle = is_toggle_parameter(editing_ai.track, selected_envelope.fx_idx, selected_envelope.param_idx, selected_envelope)
         end
 
         if is_toggle then
@@ -793,21 +728,14 @@ function main()
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
 
-        -- Keep window open checkbox
-        local changed_keep, new_keep = ImGui.Checkbox(ctx, "Keep window open after applying", keep_window_open)
-        if changed_keep then
-          keep_window_open = new_keep
-        end
-
-        ImGui.Spacing(ctx)
-
         -- Apply button
         local avail_w_button = ImGui.GetContentRegionAvail(ctx)
         if ImGui.Button(ctx, "Apply Changes", avail_w_button, 30) then
           apply_automation()
         end
+
       else
-        ImGui.TextWrapped(ctx, "Please select an envelope from the tabs above")
+        ImGui.TextWrapped(ctx, "Could not detect envelope parameter")
       end
 
       ImGui.End(ctx)
