@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.16
+@version 26.1.17
 @changelog
-  Automation Items: Add right-click edit functionality
-  Insert Automation: Disable automation item when creating at edit cursor
-  Insert Automation: Remember keep window open preference
+  Automation Items: Actually include new edit function in metapackage
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -43,6 +41,7 @@
   [main] ReaClassical_Delete With Ripple.lua
   [main] ReaClassical_Destination Markers to Item Edge.lua
   [main] ReaClassical_Duplicate folder (No items).lua
+  [main] ReaClassical_Edit Automation.lua
   [main] ReaClassical_Editing Toolbar.lua
   [main] ReaClassical_ExplodeMultiChannel.lua
   [main] ReaClassical_Factory Reset.lua
