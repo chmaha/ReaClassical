@@ -475,8 +475,8 @@ function apply_automation()
     ::continue::
   end
 
-  -- Create automation items if requested
-  if create_auto_item then
+  -- Create automation items if requested (only in time selection mode)
+  if create_auto_item and has_time_sel and (start_time ~= end_time) then
     for _, track in ipairs(selected_tracks) do
       local env
       if target_envelope_info.type == "track" then
@@ -486,16 +486,9 @@ function apply_automation()
       end
 
       if env then
-        local item_start, item_end
-        if has_time_sel and (start_time ~= end_time) then
-          -- Use time selection range (including ramps if any)
-          item_start = ramp_in > 0 and (start_time - ramp_in) or (start_time - 0.002)
-          item_end = ramp_out > 0 and (end_time + ramp_out) or (end_time + 0.002)
-        else
-          -- Use cursor to end of project
-          item_start = ramp_in > 0 and (GetCursorPosition() - ramp_in) or (GetCursorPosition() - 0.002)
-          item_end = GetProjectLength(0)
-        end
+        -- Use time selection range (including ramps if any)
+        local item_start = ramp_in > 0 and (start_time - ramp_in) or (start_time - 0.002)
+        local item_end = ramp_out > 0 and (end_time + ramp_out) or (end_time + 0.002)
 
         -- Create automation item
         InsertAutomationItem(env, -1, item_start, item_end - item_start)
@@ -1163,10 +1156,21 @@ function main()
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
 
-        -- Create automation item checkbox
+        -- Create automation item checkbox (only enabled in time selection mode)
+        if not has_time_sel then
+          ImGui.BeginDisabled(ctx)
+        end
+        
         local changed_auto_item, new_auto_item = ImGui.Checkbox(ctx, "Create automation item", create_auto_item)
         if changed_auto_item then
           create_auto_item = new_auto_item
+        end
+        
+        if not has_time_sel then
+          ImGui.EndDisabled(ctx)
+          if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+            ImGui.SetTooltip(ctx, "Automation items are only available in time selection mode")
+          end
         end
 
         -- Keep window open checkbox
