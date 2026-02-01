@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.1.17
+@version 26.2
 @changelog
-  Automation Items: Actually include new edit function in metapackage
+  Edit Automation Item: Allow clicking on other automation items to update window
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
