@@ -3,7 +3,7 @@
 @version 2.6
 @changelog
   Remove Modulator
-  Remove send version of RCReverb
+  Remove send version of Reverb
 @metapackage
 @provides
   RCComp.jsfx
