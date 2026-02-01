@@ -1,17 +1,31 @@
 --[[
 @noindex
 
-Edit Existing Automation Item
-Reads an automation item's values and ramps, allows editing, then replaces it.
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
 
 Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
+
+-- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, apply_automation, linear_to_db, db_to_linear, get_envelope_value_at_time
 local format_time, get_track_envelopes, get_track_fx_params
 local normalize_value, denormalize_value, get_fx_param_range, is_toggle_parameter
+local check_automation_item_validity, get_selected_automation_item
 
 ---------------------------------------------------------------------
 
@@ -61,6 +75,8 @@ local original_ramp_in = 0.0
 local original_ramp_out = 0.0
 local original_val_before = nil
 local original_val_after = nil
+
+local no_selection_state = false -- Track if we're in "no selection" state
 
 ---------------------------------------------------------------------
 
@@ -190,6 +206,62 @@ end
 
 ---------------------------------------------------------------------
 
+function check_automation_item_validity()
+  -- Check if the currently tracked automation item still exists and is selected
+  if not editing_ai.env or editing_ai.ai_idx < 0 then
+    return false
+  end
+  
+  -- Check if envelope still exists
+  local test_track = Envelope_GetParentTrack(editing_ai.env)
+  if not test_track then
+    return false
+  end
+  
+  -- Check if automation item still exists at this index
+  local ai_count = CountAutomationItems(editing_ai.env)
+  if editing_ai.ai_idx >= ai_count then
+    return false
+  end
+  
+  -- Check if this automation item is still selected
+  local is_selected = GetSetAutomationItemInfo(editing_ai.env, editing_ai.ai_idx, "D_UISEL", 0, false)
+  if is_selected <= 0 then
+    return false
+  end
+  
+  return true
+end
+
+---------------------------------------------------------------------
+
+function get_selected_automation_item()
+  -- Get selected envelope
+  local env = GetSelectedEnvelope(0)
+  if not env then
+    return nil, nil
+  end
+  
+  local ai_count = CountAutomationItems(env)
+  local selected_ai_idx = -1
+  
+  for i = 0, ai_count - 1 do
+    local selected = GetSetAutomationItemInfo(env, i, "D_UISEL", 0, false)
+    if selected > 0 then
+      selected_ai_idx = i
+      break
+    end
+  end
+  
+  if selected_ai_idx == -1 then
+    return nil, nil
+  end
+  
+  return env, selected_ai_idx
+end
+
+---------------------------------------------------------------------
+
 function apply_automation()
   if not editing_ai.env or editing_ai.ai_idx < 0 then return end
   if not selected_envelope then return end
@@ -257,31 +329,19 @@ function apply_automation()
   InsertAutomationItem(env, -1, new_start, new_length)
 
   UpdateArrange()
+  
+  -- After applying, reinitialize with the newly created automation item
+  initialize_from_automation_item()
 end
 
 ---------------------------------------------------------------------
 
 function initialize_from_automation_item()
   -- Get selected automation item
-  local env = GetSelectedEnvelope(0)
-  if not env then
-    MB("Please select an envelope with an automation item", "Error", 0)
-    return false
-  end
+  local env, selected_ai_idx = get_selected_automation_item()
   
-  local ai_count = CountAutomationItems(env)
-  local selected_ai_idx = -1
-  
-  for i = 0, ai_count - 1 do
-    local selected = GetSetAutomationItemInfo(env, i, "D_UISEL", 0, false)
-    if selected > 0 then
-      selected_ai_idx = i
-      break
-    end
-  end
-  
-  if selected_ai_idx == -1 then
-    MB("Please select an automation item on the selected envelope", "Error", 0)
+  if not env or not selected_ai_idx then
+    no_selection_state = true
     return false
   end
   
@@ -292,7 +352,7 @@ function initialize_from_automation_item()
   -- Get track from envelope
   local track = Envelope_GetParentTrack(env)
   if not track then
-    MB("Could not get track from envelope", "Error", 0)
+    no_selection_state = true
     return false
   end
   
@@ -342,7 +402,7 @@ function initialize_from_automation_item()
   end
   
   if not env_info then
-    MB("Could not determine envelope type", "Error", 0)
+    no_selection_state = true
     return false
   end
   
@@ -397,7 +457,7 @@ function initialize_from_automation_item()
   BR_EnvFree(br_env, false)
   
   if not middle_value then
-    MB("Could not read automation item value", "Error", 0)
+    no_selection_state = true
     return false
   end
   
@@ -473,6 +533,7 @@ function initialize_from_automation_item()
   original_ramp_in = detected_ramp_in
   original_ramp_out = detected_ramp_out
   
+  no_selection_state = false
   return true
 end
 
@@ -480,17 +541,33 @@ end
 
 function main()
   if window_open then
-    -- Check if automation item still exists and if it has moved
-    if editing_ai.env and editing_ai.ai_idx >= 0 then
+    -- Check if current automation item is still valid
+    local current_valid = check_automation_item_validity()
+    
+    -- If not valid, check if there's a new selection
+    if not current_valid then
+      local new_env, new_ai_idx = get_selected_automation_item()
+      
+      -- If there's an automation item selected, initialize it
+      -- (either a different one, or the same one being re-selected after no_selection_state)
+      if new_env and new_ai_idx then
+        if no_selection_state or new_env ~= editing_ai.env or new_ai_idx ~= editing_ai.ai_idx then
+          initialize_from_automation_item()
+        end
+      else
+        -- No valid selection - reset tracking variables
+        no_selection_state = true
+        editing_ai.env = nil
+        editing_ai.ai_idx = -1
+        editing_ai.track = nil
+      end
+    else
+      -- Check if position or length has changed (automation item was edited externally)
       local current_pos = GetSetAutomationItemInfo(editing_ai.env, editing_ai.ai_idx, "D_POSITION", 0, false)
       local current_len = GetSetAutomationItemInfo(editing_ai.env, editing_ai.ai_idx, "D_LENGTH", 0, false)
       
-      -- If position or length has changed, re-initialize
       if current_pos ~= editing_ai.start or current_len ~= editing_ai.length then
-        if not initialize_from_automation_item() then
-          window_open = false
-          return
-        end
+        initialize_from_automation_item()
       end
     end
     
@@ -500,55 +577,177 @@ function main()
     window_open = open_ref
 
     if opened then
-      -- Display automation item info
-      local _, track_name = GetSetMediaTrackInfo_String(editing_ai.track, "P_NAME", "", false)
-      if track_name == "" then
-        local track_num = GetMediaTrackInfo_Value(editing_ai.track, "IP_TRACKNUMBER")
-        track_name = "Track " .. math.floor(track_num)
-      end
-      ImGui.Text(ctx, "Track: " .. track_name)
-      ImGui.Text(ctx, string.format("Position: %s", format_time(editing_ai.start)))
-      ImGui.Text(ctx, string.format("Length: %s", format_time(editing_ai.length)))
-      
-      ImGui.Separator(ctx)
-
-      if selected_envelope then
-        -- Show parameter name
-        ImGui.Text(ctx, "Parameter: " .. selected_envelope.display)
+      -- If no valid automation item selected, show message
+      if no_selection_state then
+        ImGui.TextWrapped(ctx, "Please select an automation item on an envelope to edit.")
+        ImGui.Spacing(ctx)
+        ImGui.TextWrapped(ctx, "The window will update automatically when you select an automation item.")
+      else
+        -- Display automation item info
+        local _, track_name = GetSetMediaTrackInfo_String(editing_ai.track, "P_NAME", "", false)
+        if track_name == "" then
+          local track_num = GetMediaTrackInfo_Value(editing_ai.track, "IP_TRACKNUMBER")
+          track_name = "Track " .. math.floor(track_num)
+        end
+        ImGui.Text(ctx, "Track: " .. track_name)
+        ImGui.Text(ctx, string.format("Position: %s", format_time(editing_ai.start)))
+        ImGui.Text(ctx, string.format("Length: %s", format_time(editing_ai.length)))
         
         ImGui.Separator(ctx)
 
-        -- Show value control
-        local min_val, max_val, format_str, label
+        if selected_envelope then
+          -- Show parameter name
+          ImGui.Text(ctx, "Parameter: " .. selected_envelope.display)
+          
+          ImGui.Separator(ctx)
 
-        if selected_envelope.type == "track" then
-          if selected_envelope.name == "Volume" or selected_envelope.name == "Volume (Pre-FX)" or selected_envelope.name == "Trim Volume" then
-            min_val, max_val = -150.0, 12.0
-            format_str = "%.1f dB"
-            label = "Value (dB):"
-          elseif selected_envelope.name == "Pan" or selected_envelope.name == "Pan (Pre-FX)" then
-            min_val, max_val = -1.0, 1.0
-            format_str = "%.2f"
-            label = "Value (L=-1, C=0, R=+1):"
-          elseif selected_envelope.name == "Width" or selected_envelope.name == "Width (Pre-FX)" then
-            min_val, max_val = -1.0, 1.0
-            format_str = "%.2f"
-            label = "Value:"
-          elseif selected_envelope.name == "Mute" then
-            min_val, max_val = 0.0, 1.0
-            format_str = "%.0f"
-            label = "Value (1=Unmuted, 0=Muted):"
-          else
-            min_val, max_val = 0.0, 100.0
-            format_str = "%.1f"
-            label = "Value:"
+          -- Show value control
+          local min_val, max_val, format_str, label
+
+          if selected_envelope.type == "track" then
+            if selected_envelope.name == "Volume" or selected_envelope.name == "Volume (Pre-FX)" or selected_envelope.name == "Trim Volume" then
+              min_val, max_val = -150.0, 12.0
+              format_str = "%.1f dB"
+              label = "Value (dB):"
+            elseif selected_envelope.name == "Pan" or selected_envelope.name == "Pan (Pre-FX)" then
+              min_val, max_val = -1.0, 1.0
+              format_str = "%.2f"
+              label = "Value (L=-1, C=0, R=+1):"
+            elseif selected_envelope.name == "Width" or selected_envelope.name == "Width (Pre-FX)" then
+              min_val, max_val = -1.0, 1.0
+              format_str = "%.2f"
+              label = "Value:"
+            elseif selected_envelope.name == "Mute" then
+              min_val, max_val = 0.0, 1.0
+              format_str = "%.0f"
+              label = "Value (1=Unmuted, 0=Muted):"
+            else
+              min_val, max_val = 0.0, 100.0
+              format_str = "%.1f"
+              label = "Value:"
+            end
+
+            ImGui.Text(ctx, label)
+            ImGui.SetNextItemWidth(ctx, -1)
+            local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val, format_str)
+            if changed_val then
+              envelope_value = new_val
+            end
+
+            if ImGui.IsItemHovered(ctx) then
+              ImGui.SetTooltip(ctx, "Right-click to type value")
+            end
+
+            if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+              ImGui.OpenPopup(ctx, "env_value_input")
+            end
+
+            if ImGui.BeginPopup(ctx, "env_value_input") then
+              ImGui.Text(ctx, "Enter value:")
+              ImGui.SetNextItemWidth(ctx, 100)
+              local val_input_buf = string.format("%.2f", envelope_value)
+              local rv, buf = ImGui.InputText(ctx, "##envinput", val_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+              if rv then
+                local val = tonumber(buf)
+                if val then
+                  envelope_value = math.max(min_val, math.min(max_val, val))
+                end
+                ImGui.CloseCurrentPopup(ctx)
+              end
+              ImGui.EndPopup(ctx)
+            end
+
+          elseif selected_envelope.type == "fx" then
+            local param_min, param_max, _, is_normalized = get_fx_param_range(
+              selected_envelope.track,
+              selected_envelope.fx_idx,
+              selected_envelope.param_idx
+            )
+
+            min_val, max_val = param_min, param_max
+            label = is_normalized and "Value (normalized):" or "Value:"
+
+            ImGui.Text(ctx, label)
+
+            local old_val = reaper.TrackFX_GetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx)
+            reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, envelope_value)
+            local _, formatted_val = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, "")
+            reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, old_val)
+
+            ImGui.SetNextItemWidth(ctx, -1)
+            local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val, formatted_val)
+            if changed_val then
+              envelope_value = new_val
+            end
+
+            if ImGui.IsItemHovered(ctx) then
+              local tooltip = "Drag to adjust. Current: " .. formatted_val
+              if not is_normalized then
+                tooltip = tooltip .. string.format("\nRange: %.2f to %.2f", min_val, max_val)
+              end
+              tooltip = tooltip .. "\nRight-click to type value"
+              ImGui.SetTooltip(ctx, tooltip)
+            end
+
+            if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+              ImGui.OpenPopup(ctx, "fx_value_input")
+            end
+
+            if ImGui.BeginPopup(ctx, "fx_value_input") then
+              ImGui.Text(ctx, "Enter value:")
+              ImGui.SetNextItemWidth(ctx, 100)
+              local display_val = formatted_val:match("[-+]?[0-9]*%.?[0-9]+") or string.format("%.2f", envelope_value)
+              local rv, buf = ImGui.InputText(ctx, "##fxinput", display_val, ImGui.InputTextFlags_EnterReturnsTrue)
+              if rv then
+                local input_num = tonumber(buf)
+                if input_num then
+                  local best_val = envelope_value
+                  local best_diff = math.huge
+
+                  for i = 0, 200 do
+                    local test_val = i / 200
+                    reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, test_val)
+                    local _, test_str = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, "")
+                    local test_num = tonumber(test_str:match("[-+]?[0-9]*%.?[0-9]+"))
+
+                    if test_num then
+                      local diff = math.abs(test_num - input_num)
+                      if diff < best_diff then
+                        best_diff = diff
+                        best_val = test_val
+                      end
+                      if diff < 0.01 then break end
+                    end
+                  end
+
+                  reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, old_val)
+                  envelope_value = best_val
+                end
+                ImGui.CloseCurrentPopup(ctx)
+              end
+              ImGui.EndPopup(ctx)
+            end
           end
 
-          ImGui.Text(ctx, label)
+          ImGui.Separator(ctx)
+
+          -- Ramp controls
+          local is_toggle = false
+          if selected_envelope.type == "track" then
+            is_toggle = is_toggle_parameter(editing_ai.track, nil, nil, selected_envelope)
+          elseif selected_envelope.type == "fx" then
+            is_toggle = is_toggle_parameter(editing_ai.track, selected_envelope.fx_idx, selected_envelope.param_idx, selected_envelope)
+          end
+
+          if is_toggle then
+            ImGui.BeginDisabled(ctx)
+          end
+
+          ImGui.Text(ctx, "Ramp In (seconds from start):")
           ImGui.SetNextItemWidth(ctx, -1)
-          local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val, format_str)
-          if changed_val then
-            envelope_value = new_val
+          local changed_in, new_in = ImGui.SliderDouble(ctx, "##ramp_in", ramp_in, 0.0, 10.0, "%.2f sec")
+          if changed_in then
+            ramp_in = math.max(0, new_in)
           end
 
           if ImGui.IsItemHovered(ctx) then
@@ -556,186 +755,71 @@ function main()
           end
 
           if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-            ImGui.OpenPopup(ctx, "env_value_input")
+            ImGui.OpenPopup(ctx, "ramp_in_input")
           end
 
-          if ImGui.BeginPopup(ctx, "env_value_input") then
-            ImGui.Text(ctx, "Enter value:")
+          if ImGui.BeginPopup(ctx, "ramp_in_input") then
+            ImGui.Text(ctx, "Enter ramp in (seconds):")
             ImGui.SetNextItemWidth(ctx, 100)
-            local val_input_buf = string.format("%.2f", envelope_value)
-            local rv, buf = ImGui.InputText(ctx, "##envinput", val_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+            local ramp_in_buf = string.format("%.2f", ramp_in)
+            local rv, buf = ImGui.InputText(ctx, "##rampininput", ramp_in_buf, ImGui.InputTextFlags_EnterReturnsTrue)
             if rv then
               local val = tonumber(buf)
               if val then
-                envelope_value = math.max(min_val, math.min(max_val, val))
+                ramp_in = math.max(0, val)
               end
               ImGui.CloseCurrentPopup(ctx)
             end
             ImGui.EndPopup(ctx)
           end
 
-        elseif selected_envelope.type == "fx" then
-          local param_min, param_max, _, is_normalized = get_fx_param_range(
-            selected_envelope.track,
-            selected_envelope.fx_idx,
-            selected_envelope.param_idx
-          )
-
-          min_val, max_val = param_min, param_max
-          label = is_normalized and "Value (normalized):" or "Value:"
-
-          ImGui.Text(ctx, label)
-
-          local old_val = reaper.TrackFX_GetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx)
-          reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, envelope_value)
-          local _, formatted_val = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, "")
-          reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, old_val)
-
+          ImGui.Text(ctx, "Ramp Out (seconds before end):")
           ImGui.SetNextItemWidth(ctx, -1)
-          local changed_val, new_val = ImGui.SliderDouble(ctx, "##envvalue", envelope_value, min_val, max_val, formatted_val)
-          if changed_val then
-            envelope_value = new_val
+          local changed_out, new_out = ImGui.SliderDouble(ctx, "##ramp_out", ramp_out, 0.0, 10.0, "%.2f sec")
+          if changed_out then
+            ramp_out = math.max(0, new_out)
           end
 
           if ImGui.IsItemHovered(ctx) then
-            local tooltip = "Drag to adjust. Current: " .. formatted_val
-            if not is_normalized then
-              tooltip = tooltip .. string.format("\nRange: %.2f to %.2f", min_val, max_val)
-            end
-            tooltip = tooltip .. "\nRight-click to type value"
-            ImGui.SetTooltip(ctx, tooltip)
+            ImGui.SetTooltip(ctx, "Right-click to type value")
           end
 
           if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-            ImGui.OpenPopup(ctx, "fx_value_input")
+            ImGui.OpenPopup(ctx, "ramp_out_input")
           end
 
-          if ImGui.BeginPopup(ctx, "fx_value_input") then
-            ImGui.Text(ctx, "Enter value:")
+          if ImGui.BeginPopup(ctx, "ramp_out_input") then
+            ImGui.Text(ctx, "Enter ramp out (seconds):")
             ImGui.SetNextItemWidth(ctx, 100)
-            local display_val = formatted_val:match("[-+]?[0-9]*%.?[0-9]+") or string.format("%.2f", envelope_value)
-            local rv, buf = ImGui.InputText(ctx, "##fxinput", display_val, ImGui.InputTextFlags_EnterReturnsTrue)
+            local ramp_out_buf = string.format("%.2f", ramp_out)
+            local rv, buf = ImGui.InputText(ctx, "##rampoutinput", ramp_out_buf, ImGui.InputTextFlags_EnterReturnsTrue)
             if rv then
-              local input_num = tonumber(buf)
-              if input_num then
-                local best_val = envelope_value
-                local best_diff = math.huge
-
-                for i = 0, 200 do
-                  local test_val = i / 200
-                  reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, test_val)
-                  local _, test_str = reaper.TrackFX_GetFormattedParamValue(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, "")
-                  local test_num = tonumber(test_str:match("[-+]?[0-9]*%.?[0-9]+"))
-
-                  if test_num then
-                    local diff = math.abs(test_num - input_num)
-                    if diff < best_diff then
-                      best_diff = diff
-                      best_val = test_val
-                    end
-                    if diff < 0.01 then break end
-                  end
-                end
-
-                reaper.TrackFX_SetParam(selected_envelope.track, selected_envelope.fx_idx, selected_envelope.param_idx, old_val)
-                envelope_value = best_val
+              local val = tonumber(buf)
+              if val then
+                ramp_out = math.max(0, val)
               end
               ImGui.CloseCurrentPopup(ctx)
             end
             ImGui.EndPopup(ctx)
           end
-        end
 
-        ImGui.Separator(ctx)
-
-        -- Ramp controls
-        local is_toggle = false
-        if selected_envelope.type == "track" then
-          is_toggle = is_toggle_parameter(editing_ai.track, nil, nil, selected_envelope)
-        elseif selected_envelope.type == "fx" then
-          is_toggle = is_toggle_parameter(editing_ai.track, selected_envelope.fx_idx, selected_envelope.param_idx, selected_envelope)
-        end
-
-        if is_toggle then
-          ImGui.BeginDisabled(ctx)
-        end
-
-        ImGui.Text(ctx, "Ramp In (seconds from start):")
-        ImGui.SetNextItemWidth(ctx, -1)
-        local changed_in, new_in = ImGui.SliderDouble(ctx, "##ramp_in", ramp_in, 0.0, 10.0, "%.2f sec")
-        if changed_in then
-          ramp_in = math.max(0, new_in)
-        end
-
-        if ImGui.IsItemHovered(ctx) then
-          ImGui.SetTooltip(ctx, "Right-click to type value")
-        end
-
-        if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-          ImGui.OpenPopup(ctx, "ramp_in_input")
-        end
-
-        if ImGui.BeginPopup(ctx, "ramp_in_input") then
-          ImGui.Text(ctx, "Enter ramp in (seconds):")
-          ImGui.SetNextItemWidth(ctx, 100)
-          local ramp_in_buf = string.format("%.2f", ramp_in)
-          local rv, buf = ImGui.InputText(ctx, "##rampininput", ramp_in_buf, ImGui.InputTextFlags_EnterReturnsTrue)
-          if rv then
-            local val = tonumber(buf)
-            if val then
-              ramp_in = math.max(0, val)
-            end
-            ImGui.CloseCurrentPopup(ctx)
+          if is_toggle then
+            ImGui.EndDisabled(ctx)
           end
-          ImGui.EndPopup(ctx)
-        end
 
-        ImGui.Text(ctx, "Ramp Out (seconds before end):")
-        ImGui.SetNextItemWidth(ctx, -1)
-        local changed_out, new_out = ImGui.SliderDouble(ctx, "##ramp_out", ramp_out, 0.0, 10.0, "%.2f sec")
-        if changed_out then
-          ramp_out = math.max(0, new_out)
-        end
+          ImGui.Spacing(ctx)
+          ImGui.Separator(ctx)
+          ImGui.Spacing(ctx)
 
-        if ImGui.IsItemHovered(ctx) then
-          ImGui.SetTooltip(ctx, "Right-click to type value")
-        end
-
-        if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-          ImGui.OpenPopup(ctx, "ramp_out_input")
-        end
-
-        if ImGui.BeginPopup(ctx, "ramp_out_input") then
-          ImGui.Text(ctx, "Enter ramp out (seconds):")
-          ImGui.SetNextItemWidth(ctx, 100)
-          local ramp_out_buf = string.format("%.2f", ramp_out)
-          local rv, buf = ImGui.InputText(ctx, "##rampoutinput", ramp_out_buf, ImGui.InputTextFlags_EnterReturnsTrue)
-          if rv then
-            local val = tonumber(buf)
-            if val then
-              ramp_out = math.max(0, val)
-            end
-            ImGui.CloseCurrentPopup(ctx)
+          -- Apply button
+          local avail_w_button = ImGui.GetContentRegionAvail(ctx)
+          if ImGui.Button(ctx, "Apply Changes", avail_w_button, 30) then
+            apply_automation()
           end
-          ImGui.EndPopup(ctx)
+
+        else
+          ImGui.TextWrapped(ctx, "Could not detect envelope parameter")
         end
-
-        if is_toggle then
-          ImGui.EndDisabled(ctx)
-        end
-
-        ImGui.Spacing(ctx)
-        ImGui.Separator(ctx)
-        ImGui.Spacing(ctx)
-
-        -- Apply button
-        local avail_w_button = ImGui.GetContentRegionAvail(ctx)
-        if ImGui.Button(ctx, "Apply Changes", avail_w_button, 30) then
-          apply_automation()
-        end
-
-      else
-        ImGui.TextWrapped(ctx, "Could not detect envelope parameter")
       end
 
       ImGui.End(ctx)
@@ -748,6 +832,9 @@ end
 ---------------------------------------------------------------------
 
 -- Initialize and start
-if initialize_from_automation_item() then
-  defer(main)
+if not initialize_from_automation_item() then
+  -- If no automation item selected initially, still open the window with message
+  no_selection_state = true
 end
+
+defer(main)
