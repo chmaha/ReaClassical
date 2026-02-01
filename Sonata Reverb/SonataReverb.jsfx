@@ -1,9 +1,18 @@
-Version: 1.1
+Version: 1.5
 desc: Sonata Reverb (chmaha)
 author: chmaha
 // Using Fons Adriaensen's Zita-Rev1 Reverb Algorithm
 // Source: https://kokkinizita.linuxaudio.org/linuxaudio/downloads/index.html
 // License: GNU General Public License version 3
+//
+// Classical Music Reverb - Concert Hall & Church Spaces
+//
+// Three Reverb Models:
+// - ZR1: Pure Zita-Rev1 algorithm (neutral reference, no modulation, no ERs)
+// - MK VII: concert hall ERs, gentle diffusion, +4dB @ 120Hz, subtle modulation
+// - LEXIS: concert hall ERs, frequency-dependent decay, HF diffusion, +5dB @ 120Hz, ensemble modulation
+// - Medium concert hall early reflections (48-199ms) - Vienna Musikverein-esque
+// - 6-tap ER pattern suitable for chamber music through full orchestra
 
 slider1:40<20,100,1>-Delay (ms)
 slider2:200<50,1000,1>-XOver (Hz)
@@ -15,6 +24,8 @@ slider7:0<-15,15,0.5>-EQ1 Gain (dB)
 slider8:2500<160,10000,1>-EQ2 Freq (Hz)
 slider9:0<-15,15,0.5>-EQ2 Gain (dB)
 slider10:0.5<0,1,0.01>-Output Mix
+slider11:0<0,2,1{ZR1,MK VII,LEXIS}>-Model
+slider12:50<0,100,1>-Modulation Amount (%)
 
 options:no_meter
 
@@ -37,6 +48,80 @@ local(g_val, t_val)
   t_val = (1 - g_val * g_val) / (2 * g_val * g_val * chi_in);
   this.whi = (sqrt(1 + 4 * t_val) - 1) / (2 * t_val);
 );
+
+// MK VII ER: Tapped delay with post-diffusion (Bricasti-style)
+er_mk7_size = floor(0.220 * srate); // 220ms for concert hall taps
+er_mk7_line_l = alloc(er_mk7_size);
+er_mk7_line_r = alloc(er_mk7_size);
+er_mk7_write = 0;
+
+// Single gentle allpass for post-diffusion
+er_mk7_diff_size = floor(0.004 * srate); // 4ms
+er_mk7_diff_l = alloc(er_mk7_diff_size);
+er_mk7_diff_r = alloc(er_mk7_diff_size);
+er_mk7_diff_i = 0;
+
+// LEXIS ER: Tapped delay with frequency-dependent decay
+er_lexis_size = floor(0.220 * srate); // 220ms for concert hall taps
+er_lexis_line_l = alloc(er_lexis_size);
+er_lexis_line_r = alloc(er_lexis_size);
+er_lexis_write = 0;
+
+// LEXIS ER damping filters (highpass for frequency-dependent decay)
+er_lexis_lp_l1 = 0;
+er_lexis_lp_l2 = 0;
+er_lexis_lp_l3 = 0;
+er_lexis_lp_l4 = 0;
+er_lexis_lp_l5 = 0;
+er_lexis_lp_l6 = 0;
+er_lexis_lp_r1 = 0;
+er_lexis_lp_r2 = 0;
+er_lexis_lp_r3 = 0;
+er_lexis_lp_r4 = 0;
+er_lexis_lp_r5 = 0;
+er_lexis_lp_r6 = 0;
+
+// LEXIS HF Diffusion: Cascaded allpass above 3kHz (Lexicon shimmer)
+hf_diff1_size = floor(0.0011 * srate); // 1.1ms
+hf_diff1_l = alloc(hf_diff1_size);
+hf_diff1_r = alloc(hf_diff1_size);
+hf_diff1_i = 0;
+
+hf_diff2_size = floor(0.0017 * srate); // 1.7ms
+hf_diff2_l = alloc(hf_diff2_size);
+hf_diff2_r = alloc(hf_diff2_size);
+hf_diff2_i = 0;
+
+hf_diff3_size = floor(0.0023 * srate); // 2.3ms
+hf_diff3_l = alloc(hf_diff3_size);
+hf_diff3_r = alloc(hf_diff3_size);
+hf_diff3_i = 0;
+
+// HF split filters (3kHz crossover)
+hf_split_lp_l = 0;
+hf_split_lp_r = 0;
+hf_split_hp_l = 0;
+hf_split_hp_r = 0;
+
+// Modulation LFO initialization
+mod_phase_0 = 0;
+mod_phase_1 = 0.25;
+mod_phase_2 = 0.5;
+mod_phase_3 = 0.75;
+mod_phase_4 = 0.125;
+mod_phase_5 = 0.375;
+mod_phase_6 = 0.625;
+mod_phase_7 = 0.875;
+
+// Tertiary LFO phases for PCM-style modulation
+mod_phase_t0 = 0.1;
+mod_phase_t1 = 0.35;
+mod_phase_t2 = 0.6;
+mod_phase_t3 = 0.85;
+mod_phase_t4 = 0.2;
+mod_phase_t5 = 0.45;
+mod_phase_t6 = 0.7;
+mod_phase_t7 = 0.95;
 
 // Diff1 delay times from source (in seconds)
 tdiff1_0 = 20346*10^-6;
@@ -70,106 +155,106 @@ vdelay1_ir = 0;
 vdelay1_iw = 0;
 
 // Diff1 (allpass diffusers) - 8 of them
-diff1_0_size = floor(tdiff1_0 * srate + 0.5);
+max_mod_samples = floor(0.010 * srate);
+
+diff1_0_size = floor(tdiff1_0 * srate + 0.5) + max_mod_samples;
 diff1_0_line = alloc(diff1_0_size);
 diff1_0_i = 0;
 diff1_0_c = 0.6;
 
-diff1_1_size = floor(tdiff1_1 * srate + 0.5);
+diff1_1_size = floor(tdiff1_1 * srate + 0.5) + max_mod_samples;
 diff1_1_line = alloc(diff1_1_size);
 diff1_1_i = 0;
 diff1_1_c = -0.6;
 
-diff1_2_size = floor(tdiff1_2 * srate + 0.5);
+diff1_2_size = floor(tdiff1_2 * srate + 0.5) + max_mod_samples;
 diff1_2_line = alloc(diff1_2_size);
 diff1_2_i = 0;
 diff1_2_c = 0.6;
 
-diff1_3_size = floor(tdiff1_3 * srate + 0.5);
+diff1_3_size = floor(tdiff1_3 * srate + 0.5) + max_mod_samples;
 diff1_3_line = alloc(diff1_3_size);
 diff1_3_i = 0;
 diff1_3_c = -0.6;
 
-diff1_4_size = floor(tdiff1_4 * srate + 0.5);
+diff1_4_size = floor(tdiff1_4 * srate + 0.5) + max_mod_samples;
 diff1_4_line = alloc(diff1_4_size);
 diff1_4_i = 0;
 diff1_4_c = 0.6;
 
-diff1_5_size = floor(tdiff1_5 * srate + 0.5);
+diff1_5_size = floor(tdiff1_5 * srate + 0.5) + max_mod_samples;
 diff1_5_line = alloc(diff1_5_size);
 diff1_5_i = 0;
 diff1_5_c = -0.6;
 
-diff1_6_size = floor(tdiff1_6 * srate + 0.5);
+diff1_6_size = floor(tdiff1_6 * srate + 0.5) + max_mod_samples;
 diff1_6_line = alloc(diff1_6_size);
 diff1_6_i = 0;
 diff1_6_c = 0.6;
 
-diff1_7_size = floor(tdiff1_7 * srate + 0.5);
+diff1_7_size = floor(tdiff1_7 * srate + 0.5) + max_mod_samples;
 diff1_7_line = alloc(diff1_7_size);
 diff1_7_i = 0;
 diff1_7_c = -0.6;
 
-// Main delay lines (after subtracting diff1 sizes)
-delay_0_size = floor(tdelay_0 * srate + 0.5) - diff1_0_size;
+// Store base delay sizes
+diff1_0_base = floor(tdiff1_0 * srate + 0.5);
+diff1_1_base = floor(tdiff1_1 * srate + 0.5);
+diff1_2_base = floor(tdiff1_2 * srate + 0.5);
+diff1_3_base = floor(tdiff1_3 * srate + 0.5);
+diff1_4_base = floor(tdiff1_4 * srate + 0.5);
+diff1_5_base = floor(tdiff1_5 * srate + 0.5);
+diff1_6_base = floor(tdiff1_6 * srate + 0.5);
+diff1_7_base = floor(tdiff1_7 * srate + 0.5);
+
+// Main delay lines
+delay_0_size = floor(tdelay_0 * srate + 0.5) - diff1_0_base;
 delay_0_line = alloc(delay_0_size);
 delay_0_i = 0;
 
-delay_1_size = floor(tdelay_1 * srate + 0.5) - diff1_1_size;
+delay_1_size = floor(tdelay_1 * srate + 0.5) - diff1_1_base;
 delay_1_line = alloc(delay_1_size);
 delay_1_i = 0;
 
-delay_2_size = floor(tdelay_2 * srate + 0.5) - diff1_2_size;
+delay_2_size = floor(tdelay_2 * srate + 0.5) - diff1_2_base;
 delay_2_line = alloc(delay_2_size);
 delay_2_i = 0;
 
-delay_3_size = floor(tdelay_3 * srate + 0.5) - diff1_3_size;
+delay_3_size = floor(tdelay_3 * srate + 0.5) - diff1_3_base;
 delay_3_line = alloc(delay_3_size);
 delay_3_i = 0;
 
-delay_4_size = floor(tdelay_4 * srate + 0.5) - diff1_4_size;
+delay_4_size = floor(tdelay_4 * srate + 0.5) - diff1_4_base;
 delay_4_line = alloc(delay_4_size);
 delay_4_i = 0;
 
-delay_5_size = floor(tdelay_5 * srate + 0.5) - diff1_5_size;
+delay_5_size = floor(tdelay_5 * srate + 0.5) - diff1_5_base;
 delay_5_line = alloc(delay_5_size);
 delay_5_i = 0;
 
-delay_6_size = floor(tdelay_6 * srate + 0.5) - diff1_6_size;
+delay_6_size = floor(tdelay_6 * srate + 0.5) - diff1_6_base;
 delay_6_line = alloc(delay_6_size);
 delay_6_i = 0;
 
-delay_7_size = floor(tdelay_7 * srate + 0.5) - diff1_7_size;
+delay_7_size = floor(tdelay_7 * srate + 0.5) - diff1_7_base;
 delay_7_line = alloc(delay_7_size);
 delay_7_i = 0;
 
-// Initialize Filt1 states (damping filters)
-filt1_0_slo = 0;
-filt1_0_shi = 0;
-filt1_1_slo = 0;
-filt1_1_shi = 0;
-filt1_2_slo = 0;
-filt1_2_shi = 0;
-filt1_3_slo = 0;
-filt1_3_shi = 0;
-filt1_4_slo = 0;
-filt1_4_shi = 0;
-filt1_5_slo = 0;
-filt1_5_shi = 0;
-filt1_6_slo = 0;
-filt1_6_shi = 0;
-filt1_7_slo = 0;
-filt1_7_shi = 0;
+// Initialize Filt1 states
+filt1_0_slo = 0; filt1_0_shi = 0;
+filt1_1_slo = 0; filt1_1_shi = 0;
+filt1_2_slo = 0; filt1_2_shi = 0;
+filt1_3_slo = 0; filt1_3_shi = 0;
+filt1_4_slo = 0; filt1_4_shi = 0;
+filt1_5_slo = 0; filt1_5_shi = 0;
+filt1_6_slo = 0; filt1_6_shi = 0;
+filt1_7_slo = 0; filt1_7_shi = 0;
 
 // Pareq states
-pareq1_z1_l = 0;
-pareq1_z2_l = 0;
-pareq1_z1_r = 0;
-pareq1_z2_r = 0;
-pareq2_z1_l = 0;
-pareq2_z2_l = 0;
-pareq2_z1_r = 0;
-pareq2_z2_r = 0;
+pareq1_z1_l = 0; pareq1_z2_l = 0;
+pareq1_z1_r = 0; pareq1_z2_r = 0;
+pareq2_z1_l = 0; pareq2_z2_l = 0;
+pareq2_z1_r = 0; pareq2_z2_r = 0;
 
 pareq1_state = 0;
 pareq2_state = 0;
@@ -177,6 +262,13 @@ pareq1_g1 = 1.0;
 pareq1_f1 = 1000.0;
 pareq2_g1 = 1.0;
 pareq2_f1 = 1000.0;
+
+// Model bass EQ states (separate from user EQ)
+model_bass_z1_l = 0; model_bass_z2_l = 0;
+model_bass_z1_r = 0; model_bass_z2_r = 0;
+model_bass_state = 0;
+model_bass_g1 = 1.0;
+model_bass_f1 = 120.0;
 
 // Output gain states
 g0 = 0.75;
@@ -198,17 +290,106 @@ eq1_gain = slider7;
 eq2_freq = slider8;
 eq2_gain = slider9;
 opmix = slider10;
+mod_type = slider11;
+mod_amount = slider12 * 0.01;
+
+// Model-specific parameter adjustments
+mod_type == 1 ? ( // MK VII (Bricasti M7)
+  // MK VII adds +4dB bass boost at 120Hz (fixed, separate from user EQ)
+  model_bass_freq = 120;
+  model_bass_gain = 4.0;
+  model_xover_offset = 1.0;
+  model_damp_offset = 1.0;
+
+  // MK VII Concert Hall ER taps (medium hall - Vienna Musikverein-sized)
+  er_mk7_tap1 = floor(0.048 * srate);  // 48ms
+  er_mk7_tap2 = floor(0.071 * srate);  // 71ms
+  er_mk7_tap3 = floor(0.097 * srate);  // 97ms
+  er_mk7_tap4 = floor(0.127 * srate);  // 127ms
+  er_mk7_tap5 = floor(0.163 * srate);  // 163ms
+  er_mk7_tap6 = floor(0.199 * srate);  // 199ms
+  er_level = 0.65;
+
+) : mod_type == 2 ? ( // LEXIS (Lexicon PCM)
+  // LEXIS adds +5dB bass boost at 120Hz (fixed, separate from user EQ)
+  model_bass_freq = 120;
+  model_bass_gain = 5.0;
+  model_xover_offset = 1.0;
+  model_damp_offset = 1.0;
+
+  // LEXIS Concert Hall ER taps (same as MK VII - medium hall)
+  er_lexis_tap1 = floor(0.048 * srate);  // 48ms
+  er_lexis_tap2 = floor(0.071 * srate);  // 71ms
+  er_lexis_tap3 = floor(0.097 * srate);  // 97ms
+  er_lexis_tap4 = floor(0.127 * srate);  // 127ms
+  er_lexis_tap5 = floor(0.163 * srate);  // 163ms
+  er_lexis_tap6 = floor(0.199 * srate);  // 199ms
+  er_level = 0.6;
+  er_feedback = 0.2;
+
+  // HF split filter coefficient (3kHz)
+  hf_split_coeff = exp(-2 * $pi * 3000 / srate);
+
+) : ( // ZR1 - neutral
+  model_bass_freq = 120;
+  model_bass_gain = 0;
+  model_xover_offset = 1.0;
+  model_damp_offset = 1.0;
+  er_level = 0;
+);
+
+// User EQ controls remain fully independent
+eq1_freq_final = eq1_freq;      // User controls frequency
+eq1_gain_final = eq1_gain;      // User controls gain
+eq2_freq_final = eq2_freq;      // User controls frequency
+eq2_gain_final = eq2_gain;      // User controls gain
+
+// Model bass boost is separate (always at 120Hz, amount varies by model)
+model_bass_g0 = pow(10.0, 0.05 * model_bass_gain);
+model_bass_f0 = model_bass_freq;
+
+xover_final = xover * model_xover_offset;
+fdamp_final = fdamp * model_damp_offset;
+
+// Modulation parameters
+mod_type == 1 ? (
+  mod_rate = 0.47;
+  mod_depth_base = 0.0005;
+  mod_rate2 = 0.61;
+  mod_mix = 0.25;
+) : mod_type == 2 ? (
+  mod_rate = 0.21;
+  mod_depth_base = 0.0015;
+  mod_rate2 = 0.34;
+  mod_rate3 = 0.13;
+  mod_mix = 0.18;
+  mod_mix3 = 0.12;
+) : (
+  mod_rate = 0;
+  mod_depth_base = 0;
+  mod_rate2 = 0;
+  mod_rate3 = 0;
+  mod_mix = 0;
+  mod_mix3 = 0;
+);
+
+mod_depth = mod_depth_base * mod_amount;
+mod_depth_samples = mod_depth * srate;
+
+mod_inc = 2 * $pi * mod_rate / srate;
+mod_inc2 = 2 * $pi * mod_rate2 / srate;
+mod_inc3 = mod_type == 2 ? 2 * $pi * mod_rate3 / srate : 0;
 
 k = floor((ipdel - 0.020) * srate + 0.5);
 k = max(0, min(k, vdelay0_size - 1));
 vdelay0_del = k;
 vdelay1_del = k;
 
-wlo = 6.2832 * xover / srate;
-(fdamp > 0.49 * srate) ? (
+wlo = 6.2832 * xover_final / srate;
+(fdamp_final > 0.49 * srate) ? (
   chi = 2;
 ) : (
-  chi = 1 - cos(6.2832 * fdamp / srate);
+  chi = 1 - cos(6.2832 * fdamp_final / srate);
 );
 
 t0 = (1 - opmix) * (1 + opmix);
@@ -216,10 +397,10 @@ t1 = 0.7 * opmix * (2 - opmix) / sqrt(rtmid);
 d0 = (t0 - g0) / samplesblock;
 d1 = (t1 - g1) / samplesblock;
 
-pareq1_g0 = pow(10.0, 0.05 * eq1_gain);
-pareq1_f0 = eq1_freq;
-pareq2_g0 = pow(10.0, 0.05 * eq2_gain);
-pareq2_f0 = eq2_freq;
+pareq1_g0 = pow(10.0, 0.05 * eq1_gain_final);
+pareq1_f0 = eq1_freq_final;
+pareq2_g0 = pow(10.0, 0.05 * eq2_gain_final);
+pareq2_f0 = eq2_freq_final;
 
 filt1_0.set_filt_params(tdelay_0, rtmid, rtlow, wlo, 0.5 * rtmid, chi);
 filt1_1.set_filt_params(tdelay_1, rtmid, rtlow, wlo, 0.5 * rtmid, chi);
@@ -291,7 +472,285 @@ pareq2_upd = 0;
   ) : pareq2_state = 1;
 );
 
+// Model bass EQ calculation (separate from user EQ)
+model_bass_upd = 0;
+(model_bass_g0 != model_bass_g1) ? (
+  model_bass_upd = 1;
+  (model_bass_g0 > 2 * model_bass_g1) ? model_bass_g1 *= 2
+  : (model_bass_g1 > 2 * model_bass_g0) ? model_bass_g1 /= 2
+  : model_bass_g1 = model_bass_g0;
+);
+(model_bass_f0 != model_bass_f1) ? (
+  model_bass_upd = 1;
+  (model_bass_f0 > 2 * model_bass_f1) ? model_bass_f1 *= 2
+  : (model_bass_f1 > 2 * model_bass_f0) ? model_bass_f1 /= 2
+  : model_bass_f1 = model_bass_f0;
+);
+(model_bass_upd) ? (
+  model_bass.pareq_calcpar(model_bass_g1, model_bass_f1);
+  model_bass_state = 1;
+) : (
+  (abs(model_bass_g1 - 1) < 0.001) ? (
+    model_bass_state = 0;
+    model_bass_z1_l = 0; model_bass_z2_l = 0;
+    model_bass_z1_r = 0; model_bass_z2_r = 0;
+  ) : model_bass_state = 1;
+);
+
 @sample
+
+// Update modulation LFOs
+mod_type > 0 ? (
+  mod_phase_0 += mod_inc;
+  mod_phase_0 >= 2 * $pi ? mod_phase_0 -= 2 * $pi;
+
+  mod_phase_1 += mod_inc;
+  mod_phase_1 >= 2 * $pi ? mod_phase_1 -= 2 * $pi;
+
+  mod_phase_2 += mod_inc;
+  mod_phase_2 >= 2 * $pi ? mod_phase_2 -= 2 * $pi;
+
+  mod_phase_3 += mod_inc;
+  mod_phase_3 >= 2 * $pi ? mod_phase_3 -= 2 * $pi;
+
+  mod_phase_4 += mod_inc2;
+  mod_phase_4 >= 2 * $pi ? mod_phase_4 -= 2 * $pi;
+
+  mod_phase_5 += mod_inc2;
+  mod_phase_5 >= 2 * $pi ? mod_phase_5 -= 2 * $pi;
+
+  mod_phase_6 += mod_inc2;
+  mod_phase_6 >= 2 * $pi ? mod_phase_6 -= 2 * $pi;
+
+  mod_phase_7 += mod_inc2;
+  mod_phase_7 >= 2 * $pi ? mod_phase_7 -= 2 * $pi;
+
+  mod_type == 2 ? (
+    mod_phase_t0 += mod_inc3;
+    mod_phase_t0 >= 2 * $pi ? mod_phase_t0 -= 2 * $pi;
+
+    mod_phase_t1 += mod_inc3;
+    mod_phase_t1 >= 2 * $pi ? mod_phase_t1 -= 2 * $pi;
+
+    mod_phase_t2 += mod_inc3;
+    mod_phase_t2 >= 2 * $pi ? mod_phase_t2 -= 2 * $pi;
+
+    mod_phase_t3 += mod_inc3;
+    mod_phase_t3 >= 2 * $pi ? mod_phase_t3 -= 2 * $pi;
+
+    mod_phase_t4 += mod_inc3;
+    mod_phase_t4 >= 2 * $pi ? mod_phase_t4 -= 2 * $pi;
+
+    mod_phase_t5 += mod_inc3;
+    mod_phase_t5 >= 2 * $pi ? mod_phase_t5 -= 2 * $pi;
+
+    mod_phase_t6 += mod_inc3;
+    mod_phase_t6 >= 2 * $pi ? mod_phase_t6 -= 2 * $pi;
+
+    mod_phase_t7 += mod_inc3;
+    mod_phase_t7 >= 2 * $pi ? mod_phase_t7 -= 2 * $pi;
+  );
+
+  // Calculate modulated delay times
+  mod_type == 1 ? (
+    mod_0 = mod_depth_samples * (sin(mod_phase_0) + mod_mix * sin(mod_phase_4));
+    mod_1 = mod_depth_samples * (sin(mod_phase_1) + mod_mix * sin(mod_phase_5));
+    mod_2 = mod_depth_samples * (sin(mod_phase_2) + mod_mix * sin(mod_phase_6));
+    mod_3 = mod_depth_samples * (sin(mod_phase_3) + mod_mix * sin(mod_phase_7));
+    mod_4 = mod_depth_samples * (sin(mod_phase_4) + mod_mix * sin(mod_phase_0));
+    mod_5 = mod_depth_samples * (sin(mod_phase_5) + mod_mix * sin(mod_phase_1));
+    mod_6 = mod_depth_samples * (sin(mod_phase_6) + mod_mix * sin(mod_phase_2));
+    mod_7 = mod_depth_samples * (sin(mod_phase_7) + mod_mix * sin(mod_phase_3));
+  ) : (
+    mod_0 = mod_depth_samples * (sin(mod_phase_0) + mod_mix * sin(mod_phase_4) + mod_mix3 * sin(mod_phase_t0));
+    mod_1 = mod_depth_samples * (sin(mod_phase_1) + mod_mix * sin(mod_phase_5) + mod_mix3 * sin(mod_phase_t1));
+    mod_2 = mod_depth_samples * (sin(mod_phase_2) + mod_mix * sin(mod_phase_6) + mod_mix3 * sin(mod_phase_t2));
+    mod_3 = mod_depth_samples * (sin(mod_phase_3) + mod_mix * sin(mod_phase_7) + mod_mix3 * sin(mod_phase_t3));
+    mod_4 = mod_depth_samples * (sin(mod_phase_4) + mod_mix * sin(mod_phase_0) + mod_mix3 * sin(mod_phase_t4));
+    mod_5 = mod_depth_samples * (sin(mod_phase_5) + mod_mix * sin(mod_phase_1) + mod_mix3 * sin(mod_phase_t5));
+    mod_6 = mod_depth_samples * (sin(mod_phase_6) + mod_mix * sin(mod_phase_2) + mod_mix3 * sin(mod_phase_t6));
+    mod_7 = mod_depth_samples * (sin(mod_phase_7) + mod_mix * sin(mod_phase_3) + mod_mix3 * sin(mod_phase_t7));
+  );
+) : (
+  mod_0 = mod_1 = mod_2 = mod_3 = mod_4 = mod_5 = mod_6 = mod_7 = 0;
+);
+
+// Early Reflections processing
+mod_type == 1 ? (
+  // MK VII: Tapped delay with gentle post-diffusion (Bricasti-style)
+  er_mk7_line_l[er_mk7_write] = spl0;
+  er_mk7_line_r[er_mk7_write] = spl1;
+
+  // Read 6 taps with linear interpolation
+  er_pos1 = er_mk7_write - er_mk7_tap1;
+  er_pos1 < 0 ? er_pos1 += er_mk7_size;
+  er_idx1 = floor(er_pos1);
+  er_frac1 = er_pos1 - er_idx1;
+  er_idx1_next = er_idx1 + 1;
+  er_idx1_next >= er_mk7_size ? er_idx1_next = 0;
+  er1_l = er_mk7_line_l[er_idx1] * (1 - er_frac1) + er_mk7_line_l[er_idx1_next] * er_frac1;
+  er1_r = er_mk7_line_r[er_idx1] * (1 - er_frac1) + er_mk7_line_r[er_idx1_next] * er_frac1;
+
+  er_pos2 = er_mk7_write - er_mk7_tap2;
+  er_pos2 < 0 ? er_pos2 += er_mk7_size;
+  er_idx2 = floor(er_pos2);
+  er_frac2 = er_pos2 - er_idx2;
+  er_idx2_next = er_idx2 + 1;
+  er_idx2_next >= er_mk7_size ? er_idx2_next = 0;
+  er2_l = er_mk7_line_l[er_idx2] * (1 - er_frac2) + er_mk7_line_l[er_idx2_next] * er_frac2;
+  er2_r = er_mk7_line_r[er_idx2] * (1 - er_frac2) + er_mk7_line_r[er_idx2_next] * er_frac2;
+
+  er_pos3 = er_mk7_write - er_mk7_tap3;
+  er_pos3 < 0 ? er_pos3 += er_mk7_size;
+  er_idx3 = floor(er_pos3);
+  er_frac3 = er_pos3 - er_idx3;
+  er_idx3_next = er_idx3 + 1;
+  er_idx3_next >= er_mk7_size ? er_idx3_next = 0;
+  er3_l = er_mk7_line_l[er_idx3] * (1 - er_frac3) + er_mk7_line_l[er_idx3_next] * er_frac3;
+  er3_r = er_mk7_line_r[er_idx3] * (1 - er_frac3) + er_mk7_line_r[er_idx3_next] * er_frac3;
+
+  er_pos4 = er_mk7_write - er_mk7_tap4;
+  er_pos4 < 0 ? er_pos4 += er_mk7_size;
+  er_idx4 = floor(er_pos4);
+  er_frac4 = er_pos4 - er_idx4;
+  er_idx4_next = er_idx4 + 1;
+  er_idx4_next >= er_mk7_size ? er_idx4_next = 0;
+  er4_l = er_mk7_line_l[er_idx4] * (1 - er_frac4) + er_mk7_line_l[er_idx4_next] * er_frac4;
+  er4_r = er_mk7_line_r[er_idx4] * (1 - er_frac4) + er_mk7_line_r[er_idx4_next] * er_frac4;
+
+  er_pos5 = er_mk7_write - er_mk7_tap5;
+  er_pos5 < 0 ? er_pos5 += er_mk7_size;
+  er_idx5 = floor(er_pos5);
+  er_frac5 = er_pos5 - er_idx5;
+  er_idx5_next = er_idx5 + 1;
+  er_idx5_next >= er_mk7_size ? er_idx5_next = 0;
+  er5_l = er_mk7_line_l[er_idx5] * (1 - er_frac5) + er_mk7_line_l[er_idx5_next] * er_frac5;
+  er5_r = er_mk7_line_r[er_idx5] * (1 - er_frac5) + er_mk7_line_r[er_idx5_next] * er_frac5;
+
+  er_pos6 = er_mk7_write - er_mk7_tap6;
+  er_pos6 < 0 ? er_pos6 += er_mk7_size;
+  er_idx6 = floor(er_pos6);
+  er_frac6 = er_pos6 - er_idx6;
+  er_idx6_next = er_idx6 + 1;
+  er_idx6_next >= er_mk7_size ? er_idx6_next = 0;
+  er6_l = er_mk7_line_l[er_idx6] * (1 - er_frac6) + er_mk7_line_l[er_idx6_next] * er_frac6;
+  er6_r = er_mk7_line_r[er_idx6] * (1 - er_frac6) + er_mk7_line_r[er_idx6_next] * er_frac6;
+
+  // Mix taps
+  er_mix_l = (er1_l + er2_l + er3_l + er4_l + er5_l + er6_l) / 6;
+  er_mix_r = (er1_r + er2_r + er3_r + er4_r + er5_r + er6_r) / 6;
+
+  // Apply gentle allpass diffusion to blur the taps slightly (Bricasti character)
+  z_l = er_mk7_diff_l[er_mk7_diff_i];
+  z_r = er_mk7_diff_r[er_mk7_diff_i];
+  er_mk7_diff_l[er_mk7_diff_i] = er_mix_l + 0.3 * z_l;
+  er_mk7_diff_r[er_mk7_diff_i] = er_mix_r + 0.3 * z_r;
+  er_diffused_l = z_l - 0.3 * er_mk7_diff_l[er_mk7_diff_i];
+  er_diffused_r = z_r - 0.3 * er_mk7_diff_r[er_mk7_diff_i];
+  er_mk7_diff_i += 1;
+  er_mk7_diff_i >= er_mk7_diff_size ? er_mk7_diff_i = 0;
+
+  er_mk7_write += 1;
+  er_mk7_write >= er_mk7_size ? er_mk7_write = 0;
+
+  er_inject_l = er_diffused_l * er_level;
+  er_inject_r = er_diffused_r * er_level;
+
+) : mod_type == 2 ? (
+  // LEXIS: Tapped delay with frequency-dependent decay
+  er_lexis_line_l[er_lexis_write] = spl0;
+  er_lexis_line_r[er_lexis_write] = spl1;
+
+  // Read 6 taps with linear interpolation
+  er_pos1 = er_lexis_write - er_lexis_tap1;
+  er_pos1 < 0 ? er_pos1 += er_lexis_size;
+  er_idx1 = floor(er_pos1);
+  er_frac1 = er_pos1 - er_idx1;
+  er_idx1_next = er_idx1 + 1;
+  er_idx1_next >= er_lexis_size ? er_idx1_next = 0;
+  er1_l = er_lexis_line_l[er_idx1] * (1 - er_frac1) + er_lexis_line_l[er_idx1_next] * er_frac1;
+  er1_r = er_lexis_line_r[er_idx1] * (1 - er_frac1) + er_lexis_line_r[er_idx1_next] * er_frac1;
+
+  er_pos2 = er_lexis_write - er_lexis_tap2;
+  er_pos2 < 0 ? er_pos2 += er_lexis_size;
+  er_idx2 = floor(er_pos2);
+  er_frac2 = er_pos2 - er_idx2;
+  er_idx2_next = er_idx2 + 1;
+  er_idx2_next >= er_lexis_size ? er_idx2_next = 0;
+  er2_l = er_lexis_line_l[er_idx2] * (1 - er_frac2) + er_lexis_line_l[er_idx2_next] * er_frac2;
+  er2_r = er_lexis_line_r[er_idx2] * (1 - er_frac2) + er_lexis_line_r[er_idx2_next] * er_frac2;
+
+  er_pos3 = er_lexis_write - er_lexis_tap3;
+  er_pos3 < 0 ? er_pos3 += er_lexis_size;
+  er_idx3 = floor(er_pos3);
+  er_frac3 = er_pos3 - er_idx3;
+  er_idx3_next = er_idx3 + 1;
+  er_idx3_next >= er_lexis_size ? er_idx3_next = 0;
+  er3_l = er_lexis_line_l[er_idx3] * (1 - er_frac3) + er_lexis_line_l[er_idx3_next] * er_frac3;
+  er3_r = er_lexis_line_r[er_idx3] * (1 - er_frac3) + er_lexis_line_r[er_idx3_next] * er_frac3;
+
+  er_pos4 = er_lexis_write - er_lexis_tap4;
+  er_pos4 < 0 ? er_pos4 += er_lexis_size;
+  er_idx4 = floor(er_pos4);
+  er_frac4 = er_pos4 - er_idx4;
+  er_idx4_next = er_idx4 + 1;
+  er_idx4_next >= er_lexis_size ? er_idx4_next = 0;
+  er4_l = er_lexis_line_l[er_idx4] * (1 - er_frac4) + er_lexis_line_l[er_idx4_next] * er_frac4;
+  er4_r = er_lexis_line_r[er_idx4] * (1 - er_frac4) + er_lexis_line_r[er_idx4_next] * er_frac4;
+
+  er_pos5 = er_lexis_write - er_lexis_tap5;
+  er_pos5 < 0 ? er_pos5 += er_lexis_size;
+  er_idx5 = floor(er_pos5);
+  er_frac5 = er_pos5 - er_idx5;
+  er_idx5_next = er_idx5 + 1;
+  er_idx5_next >= er_lexis_size ? er_idx5_next = 0;
+  er5_l = er_lexis_line_l[er_idx5] * (1 - er_frac5) + er_lexis_line_l[er_idx5_next] * er_frac5;
+  er5_r = er_lexis_line_r[er_idx5] * (1 - er_frac5) + er_lexis_line_r[er_idx5_next] * er_frac5;
+
+  er_pos6 = er_lexis_write - er_lexis_tap6;
+  er_pos6 < 0 ? er_pos6 += er_lexis_size;
+  er_idx6 = floor(er_pos6);
+  er_frac6 = er_pos6 - er_idx6;
+  er_idx6_next = er_idx6 + 1;
+  er_idx6_next >= er_lexis_size ? er_idx6_next = 0;
+  er6_l = er_lexis_line_l[er_idx6] * (1 - er_frac6) + er_lexis_line_l[er_idx6_next] * er_frac6;
+  er6_r = er_lexis_line_r[er_idx6] * (1 - er_frac6) + er_lexis_line_r[er_idx6_next] * er_frac6;
+
+  // Apply frequency-dependent decay (lowpass each tap - highs decay faster)
+  er_lexis_lp_l1 += 0.75 * (er1_l - er_lexis_lp_l1);
+  er_lexis_lp_r1 += 0.75 * (er1_r - er_lexis_lp_r1);
+  er_lexis_lp_l2 += 0.65 * (er2_l - er_lexis_lp_l2);
+  er_lexis_lp_r2 += 0.65 * (er2_r - er_lexis_lp_r2);
+  er_lexis_lp_l3 += 0.55 * (er3_l - er_lexis_lp_l3);
+  er_lexis_lp_r3 += 0.55 * (er3_r - er_lexis_lp_r3);
+  er_lexis_lp_l4 += 0.45 * (er4_l - er_lexis_lp_l4);
+  er_lexis_lp_r4 += 0.45 * (er4_r - er_lexis_lp_r4);
+
+  // Additional lowpass states for taps 5 and 6
+  er_lexis_lp_l5 += 0.35 * (er5_l - er_lexis_lp_l5);
+  er_lexis_lp_r5 += 0.35 * (er5_r - er_lexis_lp_r5);
+  er_lexis_lp_l6 += 0.25 * (er6_l - er_lexis_lp_l6);
+  er_lexis_lp_r6 += 0.25 * (er6_r - er_lexis_lp_r6);
+
+  // Mix ER taps
+  er_mix_l = (er_lexis_lp_l1 + er_lexis_lp_l2 + er_lexis_lp_l3 + er_lexis_lp_l4 + er_lexis_lp_l5 + er_lexis_lp_l6) / 6;
+  er_mix_r = (er_lexis_lp_r1 + er_lexis_lp_r2 + er_lexis_lp_r3 + er_lexis_lp_r4 + er_lexis_lp_r5 + er_lexis_lp_r6) / 6;
+
+  // Feedback
+  er_lexis_line_l[er_lexis_write] += er_mix_l * er_feedback;
+  er_lexis_line_r[er_lexis_write] += er_mix_r * er_feedback;
+
+  er_lexis_write += 1;
+  er_lexis_write >= er_lexis_size ? er_lexis_write = 0;
+
+  er_inject_l = er_mix_l * er_level;
+  er_inject_r = er_mix_r * er_level;
+
+) : (
+  // ZR1: No ERs
+  er_inject_l = 0;
+  er_inject_r = 0;
+);
 
 vdelay0_line[vdelay0_iw] = spl0;
 vdelay0_iw += 1;
@@ -303,15 +762,22 @@ vdelay1_iw += 1;
 
 vdelay0_rd = vdelay0_iw - vdelay0_del;
 (vdelay0_rd < 0) ? vdelay0_rd += vdelay0_size;
-vd0 = vdelay0_line[vdelay0_rd];
+vd0 = vdelay0_line[vdelay0_rd] + er_inject_l;
 
 vdelay1_rd = vdelay1_iw - vdelay1_del;
 (vdelay1_rd < 0) ? vdelay1_rd += vdelay1_size;
-vd1 = vdelay1_line[vdelay1_rd];
+vd1 = vdelay1_line[vdelay1_rd] + er_inject_r;
 
 t = 0.3 * vd0;
 
-z0 = diff1_0_line[diff1_0_i];
+// Modulated allpass reads
+read_pos = diff1_0_i - diff1_0_base - mod_0;
+read_pos < 0 ? read_pos += diff1_0_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_0_size ? read_idx2 -= diff1_0_size;
+z0 = diff1_0_line[read_idx] * (1 - read_frac) + diff1_0_line[read_idx2] * read_frac;
 inp0 = delay_0_line[delay_0_i] + t;
 inp0 -= diff1_0_c * z0;
 diff1_0_line[diff1_0_i] = inp0;
@@ -319,7 +785,13 @@ diff1_0_i += 1;
 (diff1_0_i >= diff1_0_size) ? diff1_0_i = 0;
 x0 = z0 + diff1_0_c * inp0;
 
-z1 = diff1_1_line[diff1_1_i];
+read_pos = diff1_1_i - diff1_1_base - mod_1;
+read_pos < 0 ? read_pos += diff1_1_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_1_size ? read_idx2 -= diff1_1_size;
+z1 = diff1_1_line[read_idx] * (1 - read_frac) + diff1_1_line[read_idx2] * read_frac;
 inp1 = delay_1_line[delay_1_i] + t;
 inp1 -= diff1_1_c * z1;
 diff1_1_line[diff1_1_i] = inp1;
@@ -327,7 +799,13 @@ diff1_1_i += 1;
 (diff1_1_i >= diff1_1_size) ? diff1_1_i = 0;
 x1 = z1 + diff1_1_c * inp1;
 
-z2 = diff1_2_line[diff1_2_i];
+read_pos = diff1_2_i - diff1_2_base - mod_2;
+read_pos < 0 ? read_pos += diff1_2_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_2_size ? read_idx2 -= diff1_2_size;
+z2 = diff1_2_line[read_idx] * (1 - read_frac) + diff1_2_line[read_idx2] * read_frac;
 inp2 = delay_2_line[delay_2_i] - t;
 inp2 -= diff1_2_c * z2;
 diff1_2_line[diff1_2_i] = inp2;
@@ -335,7 +813,13 @@ diff1_2_i += 1;
 (diff1_2_i >= diff1_2_size) ? diff1_2_i = 0;
 x2 = z2 + diff1_2_c * inp2;
 
-z3 = diff1_3_line[diff1_3_i];
+read_pos = diff1_3_i - diff1_3_base - mod_3;
+read_pos < 0 ? read_pos += diff1_3_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_3_size ? read_idx2 -= diff1_3_size;
+z3 = diff1_3_line[read_idx] * (1 - read_frac) + diff1_3_line[read_idx2] * read_frac;
 inp3 = delay_3_line[delay_3_i] - t;
 inp3 -= diff1_3_c * z3;
 diff1_3_line[diff1_3_i] = inp3;
@@ -345,7 +829,13 @@ x3 = z3 + diff1_3_c * inp3;
 
 t = 0.3 * vd1;
 
-z4 = diff1_4_line[diff1_4_i];
+read_pos = diff1_4_i - diff1_4_base - mod_4;
+read_pos < 0 ? read_pos += diff1_4_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_4_size ? read_idx2 -= diff1_4_size;
+z4 = diff1_4_line[read_idx] * (1 - read_frac) + diff1_4_line[read_idx2] * read_frac;
 inp4 = delay_4_line[delay_4_i] + t;
 inp4 -= diff1_4_c * z4;
 diff1_4_line[diff1_4_i] = inp4;
@@ -353,7 +843,13 @@ diff1_4_i += 1;
 (diff1_4_i >= diff1_4_size) ? diff1_4_i = 0;
 x4 = z4 + diff1_4_c * inp4;
 
-z5 = diff1_5_line[diff1_5_i];
+read_pos = diff1_5_i - diff1_5_base - mod_5;
+read_pos < 0 ? read_pos += diff1_5_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_5_size ? read_idx2 -= diff1_5_size;
+z5 = diff1_5_line[read_idx] * (1 - read_frac) + diff1_5_line[read_idx2] * read_frac;
 inp5 = delay_5_line[delay_5_i] + t;
 inp5 -= diff1_5_c * z5;
 diff1_5_line[diff1_5_i] = inp5;
@@ -361,7 +857,13 @@ diff1_5_i += 1;
 (diff1_5_i >= diff1_5_size) ? diff1_5_i = 0;
 x5 = z5 + diff1_5_c * inp5;
 
-z6 = diff1_6_line[diff1_6_i];
+read_pos = diff1_6_i - diff1_6_base - mod_6;
+read_pos < 0 ? read_pos += diff1_6_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_6_size ? read_idx2 -= diff1_6_size;
+z6 = diff1_6_line[read_idx] * (1 - read_frac) + diff1_6_line[read_idx2] * read_frac;
 inp6 = delay_6_line[delay_6_i] - t;
 inp6 -= diff1_6_c * z6;
 diff1_6_line[diff1_6_i] = inp6;
@@ -369,7 +871,13 @@ diff1_6_i += 1;
 (diff1_6_i >= diff1_6_size) ? diff1_6_i = 0;
 x6 = z6 + diff1_6_c * inp6;
 
-z7 = diff1_7_line[diff1_7_i];
+read_pos = diff1_7_i - diff1_7_base - mod_7;
+read_pos < 0 ? read_pos += diff1_7_size;
+read_idx = floor(read_pos);
+read_frac = read_pos - read_idx;
+read_idx2 = read_idx + 1;
+read_idx2 >= diff1_7_size ? read_idx2 -= diff1_7_size;
+z7 = diff1_7_line[read_idx] * (1 - read_frac) + diff1_7_line[read_idx2] * read_frac;
 inp7 = delay_7_line[delay_7_i] - t;
 inp7 -= diff1_7_c * z7;
 diff1_7_line[diff1_7_i] = inp7;
@@ -377,7 +885,7 @@ diff1_7_i += 1;
 (diff1_7_i >= diff1_7_size) ? diff1_7_i = 0;
 x7 = z7 + diff1_7_c * inp7;
 
-// Hadamard mixing - NO NORMALIZATION (original doesn't normalize here)
+// Hadamard mixing
 t = x0 - x1; x0 += x1; x1 = t;
 t = x2 - x3; x2 += x3; x3 = t;
 t = x4 - x5; x4 += x5; x5 = t;
@@ -396,7 +904,51 @@ g1 += d1;
 out_l = g1 * (x1 + x2);
 out_r = g1 * (x1 - x2);
 
-// Apply filters and write back to delays - this is where normalization happens
+// LEXIS HF Diffusion (3kHz and above)
+mod_type == 2 ? (
+  // Split into low/high at 3kHz
+  hf_split_lp_l += hf_split_coeff * (out_l - hf_split_lp_l);
+  hf_split_lp_r += hf_split_coeff * (out_r - hf_split_lp_r);
+  hf_split_hp_l = out_l - hf_split_lp_l;
+  hf_split_hp_r = out_r - hf_split_lp_r;
+
+  // Process HF through cascaded allpass diffusers
+  // Allpass 1 (1.1ms)
+  z_l = hf_diff1_l[hf_diff1_i];
+  z_r = hf_diff1_r[hf_diff1_i];
+  hf_diff1_l[hf_diff1_i] = hf_split_hp_l + 0.5 * z_l;
+  hf_diff1_r[hf_diff1_i] = hf_split_hp_r + 0.5 * z_r;
+  hf_out1_l = z_l - 0.5 * hf_diff1_l[hf_diff1_i];
+  hf_out1_r = z_r - 0.5 * hf_diff1_r[hf_diff1_i];
+  hf_diff1_i += 1;
+  hf_diff1_i >= hf_diff1_size ? hf_diff1_i = 0;
+
+  // Allpass 2 (1.7ms)
+  z_l = hf_diff2_l[hf_diff2_i];
+  z_r = hf_diff2_r[hf_diff2_i];
+  hf_diff2_l[hf_diff2_i] = hf_out1_l + 0.5 * z_l;
+  hf_diff2_r[hf_diff2_i] = hf_out1_r + 0.5 * z_r;
+  hf_out2_l = z_l - 0.5 * hf_diff2_l[hf_diff2_i];
+  hf_out2_r = z_r - 0.5 * hf_diff2_r[hf_diff2_i];
+  hf_diff2_i += 1;
+  hf_diff2_i >= hf_diff2_size ? hf_diff2_i = 0;
+
+  // Allpass 3 (2.3ms)
+  z_l = hf_diff3_l[hf_diff3_i];
+  z_r = hf_diff3_r[hf_diff3_i];
+  hf_diff3_l[hf_diff3_i] = hf_out2_l + 0.5 * z_l;
+  hf_diff3_r[hf_diff3_i] = hf_out2_r + 0.5 * z_r;
+  hf_diffused_l = z_l - 0.5 * hf_diff3_l[hf_diff3_i];
+  hf_diffused_r = z_r - 0.5 * hf_diff3_r[hf_diff3_i];
+  hf_diff3_i += 1;
+  hf_diff3_i >= hf_diff3_size ? hf_diff3_i = 0;
+
+  // Recombine low + diffused high
+  out_l = hf_split_lp_l + hf_diffused_l;
+  out_r = hf_split_lp_r + hf_diffused_r;
+);
+
+// Apply filters and write back to delays
 g = sqrt(0.125);
 
 fv0 = g * x0;
@@ -520,46 +1072,58 @@ delay_7_i += 1;
   pareq2_z1_r = z1; pareq2_z2_r = z2;
 );
 
+// Apply model bass EQ (separate from user EQ)
+(model_bass_state != 0) ? (
+  c1 = model_bass.c1; c2 = model_bass.c2; gg = model_bass.gg;
+  z1 = model_bass_z1_l; z2 = model_bass_z2_l;
+  xx = out_l;
+  yy = xx - c2 * z2;
+  out_l = xx - gg * (z2 + c2 * yy - xx);
+  yy -= c1 * z1;
+  z2 = z1 + c1 * yy;
+  z1 = yy + 1*10^-20;
+  model_bass_z1_l = z1; model_bass_z2_l = z2;
+);
+
+(model_bass_state != 0) ? (
+  c1 = model_bass.c1; c2 = model_bass.c2; gg = model_bass.gg;
+  z1 = model_bass_z1_r; z2 = model_bass_z2_r;
+  xx = out_r;
+  yy = xx - c2 * z2;
+  out_r = xx - gg * (z2 + c2 * yy - xx);
+  yy -= c1 * z1;
+  z2 = z1 + c1 * yy;
+  z1 = yy + 1*10^-20;
+  model_bass_z1_r = z1; model_bass_z2_r = z2;
+);
+
 // Add dry signal back
 g0 += d0;
 spl0 = out_l + g0 * spl0;
 spl1 = out_r + g0 * spl1;
 
-@gfx 620 400
+@gfx 620 500
 
-function draw_knob(x, y, radius, value, min_val, max_val, label, unit)
+function draw_knob(x, y, radius, value, min_val, max_val, label, unit, disabled)
 local(angle, end_x, end_y, norm_val, val_str)
 (
-  // Normalize value to 0-1 range
   norm_val = (value - min_val) / (max_val - min_val);
-
-  // Draw outer circle
-  gfx_set(0.2, 0.2, 0.25);
+  disabled ? gfx_set(0.15, 0.15, 0.18) : gfx_set(0.2, 0.2, 0.25);
   gfx_circle(x, y, radius, 1);
-
-  // Draw inner circle
-  gfx_set(0.12, 0.12, 0.15);
+  disabled ? gfx_set(0.10, 0.10, 0.12) : gfx_set(0.12, 0.12, 0.15);
   gfx_circle(x, y, radius - 3 * scale, 1);
-
-  // Draw value arc
-  gfx_set(0.3, 0.6, 0.9);
-  angle = -2.35619 + norm_val * 4.71239; // -135° to +135°
+  disabled ? gfx_set(0.2, 0.2, 0.25) : gfx_set(0.3, 0.6, 0.9);
+  angle = -2.35619 + norm_val * 4.71239;
   end_x = x + (radius - 6 * scale) * sin(angle);
   end_y = y - (radius - 6 * scale) * cos(angle);
   gfx_line(x, y, end_x, end_y, 1);
-
-  // Draw center dot
   gfx_circle(x, y, 3 * scale, 1);
-
-  // Draw label
-  gfx_set(0.8, 0.8, 0.8);
+  disabled ? gfx_set(0.4, 0.4, 0.4) : gfx_set(0.8, 0.8, 0.8);
   gfx_measurestr(label, str_w, str_h);
   gfx_x = x - str_w * 0.5;
   gfx_y = y + radius + 8 * scale;
   gfx_drawstr(label);
-
-  // Draw value
-  gfx_set(0.6, 0.6, 0.6);
+  disabled ? gfx_set(0.3, 0.3, 0.3) : gfx_set(0.6, 0.6, 0.6);
   (label == "BASS") ?
     sprintf(val_str, "%.2f%s", value, unit) :
     sprintf(val_str, "%.1f%s", value, unit);
@@ -572,36 +1136,58 @@ local(angle, end_x, end_y, norm_val, val_str)
 function draw_slider(x, y, w, h, value, min_val, max_val, label, unit)
 local(norm_val, fill_h, val_str)
 (
-  // Normalize value
   norm_val = (value - min_val) / (max_val - min_val);
   fill_h = h * norm_val;
-
-  // Draw background
   gfx_set(0.2, 0.2, 0.25);
   gfx_rect(x, y, w, h, 1);
-
-  // Draw fill
   gfx_set(0.3, 0.6, 0.9);
   gfx_rect(x + 2 * scale, y + h - fill_h - 2 * scale, w - 4 * scale, fill_h, 1);
-
-  // Draw border
   gfx_set(0.4, 0.4, 0.45);
   gfx_rect(x, y, w, h, 0);
-
-  // Draw label
   gfx_set(0.8, 0.8, 0.8);
   gfx_measurestr(label, str_w, str_h);
   gfx_x = x + w * 0.5 - str_w * 0.5;
   gfx_y = y + h + 8 * scale;
   gfx_drawstr(label);
-
-  // Draw value
   gfx_set(0.6, 0.6, 0.6);
   sprintf(val_str, "%.1f%s", value, unit);
   gfx_measurestr(val_str, str_w, str_h);
   gfx_x = x + w * 0.5 - str_w * 0.5;
   gfx_y = y + h + 24 * scale;
   gfx_drawstr(val_str);
+);
+
+function draw_mod_selector(x, y, w, h, value)
+local(box_w, label)
+(
+  gfx_set(0.2, 0.2, 0.25);
+  gfx_rect(x, y, w, h, 1);
+  gfx_set(0.4, 0.4, 0.45);
+  gfx_rect(x, y, w, h, 0);
+  box_w = (w - 8 * scale) / 3;
+  value == 0 ? gfx_set(0.3, 0.6, 0.9) : gfx_set(0.15, 0.15, 0.18);
+  gfx_rect(x + 2 * scale, y + 2 * scale, box_w, h - 4 * scale, 1);
+  value == 1 ? gfx_set(0.3, 0.6, 0.9) : gfx_set(0.15, 0.15, 0.18);
+  gfx_rect(x + box_w + 4 * scale, y + 2 * scale, box_w, h - 4 * scale, 1);
+  value == 2 ? gfx_set(0.3, 0.6, 0.9) : gfx_set(0.15, 0.15, 0.18);
+  gfx_rect(x + 2 * box_w + 6 * scale, y + 2 * scale, box_w, h - 4 * scale, 1);
+  gfx_setfont(4, "Arial", 9 * scale);
+  gfx_set(0.8, 0.8, 0.8);
+  gfx_measurestr("ZR1", str_w, str_h);
+  gfx_x = x + box_w * 0.5 - str_w * 0.5;
+  gfx_y = y + h * 0.5 - str_h * 0.5;
+  gfx_drawstr("ZR1");
+  gfx_measurestr("MK VII", str_w, str_h);
+  gfx_x = x + box_w * 1.5 + 4 * scale - str_w * 0.5;
+  gfx_y = y + h * 0.5 - str_h * 0.5;
+  gfx_drawstr("MK VII");
+  gfx_measurestr("LEXIS", str_w, str_h);
+  gfx_x = x + box_w * 2.5 + 6 * scale - str_w * 0.5;
+  gfx_y = y + h * 0.5 - str_h * 0.5;
+  gfx_drawstr("LEXIS");
+  gfx_set(0.8, 0.8, 0.8);
+  gfx_setfont(4, "Arial", 11 * scale);
+  gfx_measurestr("MOD TYPE", str_w, str_h);
 );
 
 function point_in_circle(px, py, cx, cy, radius)
@@ -614,11 +1200,9 @@ function point_in_rect(px, py, rx, ry, rw, rh)
   px >= rx && px <= rx + rw && py >= ry && py <= ry + rh;
 );
 
-// Clear background
 gfx_set(0.1, 0.1, 0.1);
 gfx_rect(0, 0, gfx_w, gfx_h);
 
-// Draw title
 gfx_set(0.9, 0.9, 0.9);
 gfx_setfont(1, "Arial", 24 * scale, 'b');
 gfx_x = 20 * scale;
@@ -632,7 +1216,6 @@ gfx_x = 20 * scale;
 gfx_y = 50 * scale;
 gfx_drawstr("by chmaha");
 
-// Section headers
 gfx_setfont(3, "Arial", 14 * scale, 'b');
 
 gfx_set(0.7, 0.7, 0.7);
@@ -652,37 +1235,35 @@ gfx_x = 60 * scale;
 gfx_y = 240 * scale;
 gfx_drawstr("TONE");
 
-// Reset font
+gfx_x = 60 * scale;
+gfx_y = 390 * scale;
+gfx_drawstr("MODEL");
+
 gfx_setfont(4, "Arial", 11 * scale);
 
-// Define standard knob radius - ALL knobs same size
 knob_r = 28 * scale;
-knob_y1 = 150 * scale; // Row 1 Y position
-knob_y2 = 300 * scale; // Row 2 Y position
+knob_y1 = 150 * scale;
+knob_y2 = 300 * scale;
 
-// Row 1 - Input section (1 knob)
-draw_knob(80 * scale, knob_y1, knob_r, slider1, 20, 100, "DELAY", "ms");
+draw_knob(80 * scale, knob_y1, knob_r, slider1, 20, 100, "DELAY", "ms", 0);
 
-// Row 1 - Reverb section (3 knobs)
-draw_knob(200 * scale, knob_y1, knob_r, slider4, 1, 8, "RT MID", "s");
-draw_knob(310 * scale, knob_y1, knob_r, slider2, 50, 1000, "XOVER", "Hz");
-draw_knob(420 * scale, knob_y1, knob_r, slider3, 0.5, 2, "BASS", "x");
+draw_knob(200 * scale, knob_y1, knob_r, slider4, 1, 8, "RT MID", "s", 0);
+draw_knob(310 * scale, knob_y1, knob_r, slider2, 50, 1000, "XOVER", "Hz", 0);
+draw_knob(420 * scale, knob_y1, knob_r, slider3, 0.5, 2, "BASS", "x", 0);
 
-// Row 2 - Tone section (all tone controls)
-draw_knob(80 * scale, knob_y2, knob_r, slider5, 1500, 24000, "DAMP", "Hz");
-draw_knob(200 * scale, knob_y2, knob_r, slider6, 40, 2500, "EQ1 F", "Hz");
+draw_knob(80 * scale, knob_y2, knob_r, slider5, 1500, 24000, "DAMP", "Hz", 0);
+draw_knob(200 * scale, knob_y2, knob_r, slider6, 40, 2500, "EQ1 F", "Hz", 0);
 draw_slider(260 * scale, knob_y2 - 40 * scale, 22 * scale, 80 * scale, slider7, -15, 15, "EQ1 G", "dB");
-draw_knob(350 * scale, knob_y2, knob_r, slider8, 160, 10000, "EQ2 F", "Hz");
+draw_knob(350 * scale, knob_y2, knob_r, slider8, 160, 10000, "EQ2 F", "Hz", 0);
 draw_slider(410 * scale, knob_y2 - 40 * scale, 22 * scale, 80 * scale, slider9, -15, 15, "EQ2 G", "dB");
 
-// Row 1.5 - Output section
-draw_knob(540 * scale, 225 * scale, knob_r, slider10 * 100, 0, 100, "DRY/WET", "%");
+draw_knob(540 * scale, 225 * scale, knob_r, slider10 * 100, 0, 100, "DRY/WET", "%", 0);
 
-// Handle mouse wheel
+draw_mod_selector(60 * scale, 425 * scale, 180 * scale, 30 * scale, slider11);
+draw_knob(320 * scale, 415 * scale, knob_r, slider12, 0, 100, "MOD AMT", "%", slider11 == 0);
+
 mouse_wheel ? (
   wheel_slider = 0;
-
-  // Check which control is under mouse
   point_in_circle(mouse_x, mouse_y, 80 * scale, knob_y1, knob_r) ? wheel_slider = 1 :
   point_in_circle(mouse_x, mouse_y, 200 * scale, knob_y1, knob_r) ? wheel_slider = 4 :
   point_in_circle(mouse_x, mouse_y, 310 * scale, knob_y1, knob_r) ? wheel_slider = 2 :
@@ -692,53 +1273,31 @@ mouse_wheel ? (
   point_in_rect(mouse_x, mouse_y, 260 * scale, knob_y2 - 40 * scale, 22 * scale, 80 * scale) ? wheel_slider = 7 :
   point_in_circle(mouse_x, mouse_y, 350 * scale, knob_y2, knob_r) ? wheel_slider = 8 :
   point_in_rect(mouse_x, mouse_y, 410 * scale, knob_y2 - 40 * scale, 22 * scale, 80 * scale) ? wheel_slider = 9 :
-  point_in_circle(mouse_x, mouse_y, 540 * scale, 225 * scale, knob_r) ? wheel_slider = 10;
+  point_in_circle(mouse_x, mouse_y, 540 * scale, 225 * scale, knob_r) ? wheel_slider = 10 :
+  point_in_rect(mouse_x, mouse_y, 60 * scale, 425 * scale, 180 * scale, 30 * scale) ? wheel_slider = 11 :
+  (slider11 != 0 && point_in_circle(mouse_x, mouse_y, 320 * scale, 415 * scale, knob_r)) ? wheel_slider = 12;
 
-  // Apply mouse wheel adjustment
   wheel_slider > 0 ? (
-    wheel_delta = mouse_wheel / 120; // Normalize wheel delta
-
-    wheel_slider == 1 ? (
-      slider1 = max(20, min(100, slider1 + wheel_delta * 1));
-    ) :
-    wheel_slider == 2 ? (
-      slider2 = max(50, min(1000, slider2 + wheel_delta * 25));
-    ) :
-    wheel_slider == 3 ? (
-      slider3 = max(0.5, min(2, slider3 + wheel_delta * 0.05));
-    ) :
-    wheel_slider == 4 ? (
-      slider4 = max(1, min(8, slider4 + wheel_delta * 0.1));
-    ) :
-    wheel_slider == 5 ? (
-      slider5 = max(1500, min(24000, slider5 + wheel_delta * 500));
-    ) :
-    wheel_slider == 6 ? (
-      slider6 = max(40, min(2500, slider6 + wheel_delta * 50));
-    ) :
-    wheel_slider == 7 ? (
-      slider7 = max(-15, min(15, slider7 + wheel_delta * 0.5));
-    ) :
-    wheel_slider == 8 ? (
-      slider8 = max(160, min(10000, slider8 + wheel_delta * 200));
-    ) :
-    wheel_slider == 9 ? (
-      slider9 = max(-15, min(15, slider9 + wheel_delta * 0.5));
-    ) :
-    wheel_slider == 10 ? (
-      slider10 = max(0, min(1, slider10 + wheel_delta * 0.01));
-    );
+    wheel_delta = mouse_wheel / 120;
+    wheel_slider == 1 ? slider1 = max(20, min(100, slider1 + wheel_delta * 1)) :
+    wheel_slider == 2 ? slider2 = max(50, min(1000, slider2 + wheel_delta * 25)) :
+    wheel_slider == 3 ? slider3 = max(0.5, min(2, slider3 + wheel_delta * 0.05)) :
+    wheel_slider == 4 ? slider4 = max(1, min(8, slider4 + wheel_delta * 0.1)) :
+    wheel_slider == 5 ? slider5 = max(1500, min(24000, slider5 + wheel_delta * 500)) :
+    wheel_slider == 6 ? slider6 = max(40, min(2500, slider6 + wheel_delta * 50)) :
+    wheel_slider == 7 ? slider7 = max(-15, min(15, slider7 + wheel_delta * 0.5)) :
+    wheel_slider == 8 ? slider8 = max(160, min(10000, slider8 + wheel_delta * 200)) :
+    wheel_slider == 9 ? slider9 = max(-15, min(15, slider9 + wheel_delta * 0.5)) :
+    wheel_slider == 10 ? slider10 = max(0, min(1, slider10 + wheel_delta * 0.01)) :
+    wheel_slider == 11 ? slider11 = max(0, min(2, slider11 + (wheel_delta > 0 ? 1 : -1))) :
+    wheel_slider == 12 ? slider12 = max(0, min(100, slider12 + wheel_delta * 5));
   );
-
-  mouse_wheel = 0; // Reset wheel after processing
+  mouse_wheel = 0;
 );
 
-// Handle mouse input
 mouse_cap ? (
   !mouse_state ? (
-    // Check for double-click reset
     (time_precise() - last_click_time < 0.3) && last_clicked_slider > 0 ? (
-      // Reset to default values on double-click
       last_clicked_slider == 1 ? slider1 = 40 :
       last_clicked_slider == 2 ? slider2 = 200 :
       last_clicked_slider == 3 ? slider3 = 1.5 :
@@ -748,11 +1307,11 @@ mouse_cap ? (
       last_clicked_slider == 7 ? slider7 = 0 :
       last_clicked_slider == 8 ? slider8 = 2500 :
       last_clicked_slider == 9 ? slider9 = 0 :
-      last_clicked_slider == 10 ? slider10 = 0.5;
-
+      last_clicked_slider == 10 ? slider10 = 0.5 :
+      last_clicked_slider == 11 ? slider11 = 0 :
+      last_clicked_slider == 12 ? slider12 = 50;
       last_clicked_slider = 0;
     ) : (
-      // Mouse just pressed - check which control
       point_in_circle(mouse_x, mouse_y, 80 * scale, knob_y1, knob_r) ? (active_slider = 1; drag_start_y = mouse_y; drag_start_val = slider1;) :
       point_in_circle(mouse_x, mouse_y, 200 * scale, knob_y1, knob_r) ? (active_slider = 4; drag_start_y = mouse_y; drag_start_val = slider4;) :
       point_in_circle(mouse_x, mouse_y, 310 * scale, knob_y1, knob_r) ? (active_slider = 2; drag_start_y = mouse_y; drag_start_val = slider2;) :
@@ -762,19 +1321,23 @@ mouse_cap ? (
       point_in_rect(mouse_x, mouse_y, 260 * scale, knob_y2 - 40 * scale, 22 * scale, 80 * scale) ? (active_slider = 7; drag_start_y = mouse_y; drag_start_val = slider7;) :
       point_in_circle(mouse_x, mouse_y, 350 * scale, knob_y2, knob_r) ? (active_slider = 8; drag_start_y = mouse_y; drag_start_val = slider8;) :
       point_in_rect(mouse_x, mouse_y, 410 * scale, knob_y2 - 40 * scale, 22 * scale, 80 * scale) ? (active_slider = 9; drag_start_y = mouse_y; drag_start_val = slider9;) :
-      point_in_circle(mouse_x, mouse_y, 540 * scale, 225 * scale, knob_r) ? (active_slider = 10; drag_start_y = mouse_y; drag_start_val = slider10;);
-
+      point_in_circle(mouse_x, mouse_y, 540 * scale, 225 * scale, knob_r) ? (active_slider = 10; drag_start_y = mouse_y; drag_start_val = slider10;) :
+      point_in_rect(mouse_x, mouse_y, 60 * scale, 425 * scale, 180 * scale, 30 * scale) ? (
+        rel_x = mouse_x - 80 * scale;
+        box_w = (180 * scale - 8 * scale) / 3;
+        rel_x < box_w + 2 * scale ? slider11 = 0 :
+        rel_x < 2 * box_w + 4 * scale ? slider11 = 1 :
+        slider11 = 2;
+        active_slider = 11;
+      ) :
+      (slider11 != 0 && point_in_circle(mouse_x, mouse_y, 320 * scale, 415 * scale, knob_r)) ? (active_slider = 12; drag_start_y = mouse_y; drag_start_val = slider12;);
       last_clicked_slider = active_slider;
       last_click_time = time_precise();
     );
-
     mouse_state = 1;
   );
-
-  // Handle dragging
-  active_slider > 0 ? (
+  active_slider > 0 && active_slider != 11 ? (
     delta = (drag_start_y - mouse_y) * 0.5;
-
     active_slider == 1 ? slider1 = max(20, min(100, drag_start_val + delta)) :
     active_slider == 2 ? slider2 = max(50, min(1000, drag_start_val + delta * 3)) :
     active_slider == 3 ? slider3 = max(0.5, min(2, drag_start_val + delta * 0.005)) :
@@ -784,7 +1347,8 @@ mouse_cap ? (
     active_slider == 7 ? slider7 = max(-15, min(15, drag_start_val + delta * 0.1)) :
     active_slider == 8 ? slider8 = max(160, min(10000, drag_start_val + delta * 20)) :
     active_slider == 9 ? slider9 = max(-15, min(15, drag_start_val + delta * 0.1)) :
-    active_slider == 10 ? slider10 = max(0, min(1, drag_start_val + delta * 0.003));
+    active_slider == 10 ? slider10 = max(0, min(1, drag_start_val + delta * 0.003)) :
+    active_slider == 12 ? slider12 = max(0, min(100, drag_start_val + delta));
   );
 ) : (
   mouse_state = 0;
