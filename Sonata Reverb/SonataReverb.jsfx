@@ -1,18 +1,24 @@
-Version: 1.5
+Version: 1.6
 desc: Sonata Reverb (chmaha)
 author: chmaha
 // Using Fons Adriaensen's Zita-Rev1 Reverb Algorithm
 // Source: https://kokkinizita.linuxaudio.org/linuxaudio/downloads/index.html
 // License: GNU General Public License version 3
 //
-// Classical Music Reverb - Concert Hall & Church Spaces
+// Classical Music Reverb
 //
 // Three Reverb Models:
-// - ZR1: Pure Zita-Rev1 algorithm (neutral reference, no modulation, no ERs)
-// - MK VII: concert hall ERs, gentle diffusion, +4dB @ 120Hz, subtle modulation
-// - LEXIS: concert hall ERs, frequency-dependent decay, HF diffusion, +5dB @ 120Hz, ensemble modulation
-// - Medium concert hall early reflections (48-199ms) - Vienna Musikverein-esque
+// - ZR1: Pure Zita-Rev1 algorithm (neutral reference, no modulation, abstract ERs)
+// - MK VII: Bricasti-inspired (concert hall ERs with L/R decorrelation, gentle diffusion, +4dB @ 120Hz, subtle modulation)
+// - LEXIS: Lexicon-inspired (concert hall ERs with L/R decorrelation, frequency-dependent decay, HF diffusion, +5dB @ 120Hz, ensemble modulation)
+//
+// - Medium concert hall early reflections (48-199ms L, 51-197ms R) - Vienna Musikverein-sized
+// - Balanced bidirectional L/R offsets (±2-3ms) for stereo width without image shift
 // - 6-tap ER pattern suitable for chamber music through full orchestra
+// - MK VII: Discrete reflections with gentle diffusion (Bricasti smoothness)
+// - LEXIS: Frequency-dependent ER decay + HF diffusion cascade (Lexicon shimmer)
+// - Model-specific bass boost (120Hz) separate from user EQ controls
+// - User EQ1/EQ2 controls remain fully independent
 
 slider1:40<20,100,1>-Delay (ms)
 slider2:200<50,1000,1>-XOver (Hz)
@@ -301,13 +307,23 @@ mod_type == 1 ? ( // MK VII (Bricasti M7)
   model_xover_offset = 1.0;
   model_damp_offset = 1.0;
 
-  // MK VII Concert Hall ER taps (medium hall - Vienna Musikverein-sized)
-  er_mk7_tap1 = floor(0.048 * srate);  // 48ms
-  er_mk7_tap2 = floor(0.071 * srate);  // 71ms
-  er_mk7_tap3 = floor(0.097 * srate);  // 97ms
-  er_mk7_tap4 = floor(0.127 * srate);  // 127ms
-  er_mk7_tap5 = floor(0.163 * srate);  // 163ms
-  er_mk7_tap6 = floor(0.199 * srate);  // 199ms
+  // MK VII Concert Hall ER taps with balanced L/R decorrelation
+  // Left channel - base times
+  er_mk7_tap1_l = floor(0.048 * srate);  // 48ms
+  er_mk7_tap2_l = floor(0.071 * srate);  // 71ms
+  er_mk7_tap3_l = floor(0.097 * srate);  // 97ms
+  er_mk7_tap4_l = floor(0.127 * srate);  // 127ms
+  er_mk7_tap5_l = floor(0.163 * srate);  // 163ms
+  er_mk7_tap6_l = floor(0.199 * srate);  // 199ms
+
+  // Right channel - balanced bidirectional offsets (avg +0.5ms ≈ centered)
+  er_mk7_tap1_r = floor(0.051 * srate);  // 51ms   (+3ms)
+  er_mk7_tap2_r = floor(0.069 * srate);  // 69ms   (-2ms)
+  er_mk7_tap3_r = floor(0.100 * srate);  // 100ms  (+3ms)
+  er_mk7_tap4_r = floor(0.125 * srate);  // 125ms  (-2ms)
+  er_mk7_tap5_r = floor(0.166 * srate);  // 166ms  (+3ms)
+  er_mk7_tap6_r = floor(0.197 * srate);  // 197ms  (-2ms)
+
   er_level = 0.65;
 
 ) : mod_type == 2 ? ( // LEXIS (Lexicon PCM)
@@ -317,13 +333,23 @@ mod_type == 1 ? ( // MK VII (Bricasti M7)
   model_xover_offset = 1.0;
   model_damp_offset = 1.0;
 
-  // LEXIS Concert Hall ER taps (same as MK VII - medium hall)
-  er_lexis_tap1 = floor(0.048 * srate);  // 48ms
-  er_lexis_tap2 = floor(0.071 * srate);  // 71ms
-  er_lexis_tap3 = floor(0.097 * srate);  // 97ms
-  er_lexis_tap4 = floor(0.127 * srate);  // 127ms
-  er_lexis_tap5 = floor(0.163 * srate);  // 163ms
-  er_lexis_tap6 = floor(0.199 * srate);  // 199ms
+  // LEXIS Concert Hall ER taps with balanced L/R decorrelation
+  // Left channel - base times
+  er_lexis_tap1_l = floor(0.048 * srate);  // 48ms
+  er_lexis_tap2_l = floor(0.071 * srate);  // 71ms
+  er_lexis_tap3_l = floor(0.097 * srate);  // 97ms
+  er_lexis_tap4_l = floor(0.127 * srate);  // 127ms
+  er_lexis_tap5_l = floor(0.163 * srate);  // 163ms
+  er_lexis_tap6_l = floor(0.199 * srate);  // 199ms
+
+  // Right channel - balanced bidirectional offsets (avg +0.5ms ≈ centered)
+  er_lexis_tap1_r = floor(0.051 * srate);  // 51ms   (+3ms)
+  er_lexis_tap2_r = floor(0.069 * srate);  // 69ms   (-2ms)
+  er_lexis_tap3_r = floor(0.100 * srate);  // 100ms  (+3ms)
+  er_lexis_tap4_r = floor(0.125 * srate);  // 125ms  (-2ms)
+  er_lexis_tap5_r = floor(0.166 * srate);  // 166ms  (+3ms)
+  er_lexis_tap6_r = floor(0.197 * srate);  // 197ms  (-2ms)
+
   er_level = 0.6;
   er_feedback = 0.2;
 
@@ -581,59 +607,102 @@ mod_type == 1 ? (
   er_mk7_line_l[er_mk7_write] = spl0;
   er_mk7_line_r[er_mk7_write] = spl1;
 
-  // Read 6 taps with linear interpolation
-  er_pos1 = er_mk7_write - er_mk7_tap1;
+  // Read 6 LEFT taps with linear interpolation
+  er_pos1 = er_mk7_write - er_mk7_tap1_l;
   er_pos1 < 0 ? er_pos1 += er_mk7_size;
   er_idx1 = floor(er_pos1);
   er_frac1 = er_pos1 - er_idx1;
   er_idx1_next = er_idx1 + 1;
   er_idx1_next >= er_mk7_size ? er_idx1_next = 0;
   er1_l = er_mk7_line_l[er_idx1] * (1 - er_frac1) + er_mk7_line_l[er_idx1_next] * er_frac1;
-  er1_r = er_mk7_line_r[er_idx1] * (1 - er_frac1) + er_mk7_line_r[er_idx1_next] * er_frac1;
 
-  er_pos2 = er_mk7_write - er_mk7_tap2;
+  er_pos2 = er_mk7_write - er_mk7_tap2_l;
   er_pos2 < 0 ? er_pos2 += er_mk7_size;
   er_idx2 = floor(er_pos2);
   er_frac2 = er_pos2 - er_idx2;
   er_idx2_next = er_idx2 + 1;
   er_idx2_next >= er_mk7_size ? er_idx2_next = 0;
   er2_l = er_mk7_line_l[er_idx2] * (1 - er_frac2) + er_mk7_line_l[er_idx2_next] * er_frac2;
-  er2_r = er_mk7_line_r[er_idx2] * (1 - er_frac2) + er_mk7_line_r[er_idx2_next] * er_frac2;
 
-  er_pos3 = er_mk7_write - er_mk7_tap3;
+  er_pos3 = er_mk7_write - er_mk7_tap3_l;
   er_pos3 < 0 ? er_pos3 += er_mk7_size;
   er_idx3 = floor(er_pos3);
   er_frac3 = er_pos3 - er_idx3;
   er_idx3_next = er_idx3 + 1;
   er_idx3_next >= er_mk7_size ? er_idx3_next = 0;
   er3_l = er_mk7_line_l[er_idx3] * (1 - er_frac3) + er_mk7_line_l[er_idx3_next] * er_frac3;
-  er3_r = er_mk7_line_r[er_idx3] * (1 - er_frac3) + er_mk7_line_r[er_idx3_next] * er_frac3;
 
-  er_pos4 = er_mk7_write - er_mk7_tap4;
+  er_pos4 = er_mk7_write - er_mk7_tap4_l;
   er_pos4 < 0 ? er_pos4 += er_mk7_size;
   er_idx4 = floor(er_pos4);
   er_frac4 = er_pos4 - er_idx4;
   er_idx4_next = er_idx4 + 1;
   er_idx4_next >= er_mk7_size ? er_idx4_next = 0;
   er4_l = er_mk7_line_l[er_idx4] * (1 - er_frac4) + er_mk7_line_l[er_idx4_next] * er_frac4;
-  er4_r = er_mk7_line_r[er_idx4] * (1 - er_frac4) + er_mk7_line_r[er_idx4_next] * er_frac4;
 
-  er_pos5 = er_mk7_write - er_mk7_tap5;
+  er_pos5 = er_mk7_write - er_mk7_tap5_l;
   er_pos5 < 0 ? er_pos5 += er_mk7_size;
   er_idx5 = floor(er_pos5);
   er_frac5 = er_pos5 - er_idx5;
   er_idx5_next = er_idx5 + 1;
   er_idx5_next >= er_mk7_size ? er_idx5_next = 0;
   er5_l = er_mk7_line_l[er_idx5] * (1 - er_frac5) + er_mk7_line_l[er_idx5_next] * er_frac5;
-  er5_r = er_mk7_line_r[er_idx5] * (1 - er_frac5) + er_mk7_line_r[er_idx5_next] * er_frac5;
 
-  er_pos6 = er_mk7_write - er_mk7_tap6;
+  er_pos6 = er_mk7_write - er_mk7_tap6_l;
   er_pos6 < 0 ? er_pos6 += er_mk7_size;
   er_idx6 = floor(er_pos6);
   er_frac6 = er_pos6 - er_idx6;
   er_idx6_next = er_idx6 + 1;
   er_idx6_next >= er_mk7_size ? er_idx6_next = 0;
   er6_l = er_mk7_line_l[er_idx6] * (1 - er_frac6) + er_mk7_line_l[er_idx6_next] * er_frac6;
+
+  // Read 6 RIGHT taps with linear interpolation (decorrelated timing)
+  er_pos1 = er_mk7_write - er_mk7_tap1_r;
+  er_pos1 < 0 ? er_pos1 += er_mk7_size;
+  er_idx1 = floor(er_pos1);
+  er_frac1 = er_pos1 - er_idx1;
+  er_idx1_next = er_idx1 + 1;
+  er_idx1_next >= er_mk7_size ? er_idx1_next = 0;
+  er1_r = er_mk7_line_r[er_idx1] * (1 - er_frac1) + er_mk7_line_r[er_idx1_next] * er_frac1;
+
+  er_pos2 = er_mk7_write - er_mk7_tap2_r;
+  er_pos2 < 0 ? er_pos2 += er_mk7_size;
+  er_idx2 = floor(er_pos2);
+  er_frac2 = er_pos2 - er_idx2;
+  er_idx2_next = er_idx2 + 1;
+  er_idx2_next >= er_mk7_size ? er_idx2_next = 0;
+  er2_r = er_mk7_line_r[er_idx2] * (1 - er_frac2) + er_mk7_line_r[er_idx2_next] * er_frac2;
+
+  er_pos3 = er_mk7_write - er_mk7_tap3_r;
+  er_pos3 < 0 ? er_pos3 += er_mk7_size;
+  er_idx3 = floor(er_pos3);
+  er_frac3 = er_pos3 - er_idx3;
+  er_idx3_next = er_idx3 + 1;
+  er_idx3_next >= er_mk7_size ? er_idx3_next = 0;
+  er3_r = er_mk7_line_r[er_idx3] * (1 - er_frac3) + er_mk7_line_r[er_idx3_next] * er_frac3;
+
+  er_pos4 = er_mk7_write - er_mk7_tap4_r;
+  er_pos4 < 0 ? er_pos4 += er_mk7_size;
+  er_idx4 = floor(er_pos4);
+  er_frac4 = er_pos4 - er_idx4;
+  er_idx4_next = er_idx4 + 1;
+  er_idx4_next >= er_mk7_size ? er_idx4_next = 0;
+  er4_r = er_mk7_line_r[er_idx4] * (1 - er_frac4) + er_mk7_line_r[er_idx4_next] * er_frac4;
+
+  er_pos5 = er_mk7_write - er_mk7_tap5_r;
+  er_pos5 < 0 ? er_pos5 += er_mk7_size;
+  er_idx5 = floor(er_pos5);
+  er_frac5 = er_pos5 - er_idx5;
+  er_idx5_next = er_idx5 + 1;
+  er_idx5_next >= er_mk7_size ? er_idx5_next = 0;
+  er5_r = er_mk7_line_r[er_idx5] * (1 - er_frac5) + er_mk7_line_r[er_idx5_next] * er_frac5;
+
+  er_pos6 = er_mk7_write - er_mk7_tap6_r;
+  er_pos6 < 0 ? er_pos6 += er_mk7_size;
+  er_idx6 = floor(er_pos6);
+  er_frac6 = er_pos6 - er_idx6;
+  er_idx6_next = er_idx6 + 1;
+  er_idx6_next >= er_mk7_size ? er_idx6_next = 0;
   er6_r = er_mk7_line_r[er_idx6] * (1 - er_frac6) + er_mk7_line_r[er_idx6_next] * er_frac6;
 
   // Mix taps
@@ -661,59 +730,102 @@ mod_type == 1 ? (
   er_lexis_line_l[er_lexis_write] = spl0;
   er_lexis_line_r[er_lexis_write] = spl1;
 
-  // Read 6 taps with linear interpolation
-  er_pos1 = er_lexis_write - er_lexis_tap1;
+  // Read 6 LEFT taps with linear interpolation
+  er_pos1 = er_lexis_write - er_lexis_tap1_l;
   er_pos1 < 0 ? er_pos1 += er_lexis_size;
   er_idx1 = floor(er_pos1);
   er_frac1 = er_pos1 - er_idx1;
   er_idx1_next = er_idx1 + 1;
   er_idx1_next >= er_lexis_size ? er_idx1_next = 0;
   er1_l = er_lexis_line_l[er_idx1] * (1 - er_frac1) + er_lexis_line_l[er_idx1_next] * er_frac1;
-  er1_r = er_lexis_line_r[er_idx1] * (1 - er_frac1) + er_lexis_line_r[er_idx1_next] * er_frac1;
 
-  er_pos2 = er_lexis_write - er_lexis_tap2;
+  er_pos2 = er_lexis_write - er_lexis_tap2_l;
   er_pos2 < 0 ? er_pos2 += er_lexis_size;
   er_idx2 = floor(er_pos2);
   er_frac2 = er_pos2 - er_idx2;
   er_idx2_next = er_idx2 + 1;
   er_idx2_next >= er_lexis_size ? er_idx2_next = 0;
   er2_l = er_lexis_line_l[er_idx2] * (1 - er_frac2) + er_lexis_line_l[er_idx2_next] * er_frac2;
-  er2_r = er_lexis_line_r[er_idx2] * (1 - er_frac2) + er_lexis_line_r[er_idx2_next] * er_frac2;
 
-  er_pos3 = er_lexis_write - er_lexis_tap3;
+  er_pos3 = er_lexis_write - er_lexis_tap3_l;
   er_pos3 < 0 ? er_pos3 += er_lexis_size;
   er_idx3 = floor(er_pos3);
   er_frac3 = er_pos3 - er_idx3;
   er_idx3_next = er_idx3 + 1;
   er_idx3_next >= er_lexis_size ? er_idx3_next = 0;
   er3_l = er_lexis_line_l[er_idx3] * (1 - er_frac3) + er_lexis_line_l[er_idx3_next] * er_frac3;
-  er3_r = er_lexis_line_r[er_idx3] * (1 - er_frac3) + er_lexis_line_r[er_idx3_next] * er_frac3;
 
-  er_pos4 = er_lexis_write - er_lexis_tap4;
+  er_pos4 = er_lexis_write - er_lexis_tap4_l;
   er_pos4 < 0 ? er_pos4 += er_lexis_size;
   er_idx4 = floor(er_pos4);
   er_frac4 = er_pos4 - er_idx4;
   er_idx4_next = er_idx4 + 1;
   er_idx4_next >= er_lexis_size ? er_idx4_next = 0;
   er4_l = er_lexis_line_l[er_idx4] * (1 - er_frac4) + er_lexis_line_l[er_idx4_next] * er_frac4;
-  er4_r = er_lexis_line_r[er_idx4] * (1 - er_frac4) + er_lexis_line_r[er_idx4_next] * er_frac4;
 
-  er_pos5 = er_lexis_write - er_lexis_tap5;
+  er_pos5 = er_lexis_write - er_lexis_tap5_l;
   er_pos5 < 0 ? er_pos5 += er_lexis_size;
   er_idx5 = floor(er_pos5);
   er_frac5 = er_pos5 - er_idx5;
   er_idx5_next = er_idx5 + 1;
   er_idx5_next >= er_lexis_size ? er_idx5_next = 0;
   er5_l = er_lexis_line_l[er_idx5] * (1 - er_frac5) + er_lexis_line_l[er_idx5_next] * er_frac5;
-  er5_r = er_lexis_line_r[er_idx5] * (1 - er_frac5) + er_lexis_line_r[er_idx5_next] * er_frac5;
 
-  er_pos6 = er_lexis_write - er_lexis_tap6;
+  er_pos6 = er_lexis_write - er_lexis_tap6_l;
   er_pos6 < 0 ? er_pos6 += er_lexis_size;
   er_idx6 = floor(er_pos6);
   er_frac6 = er_pos6 - er_idx6;
   er_idx6_next = er_idx6 + 1;
   er_idx6_next >= er_lexis_size ? er_idx6_next = 0;
   er6_l = er_lexis_line_l[er_idx6] * (1 - er_frac6) + er_lexis_line_l[er_idx6_next] * er_frac6;
+
+  // Read 6 RIGHT taps with linear interpolation (decorrelated timing)
+  er_pos1 = er_lexis_write - er_lexis_tap1_r;
+  er_pos1 < 0 ? er_pos1 += er_lexis_size;
+  er_idx1 = floor(er_pos1);
+  er_frac1 = er_pos1 - er_idx1;
+  er_idx1_next = er_idx1 + 1;
+  er_idx1_next >= er_lexis_size ? er_idx1_next = 0;
+  er1_r = er_lexis_line_r[er_idx1] * (1 - er_frac1) + er_lexis_line_r[er_idx1_next] * er_frac1;
+
+  er_pos2 = er_lexis_write - er_lexis_tap2_r;
+  er_pos2 < 0 ? er_pos2 += er_lexis_size;
+  er_idx2 = floor(er_pos2);
+  er_frac2 = er_pos2 - er_idx2;
+  er_idx2_next = er_idx2 + 1;
+  er_idx2_next >= er_lexis_size ? er_idx2_next = 0;
+  er2_r = er_lexis_line_r[er_idx2] * (1 - er_frac2) + er_lexis_line_r[er_idx2_next] * er_frac2;
+
+  er_pos3 = er_lexis_write - er_lexis_tap3_r;
+  er_pos3 < 0 ? er_pos3 += er_lexis_size;
+  er_idx3 = floor(er_pos3);
+  er_frac3 = er_pos3 - er_idx3;
+  er_idx3_next = er_idx3 + 1;
+  er_idx3_next >= er_lexis_size ? er_idx3_next = 0;
+  er3_r = er_lexis_line_r[er_idx3] * (1 - er_frac3) + er_lexis_line_r[er_idx3_next] * er_frac3;
+
+  er_pos4 = er_lexis_write - er_lexis_tap4_r;
+  er_pos4 < 0 ? er_pos4 += er_lexis_size;
+  er_idx4 = floor(er_pos4);
+  er_frac4 = er_pos4 - er_idx4;
+  er_idx4_next = er_idx4 + 1;
+  er_idx4_next >= er_lexis_size ? er_idx4_next = 0;
+  er4_r = er_lexis_line_r[er_idx4] * (1 - er_frac4) + er_lexis_line_r[er_idx4_next] * er_frac4;
+
+  er_pos5 = er_lexis_write - er_lexis_tap5_r;
+  er_pos5 < 0 ? er_pos5 += er_lexis_size;
+  er_idx5 = floor(er_pos5);
+  er_frac5 = er_pos5 - er_idx5;
+  er_idx5_next = er_idx5 + 1;
+  er_idx5_next >= er_lexis_size ? er_idx5_next = 0;
+  er5_r = er_lexis_line_r[er_idx5] * (1 - er_frac5) + er_lexis_line_r[er_idx5_next] * er_frac5;
+
+  er_pos6 = er_lexis_write - er_lexis_tap6_r;
+  er_pos6 < 0 ? er_pos6 += er_lexis_size;
+  er_idx6 = floor(er_pos6);
+  er_frac6 = er_pos6 - er_idx6;
+  er_idx6_next = er_idx6 + 1;
+  er_idx6_next >= er_lexis_size ? er_idx6_next = 0;
   er6_r = er_lexis_line_r[er_idx6] * (1 - er_frac6) + er_lexis_line_r[er_idx6_next] * er_frac6;
 
   // Apply frequency-dependent decay (lowpass each tap - highs decay faster)
