@@ -1,8 +1,9 @@
 @description RCPlugs
 @author chmaha
-@version 2.5
+@version 2.6
 @changelog
-  Fix small typo
+  Remove Modulator
+  Remove send version of RCReverb
 @metapackage
 @provides
   RCComp.jsfx
@@ -20,9 +21,7 @@
   RCConsoleChannel.jsfx
   RCConsoleFinalizer.jsfx
   RCMidSide.jsfx
-  RCReverb_Insert.jsfx
-  RCReverb_Send.jsfx
-  RCModulator.jsfx
+  RCReverb.jsfx
   ReaVisionMetering.jsfx
   RCFader.jsfx
   Dependencies/*.jsfx-inc
