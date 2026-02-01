@@ -515,12 +515,6 @@ Insert Automation: Remember keep window open preference]]></changelog>
   </category>
   <category name="Sonata Reverb">
     <reapack name="SonataReverb.jsfx" type="effect" desc="Sonata Reverb (chmaha)">
-      <version name="1.0" time="2026-01-27T20:32:09Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/9b006d3f3ca8cb4d9a16aa989b5848c0f518b6a7/Sonata%20Reverb/SonataReverb.jsfx</source>
-      </version>
-      <version name="1.1" author="chmaha" time="2026-01-29T03:50:56Z">
-        <source>https://github.com/chmaha/ReaClassical/raw/8daabdac4ca344451f1f70e9914d54063ed4af4a/Sonata%20Reverb/SonataReverb.jsfx</source>
-      </version>
       <version name="1.5" author="chmaha" time="2026-02-01T04:51:26Z">
         <source>https://github.com/chmaha/ReaClassical/raw/165ee8e894a878cfc7e1cd80452ce3a327556543/Sonata%20Reverb/SonataReverb.jsfx</source>
       </version>
