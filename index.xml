@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="chmaha Scripts" commit="5d1c03f668d7e6c58141da09bc6437f4edc77f7e">
+<index version="1" name="chmaha Scripts" commit="0c03c1a7d0123f3b66fc5ccc8cc96a248a1f7c92">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
@@ -517,6 +517,9 @@ Insert Automation: Remember keep window open preference]]></changelog>
     <reapack name="SonataReverb.jsfx" type="effect" desc="Sonata Reverb (chmaha)">
       <version name="1.5" author="chmaha" time="2026-02-01T04:51:26Z">
         <source>https://github.com/chmaha/ReaClassical/raw/165ee8e894a878cfc7e1cd80452ce3a327556543/Sonata%20Reverb/SonataReverb.jsfx</source>
+      </version>
+      <version name="1.6" author="chmaha" time="2026-02-01T15:26:36Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/0c03c1a7d0123f3b66fc5ccc8cc96a248a1f7c92/Sonata%20Reverb/SonataReverb.jsfx</source>
       </version>
     </reapack>
   </category>
