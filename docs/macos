@@ -150,8 +150,6 @@ if [ -d "${rcfolder}/REAPER.app/Contents/InstallFiles/Effects" ]; then
     mkdir -p "${rcfolder}/Effects"
     cp -r "${rcfolder}/REAPER.app/Contents/InstallFiles/Effects/"* "${rcfolder}/Effects/" 2>/dev/null || \
         echo "Warning: No files found in InstallFiles/Effects or copy failed"
-    echo "Removing InstallFiles folder..."
-    rm -rf "${rcfolder}/REAPER.app/Contents/InstallFiles"
 else
     echo "Warning: InstallFiles/Effects directory not found"
 fi
