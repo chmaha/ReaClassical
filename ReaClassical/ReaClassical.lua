@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.2
+@version 26.2.1
 @changelog
-  Edit Automation Item: Allow clicking on other automation items to update window
+  Mixer Snapshots Manager: Add convert to automation button
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
