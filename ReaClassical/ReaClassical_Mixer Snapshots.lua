@@ -30,7 +30,7 @@ local get_selected_item_info, recall_snapshot, check_auto_recall
 local find_snapshot_by_item_guid, get_item_by_guid, refresh_snapshot_items
 local get_item_position, find_snapshot_with_gap_logic, find_snapshot_at_cursor
 local get_display_name_from_guid, update_snapshot_names
-local convert_snapshots_to_automation
+local convert_snapshots_to_automation, clear_all_automation
 
 local script_name = "Mixer Snapshot Manager"
 
@@ -71,6 +71,12 @@ local switch_mid_gap          = true -- Switch snapshots in the middle of gaps
 
 -- Track restriction per bank - REMOVED (now supports multiple tracks)
 local bank_track_guid         = nil -- Deprecated but kept for backwards compatibility
+
+-- Folder selection per bank for gap detection
+local bank_folder_selection   = {} -- "all" or folder track GUID
+
+-- Folder selection per bank for gap detection
+local bank_folder_selection   = {} -- "all" or folder GUID
 
 -- Selective parameter recall flags (all enabled by default)
 local recall_volume           = true
@@ -632,6 +638,7 @@ function save_snapshots_to_project()
   data.disable_auto_recall = disable_auto_recall
   data.switch_mid_gap = switch_mid_gap
   data.bank_track_guid = bank_track_guid
+  data.bank_folder_selection = bank_folder_selection[current_bank] or "all"
   data.recall_volume = recall_volume
   data.recall_pan = recall_pan
   data.recall_mute = recall_mute
@@ -669,6 +676,7 @@ function load_snapshots_from_project()
       disable_auto_recall = data.disable_auto_recall or false
       switch_mid_gap = data.switch_mid_gap ~= false
       bank_track_guid = data.bank_track_guid
+      bank_folder_selection[current_bank] = data.bank_folder_selection or "all"
       recall_volume = data.recall_volume ~= false
       recall_pan = data.recall_pan ~= false
       recall_mute = data.recall_mute ~= false
@@ -689,6 +697,7 @@ function load_snapshots_from_project()
     snapshot_counter = 0
     snapshots = {}
     selected_snapshot = nil
+    bank_folder_selection[current_bank] = "all"
   end
 end
 
@@ -965,12 +974,52 @@ function draw_UI()
     end
 
     ImGui.SameLine(ctx); ImGui.Dummy(ctx, 20, 0); ImGui.SameLine(ctx)
+    if ImGui.Button(ctx, "Clear All Automation") then
+      clear_all_automation()
+    end
+    if ImGui.IsItemHovered(ctx) then
+      ImGui.SetTooltip(ctx, "Clear all automation from mixer, aux, and submix tracks")
+    end
+
+    ImGui.SameLine(ctx); ImGui.Dummy(ctx, 20, 0); ImGui.SameLine(ctx)
     if ImGui.Button(ctx, "Convert to Automation") then
       convert_snapshots_to_automation()
     end
     if ImGui.IsItemHovered(ctx) then
       ImGui.SetTooltip(ctx, "Create real automation lanes from all snapshots in current bank")
     end
+    ImGui.SameLine(ctx); ImGui.Dummy(ctx, 10, 0); ImGui.SameLine(ctx)
+    -- Folder selection dropdown for gap detection
+    ImGui.Text(ctx, "Gap Detection:")
+    ImGui.SameLine(ctx)
+
+    -- Build folder options
+    local folder_options = { "All Tracks" }
+    local folder_guids = { "all" }
+    local current_selection = 0
+
+    -- Get all folder parent tracks
+    for i = 0, CountTracks(0) - 1 do
+      local track = GetTrack(0, i)
+      local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+      if folder_depth == 1 then
+        local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
+        local prefix = track_name:match("^([^:]+):")
+        if not prefix then prefix = "Folder" end
+        table.insert(folder_options, prefix) -- Uses just the prefix
+        table.insert(folder_guids, guid)
+
+        -- Check if this is the current selection
+        if bank_folder_selection[current_bank] == guid then
+          current_selection = #folder_options - 1
+        end
+      end
+    end
+
+    ImGui.SetNextItemWidth(ctx, 100)
+    local options_str = table.concat(folder_options, "\0") .. "\0"
+    local changed, new_selection = ImGui.Combo(ctx, "##folder_select", current_selection, options_str)
 
     ImGui.Separator(ctx)
 
@@ -1037,6 +1086,16 @@ function draw_UI()
       end
     end
     if not can_create then ImGui.EndDisabled(ctx) end
+
+    ImGui.Separator(ctx)
+
+    if changed then
+      bank_folder_selection[current_bank] = folder_guids[new_selection + 1]
+      save_snapshots_to_project()
+    end
+    if ImGui.IsItemHovered(ctx) then
+      ImGui.SetTooltip(ctx, "Select which folder's items to check for gaps during automation conversion")
+    end
 
     ImGui.Separator(ctx)
 
@@ -1217,6 +1276,42 @@ end
 
 ---------------------------------------------------------------------
 
+function clear_all_automation()
+  Undo_BeginBlock()
+
+  local cleared_count = 0
+
+  -- Clear all existing automation from mixer tracks and special tracks
+  for i = 0, CountTracks(0) - 1 do
+    local track = GetTrack(0, i)
+    local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+    local is_special = is_special_track(track)
+
+    if mixer_state == "y" or is_special then
+      -- Delete all envelope points on all envelopes
+      local num_envelopes = CountTrackEnvelopes(track)
+      for env_idx = 0, num_envelopes - 1 do
+        local env = GetTrackEnvelope(track, env_idx)
+        DeleteEnvelopePointRange(env, -1000000, 1000000)
+        GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
+        GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
+        GetSetEnvelopeInfo_String(env, "ARM", "0", true)
+      end
+      if num_envelopes > 0 then
+        cleared_count = cleared_count + 1
+      end
+    end
+  end
+
+  UpdateArrange()
+  TrackList_AdjustWindows(false)
+  Undo_EndBlock("Clear All Mixer Automation", -1)
+
+  ShowMessageBox("Cleared automation from " .. cleared_count .. " tracks.", "Clear All Automation", 0)
+end
+
+---------------------------------------------------------------------
+
 function convert_snapshots_to_automation()
   if #snapshots == 0 then
     ShowMessageBox("No snapshots to convert.", "Convert to Automation", 0)
@@ -1374,7 +1469,7 @@ function convert_snapshots_to_automation()
     if env then
       GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
       GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
-      -- GetSetEnvelopeInfo_String(env, "ARM", "1", true)
+      GetSetEnvelopeInfo_String(env, "ARM", "1", true)
       return env
     end
 
@@ -1444,7 +1539,7 @@ function convert_snapshots_to_automation()
     env = GetTrackEnvelopeByName(track, param_name)
     GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
     GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
-    -- GetSetEnvelopeInfo_String(env, "ARM", "1", true)
+    GetSetEnvelopeInfo_String(env, "ARM", "1", true)
     return env
   end
 
@@ -1468,6 +1563,13 @@ function convert_snapshots_to_automation()
     -- Build list of automation points to insert
     local auto_points = {}
 
+    -- Add initial point at time 0 with first snapshot's value to prevent ramp-up
+    local first_point_value = points_to_write[1].value
+    table.insert(auto_points, {
+      pos = 0,
+      value = first_point_value
+    })
+
     -- Process each value change
     for i = 1, #points_to_write do
       local point = points_to_write[i]
@@ -1477,48 +1579,105 @@ function convert_snapshots_to_automation()
       if not snap_item then goto continue_point end
 
       local snap_item_start = GetMediaItemInfo_Value(snap_item, "D_POSITION")
+      local snap_folder_track = GetMediaItem_Track(snap_item)
       local target_pos = snap_item_start
 
-      -- For points after the first, check if there's a gap
-      if i > 1 then
+      -- For points after the first, determine the switch point using gap logic
+      if i > 1 and switch_mid_gap then
         local prev_point = points_to_write[i - 1]
         local prev_snap = snapshots[prev_point.snap_idx]
         local prev_snap_item = get_item_by_guid(prev_snap.item_guid)
 
         if prev_snap_item then
-          local prev_snap_folder = GetMediaItem_Track(prev_snap_item)
-          local prev_snap_start = GetMediaItemInfo_Value(prev_snap_item, "D_POSITION")
+          local prev_folder_track = GetMediaItem_Track(prev_snap_item)
 
-          -- Find the last item end in previous snapshot's folder
-          local last_item_end_in_folder = prev_snap_start
+          -- Get folder selection for this bank
+          local selected_folder = bank_folder_selection[current_bank] or "all"
 
-          for item_idx = 0, CountMediaItems(0) - 1 do
-            local item = GetMediaItem(0, item_idx)
-            local item_track = GetMediaItem_Track(item)
-
-            if is_track_in_folder(item_track, prev_snap_folder) then
-              local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-              local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
-              local item_end = item_start + item_length
-
-              -- Only consider items that end before current snapshot starts
-              if item_end < snap_item_start and item_end > last_item_end_in_folder then
-                last_item_end_in_folder = item_end
-              end
+          -- Check if we should analyze this folder pair
+          local should_check_gap = false
+          if selected_folder == "all" then
+            should_check_gap = true
+          else
+            -- Check if either snapshot is on the selected folder
+            local _, prev_guid = GetSetMediaTrackInfo_String(prev_folder_track, "GUID", "", false)
+            local _, snap_guid = GetSetMediaTrackInfo_String(snap_folder_track, "GUID", "", false)
+            if prev_guid == selected_folder or snap_guid == selected_folder then
+              should_check_gap = true
             end
           end
 
-          -- If there's a gap, place transition at gap midpoint
-          if last_item_end_in_folder > prev_snap_start and last_item_end_in_folder < snap_item_start then
-            local gap_mid = last_item_end_in_folder + (snap_item_start - last_item_end_in_folder) / 2
-            target_pos = gap_mid
-          end
-        end
+          if should_check_gap then
+            -- Get folder selection for this bank
+            local selected_folder = bank_folder_selection[current_bank] or "all"
 
-        -- Insert ramp start point (previous value) 35ms before target
+            local snap_item_guid = BR_GetMediaItemGUID(snap_item)
+            local total_items = CountMediaItems(0)
+            local has_overlap = false
+            local latest_item_end = -1
+
+            -- Scan items based on folder selection
+            for item_idx = 0, total_items - 1 do
+              local item = GetMediaItem(0, item_idx)
+              local item_guid = BR_GetMediaItemGUID(item)
+
+              -- Skip the snapshot item itself
+              if item_guid ~= snap_item_guid then
+                -- If specific folder is selected, only check items on that folder track
+                local should_check_item = false
+                if selected_folder == "all" then
+                  should_check_item = true
+                else
+                  -- Check if this item is on the selected folder track
+                  local item_track = GetMediaItem_Track(item)
+                  local _, item_track_guid = GetSetMediaTrackInfo_String(item_track, "GUID", "", false)
+                  if item_track_guid == selected_folder then
+                    should_check_item = true
+                  end
+                end
+
+                if should_check_item then
+                  local item_start_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                  local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
+                  local item_end = item_start_pos + item_length
+
+                  -- Check if this item overlaps with the snapshot item start
+                  -- An item overlaps if: item_start < snap_item_start AND item_end > snap_item_start
+                  if item_start_pos < snap_item_start and item_end > snap_item_start then
+                    has_overlap = true
+                    break
+                  end
+
+                  -- Also track the latest item end that's before the snapshot start
+                  if item_end < snap_item_start and item_end > latest_item_end then
+                    latest_item_end = item_end
+                  end
+                end
+              end
+            end
+
+            -- If there's ANY overlap, no gap - use snap_item_start
+            -- If there's no overlap, check if there's a gap
+            if not has_overlap and latest_item_end >= 0 then
+              local gap_size = snap_item_start - latest_item_end
+
+              -- Only use gap midpoint if there's a REAL gap (more than 0.001 seconds)
+              if gap_size > 0.001 then
+                local gap_mid = latest_item_end + gap_size / 2
+                target_pos = gap_mid
+              end
+            end
+          end
+          -- Otherwise (no gap or items are adjacent), target_pos stays at snap_item_start
+        end
+      end
+      -- If switch_mid_gap is disabled, target_pos always stays at snap_item_start
+
+      -- Insert ramp start point (previous value) 35ms before target
+      if i > 1 then
         table.insert(auto_points, {
           pos = target_pos - 0.035,
-          value = prev_point.value
+          value = points_to_write[i - 1].value
         })
       end
 
@@ -1542,7 +1701,7 @@ function convert_snapshots_to_automation()
     local track = find_track_by_GUID(track_guid)
     if track then
       local track_got_automation = false
-
+      SetMediaTrackInfo_Value(track, "I_AUTOMODE", 1)
       -- Volume
       if has_changes(params.volume) then
         local env = get_or_create_envelope(track, "Volume")
@@ -1620,6 +1779,9 @@ function convert_snapshots_to_automation()
               Envelope_SortPoints(env)
               automation_count = automation_count + 1
               track_got_automation = true
+              GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
+              GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
+              GetSetEnvelopeInfo_String(env, "ARM", "1", true)
             end
           end
         end
