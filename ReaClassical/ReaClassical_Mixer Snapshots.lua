@@ -30,6 +30,7 @@ local get_selected_item_info, recall_snapshot, check_auto_recall
 local find_snapshot_by_item_guid, get_item_by_guid, refresh_snapshot_items
 local get_item_position, find_snapshot_with_gap_logic, find_snapshot_at_cursor
 local get_display_name_from_guid, update_snapshot_names
+local convert_snapshots_to_automation
 
 local script_name = "Mixer Snapshot Manager"
 
@@ -266,7 +267,7 @@ function get_selected_item_info()
   if take then
     _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
   end
-  
+
   local item_guid = BR_GetMediaItemGUID(item)
   return item_guid, name
 end
@@ -301,7 +302,7 @@ function get_display_name_from_guid(guid)
   -- Remove opening brace if present, then get first segment before hyphen
   local cleaned = guid:gsub("^{", "")
   local first_segment = cleaned:match("^([^%-]+)")
-  return "{" .. (first_segment or guid) .. "}"  -- Added curly braces around the return
+  return "{" .. (first_segment or guid) .. "}" -- Added curly braces around the return
 end
 
 ---------------------------------------------------------------------
@@ -309,7 +310,7 @@ end
 -- NEW: Update snapshot display names if item names have changed
 function update_snapshot_names()
   local needs_save = false
-  
+
   for _, snap in ipairs(snapshots) do
     local item = get_item_by_guid(snap.item_guid)
     if item then
@@ -318,7 +319,7 @@ function update_snapshot_names()
       if take then
         _, current_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
       end
-      
+
       -- Update item_name if it has changed
       if snap.item_name ~= current_name then
         snap.item_name = current_name
@@ -326,7 +327,7 @@ function update_snapshot_names()
       end
     end
   end
-  
+
   if needs_save then
     save_snapshots_to_project()
   end
@@ -342,16 +343,16 @@ function find_snapshot_with_gap_logic(cursor_pos)
   -- Helper function to check if a track is within a folder (or is the folder itself)
   local function is_track_in_folder(track, folder_track)
     if track == folder_track then return true end
-    
+
     -- Check if track is a child of the folder
     local folder_depth = GetMediaTrackInfo_Value(folder_track, "I_FOLDERDEPTH")
     if folder_depth <= 0 then return false end -- Not a folder
-    
+
     local folder_idx = GetMediaTrackInfo_Value(folder_track, "IP_TRACKNUMBER") - 1
     local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
-    
+
     if track_idx <= folder_idx then return false end -- Track is before folder
-    
+
     -- Walk through tracks to see if this track is within the folder
     local depth = folder_depth
     for i = folder_idx + 1, track_idx do
@@ -383,7 +384,7 @@ function find_snapshot_with_gap_logic(cursor_pos)
   -- Find which snapshot folders are relevant (previous and next)
   local prev_snap_folder = nil
   local next_snap_folder = nil
-  
+
   for i = #snapshot_items, 1, -1 do
     if snapshot_items[i].start <= cursor_pos then
       local prev_snap = find_snapshot_by_item_guid(snapshot_items[i].guid)
@@ -394,7 +395,7 @@ function find_snapshot_with_gap_logic(cursor_pos)
       break
     end
   end
-  
+
   for _, snap_data in ipairs(snapshot_items) do
     if snap_data.start > cursor_pos then
       local next_snap = find_snapshot_by_item_guid(snap_data.guid)
@@ -412,24 +413,24 @@ function find_snapshot_with_gap_logic(cursor_pos)
     local item = GetMediaItem(0, i)
     local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
     local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
-    
+
     if cursor_pos >= item_start and cursor_pos < item_end then
       local item_track = GetMediaItem_Track(item)
       -- Check if this item is in either the previous or next snapshot's folder
       if (prev_snap_folder and is_track_in_folder(item_track, prev_snap_folder)) or
-         (next_snap_folder and is_track_in_folder(item_track, next_snap_folder)) then
+          (next_snap_folder and is_track_in_folder(item_track, next_snap_folder)) then
         cursor_on_relevant_item = true
         break
       end
     end
   end
-  
+
   if cursor_on_relevant_item then
     -- Cursor is on a relevant item - use normal logic
     return find_snapshot_at_cursor(cursor_pos)
   end
 
-  
+
   -- Cursor is in a GAP (not on any relevant item)
   -- Find the next snapshot item
   local next_snap = nil
@@ -460,13 +461,13 @@ function find_snapshot_with_gap_logic(cursor_pos)
     for i = 0, CountMediaItems(0) - 1 do
       local item = GetMediaItem(0, i)
       local item_track = GetMediaItem_Track(item)
-      
+
       -- Only consider items in the previous snapshot's folder
       if is_track_in_folder(item_track, prev_snap_folder) then
         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
         local item_end = item_start + item_length
-        
+
         -- Only consider items that end before the next snapshot starts
         if item_end < next_snap_item_start and item_end > last_item_end_in_prev_folder then
           last_item_end_in_prev_folder = item_end
@@ -821,7 +822,7 @@ function draw_table()
       else
         display_name = get_display_name_from_guid(snap.item_guid)
       end
-      
+
       ImGui.PushID(ctx, "name_sel")
       if ImGui.Selectable(ctx, display_name, selected_snapshot == snap) then
         selected_snapshot = snap
@@ -963,11 +964,19 @@ function draw_UI()
       ImGui.EndPopup(ctx)
     end
 
+    ImGui.SameLine(ctx); ImGui.Dummy(ctx, 20, 0); ImGui.SameLine(ctx)
+    if ImGui.Button(ctx, "Convert to Automation") then
+      convert_snapshots_to_automation()
+    end
+    if ImGui.IsItemHovered(ctx) then
+      ImGui.SetTooltip(ctx, "Create real automation lanes from all snapshots in current bank")
+    end
+
     ImGui.Separator(ctx)
 
     -- Snapshot creation/management
     local item_guid, item_name = get_selected_item_info()
-    local can_create = item_guid ~= nil  -- MODIFIED: Any item works now
+    local can_create = item_guid ~= nil -- MODIFIED: Any item works now
 
     -- Generate display name for button
     local display_name
@@ -1204,6 +1213,512 @@ function handle_project_change()
     TrackList_AdjustWindows(false)
     UpdateArrange()
   end
+end
+
+---------------------------------------------------------------------
+
+function convert_snapshots_to_automation()
+  if #snapshots == 0 then
+    ShowMessageBox("No snapshots to convert.", "Convert to Automation", 0)
+    return
+  end
+
+  Undo_BeginBlock()
+
+  -- Clear all existing automation from mixer tracks and special tracks
+  for i = 0, CountTracks(0) - 1 do
+    local track = GetTrack(0, i)
+    local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+    local is_special = is_special_track(track)
+
+    if mixer_state == "y" or is_special then
+      -- Delete all envelope points on all envelopes
+      local num_envelopes = CountTrackEnvelopes(track)
+      for env_idx = 0, num_envelopes - 1 do
+        local env = GetTrackEnvelope(track, env_idx)
+        DeleteEnvelopePointRange(env, -1000000, 1000000)
+        GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
+        GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
+        GetSetEnvelopeInfo_String(env, "ARM", "0", true)
+      end
+    end
+  end
+
+  -- Sort snapshots by timeline position first
+  local sorted_snapshots = {}
+  for i, snap in ipairs(snapshots) do
+    local item = get_item_by_guid(snap.item_guid)
+    if item then
+      local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+      table.insert(sorted_snapshots, { snap = snap, pos = pos, idx = i })
+    end
+  end
+  table.sort(sorted_snapshots, function(a, b) return a.pos < b.pos end)
+
+  -- Collect all parameters that change across snapshots
+  local param_changes = {}
+
+  for _, snap_data in ipairs(sorted_snapshots) do
+    local snap = snap_data.snap
+    local snap_idx = snap_data.idx
+    local item = get_item_by_guid(snap.item_guid)
+    if item then
+      local snap_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+
+      for track_idx, track_state in pairs(snap.tracks) do
+        local track_guid = track_state.guid
+
+        if not param_changes[track_guid] then
+          param_changes[track_guid] = {
+            volume = {},
+            pan = {},
+            mute = {},
+            solo = {},
+            phase = {},
+            fx = {},
+            sends = {}
+          }
+        end
+
+        -- Record parameter values at this position WITH snapshot index
+        table.insert(param_changes[track_guid].volume,
+          { pos = snap_pos, value = track_state.volume, snap_idx = snap_idx })
+        table.insert(param_changes[track_guid].pan, { pos = snap_pos, value = track_state.pan, snap_idx = snap_idx })
+        table.insert(param_changes[track_guid].mute, { pos = snap_pos, value = track_state.mute, snap_idx = snap_idx })
+        table.insert(param_changes[track_guid].solo, { pos = snap_pos, value = track_state.solo, snap_idx = snap_idx })
+        table.insert(param_changes[track_guid].phase, { pos = snap_pos, value = track_state.phase, snap_idx = snap_idx })
+
+        -- Record FX parameters
+        for fx_idx, fx in pairs(track_state.fx_chain) do
+          if not param_changes[track_guid].fx[fx_idx] then
+            param_changes[track_guid].fx[fx_idx] = {}
+          end
+          for param_idx, param_value in pairs(fx.params) do
+            if not param_changes[track_guid].fx[fx_idx][param_idx] then
+              param_changes[track_guid].fx[fx_idx][param_idx] = {}
+            end
+            table.insert(param_changes[track_guid].fx[fx_idx][param_idx],
+              { pos = snap_pos, value = param_value, snap_idx = snap_idx })
+          end
+        end
+
+        -- Record send parameters
+        for send_idx, send in pairs(track_state.sends) do
+          if not param_changes[track_guid].sends[send_idx] then
+            param_changes[track_guid].sends[send_idx] = {
+              volume = {},
+              pan = {},
+              mute = {}
+            }
+          end
+          table.insert(param_changes[track_guid].sends[send_idx].volume,
+            { pos = snap_pos, value = send.volume, snap_idx = snap_idx })
+          table.insert(param_changes[track_guid].sends[send_idx].pan,
+            { pos = snap_pos, value = send.pan, snap_idx = snap_idx })
+          table.insert(param_changes[track_guid].sends[send_idx].mute,
+            { pos = snap_pos, value = send.mute, snap_idx = snap_idx })
+        end
+      end
+    end
+  end
+
+  -- Check which parameters actually change and write automation
+  local automation_count = 0
+  local tracks_with_automation = {} -- Track which tracks get automation
+
+  -- Helper to check if values change
+  local function has_changes(points)
+    if #points < 2 then return false end
+    local first_val = points[1].value
+    for i = 2, #points do
+      if math.abs(points[i].value - first_val) > 0.0001 then
+        return true
+      end
+    end
+    return false
+  end
+
+  -- Helper to check if a track is within a folder (or is the folder itself)
+  local function is_track_in_folder(track, folder_track)
+    if track == folder_track then return true end
+
+    -- Check if track is a child of the folder
+    local folder_depth = GetMediaTrackInfo_Value(folder_track, "I_FOLDERDEPTH")
+    if folder_depth <= 0 then return false end -- Not a folder
+
+    local folder_idx = GetMediaTrackInfo_Value(folder_track, "IP_TRACKNUMBER") - 1
+    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+
+    if track_idx <= folder_idx then return false end -- Track is before folder
+
+    -- Walk through tracks to see if this track is within the folder
+    local depth = folder_depth
+    for i = folder_idx + 1, track_idx do
+      local t = GetTrack(0, i)
+      local t_depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
+      depth = depth + t_depth
+      if i == track_idx then
+        return depth > 0 -- Track is in folder if depth is still positive
+      end
+      if depth <= 0 then
+        return false -- Folder ended before reaching our track
+      end
+    end
+    return false
+  end
+
+  -- Helper to ensure an envelope exists
+  local function get_or_create_envelope(track, param_name)
+    -- First try to get it by name
+    local env = GetTrackEnvelopeByName(track, param_name)
+    if env then
+      GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
+      GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
+      -- GetSetEnvelopeInfo_String(env, "ARM", "1", true)
+      return env
+    end
+
+    -- Save current track selection
+    local num_selected = CountSelectedTracks(0)
+    local selected_tracks = {}
+    for i = 0, num_selected - 1 do
+      selected_tracks[i] = GetSelectedTrack(0, i)
+    end
+
+    -- Select only our track
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    SetTrackSelected(track, true)
+
+    -- Toggle the appropriate envelope
+    if param_name == "Volume" then
+      local env_count = CountTrackEnvelopes(track)
+      local had_vol_env = false
+      for i = 0, env_count - 1 do
+        local e = GetTrackEnvelope(track, i)
+        local _, name = GetEnvelopeName(e, "")
+        if name == "Volume" or name == "Volume (Pre-FX)" then
+          had_vol_env = true
+          break
+        end
+      end
+      if not had_vol_env then
+        Main_OnCommand(40406, 0) -- Track: Toggle volume envelope visible
+      end
+    elseif param_name == "Pan" then
+      local env_count = CountTrackEnvelopes(track)
+      local had_pan_env = false
+      for i = 0, env_count - 1 do
+        local e = GetTrackEnvelope(track, i)
+        local _, name = GetEnvelopeName(e, "")
+        if name == "Pan" or name == "Pan (Pre-FX)" then
+          had_pan_env = true
+          break
+        end
+      end
+      if not had_pan_env then
+        Main_OnCommand(40407, 0) -- Track: Toggle pan envelope visible
+      end
+    elseif param_name == "Mute" then
+      local env_count = CountTrackEnvelopes(track)
+      local had_mute_env = false
+      for i = 0, env_count - 1 do
+        local e = GetTrackEnvelope(track, i)
+        local _, name = GetEnvelopeName(e, "")
+        if name == "Mute" then
+          had_mute_env = true
+          break
+        end
+      end
+      if not had_mute_env then
+        Main_OnCommand(40867, 0) -- Track: Toggle mute envelope visible
+      end
+    end
+
+    -- Restore selection
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    for i = 0, num_selected - 1 do
+      SetTrackSelected(selected_tracks[i], true)
+    end
+
+    -- Try to get the envelope again
+    env = GetTrackEnvelopeByName(track, param_name)
+    GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
+    GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
+    -- GetSetEnvelopeInfo_String(env, "ARM", "1", true)
+    return env
+  end
+
+  -- Helper to insert automation points with gap logic and 35ms steps
+  local function insert_automation_points(env, points, needs_scaling)
+    -- Points are already sorted by timeline position
+
+    -- First pass: determine which points to keep (where value changes)
+    local points_to_write = {}
+    local prev_value = nil
+
+    for i, point in ipairs(points) do
+      if not prev_value or math.abs(point.value - prev_value) > 0.0001 then
+        table.insert(points_to_write, point)
+        prev_value = point.value
+      end
+    end
+
+    if #points_to_write == 0 then return end
+
+    -- Build list of automation points to insert
+    local auto_points = {}
+
+    -- Process each value change
+    for i = 1, #points_to_write do
+      local point = points_to_write[i]
+      local snap = snapshots[point.snap_idx]
+      local snap_item = get_item_by_guid(snap.item_guid)
+
+      if not snap_item then goto continue_point end
+
+      local snap_item_start = GetMediaItemInfo_Value(snap_item, "D_POSITION")
+      local target_pos = snap_item_start
+
+      -- For points after the first, check if there's a gap
+      if i > 1 then
+        local prev_point = points_to_write[i - 1]
+        local prev_snap = snapshots[prev_point.snap_idx]
+        local prev_snap_item = get_item_by_guid(prev_snap.item_guid)
+
+        if prev_snap_item then
+          local prev_snap_folder = GetMediaItem_Track(prev_snap_item)
+          local prev_snap_start = GetMediaItemInfo_Value(prev_snap_item, "D_POSITION")
+
+          -- Find the last item end in previous snapshot's folder
+          local last_item_end_in_folder = prev_snap_start
+
+          for item_idx = 0, CountMediaItems(0) - 1 do
+            local item = GetMediaItem(0, item_idx)
+            local item_track = GetMediaItem_Track(item)
+
+            if is_track_in_folder(item_track, prev_snap_folder) then
+              local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+              local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
+              local item_end = item_start + item_length
+
+              -- Only consider items that end before current snapshot starts
+              if item_end < snap_item_start and item_end > last_item_end_in_folder then
+                last_item_end_in_folder = item_end
+              end
+            end
+          end
+
+          -- If there's a gap, place transition at gap midpoint
+          if last_item_end_in_folder > prev_snap_start and last_item_end_in_folder < snap_item_start then
+            local gap_mid = last_item_end_in_folder + (snap_item_start - last_item_end_in_folder) / 2
+            target_pos = gap_mid
+          end
+        end
+
+        -- Insert ramp start point (previous value) 35ms before target
+        table.insert(auto_points, {
+          pos = target_pos - 0.035,
+          value = prev_point.value
+        })
+      end
+
+      -- Insert the new value point at target position
+      table.insert(auto_points, {
+        pos = target_pos,
+        value = point.value
+      })
+
+      ::continue_point::
+    end
+
+    -- Insert all automation points
+    for _, auto_point in ipairs(auto_points) do
+      local env_val = needs_scaling and ScaleToEnvelopeMode(1, auto_point.value) or auto_point.value
+      InsertEnvelopePoint(env, auto_point.pos, env_val, 0, 0, false, true)
+    end
+  end
+
+  for track_guid, params in pairs(param_changes) do
+    local track = find_track_by_GUID(track_guid)
+    if track then
+      local track_got_automation = false
+
+      -- Volume
+      if has_changes(params.volume) then
+        local env = get_or_create_envelope(track, "Volume")
+        if env then
+          insert_automation_points(env, params.volume, true)
+          Envelope_SortPoints(env)
+          automation_count = automation_count + 1
+          track_got_automation = true
+        end
+      end
+
+      -- Pan
+      if has_changes(params.pan) then
+        local env = get_or_create_envelope(track, "Pan")
+        if env then
+          insert_automation_points(env, params.pan, false)
+          Envelope_SortPoints(env)
+          automation_count = automation_count + 1
+          track_got_automation = true
+        end
+      end
+
+      -- Mute (need to invert: track B_MUTE is 1=muted, automation is 0=muted)
+      if has_changes(params.mute) then
+        local env = get_or_create_envelope(track, "Mute")
+        if env then
+          -- Invert mute values before inserting
+          local inverted_mute_points = {}
+          for _, point in ipairs(params.mute) do
+            table.insert(inverted_mute_points, {
+              pos = point.pos,
+              value = point.value == 1 and 0 or 1, -- Invert: 1->0, 0->1
+              snap_idx = point.snap_idx
+            })
+          end
+          insert_automation_points(env, inverted_mute_points, false)
+          Envelope_SortPoints(env)
+          automation_count = automation_count + 1
+          track_got_automation = true
+        end
+      end
+
+      -- Solo
+      if has_changes(params.solo) then
+        local env = GetTrackEnvelopeByName(track, "Solo")
+        if env then
+          insert_automation_points(env, params.solo, false)
+          Envelope_SortPoints(env)
+          automation_count = automation_count + 1
+          track_got_automation = true
+        end
+      end
+
+      -- Phase
+      if has_changes(params.phase) then
+        local env = GetTrackEnvelopeByName(track, "Phase")
+        if not env then
+          env = GetTrackEnvelopeByName(track, "Polarity")
+        end
+        if env then
+          insert_automation_points(env, params.phase, false)
+          Envelope_SortPoints(env)
+          automation_count = automation_count + 1
+          track_got_automation = true
+        end
+      end
+
+      -- FX parameters
+      for fx_idx, fx_params in pairs(params.fx) do
+        for param_idx, points in pairs(fx_params) do
+          if has_changes(points) then
+            local env = GetFXEnvelope(track, fx_idx, param_idx, true)
+            if env then
+              insert_automation_points(env, points, false)
+              Envelope_SortPoints(env)
+              automation_count = automation_count + 1
+              track_got_automation = true
+            end
+          end
+        end
+      end
+
+      -- Send parameters
+      for send_idx, send_params in pairs(params.sends) do
+        local num_selected = CountSelectedTracks(0)
+        local selected_tracks = {}
+        for i = 0, num_selected - 1 do
+          selected_tracks[i] = GetSelectedTrack(0, i)
+        end
+
+        Main_OnCommand(40297, 0)
+        SetTrackSelected(track, true)
+
+        if has_changes(send_params.volume) or has_changes(send_params.pan) or has_changes(send_params.mute) then
+          Main_OnCommand(41327, 0)
+        end
+
+        Main_OnCommand(40297, 0)
+        for i = 0, num_selected - 1 do
+          SetTrackSelected(selected_tracks[i], true)
+        end
+
+        if has_changes(send_params.volume) then
+          local env = GetTrackSendEnvelope(track, 0, send_idx, 0)
+          if env then
+            insert_automation_points(env, send_params.volume, true)
+            Envelope_SortPoints(env)
+            automation_count = automation_count + 1
+            track_got_automation = true
+          end
+        end
+
+        if has_changes(send_params.pan) then
+          local env = GetTrackSendEnvelope(track, 0, send_idx, 1)
+          if env then
+            insert_automation_points(env, send_params.pan, false)
+            Envelope_SortPoints(env)
+            automation_count = automation_count + 1
+            track_got_automation = true
+          end
+        end
+
+        if has_changes(send_params.mute) then
+          local env = GetTrackSendEnvelope(track, 0, send_idx, 2)
+          if env then
+            -- Invert send mute values before inserting
+            local inverted_send_mute_points = {}
+            for _, point in ipairs(send_params.mute) do
+              table.insert(inverted_send_mute_points, {
+                pos = point.pos,
+                value = point.value == 1 and 0 or 1, -- Invert: 1->0, 0->1
+                snap_idx = point.snap_idx
+              })
+            end
+            insert_automation_points(env, inverted_send_mute_points, false)
+            Envelope_SortPoints(env)
+            automation_count = automation_count + 1
+            track_got_automation = true
+          end
+        end
+      end
+
+      -- If this track got automation, mark it
+      if track_got_automation then
+        tracks_with_automation[track] = true
+      end
+    end
+  end
+
+  -- Now show only tracks that got automation in TCP
+  for track, _ in pairs(tracks_with_automation) do
+    local current_tcp_state = GetMediaTrackInfo_Value(track, "B_SHOWINTCP")
+
+    if current_tcp_state == 0 then
+      -- Show the track in TCP
+      SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+
+      -- Update project ext state
+      local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
+      local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+
+      -- Use appropriate prefix for ext state key
+      if mixer_state == "y" then
+        SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. guid, "1")
+      else
+        SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. guid, "1")
+      end
+    end
+  end
+
+  UpdateArrange()
+  TrackList_AdjustWindows(false)
+  Undo_EndBlock("Convert Mixer Snapshots to Automation", -1)
+
+  ShowMessageBox(automation_count .. " automation lanes created from " .. #snapshots .. " snapshots.",
+    "Convert to Automation", 0)
 end
 
 ---------------------------------------------------------------------
