@@ -8,11 +8,33 @@ If you use a portable recorder such as a MixPre, you might have a multi-channel 
 
 ==== Smart Import
 
-Assuming that the filenaming contains at least a take number as a suffix along with channel descriptions:
+Ensure that all your files comply with one of the following patterns (where x represents a digit):
+
+- `sessionname_trackname_Txxx.wav`
+- `sessionname_trackname_xxx.wav`
+- `trackname_Txx.wav`
+- `trackname_xxx.wav`
+
+The take number should always be positioned just before the file extension. The "T" (for take) and any zero-padding are optional but there should always be at least a preceding underscore. 
+
+Examples of good filenaming include:
+
+- `morning_cello_012.wav` (where session is "morning", track name will match "cello" and represents take 12)
+- `harpsichord_T4.flac` (no session name, track name will match "harpsichord" and represents take 4)
+
+Examples of bad filenaming include:
+
+- `005.wav` (no trackname)
+- `violin56.wav` (no underscore before take name)
+- `Day1Mozart_67.wav` (no underscore between session and track name)
+
+IMPORTANT: Don't skip this renaming step if you want to import files easily from another DAW! Manual import by dragging in material can be time-consuming and may not allow you to use functions like searching by take number. 
+
+Assuming that the filenames now contain at least a track name and take number separated by underscore:
 
 1. Copy or move source material into the media subfolder inside your ReaClassical project folder. 
-2. Ensure that track names match any channel text in the filenames
-3. If your filenames also contain a session name, add some markers kbd:[Ctrl+M] and name them accordingly.
+2. Ensure that track names in the project match the channel text in the filenames
+3. If your filenames also contain a session name prior to the track name, the items will be grouped accordingly.
 4. Via the top ReaClassical menu, click on menu:Project Setup[Smart Audio Import]
 5. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
 

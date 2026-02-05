@@ -30,11 +30,11 @@ While it is always better to record in ReaClassical, occasionally you might need
 
 ===== Smart Import
 
-Assuming that the filenaming contains at least a take number as a suffix along with channel descriptions:
+Assuming that the filenaming contains at least a track name and take number separated by underscore e.g. `cello_004.wav` or `cello_T004.wav`:
 
 1. Copy or move source material into the media subfolder inside your ReaClassical project folder. 
 2. Ensure that track names match any channel text in the filenames
-3. If your filenames also contain a session name, add some markers kbd:[Ctrl+M] and name them accordingly.
+3. If your filenames also contain a session name prior to the track name, the items will be grouped accordingly.
 4. Via the top ReaClassical menu, click on menu:Project Setup[Smart Audio Import]
 5. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
 
@@ -60,6 +60,7 @@ Audition your material via mouse hover + kbd:[A] on parent or child tracks. Use 
 1. Add FX, change routing, and optionally adjust volume, panning etc via Mission Control kbd:[C]
 2. Open Mixing Snapshot Manager via kbd:[Shift+M]
 3. Create automatically-recalled mixer snapshots at edit cursor or inside time selection
+4. Add automation to destination or source folders via time selection + kbd:[I]
 
 ==== Mastering
 

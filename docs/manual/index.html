@@ -480,7 +480,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_editing_2">Editing</a></li>
 <li><a href="#_mixing_2">Mixing</a></li>
 <li><a href="#mastering">Mastering</a></li>
-<li><a href="#_rendering_2">Rendering</a></li>
+<li><a href="#_rendering_3">Rendering</a></li>
 <li><a href="#_collaborating_with_video_editors">Collaborating with Video Editors</a></li>
 </ul>
 </li>
@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-01-31 15:17:15 UTC</code></p>
+<p><code>Updated: 2026-02-05 20:49:16 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1134,7 +1134,7 @@ Save your project before continuing with other workflows.
 <div class="sect4">
 <h5 id="_smart_import">Smart Import</h5>
 <div class="paragraph">
-<p>Assuming that the filenaming contains at least a take number as a suffix along with channel descriptions:</p>
+<p>Assuming that the filenaming contains at least a track name and take number separated by underscore e.g. <code>cello_004.wav</code> or <code>cello_T004.wav</code>:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1145,7 +1145,7 @@ Save your project before continuing with other workflows.
 <p>Ensure that track names match any channel text in the filenames</p>
 </li>
 <li>
-<p>If your filenames also contain a session name, add some markers <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>M</kbd></span> and name them accordingly.</p>
+<p>If your filenames also contain a session name prior to the track name, the items will be grouped accordingly.</p>
 </li>
 <li>
 <p>Via the top ReaClassical menu, click on <span class="menuseq"><b class="menu">Project Setup</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Smart Audio Import</b></span></p>
@@ -1210,6 +1210,9 @@ Save your project before continuing with other workflows.
 </li>
 <li>
 <p>Create automatically-recalled mixer snapshots at edit cursor or inside time selection</p>
+</li>
+<li>
+<p>Add automation to destination or source folders via time selection + <kbd>I</kbd></p>
 </li>
 </ol>
 </div>
@@ -1441,7 +1444,70 @@ Save your project before continuing with other workflows.
 <div class="sect3">
 <h4 id="_smart_import_2">Smart Import</h4>
 <div class="paragraph">
-<p>Assuming that the filenaming contains at least a take number as a suffix along with channel descriptions:</p>
+<p>Ensure that all your files comply with one of the following patterns (where x represents a digit):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>sessionname_trackname_Txxx.wav</code></p>
+</li>
+<li>
+<p><code>sessionname_trackname_xxx.wav</code></p>
+</li>
+<li>
+<p><code>trackname_Txx.wav</code></p>
+</li>
+<li>
+<p><code>trackname_xxx.wav</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The take number should always be positioned just before the file extension. The "T" (for take) and any zero-padding are optional but there should always be at least a preceding underscore.</p>
+</div>
+<div class="paragraph">
+<p>Examples of good filenaming include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>morning_cello_012.wav</code> (where session is "morning", track name will match "cello" and represents take 12)</p>
+</li>
+<li>
+<p><code>harpsichord_T4.flac</code> (no session name, track name will match "harpsichord" and represents take 4)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Examples of bad filenaming include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>005.wav</code> (no trackname)</p>
+</li>
+<li>
+<p><code>violin56.wav</code> (no underscore before take name)</p>
+</li>
+<li>
+<p><code>Day1Mozart_67.wav</code> (no underscore between session and track name)</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Don&#8217;t skip this renaming step if you want to import files easily from another DAW! Manual import by dragging in material can be time-consuming and may not allow you to use functions like searching by take number.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Assuming that the filenames now contain at least a track name and take number separated by underscore:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1449,10 +1515,10 @@ Save your project before continuing with other workflows.
 <p>Copy or move source material into the media subfolder inside your ReaClassical project folder.</p>
 </li>
 <li>
-<p>Ensure that track names match any channel text in the filenames</p>
+<p>Ensure that track names in the project match the channel text in the filenames</p>
 </li>
 <li>
-<p>If your filenames also contain a session name, add some markers <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>M</kbd></span> and name them accordingly.</p>
+<p>If your filenames also contain a session name prior to the track name, the items will be grouped accordingly.</p>
 </li>
 <li>
 <p>Via the top ReaClassical menu, click on <span class="menuseq"><b class="menu">Project Setup</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Smart Audio Import</b></span></p>
@@ -1919,6 +1985,9 @@ This works at any point in the editing process and isn&#8217;t restricted to the
 <li>
 <p>Create automatically-recalled mixer snapshots tied to items.</p>
 </li>
+<li>
+<p>Before rendering, convert to real automation lanes via <b class="button">Convert to Automation</b></p>
+</li>
 </ol>
 </div>
 <div class="admonitionblock note">
@@ -1933,16 +2002,35 @@ If setting a snapshot tied to an unnamed item, the first part of the item&#8217;
 </tr>
 </table>
 </div>
-<div class="sect4">
-<h5 id="_mixer_snapshot_manager_in_detail">Mixer Snapshot Manager in Detail</h5>
+</div>
+<div class="sect3">
+<h4 id="_mixer_snapshot_manager_in_detail">Mixer Snapshot Manager in Detail</h4>
 <div class="imageblock">
 <div class="content">
 <img src="src/assets/mixer_snapshots.png" alt="Mixer Snapshot Manager">
 </div>
 <div class="title">Figure 15. Mixer Snapshot Manager</div>
 </div>
+<div class="sect4">
+<h5 id="_general_workflow">General Workflow</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Click on an item that you want to be the start of a snapshot or mixer "scene"</p>
+</li>
+<li>
+<p>Adjust any mixer parameter including fader, mute/solo, pan, FX parameters etc</p>
+</li>
+<li>
+<p>Click <b class="button">Set Snapshot&#8230;&#8203;</b>.</p>
+</li>
+<li>
+<p>To make changes, select the item or table row, tweak parameters and click the same button now re-labelled <b class="button">Update Snapshot&#8230;&#8203;</b></p>
+</li>
+</ol>
+</div>
 <div class="paragraph">
-<p>Coming Soon&#8230;&#8203;</p>
+<p>By default, switching mixer scenes will happen in a gap in the project during playback. Disable auto recall to treat as a simple mixer snapshot tool that affects the whole project. Filter which parameters are recalled by unchecking boxes at the bottom of the window.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -1951,10 +2039,25 @@ If setting a snapshot tied to an unnamed item, the first part of the item&#8217;
 <div class="title">Important</div>
 </td>
 <td class="content">
-For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must remain open.
+For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must remain open. However, once converted to real automation points, auto recall within the window is disabled by design and the window can be optionally closed.
 </td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_copying_and_clearing_banks">Copying and Clearing Banks</h5>
+<div class="paragraph">
+<p>The Mixer Snapshot Manager allows 4 independent banks of snapshots with ability to copy between banks and clear. This can be useful for multi-disc albums.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_rendering_2">Rendering</h5>
+<div class="paragraph">
+<p>The snapshot manager window relies on real time playback for auto recall. For faster-than-realtime rendering, this will lead to unpredictable results. Therefore, at render time, it is advisable to convert to real automation data. To do so, press <b class="button">Convert to Automation</b> and optionally set which folder to use for gap detection (the conversion will also respect the switching mid-gap checkbox). Mixer, aux and submix tracks with snapshot data will appear in the arrange window along with any active automation envelopes. If items connected to mixer snapshots are moved on the timeline as part of editing, click on the convert button again to get instantly updated automation data.</p>
+</div>
+<div class="paragraph">
+<p>To clear automation and return to auto recall via the window while editing and mixing, press <b class="button">Clear Automation</b>.</p>
 </div>
 </div>
 </div>
@@ -2000,7 +2103,7 @@ For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must rem
 <p>Set piece-by-piece "scenes" using the Mixer Snapshots Manager adjusting mixer tracks, aux and submix controls and any FX parameters.</p>
 </li>
 <li>
-<p>Make temporary adjustments (for example, volume of spot microphones etc) via the automation function <kbd>I</kbd> on tracks with items or visible mixer tracks.</p>
+<p>Make temporary adjustments (for example, volume of spot microphones etc) via the automation function <kbd>I</kbd> on tracks with items.</p>
 </li>
 <li>
 <p>For spot microphones that should be mostly muted:</p>
@@ -2192,7 +2295,7 @@ When this mode is enabled, you can still set manual marker offsets using the but
 </div>
 </div>
 <div class="sect2">
-<h3 id="_rendering_2">Rendering</h3>
+<h3 id="_rendering_3">Rendering</h3>
 <div class="imageblock">
 <div class="content">
 <img src="src/assets/render.png" alt="Render Window">

@@ -9,14 +9,31 @@
 
 NOTE: If setting a snapshot tied to an unnamed item, the first part of the item's ID will be used as the identifier in the table row.
 
-===== Mixer Snapshot Manager in Detail
+==== Mixer Snapshot Manager in Detail
 
 .Mixer Snapshot Manager
 image::mixer_snapshots.png[Mixer Snapshot Manager]
 
-Coming Soon...
+===== General Workflow
 
-IMPORTANT: For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must remain open. Once converted to real automation points, the window can be safely closed.
+1. Click on an item that you want to be the start of a snapshot or mixer "scene" 
+2. Adjust any mixer parameter including fader, mute/solo, pan, FX parameters etc
+3. Click btn:[Set Snapshot...].
+4. To make changes, select the item or table row, tweak parameters and click the same button now re-labelled btn:[Update Snapshot...]
+
+By default, switching mixer scenes will happen in a gap in the project during playback. Disable auto recall to treat as a simple mixer snapshot tool that affects the whole project. Filter which parameters are recalled by unchecking boxes at the bottom of the window.
+
+IMPORTANT: For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must remain open. However, once converted to real automation points, auto recall within the window is disabled by design and the window can be optionally closed. 
+
+===== Copying and Clearing Banks
+
+The Mixer Snapshot Manager allows 4 independent banks of snapshots with ability to copy between banks and clear. This can be useful for multi-disc albums. 
+
+===== Rendering
+
+The snapshot manager window relies on real time playback for auto recall. For faster-than-realtime rendering, this will lead to unpredictable results. Therefore, at render time, it is advisable to convert to real automation data. To do so, press btn:[Convert to Automation] and optionally set which folder to use for gap detection (the conversion will also respect the switching mid-gap checkbox). Mixer, aux and submix tracks with snapshot data will appear in the arrange window along with any active automation envelopes. If items connected to mixer snapshots are moved on the timeline as part of editing, click on the convert button again to get instantly updated automation data.
+
+To clear automation and return to auto recall via the window while editing and mixing, press btn:[Clear Automation].
 
 ==== Volume Automation
 
