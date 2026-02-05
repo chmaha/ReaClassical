@@ -5,6 +5,7 @@
 1. Add FX, change routing, and optionally adjust volume, panning etc via Mission Control kbd:[C]
 2. Open Mixer Snapshot Manager via kbd:[Shift+M]
 3. Create automatically-recalled mixer snapshots tied to items.
+4. Before rendering, convert to real automation lanes via btn:[Convert to Automation]
 
 NOTE: If setting a snapshot tied to an unnamed item, the first part of the item's ID will be used as the identifier in the table row.
 
@@ -15,7 +16,7 @@ image::mixer_snapshots.png[Mixer Snapshot Manager]
 
 Coming Soon...
 
-IMPORTANT: For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must remain open.
+IMPORTANT: For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must remain open. Once converted to real automation points, the window can be safely closed.
 
 ==== Volume Automation
 
@@ -37,7 +38,7 @@ image::automation.png[Automation Dialog]
 ==== General Mixing Workflow Suggestions
 
 - Set piece-by-piece "scenes" using the Mixer Snapshots Manager adjusting mixer tracks, aux and submix controls and any FX parameters. 
-- Make temporary adjustments (for example, volume of spot microphones etc) via the automation function kbd:[I] on tracks with items or visible mixer tracks.
+- Make temporary adjustments (for example, volume of spot microphones etc) via the automation function kbd:[I] on tracks with items.
 - For spot microphones that should be mostly muted:
     1. Use a time selection + kbd:[I] to reduce to lowest value (-150dB/-inf) for the whole piece or use edit cursor + kbd:[I] at the beginning of the timeline to affect the whole project.
     2. Use further time selections + kbd:[I] to set required values and any ramping in and out.
