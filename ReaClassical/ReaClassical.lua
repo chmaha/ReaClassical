@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.1
+@version 26.2.2
 @changelog
-  Mixer Snapshots Manager: Add convert to automation button
+  Mixer Snapshots Manager: Fix gap detection
+  Mixer Snapshots Manager: Make Convert to automation respect switch in gap
+  Mixer Snapshots Manager: Add clear button
+  Mixer Snapshots Manager: Add gap detection dropdown
+  Mixer Snapshots Manager: Fix initial automation point of the lane if snapshot is not default
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
