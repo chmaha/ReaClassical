@@ -495,7 +495,7 @@ function rename_all_items(use_take_numbers)
                             )
 
                             if take_num then
-                                GetSetMediaItemTakeInfo_String(take, "P_NAME", string.format("%04d", take_num), true)
+                                GetSetMediaItemTakeInfo_String(take, "P_NAME", string.format("%03d", take_num), true)
                             else
                                 -- No recognizable pattern, use full filename
                                 GetSetMediaItemTakeInfo_String(take, "P_NAME", name, true)
@@ -552,10 +552,10 @@ function rename_all_items(use_take_numbers)
                                     prefix = prefix:match("^(.-)[ _%-%(]+$") or prefix
                                     -- Has session-like prefix, add T
                                     GetSetMediaItemTakeInfo_String(take, "P_NAME",
-                                        prefix .. "_T" .. string.format("%04d", take_num), true)
+                                        prefix .. "_T" .. string.format("%03d", take_num), true)
                                 else
                                     -- No prefix, just padded number
-                                    GetSetMediaItemTakeInfo_String(take, "P_NAME", string.format("%04d", take_num), true)
+                                    GetSetMediaItemTakeInfo_String(take, "P_NAME", string.format("%03d", take_num), true)
                                 end
                             else
                                 -- No recognizable pattern, use full filename without extension
