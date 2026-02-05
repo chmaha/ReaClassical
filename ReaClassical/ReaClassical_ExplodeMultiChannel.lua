@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, folder_check, show_track_name_dialog, add_rcmaster
 local create_mixer_table, check_channel_count
 local get_selected_media_item_at, count_selected_media_items
-local collapse_folder, fold_small
+local collapse_folder, fold_small, wipe_track_names
 ---------------------------------------------------------------------
 
 function main()
@@ -55,13 +55,6 @@ function main()
         MB(error_message, "Explode Multi-Channel", 0)
         return
     end
-
-    -- if num_of_items == 0 then
-    --     MB(error_message, "Explode Multi-Channel", 0)
-    --     return
-    -- end
-
-    -- if num_of_items == 0 then return false end
 
     local return_code, channel_count = check_channel_count(num_of_items)
     if return_code == -2 then
@@ -152,7 +145,7 @@ function main()
     collapse_folder()
     Main_OnCommand(40939, 0) -- select track 1
     fold_small()
-
+    wipe_track_names()
     add_rcmaster()
     local updated_folders = folder_check()
     local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
@@ -169,9 +162,6 @@ function main()
             "Leave the empty child track in place so that ReaClassical can function as intended.",
             "Explode Multi-channel", 0)
     end
-
-    local mixer_tracks = create_mixer_table()
-    show_track_name_dialog(mixer_tracks)
 
     PreventUIRefresh(-1)
 
@@ -362,6 +352,16 @@ function fold_small()
                 SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 1)
             end
         end
+    end
+end
+
+---------------------------------------------------------------------
+
+function wipe_track_names()
+    local num_tracks = CountTracks(0)
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        GetSetMediaTrackInfo_String(track, "P_NAME", "", true)
     end
 end
 
