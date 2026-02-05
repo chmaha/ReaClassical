@@ -82,14 +82,16 @@ function main()
     Main_OnCommand(sync, 0)
     solo()
     PreventUIRefresh(-1)
-    Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
     UpdateArrange()
     UpdateTimeline()
     TrackList_AdjustWindows(false)
+    reaper.defer(function()
+    Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
+end)
 
     -- Prepare Takes
-    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-    Main_OnCommand(prepare_takes, 0)
+    -- local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+    -- Main_OnCommand(prepare_takes, 0)
 
     Undo_EndBlock('Duplicate folder (No items)', 0)
 end
