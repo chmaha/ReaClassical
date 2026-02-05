@@ -1,8 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.3
+@version 26.2.4
 @changelog
-  Mixer Snapshots Manager: Disable auto-recall if automation present on special tracks
+  Duplicate Folder: Defer scrolling to selected track while recording
+  Explode MultiChannel: Wipe track names and move directly to Mission Control
+  Preferences: Use padding to make 3-digit take numbers for non-ReaClassical files
+  Smart Import: Allow use in horizontal and vertical workflow modes
+  Smart Import: Ensure no need for placing session name markers
+  Smart Import: Follow canonical ReaClassical filenaming template
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
