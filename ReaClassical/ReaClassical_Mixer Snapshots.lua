@@ -31,6 +31,7 @@ local find_snapshot_by_item_guid, get_item_by_guid, refresh_snapshot_items
 local get_item_position, find_snapshot_with_gap_logic, find_snapshot_at_cursor
 local get_display_name_from_guid, update_snapshot_names
 local convert_snapshots_to_automation, clear_all_automation
+local check_for_automation_on_special_tracks
 
 local script_name = "Mixer Snapshot Manager"
 
@@ -68,6 +69,7 @@ local last_sort_direction     = nil
 -- Feature flags
 local disable_auto_recall     = false
 local switch_mid_gap          = true -- Switch snapshots in the middle of gaps
+local automation_detected     = false -- NEW: Track if automation exists on special tracks
 
 -- Track restriction per bank - REMOVED (now supports multiple tracks)
 local bank_track_guid         = nil -- Deprecated but kept for backwards compatibility
@@ -98,6 +100,7 @@ local last_project
 function main()
   handle_project_change()
   update_snapshot_names() -- NEW: Check for name changes every frame
+  check_for_automation_on_special_tracks() -- NEW: Check for automation every frame
   check_auto_recall()
   local open = draw_UI()
   if open then defer(main) end
@@ -111,6 +114,59 @@ function is_special_track(track)
   local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
 
   return mixer_state == "y" or aux_state == "y" or submix_state == "y"
+end
+
+---------------------------------------------------------------------
+
+-- NEW: Check if any special tracks have active automation
+function check_for_automation_on_special_tracks()
+  local has_automation = false
+  
+  for i = 0, CountTracks(0) - 1 do
+    local track = GetTrack(0, i)
+    if is_special_track(track) then
+      local num_envelopes = CountTrackEnvelopes(track)
+      for env_idx = 0, num_envelopes - 1 do
+        local env = GetTrackEnvelope(track, env_idx)
+        
+        -- Check if envelope is visible, active, or armed
+        local _, visible_str = GetSetEnvelopeInfo_String(env, "VISIBLE", "", false)
+        local _, active_str = GetSetEnvelopeInfo_String(env, "ACTIVE", "", false)
+        local _, arm_str = GetSetEnvelopeInfo_String(env, "ARM", "", false)
+        
+        -- If any of these are "1", the envelope is considered active
+        if visible_str == "1" or active_str == "1" or arm_str == "1" then
+          has_automation = true
+          break
+        end
+      end
+      if has_automation then break end
+    end
+  end
+  
+  -- Handle automation state changes
+  if has_automation and not automation_detected then
+    -- Automation just appeared - save current state and disable auto-recall
+    automation_detected = true
+    SetProjExtState(0, "ReaClassical", "auto_recall_before_automation_" .. current_bank, tostring(disable_auto_recall))
+    disable_auto_recall = true
+  elseif not has_automation and automation_detected then
+    -- Automation just cleared - restore previous state
+    automation_detected = false
+    local retval, saved_state = GetProjExtState(0, "ReaClassical", "auto_recall_before_automation_" .. current_bank)
+    if retval > 0 and saved_state ~= "" then
+      disable_auto_recall = (saved_state == "true")
+    end
+    -- Clean up the saved state
+    SetProjExtState(0, "ReaClassical", "auto_recall_before_automation_" .. current_bank, "")
+  elseif has_automation then
+    -- Automation still present - keep auto-recall disabled
+    automation_detected = true
+    disable_auto_recall = true
+  else
+    -- No automation
+    automation_detected = false
+  end
 end
 
 ---------------------------------------------------------------------
@@ -1121,11 +1177,23 @@ function draw_UI()
       ImGui.SetTooltip(ctx, "Refresh table order after moving items on timeline")
     end
     ImGui.SameLine(ctx); ImGui.Dummy(ctx, 20, 0); ImGui.SameLine(ctx)
+    
+    -- MODIFIED: Grey out checkbox when automation is detected
+    if automation_detected then
+      ImGui.BeginDisabled(ctx)
+    end
     local rv_disable, new_disable = ImGui.Checkbox(ctx, "Disable auto-recall", disable_auto_recall)
-    if rv_disable then
+    if rv_disable and not automation_detected then
       disable_auto_recall = new_disable
       save_snapshots_to_project()
     end
+    if automation_detected then
+      ImGui.EndDisabled(ctx)
+      if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+        ImGui.SetTooltip(ctx, "Automation detected on special tracks - auto recall of snapshots disabled")
+      end
+    end
+    
     ImGui.SameLine(ctx); ImGui.Dummy(ctx, 10, 0); ImGui.SameLine(ctx)
 
     -- Grey out mid-gap checkbox when auto-recall is disabled
