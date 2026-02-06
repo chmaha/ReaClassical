@@ -31,6 +31,7 @@ local build_unified_index, build_spatial_index
 local find_items_at_position_spatial
 local get_folder_children, is_item_colorized, group_items_fast
 local update_progress, do_processing_step
+local extract_take_number_from_filename
 
 -- Check for ReaImGui
 local imgui_exists = APIExists("ImGui_GetVersion")
@@ -96,6 +97,14 @@ function build_unified_index()
         local num_items = CountTrackMediaItems(track)
         for i = 0, num_items - 1 do
             local item = GetTrackMediaItem(track, i)
+
+            local _, existing_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+            if existing_take_num == "" then
+                local take_num = extract_take_number_from_filename(item)
+                if take_num then
+                    GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_num), true)
+                end
+            end
 
             local pos = GetMediaItemInfo_Value(item, "D_POSITION")
             local len = GetMediaItemInfo_Value(item, "D_LENGTH")
@@ -1014,7 +1023,7 @@ if workflow_check == "" then
         modifier = "Cmd"
     end
     MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
+        .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -1238,3 +1247,23 @@ function color_folder_children(parent_track, folder_color)
 end
 
 ---------------------------------------------------------------------
+
+function extract_take_number_from_filename(item)
+    local take = GetActiveTake(item)
+    if not take then return nil end
+
+    local source = GetMediaItemTake_Source(take)
+    if not source then return nil end
+
+    local filename = GetMediaSourceFileName(source, "")
+
+    -- Match any number that occurs just before the file extension
+    -- e.g., "left_T056.wav" -> 056, "violin_123.flac" -> 123, "take42.wav" -> 42
+    local take_num = string.match(filename, "(%d+)%.[^.]+$")
+
+    if take_num then
+        return tonumber(take_num)
+    end
+
+    return nil
+end
