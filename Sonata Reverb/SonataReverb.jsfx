@@ -1,4 +1,4 @@
-Version: 1.6
+Version: 1.7
 desc: Sonata Reverb (chmaha)
 author: chmaha
 // Using Fons Adriaensen's Zita-Rev1 Reverb Algorithm
@@ -406,7 +406,7 @@ mod_inc = 2 * $pi * mod_rate / srate;
 mod_inc2 = 2 * $pi * mod_rate2 / srate;
 mod_inc3 = mod_type == 2 ? 2 * $pi * mod_rate3 / srate : 0;
 
-k = floor((ipdel - 0.020) * srate + 0.5);
+k = floor(ipdel * srate + 0.5);
 k = max(0, min(k, vdelay0_size - 1));
 vdelay0_del = k;
 vdelay1_del = k;
