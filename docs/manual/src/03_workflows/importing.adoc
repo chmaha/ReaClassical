@@ -32,11 +32,15 @@ IMPORTANT: Don't skip this renaming step if you want to import files easily from
 
 Assuming that the filenames now contain at least a track name and take number separated by underscore:
 
-1. Copy or move source material into the media subfolder inside your ReaClassical project folder. 
-2. Ensure that track names in the project match the channel text in the filenames
-3. If your filenames also contain a session name prior to the track name, the items will be grouped accordingly.
-4. Via the top ReaClassical menu, click on menu:Project Setup[Smart Audio Import]
-5. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
+1. Ensure that you have first created an empty horizontal or vertical workflow ReaClassical project.
+2. Copy or move source material into the media subfolder inside your ReaClassical project folder. 
+3. Ensure that track names in the project match the channel text in the filenames
+4. If your filenames also contain a session name prior to the track name, the items will be grouped accordingly.
+5. Via the top ReaClassical menu, click on menu:Project Setup[Smart Audio Import] and, if using vertical workflow, choose distribution options.
+6. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
+
+.Smart Import
+image::smart_import.png[Smart Import]
 
 ==== Manual Import by Dragging
 
