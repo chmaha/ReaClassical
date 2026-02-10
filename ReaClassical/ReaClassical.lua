@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.6
+@version 26.2.7
 @changelog
-  Smart Import: Allow distribution options via reaimgui window
-  Documentation: Add smart import improvements
+  Mixer Snapshot Manager: Zero out mixer values before switching to read automation mode
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
