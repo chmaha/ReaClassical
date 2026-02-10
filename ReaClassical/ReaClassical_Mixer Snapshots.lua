@@ -1758,36 +1758,46 @@ function convert_snapshots_to_automation()
       ::continue_point::
     end
 
-    -- Reset all tracks to neutral values BEFORE creating automation
-    for track_guid, params in pairs(param_changes) do
-      local track = find_track_by_GUID(track_guid)
-      if track then
-        -- Reset to default/neutral values
-        SetMediaTrackInfo_Value(track, "D_VOL", 1.0) -- 0dB
-        SetMediaTrackInfo_Value(track, "D_PAN", 0.0) -- Center
-        SetMediaTrackInfo_Value(track, "B_MUTE", 0) -- Unmuted
-        SetMediaTrackInfo_Value(track, "I_SOLO", 0) -- Unsolo
-        SetMediaTrackInfo_Value(track, "B_PHASE", 0) -- Normal phase
-
-        -- Reset all FX parameters to defaults
-        local fx_count = TrackFX_GetCount(track)
-        for fx_idx = 0, fx_count - 1 do
-          local param_count = TrackFX_GetNumParams(track, fx_idx)
-          for param_idx = 0, param_count - 1 do
-            local _, default_val = TrackFX_GetParam(track, fx_idx, param_idx)
-            -- Don't reset, we'll let automation handle it
-          end
-        end
-
-        -- Reset send levels to 0dB
-        local send_count = GetTrackNumSends(track, 0)
-        for send_idx = 0, send_count - 1 do
-          SetTrackSendInfo_Value(track, 0, send_idx, "D_VOL", 1.0)
-          SetTrackSendInfo_Value(track, 0, send_idx, "D_PAN", 0.0)
-          SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", 0)
-        end
+    -- Reset specific parameters to neutral values ONLY if they're getting automation
+for track_guid, params in pairs(param_changes) do
+  local track = find_track_by_GUID(track_guid)
+  if track then
+    -- Reset volume only if it's getting automation
+    if has_changes(params.volume) then
+      SetMediaTrackInfo_Value(track, "D_VOL", 1.0)  -- 0dB
+    end
+    
+    -- Reset pan only if it's getting automation
+    if has_changes(params.pan) then
+      SetMediaTrackInfo_Value(track, "D_PAN", 0.0)  -- Center
+    end
+    
+    -- Reset mute only if it's getting automation
+    if has_changes(params.mute) then
+      SetMediaTrackInfo_Value(track, "B_MUTE", 0)  -- Unmuted
+    end
+    
+    -- Reset phase only if it's getting automation
+    if has_changes(params.phase) then
+      SetMediaTrackInfo_Value(track, "B_PHASE", 0)  -- Normal phase
+    end
+    
+    -- Reset send parameters only if they're getting automation
+    for send_idx, send_params in pairs(params.sends) do
+      if has_changes(send_params.volume) then
+        SetTrackSendInfo_Value(track, 0, send_idx, "D_VOL", 1.0)
+      end
+      if has_changes(send_params.pan) then
+        SetTrackSendInfo_Value(track, 0, send_idx, "D_PAN", 0.0)
+      end
+      if has_changes(send_params.mute) then
+        SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", 0)
       end
     end
+    
+    -- FX parameters don't need explicit reset as they'll be controlled by automation
+  end
+end
     -- Insert all automation points
     for _, auto_point in ipairs(auto_points) do
       local env_val = needs_scaling and ScaleToEnvelopeMode(1, auto_point.value) or auto_point.value
