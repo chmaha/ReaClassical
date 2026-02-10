@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.7
+@version 26.2.8
 @changelog
-  Mixer Snapshot Manager: Zero out mixer values before switching to read automation mode
+  Mixer Snapshot Manager: Only reset parameters getting automation lanes
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
