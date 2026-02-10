@@ -68,7 +68,7 @@ local last_sort_direction     = nil
 
 -- Feature flags
 local disable_auto_recall     = false
-local switch_mid_gap          = true -- Switch snapshots in the middle of gaps
+local switch_mid_gap          = true  -- Switch snapshots in the middle of gaps
 local automation_detected     = false -- NEW: Track if automation exists on special tracks
 
 -- Track restriction per bank - REMOVED (now supports multiple tracks)
@@ -99,7 +99,7 @@ local last_project
 
 function main()
   handle_project_change()
-  update_snapshot_names() -- NEW: Check for name changes every frame
+  update_snapshot_names()                  -- NEW: Check for name changes every frame
   check_for_automation_on_special_tracks() -- NEW: Check for automation every frame
   check_auto_recall()
   local open = draw_UI()
@@ -121,19 +121,19 @@ end
 -- NEW: Check if any special tracks have active automation
 function check_for_automation_on_special_tracks()
   local has_automation = false
-  
+
   for i = 0, CountTracks(0) - 1 do
     local track = GetTrack(0, i)
     if is_special_track(track) then
       local num_envelopes = CountTrackEnvelopes(track)
       for env_idx = 0, num_envelopes - 1 do
         local env = GetTrackEnvelope(track, env_idx)
-        
+
         -- Check if envelope is visible, active, or armed
         local _, visible_str = GetSetEnvelopeInfo_String(env, "VISIBLE", "", false)
         local _, active_str = GetSetEnvelopeInfo_String(env, "ACTIVE", "", false)
         local _, arm_str = GetSetEnvelopeInfo_String(env, "ARM", "", false)
-        
+
         -- If any of these are "1", the envelope is considered active
         if visible_str == "1" or active_str == "1" or arm_str == "1" then
           has_automation = true
@@ -143,7 +143,7 @@ function check_for_automation_on_special_tracks()
       if has_automation then break end
     end
   end
-  
+
   -- Handle automation state changes
   if has_automation and not automation_detected then
     -- Automation just appeared - save current state and disable auto-recall
@@ -1177,7 +1177,7 @@ function draw_UI()
       ImGui.SetTooltip(ctx, "Refresh table order after moving items on timeline")
     end
     ImGui.SameLine(ctx); ImGui.Dummy(ctx, 20, 0); ImGui.SameLine(ctx)
-    
+
     -- MODIFIED: Grey out checkbox when automation is detected
     if automation_detected then
       ImGui.BeginDisabled(ctx)
@@ -1193,7 +1193,7 @@ function draw_UI()
         ImGui.SetTooltip(ctx, "Automation detected on special tracks - auto recall of snapshots disabled")
       end
     end
-    
+
     ImGui.SameLine(ctx); ImGui.Dummy(ctx, 10, 0); ImGui.SameLine(ctx)
 
     -- Grey out mid-gap checkbox when auto-recall is disabled
@@ -1758,6 +1758,36 @@ function convert_snapshots_to_automation()
       ::continue_point::
     end
 
+    -- Reset all tracks to neutral values BEFORE creating automation
+    for track_guid, params in pairs(param_changes) do
+      local track = find_track_by_GUID(track_guid)
+      if track then
+        -- Reset to default/neutral values
+        SetMediaTrackInfo_Value(track, "D_VOL", 1.0) -- 0dB
+        SetMediaTrackInfo_Value(track, "D_PAN", 0.0) -- Center
+        SetMediaTrackInfo_Value(track, "B_MUTE", 0) -- Unmuted
+        SetMediaTrackInfo_Value(track, "I_SOLO", 0) -- Unsolo
+        SetMediaTrackInfo_Value(track, "B_PHASE", 0) -- Normal phase
+
+        -- Reset all FX parameters to defaults
+        local fx_count = TrackFX_GetCount(track)
+        for fx_idx = 0, fx_count - 1 do
+          local param_count = TrackFX_GetNumParams(track, fx_idx)
+          for param_idx = 0, param_count - 1 do
+            local _, default_val = TrackFX_GetParam(track, fx_idx, param_idx)
+            -- Don't reset, we'll let automation handle it
+          end
+        end
+
+        -- Reset send levels to 0dB
+        local send_count = GetTrackNumSends(track, 0)
+        for send_idx = 0, send_count - 1 do
+          SetTrackSendInfo_Value(track, 0, send_idx, "D_VOL", 1.0)
+          SetTrackSendInfo_Value(track, 0, send_idx, "D_PAN", 0.0)
+          SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", 0)
+        end
+      end
+    end
     -- Insert all automation points
     for _, auto_point in ipairs(auto_points) do
       local env_val = needs_scaling and ScaleToEnvelopeMode(1, auto_point.value) or auto_point.value
@@ -1785,7 +1815,16 @@ function convert_snapshots_to_automation()
       if has_changes(params.pan) then
         local env = get_or_create_envelope(track, "Pan")
         if env then
-          insert_automation_points(env, params.pan, false)
+          -- Invert pan values before inserting
+          local inverted_pan_points = {}
+          for _, point in ipairs(params.pan) do
+            table.insert(inverted_pan_points, {
+              pos = point.pos,
+              value = -point.value, -- Invert the pan value
+              snap_idx = point.snap_idx
+            })
+          end
+          insert_automation_points(env, inverted_pan_points, false)
           Envelope_SortPoints(env)
           automation_count = automation_count + 1
           track_got_automation = true
