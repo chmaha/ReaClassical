@@ -86,6 +86,7 @@ local recall_pan              = true
 local recall_mute             = true
 local recall_solo             = true
 local recall_phase            = true
+local recall_width            = true  -- NEW: Added width recall flag
 local recall_fx               = true
 local recall_sends            = true
 local recall_routing          = true
@@ -178,6 +179,7 @@ function get_track_state(track)
   state.mute = GetMediaTrackInfo_Value(track, "B_MUTE")
   state.solo = GetMediaTrackInfo_Value(track, "I_SOLO")
   state.phase = GetMediaTrackInfo_Value(track, "B_PHASE")
+  state.width = GetMediaTrackInfo_Value(track, "D_WIDTH")  -- NEW: Capture track width
   state.guid = GetTrackGUID(track)
 
   state.fx_chain = {}
@@ -241,6 +243,7 @@ function apply_track_state(track, state)
   if recall_mute then SetMediaTrackInfo_Value(track, "B_MUTE", state.mute) end
   if recall_solo then SetMediaTrackInfo_Value(track, "I_SOLO", state.solo) end
   if recall_phase then SetMediaTrackInfo_Value(track, "B_PHASE", state.phase) end
+  if recall_width and state.width then SetMediaTrackInfo_Value(track, "D_WIDTH", state.width) end  -- NEW: Apply width if available
 
   if recall_fx then
     for fx_idx, fx in pairs(state.fx_chain) do
@@ -700,6 +703,7 @@ function save_snapshots_to_project()
   data.recall_mute = recall_mute
   data.recall_solo = recall_solo
   data.recall_phase = recall_phase
+  data.recall_width = recall_width  -- NEW: Save width recall flag
   data.recall_fx = recall_fx
   data.recall_sends = recall_sends
   data.recall_routing = recall_routing
@@ -738,6 +742,7 @@ function load_snapshots_from_project()
       recall_mute = data.recall_mute ~= false
       recall_solo = data.recall_solo ~= false
       recall_phase = data.recall_phase ~= false
+      recall_width = data.recall_width ~= false  -- NEW: Load width recall flag (default true)
       recall_fx = data.recall_fx ~= false
       recall_sends = data.recall_sends ~= false
       recall_routing = data.recall_routing ~= false
@@ -1222,6 +1227,7 @@ function draw_UI()
       { "Mute",         recall_mute,    function(v) recall_mute = v end },
       { "Solo",         recall_solo,    function(v) recall_solo = v end },
       { "Phase",        recall_phase,   function(v) recall_phase = v end },
+      { "Width",        recall_width,   function(v) recall_width = v end },  -- NEW: Added Width checkbox
       { "FX",           recall_fx,      function(v) recall_fx = v end },
       { "Send Levels",  recall_sends,   function(v) recall_sends = v end },
       { "Send Routing", recall_routing, function(v) recall_routing = v end }
@@ -1463,6 +1469,7 @@ function convert_snapshots_to_automation()
             mute = {},
             solo = {},
             phase = {},
+            width = {},  -- NEW: Added width tracking
             fx = {},
             sends = {}
           }
@@ -1475,6 +1482,10 @@ function convert_snapshots_to_automation()
         table.insert(param_changes[track_guid].mute, { pos = snap_pos, value = track_state.mute, snap_idx = snap_idx })
         table.insert(param_changes[track_guid].solo, { pos = snap_pos, value = track_state.solo, snap_idx = snap_idx })
         table.insert(param_changes[track_guid].phase, { pos = snap_pos, value = track_state.phase, snap_idx = snap_idx })
+        -- NEW: Record width if available
+        if track_state.width then
+          table.insert(param_changes[track_guid].width, { pos = snap_pos, value = track_state.width, snap_idx = snap_idx })
+        end
 
         -- Record FX parameters
         for fx_idx, fx in pairs(track_state.fx_chain) do
@@ -1620,6 +1631,21 @@ function convert_snapshots_to_automation()
       if not had_mute_env then
         Main_OnCommand(40867, 0) -- Track: Toggle mute envelope visible
       end
+    elseif param_name == "Width" then
+      -- NEW: Handle width envelope
+      local env_count = CountTrackEnvelopes(track)
+      local had_width_env = false
+      for i = 0, env_count - 1 do
+        local e = GetTrackEnvelope(track, i)
+        local _, name = GetEnvelopeName(e, "")
+        if name == "Width" or name == "Width (Pre-FX)" then
+          had_width_env = true
+          break
+        end
+      end
+      if not had_width_env then
+        Main_OnCommand(41870, 0) -- Track: Toggle width envelope visible
+      end
     end
 
     -- Restore selection
@@ -1630,9 +1656,11 @@ function convert_snapshots_to_automation()
 
     -- Try to get the envelope again
     env = GetTrackEnvelopeByName(track, param_name)
-    GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
-    GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
-    GetSetEnvelopeInfo_String(env, "ARM", "1", true)
+    if env then
+      GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
+      GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
+      GetSetEnvelopeInfo_String(env, "ARM", "1", true)
+    end
     return env
   end
 
@@ -1784,45 +1812,51 @@ function convert_snapshots_to_automation()
     end
 
     -- Reset specific parameters to neutral values ONLY if they're getting automation
-for track_guid, params in pairs(param_changes) do
-  local track = find_track_by_GUID(track_guid)
-  if track then
-    -- Reset volume only if it's getting automation
-    if has_changes(params.volume) then
-      SetMediaTrackInfo_Value(track, "D_VOL", 1.0)  -- 0dB
-    end
-    
-    -- Reset pan only if it's getting automation
-    if has_changes(params.pan) then
-      SetMediaTrackInfo_Value(track, "D_PAN", 0.0)  -- Center
-    end
-    
-    -- Reset mute only if it's getting automation
-    if has_changes(params.mute) then
-      SetMediaTrackInfo_Value(track, "B_MUTE", 0)  -- Unmuted
-    end
-    
-    -- Reset phase only if it's getting automation
-    if has_changes(params.phase) then
-      SetMediaTrackInfo_Value(track, "B_PHASE", 0)  -- Normal phase
-    end
-    
-    -- Reset send parameters only if they're getting automation
-    for send_idx, send_params in pairs(params.sends) do
-      if has_changes(send_params.volume) then
-        SetTrackSendInfo_Value(track, 0, send_idx, "D_VOL", 1.0)
+    for track_guid, params in pairs(param_changes) do
+      local track = find_track_by_GUID(track_guid)
+      if track then
+        -- Reset volume only if it's getting automation
+        if has_changes(params.volume) then
+          SetMediaTrackInfo_Value(track, "D_VOL", 1.0)  -- 0dB
+        end
+        
+        -- Reset pan only if it's getting automation
+        if has_changes(params.pan) then
+          SetMediaTrackInfo_Value(track, "D_PAN", 0.0)  -- Center
+        end
+        
+        -- Reset mute only if it's getting automation
+        if has_changes(params.mute) then
+          SetMediaTrackInfo_Value(track, "B_MUTE", 0)  -- Unmuted
+        end
+        
+        -- Reset phase only if it's getting automation
+        if has_changes(params.phase) then
+          SetMediaTrackInfo_Value(track, "B_PHASE", 0)  -- Normal phase
+        end
+        
+        -- NEW: Reset width only if it's getting automation
+        if has_changes(params.width) then
+          SetMediaTrackInfo_Value(track, "D_WIDTH", 1.0)  -- Normal width
+        end
+        
+        -- Reset send parameters only if they're getting automation
+        for send_idx, send_params in pairs(params.sends) do
+          if has_changes(send_params.volume) then
+            SetTrackSendInfo_Value(track, 0, send_idx, "D_VOL", 1.0)
+          end
+          if has_changes(send_params.pan) then
+            SetTrackSendInfo_Value(track, 0, send_idx, "D_PAN", 0.0)
+          end
+          if has_changes(send_params.mute) then
+            SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", 0)
+          end
+        end
+        
+        -- FX parameters don't need explicit reset as they'll be controlled by automation
       end
-      if has_changes(send_params.pan) then
-        SetTrackSendInfo_Value(track, 0, send_idx, "D_PAN", 0.0)
-      end
-      if has_changes(send_params.mute) then
-        SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", 0)
-      end
     end
     
-    -- FX parameters don't need explicit reset as they'll be controlled by automation
-  end
-end
     -- Insert all automation points
     for _, auto_point in ipairs(auto_points) do
       local env_val = needs_scaling and ScaleToEnvelopeMode(1, auto_point.value) or auto_point.value
@@ -1905,6 +1939,17 @@ end
         end
         if env then
           insert_automation_points(env, params.phase, false)
+          Envelope_SortPoints(env)
+          automation_count = automation_count + 1
+          track_got_automation = true
+        end
+      end
+
+      -- NEW: Width automation
+      if has_changes(params.width) then
+        local env = get_or_create_envelope(track, "Width")
+        if env then
+          insert_automation_points(env, params.width, false)
           Envelope_SortPoints(env)
           automation_count = automation_count + 1
           track_got_automation = true
