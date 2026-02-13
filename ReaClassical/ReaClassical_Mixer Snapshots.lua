@@ -1348,6 +1348,7 @@ function clear_all_automation()
   Undo_BeginBlock()
 
   local cleared_count = 0
+  local tracks_to_hide = {}
 
   -- Clear all existing automation from mixer tracks and special tracks
   for i = 0, CountTracks(0) - 1 do
@@ -1367,6 +1368,30 @@ function clear_all_automation()
       end
       if num_envelopes > 0 then
         cleared_count = cleared_count + 1
+      end
+      
+      -- Mark track for hiding from TCP
+      table.insert(tracks_to_hide, track)
+    end
+  end
+
+  -- Hide tracks from TCP after clearing automation
+  for _, track in ipairs(tracks_to_hide) do
+    local current_tcp_state = GetMediaTrackInfo_Value(track, "B_SHOWINTCP")
+    
+    if current_tcp_state == 1 then
+      -- Hide the track in TCP
+      SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+      
+      -- Update project ext state
+      local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
+      local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+      
+      -- Use appropriate prefix for ext state key
+      if mixer_state == "y" then
+        SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. guid, "0")
+      else
+        SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. guid, "0")
       end
     end
   end
