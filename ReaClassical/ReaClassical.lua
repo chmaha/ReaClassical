@@ -1,8 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.8
+@version 26.2.9
 @changelog
-  Mixer Snapshot Manager: Only reset parameters getting automation lanes
+  Mission Control: Allow multiple special tracks to be added at once
+  Mixer Snapshot Manager: Hide mixer, aux and submix tracks from TCP after clearing automation
+  Vertical Zoom: Use slightly different SWS zoom command if automation present on special tracks
+  Insert Automation: Fix pan L/R switch
+  Insert Automation: Fix various command IDs for showing envelopes
+  Mixer Snapshot Manager: Add D_WIDTH capture
+  Smart Audio Import: Make file extension matching case-insensitive
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
