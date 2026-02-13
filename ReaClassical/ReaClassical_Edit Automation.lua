@@ -105,7 +105,7 @@ function normalize_value(envelope_info, raw_value)
     if envelope_info.name == "Volume" or envelope_info.name == "Volume (Pre-FX)" or envelope_info.name == "Trim Volume" then
       return linear_to_db(raw_value)
     elseif envelope_info.name == "Pan" or envelope_info.name == "Pan (Pre-FX)" then
-      return raw_value
+      return -raw_value
     elseif envelope_info.name == "Width" or envelope_info.name == "Width (Pre-FX)" then
       return raw_value
     elseif envelope_info.name == "Mute" then
@@ -127,7 +127,7 @@ function denormalize_value(envelope_info, display_value)
     if envelope_info.name == "Volume" or envelope_info.name == "Volume (Pre-FX)" or envelope_info.name == "Trim Volume" then
       return db_to_linear(display_value)
     elseif envelope_info.name == "Pan" or envelope_info.name == "Pan (Pre-FX)" then
-      return display_value
+      return -display_value
     elseif envelope_info.name == "Width" or envelope_info.name == "Width (Pre-FX)" then
       return display_value
     elseif envelope_info.name == "Mute" then

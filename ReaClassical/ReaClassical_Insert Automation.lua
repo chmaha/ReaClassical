@@ -204,7 +204,7 @@ function normalize_value(envelope_info, raw_value)
     if envelope_info.name == "Volume" or envelope_info.name == "Volume (Pre-FX)" or envelope_info.name == "Trim Volume" then
       return linear_to_db(raw_value)
     elseif envelope_info.name == "Pan" or envelope_info.name == "Pan (Pre-FX)" then
-      return raw_value -- Keep as -1 to +1
+      return -raw_value -- Keep as -1 to +1
     elseif envelope_info.name == "Width" or envelope_info.name == "Width (Pre-FX)" then
       return raw_value -- Keep as -1 to +1
     elseif envelope_info.name == "Mute" then
@@ -229,7 +229,7 @@ function denormalize_value(envelope_info, display_value)
     if envelope_info.name == "Volume" or envelope_info.name == "Volume (Pre-FX)" or envelope_info.name == "Trim Volume" then
       return db_to_linear(display_value)
     elseif envelope_info.name == "Pan" or envelope_info.name == "Pan (Pre-FX)" then
-      return display_value -- Already in -1 to +1 range
+      return -display_value -- Already in -1 to +1 range
     elseif envelope_info.name == "Width" or envelope_info.name == "Width (Pre-FX)" then
       return display_value -- Already in -1 to +1 range
     elseif envelope_info.name == "Mute" then
@@ -339,15 +339,15 @@ function apply_automation()
         elseif target_envelope_info.name == "Pan" then
           Main_OnCommand(40407, 0)
         elseif target_envelope_info.name == "Width" then
-          Main_OnCommand(41991, 0)
+          Main_OnCommand(41870, 0)
         elseif target_envelope_info.name == "Mute" then
           Main_OnCommand(40867, 0)
         elseif target_envelope_info.name == "Volume (Pre-FX)" then
           Main_OnCommand(41865, 0)
         elseif target_envelope_info.name == "Pan (Pre-FX)" then
-          Main_OnCommand(41866, 0)
-        elseif target_envelope_info.name == "Width (Pre-FX)" then
           Main_OnCommand(41867, 0)
+        elseif target_envelope_info.name == "Width (Pre-FX)" then
+          Main_OnCommand(41869, 0)
         elseif target_envelope_info.name == "Trim Volume" then
           Main_OnCommand(42020, 0)
         end
