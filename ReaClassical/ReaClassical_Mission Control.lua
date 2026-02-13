@@ -82,6 +82,7 @@ local folder_tcp_visible = {}
 local mixer_tcp_visible = {}
 local pending_hw_routing_changes = {}
 local has_dolby_atmos_beam = false
+local add_special_counts = {}
 
 local selected_folder
 local new_folder_name
@@ -1787,8 +1788,142 @@ function main()
 
         -- Add special track button (always show, even if no tracks exist)
         ImGui.Separator(ctx)
-        if ImGui.Button(ctx, "+ Add Special Track") then
-            ImGui.OpenPopup(ctx, "add_special_track_popup")
+        if ImGui.Button(ctx, "Add Special Tracks") then
+            ImGui.OpenPopup(ctx, "Add Special Tracks:")
+        end
+
+        -- Add special track popup
+        if ImGui.BeginPopupModal(ctx, "Add Special Tracks:", true, ImGui.WindowFlags_AlwaysAutoResize) then
+            -- ImGui.Text(ctx, "Add Special Tracks:")
+            -- ImGui.Separator(ctx)
+
+            -- Check existing tracks
+            local has_roomtone = false
+            local has_live = false
+            for _, track_info in ipairs(aux_submix_tracks) do
+                if track_info.type == "roomtone" then has_roomtone = true end
+                if track_info.type == "live" then has_live = true end
+            end
+
+            -- Initialize counts on first appearance
+            if ImGui.IsWindowAppearing(ctx) then
+                add_special_counts = {
+                    aux = 0,
+                    submix = 0,
+                    roomtone = 0,
+                    reference = 0,
+                    live = 0
+                }
+            end
+
+            -- Aux
+            ImGui.Text(ctx, "Aux:")
+            ImGui.SameLine(ctx)
+            ImGui.SetCursorPosX(ctx, 150)
+            ImGui.SetNextItemWidth(ctx, 100)
+            local changed, new_val = ImGui.InputInt(ctx, "##aux", add_special_counts.aux)
+            if changed then
+                add_special_counts.aux = math.max(0, math.min(99, new_val))
+            end
+
+            -- Submix
+            ImGui.Text(ctx, "Submix:")
+            ImGui.SameLine(ctx)
+            ImGui.SetCursorPosX(ctx, 150)
+            ImGui.SetNextItemWidth(ctx, 100)
+            local changed, new_val = ImGui.InputInt(ctx, "##submix", add_special_counts.submix)
+            if changed then
+                add_special_counts.submix = math.max(0, math.min(99, new_val))
+            end
+
+            -- Room Tone (max 1)
+            if has_roomtone then
+                ImGui.BeginDisabled(ctx)
+                ImGui.Text(ctx, "Room Tone:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.TextDisabled(ctx, "(already exists)")
+                ImGui.EndDisabled(ctx)
+            else
+                ImGui.Text(ctx, "Room Tone:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.SetNextItemWidth(ctx, 100)
+                local changed, new_val = ImGui.InputInt(ctx, "##roomtone", add_special_counts.roomtone)
+                if changed then
+                    add_special_counts.roomtone = math.max(0, math.min(1, new_val))
+                end
+            end
+
+            -- Reference
+            ImGui.Text(ctx, "Reference:")
+            ImGui.SameLine(ctx)
+            ImGui.SetCursorPosX(ctx, 150)
+            ImGui.SetNextItemWidth(ctx, 100)
+            local changed, new_val = ImGui.InputInt(ctx, "##reference", add_special_counts.reference)
+            if changed then
+                add_special_counts.reference = math.max(0, math.min(99, new_val))
+            end
+
+            -- Live Bounce (max 1)
+            if has_live then
+                ImGui.BeginDisabled(ctx)
+                ImGui.Text(ctx, "Live Bounce:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.TextDisabled(ctx, "(already exists)")
+                ImGui.EndDisabled(ctx)
+            else
+                ImGui.Text(ctx, "Live Bounce:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.SetNextItemWidth(ctx, 100)
+                local changed, new_val = ImGui.InputInt(ctx, "##live", add_special_counts.live)
+                if changed then
+                    add_special_counts.live = math.max(0, math.min(1, new_val))
+                end
+            end
+
+            ImGui.Separator(ctx)
+
+            -- OK button
+            if ImGui.Button(ctx, "OK", 100, 0) then
+                -- Add tracks based on counts
+                local add_aux = NamedCommandLookup("_RS1938b67a195fd37423806f2647e26c3c212ce111")
+                for i = 1, add_special_counts.aux do
+                    Main_OnCommand(add_aux, 0)
+                end
+
+                local add_submix = NamedCommandLookup("_RSdbfe4281d2bd56a7afc1c5e3967219c9f1c2095c")
+                for i = 1, add_special_counts.submix do
+                    Main_OnCommand(add_submix, 0)
+                end
+
+                if not has_roomtone and add_special_counts.roomtone > 0 then
+                    local add_roomtone = NamedCommandLookup("_RS3798d5ce6052ef404cd99dacf481f2befed4eacc")
+                    Main_OnCommand(add_roomtone, 0)
+                end
+
+                local add_ref = NamedCommandLookup("_RS00c2ccc67c644739aa15a0c93eea2c755554b30d")
+                for i = 1, add_special_counts.reference do
+                    Main_OnCommand(add_ref, 0)
+                end
+
+                if not has_live and add_special_counts.live > 0 then
+                    local add_livebounce = NamedCommandLookup("_RS3f8d9e9a5731c664bc87eb08923a2450aef06537")
+                    Main_OnCommand(add_livebounce, 0)
+                end
+
+                init()
+                ImGui.CloseCurrentPopup(ctx)
+            end
+
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Cancel", 100, 0) then
+                ImGui.CloseCurrentPopup(ctx)
+            end
+
+            ImGui.EndPopup(ctx)
         end
 
         local system = GetOS()
@@ -1909,74 +2044,6 @@ function main()
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Open ReaClassical Help (H)")
-        end
-
-        -- Add special track popup
-        if ImGui.BeginPopup(ctx, "add_special_track_popup") then
-            ImGui.Text(ctx, "Add Special Track:")
-            ImGui.Separator(ctx)
-
-            if ImGui.MenuItem(ctx, "Aux") then
-                local add_aux = NamedCommandLookup("_RS1938b67a195fd37423806f2647e26c3c212ce111")
-                Main_OnCommand(add_aux, 0)
-                init()
-            end
-
-            if ImGui.MenuItem(ctx, "Submix") then
-                local add_submix = NamedCommandLookup("_RSdbfe4281d2bd56a7afc1c5e3967219c9f1c2095c")
-                Main_OnCommand(add_submix, 0)
-                init()
-            end
-
-            -- Check if RoomTone already exists
-            local has_roomtone = false
-            for _, track_info in ipairs(aux_submix_tracks) do
-                if track_info.type == "roomtone" then
-                    has_roomtone = true
-                    break
-                end
-            end
-
-            if not has_roomtone then
-                if ImGui.MenuItem(ctx, "Room Tone") then
-                    local add_roomtone = NamedCommandLookup("_RS3798d5ce6052ef404cd99dacf481f2befed4eacc")
-                    Main_OnCommand(add_roomtone, 0)
-                    init()
-                end
-            else
-                ImGui.BeginDisabled(ctx)
-                ImGui.MenuItem(ctx, "Room Tone (already exists)")
-                ImGui.EndDisabled(ctx)
-            end
-
-            if ImGui.MenuItem(ctx, "Reference") then
-                local add_ref = NamedCommandLookup("_RS00c2ccc67c644739aa15a0c93eea2c755554b30d")
-                Main_OnCommand(add_ref, 0)
-                init()
-            end
-
-            -- Check if Live already exists
-            local has_live = false
-            for _, track_info in ipairs(aux_submix_tracks) do
-                if track_info.type == "live" then
-                    has_live = true
-                    break
-                end
-            end
-
-            if not has_live then
-                if ImGui.MenuItem(ctx, "Live Bounce") then
-                    local add_livebounce = NamedCommandLookup("_RS3f8d9e9a5731c664bc87eb08923a2450aef06537")
-                    Main_OnCommand(add_livebounce, 0)
-                    init()
-                end
-            else
-                ImGui.BeginDisabled(ctx)
-                ImGui.MenuItem(ctx, "Live Bounce (already exists)")
-                ImGui.EndDisabled(ctx)
-            end
-
-            ImGui.EndPopup(ctx)
         end
 
         -- Recording Paths section
@@ -3852,7 +3919,7 @@ function draw_folder_browser()
             local final_path = display_path
 
             -- Get the actual project file directory (not recording path)
-            local _ , project_file_path = reaper.EnumProjects(-1, "")
+            local _, project_file_path = reaper.EnumProjects(-1, "")
             local project_dir
             if project_file_path and project_file_path ~= "" then
                 -- Extract directory from project file path using split_path
