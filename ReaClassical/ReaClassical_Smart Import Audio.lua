@@ -1168,7 +1168,7 @@ function scan_media_folder_recursive(path, files)
     while true do
         local file = EnumerateFiles(path, i)
         if not file then break end
-        if file:match("%.wav$") or file:match("%.flac$") or file:match("%.aif") then
+        if file:lower():match("%.wav$") or file:lower():match("%.flac$") or file:lower():match("%.aif") then
             table.insert(files, path .. "/" .. file)
         end
         i = i + 1
