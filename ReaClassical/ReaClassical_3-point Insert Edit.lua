@@ -56,9 +56,6 @@ function main()
         return
     end
 
-    move_to_project_tab(source_proj)
-    local initial_curpos, selected_items = save_view()
-
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
@@ -97,6 +94,9 @@ function main()
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
+
+    move_to_project_tab(source_proj)
+    local initial_curpos, selected_items = save_view()
 
     ripple_lock_mode()
 
