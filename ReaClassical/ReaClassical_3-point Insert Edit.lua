@@ -99,6 +99,7 @@ function main()
 
     if dest_in == 1 and source_count == 2 then
         local last_saved_item = load_last_assembly_item()
+        move_to_project_tab(dest_proj)
         if last_saved_item then
             local item_start = GetMediaItemInfo_Value(last_saved_item, "D_POSITION")
             local item_length = GetMediaItemInfo_Value(last_saved_item, "D_LENGTH")
@@ -138,6 +139,7 @@ function main()
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _, _ = markers()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
         move_to_project_tab(source_proj)
+        Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
         fix_marker_pair(998, 999)
         local _, is_selected = copy_source()
         if is_selected == false then
@@ -197,6 +199,10 @@ function main()
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
+
+    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
+
+
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
     PreventUIRefresh(-1)

@@ -54,6 +54,9 @@ function main()
         return
     end
 
+    move_to_project_tab(dest_proj)
+    Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
+
     local _, scrubmode = get_config_var_string("scrubmode")
     scrubmode = tonumber(scrubmode) or 0
     SNM_SetIntConfigVar("scrubmode", 0)
@@ -185,6 +188,9 @@ function main()
             0)
         if moveable_dest == 1 then move_destination_folder(track_number) end
     end
+
+    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
+
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Insert with timestretching', 0)
     PreventUIRefresh(-1)

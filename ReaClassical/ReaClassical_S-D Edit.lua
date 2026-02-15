@@ -56,6 +56,9 @@ function main()
         return
     end
 
+    move_to_project_tab(dest_proj)
+    Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
+
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
@@ -214,6 +217,9 @@ function main()
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
         return
     end
+
+    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
+
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('S-D Edit', 0)
     PreventUIRefresh(-1)
