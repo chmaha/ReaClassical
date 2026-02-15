@@ -5,6 +5,7 @@
   Colorizer: Allow for saving and recalling color presets
   Mission Control: Remove unnecessary hyphen suffixes from aux and submix names if disconnected from RCM
   S-D editing: Restore previous cursor, view and selected items after edit
+  3-point insert: Move save_view function after first setting source project variable
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
