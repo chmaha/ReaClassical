@@ -1,14 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.9
+@version 26.2.10
 @changelog
-  Mission Control: Allow multiple special tracks to be added at once
-  Mixer Snapshot Manager: Hide mixer, aux and submix tracks from TCP after clearing automation
-  Vertical Zoom: Use slightly different SWS zoom command if automation present on special tracks
-  Insert Automation: Fix pan L/R switch
-  Insert Automation: Fix various command IDs for showing envelopes
-  Mixer Snapshot Manager: Add D_WIDTH capture
-  Smart Audio Import: Make file extension matching case-insensitive
+  Colorizer: Allow for saving and recalling color presets
+  Mission Control: Remove unnecessary hyphen suffixes from aux and submix names if disconnected from RCM
+  S-D editing: Restore previous cursor, view and selected items after edit
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
