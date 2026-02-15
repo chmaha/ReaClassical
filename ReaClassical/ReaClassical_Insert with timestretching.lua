@@ -54,8 +54,10 @@ function main()
         return
     end
 
+    local initial_curpos
     move_to_project_tab(dest_proj)
     Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
+    initial_curpos = GetCursorPosition()
 
     local _, scrubmode = get_config_var_string("scrubmode")
     scrubmode = tonumber(scrubmode) or 0
@@ -190,6 +192,7 @@ function main()
     end
 
     Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
+    SetEditCurPos(initial_curpos, false, false)
 
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Insert with timestretching', 0)

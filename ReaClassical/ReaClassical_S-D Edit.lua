@@ -56,8 +56,10 @@ function main()
         return
     end
 
+    local initial_curpos
     move_to_project_tab(dest_proj)
     Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
+    initial_curpos = GetCursorPosition()
 
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
@@ -219,6 +221,7 @@ function main()
     end
 
     Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
+    SetEditCurPos(initial_curpos, false, false)
 
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('S-D Edit', 0)

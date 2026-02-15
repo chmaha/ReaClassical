@@ -56,6 +56,8 @@ function main()
         return
     end
 
+    local initial_curpos
+
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
     if group_state ~= 1 then
@@ -140,6 +142,7 @@ function main()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
         move_to_project_tab(source_proj)
         Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
+        initial_curpos = GetCursorPosition()
         fix_marker_pair(998, 999)
         local _, is_selected = copy_source()
         if is_selected == false then
@@ -201,7 +204,7 @@ function main()
     end
 
     Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
-
+    SetEditCurPos(initial_curpos, false, false)
 
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
