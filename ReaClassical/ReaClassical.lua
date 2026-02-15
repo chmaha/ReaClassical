@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.11
+@version 26.2.12
 @changelog
-  3-point insert: Move save_view function after first setting source project variable
-  S-D editing: Save and restore track selection after edit
+  Mission Control: Use solo-in-place
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
