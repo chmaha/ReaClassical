@@ -78,6 +78,10 @@ function main()
 
     local proj_marker_count, source_proj, dest_proj, dest_in, _, _, source_in,
     source_out, source_count, pos_table, src_track_number, dest_track_number = markers()
+
+    move_to_project_tab(source_proj)
+    local initial_curpos, selected_items = save_view()
+
     if proj_marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
@@ -95,14 +99,11 @@ function main()
         return
     end
 
-    move_to_project_tab(source_proj)
-    local initial_curpos, selected_items = save_view()
-
     ripple_lock_mode()
 
     if dest_in == 1 and source_count == 2 then
-        local last_saved_item = load_last_assembly_item()
         move_to_project_tab(dest_proj)
+        local last_saved_item = load_last_assembly_item()
         if last_saved_item then
             local item_start = GetMediaItemInfo_Value(last_saved_item, "D_POSITION")
             local item_length = GetMediaItemInfo_Value(last_saved_item, "D_LENGTH")
@@ -142,7 +143,6 @@ function main()
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _, _ = markers()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
         move_to_project_tab(source_proj)
-        initial_curpos, selected_items = save_view()
         fix_marker_pair(998, 999)
         local _, is_selected = copy_source()
         if is_selected == false then
