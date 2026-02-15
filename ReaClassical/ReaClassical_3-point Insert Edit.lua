@@ -30,7 +30,7 @@ local move_to_project_tab, save_source_details, adaptive_delete
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
-local save_last_assembly_item
+local save_last_assembly_item, save_view, restore_view
 local get_item_by_guid, select_matching_dest_folder, add_marker
 
 ---------------------------------------------------------------------
@@ -56,7 +56,8 @@ function main()
         return
     end
 
-    local initial_curpos
+    move_to_project_tab(source_proj)
+    local initial_curpos, selected_items = save_view()
 
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
@@ -141,8 +142,7 @@ function main()
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _, _ = markers()
     if new_dest_count + new_source_count == 4 then -- final check we actually have 4 S-D markers
         move_to_project_tab(source_proj)
-        Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
-        initial_curpos = GetCursorPosition()
+        initial_curpos, selected_items = save_view()
         fix_marker_pair(998, 999)
         local _, is_selected = copy_source()
         if is_selected == false then
@@ -203,8 +203,7 @@ function main()
         return
     end
 
-    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
-    SetEditCurPos(initial_curpos, false, false)
+    restore_view(initial_curpos, selected_items)
 
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
@@ -915,6 +914,42 @@ end
 function add_marker(pos, distance, track_number, label, num, color)
     DeleteProjectMarker(nil, num, false)
     AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, color)
+end
+
+---------------------------------------------------------------------
+
+function save_view()
+    Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
+    local cursor_pos = GetCursorPosition()
+
+    -- Save selected items
+    local selected_items = {}
+    local item_count = CountMediaItems(0)
+    for i = 0, item_count - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            table.insert(selected_items, item) -- Store the pointer directly
+        end
+    end
+
+    return cursor_pos, selected_items
+end
+
+---------------------------------------------------------------------
+
+function restore_view(cursor_pos, selected_items)
+    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
+    SetEditCurPos(cursor_pos, false, false)
+
+    -- Restore selected items
+    if #selected_items > 0 then
+        Main_OnCommand(40289, 0)                     -- Unselect all items
+        for _, item in ipairs(selected_items) do
+            if pcall(IsMediaItemSelected, item) then -- Check if item pointer is still valid
+                SetMediaItemSelected(item, true)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

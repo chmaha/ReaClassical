@@ -30,6 +30,7 @@ local check_overlapping_items, count_selected_media_items, get_selected_media_it
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
 local get_item_guid, select_matching_dest_folder
+local save_view, restore_view
 
 ---------------------------------------------------------------------
 
@@ -54,10 +55,8 @@ function main()
         return
     end
 
-    local initial_curpos
     move_to_project_tab(dest_proj)
-    Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
-    initial_curpos = GetCursorPosition()
+    local initial_curpos, selected_items = save_view()
 
     local _, scrubmode = get_config_var_string("scrubmode")
     scrubmode = tonumber(scrubmode) or 0
@@ -191,8 +190,7 @@ function main()
         if moveable_dest == 1 then move_destination_folder(track_number) end
     end
 
-    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
-    SetEditCurPos(initial_curpos, false, false)
+    restore_view(initial_curpos, selected_items)
 
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Insert with timestretching', 0)
@@ -844,6 +842,42 @@ function select_matching_dest_folder()
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
             SetOnlyTrackSelected(track)
             break
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function save_view()
+    Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
+    local cursor_pos = GetCursorPosition()
+    
+    -- Save selected items
+    local selected_items = {}
+    local item_count = CountMediaItems(0)
+    for i = 0, item_count - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            table.insert(selected_items, item)  -- Store the pointer directly
+        end
+    end
+    
+    return cursor_pos, selected_items
+end
+
+---------------------------------------------------------------------
+
+function restore_view(cursor_pos, selected_items)
+    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
+    SetEditCurPos(cursor_pos, false, false)
+    
+    -- Restore selected items
+    if #selected_items > 0 then
+        Main_OnCommand(40289, 0) -- Unselect all items
+        for _, item in ipairs(selected_items) do
+            if pcall(IsMediaItemSelected, item) then  -- Check if item pointer is still valid
+                SetMediaItemSelected(item, true)
+            end
         end
     end
 end
