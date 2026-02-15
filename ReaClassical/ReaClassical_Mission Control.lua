@@ -1447,7 +1447,7 @@ function main()
                         ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)          -- Black text
                     end
                     if ImGui.Button(ctx, "S##auxsolo" .. idx, 25, 0) then
-                        SetMediaTrackInfo_Value(aux_info.track, "I_SOLO", is_soloed and 0 or 1)
+                        SetMediaTrackInfo_Value(aux_info.track, "I_SOLO", is_soloed and 0 or 2)
                     end
                     if is_soloed then
                         ImGui.PopStyleColor(ctx, 4) -- Pop all 4 colors
@@ -3204,7 +3204,7 @@ function draw_track_controls(start_idx, end_idx)
             ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)          -- Black text
         end
         if ImGui.Button(ctx, "S##solo" .. i, 25, 0) then
-            SetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO", is_soloed and 0 or 1)
+            SetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO", is_soloed and 0 or 2)
         end
         if is_soloed then
             ImGui.PopStyleColor(ctx, 4) -- Pop all 4 colors
