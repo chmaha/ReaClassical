@@ -4,6 +4,7 @@ This file is a part of "ReaClassical" package.
 See "ReaClassical.lua" for more information.
 Copyright (C) 2022–2026 chmaha
 MODIFIED VERSION - Ensures all items with same group ID are colored together
+ADDED: Color preset saving and recall functionality
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -21,6 +22,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_selected_media_item_at, count_selected_media_items
 local apply_color_to_items, remove_custom_coloring, get_all_items_in_groups
+local load_presets, save_presets
 
 ---------------------------------------------------------------------
 
@@ -59,8 +61,8 @@ local ImGui = require 'imgui' '0.10'
 local ctx = ImGui.CreateContext('ReaClassical Colorizer')
 local window_open = true
 
-local DEFAULT_W = 350
-local DEFAULT_H = 435
+local DEFAULT_W = 337
+local DEFAULT_H = 530 -- Adjusted for single row of presets
 
 -- Color state in 0xXXRRGGBB format (XX is ignored)
 local selected_color_rgb = 0x00FF8000 -- Orange color (00RRGGBB)
@@ -69,6 +71,61 @@ local selected_color_rgb = 0x00FF8000 -- Orange color (00RRGGBB)
 local message_text = ""
 local message_timer = 0
 local message_duration = 3.0 -- seconds
+
+-- Color presets (up to 13 slots)
+local MAX_PRESETS = 13
+local color_presets = {}
+
+-- Initialize presets with default colors
+local function init_presets()
+    local defaults = {
+        0x00F44336, -- Red 500
+        0x00FF9800, -- Orange 500
+        0x00FFEB3B, -- Yellow 500
+        0x00CDDC39, -- Lime 500
+        0x004CAF50, -- Green 500
+        0x002196F3, -- Blue 500
+        0x009C27B0, -- Purple 500
+        0x00E91E63, -- Pink 500
+        0x0000BCD4, -- Cyan 500
+        0x00FF5722, -- Deep Orange 500
+        0x00673AB7, -- Deep Purple 500
+        0x00009688, -- Teal 500
+        0x00795548, -- Brown 500
+    }
+    for i = 1, MAX_PRESETS do
+        color_presets[i] = defaults[i] or 0x00C0C0C0 -- Light gray fallback
+    end
+end
+
+---------------------------------------------------------------------
+
+function load_presets()
+    local saved_data = GetExtState("ReaClassical", "ColorizerPresets")
+    if saved_data ~= "" then
+        local idx = 1
+        for color_str in saved_data:gmatch('([^,]+)') do
+            if idx <= MAX_PRESETS then
+                local color = tonumber(color_str)
+                if color then
+                    color_presets[idx] = color
+                end
+                idx = idx + 1
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function save_presets()
+    local preset_string = ""
+    for i = 1, MAX_PRESETS do
+        if i > 1 then preset_string = preset_string .. "," end
+        preset_string = preset_string .. tostring(color_presets[i])
+    end
+    SetExtState("ReaClassical", "ColorizerPresets", preset_string, true) -- true = persist
+end
 
 ---------------------------------------------------------------------
 
@@ -99,6 +156,64 @@ function main()
 
             if changed then
                 selected_color_rgb = new_color
+            end
+
+            ImGui.Spacing(ctx)
+            ImGui.Separator(ctx)
+            ImGui.Spacing(ctx)
+
+            -- Color Presets Section
+            ImGui.Text(ctx, "Color Presets:")
+            ImGui.Spacing(ctx)
+
+            -- Display all presets in one row
+            local preset_size = 20
+            local spacing = 5
+
+            for i = 1, MAX_PRESETS do
+                if i > 1 then
+                    ImGui.SameLine(ctx, 0, spacing)
+                end
+
+                -- Draw color button
+                ImGui.PushID(ctx, i)
+                
+                -- Extract RGB from preset color for display
+                local preset_color = color_presets[i]
+                
+                if ImGui.ColorButton(ctx, '##preset' .. i, preset_color, 
+                    ImGui.ColorEditFlags_NoAlpha | ImGui.ColorEditFlags_NoBorder,
+                    preset_size, preset_size) then
+                    -- Left click: Load preset
+                    selected_color_rgb = preset_color
+                    message_text = string.format("Loaded preset #%d", i)
+                    message_timer = ImGui.GetTime(ctx)
+                end
+
+                -- Right click: Save current color to preset
+                if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+                    color_presets[i] = selected_color_rgb
+                    save_presets()
+                    message_text = string.format("Saved to preset #%d", i)
+                    message_timer = ImGui.GetTime(ctx)
+                end
+
+                -- Tooltip
+                if ImGui.IsItemHovered(ctx) then
+                    ImGui.SetTooltip(ctx, "Left-click: Load\nRight-click: Save current color")
+                end
+
+                ImGui.PopID(ctx)
+            end
+
+            ImGui.Spacing(ctx)
+
+            -- Reset presets button
+            if ImGui.Button(ctx, 'Reset Palette to Default Colors', avail_w, 25) then
+                init_presets()
+                save_presets()
+                message_text = "Palette reset to default colors."
+                message_timer = ImGui.GetTime(ctx)
             end
 
             ImGui.Spacing(ctx)
@@ -349,5 +464,9 @@ function remove_custom_coloring()
 end
 
 ---------------------------------------------------------------------
+
+-- Initialize and load presets
+init_presets()
+load_presets()
 
 defer(main)
