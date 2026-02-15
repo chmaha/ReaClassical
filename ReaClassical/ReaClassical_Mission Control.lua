@@ -1698,14 +1698,11 @@ function main()
                                     GetSetMediaTrackInfo_String(aux_info.track, "P_EXT:rcm_disconnect",
                                         changes.rcm_state and "" or "y", true)
 
-                                    -- Remove trailing hyphen from name if present
-                                    -- Update track name with or without hyphen based on connection state
                                     local base_name = aux_info.full_name:gsub("%-$", "")
-                                    local new_name = changes.rcm_state and base_name or (base_name .. "-")
-                                    GetSetMediaTrackInfo_String(aux_info.track, "P_NAME", new_name, true)
+                                    GetSetMediaTrackInfo_String(aux_info.track, "P_NAME", base_name, true)
 
                                     aux_info.has_hyphen = not changes.rcm_state
-                                    aux_info.full_name = new_name
+                                    aux_info.full_name = base_name
                                     sync_needed = true
                                 end
 
