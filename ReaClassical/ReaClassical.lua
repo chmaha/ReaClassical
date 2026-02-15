@@ -1,11 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.10
+@version 26.2.11
 @changelog
-  Colorizer: Allow for saving and recalling color presets
-  Mission Control: Remove unnecessary hyphen suffixes from aux and submix names if disconnected from RCM
-  S-D editing: Restore previous cursor, view and selected items after edit
   3-point insert: Move save_view function after first setting source project variable
+  S-D editing: Save and restore track selection after edit
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
