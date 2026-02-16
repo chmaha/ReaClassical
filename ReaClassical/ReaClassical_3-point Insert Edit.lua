@@ -921,25 +921,25 @@ end
 function save_view()
     Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
     local cursor_pos = GetCursorPosition()
-    
+
     -- Save selected items
     local selected_items = {}
     local item_count = CountMediaItems(0)
     for i = 0, item_count - 1 do
         local item = GetMediaItem(0, i)
         if IsMediaItemSelected(item) then
-            table.insert(selected_items, item)  -- Store the pointer directly
+            table.insert(selected_items, item) -- Store the pointer directly
         end
     end
-    
+
     -- Save selected tracks
     local selected_tracks = {}
     local track_count = CountSelectedTracks(0)
     for i = 0, track_count - 1 do
         local track = GetSelectedTrack(0, i)
-        table.insert(selected_tracks, track)  -- Store the pointer directly
+        table.insert(selected_tracks, track) -- Store the pointer directly
     end
-    
+
     return cursor_pos, selected_items, selected_tracks
 end
 
@@ -948,23 +948,23 @@ end
 function restore_view(cursor_pos, selected_items, selected_tracks)
     Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
     SetEditCurPos(cursor_pos, false, false)
-    
+
     -- Restore selected items
     if #selected_items > 0 then
-        Main_OnCommand(40289, 0) -- Unselect all items
+        Main_OnCommand(40289, 0)                     -- Unselect all items
         for _, item in ipairs(selected_items) do
-            if pcall(IsMediaItemSelected, item) then  -- Check if item pointer is still valid
+            if pcall(IsMediaItemSelected, item) then -- Check if item pointer is still valid
                 SetMediaItemSelected(item, true)
             end
         end
     end
-    
+
     -- Restore selected tracks
     if #selected_tracks > 0 then
-        Main_OnCommand(40297, 0) -- Unselect all tracks
+        Main_OnCommand(40297, 0)                  -- Unselect all tracks
         SetOnlyTrackSelected(selected_tracks[1])  -- Set first track as only selected
         for _, track in ipairs(selected_tracks) do
-            if pcall(IsTrackSelected, track) then  -- Check if track pointer is still valid
+            if pcall(IsTrackSelected, track) then -- Check if track pointer is still valid
                 SetTrackSelected(track, true)
             end
         end
