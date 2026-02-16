@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.12
+@version 26.2.13
 @changelog
-  Mission Control: Use solo-in-place
+  S-D editing: Revert to jumping to 5 and F4 edits
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
