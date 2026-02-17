@@ -50,7 +50,7 @@ if workflow == "" then
     modifier = "Cmd"
   end
   MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
+    .. "+N to use this function.", "ReaClassical Error", 0)
   return
 end
 
@@ -1374,6 +1374,45 @@ function draw(playstate)
     end
 
     ImGui.EndPopup(ctx)
+  end
+
+  -- keyboard shortcut capture
+  if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_Enter, false) then
+    if ImGui.GetKeyMods(ctx) & ImGui.Mod_Ctrl ~= 0 then
+      open = false
+    end
+  end
+
+  if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_F9, false) then
+    local mods = ImGui.GetKeyMods(ctx)
+
+    if mods & ImGui.Mod_Shift ~= 0 then
+      if is_recording then
+        Main_OnCommand(increment_take_cmd, 0)
+      end
+    elseif mods & ImGui.Mod_Alt ~= 0 then
+      if is_stopped then
+        Main_OnCommand(next_section_cmd, 0)
+      end
+    elseif mods & ImGui.Mod_Ctrl ~= 0 then
+      if is_recording then
+        Main_OnCommand(1008, 0) -- Pause
+      end
+    else
+      if not button_disabled then
+        if rec_button_label == "Rec" and not selected_track and any_armed then
+          for i = 0, num_tracks - 1 do
+            local track = GetTrack(0, i)
+            if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+              SetOnlyTrackSelected(track)
+              break
+            end
+          end
+        end
+        check_prefs()
+        Main_OnCommand(F9_command, 0)
+      end
+    end
   end
 
   UpdateTimeline()
