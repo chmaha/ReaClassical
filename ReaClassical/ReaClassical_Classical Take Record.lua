@@ -30,6 +30,7 @@ local clear_all_rec_armed_except_live, get_item_guid
 local select_children_of_selected_folders
 local unselect_folder_children, set_rec_arm_for_selected_tracks
 local find_mixer_track_for_track, is_mixer_disabled
+local avoid_take_lanes
 ---------------------------------------------------------------------
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -40,6 +41,55 @@ if input ~= "" then
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
     if table[8] then ref_is_guide = tonumber(table[8]) or 0 end
     if table[15] then use_only_take_num = tonumber(table[15]) or 0 end
+end
+
+---------------------------------------------------------------------
+
+-- Read "Record Takes Horizontally" preference set by the Record Panel.
+-- When true (Vertical workflow only), recording stays on the current folder
+-- instead of advancing to the next one after stopping.
+local function get_record_takes_horizontally()
+    local _, val = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+    return (val == "1")
+end
+
+---------------------------------------------------------------------
+
+-- If the edit cursor is before the end of the final item on any armed
+-- track, move it to 1 second after the rightmost item end. This prevents
+-- take-lane creation even when the cursor sits in a gap between items.
+function avoid_take_lanes()
+    local cursor_pos = GetCursorPosition()
+    local num_tracks = CountTracks(0)
+    local latest_end = nil
+
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+            local item_count = CountTrackMediaItems(track)
+            -- Find the rightmost item end on this armed track
+            local track_latest_end = nil
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(track, j)
+                local item_end = GetMediaItemInfo_Value(item, "D_POSITION")
+                             + GetMediaItemInfo_Value(item, "D_LENGTH")
+                if not track_latest_end or item_end > track_latest_end then
+                    track_latest_end = item_end
+                end
+            end
+
+            -- If cursor is before the end of the final item, we need to move it
+            if track_latest_end and cursor_pos < track_latest_end then
+                if not latest_end or track_latest_end > latest_end then
+                    latest_end = track_latest_end
+                end
+            end
+        end
+    end
+
+    if latest_end then
+        SetEditCurPos(latest_end + 1.0, false, false)
+    end
 end
 
 ---------------------------------------------------------------------
@@ -103,6 +153,11 @@ function main()
         set_rec_arm_for_selected_tracks(1)
         unselect_folder_children()
 
+        -- FEATURE 1: avoid creating take lanes by moving cursor if needed.
+        -- Run after arming so the user sees the correct position even when
+        -- only re-arming without immediately starting to record.
+        avoid_take_lanes()
+
         if rec_arm ~= 1 then
             TrackList_AdjustWindows(false)
             return
@@ -110,6 +165,11 @@ function main()
 
         local cursor_pos = GetCursorPosition()
         save_prefs(cursor_pos)
+
+        -- Run again right before recording in case the cursor was moved
+        -- between arming and pressing record.
+        avoid_take_lanes()
+
         PreventUIRefresh(-1)
         Main_OnCommand(1013, 0) -- Transport: Record
         Undo_EndBlock('Classical Take Record', 0)
@@ -142,7 +202,9 @@ function main()
         SetProjExtState(0, "ReaClassical", "LastRecordedItem", recorded_item_guid)
         Main_OnCommand(40289, 0) -- Unselect all items
 
-        if workflow == "Vertical" then
+        -- FEATURE 2: in Vertical workflow, only advance to the next folder when
+        -- "Record Takes Horizontally" is NOT enabled.
+        if workflow == "Vertical" and not get_record_takes_horizontally() then
             select_children_of_selected_folders()
             local ret, cursor_pos = load_prefs()
             if ret == 1 then
@@ -181,6 +243,10 @@ function main()
                 Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
             end
         end
+        -- When "Record Takes Horizontally" is enabled in Vertical workflow, we do
+        -- nothing extra on stop: the cursor stays where recording ended, ready for
+        -- the next horizontal take on the same folder.
+
         PreventUIRefresh(-1)
         Undo_EndBlock('Classical Take Record Stop', 0)
     end

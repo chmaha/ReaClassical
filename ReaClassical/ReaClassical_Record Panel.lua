@@ -43,14 +43,14 @@ if not imgui_exists then
   return
 end
 
+local system = GetOS()
+local is_mac = string.find(system, "^OSX") or string.find(system, "^macOS")
+local ctrl_key = is_mac and "Cmd" or "Ctrl"
+local alt_key = is_mac and "Opt" or "Alt"
+
 local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 if workflow == "" then
-  local modifier = "Ctrl"
-  local system = GetOS()
-  if string.find(system, "^OSX") or string.find(system, "^macOS") then
-    modifier = "Cmd"
-  end
-  MB("Please create a ReaClassical project via " .. modifier
+  MB("Please create a ReaClassical project via " .. ctrl_key
     .. "+N to use this function.", "ReaClassical Error", 0)
   return
 end
@@ -122,6 +122,7 @@ local project_userdata, project_name
 
 local start_time, end_time, duration
 local run_once = false
+local stop_cursor_pos = nil
 
 local F9_command = NamedCommandLookup("_RS25887d941a72868731ba67ccb1abcbacb587e006")
 local increment_take_cmd = NamedCommandLookup("_RSbb6037bb7fbe86a2d5a3c24cda322cf422e37612")
@@ -161,6 +162,14 @@ local session_extracted = false -- Track if current session was extracted from t
 -- by GUID (stored in ProjExtState "LastRecordedItemGUIDs").
 local had_recent_recording = false
 
+-- NEW: "Record Takes Horizontally" checkbox state (Vertical workflow only)
+-- Persisted in ProjExtState so it survives panel restarts.
+local record_takes_horizontally = false
+do
+  local _, rth_val = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+  record_takes_horizontally = (rth_val == "1")
+end
+
 -- Rank color options (matching SAI marker manager and notes app)
 local RANKS = {
   { name = "Excellent",     rgba = 0x39FF1499, prefix = "Excellent" },
@@ -174,6 +183,7 @@ local RANKS = {
   { name = "No Rank",       rgba = 0x00000000, prefix = "" }
 }
 
+---------------------------------------------------------------------
 ---------------------------------------------------------------------
 
 function main()
@@ -218,8 +228,10 @@ function main()
       remove_markers_by_name("!" .. F9_command)
 
       -- Apply rank and notes to recorded items and store their GUIDs for later re-targeting
-      apply_rank_and_notes_to_items()
-      store_last_recorded_guids()
+      local apply_pos = stop_cursor_pos or GetCursorPosition()
+      apply_rank_and_notes_to_items(apply_pos)
+      store_last_recorded_guids(apply_pos)
+      stop_cursor_pos = nil
 
       -- Mark that we just finished a recording so the UI can retarget those items by GUID.
       -- recording_rank/note are intentionally NOT reset here so the dropdown continues to
@@ -400,6 +412,7 @@ function main()
         rec_name_set = false
       end
     end
+    stop_cursor_pos = GetCursorPosition()
   end
 
   -- Draw ImGui window
@@ -911,12 +924,29 @@ function draw(playstate)
   ImGui.PopFont(ctx)
 
   -- Transport buttons
-  local button_y = take_y + text_h + (10 * scale) + session_h + (5 * scale)
   local button_width = 60 * scale
   local button_height = 25 * scale
   local button_spacing = 5 * scale
   local total_button_width = (button_width * 4) + (button_spacing * 3)
   local buttons_start_x = (win_w - total_button_width) / 2
+
+  local button_y = take_y + text_h + (10 * scale) + session_h + (5 * scale)
+
+  -- "Record Takes Horizontally" checkbox (Vertical workflow only), drawn above button row
+  local _, current_workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  if current_workflow == "Vertical" then
+    ImGui.SetCursorPos(ctx, buttons_start_x, button_y - (25 * scale))
+    ImGui.PushFont(ctx, small_font, 13 * scale)
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xCCCCCCFF)
+    local rv_cb, new_rth = ImGui.Checkbox(ctx, "Record takes horizontally", record_takes_horizontally)
+    if rv_cb then
+      record_takes_horizontally = new_rth
+      SetProjExtState(0, "ReaClassical", "RecordTakesHorizontally", new_rth and "1" or "0")
+    end
+    ImGui.PopStyleColor(ctx)
+    ImGui.PopFont(ctx)
+    -- button_y = button_y + (20 * scale)
+  end
 
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y)
 
@@ -984,6 +1014,8 @@ function draw(playstate)
     end
     Main_OnCommand(F9_command, 0)
   end
+  ImGui.SetItemTooltip(ctx, rec_button_label == "Rec" and "Start recording (F9)" or
+    rec_button_label == "Stop" and "Stop recording (F9)" or "Arm selected folder for recording (F9)")
 
   if button_disabled then
     ImGui.EndDisabled(ctx)
@@ -1037,6 +1069,7 @@ function draw(playstate)
   if ImGui.Button(ctx, "Pause", button_width, button_height) then
     Main_OnCommand(1008, 0)
   end
+  ImGui.SetItemTooltip(ctx, "Pause/unpause recording (" .. ctrl_key .. "+F9)")
   if not is_recording then ImGui.EndDisabled(ctx) end
 
   -- Increment Take button
@@ -1044,6 +1077,11 @@ function draw(playstate)
   if not is_recording then ImGui.BeginDisabled(ctx, true) end
   if ImGui.Button(ctx, "+Take", button_width, button_height) then
     Main_OnCommand(increment_take_cmd, 0)
+  end
+  if record_takes_horizontally then
+  ImGui.SetItemTooltip(ctx, "Split and increment take number (Shift+F9)")
+  else
+  ImGui.SetItemTooltip(ctx, "Move to next folder and start new take (Shift+F9)")
   end
   if not is_recording then ImGui.EndDisabled(ctx) end
 
@@ -1054,20 +1092,21 @@ function draw(playstate)
   if ImGui.Button(ctx, "Next", button_width, button_height) then
     Main_OnCommand(next_section_cmd, 0)
   end
+  ImGui.SetItemTooltip(ctx, "Move to Next Recording Section (" .. alt_key .. "+F9)")
   if not is_stopped then ImGui.EndDisabled(ctx) end
 
   -- Rank and Notes section
   local rank_y = button_y + button_height + (30 * scale)
 
-  -- Context indicator: which items will be affected
+  -- Context indicator: which items rank/notes changes will target
   if playstate == 0 then
     ImGui.SetCursorPos(ctx, buttons_start_x, rank_y - (18 * scale))
     if editing_item then
-      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF) -- Carolina blue
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF)
       ImGui.Text(ctx, "Editing Selected Item")
       ImGui.PopStyleColor(ctx)
     elseif had_recent_recording then
-      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xAACC88FF) -- Soft green
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xAACC88FF)
       ImGui.Text(ctx, "Editing Last Recording")
       ImGui.PopStyleColor(ctx)
     end
@@ -1590,12 +1629,10 @@ function update_take_name(item, rank)
 end
 
 ---------------------------------------------------------------------
-
--- Scan the project for items that were just recorded (same logic as apply_rank_and_notes_to_items
--- but only collects GUIDs) and stores them in ProjExtState for later GUID-based re-targeting.
-function store_last_recorded_guids()
+---
+function store_last_recorded_guids(cursor_pos)
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-  local cursor_pos = GetCursorPosition()
+  cursor_pos = cursor_pos or GetCursorPosition()
   local guids = {}
 
   local function collect_item(item)
@@ -1616,7 +1653,7 @@ function store_last_recorded_guids()
     for i = 0, num_tracks - 1 do
       local track = GetTrack(0, i)
       if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 and
-         GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+          GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
         rec_track = track
         break
       end
@@ -1638,8 +1675,15 @@ function store_last_recorded_guids()
           break
         end
       end
-      local target_folder = (current_folder_idx and current_folder_idx > 1) and
-                            folder_tracks[current_folder_idx - 1] or nil
+      local target_folder
+      if current_folder_idx then
+        local _, rth = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+        if rth == "1" then
+          target_folder = folder_tracks[current_folder_idx]
+        elseif current_folder_idx > 1 then
+          target_folder = folder_tracks[current_folder_idx - 1]
+        end
+      end
 
       if target_folder then
         local target_folder_idx = GetMediaTrackInfo_Value(target_folder, "IP_TRACKNUMBER") - 1
@@ -1729,8 +1773,6 @@ end
 
 ---------------------------------------------------------------------
 
--- Apply rank/notes to the last recorded items identified by stored GUIDs.
--- This is cursor-independent so it works regardless of what the user has clicked on.
 function apply_rank_and_notes_by_guids()
   local _, guid_str = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
   if not guid_str or guid_str == "" then return end
@@ -1756,7 +1798,7 @@ end
 
 ---------------------------------------------------------------------
 
-function apply_rank_and_notes_to_items()
+function apply_rank_and_notes_to_items(cursor_pos)
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
   local target_folder = nil
@@ -1795,13 +1837,20 @@ function apply_rank_and_notes_to_items()
         end
       end
 
-      if current_folder_idx and current_folder_idx > 1 then
-        target_folder = folder_tracks[current_folder_idx - 1]
+      if current_folder_idx then
+        local _, rth = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+        if rth == "1" then
+          -- Horizontal mode: arming stayed on the folder that just recorded
+          target_folder = folder_tracks[current_folder_idx]
+        elseif current_folder_idx > 1 then
+          -- Normal mode: arming advanced to next folder, so recorded folder is one back
+          target_folder = folder_tracks[current_folder_idx - 1]
+        end
       end
     end
   end
 
-  local cursor_pos = GetCursorPosition()
+  cursor_pos = cursor_pos or GetCursorPosition()
   local items_found = 0
 
   if workflow == "Vertical" then
