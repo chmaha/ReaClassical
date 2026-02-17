@@ -28,7 +28,8 @@ local get_item_color, pastel_color, get_color_table, extract_take_from_filename
 local disarm_all_tracks, extract_session_from_filename, is_folder_parent_or_child
 local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled, check_prefs
 local load_item_rank_and_notes, save_item_rank_and_notes, rgba_to_native, update_take_name
-local apply_rank_and_notes_to_items
+local apply_rank_and_notes_to_items, store_last_recorded_guids, apply_rank_and_notes_by_guids
+local apply_rank_and_notes_to_item
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -155,6 +156,11 @@ local last_selected_item = nil
 local take_extracted = false    -- Track if current take_text was extracted from take name
 local session_extracted = false -- Track if current session was extracted from take name
 
+-- Set true when a recording finishes; only cleared when a new recording starts.
+-- When true and no item is selected, rank/notes changes target the last recorded items
+-- by GUID (stored in ProjExtState "LastRecordedItemGUIDs").
+local had_recent_recording = false
+
 -- Rank color options (matching SAI marker manager and notes app)
 local RANKS = {
   { name = "Excellent",     rgba = 0x39FF1499, prefix = "Excellent" },
@@ -211,12 +217,14 @@ function main()
       remove_markers_by_name("!1013")
       remove_markers_by_name("!" .. F9_command)
 
-      -- Apply rank and notes to recorded items
+      -- Apply rank and notes to recorded items and store their GUIDs for later re-targeting
       apply_rank_and_notes_to_items()
+      store_last_recorded_guids()
 
-      -- Reset rank and notes for next recording
-      recording_rank = ""
-      recording_note = ""
+      -- Mark that we just finished a recording so the UI can retarget those items by GUID.
+      -- recording_rank/note are intentionally NOT reset here so the dropdown continues to
+      -- reflect whatever rank was set during recording.
+      had_recent_recording = true
       editing_item = nil
     end
 
@@ -232,13 +240,9 @@ function main()
       -- If selection changed, save previous and load new
       if selected_item ~= last_selected_item then
         -- Save changes to previously edited item ONLY if something changed
-        -- We don't want to overwrite colorized items just because we're moving away
         if editing_item and editing_item ~= selected_item then
-          -- Check if rank or notes actually changed from what was stored
           local _, stored_rank = GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", "", false)
           local _, stored_notes = GetSetMediaItemInfo_String(editing_item, "P_NOTES", "", false)
-
-          -- Only save if something actually changed
           if recording_rank ~= stored_rank or recording_note ~= stored_notes then
             save_item_rank_and_notes(editing_item, recording_rank, recording_note)
           end
@@ -255,7 +259,6 @@ function main()
             take_text = extracted_take
             take_extracted = true
           else
-            -- Couldn't extract - recalculate next take
             if not iterated_filenames then
               take_text = get_take_count(session) + 1
             else
@@ -274,13 +277,30 @@ function main()
             session_extracted = false
           end
         else
-          -- No item selected - restore take count and session
-          recording_rank = ""
-          recording_note = ""
+          -- No item selected - restore take count and session.
           editing_item = nil
           take_extracted = false
           session_extracted = false
           session_text = session
+          -- If returning to last-recording mode, restore rank/notes from the stored GUIDs
+          -- so the dropdown reflects the last recording, not the previously selected item.
+          if had_recent_recording then
+            local _, guid_str = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
+            if guid_str and guid_str ~= "" then
+              local first_guid = guid_str:match("([^,]+)")
+              if first_guid then
+                local total_items = CountMediaItems(0)
+                for i = 0, total_items - 1 do
+                  local item = GetMediaItem(0, i)
+                  local _, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+                  if guid == first_guid then
+                    load_item_rank_and_notes(item)
+                    break
+                  end
+                end
+              end
+            end
+          end
           if not iterated_filenames then
             take_text = get_take_count(session) + 1
           else
@@ -354,17 +374,19 @@ function main()
       laststate = playstate
 
       if editing_item and ValidatePtr2(0, editing_item, "MediaItem*") then
-        -- Save pending edits
+        -- Save pending edits before recording starts
         save_item_rank_and_notes(editing_item, recording_rank, recording_note)
-
-        -- Clear editing context for new recording
         editing_item = nil
         last_selected_item = nil
-        recording_rank = ""
-        recording_note = ""
         session_extracted = false
         session_text = session
       end
+
+      -- Starting a new recording clears last-recording targeting mode and stored GUIDs
+      had_recent_recording = false
+      SetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs", "")
+      recording_rank = ""
+      recording_note = ""
 
       if start_time or end_time then
         duration = nil
@@ -398,7 +420,6 @@ function load_item_rank_and_notes(item)
   end
 
   local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-  -- Convert numeric string to string "1"-"8" or "" for No Rank
   if rank_str ~= "" then
     local rank_num = tonumber(rank_str)
     recording_rank = (rank_num and rank_num >= 1 and rank_num <= 9) and tostring(rank_num) or ""
@@ -415,41 +436,31 @@ end
 function save_item_rank_and_notes(item, rank, note)
   if not item then return end
 
-  -- Check if item is colorized
   local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
   local is_colorized = (colorized == "y")
 
-  -- Save rank (empty string deletes P_EXT state)
   GetSetMediaItemInfo_String(item, "P_EXT:item_rank", rank, true)
 
-  -- Apply color based on rank
   local color_to_use
   if rank ~= "" then
-    -- If applying a rank, clear the colorized flag and apply rank color
     if is_colorized then
       GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
     end
-
-    -- Apply rank color ONLY if ranking_color_pref == 0 (not checked)
     if ranking_color_pref == 0 then
       local rank_index = tonumber(rank)
       if rank_index and RANKS[rank_index] then
         color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
       else
-        -- Fallback if invalid rank
         color_to_use = get_item_color(item)
       end
     end
   else
-    -- No rank selected - this is deliberate user action, so clear colorized flag
     if is_colorized then
       GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
     end
-    -- Restore original color based on workflow ONLY if auto_color_pref == 0 (not checked)
     if auto_color_pref == 0 then
       local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
       if workflow == "Horizontal" then
-        -- In horizontal workflow, use pastel color based on stored take number
         local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
         if stored_take_num ~= "" then
           local take_num = tonumber(stored_take_num)
@@ -462,16 +473,13 @@ function save_item_rank_and_notes(item, rank, note)
           color_to_use = get_item_color(item)
         end
       else
-        -- Vertical workflow uses get_item_color
         color_to_use = get_item_color(item)
       end
     else
-      -- auto_color_pref == 1: set to default color (0)
       color_to_use = 0
     end
   end
 
-  -- Only set color if we determined one to use
   if color_to_use then
     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
     UpdateItemInProject(item)
@@ -479,10 +487,8 @@ function save_item_rank_and_notes(item, rank, note)
 
   update_take_name(item, rank)
 
-  -- Save notes
   GetSetMediaItemInfo_String(item, "P_NOTES", note, true)
 
-  -- Apply to group if item is grouped
   local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
   if group_id ~= 0 then
     local track_count = CountTracks(0)
@@ -496,19 +502,14 @@ function save_item_rank_and_notes(item, rank, note)
           GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", rank, true)
           GetSetMediaItemInfo_String(current_item, "P_NOTES", note, true)
 
-          -- Check if grouped item is colorized
           local _, grouped_colorized = GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", false)
           local grouped_is_colorized = (grouped_colorized == "y")
 
-          -- Apply color to grouped items too
           local grouped_color
           if rank ~= "" then
-            -- If applying a rank, clear the colorized flag
             if grouped_is_colorized then
               GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", true)
             end
-
-            -- Apply rank color ONLY if ranking_color_pref == 0 (not checked)
             if ranking_color_pref == 0 then
               local rank_index = tonumber(rank)
               if rank_index and RANKS[rank_index] then
@@ -518,15 +519,12 @@ function save_item_rank_and_notes(item, rank, note)
               end
             end
           else
-            -- No rank selected - this is deliberate user action, so clear colorized flag
             if grouped_is_colorized then
               GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", true)
             end
-            -- Restore original color based on workflow ONLY if auto_color_pref == 0 (not checked)
             if auto_color_pref == 0 then
               local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
               if workflow == "Horizontal" then
-                -- In horizontal workflow, use pastel color based on stored take number
                 local _, stored_take_num = GetSetMediaItemInfo_String(current_item, "P_EXT:item_take_num", "", false)
                 if stored_take_num ~= "" then
                   local take_num = tonumber(stored_take_num)
@@ -539,16 +537,13 @@ function save_item_rank_and_notes(item, rank, note)
                   grouped_color = get_item_color(current_item)
                 end
               else
-                -- Vertical workflow uses get_item_color
                 grouped_color = get_item_color(current_item)
               end
             else
-              -- auto_color_pref == 1: set to default color (0)
               grouped_color = 0
             end
           end
 
-          -- Only set color if we determined one to use
           if grouped_color then
             SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", grouped_color)
             UpdateItemInProject(current_item)
@@ -596,7 +591,6 @@ end
 ---------------------------------------------------------------------
 
 function clean_up()
-  -- Save any pending changes to currently edited item
   if editing_item and ValidatePtr2(0, editing_item, "MediaItem*") then
     save_item_rank_and_notes(editing_item, recording_rank, recording_note)
   end
@@ -604,7 +598,6 @@ function clean_up()
   Main_OnCommand(24800, 0) -- clear any section override
   SetToggleCommandState(1, take_counter, 0)
 
-  -- Save window position and size
   local x, y = ImGui.GetWindowPos(ctx)
   local w, h = ImGui.GetWindowSize(ctx)
   local pos = x .. "," .. y .. "," .. w .. "," .. h
@@ -673,7 +666,7 @@ function check_time()
       end
       Main_OnCommand(F9_command, 0)
     else
-      Main_OnCommand(1013, 0) -- Regular record command
+      Main_OnCommand(1013, 0)
     end
     SetProjExtState(0, "ReaClassical", "Recording Start", "")
     SetProjExtState(0, "ReaClassical", "Recording End", "")
@@ -733,24 +726,19 @@ function is_folder_parent_or_child()
 
   local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
-  -- Check if it's a folder parent
   if depth == 1 then
     return true
   end
 
-  -- Check if it's a child of a folder
   local track_idx = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
 
-  -- Look backwards for a parent folder
   for i = track_idx - 1, 0, -1 do
     local track = GetTrack(0, i)
     local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
 
     if track_depth == 1 then
-      -- Found a parent folder, so selected track is a child
       return true
     elseif track_depth < 0 then
-      -- Reached the end of a folder group
       break
     end
   end
@@ -761,14 +749,10 @@ end
 ---------------------------------------------------------------------
 
 function draw(playstate)
-  -- Always set window to default size when opening (but allow user to resize)
   if win.xpos and win.ypos then
     ImGui.SetNextWindowPos(ctx, win.xpos, win.ypos, ImGui.Cond_FirstUseEver)
   end
-  -- Always start at default size, but user can resize
   ImGui.SetNextWindowSize(ctx, win.width, win.height, ImGui.Cond_Appearing)
-
-  -- Set minimum and maximum size constraints
   ImGui.SetNextWindowSizeConstraints(ctx, win.width, win.height, 3000, 3500)
 
   local visible, should_close = ImGui.Begin(ctx, 'Record Panel', true,
@@ -795,14 +779,12 @@ function draw(playstate)
   local win_w, win_h = ImGui.GetWindowSize(ctx)
   local win_x, win_y = ImGui.GetWindowPos(ctx)
 
-  -- Calculate scaling
   local base_width = win.width
   local base_height = win.height
   local scale_x = win_w / base_width
   local scale_y = win_h / base_height
   local scale = math.min(scale_x, scale_y)
 
-  -- Set colors based on playstate
   if playstate == 0 or playstate == 1 then
     SetThemeColor("ts_lane_bg", -1)
     SetThemeColor("marker_lane_bg", -1)
@@ -817,11 +799,11 @@ function draw(playstate)
     SetThemeColor("region_lane_bg", rec_color)
   end
 
-  -- Draw time info at top in single line (small font)
+  -- Draw time info at top
   if (playstate == 0 or playstate == 1 or (playstate == 5 or playstate == 6) and set_via_right_click) then
     if start_time or end_time or duration then
       ImGui.PushFont(ctx, small_font, 15 * scale)
-      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xD3A056FF) -- Blue tint (RGBA)
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xD3A056FF)
 
       local time_text
       if start_time and end_time then
@@ -837,7 +819,6 @@ function draw(playstate)
       end
 
       local time_w = ImGui.CalcTextSize(ctx, time_text)
-      -- Centered at top with padding
       ImGui.SetCursorPos(ctx, (win_w - time_w) / 2, 45 * scale)
       ImGui.Text(ctx, time_text)
 
@@ -846,7 +827,7 @@ function draw(playstate)
     end
   end
 
-  -- Draw take number (large font) - color changes based on playstate and editing state
+  -- Draw take number (large font)
   ImGui.PushFont(ctx, large_font, 175 * scale)
   local take_str = tostring(take_text)
   local text_w, text_h = ImGui.CalcTextSize(ctx, take_str)
@@ -854,16 +835,15 @@ function draw(playstate)
   local take_y = (win_h - text_h) / 3.75
   ImGui.SetCursorPos(ctx, take_x, take_y)
 
-  -- Set color based on playstate and editing state
   local take_color
   if playstate == 0 and editing_item and take_extracted then
-    take_color = 0x4B9CD3FF -- Carolina blue (RGB: 75, 156, 211 in RGBA format)
+    take_color = 0x4B9CD3FF -- Carolina blue: editing a selected item
   elseif playstate == 6 then
-    take_color = 0xFFFF7FFF -- Yellow for paused
+    take_color = 0xFFFF7FFF -- Yellow: paused
   elseif playstate == 5 then
-    take_color = 0xFF7F7FFF -- Red for recording
+    take_color = 0xFF7F7FFF -- Red: recording
   else
-    take_color = 0x7FCC7FFF -- Green for stopped/playing
+    take_color = 0x7FCC7FFF -- Green: stopped/playing
   end
 
   ImGui.PushStyleColor(ctx, ImGui.Col_Text, take_color)
@@ -871,14 +851,12 @@ function draw(playstate)
   ImGui.PopStyleColor(ctx)
   ImGui.PopFont(ctx)
 
-  -- Draw recording indicator (must come after text measurement)
+  -- Recording indicator
   if playstate == 5 or playstate == 6 then
     local indicator_x = win_x + 50 * scale
-    -- Align with center of take number
     local indicator_y = win_y + take_y + (text_h / 2)
 
     if playstate == 6 then
-      -- Pause bars (yellow) - RGBA format
       local bar_height = 50 * scale
       ImGui.DrawList_AddRectFilled(draw_list,
         indicator_x - 20 * scale, indicator_y - bar_height / 2,
@@ -889,7 +867,6 @@ function draw(playstate)
         indicator_x + 20 * scale, indicator_y + bar_height / 2,
         0xFFFF7FFF)
     else
-      -- Recording circle (red) - RGBA format
       ImGui.DrawList_AddCircleFilled(draw_list,
         indicator_x, indicator_y,
         20 * scale,
@@ -897,7 +874,7 @@ function draw(playstate)
     end
   end
 
-  -- Create invisible button over take number for click detection
+  -- Invisible button over take number for click detection
   ImGui.SetCursorPos(ctx, take_x, take_y)
   if ImGui.InvisibleButton(ctx, "take_number_btn", text_w, text_h) then
     laststate = nil
@@ -908,13 +885,12 @@ function draw(playstate)
     end
   end
 
-  -- Draw session name (medium or small font) - closer to take number
+  -- Session name
   local display_session = session_text
   local use_small = false
 
   if display_session == "" and take_count == 0 then
     display_session = "Right-click for options"
-    -- use_small = true
   end
 
   if use_small then
@@ -923,40 +899,33 @@ function draw(playstate)
     ImGui.PushFont(ctx, medium_font, 25 * scale)
   end
   local session_w, session_h = ImGui.CalcTextSize(ctx, display_session)
-  -- Smaller gap from take number to match original
   ImGui.SetCursorPos(ctx, (win_w - session_w) / 2, take_y + text_h * 0.95)
 
-  -- Color session text carolina blue if extracted from item
   if playstate == 0 and editing_item and session_extracted then
     ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF) -- Carolina blue
   else
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple (RGBA)
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xE6CCCCFF) -- Light purple
   end
   ImGui.Text(ctx, display_session)
   ImGui.PopStyleColor(ctx)
   ImGui.PopFont(ctx)
 
-  -- Transport control buttons below session name
+  -- Transport buttons
   local button_y = take_y + text_h + (10 * scale) + session_h + (5 * scale)
   local button_width = 60 * scale
   local button_height = 25 * scale
   local button_spacing = 5 * scale
-
-  -- Calculate total width of all buttons
   local total_button_width = (button_width * 4) + (button_spacing * 3)
   local buttons_start_x = (win_w - total_button_width) / 2
 
-  -- Record/Stop button
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y)
 
-  -- Check if any tracks are rec-armed and if selected track is rec-armed
   local any_armed = false
   local selected_track_armed = false
   local num_tracks = CountTracks(0)
   local selected_track = GetSelectedTrack(0, 0)
   local is_valid_selection = is_folder_parent_or_child()
 
-  -- Check folder arm status if selected track is a folder parent (only when not recording)
   local folder_status = nil
   local is_recording = (playstate == 5 or playstate == 6)
 
@@ -986,10 +955,10 @@ function draw(playstate)
   elseif not selected_track and not any_armed then
     rec_button_label = "Arm"
     show_select_message = true
-    button_disabled = true -- Disable if no track selected and no armed tracks
+    button_disabled = true
   elseif selected_track and not is_valid_selection then
     rec_button_label = "Arm"
-    button_disabled = true -- Disable if selected track is not a folder parent or child
+    button_disabled = true
   elseif selected_track and not selected_track_armed then
     rec_button_label = "Arm"
   elseif any_armed then
@@ -1004,7 +973,6 @@ function draw(playstate)
 
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
     check_prefs()
-    -- If pressing "Rec" and no track is selected but tracks are armed, select first armed track
     if rec_button_label == "Rec" and not selected_track and any_armed then
       for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
@@ -1021,18 +989,13 @@ function draw(playstate)
     ImGui.EndDisabled(ctx)
   end
 
-  -- Show warning indicator to the LEFT of rec button (only when not recording)
+  -- Warning indicator to the left of rec button
   if not is_recording and folder_status and (folder_status == "partial" or folder_status == "has_disabled") then
-    -- Position warning symbol to the left of the rec button
-    local warning_x = buttons_start_x - (10 * scale) -- 10 pixels to the left of rec button
+    local warning_x = buttons_start_x - (10 * scale)
     ImGui.SetCursorPos(ctx, warning_x, button_y)
-
-    ImGui.PushFont(ctx, medium_font, 25 * scale)          -- Use medium font for larger symbol
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAA00FF) -- Orange/amber warning color
-
-    local warning_symbol = "!"                            -- ASCII-safe exclamation mark
-
-    ImGui.Text(ctx, warning_symbol)
+    ImGui.PushFont(ctx, medium_font, 25 * scale)
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAA00FF)
+    ImGui.Text(ctx, "!")
     ImGui.PopStyleColor(ctx)
     ImGui.PopFont(ctx)
 
@@ -1045,100 +1008,92 @@ function draw(playstate)
     end
   end
 
-  -- Show gentle message if no track selected and no armed tracks (reserve space to prevent layout shift)
-  -- Don't show message when editing a selected item
+  -- Status message below rec button (maintains layout height)
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y + button_height + (5 * scale))
-  if not editing_item then
+  if not editing_item and not had_recent_recording then
     if show_select_message then
-      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF)
       ImGui.TextWrapped(ctx, "Select a parent track to arm")
       ImGui.PopStyleColor(ctx)
     elseif selected_track and not is_valid_selection then
-      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF) -- Gentle red/pink
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAAAAFF)
       ImGui.TextWrapped(ctx, "Select a folder parent or child")
       ImGui.PopStyleColor(ctx)
     else
-      -- Invisible placeholder to maintain spacing
-      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000) -- Fully transparent
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000)
       ImGui.TextWrapped(ctx, "Select a parent track to arm")
       ImGui.PopStyleColor(ctx)
     end
   else
-    -- Invisible placeholder to maintain spacing when editing
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000) -- Fully transparent
+    -- Invisible placeholder to maintain spacing
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000)
     ImGui.TextWrapped(ctx, "Select a parent track to arm")
     ImGui.PopStyleColor(ctx)
   end
 
-  -- Pause button (only enabled during recording)
+  -- Pause button
   ImGui.SetCursorPos(ctx, buttons_start_x + button_width + button_spacing, button_y)
-  if not is_recording then
-    ImGui.BeginDisabled(ctx, true)
-  end
+  if not is_recording then ImGui.BeginDisabled(ctx, true) end
   if ImGui.Button(ctx, "Pause", button_width, button_height) then
-    Main_OnCommand(1008, 0) -- Pause
+    Main_OnCommand(1008, 0)
   end
-  if not is_recording then
-    ImGui.EndDisabled(ctx)
-  end
+  if not is_recording then ImGui.EndDisabled(ctx) end
 
-  -- Increment Take button (only enabled during recording)
+  -- Increment Take button
   ImGui.SetCursorPos(ctx, buttons_start_x + (button_width + button_spacing) * 2, button_y)
-  if not is_recording then
-    ImGui.BeginDisabled(ctx, true)
-  end
+  if not is_recording then ImGui.BeginDisabled(ctx, true) end
   if ImGui.Button(ctx, "+Take", button_width, button_height) then
     Main_OnCommand(increment_take_cmd, 0)
   end
-  if not is_recording then
-    ImGui.EndDisabled(ctx)
-  end
+  if not is_recording then ImGui.EndDisabled(ctx) end
 
-  -- Set Next Recording Section button (only enabled when stopped)
+  -- Next section button
   ImGui.SetCursorPos(ctx, buttons_start_x + (button_width + button_spacing) * 3, button_y)
   local is_stopped = (playstate == 0)
-  if not is_stopped then
-    ImGui.BeginDisabled(ctx, true)
-  end
+  if not is_stopped then ImGui.BeginDisabled(ctx, true) end
   if ImGui.Button(ctx, "Next", button_width, button_height) then
     Main_OnCommand(next_section_cmd, 0)
   end
-  if not is_stopped then
-    ImGui.EndDisabled(ctx)
-  end
+  if not is_stopped then ImGui.EndDisabled(ctx) end
 
-  -- Rank and Notes section below buttons
+  -- Rank and Notes section
   local rank_y = button_y + button_height + (30 * scale)
 
-  -- Show indicator when editing a selected item (stopped mode only)
-  if playstate == 0 and editing_item then
+  -- Context indicator: which items will be affected
+  if playstate == 0 then
     ImGui.SetCursorPos(ctx, buttons_start_x, rank_y - (18 * scale))
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF) -- Carolina blue
-    ImGui.Text(ctx, "Editing Selected Item")
-    ImGui.PopStyleColor(ctx)
+    if editing_item then
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF) -- Carolina blue
+      ImGui.Text(ctx, "Editing Selected Item")
+      ImGui.PopStyleColor(ctx)
+    elseif had_recent_recording then
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xAACC88FF) -- Soft green
+      ImGui.Text(ctx, "Editing Last Recording")
+      ImGui.PopStyleColor(ctx)
+    end
   end
 
   -- Rank dropdown
   ImGui.SetCursorPos(ctx, buttons_start_x, rank_y)
 
-  -- Determine display index (1-9) for combo
   local display_index = recording_rank == "" and 9 or tonumber(recording_rank)
 
   ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[display_index].rgba)
   ImGui.SetNextItemWidth(ctx, total_button_width / 2)
 
-  -- Create unique ID based on editing state
   local rank_id = editing_item and tostring(editing_item):sub(-8) or "recording"
   if ImGui.BeginCombo(ctx, "##rank_" .. rank_id, RANKS[display_index].name) then
     for i, rank in ipairs(RANKS) do
       ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
       local is_selected = (display_index == i)
       if ImGui.Selectable(ctx, rank.name, is_selected) then
-        -- Store as string "1"-"8" or "" for No Rank
         recording_rank = (i == 9) and "" or tostring(i)
-        -- If stopped and editing an item, save immediately
         if playstate == 0 and editing_item then
+          -- Selected item mode: save directly to that item
           save_item_rank_and_notes(editing_item, recording_rank, recording_note)
+        elseif playstate == 0 and had_recent_recording then
+          -- Last-recording mode: apply to stored GUIDs regardless of cursor/selection
+          apply_rank_and_notes_by_guids()
         end
       end
       if is_selected then
@@ -1150,36 +1105,35 @@ function draw(playstate)
   end
   ImGui.PopStyleColor(ctx)
 
-  -- Notes input with proper scaling
+  -- Notes input
   local note_y = rank_y + (25 * scale)
   ImGui.SetCursorPos(ctx, buttons_start_x, note_y)
   local note_height = 40 * scale
 
-  -- Create unique ID based on editing state
   local note_id = editing_item and tostring(editing_item):sub(-8) or "recording"
   local rv, val = ImGui.InputTextMultiline(ctx, "##note_" .. note_id, recording_note, total_button_width, note_height)
   if rv then
     recording_note = val
-    -- If stopped and editing an item, save immediately
     if playstate == 0 and editing_item then
+      -- Selected item mode: save directly to that item
       save_item_rank_and_notes(editing_item, recording_rank, recording_note)
+    elseif playstate == 0 and had_recent_recording then
+      -- Last-recording mode: apply to stored GUIDs regardless of cursor/selection
+      apply_rank_and_notes_by_guids()
     end
   end
 
-
-  -- Handle right-click for settings popup (anywhere in window)
+  -- Right-click popup
   if ImGui.IsWindowHovered(ctx) and ImGui.IsMouseClicked(ctx, 1) then
-    -- Initialize popup values from current state when popup opens
     popup_take_text = take_text
     popup_session_text = session
-    popup_reset = reset -- This will be 0 or 1 based on current state
+    popup_reset = reset
     popup_start_text = start_text
     popup_end_text = end_text
     popup_duration_text = duration_text
     ImGui.OpenPopup(ctx, "settings_popup")
   end
 
-  -- ImGui popup menu for settings
   if ImGui.BeginPopup(ctx, "settings_popup") then
     marker_actions_running = false
     laststate = nil
@@ -1188,12 +1142,10 @@ function draw(playstate)
     ImGui.Separator(ctx)
     ImGui.Spacing(ctx)
 
-    -- Use table for aligned layout
     if ImGui.BeginTable(ctx, "settings_table", 2, ImGui.TableFlags_SizingStretchProp) then
       ImGui.TableSetupColumn(ctx, "labels", ImGui.TableColumnFlags_WidthFixed, 230)
       ImGui.TableSetupColumn(ctx, "inputs", ImGui.TableColumnFlags_WidthFixed, 250)
 
-      -- Override checkbox (first so we can enable/disable take number based on it)
       ImGui.TableNextRow(ctx)
       ImGui.TableSetColumnIndex(ctx, 0)
       ImGui.AlignTextToFramePadding(ctx)
@@ -1203,24 +1155,18 @@ function draw(playstate)
       local rv, val = ImGui.Checkbox(ctx, "##override", override_checked)
       if rv then popup_reset = val and 1 or 0 end
 
-      -- Take number input (disabled unless override is enabled)
       ImGui.TableNextRow(ctx)
       ImGui.TableSetColumnIndex(ctx, 0)
       ImGui.AlignTextToFramePadding(ctx)
       ImGui.Text(ctx, "Set Take Number:")
       ImGui.TableSetColumnIndex(ctx, 1)
       local take_disabled = (tonumber(popup_reset) ~= 1)
-      if take_disabled then
-        ImGui.BeginDisabled(ctx, true)
-      end
+      if take_disabled then ImGui.BeginDisabled(ctx, true) end
       ImGui.SetNextItemWidth(ctx, -1)
       local rv, val = ImGui.InputInt(ctx, "##take", popup_take_text)
       if rv and not take_disabled then popup_take_text = val end
-      if take_disabled then
-        ImGui.EndDisabled(ctx)
-      end
+      if take_disabled then ImGui.EndDisabled(ctx) end
 
-      -- Session name input
       ImGui.TableNextRow(ctx)
       ImGui.TableSetColumnIndex(ctx, 0)
       ImGui.AlignTextToFramePadding(ctx)
@@ -1230,7 +1176,6 @@ function draw(playstate)
       local rv, val = ImGui.InputText(ctx, "##session", popup_session_text, 256)
       if rv then popup_session_text = val end
 
-      -- Start time input
       ImGui.TableNextRow(ctx)
       ImGui.TableSetColumnIndex(ctx, 0)
       ImGui.AlignTextToFramePadding(ctx)
@@ -1240,7 +1185,6 @@ function draw(playstate)
       local rv, val = ImGui.InputText(ctx, "##start", popup_start_text, 256)
       if rv then popup_start_text = val end
 
-      -- End time input
       ImGui.TableNextRow(ctx)
       ImGui.TableSetColumnIndex(ctx, 0)
       ImGui.AlignTextToFramePadding(ctx)
@@ -1250,7 +1194,6 @@ function draw(playstate)
       local rv, val = ImGui.InputText(ctx, "##end", popup_end_text, 256)
       if rv then popup_end_text = val end
 
-      -- Duration input
       ImGui.TableNextRow(ctx)
       ImGui.TableSetColumnIndex(ctx, 0)
       ImGui.AlignTextToFramePadding(ctx)
@@ -1267,9 +1210,7 @@ function draw(playstate)
     ImGui.Separator(ctx)
     ImGui.Spacing(ctx)
 
-    -- Apply button
     if ImGui.Button(ctx, "Apply", 120, 0) then
-      -- Copy popup values to main variables
       local session_changed = (popup_session_text ~= session)
 
       take_text = popup_take_text
@@ -1281,7 +1222,6 @@ function draw(playstate)
       start_next_day = ""
       end_next_day = ""
 
-      -- Parse start time
       if start_text ~= "" then
         start_time = parse_time(start_text)
         if start_time and start_time <= current_time then
@@ -1292,7 +1232,6 @@ function draw(playstate)
         start_time = nil
       end
 
-      -- Parse end time
       if end_text ~= "" then
         end_time = parse_time(end_text)
         if end_time then
@@ -1308,7 +1247,6 @@ function draw(playstate)
         end_time = nil
       end
 
-      -- Parse duration
       if duration_text ~= "" then
         duration = parse_duration(duration_text)
         if duration and start_time then
@@ -1319,7 +1257,6 @@ function draw(playstate)
         calc_end_time = nil
       end
 
-      -- Apply session
       if popup_session_text and popup_session_text ~= "" then
         session = popup_session_text
         session_dir = session .. separator
@@ -1328,7 +1265,6 @@ function draw(playstate)
         session, session_dir, session_suffix = "", "", ""
       end
 
-      -- If session changed, recalculate take count
       if session_changed then
         iterated_filenames = false
         take_text = get_take_count(session) + 1
@@ -1336,7 +1272,6 @@ function draw(playstate)
         session_text = session
         session_extracted = false
       else
-        -- Apply take number only if session didn't change
         local take_choice = tonumber(take_text) or take_count + 1
         if take_choice >= take_count then
           take_count = take_choice - 1
@@ -1350,7 +1285,6 @@ function draw(playstate)
         end
       end
 
-      -- Save settings
       SetProjExtState(0, "ReaClassical", "TakeSessionName", session)
       SetProjExtState(0, "ReaClassical", "TakeCounterOverride", reset)
       SetProjExtState(0, "ReaClassical", "Recording Start", start_text)
@@ -1368,7 +1302,6 @@ function draw(playstate)
 
     ImGui.SameLine(ctx)
 
-    -- Cancel button
     if ImGui.Button(ctx, "Cancel", 120, 0) then
       ImGui.CloseCurrentPopup(ctx)
     end
@@ -1376,7 +1309,7 @@ function draw(playstate)
     ImGui.EndPopup(ctx)
   end
 
-  -- keyboard shortcut capture
+  -- Keyboard shortcuts
   if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_Enter, false) then
     if ImGui.GetKeyMods(ctx) & ImGui.Mod_Ctrl ~= 0 then
       open = false
@@ -1396,7 +1329,7 @@ function draw(playstate)
       end
     elseif mods & ImGui.Mod_Ctrl ~= 0 then
       if is_recording then
-        Main_OnCommand(1008, 0) -- Pause
+        Main_OnCommand(1008, 0)
       end
     else
       if not button_disabled then
@@ -1423,14 +1356,13 @@ end
 ---------------------------------------------------------------------
 
 function marker_actions()
-  if marker_actions_running then return end -- do not start twice
+  if marker_actions_running then return end
   marker_actions_running = true
 
   local markers = {}
   local next_idx = 1
-  local tolerance = 0.05 -- seconds (50 ms)
+  local tolerance = 0.05
 
-  -- Pre-scan markers once
   local function scan_markers()
     markers = {}
     local num_markers, num_regions = CountProjectMarkers(0)
@@ -1446,7 +1378,7 @@ function marker_actions()
     table.sort(markers, function(a, b) return a.pos < b.pos end)
   end
 
-  scan_markers() -- initial scan
+  scan_markers()
 
   local function reset_marker_index(play_pos)
     for i, m in ipairs(markers) do
@@ -1459,7 +1391,7 @@ function marker_actions()
   end
 
   local function check_next_marker()
-    if not marker_actions_running then return end -- allow external stop
+    if not marker_actions_running then return end
 
     local state = GetPlayState()
 
@@ -1521,7 +1453,6 @@ function pastel_color(index)
   local golden_ratio_conjugate = 0.61803398875
   local hue                    = (index * golden_ratio_conjugate) % 1.0
 
-  -- Subtle variation in saturation/lightness
   local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
   local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
 
@@ -1557,11 +1488,9 @@ function get_item_color(item)
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   local colors = get_color_table()
 
-  -- Determine color to use
   local color_to_use = nil
   local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
 
-  -- Check GUID first
   if saved_guid ~= "" then
     local referenced_item = nil
     local total_items = CountMediaItems(0)
@@ -1586,13 +1515,11 @@ function get_item_color(item)
     else
       color_to_use = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
     end
-    -- If no GUID color, use folder-based logic
   elseif not color_to_use then
     local item_track = GetMediaItemTrack(item)
     local folder_tracks = {}
     local num_tracks = CountTracks(0)
 
-    -- Build list of folder tracks in project order
     for t = 0, num_tracks - 1 do
       local track = GetTrack(0, t)
       local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
@@ -1601,7 +1528,6 @@ function get_item_color(item)
       end
     end
 
-    -- Find parent folder track of the item
     local parent_folder = nil
     local track_idx = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
     for t = track_idx, 0, -1 do
@@ -1613,24 +1539,21 @@ function get_item_color(item)
       end
     end
 
-    -- Compute pastel index: second folder → index 0
     local folder_index = 0
 
     if parent_folder then
       for i, track in ipairs(folder_tracks) do
         if track == parent_folder then
-          folder_index = i - 2 -- account for dest
+          folder_index = i - 2
           break
         end
       end
-      -- First folder special case
       if folder_index < 0 then
-        color_to_use = colors.dest_items -- use default color for first folder
+        color_to_use = colors.dest_items
       else
         color_to_use = pastel_color(folder_index)
       end
     else
-      -- No folder: fallback to dest_items
       color_to_use = colors.dest_items
     end
   end
@@ -1646,14 +1569,12 @@ function update_take_name(item, rank)
 
   local _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
 
-  -- Remove any existing rank prefixes
   local all_prefixes = { "Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start" }
   for _, prefix in ipairs(all_prefixes) do
     item_name = item_name:gsub("^" .. prefix .. "%-", "")
     item_name = item_name:gsub("^" .. prefix .. "$", "")
   end
 
-  -- Add new rank prefix if not "No Rank" (empty string)
   if rank ~= "" then
     local rank_index = tonumber(rank)
     if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
@@ -1670,17 +1591,179 @@ end
 
 ---------------------------------------------------------------------
 
+-- Scan the project for items that were just recorded (same logic as apply_rank_and_notes_to_items
+-- but only collects GUIDs) and stores them in ProjExtState for later GUID-based re-targeting.
+function store_last_recorded_guids()
+  local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+  local cursor_pos = GetCursorPosition()
+  local guids = {}
+
+  local function collect_item(item)
+    local take = GetActiveTake(item)
+    if not take then return end
+    local source = GetMediaItemTake_Source(take)
+    if GetMediaSourceType(source, "") ~= "WAVE" then return end
+    local _, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+    if guid and guid ~= "" then
+      guids[#guids + 1] = guid
+    end
+  end
+
+  if workflow == "Vertical" then
+    -- Find rec-armed folder track
+    local rec_track = nil
+    local num_tracks = CountTracks(0)
+    for i = 0, num_tracks - 1 do
+      local track = GetTrack(0, i)
+      if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 and
+         GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        rec_track = track
+        break
+      end
+    end
+
+    if rec_track then
+      local rec_track_idx = GetMediaTrackInfo_Value(rec_track, "IP_TRACKNUMBER") - 1
+      local folder_tracks = {}
+      for t = 0, num_tracks - 1 do
+        local track = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+          folder_tracks[#folder_tracks + 1] = track
+        end
+      end
+      local current_folder_idx = nil
+      for idx, folder in ipairs(folder_tracks) do
+        if GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") - 1 == rec_track_idx then
+          current_folder_idx = idx
+          break
+        end
+      end
+      local target_folder = (current_folder_idx and current_folder_idx > 1) and
+                            folder_tracks[current_folder_idx - 1] or nil
+
+      if target_folder then
+        local target_folder_idx = GetMediaTrackInfo_Value(target_folder, "IP_TRACKNUMBER") - 1
+        local folder_end = num_tracks
+        for t = target_folder_idx + 1, num_tracks - 1 do
+          if GetMediaTrackInfo_Value(GetTrack(0, t), "I_FOLDERDEPTH") == 1 then
+            folder_end = t
+            break
+          end
+        end
+        for t = target_folder_idx, folder_end - 1 do
+          local track = GetTrack(0, t)
+          for j = 0, CountTrackMediaItems(track) - 1 do
+            local item = GetTrackMediaItem(track, j)
+            if math.abs(GetMediaItemInfo_Value(item, "D_POSITION") - cursor_pos) < 0.5 then
+              collect_item(item)
+            end
+          end
+        end
+      end
+    end
+  else
+    -- Horizontal workflow
+    for i = 0, CountTracks(0) - 1 do
+      local track = GetTrack(0, i)
+      for j = 0, CountTrackMediaItems(track) - 1 do
+        local item = GetTrackMediaItem(track, j)
+        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+        if math.abs(item_end - cursor_pos) < 0.5 then
+          collect_item(item)
+        end
+      end
+    end
+  end
+
+  SetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs", table.concat(guids, ","))
+end
+
+---------------------------------------------------------------------
+
+-- Apply rank/notes to a single item (shared logic used by both apply functions).
+function apply_rank_and_notes_to_item(item)
+  local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
+  local is_colorized = (colorized == "y")
+
+  if recording_rank ~= "" then
+    if is_colorized then
+      GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
+    end
+    GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
+    if ranking_color_pref == 0 then
+      local rank_index = tonumber(recording_rank)
+      if rank_index and RANKS[rank_index] then
+        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR",
+          rgba_to_native(RANKS[rank_index].rgba) | 0x1000000)
+      end
+    end
+    update_take_name(item, recording_rank)
+  else
+    GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
+    if not is_colorized then
+      if auto_color_pref == 0 then
+        local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+        local color_to_use
+        if workflow == "Horizontal" then
+          local take_num = tonumber(take_text)
+          color_to_use = take_num and pastel_color(take_num - 1) or get_item_color(item)
+        else
+          color_to_use = get_item_color(item)
+        end
+        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+      else
+        SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", 0)
+      end
+    end
+    update_take_name(item, "")
+  end
+
+  if recording_note ~= "" then
+    GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
+  end
+
+  GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
+  UpdateItemInProject(item)
+end
+
+---------------------------------------------------------------------
+
+-- Apply rank/notes to the last recorded items identified by stored GUIDs.
+-- This is cursor-independent so it works regardless of what the user has clicked on.
+function apply_rank_and_notes_by_guids()
+  local _, guid_str = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
+  if not guid_str or guid_str == "" then return end
+
+  -- Build lookup table of target GUIDs
+  local target_guids = {}
+  for guid in guid_str:gmatch("([^,]+)") do
+    target_guids[guid] = true
+  end
+
+  -- Scan all items and apply to matching ones
+  local total_items = CountMediaItems(0)
+  for i = 0, total_items - 1 do
+    local item = GetMediaItem(0, i)
+    local _, guid = GetSetMediaItemInfo_String(item, "GUID", "", false)
+    if guid and target_guids[guid] then
+      apply_rank_and_notes_to_item(item)
+    end
+  end
+
+  UpdateArrange()
+end
+
+---------------------------------------------------------------------
+
 function apply_rank_and_notes_to_items()
-  -- Get workflow to determine detection logic
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 
-  -- In Vertical workflow, find the folder ABOVE the currently rec-armed track
   local target_folder = nil
   if workflow == "Vertical" then
     local rec_track = nil
     local num_tracks = CountTracks(0)
 
-    -- Find first rec-armed FOLDER track (parent with depth=1)
     for i = 0, num_tracks - 1 do
       local track = GetTrack(0, i)
       local rec_armed = GetMediaTrackInfo_Value(track, "I_RECARM")
@@ -1694,7 +1777,6 @@ function apply_rank_and_notes_to_items()
     if rec_track then
       local rec_track_idx = GetMediaTrackInfo_Value(rec_track, "IP_TRACKNUMBER") - 1
 
-      -- Build a list of all folder parent tracks in order
       local folder_tracks = {}
       for t = 0, num_tracks - 1 do
         local track = GetTrack(0, t)
@@ -1704,39 +1786,32 @@ function apply_rank_and_notes_to_items()
         end
       end
 
-      -- Find which folder in the list IS the rec-armed track
       local current_folder_idx = nil
       for idx, folder in ipairs(folder_tracks) do
         local folder_idx = GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER") - 1
-
         if folder_idx == rec_track_idx then
           current_folder_idx = idx
           break
         end
       end
 
-      -- Get the folder ABOVE (previous in the list)
       if current_folder_idx and current_folder_idx > 1 then
         target_folder = folder_tracks[current_folder_idx - 1]
       end
     end
   end
 
-  -- Find all items from the last recording
   local cursor_pos = GetCursorPosition()
   local items_found = 0
 
   if workflow == "Vertical" then
-    -- In Vertical workflow, process all tracks within the target folder
     if target_folder then
       local num_tracks = CountTracks(0)
       local target_folder_idx = GetMediaTrackInfo_Value(target_folder, "IP_TRACKNUMBER") - 1
 
-      -- Find the range of tracks that belong to this folder
       local folder_start = target_folder_idx
       local folder_end = num_tracks
 
-      -- Find where this folder ends (next folder or end of project)
       for t = target_folder_idx + 1, num_tracks - 1 do
         local track = GetTrack(0, t)
         local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
@@ -1746,7 +1821,6 @@ function apply_rank_and_notes_to_items()
         end
       end
 
-      -- Process all tracks within this folder (including parent and children)
       for t = folder_start, folder_end - 1 do
         local track = GetTrack(0, t)
         local item_count = CountTrackMediaItems(track)
@@ -1762,24 +1836,17 @@ function apply_rank_and_notes_to_items()
             if source_type == "WAVE" then
               local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
 
-              -- Check if item start is near cursor
               if math.abs(item_start - cursor_pos) < 0.5 then
                 items_found = items_found + 1
 
-                -- Check if item is colorized
                 local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
                 local is_colorized = (colorized == "y")
 
-                -- Apply rank (empty string deletes P_EXT state)
                 if recording_rank ~= "" then
-                  -- If applying a rank, clear the colorized flag
                   if is_colorized then
                     GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
                   end
-
                   GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
-
-                  -- Apply rank color ONLY if ranking_color_pref == 0 (not checked)
                   if ranking_color_pref == 0 then
                     local rank_index = tonumber(recording_rank)
                     if rank_index and RANKS[rank_index] then
@@ -1789,24 +1856,20 @@ function apply_rank_and_notes_to_items()
                   end
                   update_take_name(item, recording_rank)
                 else
-                  -- No rank - delete P_EXT state and only restore original color if NOT colorized AND auto_color_pref == 0 (not checked)
                   GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
                   if not is_colorized and auto_color_pref == 0 then
                     local color_to_use = get_item_color(item)
                     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
                   elseif not is_colorized and auto_color_pref == 1 then
-                    -- auto_color_pref == 1: set to default color (0)
                     SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", 0)
                   end
                   update_take_name(item, "")
                 end
 
-                -- Apply notes
                 if recording_note ~= "" then
                   GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
                 end
 
-                -- Store take number
                 GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
               end
             end
@@ -1815,7 +1878,7 @@ function apply_rank_and_notes_to_items()
       end
     end
   else
-    -- Horizontal workflow - check all tracks
+    -- Horizontal workflow
     local track_count = CountTracks(0)
     for i = 0, track_count - 1 do
       local track = GetTrack(0, i)
@@ -1834,24 +1897,17 @@ function apply_rank_and_notes_to_items()
             local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
             local item_end = item_start + item_length
 
-            -- Check if item end is near cursor (items sequential)
             if math.abs(item_end - cursor_pos) < 0.5 then
               items_found = items_found + 1
 
-              -- Check if item is colorized
               local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
               local is_colorized = (colorized == "y")
 
-              -- Apply rank (empty string deletes P_EXT state)
               if recording_rank ~= "" then
-                -- If applying a rank, clear the colorized flag
                 if is_colorized then
                   GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
                 end
-
                 GetSetMediaItemInfo_String(item, "P_EXT:item_rank", recording_rank, true)
-
-                -- Apply rank color ONLY if ranking_color_pref == 0 (not checked)
                 if ranking_color_pref == 0 then
                   local rank_index = tonumber(recording_rank)
                   if rank_index and RANKS[rank_index] then
@@ -1861,32 +1917,26 @@ function apply_rank_and_notes_to_items()
                 end
                 update_take_name(item, recording_rank)
               else
-                -- No rank - delete P_EXT state and only apply color if NOT colorized AND auto_color_pref == 0 (not checked)
                 GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", true)
                 if not is_colorized and auto_color_pref == 0 then
                   local color_to_use
                   local take_num = tonumber(take_text)
                   if take_num then
-                    -- Subsequent takes use pastel_color starting at index 0 (take_num - 1)
                     color_to_use = pastel_color(take_num - 1)
                   else
-                    -- Fallback to get_item_color if take_num is invalid
                     color_to_use = get_item_color(item)
                   end
                   SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
                 elseif not is_colorized and auto_color_pref == 1 then
-                  -- auto_color_pref == 1: set to default color (0)
                   SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", 0)
                 end
                 update_take_name(item, "")
               end
 
-              -- Apply notes
               if recording_note ~= "" then
                 GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
               end
 
-              -- Store take number
               GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
             end
           end
@@ -1907,13 +1957,11 @@ function extract_take_from_filename(item)
   local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
   if not take_name or take_name == "" then return nil end
 
-  -- Pattern 1: SessionName_T002 format - extract the number after _T
   local take_num = take_name:match("_T(%d+)$")
   if take_num then
     return tonumber(take_num)
   end
 
-  -- Pattern 2: Just padded number like "025"
   take_num = take_name:match("^(%d+)$")
   if take_num then
     return tonumber(take_num)
@@ -1931,13 +1979,11 @@ function extract_session_from_filename(item)
   local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
   if not take_name or take_name == "" then return nil end
 
-  -- Pattern 1: SessionName_T002 format
   local session_name = take_name:match("^(.+)_T%d+")
   if session_name then
     return session_name
   end
 
-  -- Pattern 2: Just padded number like "025" - no session
   if take_name:match("^%d+$") then
     return nil
   end
@@ -1949,7 +1995,6 @@ end
 
 function disarm_all_tracks()
   local playstate = GetPlayState()
-  -- Only disarm if not recording (playstate 5 or 6)
   if playstate == 5 or playstate == 6 then
     return
   end
@@ -1967,27 +2012,19 @@ end
 ---------------------------------------------------------------------
 
 function get_folder_arm_status(folder_track)
-  -- Returns: "all", "partial", "none", "has_disabled"
-  -- Shows warning if ANY track feeds a disabled mixer OR if not all tracks are armed
-
   local num_tracks = CountTracks(0)
   local folder_idx = GetMediaTrackInfo_Value(folder_track, "IP_TRACKNUMBER") - 1
 
-  -- Find all tracks in this folder (including the parent)
-  local folder_tracks = { folder_track } -- Start with the parent folder track itself
+  local folder_tracks = { folder_track }
   local i = folder_idx + 1
   local depth = 1
 
   while i < num_tracks and depth > 0 do
     local track = GetTrack(0, i)
     local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
     table.insert(folder_tracks, track)
     depth = depth + track_depth
-
-    if depth <= 0 then
-      break
-    end
+    if depth <= 0 then break end
     i = i + 1
   end
 
@@ -1995,27 +2032,17 @@ function get_folder_arm_status(folder_track)
     return "none"
   end
 
-  -- Check each track's rec-arm status and disabled status
   local armed_count = 0
   local has_any_disabled = false
 
   for _, track in ipairs(folder_tracks) do
     local is_armed = GetMediaTrackInfo_Value(track, "I_RECARM") == 1
-
-    -- Check if this track feeds a disabled mixer
     local mixer_track = find_mixer_for_track(track)
     local is_disabled = is_mixer_disabled(mixer_track)
-
-    if is_disabled then
-      has_any_disabled = true
-    end
-
-    if is_armed then
-      armed_count = armed_count + 1
-    end
+    if is_disabled then has_any_disabled = true end
+    if is_armed then armed_count = armed_count + 1 end
   end
 
-  -- Return status - show warning if ANY track is disabled OR not all are armed
   if has_any_disabled then
     return "has_disabled"
   elseif armed_count > 0 and armed_count < #folder_tracks then
@@ -2030,7 +2057,6 @@ end
 ---------------------------------------------------------------------
 
 function find_mixer_for_track(track)
-  -- Find the mixer track that this track sends to
   local num_sends = GetTrackNumSends(track, 0)
 
   for i = 0, num_sends - 1 do
