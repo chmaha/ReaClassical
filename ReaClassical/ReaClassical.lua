@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.13
+@version 26.2.14
 @changelog
-  S-D editing: Revert to jumping to 5 and F4 edits
+  Record Panel: Allow for F9-related shortcuts while window has focus
+  Various: Add toggle to close reaimgui window
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
