@@ -42,16 +42,16 @@ if workflow == "" then
         modifier = "Cmd"
     end
     MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
+        .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local ranking_color_pref = 0
 if input ~= "" then
-  local table = {}
-  for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-  if table[6] then ranking_color_pref = tonumber(table[6]) or 0 end
+    local table = {}
+    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+    if table[6] then ranking_color_pref = tonumber(table[6]) or 0 end
 end
 
 set_action_options(2)
@@ -334,7 +334,10 @@ function main()
                 end
                 ImGui.PopID(ctx)
             end
-
+            -- keyboard shortcut capture
+            if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_N, false) then
+                    window_open = false
+            end
             ImGui.End(ctx)
         end
 

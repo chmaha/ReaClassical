@@ -177,13 +177,13 @@ function main()
 
                 -- Draw color button
                 ImGui.PushID(ctx, i)
-                
+
                 -- Extract RGB from preset color for display
                 local preset_color = color_presets[i]
-                
-                if ImGui.ColorButton(ctx, '##preset' .. i, preset_color, 
-                    ImGui.ColorEditFlags_NoAlpha | ImGui.ColorEditFlags_NoBorder,
-                    preset_size, preset_size) then
+
+                if ImGui.ColorButton(ctx, '##preset' .. i, preset_color,
+                        ImGui.ColorEditFlags_NoAlpha | ImGui.ColorEditFlags_NoBorder,
+                        preset_size, preset_size) then
                     -- Left click: Load preset
                     selected_color_rgb = preset_color
                     message_text = string.format("Loaded preset #%d", i)
@@ -266,7 +266,10 @@ function main()
                     message_text = "" -- Clear message after duration
                 end
             end
-
+            -- keyboard shortcut capture
+            if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_K, false) then
+                    window_open = false
+            end
             ImGui.End(ctx)
         end
 

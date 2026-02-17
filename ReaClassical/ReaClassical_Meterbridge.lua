@@ -37,7 +37,7 @@ if workflow == "" then
     modifier = "Cmd"
   end
   MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
+    .. "+N to use this function.", "ReaClassical Error", 0)
   return
 end
 
@@ -188,7 +188,10 @@ function main()
 
         ImGui.EndTabBar(ctx)
       end
-
+      -- keyboard shortcut capture
+      if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_B, false) then
+          window_open = false
+      end
       ImGui.End(ctx)
     end
     defer(main)

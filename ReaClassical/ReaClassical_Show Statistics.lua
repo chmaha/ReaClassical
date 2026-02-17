@@ -40,7 +40,7 @@ if workflow == "" then
         modifier = "Cmd"
     end
     MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
+        .. "+N to use this function.", "ReaClassical Error", 0)
     return
 end
 
@@ -270,7 +270,10 @@ function main()
             if ImGui.Button(ctx, "Refresh", 80, 0) then
                 calculate_stats()
             end
-
+            -- keyboard shortcut capture
+            if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_F1, false) then
+                window_open = false
+            end
             ImGui.End(ctx)
         end
 

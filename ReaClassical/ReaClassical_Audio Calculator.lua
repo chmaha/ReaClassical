@@ -66,6 +66,12 @@ function main()
     local visible, open = ImGui.Begin(ctx, 'ReaClassical Audio Calculator', true)
 
     if visible then
+        -- keyboard shortcut capture
+        if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_H, false) then
+            if ImGui.GetKeyMods(ctx) & ImGui.Mod_Shift ~= 0 then
+                open = false
+            end
+        end
         -- Unit Type
         ImGui.Text(ctx, "Select Unit Type:")
         ImGui.SetNextItemWidth(ctx, -1)

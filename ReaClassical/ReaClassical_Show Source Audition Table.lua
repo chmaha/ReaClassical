@@ -336,7 +336,10 @@ function main()
                     ImGui.EndTable(ctx)
                 end
             end
-
+            -- keyboard shortcut capture
+            if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_Z, false) then
+                    window_open = false
+            end
             ImGui.End(ctx)
         end
     end

@@ -108,10 +108,14 @@ function load_colors_from_project()
   if states.paused then colors.paused = states.paused end
 
   -- Update text colors to match
-  if states.offline then text_colors.offline = { states.offline[1], states.offline[2], states.offline[3], states.offline
-        [4] } end
-  if states.standby then text_colors.standby = { states.standby[1], states.standby[2], states.standby[3], states.standby
-        [4] } end
+  if states.offline then
+    text_colors.offline = { states.offline[1], states.offline[2], states.offline[3], states.offline
+        [4] }
+  end
+  if states.standby then
+    text_colors.standby = { states.standby[1], states.standby[2], states.standby[3], states.standby
+        [4] }
+  end
   if states.recording then
     text_colors.recording = {
       math.min(1.0, states.recording[1] + 0.1),
@@ -324,6 +328,12 @@ function main()
       local text_w = select(1, ImGui.CalcTextSize(ctx, label))
       ImGui.SetCursorPosX(ctx, (win_w - text_w) * 0.5)
       ImGui.TextColored(ctx, color, label)
+    end
+    -- keyboard shortcut capture
+    if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_R, false) then
+      if ImGui.GetKeyMods(ctx) & ImGui.Mod_Alt ~= 0 then
+        window_open = false
+      end
     end
     ImGui.End(ctx)
   end

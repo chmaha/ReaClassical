@@ -904,7 +904,10 @@ function main()
         else
             ImGui.Text(ctx, "No track selected. Please select a folder track to edit metadata.")
         end
-
+        -- keyboard shortcut capture
+        if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_Y, false) then
+            window_open = false
+        end
         ImGui.End(ctx)
     end
 

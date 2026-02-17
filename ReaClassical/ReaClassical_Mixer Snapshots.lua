@@ -86,7 +86,7 @@ local recall_pan              = true
 local recall_mute             = true
 local recall_solo             = true
 local recall_phase            = true
-local recall_width            = true  -- NEW: Added width recall flag
+local recall_width            = true -- NEW: Added width recall flag
 local recall_fx               = true
 local recall_sends            = true
 local recall_routing          = true
@@ -179,7 +179,7 @@ function get_track_state(track)
   state.mute = GetMediaTrackInfo_Value(track, "B_MUTE")
   state.solo = GetMediaTrackInfo_Value(track, "I_SOLO")
   state.phase = GetMediaTrackInfo_Value(track, "B_PHASE")
-  state.width = GetMediaTrackInfo_Value(track, "D_WIDTH")  -- NEW: Capture track width
+  state.width = GetMediaTrackInfo_Value(track, "D_WIDTH") -- NEW: Capture track width
   state.guid = GetTrackGUID(track)
 
   state.fx_chain = {}
@@ -243,7 +243,7 @@ function apply_track_state(track, state)
   if recall_mute then SetMediaTrackInfo_Value(track, "B_MUTE", state.mute) end
   if recall_solo then SetMediaTrackInfo_Value(track, "I_SOLO", state.solo) end
   if recall_phase then SetMediaTrackInfo_Value(track, "B_PHASE", state.phase) end
-  if recall_width and state.width then SetMediaTrackInfo_Value(track, "D_WIDTH", state.width) end  -- NEW: Apply width if available
+  if recall_width and state.width then SetMediaTrackInfo_Value(track, "D_WIDTH", state.width) end -- NEW: Apply width if available
 
   if recall_fx then
     for fx_idx, fx in pairs(state.fx_chain) do
@@ -703,7 +703,7 @@ function save_snapshots_to_project()
   data.recall_mute = recall_mute
   data.recall_solo = recall_solo
   data.recall_phase = recall_phase
-  data.recall_width = recall_width  -- NEW: Save width recall flag
+  data.recall_width = recall_width -- NEW: Save width recall flag
   data.recall_fx = recall_fx
   data.recall_sends = recall_sends
   data.recall_routing = recall_routing
@@ -742,7 +742,7 @@ function load_snapshots_from_project()
       recall_mute = data.recall_mute ~= false
       recall_solo = data.recall_solo ~= false
       recall_phase = data.recall_phase ~= false
-      recall_width = data.recall_width ~= false  -- NEW: Load width recall flag (default true)
+      recall_width = data.recall_width ~= false -- NEW: Load width recall flag (default true)
       recall_fx = data.recall_fx ~= false
       recall_sends = data.recall_sends ~= false
       recall_routing = data.recall_routing ~= false
@@ -1227,7 +1227,7 @@ function draw_UI()
       { "Mute",         recall_mute,    function(v) recall_mute = v end },
       { "Solo",         recall_solo,    function(v) recall_solo = v end },
       { "Phase",        recall_phase,   function(v) recall_phase = v end },
-      { "Width",        recall_width,   function(v) recall_width = v end },  -- NEW: Added Width checkbox
+      { "Width",        recall_width,   function(v) recall_width = v end }, -- NEW: Added Width checkbox
       { "FX",           recall_fx,      function(v) recall_fx = v end },
       { "Send Levels",  recall_sends,   function(v) recall_sends = v end },
       { "Send Routing", recall_routing, function(v) recall_routing = v end }
@@ -1238,7 +1238,12 @@ function draw_UI()
       end
       ImGui.SameLine(ctx)
     end
-
+    -- keyboard shortcut capture
+    if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_M, false) then
+      if ImGui.GetKeyMods(ctx) & ImGui.Mod_Shift ~= 0 then
+        open = false
+      end
+    end
     ImGui.End(ctx)
   end
   return open
@@ -1375,7 +1380,7 @@ function clear_all_automation()
       if num_envelopes > 0 then
         cleared_count = cleared_count + 1
       end
-      
+
       -- Mark track for hiding from TCP
       table.insert(tracks_to_hide, track)
     end
@@ -1384,15 +1389,15 @@ function clear_all_automation()
   -- Hide tracks from TCP after clearing automation
   for _, track in ipairs(tracks_to_hide) do
     local current_tcp_state = GetMediaTrackInfo_Value(track, "B_SHOWINTCP")
-    
+
     if current_tcp_state == 1 then
       -- Hide the track in TCP
       SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-      
+
       -- Update project ext state
       local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
       local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
-      
+
       -- Use appropriate prefix for ext state key
       if mixer_state == "y" then
         SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. guid, "0")
@@ -1469,7 +1474,7 @@ function convert_snapshots_to_automation()
             mute = {},
             solo = {},
             phase = {},
-            width = {},  -- NEW: Added width tracking
+            width = {}, -- NEW: Added width tracking
             fx = {},
             sends = {}
           }
@@ -1484,7 +1489,8 @@ function convert_snapshots_to_automation()
         table.insert(param_changes[track_guid].phase, { pos = snap_pos, value = track_state.phase, snap_idx = snap_idx })
         -- NEW: Record width if available
         if track_state.width then
-          table.insert(param_changes[track_guid].width, { pos = snap_pos, value = track_state.width, snap_idx = snap_idx })
+          table.insert(param_changes[track_guid].width,
+            { pos = snap_pos, value = track_state.width, snap_idx = snap_idx })
         end
 
         -- Record FX parameters
@@ -1817,29 +1823,29 @@ function convert_snapshots_to_automation()
       if track then
         -- Reset volume only if it's getting automation
         if has_changes(params.volume) then
-          SetMediaTrackInfo_Value(track, "D_VOL", 1.0)  -- 0dB
+          SetMediaTrackInfo_Value(track, "D_VOL", 1.0) -- 0dB
         end
-        
+
         -- Reset pan only if it's getting automation
         if has_changes(params.pan) then
-          SetMediaTrackInfo_Value(track, "D_PAN", 0.0)  -- Center
+          SetMediaTrackInfo_Value(track, "D_PAN", 0.0) -- Center
         end
-        
+
         -- Reset mute only if it's getting automation
         if has_changes(params.mute) then
-          SetMediaTrackInfo_Value(track, "B_MUTE", 0)  -- Unmuted
+          SetMediaTrackInfo_Value(track, "B_MUTE", 0) -- Unmuted
         end
-        
+
         -- Reset phase only if it's getting automation
         if has_changes(params.phase) then
-          SetMediaTrackInfo_Value(track, "B_PHASE", 0)  -- Normal phase
+          SetMediaTrackInfo_Value(track, "B_PHASE", 0) -- Normal phase
         end
-        
+
         -- NEW: Reset width only if it's getting automation
         if has_changes(params.width) then
-          SetMediaTrackInfo_Value(track, "D_WIDTH", 1.0)  -- Normal width
+          SetMediaTrackInfo_Value(track, "D_WIDTH", 1.0) -- Normal width
         end
-        
+
         -- Reset send parameters only if they're getting automation
         for send_idx, send_params in pairs(params.sends) do
           if has_changes(send_params.volume) then
@@ -1852,11 +1858,11 @@ function convert_snapshots_to_automation()
             SetTrackSendInfo_Value(track, 0, send_idx, "B_MUTE", 0)
           end
         end
-        
+
         -- FX parameters don't need explicit reset as they'll be controlled by automation
       end
     end
-    
+
     -- Insert all automation points
     for _, auto_point in ipairs(auto_points) do
       local env_val = needs_scaling and ScaleToEnvelopeMode(1, auto_point.value) or auto_point.value

@@ -2167,7 +2167,10 @@ function main()
 
         -- Call folder browser dialog
         draw_folder_browser()
-
+        -- keyboard shortcut capture
+        if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_C, false) then
+            open = false
+        end
         ImGui.End(ctx)
     end
 
