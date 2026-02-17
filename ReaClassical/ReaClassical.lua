@@ -1,9 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.14
+@version 26.2.15
 @changelog
-  Record Panel: Allow for F9-related shortcuts while window has focus
-  Various: Add toggle to close reaimgui window
+  Record Panel: Allow horizontal recording mode in vertical workflow
+  Record Panel: Next button operates as carriage return if horizontal checkbox enabled
+  Record Panel: If no item selected, ranking and notes are for last recorded items
+  Record Panel: Add tooltips
+  Classical Take Record: Add rec start check and move edit cursor accordingly
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
