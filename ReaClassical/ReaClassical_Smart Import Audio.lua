@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, get_project_media_path, scan_media_folder_recursive
 local parse_canonical_filename, get_tracks, find_track_by_name
-local abort_if_items_exist, delete_items
+local get_project_end_position, get_used_source_files, delete_items
 local select_children_of_selected_folders, unselect_folder_children
 local calculate_round_robin_distribution, generate_preview_text
 local show_import_dialog, import_vertical_round_robin
@@ -53,6 +53,8 @@ local cached_session_names = nil
 local cached_total_takes = 0
 local cached_max_takes_per_session = 0
 local cached_workflow = ""
+local cached_has_existing_items = false
+local cached_start_pos = 0
 
 ---------------------------------------------------------------------
 
@@ -72,14 +74,38 @@ function main()
         return
     end
 
-    local items = abort_if_items_exist()
-    if items then return end
+    -- Determine start position: if items exist, start after the last item with a gap
+    local project_end = get_project_end_position()
+    local start_pos = 0
+    local has_existing_items = CountMediaItems(0) > 0
+    if has_existing_items then
+        start_pos = project_end + 10  -- 10 second gap after existing content
+    end
 
-    local files = scan_media_folder_recursive(get_project_media_path())
+    -- Collect source files already used in the project
+    local used_files = get_used_source_files()
 
-    -- Show error if no audio files found
+    local all_files = scan_media_folder_recursive(get_project_media_path())
+
+    -- Filter out files already in use
+    local files = {}
+    for _, filepath in ipairs(all_files) do
+        local normalized = filepath:gsub("\\", "/")
+        if not used_files[normalized] then
+            table.insert(files, filepath)
+        end
+    end
+
+    -- Show error if no new audio files found
+    if #all_files == 0 then
+        MB("No audio files were found in the project recording path. Please add audio files and try again.",
+            "Import Aborted", 0)
+        return
+    end
+
     if #files == 0 then
-        MB("No audio files were found in the 'media' folder. Please add audio files and try again.",
+        -- all_files is non-empty but files is empty, meaning every file was already in use
+        MB("No unused audio files were found in the project recording path. All files are already in the project.",
             "Import Aborted", 0)
         return
     end
@@ -127,12 +153,21 @@ function main()
         return a < b
     end)
 
+    -- Check if any files were successfully parsed into sessions
+    if #session_names == 0 then
+        MB("Audio files were found but none matched the expected naming pattern.\n"
+            .. "Files should be named like: trackname_T001.wav\n\n"
+            .. "The following issues were found:\n\n" .. table.concat(errors, "\n"),
+            "Import Aborted", 0)
+        return
+    end
+
     -- Import based on workflow
     if workflow == "Vertical" then
         -- Show dialog if ImGui is available
         if imgui_exists then
             -- Initialize dialog and start showing it
-            show_import_dialog(sessions, session_names, workflow)
+            show_import_dialog(sessions, session_names, workflow, has_existing_items, start_pos)
             
             -- Wait for dialog to close via defer loop
             local function wait_for_dialog()
@@ -152,10 +187,10 @@ function main()
                 -- Perform the actual import
                 if distribution_mode == 1 or distribution_mode == 2 then
                     -- Round-robin distribution (mode 1 = custom, mode 2 = current folder count)
-                    import_vertical_round_robin(sessions, session_names, tracks, errors, target_folder_count, include_destination)
+                    import_vertical_round_robin(sessions, session_names, tracks, errors, target_folder_count, include_destination, start_pos)
                 else
                     -- Original behavior (one folder per take)
-                    import_vertical(sessions, session_names, tracks, errors, include_destination)
+                    import_vertical(sessions, session_names, tracks, errors, include_destination, start_pos)
                 end
                 
                 Undo_EndBlock("Import Audio", -1)
@@ -184,10 +219,10 @@ function main()
             return
         else
             -- No ImGui, use original behavior
-            import_vertical(sessions, session_names, tracks, errors)
+            import_vertical(sessions, session_names, tracks, errors, false, start_pos)
         end
     else -- Horizontal
-        import_horizontal(sessions, session_names, tracks, errors)
+        import_horizontal(sessions, session_names, tracks, errors, start_pos)
     end
 
     Undo_EndBlock("Import Audio", -1)
@@ -212,7 +247,7 @@ end
 
 ---------------------------------------------------------------------
 
-function show_import_dialog(sessions, session_names, workflow)
+function show_import_dialog(sessions, session_names, workflow, has_existing_items, start_pos)
     -- Initialize ImGui if not already done
     if not ImGui then
         package.path = ImGui_GetBuiltinPath() .. '/?.lua'
@@ -224,6 +259,8 @@ function show_import_dialog(sessions, session_names, workflow)
     cached_sessions = sessions
     cached_session_names = session_names
     cached_workflow = workflow
+    cached_has_existing_items = has_existing_items or false
+    cached_start_pos = start_pos or 0
     
     -- Calculate total takes and max takes in any single session
     cached_total_takes = 0
@@ -325,7 +362,12 @@ function draw_import_dialog()
     if visible then
         -- Header info
         ImGui.Text(ctx, "Workflow: " .. cached_workflow)
-        ImGui.Text(ctx, string.format("Files found: %d takes (%d session%s)", 
+        if cached_has_existing_items then
+            ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x88CCFFFF)
+            ImGui.Text(ctx, string.format("Appending to existing project (starting at %.1fs)", cached_start_pos))
+            ImGui.PopStyleColor(ctx)
+        end
+        ImGui.Text(ctx, string.format("New files to import: %d takes (%d session%s)", 
             cached_total_takes, 
             #cached_session_names,
             #cached_session_names == 1 and "" or "s"))
@@ -616,7 +658,7 @@ end
 
 ---------------------------------------------------------------------
 
-function import_vertical_round_robin(sessions, session_names, tracks, errors, folder_count, use_destination)
+function import_vertical_round_robin(sessions, session_names, tracks, errors, folder_count, use_destination, start_pos)
     -- Ensure we have enough folders
     -- If using destination, we need (folder_count - 1) source folders since D: is folder 1
     local source_folders_needed = use_destination and (folder_count - 1) or folder_count
@@ -628,7 +670,7 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors, fo
     -- Build folder structure
     local folder_tracks = build_folder_track_map(tracks)
     
-    local pos = 0
+    local pos = start_pos or 0
     
     for _, session_name in ipairs(session_names) do
         local session_data = sessions[session_name]
@@ -759,8 +801,8 @@ end
 
 ---------------------------------------------------------------------
 
-function import_horizontal(sessions, session_names, tracks, errors)
-    local pos = 0
+function import_horizontal(sessions, session_names, tracks, errors, start_pos)
+    local pos = start_pos or 0
 
     for _, session_name in ipairs(session_names) do
         local session_data = sessions[session_name]
@@ -829,7 +871,7 @@ end
 
 ---------------------------------------------------------------------
 
-function import_vertical(sessions, session_names, tracks, errors, use_destination)
+function import_vertical(sessions, session_names, tracks, errors, use_destination, start_pos)
     -- Determine maximum number of takes needed across all sessions
     local max_takes = 0
     for _, session_name in ipairs(session_names) do
@@ -872,7 +914,7 @@ function import_vertical(sessions, session_names, tracks, errors, use_destinatio
     -- Build folder structure once
     local folder_tracks = build_folder_track_map(tracks)
 
-    local pos = 0
+    local pos = start_pos or 0
 
     for _, session_name in ipairs(session_names) do
         local session_data = sessions[session_name]
@@ -1151,10 +1193,7 @@ end
 ---------------------------------------------------------------------
 
 function get_project_media_path()
-    local _, projfn = EnumProjects(-1, '')
-    local projpath = projfn:match("^(.*)[/\\]")
-    if not projpath then return nil end
-    return projpath .. "/media"
+    return GetProjectPathEx(0)
 end
 
 ---------------------------------------------------------------------
@@ -1187,12 +1226,41 @@ end
 
 ---------------------------------------------------------------------
 
-function abort_if_items_exist()
-    if CountMediaItems(0) > 0 then
-        MB("Project already contains items. Please run on an empty project.", "Import Aborted", 0)
-        return true
+function get_project_end_position()
+    -- Find the end position of the last item on the timeline
+    local max_end = 0
+    for i = 0, CountMediaItems(0) - 1 do
+        local item = GetMediaItem(0, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local item_end = pos + len
+        if item_end > max_end then
+            max_end = item_end
+        end
     end
-    return false
+    return max_end
+end
+
+---------------------------------------------------------------------
+
+function get_used_source_files()
+    -- Collect the full paths of all source audio files already used in the project
+    local used = {}
+    for i = 0, CountMediaItems(0) - 1 do
+        local item = GetMediaItem(0, i)
+        local take = GetActiveTake(item)
+        if take then
+            local source = GetMediaItemTake_Source(take)
+            if source then
+                local filepath = GetMediaSourceFileName(source)
+                if filepath and filepath ~= "" then
+                    -- Normalize path separators for consistent comparison
+                    used[filepath:gsub("\\", "/")] = true
+                end
+            end
+        end
+    end
+    return used
 end
 
 ---------------------------------------------------------------------
