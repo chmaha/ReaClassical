@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, solo
 local select_children_of_selected_folders
 local unselect_folder_children
+local any_track_armed, get_folder_parent, arm_folder, get_folder_children
 
 ---------------------------------------------------------------------
 
@@ -42,6 +43,94 @@ if input ~= "" then
     if table[8] then ref_is_guide = tonumber(table[8]) or 0 end
 end
 
+---------------------------------------------------------------------
+
+function any_track_armed()
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+            return true
+        end
+    end
+    return false
+end
+
+---------------------------------------------------------------------
+
+function get_folder_parent(target_track)
+    local track_count = CountTracks(0)
+    for i = 0, track_count - 1 do
+        local tr = GetTrack(0, i)
+        if tr == target_track then
+            -- Check if this track is itself a folder parent
+            local depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+            if depth == 1 then
+                return tr, i
+            end
+            -- Otherwise walk backwards to find the folder parent
+            local nested = 0
+            for j = i - 1, 0, -1 do
+                local check = GetTrack(0, j)
+                local d = GetMediaTrackInfo_Value(check, "I_FOLDERDEPTH")
+                if d == -1 then
+                    nested = nested + 1
+                elseif d == 1 then
+                    if nested > 0 then
+                        nested = nested - 1
+                    else
+                        return check, j
+                    end
+                end
+            end
+            break
+        end
+    end
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+
+function get_folder_children(parent_idx)
+    local tracks = {}
+    local parent = GetTrack(0, parent_idx)
+    tracks[#tracks + 1] = parent
+
+    local track_count = CountTracks(0)
+    local j = parent_idx + 1
+    local depth = 1
+    while j < track_count and depth > 0 do
+        local ch_tr = GetTrack(0, j)
+        tracks[#tracks + 1] = ch_tr
+        local ch_depth = GetMediaTrackInfo_Value(ch_tr, "I_FOLDERDEPTH")
+        depth = depth + ch_depth
+        j = j + 1
+    end
+    return tracks
+end
+
+---------------------------------------------------------------------
+
+function arm_folder(parent_idx)
+    Main_OnCommand(40491, 0) -- un-arm all tracks for recording
+
+    -- Arm all tracks in the folder
+    local folder_tracks = get_folder_children(parent_idx)
+    for _, track in ipairs(folder_tracks) do
+        -- Skip special tracks (mixer, aux, submix, etc.)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+
+        if not (mixer_state == "y" or aux_state == "y" or submix_state == "y"
+                or ref_state == "y" or rcmaster_state == "y") then
+            SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        end
+    end
+end
+
+---------------------------------------------------------------------
 
 function main()
     Undo_BeginBlock()
@@ -54,6 +143,9 @@ function main()
     local window = BR_GetMouseCursorContext()
     local mouse_item = BR_GetMouseCursorContext_Item()
 
+    -- Check if any track is currently armed BEFORE changing selection
+    local was_armed = any_track_armed()
+
     Main_OnCommand(41110, 0)
 
     local track = GetSelectedTrack(0, 0)
@@ -62,7 +154,13 @@ function main()
             Main_OnCommand(40289, 0) -- Unselect all items
         end
 
-        SetOnlyTrackSelected(track)
+        -- If a child track was clicked, find and select its folder parent instead
+        local parent_track, parent_idx = get_folder_parent(track)
+        if parent_track then
+            SetOnlyTrackSelected(parent_track)
+        else
+            SetOnlyTrackSelected(track)
+        end
 
         local has_folders = false
         for i = 0, CountTracks(0) - 1 do
@@ -75,7 +173,14 @@ function main()
         end
 
         if has_folders then
-            solo()
+            if was_armed and parent_idx then
+                -- Tracks were armed: un-arm all, then arm the whole folder
+                solo()
+                arm_folder(parent_idx)
+            else
+                -- No tracks armed: just solo the folder as before
+                solo()
+            end
         end
 
         select_children_of_selected_folders()
