@@ -1,10 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.16
+@version 26.2.17
 @changelog
-  Smart Import: Allow custom media folder and import into non-empty project
-  Auto Solo: Arm selected folder if currently armed tracks in the project
-  Documentation: Various additions
+  Create CD Markers: Restore previously selected track
+  Create CD Markers: Remove all references to RCMix markers
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
