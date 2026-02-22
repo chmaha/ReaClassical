@@ -29,13 +29,12 @@ local empty_items_check, return_custom_length
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
 local add_roomtone_fadeout, check_saved_state, album_item_count
-local split_and_tag_final_item, restore_RCMix
+local split_and_tag_final_item
 local check_first_track_for_names, delete_all_markers_and_regions
 local shift_folder_items_and_markers, shift_all_markers_and_regions
 
 local minimum_points = 15
 local points = {}
-local RCMix_markers = {}
 
 ---------------------------------------------------------------------
 
@@ -143,8 +142,7 @@ function main()
 
   local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
   Main_OnCommand(ddp_editor, 0)
-  restore_RCMix()
-
+  SetOnlyTrackSelected(selected_track)
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end
 
@@ -928,7 +926,6 @@ end
 ---------------------------------------------------------------------
 
 function delete_all_markers_and_regions()
-  RCMix_markers = {} -- reset storage
 
   local _, num_markers, num_regions = CountProjectMarkers(0)
   local total = num_markers + num_regions
@@ -939,33 +936,8 @@ function delete_all_markers_and_regions()
         EnumProjectMarkers(i)
 
     if retval then
-      if name and name:match("^RCmix") then
-        -- Store RCMix marker/region
-        table.insert(RCMix_markers, {
-          is_region = is_region,
-          pos       = pos,
-          rgnend    = rgnend,
-          name      = name
-        })
-      end
       DeleteProjectMarker(0, markrgnindexnumber, is_region)
     end
-  end
-end
-
----------------------------------------------------------------------
-
-function restore_RCMix()
-  for _, m in ipairs(RCMix_markers) do
-    AddProjectMarker2(
-      0,             -- project
-      m.is_region,   -- is region
-      m.pos,         -- position
-      m.rgnend or 0, -- region end (ignored for markers)
-      m.name,        -- name
-      -1,            -- auto index
-      0              -- color (0 = default)
-    )
   end
 end
 
