@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-02-06 16:58:14 UTC</code></p>
+<p><code>Updated: 2026-02-22 17:16:54 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -949,7 +949,7 @@ Do not attempt to complete any of the above actions outside of Mission Control!
 <p>Add FX, set volume, panning, mute/solo</p>
 </li>
 <li>
-<p>Set primary and secondary recording paths</p>
+<p>Set primary and secondary recording paths (it can also be used to set a custom path for the Smart Audio Import function)</p>
 </li>
 </ul>
 </div>
@@ -1118,7 +1118,7 @@ Save your project before continuing with other workflows.
 <p>Use the left-most buttons in the panel to control recording, pausing and stopping</p>
 </li>
 <li>
-<p>Add ranking and notes while recording or after the fact by clicking on a previously-recorded item</p>
+<p>Add ranking and notes while recording or after the fact</p>
 </li>
 <li>
 <p>Once all recording is completed, close the record panel (automatically disengages record-armed tracks).</p>
@@ -1142,7 +1142,7 @@ Save your project before continuing with other workflows.
 <p>Ensure that you have first created an empty horizontal or vertical workflow ReaClassical project.</p>
 </li>
 <li>
-<p>Copy or move source material into the media subfolder inside your ReaClassical project folder.</p>
+<p>Copy or move source material into the media subfolder inside your ReaClassical project folder (or custom recording/import path set via Mission Control <kbd>C</kbd>).</p>
 </li>
 <li>
 <p>Ensure that track names in the project match the channel text in the filenames</p>
@@ -1154,7 +1154,7 @@ Save your project before continuing with other workflows.
 <p>Via the top ReaClassical menu, click on <span class="menuseq"><b class="menu">Project Setup</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Smart Audio Import</b></span> and, if using vertical workflow, choose distribution options.</p>
 </li>
 <li>
-<p>Open Mission Control <kbd>C</kbd> to add special tracks such as aux &amp; submix, make routing adjustments etc.</p>
+<p>Open Mission Control to add special tracks such as aux &amp; submix, make routing adjustments etc.</p>
 </li>
 </ol>
 </div>
@@ -1292,12 +1292,24 @@ Save your project before continuing with other workflows.
 <p>Use the left-most buttons in the panel to control recording, pausing and stopping</p>
 </li>
 <li>
-<p>Add ranking and notes while recording or after the fact by clicking on a previously-recorded item</p>
+<p>Add ranking and notes while recording or after the fact</p>
 </li>
 <li>
 <p>Once all recording is completed, close the record panel (automatically disengages record-armed tracks).</p>
 </li>
 </ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+There&#8217;s no real need to position the edit cursor before starting to record as the arm/record function will automatically move the recording start position to after the final item in the armed folder.
+</td>
+</tr>
+</table>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1315,9 +1327,18 @@ Save your project before continuing with other workflows.
 </div>
 </div>
 <div class="sect4">
-<h5 id="_other_buttons_in_the_main_window">Other Buttons in the Main Window</h5>
+<h5 id="_ranking_and_notes">Ranking and Notes</h5>
+<div class="paragraph">
+<p>During recording, any ranking or notes added will affect the item created immediately after recording finishes. When transport is stopped, if no items are selected, ranking and notes affect the last recorded items. Apply ranking and notes to previous items in the timeline by selecting them.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_other_buttons_and_options_in_the_main_window">Other Buttons and Options in the Main Window</h5>
 <div class="paragraph">
 <p>Use <b class="button">+Take</b> to quickly increase the take number (useful for a false start, for example). press <b class="button">Next</b> to start a new recording section. This means that in vertical workflow the first source folder is rec-armed and in both workflows, the edit cursor is placed 5 seconds after the final item in the project.</p>
+</div>
+<div class="paragraph">
+<p>Enable "Record Takes Horizontally" while in vertical workflow to record takes left to right on a single folder. This is useful, for example, if you prefer to have each folder contain takes for just one piece of music. In this instance, <b class="button">Next</b> acts as a sort of carriage return and arms the next folder down as well as move the edit cursor to the start of the timeline (or after any existing material).</p>
 </div>
 </div>
 <div class="sect4">
@@ -1518,7 +1539,7 @@ Don&#8217;t skip this renaming step if you want to import files easily from anot
 <p>Ensure that you have first created an empty horizontal or vertical workflow ReaClassical project.</p>
 </li>
 <li>
-<p>Copy or move source material into the media subfolder inside your ReaClassical project folder.</p>
+<p>Copy or move source material into the media subfolder inside your ReaClassical project folder (you can also assign a custom import/recording path via Mission Control <kbd>C</kbd>).</p>
 </li>
 <li>
 <p>Ensure that track names in the project match the channel text in the filenames</p>
@@ -1530,9 +1551,21 @@ Don&#8217;t skip this renaming step if you want to import files easily from anot
 <p>Via the top ReaClassical menu, click on <span class="menuseq"><b class="menu">Project Setup</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Smart Audio Import</b></span> and, if using vertical workflow, choose distribution options.</p>
 </li>
 <li>
-<p>Open Mission Control <kbd>C</kbd> to add special tracks such as aux &amp; submix, make routing adjustments etc.</p>
+<p>Open Mission Control to add special tracks such as aux &amp; submix, make routing adjustments etc.</p>
 </li>
 </ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+You can also "smart" import further material into a non-empty ReaClassical project! In this instance, the function will ignore source files already present and start the import at the end of the project.
+</td>
+</tr>
+</table>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1747,6 +1780,24 @@ A reminder to do all track management in Mission Control!
 </div>
 <div class="paragraph">
 <p>Hover over a reference track for easy A/Bing between your audio production and one or more reference audio files.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+To quickly remove all record-arming in the project, use mouse hover + <kbd>A</kbd> or close the Record Panel.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_auto_solo_and_auto_arm_on_mouse_click">Auto Solo and Auto Arm on Mouse Click</h4>
+<div class="paragraph">
+<p>Included with ReaClassical is an "Auto Solo" function that can be assigned to several actions under the mouse modifiers menu (accessed via <kbd>O</kbd>). This is not currently set by default. Assigning the function to both "media item" and "track" left-click will provide auto-solo when clicking on items and gaps (technically unmuting the selected folder and muting the rest). If there are currently any record-armed tracks, it will also serve to auto rec-arm the clicked folder.</p>
+</div>
 </div>
 </div>
 <div class="sect2">

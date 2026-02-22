@@ -44,5 +44,5 @@ Additionally you can use Mission Control to optionally:
 
 - Reach other important ReaClassical windows via a button click
 - Add FX, set volume, panning, mute/solo
-- Set primary and secondary recording paths
+- Set primary and secondary recording paths (it can also be used to set a custom path for the Smart Audio Import function)
 

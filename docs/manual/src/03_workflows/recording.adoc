@@ -12,8 +12,10 @@ Use Mission Control kbd:[C] to set recording inputs and panning manually or auto
 2. Select a parent track of a folder
 3. Press Arm and monitor your signal
 4. Use the left-most buttons in the panel to control recording, pausing and stopping
-5. Add ranking and notes while recording or after the fact by clicking on a previously-recorded item
+5. Add ranking and notes while recording or after the fact
 6. Once all recording is completed, close the record panel (automatically disengages record-armed tracks).
+
+TIP: There's no real need to position the edit cursor before starting to record as the arm/record function will automatically move the recording start position to after the final item in the armed folder.
 
 .Record Panel
 image::record_panel.png[Record Panel]
@@ -24,9 +26,15 @@ image::record_panel.png[Record Panel]
 
 Note that if you create a new session name, the take number will automatically be reset to 1. If you switch to an existing session name with recorded takes, the take number will be calculated accordingly.
 
-===== Other Buttons in the Main Window
+===== Ranking and Notes
+
+During recording, any ranking or notes added will affect the item created immediately after recording finishes. When transport is stopped, if no items are selected, ranking and notes affect the last recorded items. Apply ranking and notes to previous items in the timeline by selecting them.
+
+===== Other Buttons and Options in the Main Window
 
 Use btn:[+Take] to quickly increase the take number (useful for a false start, for example). press btn:[Next] to start a new recording section. This means that in vertical workflow the first source folder is rec-armed and in both workflows, the edit cursor is placed 5 seconds after the final item in the project.
+
+Enable "Record Takes Horizontally" while in vertical workflow to record takes left to right on a single folder. This is useful, for example, if you prefer to have each folder contain takes for just one piece of music. In this instance, btn:[Next] acts as a sort of carriage return and arms the next folder down as well as move the edit cursor to the start of the timeline (or after any existing material).
 
 ===== Record Panel Right-Click Options
 

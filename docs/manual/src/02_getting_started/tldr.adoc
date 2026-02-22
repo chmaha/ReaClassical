@@ -21,7 +21,7 @@ IMPORTANT: Save your project before continuing with other workflows.
 2. Select a parent track of a folder
 3. Press Arm and monitor your signal
 4. Use the left-most buttons in the panel to control recording, pausing and stopping
-5. Add ranking and notes while recording or after the fact by clicking on a previously-recorded item
+5. Add ranking and notes while recording or after the fact
 6. Once all recording is completed, close the record panel (automatically disengages record-armed tracks).
 
 ==== Importing
@@ -33,11 +33,11 @@ While it is always better to record in ReaClassical, occasionally you might need
 Assuming that the filenaming contains at least a track name and take number separated by underscore e.g. `cello_004.wav` or `cello_T004.wav`:
 
 1. Ensure that you have first created an empty horizontal or vertical workflow ReaClassical project.
-2. Copy or move source material into the media subfolder inside your ReaClassical project folder. 
+2. Copy or move source material into the media subfolder inside your ReaClassical project folder (or custom recording/import path set via Mission Control kbd:[C]). 
 3. Ensure that track names in the project match the channel text in the filenames
 4. If your filenames also contain a session name prior to the track name, the items will be grouped accordingly.
 5. Via the top ReaClassical menu, click on menu:Project Setup[Smart Audio Import] and, if using vertical workflow, choose distribution options.
-6. Open Mission Control kbd:[C] to add special tracks such as aux & submix, make routing adjustments etc.
+6. Open Mission Control to add special tracks such as aux & submix, make routing adjustments etc.
 
 ===== Manual Import by Dragging
 

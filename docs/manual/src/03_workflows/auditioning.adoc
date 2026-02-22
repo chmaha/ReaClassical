@@ -3,3 +3,9 @@
 Audition your material via mouse hover + kbd:[A] on parent or child tracks. Use hover + kbd:[Shift+A]  to playback at a custom rate set via ReaClassical Preferences kbd:[F5]. Use mixer mute and solo buttons to further customize what you hear.
 
 Hover over a reference track for easy A/Bing between your audio production and one or more reference audio files. 
+
+TIP: To quickly remove all record-arming in the project, use mouse hover + kbd:[A] or close the Record Panel.
+
+==== Auto Solo and Auto Arm on Mouse Click
+
+Included with ReaClassical is an "Auto Solo" function that can be assigned to several actions under the mouse modifiers menu (accessed via kbd:[O]). This is not currently set by default. Assigning the function to both "media item" and "track" left-click will provide auto-solo when clicking on items and gaps (technically unmuting the selected folder and muting the rest). If there are currently any record-armed tracks, it will also serve to auto rec-arm the clicked folder. 
