@@ -1,12 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.15
+@version 26.2.16
 @changelog
-  Record Panel: Allow horizontal recording mode in vertical workflow
-  Record Panel: Next button operates as carriage return if horizontal checkbox enabled
-  Record Panel: If no item selected, ranking and notes are for last recorded items
-  Record Panel: Add tooltips
-  Classical Take Record: Add rec start check and move edit cursor accordingly
+  Smart Import: Allow custom media folder and import into non-empty project
+  Auto Solo: Arm selected folder if currently armed tracks in the project
+  Documentation: Various additions
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
