@@ -82,9 +82,9 @@ function main()
     if cur_pos ~= -1 then
         local track_number = math.floor(get_track_number(track))
 
-        if to_takemarkers then
+        if not to_takemarkers then
             -- Only convert if a matching pair exists; otherwise just delete old marker
-            convert_pair_to_take_marker(999, "SOURCE-OUT")
+            convert_pair_to_take_marker(999, "SOURCE-OUT", cur_pos, track_number)
         else
             local i = 0
             while true do
@@ -118,7 +118,7 @@ end
 
 ---------------------------------------------------------------------
 
-function convert_pair_to_take_marker(marker_id, marker_type)
+function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_number)
     local black_color = ColorToNative(0, 0, 0) | 0x1000000
 
     local proj = EnumProjects(-1)
@@ -193,12 +193,26 @@ function convert_pair_to_take_marker(marker_id, marker_type)
         return
     end
 
-    -- All checks passed: convert to take marker at time selection (with length)
+    -- Find the item the existing pair lives in
     local item_in, take_in = get_item_at_position(in_pos, marker_track_num)
     local item_out, _ = get_item_at_position(out_pos, marker_track_num)
 
     -- Guard: do not convert if IN and OUT span multiple items
     if not item_in or not item_out or item_in ~= item_out then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break
+            else DeleteProjectMarker(project, marker_id, false) end
+            i = i + 1
+        end
+        return
+    end
+
+    -- Guard: if the new marker is in the same item as the existing pair,
+    -- the user is just repositioning — skip conversion, just delete old marker
+    local item_new, _ = get_item_at_position(new_pos, new_track_number)
+    if item_new and item_new == item_in then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)

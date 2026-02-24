@@ -39,7 +39,7 @@ if not SWS_exists then
     return
 end
 
-if not to_takemarkers then return end
+if to_takemarkers then return end
 
 local _, opened_string = GetProjExtState(0, "ReaClassical", "toolbaropened")
 

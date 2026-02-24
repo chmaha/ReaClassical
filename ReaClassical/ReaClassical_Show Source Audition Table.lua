@@ -23,9 +23,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, save_marker_data, load_marker_data, clean_up_orphans
-local init_marker_data, get_sai, find_sao, monitor_playback
+local init_marker_data, get_saud_regions, monitor_playback
 local move_to_marker, set_track_selected, play_from_marker
-local convert_at_marker, solo, delete_all_sai_sao_markers
+local convert_at_marker, solo, delete_all_saud_take_markers
+local source_pos_to_project_pos, get_all_saud_take_markers
+local folder_check, get_track_number, get_color_table, get_path
+local find_source_marker, get_item_at_position
+local project_pos_to_source_pos, set_take_marker_with_length
+local convert_existing_pair_to_take_marker
+local remove_take_marker_by_chunk
 
 ---------------------------------------------------------------------
 
@@ -38,7 +44,7 @@ end
 package.path      = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui       = require 'imgui' '0.10'
 
-local ctx         = ImGui.CreateContext('Source Audition Marker Manag')
+local ctx         = ImGui.CreateContext('Source Audition Marker Manager')
 local window_open = true
 
 set_action_options(2)
@@ -55,14 +61,13 @@ local COLORS                        = {
     { name = "No Rank",       rgba = 0x00000000 }  -- Transparent for default table color
 }
 
--- Storage for marker data
+-- Storage for marker data (keyed by item_guid:srcpos)
 local marker_data                   = {}
 local playback_monitor              = false
 local current_sao_pos               = nil
 local last_play_pos                 = -1
-local sort_mode                     = "time" -- "time", "marker", or "rank"
-local keep_markers_after_conversion = true   -- New checkbox state
-local set_pairs_at_cursor           = false  -- New checkbox for setting pairs at edit cursor instead of razor
+local sort_mode                     = "time" -- "time" or "rank"
+local active_row_color              = 0x56A0D399 -- carolina blue highlight for the real pair row
 
 -- ExtState keys for persistent storage
 local EXT_STATE_SECTION             = "ReaClassical_SAI_Manager"
@@ -77,10 +82,8 @@ function main()
         return
     end
 
-    -- Monitor playback for auto-stop at SAO markers
+    -- Monitor playback for auto-stop at region end
     monitor_playback()
-
-
 
     if window_open then
         ImGui.SetNextWindowSize(ctx, 750, 300, ImGui.Cond_FirstUseEver)
@@ -95,66 +98,29 @@ function main()
                 current_sao_pos = nil
             end
 
-            -- Delete all markers and exit button
+            -- Delete all S-AUD take markers button
             ImGui.SameLine(ctx)
-            if ImGui.Button(ctx, 'Delete All Audition Pairs and Exit', 220, 0) then
-                delete_all_sai_sao_markers()
-                local razor_enabled = GetToggleCommandState(42618) == 1
-                if razor_enabled then Main_OnCommand(42618, 0) end
-                window_open = false
-            end
-
-            -- Keep markers after conversion checkbox
-            ImGui.SameLine(ctx)
-            local rv, new_val = ImGui.Checkbox(ctx, 'Keep unconverted pairs', keep_markers_after_conversion)
-            if rv then
-                keep_markers_after_conversion = new_val
-                save_marker_data() -- Save checkbox state
-            end
-
-            -- Set pairs at cursor checkbox
-            ImGui.SameLine(ctx)
-            local rv2, new_val2 = ImGui.Checkbox(ctx, 'Set audition pairs at edit cursor', set_pairs_at_cursor)
-            if rv2 then
-                set_pairs_at_cursor = new_val2
-                save_marker_data() -- Save checkbox state
-
-                -- Toggle razor edit mode based on checkbox state
-                local razor_enabled = GetToggleCommandState(42618) == 1
-                if set_pairs_at_cursor then
-                    -- Checkbox enabled: disable razor edit if it's on
-                    if razor_enabled then
-                        Main_OnCommand(42618, 0) -- Toggle off razor edit
-                    end
-                else
-                    -- Checkbox disabled: enable razor edit if it's off
-                    if not razor_enabled then
-                        Main_OnCommand(42618, 0) -- Toggle on razor edit
-                    end
-                end
+            if ImGui.Button(ctx, 'Delete All Audition Pairs', 180, 0) then
+                delete_all_saud_take_markers()
             end
 
             ImGui.Separator(ctx)
 
-            local markers = get_sai()
+            local regions = get_saud_regions()
 
-            if #markers == 0 then
-                if set_pairs_at_cursor then
-                    ImGui.Text(ctx, "Press Z at the edit cursor to set an audition pair...")
-                else
-                    ImGui.Text(ctx,
-                        "Left click drag to set a razor selection and press Z to convert to a marker pair...")
-                end
+            if #regions == 0 then
+                ImGui.Text(ctx,
+                    "No S-AUD take marker regions found. Use Source IN/OUT to create audition pairs.")
             else
                 -- Create table
                 if ImGui.BeginTable(ctx, 'MarkerTable', 7, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg) then
                     -- Setup columns
                     ImGui.TableSetupColumn(ctx, 'Audition',
                         ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
-                    ImGui.TableSetupColumn(ctx, 'Marker',
-                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
+                    ImGui.TableSetupColumn(ctx, 'Item',
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 120)
                     ImGui.TableSetupColumn(ctx, 'Time',
-                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 60)
+                        ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 80)
                     ImGui.TableSetupColumn(ctx, 'Rank',
                         ImGui.TableColumnFlags_WidthFixed | ImGui.TableColumnFlags_NoHeaderLabel, 120)
                     ImGui.TableSetupColumn(ctx, 'Notes', ImGui.TableColumnFlags_WidthStretch)
@@ -172,12 +138,12 @@ function main()
                     ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
                     ImGui.Text(ctx, text)
 
-                    -- Clickable Marker header to sort by marker number
+                    -- Clickable Item header to sort by item name
                     ImGui.TableSetColumnIndex(ctx, 1)
-                    local marker_header = "Marker" .. (sort_mode == "marker" and " ▼" or "")
-                    if ImGui.Selectable(ctx, marker_header .. "##marker_sort", false) then
-                        sort_mode = "marker"
-                        save_marker_data() -- Save sort mode change
+                    local item_header = "Item" .. (sort_mode == "item" and " ▼" or "")
+                    if ImGui.Selectable(ctx, item_header .. "##item_sort", false) then
+                        sort_mode = "item"
+                        save_marker_data()
                     end
 
                     -- Clickable Time header to sort by timeline
@@ -185,7 +151,7 @@ function main()
                     local time_header = "Time" .. (sort_mode == "time" and " ▼" or "")
                     if ImGui.Selectable(ctx, time_header .. "##time_sort", false) then
                         sort_mode = "time"
-                        save_marker_data() -- Save sort mode change
+                        save_marker_data()
                     end
 
                     -- Clickable Rank header to sort by rank
@@ -193,7 +159,7 @@ function main()
                     local rank_header = "Rank" .. (sort_mode == "rank" and " ▼" or "")
                     if ImGui.Selectable(ctx, rank_header .. "##rank_sort", false) then
                         sort_mode = "rank"
-                        save_marker_data() -- Save sort mode change
+                        save_marker_data()
                     end
 
                     -- Manually draw centered header for Convert
@@ -212,19 +178,22 @@ function main()
                     ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail - text_width) * 0.5)
                     ImGui.Text(ctx, text)
 
-                    -- Display markers
-                    for _, marker in ipairs(markers) do
+                    -- Display regions
+                    for _, region in ipairs(regions) do
                         ImGui.TableNextRow(ctx)
 
                         -- Get marker data
-                        local mdata = marker_data[marker.marker_num]
+                        local mdata = marker_data[region.data_key]
                         if not mdata then
                             mdata = { notes = "", color_idx = 8 }
-                            marker_data[marker.marker_num] = mdata
+                            marker_data[region.data_key] = mdata
                         end
 
-                        -- Apply row background color if not default
-                        if mdata.color_idx ~= 8 then
+                        -- Apply row background color: real pair uses source marker color,
+                        -- otherwise use rank color if set
+                        if region.is_real then
+                            ImGui.TableSetBgColor(ctx, ImGui.TableBgTarget_RowBg0, active_row_color)
+                        elseif mdata.color_idx ~= 8 then
                             local color = COLORS[mdata.color_idx].rgba
                             ImGui.TableSetBgColor(ctx, ImGui.TableBgTarget_RowBg0, color)
                         end
@@ -233,29 +202,29 @@ function main()
                         ImGui.TableNextColumn(ctx)
                         local avail_width = ImGui.GetContentRegionAvail(ctx)
                         ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 30) * 0.5)
-                        if ImGui.Button(ctx, '▶##play' .. marker.marker_num, 30, 0) then
-                            play_from_marker(marker.pos, marker.name)
+                        if ImGui.Button(ctx, '▶##play' .. region.data_key, 30, 0) then
+                            play_from_marker(region)
                         end
 
-                        -- Column 2: Marker name (clickable)
+                        -- Column 2: Item name (clickable to navigate)
                         ImGui.TableNextColumn(ctx)
-                        if ImGui.Selectable(ctx, marker.name .. '##sel' .. marker.marker_num, false) then
-                            move_to_marker(marker.pos)
+                        if ImGui.Selectable(ctx, region.item_name .. '##sel' .. region.data_key, false) then
+                            move_to_marker(region.proj_start)
                         end
 
-                        -- Column 3: Time
+                        -- Column 3: Time range
                         ImGui.TableNextColumn(ctx)
-                        ImGui.Text(ctx, marker.time_str)
+                        ImGui.Text(ctx, region.time_str)
 
                         -- Column 4: Rank picker
                         ImGui.TableNextColumn(ctx)
                         ImGui.SetNextItemWidth(ctx, -1)
-                        if ImGui.BeginCombo(ctx, '##rank' .. marker.marker_num, COLORS[mdata.color_idx].name) then
+                        if ImGui.BeginCombo(ctx, '##rank' .. region.data_key, COLORS[mdata.color_idx].name) then
                             for j, col in ipairs(COLORS) do
                                 local is_selected = (mdata.color_idx == j)
                                 if ImGui.Selectable(ctx, col.name, is_selected) then
                                     mdata.color_idx = j
-                                    save_marker_data() -- Save when rank changes
+                                    save_marker_data()
                                 end
                                 if is_selected then
                                     ImGui.SetItemDefaultFocus(ctx)
@@ -267,68 +236,45 @@ function main()
                         -- Column 5: Notes input
                         ImGui.TableNextColumn(ctx)
                         ImGui.SetNextItemWidth(ctx, -1)
-                        local rv_notes, new_notes = ImGui.InputText(ctx, '##notes' .. marker.marker_num, mdata.notes)
+                        local rv_notes, new_notes = ImGui.InputText(ctx, '##notes' .. region.data_key,
+                            mdata.notes)
                         if rv_notes then
                             mdata.notes = new_notes
-                            save_marker_data() -- Save when notes change
+                            save_marker_data()
                         end
 
-                        -- Column 6: Convert button
+                        -- Column 6: Convert button (hidden for real pair — already converted)
                         ImGui.TableNextColumn(ctx)
-                        local avail_width = ImGui.GetContentRegionAvail(ctx)
-                        ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 40) * 0.5)
-                        if ImGui.Button(ctx, '⚡##convert' .. marker.marker_num, 40, 0) then
-                            convert_at_marker(marker.pos, marker.name)
+                        if not region.is_real then
+                            avail_width = ImGui.GetContentRegionAvail(ctx)
+                            ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 40) * 0.5)
+                            if ImGui.Button(ctx, '⚡##convert' .. region.data_key, 40, 0) then
+                                convert_at_marker(region)
+                            end
                         end
 
                         -- Column 7: Delete button
                         ImGui.TableNextColumn(ctx)
-                        local avail_width = ImGui.GetContentRegionAvail(ctx)
+                        avail_width = ImGui.GetContentRegionAvail(ctx)
                         ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 30) * 0.5)
-                        if ImGui.Button(ctx, '✕##delete' .. marker.marker_num, 30, 0) then
-                            -- Delete this marker and its corresponding SAO marker
+                        if ImGui.Button(ctx, '✕##delete' .. region.data_key, 30, 0) then
                             Undo_BeginBlock()
-
-                            -- First, find the next SAI marker on the same track to establish upper bound
-                            local next_sai_pos = nil
-                            local sai_pattern = "^" .. marker.track_num .. ":SAI"
-                            local num_markers = CountProjectMarkers(0)
-
-                            for j = 0, num_markers - 1 do
-                                local ok, isrgn, pos, _, name, _ = EnumProjectMarkers2(0, j)
-                                if ok and not isrgn and pos > marker.pos and name and name:match(sai_pattern) then
-                                    next_sai_pos = pos
-                                    break
+                            if region.is_real then
+                                -- Delete the real SOURCE-IN/OUT project markers
+                                local i = 0
+                                while true do
+                                    local project, _ = EnumProjects(i)
+                                    if project == nil then break end
+                                    DeleteProjectMarker(project, 998, false)
+                                    DeleteProjectMarker(project, 999, false)
+                                    i = i + 1
                                 end
+                            else
+                                remove_take_marker_by_chunk(region.item, region.src_start, "S-AUD")
                             end
-
-                            -- Now find the SAO marker AFTER this SAI but BEFORE the next SAI (if any)
-                            local sao_pattern = "^" .. marker.track_num .. ":SAO"
-                            local sao_idx = nil
-
-                            for j = 0, num_markers - 1 do
-                                local ok, isrgn, pos, _, name, _ = EnumProjectMarkers2(0, j)
-                                if ok and not isrgn and pos > marker.pos and name and name:match(sao_pattern) then
-                                    -- Check if this SAO is before the next SAI (or there is no next SAI)
-                                    if not next_sai_pos or pos < next_sai_pos then
-                                        sao_idx = j
-                                        break
-                                    end
-                                end
-                            end
-
-                            -- Delete SAO first if found (so SAI index stays valid)
-                            if sao_idx then
-                                DeleteProjectMarkerByIndex(0, sao_idx)
-                            end
-
-                            -- Now delete the SAI marker
-                            DeleteProjectMarkerByIndex(0, marker.idx)
-
-                            -- Remove from marker_data
-                            marker_data[marker.marker_num] = nil
-
-                            Undo_EndBlock("Delete SAI/SAO marker pair", -1)
+                            marker_data[region.data_key] = nil
+                            save_marker_data()
+                            Undo_EndBlock("Delete audition pair", -1)
                             UpdateArrange()
                         end
                     end
@@ -336,10 +282,7 @@ function main()
                     ImGui.EndTable(ctx)
                 end
             end
-            -- keyboard shortcut capture
-            if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_Z, false) then
-                    window_open = false
-            end
+
             ImGui.End(ctx)
         end
     end
@@ -348,8 +291,6 @@ function main()
         defer(main)
     else
         -- Window is closing, run cleanup before exit
-        local razor_enabled = GetToggleCommandState(42618) == 1
-        if razor_enabled then Main_OnCommand(42618, 0) end
         clean_up_orphans()
         SetToggleCommandState(1, audition_manager, 0)
     end
@@ -357,21 +298,25 @@ end
 
 ---------------------------------------------------------------------
 
-function delete_all_sai_sao_markers()
+function delete_all_saud_take_markers()
     Undo_BeginBlock()
-
     local i = 0
     while true do
         local project, _ = EnumProjects(i)
-        if not project then break end
-        local _, num_markers, num_regions = CountProjectMarkers(project)
-        local total = num_markers + num_regions
-        -- Loop backwards so indices remain valid when deleting
-        for j = total - 1, 0, -1 do
-            local ok, isrgn, _, _, name, _ = EnumProjectMarkers2(project, j)
-            if ok and not isrgn and name then
-                if name:match("^%d+:SAI") or name:match("^%d+:SAO") then
-                    DeleteProjectMarkerByIndex(project, j)
+        if project == nil then break end
+        local num_items = CountMediaItems(project)
+        for j = 0, num_items - 1 do
+            local item = GetMediaItem(project, j)
+            if item then
+                local take = GetActiveTake(item)
+                if take then
+                    local num_markers = GetNumTakeMarkers(take)
+                    for m = num_markers - 1, 0, -1 do
+                        local _, name = GetTakeMarker(take, m)
+                        if name == "S-AUD" then
+                            DeleteTakeMarker(take, m)
+                        end
+                    end
                 end
             end
         end
@@ -380,9 +325,152 @@ function delete_all_sai_sao_markers()
 
     -- Clear marker data since all markers are deleted
     marker_data = {}
+    save_marker_data()
 
-    Undo_EndBlock("Delete all SAI/SAO markers", -1)
+    Undo_EndBlock("Delete all S-AUD take markers", -1)
     UpdateArrange()
+end
+
+---------------------------------------------------------------------
+
+function get_all_saud_take_markers()
+    -- Walk all items in current project, parse chunks for S-AUD TKM lines with length
+    local results = {}
+    local num_items = CountMediaItems(0)
+
+    for j = 0, num_items - 1 do
+        local item = GetMediaItem(0, j)
+        if item then
+            local take = GetActiveTake(item)
+            if take then
+                local _, chunk = GetItemStateChunk(item, "", false)
+                if chunk and chunk:find("S%-AUD") then
+                    -- Get item GUID for data key
+                    local item_guid = BR_GetMediaItemGUID(item)
+                    local item_track = GetMediaItem_Track(item)
+                    local track_number = math.floor(get_track_number(item_track))
+
+                    -- Get item name for display
+                    local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    local item_name = take_name ~= "" and take_name or ("Track " .. track_number)
+
+                    -- Prefix with track name prefix (e.g. "S2:", "D:") if present
+                    local _, track_name = GetSetMediaTrackInfo_String(item_track, "P_NAME", "", false)
+                    local track_prefix = track_name:match("^([^:]+:)")
+                    if track_prefix then
+                        item_name = track_prefix .. " " .. item_name
+                    end
+
+                    for src_start_str, name, _, length_str in
+                        chunk:gmatch('TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)%s+(%S+)%s+(%-?[%d%.e%+%-]+)')
+                    do
+                        if name == "S-AUD" then
+                            local src_start = tonumber(src_start_str)
+                            local length = tonumber(length_str)
+                            if src_start and length and length > 0 then
+                                local src_end = src_start + length
+                                local proj_start = source_pos_to_project_pos(take, item, src_start)
+                                local proj_end = source_pos_to_project_pos(take, item, src_end)
+                                if proj_start and proj_end then
+                                    local data_key = item_guid .. ":" .. string.format("%.10g", src_start)
+                                    table.insert(results, {
+                                        item = item,
+                                        take = take,
+                                        item_guid = item_guid,
+                                        item_name = item_name,
+                                        track_number = track_number,
+                                        src_start = src_start,
+                                        src_end = src_end,
+                                        proj_start = proj_start,
+                                        proj_end = proj_end,
+                                        data_key = data_key,
+                                        time_str = format_timestr(proj_start, ""),
+                                        color_idx = marker_data[data_key]
+                                            and marker_data[data_key].color_idx or 8
+                                    })
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return results
+end
+
+---------------------------------------------------------------------
+
+function get_saud_regions()
+    local regions = get_all_saud_take_markers()
+
+    -- Also include the real SOURCE-IN/OUT pair if one exists
+    local proj = EnumProjects(-1)
+    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos, out_track_num = find_source_marker(proj, 999, "SOURCE-OUT")
+
+    if in_pos and out_pos and in_track_num and out_track_num
+        and in_track_num == out_track_num and in_pos < out_pos then
+        local item, take = get_item_at_position(in_pos, in_track_num)
+        if item and take then
+            local item_guid = BR_GetMediaItemGUID(item)
+            local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            local item_name = take_name ~= "" and take_name or ("Track " .. in_track_num)
+
+            -- Prefix with track name prefix (e.g. "S2:", "D:") if present
+            local item_track = GetMediaItem_Track(item)
+            local _, track_name = GetSetMediaTrackInfo_String(item_track, "P_NAME", "", false)
+            local track_prefix = track_name:match("^([^:]+:)")
+            if track_prefix then
+                item_name = track_prefix .. " " .. item_name
+            end
+
+            local src_start = project_pos_to_source_pos(take, item, in_pos)
+            local src_end = project_pos_to_source_pos(take, item, out_pos)
+            local data_key = "real_pair:" .. item_guid .. ":" .. string.format("%.10g", src_start)
+
+            table.insert(regions, {
+                item = item,
+                take = take,
+                item_guid = item_guid,
+                item_name = item_name,
+                track_number = in_track_num,
+                src_start = src_start,
+                src_end = src_end,
+                proj_start = in_pos,
+                proj_end = out_pos,
+                data_key = data_key,
+                time_str = format_timestr(in_pos, ""),
+                color_idx = marker_data[data_key]
+                    and marker_data[data_key].color_idx or 8,
+                is_real = true
+            })
+        end
+    end
+
+    -- Sort based on current sort mode
+    if sort_mode == "time" then
+        table.sort(regions, function(a, b) return a.proj_start < b.proj_start end)
+    elseif sort_mode == "item" then
+        table.sort(regions, function(a, b)
+            if a.item_name == b.item_name then
+                return a.proj_start < b.proj_start
+            end
+            return a.item_name < b.item_name
+        end)
+    elseif sort_mode == "rank" then
+        table.sort(regions, function(a, b)
+            if a.color_idx == b.color_idx then
+                return a.proj_start < b.proj_start
+            end
+            if a.color_idx == 8 then return false end
+            if b.color_idx == 8 then return true end
+            return a.color_idx < b.color_idx
+        end)
+    end
+
+    return regions
 end
 
 ---------------------------------------------------------------------
@@ -391,31 +479,14 @@ function save_marker_data()
     -- Save sort mode
     SetExtState(EXT_STATE_SECTION, "sort_mode", sort_mode, true)
 
-    -- Save keep_markers_after_conversion checkbox state
-    SetExtState(EXT_STATE_SECTION, "keep_markers_after_conversion", tostring(keep_markers_after_conversion), true)
-
-    -- Save set_pairs_at_cursor checkbox state
-    SetExtState(EXT_STATE_SECTION, "set_pairs_at_cursor", tostring(set_pairs_at_cursor), true)
-
-    -- Save each marker's data using its GUID stored in P_EXT
-    local num_markers = CountProjectMarkers(0)
-    for i = 0, num_markers - 1 do
-        local _, isrgn, _, _, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
-
-        if not isrgn and name:match("^%d+:SAI") then
-            -- Get the marker's GUID
-            local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
-
-            if ok and guid ~= "" and marker_data[markrgnindexnumber] then
-                local data = marker_data[markrgnindexnumber]
-                -- Store data in the marker's P_EXT
-                SetProjExtState(0, "sai_marker", guid .. "_NOTES", data.notes or "")
-                SetProjExtState(0, "sai_marker", guid .. "_COLOR", tostring(data.color_idx or 8))
-            end
-        end
+    -- Save each marker's data using item_guid:srcpos as key
+    -- First clear old entries
+    -- (We just overwrite with current data)
+    for data_key, data in pairs(marker_data) do
+        SetProjExtState(0, "saud_marker", data_key .. "_NOTES", data.notes or "")
+        SetProjExtState(0, "saud_marker", data_key .. "_COLOR", tostring(data.color_idx or 8))
     end
 
-    -- Mark project as dirty so changes get saved
     MarkProjectDirty(0)
 end
 
@@ -425,66 +496,54 @@ function load_marker_data()
     -- Load sort mode
     if HasExtState(EXT_STATE_SECTION, "sort_mode") then
         sort_mode = GetExtState(EXT_STATE_SECTION, "sort_mode")
-    end
-
-    -- Load keep_markers_after_conversion checkbox state
-    if HasExtState(EXT_STATE_SECTION, "keep_markers_after_conversion") then
-        local value = GetExtState(EXT_STATE_SECTION, "keep_markers_after_conversion")
-        keep_markers_after_conversion = (value == "true")
-    end
-
-    -- Load set_pairs_at_cursor checkbox state
-    if HasExtState(EXT_STATE_SECTION, "set_pairs_at_cursor") then
-        local value = GetExtState(EXT_STATE_SECTION, "set_pairs_at_cursor")
-        set_pairs_at_cursor = (value == "true")
-
-        -- Disable razor edit mode if checkbox was enabled
-        if set_pairs_at_cursor then
-            local razor_enabled = GetToggleCommandState(42618) == 1
-            if razor_enabled then
-                Main_OnCommand(42618, 0) -- Toggle off razor edit
-            end
+        -- Remove invalid sort modes from old version
+        if sort_mode ~= "time" and sort_mode ~= "item" and sort_mode ~= "rank" then
+            sort_mode = "time"
         end
     end
-
-    -- We'll load marker-specific data as we encounter markers in init_marker_data
 end
 
 ---------------------------------------------------------------------
 
 function clean_up_orphans()
-    -- Collect all current SAI marker GUIDs
-    local current_guids = {}
-    local num_markers = CountProjectMarkers(0)
-    for i = 0, num_markers - 1 do
-        local _, isrgn, _, _, name = EnumProjectMarkers3(0, i)
+    -- Collect all current S-AUD data keys
+    local current_keys = {}
+    local regions = get_all_saud_take_markers()
+    for _, region in ipairs(regions) do
+        current_keys[region.data_key] = true
+    end
 
-        if not isrgn and name:match("^%d+:SAI") then
-            local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
-            if ok and guid ~= "" then
-                current_guids[guid] = true
-            end
+    -- Also include the real pair's data key if it exists
+    local proj = EnumProjects(-1)
+    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos = find_source_marker(proj, 999, "SOURCE-OUT")
+    if in_pos and out_pos and in_track_num then
+        local item, take = get_item_at_position(in_pos, in_track_num)
+        if item and take then
+            local item_guid = BR_GetMediaItemGUID(item)
+            local src_start = project_pos_to_source_pos(take, item, in_pos)
+            local data_key = "real_pair:" .. item_guid .. ":" .. string.format("%.10g", src_start)
+            current_keys[data_key] = true
         end
     end
 
-    -- Collect ALL keys first (don't delete while enumerating)
+    -- Collect ALL ProjExtState keys for saud_marker
     local all_keys = {}
     local i = 0
     while true do
-        local ok, key = EnumProjExtState(0, "sai_marker", i)
+        local ok, key = EnumProjExtState(0, "saud_marker", i)
         if not ok then break end
         table.insert(all_keys, key)
         i = i + 1
     end
 
-    -- Now check which ones to delete
+    -- Delete orphaned entries
     local deleted_count = 0
     for _, key in ipairs(all_keys) do
-        -- Extract GUID from key
-        local guid = key:match("^({.+})_NOTES$") or key:match("^({.+})_COLOR$")
-        if guid and not current_guids[guid] then
-            -- Delete by setting to empty AND using DeleteExtState
-            SetProjExtState(0, "sai_marker", key, "")
+        -- Extract data_key from the stored key (remove _NOTES or _COLOR suffix)
+        local data_key = key:match("^(.+)_NOTES$") or key:match("^(.+)_COLOR$")
+        if data_key and not current_keys[data_key] then
+            SetProjExtState(0, "saud_marker", key, "")
             deleted_count = deleted_count + 1
         end
     end
@@ -498,112 +557,48 @@ end
 
 function init_marker_data()
     marker_data = {}
-    local num_markers = CountProjectMarkers(0)
+    local regions = get_all_saud_take_markers()
 
-    for i = 0, num_markers - 1 do
-        local _, isrgn, _, _, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
+    for _, region in ipairs(regions) do
+        local saved_notes = ""
+        local saved_color = 8
 
-        if not isrgn then -- Only process markers, not regions
-            -- Check if marker name matches pattern: number(s):SAI
-            if name:match("^%d+:SAI") then
-                -- Get the marker's GUID
-                local ok, guid = GetSetProjectInfo_String(0, "MARKER_GUID:" .. tostring(i), "", false)
+        local has_notes, notes = GetProjExtState(0, "saud_marker", region.data_key .. "_NOTES")
+        local has_color, color = GetProjExtState(0, "saud_marker", region.data_key .. "_COLOR")
 
-                local saved_notes = ""
-                local saved_color = 8
+        if has_notes == 1 then saved_notes = notes end
+        if has_color == 1 then saved_color = tonumber(color) or 8 end
 
-                if ok and guid ~= "" then
-                    -- Try to load saved data from P_EXT using GUID
-                    local has_notes, notes = GetProjExtState(0, "sai_marker", guid .. "_NOTES")
-                    local has_color, color = GetProjExtState(0, "sai_marker", guid .. "_COLOR")
+        marker_data[region.data_key] = {
+            notes = saved_notes,
+            color_idx = saved_color
+        }
+    end
 
-                    if has_notes == 1 then
-                        saved_notes = notes
-                    end
-                    if has_color == 1 then
-                        saved_color = tonumber(color) or 8
-                    end
-                end
+    -- Also load data for the real pair if it exists
+    local proj = EnumProjects(-1)
+    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos = find_source_marker(proj, 999, "SOURCE-OUT")
+    if in_pos and out_pos and in_track_num then
+        local item, take = get_item_at_position(in_pos, in_track_num)
+        if item and take then
+            local item_guid = BR_GetMediaItemGUID(item)
+            local src_start = project_pos_to_source_pos(take, item, in_pos)
+            local data_key = "real_pair:" .. item_guid .. ":" .. string.format("%.10g", src_start)
 
-                marker_data[markrgnindexnumber] = {
-                    notes = saved_notes,
-                    color_idx = saved_color
-                }
-            end
+            local saved_notes = ""
+            local saved_color = 8
+            local has_notes, notes = GetProjExtState(0, "saud_marker", data_key .. "_NOTES")
+            local has_color, color = GetProjExtState(0, "saud_marker", data_key .. "_COLOR")
+            if has_notes == 1 then saved_notes = notes end
+            if has_color == 1 then saved_color = tonumber(color) or 8 end
+
+            marker_data[data_key] = {
+                notes = saved_notes,
+                color_idx = saved_color
+            }
         end
     end
-end
-
----------------------------------------------------------------------
-
-function get_sai()
-    local markers = {}
-    local num_markers = CountProjectMarkers(0)
-
-    for i = 0, num_markers - 1 do
-        local _, isrgn, pos, _, name, markrgnindexnumber = EnumProjectMarkers3(0, i)
-
-        if not isrgn then -- Only process markers, not regions
-            -- Check if marker name matches pattern: number(s):SAI
-            if name:match("^%d+:SAI") then
-                local track_num = tonumber(name:match("^(%d+):SAI"))
-
-                -- Get or initialize marker data
-                if not marker_data[markrgnindexnumber] then
-                    marker_data[markrgnindexnumber] = {
-                        notes = "",
-                        color_idx = 8 -- Default color (No Rank)
-                    }
-                end
-
-                table.insert(markers, {
-                    idx = i,
-                    marker_num = markrgnindexnumber,
-                    pos = pos,
-                    name = name,
-                    track_num = track_num,
-                    time_str = format_timestr(pos, ""),
-                    color_idx = marker_data[markrgnindexnumber].color_idx
-                })
-            end
-        end
-    end
-
-    -- Sort based on current sort mode
-    if sort_mode == "time" then
-        table.sort(markers, function(a, b) return a.pos < b.pos end)
-    elseif sort_mode == "marker" then
-        table.sort(markers, function(a, b) return a.track_num < b.track_num end)
-    elseif sort_mode == "rank" then
-        table.sort(markers, function(a, b)
-            if a.color_idx == b.color_idx then
-                return a.pos < b.pos                  -- Secondary sort by time
-            end
-            if a.color_idx == 8 then return false end -- No Rank goes last
-            if b.color_idx == 8 then return true end
-            return a.color_idx < b.color_idx          -- Lower number = better rank
-        end)
-    end
-
-    return markers
-end
-
----------------------------------------------------------------------
-
-function find_sao(track_num, sai_pos)
-    local num_markers = CountProjectMarkers(0)
-    local sao_pattern = "^" .. track_num .. ":SAO"
-
-    for i = 0, num_markers - 1 do
-        local _, isrgn, pos, _, name = EnumProjectMarkers3(0, i)
-
-        -- Only look for SAO markers that come AFTER the SAI marker
-        if not isrgn and pos > sai_pos and name:match(sao_pattern) then
-            return pos
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------
@@ -615,11 +610,11 @@ function monitor_playback()
 
     local play_state = GetPlayState()
 
-    -- If playing and we have a target SAO position
+    -- If playing and we have a target end position
     if play_state & 1 == 1 and current_sao_pos then
         local play_pos = GetPlayPosition()
 
-        -- Check if we've reached or passed the SAO marker
+        -- Check if we've reached or passed the end position
         if play_pos >= current_sao_pos and last_play_pos < current_sao_pos then
             OnStopButton()
             playback_monitor = false
@@ -639,57 +634,323 @@ end
 ---------------------------------------------------------------------
 
 function move_to_marker(pos)
-    SetEditCurPos(pos, true, true) -- move view and seek play
+    SetEditCurPos(pos, true, true)
 end
 
 ---------------------------------------------------------------------
 
-function set_track_selected(marker_name)
-    local track_num = tonumber(marker_name:match("^(%d+):SAI"))
-
-    if track_num then
+function set_track_selected(track_number)
+    if track_number then
         -- Unselect all tracks first
         for i = 0, CountTracks(0) - 1 do
             local tr = GetTrack(0, i)
             SetTrackSelected(tr, false)
         end
 
-        -- Select the parent track (track_num - 1 because tracks are 0-indexed)
-        local track = GetTrack(0, track_num - 1)
+        -- Select the parent track (track_number - 1 because tracks are 0-indexed)
+        local track = GetTrack(0, track_number - 1)
         if track then
             SetTrackSelected(track, true)
             solo()
         end
-        return track_num
     end
 end
 
 ---------------------------------------------------------------------
 
-function play_from_marker(pos, marker_name)
-    local track_num = set_track_selected(marker_name)
-    if track_num then
-        -- Find the corresponding SAO marker AFTER this SAI position
-        current_sao_pos = find_sao(track_num, pos)
-        if current_sao_pos then
-            playback_monitor = true
-            last_play_pos = pos - 1 -- Set to before start position
-        end
-    end
+function play_from_marker(region)
+    set_track_selected(region.track_number)
+
+    -- Set the end position for auto-stop
+    current_sao_pos = region.proj_end
+    playback_monitor = true
+    last_play_pos = region.proj_start - 1
 
     -- Move to position and play
-    SetEditCurPos(pos, true, true)
+    SetEditCurPos(region.proj_start, true, true)
     OnPlayButton()
 end
 
 ---------------------------------------------------------------------
 
-function convert_at_marker(pos, marker_name)
-    SetEditCurPos(pos, true, true)
-    Main_OnCommand(NamedCommandLookup("_RSfc71f5ffae31df8f6cf62977dc9fbdab58256522"), 0)
-    set_track_selected(marker_name)
-    -- Close the window
-    -- visible = false
+function convert_at_marker(region)
+    Undo_BeginBlock()
+
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+
+    -- Get the track and color for the new project markers
+    local item_track = GetMediaItem_Track(region.item)
+    local track_number = region.track_number
+
+    local colors = get_color_table()
+    local marker_color
+    if workflow == "Horizontal" then
+        marker_color = colors.source_marker
+    else
+        marker_color = item_track and GetTrackColor(item_track) or colors.source_marker
+    end
+
+    -- Before placing new project markers, convert any existing pair to a take marker
+    local proj = EnumProjects(-1)
+    convert_existing_pair_to_take_marker(proj)
+
+    -- Add real project markers
+    AddProjectMarker2(0, false, region.proj_start, 0,
+        track_number .. ":SOURCE-IN", 998, marker_color)
+    AddProjectMarker2(0, false, region.proj_end, 0,
+        track_number .. ":SOURCE-OUT", 999, marker_color)
+
+    -- Remove the S-AUD take marker
+    remove_take_marker_by_chunk(region.item, region.src_start, "S-AUD")
+
+    -- Select the track and move cursor
+    set_track_selected(track_number)
+    SetEditCurPos(region.proj_start, true, true)
+
+    Undo_EndBlock("Convert S-AUD to SOURCE-IN/OUT", -1)
+    UpdateArrange()
+end
+
+---------------------------------------------------------------------
+
+function convert_existing_pair_to_take_marker(proj)
+    local black_color = ColorToNative(0, 0, 0) | 0x1000000
+
+    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos, out_track_num = find_source_marker(proj, 999, "SOURCE-OUT")
+
+    -- No pair or mismatched track numbers: just delete both
+    if not in_pos or not out_pos or not in_track_num or not out_track_num
+        or in_track_num ~= out_track_num then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
+            i = i + 1
+        end
+        return
+    end
+
+    -- Guard: backwards pair
+    if in_pos >= out_pos then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
+            i = i + 1
+        end
+        return
+    end
+
+    -- Guard: must be in the same item
+    local item_in, take_in = get_item_at_position(in_pos, in_track_num)
+    local item_out, _ = get_item_at_position(out_pos, in_track_num)
+
+    if not item_in or not item_out or item_in ~= item_out then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
+            i = i + 1
+        end
+        return
+    end
+
+    -- Guard: target item already has an S-AUD take marker
+    local _, existing_chunk = GetItemStateChunk(item_in, "", false)
+    if existing_chunk and existing_chunk:find("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+") then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
+            i = i + 1
+        end
+        return
+    end
+
+    -- Convert pair to take marker
+    if take_in then
+        local src_in = project_pos_to_source_pos(take_in, item_in, in_pos)
+        local src_out = project_pos_to_source_pos(take_in, item_in, out_pos)
+        if src_in and src_out then
+            set_take_marker_with_length(item_in, src_in, src_out, "S-AUD", black_color)
+        end
+    end
+
+    -- Delete both project markers across all tabs
+    local i = 0
+    while true do
+        local project, _ = EnumProjects(i)
+        if project == nil then break end
+        DeleteProjectMarker(project, 998, false)
+        DeleteProjectMarker(project, 999, false)
+        i = i + 1
+    end
+end
+
+---------------------------------------------------------------------
+
+function remove_take_marker_by_chunk(item, src_start, name)
+    local _, chunk = GetItemStateChunk(item, "", false)
+    if not chunk or chunk == "" then return end
+
+    local new_lines = {}
+    local removed = false
+    for line in chunk:gmatch("[^\n]+") do
+        if not removed then
+            local tm_src, tm_name = line:match(
+                '%s*TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)'
+            )
+            if tm_name == name and tm_src then
+                local tm_pos = tonumber(tm_src)
+                if tm_pos and math.abs(tm_pos - src_start) < 0.0001 then
+                    removed = true
+                    goto continue
+                end
+            end
+        end
+        new_lines[#new_lines + 1] = line
+        ::continue::
+    end
+
+    if removed then
+        SetItemStateChunk(item, table.concat(new_lines, "\n"), false)
+    end
+end
+
+---------------------------------------------------------------------
+
+function set_take_marker_with_length(item, src_start, src_end, name, color)
+    local _, chunk = GetItemStateChunk(item, "", false)
+    if not chunk or chunk == "" then return end
+
+    local length = src_end - src_start
+    local marker_line = string.format(
+        '    TKM %.14g %s %d %.14g',
+        src_start, name, color, length
+    )
+
+    local insert_pos = chunk:find("\n>%s*$")
+    if insert_pos then
+        chunk = chunk:sub(1, insert_pos - 1) .. "\n" .. marker_line .. chunk:sub(insert_pos)
+    else
+        chunk = chunk:gsub("(>)%s*$", marker_line .. "\n>")
+    end
+
+    SetItemStateChunk(item, chunk, false)
+end
+
+---------------------------------------------------------------------
+
+function find_source_marker(proj, marker_id, marker_type)
+    local _, num_markers, num_regions = CountProjectMarkers(proj)
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
+        if not isrgn and markrgnindexnumber == marker_id then
+            local number, label = raw_label:match("(%d+):(.+)")
+            if label and label == marker_type then
+                return pos, tonumber(number)
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+
+function get_item_at_position(proj_pos, track_number)
+    local tr = GetTrack(0, track_number - 1)
+    if not tr then return nil, nil end
+
+    local tracks_to_check = { tr }
+    if GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH") == 1 then
+        local depth = 1
+        local idx = track_number
+        while depth > 0 and idx < CountTracks(0) do
+            local child = GetTrack(0, idx)
+            if child then
+                tracks_to_check[#tracks_to_check + 1] = child
+                depth = depth + GetMediaTrackInfo_Value(child, "I_FOLDERDEPTH")
+            end
+            idx = idx + 1
+        end
+    end
+
+    for _, check_tr in ipairs(tracks_to_check) do
+        local num_items = CountTrackMediaItems(check_tr)
+        for j = 0, num_items - 1 do
+            local item = GetTrackMediaItem(check_tr, j)
+            if item then
+                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if proj_pos >= item_pos and proj_pos <= item_pos + item_len then
+                    local take = GetActiveTake(item)
+                    if take then return item, take end
+                end
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+
+function source_pos_to_project_pos(take, item, src_pos)
+    if not take or not item then return nil end
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local take_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+    local take_rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+    if take_rate == 0 then return nil end
+    return item_pos + (src_pos - take_offset) / take_rate
+end
+
+---------------------------------------------------------------------
+
+function project_pos_to_source_pos(take, item, proj_pos)
+    if not take or not item then return nil end
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local take_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+    local take_rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+    return take_offset + (proj_pos - item_pos) * take_rate
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
+function get_track_number(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return 1
+    elseif GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        return GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+    else
+        local folder = GetParentTrack(track)
+        return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
+    end
 end
 
 ---------------------------------------------------------------------
@@ -756,9 +1017,6 @@ function solo()
                 Main_OnCommand(40340, 0) -- unsolo all tracks
                 mute_state = 0
                 solo_state = 1
-            elseif ref_is_guide == 1 then
-                mute_state = 0
-                solo_state = 0
             end
 
             SetMediaTrackInfo_Value(track, "B_MUTE", mute_state)
@@ -774,8 +1032,25 @@ end
 
 ---------------------------------------------------------------------
 
+function get_color_table()
+    local resource_path = GetResourcePath()
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
+    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function get_path(...)
+    local pathseparator = package.config:sub(1, 1);
+    local elements = { ... }
+    return table.concat(elements, pathseparator)
+end
+
+---------------------------------------------------------------------
+
 -- Initialize and start
-load_marker_data() -- Load saved data first
-clean_up_orphans() -- Clean up any orphaned entries
+load_marker_data()
+clean_up_orphans()
 init_marker_data()
 defer(main)
