@@ -99,7 +99,7 @@ function main()
 
             -- Delete all S-AUD take markers button
             ImGui.SameLine(ctx)
-            if ImGui.Button(ctx, 'Delete All Audition Pairs', 180, 0) then
+            if ImGui.Button(ctx, 'Delete All Audition Markers', 180, 0) then
                 delete_all_saud_take_markers()
             end
 
