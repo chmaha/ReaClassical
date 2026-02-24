@@ -25,6 +25,9 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, folder_check, get_track_number
 local move_destination_folder, get_tracks_per_group
 local calculate_destination_info, get_path, get_color_table
+local convert_pair_to_take_marker, find_source_marker
+local project_pos_to_source_pos, get_item_at_position
+local set_take_marker_with_length
 
 ---------------------------------------------------------------------
 
@@ -66,6 +69,8 @@ function main()
         if table[13] then moveable_dest = tonumber(table[13]) or 0 end
     end
 
+    local to_takemarkers = false -- placeholder: add proper logic later
+
     local selected_track = GetSelectedTrack(0, 0)
     local dest_track_num = calculate_destination_info()
 
@@ -79,18 +84,20 @@ function main()
     end
 
     if cur_pos ~= -1 then
-        local i = 0
-        while true do
-            local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            else
-                DeleteProjectMarker(project, 998, false)
-            end
-            i = i + 1
-        end
-
         local track_number = math.floor(get_track_number(track))
+
+        if to_takemarkers then
+            -- Only convert if a matching pair exists; otherwise just delete old marker
+            convert_pair_to_take_marker(998, "SOURCE-IN")
+        else
+            local i = 0
+            while true do
+                local project, _ = EnumProjects(i)
+                if project == nil then break
+                else DeleteProjectMarker(project, 998, false) end
+                i = i + 1
+            end
+        end
 
         if moveable_dest == 1 then
             move_destination_folder(track_number)
@@ -114,6 +121,222 @@ function main()
         AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
     end
     PreventUIRefresh(-1)
+end
+
+---------------------------------------------------------------------
+
+function convert_pair_to_take_marker(marker_id, marker_type)
+    local black_color = ColorToNative(0, 0, 0) | 0x1000000
+
+    local proj = EnumProjects(-1)
+    if not proj then return end
+
+    local _, num_markers, num_regions = CountProjectMarkers(proj)
+    local marker_pos = nil
+    local marker_track_num = nil
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
+        if not isrgn and markrgnindexnumber == marker_id then
+            local number, label = raw_label:match("(%d+):(.+)")
+            if label and label == marker_type then
+                marker_pos = pos
+                marker_track_num = tonumber(number)
+            end
+            break
+        end
+    end
+
+    if not marker_pos then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break
+            else DeleteProjectMarker(project, marker_id, false) end
+            i = i + 1
+        end
+        return
+    end
+
+    -- Check for matching partner marker
+    local other_id = (marker_type == "SOURCE-IN") and 999 or 998
+    local other_type = (marker_type == "SOURCE-IN") and "SOURCE-OUT" or "SOURCE-IN"
+    local other_pos, other_track_num = find_source_marker(proj, other_id, other_type)
+
+    local is_pair = other_pos and other_track_num and
+        marker_track_num and other_track_num == marker_track_num
+
+    if not is_pair then
+        -- No pair: just delete old marker, do NOT convert singles
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break
+            else DeleteProjectMarker(project, marker_id, false) end
+            i = i + 1
+        end
+        return
+    end
+
+    -- Determine IN and OUT positions
+    local in_pos, out_pos
+    if marker_type == "SOURCE-IN" then
+        in_pos = marker_pos
+        out_pos = other_pos
+    else
+        in_pos = other_pos
+        out_pos = marker_pos
+    end
+
+    -- Guard: do not convert if pair is backwards (OUT before IN)
+    if in_pos >= out_pos then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break
+            else DeleteProjectMarker(project, marker_id, false) end
+            i = i + 1
+        end
+        return
+    end
+
+    -- All checks passed: convert to take marker at time selection (with length)
+    local item_in, take_in = get_item_at_position(in_pos, marker_track_num)
+    local item_out, _ = get_item_at_position(out_pos, marker_track_num)
+
+    -- Guard: do not convert if IN and OUT span multiple items
+    if not item_in or not item_out or item_in ~= item_out then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break
+            else DeleteProjectMarker(project, marker_id, false) end
+            i = i + 1
+        end
+        return
+    end
+
+    -- Guard: do not convert if the target item already has an S-AUD take marker
+    local _, existing_chunk = GetItemStateChunk(item_in, "", false)
+    if existing_chunk and existing_chunk:find("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+") then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break
+            else DeleteProjectMarker(project, marker_id, false) end
+            i = i + 1
+        end
+        return
+    end
+
+    if take_in then
+        local src_in = project_pos_to_source_pos(take_in, item_in, in_pos)
+        local src_out = project_pos_to_source_pos(take_in, item_in, out_pos)
+        if src_in and src_out then
+            set_take_marker_with_length(item_in, src_in, src_out, "S-AUD", black_color)
+        end
+    end
+
+    -- Delete both project markers across all tabs
+    local i = 0
+    while true do
+        local project, _ = EnumProjects(i)
+        if project == nil then break end
+        DeleteProjectMarker(project, 998, false)
+        DeleteProjectMarker(project, 999, false)
+        i = i + 1
+    end
+end
+
+---------------------------------------------------------------------
+
+function set_take_marker_with_length(item, src_start, src_end, name, color)
+    -- Use chunk manipulation since SetTakeMarker API lacks length parameter
+    -- Chunk format: TKM srcpos name color length
+    local _, chunk = GetItemStateChunk(item, "", false)
+    if not chunk or chunk == "" then return end
+
+    local length = src_end - src_start
+    local marker_line = string.format(
+        '    TKM %.14g %s %d %.14g',
+        src_start, name, color, length
+    )
+
+    -- Insert before the closing ">" of the ITEM chunk
+    local insert_pos = chunk:find("\n>%s*$")
+    if insert_pos then
+        chunk = chunk:sub(1, insert_pos - 1) .. "\n" .. marker_line .. chunk:sub(insert_pos)
+    else
+        chunk = chunk:gsub("(>)%s*$", marker_line .. "\n>")
+    end
+
+    SetItemStateChunk(item, chunk, false)
+end
+
+---------------------------------------------------------------------
+
+function find_source_marker(proj, marker_id, marker_type)
+    local _, num_markers, num_regions = CountProjectMarkers(proj)
+
+    for i = 0, num_markers + num_regions - 1 do
+        local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
+        if not isrgn and markrgnindexnumber == marker_id then
+            local number, label = raw_label:match("(%d+):(.+)")
+            if label and label == marker_type then
+                return pos, tonumber(number)
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+
+function get_item_at_position(proj_pos, track_number)
+    local tr = GetTrack(0, track_number - 1)
+    if not tr then return nil, nil end
+
+    local tracks_to_check = { tr }
+    if GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH") == 1 then
+        local depth = 1
+        local idx = track_number
+        while depth > 0 and idx < CountTracks(0) do
+            local child = GetTrack(0, idx)
+            if child then
+                tracks_to_check[#tracks_to_check + 1] = child
+                depth = depth + GetMediaTrackInfo_Value(child, "I_FOLDERDEPTH")
+            end
+            idx = idx + 1
+        end
+    end
+
+    for _, check_tr in ipairs(tracks_to_check) do
+        local num_items = CountTrackMediaItems(check_tr)
+        for j = 0, num_items - 1 do
+            local item = GetTrackMediaItem(check_tr, j)
+            if item then
+                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if proj_pos >= item_pos and proj_pos <= item_pos + item_len then
+                    local take = GetActiveTake(item)
+                    if take then return item, take end
+                end
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+
+function project_pos_to_source_pos(take, item, proj_pos)
+    if not take or not item then return nil end
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local take_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+    local take_rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+    return take_offset + (proj_pos - item_pos) * take_rate
 end
 
 ---------------------------------------------------------------------
@@ -149,26 +372,21 @@ end
 function move_destination_folder(track_number)
     local destination_folder = nil
     local track_count = CountTracks(0)
-
     for i = 0, track_count - 1 do
-        local track = GetTrack(0, i)
-        if track then
-            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                destination_folder = track
+        local tr = GetTrack(0, i)
+        if tr then
+            local _, track_name = GetSetMediaTrackInfo_String(tr, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH") == 1 then
+                destination_folder = tr
                 break
             end
         end
     end
-
     if not destination_folder then return end
-
     local target_track = GetTrack(0, track_number - 1)
     if not target_track then return end
-
     local destination_index = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER") - 1
     local target_index = track_number - 1
-
     if destination_index ~= target_index then
         SetOnlyTrackSelected(destination_folder)
         ReorderSelectedTracks(target_index, 0)
@@ -180,20 +398,15 @@ end
 function get_tracks_per_group()
     local track_count = CountTracks(0)
     if track_count == 0 then return 0 end
-
     local tracks_per_group = 1
     local first_track = GetTrack(0, 0)
     if not first_track or GetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH") ~= 1 then
-        return 0 -- No valid parent folder
+        return 0
     end
-
     for i = 1, track_count - 1 do
-        local track = GetTrack(0, i)
-        if track then
-            local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            if depth == 1 then
-                break -- New parent folder found, stop counting
-            end
+        local tr = GetTrack(0, i)
+        if tr then
+            if GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH") == 1 then break end
             tracks_per_group = tracks_per_group + 1
         end
     end
@@ -206,17 +419,16 @@ function calculate_destination_info()
     local track_count = CountTracks(0)
     local destination_folder = GetTrack(0, 0)
     for i = 0, track_count - 1 do
-        local track = GetTrack(0, i)
-        if track then
-            local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            if track_name:find("^D:") and GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                destination_folder = track
+        local tr = GetTrack(0, i)
+        if tr then
+            local _, track_name = GetSetMediaTrackInfo_String(tr, "P_NAME", "", false)
+            if track_name:find("^D:") and GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH") == 1 then
+                destination_folder = tr
                 break
             end
         end
     end
-    local dest_track_num = GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER")
-    return dest_track_num
+    return GetMediaTrackInfo_Value(destination_folder, "IP_TRACKNUMBER")
 end
 
 ---------------------------------------------------------------------

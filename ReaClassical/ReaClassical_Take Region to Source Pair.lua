@@ -20,14 +20,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 -- luacheck: ignore 113
 
-
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number, other_source_marker_check
+local main, folder_check, get_track_number
 local get_path, get_color_table
-local convert_pair_to_take_marker, find_source_marker
-local project_pos_to_source_pos, get_item_at_position
-local set_take_marker_with_length
+local source_pos_to_project_pos, project_pos_to_source_pos
+local find_saud_take_marker_at_cursor, remove_take_marker_by_chunk
+local find_source_marker, get_item_at_position, set_take_marker_with_length
+local convert_existing_pair_to_take_marker
+
+local to_takemarkers = false
 
 ---------------------------------------------------------------------
 
@@ -36,6 +38,8 @@ if not SWS_exists then
     MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
+
+if not to_takemarkers then return end
 
 local _, opened_string = GetProjExtState(0, "ReaClassical", "toolbaropened")
 
@@ -58,170 +62,125 @@ function main()
             .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    local sdmousehover = 0
-    if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[9] then sdmousehover = tonumber(table[9]) or 0 end
+
+    local selected_item = GetSelectedMediaItem(0, 0)
+    if not selected_item then
+        MB("Please select an item containing take markers.", "ReaClassical Error", 0)
+        return
     end
 
-    local to_takemarkers = false -- placeholder: add proper logic later
+    local take = GetActiveTake(selected_item)
+    if not take then
+        MB("No active take found on selected item.", "ReaClassical Error", 0)
+        return
+    end
 
-    local selected_track = GetSelectedTrack(0, 0)
+    local cur_pos = GetCursorPosition()
 
-    local cur_pos, track
-    if sdmousehover == 1 then
-        cur_pos = BR_PositionAtMouseCursor(false)
-        local screen_x, screen_y = GetMousePosition()
-        track = GetTrackFromPoint(screen_x, screen_y)
+    -- Find S-AUD take marker (with length) surrounding the edit cursor
+    local marker_info = find_saud_take_marker_at_cursor(selected_item, take, cur_pos)
+
+    if not marker_info then
+        MB("Edit cursor is not inside an S-AUD take marker region on the selected item.",
+            "ReaClassical Error", 0)
+        return
+    end
+
+    -- Get the track number for the marker labels
+    local item_track = GetMediaItem_Track(selected_item)
+    local track_number = math.floor(get_track_number(item_track))
+
+    -- Get marker color
+    local colors = get_color_table()
+    local marker_color
+    if workflow == "Horizontal" then
+        marker_color = colors.source_marker
     else
-        cur_pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
+        marker_color = item_track and GetTrackColor(item_track) or colors.source_marker
     end
 
-    if cur_pos ~= -1 then
-        local track_number = math.floor(get_track_number(track))
+    -- Before placing new project markers, convert any existing pair to a take marker
+    local proj = EnumProjects(-1)
+    convert_existing_pair_to_take_marker(proj)
 
-        if to_takemarkers then
-            -- Only convert if a matching pair exists; otherwise just delete old marker
-            convert_pair_to_take_marker(999, "SOURCE-OUT")
-        else
-            local i = 0
-            while true do
-                local project, _ = EnumProjects(i)
-                if project == nil then break
-                else DeleteProjectMarker(project, 999, false) end
-                i = i + 1
-            end
-        end
+    -- Add real project markers
+    AddProjectMarker2(0, false, marker_info.in_proj_pos, 0,
+        track_number .. ":SOURCE-IN", 998, marker_color)
+    AddProjectMarker2(0, false, marker_info.out_proj_pos, 0,
+        track_number .. ":SOURCE-OUT", 999, marker_color)
 
-        local other_source_marker = other_source_marker_check()
+    -- Remove the S-AUD take marker via chunk manipulation
+    remove_take_marker_by_chunk(selected_item, marker_info.src_start, "S-AUD")
 
-        local color_track = track or selected_track
-        local colors = get_color_table()
-
-        local marker_color
-        if workflow == "Horizontal" then
-            marker_color = colors.source_marker
-        else
-            marker_color = color_track and GetTrackColor(color_track) or colors.source_marker
-        end
-
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
-
-        if other_source_marker and other_source_marker ~= track_number then
-            MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
-        end
-    end
     PreventUIRefresh(-1)
 end
 
 ---------------------------------------------------------------------
 
-function convert_pair_to_take_marker(marker_id, marker_type)
+function convert_existing_pair_to_take_marker(proj)
     local black_color = ColorToNative(0, 0, 0) | 0x1000000
 
-    local proj = EnumProjects(-1)
-    if not proj then return end
+    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos, out_track_num = find_source_marker(proj, 999, "SOURCE-OUT")
 
-    local _, num_markers, num_regions = CountProjectMarkers(proj)
-    local marker_pos = nil
-    local marker_track_num = nil
-
-    for i = 0, num_markers + num_regions - 1 do
-        local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
-        if not isrgn and markrgnindexnumber == marker_id then
-            local number, label = raw_label:match("(%d+):(.+)")
-            if label and label == marker_type then
-                marker_pos = pos
-                marker_track_num = tonumber(number)
-            end
-            break
-        end
-    end
-
-    if not marker_pos then
+    -- No pair or mismatched track numbers: just delete both
+    if not in_pos or not out_pos or not in_track_num or not out_track_num
+        or in_track_num ~= out_track_num then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
             i = i + 1
         end
         return
     end
 
-    -- Check for matching partner marker
-    local other_id = (marker_type == "SOURCE-OUT") and 998 or 999
-    local other_type = (marker_type == "SOURCE-OUT") and "SOURCE-IN" or "SOURCE-OUT"
-    local other_pos, other_track_num = find_source_marker(proj, other_id, other_type)
-
-    local is_pair = other_pos and other_track_num and
-        marker_track_num and other_track_num == marker_track_num
-
-    if not is_pair then
-        -- No pair: just delete old marker, do NOT convert singles
-        local i = 0
-        while true do
-            local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
-            i = i + 1
-        end
-        return
-    end
-
-    -- Determine IN and OUT positions
-    local in_pos, out_pos
-    if marker_type == "SOURCE-IN" then
-        in_pos = marker_pos
-        out_pos = other_pos
-    else
-        in_pos = other_pos
-        out_pos = marker_pos
-    end
-
-    -- Guard: do not convert if pair is backwards (OUT before IN)
+    -- Guard: backwards pair
     if in_pos >= out_pos then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
             i = i + 1
         end
         return
     end
 
-    -- All checks passed: convert to take marker at time selection (with length)
-    local item_in, take_in = get_item_at_position(in_pos, marker_track_num)
-    local item_out, _ = get_item_at_position(out_pos, marker_track_num)
+    -- Guard: must be in the same item
+    local item_in, take_in = get_item_at_position(in_pos, in_track_num)
+    local item_out, _ = get_item_at_position(out_pos, in_track_num)
 
-    -- Guard: do not convert if IN and OUT span multiple items
     if not item_in or not item_out or item_in ~= item_out then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
             i = i + 1
         end
         return
     end
 
-    -- Guard: do not convert if the target item already has an S-AUD take marker
+    -- Guard: target item already has an S-AUD take marker
     local _, existing_chunk = GetItemStateChunk(item_in, "", false)
     if existing_chunk and existing_chunk:find("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+") then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then break end
+            DeleteProjectMarker(project, 998, false)
+            DeleteProjectMarker(project, 999, false)
             i = i + 1
         end
         return
     end
 
+    -- Convert pair to take marker
     if take_in then
         local src_in = project_pos_to_source_pos(take_in, item_in, in_pos)
         local src_out = project_pos_to_source_pos(take_in, item_in, out_pos)
@@ -243,6 +202,71 @@ end
 
 ---------------------------------------------------------------------
 
+function find_saud_take_marker_at_cursor(item, take, cursor_pos)
+    -- Parse item chunk to find TKM lines with a length (time selection style)
+    -- Chunk format: TKM srcpos name color length
+    local _, chunk = GetItemStateChunk(item, "", false)
+    if not chunk or chunk == "" then return nil end
+
+    for src_start_str, name, _, length_str in
+        chunk:gmatch('TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)%s+(%S+)%s+(%-?[%d%.e%+%-]+)')
+    do
+        if name == "S-AUD" then
+            local src_start = tonumber(src_start_str)
+            local length = tonumber(length_str)
+            if src_start and length and length > 0 then
+                local src_end = src_start + length
+                local proj_start = source_pos_to_project_pos(take, item, src_start)
+                local proj_end = source_pos_to_project_pos(take, item, src_end)
+                if proj_start and proj_end and
+                    cursor_pos >= proj_start and cursor_pos <= proj_end then
+                    return {
+                        in_proj_pos = proj_start,
+                        out_proj_pos = proj_end,
+                        src_start = src_start,
+                        src_end = src_end
+                    }
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function remove_take_marker_by_chunk(item, src_start, name)
+    local _, chunk = GetItemStateChunk(item, "", false)
+    if not chunk or chunk == "" then return end
+
+    -- Match TKM lines: TKM srcpos name color [length]
+    local new_lines = {}
+    local removed = false
+    for line in chunk:gmatch("[^\n]+") do
+        if not removed then
+            local tm_src, tm_name = line:match(
+                '%s*TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)'
+            )
+            if tm_name == name and tm_src then
+                local tm_pos = tonumber(tm_src)
+                if tm_pos and math.abs(tm_pos - src_start) < 0.0001 then
+                    removed = true
+                    goto continue
+                end
+            end
+        end
+        new_lines[#new_lines + 1] = line
+        ::continue::
+    end
+
+    if removed then
+        SetItemStateChunk(item, table.concat(new_lines, "\n"), false)
+    end
+end
+
+---------------------------------------------------------------------
+
 function set_take_marker_with_length(item, src_start, src_end, name, color)
     -- Use chunk manipulation since SetTakeMarker API lacks length parameter
     -- Chunk format: TKM srcpos name color length
@@ -255,6 +279,7 @@ function set_take_marker_with_length(item, src_start, src_end, name, color)
         src_start, name, color, length
     )
 
+    -- Insert before the closing ">" of the ITEM chunk
     local insert_pos = chunk:find("\n>%s*$")
     if insert_pos then
         chunk = chunk:sub(1, insert_pos - 1) .. "\n" .. marker_line .. chunk:sub(insert_pos)
@@ -323,6 +348,17 @@ end
 
 ---------------------------------------------------------------------
 
+function source_pos_to_project_pos(take, item, src_pos)
+    if not take or not item then return nil end
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local take_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+    local take_rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+    if take_rate == 0 then return nil end
+    return item_pos + (src_pos - take_offset) / take_rate
+end
+
+---------------------------------------------------------------------
+
 function project_pos_to_source_pos(take, item, proj_pos)
     if not take or not item then return nil end
     local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
@@ -357,26 +393,6 @@ function get_track_number(track)
         local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
-end
-
----------------------------------------------------------------------
-
-function other_source_marker_check()
-    local proj = EnumProjects(-1)
-    if not proj then return nil end
-
-    local _, num_markers, num_regions = CountProjectMarkers(proj)
-
-    for i = 0, num_markers + num_regions - 1 do
-        local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-        local number, label = raw_label:match("(%d+):(.+)")
-
-        if label and (label == "SOURCE-IN" or label == "SOURCE-OUT") then
-            return tonumber(number)
-        end
-    end
-
-    return nil
 end
 
 ---------------------------------------------------------------------
