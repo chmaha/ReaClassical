@@ -66,8 +66,7 @@ local marker_data                   = {}
 local playback_monitor              = false
 local current_sao_pos               = nil
 local last_play_pos                 = -1
-local sort_mode                     = "time" -- "time" or "rank"
-local active_row_color              = 0x56A0D399 -- carolina blue highlight for the real pair row
+local sort_mode                     = "time" -- "time", "item", or "rank"
 
 -- ExtState keys for persistent storage
 local EXT_STATE_SECTION             = "ReaClassical_SAI_Manager"
@@ -189,11 +188,8 @@ function main()
                             marker_data[region.data_key] = mdata
                         end
 
-                        -- Apply row background color: real pair uses source marker color,
-                        -- otherwise use rank color if set
-                        if region.is_real then
-                            ImGui.TableSetBgColor(ctx, ImGui.TableBgTarget_RowBg0, active_row_color)
-                        elseif mdata.color_idx ~= 8 then
+                        -- Apply row background color based on rank if set
+                        if mdata.color_idx ~= 8 then
                             local color = COLORS[mdata.color_idx].rgba
                             ImGui.TableSetBgColor(ctx, ImGui.TableBgTarget_RowBg0, color)
                         end
@@ -243,11 +239,17 @@ function main()
                             save_marker_data()
                         end
 
-                        -- Column 6: Convert button (hidden for real pair — already converted)
+                        -- Column 6: Convert button or green indicator for real pair
                         ImGui.TableNextColumn(ctx)
-                        if not region.is_real then
-                            avail_width = ImGui.GetContentRegionAvail(ctx)
-                            ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 40) * 0.5)
+                        avail_width = ImGui.GetContentRegionAvail(ctx)
+                        ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + (avail_width - 40) * 0.5)
+                        if region.is_real then
+                            local cx, cy = ImGui.GetCursorScreenPos(ctx)
+                            local draw_list = ImGui.GetWindowDrawList(ctx)
+                            local frame_h = ImGui.GetFrameHeight(ctx)
+                            ImGui.DrawList_AddRectFilled(draw_list, cx, cy, cx + 40, cy + frame_h, 0x32CD32CC, 4.0)
+                            ImGui.Dummy(ctx, 40, frame_h)
+                        else
                             if ImGui.Button(ctx, '⚡##convert' .. region.data_key, 40, 0) then
                                 convert_at_marker(region)
                             end
@@ -428,7 +430,7 @@ function get_saud_regions()
 
             local src_start = project_pos_to_source_pos(take, item, in_pos)
             local src_end = project_pos_to_source_pos(take, item, out_pos)
-            local data_key = "real_pair:" .. item_guid .. ":" .. string.format("%.10g", src_start)
+            local data_key = item_guid .. ":" .. string.format("%.10g", src_start)
 
             table.insert(regions, {
                 item = item,
@@ -522,7 +524,7 @@ function clean_up_orphans()
         if item and take then
             local item_guid = BR_GetMediaItemGUID(item)
             local src_start = project_pos_to_source_pos(take, item, in_pos)
-            local data_key = "real_pair:" .. item_guid .. ":" .. string.format("%.10g", src_start)
+            local data_key = item_guid .. ":" .. string.format("%.10g", src_start)
             current_keys[data_key] = true
         end
     end
@@ -584,7 +586,7 @@ function init_marker_data()
         if item and take then
             local item_guid = BR_GetMediaItemGUID(item)
             local src_start = project_pos_to_source_pos(take, item, in_pos)
-            local data_key = "real_pair:" .. item_guid .. ":" .. string.format("%.10g", src_start)
+            local data_key = item_guid .. ":" .. string.format("%.10g", src_start)
 
             local saved_notes = ""
             local saved_color = 8
