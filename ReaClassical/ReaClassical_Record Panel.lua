@@ -1063,14 +1063,24 @@ function draw(playstate)
     ImGui.PopStyleColor(ctx)
   end
 
-  -- Pause button
+  -- Pause / Disarm button
   ImGui.SetCursorPos(ctx, buttons_start_x + button_width + button_spacing, button_y)
-  if not is_recording then ImGui.BeginDisabled(ctx, true) end
-  if ImGui.Button(ctx, "Pause", button_width, button_height) then
-    Main_OnCommand(1008, 0)
+  if is_recording then
+    if ImGui.Button(ctx, "Pause", button_width, button_height) then
+      Main_OnCommand(1008, 0)
+    end
+    ImGui.SetItemTooltip(ctx, "Pause/unpause recording (" .. ctrl_key .. "+F9)")
+  elseif any_armed then
+    if ImGui.Button(ctx, "Disarm", button_width, button_height) then
+      disarm_all_tracks()
+    end
+    ImGui.SetItemTooltip(ctx, "Disarm all tracks")
+  else
+    ImGui.BeginDisabled(ctx, true)
+    ImGui.Button(ctx, "Pause", button_width, button_height)
+    ImGui.EndDisabled(ctx)
+    ImGui.SetItemTooltip(ctx, "Pause/unpause recording (" .. ctrl_key .. "+F9)")
   end
-  ImGui.SetItemTooltip(ctx, "Pause/unpause recording (" .. ctrl_key .. "+F9)")
-  if not is_recording then ImGui.EndDisabled(ctx) end
 
   -- Increment Take button
   ImGui.SetCursorPos(ctx, buttons_start_x + (button_width + button_spacing) * 2, button_y)
