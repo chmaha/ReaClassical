@@ -62,14 +62,14 @@ function main()
     local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
     local sdmousehover = 0
     local moveable_dest = 0
+    local to_takemarkers = 0
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
         if table[9] then sdmousehover = tonumber(table[9]) or 0 end
         if table[13] then moveable_dest = tonumber(table[13]) or 0 end
+        if table[16] then to_takemarkers = tonumber(table[16]) or 0 end
     end
-
-    local to_takemarkers = false -- placeholder: add proper logic later
 
     local selected_track = GetSelectedTrack(0, 0)
     local dest_track_num = calculate_destination_info()
@@ -86,15 +86,18 @@ function main()
     if cur_pos ~= -1 then
         local track_number = math.floor(get_track_number(track))
 
-        if not to_takemarkers then
+        if to_takemarkers == 1 then
             -- Only convert if a matching pair exists; otherwise just delete old marker
             convert_pair_to_take_marker(998, "SOURCE-IN", cur_pos, track_number)
         else
             local i = 0
             while true do
                 local project, _ = EnumProjects(i)
-                if project == nil then break
-                else DeleteProjectMarker(project, 998, false) end
+                if project == nil then
+                    break
+                else
+                    DeleteProjectMarker(project, 998, false)
+                end
                 i = i + 1
             end
         end
@@ -151,8 +154,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -171,8 +177,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -193,8 +202,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -209,8 +221,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -223,8 +238,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -236,8 +254,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return

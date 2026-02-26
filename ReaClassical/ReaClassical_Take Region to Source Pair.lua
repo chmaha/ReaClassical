@@ -29,8 +29,6 @@ local find_saud_take_marker_at_cursor, remove_take_marker_by_chunk
 local find_source_marker, get_item_at_position, set_take_marker_with_length
 local convert_existing_pair_to_take_marker
 
-local to_takemarkers = false
-
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -38,8 +36,6 @@ if not SWS_exists then
     MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
     return
 end
-
-if to_takemarkers then return end
 
 local _, opened_string = GetProjExtState(0, "ReaClassical", "toolbaropened")
 
@@ -62,6 +58,16 @@ function main()
             .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local to_takemarkers = 0
+    if input ~= "" then
+        local table = {}
+        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
+        if table[16] then to_takemarkers = tonumber(table[16]) or 0 end
+    end
+
+    if to_takemarkers == 0 then return end
 
     local selected_item = GetSelectedMediaItem(0, 0)
     if not selected_item then
@@ -209,7 +215,7 @@ function find_saud_take_marker_at_cursor(item, take, cursor_pos)
     if not chunk or chunk == "" then return nil end
 
     for src_start_str, name, _, length_str in
-        chunk:gmatch('TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)%s+(%S+)%s+(%-?[%d%.e%+%-]+)')
+    chunk:gmatch('TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)%s+(%S+)%s+(%-?[%d%.e%+%-]+)')
     do
         if name == "S-AUD" then
             local src_start = tonumber(src_start_str)
