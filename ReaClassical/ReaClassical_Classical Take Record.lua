@@ -66,7 +66,7 @@ function avoid_take_lanes()
             for j = 0, item_count - 1 do
                 local item = GetTrackMediaItem(track, j)
                 local item_end = GetMediaItemInfo_Value(item, "D_POSITION")
-                             + GetMediaItemInfo_Value(item, "D_LENGTH")
+                    + GetMediaItemInfo_Value(item, "D_LENGTH")
                 if not track_latest_end or item_end > track_latest_end then
                     track_latest_end = item_end
                 end
@@ -122,7 +122,7 @@ function main()
     Undo_BeginBlock()
     local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
 
-    Main_OnCommand(40339, 0) --unmute all tracks
+    -- Main_OnCommand(40339, 0) --unmute all tracks
 
     if GetPlayState() == 0 then
         local record_panel = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
@@ -231,10 +231,13 @@ function main()
                 unselect_folder_children()
                 Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
             end
+        elseif workflow == "Vertical" then
+            -- Stay on same folder but restore mute/solo state
+            select_children_of_selected_folders()
+            solo()
+            mixer()
+            unselect_folder_children()
         end
-        -- When "Record Takes Horizontally" is enabled in Vertical workflow, we do
-        -- nothing extra on stop: the cursor stays where recording ended, ready for
-        -- the next horizontal take on the same folder.
 
         PreventUIRefresh(-1)
         Undo_EndBlock('Classical Take Record Stop', 0)
@@ -265,6 +268,8 @@ function solo()
             and rt_state ~= "y" and live_state ~= "y" and rcmaster_state ~= "y" then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+        elseif IsTrackSelected(track) then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
         end
         if live_state == "y" then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
