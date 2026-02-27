@@ -73,12 +73,11 @@ end
 ---------------------------------------------------------------------
 
 function sync_based_on_workflow(workflow)
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     if workflow == "Vertical" then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     elseif workflow == "Horizontal" then
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 end
 

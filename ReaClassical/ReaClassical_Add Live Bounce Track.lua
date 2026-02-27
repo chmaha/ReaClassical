@@ -22,10 +22,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_color_table, get_path
+local main, folder_check, get_color_table
 local trackname_check
 
 ---------------------------------------------------------------------
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -92,11 +94,9 @@ function main()
     SetTrackColor(live_track, colors.live)
 
     if folders > 1 then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     else
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
     Undo_EndBlock("Add Aux", 0)
@@ -139,18 +139,8 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

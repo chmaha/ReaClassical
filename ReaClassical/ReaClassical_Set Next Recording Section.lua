@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, get_last_item_end, get_last_item_end_in_folder
 local set_group_state, find_folder_parents_indices
 local next_section_vertical_horiz
-local solo, mixer, get_color_table, get_path
+local solo, mixer, get_color_table
 local select_children_of_selected_folders, unselect_folder_children
 local set_rec_arm_for_selected_tracks
 local find_mixer_track_for_track, is_mixer_disabled
@@ -505,18 +505,9 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1)
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

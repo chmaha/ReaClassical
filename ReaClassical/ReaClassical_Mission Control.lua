@@ -146,6 +146,7 @@ local track_num_format = "%d" -- Will be set based on number of tracks
 
 local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 ---------------------------------------------------------------------
 
 function main()
@@ -301,8 +302,7 @@ function main()
                 ImGui.SetCursorPosX(ctx, (window_width - total_width) / 2)
 
                 if ImGui.Button(ctx, "Yes", button_width, 0) then
-                    local vert_convert = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-                    Main_OnCommand(vert_convert, 0)
+                    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
                     init()
                     local whole_view = NamedCommandLookup("_RS63665092232578f8c8d10c5936ca5013a9ecab51")
                     Main_OnCommand(whole_view, 0)
@@ -339,8 +339,7 @@ function main()
 
                 if ImGui.Button(ctx, "Yes", button_width, 0) then
                     consolidate_folders_to_first()
-                    local horiz_convert = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-                    Main_OnCommand(horiz_convert, 0)
+                    dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
                     init()
                     ImGui.CloseCurrentPopup(ctx)
                     Main_OnCommand(prepare_takes, 0)
@@ -1888,29 +1887,24 @@ function main()
             -- OK button
             if ImGui.Button(ctx, "OK", 100, 0) then
                 -- Add tracks based on counts
-                local add_aux = NamedCommandLookup("_RS1938b67a195fd37423806f2647e26c3c212ce111")
                 for i = 1, add_special_counts.aux do
-                    Main_OnCommand(add_aux, 0)
+                    dofile(script_path .. "ReaClassical_Add Aux.lua")
                 end
 
-                local add_submix = NamedCommandLookup("_RSdbfe4281d2bd56a7afc1c5e3967219c9f1c2095c")
                 for i = 1, add_special_counts.submix do
-                    Main_OnCommand(add_submix, 0)
+                    dofile(script_path .. "ReaClassical_Add Submix.lua")
                 end
 
                 if not has_roomtone and add_special_counts.roomtone > 0 then
-                    local add_roomtone = NamedCommandLookup("_RS3798d5ce6052ef404cd99dacf481f2befed4eacc")
-                    Main_OnCommand(add_roomtone, 0)
+                    dofile(script_path .. "ReaClassical_Add RoomTone Track.lua")
                 end
 
-                local add_ref = NamedCommandLookup("_RS00c2ccc67c644739aa15a0c93eea2c755554b30d")
                 for i = 1, add_special_counts.reference do
-                    Main_OnCommand(add_ref, 0)
+                    dofile(script_path .. "ReaClassical_Add Ref Track.lua")
                 end
 
                 if not has_live and add_special_counts.live > 0 then
-                    local add_livebounce = NamedCommandLookup("_RS3f8d9e9a5731c664bc87eb08923a2450aef06537")
-                    Main_OnCommand(add_livebounce, 0)
+                    dofile(script_path .. "ReaClassical_Add Live Bounce Track.lua")
                 end
 
                 init()
@@ -2572,11 +2566,9 @@ end
 
 function sync()
     if workflow == "Vertical" then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     elseif workflow == "Horizontal" then
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 end
 
@@ -2722,8 +2714,7 @@ function delete_mixer_track(track_info)
     SetTrackSelected(track_info.mixer_track, true)
 
     -- Run the delete mixer command
-    local delete_mixer = NamedCommandLookup("_RS3e0eac1c51cbab48f6c385d7f39529ad5f16f961")
-    Main_OnCommand(delete_mixer, 0)
+    dofile(script_path .. "ReaClassical_Delete Track From All Groups.lua")
 
     -- Completely reinitialize
     selected_track = nil
@@ -2820,11 +2811,9 @@ function add_mixer_track(name)
 
     -- Run sync based on workflow
     if folder_count > 1 then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     else
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
     -- Restore rec inputs after sync

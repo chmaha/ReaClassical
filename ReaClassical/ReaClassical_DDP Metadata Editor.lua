@@ -1117,8 +1117,8 @@ end
 ---------------------------------------------------------------------
 
 function create_metadata_report_and_cue()
-    local metadata_report = NamedCommandLookup("_RS9dfbe237f69ecb0151b67e27e607b93a7bd0c4b4")
-    Main_OnCommand(metadata_report, 0)
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    dofile(script_path .. "ReaClassical_Metadata Report.lua")
 end
 
 ---------------------------------------------------------------------

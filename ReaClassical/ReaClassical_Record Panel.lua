@@ -1489,11 +1489,9 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-  local resource_path = GetResourcePath()
-  local pathseparator = package.config:sub(1, 1)
-  local relative_path = table.concat({ "", "Scripts", "chmaha Scripts", "ReaClassical", "" }, pathseparator)
-  package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
-  return require("ReaClassical_Colors_Table")
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    package.path = package.path .. ";" .. script_path .. "?.lua;"
+    return require("ReaClassical_Colors_Table")
 end
 
 ---------------------------------------------------------------------

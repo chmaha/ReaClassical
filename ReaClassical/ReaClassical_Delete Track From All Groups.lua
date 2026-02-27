@@ -90,13 +90,13 @@ function main()
     end
   end
 
-  if folder_count > 1 then
-    local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-    Main_OnCommand(F8_sync, 0)
-  else
-    local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-    Main_OnCommand(F7_sync, 0)
-  end
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+
+    if folder_count > 1 then
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+    else
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+    end
   PreventUIRefresh(-1)
   Undo_EndBlock("Delete Track From All Groups", -1)
 end

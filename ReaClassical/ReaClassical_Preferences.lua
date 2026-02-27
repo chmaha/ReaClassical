@@ -37,7 +37,7 @@ package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,0,500,0,0,0.75,' .. year .. ',WAV,0,0,0'
+local default_values = '35,200,3,7,0,0,500,0,0,0.75,' .. year .. ',WAV,0,0,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade Length (ms)',
@@ -54,11 +54,12 @@ local labels = {
     'CUE Audio Format',
     'Floating Destination Folder',
     'Find Takes Using Item Names',
-    'Show Only Item Take Numbers'
+    'Show Only Item Take Numbers',
+    'Source Audition Mode'
 }
 
 -- Binary option indices (1-based)
-local binary_options = { 5, 6, 8, 9, 13, 14, 15 }
+local binary_options = { 5, 6, 8, 9, 13, 14, 15, 16 }
 
 -- ImGui Context
 local ctx = ImGui.CreateContext('ReaClassical Preferences')
@@ -381,6 +382,7 @@ function pref_check()
         local num_13       = tonumber(t[13])
         local num_14       = tonumber(t[14])
         local num_15       = tonumber(t[15])
+        local num_16       = tonumber(t[16])
 
         -- normalize audio format and store it back into t[12]
         t[12]              = tostring(t[12]):upper()
@@ -392,7 +394,8 @@ function pref_check()
             (num_9 and num_9 > 1) or
             (num_13 and num_13 > 1) or
             (num_14 and num_14 > 1) or
-            (num_15 and num_15 > 1) then
+            (num_15 and num_15 > 1) or
+            (num_16 and num_16 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end
@@ -445,12 +448,11 @@ end
 -----------------------------------------------------------------------
 
 function sync_based_on_workflow(workflow)
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     if workflow == "Vertical" then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     elseif workflow == "Horizontal" then
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 end
 

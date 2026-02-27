@@ -160,12 +160,12 @@ local function main()
             if ImGui.Button(ctx, "OK", button_w, 30) then
                 -- Store track count in project extended state
                 SetProjExtState(0, "ReaClassical", "TrackCount", tostring(track_count))
-
+                local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
                 -- Run appropriate command based on workflow type
                 if workflow_type == 0 then
-                    Main_OnCommand(NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6"), 0)
+                    dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
                 else
-                    Main_OnCommand(NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549"), 0)
+                    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
                 end
                 ImGui.End(ctx)
                 return -- Exit immediately

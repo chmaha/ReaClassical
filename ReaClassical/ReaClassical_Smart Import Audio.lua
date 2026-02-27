@@ -41,9 +41,9 @@ local ctx = nil
 
 -- Dialog state
 local dialog_open = false
-local distribution_mode = 0  -- 0 = one per take, 1 = round-robin custom, 2 = round-robin current
+local distribution_mode = 0       -- 0 = one per take, 1 = round-robin custom, 2 = round-robin current
 local target_folder_count = 1
-local include_destination = false  -- NEW: whether to include D: folder in round-robin
+local include_destination = false -- NEW: whether to include D: folder in round-robin
 local import_confirmed = false
 local import_cancelled = false
 
@@ -55,6 +55,8 @@ local cached_max_takes_per_session = 0
 local cached_workflow = ""
 local cached_has_existing_items = false
 local cached_start_pos = 0
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 
 ---------------------------------------------------------------------
 
@@ -79,7 +81,7 @@ function main()
     local start_pos = 0
     local has_existing_items = CountMediaItems(0) > 0
     if has_existing_items then
-        start_pos = project_end + 10  -- 10 second gap after existing content
+        start_pos = project_end + 10 -- 10 second gap after existing content
     end
 
     -- Collect source files already used in the project
@@ -168,14 +170,14 @@ function main()
         if imgui_exists then
             -- Initialize dialog and start showing it
             show_import_dialog(sessions, session_names, workflow, has_existing_items, start_pos)
-            
+
             -- Wait for dialog to close via defer loop
             local function wait_for_dialog()
                 if dialog_open then
                     defer(wait_for_dialog)
                     return
                 end
-                
+
                 -- Dialog closed, now perform import
                 if not import_confirmed then
                     Undo_EndBlock("Import Audio (Cancelled)", -1)
@@ -183,16 +185,17 @@ function main()
                     UpdateArrange()
                     return
                 end
-                
+
                 -- Perform the actual import
                 if distribution_mode == 1 or distribution_mode == 2 then
                     -- Round-robin distribution (mode 1 = custom, mode 2 = current folder count)
-                    import_vertical_round_robin(sessions, session_names, tracks, errors, target_folder_count, include_destination, start_pos)
+                    import_vertical_round_robin(sessions, session_names, tracks, errors, target_folder_count,
+                        include_destination, start_pos)
                 else
                     -- Original behavior (one folder per take)
                     import_vertical(sessions, session_names, tracks, errors, include_destination, start_pos)
                 end
-                
+
                 Undo_EndBlock("Import Audio", -1)
 
                 -- Prepare Takes
@@ -214,7 +217,7 @@ function main()
                 UpdateArrange()
                 UpdateTimeline()
             end
-            
+
             wait_for_dialog()
             return
         else
@@ -261,7 +264,7 @@ function show_import_dialog(sessions, session_names, workflow, has_existing_item
     cached_workflow = workflow
     cached_has_existing_items = has_existing_items or false
     cached_start_pos = start_pos or 0
-    
+
     -- Calculate total takes and max takes in any single session
     cached_total_takes = 0
     local max_takes_per_session = 0
@@ -275,36 +278,36 @@ function show_import_dialog(sessions, session_names, workflow, has_existing_item
             max_takes_per_session = session_take_count
         end
     end
-    
+
     -- Store max takes per session for use in slider and warnings
     cached_max_takes_per_session = max_takes_per_session
 
     -- Get current folder count
     local current_folders = count_source_folders()
-    
+
     -- Load saved preferences
     local _, mode_str = GetProjExtState(0, "ReaClassical", "ImportDistributionMode")
     local _, count_str = GetProjExtState(0, "ReaClassical", "ImportFolderCount")
     local _, include_dest_str = GetProjExtState(0, "ReaClassical", "ImportIncludeDestination")
-    
+
     if mode_str ~= "" then
         distribution_mode = tonumber(mode_str) or 0
     else
         distribution_mode = 0
     end
-    
+
     if count_str ~= "" then
         target_folder_count = tonumber(count_str) or math.max(1, current_folders)
     else
         target_folder_count = math.max(1, current_folders)
     end
-    
+
     if include_dest_str ~= "" then
         include_destination = (include_dest_str == "true")
     else
         include_destination = false
     end
-    
+
     -- Adjust target_folder_count based on the loaded mode
     if distribution_mode == 0 then
         -- Mode 0: one folder per take
@@ -314,10 +317,10 @@ function show_import_dialog(sessions, session_names, workflow, has_existing_item
         target_folder_count = include_destination and (current_folders + 1) or current_folders
     end
     -- Mode 1 keeps the saved target_folder_count
-    
+
     -- Clamp folder count to valid range
     target_folder_count = math.max(1, math.min(cached_max_takes_per_session, target_folder_count))
-    
+
     -- Reset state
     dialog_open = true
     import_confirmed = false
@@ -333,17 +336,17 @@ function show_import_dialog(sessions, session_names, workflow, has_existing_item
                 return false, 0, 0
             end
         end
-        
+
         draw_import_dialog()
-        
+
         if dialog_open then
             defer(dialog_loop)
         end
     end
-    
+
     -- Start the dialog loop
     dialog_loop()
-    
+
     -- This function now returns immediately, actual result handled in main()
     return nil
 end
@@ -352,13 +355,13 @@ end
 
 function draw_import_dialog()
     local current_folders = count_source_folders()
-    
+
     local FLT_MIN, FLT_MAX = ImGui.NumericLimits_Float()
     ImGui.SetNextWindowSizeConstraints(ctx, 500, 400, FLT_MAX, FLT_MAX)
-    
+
     local visible, open = ImGui.Begin(ctx, "ReaClassical Smart Import", true, ImGui.WindowFlags_NoCollapse)
     dialog_open = open
-    
+
     if visible then
         -- Header info
         ImGui.Text(ctx, "Workflow: " .. cached_workflow)
@@ -367,16 +370,16 @@ function draw_import_dialog()
             ImGui.Text(ctx, string.format("Appending to existing project (starting at %.1fs)", cached_start_pos))
             ImGui.PopStyleColor(ctx)
         end
-        ImGui.Text(ctx, string.format("New files to import: %d takes (%d session%s)", 
-            cached_total_takes, 
+        ImGui.Text(ctx, string.format("New files to import: %d takes (%d session%s)",
+            cached_total_takes,
             #cached_session_names,
             #cached_session_names == 1 and "" or "s"))
         ImGui.Text(ctx, "Current folders: " .. current_folders)
-        
+
         ImGui.Spacing(ctx)
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
-        
+
         -- Distribution mode
         ImGui.Text(ctx, "Distribution Mode:")
         local changed_mode, new_mode = ImGui.RadioButtonEx(ctx, "One folder per take", distribution_mode, 0)
@@ -385,35 +388,36 @@ function draw_import_dialog()
             -- In mode 0, we need max takes in any session
             target_folder_count = cached_max_takes_per_session
         end
-        
+
         changed_mode, new_mode = ImGui.RadioButtonEx(ctx, "Use current folder count", distribution_mode, 2)
         if changed_mode then
             distribution_mode = new_mode
             -- Use all source folders, plus D: if destination is included
             target_folder_count = include_destination and (current_folders + 1) or current_folders
         end
-        
-        changed_mode, new_mode = ImGui.RadioButtonEx(ctx, "Round-robin across custom number of folders", distribution_mode, 1)
+
+        changed_mode, new_mode = ImGui.RadioButtonEx(ctx, "Round-robin across custom number of folders",
+            distribution_mode, 1)
         if changed_mode then
             distribution_mode = new_mode
         end
-        
+
         ImGui.Spacing(ctx)
-        
+
         -- Folder count slider (only enabled in custom round-robin mode)
         if distribution_mode ~= 1 then
             ImGui.BeginDisabled(ctx)
         end
-        
+
         ImGui.Text(ctx, "Number of folders:")
         ImGui.SetNextItemWidth(ctx, -1)
-        local changed_count, new_count = ImGui.SliderInt(ctx, "##folder_count", 
+        local changed_count, new_count = ImGui.SliderInt(ctx, "##folder_count",
             target_folder_count, 1, cached_max_takes_per_session)
-        
+
         if changed_count then
             target_folder_count = new_count
         end
-        
+
         if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
             if distribution_mode == 1 then
                 ImGui.SetTooltip(ctx, "Right-click to type value")
@@ -421,12 +425,12 @@ function draw_import_dialog()
                 ImGui.SetTooltip(ctx, "Only available in custom round-robin mode")
             end
         end
-        
+
         -- Right-click popup for typing value
         if distribution_mode == 1 and ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
             ImGui.OpenPopup(ctx, "folder_count_input")
         end
-        
+
         if ImGui.BeginPopup(ctx, "folder_count_input") then
             ImGui.Text(ctx, "Enter folder count:")
             ImGui.SetNextItemWidth(ctx, 100)
@@ -441,98 +445,101 @@ function draw_import_dialog()
             end
             ImGui.EndPopup(ctx)
         end
-        
+
         if distribution_mode ~= 1 then
             ImGui.EndDisabled(ctx)
         end
-        
+
         ImGui.Spacing(ctx)
-        
+
         -- Checkbox to include destination folder (enabled for all modes)
-        local changed_dest, new_dest = ImGui.Checkbox(ctx, "Include destination folder (D:) in distribution", include_destination)
+        local changed_dest, new_dest = ImGui.Checkbox(ctx, "Include destination folder (D:) in distribution",
+            include_destination)
         if changed_dest then
             include_destination = new_dest
             -- If in "use current folder count" mode, adjust the count when toggling destination
             if distribution_mode == 2 then
                 if include_destination then
-                    target_folder_count = current_folders + 1  -- D: + all source folders
+                    target_folder_count = current_folders + 1 -- D: + all source folders
                 else
-                    target_folder_count = current_folders  -- Just all source folders
+                    target_folder_count = current_folders     -- Just all source folders
                 end
             end
         end
-        
+
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "When enabled, D: folder is used as the first folder in the distribution sequence")
         end
-        
+
         ImGui.Spacing(ctx)
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
-        
+
         -- Preview section
         ImGui.Text(ctx, "Preview:")
-        
+
         -- Check if new folders will be created and show warning
         local preview_folder_count = target_folder_count
-        
+
         if distribution_mode == 0 then
             -- Check if new folders will be created for one-folder-per-take mode
             local folders_needed = cached_max_takes_per_session
-            local folders_to_create = include_destination and (folders_needed - 1 - current_folders) or (folders_needed - current_folders)
+            local folders_to_create = include_destination and (folders_needed - 1 - current_folders) or
+                (folders_needed - current_folders)
             if folders_to_create > 0 then
                 ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAA44FF)
-                ImGui.Text(ctx, string.format("⚠ Will create %d new folder%s", 
+                ImGui.Text(ctx, string.format("⚠ Will create %d new folder%s",
                     folders_to_create,
                     folders_to_create == 1 and "" or "s"))
                 ImGui.PopStyleColor(ctx)
             end
         else
             -- Mode 1 or 2 (both use round-robin)
-            local folders_to_create = include_destination and (preview_folder_count - 1 - current_folders) or (preview_folder_count - current_folders)
+            local folders_to_create = include_destination and (preview_folder_count - 1 - current_folders) or
+                (preview_folder_count - current_folders)
             if folders_to_create > 0 then
                 ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFAA44FF)
-                ImGui.Text(ctx, string.format("⚠ Will create %d new folder%s", 
+                ImGui.Text(ctx, string.format("⚠ Will create %d new folder%s",
                     folders_to_create,
                     folders_to_create == 1 and "" or "s"))
                 ImGui.PopStyleColor(ctx)
             end
         end
-        
+
         -- Scrollable preview
         local avail_w, avail_height = ImGui.GetContentRegionAvail(ctx)
         ImGui.BeginChild(ctx, "PreviewScroll", 0, avail_height - 40)
-        
+
         -- Generate preview using ImGui columns for alignment
         -- Mode 0 uses nil to show one folder per take, modes 1 & 2 use target_folder_count
-        generate_preview_ui(cached_sessions, cached_session_names, 
-            distribution_mode == 0 and nil or target_folder_count, 
+        generate_preview_ui(cached_sessions, cached_session_names,
+            distribution_mode == 0 and nil or target_folder_count,
             include_destination)
-        
+
         ImGui.EndChild(ctx)
-        
+
         ImGui.Spacing(ctx)
-        
+
         -- Buttons
         local button_width = (ImGui.GetContentRegionAvail(ctx) - 8) / 2
-        
+
         if ImGui.Button(ctx, "Import", button_width, 30) then
             import_confirmed = true
             dialog_open = false
-            
+
             -- Save preferences
             SetProjExtState(0, "ReaClassical", "ImportDistributionMode", tostring(distribution_mode))
             SetProjExtState(0, "ReaClassical", "ImportFolderCount", tostring(target_folder_count))
             SetProjExtState(0, "ReaClassical", "ImportIncludeDestination", tostring(include_destination))
         end
-        
+
         ImGui.SameLine(ctx)
-        
+
         if ImGui.Button(ctx, "Cancel", button_width, 30) then
             import_cancelled = true
             dialog_open = false
         end
-        
+
         ImGui.End(ctx)
     end
 end
@@ -540,24 +547,24 @@ end
 ---------------------------------------------------------------------
 
 function generate_preview_ui(sessions, session_names, folder_count, include_destination)
-    local take_column_x = 60  -- X position where takes should start
-    
+    local take_column_x = 60 -- X position where takes should start
+
     if not folder_count then
         -- One folder per take mode
         for _, session_name in ipairs(session_names) do
             local session_data = sessions[session_name]
-            
+
             -- Get take numbers
             local take_nums = {}
             for take_num, _ in pairs(session_data) do
                 table.insert(take_nums, take_num)
             end
             table.sort(take_nums)
-            
+
             -- Session header
             local display_name = session_name == "default" and "No Session Name" or session_name
             ImGui.Text(ctx, string.format("Session: %s (%d takes)", display_name, #take_nums))
-            
+
             -- One folder per take
             for idx, take_num in ipairs(take_nums) do
                 local folder_label
@@ -568,7 +575,7 @@ function generate_preview_ui(sessions, session_names, folder_count, include_dest
                 else
                     folder_label = "S" .. idx .. ":"
                 end
-                
+
                 ImGui.Bullet(ctx)
                 ImGui.SameLine(ctx)
                 ImGui.Text(ctx, folder_label)
@@ -576,28 +583,28 @@ function generate_preview_ui(sessions, session_names, folder_count, include_dest
                 ImGui.SetCursorPosX(ctx, take_column_x)
                 ImGui.Text(ctx, string.format("T%03d", take_num))
             end
-            
+
             ImGui.Spacing(ctx)
         end
     else
         -- Round-robin mode
         for _, session_name in ipairs(session_names) do
             local session_data = sessions[session_name]
-            
+
             -- Get take numbers
             local take_nums = {}
             for take_num, _ in pairs(session_data) do
                 table.insert(take_nums, take_num)
             end
             table.sort(take_nums)
-            
+
             -- Calculate distribution
             local distribution = calculate_round_robin_distribution(take_nums, folder_count)
-            
+
             -- Session header
             local display_name = session_name == "default" and "No Session Name" or session_name
             ImGui.Text(ctx, string.format("Session: %s (%d takes)", display_name, #take_nums))
-            
+
             -- Show distribution (only non-empty folders)
             for folder_idx = 1, folder_count do
                 local takes = distribution[folder_idx] or {}
@@ -611,13 +618,13 @@ function generate_preview_ui(sessions, session_names, folder_count, include_dest
                     else
                         folder_label = "S" .. folder_idx .. ":"
                     end
-                    
+
                     ImGui.Bullet(ctx)
                     ImGui.SameLine(ctx)
                     ImGui.Text(ctx, folder_label)
                     ImGui.SameLine(ctx)
                     ImGui.SetCursorPosX(ctx, take_column_x)
-                    
+
                     -- Show takes with spacing
                     for i, take_num in ipairs(takes) do
                         ImGui.Text(ctx, string.format("T%03d", take_num))
@@ -625,13 +632,13 @@ function generate_preview_ui(sessions, session_names, folder_count, include_dest
                             ImGui.SameLine(ctx)
                         end
                     end
-                    
+
                     -- Show count
                     ImGui.SameLine(ctx)
                     ImGui.Text(ctx, string.format(" (%d take%s)", #takes, #takes == 1 and "" or "s"))
                 end
             end
-            
+
             ImGui.Spacing(ctx)
         end
     end
@@ -641,18 +648,18 @@ end
 
 function calculate_round_robin_distribution(take_nums, folder_count)
     local distribution = {}
-    
+
     -- Initialize folder arrays
     for i = 1, folder_count do
         distribution[i] = {}
     end
-    
+
     -- Distribute takes round-robin
     for idx, take_num in ipairs(take_nums) do
         local folder_idx = ((idx - 1) % folder_count) + 1
         table.insert(distribution[folder_idx], take_num)
     end
-    
+
     return distribution
 end
 
@@ -663,62 +670,62 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors, fo
     -- If using destination, we need (folder_count - 1) source folders since D: is folder 1
     local source_folders_needed = use_destination and (folder_count - 1) or folder_count
     create_folders_if_needed(source_folders_needed)
-    
+
     -- Re-get tracks after folder creation
     tracks = get_tracks("Vertical")
-    
+
     -- Build folder structure
     local folder_tracks = build_folder_track_map(tracks)
-    
+
     local pos = start_pos or 0
-    
+
     for _, session_name in ipairs(session_names) do
         local session_data = sessions[session_name]
-        
+
         -- Sort takes numerically
         local take_nums = {}
         for take_num, _ in pairs(session_data) do
             table.insert(take_nums, take_num)
         end
         table.sort(take_nums)
-        
+
         -- Calculate round-robin distribution for this session
         local distribution = calculate_round_robin_distribution(take_nums, folder_count)
-        
+
         -- Track the current position for each folder separately
         local folder_positions = {}
         for i = 1, folder_count do
             folder_positions[i] = pos
         end
-        
+
         local max_end_position = pos
-        
+
         -- Process takes in round-robin order (not by folder)
         for take_idx, take_num in ipairs(take_nums) do
             -- Calculate which folder this take goes to (round-robin)
             local folder_idx = ((take_idx - 1) % folder_count) + 1
             local take_data = session_data[take_num]
-            
+
             -- Determine actual folder index in folder_tracks
             -- If use_destination is true: folder 1 = D: (index 1), folder 2 = S1: (index 2), etc.
             -- If use_destination is false: folder 1 = S1: (index 2), folder 2 = S2: (index 3), etc.
             local actual_folder_idx
             if use_destination then
-                actual_folder_idx = folder_idx  -- Direct mapping: 1=D:, 2=S1:, 3=S2:, etc.
+                actual_folder_idx = folder_idx     -- Direct mapping: 1=D:, 2=S1:, 3=S2:, etc.
             else
-                actual_folder_idx = folder_idx + 1  -- Skip D:, start at S1: (index 2)
+                actual_folder_idx = folder_idx + 1 -- Skip D:, start at S1: (index 2)
             end
-            
+
             local folder_track_list = folder_tracks[actual_folder_idx]
-            
+
             if not folder_track_list then
                 table.insert(errors,
                     string.format("Could not find source folder %d for take T%03d",
                         folder_idx, take_num))
             else
                 local take_max_len = 0
-                
-                -- Before placing this take, if we've cycled back to folder 1, 
+
+                -- Before placing this take, if we've cycled back to folder 1,
                 -- we need to advance all folder positions to 2 seconds past the longest item
                 if take_idx > folder_count and folder_idx == 1 then
                     local next_round_start = max_end_position + 2
@@ -726,12 +733,12 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors, fo
                         folder_positions[i] = next_round_start
                     end
                 end
-                
+
                 -- Import files for this take at the current folder position
                 for track_obj, filepath in pairs(take_data) do
                     -- Find matching track in this folder
                     local target_track = find_track_in_folder_list(folder_track_list, track_obj.base_name)
-                    
+
                     if target_track then
                         SetOnlyTrackSelected(target_track.track)
                         InsertMedia(filepath, 0)
@@ -740,7 +747,7 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors, fo
                             SetMediaItemInfo_Value(item, "D_POSITION", folder_positions[folder_idx])
                             local len = GetMediaItemInfo_Value(item, "D_LENGTH")
                             if len > take_max_len then take_max_len = len end
-                            
+
                             -- Rename item: session_T### or just ###
                             local take = GetActiveTake(item)
                             if take then
@@ -759,19 +766,19 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors, fo
                                 track_obj.base_name, folder_idx, take_num))
                     end
                 end
-                
+
                 -- Calculate the end position of this take
                 local take_end_position = folder_positions[folder_idx] + take_max_len
-                
+
                 -- Track the maximum end position across ALL folders in this round
                 if take_end_position > max_end_position then
                     max_end_position = take_end_position
                 end
-                
+
                 -- Don't advance this folder's position yet - we'll do it when cycling back
             end
         end
-        
+
         pos = max_end_position + 10 -- Move to next session (10 second gap)
     end
 end
@@ -781,7 +788,7 @@ end
 function create_folders_if_needed(target_count)
     local current_folders = count_source_folders()
     local folders_needed = target_count
-    
+
     if folders_needed > current_folders then
         local track_one = GetTrack(0, 0) -- Track 1 in project
         for i = 1, folders_needed - current_folders do
@@ -793,8 +800,7 @@ function create_folders_if_needed(target_count)
             delete_items()
             unselect_folder_children()
         end
-        local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
         Main_OnCommand(40297, 0) -- Unselect all tracks
     end
 end
@@ -888,7 +894,7 @@ function import_vertical(sessions, session_names, tracks, errors, use_destinatio
     -- Create all needed folders upfront
     local current_folders = count_source_folders()
     local folders_needed = max_takes
-    
+
     -- If using destination, we need (folders_needed - 1) source folders since D: counts as one
     local source_folders_needed = use_destination and (folders_needed - 1) or folders_needed
 
@@ -903,8 +909,7 @@ function import_vertical(sessions, session_names, tracks, errors, use_destinatio
             delete_items()
             unselect_folder_children()
         end
-        local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
         Main_OnCommand(40297, 0) -- Unselect all tracks
     end
 
@@ -937,11 +942,11 @@ function import_vertical(sessions, session_names, tracks, errors, use_destinatio
             -- If use_destination is false: take 1 = S1: (index 2), take 2 = S2: (index 3), etc.
             local folder_idx
             if use_destination then
-                folder_idx = take_idx  -- Direct mapping: 1=D:, 2=S1:, 3=S2:, etc.
+                folder_idx = take_idx     -- Direct mapping: 1=D:, 2=S1:, 3=S2:, etc.
             else
-                folder_idx = take_idx + 1  -- Skip D:, start at S1: (index 2)
+                folder_idx = take_idx + 1 -- Skip D:, start at S1: (index 2)
             end
-            
+
             local folder_track_list = folder_tracks[folder_idx]
 
             if not folder_track_list then

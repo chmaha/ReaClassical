@@ -106,8 +106,8 @@ function swap_selected_source_with_destination()
     GetSetMediaTrackInfo_String(selected_source, "P_EXT:Source", "", true)
     GetSetMediaTrackInfo_String(selected_source, "P_EXT:destination", "y", true)
 
-    local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-    Main_OnCommand(F8_sync, 0)
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
 end
 
 ---------------------------------------------------------------------

@@ -140,8 +140,8 @@ function main()
 
   UpdateArrange()
 
-  local ddp_editor = NamedCommandLookup("_RS5a9d8a4bab9aff7879af27a7d054e3db8da4e256")
-  Main_OnCommand(ddp_editor, 0)
+  local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+  dofile(script_path .. "ReaClassical_DDP Metadata Editor.lua")
   SetOnlyTrackSelected(selected_track)
   Undo_EndBlock("Create CD/DDP Markers", -1)
 end

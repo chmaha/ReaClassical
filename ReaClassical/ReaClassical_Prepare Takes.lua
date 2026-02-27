@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_color_table
-local xfade_check, empty_items_check, get_path, folder_check
+local xfade_check, empty_items_check, folder_check
 local trackname_check, delete_empty_items, pastel_color
 local color_folder_children
 local rgba_to_native, get_rank_color
@@ -1116,18 +1116,9 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

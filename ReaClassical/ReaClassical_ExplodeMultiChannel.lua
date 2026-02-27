@@ -148,13 +148,12 @@ function main()
     wipe_track_names()
     add_rcmaster()
     local updated_folders = folder_check()
-    local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-    local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 
-    if updated_folders == 1 then -- run F7
-        Main_OnCommand(F7_sync, 0)
-    else                         -- run F8
-        Main_OnCommand(F8_sync, 0)
+    if updated_folders == 1 then
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+    else
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     end
 
     if int == 6 and channel_count == 2 then

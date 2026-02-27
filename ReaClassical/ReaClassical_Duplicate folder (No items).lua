@@ -78,16 +78,16 @@ function main()
     delete_items()
     unselect_folder_children()
 
-    local sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-    Main_OnCommand(sync, 0)
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     solo()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
     TrackList_AdjustWindows(false)
-    reaper.defer(function()
-    Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
-end)
+    defer(function()
+        Main_OnCommand(40913, 0) -- adjust scroll to selected tracks
+    end)
 
     -- Prepare Takes
     -- local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")

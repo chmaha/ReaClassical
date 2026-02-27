@@ -22,10 +22,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_color_table, get_path, trackname_check
+local main, folder_check, get_color_table, trackname_check
 local scroll_to_first_track
 
 ---------------------------------------------------------------------
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -80,12 +82,11 @@ function main()
     Main_OnCommand(40297, 0)
     scroll_to_first_track()
 
+
     if folders > 1 then
-        local F8_sync = NamedCommandLookup("_RSbc3e25053ffd4a2dff87f6c3e49c0dadf679a549")
-        Main_OnCommand(F8_sync, 0)
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     else
-        local F7_sync = NamedCommandLookup("_RS59740cdbf71a5206a68ae5222bd51834ec53f6e6")
-        Main_OnCommand(F7_sync, 0)
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
     Undo_EndBlock("Add Reference track", 0)
@@ -126,18 +127,8 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
@@ -150,28 +141,28 @@ end
 ---------------------------------------------------------------------
 
 function scroll_to_first_track()
-  local track1 = GetTrack(0, 0)
-  if not track1 then return end
+    local track1 = GetTrack(0, 0)
+    if not track1 then return end
 
-  -- Save current selected tracks to restore later
-  local saved_sel = {}
-  local count_sel = CountSelectedTracks(0)
-  for i = 0, count_sel - 1 do
-    saved_sel[i+1] = GetSelectedTrack(0, i)
-  end
+    -- Save current selected tracks to restore later
+    local saved_sel = {}
+    local count_sel = CountSelectedTracks(0)
+    for i = 0, count_sel - 1 do
+        saved_sel[i + 1] = GetSelectedTrack(0, i)
+    end
 
-  -- Select only Track 1
-  Main_OnCommand(40297, 0) -- Unselect all tracks
-  SetTrackSelected(track1, true)
+    -- Select only Track 1
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    SetTrackSelected(track1, true)
 
-  -- Scroll Track 1 into view (vertically)
-  Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
+    -- Scroll Track 1 into view (vertically)
+    Main_OnCommand(40913, 0) -- "Track: Vertical scroll selected tracks into view"
 
-  -- Restore previous selection
-  Main_OnCommand(40297, 0) -- Unselect all tracks
-  for _, tr in ipairs(saved_sel) do
-    SetTrackSelected(tr, true)
-  end
+    -- Restore previous selection
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    for _, tr in ipairs(saved_sel) do
+        SetTrackSelected(tr, true)
+    end
 end
 
 ---------------------------------------------------------------------

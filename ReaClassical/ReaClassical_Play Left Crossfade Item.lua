@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, move_cursor_to_time_selection_midpoint, get_color_table
-local get_path, on_stop, marker_actions
+local on_stop, marker_actions
 ---------------------------------------------------------------------
 
 function main()
@@ -72,18 +72,9 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------

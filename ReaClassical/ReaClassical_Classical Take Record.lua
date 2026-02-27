@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo, trackname_check, mixer, track_check
-local load_prefs, save_prefs, get_color_table, get_path
+local load_prefs, save_prefs, get_color_table
 local extract_take_number, check_parent_track
 local get_selected_media_item_at, count_selected_media_items
 local clear_all_rec_armed_except_live, get_item_guid
@@ -492,18 +492,9 @@ end
 -----------------------------------------------------------------------
 
 function get_color_table()
-    local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "")
-    package.path = package.path .. ";" .. resource_path .. relative_path .. "?.lua;"
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function get_path(...)
-    local pathseparator = package.config:sub(1, 1);
-    local elements = { ... }
-    return table.concat(elements, pathseparator)
 end
 
 ---------------------------------------------------------------------
