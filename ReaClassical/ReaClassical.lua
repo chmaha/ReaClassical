@@ -33,9 +33,7 @@
   [main] ReaClassical_Classical Crossfade Editor.lua
   [main] ReaClassical_Classical Take Record.lua
   [main] ReaClassical_Colorize.lua
-  [main] ReaClassical_Convert Razor Area to Source Audition Markers.lua
   [main] ReaClassical_Convert REAPER project.lua
-  [main] ReaClassical_Convert Source Audition markers.lua
   [main] ReaClassical_Copy Destination Material to Source.lua
   [main] ReaClassical_Create CD Markers.lua
   [main] ReaClassical_Create Project.lua
@@ -58,7 +56,6 @@
   [main] ReaClassical_Help.lua
   [main] ReaClassical_Hide Children.lua
   [nomain] ReaClassical_Horizontal Workflow.lua
-  [main] ReaClassical_Import Audio.lua
   [main] ReaClassical_Increment Take Number While Recording.lua
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Insert with timestretching.lua
