@@ -3,7 +3,7 @@
 SRC="$HOME/Desktop/ReaClassical_26"
 DEST="$HOME/code/chmaha/ReaClassical/ReaClassical"
 
-rsync -av --delete --exclude='ReaClassical.lua' "$SRC/Scripts/chmaha Scripts/ReaClassical/" "$DEST/"
+rsync -av --delete --exclude='ReaClassical.lua' --exclude='ListenbackMicMonitor.jsfx' "$SRC/Scripts/chmaha Scripts/ReaClassical/" "$DEST/"
 
 cp "$SRC/ColorThemes/"* "$DEST"
 cp "$SRC/ProjectTemplates/ReaClassical.RPP" "$DEST"
