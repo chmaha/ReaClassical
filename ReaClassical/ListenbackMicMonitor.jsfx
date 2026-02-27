@@ -1,0 +1,14 @@
+NoIndex: true
+desc:Listenback Monitor (chmaha)
+author: chmaha
+about:
+  Released under GPLv3 license
+
+slider1:0<0,1,1{Stopped/Paused Only,Always On}>Mode
+
+@sample
+ps = play_state;
+slider1 == 0 && (ps == 1 || ps == 5) ? (
+  spl0 = 0;
+  spl1 = 0;
+);
