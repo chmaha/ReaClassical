@@ -120,7 +120,6 @@ end
 ---------------------------------------------------------------------
 
 function main()
-
     if workflow ~= "Vertical" then
         MB("This function only runs on a vertical workflow project.", "ReaClassical Error", 0)
         return
@@ -208,7 +207,7 @@ function get_last_item_end_in_folder(folder_track)
         for j = 0, item_count - 1 do
             local item = GetTrackMediaItem(tr, j)
             local item_end = GetMediaItemInfo_Value(item, "D_POSITION")
-                           + GetMediaItemInfo_Value(item, "D_LENGTH")
+                + GetMediaItemInfo_Value(item, "D_LENGTH")
             if not latest_end or item_end > latest_end then
                 latest_end = item_end
             end
@@ -294,18 +293,19 @@ function solo()
     if not track then return false end
 
     for i = 0, CountTracks(0) - 1 do
-        track = GetTrack(0, i)
-        local _, mixer_state    = GetSetMediaTrackInfo_String(track, "P_EXT:mixer",     "", false)
-        local _, aux_state      = GetSetMediaTrackInfo_String(track, "P_EXT:aux",       "", false)
-        local _, submix_state   = GetSetMediaTrackInfo_String(track, "P_EXT:submix",    "", false)
-        local _, rt_state       = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone",  "", false)
-        local _, live_state     = GetSetMediaTrackInfo_String(track, "P_EXT:live",      "", false)
-        local _, ref_state      = GetSetMediaTrackInfo_String(track, "P_EXT:rcref",     "", false)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster",  "", false)
+        track                     = GetTrack(0, i)
+        local _, mixer_state      = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state        = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state     = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state         = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state       = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, ref_state        = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, rcmaster_state   = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         if IsTrackSelected(track) == false and mixer_state ~= "y" and aux_state ~= "y"
             and submix_state ~= "y" and rt_state ~= "y" and live_state ~= "y"
-            and rcmaster_state ~= "y" then
+            and listenback_state ~= "y" and rcmaster_state ~= "y" then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         end
@@ -326,85 +326,175 @@ end
 function mixer()
     local colors = get_color_table()
 
-    for i = 0, CountTracks(0) - 1 do
+    for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
-        local _, mixer_state    = GetSetMediaTrackInfo_String(track, "P_EXT:mixer",     "", false)
-        local _, aux_state      = GetSetMediaTrackInfo_String(track, "P_EXT:aux",       "", false)
-        local _, submix_state   = GetSetMediaTrackInfo_String(track, "P_EXT:submix",    "", false)
-        local _, rt_state       = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone",  "", false)
-        local _, live_state     = GetSetMediaTrackInfo_String(track, "P_EXT:live",      "", false)
-        local _, ref_state      = GetSetMediaTrackInfo_String(track, "P_EXT:rcref",     "", false)
-        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster",  "", false)
-        local _, guid           = GetSetMediaTrackInfo_String(track, "GUID",            "", false)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
+        -- Check if this is a special track that should respect Mission Control TCP visibility
         local is_special_track = (aux_state == "y" or submix_state == "y" or rt_state == "y" or
-            live_state == "y" or ref_state == "y" or rcmaster_state == "y")
+            live_state == "y" or ref_state == "y" or rcmaster_state == "y") or listenback_state == "y"
 
+        -- Get Mission Control TCP visibility setting
         local mission_control_tcp_visible = nil
         if is_special_track then
+            -- Special tracks use "tcp_visible_" prefix
             local _, tcp_vis_str = GetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. guid)
-            if tcp_vis_str ~= "" then mission_control_tcp_visible = (tcp_vis_str == "1") end
-        elseif mixer_state == "y" then
-            local _, tcp_vis_str = GetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. guid)
-            if tcp_vis_str ~= "" then mission_control_tcp_visible = (tcp_vis_str == "1") end
-        end
-
-        local function tcp(default)
-            if mission_control_tcp_visible ~= nil then
-                return mission_control_tcp_visible and 1 or 0
+            if tcp_vis_str ~= "" then
+                mission_control_tcp_visible = (tcp_vis_str == "1")
             end
-            return default
+        elseif mixer_state == "y" then
+            -- Mixer tracks use "mixer_tcp_visible_" prefix
+            local _, tcp_vis_str = GetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. guid)
+            if tcp_vis_str ~= "" then
+                mission_control_tcp_visible = (tcp_vis_str == "1")
+            end
         end
 
-        if mixer_state    == "y" then SetTrackColor(track, colors.mixer);    SetMediaTrackInfo_Value(track, "B_SHOWINTCP", tcp(0)) end
-        if aux_state      == "y" then SetTrackColor(track, colors.aux);      SetMediaTrackInfo_Value(track, "B_SHOWINTCP", tcp(0)) end
-        if submix_state   == "y" then SetTrackColor(track, colors.submix);   SetMediaTrackInfo_Value(track, "B_SHOWINTCP", tcp(0)) end
-        if rt_state       == "y" then SetTrackColor(track, colors.roomtone); SetMediaTrackInfo_Value(track, "B_SHOWINTCP", tcp(1)) end
-        if live_state     == "y" then SetTrackColor(track, colors.live);     SetMediaTrackInfo_Value(track, "B_SHOWINTCP", tcp(1)) end
-        if ref_state      == "y" then SetTrackColor(track, colors.ref);      SetMediaTrackInfo_Value(track, "B_SHOWINTCP", tcp(1)) end
-        if rcmaster_state == "y" then SetTrackColor(track, colors.rcmaster); SetMediaTrackInfo_Value(track, "B_SHOWINTCP", tcp(0)) end
+        -- Handle mixer tracks
+        if mixer_state == "y" then
+            SetTrackColor(track, colors.mixer)
+            -- Use Mission Control setting if available, otherwise default to 0 (hidden)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+            end
+        end
 
+        -- Handle aux tracks
+        if aux_state == "y" then
+            SetTrackColor(track, colors.aux)
+            -- Use Mission Control setting if available, otherwise default to 0 (hidden)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+            end
+        end
+
+        -- Handle submix tracks
+        if submix_state == "y" then
+            SetTrackColor(track, colors.submix)
+            -- Use Mission Control setting if available, otherwise default to 0 (hidden)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+            end
+        end
+
+        -- Handle room tone tracks
+        if rt_state == "y" then
+            SetTrackColor(track, colors.roomtone)
+            -- Use Mission Control setting if available, otherwise default to 1 (visible)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+            end
+        end
+
+        -- Handle live tracks
+        if live_state == "y" then
+            SetTrackColor(track, colors.live)
+            -- Use Mission Control setting if available, otherwise default to 1 (visible)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+            end
+        end
+
+        -- Handle reference tracks
+        if ref_state == "y" then
+            SetTrackColor(track, colors.ref)
+            -- Use Mission Control setting if available, otherwise default to 1 (visible)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+            end
+        end
+
+        -- Handle RCMASTER tracks
+        if rcmaster_state == "y" then
+            SetTrackColor(track, colors.rcmaster)
+            -- Use Mission Control setting if available, otherwise default to 0 (hidden)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+            end
+        end
+
+        -- Show all special/mixer tracks in mixer window
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
-            or rt_state == "y" or live_state == "y" or ref_state == "y" then
-            SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 1)
+            or rt_state == "y" or live_state == "y" or ref_state == "y" or listenback_state == "y" then
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
-            SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 0)
+            SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
         end
 
+        -- Handle source tracks - always show in TCP
         local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", false)
-        local _, trackname    = GetSetMediaTrackInfo_String(track, "P_NAME",       "", false)
-        if trackname:find("^S%d+:") or source_track == "y" then
+        if trackname_check(track, "^S%d+:") or source_track == "y" then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
 
-        local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
-        local parent_folder_visible = true
+        -- Check folder visibility (only in Vertical workflow)
+        -- This needs to run BEFORE we check for folder parent tracks
+        local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+        local parent_folder_visible = true -- Default to visible
 
-        if wf == "Vertical" then
+        if workflow == "Vertical" then
+            -- First, find if this track is inside a folder and get that folder's visibility
             local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
 
             if folder_depth ~= 1 then
+                -- This might be a child track - find its parent folder
                 local search_idx = i - 1
+
                 while search_idx >= 0 do
-                    local pt = GetTrack(0, search_idx)
-                    if GetMediaTrackInfo_Value(pt, "I_FOLDERDEPTH") == 1 then
-                        local _, pguid = GetSetMediaTrackInfo_String(pt, "GUID", "", false)
-                        local _, fvs = GetProjExtState(0, "ReaClassical_MissionControl",
-                            "folder_tcp_visible_" .. pguid)
-                        if fvs ~= "" then parent_folder_visible = (fvs == "1") end
+                    local parent_track = GetTrack(0, search_idx)
+                    local parent_depth = GetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH")
+
+                    if parent_depth == 1 then
+                        -- Found the parent folder - check its visibility
+                        local _, parent_guid = GetSetMediaTrackInfo_String(parent_track, "GUID", "", false)
+                        local _, folder_vis_str = GetProjExtState(0, "ReaClassical_MissionControl",
+                            "folder_tcp_visible_" .. parent_guid)
+
+                        if folder_vis_str ~= "" then
+                            parent_folder_visible = (folder_vis_str == "1")
+                        end
                         break
                     end
+
                     search_idx = search_idx - 1
                 end
             end
 
+            -- Now handle the track based on whether it's a folder parent or child
             if folder_depth == 1 then
-                local _, fvs = GetProjExtState(0, "ReaClassical_MissionControl",
+                -- This is a folder parent track - check Mission Control visibility
+                local _, folder_vis_str = GetProjExtState(0, "ReaClassical_MissionControl",
                     "folder_tcp_visible_" .. guid)
-                if fvs ~= "" then
-                    SetMediaTrackInfo_Value(track, "B_SHOWINTCP", (fvs == "1") and 1 or 0)
+
+                if folder_vis_str ~= "" then
+                    local should_show = (folder_vis_str == "1")
+                    SetMediaTrackInfo_Value(track, "B_SHOWINTCP", should_show and 1 or 0)
                 end
             else
+                -- This is potentially a child track - hide it if parent folder is hidden
+                -- BUT don't hide special tracks or mixer tracks (they have their own visibility control)
                 if not parent_folder_visible and not is_special_track and mixer_state ~= "y" then
                     SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
                 end

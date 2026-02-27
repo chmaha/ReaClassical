@@ -86,6 +86,14 @@ end
 
 function solo()
     Main_OnCommand(40491, 0) -- un-arm all tracks for recording
+    -- Re-arm listenback tracks
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        if lb_state == "y" then
+            SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        end
+    end
     local selected_track = GetSelectedTrack(0, 0)
     local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
@@ -95,11 +103,12 @@ function solo()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
-        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
+            or ref_state == "y" or listenback_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -107,7 +116,7 @@ function solo()
         end
 
         if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
-                or ref_state == "y" or rcmaster_state == "y") then
+                or ref_state == "y" or listenback_state == "y" or rcmaster_state == "y") then
             if IsTrackSelected(track) and parent ~= 1 then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 2)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
@@ -124,13 +133,6 @@ function solo()
         end
 
         if rt_state == "y" then
-            if IsTrackSelected(track) then
-                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            end
-        end
-
-        if live_state == "y" then
             if IsTrackSelected(track) then
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
                 SetMediaTrackInfo_Value(track, "I_SOLO", 0)
@@ -182,12 +184,13 @@ function mixer()
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         -- Check if this is a special track that should respect Mission Control TCP visibility
         local is_special_track = (aux_state == "y" or submix_state == "y" or rt_state == "y" or
-            live_state == "y" or ref_state == "y" or rcmaster_state == "y")
+            live_state == "y" or ref_state == "y" or rcmaster_state == "y") or listenback_state == "y"
 
         -- Get Mission Control TCP visibility setting
         local mission_control_tcp_visible = nil
@@ -284,7 +287,7 @@ function mixer()
 
         -- Show all special/mixer tracks in mixer window
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
-            or rt_state == "y" or live_state == "y" or ref_state == "y" then
+            or rt_state == "y" or live_state == "y" or ref_state == "y" or listenback_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

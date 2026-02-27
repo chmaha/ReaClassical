@@ -117,13 +117,15 @@ function folder_check()
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
-            or rt_state == "y" or ref_state == "y" or live_state == "y" or rcmaster_state == "y"
+            or rt_state == "y" or ref_state == "y" or live_state == "y"
+            or listenback_state == "y" or rcmaster_state == "y"
         local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
             or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
-            or trackname_check(track, "^LIVE") or trackname_check(track, "^REF")
+            or trackname_check(track, "^LIVE") or trackname_check(track, "^REF") or trackname_check(track, "^LISTENBACK")
 
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
             folders = folders + 1

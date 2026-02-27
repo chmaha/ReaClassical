@@ -147,6 +147,11 @@ local track_num_format = "%d" -- Will be set based on number of tracks
 local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+
+local LISTENBACK_JSFX_NAME = "ListenbackMicMonitor"
+local LISTENBACK_TRACK_NAME = "LISTENBACK"
+local listenback_input_channel = 0 -- Current hardware input index for listenback
+local listenback_is_stereo = false -- Listenback mono/stereo state
 ---------------------------------------------------------------------
 
 function main()
@@ -507,7 +512,7 @@ function main()
             for _, aux_info in ipairs(aux_submix_tracks) do
                 if aux_info.type == "aux" or aux_info.type == "submix" or
                     aux_info.type == "roomtone" or aux_info.type == "reference" or
-                    aux_info.type == "rcmaster" or aux_info.type == "live" then
+                    aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" then
                     local num_channels = get_track_num_channels(aux_info.track)
 
                     for ch = 0, max_hw_outs - num_channels, num_channels do
@@ -575,9 +580,12 @@ function main()
                 for idx, aux_info in ipairs(aux_submix_tracks) do
                     if aux_info.type == "aux" or aux_info.type == "submix" or
                         aux_info.type == "roomtone" or aux_info.type == "reference" or
-                        aux_info.type == "rcmaster" or aux_info.type == "live" then
+                        aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" then
                         local fresh_hw = get_hardware_outputs(aux_info.track)
                         local num_channels = get_track_num_channels(aux_info.track)
+                        if aux_info.type == "listenback" then
+                            num_channels = 1
+                        end
 
                         pending_hw_routing_changes.special[idx] = {
                             hw_channel = -1,
@@ -853,7 +861,7 @@ function main()
             for idx, aux_info in ipairs(aux_submix_tracks) do
                 if aux_info.type == "aux" or aux_info.type == "submix" or
                     aux_info.type == "roomtone" or aux_info.type == "reference" or
-                    aux_info.type == "rcmaster" or aux_info.type == "live" then
+                    aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" then
                     ImGui.PushID(ctx, "hw_special_" .. idx)
 
                     -- Track type indicator with color
@@ -878,6 +886,9 @@ function main()
                     elseif aux_info.type == "live" then
                         display_prefix = "LIVE"
                         prefix_color = color_to_native(255, 200, 200)
+                    elseif aux_info.type == "listenback" then
+                        display_prefix = "LB"
+                        prefix_color = color_to_native(170, 200, 255) -- Light blue
                     end
 
                     -- Prefix with fixed width
@@ -928,14 +939,17 @@ function main()
                             end
 
                             if all_have_names then
-                                if num_channels == 2 then
+                                if num_channels == 1 then
+                                    label = hw_names[1]
+                                elseif num_channels == 2 then
                                     label = string.format("%s+%s", hw_names[1], hw_names[2])
                                 else
                                     label = string.format("%s-%s", hw_names[1], hw_names[num_channels])
                                 end
                             else
-                                -- Fallback to channel numbers
-                                if num_channels == 2 then
+                                if num_channels == 1 then
+                                    label = tostring(ch + 1)
+                                elseif num_channels == 2 then
                                     label = string.format("%d+%d", ch + 1, ch + 2)
                                 else
                                     label = string.format("%d-%d", ch + 1, ch + num_channels)
@@ -1333,6 +1347,9 @@ function main()
                     elseif aux_info.type == "rcmaster" then
                         display_prefix = "RCM"
                         prefix_color = color_to_native(80, 200, 80) -- Brightened green
+                    elseif aux_info.type == "listenback" then
+                        display_prefix = "LB"
+                        prefix_color = color_to_native(170, 200, 255)
                     end
 
                     ImGui.PushStyleColor(ctx, ImGui.Col_Text, prefix_color)
@@ -1407,6 +1424,45 @@ function main()
                                     focus_special_input = prev_idx
                                 end
                             end
+                        end
+                    elseif aux_info.type == "listenback" then
+                        -- Hardware input dropdown for listenback
+                        ImGui.SetNextItemWidth(ctx, input_dropdown_width)
+                        local lb_options = is_stereo and stereo_options or mono_options
+                        -- Build mono options for listenback
+                        local lb_mono_opts = {}
+                        if listenback_input_channel == 0 then
+                            table.insert(lb_mono_opts, "Select Ch")
+                        else
+                            table.insert(lb_mono_opts, "None")
+                        end
+                        for ch_idx = 1, MAX_INPUTS do
+                            local opt_text
+                            if show_hardware_names then
+                                local hw_name = GetInputChannelName(ch_idx - 1)
+                                if hw_name and hw_name ~= "" then
+                                    opt_text = hw_name
+                                else
+                                    opt_text = tostring(ch_idx)
+                                end
+                            else
+                                opt_text = tostring(ch_idx)
+                            end
+                            table.insert(lb_mono_opts, opt_text)
+                        end
+                        local lb_opts_str = table.concat(lb_mono_opts, "\0") .. "\0"
+                        local lb_changed, lb_new_input = ImGui.Combo(ctx, "##lb_input" .. idx, listenback_input_channel,
+                            lb_opts_str)
+                        if lb_changed then
+                            listenback_input_channel = lb_new_input
+                            -- Apply: 0 = None (-1), otherwise mono input
+                            local rec_input
+                            if lb_new_input == 0 then
+                                rec_input = -1
+                            else
+                                rec_input = (lb_new_input - 1) -- mono (no flag)
+                            end
+                            SetMediaTrackInfo_Value(aux_info.track, "I_RECINPUT", rec_input)
                         end
                     else
                         -- Add spacing to align with tracks that have name inputs
@@ -1796,9 +1852,11 @@ function main()
             -- Check existing tracks
             local has_roomtone = false
             local has_live = false
+            local has_listenback = false
             for _, track_info in ipairs(aux_submix_tracks) do
                 if track_info.type == "roomtone" then has_roomtone = true end
                 if track_info.type == "live" then has_live = true end
+                if track_info.type == "listenback" then has_listenback = true end
             end
 
             -- Initialize counts on first appearance
@@ -1808,7 +1866,8 @@ function main()
                     submix = 0,
                     roomtone = 0,
                     reference = 0,
-                    live = 0
+                    live = 0,
+                    listenback = 0
                 }
             end
 
@@ -1882,6 +1941,25 @@ function main()
                 end
             end
 
+            -- Listenback (max 1)
+            if has_listenback then
+                ImGui.BeginDisabled(ctx)
+                ImGui.Text(ctx, "Listenback:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.TextDisabled(ctx, "(already exists)")
+                ImGui.EndDisabled(ctx)
+            else
+                ImGui.Text(ctx, "Listenback:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.SetNextItemWidth(ctx, 100)
+                local changed, new_val = ImGui.InputInt(ctx, "##listenback", add_special_counts.listenback)
+                if changed then
+                    add_special_counts.listenback = math.max(0, math.min(1, new_val))
+                end
+            end
+
             ImGui.Separator(ctx)
 
             -- OK button
@@ -1901,6 +1979,37 @@ function main()
 
                 for i = 1, add_special_counts.reference do
                     dofile(script_path .. "ReaClassical_Add Ref Track.lua")
+                end
+
+                if not has_listenback and add_special_counts.listenback > 0 then
+                    -- Create listenback track inline
+                    Undo_BeginBlock()
+                    PreventUIRefresh(1)
+
+                    local insert_pos = CountTracks(0)
+                    InsertTrackAtIndex(insert_pos, false)
+                    local lb_track = GetTrack(0, insert_pos)
+
+                    GetSetMediaTrackInfo_String(lb_track, "P_EXT:listenback", "y", true)
+                    GetSetMediaTrackInfo_String(lb_track, "P_NAME", "LISTENBACK", true)
+
+                    SetMediaTrackInfo_Value(lb_track, "I_RECINPUT", -1) -- None initially
+                    SetMediaTrackInfo_Value(lb_track, "I_RECMON", 1)
+                    SetMediaTrackInfo_Value(lb_track, "I_RECARM", 1)
+                    SetMediaTrackInfo_Value(lb_track, "I_RECMODE", 2)
+                    SetMediaTrackInfo_Value(lb_track, "B_MAINSEND", 1)
+                    SetMediaTrackInfo_Value(lb_track, "B_SHOWINTCP", 0)
+                    SetMediaTrackInfo_Value(lb_track, "B_SHOWINMIXER", 1)
+                    SetMediaTrackInfo_Value(lb_track, "D_VOL", 1.0)
+
+                    -- Add JSFX
+                    local fx_idx = TrackFX_AddByName(lb_track, LISTENBACK_JSFX_NAME, false, -1)
+                    if fx_idx < 0 then
+                        TrackFX_AddByName(lb_track, "JS:" .. LISTENBACK_JSFX_NAME, false, -1)
+                    end
+
+                    PreventUIRefresh(-1)
+                    Undo_EndBlock("Add Listenback Track", -1)
                 end
 
                 if not has_live and add_special_counts.live > 0 then
@@ -2276,10 +2385,12 @@ function get_special_tracks()
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
-        if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" or live_state == "y" or rcmaster_state == "y" then
+        if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
+            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y" then
             local track_type = "other"
             local has_routing = false
 
@@ -2295,6 +2406,8 @@ function get_special_tracks()
                 track_type = "reference"
             elseif live_state == "y" then
                 track_type = "live"
+            elseif listenback_state == "y" then
+                track_type = "listenback"
             elseif rcmaster_state == "y" then
                 track_type = "rcmaster"
             end
@@ -2315,6 +2428,8 @@ function get_special_tracks()
                 display_name = ""
             elseif track_type == "live" then
                 -- LIVE has no additional name
+                display_name = ""
+            elseif track_type == "listenback" then
                 display_name = ""
             elseif track_type == "rcmaster" then
                 -- RCMASTER has no additional name
@@ -2342,7 +2457,8 @@ function get_special_tracks()
         roomtone = 3,
         rcmaster = 4,
         live = 5,
-        reference = 6
+        reference = 6,
+        listenback = 7
     }
 
     table.sort(tracks, function(a, b)
@@ -2871,6 +2987,23 @@ function init()
         -- Also save to project ext state for your audition functions
         local _, guid = GetSetMediaTrackInfo_String(aux_info.track, "GUID", "", false)
         SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. guid, (current_tcp_state == 1) and "1" or "0")
+    end
+
+    -- Initialize listenback input state
+    for i, aux_info in ipairs(aux_submix_tracks) do
+        if aux_info.type == "listenback" then
+            local rec_input = GetMediaTrackInfo_Value(aux_info.track, "I_RECINPUT")
+            if rec_input < 0 then
+                listenback_input_channel = 0 -- None
+            elseif rec_input >= 1024 then
+                -- Stereo (shouldn't happen, but handle gracefully)
+                listenback_input_channel = (rec_input - 1024) + 1
+            else
+                -- Mono
+                listenback_input_channel = rec_input + 1
+            end
+            break
+        end
     end
 
     -- Collect folder parent tracks (only in Vertical workflow)

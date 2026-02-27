@@ -186,6 +186,16 @@ local RANKS = {
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 
+-- Re-arm listenback tracks
+local num_tracks = CountTracks(0)
+for i = 0, num_tracks - 1 do
+  local track = GetTrack(0, i)
+  local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+  if lb_state == "y" then
+    SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+  end
+end
+
 function main()
   local retval, projfn = EnumProjects(-1)
   if project_userdata ~= retval or project_name ~= projfn then
@@ -1089,9 +1099,9 @@ function draw(playstate)
     Main_OnCommand(increment_take_cmd, 0)
   end
   if record_takes_horizontally then
-  ImGui.SetItemTooltip(ctx, "Split and increment take number (Shift+F9)")
+    ImGui.SetItemTooltip(ctx, "Split and increment take number (Shift+F9)")
   else
-  ImGui.SetItemTooltip(ctx, "Move to next folder and start new take (Shift+F9)")
+    ImGui.SetItemTooltip(ctx, "Move to next folder and start new take (Shift+F9)")
   end
   if not is_recording then ImGui.EndDisabled(ctx) end
 
@@ -1489,9 +1499,9 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
-    return require("ReaClassical_Colors_Table")
+  local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+  package.path = package.path .. ";" .. script_path .. "?.lua;"
+  return require("ReaClassical_Colors_Table")
 end
 
 ---------------------------------------------------------------------
@@ -2053,13 +2063,19 @@ function disarm_all_tracks()
   if playstate == 5 or playstate == 6 then
     return
   end
-
   local num_tracks = CountTracks(0)
   for i = 0, num_tracks - 1 do
     local track = GetTrack(0, i)
     local is_rec_armed = GetMediaTrackInfo_Value(track, "I_RECARM")
     if is_rec_armed == 1 then
       SetMediaTrackInfo_Value(track, "I_RECARM", 0)
+    end
+  end
+  for i = 0, num_tracks - 1 do
+    local track = GetTrack(0, i)
+    local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+    if lb_state == "y" then
+      SetMediaTrackInfo_Value(track, "I_RECARM", 1)
     end
   end
 end

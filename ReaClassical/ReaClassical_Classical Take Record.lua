@@ -262,10 +262,11 @@ function solo()
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         if IsTrackSelected(track) == false and mixer_state ~= "y" and aux_state ~= "y" and submix_state ~= "y"
-            and rt_state ~= "y" and live_state ~= "y" and rcmaster_state ~= "y" then
+            and rt_state ~= "y" and live_state ~= "y" and listenback_state ~= "y" and rcmaster_state ~= "y" then
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
             SetMediaTrackInfo_Value(track, "B_MUTE", 1)
         elseif IsTrackSelected(track) then
@@ -303,12 +304,13 @@ function mixer()
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         -- Check if this is a special track that should respect Mission Control TCP visibility
         local is_special_track = (aux_state == "y" or submix_state == "y" or rt_state == "y" or
-            live_state == "y" or ref_state == "y" or rcmaster_state == "y")
+            live_state == "y" or ref_state == "y" or rcmaster_state == "y") or listenback_state == "y"
 
         -- Get Mission Control TCP visibility setting
         local mission_control_tcp_visible = nil
@@ -405,7 +407,7 @@ function mixer()
 
         -- Show all special/mixer tracks in mixer window
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
-            or rt_state == "y" or live_state == "y" or ref_state == "y" then
+            or rt_state == "y" or live_state == "y" or ref_state == "y" or listenback_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -556,9 +558,13 @@ function clear_all_rec_armed_except_live(workflow)
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         local _, live_flag = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, lb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
 
         if live_flag == "y" and workflow == "Horizontal" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        elseif lb_flag == "y" then
+            SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+            SetMediaTrackInfo_Value(track, "I_RECMODE", 2)
         else
             SetMediaTrackInfo_Value(track, "I_RECARM", 0)
         end
@@ -660,20 +666,21 @@ end
 ---------------------------------------------------------------------
 
 function set_rec_arm_for_selected_tracks(state)
-    -- state: 0 = disarm, 1 = arm
     local num_tracks = CountTracks(0)
 
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
-        if IsTrackSelected(track) then
-            -- Check if this track feeds a disabled mixer
+        local _, lb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+
+        if lb_flag == "y" then
+            -- Always keep listenback armed
+            SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        elseif IsTrackSelected(track) then
             local mixer_track = find_mixer_track_for_track(track)
 
             if state == 1 and is_mixer_disabled(mixer_track) then
-                -- Don't arm this track - its mixer is disabled
                 SetMediaTrackInfo_Value(track, "I_RECARM", 0)
             else
-                -- Normal arming/disarming
                 SetMediaTrackInfo_Value(track, "I_RECARM", state)
             end
         end

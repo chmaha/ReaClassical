@@ -50,7 +50,7 @@ local window_open = true
 set_action_options(2)
 
 -- Rank color options (slightly desaturated for better readability)
-local COLORS                        = {
+local COLORS            = {
     { name = "Excellent",     rgba = 0x39FF1499 }, -- Bright lime green
     { name = "Very Good",     rgba = 0x32CD3299 }, -- Lime green
     { name = "Good",          rgba = 0x00AD8399 }, -- Teal green
@@ -62,16 +62,16 @@ local COLORS                        = {
 }
 
 -- Storage for marker data (keyed by item_guid:srcpos)
-local marker_data                   = {}
-local playback_monitor              = false
-local current_sao_pos               = nil
-local last_play_pos                 = -1
-local sort_mode                     = "time" -- "time", "item", or "rank"
+local marker_data       = {}
+local playback_monitor  = false
+local current_sao_pos   = nil
+local last_play_pos     = -1
+local sort_mode         = "time"             -- "time", "item", or "rank"
 
 -- ExtState keys for persistent storage
-local EXT_STATE_SECTION             = "ReaClassical_SAI_Manager"
+local EXT_STATE_SECTION = "ReaClassical_SAI_Manager"
 
-local audition_manager              = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
+local audition_manager  = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
 SetToggleCommandState(1, audition_manager, 1)
 
 ---------------------------------------------------------------------
@@ -364,7 +364,7 @@ function get_all_saud_take_markers()
                     end
 
                     for src_start_str, name, _, length_str in
-                        chunk:gmatch('TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)%s+(%S+)%s+(%-?[%d%.e%+%-]+)')
+                    chunk:gmatch('TKM%s+(%-?[%d%.e%+%-]+)%s+(%S+)%s+(%S+)%s+(%-?[%d%.e%+%-]+)')
                     do
                         if name == "S-AUD" then
                             local src_start = tonumber(src_start_str)
@@ -959,6 +959,14 @@ end
 
 function solo()
     Main_OnCommand(40491, 0) -- un-arm all tracks for recording
+    -- Re-arm listenback tracks
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        if lb_state == "y" then
+            SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        end
+    end
     local selected_track = GetSelectedTrack(0, 0)
     local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
 
@@ -968,11 +976,12 @@ function solo()
         local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
         local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
-        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
-        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y" then
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
+            or ref_state == "y" or listenback_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -980,7 +989,7 @@ function solo()
         end
 
         if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
-                or ref_state == "y" or rcmaster_state == "y") then
+                or ref_state == "y" or listenback_state == "y" or rcmaster_state == "y") then
             if IsTrackSelected(track) and parent ~= 1 then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 2)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
@@ -1003,13 +1012,6 @@ function solo()
             end
         end
 
-        if live_state == "y" then
-            if IsTrackSelected(track) then
-                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
-            end
-        end
-
         if ref_state == "y" then
             local is_selected = IsTrackSelected(track)
             local mute_state = 1
@@ -1019,6 +1021,9 @@ function solo()
                 Main_OnCommand(40340, 0) -- unsolo all tracks
                 mute_state = 0
                 solo_state = 1
+            elseif ref_is_guide == 1 then
+                mute_state = 0
+                solo_state = 0
             end
 
             SetMediaTrackInfo_Value(track, "B_MUTE", mute_state)
