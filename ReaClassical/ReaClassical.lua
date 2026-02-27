@@ -1,23 +1,27 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.18
+@version 26.2.19
 @changelog
-  Record Panel: Pause button doubles as disarm
-  Record Panel: Fix ranking and note-taking when recording
-  Notes: Update arrange as part of item note logic
+  Recording: Avoid briefly unmuting all tracks to avoid audio bump
+  Mission Control: Limit live bounce track addition/recording to horizontal workflow
+  NEW: Source audition mode
+  NEW: Listenback special track
+  F5 Prefs: Add source audition mode checkbox
+  Various: Move functions not requiring shortcuts out of main action menu
+  Documentation: Add details of the new features
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
-  [main] ReaClassical_Add Aux.lua
+  [nomain] ReaClassical_Add Aux.lua
   [main] ReaClassical_Add CD Marker Offsets.lua
   [main] ReaClassical_Add Destination IN marker.lua
   [main] ReaClassical_Add Destination OUT Marker.lua
-  [main] ReaClassical_Add Live Bounce Track.lua
-  [main] ReaClassical_Add Ref Track.lua
-  [main] ReaClassical_Add RoomTone Track.lua
+  [nomain] ReaClassical_Add Live Bounce Track.lua
+  [nomain] ReaClassical_Add Ref Track.lua
+  [nomain] ReaClassical_Add RoomTone Track.lua
   [main] ReaClassical_Add Source IN marker.lua
   [main] ReaClassical_Add Source OUT marker.lua
-  [main] ReaClassical_Add Submix.lua
+  [nomain] ReaClassical_Add Submix.lua
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Audition.lua
   [main] ReaClassical_Audition_with_playrate.lua
@@ -34,12 +38,12 @@
   [main] ReaClassical_Copy Destination Material to Source.lua
   [main] ReaClassical_Create CD Markers.lua
   [main] ReaClassical_Create Project.lua
-  [main] ReaClassical_DDP Metadata Editor.lua
-  [main] ReaClassical_Delete All Audition Markers.lua
+  [nomain] ReaClassical_DDP Metadata Editor.lua
+  [main] ReaClassical_Delete All S-AUD Markers.lua
   [main] ReaClassical_Delete All S-D markers.lua
   [main] ReaClassical_Delete Leaving Silence.lua
   [main] ReaClassical_Delete S-D Project Markers.lua
-  [main] ReaClassical_Delete Track From All Groups.lua
+  [nomain] ReaClassical_Delete Track From All Groups.lua
   [main] ReaClassical_Delete With Ripple.lua
   [main] ReaClassical_Destination Markers to Item Edge.lua
   [main] ReaClassical_Duplicate folder (No items).lua
@@ -52,13 +56,13 @@
   [main] ReaClassical_Heal Edit.lua
   [main] ReaClassical_Help.lua
   [main] ReaClassical_Hide Children.lua
-  [main] ReaClassical_Horizontal Workflow.lua
+  [nomain] ReaClassical_Horizontal Workflow.lua
   [main] ReaClassical_Import Audio.lua
   [main] ReaClassical_Increment Take Number While Recording.lua
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Insert with timestretching.lua
   [main] ReaClassical_Jump To Time.lua
-  [main] ReaClassical_Metadata Report.lua
+  [nomain] ReaClassical_Metadata Report.lua
   [main] ReaClassical_Meterbridge.lua
   [main] ReaClassical_Microphone Indicator.lua
   [main] ReaClassical_Mixer Snapshots.lua
@@ -101,7 +105,7 @@
   [main] ReaClassical_Split Items at Markers.lua
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
-  [main] ReaClassical_Vertical Workflow.lua
+  [nomain] ReaClassical_Vertical Workflow.lua
   [main] ReaClassical_Whole Project View.lua
   [main] ReaClassical_Whole Project View Horizontal.lua
   [main] ReaClassical_Whole Project View Vertical.lua
@@ -109,6 +113,8 @@
   [main] ReaClassical_Zoom to Destination OUT marker.lua
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
+  [main] ReaClassical_Take Region to Source Pair.lua
+  [jsfx] ListenbackMicMonitor.jsfx
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Gen.RPP
   [theme] ReaClassical.ReaperThemeZip
