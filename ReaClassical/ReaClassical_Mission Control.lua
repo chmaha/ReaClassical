@@ -1427,7 +1427,7 @@ function main()
                         end
                     elseif aux_info.type == "listenback" then
                         -- Hardware input dropdown for listenback
-                        ImGui.SetNextItemWidth(ctx, input_dropdown_width)
+                        ImGui.SetNextItemWidth(ctx, 180)
                         local lb_options = is_stereo and stereo_options or mono_options
                         -- Build mono options for listenback
                         local lb_mono_opts = {}
