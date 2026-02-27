@@ -1648,21 +1648,27 @@ function main()
 
                     -- TCP visibility checkbox - placed just before Routing button
                     ImGui.SameLine(ctx)
+                    if aux_info.type == "listenback" then
+                        ImGui.BeginDisabled(ctx)
+                    end
                     local changed_tcp, new_tcp = ImGui.Checkbox(ctx, "TCP##tcp" .. idx, aux_submix_tcp_visible[idx])
                     if changed_tcp then
                         aux_submix_tcp_visible[idx] = new_tcp
-
-                        -- Actually show/hide the track in TCP
                         SetMediaTrackInfo_Value(aux_info.track, "B_SHOWINTCP", new_tcp and 1 or 0)
-
                         TrackList_AdjustWindows(false)
                         UpdateArrange()
-                        -- Save to project ext state for persistence
                         SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. aux_guid,
                             new_tcp and "1" or "0")
                     end
-                    if ImGui.IsItemHovered(ctx) then
-                        ImGui.SetTooltip(ctx, "Show in TCP")
+                    if aux_info.type == "listenback" then
+                        ImGui.EndDisabled(ctx)
+                    end
+                    if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+                        if aux_info.type == "listenback" then
+                            ImGui.SetTooltip(ctx, "Listenback is MCP only")
+                        else
+                            ImGui.SetTooltip(ctx, "Show in TCP")
+                        end
                     end
 
                     -- Routing button (only for aux and submix) or disabled button for alignment
