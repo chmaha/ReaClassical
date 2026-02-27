@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.17
+@version 26.2.18
 @changelog
-  Create CD Markers: Restore previously selected track
-  Create CD Markers: Remove all references to RCMix markers
+  Record Panel: Pause button doubles as disarm
+  Record Panel: Fix ranking and note-taking when recording
+  Notes: Update arrange as part of item note logic
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
