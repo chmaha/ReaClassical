@@ -30,7 +30,7 @@ Use this dialog to:
 - Set recording inputs manually or automatically based on track naming
 - Temporarily disable recording of a channel
 - Set routing
-- Add "special" tracks such as aux, submix, room tone, live bounce and reference tracks
+- Add "special" tracks such as aux, submix, room tone, live bounce, listenback and reference tracks
 - Change visibility of folders and special tracks in the arrange window
 - Add a track to all folders
 - Delete a track from all folders
