@@ -45,9 +45,6 @@ end
 
 ---------------------------------------------------------------------
 
--- Read "Record Takes Horizontally" preference set by the Record Panel.
--- When true (Vertical workflow only), recording stays on the current folder
--- instead of advancing to the next one after stopping.
 local function get_record_takes_horizontally()
     local _, val = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
     return (val == "1")
@@ -55,9 +52,6 @@ end
 
 ---------------------------------------------------------------------
 
--- If the edit cursor is before the end of the final item on any armed
--- track, move it to 1 second after the rightmost item end. This prevents
--- take-lane creation even when the cursor sits in a gap between items.
 function avoid_take_lanes()
     local cursor_pos = GetCursorPosition()
     local num_tracks = CountTracks(0)
@@ -79,7 +73,7 @@ function avoid_take_lanes()
             end
 
             -- If cursor is before the end of the final item, we need to move it
-            if track_latest_end and cursor_pos < track_latest_end then
+            if track_latest_end and cursor_pos <= track_latest_end then
                 if not latest_end or track_latest_end > latest_end then
                     latest_end = track_latest_end
                 end
@@ -153,9 +147,6 @@ function main()
         set_rec_arm_for_selected_tracks(1)
         unselect_folder_children()
 
-        -- FEATURE 1: avoid creating take lanes by moving cursor if needed.
-        -- Run after arming so the user sees the correct position even when
-        -- only re-arming without immediately starting to record.
         avoid_take_lanes()
 
         if rec_arm ~= 1 then
@@ -166,8 +157,6 @@ function main()
         local cursor_pos = GetCursorPosition()
         save_prefs(cursor_pos)
 
-        -- Run again right before recording in case the cursor was moved
-        -- between arming and pressing record.
         avoid_take_lanes()
 
         PreventUIRefresh(-1)

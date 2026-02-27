@@ -1716,14 +1716,14 @@ function store_last_recorded_guids(cursor_pos)
       end
     end
   else
-    -- Horizontal workflow
+    -- Horizontal workflow: match by item_end OR item_start
     for i = 0, CountTracks(0) - 1 do
       local track = GetTrack(0, i)
       for j = 0, CountTrackMediaItems(track) - 1 do
         local item = GetTrackMediaItem(track, j)
         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
         local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
-        if math.abs(item_end - cursor_pos) < 0.5 then
+        if math.abs(item_end - cursor_pos) < 0.5 or math.abs(item_start - cursor_pos) < 0.5 then
           collect_item(item)
         end
       end
@@ -1773,9 +1773,8 @@ function apply_rank_and_notes_to_item(item)
     update_take_name(item, "")
   end
 
-  if recording_note ~= "" then
-    GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
-  end
+  -- FIX: Always write notes (including empty string to clear them)
+  GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
 
   GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
   UpdateItemInProject(item)
@@ -1925,9 +1924,8 @@ function apply_rank_and_notes_to_items(cursor_pos)
                   update_take_name(item, "")
                 end
 
-                if recording_note ~= "" then
-                  GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
-                end
+                -- FIX: Always write notes (including empty string to clear them)
+                GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
 
                 GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
               end
@@ -1956,7 +1954,8 @@ function apply_rank_and_notes_to_items(cursor_pos)
             local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
             local item_end = item_start + item_length
 
-            if math.abs(item_end - cursor_pos) < 0.5 then
+            -- FIX: Also match by item_start as fallback for cursor position differences
+            if math.abs(item_end - cursor_pos) < 0.5 or math.abs(item_start - cursor_pos) < 0.5 then
               items_found = items_found + 1
 
               local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
@@ -1992,9 +1991,8 @@ function apply_rank_and_notes_to_items(cursor_pos)
                 update_take_name(item, "")
               end
 
-              if recording_note ~= "" then
-                GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
-              end
+              -- FIX: Always write notes (including empty string to clear them)
+              GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
 
               GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
             end

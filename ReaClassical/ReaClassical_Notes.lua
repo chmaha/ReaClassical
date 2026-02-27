@@ -331,6 +331,7 @@ function main()
                 changed_item, item_note = ImGui.InputTextMultiline(ctx, "##item_note", item_note, avail_w, h_item)
                 if changed_item and editing_item then
                     GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
+                    UpdateArrange()
                 end
                 ImGui.PopID(ctx)
             end
