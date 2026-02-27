@@ -6,6 +6,7 @@
   Mission Control: Limit live bounce track addition/recording to horizontal workflow
   NEW: Source audition mode
   NEW: Listenback special track
+  NEW: Add monitoring JSFX
   F5 Prefs: Add source audition mode checkbox
   Various: Move functions not requiring shortcuts out of main action menu
   Documentation: Add details of the new features
