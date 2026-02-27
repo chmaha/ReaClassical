@@ -143,7 +143,7 @@ function main()
             MB("Please select a folder or track before running", "Classical Take Record", 0)
             return
         end
-        clear_all_rec_armed_except_live()
+        clear_all_rec_armed_except_live(workflow)
         set_rec_arm_for_selected_tracks(1)
         unselect_folder_children()
 
@@ -560,18 +560,16 @@ end
 
 ---------------------------------------------------------------------
 
-function clear_all_rec_armed_except_live()
+function clear_all_rec_armed_except_live(workflow)
     local num_tracks = CountTracks(0)
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         local _, live_flag = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
 
-        if live_flag ~= "y" then
-            -- Disarm track
-            SetMediaTrackInfo_Value(track, "I_RECARM", 0)
-        else
-            -- Optional: ensure LIVE track is armed
+        if live_flag == "y" and workflow == "Horizontal" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        else
+            SetMediaTrackInfo_Value(track, "I_RECARM", 0)
         end
     end
 end

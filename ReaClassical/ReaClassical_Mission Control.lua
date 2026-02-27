@@ -1862,22 +1862,24 @@ function main()
                 add_special_counts.reference = math.max(0, math.min(99, new_val))
             end
 
-            -- Live Bounce (max 1)
-            if has_live then
-                ImGui.BeginDisabled(ctx)
-                ImGui.Text(ctx, "Live Bounce:")
-                ImGui.SameLine(ctx)
-                ImGui.SetCursorPosX(ctx, 150)
-                ImGui.TextDisabled(ctx, "(already exists)")
-                ImGui.EndDisabled(ctx)
-            else
-                ImGui.Text(ctx, "Live Bounce:")
-                ImGui.SameLine(ctx)
-                ImGui.SetCursorPosX(ctx, 150)
-                ImGui.SetNextItemWidth(ctx, 100)
-                local changed, new_val = ImGui.InputInt(ctx, "##live", add_special_counts.live)
-                if changed then
-                    add_special_counts.live = math.max(0, math.min(1, new_val))
+            -- Live Bounce (max 1, only in Horizontal workflow)
+            if workflow == "Horizontal" then
+                if has_live then
+                    ImGui.BeginDisabled(ctx)
+                    ImGui.Text(ctx, "Live Bounce:")
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, 150)
+                    ImGui.TextDisabled(ctx, "(already exists)")
+                    ImGui.EndDisabled(ctx)
+                else
+                    ImGui.Text(ctx, "Live Bounce:")
+                    ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, 150)
+                    ImGui.SetNextItemWidth(ctx, 100)
+                    local changed, new_val = ImGui.InputInt(ctx, "##live", add_special_counts.live)
+                    if changed then
+                        add_special_counts.live = math.max(0, math.min(1, new_val))
+                    end
                 end
             end
 
