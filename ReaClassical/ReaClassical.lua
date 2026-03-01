@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3
+@version 26.3.1
 @changelog
-  Mission Control: Assign updated command ID to source audition button
+  ReaClassical Menu: Update source audition entries
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
