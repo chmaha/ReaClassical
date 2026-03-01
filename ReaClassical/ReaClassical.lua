@@ -1,15 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.2.19
+@version 26.3
 @changelog
-  Recording: Avoid briefly unmuting all tracks to avoid audio bump
-  Mission Control: Limit live bounce track addition/recording to horizontal workflow
-  NEW: Source audition mode
-  NEW: Listenback special track
-  NEW: Add monitoring JSFX
-  F5 Prefs: Add source audition mode checkbox
-  Various: Move functions not requiring shortcuts out of main action menu
-  Documentation: Add details of the new features
+  Mission Control: Assign updated command ID to source audition button
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
