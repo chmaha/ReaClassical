@@ -2094,7 +2094,7 @@ function main()
 
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Source Audition") then
-            local source_audition = NamedCommandLookup("_RSde9495791cb6413268f7d42af6d0ca5b6923d282")
+            local source_audition = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
             Main_OnCommand(source_audition, 0)
         end
         if ImGui.IsItemHovered(ctx) then
