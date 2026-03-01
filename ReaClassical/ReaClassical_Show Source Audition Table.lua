@@ -66,7 +66,7 @@ local marker_data       = {}
 local playback_monitor  = false
 local current_sao_pos   = nil
 local last_play_pos     = -1
-local sort_mode         = "time"             -- "time", "item", or "rank"
+local sort_mode         = "time" -- "time", "item", or "rank"
 
 -- ExtState keys for persistent storage
 local EXT_STATE_SECTION = "ReaClassical_SAI_Manager"
@@ -284,7 +284,10 @@ function main()
                     ImGui.EndTable(ctx)
                 end
             end
-
+            -- keyboard shortcut capture
+            if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_Z, false) then
+                window_open = false
+            end
             ImGui.End(ctx)
         end
     end
