@@ -1,6 +1,9 @@
-Version: 1.7
+Version: 1.8
 desc: Sonata Reverb (chmaha)
 author: chmaha
+changelog:
+  Add random autopan of low-level dry signal for added liveliness
+
 // Using Fons Adriaensen's Zita-Rev1 Reverb Algorithm
 // Source: https://kokkinizita.linuxaudio.org/linuxaudio/downloads/index.html
 // License: GNU General Public License version 3
@@ -19,6 +22,7 @@ author: chmaha
 // - LEXIS: Frequency-dependent ER decay + HF diffusion cascade (Lexicon shimmer)
 // - Model-specific bass boost (120Hz) separate from user EQ controls
 // - User EQ1/EQ2 controls remain fully independent
+// - MK VII/LEXIS: Subtle random autopan of direct signal (-12dB from reverb) for added liveliness
 
 slider1:40<20,100,1>-Delay (ms)
 slider2:200<50,1000,1>-XOver (Hz)
@@ -128,6 +132,12 @@ mod_phase_t4 = 0.2;
 mod_phase_t5 = 0.45;
 mod_phase_t6 = 0.7;
 mod_phase_t7 = 0.95;
+
+// Auto-pan
+autopan_phase_a = 0;
+autopan_phase_b = 0;
+autopan_phase_c = 0;
+autopan_smooth = 0;
 
 // Diff1 delay times from source (in seconds)
 tdiff1_0 = 20346*10^-6;
@@ -406,6 +416,14 @@ mod_inc = 2 * $pi * mod_rate / srate;
 mod_inc2 = 2 * $pi * mod_rate2 / srate;
 mod_inc3 = mod_type == 2 ? 2 * $pi * mod_rate3 / srate : 0;
 
+// Random autopan section
+autopan_inc_a = 2 * $pi * 0.071 / srate;
+autopan_inc_b = 2 * $pi * 0.113 / srate;
+autopan_inc_c = 2 * $pi * 0.173 / srate;
+autopan_gain = 0.251; // -12dB = 10^(-12/20) ≈ 0.251
+// Smoothing coefficient
+autopan_smooth_coeff = exp(-2 * $pi * 5 / srate);
+
 k = floor(ipdel * srate + 0.5);
 k = max(0, min(k, vdelay0_size - 1));
 vdelay0_del = k;
@@ -597,9 +615,24 @@ mod_type > 0 ? (
     mod_6 = mod_depth_samples * (sin(mod_phase_6) + mod_mix * sin(mod_phase_2) + mod_mix3 * sin(mod_phase_t6));
     mod_7 = mod_depth_samples * (sin(mod_phase_7) + mod_mix * sin(mod_phase_3) + mod_mix3 * sin(mod_phase_t7));
   );
+
+  autopan_phase_a += autopan_inc_a;
+  autopan_phase_a >= 2 * $pi ? autopan_phase_a -= 2 * $pi;
+  autopan_phase_b += autopan_inc_b;
+  autopan_phase_b >= 2 * $pi ? autopan_phase_b -= 2 * $pi;
+  autopan_phase_c += autopan_inc_c;
+  autopan_phase_c >= 2 * $pi ? autopan_phase_c -= 2 * $pi;
+
+  autopan_raw = 0.5 * sin(autopan_phase_a) + 0.33 * sin(autopan_phase_b) + 0.17 * sin(autopan_phase_c);
+  autopan_smooth += (1 - autopan_smooth_coeff) * (autopan_raw - autopan_smooth);
+
 ) : (
   mod_0 = mod_1 = mod_2 = mod_3 = mod_4 = mod_5 = mod_6 = mod_7 = 0;
+  autopan_smooth = 0;
 );
+
+dry_in_l = spl0;
+dry_in_r = spl1;
 
 // Early Reflections processing
 mod_type == 1 ? (
@@ -1209,10 +1242,26 @@ delay_7_i += 1;
   model_bass_z1_r = z1; model_bass_z2_r = z2;
 );
 
-// Add dry signal back
+// Add dry signal back with random autopan (MK VII / LEXIS only)
 g0 += d0;
-spl0 = out_l + g0 * spl0;
-spl1 = out_r + g0 * spl1;
+
+mod_type > 0 ? (
+  pan_pos = autopan_smooth;
+  pan_angle = (pan_pos + 1) * 0.25 * $pi;
+  pan_l = cos(pan_angle);
+  pan_r = sin(pan_angle);
+
+  // Mix: dry mono sum panned at -12dB + normal dry stereo
+  dry_mono = 0.5 * (dry_in_l + dry_in_r);
+  autopan_l = dry_mono * pan_l * autopan_gain;
+  autopan_r = dry_mono * pan_r * autopan_gain;
+
+  spl0 = out_l + g0 * spl0 + autopan_l;
+  spl1 = out_r + g0 * spl1 + autopan_r;
+) : (
+  spl0 = out_l + g0 * spl0;
+  spl1 = out_r + g0 * spl1;
+);
 
 @gfx 620 500
 
