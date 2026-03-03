@@ -200,11 +200,17 @@ end
 ---------------------------------------------------------------------
 
 function find_first_folder_track()
+  local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+  local target_index = (wf == "Vertical") and 2 or 1
+  local folder_count = 0
   local num_tracks = CountTracks(0)
   for i = 0, num_tracks - 1 do
     local track = GetTrack(0, i)
     if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-      return track
+      folder_count = folder_count + 1
+      if folder_count == target_index then
+        return track
+      end
     end
   end
   return nil
@@ -1065,12 +1071,9 @@ function draw(playstate)
 
   -- Dynamic tooltip based on button state
   if arm_first_folder_mode then
-    local _, folder_name = GetSetMediaTrackInfo_String(first_folder, "P_NAME", "", false)
-    local tip = "Arm first folder"
-    if folder_name and folder_name ~= "" then
-      tip = tip .. " (" .. folder_name .. ")"
-    end
-    tip = tip .. " for recording (F9)"
+    local tip = current_workflow == "Vertical"
+      and "Arm first source folder for recording (F9)"
+      or "Arm folder for recording (F9)"
     ImGui.SetItemTooltip(ctx, tip)
   else
     ImGui.SetItemTooltip(ctx, rec_button_label == "Rec" and "Start recording (F9)" or

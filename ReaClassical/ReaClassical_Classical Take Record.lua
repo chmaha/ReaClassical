@@ -109,14 +109,20 @@ function main()
 
     local first_selected = GetSelectedTrack(0, 0)
     if not first_selected then
-        -- No track selected: find and select the first folder in the project
+        -- No track selected: find the appropriate folder to arm
+        -- In Vertical workflow, skip the first folder (destination) and use the second
+        local target_index = (workflow == "Vertical") and 2 or 1
+        local folder_count = 0
         local num_tracks = CountTracks(0)
         for i = 0, num_tracks - 1 do
             local track = GetTrack(0, i)
             if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                SetOnlyTrackSelected(track)
-                first_selected = track
-                break
+                folder_count = folder_count + 1
+                if folder_count == target_index then
+                    SetOnlyTrackSelected(track)
+                    first_selected = track
+                    break
+                end
             end
         end
         if not first_selected then
