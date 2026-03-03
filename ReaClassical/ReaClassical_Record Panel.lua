@@ -30,6 +30,7 @@ local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled, check_pref
 local load_item_rank_and_notes, save_item_rank_and_notes, rgba_to_native, update_take_name
 local apply_rank_and_notes_to_items, store_last_recorded_guids, apply_rank_and_notes_by_guids
 local apply_rank_and_notes_to_item
+local find_first_folder_track
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -196,6 +197,21 @@ for i = 0, num_tracks - 1 do
   end
 end
 
+---------------------------------------------------------------------
+
+function find_first_folder_track()
+  local num_tracks = CountTracks(0)
+  for i = 0, num_tracks - 1 do
+    local track = GetTrack(0, i)
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+      return track
+    end
+  end
+  return nil
+end
+
+---------------------------------------------------------------------
+
 function main()
   local retval, projfn = EnumProjects(-1)
   if project_userdata ~= retval or project_name ~= projfn then
@@ -239,8 +255,17 @@ function main()
 
       -- Apply rank and notes to recorded items and store their GUIDs for later re-targeting
       local apply_pos = stop_cursor_pos or GetCursorPosition()
-      apply_rank_and_notes_to_items(apply_pos)
-      store_last_recorded_guids(apply_pos)
+
+      -- Check if Classical Take Record already stored GUIDs (more reliable than position matching)
+      local _, existing_guids = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
+      if existing_guids and existing_guids ~= "" then
+        -- GUIDs already stored by Classical Take Record — apply rank/notes via GUIDs
+        apply_rank_and_notes_by_guids()
+      else
+        -- Fallback: position-based matching and GUID storage
+        apply_rank_and_notes_to_items(apply_pos)
+        store_last_recorded_guids(apply_pos)
+      end
       stop_cursor_pos = nil
 
       -- Mark that we just finished a recording so the UI can retarget those items by GUID.
@@ -986,13 +1011,23 @@ function draw(playstate)
     end
   end
 
+  -- Check if a first folder exists (for fallback arm behavior)
+  local first_folder = find_first_folder_track()
+  local can_arm_first_folder = (not selected_track and not any_armed and first_folder ~= nil)
+
   local rec_button_label
   local show_select_message = false
   local button_disabled = false
+  local arm_first_folder_mode = false
 
   if is_recording then
     rec_button_label = "Stop"
+  elseif can_arm_first_folder then
+    -- No track selected, nothing armed, but a folder exists: allow arming first folder
+    rec_button_label = "Arm"
+    arm_first_folder_mode = true
   elseif not selected_track and not any_armed then
+    -- No track selected, nothing armed, no folder found
     rec_button_label = "Arm"
     show_select_message = true
     button_disabled = true
@@ -1013,7 +1048,10 @@ function draw(playstate)
 
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
     check_prefs()
-    if rec_button_label == "Rec" and not selected_track and any_armed then
+    if arm_first_folder_mode then
+      -- Select the first folder track so F9 can arm it
+      SetOnlyTrackSelected(first_folder)
+    elseif rec_button_label == "Rec" and not selected_track and any_armed then
       for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
@@ -1024,8 +1062,20 @@ function draw(playstate)
     end
     Main_OnCommand(F9_command, 0)
   end
-  ImGui.SetItemTooltip(ctx, rec_button_label == "Rec" and "Start recording (F9)" or
-    rec_button_label == "Stop" and "Stop recording (F9)" or "Arm selected folder for recording (F9)")
+
+  -- Dynamic tooltip based on button state
+  if arm_first_folder_mode then
+    local _, folder_name = GetSetMediaTrackInfo_String(first_folder, "P_NAME", "", false)
+    local tip = "Arm first folder"
+    if folder_name and folder_name ~= "" then
+      tip = tip .. " (" .. folder_name .. ")"
+    end
+    tip = tip .. " for recording (F9)"
+    ImGui.SetItemTooltip(ctx, tip)
+  else
+    ImGui.SetItemTooltip(ctx, rec_button_label == "Rec" and "Start recording (F9)" or
+      rec_button_label == "Stop" and "Stop recording (F9)" or "Arm selected folder for recording (F9)")
+  end
 
   if button_disabled then
     ImGui.EndDisabled(ctx)
@@ -1108,12 +1158,17 @@ function draw(playstate)
   -- Next section button
   ImGui.SetCursorPos(ctx, buttons_start_x + (button_width + button_spacing) * 3, button_y)
   local is_stopped = (playstate == 0)
-  if not is_stopped then ImGui.BeginDisabled(ctx, true) end
+  local next_disabled = (not is_stopped or current_workflow == "Horizontal")
+  if next_disabled then ImGui.BeginDisabled(ctx, true) end
   if ImGui.Button(ctx, "Next", button_width, button_height) then
     Main_OnCommand(next_section_cmd, 0)
   end
-  ImGui.SetItemTooltip(ctx, "Move to Next Recording Section (" .. alt_key .. "+F9)")
-  if not is_stopped then ImGui.EndDisabled(ctx) end
+  if current_workflow == "Horizontal" then
+    ImGui.SetItemTooltip(ctx, "Next Section is only available in Vertical workflow")
+  else
+    ImGui.SetItemTooltip(ctx, "Move to Next Recording Section (" .. alt_key .. "+F9)")
+  end
+  if next_disabled then ImGui.EndDisabled(ctx) end
 
   -- Rank and Notes section
   local rank_y = button_y + button_height + (30 * scale)
@@ -1392,7 +1447,9 @@ function draw(playstate)
       end
     else
       if not button_disabled then
-        if rec_button_label == "Rec" and not selected_track and any_armed then
+        if arm_first_folder_mode then
+          SetOnlyTrackSelected(first_folder)
+        elseif rec_button_label == "Rec" and not selected_track and any_armed then
           for i = 0, num_tracks - 1 do
             local track = GetTrack(0, i)
             if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then

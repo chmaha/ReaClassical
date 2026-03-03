@@ -108,7 +108,22 @@ function main()
     local _, rec_wildcards = get_config_var_string("recfile_wildcards")
 
     local first_selected = GetSelectedTrack(0, 0)
-    if not first_selected then return end
+    if not first_selected then
+        -- No track selected: find and select the first folder in the project
+        local num_tracks = CountTracks(0)
+        for i = 0, num_tracks - 1 do
+            local track = GetTrack(0, i)
+            if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                SetOnlyTrackSelected(track)
+                first_selected = track
+                break
+            end
+        end
+        if not first_selected then
+            MB("No folder found in the project.", "Classical Take Record", 0)
+            return
+        end
+    end
     if not check_parent_track(first_selected) then
         local parent_track = GetParentTrack(first_selected)
         if not parent_track then
@@ -185,10 +200,22 @@ function main()
 
         --group last recorded items
         Main_OnCommand(40032, 0)
-        --save recorded item guid
+        --save recorded item guids (single for legacy, plural for Record Panel)
         local recorded_item = get_selected_media_item_at(0)
         local recorded_item_guid = get_item_guid(recorded_item)
         SetProjExtState(0, "ReaClassical", "LastRecordedItem", recorded_item_guid)
+
+        -- Store all selected (just-recorded) item GUIDs for Record Panel coloring
+        local recorded_guids = {}
+        local num_selected = count_selected_media_items()
+        for i = 0, num_selected - 1 do
+            local sel_item = get_selected_media_item_at(i)
+            local guid = get_item_guid(sel_item)
+            if guid ~= "" then
+                recorded_guids[#recorded_guids + 1] = guid
+            end
+        end
+        SetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs", table.concat(recorded_guids, ","))
         Main_OnCommand(40289, 0) -- Unselect all items
 
         -- FEATURE 2: in Vertical workflow, only advance to the next folder when
