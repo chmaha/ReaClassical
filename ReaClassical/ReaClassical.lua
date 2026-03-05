@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.1
+@version 26.3.2
 @changelog
-  ReaClassical Menu: Update source audition entries
+  Recording: Allow rec-arming first appropriate folder if no tracks are selected
+  S-D markers: Use folder prefix instead of track number
+  Create CD Markers: Combine DDP workflow into a single file
+  Add window toggle for source audition manager
+  Add metadata presets
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -30,7 +34,6 @@
   [main] ReaClassical_Copy Destination Material to Source.lua
   [main] ReaClassical_Create CD Markers.lua
   [main] ReaClassical_Create Project.lua
-  [nomain] ReaClassical_DDP Metadata Editor.lua
   [main] ReaClassical_Delete All S-AUD Markers.lua
   [main] ReaClassical_Delete All S-D markers.lua
   [main] ReaClassical_Delete Leaving Silence.lua
@@ -118,6 +121,7 @@
   ReaClassical-mouse.ini
   ReaClassical-menu.ini
   ReaClassical-render.ini
+  ReaClassical-metadata.ini
   reaclassical-splash.png
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
