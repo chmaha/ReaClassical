@@ -131,7 +131,7 @@ function main()
         end
     end
 
-    -- --- Gather key values ---
+    -- Gather key values
     local src_start      = GetMediaItemInfo_Value(source_item, "D_POSITION")
     local src_len        = GetMediaItemInfo_Value(source_item, "D_LENGTH")
     local src_startoffs  = GetMediaItemTakeInfo_Value(GetActiveTake(source_item), "D_STARTOFFS")
@@ -142,20 +142,18 @@ function main()
     local playrate       = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
 
 
-    -- --- Compute difference between source and edited start offsets ---
+    -- Compute difference between source and edited start offsets
     local offset_diff = edit_startoffs - src_startoffs
     local pos_in      = src_start + offset_diff
     local pos_out     = pos_in + (edit_len * playrate)
 
-    -- Safety: ensure both IN and OUT markers fit within the source item
-    -- Allow small tolerance for floating-point precision issues
     local tolerance   = 0.001 -- 1 millisecond tolerance
     if pos_in < src_start - tolerance or pos_out > src_start + src_len + tolerance then
         MB("Error: Edited section exceeds the source item boundaries.", "Error", 0)
         return
     end
 
-    -- --- Remove existing 998/999 markers ---
+    -- Remove existing 998/999 markers
     local i = 0
     while true do
         local proj = EnumProjects(i)
@@ -165,12 +163,15 @@ function main()
         i = i + 1
     end
 
-    -- --- Add markers ---
-    local marker_color = GetTrackColor(GetMediaItemTrack(source_item)) or 0
-    AddProjectMarker2(0, false, pos_in, 0, "SOURCE-IN", 998, marker_color)
-    AddProjectMarker2(0, false, pos_out, 0, "SOURCE-OUT", 999, marker_color)
+    -- Add markers
+    local source_track = GetMediaItemTrack(source_item)
+    local marker_color = GetTrackColor(source_track) or 0
+    local track_number = GetMediaTrackInfo_Value(source_track, "IP_TRACKNUMBER")
+    local track_prefix = tostring(math.floor(track_number)) .. ":"
+    AddProjectMarker2(0, false, pos_in, 0, track_prefix .. "SOURCE-IN", 998, marker_color)
+    AddProjectMarker2(0, false, pos_out, 0, track_prefix .. "SOURCE-OUT", 999, marker_color)
 
-    -- --- Optionally move to IN marker ---
+    -- Optionally move to IN marker
     local move_to_src_in = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
     if move_to_src_in then Main_OnCommand(move_to_src_in, 0) end
 
