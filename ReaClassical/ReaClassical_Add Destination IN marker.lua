@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_color_table, edge_check, return_check_length
-local get_track_number, folder_check
+local get_track_prefix, get_track_number, folder_check
 
 ---------------------------------------------------------------------
 
@@ -87,6 +87,7 @@ function main()
             i = i + 1
         end
 
+        local track_prefix = get_track_prefix(track)
         local track_number = math.floor(get_track_number(track))
 
         if selected_track then SetOnlyTrackSelected(selected_track) end
@@ -110,10 +111,12 @@ function main()
             marker_color = final_track and GetTrackColor(final_track) or colors.dest_marker
         end
         if moveable_dest == 1 then
+            track_prefix = "D"
             track_number = 1
             marker_color = colors.dest_items
         end
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":DEST-IN", 996, marker_color)
+        AddProjectMarker2(0, false, cur_pos, 0, track_prefix .. ":DEST-IN", 996, marker_color)
+        SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
     end
     PreventUIRefresh(-1)
 end
@@ -166,6 +169,27 @@ function return_check_length()
         if table[7] then check_length = table[7] / 1000 end
     end
     return check_length
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------

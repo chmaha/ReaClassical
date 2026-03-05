@@ -32,6 +32,7 @@ local check_overlapping_items, count_selected_media_items, get_selected_media_it
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
 local select_matching_dest_folder, save_view, restore_view
+local folder_check, get_track_prefix
 
 ---------------------------------------------------------------------
 
@@ -241,8 +242,13 @@ function markers()
     local proj_marker_count = 0
     local pos_table = {}
     local active_proj = EnumProjects(-1)
-    local dest_track_number = 1
-    local src_track_number = 1
+
+    -- Get track numbers from ext state
+    local _, src_stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local _, dest_stored = GetProjExtState(0, "ReaClassical", "DestInTrackNum")
+    local src_track_number = tonumber(src_stored) or 1
+    local dest_track_number = tonumber(dest_stored) or 1
+
     while true do
         local proj = EnumProjects(num)
         if proj == nil then
@@ -251,26 +257,21 @@ function markers()
         local _, num_markers, num_regions = CountProjectMarkers(proj)
         for i = 0, num_markers + num_regions - 1, 1 do
             local _, _, pos, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-            local number = string.match(raw_label, "(%d+):.+")
-            local label = string.match(raw_label, "%d*:?(.+)") or ""
+            local label = string.match(raw_label, ".+:(.+)") or ""
 
             if label == "DEST-IN" then
-                dest_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[1] = pos
             elseif label == "DEST-OUT" then
-                dest_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[2] = pos
             elseif label == "SOURCE-IN" then
-                src_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[3] = pos
             elseif label == "SOURCE-OUT" then
-                src_track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[4] = pos
@@ -325,7 +326,19 @@ end
 function add_marker(pos, distance, track_number, label, num)
     local colors = get_color_table()
     DeleteProjectMarker(nil, num, false)
-    AddProjectMarker2(0, false, pos + distance, 0, track_number .. ":" .. label, num, colors.source_marker)
+    local track = GetTrack(0, track_number - 1)
+    local prefix = get_track_prefix(track)
+    AddProjectMarker2(0, false, pos + distance, 0, prefix .. ":" .. label, num, colors.source_marker)
+    -- Update the corresponding ext state
+    if label == "DEST-IN" then
+        SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
+    elseif label == "DEST-OUT" then
+        SetProjExtState(0, "ReaClassical", "DestOutTrackNum", tostring(track_number))
+    elseif label == "SOURCE-IN" then
+        SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
+    elseif label == "SOURCE-OUT" then
+        SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
+    end
 end
 
 ---------------------------------------------------------------------
@@ -343,10 +356,9 @@ end
 ---------------------------------------------------------------------
 
 function select_matching_src_folder()
-    local cursor = GetCursorPosition()
-    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
-    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
-    local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
+    local _, stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local folder_number = tonumber(stored)
+    if not folder_number then return end
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
@@ -769,11 +781,11 @@ function save_source_details()
     local item = get_selected_media_item_at(0)
     if not item then return end
 
-    -- Get the selected item’s GUID
+    -- Get the selected item's GUID
     local guid = get_item_guid(item)
     if not guid or guid == "" then return end
 
-    -- Save the GUID to the project’s ExtState
+    -- Save the GUID to the project's ExtState
     SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
 end
 
@@ -906,26 +918,9 @@ end
 
 function select_matching_dest_folder()
     GoToMarker(0, 996, false)
-    local cursor = GetCursorPosition()
-
-    -- Search through all markers to find DEST marker at cursor position
-    local dest_label
-    local _, num_markers, num_regions = CountProjectMarkers(0)
-
-    for i = 0, num_markers + num_regions - 1 do
-        local _, isrgn, pos, _, name, _, _ = EnumProjectMarkers3(0, i)
-
-        -- Check if it's a marker (not region) at cursor position with DEST in label
-        if not isrgn and math.abs(pos - cursor) < 0.0001 and string.match(name, ":DEST") then
-            dest_label = name
-            break
-        end
-    end
-
-    -- Extract folder number from DEST marker
-    local folder_number = tonumber(string.match(dest_label, "(%d*):DEST*"))
-
-    -- Select the matching track
+    local _, stored = GetProjExtState(0, "ReaClassical", "DestInTrackNum")
+    local folder_number = tonumber(stored)
+    if not folder_number then return end
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
@@ -933,6 +928,41 @@ function select_matching_dest_folder()
             break
         end
     end
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------

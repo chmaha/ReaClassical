@@ -112,8 +112,7 @@ function markers()
         local _, num_markers, num_regions = CountProjectMarkers(proj)
         for i = 0, num_markers + num_regions - 1, 1 do
             local _, _, pos, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-            local number = string.match(raw_label, "(%d+):.+")
-            local label = string.match(raw_label, "%d*:?(.+)") or ""
+            local label = string.match(raw_label, ".+:(.+)") or ""
 
             if label == "DEST-IN" then
                 sd_markers[label].count = 1
@@ -124,12 +123,10 @@ function markers()
                 sd_markers[label].proj = proj
                 pos_table[2] = pos
             elseif label == "SOURCE-IN" then
-                track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[3] = pos
             elseif label == "SOURCE-OUT" then
-                track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[4] = pos

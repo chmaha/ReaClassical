@@ -79,9 +79,6 @@ function main()
     end
     local proj_marker_count, source_proj, dest_proj, _, _, dest_count, _, _, source_count, _, track_number = markers()
 
-    -- move_to_project_tab(dest_proj)
-    -- local initial_curpos, initial_selected_items, initial_selected_tracks = save_view()
-
     if proj_marker_count == 1 then
         MB("Only one S-D project marker was found."
             .. "\nUse zero for regular single project S-D editing"
@@ -190,8 +187,6 @@ function main()
         if moveable_dest == 1 then move_destination_folder(track_number) end
     end
 
-    -- restore_view(initial_curpos, initial_selected_items, initial_selected_tracks)
-
     SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Insert with timestretching', 0)
     PreventUIRefresh(-1)
@@ -202,10 +197,9 @@ end
 ---------------------------------------------------------------------
 
 function select_matching_src_folder()
-    local cursor = GetCursorPosition()
-    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
-    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
-    local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
+    local _, stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local folder_number = tonumber(stored)
+    if not folder_number then return end
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
@@ -463,7 +457,11 @@ function markers()
     local proj_marker_count = 0
     local pos_table = {}
     local active_proj = EnumProjects(-1)
-    local track_number = 1
+
+    -- Get track number from ext state
+    local _, src_stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local track_number = tonumber(src_stored) or 1
+
     while true do
         local proj = EnumProjects(num)
         if proj == nil then
@@ -472,8 +470,7 @@ function markers()
         local _, num_markers, num_regions = CountProjectMarkers(proj)
         for i = 0, num_markers + num_regions - 1, 1 do
             local _, _, pos, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-            local number = string.match(raw_label, "(%d+):.+")
-            local label = string.match(raw_label, "%d*:?(.+)") or ""
+            local label = string.match(raw_label, ".+:(.+)") or ""
 
             if label == "DEST-IN" then
                 sd_markers[label].count = 1
@@ -484,12 +481,10 @@ function markers()
                 sd_markers[label].proj = proj
                 pos_table[2] = pos
             elseif label == "SOURCE-IN" then
-                track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[3] = pos
             elseif label == "SOURCE-OUT" then
-                track_number = number
                 sd_markers[label].count = 1
                 sd_markers[label].proj = proj
                 pos_table[4] = pos
@@ -696,11 +691,11 @@ function save_source_details()
     local item = get_selected_media_item_at(0)
     if not item then return end
 
-    -- Get the selected item’s GUID
+    -- Get the selected item's GUID
     local guid = get_item_guid(item)
     if not guid or guid == "" then return end
 
-    -- Save the GUID to the project’s ExtState
+    -- Save the GUID to the project's ExtState
     SetProjExtState(0, "ReaClassical", "temp_src_guid", guid)
 end
 
@@ -833,10 +828,9 @@ end
 
 function select_matching_dest_folder()
     GoToMarker(0, 996, false)
-    local cursor = GetCursorPosition()
-    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
-    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
-    local folder_number = tonumber(string.match(label, "(%d*):DEST*"))
+    local _, stored = GetProjExtState(0, "ReaClassical", "DestInTrackNum")
+    local folder_number = tonumber(stored)
+    if not folder_number then return end
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then

@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_color_table, edge_check, return_check_length
-local get_track_number, folder_check, other_dest_marker_check
+local get_track_prefix, get_track_number, folder_check, other_dest_marker_check
 
 ---------------------------------------------------------------------
 
@@ -87,8 +87,9 @@ function main()
             i = i + 1
         end
 
+        local track_prefix = get_track_prefix(track)
         local track_number = math.floor(get_track_number(track))
-        local other_dest_marker = other_dest_marker_check()
+        local other_dest_track_num = other_dest_marker_check()
 
         if selected_track then SetOnlyTrackSelected(selected_track) end
 
@@ -112,12 +113,14 @@ function main()
         end
 
         if moveable_dest == 1 then
+            track_prefix = "D"
             track_number = 1
             marker_color = colors.dest_items
         end
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
+        AddProjectMarker2(0, false, cur_pos, 0, track_prefix .. ":DEST-OUT", 997, marker_color)
+        SetProjExtState(0, "ReaClassical", "DestOutTrackNum", tostring(track_number))
 
-        if other_dest_marker and other_dest_marker ~= track_number then
+        if other_dest_track_num and other_dest_track_num ~= track_number then
             MB("Warning: Dest OUT marker group does not match Dest IN!", "Add Dest Marker OUT", 0)
         end
     end
@@ -176,6 +179,27 @@ end
 
 ---------------------------------------------------------------------
 
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
+end
+
+---------------------------------------------------------------------
+
 function get_track_number(track)
     if not track then track = GetSelectedTrack(0, 0) end
     if folder_check() == 0 or track == nil then
@@ -205,21 +229,11 @@ end
 ---------------------------------------------------------------------
 
 function other_dest_marker_check()
-    local proj = EnumProjects(-1) -- Get the active project
-    if not proj then return nil end
-
-    local _, num_markers, num_regions = CountProjectMarkers(proj)
-
-    for i = 0, num_markers + num_regions - 1 do
-        local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-        local number, label = raw_label:match("(%d+):(.+)") -- Extract number and label
-
-        if label and (label == "DEST-IN" or label == "DEST-OUT") then
-            return tonumber(number) -- Convert track number to a number and return
-        end
+    local _, stored = GetProjExtState(0, "ReaClassical", "DestInTrackNum")
+    if stored ~= "" then
+        return tonumber(stored)
     end
-
-    return nil -- Return nil if no marker is found
+    return nil
 end
 
 ---------------------------------------------------------------------

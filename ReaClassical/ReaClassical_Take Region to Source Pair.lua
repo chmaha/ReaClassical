@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number
+local main, folder_check, get_track_number, get_track_prefix
 local get_color_table
 local source_pos_to_project_pos, project_pos_to_source_pos
 local find_saud_take_marker_at_cursor, remove_take_marker_by_chunk
@@ -92,9 +92,10 @@ function main()
         return
     end
 
-    -- Get the track number for the marker labels
+    -- Get the track number and prefix for the marker labels
     local item_track = GetMediaItem_Track(selected_item)
     local track_number = math.floor(get_track_number(item_track))
+    local track_prefix = get_track_prefix(item_track)
 
     -- Get marker color
     local colors = get_color_table()
@@ -111,9 +112,11 @@ function main()
 
     -- Add real project markers
     AddProjectMarker2(0, false, marker_info.in_proj_pos, 0,
-        track_number .. ":SOURCE-IN", 998, marker_color)
+        track_prefix .. ":SOURCE-IN", 998, marker_color)
     AddProjectMarker2(0, false, marker_info.out_proj_pos, 0,
-        track_number .. ":SOURCE-OUT", 999, marker_color)
+        track_prefix .. ":SOURCE-OUT", 999, marker_color)
+    SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
+    SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
 
     -- Remove the S-AUD take marker via chunk manipulation
     remove_take_marker_by_chunk(selected_item, marker_info.src_start, "S-AUD")
@@ -126,8 +129,14 @@ end
 function convert_existing_pair_to_take_marker(proj)
     local black_color = ColorToNative(0, 0, 0) | 0x1000000
 
-    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
-    local out_pos, out_track_num = find_source_marker(proj, 999, "SOURCE-OUT")
+    local in_pos = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos = find_source_marker(proj, 999, "SOURCE-OUT")
+
+    -- Get track numbers from ext state
+    local _, in_stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local _, out_stored = GetProjExtState(0, "ReaClassical", "SourceOutTrackNum")
+    local in_track_num = tonumber(in_stored)
+    local out_track_num = tonumber(out_stored)
 
     -- No pair or mismatched track numbers: just delete both
     if not in_pos or not out_pos or not in_track_num or not out_track_num
@@ -304,14 +313,14 @@ function find_source_marker(proj, marker_id, marker_type)
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local number, label = raw_label:match("(%d+):(.+)")
+            local _, label = raw_label:match("(.+):(.+)")
             if label and label == marker_type then
-                return pos, tonumber(number)
+                return pos
             end
         end
     end
 
-    return nil, nil
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -399,6 +408,27 @@ function get_track_number(track)
         local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------

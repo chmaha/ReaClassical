@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, get_selected_media_item_at
 local get_item_by_guid, find_item_by_source_file
+local folder_check, get_track_prefix
 
 
 ---------------------------------------------------------------------
@@ -166,10 +167,12 @@ function main()
     -- Add markers
     local source_track = GetMediaItemTrack(source_item)
     local marker_color = GetTrackColor(source_track) or 0
-    local track_number = GetMediaTrackInfo_Value(source_track, "IP_TRACKNUMBER")
-    local track_prefix = tostring(math.floor(track_number)) .. ":"
-    AddProjectMarker2(0, false, pos_in, 0, track_prefix .. "SOURCE-IN", 998, marker_color)
-    AddProjectMarker2(0, false, pos_out, 0, track_prefix .. "SOURCE-OUT", 999, marker_color)
+    local track_number = math.floor(GetMediaTrackInfo_Value(source_track, "IP_TRACKNUMBER"))
+    local track_prefix = get_track_prefix(source_track)
+    AddProjectMarker2(0, false, pos_in, 0, track_prefix .. ":SOURCE-IN", 998, marker_color)
+    AddProjectMarker2(0, false, pos_out, 0, track_prefix .. ":SOURCE-OUT", 999, marker_color)
+    SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
+    SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
 
     -- Optionally move to IN marker
     local move_to_src_in = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
@@ -272,6 +275,41 @@ function find_item_by_source_file(project, filename, required_start, required_en
     end
 
     return nil -- not found
+end
+
+---------------------------------------------------------------------
+
+function folder_check()
+    local folders = 0
+    local total_tracks = CountTracks(0)
+    for i = 0, total_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            folders = folders + 1
+        end
+    end
+    return folders
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------

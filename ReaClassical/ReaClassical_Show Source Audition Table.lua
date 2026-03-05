@@ -27,7 +27,7 @@ local init_marker_data, get_saud_regions, monitor_playback
 local move_to_marker, set_track_selected, play_from_marker
 local convert_at_marker, solo, delete_all_saud_take_markers
 local source_pos_to_project_pos, get_all_saud_take_markers
-local folder_check, get_track_number, get_color_table
+local folder_check, get_track_number, get_track_prefix, get_color_table
 local find_source_marker, get_item_at_position
 local project_pos_to_source_pos, set_take_marker_with_length
 local convert_existing_pair_to_take_marker
@@ -412,8 +412,14 @@ function get_saud_regions()
 
     -- Also include the real SOURCE-IN/OUT pair if one exists
     local proj = EnumProjects(-1)
-    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
-    local out_pos, out_track_num = find_source_marker(proj, 999, "SOURCE-OUT")
+    local in_pos = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos = find_source_marker(proj, 999, "SOURCE-OUT")
+
+    -- Get track numbers from ext state
+    local _, in_stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local _, out_stored = GetProjExtState(0, "ReaClassical", "SourceOutTrackNum")
+    local in_track_num = tonumber(in_stored)
+    local out_track_num = tonumber(out_stored)
 
     if in_pos and out_pos and in_track_num and out_track_num
         and in_track_num == out_track_num and in_pos < out_pos then
@@ -520,8 +526,10 @@ function clean_up_orphans()
 
     -- Also include the real pair's data key if it exists
     local proj = EnumProjects(-1)
-    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
+    local in_pos = find_source_marker(proj, 998, "SOURCE-IN")
     local out_pos = find_source_marker(proj, 999, "SOURCE-OUT")
+    local _, in_stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local in_track_num = tonumber(in_stored)
     if in_pos and out_pos and in_track_num then
         local item, take = get_item_at_position(in_pos, in_track_num)
         if item and take then
@@ -582,8 +590,10 @@ function init_marker_data()
 
     -- Also load data for the real pair if it exists
     local proj = EnumProjects(-1)
-    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
+    local in_pos = find_source_marker(proj, 998, "SOURCE-IN")
     local out_pos = find_source_marker(proj, 999, "SOURCE-OUT")
+    local _, in_stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local in_track_num = tonumber(in_stored)
     if in_pos and out_pos and in_track_num then
         local item, take = get_item_at_position(in_pos, in_track_num)
         if item and take then
@@ -686,6 +696,7 @@ function convert_at_marker(region)
     -- Get the track and color for the new project markers
     local item_track = GetMediaItem_Track(region.item)
     local track_number = region.track_number
+    local track_prefix = get_track_prefix(item_track)
 
     local colors = get_color_table()
     local marker_color
@@ -701,9 +712,11 @@ function convert_at_marker(region)
 
     -- Add real project markers
     AddProjectMarker2(0, false, region.proj_start, 0,
-        track_number .. ":SOURCE-IN", 998, marker_color)
+        track_prefix .. ":SOURCE-IN", 998, marker_color)
     AddProjectMarker2(0, false, region.proj_end, 0,
-        track_number .. ":SOURCE-OUT", 999, marker_color)
+        track_prefix .. ":SOURCE-OUT", 999, marker_color)
+    SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
+    SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
 
     -- Remove the S-AUD take marker
     remove_take_marker_by_chunk(region.item, region.src_start, "S-AUD")
@@ -721,8 +734,14 @@ end
 function convert_existing_pair_to_take_marker(proj)
     local black_color = ColorToNative(0, 0, 0) | 0x1000000
 
-    local in_pos, in_track_num = find_source_marker(proj, 998, "SOURCE-IN")
-    local out_pos, out_track_num = find_source_marker(proj, 999, "SOURCE-OUT")
+    local in_pos = find_source_marker(proj, 998, "SOURCE-IN")
+    local out_pos = find_source_marker(proj, 999, "SOURCE-OUT")
+
+    -- Get track numbers from ext state
+    local _, in_stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local _, out_stored = GetProjExtState(0, "ReaClassical", "SourceOutTrackNum")
+    local in_track_num = tonumber(in_stored)
+    local out_track_num = tonumber(out_stored)
 
     -- No pair or mismatched track numbers: just delete both
     if not in_pos or not out_pos or not in_track_num or not out_track_num
@@ -861,14 +880,14 @@ function find_source_marker(proj, marker_id, marker_type)
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local number, label = raw_label:match("(%d+):(.+)")
+            local _, label = raw_label:match("(.+):(.+)")
             if label and label == marker_type then
-                return pos, tonumber(number)
+                return pos
             end
         end
     end
 
-    return nil, nil
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -956,6 +975,27 @@ function get_track_number(track)
         local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------

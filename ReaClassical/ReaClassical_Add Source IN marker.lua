@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number
+local main, folder_check, get_track_number, get_track_prefix
 local move_destination_folder, get_tracks_per_group
 local calculate_destination_info, get_color_table
 local convert_pair_to_take_marker, find_source_marker
@@ -85,6 +85,7 @@ function main()
 
     if cur_pos ~= -1 then
         local track_number = math.floor(get_track_number(track))
+        local track_prefix = get_track_prefix(track)
 
         if to_takemarkers == 1 then
             -- Only convert if a matching pair exists; otherwise just delete old marker
@@ -121,7 +122,8 @@ function main()
             marker_color = color_track and GetTrackColor(color_track) or colors.source_marker
         end
 
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
+        AddProjectMarker2(0, false, cur_pos, 0, track_prefix .. ":SOURCE-IN", 998, marker_color)
+        SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
     end
     PreventUIRefresh(-1)
 end
@@ -134,23 +136,26 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     local proj = EnumProjects(-1)
     if not proj then return end
 
+    -- Get the existing marker's track number from ext state
+    local ext_key = (marker_type == "SOURCE-IN") and "SourceInTrackNum" or "SourceOutTrackNum"
+    local _, stored = GetProjExtState(0, "ReaClassical", ext_key)
+    local marker_track_num = tonumber(stored)
+
     local _, num_markers, num_regions = CountProjectMarkers(proj)
     local marker_pos = nil
-    local marker_track_num = nil
 
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local number, label = raw_label:match("(%d+):(.+)")
+            local _, label = raw_label:match("(.+):(.+)")
             if label and label == marker_type then
                 marker_pos = pos
-                marker_track_num = tonumber(number)
             end
             break
         end
     end
 
-    if not marker_pos then
+    if not marker_pos or not marker_track_num then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
@@ -167,7 +172,10 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     -- Check for matching partner marker
     local other_id = (marker_type == "SOURCE-IN") and 999 or 998
     local other_type = (marker_type == "SOURCE-IN") and "SOURCE-OUT" or "SOURCE-IN"
-    local other_pos, other_track_num = find_source_marker(proj, other_id, other_type)
+    local other_ext_key = (marker_type == "SOURCE-IN") and "SourceOutTrackNum" or "SourceInTrackNum"
+    local other_pos = find_source_marker(proj, other_id, other_type)
+    local _, other_stored = GetProjExtState(0, "ReaClassical", other_ext_key)
+    local other_track_num = tonumber(other_stored)
 
     local is_pair = other_pos and other_track_num and
         marker_track_num and other_track_num == marker_track_num
@@ -316,14 +324,14 @@ function find_source_marker(proj, marker_id, marker_type)
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local number, label = raw_label:match("(%d+):(.+)")
+            local _, label = raw_label:match("(.+):(.+)")
             if label and label == marker_type then
-                return pos, tonumber(number)
+                return pos
             end
         end
     end
 
-    return nil, nil
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -400,6 +408,27 @@ function get_track_number(track)
         local folder = GetParentTrack(track)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------

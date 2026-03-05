@@ -23,7 +23,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number, other_source_marker_check
+local main, folder_check, get_track_number, get_track_prefix
+local other_source_marker_check
 local get_color_table
 local convert_pair_to_take_marker, find_source_marker
 local project_pos_to_source_pos, get_item_at_position
@@ -81,6 +82,7 @@ function main()
 
     if cur_pos ~= -1 then
         local track_number = math.floor(get_track_number(track))
+        local track_prefix = get_track_prefix(track)
 
         if to_takemarkers == 1 then
             -- Only convert if a matching pair exists; otherwise just delete old marker
@@ -95,7 +97,7 @@ function main()
             end
         end
 
-        local other_source_marker = other_source_marker_check()
+        local other_source_track_num = other_source_marker_check()
 
         local color_track = track or selected_track
         local colors = get_color_table()
@@ -107,9 +109,10 @@ function main()
             marker_color = color_track and GetTrackColor(color_track) or colors.source_marker
         end
 
-        AddProjectMarker2(0, false, cur_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
+        AddProjectMarker2(0, false, cur_pos, 0, track_prefix .. ":SOURCE-OUT", 999, marker_color)
+        SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
 
-        if other_source_marker and other_source_marker ~= track_number then
+        if other_source_track_num and other_source_track_num ~= track_number then
             MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
         end
     end
@@ -124,23 +127,26 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     local proj = EnumProjects(-1)
     if not proj then return end
 
+    -- Get the existing marker's track number from ext state
+    local ext_key = (marker_type == "SOURCE-OUT") and "SourceOutTrackNum" or "SourceInTrackNum"
+    local _, stored = GetProjExtState(0, "ReaClassical", ext_key)
+    local marker_track_num = tonumber(stored)
+
     local _, num_markers, num_regions = CountProjectMarkers(proj)
     local marker_pos = nil
-    local marker_track_num = nil
 
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local number, label = raw_label:match("(%d+):(.+)")
+            local _, label = raw_label:match("(.+):(.+)")
             if label and label == marker_type then
                 marker_pos = pos
-                marker_track_num = tonumber(number)
             end
             break
         end
     end
 
-    if not marker_pos then
+    if not marker_pos or not marker_track_num then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
@@ -154,7 +160,10 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     -- Check for matching partner marker
     local other_id = (marker_type == "SOURCE-OUT") and 998 or 999
     local other_type = (marker_type == "SOURCE-OUT") and "SOURCE-IN" or "SOURCE-OUT"
-    local other_pos, other_track_num = find_source_marker(proj, other_id, other_type)
+    local other_ext_key = (marker_type == "SOURCE-OUT") and "SourceInTrackNum" or "SourceOutTrackNum"
+    local other_pos = find_source_marker(proj, other_id, other_type)
+    local _, other_stored = GetProjExtState(0, "ReaClassical", other_ext_key)
+    local other_track_num = tonumber(other_stored)
 
     local is_pair = other_pos and other_track_num and
         marker_track_num and other_track_num == marker_track_num
@@ -287,14 +296,14 @@ function find_source_marker(proj, marker_id, marker_type)
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local number, label = raw_label:match("(%d+):(.+)")
+            local _, label = raw_label:match("(.+):(.+)")
             if label and label == marker_type then
-                return pos, tonumber(number)
+                return pos
             end
         end
     end
 
-    return nil, nil
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -375,21 +384,32 @@ end
 
 ---------------------------------------------------------------------
 
-function other_source_marker_check()
-    local proj = EnumProjects(-1)
-    if not proj then return nil end
-
-    local _, num_markers, num_regions = CountProjectMarkers(proj)
-
-    for i = 0, num_markers + num_regions - 1 do
-        local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-        local number, label = raw_label:match("(%d+):(.+)")
-
-        if label and (label == "SOURCE-IN" or label == "SOURCE-OUT") then
-            return tonumber(number)
-        end
+function get_track_prefix(track)
+    if not track then track = GetSelectedTrack(0, 0) end
+    if folder_check() == 0 or track == nil then
+        return "1"
     end
+    local folder
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        folder = track
+    else
+        folder = GetParentTrack(track)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or track, "IP_TRACKNUMBER")))
+end
 
+---------------------------------------------------------------------
+
+function other_source_marker_check()
+    local _, stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    if stored ~= "" then
+        return tonumber(stored)
+    end
     return nil
 end
 
