@@ -1,12 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.2
+@version 26.3.3
 @changelog
-  Recording: Allow rec-arming first appropriate folder if no tracks are selected
-  S-D markers: Use folder prefix instead of track number
-  Create CD Markers: Combine DDP workflow into a single file
-  Add window toggle for source audition manager
-  Add metadata presets
+  Record Panel: Ignore listenback when iterating for rec-armed tracks
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
