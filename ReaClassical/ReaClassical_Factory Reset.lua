@@ -187,17 +187,10 @@ end
 ---------------------------------------------------------------------
 
 function ExecUpdate()
-    local msg = [[
-        ReaClassical has to close for the update process to complete.
-        Should you have unsaved projects, you will be prompted to save them.
-        After the installation is complete, ReaClassical will restart automatically.
-
-        Quit ReaClassical?]]
-
-    local ret = MB(msg, "ReaClassical Reset", 4)
-    if ret == 7 then
-        return
-    end
+    MB("ReaClassical will now close to complete the update.\n" ..
+       "Should you have unsaved projects, you will be prompted to save them.\n" ..
+       "ReaClassical will restart automatically.",
+       "ReaClassical Reset", 0)
 
     Main_OnCommand(40886, 0)
 
@@ -205,7 +198,7 @@ function ExecUpdate()
         Main_OnCommand(40063, 0)
         Main_OnCommand(40004, 0)
     else
-        MB("Restart cancelled!", "ReaClassical Reset", 0)
+        MB("Restart cancelled due to unsaved changes.", "ReaClassical Reset", 0)
     end
 end
 
