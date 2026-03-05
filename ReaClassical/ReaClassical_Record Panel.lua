@@ -1007,15 +1007,18 @@ function draw(playstate)
     end
   end
 
-  for i = 0, num_tracks - 1 do
-    local track = GetTrack(0, i)
-    if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+for i = 0, num_tracks - 1 do
+  local track = GetTrack(0, i)
+  if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+    local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+    if lb_state ~= "y" then
       any_armed = true
       if selected_track and track == selected_track then
         selected_track_armed = true
       end
     end
   end
+end
 
   -- Check if a first folder exists (for fallback arm behavior)
   local first_folder = find_first_folder_track()
