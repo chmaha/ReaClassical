@@ -62,6 +62,7 @@ reaper-kb.ini
 reaper-menu.ini
 reaper-render.ini
 reaper-render2.ini
+reaper-metadata.ini
 reaper-themeconfig.ini
 sws-autocoloricon.ini
 reaper-install-rev.txt

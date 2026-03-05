@@ -14,5 +14,6 @@ cp $SRC/reaper-kb.ini "$DEST/ReaClassical-kb.ini"
 cp $SRC/reaper-mouse.ini "$DEST/ReaClassical-mouse.ini"
 cp $SRC/reaper-menu.ini "$DEST/ReaClassical-menu.ini"
 cp $SRC/reaper-render.ini "$DEST/ReaClassical-render.ini"
+cp $SRC/reaper-metadata.ini "$DEST/ReaClassical-metadata.ini"
 
 

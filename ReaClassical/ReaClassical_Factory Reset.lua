@@ -37,6 +37,8 @@ function main()
     local mouse_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-mouse.ini")
     local renderpresets_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical",
         "ReaClassical-render.ini")
+    local metadata_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical",
+        "ReaClassical-metadata.ini")
     local main_ini_relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical",
         "ReaClassical.ini")
 
@@ -44,12 +46,14 @@ function main()
     local src_renderpresets_path = resource_path .. renderpresets_relative_path
     local src_shortcuts_path = resource_path .. kb_relative_path
     local src_mouse_path = resource_path .. mouse_relative_path
+    local src_metadata_path = resource_path .. metadata_relative_path
     local src_main_ini_path = resource_path .. main_ini_relative_path
 
     local dest_menu_path = resource_path .. separator .. "reaper-menu.ini"
     local dest_shortcuts_path = resource_path .. separator .. "reaper-kb.ini"
     local dest_mouse_path = resource_path .. separator .. "reaper-mouse.ini"
     local dest_renderpresets_path = resource_path .. separator .. "reaper-render.ini"
+    local dest_metadata_path = resource_path .. separator .. "reaper-metadata.ini"
     local dest_main_ini_path = resource_path .. separator .. "reaper.ini"
 
     local splash_relative_path = get_path("Scripts", "chmaha Scripts", "ReaClassical", "reaclassical-splash.png")
@@ -66,6 +70,7 @@ function main()
 
     if response == 6 then
         copy_file(src_renderpresets_path, dest_renderpresets_path)
+        copy_file(src_metadata_path, dest_metadata_path)
         copy_file(src_menu_path, dest_menu_path)
         copy_file(src_shortcuts_path, dest_shortcuts_path)
         copy_file(src_mouse_path, dest_mouse_path)
