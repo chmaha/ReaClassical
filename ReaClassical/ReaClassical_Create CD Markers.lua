@@ -647,7 +647,7 @@ function is_item_start_crossfaded(selected_track, item_number)
         local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
         local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
         local prev_end = prev_pos + prev_len
-        if prev_end > item_pos then
+        if prev_end >= item_pos - 1e-9 then
             bool = true
         end
     end
@@ -665,7 +665,7 @@ function is_item_end_crossfaded(selected_track, item_number)
     local next_item = GetTrackMediaItem(selected_track, item_number + 1)
     if next_item then
         local next_pos = GetMediaItemInfo_Value(next_item, "D_POSITION")
-        if next_pos < item_end then
+        if next_pos <= item_end + 1e-9 then
             bool = true
         end
     end
