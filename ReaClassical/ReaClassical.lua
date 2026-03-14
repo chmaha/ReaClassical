@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.3
+@version 26.3.4
 @changelog
-  Record Panel: Ignore listenback when iterating for rec-armed tracks
+  Create CD Markers: Do not add automation points when items are abutting
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
