@@ -1007,18 +1007,18 @@ function draw(playstate)
     end
   end
 
-for i = 0, num_tracks - 1 do
-  local track = GetTrack(0, i)
-  if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
-    local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
-    if lb_state ~= "y" then
-      any_armed = true
-      if selected_track and track == selected_track then
-        selected_track_armed = true
+  for i = 0, num_tracks - 1 do
+    local track = GetTrack(0, i)
+    if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+      local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+      if lb_state ~= "y" then
+        any_armed = true
+        if selected_track and track == selected_track then
+          selected_track_armed = true
+        end
       end
     end
   end
-end
 
   -- Check if a first folder exists (for fallback arm behavior)
   local first_folder = find_first_folder_track()
@@ -1057,6 +1057,9 @@ end
 
   if ImGui.Button(ctx, rec_button_label, button_width, button_height) then
     check_prefs()
+    if rec_button_label == "Arm" then
+      Main_OnCommand(40289, 0) -- Item: Unselect all items
+    end
     if arm_first_folder_mode then
       -- Select the first folder track so F9 can arm it
       SetOnlyTrackSelected(first_folder)
@@ -1069,14 +1072,29 @@ end
         end
       end
     end
+    if rec_button_label == "Rec" then
+      editing_item = nil
+      last_selected_item = nil
+      take_extracted = false
+      session_extracted = false
+      session_text = session
+      if not iterated_filenames then
+        get_take_count(session)
+      end
+      take_text = take_count + 1
+      local padded_take_text = string.format("%03d", tonumber(take_text))
+      SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
+        .. "$tracknameornumber_T" .. padded_take_text)
+      rec_name_set = true
+    end
     Main_OnCommand(F9_command, 0)
   end
 
   -- Dynamic tooltip based on button state
   if arm_first_folder_mode then
     local tip = current_workflow == "Vertical"
-      and "Arm first source folder for recording (F9)"
-      or "Arm folder for recording (F9)"
+        and "Arm first source folder for recording (F9)"
+        or "Arm folder for recording (F9)"
     ImGui.SetItemTooltip(ctx, tip)
   else
     ImGui.SetItemTooltip(ctx, rec_button_label == "Rec" and "Start recording (F9)" or
@@ -1465,6 +1483,24 @@ end
           end
         end
         check_prefs()
+        if rec_button_label == "Arm" then
+          Main_OnCommand(40289, 0) -- Item: Unselect all items
+        end
+        if rec_button_label == "Rec" then
+          editing_item = nil
+          last_selected_item = nil
+          take_extracted = false
+          session_extracted = false
+          session_text = session
+          if not iterated_filenames then
+            get_take_count(session)
+          end
+          take_text = take_count + 1
+          local padded_take_text = string.format("%03d", tonumber(take_text))
+          SNM_SetStringConfigVar("recfile_wildcards", session_dir .. session_suffix
+            .. "$tracknameornumber_T" .. padded_take_text)
+          rec_name_set = true
+        end
         Main_OnCommand(F9_command, 0)
       end
     end
