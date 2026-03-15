@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.5
+@version 26.3.6
 @changelog
-  Record Panel: Use correct take number for recording when re-opening with previous item selected
+  Statistics: Add copy buttons and fix automation lane count
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
