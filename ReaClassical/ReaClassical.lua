@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.4
+@version 26.3.5
 @changelog
-  Create CD Markers: Do not add automation points when items are abutting
+  Record Panel: Use correct take number for recording when re-opening with previous item selected
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
