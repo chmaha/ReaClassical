@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, format_time, get_project_age, calculate_stats
+local main, format_time, get_project_age, calculate_stats, get_reaper_version, get_reaclassical_version
 
 ---------------------------------------------------------------------
 
@@ -53,6 +53,42 @@ local ctx = ImGui.CreateContext('ReaClassical Stats')
 local window_open = true
 
 local stats = {}
+
+---------------------------------------------------------------------
+
+function get_reaper_version()
+    local version_str = GetAppVersion()
+    local version = version_str:match("^(%d+%.%d+)")
+    return tonumber(version)
+end
+
+---------------------------------------------------------------------
+
+function get_reaclassical_version()
+    local reapack_exists = APIExists("ReaPack_GetOwner")
+    if not reapack_exists then
+        return "n/a (ReaPack API not found)"
+    end
+
+    local script_path = ({get_action_context()})[2]
+    if not script_path or script_path == "" then
+        return "n/a"
+    end
+
+    local entry = ReaPack_GetOwner(script_path)
+    if not entry then
+        return "n/a (not installed via ReaPack)"
+    end
+
+    local retval, _repo, _cat, _pkg, _desc, _type, version = ReaPack_GetEntryInfo(entry)
+    ReaPack_FreeEntry(entry)
+
+    if retval and version and version ~= "" then
+        return version
+    end
+
+    return "n/a"
+end
 
 ---------------------------------------------------------------------
 
@@ -96,6 +132,8 @@ end
 
 function calculate_stats()
     local project_age = get_project_age()
+    local reaper_version = get_reaper_version()
+    local reaclassical_version = get_reaclassical_version()
 
     local num_items, num_tracks = CountMediaItems(0), CountTracks(0)
     local num_cd_markers, num_sd_edits, num_splits, num_regions = 0, 0, 0, 0
@@ -189,13 +227,24 @@ function calculate_stats()
             end
 
             num_fx = num_fx + TrackFX_GetCount(track)
-            num_automation_lanes = num_automation_lanes + CountTrackEnvelopes(track)
+            local num_envelopes = CountTrackEnvelopes(track)
+            for e = 0, num_envelopes - 1 do
+                local env = GetTrackEnvelope(track, e)
+                if env then
+                    local _, chunk = GetEnvelopeStateChunk(env, "", false)
+                    if chunk:match("VIS 1") and CountEnvelopePoints(env) > 0 then
+                        num_automation_lanes = num_automation_lanes + 1
+                    end
+                end
+            end
         end
     end
 
     local special_tracks = num_tracks - (folder_count * tracks_per_group) - tracks_per_group - 1
 
     stats = {
+        reaper_version = reaper_version,
+        reaclassical_version = reaclassical_version,
         album_end = format_time(album_end),
         num_cd_markers = num_cd_markers,
         project_age = project_age,
@@ -236,6 +285,15 @@ function main()
         window_open = open_ref
 
         if opened then
+            -- Version Info
+            local version_text = "ReaClassical " .. stats.reaclassical_version .. " | REAPER " .. stats.reaper_version
+            ImGui.Text(ctx, version_text)
+            ImGui.SameLine(ctx)
+            if ImGui.SmallButton(ctx, "Copy Ver") then
+                ImGui.SetClipboardText(ctx, version_text)
+            end
+            ImGui.Spacing(ctx)
+
             -- Album Stats Section
             ImGui.Text(ctx, "Album Stats:")
             ImGui.Text(ctx, "- Final album length: " .. stats.album_end)
@@ -266,9 +324,32 @@ function main()
             ImGui.Text(ctx, "- Total automation lanes: " .. tostring(stats.num_automation_lanes))
             ImGui.Spacing(ctx)
 
-            -- Refresh button
+            -- Refresh and Copy Stats buttons
             if ImGui.Button(ctx, "Refresh", 80, 0) then
                 calculate_stats()
+            end
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Copy Statistics", 110, 0) then
+                local stats_text = "ReaClassical Project Statistics\n\n"
+                    .. "Album Stats:\n"
+                    .. "- Final album length: " .. stats.album_end .. "\n"
+                    .. "- Number of CD markers: " .. tostring(stats.num_cd_markers) .. "\n\n"
+                    .. "Project Stats:\n"
+                    .. "- Project age: " .. stats.project_age .. "\n"
+                    .. "- Total project length: " .. stats.total_project_length .. "\n"
+                    .. "- Total length of all source material: " .. stats.total_source_length .. "\n"
+                    .. "- Total number of items: " .. tostring(stats.num_items) .. "\n"
+                    .. "- Number of track folders: " .. tostring(stats.folder_count) .. "\n"
+                    .. "- Number of tracks per group: " .. tostring(stats.tracks_per_group) .. "\n"
+                    .. "- Number of special tracks: " .. tostring(stats.special_tracks) .. "\n"
+                    .. "- Number of regions: " .. tostring(stats.num_regions) .. "\n\n"
+                    .. "Edit Stats:\n"
+                    .. "- Number of dest S-D edits: " .. tostring(stats.num_sd_edits) .. "\n"
+                    .. "- Number of dest item splits: " .. tostring(stats.num_splits) .. "\n\n"
+                    .. "FX & Automation:\n"
+                    .. "- Total FX count: " .. tostring(stats.num_fx) .. "\n"
+                    .. "- Total automation lanes: " .. tostring(stats.num_automation_lanes)
+                ImGui.SetClipboardText(ctx, stats_text)
             end
             -- keyboard shortcut capture
             if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_F1, false) then
