@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.6
+@version 26.3.7
 @changelog
-  Statistics: Add copy buttons and fix automation lane count
+  Auto Solo Folder: Force playback to edit cursor
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
