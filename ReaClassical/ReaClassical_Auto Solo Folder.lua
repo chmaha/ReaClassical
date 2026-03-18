@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, solo
 local select_children_of_selected_folders
-local unselect_folder_children
+local unselect_folder_children, jump_playback_to_edit_cursor
 local any_track_armed, get_folder_parent, arm_folder, get_folder_children
 
 ---------------------------------------------------------------------
@@ -192,6 +192,7 @@ function main()
 
         select_children_of_selected_folders()
         unselect_folder_children()
+        jump_playback_to_edit_cursor()
         PreventUIRefresh(-1)
         Undo_EndBlock('Select Folder', 0)
         UpdateArrange()
@@ -337,6 +338,16 @@ function unselect_folder_children()
                 depth = 0
             end
         end
+    end
+end
+
+---------------------------------------------------------------------
+
+function jump_playback_to_edit_cursor()
+    local play_state = GetPlayState()
+    if play_state & 1 == 1 then -- if playing
+        OnStopButton()
+        OnPlayButton()
     end
 end
 
