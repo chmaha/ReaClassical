@@ -87,6 +87,7 @@ local add_special_counts = {}
 local selected_folder
 local new_folder_name
 local rename_folder_name
+local auto_assign_start = 1
 
 set_action_options(2)
 
@@ -446,11 +447,34 @@ function main()
         -- Auto assign inputs button
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "Auto Rec Inputs") then
-            auto_assign()
+            ImGui.OpenPopup(ctx, "Auto Rec Inputs Popup")
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx,
                 "Auto-assign inputs based on track names\n(pair/stereo = stereo, left/right = mono with pan)")
+        end
+        -- Auto assign popup
+        if ImGui.BeginPopupModal(ctx, "Auto Rec Inputs Popup", true, ImGui.WindowFlags_AlwaysAutoResize) then
+            ImGui.Text(ctx, "Start assignment at hardware input:")
+            ImGui.Separator(ctx)
+            ImGui.SetNextItemWidth(ctx, 100)
+            if ImGui.IsWindowAppearing(ctx) then
+                ImGui.SetKeyboardFocusHere(ctx)
+            end
+            local changed, new_val = ImGui.InputInt(ctx, "##auto_start", auto_assign_start)
+            if changed then
+                auto_assign_start = math.max(1, math.min(MAX_INPUTS, new_val))
+            end
+            ImGui.Separator(ctx)
+            if ImGui.Button(ctx, "OK", 80, 0) then
+                auto_assign(auto_assign_start)
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, "Cancel", 80, 0) then
+                ImGui.CloseCurrentPopup(ctx)
+            end
+            ImGui.EndPopup(ctx)
         end
 
         -- Auto assign hardware outputs button
@@ -2696,8 +2720,9 @@ end
 
 ---------------------------------------------------------------------
 
-function auto_assign()
-    local input_channel = 0
+function auto_assign(start_input)
+    start_input = start_input or 1
+    local input_channel = start_input - 1
 
     for i = 1, #mixer_tracks do
         local track_info = mixer_tracks[i]
