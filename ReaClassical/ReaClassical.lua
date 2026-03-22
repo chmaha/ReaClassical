@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.7
+@version 26.3.8
 @changelog
-  Auto Solo Folder: Force playback to edit cursor
+  Mission Control: Allow offset for auto assignment of inputs
+  Classical Take Record: Find current rec-armed folder before stopping recording
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
