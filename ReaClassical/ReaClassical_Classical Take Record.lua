@@ -30,7 +30,7 @@ local clear_all_rec_armed_except_live, get_item_guid
 local select_children_of_selected_folders
 local unselect_folder_children, set_rec_arm_for_selected_tracks
 local find_mixer_track_for_track, is_mixer_disabled
-local avoid_take_lanes
+local avoid_take_lanes, find_recording_folder, get_record_takes_horizontally
 ---------------------------------------------------------------------
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -41,49 +41,6 @@ if input ~= "" then
     for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
     if table[8] then ref_is_guide = tonumber(table[8]) or 0 end
     if table[15] then use_only_take_num = tonumber(table[15]) or 0 end
-end
-
----------------------------------------------------------------------
-
-local function get_record_takes_horizontally()
-    local _, val = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
-    return (val == "1")
-end
-
----------------------------------------------------------------------
-
-function avoid_take_lanes()
-    local cursor_pos = GetCursorPosition()
-    local num_tracks = CountTracks(0)
-    local latest_end = nil
-
-    for i = 0, num_tracks - 1 do
-        local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
-            local item_count = CountTrackMediaItems(track)
-            -- Find the rightmost item end on this armed track
-            local track_latest_end = nil
-            for j = 0, item_count - 1 do
-                local item = GetTrackMediaItem(track, j)
-                local item_end = GetMediaItemInfo_Value(item, "D_POSITION")
-                    + GetMediaItemInfo_Value(item, "D_LENGTH")
-                if not track_latest_end or item_end > track_latest_end then
-                    track_latest_end = item_end
-                end
-            end
-
-            -- If cursor is before the end of the final item, we need to move it
-            if track_latest_end and cursor_pos <= track_latest_end then
-                if not latest_end or track_latest_end > latest_end then
-                    latest_end = track_latest_end
-                end
-            end
-        end
-    end
-
-    if latest_end then
-        SetEditCurPos(latest_end + 1.0, false, false)
-    end
 end
 
 ---------------------------------------------------------------------
@@ -104,86 +61,26 @@ function main()
         MB("Please add at least one folder before running", "Classical Take Record", 0)
         return
     end
+
     PreventUIRefresh(1)
     local _, rec_wildcards = get_config_var_string("recfile_wildcards")
 
-    local first_selected = GetSelectedTrack(0, 0)
-    if not first_selected then
-        -- No track selected: find the appropriate folder to arm
-        -- In Vertical workflow, skip the first folder (destination) and use the second
-        local target_index = (workflow == "Vertical") and 2 or 1
-        local folder_count = 0
-        local num_tracks = CountTracks(0)
-        for i = 0, num_tracks - 1 do
-            local track = GetTrack(0, i)
-            if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-                folder_count = folder_count + 1
-                if folder_count == target_index then
-                    SetOnlyTrackSelected(track)
-                    first_selected = track
-                    break
-                end
-            end
-        end
-        if not first_selected then
-            MB("No folder found in the project.", "Classical Take Record", 0)
+    if GetPlayState() ~= 0 then
+        -- Find the folder that is actually recording
+        local recording_folder = find_recording_folder()
+        if not recording_folder then
+            -- Fallback: nothing armed, just stop
+            Main_OnCommand(40667, 0) -- Transport: Stop
+            PreventUIRefresh(-1)
             return
         end
-    end
-    if not check_parent_track(first_selected) then
-        local parent_track = GetParentTrack(first_selected)
-        if not parent_track then
-            MB("Classical Take Record only works with groups", "Error", 0)
-            return
-        else
-            SetOnlyTrackSelected(parent_track)
-        end
-    end
 
-    Undo_BeginBlock()
-    local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
-
-    -- Main_OnCommand(40339, 0) --unmute all tracks
-
-    if GetPlayState() == 0 then
-        local record_panel = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
-        local state = GetToggleCommandState(record_panel)
-        if state ~= 1 then
-            Main_OnCommand(record_panel, 0)
-        end
-
-        -- Keep only the first selected track
-        local first_selected_track = GetSelectedTrack(0, 0)
+        -- Re-select the recording folder so the rest of the logic works
         Main_OnCommand(40297, 0) -- deselect all tracks
-        SetTrackSelected(first_selected_track, true)
+        SetTrackSelected(recording_folder, true)
 
-        select_children_of_selected_folders()
-        mixer()
-        local selected = solo()
-        if not selected then
-            MB("Please select a folder or track before running", "Classical Take Record", 0)
-            return
-        end
-        clear_all_rec_armed_except_live(workflow)
-        set_rec_arm_for_selected_tracks(1)
-        unselect_folder_children()
+        Undo_BeginBlock()
 
-        avoid_take_lanes()
-
-        if rec_arm ~= 1 then
-            TrackList_AdjustWindows(false)
-            return
-        end
-
-        local cursor_pos = GetCursorPosition()
-        save_prefs(cursor_pos)
-
-        avoid_take_lanes()
-
-        PreventUIRefresh(-1)
-        Main_OnCommand(1013, 0) -- Transport: Record
-        Undo_EndBlock('Classical Take Record', 0)
-    else
         Main_OnCommand(40667, 0) -- Transport: Stop (save all recorded media)
         local _, session_name = GetProjExtState(0, "ReaClassical", "TakeSessionName")
         session_name = (session_name ~= "" and session_name .. "_") or ""
@@ -224,8 +121,6 @@ function main()
         SetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs", table.concat(recorded_guids, ","))
         Main_OnCommand(40289, 0) -- Unselect all items
 
-        -- FEATURE 2: in Vertical workflow, only advance to the next folder when
-        -- "Record Takes Horizontally" is NOT enabled.
         if workflow == "Vertical" and not get_record_takes_horizontally() then
             select_children_of_selected_folders()
             local ret, cursor_pos = load_prefs()
@@ -274,7 +169,89 @@ function main()
 
         PreventUIRefresh(-1)
         Undo_EndBlock('Classical Take Record Stop', 0)
+        UpdateArrange()
+        UpdateTimeline()
+        return
     end
+
+    local first_selected = GetSelectedTrack(0, 0)
+    if not first_selected then
+        -- No track selected: find the appropriate folder to arm
+        -- In Vertical workflow, skip the first folder (destination) and use the second
+        local target_index = (workflow == "Vertical") and 2 or 1
+        local folder_count = 0
+        local num_tracks = CountTracks(0)
+        for i = 0, num_tracks - 1 do
+            local track = GetTrack(0, i)
+            if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                folder_count = folder_count + 1
+                if folder_count == target_index then
+                    SetOnlyTrackSelected(track)
+                    first_selected = track
+                    break
+                end
+            end
+        end
+        if not first_selected then
+            MB("No folder found in the project.", "Classical Take Record", 0)
+            return
+        end
+    end
+    if not check_parent_track(first_selected) then
+        local parent_track = GetParentTrack(first_selected)
+        if not parent_track then
+            MB("Classical Take Record only works with folders", "Error", 0)
+            return
+        else
+            SetOnlyTrackSelected(parent_track)
+        end
+    end
+
+    Undo_BeginBlock()
+    local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
+
+    local record_panel = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
+    local state = GetToggleCommandState(record_panel)
+    if state ~= 1 then
+        Main_OnCommand(record_panel, 0)
+    end
+
+    -- Keep only the first selected track
+    local first_selected_track = GetSelectedTrack(0, 0)
+    Main_OnCommand(40297, 0) -- deselect all tracks
+    SetTrackSelected(first_selected_track, true)
+
+    select_children_of_selected_folders()
+    mixer()
+    local selected = solo()
+    if not selected then
+        MB("Please select a folder or track before running", "Classical Take Record", 0)
+        return
+    end
+    clear_all_rec_armed_except_live(workflow)
+    set_rec_arm_for_selected_tracks(1)
+    unselect_folder_children()
+
+    avoid_take_lanes()
+
+    if rec_arm ~= 1 then
+        TrackList_AdjustWindows(false)
+        PreventUIRefresh(-1)
+        Undo_EndBlock('Classical Take Record', 0)
+        UpdateArrange()
+        UpdateTimeline()
+        return
+    end
+
+    local cursor_pos = GetCursorPosition()
+    save_prefs(cursor_pos)
+
+    avoid_take_lanes()
+
+    PreventUIRefresh(-1)
+    Main_OnCommand(1013, 0) -- Transport: Record
+    Undo_EndBlock('Classical Take Record', 0)
+
     UpdateArrange()
     UpdateTimeline()
 end
@@ -454,10 +431,10 @@ function mixer()
 
         -- Check folder visibility (only in Vertical workflow)
         -- This needs to run BEFORE we check for folder parent tracks
-        local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+        local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         local parent_folder_visible = true -- Default to visible
 
-        if workflow == "Vertical" then
+        if wf == "Vertical" then
             -- First, find if this track is inside a folder and get that folder's visibility
             local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
 
@@ -665,9 +642,6 @@ end
 ---------------------------------------------------------------------
 
 function find_mixer_track_for_track(track)
-    -- Find the mixer track that this track sends to
-    -- Each track should send to exactly one mixer track
-
     local num_sends = GetTrackNumSends(track, 0) -- 0 = sends (not receives)
 
     for i = 0, num_sends - 1 do
@@ -736,6 +710,76 @@ function get_item_guid(item)
     else
         return ""
     end
+end
+
+---------------------------------------------------------------------
+
+function get_record_takes_horizontally()
+    local _, val = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+    return (val == "1")
+end
+
+---------------------------------------------------------------------
+
+function avoid_take_lanes()
+    local cursor_pos = GetCursorPosition()
+    local num_tracks = CountTracks(0)
+    local latest_end = nil
+
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+            local item_count = CountTrackMediaItems(track)
+            -- Find the rightmost item end on this armed track
+            local track_latest_end = nil
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(track, j)
+                local item_end = GetMediaItemInfo_Value(item, "D_POSITION")
+                    + GetMediaItemInfo_Value(item, "D_LENGTH")
+                if not track_latest_end or item_end > track_latest_end then
+                    track_latest_end = item_end
+                end
+            end
+
+            -- If cursor is before the end of the final item, we need to move it
+            if track_latest_end and cursor_pos <= track_latest_end then
+                if not latest_end or track_latest_end > latest_end then
+                    latest_end = track_latest_end
+                end
+            end
+        end
+    end
+
+    if latest_end then
+        SetEditCurPos(latest_end + 1.0, false, false)
+    end
+end
+
+---------------------------------------------------------------------
+
+function find_recording_folder()
+    local num_tracks = CountTracks(0)
+
+    -- Find the first rec-armed track that belongs to a folder
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_RECARM") == 1 then
+            -- If it's a folder parent, return it directly
+            if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+                return track
+            end
+            -- Otherwise check if it's inside a folder by walking backwards
+            for j = i - 1, 0, -1 do
+                local parent = GetTrack(0, j)
+                if GetMediaTrackInfo_Value(parent, "I_FOLDERDEPTH") == 1 then
+                    return parent
+                end
+            end
+            -- Not inside a folder — skip this track and keep looking
+        end
+    end
+
+    return nil
 end
 
 ---------------------------------------------------------------------
