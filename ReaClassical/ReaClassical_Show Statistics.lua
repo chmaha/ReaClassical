@@ -70,7 +70,7 @@ function get_reaclassical_version()
         return "n/a (ReaPack API not found)"
     end
 
-    local script_path = ({get_action_context()})[2]
+    local script_path = ({ get_action_context() })[2]
     if not script_path or script_path == "" then
         return "n/a"
     end
@@ -214,6 +214,9 @@ function calculate_stats()
 
             if in_first_folder then
                 tracks_per_group = tracks_per_group + 1
+                if depth < 0 then
+                    in_first_folder = false
+                end
             end
 
             if folder_count > 1 then
