@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.8
+@version 26.3.9
 @changelog
-  Mission Control: Allow offset for auto assignment of inputs
-  Classical Take Record: Find current rec-armed folder before stopping recording
+  Statistics: Fix calculations when in horizontal workflow
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
