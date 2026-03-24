@@ -1256,8 +1256,9 @@ mod_type > 0 ? (
   autopan_l = dry_mono * pan_l * autopan_gain;
   autopan_r = dry_mono * pan_r * autopan_gain;
 
-  spl0 = out_l + g0 * spl0 + autopan_l;
-  spl1 = out_r + g0 * spl1 + autopan_r;
+  autopan_active = (opmix > 0) ? 1 : 0;
+  spl0 = out_l + g0 * spl0 + autopan_l * autopan_active;
+  spl1 = out_r + g0 * spl1 + autopan_r * autopan_active;
 ) : (
   spl0 = out_l + g0 * spl0;
   spl1 = out_r + g0 * spl1;
