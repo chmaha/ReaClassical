@@ -6,6 +6,10 @@ Now that you have decided on a workflow, we can start recording!
 
 Use Mission Control kbd:[C] to set recording inputs and panning manually or automatically based on track name. For automatic assignment, add text like "Left", "R", "Pair", "2ch" etc. as a suffix and press btn:[Auto Rec Inputs].
 
+==== Primary and Secondary Recording Paths
+
+By default, ReaClassical creates a media subfolder within the project directory to serve as the primary location for storing audio files. If a secondary recording folder is specified, all tracks are automatically configured to use it. To set the secondary recording path or change the primary path, open Project Settings by pressing kbd:[P], then select the "Media" tab.
+
 ==== Easy Steps to Record
 
 1. Open ReaClassical Record Panel via kbd:[Ctrl+Enter]. Optionally set a session name by right-clicking on the window.
