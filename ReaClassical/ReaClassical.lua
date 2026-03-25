@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.9
+@version 26.3.10
 @changelog
-  Statistics: Fix calculations when in horizontal workflow
+  Mission Control: Remove recording path section
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
