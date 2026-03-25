@@ -1,9 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 2.6
+@version 2.7
 @changelog
-  Remove Modulator
-  Remove send version of Reverb
+  Add ability to disable ReaVision modules
 @metapackage
 @provides
   RCComp.jsfx
