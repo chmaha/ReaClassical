@@ -1,17 +1,14 @@
 #!/bin/sh
-
 # Script to create ReaClassical folder
 #
 # by chmaha (November 2025)
-
 # sh "$(dirname "$0")/copy_lua.sh"
-
 # Use Linux temp directory for collection
 dir=$(mktemp -d)
 echo "Using temporary directory: $dir"
-
 # Source directory
-src="$HOME/Desktop/ReaClassical_26/"
+WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+src="/mnt/c/Users/$WIN_USER/Desktop/ReaClassical_26/"
 
 # List of files and directories to copy
 files="BR.ini
