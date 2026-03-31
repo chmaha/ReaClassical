@@ -45,6 +45,15 @@ function main()
     if left_mute == 1 then CrossfadeEditor_OnCommand(43633) end
     if right_mute == 0 then CrossfadeEditor_OnCommand(43634) end
     local midpoint = move_cursor_to_time_selection_midpoint()
+    if not midpoint then
+        local in_bounds = GetToggleCommandStateEx(32065, 43664)
+        if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
+        CrossfadeEditor_OnCommand(43483)
+        CSurf_OnPlayRateChange(1)
+        CrossfadeEditor_OnCommand(43491) -- this creates the time selection
+        midpoint = move_cursor_to_time_selection_midpoint()
+        if not midpoint then return end -- still no selection, give up silently
+    end
     local colors = get_color_table()
     CSurf_OnPlayRateChange(1)
     -- prevent action 43491 from not playing if mouse cursor doesn't move
