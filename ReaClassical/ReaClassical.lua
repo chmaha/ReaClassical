@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.10
+@version 26.3.11
 @changelog
-  Mission Control: Remove recording path section
+  Play Left Crossfade Item: Add time selection if one does not exist
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
