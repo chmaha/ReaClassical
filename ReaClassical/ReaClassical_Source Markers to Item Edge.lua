@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, folder_check, get_track_number
+local main, folder_check, get_track_number, get_track_prefix
 local move_destination_folder, calculate_destination_info, get_tracks_per_group
 local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
@@ -96,6 +96,7 @@ function main()
     local dest_track_num = calculate_destination_info()
 
     local track_number = math.floor(get_track_number())
+    local track_prefix = get_track_prefix()
 
     if moveable_dest == 1 then
         move_destination_folder(track_number)
@@ -107,10 +108,14 @@ function main()
 
     if selected_track then SetOnlyTrackSelected(selected_track) end
 
+    -- Store real track number in ext state (matching SOURCE-IN script convention)
+    SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
+    SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
+
     local color_track = GetTrack(0, track_number - 1)
     local marker_color = color_track and GetTrackColor(color_track) or 0
-    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":SOURCE-IN", 998, marker_color)
-    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":SOURCE-OUT", 999, marker_color)
+    AddProjectMarker2(0, false, left_pos, 0, track_prefix .. ":SOURCE-IN", 998, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, track_prefix .. ":SOURCE-OUT", 999, marker_color)
     Main_OnCommand(40635, 0) -- remove time selection
     PreventUIRefresh(-1)
     Undo_EndBlock("Source Markers to Item Edge", 0)
@@ -142,6 +147,27 @@ function get_track_number()
         local folder = GetParentTrack(selected)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix()
+    local selected = GetSelectedTrack(0, 0)
+    if folder_check() == 0 or selected == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
+        folder = selected
+    else
+        folder = GetParentTrack(selected)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or selected, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------
@@ -203,7 +229,7 @@ function get_tracks_per_group()
     local tracks_per_group = 1
     local first_track = GetTrack(0, 0)
     if not first_track or GetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH") ~= 1 then
-        return 0 -- No valid parent folder
+        return 0
     end
 
     for i = 1, track_count - 1 do
@@ -211,7 +237,7 @@ function get_tracks_per_group()
         if track then
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
             if depth == 1 then
-                break -- New parent folder found, stop counting
+                break
             end
             tracks_per_group = tracks_per_group + 1
         end

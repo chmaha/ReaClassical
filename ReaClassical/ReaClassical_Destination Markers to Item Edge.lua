@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_selected_media_item_at, count_selected_media_items
-local folder_check, get_track_number
+local folder_check, get_track_number, get_track_prefix
 ---------------------------------------------------------------------
 
 function main()
@@ -68,7 +68,6 @@ function main()
         end
     end
 
-
     -- Remove old markers
     local i = 0
     while true do
@@ -82,16 +81,21 @@ function main()
         i = i + 1
     end
 
-    -- Get track number
+    -- Get track number and prefix
     local track_number = math.floor(get_track_number())
+    local track_prefix = get_track_prefix()
+
+    -- Store real track numbers in ext state
+    SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
+    SetProjExtState(0, "ReaClassical", "DestOutTrackNum", tostring(track_number))
 
     -- Get selected track for color or default to track 0
     local selected_track = GetSelectedTrack(0, 0)
     local color_track = selected_track or GetTrack(0, 0)
     local marker_color = color_track and GetTrackColor(color_track) or 0
 
-    AddProjectMarker2(0, false, left_pos, 0, track_number .. ":DEST-IN", 996, marker_color)
-    AddProjectMarker2(0, false, right_pos, 0, track_number .. ":DEST-OUT", 997, marker_color)
+    AddProjectMarker2(0, false, left_pos, 0, track_prefix .. ":DEST-IN", 996, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, track_prefix .. ":DEST-OUT", 997, marker_color)
 
     Undo_EndBlock("Destination Markers to Item Edge", 0)
 end
@@ -122,6 +126,27 @@ function get_track_number()
         local folder = GetParentTrack(selected)
         return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
     end
+end
+
+---------------------------------------------------------------------
+
+function get_track_prefix()
+    local selected = GetSelectedTrack(0, 0)
+    if folder_check() == 0 or selected == nil then
+        return "1"
+    end
+    local folder
+    if GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
+        folder = selected
+    else
+        folder = GetParentTrack(selected)
+    end
+    if folder then
+        local _, name = GetTrackName(folder)
+        local prefix = name:match("^(.-):")
+        if prefix then return prefix end
+    end
+    return tostring(math.floor(GetMediaTrackInfo_Value(folder or selected, "IP_TRACKNUMBER")))
 end
 
 ---------------------------------------------------------------------
