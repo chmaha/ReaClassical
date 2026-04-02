@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.3.11
+@version 26.4
 @changelog
-  Play Left Crossfade Item: Add time selection if one does not exist
+  S-D Markers to item edge: Use updated prefix method
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
