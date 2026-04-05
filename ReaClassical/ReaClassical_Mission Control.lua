@@ -154,25 +154,6 @@ local listenback_input_channel = 0 -- Current hardware input index for listenbac
 local listenback_is_stereo = false -- Listenback mono/stereo state
 ---------------------------------------------------------------------
 
--- Returns font-aware character width, with fallback if ctx not yet valid
-local function get_char_width()
-    if ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
-        return ImGui.GetFontSize(ctx) * 0.6
-    end
-    return 7
-end
-
--- Returns font-aware column positions for the special tracks section
-local function get_special_col_positions()
-    local font_size = ImGui.ValidatePtr(ctx, 'ImGui_Context*') and ImGui.GetFontSize(ctx) or 13
-    local col_name    = font_size * 4.5   -- prefix label width
-    local col_pan     = col_name + font_size * 14.5  -- name input width (180px equiv)
-    local col_hw      = col_pan + font_size * 27     -- past M/S/pan/vol controls
-    return col_name, col_pan, col_hw
-end
-
----------------------------------------------------------------------
-
 function main()
     if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
         return
@@ -510,14 +491,13 @@ function main()
             ImGui.Separator(ctx)
 
             local max_hw_outs = GetNumAudioOutputs()
-            local char_width = get_char_width()
 
             -- Calculate maximum dropdown width needed for consistent appearance
-            local max_dropdown_chars = 4 -- minimum
+            local max_dropdown_width = 100 -- Start with minimum width
 
-            -- Function to estimate character count of a dropdown option
-            local function estimate_option_chars(text)
-                return #text
+            -- Function to estimate width of a dropdown option
+            local function estimate_option_width(text)
+                return (#text * 7) + 30 -- ~7 pixels per char + padding
             end
 
             -- Check mono options
@@ -531,7 +511,7 @@ function main()
                 else
                     label = tostring(ch + 1)
                 end
-                max_dropdown_chars = math.max(max_dropdown_chars, estimate_option_chars(label))
+                max_dropdown_width = math.max(max_dropdown_width, estimate_option_width(label))
             end
 
             -- Check stereo options
@@ -548,7 +528,7 @@ function main()
                 else
                     label = string.format("%d+%d", ch + 1, ch + 2)
                 end
-                max_dropdown_chars = math.max(max_dropdown_chars, estimate_option_chars(label))
+                max_dropdown_width = math.max(max_dropdown_width, estimate_option_width(label))
             end
 
             -- Check special tracks multi-channel options
@@ -593,16 +573,10 @@ function main()
                                 label = string.format("%d-%d", ch + 1, ch + num_channels)
                             end
                         end
-                        max_dropdown_chars = math.max(max_dropdown_chars, estimate_option_chars(label))
+                        max_dropdown_width = math.max(max_dropdown_width, estimate_option_width(label))
                     end
                 end
             end
-
-            -- Font-aware dropdown width
-            local max_dropdown_width = math.max(100, math.floor(max_dropdown_chars * char_width) + 30)
-
-            -- Font-aware column position for the dropdown
-            local hw_dropdown_col = math.floor(ImGui.GetFontSize(ctx) * 27)
 
             -- Initialize pending changes if needed
             if not pending_hw_routing_changes.manual then
@@ -690,7 +664,7 @@ function main()
                                 ImGui.TextColored(ctx, 0xAAAAAAAA, type_label)
 
                                 ImGui.SameLine(ctx)
-                                ImGui.SetCursorPosX(ctx, hw_dropdown_col)
+                                ImGui.SetCursorPosX(ctx, 350)
 
                                 -- Build options based on track mono/stereo
                                 local options = { "None" }
@@ -738,7 +712,7 @@ function main()
                                         end
                                     end
                                 end
-                                ImGui.SetNextItemWidth(ctx, max_dropdown_width)
+                                ImGui.SetNextItemWidth(ctx, max_dropdown_width) -- Changed from 200
                                 local options_str = table.concat(options, "\0") .. "\0"
                                 local changed, new_selection = ImGui.Combo(ctx, "##hw_combo", current_selection,
                                     options_str)
@@ -750,8 +724,10 @@ function main()
                                     else
                                         -- Calculate actual hardware channel
                                         if is_stereo[i] then
+                                            -- For stereo, selection 1 = channels 0+1, selection 2 = channels 2+3, etc.
                                             pending_hw_routing_changes.manual[i].hw_channel = (new_selection - 1) * 2
                                         else
+                                            -- For mono, selection 1 = channel 0, selection 2 = channel 1, etc.
                                             pending_hw_routing_changes.manual[i].hw_channel = new_selection - 1
                                         end
                                     end
@@ -780,7 +756,7 @@ function main()
                     ImGui.TextColored(ctx, 0xAAAAAAAA, type_label)
 
                     ImGui.SameLine(ctx)
-                    ImGui.SetCursorPosX(ctx, hw_dropdown_col)
+                    ImGui.SetCursorPosX(ctx, 350)
 
                     -- Build options based on track mono/stereo
                     local options = { "None" }
@@ -829,7 +805,7 @@ function main()
                         end
                     end
 
-                    ImGui.SetNextItemWidth(ctx, max_dropdown_width)
+                    ImGui.SetNextItemWidth(ctx, max_dropdown_width) -- Changed from 200
                     local options_str = table.concat(options, "\0") .. "\0"
                     local changed, new_selection = ImGui.Combo(ctx, "##hw_combo", current_selection, options_str)
 
@@ -840,8 +816,10 @@ function main()
                         else
                             -- Calculate actual hardware channel
                             if is_stereo[i] then
+                                -- For stereo, selection 1 = channels 0+1, selection 2 = channels 2+3, etc.
                                 pending_hw_routing_changes.manual[i].hw_channel = (new_selection - 1) * 2
                             else
+                                -- For mono, selection 1 = channel 0, selection 2 = channel 1, etc.
                                 pending_hw_routing_changes.manual[i].hw_channel = new_selection - 1
                             end
                         end
@@ -933,7 +911,7 @@ function main()
                         prefix_color = color_to_native(255, 200, 200)
                     elseif aux_info.type == "listenback" then
                         display_prefix = "LB"
-                        prefix_color = color_to_native(170, 200, 255)
+                        prefix_color = color_to_native(170, 200, 255) -- Light blue
                     end
 
                     -- Prefix with fixed width
@@ -941,36 +919,36 @@ function main()
                     ImGui.Text(ctx, display_prefix)
                     ImGui.PopStyleColor(ctx)
 
-                    local font_size = ImGui.GetFontSize(ctx)
-                    local sp_col_name = math.floor(font_size * 4.5)
-                    local sp_col_ch   = math.floor(font_size * 18)
-                    local sp_col_drop = math.floor(font_size * 27)
-
-                    -- Track name
+                    -- Track name - aligned at column position
                     ImGui.SameLine(ctx)
-                    ImGui.SetCursorPosX(ctx, sp_col_name)
+                    ImGui.SetCursorPosX(ctx, 60)
                     ImGui.Text(ctx, aux_info.name ~= "" and aux_info.name or display_prefix)
 
                     -- Get the number of channels for this track
                     local num_channels = pending_hw_routing_changes.special[idx].num_channels
 
-                    -- Channel count
+                    -- Channel count - aligned at column position
                     ImGui.SameLine(ctx)
-                    ImGui.SetCursorPosX(ctx, sp_col_ch)
+                    ImGui.SetCursorPosX(ctx, 240)
                     local channel_label = string.format("[%dch]", num_channels)
                     ImGui.TextColored(ctx, 0xAAAAAAAA, channel_label)
 
-                    -- Hardware output dropdown
+                    -- Hardware output dropdown - aligned at column position
                     ImGui.SameLine(ctx)
-                    ImGui.SetCursorPosX(ctx, sp_col_drop)
+                    ImGui.SetCursorPosX(ctx, 350)
 
                     -- Build channel pair options based on track's channel count
                     local options = { "None" }
                     local current_selection = 0
 
+                    -- Generate options for channel pairs matching the track's channel count
+                    -- For 2ch: 1+2, 3+4, 5+6, etc.
+                    -- For 4ch: 1-4, 5-8, 9-12, etc.
+                    -- For 8ch: 1-8, 9-16, etc.
                     for ch = 0, max_hw_outs - num_channels, num_channels do
                         local label
                         if show_hardware_names then
+                            -- Build label with hardware names
                             local hw_names = {}
                             local all_have_names = true
                             for c = ch, ch + num_channels - 1 do
@@ -1001,6 +979,7 @@ function main()
                                 end
                             end
                         else
+                            -- Just use channel numbers
                             if num_channels == 2 then
                                 label = string.format("%d+%d", ch + 1, ch + 2)
                             else
@@ -1015,7 +994,7 @@ function main()
                         end
                     end
 
-                    ImGui.SetNextItemWidth(ctx, max_dropdown_width)
+                    ImGui.SetNextItemWidth(ctx, max_dropdown_width) -- Changed from 200
                     local options_str = table.concat(options, "\0") .. "\0"
                     local changed, new_selection = ImGui.Combo(ctx, "##hw_special_combo", current_selection,
                         options_str)
@@ -1024,6 +1003,7 @@ function main()
                         if new_selection == 0 then
                             pending_hw_routing_changes.special[idx].hw_channel = -1
                         else
+                            -- Calculate the starting channel based on track's channel count
                             pending_hw_routing_changes.special[idx].hw_channel = (new_selection - 1) * num_channels
                         end
                     end
@@ -1155,16 +1135,21 @@ function main()
                     -- Handle RCFader positioning
                     local needs_rcfader_action = false
                     if not rcfader_idx then
+                        -- RCFader doesn't exist - need to add it
                         needs_rcfader_action = true
                     elseif fiedler_idx and rcfader_idx > fiedler_idx then
+                        -- RCFader exists but is AFTER Fiedler - need to move it
                         needs_rcfader_action = true
+                        -- Delete the misplaced RCFader first
                         TrackFX_Delete(track, rcfader_idx)
                     end
 
                     if needs_rcfader_action then
+                        -- Refresh count after potential deletion
                         fx_count = TrackFX_GetCount(track)
                         fiedler_idx = nil
 
+                        -- Find Fiedler again
                         for fx_idx = 0, fx_count - 1 do
                             local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
                             if fx_name:match("VST3: Dolby Atmos Beam") then
@@ -1173,17 +1158,22 @@ function main()
                             end
                         end
 
+                        -- Add RCFader
                         if fiedler_idx then
+                            -- Insert before Fiedler
                             TrackFX_AddByName(track, "JS:RCFader", false, -1000 - fiedler_idx)
                         else
+                            -- Add at end if no Fiedler found (we'll add Fiedler next)
                             TrackFX_AddByName(track, "JS:RCFader", false, -1)
                         end
                     end
 
+                    -- Now ensure Fiedler exists and is after RCFader
                     fx_count = TrackFX_GetCount(track)
                     rcfader_idx = nil
                     fiedler_idx = nil
 
+                    -- Find both plugins again
                     for fx_idx = 0, fx_count - 1 do
                         local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
                         if fx_name:match("RCFader") then
@@ -1193,39 +1183,54 @@ function main()
                         end
                     end
 
+                    -- Add Fiedler if missing
                     if not fiedler_idx then
                         if rcfader_idx then
+                            -- Add Fiedler right after RCFader
                             TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false,
                                 -1000 - (rcfader_idx + 1))
                         else
+                            -- This shouldn't happen, but add at end as fallback
                             TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false, -1)
                         end
                     end
                 end
 
+                -- ALWAYS sync values and enable plugins after ensuring correct positioning
                 for i = 1, #mixer_tracks do
                     local track_info = mixer_tracks[i]
                     local track = track_info.mixer_track
 
+                    -- Find RCFader and Dolby Atmos Beam to sync and enable
                     local fx_count = TrackFX_GetCount(track)
                     for fx_idx = 0, fx_count - 1 do
                         local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
 
                         if fx_name:match("RCFader") then
+                            -- Get track volume in dB
                             local vol_linear = GetMediaTrackInfo_Value(track, "D_VOL")
                             local vol_db
 
+                            -- Handle -inf (very small linear values)
                             if vol_linear < 0.00000001 then
-                                vol_db = -150
+                                vol_db = -150 -- Set to minimum
                             else
                                 vol_db = 20 * math.log(vol_linear, 10)
                             end
 
+                            -- Clamp to RCFader's range (-150dB to +12dB)
                             vol_db = math.max(-150, math.min(12, vol_db))
+
+                            -- Round to 0.01 dB (RCFader's step)
                             vol_db = math.floor(vol_db * 100 + 0.5) / 100
+
+                            -- Set the parameter directly with the dB value
                             TrackFX_SetParam(track, fx_idx, 0, vol_db)
+
+                            -- Enable RCFader
                             TrackFX_SetEnabled(track, fx_idx, true)
                         elseif fx_name:match("VST3: Dolby Atmos Beam") then
+                            -- Enable Dolby Atmos Beam
                             TrackFX_SetEnabled(track, fx_idx, true)
                         end
                     end
@@ -1244,6 +1249,7 @@ function main()
                     local track = mixer_tracks[i].mixer_track
                     local fx_count = TrackFX_GetCount(track)
 
+                    -- Find and disable both RCFader and Dolby Atmos Beam
                     for fx_idx = 0, fx_count - 1 do
                         local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
                         if fx_name:match("RCFader") or fx_name:match("VST3: Dolby Atmos Beam") then
@@ -1256,7 +1262,6 @@ function main()
                 ImGui.SetTooltip(ctx, "Disable RCFader and Dolby Atmos Beam on all mixer tracks")
             end
         end
-
         -- Hardware names toggle button
         ImGui.SameLine(ctx)
         local btn_label = show_hardware_names and "Ch #" or "HW"
@@ -1301,15 +1306,19 @@ function main()
                             local child_track = GetTrack(0, child_idx)
                             local child_depth = GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
 
+                            -- Set visibility for this child track
                             SetMediaTrackInfo_Value(child_track, "B_SHOWINTCP", new_state and 1 or 0)
 
+                            -- Update depth counter
                             depth = depth + child_depth
                             child_idx = child_idx + 1
                         end
 
+                        -- Force REAPER to update the track display
                         TrackList_AdjustWindows(false)
                         UpdateArrange()
 
+                        -- Save to project ext state
                         SetProjExtState(0, "ReaClassical_MissionControl", "folder_tcp_visible_" .. folder_info.guid,
                             new_state and "1" or "0")
                     end
@@ -1335,12 +1344,6 @@ function main()
                 ImGui.TreeNodeFlags_DefaultOpen)
 
             if expanded then
-                -- Calculate font-aware column positions once for this section
-                local font_size = ImGui.GetFontSize(ctx)
-                local col_name = math.floor(font_size * 4.5)
-                local col_controls = col_name + math.floor(font_size * 14.5) -- after name input
-                local col_ch = math.floor(font_size * 18)  -- channel count label (HW popup only)
-
                 for idx, aux_info in ipairs(aux_submix_tracks) do
                     local _, aux_guid = GetSetMediaTrackInfo_String(aux_info.track, "GUID", "", false)
                     ImGui.PushID(ctx, idx .. "_special_" .. aux_guid)
@@ -1351,22 +1354,22 @@ function main()
 
                     if aux_info.type == "aux" then
                         display_prefix = "@"
-                        prefix_color = color_to_native(200, 140, 135)
+                        prefix_color = color_to_native(200, 140, 135) -- Brightened reddish-brown
                     elseif aux_info.type == "submix" then
                         display_prefix = "#"
-                        prefix_color = color_to_native(135, 195, 200)
+                        prefix_color = color_to_native(135, 195, 200) -- Brightened blue-grey
                     elseif aux_info.type == "roomtone" then
                         display_prefix = "RT"
-                        prefix_color = color_to_native(200, 160, 110)
+                        prefix_color = color_to_native(200, 160, 110) -- Brightened tan/brown
                     elseif aux_info.type == "reference" then
                         display_prefix = "REF"
-                        prefix_color = color_to_native(180, 180, 180)
+                        prefix_color = color_to_native(180, 180, 180) -- Brightened grey
                     elseif aux_info.type == "live" then
                         display_prefix = "LIVE"
-                        prefix_color = color_to_native(255, 200, 200)
+                        prefix_color = color_to_native(255, 200, 200) -- Brightened pink
                     elseif aux_info.type == "rcmaster" then
                         display_prefix = "RCM"
-                        prefix_color = color_to_native(80, 200, 80)
+                        prefix_color = color_to_native(80, 200, 80) -- Brightened green
                     elseif aux_info.type == "listenback" then
                         display_prefix = "LB"
                         prefix_color = color_to_native(170, 200, 255)
@@ -1379,12 +1382,15 @@ function main()
                     -- Track name input (only for tracks that can be renamed)
                     local can_rename = (aux_info.type == "aux" or aux_info.type == "submix" or aux_info.type == "reference")
 
+                    -- Set cursor position for name input column (aligned)
+                    local name_col_x = 60
                     ImGui.SameLine(ctx)
-                    ImGui.SetCursorPosX(ctx, col_name)
+                    ImGui.SetCursorPosX(ctx, name_col_x)
 
                     if can_rename then
-                        ImGui.SetNextItemWidth(ctx, math.floor(font_size * 14))
+                        ImGui.SetNextItemWidth(ctx, 180)
 
+                        -- Set focus if this is the special track that should receive focus
                         if focus_special_input == idx then
                             ImGui.SetKeyboardFocusHere(ctx)
                             focus_special_input = nil
@@ -1395,6 +1401,7 @@ function main()
                             aux_submix_names[idx])
                         if changed_name then
                             aux_submix_names[idx] = new_name
+                            -- Update track name with prefix
                             local full_name
                             if aux_info.type == "aux" then
                                 full_name = "@" .. new_name
@@ -1411,8 +1418,10 @@ function main()
                             aux_info.full_name = full_name
                         end
 
+                        -- Handle TAB key to move to next/previous renameable special track input
                         if ImGui.IsItemActive(ctx) then
                             if ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and not ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                                -- TAB: Find next renameable track
                                 local next_idx = nil
                                 for i = idx + 1, #aux_submix_tracks do
                                     local next_aux = aux_submix_tracks[i]
@@ -1425,6 +1434,7 @@ function main()
                                     focus_special_input = next_idx
                                 end
                             elseif ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                                -- Shift+TAB: Find previous renameable track
                                 local prev_idx = nil
                                 for i = idx - 1, 1, -1 do
                                     local prev_aux = aux_submix_tracks[i]
@@ -1440,7 +1450,9 @@ function main()
                         end
                     elseif aux_info.type == "listenback" then
                         -- Hardware input dropdown for listenback
-                        ImGui.SetNextItemWidth(ctx, math.floor(font_size * 14))
+                        ImGui.SetNextItemWidth(ctx, 180)
+                        local lb_options = is_stereo and stereo_options or mono_options
+                        -- Build mono options for listenback
                         local lb_mono_opts = {}
                         if listenback_input_channel == 0 then
                             table.insert(lb_mono_opts, "Select Ch")
@@ -1466,34 +1478,38 @@ function main()
                             lb_opts_str)
                         if lb_changed then
                             listenback_input_channel = lb_new_input
+                            -- Apply: 0 = None (-1), otherwise mono input
                             local rec_input
                             if lb_new_input == 0 then
                                 rec_input = -1
                             else
-                                rec_input = (lb_new_input - 1)
+                                rec_input = (lb_new_input - 1) -- mono (no flag)
                             end
                             SetMediaTrackInfo_Value(aux_info.track, "I_RECINPUT", rec_input)
                         end
                     else
-                        -- Spacer to keep alignment consistent
-                        ImGui.Dummy(ctx, math.floor(font_size * 14), ImGui.GetTextLineHeight(ctx))
+                        -- Add spacing to align with tracks that have name inputs
+                        ImGui.Dummy(ctx, 180, ImGui.GetTextLineHeight(ctx))
                     end
 
-                    -- All controls after the name field flow naturally via SameLine
-                    -- Mute button
+                    -- Set cursor position for pan slider column (aligned)
+                    local pan_col_x = name_col_x + 190
                     ImGui.SameLine(ctx)
+                    ImGui.SetCursorPosX(ctx, pan_col_x)
+
+                    -- Mute button (before pan)
                     local is_muted = GetMediaTrackInfo_Value(aux_info.track, "B_MUTE") == 1
                     if is_muted then
-                        ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFF0000FF)
-                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFF3333FF)
-                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCC0000FF)
-                        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFFFFFFF)
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFF0000FF)        -- Red when muted (RGBA)
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFF3333FF) -- Lighter red on hover
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCC0000FF)  -- Darker red when clicked
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFFFFFFF)          -- White text
                     end
                     if ImGui.Button(ctx, "M##auxmute" .. idx, 25, 0) then
                         SetMediaTrackInfo_Value(aux_info.track, "B_MUTE", is_muted and 0 or 1)
                     end
                     if is_muted then
-                        ImGui.PopStyleColor(ctx, 4)
+                        ImGui.PopStyleColor(ctx, 4) -- Pop all 4 colors
                     end
                     if ImGui.IsItemHovered(ctx) then
                         ImGui.SetTooltip(ctx, "Mute")
@@ -1503,16 +1519,16 @@ function main()
                     ImGui.SameLine(ctx)
                     local is_soloed = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
                     if is_soloed then
-                        ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)
-                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF)
-                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCCCC00FF)
-                        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)        -- Yellow when soloed (RGBA)
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF) -- Lighter yellow on hover
+                        ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCCCC00FF)  -- Darker yellow when clicked
+                        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)          -- Black text
                     end
                     if ImGui.Button(ctx, "S##auxsolo" .. idx, 25, 0) then
                         SetMediaTrackInfo_Value(aux_info.track, "I_SOLO", is_soloed and 0 or 2)
                     end
                     if is_soloed then
-                        ImGui.PopStyleColor(ctx, 4)
+                        ImGui.PopStyleColor(ctx, 4) -- Pop all 4 colors
                     end
                     if ImGui.IsItemHovered(ctx) then
                         ImGui.SetTooltip(ctx, "Solo")
@@ -1524,6 +1540,7 @@ function main()
                     local changed_pan, new_pan = ImGui.SliderDouble(ctx, "##specialpan" .. idx, aux_submix_pans[idx],
                         -1.0, 1.0, format_pan(aux_submix_pans[idx]))
 
+                    -- Check for double-click reset to center
                     new_pan = reset_pan_on_double_click("##specialpan" .. idx, new_pan, 0.0)
 
                     if ImGui.IsItemHovered(ctx) then
@@ -1535,6 +1552,7 @@ function main()
                         SetMediaTrackInfo_Value(aux_info.track, "D_PAN", new_pan)
                     end
 
+                    -- Right-click popup for typing pan value
                     if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
                         ImGui.OpenPopup(ctx, "auxpan_input##" .. idx)
                     end
@@ -1547,7 +1565,7 @@ function main()
                             ImGui.InputTextFlags_EnterReturnsTrue)
                         if rv then
                             local pan_val = 0.0
-                            local input = buf:gsub("%s+", "")
+                            local input = buf:gsub("%s+", "") -- Remove spaces but keep original case
                             local input_upper = input:upper()
 
                             if input_upper == "C" or input == "" then
@@ -1557,6 +1575,7 @@ function main()
                             elseif input_upper == "R" then
                                 pan_val = 1.0
                             else
+                                -- Try to parse number followed by L or R (case insensitive)
                                 local num, side = input:match("^(%d+%.?%d*)([LlRr])$")
                                 if num and side then
                                     local amount = tonumber(num)
@@ -1574,11 +1593,13 @@ function main()
                         ImGui.EndPopup(ctx)
                     end
 
-                    -- Volume slider
+                    -- Volume knob
                     ImGui.SameLine(ctx)
                     ImGui.SetNextItemWidth(ctx, 200)
+                    -- Convert linear volume to dB for display
                     local volume_db = 20 *
                         math.log(aux_volume_values[idx] > 0.0000001 and aux_volume_values[idx] or 0.0000001, 10)
+                    -- Use logarithmic scale with more resolution near 0dB
                     local fader_pos
                     if volume_db <= -60 then
                         fader_pos = 0.0
@@ -1595,6 +1616,7 @@ function main()
                     local changed_fader, new_fader_pos = ImGui.SliderDouble(ctx, "##auxvol" .. idx, fader_pos, 0.0, 1.0,
                         string.format("%.1f dB", volume_db))
 
+                    -- Check for double-click reset to 0dB
                     if ImGui.IsItemDeactivated(ctx) and pan_reset["auxvol" .. idx] then
                         new_fader_pos = 0.75
                         changed_fader = true
@@ -1604,12 +1626,14 @@ function main()
                     end
 
                     if changed_fader then
+                        -- Convert fader position back to dB
                         local new_db
                         if new_fader_pos <= 0.75 then
                             new_db = -60 + (new_fader_pos / 0.75) * 60
                         else
                             new_db = ((new_fader_pos - 0.75) / 0.25) * 12
                         end
+                        -- Convert dB to linear
                         local new_vol = 10 ^ (new_db / 20)
                         aux_volume_values[idx] = new_vol
                         SetMediaTrackInfo_Value(aux_info.track, "D_VOL", new_vol)
@@ -1618,6 +1642,7 @@ function main()
                         ImGui.SetTooltip(ctx, "Volume (double-click for 0dB, right-click to type dB)")
                     end
 
+                    -- Right-click popup for typing dB value
                     if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
                         ImGui.OpenPopup(ctx, "auxvol_input##" .. idx)
                     end
@@ -1633,6 +1658,7 @@ function main()
                         if rv then
                             local db_val = tonumber(buf)
                             if db_val then
+                                -- Clamp to -60 to +12 dB
                                 db_val = math.max(-60, math.min(12, db_val))
                                 local new_vol = 10 ^ (db_val / 20)
                                 aux_volume_values[idx] = new_vol
@@ -1643,7 +1669,7 @@ function main()
                         ImGui.EndPopup(ctx)
                     end
 
-                    -- TCP visibility checkbox
+                    -- TCP visibility checkbox - placed just before Routing button
                     ImGui.SameLine(ctx)
                     if aux_info.type == "listenback" then
                         ImGui.BeginDisabled(ctx)
@@ -1668,7 +1694,7 @@ function main()
                         end
                     end
 
-                    -- Routing button
+                    -- Routing button (only for aux and submix) or disabled button for alignment
                     ImGui.SameLine(ctx)
                     if aux_info.has_routing then
                         if ImGui.Button(ctx, "Routing##routing") then
@@ -1678,11 +1704,14 @@ function main()
                             ImGui.SetTooltip(ctx, "Route to RCMASTER and other Aux/Submix tracks")
                         end
 
+                        -- Routing popup for this aux/submix
                         if ImGui.BeginPopup(ctx, "special_routing_popup") then
+                            -- Read fresh P_EXT state when popup opens
                             local _, rcm_disconnect = GetSetMediaTrackInfo_String(aux_info.track, "P_EXT:rcm_disconnect",
                                 "", false)
-                            local current_rcm_state = (rcm_disconnect ~= "y")
+                            local current_rcm_state = (rcm_disconnect ~= "y") -- Convert to boolean
 
+                            -- Get fresh sends
                             local fresh_aux_sends = {}
                             local num_sends = GetTrackNumSends(aux_info.track, 0)
                             for j = 0, num_sends - 1 do
@@ -1696,6 +1725,7 @@ function main()
                                 "Route " .. (aux_info.name ~= "" and aux_info.name or display_prefix) .. " to:")
                             ImGui.Separator(ctx)
 
+                            -- Initialize pending changes with FRESH data ONLY on first open
                             local popup_id = "special_" .. aux_info.index
                             if not pending_routing_changes[popup_id] then
                                 pending_routing_changes[popup_id] = {
@@ -1705,6 +1735,7 @@ function main()
                                 }
                             end
 
+                            -- RCMASTER checkbox (checked when track name does NOT end with hyphen)
                             local changed_rcm, new_rcm_state = ImGui.Checkbox(ctx, "RCMASTER",
                                 pending_routing_changes[popup_id].rcm_state)
                             if changed_rcm then
@@ -1714,14 +1745,16 @@ function main()
 
                             ImGui.Separator(ctx)
 
+                            -- Show checkboxes for other aux/submix tracks (only those with routing)
                             local has_destinations = false
                             for _, dest_aux in ipairs(aux_submix_tracks) do
                                 if dest_aux.track ~= aux_info.track and dest_aux.has_routing then
                                     has_destinations = true
 
+                                    -- Use pending state if available, otherwise FRESH state
                                     local current_state = pending_routing_changes[popup_id].sends[dest_aux.track]
                                     if current_state == nil then
-                                        current_state = fresh_aux_sends[dest_aux.track] or false
+                                        current_state = fresh_aux_sends[dest_aux.track] or false -- Fresh data
                                     end
 
                                     local changed, new_state = ImGui.Checkbox(ctx, dest_aux.full_name, current_state)
@@ -1738,11 +1771,14 @@ function main()
 
                             ImGui.EndPopup(ctx)
                         else
+                            -- Popup just closed - apply all pending changes
                             local popup_id = "special_" .. aux_info.index
                             if pending_routing_changes[popup_id] then
                                 local changes = pending_routing_changes[popup_id]
 
+                                -- Apply RCMASTER routing change
                                 if changes.rcm_changed then
+                                    -- Update P_EXT state
                                     GetSetMediaTrackInfo_String(aux_info.track, "P_EXT:rcm_disconnect",
                                         changes.rcm_state and "" or "y", true)
 
@@ -1754,7 +1790,9 @@ function main()
                                     sync_needed = true
                                 end
 
+                                -- Apply aux/submix send changes
                                 for dest_track, new_state in pairs(changes.sends) do
+                                    -- Get FRESH sends again to compare
                                     local fresh_aux_sends_now = {}
                                     local num_sends_now = GetTrackNumSends(aux_info.track, 0)
                                     for j = 0, num_sends_now - 1 do
@@ -1769,6 +1807,7 @@ function main()
                                         if new_state then
                                             CreateTrackSend(aux_info.track, dest_track)
                                         else
+                                            -- Remove send
                                             for j = 0, num_sends_now - 1 do
                                                 local dest = GetTrackSendInfo_Value(aux_info.track, 0, j, "P_DESTTRACK")
                                                 if dest == dest_track then
@@ -1780,10 +1819,12 @@ function main()
                                     end
                                 end
 
+                                -- Clear pending changes
                                 pending_routing_changes[popup_id] = nil
                             end
                         end
                     else
+                        -- Disabled routing button for tracks without routing (RT, LIVE, REF)
                         ImGui.BeginDisabled(ctx)
                         ImGui.Button(ctx, "Routing##routing_disabled")
                         ImGui.EndDisabled(ctx)
@@ -1792,13 +1833,14 @@ function main()
                     -- FX button
                     ImGui.SameLine(ctx)
                     if ImGui.Button(ctx, "FX##specialfx") then
+                        -- Open FX chain window for this track
                         TrackFX_Show(aux_info.track, 0, 1)
                     end
                     if ImGui.IsItemHovered(ctx) then
                         ImGui.SetTooltip(ctx, "Open FX chain")
                     end
 
-                    -- Delete button
+                    -- Delete button (disabled for RCMASTER)
                     ImGui.SameLine(ctx)
                     if aux_info.type == "rcmaster" then
                         ImGui.BeginDisabled(ctx)
@@ -1810,6 +1852,7 @@ function main()
                     else
                         if ImGui.Button(ctx, "✕##specialdelete") then
                             DeleteTrack(aux_info.track)
+                            -- Reinitialize to refresh the list
                             init()
                             ImGui.PopID(ctx)
                             break
@@ -1824,13 +1867,18 @@ function main()
             end
         end
 
-        -- Add special track button
+        -- Add special track button (always show, even if no tracks exist)
         ImGui.Separator(ctx)
         if ImGui.Button(ctx, "Add Special Tracks") then
             ImGui.OpenPopup(ctx, "Add Special Tracks:")
         end
 
+        -- Add special track popup
         if ImGui.BeginPopupModal(ctx, "Add Special Tracks:", true, ImGui.WindowFlags_AlwaysAutoResize) then
+            -- ImGui.Text(ctx, "Add Special Tracks:")
+            -- ImGui.Separator(ctx)
+
+            -- Check existing tracks
             local has_roomtone = false
             local has_live = false
             local has_listenback = false
@@ -1840,6 +1888,7 @@ function main()
                 if track_info.type == "listenback" then has_listenback = true end
             end
 
+            -- Initialize counts on first appearance
             if ImGui.IsWindowAppearing(ctx) then
                 add_special_counts = {
                     aux = 0,
@@ -1942,7 +1991,9 @@ function main()
 
             ImGui.Separator(ctx)
 
+            -- OK button
             if ImGui.Button(ctx, "OK", 100, 0) then
+                -- Add tracks based on counts
                 for i = 1, add_special_counts.aux do
                     dofile(script_path .. "ReaClassical_Add Aux.lua")
                 end
@@ -1960,6 +2011,7 @@ function main()
                 end
 
                 if not has_listenback and add_special_counts.listenback > 0 then
+                    -- Create listenback track inline
                     Undo_BeginBlock()
                     PreventUIRefresh(1)
 
@@ -1970,7 +2022,7 @@ function main()
                     GetSetMediaTrackInfo_String(lb_track, "P_EXT:listenback", "y", true)
                     GetSetMediaTrackInfo_String(lb_track, "P_NAME", "LISTENBACK", true)
 
-                    SetMediaTrackInfo_Value(lb_track, "I_RECINPUT", -1)
+                    SetMediaTrackInfo_Value(lb_track, "I_RECINPUT", -1) -- None initially
                     SetMediaTrackInfo_Value(lb_track, "I_RECMON", 1)
                     SetMediaTrackInfo_Value(lb_track, "I_RECARM", 1)
                     SetMediaTrackInfo_Value(lb_track, "I_RECMODE", 2)
@@ -1979,6 +2031,7 @@ function main()
                     SetMediaTrackInfo_Value(lb_track, "B_SHOWINMIXER", 1)
                     SetMediaTrackInfo_Value(lb_track, "D_VOL", 1.0)
 
+                    -- Add JSFX
                     local fx_idx = TrackFX_AddByName(lb_track, LISTENBACK_JSFX_NAME, false, -1)
                     if fx_idx < 0 then
                         TrackFX_AddByName(lb_track, "JS:" .. LISTENBACK_JSFX_NAME, false, -1)
@@ -2164,8 +2217,10 @@ function generate_input_options()
         if show_hardware_names then
             local hw_name = GetInputChannelName(i - 1) -- 0-indexed API
             if hw_name and hw_name ~= "" then
+                -- Show just the hardware name
                 option_text = hw_name
             else
+                -- Fallback to just number if no name available
                 option_text = tostring(i)
             end
         else
@@ -2183,15 +2238,19 @@ function generate_input_options()
             local hw_name2 = GetInputChannelName(i)
 
             if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
+                -- Try to detect if they're a stereo pair with matching base name
                 local base1 = hw_name1:match("^(.+)%s+%d+$") or hw_name1
                 local base2 = hw_name2:match("^(.+)%s+%d+$") or hw_name2
 
                 if base1 == base2 then
+                    -- Same device/interface, show single name
                     option_text = string.format("%s+%s", hw_name1, hw_name2)
                 else
+                    -- Different devices, show both names
                     option_text = string.format("%s/%s", hw_name1, hw_name2)
                 end
             else
+                -- Fallback to just numbers if no names available
                 option_text = string.format("%d+%d", i, i + 1)
             end
         else
@@ -2201,9 +2260,9 @@ function generate_input_options()
         max_chars = math.max(max_chars, #option_text)
     end
 
-    -- Font-aware dropdown width: use GetFontSize if context is valid, else fallback
-    local char_width = get_char_width()
-    input_dropdown_width = math.max(80, math.floor((max_chars * char_width) + 30))
+    -- Calculate dropdown width based on max characters
+    -- Approximate 7 pixels per character + 30 for dropdown arrow/padding
+    input_dropdown_width = math.max(80, (max_chars * 7) + 30)
 end
 
 ---------------------------------------------------------------------
@@ -2258,22 +2317,27 @@ function get_special_tracks()
                 track_type = "rcmaster"
             end
 
+            -- Get RCMASTER connection state from P_EXT
             local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
             local has_hyphen = (rcm_disconnect == "y")
 
             local display_name
 
+            -- Extract display name based on track type
             if track_type == "aux" or track_type == "submix" then
                 display_name = name:gsub("^[@#]:?", ""):gsub("%-$", "")
             elseif track_type == "reference" then
                 display_name = name:gsub("^REF:?", ""):gsub("%-$", "")
             elseif track_type == "roomtone" then
+                -- RoomTone has no additional name
                 display_name = ""
             elseif track_type == "live" then
+                -- LIVE has no additional name
                 display_name = ""
             elseif track_type == "listenback" then
                 display_name = ""
             elseif track_type == "rcmaster" then
+                -- RCMASTER has no additional name
                 display_name = ""
             else
                 display_name = name:gsub("%-$", "")
@@ -2291,6 +2355,7 @@ function get_special_tracks()
         end
     end
 
+    -- Sort tracks by type priority: aux, submix, roomtone, rcmaster, live, reference
     local type_priority = {
         aux = 1,
         submix = 2,
@@ -2307,6 +2372,7 @@ function get_special_tracks()
         if priority_a ~= priority_b then
             return priority_a < priority_b
         else
+            -- If same type, maintain original track order
             return a.index < b.index
         end
     end)
@@ -2341,6 +2407,7 @@ function get_tracks_from_first_folder()
     local tracks = {}
     local first_folder_idx = nil
 
+    -- Find the first folder
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
@@ -2352,8 +2419,11 @@ function get_tracks_from_first_folder()
 
     if not first_folder_idx then return tracks end
 
+    -- Get all tracks in the first folder
+    -- The folder track is the first one
     table.insert(tracks, GetTrack(0, first_folder_idx))
 
+    -- Continue adding tracks until we hit the end of the folder
     local i = first_folder_idx + 1
     local depth = 1
 
@@ -2361,10 +2431,12 @@ function get_tracks_from_first_folder()
         local track = GetTrack(0, i)
         local folder_change = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
 
+        -- Add track before checking depth (so we include the last track)
         if depth > 0 then
             table.insert(tracks, track)
         end
 
+        -- Update depth after adding
         depth = depth + folder_change
         i = i + 1
     end
@@ -2398,14 +2470,17 @@ function get_current_input_info(d_track)
     local channel_index
 
     if recInput < 0 then
+        -- None
         channel_index = 0
         is_stereo_input = false
     elseif recInput >= 1024 then
+        -- Stereo pair
         local ch = recInput - 1024
-        channel_index = ch + 1
+        channel_index = ch + 1 -- +1 because index 0 is now "None"
         is_stereo_input = true
     else
-        channel_index = recInput + 1
+        -- Mono
+        channel_index = recInput + 1 -- +1 because index 0 is "None"
         is_stereo_input = false
     end
 
@@ -2418,16 +2493,18 @@ function apply_input_selection(d_track, is_stereo_input, channel_index)
     local recInput
 
     if not is_stereo_input then
+        -- Mono
         if channel_index == 0 then
-            recInput = -1
+            recInput = -1                -- None
         else
-            recInput = channel_index - 1
+            recInput = channel_index - 1 -- -1 because index 0 is "None"
         end
     else
+        -- Stereo
         if channel_index == 0 then
-            recInput = -1
+            recInput = -1                         -- None
         else
-            recInput = 1024 + (channel_index - 1)
+            recInput = 1024 + (channel_index - 1) -- -1 because index 0 is "None"
         end
     end
 
@@ -2437,12 +2514,16 @@ end
 ---------------------------------------------------------------------
 
 function rename_tracks(track_info, new_name, disconnect_rcm)
+    -- Store RCMASTER disconnect state in P_EXT
     GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect", disconnect_rcm and "y" or "", true)
 
+    -- Remove any trailing hyphen from the name (we no longer use it)
     local clean_name = new_name:gsub("%-$", "")
 
+    -- Rename mixer track with M: prefix (no hyphen)
     GetSetMediaTrackInfo_String(track_info.mixer_track, "P_NAME", "M:" .. clean_name, true)
 
+    -- Get the mixer track's position in the list (1-based)
     local mixer_position = nil
     for idx, info in ipairs(mixer_tracks) do
         if info.mixer_track == track_info.mixer_track then
@@ -2453,20 +2534,27 @@ function rename_tracks(track_info, new_name, disconnect_rcm)
 
     if not mixer_position then return end
 
+    -- Find all folder tracks in the project
     local folder_number = 0
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
 
+        -- If this is a folder track (depth == 1)
         if folder_depth == 1 then
             folder_number = folder_number + 1
 
+            -- The folder track itself is the first track (mixer_position 1)
+            -- So for mixer_position 1, we want track at index i
+            -- For mixer_position 2, we want track at index i+1, etc.
             local track_index = i + (mixer_position - 1)
             local target_track = GetTrack(0, track_index)
 
             if target_track then
+                -- Store RCMASTER disconnect state in P_EXT for this track too
                 GetSetMediaTrackInfo_String(target_track, "P_EXT:rcm_disconnect", disconnect_rcm and "y" or "", true)
 
+                -- Determine prefix based on workflow and folder number
                 local prefix = ""
                 if workflow == "Vertical" then
                     if folder_number == 1 then
@@ -2476,6 +2564,7 @@ function rename_tracks(track_info, new_name, disconnect_rcm)
                     end
                 end
 
+                -- Rename the track without hyphen
                 GetSetMediaTrackInfo_String(target_track, "P_NAME", prefix .. clean_name, true)
             end
         end
@@ -2516,6 +2605,7 @@ function auto_assign(start_input)
         local track_name = track_names[i]
         local lower_name = track_name:lower()
 
+        -- Check if track name ENDS with pair words (stereo)
         local is_pair = false
         for _, word in ipairs(pair_words) do
             if lower_name:match("%s" .. word .. "$") or lower_name:match(word .. "$") then
@@ -2524,6 +2614,7 @@ function auto_assign(start_input)
             end
         end
 
+        -- Check for left/right in name for panning
         local is_left = false
         local is_right = false
 
@@ -2542,31 +2633,36 @@ function auto_assign(start_input)
             end
         end
 
+        -- Set pan only for explicit left/right (don't touch pair/stereo pan)
         if is_left then
             SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", -1.0)
         elseif is_right then
             SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", 1.0)
         end
 
+        -- Assign inputs
         if input_channel < MAX_INPUTS then
             if is_pair and (input_channel + 1 < MAX_INPUTS) then
+                -- Assign stereo input
                 SetMediaTrackInfo_Value(d_track, "I_RECINPUT", 1024 + input_channel)
                 is_stereo[i] = true
-                input_channels[i] = input_channel + 1
+                input_channels[i] = input_channel + 1 -- +1 for "None" offset
                 input_channels_stereo[i] = input_channel + 1
                 stereo_has_been_set[i] = true
                 input_channel = input_channel + 2
             else
+                -- Assign mono input
                 SetMediaTrackInfo_Value(d_track, "I_RECINPUT", input_channel)
                 is_stereo[i] = false
-                input_channels[i] = input_channel + 1
+                input_channels[i] = input_channel + 1 -- +1 for "None" offset
                 input_channels_mono[i] = input_channel + 1
                 mono_has_been_set[i] = true
                 input_channel = input_channel + 1
             end
         else
+            -- Beyond max hardware inputs, set to None
             SetMediaTrackInfo_Value(d_track, "I_RECINPUT", -1)
-            input_channels[i] = 0
+            input_channels[i] = 0 -- None
             if is_stereo[i] then
                 input_channels_stereo[i] = 0
             else
@@ -2575,10 +2671,12 @@ function auto_assign(start_input)
         end
     end
 
+    -- Sync if vertical workflow
     if workflow == "Vertical" then
         sync()
     end
 
+    -- Refresh state
     init()
 end
 
@@ -2587,42 +2685,60 @@ end
 function reorder_track(from_idx, to_idx)
     if from_idx == to_idx then return end
 
+    -- Get the mixer track to move
     local from_track = mixer_tracks[from_idx].mixer_track
 
+    -- Get the target position (which mixer track it should be before)
     local before_track
     if to_idx < from_idx then
+        -- Moving up - place before the to_idx track
         before_track = mixer_tracks[to_idx].mixer_track
     else
+        -- Moving down - place before the track after to_idx (or at end if last)
         if to_idx < #mixer_tracks then
             before_track = mixer_tracks[to_idx + 1].mixer_track
         else
+            -- Moving to end - use the track count
             before_track = nil
         end
     end
 
-    Main_OnCommand(40297, 0)
+    -- Select only the from_track
+    Main_OnCommand(40297, 0) -- Unselect all tracks
     SetTrackSelected(from_track, true)
 
+    -- Get the track index to move before (0-based)
     local before_track_idx
     if before_track then
         before_track_idx = GetMediaTrackInfo_Value(before_track, "IP_TRACKNUMBER") - 1
     else
+        -- Move to end
         before_track_idx = CountTracks(0)
     end
 
+    -- Reorder the track
     ReorderSelectedTracks(before_track_idx, 0)
 
+    -- Sync based on workflow
     sync()
+
+    -- Completely reinitialize
     init()
 end
 
 ---------------------------------------------------------------------
 
 function delete_mixer_track(track_info)
-    Main_OnCommand(40297, 0)
+    -- Unselect all tracks
+    Main_OnCommand(40297, 0) -- Track: Unselect all tracks
+
+    -- Select only this mixer track
     SetTrackSelected(track_info.mixer_track, true)
+
+    -- Run the delete mixer command
     dofile(script_path .. "ReaClassical_Delete Track From All Groups.lua")
 
+    -- Completely reinitialize
     selected_track = nil
     init()
 end
@@ -2634,6 +2750,7 @@ function add_mixer_track(name)
 
     Undo_BeginBlock()
 
+    -- Get folder and child count
     local num_of_tracks = CountTracks(0)
     local folder_count = 0
     local child_count = 0
@@ -2663,6 +2780,7 @@ function add_mixer_track(name)
         return
     end
 
+    -- Save all rec inputs before doing anything
     local saved_rec_inputs = {}
     for i = 0, num_of_tracks - 1 do
         local track = GetTrack(0, i)
@@ -2673,31 +2791,38 @@ function add_mixer_track(name)
 
     PreventUIRefresh(1)
 
+    -- Add new track to penultimate position
     local current_track_count = CountTracks(0)
     for i = 0, current_track_count - 1 do
         local track = GetTrack(0, i)
         local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
         if depth == 1 then
+            -- Get color from this specific folder
             local folder_color = GetTrackColor(track)
 
+            -- If folder doesn't have color, try first child
             if folder_color == 0 and i + 1 < CountTracks(0) then
                 local child_track = GetTrack(0, i + 1)
                 folder_color = GetTrackColor(child_track)
             end
 
+            -- Insert the new track
             InsertTrackAtIndex(i + child_count, 1)
 
+            -- Apply the folder's color to the newly inserted track
             if folder_color ~= 0 then
                 local new_track_in_folder = GetTrack(0, i + child_count)
                 SetTrackColor(new_track_in_folder, folder_color)
             end
         end
         if depth == -1 then
+            -- Switch with last track in folder
             SetOnlyTrackSelected(track)
             ReorderSelectedTracks(i - 1, 0)
         end
     end
 
+    -- Add new mixer track
     local tracks_per_folder = child_count + 2
     local index = (folder_count * tracks_per_folder) + tracks_per_folder - 1
     InsertTrackAtIndex(index, 1)
@@ -2706,12 +2831,14 @@ function add_mixer_track(name)
     GetSetMediaTrackInfo_String(new_track, "P_EXT:mix_order", index, true)
     GetSetMediaTrackInfo_String(new_track, "P_EXT:mixer", "y", true)
 
+    -- Run sync based on workflow
     if folder_count > 1 then
         dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     else
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
+    -- Restore rec inputs after sync
     local new_num_tracks = CountTracks(0)
     for i = 0, new_num_tracks - 1 do
         local track = GetTrack(0, i)
@@ -2724,6 +2851,7 @@ function add_mixer_track(name)
     PreventUIRefresh(-1)
     Undo_EndBlock("Add Track to Folder", -1)
 
+    -- Completely reinitialize from scratch
     selected_track = nil
     init()
 end
@@ -2733,6 +2861,7 @@ end
 function init()
     generate_input_options()
 
+    -- Check if current project is a ReaClassical project
     local _, current_workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     workflow = current_workflow
     if current_workflow == "" then
@@ -2740,10 +2869,16 @@ function init()
         return false
     end
 
+    -- Get D: tracks from first folder
     d_tracks = get_tracks_from_first_folder()
+
+    -- Get mixer tracks
     mixer_tracks = create_mixer_table()
+
+    -- Get aux and submix tracks
     aux_submix_tracks = get_special_tracks()
 
+    -- Initialize aux/submix names, pan values, and TCP visibility
     aux_submix_names = {}
     aux_submix_pans = {}
     aux_submix_tcp_visible = {}
@@ -2751,27 +2886,33 @@ function init()
         aux_submix_names[i] = aux_info.name
         aux_submix_pans[i] = GetMediaTrackInfo_Value(aux_info.track, "D_PAN")
 
+        -- Read current TCP visibility state from the track itself
         local current_tcp_state = GetMediaTrackInfo_Value(aux_info.track, "B_SHOWINTCP")
         aux_submix_tcp_visible[i] = (current_tcp_state == 1)
 
+        -- Also save to project ext state for your audition functions
         local _, guid = GetSetMediaTrackInfo_String(aux_info.track, "GUID", "", false)
         SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. guid, (current_tcp_state == 1) and "1" or "0")
     end
 
+    -- Initialize listenback input state
     for i, aux_info in ipairs(aux_submix_tracks) do
         if aux_info.type == "listenback" then
             local rec_input = GetMediaTrackInfo_Value(aux_info.track, "I_RECINPUT")
             if rec_input < 0 then
-                listenback_input_channel = 0
+                listenback_input_channel = 0 -- None
             elseif rec_input >= 1024 then
+                -- Stereo (shouldn't happen, but handle gracefully)
                 listenback_input_channel = (rec_input - 1024) + 1
             else
+                -- Mono
                 listenback_input_channel = rec_input + 1
             end
             break
         end
     end
 
+    -- Collect folder parent tracks (only in Vertical workflow)
     folder_tracks = {}
     folder_tcp_visible = {}
     if workflow == "Vertical" then
@@ -2785,9 +2926,11 @@ function init()
                 local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
                 local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
+                -- Extract prefix (D:, S1:, S2:, etc.)
                 local prefix = track_name:match("^([^:]+):")
                 if not prefix then prefix = "Folder " .. folder_count end
 
+                -- Read current TCP visibility
                 local current_tcp_state = GetMediaTrackInfo_Value(track, "B_SHOWINTCP")
 
                 table.insert(folder_tracks, {
@@ -2799,6 +2942,7 @@ function init()
 
                 table.insert(folder_tcp_visible, current_tcp_state == 1)
 
+                -- Save to project ext state
                 SetProjExtState(0, "ReaClassical_MissionControl", "folder_tcp_visible_" .. guid,
                     (current_tcp_state == 1) and "1" or "0")
             end
@@ -2806,28 +2950,35 @@ function init()
     end
 
     if #mixer_tracks == 0 then
+        -- MB("No mixer tracks found.", "Error", 0)
         return false
     end
 
     if #d_tracks < #mixer_tracks then
+        -- MB("Not enough D: tracks in first folder for all mixers.", "Error", 0)
         return false
     end
 
+    -- Initialize mixer TCP visibility
     mixer_tcp_visible = {}
     for i = 1, #mixer_tracks do
         local track_info = mixer_tracks[i]
         local _, guid = GetSetMediaTrackInfo_String(track_info.mixer_track, "GUID", "", false)
 
+        -- Read current TCP visibility state from the track itself
         local current_tcp_state = GetMediaTrackInfo_Value(track_info.mixer_track, "B_SHOWINTCP")
         mixer_tcp_visible[i] = (current_tcp_state == 1)
 
+        -- Save to project ext state for persistence
         SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. guid,
             (current_tcp_state == 1) and "1" or "0")
     end
 
+    -- Calculate zero padding for track numbers
     local num_digits = #tostring(#mixer_tracks)
     track_num_format = "%0" .. num_digits .. "d"
 
+    -- Clear all state
     input_channels = {}
     input_channels_mono = {}
     input_channels_stereo = {}
@@ -2840,41 +2991,47 @@ function init()
     track_has_hyphen = {}
     volume_values = {}
 
+    -- Initialize by reading from D: tracks (first folder)
     for i = 1, #mixer_tracks do
         local track_info = mixer_tracks[i]
-        local d_track = d_tracks[i]
+        local d_track = d_tracks[i] -- Corresponding D: track
 
         local ch, stereo = get_current_input_info(d_track)
         input_channels[i] = ch
         is_stereo[i] = stereo
 
+        -- Read disabled state from P_EXT on MIXER track
         local _, disabled_state = GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:input_disabled", "", false)
         input_disabled[i] = (disabled_state == "y")
 
+        -- Initialize both mono and stereo memory
         if stereo then
             input_channels_stereo[i] = ch
-            input_channels_mono[i] = 0
-            stereo_has_been_set[i] = true
+            input_channels_mono[i] = 0    -- Default mono to "None"
+            stereo_has_been_set[i] = true -- Current value was set
             mono_has_been_set[i] = false
         else
             input_channels_mono[i] = ch
-            input_channels_stereo[i] = 0
-            mono_has_been_set[i] = true
+            input_channels_stereo[i] = 0 -- Default stereo to first pair
+            mono_has_been_set[i] = true  -- Current value was set
             stereo_has_been_set[i] = false
         end
 
         pan_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN")
         volume_values[i] = GetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL")
 
+        -- Get mixer track name without M: prefix and remove any trailing hyphen
         local _, mixer_name = GetTrackName(track_info.mixer_track)
         local name_without_prefix = mixer_name:gsub("^M:?", ""):gsub("%-$", "")
 
+        -- Read RCMASTER connection state from P_EXT instead of checking hyphen
         local _, rcm_disconnect = GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect", "", false)
         track_has_hyphen[i] = (rcm_disconnect == "y")
 
         track_names[i] = name_without_prefix
     end
 
+    -- Initialize special tracks volume
     aux_volume_values = {}
     for i, aux_info in ipairs(aux_submix_tracks) do
         aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
@@ -2891,6 +3048,7 @@ function draw_track_controls(start_idx, end_idx)
         local track_info = mixer_tracks[i]
         local d_track = d_tracks[i]
 
+        -- Use track GUID for unique ID instead of index
         local _, track_guid = GetSetMediaTrackInfo_String(track_info.mixer_track, "GUID", "", false)
         ImGui.PushID(ctx, i .. "_" .. track_guid)
 
@@ -2903,12 +3061,13 @@ function draw_track_controls(start_idx, end_idx)
             local item_height = ImGui.GetTextLineHeightWithSpacing(ctx)
             ImGui.DrawList_AddRectFilled(draw_list, cursor_screen_x, cursor_screen_y,
                 cursor_screen_x + window_width, cursor_screen_y + item_height,
-                0xADD8E688)
+                0xADD8E688) -- Pastel blue (RGBA)
         end
 
         -- Track number
         ImGui.Text(ctx, string.format(track_num_format, i))
 
+        -- Check if this row should be selected (clicking on track number)
         if ImGui.IsItemClicked(ctx) then
             selected_track = i
         end
@@ -2917,6 +3076,7 @@ function draw_track_controls(start_idx, end_idx)
         ImGui.SameLine(ctx)
         ImGui.SetNextItemWidth(ctx, 220)
 
+        -- Set focus if this is the track that should receive focus
         if focus_track_input == i then
             ImGui.SetKeyboardFocusHere(ctx)
             focus_track_input = nil
@@ -2929,18 +3089,23 @@ function draw_track_controls(start_idx, end_idx)
             rename_tracks(track_info, new_name, track_has_hyphen[i])
         end
 
+        -- Handle TAB key to move to next track name input
         if ImGui.IsItemActive(ctx) then
             if ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and not ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                -- TAB: Move forward to next track
                 if i < end_idx then
                     focus_track_input = i + 1
                 elseif i == end_idx and current_tab < math.ceil(#mixer_tracks / TRACKS_PER_TAB) - 1 then
+                    -- Last track in current tab - switch to next tab
                     current_tab = current_tab + 1
                     focus_track_input = end_idx + 1
                 end
             elseif ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                -- Shift+TAB: Move backwards to previous track
                 if i > start_idx then
                     focus_track_input = i - 1
                 elseif i == start_idx and current_tab > 0 then
+                    -- First track in current tab - switch to previous tab
                     current_tab = current_tab - 1
                     local prev_tab_end = current_tab * TRACKS_PER_TAB + TRACKS_PER_TAB
                     focus_track_input = math.min(prev_tab_end, #mixer_tracks)
@@ -2955,15 +3120,17 @@ function draw_track_controls(start_idx, end_idx)
         local changed_to_stereo = ImGui.RadioButton(ctx, "Stereo##stereo", is_stereo[i])
 
         if changed_to_mono and is_stereo[i] then
+            -- Save current stereo value and switch to mono
             input_channels_stereo[i] = input_channels[i]
             stereo_has_been_set[i] = true
             is_stereo[i] = false
 
+            -- On first switch, use channel 1 if available, otherwise None
             if not mono_has_been_set[i] then
                 if MAX_INPUTS >= 1 then
-                    input_channels[i] = 1
+                    input_channels[i] = 1 -- Channel 1 (index 1 in mono_options)
                 else
-                    input_channels[i] = 0
+                    input_channels[i] = 0 -- None
                 end
                 input_channels_mono[i] = input_channels[i]
                 mono_has_been_set[i] = true
@@ -2973,19 +3140,22 @@ function draw_track_controls(start_idx, end_idx)
 
             apply_input_selection(d_track, is_stereo[i], input_channels[i])
 
+            -- Set flag if vertical workflow
             if workflow == "Vertical" then
                 sync_needed = true
             end
         elseif changed_to_stereo and not is_stereo[i] then
+            -- Save current mono value and switch to stereo
             input_channels_mono[i] = input_channels[i]
             mono_has_been_set[i] = true
             is_stereo[i] = true
 
+            -- On first switch, use 1+2 if available, otherwise None
             if not stereo_has_been_set[i] then
                 if MAX_INPUTS >= 2 then
-                    input_channels[i] = 1
+                    input_channels[i] = 1 -- 1+2 (index 1 in stereo_options)
                 else
-                    input_channels[i] = 0
+                    input_channels[i] = 0 -- None
                 end
                 input_channels_stereo[i] = input_channels[i]
                 stereo_has_been_set[i] = true
@@ -2995,6 +3165,7 @@ function draw_track_controls(start_idx, end_idx)
 
             apply_input_selection(d_track, is_stereo[i], input_channels[i])
 
+            -- Set flag if vertical workflow
             if workflow == "Vertical" then
                 sync_needed = true
             end
@@ -3009,6 +3180,7 @@ function draw_track_controls(start_idx, end_idx)
         if changed_input then
             input_channels[i] = new_input
 
+            -- Save to appropriate memory and mark as set
             if is_stereo[i] then
                 input_channels_stereo[i] = new_input
                 stereo_has_been_set[i] = true
@@ -3019,6 +3191,7 @@ function draw_track_controls(start_idx, end_idx)
 
             apply_input_selection(d_track, is_stereo[i], input_channels[i])
 
+            -- Set flag if vertical workflow
             if workflow == "Vertical" then
                 sync_needed = true
             end
@@ -3028,6 +3201,7 @@ function draw_track_controls(start_idx, end_idx)
         local changed_disabled, new_disabled = ImGui.Checkbox(ctx, "Rec Disabled##disabled" .. i, input_disabled[i])
         if changed_disabled then
             input_disabled[i] = new_disabled
+            -- Save to P_EXT on MIXER track
             GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:input_disabled", new_disabled and "y" or "", true)
         end
         if ImGui.IsItemHovered(ctx) then
@@ -3038,16 +3212,16 @@ function draw_track_controls(start_idx, end_idx)
         ImGui.SameLine(ctx)
         local is_muted = GetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE") == 1
         if is_muted then
-            ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFF0000FF)
-            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFF3333FF)
-            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCC0000FF)
-            ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFFFFFFF)
+            ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFF0000FF)        -- Red when muted (RGBA)
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFF3333FF) -- Lighter red on hover
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCC0000FF)  -- Darker red when clicked
+            ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFFFFFFF)          -- White text
         end
         if ImGui.Button(ctx, "M##mute" .. i, 25, 0) then
             SetMediaTrackInfo_Value(track_info.mixer_track, "B_MUTE", is_muted and 0 or 1)
         end
         if is_muted then
-            ImGui.PopStyleColor(ctx, 4)
+            ImGui.PopStyleColor(ctx, 4) -- Pop all 4 colors
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Mute")
@@ -3057,16 +3231,16 @@ function draw_track_controls(start_idx, end_idx)
         ImGui.SameLine(ctx)
         local is_soloed = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
         if is_soloed then
-            ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)
-            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF)
-            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCCCC00FF)
-            ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)
+            ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)        -- Yellow when soloed (RGBA)
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF) -- Lighter yellow on hover
+            ImGui.PushStyleColor(ctx, ImGui.Col_ButtonActive, 0xCCCC00FF)  -- Darker yellow when clicked
+            ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)          -- Black text
         end
         if ImGui.Button(ctx, "S##solo" .. i, 25, 0) then
             SetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO", is_soloed and 0 or 2)
         end
         if is_soloed then
-            ImGui.PopStyleColor(ctx, 4)
+            ImGui.PopStyleColor(ctx, 4) -- Pop all 4 colors
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Solo")
@@ -3078,6 +3252,7 @@ function draw_track_controls(start_idx, end_idx)
         local changed_pan, new_pan = ImGui.SliderDouble(ctx, "##pan" .. i, pan_values[i], -1.0, 1.0,
             format_pan(pan_values[i]))
 
+        -- Check for double-click reset to center
         new_pan = reset_pan_on_double_click("##pan" .. i, new_pan, 0.0)
 
         if ImGui.IsItemHovered(ctx) then
@@ -3089,6 +3264,7 @@ function draw_track_controls(start_idx, end_idx)
             SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", new_pan)
         end
 
+        -- Right-click popup for typing pan value
         if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
             ImGui.OpenPopup(ctx, "pan_input##" .. i)
         end
@@ -3100,8 +3276,8 @@ function draw_track_controls(start_idx, end_idx)
             local rv, buf = ImGui.InputText(ctx, "##paninput", pan_input_buf, ImGui.InputTextFlags_EnterReturnsTrue)
             if rv then
                 local pan_val = 0.0
-                local input = buf:gsub("%s+", "")
-                local input_upper = input:upper()
+                local input = buf:gsub("%s+", "") -- Remove spaces but keep original case
+                local input_upper = input:upper() -- Uppercase version for comparison
 
                 if input_upper == "C" or input == "" then
                     pan_val = 0.0
@@ -3110,11 +3286,12 @@ function draw_track_controls(start_idx, end_idx)
                 elseif input_upper == "R" then
                     pan_val = 1.0
                 else
+                    -- Try to parse number followed by L or R (case insensitive)
                     local num, side = input:match("^(%d+%.?%d*)([LlRr])$")
                     if num and side then
                         local amount = tonumber(num)
                         if amount then
-                            amount = math.min(100, amount) / 100
+                            amount = math.min(100, amount) / 100 -- Clamp to 100 and convert to 0-1
                             pan_val = (side == "L" or side == "l") and -amount or amount
                         end
                     end
@@ -3127,16 +3304,22 @@ function draw_track_controls(start_idx, end_idx)
             ImGui.EndPopup(ctx)
         end
 
-        -- Volume slider
+        -- Volume knob (as slider for now)
         ImGui.SameLine(ctx)
         ImGui.SetNextItemWidth(ctx, 200)
+        -- Convert linear volume to dB for display
         local volume_db = 20 * math.log(volume_values[i] > 0.0000001 and volume_values[i] or 0.0000001, 10)
+        -- Use logarithmic scale: map -60dB to 12dB non-linearly
+        -- More resolution near 0dB (unity gain)
         local fader_pos
         if volume_db <= -60 then
             fader_pos = 0.0
         elseif volume_db >= 12 then
             fader_pos = 1.0
         else
+            -- Logarithmic mapping with more resolution near 0dB
+            -- Below 0dB: spread -60 to 0 over 0.0 to 0.75
+            -- Above 0dB: spread 0 to 12 over 0.75 to 1.0
             if volume_db < 0 then
                 fader_pos = 0.75 * (volume_db + 60) / 60
             else
@@ -3147,8 +3330,9 @@ function draw_track_controls(start_idx, end_idx)
         local changed_fader, new_fader_pos = ImGui.SliderDouble(ctx, "##vol" .. i, fader_pos, 0.0, 1.0,
             string.format("%.1f dB", volume_db))
 
+        -- Check for double-click reset to 0dB (1.0 linear)
         if ImGui.IsItemDeactivated(ctx) and pan_reset["vol" .. i] then
-            new_fader_pos = 0.75
+            new_fader_pos = 0.75 -- 0dB position
             changed_fader = true
             pan_reset["vol" .. i] = nil
         elseif ImGui.IsItemHovered(ctx) and ImGui.IsMouseDoubleClicked(ctx, 0) then
@@ -3156,12 +3340,16 @@ function draw_track_controls(start_idx, end_idx)
         end
 
         if changed_fader then
+            -- Convert fader position back to dB
             local new_db
             if new_fader_pos <= 0.75 then
+                -- -60dB to 0dB range
                 new_db = -60 + (new_fader_pos / 0.75) * 60
             else
+                -- 0dB to 12dB range
                 new_db = ((new_fader_pos - 0.75) / 0.25) * 12
             end
+            -- Convert dB to linear
             local new_vol = 10 ^ (new_db / 20)
             volume_values[i] = new_vol
             SetMediaTrackInfo_Value(track_info.mixer_track, "D_VOL", new_vol)
@@ -3170,6 +3358,7 @@ function draw_track_controls(start_idx, end_idx)
             ImGui.SetTooltip(ctx, "Volume (double-click for 0dB, right-click to type dB)")
         end
 
+        -- Right-click popup for typing dB value
         if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
             ImGui.OpenPopup(ctx, "vol_input##" .. i)
         end
@@ -3183,6 +3372,7 @@ function draw_track_controls(start_idx, end_idx)
             if rv then
                 local db_val = tonumber(buf)
                 if db_val then
+                    -- Clamp to -60 to +12 dB
                     db_val = math.max(-60, math.min(12, db_val))
                     local new_vol = 10 ^ (db_val / 20)
                     volume_values[i] = new_vol
@@ -3193,16 +3383,20 @@ function draw_track_controls(start_idx, end_idx)
             ImGui.EndPopup(ctx)
         end
 
-        -- TCP visibility checkbox
+        -- TCP visibility checkbox - placed just before Routing button
         ImGui.SameLine(ctx)
-        local _, track_guid2 = GetSetMediaTrackInfo_String(track_info.mixer_track, "GUID", "", false)
+        local _, track_guid = GetSetMediaTrackInfo_String(track_info.mixer_track, "GUID", "", false)
         local changed_tcp, new_tcp = ImGui.Checkbox(ctx, "TCP##tcp" .. i, mixer_tcp_visible[i])
         if changed_tcp then
             mixer_tcp_visible[i] = new_tcp
+
+            -- Actually show/hide the track in TCP
             SetMediaTrackInfo_Value(track_info.mixer_track, "B_SHOWINTCP", new_tcp and 1 or 0)
+
             TrackList_AdjustWindows(false)
             UpdateArrange()
-            SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. track_guid2,
+            -- Save to project ext state for persistence
+            SetProjExtState(0, "ReaClassical_MissionControl", "mixer_tcp_visible_" .. track_guid,
                 new_tcp and "1" or "0")
         end
         if ImGui.IsItemHovered(ctx) then
@@ -3218,16 +3412,20 @@ function draw_track_controls(start_idx, end_idx)
             ImGui.SetTooltip(ctx, "Route to RCMASTER and Aux/Submix tracks")
         end
 
+        -- Aux routing popup
         if ImGui.BeginPopup(ctx, "aux_routing##" .. i) then
+            -- Read fresh P_EXT state when popup opens
             local _, rcm_disconnect = GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect", "",
                 false)
-            local current_rcm_state = (rcm_disconnect ~= "y")
+            local current_rcm_state = (rcm_disconnect ~= "y") -- Convert to boolean (true = connected)
 
+            -- Get fresh sends data
             local fresh_sends = get_mixer_sends(track_info.mixer_track)
 
             ImGui.Text(ctx, "Route " .. track_names[i] .. " to:")
             ImGui.Separator(ctx)
 
+            -- Initialize pending changes with FRESH data ONLY on first open
             if not pending_routing_changes[i] then
                 pending_routing_changes[i] = {
                     rcm_changed = false,
@@ -3236,6 +3434,7 @@ function draw_track_controls(start_idx, end_idx)
                 }
             end
 
+            -- RCMASTER checkbox (checked when track name does NOT end with hyphen)
             local changed_rcm, new_rcm_state = ImGui.Checkbox(ctx, "RCMASTER", pending_routing_changes[i].rcm_state)
             if changed_rcm then
                 pending_routing_changes[i].rcm_changed = true
@@ -3248,10 +3447,12 @@ function draw_track_controls(start_idx, end_idx)
                 ImGui.Text(ctx, "(No Aux/Submix tracks available)")
             else
                 for _, aux_info in ipairs(aux_submix_tracks) do
+                    -- Only show aux/submix tracks with routing in mixer routing popups
                     if aux_info.has_routing then
+                        -- Use pending state if available, otherwise FRESH state
                         local current_state = pending_routing_changes[i].sends[aux_info.track]
                         if current_state == nil then
-                            current_state = fresh_sends[aux_info.track] or false
+                            current_state = fresh_sends[aux_info.track] or false -- Use fresh data
                         end
 
                         local changed, new_state = ImGui.Checkbox(ctx, aux_info.full_name .. "##aux" .. i, current_state)
@@ -3265,10 +3466,13 @@ function draw_track_controls(start_idx, end_idx)
 
             ImGui.EndPopup(ctx)
         else
+            -- Popup just closed - apply all pending changes
             if pending_routing_changes[i] then
                 local changes = pending_routing_changes[i]
 
+                -- Apply RCMASTER routing change
                 if changes.rcm_changed then
+                    -- Update P_EXT state
                     GetSetMediaTrackInfo_String(track_info.mixer_track, "P_EXT:rcm_disconnect",
                         changes.rcm_state and "" or "y", true)
 
@@ -3277,13 +3481,17 @@ function draw_track_controls(start_idx, end_idx)
                     sync_needed = true
                 end
 
+                -- Apply aux/submix send changes
                 for aux_track, new_state in pairs(changes.sends) do
+                    -- Get FRESH sends again to compare
                     local fresh_sends_now = get_mixer_sends(track_info.mixer_track)
                     local current_state = fresh_sends_now[aux_track] or false
                     if new_state ~= current_state then
                         if new_state then
+                            -- Create send
                             CreateTrackSend(track_info.mixer_track, aux_track)
                         else
+                            -- Remove send
                             local num_sends = GetTrackNumSends(track_info.mixer_track, 0)
                             for j = 0, num_sends - 1 do
                                 local dest = GetTrackSendInfo_Value(track_info.mixer_track, 0, j, "P_DESTTRACK")
@@ -3296,6 +3504,7 @@ function draw_track_controls(start_idx, end_idx)
                     end
                 end
 
+                -- Clear pending changes
                 pending_routing_changes[i] = nil
             end
         end
@@ -3303,6 +3512,7 @@ function draw_track_controls(start_idx, end_idx)
         -- FX button
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "FX##fx" .. i) then
+            -- Open FX chain window for this track
             TrackFX_Show(track_info.mixer_track, 0, 1)
         end
         if ImGui.IsItemHovered(ctx) then
@@ -3313,6 +3523,7 @@ function draw_track_controls(start_idx, end_idx)
         ImGui.SameLine(ctx)
         if ImGui.Button(ctx, "✕##delete" .. i) then
             delete_mixer_track(track_info)
+            -- Break out of the loop since we've modified the tracks array
             ImGui.PopID(ctx)
             return
         end
@@ -3320,7 +3531,7 @@ function draw_track_controls(start_idx, end_idx)
             ImGui.SetTooltip(ctx, "Delete this track from all folders")
         end
 
-        -- Invisible button to fill the rest of the row
+        -- Invisible button to fill the rest of the row and make it clickable
         ImGui.SameLine(ctx)
         local remaining_width = ImGui.GetContentRegionAvail(ctx)
         ImGui.InvisibleButton(ctx, "##rowclick", remaining_width, ImGui.GetTextLineHeight(ctx))
@@ -3338,6 +3549,7 @@ function consolidate_folders_to_first()
     local num_tracks = CountTracks(0)
     local folders = {}
 
+    -- Collect all folder parent tracks and their children
     local i = 0
     while i < num_tracks do
         local track = GetTrack(0, i)
@@ -3347,6 +3559,7 @@ function consolidate_folders_to_first()
             local folder_info = { parent = track, children = {} }
             table.insert(folders, folder_info)
 
+            -- Collect children of this folder
             i = i + 1
             local current_depth = 1
             while i < num_tracks and current_depth > 0 do
@@ -3367,6 +3580,7 @@ function consolidate_folders_to_first()
 
     if #folders < 2 then return end
 
+    -- Collect items from each folder (only from tracks within folders)
     for _, folder in ipairs(folders) do
         local all_folder_tracks = { folder.parent }
         for _, child in ipairs(folder.children) do
@@ -3397,6 +3611,7 @@ function consolidate_folders_to_first()
         folder.ungrouped_items = ungrouped_items
     end
 
+    -- Find the earliest and latest item positions in first folder
     local first_folder = folders[1]
     local first_folder_earliest = math.huge
     local latest_end = 0
@@ -3427,6 +3642,7 @@ function consolidate_folders_to_first()
         end
     end
 
+    -- If first folder doesn't start at 0, shift all its items to start at 0
     if first_folder_earliest ~= 0 and first_folder_earliest ~= math.huge then
         local shift_amount = -first_folder_earliest
 
@@ -3442,19 +3658,24 @@ function consolidate_folders_to_first()
             SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
         end
 
+        -- Adjust latest_end accordingly
         latest_end = latest_end + shift_amount
     end
 
+    -- Get first folder's tracks for moving items to
     local first_folder_tracks = { first_folder.parent }
     for _, child in ipairs(first_folder.children) do
         table.insert(first_folder_tracks, child)
     end
 
+    -- Move items from subsequent folders to first folder
+    -- If first folder is empty (latest_end is 0), start at 0, otherwise add 10 second gap
     local current_position = (latest_end > 0) and (latest_end + 10) or 0
 
     for folder_idx = 2, #folders do
         local source_folder = folders[folder_idx]
 
+        -- Find the earliest position in this entire folder to calculate offset
         local folder_earliest = math.huge
 
         for _, items in pairs(source_folder.items_by_group) do
@@ -3473,15 +3694,19 @@ function consolidate_folders_to_first()
             end
         end
 
+        -- Calculate time offset for this entire folder
         local folder_offset = current_position - folder_earliest
 
+        -- Process grouped items - maintain their relative positions within the folder
         for _, items in pairs(source_folder.items_by_group) do
             for _, item in ipairs(items) do
                 local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
                 local new_pos = original_pos + folder_offset
 
+                -- Find appropriate track in first folder (match relative track position)
                 local source_track = GetMediaItem_Track(item)
 
+                -- Find source track's position within its folder
                 local source_folder_tracks = { source_folder.parent }
                 for _, child in ipairs(source_folder.children) do
                     table.insert(source_folder_tracks, child)
@@ -3495,6 +3720,7 @@ function consolidate_folders_to_first()
                     end
                 end
 
+                -- Map to corresponding track in first folder
                 if source_track_pos and source_track_pos <= #first_folder_tracks then
                     local dest_track = first_folder_tracks[source_track_pos]
                     MoveMediaItemToTrack(item, dest_track)
@@ -3503,12 +3729,14 @@ function consolidate_folders_to_first()
             end
         end
 
+        -- Process ungrouped items - maintain their relative positions within the folder
         for _, item in ipairs(source_folder.ungrouped_items) do
             local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
             local new_pos = original_pos + folder_offset
 
             local source_track = GetMediaItem_Track(item)
 
+            -- Find source track's position within its folder
             local source_folder_tracks = { source_folder.parent }
             for _, child in ipairs(source_folder.children) do
                 table.insert(source_folder_tracks, child)
@@ -3522,6 +3750,7 @@ function consolidate_folders_to_first()
                 end
             end
 
+            -- Map to corresponding track in first folder
             if source_track_pos and source_track_pos <= #first_folder_tracks then
                 local dest_track = first_folder_tracks[source_track_pos]
                 MoveMediaItemToTrack(item, dest_track)
@@ -3529,6 +3758,7 @@ function consolidate_folders_to_first()
             end
         end
 
+        -- Find the end of all items in this folder to set next folder's position
         local folder_end = 0
         for _, items in pairs(source_folder.items_by_group) do
             for _, item in ipairs(items) do
@@ -3548,18 +3778,21 @@ function consolidate_folders_to_first()
             end
         end
 
-        current_position = folder_end + 10
+        current_position = folder_end + 10 -- 10 second gap before next folder
     end
 
-    Main_OnCommand(40297, 0)
+    -- Delete only empty folders (2 onwards) - check if folder has no items
+    Main_OnCommand(40297, 0) -- Unselect all
     for folder_idx = 2, #folders do
         local folder = folders[folder_idx]
         local has_items = false
 
+        -- Check if folder parent has items
         if CountTrackMediaItems(folder.parent) > 0 then
             has_items = true
         end
 
+        -- Check if any children have items
         if not has_items then
             for _, child in ipairs(folder.children) do
                 if CountTrackMediaItems(child) > 0 then
@@ -3569,6 +3802,7 @@ function consolidate_folders_to_first()
             end
         end
 
+        -- Only delete if folder is completely empty
         if not has_items then
             SetTrackSelected(folder.parent, true)
             for _, child in ipairs(folder.children) do
@@ -3577,19 +3811,20 @@ function consolidate_folders_to_first()
         end
     end
 
-    Main_OnCommand(40005, 0)
-    Main_OnCommand(40297, 0)
+    Main_OnCommand(40005, 0) -- Remove selected tracks
+    Main_OnCommand(40297, 0) -- Unselect all
 end
 
 ---------------------------------------------------------------------
 
 function get_hardware_outputs(mixer_track)
     local outputs = {}
-    local num_hw_sends = GetTrackNumSends(mixer_track, 1)
+    local num_hw_sends = GetTrackNumSends(mixer_track, 1) -- 1 = hardware outputs
 
     for i = 0, num_hw_sends - 1 do
         local hw_out = GetTrackSendInfo_Value(mixer_track, 1, i, "I_DSTCHAN")
         if hw_out >= 0 then
+            -- Store the raw value (with or without 1024 flag)
             outputs[hw_out] = true
         end
     end
@@ -3600,14 +3835,17 @@ end
 ---------------------------------------------------------------------
 
 function check_dolby_atmos_beam_available()
+    -- Get REAPER resource path
     local resource_path = GetResourcePath()
     local ini_file = resource_path .. os_separator .. "reaper-vstplugins64.ini"
 
+    -- Try to open the file
     local file = io.open(ini_file, "r")
     if not file then
         return false
     end
 
+    -- Search for the plugin
     local found = false
     for line in file:lines() do
         if line:match("Dolby Atmos Beam") then
