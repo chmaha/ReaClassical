@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.4
+@version 26.4.1
 @changelog
-  S-D Markers to item edge: Use updated prefix method
+  Mission Control: Fix misalignment of row elements
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
