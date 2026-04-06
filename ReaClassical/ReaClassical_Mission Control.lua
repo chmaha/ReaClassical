@@ -3073,7 +3073,7 @@ function draw_track_controls(start_idx, end_idx)
         end
 
         -- Track name input
-        ImGui.SameLine(ctx)
+        ImGui.SameLine(ctx, 30)
         ImGui.SetNextItemWidth(ctx, 220)
 
         -- Set focus if this is the track that should receive focus
