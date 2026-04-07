@@ -263,6 +263,27 @@ local first_run = true
 local selected_track_row = nil
 local pending_reinit = false
 
+local last_item_fingerprint = nil   -- fingerprint from the previous frame
+local stable_frame_count = 0        -- how many consecutive frames the fp has been unchanged
+local STABLE_FRAMES_REQUIRED = 12    -- ~0.2s at 30 fps; increase if too twitchy
+
+---------------------------------------------------------------------
+-- Item movement fingerprint helper
+---------------------------------------------------------------------
+
+local function get_item_fingerprint(track)
+    if not track then return nil end
+    local parts = {}
+    local item_count = CountTrackMediaItems(track)
+    for i = 0, item_count - 1 do
+        local item = GetTrackMediaItem(track, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        parts[#parts + 1] = string.format("%.6f:%.6f", pos, len)
+    end
+    return table.concat(parts, "|")
+end
+
 ---------------------------------------------------------------------
 --                    CD MARKER FUNCTIONS
 ---------------------------------------------------------------------
@@ -1553,13 +1574,44 @@ function editor_main()
             local _, trigger = GetProjExtState(0, "ReaClassical", "ddp_refresh_trigger")
             if trigger == "y" then
                 editing_track = nil
+                last_item_fingerprint = nil
+                stable_frame_count = 0
                 SetProjExtState(0, "ReaClassical", "ddp_refresh_trigger", "")
             end
 
             -- Handle pending re-init from move operations BEFORE checking editing_track
             if pending_reinit then
                 editing_track = nil
+                last_item_fingerprint = nil
+                stable_frame_count = 0
                 pending_reinit = false
+            end
+
+            -- Detect item position/length changes while the window is open.
+            -- Debounce strategy: the fingerprint must remain IDENTICAL for
+            -- STABLE_FRAMES_REQUIRED consecutive frames before we fire a re-init.
+            -- During a drag the fingerprint changes every frame, so stable_frame_count
+            -- never accumulates. Once the user releases and positions settle, the
+            -- counter reaches the threshold and the re-init fires exactly once.
+            if editing_track == selected_track then
+                local fingerprint = get_item_fingerprint(selected_track)
+                if fingerprint == last_item_fingerprint then
+                    -- Fingerprint unchanged — count stable frames
+                    if stable_frame_count > 0 then
+                        stable_frame_count = stable_frame_count + 1
+                        if stable_frame_count >= STABLE_FRAMES_REQUIRED then
+                            -- Stable long enough: trigger re-init, reset counter
+                            editing_track = nil
+                            stable_frame_count = 0
+                        end
+                    end
+                else
+                    -- Fingerprint changed (drag in progress or first detection of movement)
+                    -- Start / restart the stability counter only if this differs from the
+                    -- baseline that was set right after the last re-init.
+                    last_item_fingerprint = fingerprint
+                    stable_frame_count = 1  -- begin counting; needs N-1 more stable frames
+                end
             end
 
             if editing_track ~= selected_track then
@@ -1580,6 +1632,11 @@ function editor_main()
                 Undo_BeginBlock()
                 run_create_cd_markers(selected_track)
                 Undo_EndBlock("Create CD/DDP Markers", -1)
+
+                -- Seed the baseline fingerprint AFTER reinit (add_pregap shifts items,
+                -- so we must capture the post-shift positions as the new baseline).
+                last_item_fingerprint = get_item_fingerprint(selected_track)
+                stable_frame_count = 0
 
                 create_metadata_report_and_cue()
                 album_metadata, album_item = nil, nil
@@ -1647,6 +1704,8 @@ function editor_main()
                 if digital_changed then
                     SetProjExtState(0, "ReaClassical", "digital_release_only", digital_release_only and "1" or "0")
                     editing_track = nil
+                    last_item_fingerprint = nil
+                    stable_frame_count = 0
                     -- Reset points and re-run Create CD Markers
                     points = {}
                     Undo_BeginBlock()
