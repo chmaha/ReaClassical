@@ -7,8 +7,7 @@
 dir=$(mktemp -d)
 echo "Using temporary directory: $dir"
 # Source directory
-WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-src="/mnt/c/Users/$WIN_USER/Desktop/ReaClassical_26/"
+src="$HOME/Desktop/ReaClassical_26/"
 
 # List of files and directories to copy
 files="BR.ini

@@ -1,9 +1,7 @@
 #!/bin/sh
 
 # POSIX-compliant script to copy ReaClassical Lua scripts from $SRC to $DEST
-
-WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-SRC="/mnt/c/Users/$WIN_USER/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical"
+SRC="$HOME/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical"
 DEST="$HOME/code/chmaha/ReaClassical/ReaClassicalCore"
 
 # Ensure DEST directory exists

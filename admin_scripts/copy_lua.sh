@@ -1,7 +1,6 @@
 #!/bin/sh
 # copy over changed lua files from REAPER scripts folder
-WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-SRC="/mnt/c/Users/$WIN_USER/Desktop/ReaClassical_26"
+SRC="$HOME/Desktop/ReaClassical_26"
 DEST="$HOME/code/chmaha/ReaClassical/ReaClassical"
 rsync -av --delete --exclude='ReaClassical.lua' --exclude='ListenbackMicMonitor.jsfx' "$SRC/Scripts/chmaha Scripts/ReaClassical/" "$DEST/"
 cp "$SRC/ColorThemes/"* "$DEST"

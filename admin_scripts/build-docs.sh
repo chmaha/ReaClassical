@@ -1,5 +1,4 @@
-WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-RC_install="/mnt/c/Users/$WIN_USER/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
+RC_install="$HOME/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Manual.pdf"
 REAPACK="$HOME/code/chmaha/ReaClassical/ReaClassical/ReaClassical-Manual.pdf"
 front_matter="docs/manual/src/front_matter/front_matter.adoc"
 index="docs/manual/src/index.adoc"
