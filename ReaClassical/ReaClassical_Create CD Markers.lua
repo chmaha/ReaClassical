@@ -34,7 +34,7 @@ local empty_items_check, return_custom_length
 local fade_equations, pos_check, is_item_start_crossfaded, is_item_end_crossfaded
 local steps_by_length, generate_interpolated_fade, convert_fades_to_env, room_tone
 local add_roomtone_fadeout, check_saved_state, album_item_count
-local split_and_tag_final_item
+local split_and_tag_final_item, recalculate
 local check_first_track_for_names, delete_all_markers_and_regions
 local shift_folder_items_and_markers, shift_all_markers_and_regions
 
@@ -367,6 +367,20 @@ function get_info(track)
         end
     end
     return false
+end
+
+---------------------------------------------------------------------
+
+function recalculate()
+    local refresh_track = GetSelectedTrack(0, 0)
+    if refresh_track then
+        points = {}
+        Undo_BeginBlock()
+        run_create_cd_markers(refresh_track)
+        Undo_EndBlock("Create CD/DDP Markers", -1)
+        create_metadata_report_and_cue()
+        editing_track = nil
+    end
 end
 
 ---------------------------------------------------------------------
@@ -1633,30 +1647,19 @@ function editor_main()
 
             if album_metadata then
                 local previous_valid_catalog = album_metadata.catalog or ""
-                local function recalculate()
-                    local refresh_track = GetSelectedTrack(0, 0)
-                    if refresh_track then
-                        points = {}
-                        Undo_BeginBlock()
-                        run_create_cd_markers(refresh_track)
-                        Undo_EndBlock("Create CD/DDP Markers", -1)
-                        create_metadata_report_and_cue()
-                        editing_track = nil
-                    end
-                end
 
-local btn_label = "Recalculate"
-local btn_text_w = ImGui.CalcTextSize(ctx, btn_label)
-local pad_x = select(1, ImGui.GetStyleVar(ctx, ImGui.StyleVar_FramePadding))
-local btn_w = btn_text_w + pad_x * 2
-local window_w = select(1, ImGui.GetContentRegionAvail(ctx))
-ImGui.Text(ctx, "Album Metadata:")
-ImGui.SameLine(ctx)
-ImGui.SetCursorPosX(ctx, (window_w - btn_w) / 2)
-if ImGui.Button(ctx, btn_label) then
-    recalculate()
-end
-ImGui.Separator(ctx)
+                local btn_label = "Recalculate"
+                local btn_text_w = ImGui.CalcTextSize(ctx, btn_label)
+                local pad_x = select(1, ImGui.GetStyleVar(ctx, ImGui.StyleVar_FramePadding))
+                local btn_w = btn_text_w + pad_x * 2
+                local window_w = select(1, ImGui.GetContentRegionAvail(ctx))
+                ImGui.Text(ctx, "Album Metadata:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, (window_w - btn_w) / 2)
+                if ImGui.Button(ctx, btn_label) then
+                    recalculate()
+                end
+                ImGui.Separator(ctx)
 
                 ImGui.Dummy(ctx, 0, 10)
 
@@ -1886,6 +1889,7 @@ ImGui.Separator(ctx)
             ImGui.SameLine(ctx)
             if ImGui.Button(ctx, "Reposition Album Tracks") then
                 Main_OnCommand(reposition_album_tracks, 0)
+                recalculate()
             end
 
             local item_count = CountTrackMediaItems(selected_track)
