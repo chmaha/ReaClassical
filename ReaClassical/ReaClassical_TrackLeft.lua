@@ -22,12 +22,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, takename_check, check_position, get_track_info, paste
-local select_and_cut, go_to_previous, shift, select_CD_track_items
-local calc_postgap, is_item_start_crossfaded
-local get_selected_media_item_at, count_selected_media_items
-local select_items_containing_midpoint, get_folder_children
-local is_folder_track, shift_track_automation
+local main, get_selected_cd_track_item, is_cd_track_start, is_folder_track
+local get_cd_track_items, get_prev_cd_track_item, get_next_cd_track_item
+local move_items, get_folder_children, collect_automation, restore_automation
+local is_in_child_track, get_parent_folder
+
 ---------------------------------------------------------------------
 
 function main()
@@ -43,57 +42,62 @@ function main()
             .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
-    local take_name, selected_item = takename_check()
-    if take_name == -1 or take_name == "" then
+
+    local selected_item, folder_track = get_selected_cd_track_item()
+    if not selected_item then
         MB('Please select an item that starts a CD track', "Select CD track start", 0)
         return
     end
 
-    -- Verify the selected item is on a folder parent track
-    local selected_track = GetMediaItemTrack(selected_item)
-    if not is_folder_track(selected_track) then
-        MB('Please select an item on a parent folder track', "Select CD track start", 0)
-        return
-    end
-
-    local ret, item_number = check_position(selected_item)
-    if ret then
+    local prev_item = get_prev_cd_track_item(selected_item, folder_track)
+    if not prev_item then
         MB('The selected track is already in first position', "Select CD track start", 0)
         return
     end
 
+    local next_item = get_next_cd_track_item(selected_item, folder_track)
+
+    local selected_items = get_cd_track_items(selected_item, folder_track)
+    local prev_items = get_cd_track_items(prev_item, folder_track)
+
+    local selected_start = GetMediaItemInfo_Value(selected_item, "D_POSITION")
+    local prev_start = GetMediaItemInfo_Value(prev_item, "D_POSITION")
+
+    -- How far Selected moves left: distance from Selected start to Prev start
+    local prev_span = selected_start - prev_start
+
+    -- How far Prev moves right: distance from Selected start to next CD track start
+    -- (or end of Selected's last item + 4s postgap if it is the last track)
+    local selected_span
+    if next_item then
+        local next_start = GetMediaItemInfo_Value(next_item, "D_POSITION")
+        selected_span = next_start - selected_start
+    else
+        local last_end = 0
+        for _, it in ipairs(selected_items) do
+            local p = GetMediaItemInfo_Value(it, "D_POSITION")
+            local l = GetMediaItemInfo_Value(it, "D_LENGTH")
+            last_end = math.max(last_end, p + l)
+        end
+        selected_span = last_end - selected_start + 4
+    end
+
     PreventUIRefresh(1)
-    local folder_track, num_of_items = get_track_info(selected_item)
 
-    local item_start_crossfaded = is_item_start_crossfaded(folder_track, item_number)
-    if item_start_crossfaded then
-        Main_OnCommand(40769, 0) -- unselect all
-        SetMediaItemSelected(selected_item, true)
-        MB('The selected track start is crossfaded and ' ..
-            'therefore cannot be moved', "Select CD track start", 0)
-        return
-    end
+    -- Snapshot automation for both CD tracks relative to their start positions,
+    -- then clear it — before any items are moved
+    local selected_automation = collect_automation(selected_items, selected_start, folder_track)
+    local prev_automation = collect_automation(prev_items, prev_start, folder_track)
 
-    local count = select_CD_track_items(item_number, num_of_items, folder_track)
+    -- Move items
+    move_items(selected_items, folder_track, -prev_span)
+    move_items(prev_items, folder_track, selected_span)
 
-
-
-    local new_track_item, postgap = calc_postgap(count, num_of_items, folder_track, selected_item)
-
-    select_and_cut()
-
-    -- shift all future tracks back length of selected track postgap
-    if item_number + count ~= num_of_items - 1 then
-        shift(folder_track, new_track_item, postgap, 0, "left")
-    end
-
-    go_to_previous(item_number, folder_track)
-    paste()
-
-    selected_item = get_selected_media_item_at(0)
-
-    -- shift forward all future tracks the length of track postgap
-    shift(folder_track, selected_item, postgap, count, "right")
+    -- Restore automation at new positions
+    -- Selected moved left by prev_span, so new start = selected_start - prev_span = prev_start
+    restore_automation(selected_automation, prev_start, folder_track)
+    -- Prev moved right by selected_span, so new start = prev_start + selected_span
+    restore_automation(prev_automation, prev_start + selected_span, folder_track)
 
     Main_OnCommand(40769, 0) -- unselect all
     SetOnlyTrackSelected(folder_track)
@@ -104,337 +108,207 @@ end
 
 ---------------------------------------------------------------------
 
+function is_cd_track_start(take_name)
+    return take_name ~= "" and not take_name:match("^@")
+end
+
+---------------------------------------------------------------------
+
 function is_folder_track(track)
     if not track then return false end
-    local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-    return folder_depth == 1
+    return GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1
 end
 
 ---------------------------------------------------------------------
 
-function takename_check()
-    local item = get_selected_media_item_at(0)
-    if item then
-        local take = GetActiveTake(item)
-        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-        return take_name, item
-    else
-        return -1
-    end
+function is_in_child_track(item)
+    if not item then return false end
+    local track = GetMediaItemTrack(item)
+    if not track then return false end
+    if is_folder_track(track) then return false end
+    return get_parent_folder(track) ~= nil
 end
 
 ---------------------------------------------------------------------
 
-function check_position(item)
-    local item_number = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
-    return item_number == 0, item_number
-end
-
----------------------------------------------------------------------
-
-function get_track_info(item)
-    local folder_track = GetMediaItemTrack(item)
-    return folder_track, GetTrackNumMediaItems(folder_track)
-end
-
----------------------------------------------------------------------
-
-function paste()
-    Main_OnCommand(42398, 0)
-end
-
----------------------------------------------------------------------
-
-function select_and_cut()
-    select_items_containing_midpoint()
-    Main_OnCommand(40699, 0) -- paste items
-end
-
----------------------------------------------------------------------
-
-function go_to_previous(item_number, track)
-    for i = item_number - 1, 0, -1 do
-        local first_prev_item = GetTrackMediaItem(track, i)
-        local take = GetActiveTake(first_prev_item)
-        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-        local first_prev_pos = GetMediaItemInfo_Value(first_prev_item, "D_POSITION")
-        local second_prev_item = GetTrackMediaItem(track, i - 1)
-        if second_prev_item then
-            local second_prev_pos = GetMediaItemInfo_Value(second_prev_item, "D_POSITION")
-            local second_prev_len = GetMediaItemInfo_Value(second_prev_item, "D_LENGTH")
-            local second_prev_end = second_prev_pos + second_prev_len
-            if take_name ~= "" and first_prev_pos > second_prev_end then
-                local prev_item_pos = GetMediaItemInfo_Value(first_prev_item, "D_POSITION")
-                SetEditCurPos(prev_item_pos, false, false)
-                break
-            end
-        else
-            if take_name ~= "" then
-                local prev_item_pos = GetMediaItemInfo_Value(first_prev_item, "D_POSITION")
-                SetEditCurPos(prev_item_pos, false, false)
-                break
-            end
+function get_parent_folder(track)
+    if not track then return nil end
+    local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+    for i = track_idx - 1, 0, -1 do
+        local t = GetTrack(0, i)
+        if not t then break end
+        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+            return t
         end
     end
-end
-
----------------------------------------------------------------------
-
-function shift_track_automation(track, start_time, end_time, shift_amount)
-    -- Shift all automation (points and automation items) within the time range
-    local num_envs = CountTrackEnvelopes(track)
-    
-    for e = 0, num_envs - 1 do
-        local env = GetTrackEnvelope(track, e)
-        
-        -- Shift regular envelope points within the time range
-        local num_points = CountEnvelopePoints(env)
-        local points_to_shift = {}
-        
-        for p = 0, num_points - 1 do
-            local retval, time, value, shape, tension, selected = GetEnvelopePoint(env, p)
-            if time >= start_time and time <= end_time then
-                table.insert(points_to_shift, {
-                    index = p,
-                    time = time,
-                    new_time = time + shift_amount,
-                    value = value,
-                    shape = shape,
-                    tension = tension,
-                    selected = selected
-                })
-            end
-        end
-        
-        -- Delete and recreate shifted points
-        for i = #points_to_shift, 1, -1 do
-            local pt = points_to_shift[i]
-            DeleteEnvelopePointRange(env, pt.time - 0.0001, pt.time + 0.0001)
-        end
-        
-        for _, pt in ipairs(points_to_shift) do
-            InsertEnvelopePoint(env, pt.new_time, pt.value, pt.shape, pt.tension, pt.selected, true)
-        end
-        
-        Envelope_SortPoints(env)
-        
-        -- Shift automation items within the time range
-        local num_ai = CountAutomationItems(env)
-        for ai = 0, num_ai - 1 do
-            local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
-            local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
-            local ai_end = ai_pos + ai_len
-            
-            -- If automation item overlaps with the time range, shift it
-            if ai_pos < end_time and ai_end > start_time then
-                GetSetAutomationItemInfo(env, ai, "D_POSITION", ai_pos + shift_amount, true)
-            end
-        end
-    end
-end
-
----------------------------------------------------------------------
-
-function shift(track, item, shift_amount, items_in_track, direction)
-    local num_of_items = GetTrackNumMediaItems(track)
-    local item_number = GetMediaItemInfo_Value(item, "IP_ITEMNUMBER")
-    local items_to_move = {}
-    if direction == "right" then
-        item_number = item_number + items_in_track + 1
-        shift_amount = -shift_amount
-    end
-    Main_OnCommand(40289, 0) -- unselect all items
-    for i = item_number, num_of_items - 1, 1 do
-        local track_item = GetTrackMediaItem(track, i)
-        SetMediaItemSelected(track_item, true)
-        select_items_containing_midpoint()
-    end
-    local selected_item_count = count_selected_media_items()
-    for i = 0, selected_item_count - 1 do
-        items_to_move[#items_to_move + 1] = get_selected_media_item_at(i)
-    end
-    
-    -- Calculate time range for automation shifting
-    local min_pos = nil
-    local max_end = 0
-    for _, v in pairs(items_to_move) do
-        local item_pos = GetMediaItemInfo_Value(v, "D_POSITION")
-        local item_len = GetMediaItemInfo_Value(v, "D_LENGTH")
-        if min_pos == nil or item_pos < min_pos then
-            min_pos = item_pos
-        end
-        max_end = math.max(max_end, item_pos + item_len)
-    end
-    
-    -- Collect all unique tracks
-    local tracks_hash = {}
-    for _, v in pairs(items_to_move) do
-        local item_track = GetMediaItemTrack(v)
-        tracks_hash[item_track] = true
-    end
-    
-    -- Shift automation for all affected tracks
-    if min_pos then
-        for item_track, _ in pairs(tracks_hash) do
-            shift_track_automation(item_track, min_pos, max_end, -shift_amount)
-        end
-    end
-    
-    Main_OnCommand(40289, 0) -- unselect all items
-    for _, v in pairs(items_to_move) do
-        local item_pos = GetMediaItemInfo_Value(v, "D_POSITION")
-        SetMediaItemInfo_Value(v, "D_POSITION", item_pos - shift_amount)
-    end
-end
-
----------------------------------------------------------------------
-
-function select_CD_track_items(item_number, num_of_items, track)
-    local count = 0
-    if item_number ~= num_of_items - 1 then
-        for i = item_number + 1, num_of_items - 1, 1 do
-            local item = GetTrackMediaItem(track, i)
-            local prev_item = GetTrackMediaItem(track, i - 1)
-            local take = GetActiveTake(item)
-            local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-            local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
-            local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
-            local prev_end = prev_pos + prev_len
-            local next_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            if take_name == "" or next_pos < prev_end then
-                SetMediaItemSelected(item, true)
-                count = count + 1
-            else
-                break
-            end
-        end
-    end
-    return count
-end
-
----------------------------------------------------------------------
-
-function calc_postgap(count, num_of_items, track, selected_item)
-    local last_item_of_track = get_selected_media_item_at(0 + count)
-    local last_item_of_track_pos = GetMediaItemInfo_Value(last_item_of_track, "D_POSITION")
-    local last_item_of_track_length = GetMediaItemInfo_Value(last_item_of_track, "D_LENGTH")
-    local last_item_of_track_end = last_item_of_track_pos + last_item_of_track_length
-
-    local _, last_item_number = check_position(last_item_of_track)
-    local postgap
-    local new_track_item
-    if last_item_number ~= num_of_items - 1 then
-        new_track_item = GetTrackMediaItem(track, last_item_number + 1)
-        local new_track_pos = GetMediaItemInfo_Value(new_track_item, "D_POSITION")
-        postgap = new_track_pos - last_item_of_track_end
-    else
-        new_track_item = selected_item
-        postgap = 4
-    end
-    return new_track_item, postgap
-end
-
----------------------------------------------------------------------
-
-function is_item_start_crossfaded(first_track, item_number)
-    local item = GetTrackMediaItem(first_track, item_number)
-    local next_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local prev_item = GetTrackMediaItem(first_track, item_number - 1)
-    if prev_item then
-        local prev_pos = GetMediaItemInfo_Value(prev_item, "D_POSITION")
-        local prev_len = GetMediaItemInfo_Value(prev_item, "D_LENGTH")
-        local prev_end = prev_pos + prev_len
-        if prev_end > next_pos then
-            return true
-        end
-    end
-    return false
-end
-
----------------------------------------------------------------------
-
-function count_selected_media_items()
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            selected_count = selected_count + 1
-        end
-    end
-
-    return selected_count
-end
-
----------------------------------------------------------------------
-
-function get_selected_media_item_at(index)
-    local selected_count = 0
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            if selected_count == index then
-                return item
-            end
-            selected_count = selected_count + 1
-        end
-    end
-
     return nil
 end
 
 ---------------------------------------------------------------------
 
-function select_items_containing_midpoint()
-    local num_sel = CountSelectedMediaItems(0)
-    if num_sel == 0 then return end
-
-    -- Get the folder track for the first selected item
-    local first_item = GetSelectedMediaItem(0, 0)
-    local first_track = GetMediaItemTrack(first_item)
-    local folder_track = first_track
-
-    -- If it's not a folder track, this shouldn't happen due to validation
-    if not is_folder_track(folder_track) then
-        return
+function get_selected_cd_track_item()
+    local total_items = CountMediaItems(0)
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            local take = GetActiveTake(item)
+            if not take then return nil, nil end
+            local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            if not is_cd_track_start(take_name) then return nil, nil end
+            local track = GetMediaItemTrack(item)
+            if not is_folder_track(track) then return nil, nil end
+            if is_in_child_track(item) then return nil, nil end
+            return item, track
+        end
     end
+    return nil, nil
+end
 
-    -- Get all tracks within this specific folder only
-    local tracks_to_check = {}
-    tracks_to_check[folder_track] = true -- Include folder track itself
-    local children = get_folder_children(folder_track)
-    for _, child in ipairs(children) do
-        tracks_to_check[child] = true
+---------------------------------------------------------------------
+
+function get_cd_track_items(start_item, folder_track)
+    local items = {}
+    local start_number = GetMediaItemInfo_Value(start_item, "IP_ITEMNUMBER")
+    local num_items = GetTrackNumMediaItems(folder_track)
+    table.insert(items, start_item)
+    for i = start_number + 1, num_items - 1 do
+        local item = GetTrackMediaItem(folder_track, i)
+        local take = GetActiveTake(item)
+        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        if is_cd_track_start(take_name) then
+            break
+        end
+        table.insert(items, item)
     end
+    return items
+end
 
-    -- Collect selected items' midpoints
-    local positions_to_check = {}
-    for i = 0, num_sel - 1 do
-        local item = GetSelectedMediaItem(0, i)
+---------------------------------------------------------------------
+
+function get_prev_cd_track_item(selected_item, folder_track)
+    local item_number = GetMediaItemInfo_Value(selected_item, "IP_ITEMNUMBER")
+    for i = item_number - 1, 0, -1 do
+        local item = GetTrackMediaItem(folder_track, i)
+        local take = GetActiveTake(item)
+        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        if is_cd_track_start(take_name) then
+            return item
+        end
+    end
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function get_next_cd_track_item(selected_item, folder_track)
+    local item_number = GetMediaItemInfo_Value(selected_item, "IP_ITEMNUMBER")
+    local num_items = GetTrackNumMediaItems(folder_track)
+    local i = item_number + 1
+    while i < num_items do
+        local item = GetTrackMediaItem(folder_track, i)
+        local take = GetActiveTake(item)
+        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        if is_cd_track_start(take_name) then
+            return item
+        end
+        i = i + 1
+    end
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function collect_automation(folder_items, track_start, folder_track)
+    -- Determine the time range covered by this CD track's folder items
+    local range_start = math.huge
+    local range_end = 0
+    for _, item in ipairs(folder_items) do
         local pos = GetMediaItemInfo_Value(item, "D_POSITION")
         local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-        local mid = pos + (len / 2)
-        table.insert(positions_to_check, mid)
+        range_start = math.min(range_start, pos)
+        range_end = math.max(range_end, pos + len)
     end
 
-    local tolerance = 0.0001
+    -- Collect all tracks in the folder
+    local tracks_to_check = { folder_track }
+    local children = get_folder_children(folder_track)
+    for _, child in ipairs(children) do
+        table.insert(tracks_to_check, child)
+    end
 
-    -- For each midpoint position, select items in folder that contain it
-    for _, check_pos in ipairs(positions_to_check) do
-        for track, _ in pairs(tracks_to_check) do
-            local num_items = CountTrackMediaItems(track)
-            for i = 0, num_items - 1 do
-                local item = GetTrackMediaItem(track, i)
-                local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                local item_end = item_pos + item_len
+    -- For each track, collect envelope points and automation items
+    -- within the time range, storing positions relative to track_start
+    local snapshot = {}
+    for _, track in ipairs(tracks_to_check) do
+        local track_data = { track = track, envs = {} }
+        local num_envs = CountTrackEnvelopes(track)
+        for e = 0, num_envs - 1 do
+            local env = GetTrackEnvelope(track, e)
+            local env_data = { env = env, points = {}, ai = {} }
 
-                -- Select if this item's span contains the check position
-                if check_pos >= (item_pos - tolerance) and check_pos <= (item_end + tolerance) then
-                    SetMediaItemSelected(item, true)
+            -- Collect envelope points within range
+            local num_points = CountEnvelopePoints(env)
+            for p = 0, num_points - 1 do
+                local _, time, value, shape, tension, sel = GetEnvelopePoint(env, p)
+                if time >= range_start and time <= range_end then
+                    table.insert(env_data.points, {
+                        rel = time - track_start,
+                        value = value, shape = shape,
+                        tension = tension, sel = sel
+                    })
+                    -- Delete the point so we can reinsert at correct position later
+                    DeleteEnvelopePointRange(env, time - 0.00005, time + 0.00005)
+                    -- Recount since we just deleted
+                    num_points = CountEnvelopePoints(env)
+                    p = p - 1
+                end
+            end
+            Envelope_SortPoints(env)
+
+            -- Collect automation items within range
+            local num_ai = CountAutomationItems(env)
+            for ai = 0, num_ai - 1 do
+                local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
+                local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
+                if ai_pos < range_end and (ai_pos + ai_len) > range_start then
+                    table.insert(env_data.ai, {
+                        rel = ai_pos - track_start,
+                        len = ai_len
+                    })
+                end
+            end
+
+            table.insert(track_data.envs, env_data)
+        end
+        table.insert(snapshot, track_data)
+    end
+    return snapshot
+end
+
+---------------------------------------------------------------------
+
+function restore_automation(snapshot, new_track_start, folder_track)
+    for _, track_data in ipairs(snapshot) do
+        for _, env_data in ipairs(track_data.envs) do
+            local env = env_data.env
+            -- Reinsert envelope points at new absolute positions
+            for _, pt in ipairs(env_data.points) do
+                InsertEnvelopePoint(env, new_track_start + pt.rel, pt.value,
+                    pt.shape, pt.tension, pt.sel, true)
+            end
+            Envelope_SortPoints(env)
+            -- Reposition automation items
+            local num_ai = CountAutomationItems(env)
+            for ai = 0, num_ai - 1 do
+                local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
+                local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
+                -- Match by length and approximate original position
+                for _, saved_ai in ipairs(env_data.ai) do
+                    if math.abs(ai_len - saved_ai.len) < 0.0001 then
+                        GetSetAutomationItemInfo(env, ai, "D_POSITION",
+                            new_track_start + saved_ai.rel, true)
+                        break
+                    end
                 end
             end
         end
@@ -443,33 +317,62 @@ end
 
 ---------------------------------------------------------------------
 
+function move_items(folder_items, folder_track, delta)
+    -- Collect group IDs from all folder track items
+    local group_ids = {}
+    for _, item in ipairs(folder_items) do
+        local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
+        if gid and gid > 0 then
+            group_ids[gid] = true
+        end
+    end
+
+    -- Build full list: start with folder items, then add any project item
+    -- sharing a group ID with them
+    local items_to_move = {}
+    local seen = {}
+    for _, item in ipairs(folder_items) do
+        items_to_move[#items_to_move + 1] = item
+        seen[item] = true
+    end
+
+    local total_items = CountMediaItems(0)
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if not seen[item] then
+            local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
+            if gid and gid > 0 and group_ids[gid] then
+                items_to_move[#items_to_move + 1] = item
+                seen[item] = true
+            end
+        end
+    end
+
+    -- Move all items
+    for _, item in ipairs(items_to_move) do
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        SetMediaItemInfo_Value(item, "D_POSITION", pos + delta)
+    end
+end
+
+---------------------------------------------------------------------
+
 function get_folder_children(parent_track)
-    -- Returns all child tracks of a folder
     local children = {}
     if not parent_track then return children end
-
     local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
     local num_tracks = CountTracks(0)
     local idx = parent_idx + 1
     local depth = 1
-
     while idx < num_tracks and depth > 0 do
         local tr = GetTrack(0, idx)
         if not tr then break end
-
         local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
-
-        if depth > 0 then
-            table.insert(children, tr)
-        end
-
+        table.insert(children, tr)
         depth = depth + folder_depth
-
         if depth <= 0 then break end
-
         idx = idx + 1
     end
-
     return children
 end
 
