@@ -61,6 +61,7 @@ local is_playing              = false
 local editing_row             = nil
 local editing_column          = nil
 local edit_buffer             = ""
+local note_buffers            = {}
 local sort_mode               = 0   -- 0=timeline position, 1=name, 2=time
 local sort_direction          = nil -- Will be set to ascending after context is created
 local last_sort_mode          = 0
@@ -750,6 +751,10 @@ function load_snapshots_from_project()
       for _, s in ipairs(data.snapshots or {}) do
         table.insert(snapshots, s)
       end
+      note_buffers = {}
+      for _, s in ipairs(snapshots) do
+        note_buffers[s.item_guid] = s.notes or ""
+      end
 
       -- Force a resort after loading
       last_sort_mode = -1
@@ -775,6 +780,10 @@ function copy_from_bank(source_bank)
       for _, s in ipairs(data.snapshots or {}) do
         table.insert(snapshots, s)
       end
+      note_buffers = {}
+      for _, s in ipairs(snapshots) do
+        note_buffers[s.item_guid] = s.notes or ""
+      end
       save_snapshots_to_project()
     end
   end
@@ -787,6 +796,7 @@ function clear_bank()
   snapshot_counter = 0
   selected_snapshot = nil
   bank_track_guid = nil
+  note_buffers = {}
   save_snapshots_to_project()
 end
 
@@ -925,39 +935,15 @@ function draw_table()
 
       -- Column 3: Notes
       ImGui.TableSetColumnIndex(ctx, 3)
-      if editing_row == i and editing_column == 3 then
-        ImGui.SetKeyboardFocusHere(ctx)
-        ImGui.PushID(ctx, "edit_notes")
-        ImGui.SetNextItemWidth(ctx, -1)
-        local rv, new_text = ImGui.InputText(ctx, "##edit", edit_buffer, ImGui.InputTextFlags_EnterReturnsTrue)
-        ImGui.PopID(ctx)
-        if rv then edit_buffer = new_text end
-        if ImGui.IsKeyPressed(ctx, ImGui.Key_Escape) then
-          editing_row, editing_column = nil, nil
-        elseif ImGui.IsItemDeactivatedAfterEdit(ctx) then
-          if edit_buffer ~= snap.notes then
-            snap.notes = edit_buffer
-            save_snapshots_to_project()
-          end
-          editing_row, editing_column = nil, nil
-        end
-      else
-        ImGui.PushID(ctx, "notes_sel")
-        if ImGui.Selectable(ctx, snap.notes, selected_snapshot == snap) then
-          selected_snapshot = snap
-          recall_snapshot(snap)
-          if not disable_auto_recall then
-            local item = get_item_by_guid(snap.item_guid)
-            if item then
-              local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-              SetEditCurPos(item_pos, true, true)
-            end
-          end
-        end
-        ImGui.PopID(ctx)
-        if ImGui.IsItemHovered(ctx) and ImGui.IsMouseDoubleClicked(ctx, 0) then
-          editing_row, editing_column, edit_buffer = i, 3, snap.notes
-        end
+      if not note_buffers[snap.item_guid] then
+        note_buffers[snap.item_guid] = snap.notes or ""
+      end
+      ImGui.SetNextItemWidth(ctx, -1)
+      local changed, new_notes = ImGui.InputText(ctx, "##notes_" .. snap.item_guid, note_buffers[snap.item_guid])
+      if changed then
+        note_buffers[snap.item_guid] = new_notes
+        snap.notes = new_notes
+        save_snapshots_to_project()
       end
 
       -- Column 4: Delete button
