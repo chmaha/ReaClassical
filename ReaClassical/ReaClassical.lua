@@ -1,8 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.1
+@version 26.4.2
 @changelog
-  Mission Control: Fix misalignment of row elements
+  ReaClassical menu: Add remove fades function
+  Create CD Markers: Add recalculate button
+  Create CD Markers: Recalculate markers when repositioning items
+  Allow rearranging of album tracks without gaps
+  Add crossfade editor shortcuts for out-of-bounds left and right
+  Allow single-click auto-saving notes in Mixer Snapshots window
+  Create CD Markers: Fix messages when selecting a special track
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
