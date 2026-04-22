@@ -292,7 +292,8 @@ function run_create_cd_markers(selected_track)
             end
         end
         if not folder_track then
-            MB("Error: The selected track is not inside a folder. Please select a folder or a child track inside a folder.",
+            MB(
+                "Error: No folder track found. Please add take names to items on the parent track of a folder.",
                 "Create CD Markers", 0)
             return false
         end
@@ -1135,7 +1136,7 @@ function check_first_track_for_names(track)
 
     -- If no valid takes found
     MB(
-        "Please add take names to all items that you want to be CD track starts (Select item then press F2)",
+        "Please add take names to items on the parent track of a folder (press N then select an item).",
         "No track markers created",
         0
     )
@@ -1544,6 +1545,7 @@ function editor_main()
 
     if opened then
         local selected_track = GetSelectedTrack(0, 0)
+        local no_folder_found = false
         if selected_track then
             local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
             if depth ~= 1 then
@@ -1551,17 +1553,26 @@ function editor_main()
                 local folder_track = nil
                 for i = track_index - 1, 0, -1 do
                     local t = GetTrack(0, i)
-                    if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                    local t_depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
+                    if t_depth < 0 then
+                        -- Hit a folder-closing track, so selected track is outside any folder
+                        break
+                    end
+                    if t_depth == 1 then
                         folder_track = t
                         break
                     end
                 end
-                if folder_track then selected_track = folder_track end
+                if folder_track then
+                    selected_track = folder_track
+                else
+                    no_folder_found = true
+                end
             end
         end
-        local valid_items = track_has_valid_items(selected_track)
-
-        if selected_track and not valid_items then
+        if selected_track and no_folder_found then
+            ImGui.Text(ctx, "Please select the parent track of a folder.")
+        elseif selected_track and not track_has_valid_items(selected_track) then
             ImGui.Text(ctx, "No valid item names found for DDP metadata editing.")
         elseif selected_track then
             local _, trigger = GetProjExtState(0, "ReaClassical", "ddp_refresh_trigger")
@@ -2246,8 +2257,9 @@ local selected_track = GetSelectedTrack(0, 0)
 if selected_track then
     points = {}
     Undo_BeginBlock()
-    run_create_cd_markers(selected_track)
+    local success = run_create_cd_markers(selected_track)
     Undo_EndBlock("Create CD/DDP Markers", -1)
+    if not success then return end
 end
 
 defer(editor_main)
