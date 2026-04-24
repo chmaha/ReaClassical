@@ -64,7 +64,7 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[16] then to_takemarkers = tonumber(table[16]) or 0 end
+        if table[15] then to_takemarkers = tonumber(table[15]) or 0 end
     end
 
     if to_takemarkers == 0 then return end

@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_color_table, edge_check, return_check_length
+local main, get_color_table, return_check_length
 local get_track_prefix, get_track_number, folder_check
 
 ---------------------------------------------------------------------
@@ -60,8 +60,8 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[9] then sdmousehover = tonumber(table[9]) or 0 end
-        if table[13] then moveable_dest = tonumber(table[13]) or 0 end
+        if table[8] then sdmousehover = tonumber(table[8]) or 0 end
+        if table[12] then moveable_dest = tonumber(table[12]) or 0 end
     end
 
     local selected_track = GetSelectedTrack(0, 0)
@@ -94,13 +94,6 @@ function main()
 
         local final_track = track or selected_track
 
-        -- if edge_check(cur_pos, final_track) == true then
-        --     local response = MB(
-        --         "The marker you are trying to add would either be on or close to an item edge or crossfade. Continue?",
-        --         "Add Dest-IN Marker", 4)
-        --     if response ~= 6 then return end
-        -- end
-
         local colors = get_color_table()
 
         -- Force dest marker color for Horizontal workflow
@@ -127,48 +120,6 @@ function get_color_table()
     local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function edge_check(cur_pos, track)
-    local num_of_items = 0
-    local check_length = return_check_length()
-    if track then num_of_items = CountTrackMediaItems(track) end
-    local clash = false
-    for i = 0, num_of_items - 1 do
-        local item = GetTrackMediaItem(track, i)
-        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-        local item_fadein_len = GetMediaItemInfo_Value(item, "D_FADEINLEN")
-        local item_fadein_end = item_start + item_fadein_len
-        if cur_pos > item_start and cur_pos < item_fadein_end + check_length then
-            clash = true
-            break
-        end
-        local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
-        local item_end = item_start + item_length
-        local item_fadeout_len = GetMediaItemInfo_Value(item, "D_FADEOUTLEN")
-        local item_fadeout_start = item_end - item_fadeout_len
-        if cur_pos > item_fadeout_start - check_length and cur_pos < item_end then
-            clash = true
-            break
-        end
-    end
-
-    return clash
-end
-
----------------------------------------------------------------------
-
-function return_check_length()
-    local check_length = 0.5
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-    if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[7] then check_length = table[7] / 1000 end
-    end
-    return check_length
 end
 
 ---------------------------------------------------------------------

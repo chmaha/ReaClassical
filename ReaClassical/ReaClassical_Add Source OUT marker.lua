@@ -65,8 +65,8 @@ function main()
     if input ~= "" then
         local table = {}
         for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[9] then sdmousehover = tonumber(table[9]) or 0 end
-        if table[16] then to_takemarkers = tonumber(table[16]) or 0 end
+        if table[8] then sdmousehover = tonumber(table[8]) or 0 end
+        if table[15] then to_takemarkers = tonumber(table[15]) or 0 end
     end
 
     local selected_track = GetSelectedTrack(0, 0)
