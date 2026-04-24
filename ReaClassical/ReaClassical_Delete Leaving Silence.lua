@@ -24,6 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, source_markers, select_matching_folder
 local adaptive_delete, count_selected_media_items, get_selected_media_item_at
+local nudge_xfades_at_source_boundaries
 
 ---------------------------------------------------------------------
 
@@ -54,6 +55,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         GoToMarker(0, 998, false)
         select_matching_folder()
+        nudge_xfades_at_source_boundaries()
         Main_OnCommand(40625, 0)  -- Time Selection: Set start point
         GoToMarker(0, 999, false)
         Main_OnCommand(40626, 0)  -- Time Selection: Set end point
@@ -185,6 +187,108 @@ function get_selected_media_item_at(index)
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function nudge_xfades_at_source_boundaries()
+    local epsilon = 0.0001
+
+    local source_in_pos, source_out_pos = nil, nil
+    local _, num_markers, num_regions = CountProjectMarkers(0)
+    for i = 0, num_markers + num_regions - 1 do
+        local _, _, pos, _, _, id = EnumProjectMarkers2(0, i)
+        if id == 998 then source_in_pos = pos end
+        if id == 999 then source_out_pos = pos end
+    end
+
+    if not source_in_pos or not source_out_pos then return end
+
+    local sel_track = GetSelectedTrack(0, 0)
+    if not sel_track then return end
+    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local folder_start, folder_end = nil, nil
+
+    for t = track_num, num_tracks - 1 do
+        local track = GetTrack(0, t)
+        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if depth == 1 then
+            folder_start = t
+            folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+
+    if not folder_start then return end
+
+    local function find_overlap_at_pos(pos)
+        local ref_track = GetTrack(0, folder_start)
+        local n = CountTrackMediaItems(ref_track)
+        for i = 0, n - 2 do
+            local item_a = GetTrackMediaItem(ref_track, i)
+            local item_b = GetTrackMediaItem(ref_track, i + 1)
+            local a_start = GetMediaItemInfo_Value(item_a, "D_POSITION")
+            local a_end   = a_start + GetMediaItemInfo_Value(item_a, "D_LENGTH")
+            local b_start = GetMediaItemInfo_Value(item_b, "D_POSITION")
+            if a_end > b_start then
+                -- marker falls within the overlap region
+                if pos > b_start and pos < a_end then
+                    return item_a, item_b, a_end - b_start
+                end
+            end
+        end
+        return nil, nil, nil
+    end
+
+    local function move_xfade_boundaries(gid_a, gid_b, new_a_end, new_b_start)
+        for t = folder_start, folder_end do
+            local track = GetTrack(0, t)
+            local n = CountTrackMediaItems(track)
+            for j = 0, n - 1 do
+                local item = GetTrackMediaItem(track, j)
+                local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
+                if gid ~= 0 then
+                    if gid == gid_a then
+                        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                        SetMediaItemInfo_Value(item, "D_LENGTH", new_a_end - pos)
+                    elseif gid == gid_b then
+                        local old_end = GetMediaItemInfo_Value(item, "D_POSITION")
+                                      + GetMediaItemInfo_Value(item, "D_LENGTH")
+                        SetMediaItemInfo_Value(item, "D_POSITION", new_b_start)
+                        SetMediaItemInfo_Value(item, "D_LENGTH", old_end - new_b_start)
+                    end
+                end
+            end
+        end
+    end
+
+    -- Check and fix SOURCE-IN (nudge rightward into source region)
+    local a, b, overlap_len_in = find_overlap_at_pos(source_in_pos)
+    if a and b then
+        local gid_a = GetMediaItemInfo_Value(a, "I_GROUPID")
+        local gid_b = GetMediaItemInfo_Value(b, "I_GROUPID")
+        local new_b_start = source_in_pos + epsilon
+        local new_a_end   = new_b_start + overlap_len_in
+        move_xfade_boundaries(gid_a, gid_b, new_a_end, new_b_start)
+    end
+
+    -- Check and fix SOURCE-OUT (nudge leftward into source region)
+    local c, d, overlap_len_out = find_overlap_at_pos(source_out_pos)
+    if c and d then
+        local gid_c = GetMediaItemInfo_Value(c, "I_GROUPID")
+        local gid_d = GetMediaItemInfo_Value(d, "I_GROUPID")
+        local new_c_end   = source_out_pos - epsilon
+        local new_d_start = new_c_end - overlap_len_out
+        move_xfade_boundaries(gid_c, gid_d, new_c_end, new_d_start)
+    end
 end
 
 ---------------------------------------------------------------------
