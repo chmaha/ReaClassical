@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.4
+@version 26.4.5
 @changelog
-  Fix delete functions (use updated folder prefix method)
+  Delete with Ripple: Re-order commands to ensure correct folder is selected
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
