@@ -60,6 +60,7 @@ function main()
         ripple_lock_mode()
         SetCursorContext(1, nil)
         GoToMarker(0, 998, false)
+        select_matching_folder()
         local source_in_pos = GetCursorPosition()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40625, 0) -- Time Selection: Set start point
@@ -67,7 +68,6 @@ function main()
         Main_OnCommand(40626, 0) -- Time Selection: Set end point
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
         Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
-        select_matching_folder()
         local folder = GetSelectedTrack(0, 0)
         if not folder then
             return
