@@ -83,7 +83,7 @@ function source_markers()
     local exists = 0
     for i = 0, num_markers + num_regions - 1, 1 do
         local _, _, _, _, label, _ = EnumProjectMarkers(i)
-        if string.match(label, "%d+:SOURCE[-]IN") or string.match(label, "%d+:SOURCE[-]OUT") then
+        if string.match(label, ".+:SOURCE%-IN") or string.match(label, ".+:SOURCE%-OUT") then
             exists = exists + 1
         end
     end
@@ -93,11 +93,10 @@ end
 ---------------------------------------------------------------------
 
 function select_matching_folder()
-    local cursor = GetCursorPosition()
-    local marker_id, _ = GetLastMarkerAndCurRegion(0, cursor)
-    local _, _, _, _, label, _, _ = EnumProjectMarkers3(0, marker_id)
-    local folder_number = tonumber(string.match(label, "(%d*):SOURCE*"))
-    for i = 0, CountTracks(0) - 1, 1 do
+    local _, stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
+    local folder_number = tonumber(stored)
+    if not folder_number then return end
+    for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
             SetOnlyTrackSelected(track)
@@ -109,49 +108,48 @@ end
 ---------------------------------------------------------------------
 
 function adaptive_delete()
-  local sel_items = {}
-  local item_count = count_selected_media_items()
-  for i = 0, item_count - 1 do
-    sel_items[#sel_items+1] = get_selected_media_item_at(i)
-  end
-
-  local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
-  local items_in_time_sel = {}
-
-  if time_sel_end - time_sel_start > 0 then
-    for _, item in ipairs(sel_items) do
-      local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-      local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-      local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
-
-      if item_sel then
-        local intersectmatches = 0
-        -- conditions copied from original C++ logic
-        if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
-          intersectmatches = intersectmatches + 1
-        end
-        if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
-          intersectmatches = intersectmatches + 1
-        end
-        if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
-          intersectmatches = intersectmatches + 1
-        end
-        if time_sel_end >= item_pos and time_sel_start < item_pos then
-          intersectmatches = intersectmatches + 1
-        end
-
-        if intersectmatches > 0 then
-          table.insert(items_in_time_sel, item)
-        end
-      end
+    local sel_items = {}
+    local item_count = count_selected_media_items()
+    for i = 0, item_count - 1 do
+        sel_items[#sel_items + 1] = get_selected_media_item_at(i)
     end
-  end
 
-  if #items_in_time_sel > 0 then
-    Main_OnCommand(40312, 0) -- Delete items in time selection
-  else
-    Main_OnCommand(40006, 0) -- Delete items or time selection contents
-  end
+    local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
+    local items_in_time_sel = {}
+
+    if time_sel_end - time_sel_start > 0 then
+        for _, item in ipairs(sel_items) do
+            local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
+
+            if item_sel then
+                local intersectmatches = 0
+                if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
+                    intersectmatches = intersectmatches + 1
+                end
+                if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
+                    intersectmatches = intersectmatches + 1
+                end
+                if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
+                    intersectmatches = intersectmatches + 1
+                end
+                if time_sel_end >= item_pos and time_sel_start < item_pos then
+                    intersectmatches = intersectmatches + 1
+                end
+
+                if intersectmatches > 0 then
+                    table.insert(items_in_time_sel, item)
+                end
+            end
+        end
+    end
+
+    if #items_in_time_sel > 0 then
+        Main_OnCommand(40312, 0) -- Delete items in time selection
+    else
+        Main_OnCommand(40006, 0) -- Delete items or time selection contents
+    end
 end
 
 ---------------------------------------------------------------------
