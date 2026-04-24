@@ -33,6 +33,7 @@ local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
 local select_matching_dest_folder, save_view, restore_view
 local folder_check, get_track_prefix, nudge_xfades_inside_dest_markers
+local reposition_dest_out, reposition_dest_in
 
 ---------------------------------------------------------------------
 
@@ -175,7 +176,7 @@ function main()
         fix_marker_pair(998, 999)
         local _, is_selected = copy_source()
         if is_selected == false then
-            clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
+            clean_up(is_selected, dest_in, dest_out, source_in, source_out)
             return
         end
         Main_OnCommand(40020, 0) -- remove time selection
@@ -203,10 +204,9 @@ function main()
         mark_as_edit()
 
         create_crossfades()
-
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
 
-        clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
+        clean_up(is_selected, dest_in, dest_out, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
     else
@@ -507,6 +507,7 @@ function create_crossfades()
     MoveEditCursor(xfade_len, false)
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
+    reposition_dest_in()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
@@ -522,35 +523,23 @@ function create_crossfades()
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
+    reposition_dest_out()
 end
 
 ---------------------------------------------------------------------
 
-function clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
+function clean_up(is_selected, dest_in, dest_out, source_in, source_out)
     Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     if is_selected then
         local i = 0
         while true do
-            local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            end
-            if proj_marker_count ~= 2 then
-                DeleteProjectMarker(project, 996, false)
-                DeleteProjectMarker(project, 997, false)
-                DeleteProjectMarker(project, 998, false)
-                DeleteProjectMarker(project, 999, false)
-            else
-                if source_count == 1 then
-                    if source_in == 0 then
-                        DeleteProjectMarker(project, 998, false) -- Delete SOURCE-IN marker
-                    elseif source_out == 0 then
-                        DeleteProjectMarker(project, 999, false) -- Delete SOURCE-OUT marker
-                    end
-                end
-                DeleteProjectMarker(project, 996, false) -- Delete DEST-IN marker
-                DeleteProjectMarker(project, 997, false) -- Delete DEST-OUT marker
-            end
+            local project = EnumProjects(i)
+            if project == nil then break end
+
+            if dest_in == 0   then DeleteProjectMarker(project, 996, false) end
+            if dest_out == 0  then DeleteProjectMarker(project, 997, false) end
+            if source_in == 0 then DeleteProjectMarker(project, 998, false) end
+            if source_out == 0 then DeleteProjectMarker(project, 999, false) end
 
             i = i + 1
         end
@@ -1076,6 +1065,48 @@ function nudge_xfades_inside_dest_markers()
         local new_d_start = new_c_end - xfade_len
         move_xfade_boundaries(gid_c, gid_d, new_c_end, new_d_start)
     end
+end
+
+---------------------------------------------------------------------
+
+function reposition_dest_out()
+    local _, num_markers, num_regions = CountProjectMarkers(0)
+    local dest_out_name = nil
+    local dest_out_color = 0
+    for i = 0, num_markers + num_regions - 1 do
+        local _, _, _, _, name, id, color = EnumProjectMarkers3(0, i)
+        if id == 997 then
+            dest_out_name = name
+            dest_out_color = color
+            break
+        end
+    end
+    if not dest_out_name then return end
+
+    local cursor_pos = GetCursorPosition()
+    DeleteProjectMarker(0, 997, false)
+    AddProjectMarker2(0, false, cursor_pos, 0, dest_out_name, 997, dest_out_color)
+end
+
+---------------------------------------------------------------------
+
+function reposition_dest_in()
+    local _, num_markers, num_regions = CountProjectMarkers(0)
+    local dest_in_name = nil
+    local dest_in_color = 0
+    for i = 0, num_markers + num_regions - 1 do
+        local _, _, _, _, name, id, color = EnumProjectMarkers3(0, i)
+        if id == 996 then
+            dest_in_name = name
+            dest_in_color = color
+            break
+        end
+    end
+    if not dest_in_name then return end
+
+    local cursor_pos = GetCursorPosition()
+    DeleteProjectMarker(0, 996, false)
+    AddProjectMarker2(0, false, cursor_pos, 0, dest_in_name, 996, dest_in_color)
 end
 
 ---------------------------------------------------------------------

@@ -147,7 +147,7 @@ function main()
         fix_marker_pair(998, 999)
         local _, is_selected = copy_source()
         if is_selected == false then
-            clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
+            clean_up(is_selected)
             return
         end
         Main_OnCommand(40020, 0) -- remove time selection
@@ -176,7 +176,7 @@ function main()
 
         local new_last_item = create_crossfades()
         save_last_assembly_item(new_last_item)
-        clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
+        clean_up(is_selected)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40310, 0) -- Toggle ripple editing per-track
         local item_start = GetMediaItemInfo_Value(new_last_item, "D_POSITION")
@@ -495,32 +495,15 @@ end
 
 ---------------------------------------------------------------------
 
-function clean_up(is_selected, proj_marker_count, source_count, source_in, source_out)
+function clean_up(is_selected)
     Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
     if is_selected then
         local i = 0
         while true do
-            local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            end
-            if proj_marker_count ~= 2 then
-                DeleteProjectMarker(project, 996, false)
-                DeleteProjectMarker(project, 997, false)
-                DeleteProjectMarker(project, 998, false)
-                DeleteProjectMarker(project, 999, false)
-            else
-                if source_count == 1 then
-                    if source_in == 0 then
-                        DeleteProjectMarker(project, 998, false) -- Delete SOURCE-IN marker
-                    elseif source_out == 0 then
-                        DeleteProjectMarker(project, 999, false) -- Delete SOURCE-OUT marker
-                    end
-                end
-                DeleteProjectMarker(project, 996, false) -- Delete DEST-IN marker
-                DeleteProjectMarker(project, 997, false) -- Delete DEST-OUT marker
-            end
-
+            local project = EnumProjects(i)
+            if project == nil then break end
+            DeleteProjectMarker(project, 996, false)
+            DeleteProjectMarker(project, 997, false)
             i = i + 1
         end
     else

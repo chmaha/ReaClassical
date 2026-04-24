@@ -95,12 +95,12 @@ function main()
 
         local final_track = track or selected_track
 
-        if edge_check(cur_pos, final_track) == true then
-            local response = MB(
-                "The marker you are trying to add would either be on or close to an item edge or crossfade. Continue?",
-                "Add Dest-IN Marker", 4)
-            if response ~= 6 then return end
-        end
+        -- if edge_check(cur_pos, final_track) == true then
+        --     local response = MB(
+        --         "The marker you are trying to add would either be on or close to an item edge or crossfade. Continue?",
+        --         "Add Dest-IN Marker", 4)
+        --     if response ~= 6 then return end
+        -- end
 
         local colors = get_color_table()
 
