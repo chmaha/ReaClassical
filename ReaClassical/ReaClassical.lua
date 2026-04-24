@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.3
+@version 26.4.4
 @changelog
-  Fix multi-tab S-D editing
+  Fix delete functions (use updated folder prefix method)
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
