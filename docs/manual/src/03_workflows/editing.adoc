@@ -37,10 +37,14 @@ To audition material, hover the mouse inside the crossfade window and:
 . press kbd:[A] to audition the crossfade with mirrored pre/post roll based on mouse cursor location
 . press kbd:[S] to audition just the left item based on mouse cursor location or its mirrored position
 . press kbd:[D] to audition just the right item based on mouse cursor location or its mirrored position
-. press kbd:[E] to audition just the top lane based on mouse cursor location or its mirrored position
-. press kbd:[C] to audition just the bottom lane based on mouse cursor location or its mirrored position
 
 Use kbd:[Shift+A], kbd:[Shift+S] or kbd:[Shift+D] to do the equivalent but with a custom playrate as set in kbd:[F5] preferences.
+
+Other shortcuts include:
+. press kbd:[E] to audition just the top lane based on mouse cursor location or its mirrored position
+. press kbd:[C] to audition just the bottom lane based on mouse cursor location or its mirrored position
+. press kbd:[Alt+S] to audition just the out-of-bounds material left of the xfade
+. press kbd:[Alt+D] to audition just the out-of-bounds material right of the xfade
 
 You can shuttle between crossfades using the kbd:[Q] and kbd:[W] shortcuts. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.
 
@@ -66,6 +70,10 @@ TIP: This works at any point in the editing process and isn't restricted to the 
 ===== Finding Source Material
 
 The items representing a S-D edit are colored according to the source material. However, you can also easily locate source material by clicking on an edited item and pressing kbd:[Ctrl+F]. A color-coordinated source IN and OUT marker pair are placed at the source location and in vertical workflow mode, the associated folder is selected.
+
+===== Automatic Crossfade Protection
+
+When performing S-D edits, deletions or ripple deletes, ReaClassical automatically detects any existing crossfades that straddle your marker boundaries and consumes them as part of the resulting edit. This prevents stray partial fades being left behind in your project. This is also useful when quickly iterating through alternative source material: since destination markers persist after an edit and are placed at the exact edit bounds, you can create new source markers and immediately re-edit without worrying about crossfade debris accumulating at the destination boundaries.
 
 ===== Marking Edits on your Scores
 

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.23">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <meta name="copyright" content="© 2022–2026 chmaha<br><br>This manual is released under the GNU Free Documentation License v1.3<br>See https://www.gnu.org/licenses/fdl-1.3-standalone.html">
 <title>Welcome</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -117,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -220,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-03-25 19:19:14 UTC</code></p>
+<p><code>Updated: 2026-04-25 15:14:02 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1019,10 +1019,6 @@ Do not attempt to complete any of the above actions outside of Mission Control!
 <dt class="hdlist1">No Ranking Color</dt>
 <dd>
 <p>To remove all ranking colors, set to checked. You can still color items manually via the Colorize function <kbd>K</kbd>. Default = unchecked.</p>
-</dd>
-<dt class="hdlist1">S-D Marker Check (ms)</dt>
-<dd>
-<p>When placing destination markers, a check occurs to see if the marker would be placed close to an existing crossfade. This prevents unnecessary "sliver" edits. Set to 0 to disable. Default = 500ms.</p>
 </dd>
 <dt class="hdlist1">REF = Overdub Guide</dt>
 <dd>
@@ -1925,16 +1921,17 @@ Prepare Takes will automatically run on placing the first S-D marker in the proj
 <li>
 <p>press <kbd>D</kbd> to audition just the right item based on mouse cursor location or its mirrored position</p>
 </li>
-<li>
-<p>press <kbd>E</kbd> to audition just the top lane based on mouse cursor location or its mirrored position</p>
-</li>
-<li>
-<p>press <kbd>C</kbd> to audition just the bottom lane based on mouse cursor location or its mirrored position</p>
-</li>
 </ol>
 </div>
 <div class="paragraph">
 <p>Use <span class="keyseq"><kbd>Shift</kbd>+<kbd>A</kbd></span>, <span class="keyseq"><kbd>Shift</kbd>+<kbd>S</kbd></span> or <span class="keyseq"><kbd>Shift</kbd>+<kbd>D</kbd></span> to do the equivalent but with a custom playrate as set in <kbd>F5</kbd> preferences.</p>
+</div>
+<div class="paragraph">
+<p>Other shortcuts include:
+. press <kbd>E</kbd> to audition just the top lane based on mouse cursor location or its mirrored position
+. press <kbd>C</kbd> to audition just the bottom lane based on mouse cursor location or its mirrored position
+. press <span class="keyseq"><kbd>Alt</kbd>+<kbd>S</kbd></span> to audition just the out-of-bounds material left of the xfade
+. press <span class="keyseq"><kbd>Alt</kbd>+<kbd>D</kbd></span> to audition just the out-of-bounds material right of the xfade</p>
 </div>
 <div class="paragraph">
 <p>You can shuttle between crossfades using the <kbd>Q</kbd> and <kbd>W</kbd> shortcuts. Please see the REAPER manual for more details of what is possible including phase alignment and various view options.</p>
@@ -1982,6 +1979,12 @@ This works at any point in the editing process and isn&#8217;t restricted to the
 <h5 id="_finding_source_material">Finding Source Material</h5>
 <div class="paragraph">
 <p>The items representing a S-D edit are colored according to the source material. However, you can also easily locate source material by clicking on an edited item and pressing <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>F</kbd></span>. A color-coordinated source IN and OUT marker pair are placed at the source location and in vertical workflow mode, the associated folder is selected.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_automatic_crossfade_protection">Automatic Crossfade Protection</h5>
+<div class="paragraph">
+<p>When performing S-D edits, deletions or ripple deletes, ReaClassical automatically detects any existing crossfades that straddle your marker boundaries and consumes them as part of the resulting edit. This prevents stray partial fades being left behind in your project. This is also useful when quickly iterating through alternative source material: since destination markers persist after an edit and are placed at the exact edit bounds, you can create new source markers and immediately re-edit without worrying about crossfade debris accumulating at the destination boundaries.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2318,6 +2321,12 @@ Check the "!" box for CD tracks that you would like to have a visual countdown (
 </table>
 </div>
 <div class="sect4">
+<h5 id="_recalculate">Recalculate</h5>
+<div class="paragraph">
+<p>After moving CD start (named) items on the timeline, press <b class="button">Recalculate</b> to refresh marker positions.</p>
+</div>
+</div>
+<div class="sect4">
 <h5 id="_digital_release_only">Digital Release Only</h5>
 <div class="paragraph">
 <p>For those wanting to export individual media files only, check the "Digital Release Only" checkbox to ignore the CD offset value set in <kbd>F5</kbd> preferences as well as disable the automatic snapping of markers and regions to CD frames. Render using one of the ReaClassical "All Settings" presets.</p>
@@ -2366,9 +2375,6 @@ When this mode is enabled, you can still set manual marker offsets using the but
 <img src="src/assets/html_album_report.png" alt="Example of HTML Album Report">
 </div>
 <div class="title">Figure 19. Example of HTML Album Report</div>
-</div>
-<div class="paragraph">
-<p>To clear all offsets, run <span class="keyseq"><kbd>Alt</kbd>+<kbd>O</kbd></span>.</p>
 </div>
 </div>
 <div class="sect4">

@@ -24,6 +24,10 @@ The metadata window allows you to enter all track and album metadata in a single
 
 TIP: Check the "!" box for CD tracks that you would like to have a visual countdown (length set in kbd:[F5] prefs). This feature is not available in all CD players. 
 
+===== Recalculate
+
+After moving CD start (named) items on the timeline, press btn:[Recalculate] to refresh marker positions.
+
 ===== Digital Release Only
 
 For those wanting to export individual media files only, check the "Digital Release Only" checkbox to ignore the CD offset value set in kbd:[F5] preferences as well as disable the automatic snapping of markers and regions to CD frames. Render using one of the ReaClassical "All Settings" presets.
@@ -50,10 +54,6 @@ In your project folder you will see an automatically-generated CUE file (for use
 
 .Example of HTML Album Report
 image::html_album_report.png[Example of HTML Album Report]
-
-
-
-To clear all offsets, run kbd:[Alt+O].
 
 ===== BIN+CUE set
 
