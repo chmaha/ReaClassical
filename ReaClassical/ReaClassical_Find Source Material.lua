@@ -24,7 +24,8 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, get_selected_media_item_at
 local get_item_by_guid, find_item_by_source_file
 local folder_check, get_track_prefix
-
+local find_item_across_projects_by_guid, find_item_across_projects_by_source
+local get_workflow_for_project
 
 ---------------------------------------------------------------------
 
@@ -32,24 +33,25 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    local current_project = EnumProjects(-1, "") -- current tab
+
+    local _, workflow = GetProjExtState(current_project, "ReaClassical", "Workflow")
     if workflow == "" then
         local modifier = "Ctrl"
         local system = GetOS()
         if string.find(system, "^OSX") or string.find(system, "^macOS") then
             modifier = "Cmd"
         end
-        MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
+        MB("Please create a ReaClassical project via " .. modifier .. "+N.", "Error", 0)
         return
     end
 
-    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    local _, input = GetProjExtState(current_project, "ReaClassical", "Preferences")
     local auto_color_pref = 0
     if input ~= "" then
-        local table = {}
-        for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-        if table[5] then auto_color_pref = tonumber(table[5]) or 0 end
+        local t = {}
+        for entry in input:gmatch('([^,]+)') do t[#t + 1] = entry end
+        if t[5] then auto_color_pref = tonumber(t[5]) or 0 end
     end
 
     local edit_item = get_selected_media_item_at(0)
@@ -60,101 +62,72 @@ function main()
 
     local _, saved_guid = GetSetMediaItemInfo_String(edit_item, "P_EXT:src_guid", "", false)
 
-    local source_item = nil
+    local source_item, source_project
 
-    -- Try to find by GUID first
     if saved_guid ~= "" then
-        source_item = get_item_by_guid(0, saved_guid)
+        source_item, source_project = find_item_across_projects_by_guid(saved_guid)
     end
 
-    -- Fallback: search by source file
     local found_via_fallback = false
+
     if not source_item then
-        local edit_take = GetActiveTake(edit_item)
-        if not edit_take then
-            MB("Error: No active take on selected item.", "Error", 0)
+        local take = GetActiveTake(edit_item)
+        if not take then
+            MB("No active take.", "Error", 0)
             return
         end
 
-        local edit_source = GetMediaItemTake_Source(edit_take)
-        if not edit_source then
-            MB("Error: No media source on selected item.", "Error", 0)
-            return
-        end
+        local src = GetMediaItemTake_Source(take)
+        local filename = GetMediaSourceFileName(src, "")
 
-        local edit_filename = GetMediaSourceFileName(edit_source, "")
+        local startoffs = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+        local len = GetMediaItemInfo_Value(edit_item, "D_LENGTH")
+        local rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
 
-        -- Calculate the required range based on edit item
-        local edit_startoffs = GetMediaItemTakeInfo_Value(edit_take, "D_STARTOFFS")
-        local edit_len = GetMediaItemInfo_Value(edit_item, "D_LENGTH")
-        local playrate = GetMediaItemTakeInfo_Value(edit_take, "D_PLAYRATE")
+        local req_start = startoffs
+        local req_end = startoffs + (len * rate)
 
-        local required_start = edit_startoffs
-        local required_end = edit_startoffs + (edit_len * playrate)
-
-        source_item = find_item_by_source_file(0, edit_filename, required_start, required_end, edit_item)
+        source_item, source_project =
+            find_item_across_projects_by_source(filename, req_start, req_end, edit_item)
 
         if not source_item then
-            MB("Error: Could not find source item by GUID or matching source file.", "Error", 0)
+            MB("Source not found in any open project.", "Error", 0)
             return
         end
 
         found_via_fallback = true
     end
 
-    -- If found via fallback, match colors and store GUID
+    if source_project ~= current_project then
+        SelectProjectInstance(source_project)
+    end
+
     if found_via_fallback then
         local source_take = GetActiveTake(source_item)
         local source_color = GetDisplayedMediaItemColor2(source_item, source_take)
-        local edit_group_id = GetMediaItemInfo_Value(edit_item, "I_GROUPID")
 
-        -- Get the source item's GUID
         local _, source_guid = GetSetMediaItemInfo_String(source_item, "GUID", "", false)
-
-        -- Set color and GUID for the edit item
 
         if auto_color_pref == 0 then
             SetMediaItemInfo_Value(edit_item, "I_CUSTOMCOLOR", source_color)
         end
+
         GetSetMediaItemInfo_String(edit_item, "P_EXT:src_guid", source_guid, true)
-
-        -- Set color and GUID for all items in the same group
-        if edit_group_id ~= 0 then
-            local numItems = CountMediaItems(0)
-            for i = 0, numItems - 1 do
-                local item = GetMediaItem(0, i)
-                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-                if group_id == edit_group_id then
-                    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", source_color)
-                    GetSetMediaItemInfo_String(item, "P_EXT:src_guid", source_guid, true)
-                end
-            end
-        end
     end
 
-    -- Gather key values
-    local src_start      = GetMediaItemInfo_Value(source_item, "D_POSITION")
-    local src_len        = GetMediaItemInfo_Value(source_item, "D_LENGTH")
-    local src_startoffs  = GetMediaItemTakeInfo_Value(GetActiveTake(source_item), "D_STARTOFFS")
+    local src_start = GetMediaItemInfo_Value(source_item, "D_POSITION")
+    local src_len = GetMediaItemInfo_Value(source_item, "D_LENGTH")
+    local src_startoffs = GetMediaItemTakeInfo_Value(GetActiveTake(source_item), "D_STARTOFFS")
 
-    local take           = GetActiveTake(edit_item)
+    local take = GetActiveTake(edit_item)
     local edit_startoffs = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
-    local edit_len       = GetMediaItemInfo_Value(edit_item, "D_LENGTH")
-    local playrate       = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+    local edit_len = GetMediaItemInfo_Value(edit_item, "D_LENGTH")
+    local playrate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
 
-
-    -- Compute difference between source and edited start offsets
     local offset_diff = edit_startoffs - src_startoffs
-    local pos_in      = src_start + offset_diff
-    local pos_out     = pos_in + (edit_len * playrate)
+    local pos_in = src_start + offset_diff
+    local pos_out = pos_in + (edit_len * playrate)
 
-    local tolerance   = 0.001 -- 1 millisecond tolerance
-    if pos_in < src_start - tolerance or pos_out > src_start + src_len + tolerance then
-        MB("Error: Edited section exceeds the source item boundaries.", "Error", 0)
-        return
-    end
-
-    -- Remove existing 998/999 markers
     local i = 0
     while true do
         local proj = EnumProjects(i)
@@ -164,28 +137,32 @@ function main()
         i = i + 1
     end
 
-    -- Add markers
     local source_track = GetMediaItemTrack(source_item)
-    local marker_color = GetTrackColor(source_track) or 0
-    local track_number = math.floor(GetMediaTrackInfo_Value(source_track, "IP_TRACKNUMBER"))
-    local track_prefix = get_track_prefix(source_track)
-    local in_label = (workflow == "Horizontal") and "SOURCE-IN" or (track_prefix .. ":SOURCE-IN")
-    local out_label = (workflow == "Horizontal") and "SOURCE-OUT" or (track_prefix .. ":SOURCE-OUT")
-    AddProjectMarker2(0, false, pos_in, 0, in_label, 998, marker_color)
-    AddProjectMarker2(0, false, pos_out, 0, out_label, 999, marker_color)
-    SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
-    SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
+    local color = GetTrackColor(source_track) or 0
+    local prefix = get_track_prefix(source_track)
 
-    -- Optionally move to IN marker
-    local move_to_src_in = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
-    if move_to_src_in then Main_OnCommand(move_to_src_in, 0) end
+    local source_workflow = get_workflow_for_project(source_project)
 
-    SetOnlyTrackSelected(GetMediaItemTrack(source_item))
+    local in_label, out_label
+    if source_workflow == "Horizontal" then
+        in_label = "SOURCE-IN"
+        out_label = "SOURCE-OUT"
+    else
+        in_label = prefix .. ":SOURCE-IN"
+        out_label = prefix .. ":SOURCE-OUT"
+    end
 
-    Undo_EndBlock('Find Source Material (simplified)', 0)
+    AddProjectMarker2(source_project, false, pos_in, 0, in_label, 998, color)
+    AddProjectMarker2(source_project, false, pos_out, 0, out_label, 999, color)
+
+    SetOnlyTrackSelected(source_track)
+
+    local cmd = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
+    if cmd then Main_OnCommand(cmd, 0) end
+
+    Undo_EndBlock("Find Source Material (multi-tab)", 0)
     PreventUIRefresh(-1)
     UpdateArrange()
-    UpdateTimeline()
 end
 
 ---------------------------------------------------------------------
@@ -315,5 +292,50 @@ function get_track_prefix(track)
 end
 
 ---------------------------------------------------------------------
+
+function find_item_across_projects_by_guid(guid)
+    if not guid or guid == "" then return nil, nil end
+
+    local i = 0
+    while true do
+        local proj = EnumProjects(i)
+        if not proj then break end
+
+        local item = get_item_by_guid(proj, guid)
+        if item then
+            return item, proj
+        end
+
+        i = i + 1
+    end
+
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+
+function find_item_across_projects_by_source(filename, required_start, required_end, exclude_item)
+    local i = 0
+    while true do
+        local proj = EnumProjects(i)
+        if not proj then break end
+
+        local item = find_item_by_source_file(proj, filename, required_start, required_end, exclude_item)
+        if item then
+            return item, proj
+        end
+
+        i = i + 1
+    end
+
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+
+function get_workflow_for_project(proj)
+    local _, wf = GetProjExtState(proj, "ReaClassical", "Workflow")
+    return wf or ""
+end
 
 main()
