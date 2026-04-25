@@ -203,7 +203,7 @@ function main()
         Main_OnCommand(42398, 0) -- paste
         mark_as_edit()
 
-        create_crossfades()
+        create_crossfades(workflow, moveable_dest)
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
 
         clean_up(is_selected, dest_in, dest_out, source_in, source_out)
@@ -503,7 +503,7 @@ end
 
 ---------------------------------------------------------------------
 
-function create_crossfades()
+function create_crossfades(workflow, moveable_dest)
     local first_sel_item, last_sel_item = get_first_last_items()
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(first_sel_item, true)
@@ -515,7 +515,7 @@ function create_crossfades()
     MoveEditCursor(xfade_len, false)
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
-    reposition_dest_in()
+    reposition_dest_in(workflow, moveable_dest)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
@@ -531,7 +531,7 @@ function create_crossfades()
     MoveEditCursor(-0.0001, false)
     xfade(xfade_len)
     Main_OnCommand(40912, 0) -- Options: Toggle auto-crossfade on split (OFF)
-    reposition_dest_out()
+    reposition_dest_out(workflow, moveable_dest)
 end
 
 ---------------------------------------------------------------------
@@ -1077,7 +1077,7 @@ end
 
 ---------------------------------------------------------------------
 
-function reposition_dest_out()
+function reposition_dest_out(workflow, moveable_dest)
     local _, num_markers, num_regions = CountProjectMarkers(0)
     local dest_out_name = nil
     local dest_out_color = 0
@@ -1089,7 +1089,17 @@ function reposition_dest_out()
             break
         end
     end
-    if not dest_out_name then return end
+
+    -- If marker was deleted by ripple-all (Horizontal), recreate it
+    if not dest_out_name then
+        if workflow == "Horizontal" then
+            dest_out_name = "DEST-OUT"
+            local colors = get_color_table()
+            dest_out_color = (moveable_dest == 1) and colors.dest_items or colors.dest_marker
+        else
+            return
+        end
+    end
 
     local cursor_pos = GetCursorPosition()
     DeleteProjectMarker(0, 997, false)
@@ -1098,7 +1108,7 @@ end
 
 ---------------------------------------------------------------------
 
-function reposition_dest_in()
+function reposition_dest_in(workflow, moveable_dest)
     local _, num_markers, num_regions = CountProjectMarkers(0)
     local dest_in_name = nil
     local dest_in_color = 0
@@ -1110,7 +1120,16 @@ function reposition_dest_in()
             break
         end
     end
-    if not dest_in_name then return end
+
+    -- If marker was deleted by ripple-all (Horizontal), recreate it
+    if not dest_in_name then
+        if workflow == "Horizontal" then
+            dest_in_name = "DEST-IN"
+            dest_in_color = get_color_table().dest_marker
+        else
+            return
+        end
+    end
 
     local cursor_pos = GetCursorPosition()
     DeleteProjectMarker(0, 996, false)
