@@ -1,8 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.5
+@version 26.4.6
 @changelog
-  Delete with Ripple: Re-order commands to ensure correct folder is selected
+  Allow placement of destination markers on existing xfades and consume as part of new edit
+  Retain S-D markers after edit
+  Preferences: Remove safety check option
+  Remove marker prefixes in horizontal workflow
+  Allow searching for source material across project tabs
+  Fix multi-tab editing when using different workflows
+  Exclusively select parent track when moving or zooming to S-D marker
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
