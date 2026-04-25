@@ -41,7 +41,7 @@ local shift_folder_items_and_markers, shift_all_markers_and_regions
 -- Metadata Editor functions
 local editor_main, parse_item_name, serialize_metadata, increment_isrc
 local update_marker_and_region, update_album_marker, propagate_album_field
-local track_has_valid_items, create_metadata_report_and_cue
+local track_has_valid_items, track_has_any_named_items, create_metadata_report_and_cue
 
 ---------------------------------------------------------------------
 -- Shared state
@@ -1523,6 +1523,23 @@ end
 
 ---------------------------------------------------------------------
 
+function track_has_any_named_items(track)
+    if not track then return false end
+    local item_count = CountTrackMediaItems(track)
+    if item_count == 0 then return false end
+    for i = 0, item_count - 1 do
+        local item = GetTrackMediaItem(track, i)
+        local take = GetActiveTake(item)
+        if take then
+            local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            if name and name:match("%S") then return true end
+        end
+    end
+    return false
+end
+
+---------------------------------------------------------------------
+
 function create_metadata_report_and_cue()
     local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     dofile(script_path .. "ReaClassical_Metadata Report.lua")
@@ -1573,7 +1590,13 @@ function editor_main()
         if selected_track and no_folder_found then
             ImGui.Text(ctx, "Please select the parent track of a folder.")
         elseif selected_track and not track_has_valid_items(selected_track) then
-            ImGui.Text(ctx, "No valid item names found for DDP metadata editing.")
+            if track_has_any_named_items(selected_track) then
+                ImGui.TextWrapped(ctx,
+                    "This folder hasn't been designated as a CD album yet. " ..
+                    "Please close (press Y) and re-open the DDP Metadata Editor to set it up.")
+            else
+                ImGui.Text(ctx, "No valid item names found for DDP metadata editing.")
+            end
         elseif selected_track then
             local _, trigger = GetProjExtState(0, "ReaClassical", "ddp_refresh_trigger")
             if trigger == "y" then
