@@ -41,6 +41,7 @@ To audition material, hover the mouse inside the crossfade window and:
 Use kbd:[Shift+A], kbd:[Shift+S] or kbd:[Shift+D] to do the equivalent but with a custom playrate as set in kbd:[F5] preferences.
 
 Other shortcuts include:
+
 . press kbd:[E] to audition just the top lane based on mouse cursor location or its mirrored position
 . press kbd:[C] to audition just the bottom lane based on mouse cursor location or its mirrored position
 . press kbd:[Alt+S] to audition just the out-of-bounds material left of the xfade
