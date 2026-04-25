@@ -94,8 +94,10 @@ function main()
     local color_track = selected_track or GetTrack(0, 0)
     local marker_color = color_track and GetTrackColor(color_track) or 0
 
-    AddProjectMarker2(0, false, left_pos, 0, track_prefix .. ":DEST-IN", 996, marker_color)
-    AddProjectMarker2(0, false, right_pos, 0, track_prefix .. ":DEST-OUT", 997, marker_color)
+    local in_label = (workflow == "Horizontal") and "DEST-IN" or (track_prefix .. ":DEST-IN")
+    local out_label = (workflow == "Horizontal") and "DEST-OUT" or (track_prefix .. ":DEST-OUT")
+    AddProjectMarker2(0, false, left_pos, 0, in_label, 996, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, out_label, 997, marker_color)
 
     Undo_EndBlock("Destination Markers to Item Edge", 0)
 end

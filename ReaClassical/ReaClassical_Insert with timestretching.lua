@@ -474,6 +474,7 @@ function markers()
         local _, num_markers, num_regions = CountProjectMarkers(proj)
         for i = 0, num_markers + num_regions - 1, 1 do
             local _, _, pos, _, raw_label, _ = EnumProjectMarkers2(proj, i)
+            -- Accept both "PREFIX:LABEL" and bare "LABEL" forms
             local label = string.match(raw_label, ".+:(.+)") or raw_label
 
             if label == "DEST-IN" then

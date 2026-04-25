@@ -110,7 +110,8 @@ function main()
             track_number = 1
             marker_color = colors.dest_items
         end
-        AddProjectMarker2(0, false, cur_pos, 0, track_prefix .. ":DEST-OUT", 997, marker_color)
+        local marker_label = (workflow == "Horizontal") and "DEST-OUT" or (track_prefix .. ":DEST-OUT")
+        AddProjectMarker2(0, false, cur_pos, 0, marker_label, 997, marker_color)
         SetProjExtState(0, "ReaClassical", "DestOutTrackNum", tostring(track_number))
 
         if other_dest_track_num and other_dest_track_num ~= track_number then

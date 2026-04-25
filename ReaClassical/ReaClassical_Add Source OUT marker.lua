@@ -109,7 +109,8 @@ function main()
             marker_color = color_track and GetTrackColor(color_track) or colors.source_marker
         end
 
-        AddProjectMarker2(0, false, cur_pos, 0, track_prefix .. ":SOURCE-OUT", 999, marker_color)
+        local marker_label = (workflow == "Horizontal") and "SOURCE-OUT" or (track_prefix .. ":SOURCE-OUT")
+        AddProjectMarker2(0, false, cur_pos, 0, marker_label, 999, marker_color)
         SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
 
         if other_source_track_num and other_source_track_num ~= track_number then
@@ -138,8 +139,9 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local _, label = raw_label:match("(.+):(.+)")
-            if label and label == marker_type then
+            -- Accept both "PREFIX:LABEL" and bare "LABEL" forms
+            local label = raw_label:match(":(.+)$") or raw_label
+            if label == marker_type then
                 marker_pos = pos
             end
             break
@@ -296,8 +298,9 @@ function find_source_marker(proj, marker_id, marker_type)
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            local _, label = raw_label:match("(.+):(.+)")
-            if label and label == marker_type then
+            -- Accept both "PREFIX:LABEL" and bare "LABEL" forms
+            local label = raw_label:match(":(.+)$") or raw_label
+            if label == marker_type then
                 return pos
             end
         end

@@ -169,8 +169,10 @@ function main()
     local marker_color = GetTrackColor(source_track) or 0
     local track_number = math.floor(GetMediaTrackInfo_Value(source_track, "IP_TRACKNUMBER"))
     local track_prefix = get_track_prefix(source_track)
-    AddProjectMarker2(0, false, pos_in, 0, track_prefix .. ":SOURCE-IN", 998, marker_color)
-    AddProjectMarker2(0, false, pos_out, 0, track_prefix .. ":SOURCE-OUT", 999, marker_color)
+    local in_label = (workflow == "Horizontal") and "SOURCE-IN" or (track_prefix .. ":SOURCE-IN")
+    local out_label = (workflow == "Horizontal") and "SOURCE-OUT" or (track_prefix .. ":SOURCE-OUT")
+    AddProjectMarker2(0, false, pos_in, 0, in_label, 998, marker_color)
+    AddProjectMarker2(0, false, pos_out, 0, out_label, 999, marker_color)
     SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
     SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
 

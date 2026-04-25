@@ -85,7 +85,9 @@ function source_markers()
     local exists = 0
     for i = 0, num_markers + num_regions - 1, 1 do
         local _, _, _, _, label, _ = EnumProjectMarkers(i)
-        if string.match(label, ".+:SOURCE%-IN") or string.match(label, ".+:SOURCE%-OUT") then
+        -- Accept both "PREFIX:SOURCE-IN/OUT" and bare "SOURCE-IN/OUT" forms
+        local stripped = label:match(":(.+)$") or label
+        if stripped == "SOURCE-IN" or stripped == "SOURCE-OUT" then
             exists = exists + 1
         end
     end

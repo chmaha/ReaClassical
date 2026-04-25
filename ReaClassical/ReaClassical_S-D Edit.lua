@@ -110,22 +110,22 @@ function main()
             pos = pos_table[2]
             distance = pos_table[4] - pos_table[3]
             move_to_project_tab(dest_proj)
-            add_marker(pos, -distance, dest_track_number, "DEST-IN", 996)
+            add_marker(pos, -distance, dest_track_number, "DEST-IN", 996, workflow)
         elseif dest_out == 0 then
             pos = pos_table[1]
             distance = pos_table[4] - pos_table[3]
             move_to_project_tab(dest_proj)
-            add_marker(pos, distance, dest_track_number, "DEST-OUT", 997)
+            add_marker(pos, distance, dest_track_number, "DEST-OUT", 997, workflow)
         elseif source_in == 0 then
             pos = pos_table[4]
             distance = pos_table[2] - pos_table[1]
             move_to_project_tab(source_proj)
-            add_marker(pos, -distance, src_track_number, "SOURCE-IN", 998)
+            add_marker(pos, -distance, src_track_number, "SOURCE-IN", 998, workflow)
         elseif source_out == 0 then
             pos = pos_table[3]
             distance = pos_table[2] - pos_table[1]
             move_to_project_tab(source_proj)
-            add_marker(pos, distance, src_track_number, "SOURCE-OUT", 999)
+            add_marker(pos, distance, src_track_number, "SOURCE-OUT", 999, workflow)
         end
     elseif dest_count == 1 and source_count == 1 then -- add two extra markers 2-point editing
         if dest_in == 1 and source_in == 1 then
@@ -137,15 +137,15 @@ function main()
                 source_end = get_track_length(src_track_number)
             end
             move_to_project_tab(source_proj)
-            add_marker(source_end, 0, src_track_number, "SOURCE-OUT", 999)
+            add_marker(source_end, 0, src_track_number, "SOURCE-OUT", 999, workflow)
             local dest_end = GetProjectLength(0)
             move_to_project_tab(dest_proj)
-            add_marker(dest_end, 0, dest_track_number, "DEST-OUT", 997)
+            add_marker(dest_end, 0, dest_track_number, "DEST-OUT", 997, workflow)
         elseif dest_out == 1 and source_out == 1 then
             move_to_project_tab(source_proj)
-            add_marker(0, 0, src_track_number, "SOURCE-IN", 998)
+            add_marker(0, 0, src_track_number, "SOURCE-IN", 998, workflow)
             move_to_project_tab(dest_proj)
-            add_marker(0, 0, dest_track_number, "DEST-IN", 996)
+            add_marker(0, 0, dest_track_number, "DEST-IN", 996, workflow)
         elseif source_in == 1 and dest_out == 1 then
             move_to_project_tab(dest_proj)
             local source_end
@@ -155,19 +155,19 @@ function main()
                 source_end = get_track_length(src_track_number)
             end
             move_to_project_tab(source_proj)
-            add_marker(source_end, 0, src_track_number, "SOURCE-OUT", 999)
+            add_marker(source_end, 0, src_track_number, "SOURCE-OUT", 999, workflow)
             move_to_project_tab(dest_proj)
-            add_marker(0, 0, dest_track_number, "DEST-IN", 996)
+            add_marker(0, 0, dest_track_number, "DEST-IN", 996, workflow)
         elseif source_out == 1 and dest_in == 1 then
             move_to_project_tab(source_proj)
-            add_marker(0, 0, src_track_number, "SOURCE-IN", 998)
+            add_marker(0, 0, src_track_number, "SOURCE-IN", 998, workflow)
             local dest_end = GetProjectLength(0)
             move_to_project_tab(dest_proj)
-            add_marker(dest_end, 0, dest_track_number, "DEST-OUT", 997)
+            add_marker(dest_end, 0, dest_track_number, "DEST-OUT", 997, workflow)
         end
     elseif source_count == 2 and dest_count == 0 and pos_table ~= nil and proj_marker_count == 0 then
-        add_marker(pos_table[3], 0, dest_track_number, "DEST-IN", 996)
-        add_marker(pos_table[4], 0, dest_track_number, "DEST-OUT", 997)
+        add_marker(pos_table[3], 0, dest_track_number, "DEST-IN", 996, workflow)
+        add_marker(pos_table[4], 0, dest_track_number, "DEST-OUT", 997, workflow)
     end
 
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _ = markers()
@@ -258,6 +258,7 @@ function markers()
         local _, num_markers, num_regions = CountProjectMarkers(proj)
         for i = 0, num_markers + num_regions - 1, 1 do
             local _, _, pos, _, raw_label, _ = EnumProjectMarkers2(proj, i)
+            -- Accept both "PREFIX:LABEL" and bare "LABEL" forms
             local label = string.match(raw_label, ".+:(.+)") or raw_label
 
             if label == "DEST-IN" then
@@ -324,12 +325,19 @@ end
 
 ---------------------------------------------------------------------
 
-function add_marker(pos, distance, track_number, label, num)
+function add_marker(pos, distance, track_number, label, num, workflow)
     local colors = get_color_table()
     DeleteProjectMarker(nil, num, false)
     local track = GetTrack(0, track_number - 1)
     local prefix = get_track_prefix(track)
-    AddProjectMarker2(0, false, pos + distance, 0, prefix .. ":" .. label, num, colors.source_marker)
+    -- In Horizontal workflow, omit the track prefix (bare label)
+    local marker_label
+    if workflow == "Horizontal" then
+        marker_label = label
+    else
+        marker_label = prefix .. ":" .. label
+    end
+    AddProjectMarker2(0, false, pos + distance, 0, marker_label, num, colors.source_marker)
     -- Update the corresponding ext state
     if label == "DEST-IN" then
         SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))

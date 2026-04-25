@@ -114,8 +114,10 @@ function main()
 
     local color_track = GetTrack(0, track_number - 1)
     local marker_color = color_track and GetTrackColor(color_track) or 0
-    AddProjectMarker2(0, false, left_pos, 0, track_prefix .. ":SOURCE-IN", 998, marker_color)
-    AddProjectMarker2(0, false, right_pos, 0, track_prefix .. ":SOURCE-OUT", 999, marker_color)
+    local in_label = (workflow == "Horizontal") and "SOURCE-IN" or (track_prefix .. ":SOURCE-IN")
+    local out_label = (workflow == "Horizontal") and "SOURCE-OUT" or (track_prefix .. ":SOURCE-OUT")
+    AddProjectMarker2(0, false, left_pos, 0, in_label, 998, marker_color)
+    AddProjectMarker2(0, false, right_pos, 0, out_label, 999, marker_color)
     Main_OnCommand(40635, 0) -- remove time selection
     PreventUIRefresh(-1)
     Undo_EndBlock("Source Markers to Item Edge", 0)

@@ -108,7 +108,8 @@ function main()
             track_number = 1
             marker_color = colors.dest_items
         end
-        AddProjectMarker2(0, false, cur_pos, 0, track_prefix .. ":DEST-IN", 996, marker_color)
+        local marker_label = (workflow == "Horizontal") and "DEST-IN" or (track_prefix .. ":DEST-IN")
+        AddProjectMarker2(0, false, cur_pos, 0, marker_label, 996, marker_color)
         SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
     end
     PreventUIRefresh(-1)

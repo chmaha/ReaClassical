@@ -129,11 +129,11 @@ function main()
                         end
                         i = i + 1
                     end
-                    add_marker(item_right_edge, 0, dest_track_number, "DEST-IN", 996, 0)
+                    add_marker(item_right_edge, 0, dest_track_number, "DEST-IN", 996, 0, workflow)
                 end
             end
         end
-        add_marker(pos_table[1], 0, dest_track_number, "DEST-OUT", 997, 0)
+        add_marker(pos_table[1], 0, dest_track_number, "DEST-OUT", 997, 0, workflow)
     else
         MB(
             "Please add 3 valid source-destination markers: DEST-IN, SOURCE-IN and SOURCE-OUT"
@@ -183,7 +183,7 @@ function main()
         local item_length = GetMediaItemInfo_Value(new_last_item, "D_LENGTH")
         local end_of_new_item = item_start + item_length
         local dest_track = GetTrack(0, dest_track_number - 1)
-        add_marker(end_of_new_item, 0, dest_track_number, "DEST-IN", 996, GetTrackColor(dest_track))
+        add_marker(end_of_new_item, 0, dest_track_number, "DEST-IN", 996, GetTrackColor(dest_track), workflow)
 
         move_to_project_tab(source_proj)
 
@@ -243,6 +243,7 @@ function markers()
         local _, num_markers, num_regions = CountProjectMarkers(proj)
         for i = 0, num_markers + num_regions - 1, 1 do
             local _, _, pos, _, raw_label, _ = EnumProjectMarkers2(proj, i)
+            -- Accept both "PREFIX:LABEL" and bare "LABEL" forms
             local label = string.match(raw_label, ".+:(.+)") or raw_label
 
             if label == "DEST-IN" then
@@ -329,7 +330,7 @@ function select_matching_dest_folder()
     local _, stored = GetProjExtState(0, "ReaClassical", "DestInTrackNum")
     local folder_number = tonumber(stored)
     if not folder_number then return end
-    for i = 0, CountTracks(0) - 1, 1 do
+    for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
             SetOnlyTrackSelected(track)
@@ -894,11 +895,18 @@ end
 
 ---------------------------------------------------------------------
 
-function add_marker(pos, distance, track_number, label, num, color)
+function add_marker(pos, distance, track_number, label, num, color, workflow)
     DeleteProjectMarker(nil, num, false)
     local track = GetTrack(0, track_number - 1)
     local prefix = get_track_prefix(track)
-    AddProjectMarker2(0, false, pos + distance, 0, prefix .. ":" .. label, num, color)
+    -- In Horizontal workflow, omit the track prefix (bare label)
+    local marker_label
+    if workflow == "Horizontal" then
+        marker_label = label
+    else
+        marker_label = prefix .. ":" .. label
+    end
+    AddProjectMarker2(0, false, pos + distance, 0, marker_label, num, color)
     -- Update the corresponding ext state
     if label == "DEST-IN" then
         SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
