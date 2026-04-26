@@ -28,7 +28,7 @@ local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, copy_track_names
 local add_rcmaster, route_to_track, special_check, remove_connections
 local create_single_mixer, route_tracks, create_track_table
-local process_name
+local process_name, delete_non_rc_tracks
 local save_track_settings, reset_track_settings, write_to_mixer
 local rearrange_tracks, reset_mixer_order, copy_track_names_from_dest
 local process_dest, check_hidden_track_items
@@ -101,7 +101,13 @@ function main()
         local is_empty = false
         SetCursorContext(1, nil)
         remove_track_groups()
-
+        delete_non_rc_tracks()
+        for i = #pre_selected, 1, -1 do
+            if not ValidatePtr(pre_selected[i], "MediaTrack*") then
+                table.remove(pre_selected, i)
+            end
+        end
+        num_pre_selected = #pre_selected
         rcmaster_exists = special_check()
         if not rcmaster_exists then
             add_rcmaster(num_of_tracks)
@@ -1261,6 +1267,56 @@ function select_all_parents()
         else
             SetMediaTrackInfo_Value(tr, "I_SELECTED", 0)
         end
+    end
+end
+
+---------------------------------------------------------------------
+
+function delete_non_rc_tracks()
+    local rc_keys = {
+        "mix_order", "mixer", "aux", "submix", "roomtone",
+        "live", "rcref", "listenback", "rcmaster", "Destination", "Source"
+    }
+
+    local function is_rc_track(track)
+        for _, key in ipairs(rc_keys) do
+            local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
+            if val ~= "" then return true end
+        end
+        return false
+    end
+
+    local to_delete = {}
+    local named_with_items = {}
+
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if not is_rc_track(track) then
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            local item_count = CountTrackMediaItems(track)
+            if item_count > 0 then
+                table.insert(named_with_items, name ~= "" and name or "<unnamed>")
+            end
+            table.insert(to_delete, track)
+        end
+    end
+
+    if #to_delete > 0 then
+        Main_OnCommand(40297, 0) -- unselect all
+        for _, track in ipairs(to_delete) do
+            SetTrackSelected(track, true)
+        end
+        ReorderSelectedTracks(CountTracks(0), 0)
+        Main_OnCommand(40297, 0)
+
+        for i = #to_delete, 1, -1 do
+            DeleteTrack(to_delete[i])
+        end
+    end
+
+    if #named_with_items > 0 then
+        MB("The following tracks contained items and were removed:\n" ..
+            table.concat(named_with_items, "\n"), "ReaClassical", 0)
     end
 end
 

@@ -36,7 +36,7 @@ local check_hidden_track_items, move_destination_folder_to_top
 local set_recording_to_primary_and_secondary
 local reorder_special_tracks, select_children_of_selected_folders
 local select_next_folder, collapse_folder, fold_small, make_folder
-local select_all_parents
+local select_all_parents, delete_non_rc_tracks
 
 ---------------------------------------------------------------------
 
@@ -108,6 +108,13 @@ function main()
         end
 
         local is_empty = false
+        delete_non_rc_tracks()
+        for i = #pre_selected, 1, -1 do
+            if not ValidatePtr(pre_selected[i], "MediaTrack*") then
+                table.remove(pre_selected, i)
+            end
+        end
+        num_pre_selected = #pre_selected
         rcmaster_exists = special_check()
 
         if not rcmaster_exists then
@@ -183,6 +190,13 @@ function main()
         end
         reorder_special_tracks()
         local is_empty = true
+        delete_non_rc_tracks()
+        for i = #pre_selected, 1, -1 do
+            if not ValidatePtr(pre_selected[i], "MediaTrack*") then
+                table.remove(pre_selected, i)
+            end
+        end
+        num_pre_selected = #pre_selected
         rcmaster_exists = special_check()
 
         if not rcmaster_exists then
@@ -1525,6 +1539,56 @@ function select_all_parents()
         else
             SetMediaTrackInfo_Value(tr, "I_SELECTED", 0)
         end
+    end
+end
+
+---------------------------------------------------------------------
+
+function delete_non_rc_tracks()
+    local rc_keys = {
+        "mix_order", "mixer", "aux", "submix", "roomtone",
+        "live", "rcref", "listenback", "rcmaster", "Destination", "Source"
+    }
+
+    local function is_rc_track(track)
+        for _, key in ipairs(rc_keys) do
+            local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
+            if val ~= "" then return true end
+        end
+        return false
+    end
+
+    local to_delete = {}
+    local named_with_items = {}
+
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if not is_rc_track(track) then
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            local item_count = CountTrackMediaItems(track)
+            if item_count > 0 then
+                table.insert(named_with_items, name ~= "" and name or "<unnamed>")
+            end
+            table.insert(to_delete, track)
+        end
+    end
+
+    if #to_delete > 0 then
+        Main_OnCommand(40297, 0) -- unselect all
+        for _, track in ipairs(to_delete) do
+            SetTrackSelected(track, true)
+        end
+        ReorderSelectedTracks(CountTracks(0), 0)
+        Main_OnCommand(40297, 0)
+
+        for i = #to_delete, 1, -1 do
+            DeleteTrack(to_delete[i])
+        end
+    end
+
+    if #named_with_items > 0 then
+        MB("The following tracks contained items and were removed:\n" ..
+            table.concat(named_with_items, "\n"), "ReaClassical", 0)
     end
 end
 
