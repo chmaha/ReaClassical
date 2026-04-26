@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.7
+@version 26.4.8
 @changelog
-  Solo folder when moving and zooming to S-D markers
+  Allow repositioning of S-AUD if new real source pair added to item
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
