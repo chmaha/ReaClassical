@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.8
+@version 26.4.9
 @changelog
-  Allow repositioning of S-AUD if new real source pair added to item
+  Source Auditioning: Allow unrestricted S-AUD updates when placing multiple real pairs in same item
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
