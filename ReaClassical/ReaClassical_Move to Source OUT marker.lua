@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, markers, exclusive_select_folder_parent
+local main, markers, exclusive_select_folder_parent, solo
 
 ---------------------------------------------------------------------
 
@@ -50,6 +50,7 @@ function main()
     end
 
     GoToMarker(0, 999, false)
+    solo()
 end
 
 ---------------------------------------------------------------------
@@ -112,6 +113,88 @@ function exclusive_select_folder_parent(prefix)
 
     if target_track then
         SetTrackSelected(target_track, true)
+    end
+end
+
+---------------------------------------------------------------------
+
+function solo()
+    Main_OnCommand(40491, 0) -- un-arm all tracks for recording
+    -- Re-arm listenback tracks
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        if lb_state == "y" then
+            SetMediaTrackInfo_Value(track, "I_RECARM", 1)
+        end
+    end
+    local selected_track = GetSelectedTrack(0, 0)
+    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+
+    for i = 0, CountTracks(0) - 1, 1 do
+        local track = GetTrack(0, i)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+
+        if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
+            or ref_state == "y" or listenback_state == "y" then
+            local num_of_sends = GetTrackNumSends(track, 0)
+            for j = 0, num_of_sends - 1, 1 do
+                SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
+            end
+        end
+
+        if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
+                or ref_state == "y" or listenback_state == "y" or rcmaster_state == "y") then
+            if IsTrackSelected(track) and parent ~= 1 then
+                SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            elseif IsTrackSelected(track) then
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            elseif IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+                SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            end
+        end
+
+        if rt_state == "y" then
+            if IsTrackSelected(track) then
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            end
+        end
+
+        if ref_state == "y" then
+            local is_selected = IsTrackSelected(track)
+            local mute_state = 1
+            local solo_state = 0
+
+            if is_selected then
+                Main_OnCommand(40340, 0) -- unsolo all tracks
+                mute_state = 0
+                solo_state = 1
+            elseif ref_is_guide == 1 then
+                mute_state = 0
+                solo_state = 0
+            end
+
+            SetMediaTrackInfo_Value(track, "B_MUTE", mute_state)
+            SetMediaTrackInfo_Value(track, "I_SOLO", solo_state)
+        end
+
+        if rcmaster_state == "y" then
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        end
     end
 end
 
