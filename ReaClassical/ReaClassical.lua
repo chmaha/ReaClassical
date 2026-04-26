@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.6
+@version 26.4.7
 @changelog
-  Allow placement of destination markers on existing xfades and consume as part of new edit
-  Retain S-D markers after edit
-  Preferences: Remove safety check option
-  Remove marker prefixes in horizontal workflow
-  Allow searching for source material across project tabs
-  Fix multi-tab editing when using different workflows
-  Exclusively select parent track when moving or zooming to S-D marker
+  Solo folder when moving and zooming to S-D markers
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
