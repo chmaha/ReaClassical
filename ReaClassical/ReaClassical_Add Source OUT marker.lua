@@ -240,24 +240,6 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     local has_saud = existing_chunk and
         existing_chunk:find("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+") ~= nil
 
-    -- Guard: if the new marker is in the same item as the existing pair,
-    -- only skip conversion if an S-AUD already exists
-    -- If no S-AUD exists yet, allow conversion
-    local item_new, _ = get_item_at_position(new_pos, new_track_number)
-    if item_new and item_new == item_in and has_saud then
-        local i = 0
-        while true do
-            local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            else
-                DeleteProjectMarker(project, marker_id, false)
-            end
-            i = i + 1
-        end
-        return
-    end
-
     -- If the target item already has an S-AUD take marker, remove it first
     -- so the new pair replaces it (only one S-AUD allowed per item)
     if has_saud then
