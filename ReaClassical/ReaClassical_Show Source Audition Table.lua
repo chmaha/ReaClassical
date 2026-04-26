@@ -41,6 +41,23 @@ if not imgui_exists then
     return
 end
 
+-- Check that Source Audition Mode is enabled
+do
+    local saud_mode = 0
+    local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+    if input ~= "" then
+        local t = {}
+        for entry in input:gmatch('([^,]+)') do t[#t + 1] = entry end
+        if t[15] then saud_mode = tonumber(t[15]) or 0 end
+    end
+    if saud_mode ~= 1 then
+        MB("Source Audition Mode is not enabled.\n\nPlease activate it in ReaClassical Project Preferences (F5) before using this manager.",
+            "Source Audition Manager", 0)
+        return
+    end
+end
+
+
 package.path      = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui       = require 'imgui' '0.10'
 
