@@ -91,8 +91,11 @@ function main()
             local i = 0
             while true do
                 local project, _ = EnumProjects(i)
-                if project == nil then break
-                else DeleteProjectMarker(project, 999, false) end
+                if project == nil then
+                    break
+                else
+                    DeleteProjectMarker(project, 999, false)
+                end
                 i = i + 1
             end
         end
@@ -152,8 +155,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -175,8 +181,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -197,8 +206,11 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
@@ -213,39 +225,46 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
     end
+
+    -- Check for existing S-AUD on the item the pair lives in
+    local _, existing_chunk = GetItemStateChunk(item_in, "", false)
+    local has_saud = existing_chunk and
+        existing_chunk:find("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+") ~= nil
 
     -- Guard: if the new marker is in the same item as the existing pair,
-    -- the user is just repositioning — skip conversion, just delete old marker
+    -- only skip conversion if an S-AUD already exists
+    -- If no S-AUD exists yet, allow conversion
     local item_new, _ = get_item_at_position(new_pos, new_track_number)
-    if item_new and item_new == item_in then
+    if item_new and item_new == item_in and has_saud then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
+            if project == nil then
+                break
+            else
+                DeleteProjectMarker(project, marker_id, false)
+            end
             i = i + 1
         end
         return
     end
 
-    -- Guard: do not convert if the target item already has an S-AUD take marker
-    local _, existing_chunk = GetItemStateChunk(item_in, "", false)
-    if existing_chunk and existing_chunk:find("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+") then
-        local i = 0
-        while true do
-            local project, _ = EnumProjects(i)
-            if project == nil then break
-            else DeleteProjectMarker(project, marker_id, false) end
-            i = i + 1
-        end
-        return
+    -- If the target item already has an S-AUD take marker, remove it first
+    -- so the new pair replaces it (only one S-AUD allowed per item)
+    if has_saud then
+        local stripped = existing_chunk:gsub("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+[^\n]*", "")
+        SetItemStateChunk(item_in, stripped, false)
     end
+
 
     if take_in then
         local src_in = project_pos_to_source_pos(take_in, item_in, in_pos)
