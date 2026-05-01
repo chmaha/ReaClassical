@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.4.9
+@version 26.5
 @changelog
-  Source Auditioning: Allow unrestricted S-AUD updates when placing multiple real pairs in same item
+  Delete non-reaclassical tracks as part of sync
+  Source Audition Manager: Do not allow opening of window if source audition mode not activated
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
