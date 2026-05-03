@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5
+@version 26.5.1
 @changelog
-  Delete non-reaclassical tracks as part of sync
-  Source Audition Manager: Do not allow opening of window if source audition mode not activated
+  Mission Control: Fix add track button
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
