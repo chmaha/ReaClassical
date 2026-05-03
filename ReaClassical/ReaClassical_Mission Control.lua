@@ -2792,31 +2792,43 @@ function add_mixer_track(name)
     PreventUIRefresh(1)
 
     -- Add new track to penultimate position
-    local current_track_count = CountTracks(0)
-    for i = 0, current_track_count - 1 do
+    local folder_indices = {}
+    local folder_colors = {}
+    local folder_seen = 0
+    for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
         if depth == 1 then
-            -- Get color from this specific folder
+            folder_seen = folder_seen + 1
             local folder_color = GetTrackColor(track)
-
-            -- If folder doesn't have color, try first child
             if folder_color == 0 and i + 1 < CountTracks(0) then
                 local child_track = GetTrack(0, i + 1)
                 folder_color = GetTrackColor(child_track)
             end
-
-            -- Insert the new track
-            InsertTrackAtIndex(i + child_count, 1)
-
-            -- Apply the folder's color to the newly inserted track
-            if folder_color ~= 0 then
-                local new_track_in_folder = GetTrack(0, i + child_count)
-                SetTrackColor(new_track_in_folder, folder_color)
-            end
+            table.insert(folder_indices, i)
+            table.insert(folder_colors, folder_color)
         end
+    end
+
+    for f = #folder_indices, 1, -1 do
+        local i = folder_indices[f]
+        InsertTrackAtIndex(i + child_count, 1)
+        local new_track_in_folder = GetTrack(0, i + child_count)
+        if folder_colors[f] ~= 0 then
+            SetTrackColor(new_track_in_folder, folder_colors[f])
+        end
+        if f == 1 then
+            GetSetMediaTrackInfo_String(new_track_in_folder, "P_EXT:Destination", "y", true)
+        else
+            GetSetMediaTrackInfo_String(new_track_in_folder, "P_EXT:Source", "y", true)
+        end
+    end
+
+    -- Handle depth == -1 swap separately
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
         if depth == -1 then
-            -- Switch with last track in folder
             SetOnlyTrackSelected(track)
             ReorderSelectedTracks(i - 1, 0)
         end
