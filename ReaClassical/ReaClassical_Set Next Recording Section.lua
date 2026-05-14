@@ -445,7 +445,8 @@ function mixer()
 
         -- Handle source tracks - always show in TCP
         local _, source_track = GetSetMediaTrackInfo_String(track, "P_EXT:Source", "", false)
-        if trackname_check(track, "^S%d+:") or source_track == "y" then
+        local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        if track_name:match("^S%d+:") or source_track == "y" then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
         end
 

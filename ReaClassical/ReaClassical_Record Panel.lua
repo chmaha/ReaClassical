@@ -265,18 +265,13 @@ function main()
       -- Check if Classical Take Record already stored GUIDs (more reliable than position matching)
       local _, existing_guids = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
       if existing_guids and existing_guids ~= "" then
-        -- GUIDs already stored by Classical Take Record — apply rank/notes via GUIDs
         apply_rank_and_notes_by_guids()
       else
-        -- Fallback: position-based matching and GUID storage
         apply_rank_and_notes_to_items(apply_pos)
         store_last_recorded_guids(apply_pos)
       end
       stop_cursor_pos = nil
 
-      -- Mark that we just finished a recording so the UI can retarget those items by GUID.
-      -- recording_rank/note are intentionally NOT reset here so the dropdown continues to
-      -- reflect whatever rank was set during recording.
       had_recent_recording = true
       editing_item = nil
     end
@@ -335,8 +330,6 @@ function main()
           take_extracted = false
           session_extracted = false
           session_text = session
-          -- If returning to last-recording mode, restore rank/notes from the stored GUIDs
-          -- so the dropdown reflects the last recording, not the previously selected item.
           if had_recent_recording then
             local _, guid_str = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
             if guid_str and guid_str ~= "" then
@@ -363,12 +356,52 @@ function main()
 
         last_selected_item = selected_item
       end
+
+      -- WEB REMOTE: re-read session name in case web panel changed it.
+      -- Only when not editing a specific item (which may have its own extracted session).
+      if not session_extracted then
+        local _, web_session = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        if web_session ~= session then
+          session = web_session ~= "" and web_session or ""
+          session_dir = session ~= "" and (session .. separator) or ""
+          session_suffix = session ~= "" and (session .. "_") or ""
+          iterated_filenames = false
+          rec_name_set = false
+          session_text = session
+        end
+      end
+
+      -- WEB REMOTE: re-read RecordTakesHorizontally in case web panel toggled it.
+      local _, rth_web = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+      local rth_web_bool = (rth_web == "1")
+      if rth_web_bool ~= record_takes_horizontally then
+        record_takes_horizontally = rth_web_bool
+      end
+
+      -- WEB REMOTE: apply rank/notes if web panel submitted new values.
+      -- WebRemote_Pending is set to "1" by the web panel on every submission
+      -- (including "No rank" + empty notes), so we don't gate on content.
+      local _, web_pending = GetProjExtState(0, "ReaClassical", "WebRemote_Pending")
+      if web_pending == "1" then
+        local _, web_rank = GetProjExtState(0, "ReaClassical", "WebRemote_Rank")
+        local _, web_note = GetProjExtState(0, "ReaClassical", "WebRemote_Note")
+        recording_rank = web_rank
+        recording_note = web_note
+        apply_rank_and_notes_by_guids()
+        SetProjExtState(0, "ReaClassical", "WebRemote_Pending", "0")
+      end
     end
 
     if not iterated_filenames and not editing_item then
       take_text = get_take_count(session) + 1
     elseif not editing_item then
       take_text = take_count + 1
+    end
+
+    -- WEB REMOTE: publish take number after recalculation so web panel
+    -- always shows the same value as the panel (next take to record).
+    if not editing_item then
+      SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(take_text))
     end
 
     -- Reset session_text if not editing an item
@@ -451,6 +484,9 @@ function main()
         take_text = take_count
         added_take_number = true
         rec_name_set = false
+
+        -- WEB REMOTE: publish take number as recording starts (take is now locked in).
+        SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(take_text))
       end
     end
     stop_cursor_pos = GetCursorPosition()
@@ -986,7 +1022,6 @@ function draw(playstate)
     end
     ImGui.PopStyleColor(ctx)
     ImGui.PopFont(ctx)
-    -- button_y = button_y + (20 * scale)
   end
 
   ImGui.SetCursorPos(ctx, buttons_start_x, button_y)
@@ -1032,11 +1067,9 @@ function draw(playstate)
   if is_recording then
     rec_button_label = "Stop"
   elseif can_arm_first_folder then
-    -- No track selected, nothing armed, but a folder exists: allow arming first folder
     rec_button_label = "Arm"
     arm_first_folder_mode = true
   elseif not selected_track and not any_armed then
-    -- No track selected, nothing armed, no folder found
     rec_button_label = "Arm"
     show_select_message = true
     button_disabled = true
@@ -1061,7 +1094,6 @@ function draw(playstate)
       Main_OnCommand(40289, 0) -- Item: Unselect all items
     end
     if arm_first_folder_mode then
-      -- Select the first folder track so F9 can arm it
       SetOnlyTrackSelected(first_folder)
     elseif rec_button_label == "Rec" and not selected_track and any_armed then
       for i = 0, num_tracks - 1 do
@@ -1141,7 +1173,6 @@ function draw(playstate)
       ImGui.PopStyleColor(ctx)
     end
   else
-    -- Invisible placeholder to maintain spacing
     ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x00000000)
     ImGui.TextWrapped(ctx, "Select a parent track to arm")
     ImGui.PopStyleColor(ctx)
@@ -1227,10 +1258,8 @@ function draw(playstate)
       if ImGui.Selectable(ctx, rank.name, is_selected) then
         recording_rank = (i == 9) and "" or tostring(i)
         if playstate == 0 and editing_item then
-          -- Selected item mode: save directly to that item
           save_item_rank_and_notes(editing_item, recording_rank, recording_note)
         elseif playstate == 0 and had_recent_recording then
-          -- Last-recording mode: apply to stored GUIDs regardless of cursor/selection
           apply_rank_and_notes_by_guids()
         end
       end
@@ -1253,10 +1282,8 @@ function draw(playstate)
   if rv then
     recording_note = val
     if playstate == 0 and editing_item then
-      -- Selected item mode: save directly to that item
       save_item_rank_and_notes(editing_item, recording_rank, recording_note)
     elseif playstate == 0 and had_recent_recording then
-      -- Last-recording mode: apply to stored GUIDs regardless of cursor/selection
       apply_rank_and_notes_by_guids()
     end
   end
@@ -1433,6 +1460,9 @@ function draw(playstate)
         take_text = get_take_count(session) + 1
         rec_name_set = false
       end
+
+      -- WEB REMOTE: publish updated take number after popup apply
+      SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(take_text))
 
       set_via_right_click = true
       ImGui.CloseCurrentPopup(ctx)
@@ -1746,7 +1776,7 @@ function update_take_name(item, rank)
 end
 
 ---------------------------------------------------------------------
----
+
 function store_last_recorded_guids(cursor_pos)
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   cursor_pos = cursor_pos or GetCursorPosition()
@@ -1764,7 +1794,6 @@ function store_last_recorded_guids(cursor_pos)
   end
 
   if workflow == "Vertical" then
-    -- Find rec-armed folder track
     local rec_track = nil
     local num_tracks = CountTracks(0)
     for i = 0, num_tracks - 1 do
@@ -1823,7 +1852,6 @@ function store_last_recorded_guids(cursor_pos)
       end
     end
   else
-    -- Horizontal workflow: match by item_end OR item_start
     for i = 0, CountTracks(0) - 1 do
       local track = GetTrack(0, i)
       for j = 0, CountTrackMediaItems(track) - 1 do
@@ -1842,7 +1870,6 @@ end
 
 ---------------------------------------------------------------------
 
--- Apply rank/notes to a single item (shared logic used by both apply functions).
 function apply_rank_and_notes_to_item(item)
   local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
   local is_colorized = (colorized == "y")
@@ -1880,9 +1907,7 @@ function apply_rank_and_notes_to_item(item)
     update_take_name(item, "")
   end
 
-  -- FIX: Always write notes (including empty string to clear them)
   GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
-
   GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
   UpdateItemInProject(item)
 end
@@ -1893,13 +1918,11 @@ function apply_rank_and_notes_by_guids()
   local _, guid_str = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
   if not guid_str or guid_str == "" then return end
 
-  -- Build lookup table of target GUIDs
   local target_guids = {}
   for guid in guid_str:gmatch("([^,]+)") do
     target_guids[guid] = true
   end
 
-  -- Scan all items and apply to matching ones
   local total_items = CountMediaItems(0)
   for i = 0, total_items - 1 do
     local item = GetMediaItem(0, i)
@@ -1956,10 +1979,8 @@ function apply_rank_and_notes_to_items(cursor_pos)
       if current_folder_idx then
         local _, rth = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
         if rth == "1" then
-          -- Horizontal mode: arming stayed on the folder that just recorded
           target_folder = folder_tracks[current_folder_idx]
         elseif current_folder_idx > 1 then
-          -- Normal mode: arming advanced to next folder, so recorded folder is one back
           target_folder = folder_tracks[current_folder_idx - 1]
         end
       end
@@ -2031,9 +2052,7 @@ function apply_rank_and_notes_to_items(cursor_pos)
                   update_take_name(item, "")
                 end
 
-                -- FIX: Always write notes (including empty string to clear them)
                 GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
-
                 GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
               end
             end
@@ -2042,7 +2061,6 @@ function apply_rank_and_notes_to_items(cursor_pos)
       end
     end
   else
-    -- Horizontal workflow
     local track_count = CountTracks(0)
     for i = 0, track_count - 1 do
       local track = GetTrack(0, i)
@@ -2061,7 +2079,6 @@ function apply_rank_and_notes_to_items(cursor_pos)
             local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
             local item_end = item_start + item_length
 
-            -- FIX: Also match by item_start as fallback for cursor position differences
             if math.abs(item_end - cursor_pos) < 0.5 or math.abs(item_start - cursor_pos) < 0.5 then
               items_found = items_found + 1
 
@@ -2098,9 +2115,7 @@ function apply_rank_and_notes_to_items(cursor_pos)
                 update_take_name(item, "")
               end
 
-              -- FIX: Always write notes (including empty string to clear them)
               GetSetMediaItemInfo_String(item, "P_NOTES", recording_note, true)
-
               GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", tostring(take_text), true)
             end
           end
