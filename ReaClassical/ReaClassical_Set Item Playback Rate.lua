@@ -353,21 +353,25 @@ function apply_rate_change(new_rate_val, relative_mode, pres_pitch)
         return
     end
 
-    -- In ReaClassical, the user selects the folder track item. All child track
-    -- items share the same group ID. We find the folder track item from the
-    -- original selection (it's on a folder track), use it as the single source
-    -- of truth for position/delta, then apply rate+length to ALL grouped items.
-
-    -- Find the selected folder track item
+    -- Only one folder track item may be selected. Multiple would each need
+    -- their own delta and would interfere with each other's ripple.
     local folder_item = nil
+    local folder_item_count = 0
     for _, item in ipairs(sel_items) do
         local track = GetMediaItemTrack(item)
         if is_folder_track(track) then
             folder_item = item
-            break
+            folder_item_count = folder_item_count + 1
         end
     end
-    -- Fallback: just use first selected item if none found on folder track
+    if folder_item_count > 1 then
+        PreventUIRefresh(-1)
+        message_text = "Please select only one parent track item at a time."
+        message_timer = ImGui.GetTime(ctx)
+        Undo_EndBlock("RC Time Stretch (no-op)", -1)
+        return
+    end
+    -- Fallback: use first selected item if none found on folder track
     if not folder_item then folder_item = sel_items[1] end
 
     -- Expand to all grouped items (stereo pair, child tracks etc.)
@@ -480,7 +484,7 @@ end
 function main()
     if window_open then
         ImGui.SetNextWindowSizeConstraints(ctx, DEFAULT_W, DEFAULT_H, math.huge, math.huge)
-        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Time Stretch", window_open)
+        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Time Stretcher", window_open)
         window_open = open_ref
 
         if opened then
