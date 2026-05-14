@@ -44,6 +44,7 @@ Effects/ReJJ/
 Effects/chmaha Scripts/
 Effects/chmaha airwindows JSFX Ports
 ReaPack/
+reaper_www_root/
 ProjectTemplates/ReaClassical.RPP
 ProjectTemplates/Room_Tone_Gen.RPP
 Scripts/ReaTeam Scripts/Development/cfillion_Interactive ReaScript.lua

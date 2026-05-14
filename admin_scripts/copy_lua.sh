@@ -6,6 +6,7 @@ rsync -av --delete --exclude='ReaClassical.lua' --exclude='ListenbackMicMonitor.
 cp "$SRC/ColorThemes/"* "$DEST"
 cp "$SRC/ProjectTemplates/ReaClassical.RPP" "$DEST"
 cp "$SRC/ProjectTemplates/Room_Tone_Gen.RPP" "$DEST"
+cp "$SRC/reaper_www_root/ReaClassical_remote.html" "$DEST"
 cp $SRC/reaper.ini "$DEST/ReaClassical.ini"
 cp $SRC/reaper-kb.ini "$DEST/ReaClassical-kb.ini"
 cp $SRC/reaper-mouse.ini "$DEST/ReaClassical-mouse.ini"
