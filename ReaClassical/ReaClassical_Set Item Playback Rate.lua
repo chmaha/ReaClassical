@@ -366,7 +366,7 @@ function apply_rate_change(new_rate_val, relative_mode, pres_pitch)
     end
     if folder_item_count > 1 then
         PreventUIRefresh(-1)
-        message_text = "Please select only one parent track item at a time."
+        message_text = "Please select only one item at a time."
         message_timer = ImGui.GetTime(ctx)
         Undo_EndBlock("RC Time Stretch (no-op)", -1)
         return
@@ -420,9 +420,17 @@ function apply_rate_change(new_rate_val, relative_mode, pres_pitch)
         end
     end
 
-    -- Step 3: Ripple once, using the folder item's position as boundary.
-    -- Everything starting after the folder item's start shifts by delta.
-    -- This correctly handles crossfaded following items.
+    -- Step 3: Build a set of tracks that belong to the selected item's folder.
+    -- Only items on these tracks should be rippled — items in other folders
+    -- must not be affected.
+    local folder_track = GetMediaItemTrack(folder_item)
+    local folder_track_set = { [folder_track] = true }
+    for _, child in ipairs(get_folder_children(folder_track)) do
+        folder_track_set[child] = true
+    end
+
+    -- Ripple once, using the folder item's position as boundary.
+    -- Only items within the same folder and starting after folder_pos are moved.
     local total_delta = delta
     if math.abs(delta) > 0.0001 then
         local total_items = CountMediaItems(0)
@@ -432,7 +440,7 @@ function apply_rate_change(new_rate_val, relative_mode, pres_pitch)
 
         for i = 0, total_items - 1 do
             local it = GetMediaItem(0, i)
-            if not target_set[it] then
+            if not target_set[it] and folder_track_set[GetMediaItemTrack(it)] then
                 local ipos = GetMediaItemInfo_Value(it, "D_POSITION")
                 if ipos > folder_pos + 0.0001 then
                     if not to_move_set[it] then
@@ -445,10 +453,12 @@ function apply_rate_change(new_rate_val, relative_mode, pres_pitch)
             end
         end
 
+        -- Group-mates must also be within the folder
         if next(move_group_ids) then
             for i = 0, total_items - 1 do
                 local it = GetMediaItem(0, i)
-                if not target_set[it] and not to_move_set[it] then
+                if not target_set[it] and not to_move_set[it]
+                        and folder_track_set[GetMediaItemTrack(it)] then
                     local gid = GetMediaItemInfo_Value(it, "I_GROUPID")
                     if gid and gid > 0 and move_group_ids[gid] then
                         local ipos = GetMediaItemInfo_Value(it, "D_POSITION")
@@ -497,7 +507,7 @@ function main()
             ImGui.Spacing(ctx)
 
             -- Absolute checkbox
-            local rv_abs, new_abs = ImGui.Checkbox(ctx, "Absolute rate (%)", not is_relative)
+            local rv_abs, new_abs = ImGui.Checkbox(ctx, "Absolute rate (%%)", not is_relative)
             if rv_abs then is_relative = not new_abs end
 
             ImGui.Spacing(ctx)
@@ -506,9 +516,9 @@ function main()
 
             -- Value input
             if is_relative then
-                ImGui.Text(ctx, "Rate change (%):  relative to current rate")
+                ImGui.Text(ctx, "Rate change (%%):  relative to current rate")
             else
-                ImGui.Text(ctx, "Rate (%):  absolute from normal speed")
+                ImGui.Text(ctx, "Rate (%%):  absolute from normal speed")
             end
             ImGui.SetNextItemWidth(ctx, avail_w)
             local rv, new_str = ImGui.InputText(ctx, "##rate_input", rate_str)
