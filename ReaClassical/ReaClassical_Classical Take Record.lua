@@ -27,7 +27,7 @@ local load_prefs, save_prefs, get_color_table
 local extract_take_number, check_parent_track
 local get_selected_media_item_at, count_selected_media_items
 local clear_all_rec_armed_except_live, get_item_guid
-local select_children_of_selected_folders
+local select_children_of_selected_folders, reset_playback_rate
 local unselect_folder_children, set_rec_arm_for_selected_tracks
 local find_mixer_track_for_track, is_mixer_disabled
 local avoid_take_lanes, find_recording_folder, get_record_takes_horizontally
@@ -673,6 +673,9 @@ end
 ---------------------------------------------------------------------
 
 function set_rec_arm_for_selected_tracks(state)
+    if state == 1 then
+        CSurf_OnPlayRateChange(1.0)
+    end
     local num_tracks = CountTracks(0)
 
     for i = 0, num_tracks - 1 do
@@ -780,6 +783,12 @@ function find_recording_folder()
     end
 
     return nil
+end
+
+---------------------------------------------------------------------
+
+function reset_playback_rate()
+    CSurf_OnPlayRateChange(1.0)
 end
 
 ---------------------------------------------------------------------
