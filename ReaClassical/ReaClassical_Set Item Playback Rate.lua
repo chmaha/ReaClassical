@@ -507,7 +507,7 @@ function main()
             ImGui.Spacing(ctx)
 
             -- Absolute checkbox
-            local rv_abs, new_abs = ImGui.Checkbox(ctx, "Absolute rate (%%)", not is_relative)
+            local rv_abs, new_abs = ImGui.Checkbox(ctx, "Absolute rate (%)", not is_relative)
             if rv_abs then is_relative = not new_abs end
 
             ImGui.Spacing(ctx)
@@ -516,9 +516,9 @@ function main()
 
             -- Value input
             if is_relative then
-                ImGui.Text(ctx, "Rate change (%%):  relative to current rate")
+                ImGui.Text(ctx, "Rate change (%):  relative to current rate")
             else
-                ImGui.Text(ctx, "Rate (%%):  absolute from normal speed")
+                ImGui.Text(ctx, "Rate (%):  absolute from normal speed")
             end
             ImGui.SetNextItemWidth(ctx, avail_w)
             local rv, new_str = ImGui.InputText(ctx, "##rate_input", rate_str)
