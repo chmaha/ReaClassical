@@ -3,7 +3,7 @@
 @version 26.5.2
 @changelog
   Add record panel web interface
-  Reset playback rate to 1x on rec-arm
+  Reset playback rate to 1x on rec arm
   New function: Set item rate with ripple
   Move Track left/right: Remove unused function parameter
 @metapackage
@@ -114,6 +114,7 @@
   [theme] ReaClassical Light.ReaperThemeZip
   [theme] ReaClassical WaveColors Dark.ReaperThemeZip
   [theme] ReaClassical WaveColors Light.ReaperThemeZip
+  [www] ReaClassical_remote.html
   ReaClassical_Colors_Table.lua
   ReaClassical.ini
   ReaClassical-kb.ini
