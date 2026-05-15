@@ -2,10 +2,7 @@
 @author chmaha
 @version 26.5.3
 @changelog
-  Add record panel web interface
-  Reset playback rate to 1x on rec arm
-  New function: Set item rate with ripple
-  Move Track left/right: Remove unused function parameter
+  Actually include new playrate with ripple function
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
