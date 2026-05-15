@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.2
+@version 26.5.3
 @changelog
   Add record panel web interface
   Reset playback rate to 1x on rec arm
@@ -107,6 +107,7 @@
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
   [main] ReaClassical_Take Region to Source Pair.lua
+  [main] ReaClassical_Set Item Playback Rate.lua
   [jsfx] ListenbackMicMonitor.jsfx
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Gen.RPP
