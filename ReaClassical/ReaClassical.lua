@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.1
+@version 26.5.2
 @changelog
-  Mission Control: Fix add track button
+  Add record panel web interface
+  Reset playback rate to 1x on rec-arm
+  New function: Set item rate with ripple
+  Move Track left/right: Remove unused function parameter
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
