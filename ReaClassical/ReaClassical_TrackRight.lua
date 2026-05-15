@@ -90,8 +90,8 @@ function main()
     local next_automation = collect_automation(next_items, next_start, folder_track)
 
     -- Move items
-    move_items(selected_items, folder_track, next_span)
-    move_items(next_items, folder_track, -selected_span)
+    move_items(selected_items, next_span)
+    move_items(next_items, -selected_span)
 
     -- Restore automation at new positions
     -- Selected moved right by next_span, so new start = selected_start + next_span
@@ -301,7 +301,7 @@ end
 
 ---------------------------------------------------------------------
 
-function move_items(folder_items, folder_track, delta)
+function move_items(folder_items, delta)
     -- Collect group IDs from all folder track items
     local group_ids = {}
     for _, item in ipairs(folder_items) do
