@@ -51,17 +51,17 @@ set_action_options(2)
 package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
-local ctx = ImGui.CreateContext('ReaClassical Time Stretcher')
+local ctx = ImGui.CreateContext('ReaClassical Playrate and Pitch Adjuster')
 local window_open = true
 
 local DEFAULT_W = 320
-local DEFAULT_H = 300
+local DEFAULT_H = 420
 
 -- UI state
 local rate_input_buf = reaper.new_array and nil  -- handled via string
-local rate_str = "5.0"  -- relative % change by default          -- percentage string in the input box
-local is_relative  = true       -- true = relative %, false = absolute rate value
-local preserve_pitch = true
+local rate_str = "5.0"  -- relative % change by default
+local is_relative = true        -- true = relative %, false = absolute rate value
+local pitch_str = "0.0"         -- semitones input
 
 -- Message state
 local message_text = ""
@@ -335,12 +335,12 @@ end
 
 function reset_to_normal()
     -- 0 in absolute mode = 1.0x (normal speed)
-    apply_rate_change(0, false, preserve_pitch)
+    apply_rate_change(0, false)
 end
 
 ---------------------------------------------------------------------
 
-function apply_rate_change(new_rate_val, relative_mode, pres_pitch)
+function apply_rate_change(new_rate_val, relative_mode)
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
@@ -412,9 +412,9 @@ function apply_rate_change(new_rate_val, relative_mode, pres_pitch)
     for _, item in ipairs(all_target_items) do
         local take = GetActiveTake(item)
         if take then
-            if pres_pitch then
-                SetMediaItemTakeInfo_Value(take, "B_PPITCH", 1)
-            end
+            -- Explicitly set B_PPITCH in both directions so toggling the
+            -- checkbox always takes effect, even on previously stretched items.
+            SetMediaItemTakeInfo_Value(take, "B_PPITCH", 1)  -- always preserve pitch when time-stretching
             SetMediaItemTakeInfo_Value(take, "D_PLAYRATE", new_rate)
             SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
         end
@@ -491,10 +491,60 @@ end
 
 ---------------------------------------------------------------------
 
+function apply_pitch_change(semitones)
+    Undo_BeginBlock()
+    PreventUIRefresh(1)
+
+    local sel_items = get_selected_media_items()
+    if #sel_items == 0 then
+        PreventUIRefresh(-1)
+        message_text = "No items selected."
+        message_timer = ImGui.GetTime(ctx)
+        Undo_EndBlock("RC Pitch Adjust (no-op)", -1)
+        return
+    end
+
+    -- Find folder item and expand to grouped items
+    local folder_item = nil
+    local folder_item_count = 0
+    for _, item in ipairs(sel_items) do
+        if is_folder_track(GetMediaItemTrack(item)) then
+            folder_item = item
+            folder_item_count = folder_item_count + 1
+        end
+    end
+    if folder_item_count > 1 then
+        PreventUIRefresh(-1)
+        message_text = "Please select only one item at a time."
+        message_timer = ImGui.GetTime(ctx)
+        Undo_EndBlock("RC Pitch Adjust (no-op)", -1)
+        return
+    end
+    if not folder_item then folder_item = sel_items[1] end
+
+    local all_target_items = get_all_items_in_groups_for_items(sel_items)
+
+    for _, item in ipairs(all_target_items) do
+        local take = GetActiveTake(item)
+        if take then
+            SetMediaItemTakeInfo_Value(take, "D_PITCH", semitones)
+        end
+    end
+
+    UpdateArrange()
+    PreventUIRefresh(-1)
+    message_text = string.format("Pitch set to %.2f semitones on %d item(s).",
+        semitones, #all_target_items)
+    message_timer = ImGui.GetTime(ctx)
+    Undo_EndBlock(string.format("RC Pitch Adjust (%.2f semitones)", semitones), -1)
+end
+
+---------------------------------------------------------------------
+
 function main()
     if window_open then
         ImGui.SetNextWindowSizeConstraints(ctx, DEFAULT_W, DEFAULT_H, math.huge, math.huge)
-        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Time Stretcher", window_open)
+        local opened, open_ref = ImGui.Begin(ctx, "ReaClassical Playrate and Pitch Adjuster", window_open)
         window_open = open_ref
 
         if opened then
@@ -528,40 +578,64 @@ function main()
             ImGui.Separator(ctx)
             ImGui.Spacing(ctx)
 
-            -- Preserve pitch checkbox
-            local rv_pp, new_pp = ImGui.Checkbox(ctx, "Preserve Pitch", preserve_pitch)
-            if rv_pp then preserve_pitch = new_pp end
-
-            ImGui.Spacing(ctx)
-            ImGui.Separator(ctx)
-            ImGui.Spacing(ctx)
-
             -- Apply button
             local can_apply = sel_count > 0 and tonumber(rate_str) ~= nil
-            if not can_apply then
-                ImGui.BeginDisabled(ctx)
-            end
+            if not can_apply then ImGui.BeginDisabled(ctx) end
 
             if ImGui.Button(ctx, 'Apply & Ripple', avail_w, 35) then
                 local val = tonumber(rate_str)
                 if val then
-                    apply_rate_change(val, is_relative, preserve_pitch)
+                    apply_rate_change(val, is_relative)
                 else
                     message_text = "Invalid rate value."
                     message_timer = ImGui.GetTime(ctx)
                 end
             end
 
-            if not can_apply then
-                ImGui.EndDisabled(ctx)
-            end
+            if not can_apply then ImGui.EndDisabled(ctx) end
 
             ImGui.Spacing(ctx)
 
-            -- Reset button (always enabled if items selected)
+            -- Reset button
             if sel_count == 0 then ImGui.BeginDisabled(ctx) end
             if ImGui.Button(ctx, 'Reset to Normal Speed', avail_w, 30) then
                 reset_to_normal()
+            end
+            if sel_count == 0 then ImGui.EndDisabled(ctx) end
+
+            ImGui.Spacing(ctx)
+            ImGui.Separator(ctx)
+            ImGui.Spacing(ctx)
+
+            -- Pitch adjustment section
+            ImGui.Text(ctx, "Pitch Adjustment (semitones):")
+            ImGui.SetNextItemWidth(ctx, avail_w)
+            local rv_p, new_p = ImGui.InputText(ctx, "##pitch_input", pitch_str)
+            if rv_p then pitch_str = new_p end
+            ImGui.Spacing(ctx)
+            ImGui.TextDisabled(ctx, "0 = normal  |  positive = higher  |  negative = lower")
+            ImGui.Spacing(ctx)
+
+            local can_pitch = sel_count > 0 and tonumber(pitch_str) ~= nil
+            if not can_pitch then ImGui.BeginDisabled(ctx) end
+
+            if ImGui.Button(ctx, 'Apply Pitch', avail_w, 30) then
+                local val = tonumber(pitch_str)
+                if val then
+                    apply_pitch_change(val)
+                else
+                    message_text = "Invalid pitch value."
+                    message_timer = ImGui.GetTime(ctx)
+                end
+            end
+
+            if not can_pitch then ImGui.EndDisabled(ctx) end
+
+            ImGui.Spacing(ctx)
+
+            if sel_count == 0 then ImGui.BeginDisabled(ctx) end
+            if ImGui.Button(ctx, 'Reset Pitch', avail_w, 30) then
+                apply_pitch_change(0.0)
             end
             if sel_count == 0 then ImGui.EndDisabled(ctx) end
 
