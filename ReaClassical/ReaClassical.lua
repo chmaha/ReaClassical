@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.3
+@version 26.5.4
 @changelog
-  Actually include new playrate with ripple function
+  Playrate with ripple: Add separate pitch dialog to window
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
