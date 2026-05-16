@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_selected_cd_track_item, is_cd_track_start, is_folder_track
 local get_cd_track_items, get_next_cd_track_item
-local move_items, get_folder_children, collect_automation, restore_automation
+local collect_move, move_all, get_folder_children, collect_automation, restore_automation
 local is_in_child_track, get_parent_folder
 
 ---------------------------------------------------------------------
@@ -58,16 +58,13 @@ function main()
     local next_next_item = get_next_cd_track_item(next_item, folder_track)
 
     local selected_items = get_cd_track_items(selected_item, folder_track)
-    local next_items = get_cd_track_items(next_item, folder_track)
+    local next_items     = get_cd_track_items(next_item, folder_track)
 
     local selected_start = GetMediaItemInfo_Value(selected_item, "D_POSITION")
-    local next_start = GetMediaItemInfo_Value(next_item, "D_POSITION")
+    local next_start     = GetMediaItemInfo_Value(next_item, "D_POSITION")
 
-    -- How far Next moves left: distance from Selected start to Next start
     local selected_span = next_start - selected_start
 
-    -- How far Selected moves right: span of the next CD track
-    -- (or end of Next's last item + 4s postgap if Next is the last track)
     local next_span
     if next_next_item then
         local next_next_start = GetMediaItemInfo_Value(next_next_item, "D_POSITION")
@@ -84,19 +81,19 @@ function main()
 
     PreventUIRefresh(1)
 
-    -- Snapshot automation for both CD tracks relative to their start positions,
-    -- then clear it — before any items are moved
     local selected_automation = collect_automation(selected_items, selected_start, folder_track)
-    local next_automation = collect_automation(next_items, next_start, folder_track)
+    local next_automation     = collect_automation(next_items, next_start, folder_track)
 
-    -- Move items
-    move_items(selected_items, next_span)
-    move_items(next_items, -selected_span)
+    -- Collect items for both moves with their deltas, deduplicated globally,
+    -- so no child item gets moved twice.
+    -- selected moves right by next_span; next moves left by selected_span.
+    move_all(
+        { { items = selected_items, delta =  next_span },
+          { items = next_items,     delta = -selected_span } },
+        folder_track
+    )
 
-    -- Restore automation at new positions
-    -- Selected moved right by next_span, so new start = selected_start + next_span
     restore_automation(selected_automation, selected_start + next_span, folder_track)
-    -- Next moved left by selected_span, so new start = next_start - selected_span = selected_start
     restore_automation(next_automation, selected_start, folder_track)
 
     Main_OnCommand(40769, 0) -- unselect all
@@ -137,9 +134,7 @@ function get_parent_folder(track)
     for i = track_idx - 1, 0, -1 do
         local t = GetTrack(0, i)
         if not t then break end
-        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
-            return t
-        end
+        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then return t end
     end
     return nil
 end
@@ -175,9 +170,7 @@ function get_cd_track_items(start_item, folder_track)
         local item = GetTrackMediaItem(folder_track, i)
         local take = GetActiveTake(item)
         local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-        if is_cd_track_start(take_name) then
-            break
-        end
+        if is_cd_track_start(take_name) then break end
         table.insert(items, item)
     end
     return items
@@ -193,9 +186,7 @@ function get_next_cd_track_item(start_item, folder_track)
         local item = GetTrackMediaItem(folder_track, i)
         local take = GetActiveTake(item)
         local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-        if is_cd_track_start(take_name) then
-            return item
-        end
+        if is_cd_track_start(take_name) then return item end
         i = i + 1
     end
     return nil
@@ -204,7 +195,6 @@ end
 ---------------------------------------------------------------------
 
 function collect_automation(folder_items, track_start, folder_track)
-    -- Determine the time range covered by this CD track's folder items
     local range_start = math.huge
     local range_end = 0
     for _, item in ipairs(folder_items) do
@@ -214,15 +204,12 @@ function collect_automation(folder_items, track_start, folder_track)
         range_end = math.max(range_end, pos + len)
     end
 
-    -- Collect all tracks in the folder
     local tracks_to_check = { folder_track }
     local children = get_folder_children(folder_track)
     for _, child in ipairs(children) do
         table.insert(tracks_to_check, child)
     end
 
-    -- For each track, collect envelope points and automation items
-    -- within the time range, storing positions relative to track_start
     local snapshot = {}
     for _, track in ipairs(tracks_to_check) do
         local track_data = { track = track, envs = {} }
@@ -231,7 +218,6 @@ function collect_automation(folder_items, track_start, folder_track)
             local env = GetTrackEnvelope(track, e)
             local env_data = { env = env, points = {}, ai = {} }
 
-            -- Collect envelope points within range
             local num_points = CountEnvelopePoints(env)
             for p = 0, num_points - 1 do
                 local _, time, value, shape, tension, sel = GetEnvelopePoint(env, p)
@@ -241,25 +227,19 @@ function collect_automation(folder_items, track_start, folder_track)
                         value = value, shape = shape,
                         tension = tension, sel = sel
                     })
-                    -- Delete the point so we can reinsert at correct position later
                     DeleteEnvelopePointRange(env, time - 0.00005, time + 0.00005)
-                    -- Recount since we just deleted
                     num_points = CountEnvelopePoints(env)
                     p = p - 1
                 end
             end
             Envelope_SortPoints(env)
 
-            -- Collect automation items within range
             local num_ai = CountAutomationItems(env)
             for ai = 0, num_ai - 1 do
                 local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
                 local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
                 if ai_pos < range_end and (ai_pos + ai_len) > range_start then
-                    table.insert(env_data.ai, {
-                        rel = ai_pos - track_start,
-                        len = ai_len
-                    })
+                    table.insert(env_data.ai, { rel = ai_pos - track_start, len = ai_len })
                 end
             end
 
@@ -276,16 +256,13 @@ function restore_automation(snapshot, new_track_start, folder_track)
     for _, track_data in ipairs(snapshot) do
         for _, env_data in ipairs(track_data.envs) do
             local env = env_data.env
-            -- Reinsert envelope points at new absolute positions
             for _, pt in ipairs(env_data.points) do
                 InsertEnvelopePoint(env, new_track_start + pt.rel, pt.value,
                     pt.shape, pt.tension, pt.sel, true)
             end
             Envelope_SortPoints(env)
-            -- Reposition automation items
             local num_ai = CountAutomationItems(env)
             for ai = 0, num_ai - 1 do
-                local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
                 local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
                 for _, saved_ai in ipairs(env_data.ai) do
                     if math.abs(ai_len - saved_ai.len) < 0.0001 then
@@ -301,39 +278,60 @@ end
 
 ---------------------------------------------------------------------
 
-function move_items(folder_items, delta)
-    -- Collect group IDs from all folder track items
-    local group_ids = {}
+-- collect_move: return { item -> delta } for all items in a CD track group,
+-- including child-track items whose midpoint falls within the parent range.
+function collect_move(folder_items, folder_track, delta)
+    local range_start = math.huge
+    local range_end = 0
     for _, item in ipairs(folder_items) do
-        local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
-        if gid and gid > 0 then
-            group_ids[gid] = true
-        end
+        local p = GetMediaItemInfo_Value(item, "D_POSITION")
+        local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+        range_start = math.min(range_start, p)
+        range_end   = math.max(range_end, p + l)
     end
 
-    -- Build full list: start with folder items, then add any project item
-    -- sharing a group ID with them
-    local items_to_move = {}
-    local seen = {}
+    local result = {}
     for _, item in ipairs(folder_items) do
-        items_to_move[#items_to_move + 1] = item
-        seen[item] = true
+        result[item] = delta
     end
 
-    local total_items = CountMediaItems(0)
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if not seen[item] then
-            local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
-            if gid and gid > 0 and group_ids[gid] then
-                items_to_move[#items_to_move + 1] = item
-                seen[item] = true
+    local children = get_folder_children(folder_track)
+    for _, child in ipairs(children) do
+        local n = CountTrackMediaItems(child)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(child, i)
+            if result[item] == nil then
+                local p = GetMediaItemInfo_Value(item, "D_POSITION")
+                local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+                local mid = p + l * 0.5
+                if mid >= range_start and mid < range_end then
+                    result[item] = delta
+                end
             end
         end
     end
 
-    -- Move all items
-    for _, item in ipairs(items_to_move) do
+    return result
+end
+
+---------------------------------------------------------------------
+
+-- move_all: takes a list of { items, delta } groups, collects all item->delta
+-- mappings globally deduplicated (first group wins), then moves each item
+-- exactly once. Prevents child items at boundaries from being moved twice.
+function move_all(groups, folder_track)
+    local item_delta = {}
+
+    for _, group in ipairs(groups) do
+        local moves = collect_move(group.items, folder_track, group.delta)
+        for item, delta in pairs(moves) do
+            if item_delta[item] == nil then
+                item_delta[item] = delta
+            end
+        end
+    end
+
+    for item, delta in pairs(item_delta) do
         local pos = GetMediaItemInfo_Value(item, "D_POSITION")
         SetMediaItemInfo_Value(item, "D_POSITION", pos + delta)
     end

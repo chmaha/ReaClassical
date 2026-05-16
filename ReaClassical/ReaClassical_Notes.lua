@@ -24,7 +24,8 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, get_take_number, rgba_to_native, get_color_table
 local pastel_color, get_item_color, apply_rank_color
-local strip_rank_prefix
+local strip_rank_prefix, get_items_at_midpoint
+local get_folder_range_for_item
 
 ---------------------------------------------------------------------
 
@@ -71,14 +72,13 @@ local MIN_H_ITEM    = 80
 
 local track_note    = ""
 local item_note     = ""
-local item_rank     = "" -- Default to "No Rank"
+local item_rank     = ""
 local item_take_num = ""
 local item_name     = ""
 
 local editing_track = nil
 local editing_item  = nil
 
--- Rank color options (matching SAI marker manager)
 local RANKS         = {
     { name = "Excellent",     rgba = 0x39FF1499, prefix = "Excellent" },
     { name = "Very Good",     rgba = 0x32CD3299, prefix = "Very Good" },
@@ -94,17 +94,71 @@ local RANKS         = {
 ---------------------------------------------------------------------
 
 function strip_rank_prefix(name)
-    -- Remove any existing rank prefixes from name
     local all_prefixes = { "Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start" }
     for _, prefix in ipairs(all_prefixes) do
-        -- First check if name is exactly the prefix (no base name)
-        if name == prefix then
-            return ""
-        end
-        -- Then check for prefix with hyphen
+        if name == prefix then return "" end
         name = name:gsub("^" .. prefix .. "%-", "")
     end
     return name
+end
+
+---------------------------------------------------------------------
+
+-- Resolves the folder track range (0-based indices) that contains ref_item.
+function get_folder_range_for_item(ref_item)
+    local track = GetMediaItem_Track(ref_item)
+    local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
+            end
+        end
+    end
+    local folder_start, folder_end = nil, nil
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    return folder_start, folder_end
+end
+
+---------------------------------------------------------------------
+
+function get_items_at_midpoint(ref_item)
+    local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+    local mid = pos + len * 0.5
+    local tolerance = 0.0001
+    local result = {}
+    local folder_start, folder_end = get_folder_range_for_item(ref_item)
+    if not folder_start then return result end
+    for t = folder_start, folder_end do
+        local track = GetTrack(0, t)
+        local n = CountTrackMediaItems(track)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+            if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                result[#result + 1] = item
+            end
+        end
+    end
+    return result
 end
 
 ---------------------------------------------------------------------
@@ -116,7 +170,6 @@ function main()
 
     local project_note = GetSetProjectNotes(proj, false, "")
 
-    -- Safety: check if last edited item/track still exists
     if editing_item and not ValidatePtr2(0, editing_item, "MediaItem*") then
         editing_item = nil
         item_note = ""
@@ -144,20 +197,15 @@ function main()
     end
 
     if editing_item ~= item then
-        -- Clear keyboard focus to prevent InputText from retaining old value
         ImGui.SetWindowFocus(ctx)
         if editing_item then
             GetSetMediaItemInfo_String(editing_item, "P_NOTES", item_note, true)
-            -- Save rank (empty string if No Rank to delete P_EXT state)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", item_rank, true)
             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_take_num", item_take_num, true)
-            -- Save item name with rank prefix applied (using current item_name which is clean)
             local take = GetActiveTake(editing_item)
             if take then
-                local base_name = item_name -- Already clean, no prefix
+                local base_name = item_name
                 local final_name = base_name
-
-                -- Add rank prefix if not "No Rank"
                 if item_rank ~= "" then
                     local rank_index = tonumber(item_rank)
                     if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
@@ -168,7 +216,6 @@ function main()
                         end
                     end
                 end
-
                 GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
             end
         end
@@ -179,7 +226,6 @@ function main()
             item_note = note
 
             local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-            -- Convert numeric string to index, default to "" for No Rank
             if rank_str ~= "" then
                 local rank_num = tonumber(rank_str)
                 item_rank = (rank_num and rank_num >= 1 and rank_num <= 9) and tostring(rank_num) or ""
@@ -187,15 +233,12 @@ function main()
                 item_rank = ""
             end
 
-            -- Load take number - use stored value or default to filename
             local _, item_take_num_stored = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
             item_take_num = item_take_num_stored ~= "" and item_take_num_stored or get_take_number(item)
 
-            -- Load item name from active take (strip rank prefix for display)
             local take = GetActiveTake(item)
             if take then
                 local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                -- Remove any rank prefixes for display only
                 item_name = strip_rank_prefix(name)
             else
                 item_name = ""
@@ -246,7 +289,6 @@ function main()
                 local item_id = tostring(editing_item):sub(-8)
                 ImGui.PushID(ctx, item_id)
 
-                -- Item Name input (full width)
                 ImGui.Text(ctx, "Item Name:")
                 ImGui.SetNextItemWidth(ctx, avail_w)
                 local changed_name
@@ -254,10 +296,8 @@ function main()
                 if changed_name and editing_item then
                     local take = GetActiveTake(editing_item)
                     if take then
-                        local base_name = item_name -- Already clean, no prefix
+                        local base_name = item_name
                         local final_name = base_name
-
-                        -- Add rank prefix if not "No Rank"
                         if item_rank ~= "" then
                             local rank_index = tonumber(item_rank)
                             if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
@@ -268,7 +308,6 @@ function main()
                                 end
                             end
                         end
-
                         GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
                     end
                 end
@@ -278,7 +317,6 @@ function main()
                 ImGui.BeginGroup(ctx)
                 ImGui.Text(ctx, "Item Rank:")
 
-                -- Determine display index (1-9) for combo
                 local display_index = item_rank == "" and 9 or tonumber(item_rank)
 
                 ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[display_index].rgba)
@@ -288,15 +326,11 @@ function main()
                         ImGui.PushStyleColor(ctx, ImGui.Col_Header, rank.rgba)
                         local is_selected = (display_index == i)
                         if ImGui.Selectable(ctx, rank.name, is_selected) then
-                            -- Store as string "1"-"8" or "" for No Rank
                             item_rank = (i == 9) and "" or tostring(i)
                             GetSetMediaItemInfo_String(editing_item, "P_EXT:item_rank", item_rank, true)
-                            -- Apply color to item and group
                             apply_rank_color(editing_item, item_rank)
                         end
-                        if is_selected then
-                            ImGui.SetItemDefaultFocus(ctx)
-                        end
+                        if is_selected then ImGui.SetItemDefaultFocus(ctx) end
                         ImGui.PopStyleColor(ctx)
                     end
                     ImGui.EndCombo(ctx)
@@ -335,9 +369,9 @@ function main()
                 end
                 ImGui.PopID(ctx)
             end
-            -- keyboard shortcut capture
+
             if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_N, false) then
-                    window_open = false
+                window_open = false
             end
             ImGui.End(ctx)
         end
@@ -351,18 +385,12 @@ end
 function get_take_number(item)
     local take = GetActiveTake(item)
     if not take then return "" end
-
     local src = GetMediaItemTake_Source(take)
     local filename = GetMediaSourceFileName(src, "")
-
-    -- Try to extract take number from filename
-    -- Case: (###)[chan X].wav or ### [chan X].wav (with or without space)
     local take_num = tonumber(
         filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
-        -- Case: (###).wav or ###.wav
         or filename:match("(%d+)%)?%.[^%.]+$")
     )
-
     return take_num and tostring(take_num) or ""
 end
 
@@ -372,7 +400,6 @@ function rgba_to_native(rgba)
     local r = (rgba >> 24) & 0xFF
     local g = (rgba >> 16) & 0xFF
     local b = (rgba >> 8) & 0xFF
-    -- Use REAPER's ColorToNative function
     return ColorToNative(r, g, b)
 end
 
@@ -389,8 +416,6 @@ end
 function pastel_color(index)
     local golden_ratio_conjugate = 0.61803398875
     local hue                    = (index * golden_ratio_conjugate) % 1.0
-
-    -- Subtle variation in saturation/lightness
     local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
     local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
 
@@ -416,7 +441,6 @@ function pastel_color(index)
         math.floor(g * 255 + 0.5),
         math.floor(b * 255 + 0.5)
     )
-
     return color_int | 0x1000000
 end
 
@@ -426,25 +450,18 @@ function get_item_color(item)
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     local colors = get_color_table()
 
-    -- Determine color to use
     local color_to_use = nil
     local _, saved_guid = GetSetMediaItemInfo_String(item, "P_EXT:src_guid", "", false)
 
-    -- Check GUID first
     if saved_guid ~= "" then
-        local referenced_item = nil
         local total_items = CountMediaItems(0)
         for i = 0, total_items - 1 do
             local test_item = GetMediaItem(0, i)
             local _, test_guid = GetSetMediaItemInfo_String(test_item, "GUID", "", false)
             if test_guid == saved_guid then
-                referenced_item = test_item
+                color_to_use = GetMediaItemInfo_Value(test_item, "I_CUSTOMCOLOR")
                 break
             end
-        end
-
-        if referenced_item then
-            color_to_use = GetMediaItemInfo_Value(referenced_item, "I_CUSTOMCOLOR")
         end
     end
 
@@ -455,51 +472,39 @@ function get_item_color(item)
         else
             color_to_use = colors.dest_items
         end
-        -- If no GUID color, use folder-based logic
     elseif not color_to_use then
         local item_track = GetMediaItemTrack(item)
         local folder_tracks = {}
         local num_tracks = CountTracks(0)
 
-        -- Build list of folder tracks in project order
         for t = 0, num_tracks - 1 do
             local track = GetTrack(0, t)
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            if depth > 0 then
-                table.insert(folder_tracks, track)
-            end
+            if depth > 0 then table.insert(folder_tracks, track) end
         end
 
-        -- Find parent folder track of the item
         local parent_folder = nil
         local track_idx = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
         for t = track_idx, 0, -1 do
             local track = GetTrack(0, t)
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            if depth > 0 then
-                parent_folder = track
-                break
-            end
+            if depth > 0 then parent_folder = track; break end
         end
 
-        -- Compute pastel index: second folder → index 0
         local folder_index = 0
-
         if parent_folder then
             for i, track in ipairs(folder_tracks) do
                 if track == parent_folder then
-                    folder_index = i - 2 -- account for dest
+                    folder_index = i - 2
                     break
                 end
             end
-            -- First folder special case
             if folder_index < 0 then
-                color_to_use = colors.dest_items -- use default color for first folder
+                color_to_use = colors.dest_items
             else
                 color_to_use = pastel_color(folder_index)
             end
         else
-            -- No folder: fallback to dest_items
             color_to_use = colors.dest_items
         end
     end
@@ -513,93 +518,54 @@ function apply_rank_color(item, rank)
     local color_to_use
 
     if rank == "" or ranking_color_pref == 1 then
-        -- No Rank selected - restore original color
         color_to_use = get_item_color(item)
     else
         GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
-        -- Get the color for this rank
         local rank_index = tonumber(rank)
         if rank_index and RANKS[rank_index] then
             color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
         else
-            -- Fallback if invalid rank
             color_to_use = get_item_color(item)
         end
     end
 
-    -- Apply color to the item
-    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
+    -- Apply color and rank name to the item and all its midpoint peers
+    local peers = get_items_at_midpoint(item)
+    for _, peer in ipairs(peers) do
+        SetMediaItemInfo_Value(peer, "I_CUSTOMCOLOR", color_to_use)
 
-    -- Update take name with rank prefix
+        local peer_take = GetActiveTake(peer)
+        if peer_take then
+            local _, peer_name = GetSetMediaItemTakeInfo_String(peer_take, "P_NAME", "", false)
+            local peer_base = strip_rank_prefix(peer_name)
+            local peer_final = peer_base
+            if rank ~= "" then
+                local rank_index = tonumber(rank)
+                if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
+                    peer_final = peer_base ~= "" and (RANKS[rank_index].prefix .. "-" .. peer_base)
+                                                 or  RANKS[rank_index].prefix
+                end
+            end
+            GetSetMediaItemTakeInfo_String(peer_take, "P_NAME", peer_final, true)
+        end
+
+        GetSetMediaItemInfo_String(peer, "P_EXT:item_rank", rank, true)
+        GetSetMediaItemInfo_String(peer, "P_EXT:colorized", "", true)
+    end
+
+    -- Also update the take name for the triggering item itself using item_name
     local take = GetActiveTake(item)
     if take then
-        local base_name = item_name -- Already clean, no prefix
+        local base_name = item_name
         local final_name = base_name
-
-        -- Add rank prefix if not "No Rank"
         if rank ~= "" then
             local rank_index = tonumber(rank)
             if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
-                if base_name ~= "" then
-                    final_name = RANKS[rank_index].prefix .. "-" .. base_name
-                else
-                    final_name = RANKS[rank_index].prefix
-                end
+                final_name = base_name ~= "" and (RANKS[rank_index].prefix .. "-" .. base_name)
+                                              or  RANKS[rank_index].prefix
             end
         end
-
         GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
-    end
-
-    -- Get the group ID of this item
-    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-
-    -- If item is in a group, apply color and rank to all items in the same group
-    if group_id ~= 0 then
-        local track_count = CountTracks(0)
-        for i = 0, track_count - 1 do
-            local track = GetTrack(0, i)
-            local item_count = CountTrackMediaItems(track)
-            for j = 0, item_count - 1 do
-                local current_item = GetTrackMediaItem(track, j)
-                local current_group_id = GetMediaItemInfo_Value(current_item, "I_GROUPID")
-                if current_group_id == group_id and current_item ~= item then
-                    if rank == "" then
-                        -- No Rank - restore original color for each item in group
-                        local current_color = get_item_color(current_item)
-                        SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", current_color)
-                    else
-                        SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", color_to_use)
-                    end
-
-                    -- Update take name for grouped items
-                    local grouped_take = GetActiveTake(current_item)
-                    if grouped_take then
-                        local _, grouped_name = GetSetMediaItemTakeInfo_String(grouped_take, "P_NAME", "", false)
-                        local grouped_base_name = strip_rank_prefix(grouped_name)
-                        local grouped_final_name = grouped_base_name
-
-                        -- Add rank prefix if not "No Rank"
-                        if rank ~= "" then
-                            local rank_index = tonumber(rank)
-                            if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
-                                if grouped_base_name ~= "" then
-                                    grouped_final_name = RANKS[rank_index].prefix .. "-" .. grouped_base_name
-                                else
-                                    grouped_final_name = RANKS[rank_index].prefix
-                                end
-                            end
-                        end
-
-                        GetSetMediaItemTakeInfo_String(grouped_take, "P_NAME", grouped_final_name, true)
-                    end
-
-                    -- Store the rank for grouped items (empty string deletes P_EXT state)
-                    GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", rank, true)
-                    GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
-                end
-            end
-        end
     end
 
     UpdateArrange()

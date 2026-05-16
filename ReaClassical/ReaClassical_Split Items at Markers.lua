@@ -23,6 +23,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, split_items_at_markers, clear_item_names_from_selected
 local get_selected_media_item_at, count_selected_media_items, get_folder_parent_track
+local get_items_at_midpoint, get_folder_range_for_item
+local select_midpoint_peers
 
 ---------------------------------------------------------------------
 
@@ -41,7 +43,6 @@ function main()
         return
     end
 
-    -- Check if any item is selected
     if CountSelectedMediaItems(0) == 0 then
         MB("Please select at least one item.", "ReaClassical Error", 0)
         return
@@ -57,36 +58,81 @@ end
 ---------------------------------------------------------------------
 
 function get_folder_parent_track(track)
-    -- Get the folder parent track (the first track in the folder)
     local track_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
-    -- If this track is a folder parent itself, return it
-    if track_depth == 1 then
-        return track
-    end
-
-    -- Otherwise, walk backwards to find the folder parent
+    if track_depth == 1 then return track end
     local track_idx = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
-
     for i = track_idx - 1, 0, -1 do
         local parent_track = GetTrack(0, i)
         local parent_depth = GetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH")
-
-        if parent_depth == 1 then
-            return parent_track
-        end
+        if parent_depth == 1 then return parent_track end
     end
-
-    -- If no folder parent found, return the original track
     return track
 end
 
 ---------------------------------------------------------------------
 
-function split_items_at_markers()
-    local cursor_pos = GetCursorPosition() -- Save current edit cursor position
+-- Resolves the folder track range (0-based indices) that contains ref_item.
+function get_folder_range_for_item(ref_item)
+    local track = GetMediaItem_Track(ref_item)
+    local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
+            end
+        end
+    end
+    local folder_start, folder_end = nil, nil
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    return folder_start, folder_end
+end
 
-    -- Get the first selected item and find its folder parent track
+---------------------------------------------------------------------
+
+function get_items_at_midpoint(ref_item)
+    local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+    local mid = pos + len * 0.5
+    local tolerance = 0.0001
+    local result = {}
+    local folder_start, folder_end = get_folder_range_for_item(ref_item)
+    if not folder_start then return result end
+    for t = folder_start, folder_end do
+        local track = GetTrack(0, t)
+        local n = CountTrackMediaItems(track)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+            if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                result[#result + 1] = item
+            end
+        end
+    end
+    return result
+end
+
+---------------------------------------------------------------------
+
+function split_items_at_markers()
+    local cursor_pos = GetCursorPosition()
+
     local first_selected_item = GetSelectedMediaItem(0, 0)
     if not first_selected_item then return end
 
@@ -94,17 +140,13 @@ function split_items_at_markers()
     local parent_track = get_folder_parent_track(selected_track)
     local parent_track_index = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER")
 
-    -- Get the original item bounds and name for subtake numbering
     local original_take = GetActiveTake(first_selected_item)
     local original_item_name = ""
-    if original_take then
-        original_item_name = GetTakeName(original_take)
-    end
+    if original_take then original_item_name = GetTakeName(original_take) end
     local original_item_start = GetMediaItemInfo_Value(first_selected_item, "D_POSITION")
     local original_item_length = GetMediaItemInfo_Value(first_selected_item, "D_LENGTH")
     local original_item_end = original_item_start + original_item_length
 
-    -- Collect all regular (non-region) markers and their names
     local marker_data = {}
     local _, num_markers, _ = CountProjectMarkers(0)
     local has_named_markers = false
@@ -112,26 +154,18 @@ function split_items_at_markers()
     for i = 0, num_markers - 1 do
         local retval, isrgn, pos, _, name, markrgnindex = EnumProjectMarkers(i)
         if retval and not isrgn then
-            -- Only include markers within the original item bounds
             if pos > original_item_start and pos < original_item_end then
-                if name ~= "" then
-                    has_named_markers = true
-                end
+                if name ~= "" then has_named_markers = true end
                 local label = name ~= "" and name or ("Marker " .. tostring(markrgnindex))
                 table.insert(marker_data, { pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex })
             end
         end
     end
 
-    -- If no markers within bounds, do nothing
-    if #marker_data == 0 then
-        return
-    end
+    if #marker_data == 0 then return end
 
-    -- Sort markers by position
     table.sort(marker_data, function(a, b) return a.pos < b.pos end)
 
-    -- Store markers to delete (those within original bounds)
     local markers_to_delete = {}
 
     for _, marker in ipairs(marker_data) do
@@ -151,27 +185,25 @@ function split_items_at_markers()
                 local item_end = item_pos + item_len
 
                 if marker.pos > item_pos and marker.pos < item_end then
-                    -- Mark this marker for deletion
                     table.insert(markers_to_delete, marker.marker_index)
 
                     SetMediaItemSelected(item, true)
-                    Main_OnCommand(40034, 0) -- Select all items in group
+                    select_midpoint_peers()
                     Main_OnCommand(40012, 0) -- Split at edit cursor
 
                     clear_item_names_from_selected()
 
-                    -- If using named markers, name the item starting at this marker
                     if has_named_markers then
                         local new_item_count = CountMediaItems(0)
                         for j = 0, new_item_count - 1 do
                             local new_item = GetMediaItem(0, j)
                             local new_track = GetMediaItemTrack(new_item)
                             local new_item_parent_track = get_folder_parent_track(new_track)
-                            local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track,
-                                "IP_TRACKNUMBER")
+                            local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track, "IP_TRACKNUMBER")
                             local new_item_pos = GetMediaItemInfo_Value(new_item, "D_POSITION")
 
-                            if new_parent_track_index == parent_track_index and math.abs(new_item_pos - marker.pos) < 0.0001 then
+                            if new_parent_track_index == parent_track_index
+                                    and math.abs(new_item_pos - marker.pos) < 0.0001 then
                                 local take = GetActiveTake(new_item)
                                 if take then
                                     GetSetMediaItemTakeInfo_String(take, "P_NAME", marker.name, true)
@@ -181,90 +213,69 @@ function split_items_at_markers()
                         end
                     end
 
-                    break -- Only process one group per marker
+                    break
                 end
             end
         end
     end
 
-    -- If using subtake numbering, name only the items within original bounds
+    -- Subtake numbering: group items by midpoint rather than I_GROUPID.
+    -- For each parent-track item within the original bounds, find all its
+    -- folder peers via midpoint matching and treat them as a unit.
     if not has_named_markers then
-        -- Collect all unique group IDs within the original item bounds
-        local group_positions = {}
         local item_count = CountMediaItems(0)
 
+        -- Collect reference items on the parent track within original bounds,
+        -- ordered by position.
+        local ref_items = {}
         for i = 0, item_count - 1 do
             local item = GetMediaItem(0, i)
             local track = GetMediaItemTrack(item)
-            local track_index = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-            local item_parent_track = get_folder_parent_track(track)
-            local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
-
-            -- Only look at parent track items within original bounds
-            if item_parent_track_index == parent_track_index and track_index == parent_track_index then
+            -- Only look at items directly on the parent track
+            if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == parent_track_index then
                 local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                local item_end = item_pos + item_len
-
-                -- Check if item is completely within original bounds (not extending beyond)
+                local item_end = item_pos + GetMediaItemInfo_Value(item, "D_LENGTH")
                 if item_pos >= original_item_start - 0.0001 and item_end <= original_item_end + 0.0001 then
-                    local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-                    if group_id > 0 then
-                        if not group_positions[group_id] then
-                            group_positions[group_id] = item_pos
+                    table.insert(ref_items, item)
+                end
+            end
+        end
+
+        -- Sort by position
+        table.sort(ref_items, function(a, b)
+            return GetMediaItemInfo_Value(a, "D_POSITION") < GetMediaItemInfo_Value(b, "D_POSITION")
+        end)
+
+        -- For each reference item, find all midpoint peers and assign the suffix
+        local seen = {}
+        for idx, ref_item in ipairs(ref_items) do
+            if not seen[ref_item] then
+                local suffix = string.format("%02d", idx)
+                local peers = get_items_at_midpoint(ref_item)
+                for _, peer in ipairs(peers) do
+                    seen[peer] = true
+                    local peer_parent = get_folder_parent_track(GetMediaItemTrack(peer))
+                    if GetMediaTrackInfo_Value(peer_parent, "IP_TRACKNUMBER") == parent_track_index then
+                        local take = GetActiveTake(peer)
+                        if take then
+                            local take_name = GetTakeName(take)
+                            local base_name = (take_name ~= "" and take_name) or original_item_name
+                            GetSetMediaItemTakeInfo_String(take, "P_NAME", base_name .. "-" .. suffix, true)
                         end
                     end
                 end
             end
         end
-
-        -- Sort groups by their position
-        local sorted_groups = {}
-        for group_id, pos in pairs(group_positions) do
-            table.insert(sorted_groups, { group_id = group_id, pos = pos })
-        end
-        table.sort(sorted_groups, function(a, b) return a.pos < b.pos end)
-
-        -- Create mapping from group_id to suffix number
-        local group_to_suffix = {}
-        for idx, group_data in ipairs(sorted_groups) do
-            group_to_suffix[group_data.group_id] = string.format("%02d", idx)
-        end
-
-        -- Now apply suffixes to items with these group IDs
-        for i = 0, item_count - 1 do
-            local item = GetMediaItem(0, i)
-            local track = GetMediaItemTrack(item)
-            local item_parent_track = get_folder_parent_track(track)
-            local item_parent_track_index = GetMediaTrackInfo_Value(item_parent_track, "IP_TRACKNUMBER")
-
-            if item_parent_track_index == parent_track_index then
-                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-
-                if group_id > 0 and group_to_suffix[group_id] then
-                    local take = GetActiveTake(item)
-                    if take then
-                        local take_name = GetTakeName(take)
-                        -- Use existing name if present, otherwise use original name
-                        local base_name = (take_name ~= "" and take_name) or original_item_name
-                        local subtake_name = base_name .. "-" .. group_to_suffix[group_id]
-                        GetSetMediaItemTakeInfo_String(take, "P_NAME", subtake_name, true)
-                    end
-                end
-            end
-        end
     end
 
-    -- Delete markers within original bounds (in reverse order to maintain indices)
+    -- Delete markers within original bounds (reverse order to preserve indices)
     table.sort(markers_to_delete, function(a, b) return a > b end)
     for _, marker_idx in ipairs(markers_to_delete) do
         DeleteProjectMarker(0, marker_idx, false)
     end
 
-    -- Unselect all items
-    Main_OnCommand(40289, 0)
-
-    SetEditCurPos(cursor_pos, false, false) -- Restore cursor position
+    Main_OnCommand(40289, 0) -- Unselect all items
+    SetEditCurPos(cursor_pos, false, false)
 end
 
 ---------------------------------------------------------------------
@@ -275,9 +286,7 @@ function clear_item_names_from_selected()
         local item = get_selected_media_item_at(i)
         if item then
             local take = GetActiveTake(item)
-            if take then
-                GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
-            end
+            if take then GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true) end
         end
     end
 end
@@ -287,14 +296,10 @@ end
 function count_selected_media_items()
     local selected_count = 0
     local total_items = CountMediaItems(0)
-
     for i = 0, total_items - 1 do
         local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            selected_count = selected_count + 1
-        end
+        if IsMediaItemSelected(item) then selected_count = selected_count + 1 end
     end
-
     return selected_count
 end
 
@@ -303,18 +308,71 @@ end
 function get_selected_media_item_at(index)
     local selected_count = 0
     local total_items = CountMediaItems(0)
-
     for i = 0, total_items - 1 do
         local item = GetMediaItem(0, i)
         if IsMediaItemSelected(item) then
-            if selected_count == index then
-                return item
-            end
+            if selected_count == index then return item end
             selected_count = selected_count + 1
         end
     end
-
     return nil
+end
+
+---------------------------------------------------------------------
+
+function select_midpoint_peers()
+    local sel_track = GetSelectedTrack(0, 0)
+    if not sel_track then return end
+    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local folder_start, folder_end = nil, nil
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(sel_track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
+            end
+        end
+    end
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    if not folder_start then return end
+    local seed_items = {}
+    local num_sel = CountSelectedMediaItems(0)
+    for i = 0, num_sel - 1 do
+        seed_items[#seed_items + 1] = GetSelectedMediaItem(0, i)
+    end
+    for _, ref_item in ipairs(seed_items) do
+        local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+        local mid = pos + len * 0.5
+        local tolerance = 0.0001
+        for t = folder_start, folder_end do
+            local track = GetTrack(0, t)
+            local n = CountTrackMediaItems(track)
+            for i = 0, n - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                    SetMediaItemSelected(item, true)
+                end
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

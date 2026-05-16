@@ -31,10 +31,11 @@ local move_to_project_tab, save_source_details, adaptive_delete
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
 local select_item_under_cursor_on_selected_track, fix_marker_pair
-local select_matching_dest_folder, save_view, restore_view
+local select_matching_dest_folder
 local folder_check, get_track_prefix, nudge_xfades_inside_dest_markers
 local reposition_dest_out, reposition_dest_in
 local save_ripple_state, restore_ripple_state
+local get_folder_items_at_midpoint, select_midpoint_peers
 
 ---------------------------------------------------------------------
 
@@ -220,7 +221,7 @@ function main()
         Main_OnCommand(40289, 0)
         Main_OnCommand(40626, 0) -- Time Selection: Set end point
         Main_OnCommand(40718, 0) -- Select all items on selected tracks in current time selection
-        Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
+        select_midpoint_peers()
         Main_OnCommand(40630, 0) -- Go to start of time selection
 
         if dest_workflow == "Horizontal" then
@@ -417,10 +418,35 @@ function copy_source()
         selected_items = selected_items - 1
     end
     if selected_items == 0 then is_selected = false end
-    Main_OnCommand(40034, 0) -- Item Grouping: Select all items in group(s)
+    select_midpoint_peers()
     Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points within time selection
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     return sel_length, is_selected
+end
+
+---------------------------------------------------------------------
+
+-- Returns all items on tracks folder_start..folder_end whose span contains
+-- the midpoint of ref_item. This replaces I_GROUPID-based peer lookup.
+function get_folder_items_at_midpoint(ref_item, folder_start, folder_end)
+    local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+    local mid = pos + len * 0.5
+    local tolerance = 0.0001
+    local result = {}
+    for t = folder_start, folder_end do
+        local track = GetTrack(0, t)
+        local n = CountTrackMediaItems(track)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+            if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                result[#result + 1] = item
+            end
+        end
+    end
+    return result
 end
 
 ---------------------------------------------------------------------
@@ -444,44 +470,38 @@ function split_at_dest_in()
             end
 
             if marker_pos then
-                local group_id = GetMediaItemInfo_Value(second_item, "I_GROUPID")
-                if group_id ~= 0 then
-                    local num_tracks = CountTracks(0)
-                    local sel_track = GetSelectedTrack(0, 0)
-                    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
-                    local folder_start, folder_end = nil, nil
-                    for t = track_num, num_tracks - 1 do
-                        local track = GetTrack(0, t)
-                        local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-                        if depth == 1 then
-                            folder_start = t; folder_end = t
-                            local x = t + 1
-                            while x < num_tracks do
-                                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
-                                folder_end = x
-                                if d < 0 then break end
-                                x = x + 1
-                            end
-                            break
+                -- Resolve folder extents from the selected track
+                local num_tracks = CountTracks(0)
+                local sel_track = GetSelectedTrack(0, 0)
+                local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+                local folder_start, folder_end = nil, nil
+                for t = track_num, num_tracks - 1 do
+                    local track = GetTrack(0, t)
+                    local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                    if depth == 1 then
+                        folder_start = t; folder_end = t
+                        local x = t + 1
+                        while x < num_tracks do
+                            local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                            folder_end = x
+                            if d < 0 then break end
+                            x = x + 1
                         end
+                        break
                     end
+                end
 
-                    if folder_start then
-                        for t = folder_start, folder_end do
-                            local track = GetTrack(0, t)
-                            local num_items_on_track = CountTrackMediaItems(track)
-                            for j = 0, num_items_on_track - 1 do
-                                local item = GetTrackMediaItem(track, j)
-                                if GetMediaItemInfo_Value(item, "I_GROUPID") == group_id then
-                                    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-                                    local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
-                                    if marker_pos > item_start and marker_pos < item_end then
-                                        local new_len = item_end - marker_pos
-                                        SetMediaItemInfo_Value(item, "D_POSITION", marker_pos)
-                                        SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
-                                    end
-                                end
-                            end
+                if folder_start then
+                    -- Find all items whose midpoint matches second_item, across the folder
+                    local peers = get_folder_items_at_midpoint(second_item, folder_start, folder_end)
+                    for _, item in ipairs(peers) do
+                        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                        local item_end   = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+                        if marker_pos > item_start and marker_pos < item_end then
+                            -- Shift left edge to marker 996, keep right edge fixed
+                            local new_len = item_end - marker_pos
+                            SetMediaItemInfo_Value(item, "D_POSITION", marker_pos)
+                            SetMediaItemInfo_Value(item, "D_LENGTH",   new_len)
                         end
                     end
                 end
@@ -491,7 +511,7 @@ function split_at_dest_in()
         end
     end
     local final_selected_items = count_selected_media_items()
-    Main_OnCommand(40034, 0)     -- Item grouping: Select all items in groups
+    select_midpoint_peers()
     Main_OnCommand(40912, 0)     -- Options: Toggle auto-crossfade on split (OFF)
     if final_selected_items > 0 then
         Main_OnCommand(40186, 0) -- Item: Split items at edit or play cursor (ignoring grouping)
@@ -506,7 +526,7 @@ function create_crossfades(dest_workflow)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(first_sel_item, true)
     Main_OnCommand(41173, 0) -- Item navigation: Move cursor to start of items
-    Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
+    select_midpoint_peers()
     local xfade_len = return_xfade_length()
     MoveEditCursor(-xfade_len, false)
     Main_OnCommand(41305, 0) -- Item edit: Trim left edge of item to edit cursor
@@ -517,7 +537,7 @@ function create_crossfades(dest_workflow)
     Main_OnCommand(40289, 0) -- Item: Unselect all items
     SetMediaItemSelected(last_sel_item, true)
     Main_OnCommand(41174, 0) -- Item navigation: Move cursor to end of items
-    Main_OnCommand(40034, 0) -- Item grouping: Select all items in groups
+    select_midpoint_peers()
     Main_OnCommand(41311, 0) -- Item edit: Trim right edge of item to edit cursor
     MoveEditCursor(0.001, false)
     select_item_under_cursor_on_selected_track()
@@ -934,6 +954,8 @@ function nudge_xfades_inside_dest_markers()
     end
     if not folder_start then return end
 
+    -- Detect a crossfade overlap on the reference (folder_start) track whose
+    -- boundary falls within the given zone. Returns the two overlapping items.
     local function find_overlap_in_zone(zone_left, zone_right)
         local ref_track = GetTrack(0, folder_start)
         local n = CountTrackMediaItems(ref_track)
@@ -952,42 +974,35 @@ function nudge_xfades_inside_dest_markers()
         return nil, nil, nil
     end
 
-    local function move_xfade_boundaries(group_id_a, group_id_b, new_a_end, new_b_start)
-        for t = folder_start, folder_end do
-            local track = GetTrack(0, t)
-            local n = CountTrackMediaItems(track)
-            for j = 0, n - 1 do
-                local item = GetTrackMediaItem(track, j)
-                local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
-                if gid == group_id_a then
-                    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                    SetMediaItemInfo_Value(item, "D_LENGTH", new_a_end - pos)
-                elseif gid == group_id_b then
-                    local old_end = GetMediaItemInfo_Value(item, "D_POSITION")
-                                  + GetMediaItemInfo_Value(item, "D_LENGTH")
-                    SetMediaItemInfo_Value(item, "D_POSITION", new_b_start)
-                    SetMediaItemInfo_Value(item, "D_LENGTH", old_end - new_b_start)
-                end
-            end
+    -- Reposition both edges of a crossfade across all folder tracks, using
+    -- midpoint matching instead of group IDs to find peer items.
+    local function move_xfade_boundaries(ref_a, ref_b, new_a_end, new_b_start)
+        local peers_a = get_folder_items_at_midpoint(ref_a, folder_start, folder_end)
+        local peers_b = get_folder_items_at_midpoint(ref_b, folder_start, folder_end)
+        for _, item in ipairs(peers_a) do
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetMediaItemInfo_Value(item, "D_LENGTH", new_a_end - ipos)
+        end
+        for _, item in ipairs(peers_b) do
+            local old_end = GetMediaItemInfo_Value(item, "D_POSITION")
+                          + GetMediaItemInfo_Value(item, "D_LENGTH")
+            SetMediaItemInfo_Value(item, "D_POSITION", new_b_start)
+            SetMediaItemInfo_Value(item, "D_LENGTH",   old_end - new_b_start)
         end
     end
 
     local a, b, _ = find_overlap_in_zone(in_zone_left, in_zone_right)
     if a and b then
-        local gid_a = GetMediaItemInfo_Value(a, "I_GROUPID")
-        local gid_b = GetMediaItemInfo_Value(b, "I_GROUPID")
         local new_b_start = dest_in_pos + epsilon
         local new_a_end   = new_b_start + xfade_len
-        move_xfade_boundaries(gid_a, gid_b, new_a_end, new_b_start)
+        move_xfade_boundaries(a, b, new_a_end, new_b_start)
     end
 
     local c, d, _ = find_overlap_in_zone(out_zone_left, out_zone_right)
     if c and d then
-        local gid_c = GetMediaItemInfo_Value(c, "I_GROUPID")
-        local gid_d = GetMediaItemInfo_Value(d, "I_GROUPID")
         local new_c_end   = dest_out_pos - epsilon
         local new_d_start = new_c_end - xfade_len
-        move_xfade_boundaries(gid_c, gid_d, new_c_end, new_d_start)
+        move_xfade_boundaries(c, d, new_c_end, new_d_start)
     end
 end
 
@@ -1037,39 +1052,57 @@ end
 
 ---------------------------------------------------------------------
 
-function save_view()
-    Main_OnCommand(NamedCommandLookup("_SWS_SAVEVIEW"), 0)
-    local cursor_pos = GetCursorPosition()
-    local selected_items = {}
-    local item_count = CountMediaItems(0)
-    for i = 0, item_count - 1 do
-        local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then table.insert(selected_items, item) end
-    end
-    local selected_tracks = {}
-    local track_count = CountSelectedTracks(0)
-    for i = 0, track_count - 1 do
-        table.insert(selected_tracks, GetSelectedTrack(0, i))
-    end
-    return cursor_pos, selected_items, selected_tracks
-end
-
----------------------------------------------------------------------
-
-function restore_view(cursor_pos, selected_items, selected_tracks)
-    Main_OnCommand(NamedCommandLookup("_SWS_RESTOREVIEW"), 0)
-    SetEditCurPos(cursor_pos, false, false)
-    if #selected_items > 0 then
-        Main_OnCommand(40289, 0)
-        for _, item in ipairs(selected_items) do
-            if pcall(IsMediaItemSelected, item) then SetMediaItemSelected(item, true) end
+function select_midpoint_peers()
+    local sel_track = GetSelectedTrack(0, 0)
+    if not sel_track then return end
+    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local folder_start, folder_end = nil, nil
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(sel_track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
+            end
         end
     end
-    if #selected_tracks > 0 then
-        Main_OnCommand(40297, 0)
-        SetOnlyTrackSelected(selected_tracks[1])
-        for _, track in ipairs(selected_tracks) do
-            if pcall(IsTrackSelected, track) then SetTrackSelected(track, true) end
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    if not folder_start then return end
+    local seed_items = {}
+    local num_sel = CountSelectedMediaItems(0)
+    for i = 0, num_sel - 1 do
+        seed_items[#seed_items + 1] = GetSelectedMediaItem(0, i)
+    end
+    for _, ref_item in ipairs(seed_items) do
+        local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+        local mid = pos + len * 0.5
+        local tolerance = 0.0001
+        for t = folder_start, folder_end do
+            local track = GetTrack(0, t)
+            local n = CountTrackMediaItems(track)
+            for i = 0, n - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                    SetMediaItemSelected(item, true)
+                end
+            end
         end
     end
 end

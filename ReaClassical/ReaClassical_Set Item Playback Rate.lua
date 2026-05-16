@@ -21,10 +21,10 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main
 local get_selected_media_items, count_selected_media_items
-local apply_rate_change
-local get_folder_children, get_all_items_in_groups_for_items
-local collect_automation, restore_automation
-local is_folder_track, get_parent_folder, is_in_child_track
+local apply_rate_change, apply_pitch_change
+local get_folder_children, get_all_items_at_midpoints
+local get_items_at_midpoint
+local is_folder_track, get_parent_folder
 
 ---------------------------------------------------------------------
 
@@ -57,13 +57,10 @@ local window_open = true
 local DEFAULT_W = 320
 local DEFAULT_H = 420
 
--- UI state
-local rate_input_buf = reaper.new_array and nil  -- handled via string
-local rate_str = "5.0"  -- relative % change by default
-local is_relative = true        -- true = relative %, false = absolute rate value
-local pitch_str = "0.0"         -- semitones input
+local rate_str = "5.0"
+local is_relative = true
+local pitch_str = "0.0"
 
--- Message state
 local message_text = ""
 local message_timer = 0
 local message_duration = 3.0
@@ -83,21 +80,9 @@ function get_parent_folder(track)
     for i = track_idx - 1, 0, -1 do
         local t = GetTrack(0, i)
         if not t then break end
-        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
-            return t
-        end
+        if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then return t end
     end
     return nil
-end
-
----------------------------------------------------------------------
-
-function is_in_child_track(item)
-    if not item then return false end
-    local track = GetMediaItemTrack(item)
-    if not track then return false end
-    if is_folder_track(track) then return false end
-    return get_parent_folder(track) ~= nil
 end
 
 ---------------------------------------------------------------------
@@ -128,9 +113,7 @@ function count_selected_media_items()
     local total_items = CountMediaItems(0)
     for i = 0, total_items - 1 do
         local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            selected_count = selected_count + 1
-        end
+        if IsMediaItemSelected(item) then selected_count = selected_count + 1 end
     end
     return selected_count
 end
@@ -142,199 +125,92 @@ function get_selected_media_items()
     local total_items = CountMediaItems(0)
     for i = 0, total_items - 1 do
         local item = GetMediaItem(0, i)
-        if IsMediaItemSelected(item) then
-            result[#result + 1] = item
-        end
+        if IsMediaItemSelected(item) then result[#result + 1] = item end
     end
     return result
 end
 
 ---------------------------------------------------------------------
 
--- Returns all items that share a group with any item in the provided list,
--- plus the provided items themselves. De-duplicated.
-function get_all_items_in_groups_for_items(base_items)
-    local group_ids = {}
-    local seen = {}
-    local result = {}
-
-    for _, item in ipairs(base_items) do
-        seen[item] = true
-        result[#result + 1] = item
-        local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
-        if gid and gid > 0 then
-            group_ids[gid] = true
-        end
-    end
-
-    if next(group_ids) then
-        local total_items = CountMediaItems(0)
-        for i = 0, total_items - 1 do
-            local item = GetMediaItem(0, i)
-            if not seen[item] then
-                local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
-                if gid and gid > 0 and group_ids[gid] then
-                    seen[item] = true
-                    result[#result + 1] = item
-                end
+-- Resolves the folder track range (0-based indices) that contains ref_item.
+local function get_folder_range_for_item(ref_item)
+    local track = GetMediaItem_Track(ref_item)
+    local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
             end
         end
     end
+    local folder_start, folder_end = nil, nil
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    return folder_start, folder_end
+end
 
+-- Returns all items in the same folder as ref_item whose span contains
+-- ref_item's midpoint. Scoped to the folder — never crosses into other folders.
+function get_items_at_midpoint(ref_item)
+    local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+    local mid = pos + len * 0.5
+    local tolerance = 0.0001
+    local result = {}
+    local folder_start, folder_end = get_folder_range_for_item(ref_item)
+    if not folder_start then return result end
+    for t = folder_start, folder_end do
+        local track = GetTrack(0, t)
+        local n = CountTrackMediaItems(track)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+            if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                result[#result + 1] = item
+            end
+        end
+    end
     return result
 end
 
----------------------------------------------------------------------
-
--- Collect automation envelope points and automation items for a set of items
--- (covering the union of their time spans), relative to track_start.
--- Points are deleted from envelopes so they can be reinserted at new positions.
-function collect_automation(items_list, track_start, tracks_list)
-    local range_start = math.huge
-    local range_end   = 0
-    for _, item in ipairs(items_list) do
-        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-        range_start = math.min(range_start, pos)
-        range_end   = math.max(range_end, pos + len)
-    end
-    if range_start == math.huge then return {} end
-
-    local snapshot = {}
-    for _, track in ipairs(tracks_list) do
-        local track_data = { track = track, envs = {} }
-        local num_envs = CountTrackEnvelopes(track)
-        for e = 0, num_envs - 1 do
-            local env = GetTrackEnvelope(track, e)
-            local env_data = { env = env, points = {}, ai = {} }
-
-            -- Collect + delete envelope points in range
-            local num_points = CountEnvelopePoints(env)
-            local p = 0
-            while p < num_points do
-                local _, time, value, shape, tension, sel = GetEnvelopePoint(env, p)
-                if time >= range_start and time <= range_end then
-                    table.insert(env_data.points, {
-                        rel     = time - track_start,
-                        value   = value, shape = shape,
-                        tension = tension, sel = sel
-                    })
-                    DeleteEnvelopePointRange(env, time - 0.00005, time + 0.00005)
-                    num_points = CountEnvelopePoints(env)
-                    -- don't advance p, same index is now the next point
-                else
-                    p = p + 1
-                end
-            end
-            Envelope_SortPoints(env)
-
-            -- Collect automation items in range
-            local num_ai = CountAutomationItems(env)
-            for ai = 0, num_ai - 1 do
-                local ai_pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
-                local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
-                if ai_pos < range_end and (ai_pos + ai_len) > range_start then
-                    table.insert(env_data.ai, {
-                        rel = ai_pos - track_start,
-                        len = ai_len
-                    })
-                end
-            end
-
-            table.insert(track_data.envs, env_data)
-        end
-        table.insert(snapshot, track_data)
-    end
-    return snapshot
-end
-
----------------------------------------------------------------------
-
-function restore_automation(snapshot, new_track_start)
-    for _, track_data in ipairs(snapshot) do
-        for _, env_data in ipairs(track_data.envs) do
-            local env = env_data.env
-            for _, pt in ipairs(env_data.points) do
-                InsertEnvelopePoint(env, new_track_start + pt.rel, pt.value,
-                    pt.shape, pt.tension, pt.sel, true)
-            end
-            Envelope_SortPoints(env)
-            local num_ai = CountAutomationItems(env)
-            for ai = 0, num_ai - 1 do
-                local ai_len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
-                for _, saved_ai in ipairs(env_data.ai) do
-                    if math.abs(ai_len - saved_ai.len) < 0.0001 then
-                        GetSetAutomationItemInfo(env, ai, "D_POSITION",
-                            new_track_start + saved_ai.rel, true)
-                        break
-                    end
-                end
-            end
-        end
-    end
-end
-
----------------------------------------------------------------------
-
--- Find all items that start at or after right_boundary and are not in the
--- target set. Then expand to include group-mates -- BUT only add a group-mate
--- if it also starts at or after right_boundary, so we never accidentally
--- drag a left-side item into the ripple move.
-function get_items_to_ripple(selected_and_group, right_boundary)
-    -- Build a fast lookup for the target set
-    local target_set = {}
-    for _, si in ipairs(selected_and_group) do
-        target_set[si] = true
-    end
-
-    -- First pass: items that start at/after boundary and are not target items
-    local group_ids = {}
+-- For every item in base_items, collect it and all folder-scoped midpoint peers.
+-- De-duplicated.
+function get_all_items_at_midpoints(base_items)
     local seen = {}
     local result = {}
-    local total_items = CountMediaItems(0)
-
-    for i = 0, total_items - 1 do
-        local item = GetMediaItem(0, i)
-        if not target_set[item] then
-            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            if pos >= right_boundary - 0.0001 then
-                if not seen[item] then
-                    seen[item] = true
-                    result[#result + 1] = item
-                end
-                local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
-                if gid and gid > 0 then
-                    group_ids[gid] = true
+    for _, ref_item in ipairs(base_items) do
+        if not seen[ref_item] then
+            local peers = get_items_at_midpoint(ref_item)
+            for _, peer in ipairs(peers) do
+                if not seen[peer] then
+                    seen[peer] = true
+                    result[#result + 1] = peer
                 end
             end
         end
     end
-
-    -- Second pass: add group-mates that are ALSO at/after the boundary
-    -- (never pull in items from the left side of the boundary)
-    if next(group_ids) then
-        for i = 0, total_items - 1 do
-            local item = GetMediaItem(0, i)
-            if not target_set[item] and not seen[item] then
-                local gid = GetMediaItemInfo_Value(item, "I_GROUPID")
-                if gid and gid > 0 and group_ids[gid] then
-                    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                    if pos >= right_boundary - 0.0001 then
-                        seen[item] = true
-                        result[#result + 1] = item
-                    end
-                end
-            end
-        end
-    end
-
     return result
 end
 
 ---------------------------------------------------------------------
 
 function reset_to_normal()
-    -- 0 in absolute mode = 1.0x (normal speed)
     apply_rate_change(0, false)
 end
 
@@ -353,8 +229,7 @@ function apply_rate_change(new_rate_val, relative_mode)
         return
     end
 
-    -- Only one folder track item may be selected. Multiple would each need
-    -- their own delta and would interfere with each other's ripple.
+    -- Only one folder track item may be selected
     local folder_item = nil
     local folder_item_count = 0
     for _, item in ipairs(sel_items) do
@@ -371,17 +246,15 @@ function apply_rate_change(new_rate_val, relative_mode)
         Undo_EndBlock("RC Time Stretch (no-op)", -1)
         return
     end
-    -- Fallback: use first selected item if none found on folder track
     if not folder_item then folder_item = sel_items[1] end
 
-    -- Expand to all grouped items (stereo pair, child tracks etc.)
-    local all_target_items = get_all_items_in_groups_for_items(sel_items)
+    -- Expand selected items to all folder-scoped midpoint peers
+    local all_target_items = get_all_items_at_midpoints(sel_items)
 
-    -- Build target_set for ripple exclusion
     local target_set = {}
     for _, ti in ipairs(all_target_items) do target_set[ti] = true end
 
-    -- Step 1: Compute rate/length from the folder item only
+    -- Compute rate/length from the folder item only
     local folder_take = GetActiveTake(folder_item)
     if not folder_take then
         PreventUIRefresh(-1)
@@ -391,16 +264,14 @@ function apply_rate_change(new_rate_val, relative_mode)
         return
     end
 
-    local folder_pos  = GetMediaItemInfo_Value(folder_item, "D_POSITION")
-    local old_len     = GetMediaItemInfo_Value(folder_item, "D_LENGTH")
-    local old_rate    = GetMediaItemTakeInfo_Value(folder_take, "D_PLAYRATE")
+    local folder_pos = GetMediaItemInfo_Value(folder_item, "D_POSITION")
+    local old_len    = GetMediaItemInfo_Value(folder_item, "D_LENGTH")
+    local old_rate   = GetMediaItemTakeInfo_Value(folder_take, "D_PLAYRATE")
 
     local new_rate
     if relative_mode then
-        -- 5 = 5% faster than current rate
         new_rate = old_rate * (1.0 + new_rate_val / 100.0)
     else
-        -- 5 = 5% faster than normal (1.0x), i.e. always relative to 1.0
         new_rate = 1.0 + new_rate_val / 100.0
     end
     new_rate = math.max(0.01, math.min(100.0, new_rate))
@@ -408,68 +279,58 @@ function apply_rate_change(new_rate_val, relative_mode)
     new_len = math.max(0.001, new_len)
     local delta = new_len - old_len
 
-    -- Step 2: Apply rate+length to ALL grouped items (folder + all children)
+    -- Apply rate + length to all target items
     for _, item in ipairs(all_target_items) do
         local take = GetActiveTake(item)
         if take then
-            -- Explicitly set B_PPITCH in both directions so toggling the
-            -- checkbox always takes effect, even on previously stretched items.
-            SetMediaItemTakeInfo_Value(take, "B_PPITCH", 1)  -- always preserve pitch when time-stretching
+            SetMediaItemTakeInfo_Value(take, "B_PPITCH", 1)
             SetMediaItemTakeInfo_Value(take, "D_PLAYRATE", new_rate)
             SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
         end
     end
 
-    -- Step 3: Build a set of tracks that belong to the selected item's folder.
-    -- Only items on these tracks should be rippled — items in other folders
-    -- must not be affected.
+    -- Build folder track set — only items on these tracks should be rippled
     local folder_track = GetMediaItemTrack(folder_item)
     local folder_track_set = { [folder_track] = true }
     for _, child in ipairs(get_folder_children(folder_track)) do
         folder_track_set[child] = true
     end
 
-    -- Ripple once, using the folder item's position as boundary.
-    -- Only items within the same folder and starting after folder_pos are moved.
+    -- Ripple items within the same folder that start after folder_pos
     local total_delta = delta
     if math.abs(delta) > 0.0001 then
         local total_items = CountMediaItems(0)
         local to_move_set = {}
-        local to_move     = {}
-        local move_group_ids = {}
+        local to_move = {}
 
+        -- First pass: items in this folder after folder_pos
         for i = 0, total_items - 1 do
             local it = GetMediaItem(0, i)
             if not target_set[it] and folder_track_set[GetMediaItemTrack(it)] then
                 local ipos = GetMediaItemInfo_Value(it, "D_POSITION")
-                if ipos > folder_pos + 0.0001 then
-                    if not to_move_set[it] then
-                        to_move_set[it] = true
-                        to_move[#to_move + 1] = it
-                    end
-                    local gid = GetMediaItemInfo_Value(it, "I_GROUPID")
-                    if gid and gid > 0 then move_group_ids[gid] = true end
+                if ipos > folder_pos + 0.0001 and not to_move_set[it] then
+                    to_move_set[it] = true
+                    to_move[#to_move + 1] = it
                 end
             end
         end
 
-        -- Group-mates must also be within the folder
-        if next(move_group_ids) then
-            for i = 0, total_items - 1 do
-                local it = GetMediaItem(0, i)
-                if not target_set[it] and not to_move_set[it]
-                        and folder_track_set[GetMediaItemTrack(it)] then
-                    local gid = GetMediaItemInfo_Value(it, "I_GROUPID")
-                    if gid and gid > 0 and move_group_ids[gid] then
-                        local ipos = GetMediaItemInfo_Value(it, "D_POSITION")
-                        if ipos > folder_pos + 0.0001 then
-                            to_move_set[it] = true
-                            to_move[#to_move + 1] = it
-                        end
+        -- Second pass: folder-scoped midpoint peers of items to move
+        local extra = {}
+        for _, it in ipairs(to_move) do
+            local peers = get_items_at_midpoint(it)
+            for _, peer in ipairs(peers) do
+                if not target_set[peer] and not to_move_set[peer]
+                        and folder_track_set[GetMediaItemTrack(peer)] then
+                    local ipos = GetMediaItemInfo_Value(peer, "D_POSITION")
+                    if ipos > folder_pos + 0.0001 then
+                        to_move_set[peer] = true
+                        extra[#extra + 1] = peer
                     end
                 end
             end
         end
+        for _, it in ipairs(extra) do to_move[#to_move + 1] = it end
 
         for _, it in ipairs(to_move) do
             local ipos = GetMediaItemInfo_Value(it, "D_POSITION")
@@ -504,7 +365,6 @@ function apply_pitch_change(semitones)
         return
     end
 
-    -- Find folder item and expand to grouped items
     local folder_item = nil
     local folder_item_count = 0
     for _, item in ipairs(sel_items) do
@@ -522,7 +382,7 @@ function apply_pitch_change(semitones)
     end
     if not folder_item then folder_item = sel_items[1] end
 
-    local all_target_items = get_all_items_in_groups_for_items(sel_items)
+    local all_target_items = get_all_items_at_midpoints(sel_items)
 
     for _, item in ipairs(all_target_items) do
         local take = GetActiveTake(item)
@@ -550,13 +410,11 @@ function main()
         if opened then
             local avail_w = ImGui.GetContentRegionAvail(ctx)
 
-            -- Selected item count
             local sel_count = count_selected_media_items()
             ImGui.Text(ctx, string.format("Selected items: %d", sel_count))
             ImGui.Separator(ctx)
             ImGui.Spacing(ctx)
 
-            -- Absolute checkbox
             local rv_abs, new_abs = ImGui.Checkbox(ctx, "Absolute rate (%)", not is_relative)
             if rv_abs then is_relative = not new_abs end
 
@@ -564,7 +422,6 @@ function main()
             ImGui.Separator(ctx)
             ImGui.Spacing(ctx)
 
-            -- Value input
             if is_relative then
                 ImGui.Text(ctx, "Rate change (%):  relative to current rate")
             else
@@ -578,7 +435,6 @@ function main()
             ImGui.Separator(ctx)
             ImGui.Spacing(ctx)
 
-            -- Apply button
             local can_apply = sel_count > 0 and tonumber(rate_str) ~= nil
             if not can_apply then ImGui.BeginDisabled(ctx) end
 
@@ -596,7 +452,6 @@ function main()
 
             ImGui.Spacing(ctx)
 
-            -- Reset button
             if sel_count == 0 then ImGui.BeginDisabled(ctx) end
             if ImGui.Button(ctx, 'Reset to Normal Speed', avail_w, 30) then
                 reset_to_normal()
@@ -607,7 +462,6 @@ function main()
             ImGui.Separator(ctx)
             ImGui.Spacing(ctx)
 
-            -- Pitch adjustment section
             ImGui.Text(ctx, "Pitch Adjustment (semitones):")
             ImGui.SetNextItemWidth(ctx, avail_w)
             local rv_p, new_p = ImGui.InputText(ctx, "##pitch_input", pitch_str)
@@ -641,8 +495,6 @@ function main()
 
             ImGui.Spacing(ctx)
 
-            -- Status / feedback message — always reserve the same space so the
-            -- window never grows and gets a scrollbar.
             do
                 local current_time = ImGui.GetTime(ctx)
                 if message_text ~= "" and current_time - message_timer < message_duration then
@@ -656,14 +508,12 @@ function main()
                         message_text = ""
                     end
                 else
-                    -- Empty placeholder — same height as two lines of text
                     ImGui.Text(ctx, " ")
                     ImGui.Text(ctx, " ")
                     message_text = ""
                 end
             end
 
-            -- Close on K
             if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_K, false) then
                 window_open = false
             end

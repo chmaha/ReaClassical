@@ -35,6 +35,7 @@ local format_pan, sync, auto_assign, reorder_track, delete_mixer_track
 local add_mixer_track, init, draw_track_controls
 local consolidate_folders_to_first, get_hardware_outputs
 local check_dolby_atmos_beam_available, get_track_num_channels
+local get_items_at_midpoint
 
 ---------------------------------------------------------------------
 
@@ -62,7 +63,7 @@ local show_hardware_names = true
 local input_dropdown_width = 80
 
 local show_folder_browser = false
-local folder_browser_type = nil -- "primary" or "secondary"
+local folder_browser_type = nil
 local folder_browser_path = ""
 local folder_browser_dirs = {}
 local os_separator = package.config:sub(1, 1)
@@ -90,34 +91,32 @@ local auto_assign_start = 1
 
 set_action_options(2)
 
--- State storage
 local mixer_tracks = {}
-local d_tracks = {}                -- D: tracks from first folder (one per mixer)
-local aux_submix_tracks = {}       -- Aux and submix tracks
-local aux_submix_names = {}        -- Display names for aux/submix tracks
-local aux_submix_pans = {}         -- Pan values for aux/submix tracks
-local pending_routing_changes = {} -- Track routing changes to apply when popup closes
-local input_channels = {}          -- Store selected input channel index
-local input_channels_mono = {}     -- Remember mono selection when switching to stereo
-local input_channels_stereo = {}   -- Remember stereo selection when switching to mono
-local mono_has_been_set = {}       -- Track if user has manually set mono
-local stereo_has_been_set = {}     -- Track if user has manually set stereo
-local is_stereo = {}               -- Store stereo checkbox state
-local input_disabled = {}          -- store if channel is disabled
-local pan_values = {}              -- Store pan values for each track
-local track_names = {}             -- Store mixer track names (without M: prefix)
-local track_has_hyphen = {}        -- Track if mixer track name ends with hyphen
-local volume_values = {}           -- Volume values for mixer tracks
-local aux_volume_values = {}       -- Volume values for special tracks
+local d_tracks = {}
+local aux_submix_tracks = {}
+local aux_submix_names = {}
+local aux_submix_pans = {}
+local pending_routing_changes = {}
+local input_channels = {}
+local input_channels_mono = {}
+local input_channels_stereo = {}
+local mono_has_been_set = {}
+local stereo_has_been_set = {}
+local is_stereo = {}
+local input_disabled = {}
+local pan_values = {}
+local track_names = {}
+local track_has_hyphen = {}
+local volume_values = {}
+local aux_volume_values = {}
 local current_tab = 0
-local selected_track = nil         -- Currently selected track index
-local sync_needed = false          -- Flag to trigger sync at end of frame
-local pan_reset = {}               -- Track double-click reset for pan sliders
-local new_track_name = ""          -- Name for new mixer track
-local focus_track_input = nil      -- Track which input should get focus next frame
-local focus_special_input = nil    -- Track which special track input should get focus next frame
+local selected_track = nil
+local sync_needed = false
+local pan_reset = {}
+local new_track_name = ""
+local focus_track_input = nil
+local focus_special_input = nil
 
--- Word lists for auto input assignment
 local pair_words = {
     "2ch", "pair", "paire", "paar", "coppia", "par", "para", "пара", "对", "ペア",
     "쌍", "زوج", "pari", "пар", "πάρoς", "двойка", "קבוצה", "çift",
@@ -139,10 +138,9 @@ local right_words = {
     "rechts", "rechte", "prawa", "prawy", "prawe", "prawo"
 }
 
--- Generate input options
 local mono_options = {}
 local stereo_options = {}
-local track_num_format = "%d" -- Will be set based on number of tracks
+local track_num_format = "%d"
 
 local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
 
@@ -150,8 +148,9 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 
 local LISTENBACK_JSFX_NAME = "ListenbackMicMonitor"
 local LISTENBACK_TRACK_NAME = "LISTENBACK"
-local listenback_input_channel = 0 -- Current hardware input index for listenback
-local listenback_is_stereo = false -- Listenback mono/stereo state
+local listenback_input_channel = 0
+local listenback_is_stereo = false
+
 ---------------------------------------------------------------------
 
 function main()
@@ -3557,278 +3556,6 @@ end
 
 ---------------------------------------------------------------------
 
-function consolidate_folders_to_first()
-    local num_tracks = CountTracks(0)
-    local folders = {}
-
-    -- Collect all folder parent tracks and their children
-    local i = 0
-    while i < num_tracks do
-        local track = GetTrack(0, i)
-        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-
-        if folder_depth == 1 then
-            local folder_info = { parent = track, children = {} }
-            table.insert(folders, folder_info)
-
-            -- Collect children of this folder
-            i = i + 1
-            local current_depth = 1
-            while i < num_tracks and current_depth > 0 do
-                local child_track = GetTrack(0, i)
-                local child_depth = GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
-
-                table.insert(folder_info.children, child_track)
-                current_depth = current_depth + child_depth
-
-                if current_depth <= 0 then
-                    break
-                end
-                i = i + 1
-            end
-        end
-        i = i + 1
-    end
-
-    if #folders < 2 then return end
-
-    -- Collect items from each folder (only from tracks within folders)
-    for _, folder in ipairs(folders) do
-        local all_folder_tracks = { folder.parent }
-        for _, child in ipairs(folder.children) do
-            table.insert(all_folder_tracks, child)
-        end
-
-        local items_by_group = {}
-        local ungrouped_items = {}
-
-        for _, track in ipairs(all_folder_tracks) do
-            local item_count = CountTrackMediaItems(track)
-            for j = 0, item_count - 1 do
-                local item = GetTrackMediaItem(track, j)
-                local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-
-                if group_id > 0 then
-                    if not items_by_group[group_id] then
-                        items_by_group[group_id] = {}
-                    end
-                    table.insert(items_by_group[group_id], item)
-                else
-                    table.insert(ungrouped_items, item)
-                end
-            end
-        end
-
-        folder.items_by_group = items_by_group
-        folder.ungrouped_items = ungrouped_items
-    end
-
-    -- Find the earliest and latest item positions in first folder
-    local first_folder = folders[1]
-    local first_folder_earliest = math.huge
-    local latest_end = 0
-
-    for _, items in pairs(first_folder.items_by_group) do
-        for _, item in ipairs(items) do
-            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
-
-            if pos < first_folder_earliest then
-                first_folder_earliest = pos
-            end
-            if item_end > latest_end then
-                latest_end = item_end
-            end
-        end
-    end
-
-    for _, item in ipairs(first_folder.ungrouped_items) do
-        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-        local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
-
-        if pos < first_folder_earliest then
-            first_folder_earliest = pos
-        end
-        if item_end > latest_end then
-            latest_end = item_end
-        end
-    end
-
-    -- If first folder doesn't start at 0, shift all its items to start at 0
-    if first_folder_earliest ~= 0 and first_folder_earliest ~= math.huge then
-        local shift_amount = -first_folder_earliest
-
-        for _, items in pairs(first_folder.items_by_group) do
-            for _, item in ipairs(items) do
-                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
-            end
-        end
-
-        for _, item in ipairs(first_folder.ungrouped_items) do
-            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            SetMediaItemInfo_Value(item, "D_POSITION", pos + shift_amount)
-        end
-
-        -- Adjust latest_end accordingly
-        latest_end = latest_end + shift_amount
-    end
-
-    -- Get first folder's tracks for moving items to
-    local first_folder_tracks = { first_folder.parent }
-    for _, child in ipairs(first_folder.children) do
-        table.insert(first_folder_tracks, child)
-    end
-
-    -- Move items from subsequent folders to first folder
-    -- If first folder is empty (latest_end is 0), start at 0, otherwise add 10 second gap
-    local current_position = (latest_end > 0) and (latest_end + 10) or 0
-
-    for folder_idx = 2, #folders do
-        local source_folder = folders[folder_idx]
-
-        -- Find the earliest position in this entire folder to calculate offset
-        local folder_earliest = math.huge
-
-        for _, items in pairs(source_folder.items_by_group) do
-            for _, item in ipairs(items) do
-                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                if pos < folder_earliest then
-                    folder_earliest = pos
-                end
-            end
-        end
-
-        for _, item in ipairs(source_folder.ungrouped_items) do
-            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            if pos < folder_earliest then
-                folder_earliest = pos
-            end
-        end
-
-        -- Calculate time offset for this entire folder
-        local folder_offset = current_position - folder_earliest
-
-        -- Process grouped items - maintain their relative positions within the folder
-        for _, items in pairs(source_folder.items_by_group) do
-            for _, item in ipairs(items) do
-                local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                local new_pos = original_pos + folder_offset
-
-                -- Find appropriate track in first folder (match relative track position)
-                local source_track = GetMediaItem_Track(item)
-
-                -- Find source track's position within its folder
-                local source_folder_tracks = { source_folder.parent }
-                for _, child in ipairs(source_folder.children) do
-                    table.insert(source_folder_tracks, child)
-                end
-
-                local source_track_pos = nil
-                for idx, folder_track in ipairs(source_folder_tracks) do
-                    if folder_track == source_track then
-                        source_track_pos = idx
-                        break
-                    end
-                end
-
-                -- Map to corresponding track in first folder
-                if source_track_pos and source_track_pos <= #first_folder_tracks then
-                    local dest_track = first_folder_tracks[source_track_pos]
-                    MoveMediaItemToTrack(item, dest_track)
-                    SetMediaItemInfo_Value(item, "D_POSITION", new_pos)
-                end
-            end
-        end
-
-        -- Process ungrouped items - maintain their relative positions within the folder
-        for _, item in ipairs(source_folder.ungrouped_items) do
-            local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
-            local new_pos = original_pos + folder_offset
-
-            local source_track = GetMediaItem_Track(item)
-
-            -- Find source track's position within its folder
-            local source_folder_tracks = { source_folder.parent }
-            for _, child in ipairs(source_folder.children) do
-                table.insert(source_folder_tracks, child)
-            end
-
-            local source_track_pos = nil
-            for idx, folder_track in ipairs(source_folder_tracks) do
-                if folder_track == source_track then
-                    source_track_pos = idx
-                    break
-                end
-            end
-
-            -- Map to corresponding track in first folder
-            if source_track_pos and source_track_pos <= #first_folder_tracks then
-                local dest_track = first_folder_tracks[source_track_pos]
-                MoveMediaItemToTrack(item, dest_track)
-                SetMediaItemInfo_Value(item, "D_POSITION", new_pos)
-            end
-        end
-
-        -- Find the end of all items in this folder to set next folder's position
-        local folder_end = 0
-        for _, items in pairs(source_folder.items_by_group) do
-            for _, item in ipairs(items) do
-                local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
-                    GetMediaItemInfo_Value(item, "D_LENGTH")
-                if item_end > folder_end then
-                    folder_end = item_end
-                end
-            end
-        end
-
-        for _, item in ipairs(source_folder.ungrouped_items) do
-            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
-                GetMediaItemInfo_Value(item, "D_LENGTH")
-            if item_end > folder_end then
-                folder_end = item_end
-            end
-        end
-
-        current_position = folder_end + 10 -- 10 second gap before next folder
-    end
-
-    -- Delete only empty folders (2 onwards) - check if folder has no items
-    Main_OnCommand(40297, 0) -- Unselect all
-    for folder_idx = 2, #folders do
-        local folder = folders[folder_idx]
-        local has_items = false
-
-        -- Check if folder parent has items
-        if CountTrackMediaItems(folder.parent) > 0 then
-            has_items = true
-        end
-
-        -- Check if any children have items
-        if not has_items then
-            for _, child in ipairs(folder.children) do
-                if CountTrackMediaItems(child) > 0 then
-                    has_items = true
-                    break
-                end
-            end
-        end
-
-        -- Only delete if folder is completely empty
-        if not has_items then
-            SetTrackSelected(folder.parent, true)
-            for _, child in ipairs(folder.children) do
-                SetTrackSelected(child, true)
-            end
-        end
-    end
-
-    Main_OnCommand(40005, 0) -- Remove selected tracks
-    Main_OnCommand(40297, 0) -- Unselect all
-end
-
----------------------------------------------------------------------
-
 function get_hardware_outputs(mixer_track)
     local outputs = {}
     local num_hw_sends = GetTrackNumSends(mixer_track, 1) -- 1 = hardware outputs
@@ -3878,6 +3605,261 @@ function get_track_num_channels(track)
         num_channels = 2
     end
     return num_channels
+end
+
+---------------------------------------------------------------------
+
+function get_items_at_midpoint(ref_item, folder_start, folder_end)
+    local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+    local mid = pos + len * 0.5
+    local tolerance = 0.0001
+    local result = {}
+    for t = folder_start, folder_end do
+        local track = GetTrack(0, t)
+        local n = CountTrackMediaItems(track)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+            if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                result[#result + 1] = item
+            end
+        end
+    end
+    return result
+end
+
+---------------------------------------------------------------------
+
+function consolidate_folders_to_first()
+    local num_tracks = CountTracks(0)
+    local folders = {}
+
+    local i = 0
+    while i < num_tracks do
+        local track = GetTrack(0, i)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+        if folder_depth == 1 then
+            local folder_info = { parent = track, children = {} }
+            table.insert(folders, folder_info)
+
+            i = i + 1
+            local current_depth = 1
+            while i < num_tracks and current_depth > 0 do
+                local child_track = GetTrack(0, i)
+                local child_depth = GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
+                table.insert(folder_info.children, child_track)
+                current_depth = current_depth + child_depth
+                if current_depth <= 0 then break end
+                i = i + 1
+            end
+        end
+        i = i + 1
+    end
+
+    if #folders < 2 then return end
+
+    -- Collect items from each folder, grouping peers by midpoint instead of I_GROUPID.
+    -- Each "midpoint group" is a set of items that share the same midpoint position —
+    -- they are treated as a unit when consolidating, just as grouped items were before.
+    for _, folder in ipairs(folders) do
+        local all_folder_tracks = { folder.parent }
+        for _, child in ipairs(folder.children) do
+            table.insert(all_folder_tracks, child)
+        end
+
+        -- Build a set of all items in this folder
+        local folder_item_set = {}
+        for _, track in ipairs(all_folder_tracks) do
+            local item_count = CountTrackMediaItems(track)
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(track, j)
+                folder_item_set[item] = true
+            end
+        end
+
+        -- Group items by midpoint: use the parent (folder.parent) track's items
+        -- as reference items, then find their peers across the folder.
+        local midpoint_groups = {} -- list of {items = {...}, ref_pos = pos}
+        local seen = {}
+
+        -- Resolve folder track index range for scoped midpoint lookup
+        local folder_start_idx = GetMediaTrackInfo_Value(folder.parent, "IP_TRACKNUMBER") - 1
+        local folder_end_idx = folder_start_idx
+        for _, child in ipairs(folder.children) do
+            folder_end_idx = GetMediaTrackInfo_Value(child, "IP_TRACKNUMBER") - 1
+        end
+
+        local parent_item_count = CountTrackMediaItems(folder.parent)
+        for j = 0, parent_item_count - 1 do
+            local ref_item = GetTrackMediaItem(folder.parent, j)
+            if not seen[ref_item] then
+                local peers = get_items_at_midpoint(ref_item, folder_start_idx, folder_end_idx)
+
+                -- Only keep peers that are actually in this folder
+                local group_items = {}
+                for _, peer in ipairs(peers) do
+                    if folder_item_set[peer] then
+                        group_items[#group_items + 1] = peer
+                        seen[peer] = true
+                    end
+                end
+                local ref_pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+                table.insert(midpoint_groups, { items = group_items, ref_pos = ref_pos })
+            end
+        end
+
+        -- Collect any remaining folder items not reached via the parent track
+        local ungrouped_items = {}
+        for _, track in ipairs(all_folder_tracks) do
+            local item_count = CountTrackMediaItems(track)
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(track, j)
+                if not seen[item] then
+                    seen[item] = true
+                    table.insert(ungrouped_items, item)
+                end
+            end
+        end
+
+        folder.midpoint_groups = midpoint_groups
+        folder.ungrouped_items = ungrouped_items
+    end
+
+    -- Find earliest and latest positions in first folder
+    local first_folder = folders[1]
+    local first_folder_earliest = math.huge
+    local latest_end = 0
+
+    for _, group in ipairs(first_folder.midpoint_groups) do
+        for _, item in ipairs(group.items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
+            if pos < first_folder_earliest then first_folder_earliest = pos end
+            if item_end > latest_end then latest_end = item_end end
+        end
+    end
+    for _, item in ipairs(first_folder.ungrouped_items) do
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
+        if pos < first_folder_earliest then first_folder_earliest = pos end
+        if item_end > latest_end then latest_end = item_end end
+    end
+
+    -- Shift first folder to start at 0 if needed
+    if first_folder_earliest ~= 0 and first_folder_earliest ~= math.huge then
+        local shift = -first_folder_earliest
+        for _, group in ipairs(first_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                SetMediaItemInfo_Value(item, "D_POSITION", pos + shift)
+            end
+        end
+        for _, item in ipairs(first_folder.ungrouped_items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetMediaItemInfo_Value(item, "D_POSITION", pos + shift)
+        end
+        latest_end = latest_end + shift
+    end
+
+    local first_folder_tracks = { first_folder.parent }
+    for _, child in ipairs(first_folder.children) do
+        table.insert(first_folder_tracks, child)
+    end
+
+    local current_position = (latest_end > 0) and (latest_end + 10) or 0
+
+    for folder_idx = 2, #folders do
+        local source_folder = folders[folder_idx]
+
+        -- Find earliest position in this folder
+        local folder_earliest = math.huge
+        for _, group in ipairs(source_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                if pos < folder_earliest then folder_earliest = pos end
+            end
+        end
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if pos < folder_earliest then folder_earliest = pos end
+        end
+
+        local folder_offset = current_position - folder_earliest
+
+        local source_folder_tracks = { source_folder.parent }
+        for _, child in ipairs(source_folder.children) do
+            table.insert(source_folder_tracks, child)
+        end
+
+        local function move_item_to_first_folder(item, new_pos)
+            local source_track = GetMediaItem_Track(item)
+            local source_track_pos = nil
+            for idx, folder_track in ipairs(source_folder_tracks) do
+                if folder_track == source_track then
+                    source_track_pos = idx; break
+                end
+            end
+            if source_track_pos and source_track_pos <= #first_folder_tracks then
+                local dest_track = first_folder_tracks[source_track_pos]
+                MoveMediaItemToTrack(item, dest_track)
+                SetMediaItemInfo_Value(item, "D_POSITION", new_pos)
+            end
+        end
+
+        for _, group in ipairs(source_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                move_item_to_first_folder(item, original_pos + folder_offset)
+            end
+        end
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            move_item_to_first_folder(item, original_pos + folder_offset)
+        end
+
+        -- Find end of all items now in this folder's slots
+        local folder_end = 0
+        for _, group in ipairs(source_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+                    GetMediaItemInfo_Value(item, "D_LENGTH")
+                if item_end > folder_end then folder_end = item_end end
+            end
+        end
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+                GetMediaItemInfo_Value(item, "D_LENGTH")
+            if item_end > folder_end then folder_end = item_end end
+        end
+
+        current_position = folder_end + 10
+    end
+
+    -- Delete only empty folders (2 onwards)
+    Main_OnCommand(40297, 0) -- Unselect all
+    for folder_idx = 2, #folders do
+        local folder = folders[folder_idx]
+        local has_items = CountTrackMediaItems(folder.parent) > 0
+        if not has_items then
+            for _, child in ipairs(folder.children) do
+                if CountTrackMediaItems(child) > 0 then
+                    has_items = true; break
+                end
+            end
+        end
+        if not has_items then
+            SetTrackSelected(folder.parent, true)
+            for _, child in ipairs(folder.children) do
+                SetTrackSelected(child, true)
+            end
+        end
+    end
+
+    Main_OnCommand(40005, 0) -- Remove selected tracks
+    Main_OnCommand(40297, 0) -- Unselect all
 end
 
 ---------------------------------------------------------------------

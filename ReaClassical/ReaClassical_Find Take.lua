@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
+local main, select_midpoint_peers
 
 ---------------------------------------------------------------------
 
@@ -100,7 +100,7 @@ function main()
                     SetEditCurPos(item_start, true, false)
                     Main_OnCommand(40769, 0) -- unselect all items
                     SetMediaItemSelected(item, true)
-                    Main_OnCommand(40034, 0) -- select all in group
+                    select_midpoint_peers()
                     break
                 end
             end
@@ -137,7 +137,7 @@ function main()
                         SetEditCurPos(item_start, true, false)
                         Main_OnCommand(40769, 0) -- unselect all items
                         SetMediaItemSelected(item, true)
-                        Main_OnCommand(40034, 0) -- select all in group
+                        select_midpoint_peers()
                         break
                     end
                 end
@@ -168,7 +168,7 @@ function main()
                             SetEditCurPos(item_start, true, false)
                             Main_OnCommand(40769, 0)
                             SetMediaItemSelected(item, true)
-                            Main_OnCommand(40034, 0)
+                            select_midpoint_peers()
                             break
                         end
                     end
@@ -181,6 +181,63 @@ function main()
         local response = MB("Take not found. Try again?", "Find Take", 4)
         if response == 6 then
             goto start
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+function select_midpoint_peers()
+    local sel_track = GetSelectedTrack(0, 0)
+    if not sel_track then return end
+    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local folder_start, folder_end = nil, nil
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(sel_track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
+            end
+        end
+    end
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    if not folder_start then return end
+    local seed_items = {}
+    local num_sel = CountSelectedMediaItems(0)
+    for i = 0, num_sel - 1 do
+        seed_items[#seed_items + 1] = GetSelectedMediaItem(0, i)
+    end
+    for _, ref_item in ipairs(seed_items) do
+        local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+        local mid = pos + len * 0.5
+        local tolerance = 0.0001
+        for t = folder_start, folder_end do
+            local track = GetTrack(0, t)
+            local n = CountTrackMediaItems(track)
+            for i = 0, n - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                    SetMediaItemSelected(item, true)
+                end
+            end
         end
     end
 end

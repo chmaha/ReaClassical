@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, return_xfade_length, is_cursor_between_items
 local get_selected_media_item_at, count_selected_media_items
 local select_item_under_cursor_on_selected_track
+local select_midpoint_peers
 ---------------------------------------------------------------------
 
 function main()
@@ -108,7 +109,7 @@ function main()
         if item1_orig_offset ~= "" and math.abs(offset_amount) > 1e-10 then
             Main_OnCommand(40289, 0)                     -- unselect all items
             SetMediaItemSelected(item1, true)
-            Main_OnCommand(40034, 0)                     -- Item Grouping: Select all items in group(s)
+            select_midpoint_peers()
             local num_items = count_selected_media_items() -- Get the number of selected items
             for i = 0, num_items - 1 do
                 local item = get_selected_media_item_at(i)  -- Get the selected media item
@@ -243,6 +244,63 @@ function select_item_under_cursor_on_selected_track()
       end
     end
   end
+end
+
+---------------------------------------------------------------------
+
+function select_midpoint_peers()
+    local sel_track = GetSelectedTrack(0, 0)
+    if not sel_track then return end
+    local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local folder_start, folder_end = nil, nil
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(sel_track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
+            end
+        end
+    end
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    if not folder_start then return end
+    local seed_items = {}
+    local num_sel = CountSelectedMediaItems(0)
+    for i = 0, num_sel - 1 do
+        seed_items[#seed_items + 1] = GetSelectedMediaItem(0, i)
+    end
+    for _, ref_item in ipairs(seed_items) do
+        local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+        local mid = pos + len * 0.5
+        local tolerance = 0.0001
+        for t = folder_start, folder_end do
+            local track = GetTrack(0, t)
+            local n = CountTrackMediaItems(track)
+            for i = 0, n - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                    SetMediaItemSelected(item, true)
+                end
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

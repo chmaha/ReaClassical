@@ -25,7 +25,67 @@ local main, get_selected_media_item_at
 local get_item_by_guid, find_item_by_source_file
 local folder_check, get_track_prefix
 local find_item_across_projects_by_guid, find_item_across_projects_by_source
-local get_workflow_for_project
+local get_workflow_for_project, get_items_at_midpoint
+local get_folder_range_for_item
+
+---------------------------------------------------------------------
+
+-- Resolves the folder track range (0-based indices) that contains ref_item.
+function get_folder_range_for_item(ref_item)
+    local track = GetMediaItem_Track(ref_item)
+    local track_num = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") ~= 1 then
+        for t = track_num - 1, 0, -1 do
+            local tt = GetTrack(0, t)
+            if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+                start_search = t; break
+            end
+        end
+    end
+    local folder_start, folder_end = nil, nil
+    for t = start_search, num_tracks - 1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+            folder_start = t; folder_end = t
+            local x = t + 1
+            while x < num_tracks do
+                local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+                folder_end = x
+                if d < 0 then break end
+                x = x + 1
+            end
+            break
+        end
+    end
+    return folder_start, folder_end
+end
+
+---------------------------------------------------------------------
+
+function get_items_at_midpoint(ref_item)
+    local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+    local mid = pos + len * 0.5
+    local tolerance = 0.0001
+    local result = {}
+    local folder_start, folder_end = get_folder_range_for_item(ref_item)
+    if not folder_start then return result end
+    for t = folder_start, folder_end do
+        local track = GetTrack(0, t)
+        local n = CountTrackMediaItems(track)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+            if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                result[#result + 1] = item
+            end
+        end
+    end
+    return result
+end
 
 ---------------------------------------------------------------------
 
@@ -33,7 +93,7 @@ function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
 
-    local current_project = EnumProjects(-1, "") -- current tab
+    local current_project = EnumProjects(-1, "")
 
     local _, workflow = GetProjExtState(current_project, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -87,8 +147,14 @@ function main()
         local req_start = startoffs
         local req_end = startoffs + (len * rate)
 
+        -- Build exclusion set: the edit item and all its midpoint peers
+        local exclude_set = {}
+        for _, peer in ipairs(get_items_at_midpoint(edit_item)) do
+            exclude_set[peer] = true
+        end
+
         source_item, source_project =
-            find_item_across_projects_by_source(filename, req_start, req_end, edit_item)
+            find_item_across_projects_by_source(filename, req_start, req_end, exclude_set)
 
         if not source_item then
             MB("Source not found in any open project.", "Error", 0)
@@ -170,17 +236,13 @@ end
 function get_selected_media_item_at(index)
     local selected_count = 0
     local total_items = CountMediaItems(0)
-
     for i = 0, total_items - 1 do
         local edit_item = GetMediaItem(0, i)
         if IsMediaItemSelected(edit_item) then
-            if selected_count == index then
-                return edit_item
-            end
+            if selected_count == index then return edit_item end
             selected_count = selected_count + 1
         end
     end
-
     return nil
 end
 
@@ -188,64 +250,41 @@ end
 
 function get_item_by_guid(project, guid)
     if not guid or guid == "" then return nil end
-    project = project or 0 -- default to current project if nil
-
+    project = project or 0
     local numItems = CountMediaItems(project)
     for i = 0, numItems - 1 do
         local item = GetMediaItem(project, i)
         local retval, itemGUID = GetSetMediaItemInfo_String(item, "GUID", "", false)
-        if retval and itemGUID == guid then
-            return item
-        end
+        if retval and itemGUID == guid then return item end
     end
-
-    return nil -- not found
+    return nil
 end
 
 ---------------------------------------------------------------------
 
-function find_item_by_source_file(project, filename, required_start, required_end, exclude_item)
+-- exclude_set is a table keyed by item pointer; any item in it is skipped.
+function find_item_by_source_file(project, filename, required_start, required_end, exclude_set)
     if not filename or filename == "" then return nil end
     project = project or 0
-
-    -- Get the group ID of the exclude_item (edit item)
-    local exclude_group_id = nil
-    if exclude_item then
-        exclude_group_id = GetMediaItemInfo_Value(exclude_item, "I_GROUPID")
-    end
 
     local numItems = CountMediaItems(project)
     for i = 0, numItems - 1 do
         local item = GetMediaItem(project, i)
 
-        -- Skip if this is the item we want to exclude (the edit item)
-        if item ~= exclude_item then
-            -- Skip if this item has the same group ID as the edit item (and group ID is not 0)
-            local item_group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-            local same_group = (exclude_group_id ~= 0 and item_group_id == exclude_group_id)
-
-            if not same_group then
-                local take = GetActiveTake(item)
-
-                if take then
-                    local source = GetMediaItemTake_Source(take)
-                    if source then
-                        local item_filename = GetMediaSourceFileName(source, "")
-
-                        -- Check if filenames match
-                        if item_filename == filename then
-                            -- Check if this item's audio range covers the required range
-                            local item_startoffs = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
-                            local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                            local item_playrate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
-
-                            local item_audio_start = item_startoffs
-                            local item_audio_end = item_startoffs + (item_len * item_playrate)
-
-                            -- Check if the item contains the required audio range
-                            if item_audio_start <= required_start and item_audio_end >= required_end then
-                                return item
-                            end
+        if not exclude_set[item] then
+            local take = GetActiveTake(item)
+            if take then
+                local source = GetMediaItemTake_Source(take)
+                if source then
+                    local item_filename = GetMediaSourceFileName(source, "")
+                    if item_filename == filename then
+                        local item_startoffs = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+                        local item_len       = GetMediaItemInfo_Value(item, "D_LENGTH")
+                        local item_playrate  = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+                        local item_audio_start = item_startoffs
+                        local item_audio_end   = item_startoffs + (item_len * item_playrate)
+                        if item_audio_start <= required_start and item_audio_end >= required_end then
+                            return item
                         end
                     end
                 end
@@ -253,7 +292,7 @@ function find_item_by_source_file(project, filename, required_start, required_en
         end
     end
 
-    return nil -- not found
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -274,9 +313,7 @@ end
 
 function get_track_prefix(track)
     if not track then track = GetSelectedTrack(0, 0) end
-    if folder_check() == 0 or track == nil then
-        return "1"
-    end
+    if folder_check() == 0 or track == nil then return "1" end
     local folder
     if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
         folder = track
@@ -295,39 +332,28 @@ end
 
 function find_item_across_projects_by_guid(guid)
     if not guid or guid == "" then return nil, nil end
-
     local i = 0
     while true do
         local proj = EnumProjects(i)
         if not proj then break end
-
         local item = get_item_by_guid(proj, guid)
-        if item then
-            return item, proj
-        end
-
+        if item then return item, proj end
         i = i + 1
     end
-
     return nil, nil
 end
 
 ---------------------------------------------------------------------
 
-function find_item_across_projects_by_source(filename, required_start, required_end, exclude_item)
+function find_item_across_projects_by_source(filename, required_start, required_end, exclude_set)
     local i = 0
     while true do
         local proj = EnumProjects(i)
         if not proj then break end
-
-        local item = find_item_by_source_file(proj, filename, required_start, required_end, exclude_item)
-        if item then
-            return item, proj
-        end
-
+        local item = find_item_by_source_file(proj, filename, required_start, required_end, exclude_set)
+        if item then return item, proj end
         i = i + 1
     end
-
     return nil, nil
 end
 

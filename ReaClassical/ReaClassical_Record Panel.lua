@@ -29,8 +29,7 @@ local disarm_all_tracks, extract_session_from_filename, is_folder_parent_or_chil
 local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled, check_prefs
 local load_item_rank_and_notes, save_item_rank_and_notes, rgba_to_native, update_take_name
 local apply_rank_and_notes_to_items, store_last_recorded_guids, apply_rank_and_notes_by_guids
-local apply_rank_and_notes_to_item
-local find_first_folder_track
+local apply_rank_and_notes_to_item, find_first_folder_track, get_folder_items_at_midpoint
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -195,6 +194,29 @@ for i = 0, num_tracks - 1 do
   if lb_state == "y" then
     SetMediaTrackInfo_Value(track, "I_RECARM", 1)
   end
+end
+
+---------------------------------------------------------------------
+
+function get_folder_items_at_midpoint(ref_item, folder_start, folder_end)
+  local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+  local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+  local mid = pos + len * 0.5
+  local tolerance = 0.0001
+  local result = {}
+  for t = folder_start, folder_end do
+    local track = GetTrack(0, t)
+    local n = CountTrackMediaItems(track)
+    for i = 0, n - 1 do
+      local item = GetTrackMediaItem(track, i)
+      local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+      local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+      if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+        result[#result + 1] = item
+      end
+    end
+  end
+  return result
 end
 
 ---------------------------------------------------------------------
@@ -579,71 +601,95 @@ function save_item_rank_and_notes(item, rank, note)
 
   GetSetMediaItemInfo_String(item, "P_NOTES", note, true)
 
-  local group_id = GetMediaItemInfo_Value(item, "I_GROUPID")
-  if group_id ~= 0 then
-    local track_count = CountTracks(0)
-    for i = 0, track_count - 1 do
-      local track = GetTrack(0, i)
-      local item_count = CountTrackMediaItems(track)
-      for j = 0, item_count - 1 do
-        local current_item = GetTrackMediaItem(track, j)
-        local current_group_id = GetMediaItemInfo_Value(current_item, "I_GROUPID")
-        if current_group_id == group_id and current_item ~= item then
-          GetSetMediaItemInfo_String(current_item, "P_EXT:item_rank", rank, true)
-          GetSetMediaItemInfo_String(current_item, "P_NOTES", note, true)
+  -- Propagate rank/notes/color to folder-scoped midpoint peers (replaces I_GROUPID)
+  do
+    local item_track = GetMediaItemTrack(item)
+    local track_num = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local folder_start, folder_end = nil, nil
+    local start_search = track_num
+    if GetMediaTrackInfo_Value(item_track, "I_FOLDERDEPTH") ~= 1 then
+      for t = track_num - 1, 0, -1 do
+        local tt = GetTrack(0, t)
+        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+          start_search = t; break
+        end
+      end
+    end
+    for t = start_search, num_tracks - 1 do
+      local tt = GetTrack(0, t)
+      if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+        folder_start = t; folder_end = t
+        local x = t + 1
+        while x < num_tracks do
+          local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+          folder_end = x
+          if d < 0 then break end
+          x = x + 1
+        end
+        break
+      end
+    end
+    if folder_start then
+      local peers = get_folder_items_at_midpoint(item, folder_start, folder_end)
+      for _, peer in ipairs(peers) do
+        if peer ~= item then
+          GetSetMediaItemInfo_String(peer, "P_EXT:item_rank", rank, true)
+          GetSetMediaItemInfo_String(peer, "P_NOTES", note, true)
 
-          local _, grouped_colorized = GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", false)
-          local grouped_is_colorized = (grouped_colorized == "y")
+          local _, peer_colorized = GetSetMediaItemInfo_String(peer, "P_EXT:colorized", "", false)
+          local peer_is_colorized = (peer_colorized == "y")
 
-          local grouped_color
+          local peer_color
           if rank ~= "" then
-            if grouped_is_colorized then
-              GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", true)
+            if peer_is_colorized then
+              GetSetMediaItemInfo_String(peer, "P_EXT:colorized", "", true)
             end
             if ranking_color_pref == 0 then
               local rank_index = tonumber(rank)
               if rank_index and RANKS[rank_index] then
-                grouped_color = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
+                peer_color = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
               else
-                grouped_color = get_item_color(current_item)
+                peer_color = get_item_color(peer)
               end
             end
           else
-            if grouped_is_colorized then
-              GetSetMediaItemInfo_String(current_item, "P_EXT:colorized", "", true)
+            if peer_is_colorized then
+              GetSetMediaItemInfo_String(peer, "P_EXT:colorized", "", true)
             end
             if auto_color_pref == 0 then
-              local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-              if workflow == "Horizontal" then
-                local _, stored_take_num = GetSetMediaItemInfo_String(current_item, "P_EXT:item_take_num", "", false)
+              local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+              if wf == "Horizontal" then
+                local _, stored_take_num = GetSetMediaItemInfo_String(peer, "P_EXT:item_take_num", "", false)
                 if stored_take_num ~= "" then
                   local take_num = tonumber(stored_take_num)
                   if take_num then
-                    grouped_color = pastel_color(take_num - 1)
+                    peer_color = pastel_color(take_num - 1)
                   else
-                    grouped_color = get_item_color(current_item)
+                    peer_color = get_item_color(peer)
                   end
                 else
-                  grouped_color = get_item_color(current_item)
+                  peer_color = get_item_color(peer)
                 end
               else
-                grouped_color = get_item_color(current_item)
+                peer_color = get_item_color(peer)
               end
             else
-              grouped_color = 0
+              peer_color = 0
             end
           end
 
-          if grouped_color then
-            SetMediaItemInfo_Value(current_item, "I_CUSTOMCOLOR", grouped_color)
-            UpdateItemInProject(current_item)
+          if peer_color then
+            SetMediaItemInfo_Value(peer, "I_CUSTOMCOLOR", peer_color)
+            UpdateItemInProject(peer)
           end
 
-          update_take_name(current_item, rank)
+          update_take_name(peer, rank)
         end
       end
     end
   end
+
 
   UpdateArrange()
 end
