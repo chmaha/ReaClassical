@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-04-25 23:53:21 UTC</code></p>
+<p><code>Updated: 2026-05-16 13:06:31 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1367,12 +1367,27 @@ There&#8217;s no real need to position the edit cursor before starting to record
 </div>
 </div>
 <div class="sect3">
+<h4 id="_remote_recording_via_web_interface">Remote Recording via web interface</h4>
+<div class="imageblock">
+<div class="content">
+<img src="src/assets/web_interface.png" alt="Record Panel Web Interface">
+</div>
+<div class="title">Figure 6. Record Panel Web Interface</div>
+</div>
+<div class="paragraph">
+<p>The ReaClassical Remote is a browser-based control panel that mirrors the Record Panel&#8217;s core functionality, allowing you to arm tracks, start and stop recording, manage takes, and apply rankings and notes from a phone, tablet, or laptop anywhere in the room. To set it up, enable REAPER&#8217;s built-in web remote by going opening REAPER preferences <kbd>O</kbd> and navigate to Control/OSC/web and add a new web browser interface from the drop-down. Select <code>ReaClassical_remote.html</code> from the default interface drop-down and click apply. This same options page displays a ready-made access URL. Simply open that in a browser on any device connected to the same local network.</p>
+</div>
+<div class="paragraph">
+<p>Once connected, the Arm/Rec/Stop button, Pause/Disarm, +Take, and Next Section buttons all behave identically to their counterparts in the Record Panel window, and the take number display is kept in sync with the running panel. Session settings including start and end times, duration, and session name are read from REAPER on first load and can be edited and applied back to the running panel from the Session Settings section at the bottom of the page. Rank and notes can be set remotely and will be applied to the last recorded items exactly as if you had used the Record Panel directly. Note that the Record Panel Lua script must be open and running for the remote to function correctly, as it acts as the bridge between the web interface and ReaClassical&#8217;s project state.</p>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_meterbridge">Meterbridge</h4>
 <div class="imageblock">
 <div class="content">
 <img src="src/assets/meterbridge.png" alt="Meterbridge">
 </div>
-<div class="title">Figure 6. Meterbridge</div>
+<div class="title">Figure 7. Meterbridge</div>
 </div>
 <div class="paragraph">
 <p>Use <kbd>B</kbd> to open the Meterbridge. The default view shows numeric peak holds. When tracks are record-armed, the main window displays recording inputs. During auditioning of material, the top rows show mixer tracks and the bottom any special tracks including RCMASTER and Master tracks.</p>
@@ -1387,7 +1402,7 @@ There&#8217;s no real need to position the edit cursor before starting to record
 <div class="content">
 <img src="src/assets/rec_indicator.png" alt="Recording Indicator">
 </div>
-<div class="title">Figure 7. Recording Indicator</div>
+<div class="title">Figure 8. Recording Indicator</div>
 </div>
 <div class="paragraph">
 <p>The recording indicator <span class="keyseq"><kbd>Alt</kbd>+<kbd>R</kbd></span> is designed to be placed on a secondary monitor full screen so in situations where engineers are located in a separate control room, musicians are aware of when recording is active. Right-click to set custom colors for offline, standby, recording and pause.</p>
@@ -1462,7 +1477,7 @@ There&#8217;s no real need to position the edit cursor before starting to record
 <div class="content">
 <img src="src/assets/calc.png" alt="Audio Calculator">
 </div>
-<div class="title">Figure 8. Audio Calculator</div>
+<div class="title">Figure 9. Audio Calculator</div>
 </div>
 <div class="paragraph">
 <p>To figure out required disk space for a duration of audio or vice versa to figure out maximum duration of audio you can record based on available disk space, use <span class="keyseq"><kbd>Shift</kbd>+<kbd>H</kbd></span> to open a calculator. You can set units, channel count, samplerate, bit depth and format (WAV or MP3 at various bitrates).</p>
@@ -1586,7 +1601,7 @@ You can also "smart" import further material into a non-empty ReaClassical proje
 <div class="content">
 <img src="src/assets/smart_import.png" alt="Smart Import">
 </div>
-<div class="title">Figure 9. Smart Import</div>
+<div class="title">Figure 10. Smart Import</div>
 </div>
 </div>
 <div class="sect3">
@@ -1697,7 +1712,7 @@ You can also "smart" import further material into a non-empty ReaClassical proje
 <div class="content">
 <img src="src/assets/editing_toolbar.png" alt="S-D Editing Toolbar">
 </div>
-<div class="title">Figure 10. S-D Editing Toolbar</div>
+<div class="title">Figure 11. S-D Editing Toolbar</div>
 </div>
 <div class="paragraph">
 <p>While I designed ReaClassical to be used efficiently with keyboard shortcuts, there is a custom S-D editing toolbar for those that prefer it. However I do highly recommend learning the key strokes as you will find your editing speeds improve dramatically. The floating toolbar can be opened via <kbd>F6</kbd> but will automatically open once when you start source-destination editing. Right-click to set a different icon layout and/or zoom.</p>
@@ -1754,7 +1769,7 @@ A reminder to do all track management in Mission Control!
 <div class="content">
 <img src="src/assets/stats.png" alt="Statistics">
 </div>
-<div class="title">Figure 11. Statistics</div>
+<div class="title">Figure 12. Statistics</div>
 </div>
 <div class="paragraph">
 <p>For a complete set of statistics on the ReaClassical project, either for your own information or to assist with billing a client, go to <span class="menuseq"><b class="menu">ReaClassical</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">Utilities</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">Show Statistics</b></span> or use the shortcut <kbd>F1</kbd>. For example, you might have a billing system that charges clients based on number of source-destination edits, or mixing/mastering based on the final length of the album. Information includes: final album length, number of CD markers, project age, total project length, total length of source material, total number of items, number of track folders, number of tracks per folder, number of <em>special</em> tracks, number of regions, number of destination S-D edits, number of destination item splits, FX count and number of automation lanes.</p>
@@ -1766,7 +1781,7 @@ A reminder to do all track management in Mission Control!
 <div class="content">
 <img src="src/assets/notes.png" alt="ReaClassical Notes">
 </div>
-<div class="title">Figure 12. ReaClassical Notes</div>
+<div class="title">Figure 13. ReaClassical Notes</div>
 </div>
 <div class="paragraph">
 <p>Add project, track, item notes and item ranking using ReaClassical&#8217;s Notes window <kbd>N</kbd>. The window can also be used to name or rename items.</p>
@@ -1896,7 +1911,7 @@ Prepare Takes will automatically run on placing the first S-D marker in the proj
 <div class="content">
 <img src="src/assets/xfade_window.png" alt="Crossfade Editor">
 </div>
-<div class="title">Figure 13. Crossfade Editor</div>
+<div class="title">Figure 14. Crossfade Editor</div>
 </div>
 <div class="paragraph">
 <p>Since v7.40, REAPER includes an excellent professional two-lane crossfade editor similar in nature to the specialist classical DAWs such as Sequoia and Pyramix. With the improved crossfade editor, users can see the continued "ghost" waveforms of the items beyond the crossfade they enter and likewise the previous waveforms of the items that exit the crossfade. The ability to visually align transients and then position the crossfade just before it is absolutely critical (and fun when you have the tools to do it!). Select the right-hand item of a fade (or hover over the item if <code>Add S-D Markers at Mouse Hover</code> is set to checked in ReaClassical Project Preferences <kbd>F5</kbd>), press <kbd>F</kbd> and you are moved into crossfade editor mode. Note also that you are automatically centered on the crossfade and can use the mouse wheel to zoom in and out. Press <kbd>F</kbd> again and you exit that mode.</p>
@@ -1955,7 +1970,7 @@ Prepare Takes will automatically run on placing the first S-D marker in the proj
 <div class="content">
 <img src="src/assets/source_audition.png" alt="Source Audition Manager">
 </div>
-<div class="title">Figure 14. Source Audition Manager</div>
+<div class="title">Figure 15. Source Audition Manager</div>
 </div>
 <div class="paragraph">
 <p>When making a source-destination edit, you may not have a list or annotated score from the musicians or producer showing preferred edits. If the decision is left to the audio engineer, this process is now very straightforward in ReaClassical 26. First set the source audition mode to checked in <kbd>F5</kbd> preferences. Then, open the Source Audition Manager via Mission Control or <kbd>Z</kbd> shortcut.</p>
@@ -1994,6 +2009,15 @@ This works at any point in the editing process and isn&#8217;t restricted to the
 </div>
 </div>
 <div class="sect4">
+<h5 id="_set_item_playrate_with_ripple">Set Item Playrate with Ripple</h5>
+<div class="paragraph">
+<p>This function, run via <span class="keyseq"><kbd>Shift</kbd>+<kbd>R</kbd></span>, allows you to change the playback rate of a selected item, automatically rippling all subsequent items within the same folder to maintain the integrity of your edits. Select a single item on the folder track, enter a percentage value in the input box, and press <b class="button">Apply &amp; Ripple</b>. In relative mode (the default), the value is applied as a percentage change relative to the item&#8217;s current rate — so entering <code>5</code> makes the item 5% faster than it currently is, while <code>-5</code> makes it 5% slower. In absolute mode (enable the "Absolute rate" checkbox), the value is always relative to normal speed — so <code>5</code> always results in a rate of 1.05x regardless of the item&#8217;s current rate, and <code>0</code> always restores normal speed. The <b class="button">Reset to Normal Speed</b> button is a convenient shortcut to return the item to 1.0x playback rate. Pitch is always preserved during time-stretching. Note that only one item may be selected at a time, as each item requires its own independent ripple calculation.</p>
+</div>
+<div class="paragraph">
+<p>The window also includes a Pitch Adjustment section for correcting intonation without affecting item length or requiring any ripple. Enter a value in semitones and press <b class="button">Apply Pitch</b> — positive values raise the pitch, negative values lower it, and fractional values are supported for fine adjustments (e.g. <code>0.5</code> for a quarter-tone). The <b class="button">Reset Pitch</b> button returns the pitch to <code>0.0</code> (no adjustment).</p>
+</div>
+</div>
+<div class="sect4">
 <h5 id="_automatic_crossfade_protection">Automatic Crossfade Protection</h5>
 <div class="paragraph">
 <p>When performing S-D edits, deletions or ripple deletes, ReaClassical automatically detects any existing crossfades that straddle your marker boundaries and consumes them as part of the resulting edit. This prevents stray partial fades being left behind in your project. This is also useful when quickly iterating through alternative source material: since destination markers persist after an edit and are placed at the exact edit bounds, you can create new source markers and immediately re-edit without worrying about crossfade debris accumulating at the destination boundaries.</p>
@@ -2008,7 +2032,7 @@ This works at any point in the editing process and isn&#8217;t restricted to the
 <div class="content">
 <img src="src/assets/score-edits.png" alt="Score Edits">
 </div>
-<div class="title">Figure 15. Editing a physical score</div>
+<div class="title">Figure 16. Editing a physical score</div>
 </div>
 </div>
 <div class="sect4">
@@ -2121,7 +2145,7 @@ If setting a snapshot tied to an unnamed item, the first part of the item&#8217;
 <div class="content">
 <img src="src/assets/mixer_snapshots.png" alt="Mixer Snapshot Manager">
 </div>
-<div class="title">Figure 16. Mixer Snapshot Manager</div>
+<div class="title">Figure 17. Mixer Snapshot Manager</div>
 </div>
 <div class="sect4">
 <h5 id="_general_workflow">General Workflow</h5>
@@ -2204,7 +2228,7 @@ For auto recall of mixer snapshots to work, the Mixer Snapshots Manager must rem
 <div class="content">
 <img src="src/assets/automation.png" alt="Automation Dialog">
 </div>
-<div class="title">Figure 17. Automation Dialog</div>
+<div class="title">Figure 18. Automation Dialog</div>
 </div>
 </div>
 <div class="sect3">
@@ -2315,7 +2339,7 @@ In order to make the process as streamlined as possible for the user before the 
 <div class="content">
 <img src="src/assets/metadata_editor.png" alt="Metadata Editor">
 </div>
-<div class="title">Figure 18. Metadata Editor</div>
+<div class="title">Figure 19. Metadata Editor</div>
 </div>
 <div class="paragraph">
 <p>The metadata window allows you to enter all track and album metadata in a single place including automatic ISRC values based on the first track entry, and automatic album-wide performer, songwriter, composer and arranger values based on one or more entries in the track table. These can be overridden via the checkboxes.</p>
@@ -2386,7 +2410,7 @@ When this mode is enabled, you can still set manual marker offsets using the but
 <div class="content">
 <img src="src/assets/html_album_report.png" alt="Example of HTML Album Report">
 </div>
-<div class="title">Figure 19. Example of HTML Album Report</div>
+<div class="title">Figure 20. Example of HTML Album Report</div>
 </div>
 </div>
 <div class="sect4">
@@ -2415,7 +2439,7 @@ When this mode is enabled, you can still set manual marker offsets using the but
 <div class="content">
 <img src="src/assets/render.png" alt="Render Window">
 </div>
-<div class="title">Figure 20. Render Window</div>
+<div class="title">Figure 21. Render Window</div>
 </div>
 <div class="sect3">
 <h4 id="_presets">Presets</h4>
@@ -2517,7 +2541,7 @@ When this mode is enabled, you can still set manual marker offsets using the but
 <div class="content">
 <img src="src/assets/build_edit_list.png" alt="Build Edit List">
 </div>
-<div class="title">Figure 21. An example edit list</div>
+<div class="title">Figure 22. An example edit list</div>
 </div>
 </div>
 </div>

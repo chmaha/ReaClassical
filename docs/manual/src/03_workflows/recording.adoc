@@ -53,6 +53,15 @@ To start (and optionally end) a recording at specific times or manually start a 
 
 You shouldn't need to use this but there are cases where you might want to start a new ReaClassical project but continue from the previous day's last take number. To do so, check the "Allow Take Number Override" option and set a new take number. Note that it will not allow you to set a number lower than already used. 
 
+==== Remote Recording via web interface
+
+.Record Panel Web Interface
+image::web_interface.png[Record Panel Web Interface]
+
+The ReaClassical Remote is a browser-based control panel that mirrors the Record Panel's core functionality, allowing you to arm tracks, start and stop recording, manage takes, and apply rankings and notes from a phone, tablet, or laptop anywhere in the room. To set it up, enable REAPER's built-in web remote by going opening REAPER preferences kbd:[O] and navigate to Control/OSC/web and add a new web browser interface from the drop-down. Select `ReaClassical_remote.html` from the default interface drop-down and click apply. This same options page displays a ready-made access URL. Simply open that in a browser on any device connected to the same local network.
+
+Once connected, the Arm/Rec/Stop button, Pause/Disarm, +Take, and Next Section buttons all behave identically to their counterparts in the Record Panel window, and the take number display is kept in sync with the running panel. Session settings including start and end times, duration, and session name are read from REAPER on first load and can be edited and applied back to the running panel from the Session Settings section at the bottom of the page. Rank and notes can be set remotely and will be applied to the last recorded items exactly as if you had used the Record Panel directly. Note that the Record Panel Lua script must be open and running for the remote to function correctly, as it acts as the bridge between the web interface and ReaClassical's project state.
+
 ==== Meterbridge
 
 .Meterbridge
