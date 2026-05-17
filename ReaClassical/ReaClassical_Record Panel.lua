@@ -68,6 +68,11 @@ function check_prefs()
   end
 end
 
+local group_state = GetToggleCommandState(1156)
+if group_state ~= 1 then
+  Main_OnCommand(1156, 0)       -- Enable item grouping
+end
+
 check_prefs()
 
 set_action_options(2)

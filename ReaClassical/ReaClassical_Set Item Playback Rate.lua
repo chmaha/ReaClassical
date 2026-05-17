@@ -46,6 +46,11 @@ if workflow == "" then
     return
 end
 
+local group_state = GetToggleCommandState(1156)
+if group_state ~= 1 then
+    Main_OnCommand(1156, 0)     -- Enable item grouping
+end
+
 set_action_options(2)
 
 package.path = ImGui_GetBuiltinPath() .. '/?.lua'
@@ -321,7 +326,7 @@ function apply_rate_change(new_rate_val, relative_mode)
             local peers = get_items_at_midpoint(it)
             for _, peer in ipairs(peers) do
                 if not target_set[peer] and not to_move_set[peer]
-                        and folder_track_set[GetMediaItemTrack(peer)] then
+                    and folder_track_set[GetMediaItemTrack(peer)] then
                     local ipos = GetMediaItemInfo_Value(peer, "D_POSITION")
                     if ipos > folder_pos + 0.0001 then
                         to_move_set[peer] = true
@@ -342,7 +347,7 @@ function apply_rate_change(new_rate_val, relative_mode)
     PreventUIRefresh(-1)
 
     local mode_str = relative_mode and string.format("%.2f%% relative", new_rate_val)
-                                    or string.format("%.4fs absolute", new_rate_val)
+        or string.format("%.4fs absolute", new_rate_val)
     message_text = string.format("Time-stretched (%s) on %d item(s)\nRippled by %.4fs.",
         mode_str, #all_target_items, total_delta)
     message_timer = ImGui.GetTime(ctx)

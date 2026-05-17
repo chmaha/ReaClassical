@@ -43,12 +43,17 @@ function main()
         return
     end
 
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
+
     local selected, prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
-          total_selected_length = select_previous_and_next()
+    total_selected_length = select_previous_and_next()
 
     if selected then
         heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
-             total_selected_length)
+            total_selected_length)
     end
 
     Undo_EndBlock('Heal Edit', 0)
@@ -229,31 +234,31 @@ function select_previous_and_next()
         next_fadeout_len = next_fadeout_len_auto
     end
 
-    local fadeout_shape = GetMediaItemInfo_Value(next_item, "C_FADEOUTSHAPE")
+    local fadeout_shape         = GetMediaItemInfo_Value(next_item, "C_FADEOUTSHAPE")
 
     -- next_end is the source-file position where next_item ends
-    local next_end = next_startoffs + next_length
+    local next_end              = next_startoffs + next_length
 
     -- total_selected_length: timeline span of everything selected
     -- (prev + edit items + next), measured on the parent track
-    sel_count = count_selected_media_items()
-    local first_sel_item = get_selected_media_item_at(0)
-    local last_sel_item  = get_selected_media_item_at(sel_count - 1)
+    sel_count                   = count_selected_media_items()
+    local first_sel_item        = get_selected_media_item_at(0)
+    local last_sel_item         = get_selected_media_item_at(sel_count - 1)
 
-    local first_pos  = GetMediaItemInfo_Value(first_sel_item, "D_POSITION")
-    local last_pos   = GetMediaItemInfo_Value(last_sel_item,  "D_POSITION")
-    local last_len   = GetMediaItemInfo_Value(last_sel_item,  "D_LENGTH")
+    local first_pos             = GetMediaItemInfo_Value(first_sel_item, "D_POSITION")
+    local last_pos              = GetMediaItemInfo_Value(last_sel_item, "D_POSITION")
+    local last_len              = GetMediaItemInfo_Value(last_sel_item, "D_LENGTH")
 
     local total_selected_length = (last_pos + last_len) - first_pos
 
     return true, prev_startoffs, next_end, next_fadeout_len, fadeout_shape,
-           total_selected_length
+        total_selected_length
 end
 
 ---------------------------------------------------------------------
 
 function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
-             total_selected_length)
+              total_selected_length)
     local sel_count = count_selected_media_items()
     if sel_count == 0 then
         MB("No items selected.", "Error", 0)
@@ -261,18 +266,18 @@ function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
     end
 
     -- prev_item is the first selected item (added by select_previous_and_next)
-    local prev_item  = get_selected_media_item_at(0)
-    local prev_track = GetMediaItem_Track(prev_item)
-    local prev_pos   = GetMediaItemInfo_Value(prev_item, "D_POSITION")
+    local prev_item                = get_selected_media_item_at(0)
+    local prev_track               = GetMediaItem_Track(prev_item)
+    local prev_pos                 = GetMediaItemInfo_Value(prev_item, "D_POSITION")
 
     local folder_start, folder_end = get_folder_range(prev_track)
 
     -- Peers of prev_item across the folder (these survive and get extended)
-    local prev_peers = folder_start
+    local prev_peers               = folder_start
         and get_folder_items_at_midpoint(prev_item, folder_start, folder_end)
-        or  { prev_item }
+        or { prev_item }
 
-    local is_prev_peer = {}
+    local is_prev_peer             = {}
     for _, item in ipairs(prev_peers) do is_prev_peer[item] = true end
 
     -- ---------------------------------------------------------------
@@ -294,7 +299,7 @@ function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
         if not deleted[item] then
             local peers = folder_start
                 and get_folder_items_at_midpoint(item, folder_start, folder_end)
-                or  { item }
+                or { item }
             for _, peer in ipairs(peers) do
                 if not is_prev_peer[peer] and not deleted[peer] then
                     deleted[peer] = true
@@ -317,7 +322,7 @@ function heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
             SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", prev_startoffs)
             SetMediaItemInfo_Value(item, "D_LENGTH", new_prev_length)
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", next_fadeout_len)
-            SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE",    next_fadeout_shape)
+            SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE", next_fadeout_shape)
             SetMediaItemSelected(item, true)
         end
     end

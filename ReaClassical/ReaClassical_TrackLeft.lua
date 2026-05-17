@@ -43,6 +43,11 @@ function main()
         return
     end
 
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
+
     local selected_item, folder_track = get_selected_cd_track_item()
     if not selected_item then
         MB('Please select an item that starts a CD track', "Select CD track start", 0)
@@ -55,7 +60,7 @@ function main()
         return
     end
 
-    local next_item = get_next_cd_track_item(selected_item, folder_track)
+    local next_item      = get_next_cd_track_item(selected_item, folder_track)
 
     local selected_items = get_cd_track_items(selected_item, folder_track)
     local prev_items     = get_cd_track_items(prev_item, folder_track)
@@ -63,7 +68,7 @@ function main()
     local selected_start = GetMediaItemInfo_Value(selected_item, "D_POSITION")
     local prev_start     = GetMediaItemInfo_Value(prev_item, "D_POSITION")
 
-    local prev_span = selected_start - prev_start
+    local prev_span      = selected_start - prev_start
 
     local selected_span
     if next_item then
@@ -89,7 +94,7 @@ function main()
     -- selected moves left by prev_span; prev moves right by selected_span.
     move_all(
         { { items = selected_items, delta = -prev_span },
-          { items = prev_items,     delta =  selected_span } },
+            { items = prev_items,     delta = selected_span } },
         folder_track
     )
 
@@ -237,8 +242,10 @@ function collect_automation(folder_items, track_start, folder_track)
                 if time >= range_start and time <= range_end then
                     table.insert(env_data.points, {
                         rel = time - track_start,
-                        value = value, shape = shape,
-                        tension = tension, sel = sel
+                        value = value,
+                        shape = shape,
+                        tension = tension,
+                        sel = sel
                     })
                     DeleteEnvelopePointRange(env, time - 0.00005, time + 0.00005)
                     num_points = CountEnvelopePoints(env)
@@ -297,8 +304,8 @@ function collect_move(folder_items, folder_track, delta)
     local range_start = math.huge
     local range_end = 0
     for _, item in ipairs(folder_items) do
-        local p = GetMediaItemInfo_Value(item, "D_POSITION")
-        local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local p     = GetMediaItemInfo_Value(item, "D_POSITION")
+        local l     = GetMediaItemInfo_Value(item, "D_LENGTH")
         range_start = math.min(range_start, p)
         range_end   = math.max(range_end, p + l)
     end
@@ -334,7 +341,7 @@ end
 -- item exactly once. Prevents child items shared between adjacent CD tracks
 -- from being moved twice.
 function move_all(groups, folder_track)
-    local item_delta = {}  -- item -> delta, first group wins
+    local item_delta = {} -- item -> delta, first group wins
 
     for _, group in ipairs(groups) do
         local moves = collect_move(group.items, folder_track, group.delta)

@@ -54,6 +54,11 @@ if input ~= "" then
     if table[5] then auto_color_pref = tonumber(table[5]) or 0 end
 end
 
+local group_state = GetToggleCommandState(1156)
+if group_state ~= 1 then
+    Main_OnCommand(1156, 0)     -- Enable item grouping
+end
+
 set_action_options(2)
 
 package.path = ImGui_GetBuiltinPath() .. '/?.lua'

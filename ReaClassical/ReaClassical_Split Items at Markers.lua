@@ -43,6 +43,11 @@ function main()
         return
     end
 
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
+
     if CountSelectedMediaItems(0) == 0 then
         MB("Please select at least one item.", "ReaClassical Error", 0)
         return
@@ -157,7 +162,8 @@ function split_items_at_markers()
             if pos > original_item_start and pos < original_item_end then
                 if name ~= "" then has_named_markers = true end
                 local label = name ~= "" and name or ("Marker " .. tostring(markrgnindex))
-                table.insert(marker_data, { pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex })
+                table.insert(marker_data,
+                    { pos = pos, name = label, has_name = (name ~= ""), marker_index = markrgnindex })
             end
         end
     end
@@ -199,11 +205,12 @@ function split_items_at_markers()
                             local new_item = GetMediaItem(0, j)
                             local new_track = GetMediaItemTrack(new_item)
                             local new_item_parent_track = get_folder_parent_track(new_track)
-                            local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track, "IP_TRACKNUMBER")
+                            local new_parent_track_index = GetMediaTrackInfo_Value(new_item_parent_track,
+                                "IP_TRACKNUMBER")
                             local new_item_pos = GetMediaItemInfo_Value(new_item, "D_POSITION")
 
                             if new_parent_track_index == parent_track_index
-                                    and math.abs(new_item_pos - marker.pos) < 0.0001 then
+                                and math.abs(new_item_pos - marker.pos) < 0.0001 then
                                 local take = GetActiveTake(new_item)
                                 if take then
                                     GetSetMediaItemTakeInfo_String(take, "P_NAME", marker.name, true)

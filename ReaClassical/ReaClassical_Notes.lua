@@ -55,6 +55,11 @@ if input ~= "" then
     if table[6] then ranking_color_pref = tonumber(table[6]) or 0 end
 end
 
+local group_state = GetToggleCommandState(1156)
+if group_state ~= 1 then
+    Main_OnCommand(1156, 0)     -- Enable item grouping
+end
+
 set_action_options(2)
 
 package.path        = ImGui_GetBuiltinPath() .. '/?.lua'
@@ -488,7 +493,9 @@ function get_item_color(item)
         for t = track_idx, 0, -1 do
             local track = GetTrack(0, t)
             local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-            if depth > 0 then parent_folder = track; break end
+            if depth > 0 then
+                parent_folder = track; break
+            end
         end
 
         local folder_index = 0
@@ -543,7 +550,7 @@ function apply_rank_color(item, rank)
                 local rank_index = tonumber(rank)
                 if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
                     peer_final = peer_base ~= "" and (RANKS[rank_index].prefix .. "-" .. peer_base)
-                                                 or  RANKS[rank_index].prefix
+                        or RANKS[rank_index].prefix
                 end
             end
             GetSetMediaItemTakeInfo_String(peer_take, "P_NAME", peer_final, true)
@@ -562,7 +569,7 @@ function apply_rank_color(item, rank)
             local rank_index = tonumber(rank)
             if rank_index and RANKS[rank_index] and RANKS[rank_index].prefix ~= "" then
                 final_name = base_name ~= "" and (RANKS[rank_index].prefix .. "-" .. base_name)
-                                              or  RANKS[rank_index].prefix
+                    or RANKS[rank_index].prefix
             end
         end
         GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)

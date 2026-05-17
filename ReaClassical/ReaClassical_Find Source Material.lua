@@ -106,6 +106,11 @@ function main()
         return
     end
 
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
+
     local _, input = GetProjExtState(current_project, "ReaClassical", "Preferences")
     local auto_color_pref = 0
     if input ~= "" then
@@ -278,9 +283,9 @@ function find_item_by_source_file(project, filename, required_start, required_en
                 if source then
                     local item_filename = GetMediaSourceFileName(source, "")
                     if item_filename == filename then
-                        local item_startoffs = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
-                        local item_len       = GetMediaItemInfo_Value(item, "D_LENGTH")
-                        local item_playrate  = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+                        local item_startoffs   = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+                        local item_len         = GetMediaItemInfo_Value(item, "D_LENGTH")
+                        local item_playrate    = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
                         local item_audio_start = item_startoffs
                         local item_audio_end   = item_startoffs + (item_len * item_playrate)
                         if item_audio_start <= required_start and item_audio_end >= required_end then

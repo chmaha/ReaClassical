@@ -43,6 +43,11 @@ function main()
         return
     end
 
+    local group_state = GetToggleCommandState(1156)
+    if group_state ~= 1 then
+        Main_OnCommand(1156, 0) -- Enable item grouping
+    end
+
     local selected_item, folder_track = get_selected_cd_track_item()
     if not selected_item then
         MB('Please select an item that starts a CD track', "Select CD track start", 0)
@@ -63,7 +68,7 @@ function main()
     local selected_start = GetMediaItemInfo_Value(selected_item, "D_POSITION")
     local next_start     = GetMediaItemInfo_Value(next_item, "D_POSITION")
 
-    local selected_span = next_start - selected_start
+    local selected_span  = next_start - selected_start
 
     local next_span
     if next_next_item then
@@ -88,8 +93,8 @@ function main()
     -- so no child item gets moved twice.
     -- selected moves right by next_span; next moves left by selected_span.
     move_all(
-        { { items = selected_items, delta =  next_span },
-          { items = next_items,     delta = -selected_span } },
+        { { items = selected_items, delta = next_span },
+            { items = next_items,     delta = -selected_span } },
         folder_track
     )
 
@@ -224,8 +229,10 @@ function collect_automation(folder_items, track_start, folder_track)
                 if time >= range_start and time <= range_end then
                     table.insert(env_data.points, {
                         rel = time - track_start,
-                        value = value, shape = shape,
-                        tension = tension, sel = sel
+                        value = value,
+                        shape = shape,
+                        tension = tension,
+                        sel = sel
                     })
                     DeleteEnvelopePointRange(env, time - 0.00005, time + 0.00005)
                     num_points = CountEnvelopePoints(env)
@@ -284,8 +291,8 @@ function collect_move(folder_items, folder_track, delta)
     local range_start = math.huge
     local range_end = 0
     for _, item in ipairs(folder_items) do
-        local p = GetMediaItemInfo_Value(item, "D_POSITION")
-        local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local p     = GetMediaItemInfo_Value(item, "D_POSITION")
+        local l     = GetMediaItemInfo_Value(item, "D_LENGTH")
         range_start = math.min(range_start, p)
         range_end   = math.max(range_end, p + l)
     end
