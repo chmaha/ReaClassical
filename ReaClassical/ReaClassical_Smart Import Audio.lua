@@ -79,10 +79,15 @@ function main()
     local is_blank_project = (not is_rc_project and CountTracks(0) == 0)
 
     if is_blank_project then
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
         MB("Smart Import requires a saved ReaClassical project with audio files "
             .. "in the project recording path.\n\n"
-            .. "Please create and save a ReaClassical project first (Ctrl+N / Cmd+N), "
-            .. "then place your audio files in the project folder before running Smart Import.",
+            .. "Please create and save a ReaClassical project first (" .. modifier .. "+N), "
+            .. "then place your audio files in the project media folder before running Smart Import.",
             "Smart Import", 0)
         return
     end
