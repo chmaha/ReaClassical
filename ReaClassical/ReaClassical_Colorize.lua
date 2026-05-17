@@ -392,9 +392,9 @@ function apply_color_to_items(color)
 
     for _, item in ipairs(items_to_color) do
         if item then
-            local _, saved_color = GetSetMediaItemInfo_String(item, "P_EXT:saved_color", "", false)
-            if saved_color == "" then
-                local original_color = GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR")
+            local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
+            if colorized ~= "y" then
+                local original_color = math.floor(GetMediaItemInfo_Value(item, "I_CUSTOMCOLOR"))
                 GetSetMediaItemInfo_String(item, "P_EXT:saved_color", tostring(original_color), true)
             end
             SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color)
