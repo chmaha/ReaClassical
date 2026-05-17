@@ -1,8 +1,13 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.4
+@version 26.5.5
 @changelog
-  Playrate with ripple: Add separate pitch dialog to window
+  Various: Remove group ID and 40034 requirements
+  Smart Import: Name tracks automatically based on filename pattern
+  S-D Editing functions: Conform child item edges and fades to parent item
+  Prepare Takes: Remove grouping functions, keep coloring
+  Prepare Takes: Add conforming of child items to parent item
+  Documentation: Various
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
