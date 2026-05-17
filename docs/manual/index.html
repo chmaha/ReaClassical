@@ -560,7 +560,7 @@ See <a href="https://www.gnu.org/licenses/fdl-1.3-standalone.html" class="bare">
 <p><em>Copyright © 2022–2026 chmaha</em></p>
 </div>
 <div class="paragraph text-center">
-<p><code>Updated: 2026-05-17 14:30:06 UTC</code></p>
+<p><code>Updated: 2026-05-17 18:10:12 UTC</code></p>
 </div>
 <div class="sidebarblock text-center">
 <div class="content">
@@ -1848,36 +1848,9 @@ To quickly remove all record-arming in the project, use mouse hover + <kbd>A</kb
 <p>In ReaClassical 26 and following, source-destination editing is truly anywhere to anywhere. This means you can place your source and destination marker pairs on <em>any</em> folder. It opens the door to multi-disc album projects and more!</p>
 </div>
 <div class="sect3">
-<h4 id="_preparing_takes">Preparing Takes</h4>
+<h4 id="_preparing_takes_optional">Preparing Takes (optional)</h4>
 <div class="paragraph">
-<p>The Prepare Takes function is essential when working with imported material. Additionally, some projects also arrive with items that have been individually top-and-tailed to remove silence. In this case, items may look aligned musically, but standard REAPER no longer understands them as belonging together. Prepare Takes fixes this by ensuring all related audio behaves as a single logical unit when dragging, adjusting item starts, ends fades etc. In addition, certain advanced ReaClassical functions like healing edits, rely on correct item grouping.</p>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Important</div>
-</td>
-<td class="content">
-Once all your takes are in the project, run Prepare Takes before starting to work with your audio.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Prepare Takes is intelligent enough to figure out which workflow you are using. Just press <kbd>T</kbd> (for <em>Takes</em>) or press the dedicated button in Mission Control. Every item comprising the same take are now grouped together no matter whether they share a common item start or end time.</p>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Tip</div>
-</td>
-<td class="content">
-Prepare Takes will automatically run on placing the first S-D marker in the project if it hasn&#8217;t already been run once.
-</td>
-</tr>
-</table>
+<p>Prepare Takes is no longer a required step before editing. ReaClassical&#8217;s editing functions now find peer items by midpoint matching rather than relying on explicit group IDs, and child item edges and fades are conformed to their parent automatically whenever an edit operation runs. That said, Prepare Takes might still worth running on projects with manually imported material since it immediately corrects any drifted child item edges and fades, and applies colours based on take number or folder.</p>
 </div>
 </div>
 <div class="sect3">
