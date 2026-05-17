@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, select_matching_source_folder, copy_source, split_at_dest_in
 local create_crossfades, clean_up, load_last_assembly_item
 local ripple_lock_mode, return_xfade_length, xfade, get_item_guid
-local get_first_last_items, mark_as_edit
+local get_first_last_items, mark_as_edit, select_midpoint_peers
 local move_to_project_tab, save_source_details, adaptive_delete
 local check_overlapping_items, count_selected_media_items, get_selected_media_item_at
 local move_destination_folder_to_top, move_destination_folder
@@ -34,7 +34,7 @@ local save_last_assembly_item, save_view, restore_view
 local get_item_by_guid, select_matching_dest_folder, add_marker
 local folder_check, get_track_prefix, trim_left_item_to_dest_in
 local save_ripple_state, restore_ripple_state
-local get_folder_items_at_midpoint  -- replaces I_GROUPID lookups
+local get_folder_items_at_midpoint, select_all_folder_tracks
 
 ---------------------------------------------------------------------
 
@@ -1056,7 +1056,6 @@ end
 function select_midpoint_peers(folder_start, folder_end)
     local num_sel = CountSelectedMediaItems(0)
     if num_sel == 0 then return end
-
     if not folder_start then
         local sel_track = GetSelectedTrack(0, 0)
         if not sel_track then return end
@@ -1087,15 +1086,38 @@ function select_midpoint_peers(folder_start, folder_end)
         end
         if not folder_start then return end
     end
-
     local seed_items = {}
     for i = 0, num_sel - 1 do
         seed_items[#seed_items + 1] = GetSelectedMediaItem(0, i)
     end
     for _, ref_item in ipairs(seed_items) do
+        local ref_take            = GetActiveTake(ref_item)
+        local ref_pos             = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+        local ref_len             = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+        local ref_soffs           = ref_take and GetMediaItemTakeInfo_Value(ref_take, "D_STARTOFFS") or nil
+        local ref_fadeinlen       = GetMediaItemInfo_Value(ref_item, "D_FADEINLEN")
+        local ref_fadeoutlen      = GetMediaItemInfo_Value(ref_item, "D_FADEOUTLEN")
+        local ref_fadeinlen_auto  = GetMediaItemInfo_Value(ref_item, "D_FADEINLEN_AUTO")
+        local ref_fadeoutlen_auto = GetMediaItemInfo_Value(ref_item, "D_FADEOUTLEN_AUTO")
+        local ref_fadeinshape     = GetMediaItemInfo_Value(ref_item, "C_FADEINSHAPE")
+        local ref_fadeoutshape    = GetMediaItemInfo_Value(ref_item, "C_FADEOUTSHAPE")
         local peers = get_folder_items_at_midpoint(ref_item, folder_start, folder_end)
         for _, peer in ipairs(peers) do
             SetMediaItemSelected(peer, true)
+            if peer ~= ref_item then
+                local peer_take = GetActiveTake(peer)
+                if peer_take and ref_soffs ~= nil then
+                    SetMediaItemInfo_Value(peer, "D_POSITION",        ref_pos)
+                    SetMediaItemInfo_Value(peer, "D_LENGTH",          ref_len)
+                    SetMediaItemTakeInfo_Value(peer_take, "D_STARTOFFS", ref_soffs)
+                    SetMediaItemInfo_Value(peer, "D_FADEINLEN",       ref_fadeinlen)
+                    SetMediaItemInfo_Value(peer, "D_FADEOUTLEN",      ref_fadeoutlen)
+                    SetMediaItemInfo_Value(peer, "D_FADEINLEN_AUTO",  ref_fadeinlen_auto)
+                    SetMediaItemInfo_Value(peer, "D_FADEOUTLEN_AUTO", ref_fadeoutlen_auto)
+                    SetMediaItemInfo_Value(peer, "C_FADEINSHAPE",     ref_fadeinshape)
+                    SetMediaItemInfo_Value(peer, "C_FADEOUTSHAPE",    ref_fadeoutshape)
+                end
+            end
         end
     end
 end
