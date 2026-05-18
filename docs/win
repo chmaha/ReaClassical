@@ -151,12 +151,18 @@ $reaperOutput = Join-Path $tempDir $reaperFile
 Invoke-WebRequest -Uri $reaperUrl -OutFile $reaperOutput -UseBasicParsing
 
 # ------------------------
-# Download portable 7zip
+# Download portable 7zip (architecture-appropriate)
 # ------------------------
 $sevenZipZip = Join-Path $tempDir "7zip.zip"
 $sevenZipPath = Join-Path $tempDir "7zip"
 
-Invoke-WebRequest -Uri "https://github.com/chmaha/7zip/raw/main/7zip.zip" -OutFile $sevenZipZip -UseBasicParsing
+if ($arch -eq "x86") {
+    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip32.zip"
+} else {
+    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip.zip"
+}
+
+Invoke-WebRequest -Uri $sevenZipUrl -OutFile $sevenZipZip -UseBasicParsing
 Expand-Archive -Path $sevenZipZip -DestinationPath $sevenZipPath -Force
 
 # ------------------------
@@ -236,4 +242,3 @@ Write-Host "Installed to: $finalInstallPath"
 # Cleanup TEMP
 # ------------------------
 Cleanup
-
