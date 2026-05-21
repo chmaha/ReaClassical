@@ -1,13 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.5
+@version 26.5.6
 @changelog
-  Various: Remove group ID and 40034 requirements
-  Smart Import: Name tracks automatically based on filename pattern
-  S-D Editing functions: Conform child item edges and fades to parent item
-  Prepare Takes: Remove grouping functions, keep coloring
-  Prepare Takes: Add conforming of child items to parent item
-  Documentation: Various
+  Build Edit List: Make timecodes relative to time selection start
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
