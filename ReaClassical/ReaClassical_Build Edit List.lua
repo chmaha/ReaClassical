@@ -154,7 +154,32 @@ function main()
         end
     end
 
-    file:write([[</tbody></table>"
+    file:write([[</tbody></table>]])
+
+    -- Build unique source files list (in order of first appearance)
+    local seen = {}
+    local unique_files = {}
+    for _, item in ipairs(items) do
+        local f = item.filename
+        if f and f ~= "" and f ~= "…" and f ~= "Gap" and not seen[f] then
+            seen[f] = true
+            table.insert(unique_files, f)
+        end
+    end
+    table.sort(unique_files)
+
+    file:write([[<div style="margin-top: 30px;">
+        <h3>Source Files Used</h3>
+        <ol>
+    ]])
+    for _, f in ipairs(unique_files) do
+        file:write(string.format("  <li>%s</li>\n", f))
+    end
+    file:write([[    </ol>
+    </div>
+    ]])
+
+    file:write([[
 
 
 
