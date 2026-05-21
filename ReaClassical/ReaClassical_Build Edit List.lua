@@ -291,13 +291,14 @@ function build_item_table(fps)
             prev_filename = filename
         end
 
+        local offset = has_time_sel and time_sel_start or 0
         table.insert(item_table, {
             edit_number = edit_number,
-            position = format_timecode(position, fps),
+            position = format_timecode(position - offset, fps),
             filename = filename,
             s_in = format_timecode(start_offset, fps),
             s_out = format_timecode(end_offset, fps),
-            dest_end = format_timecode(position + source_length, fps),
+            dest_end = format_timecode(position + source_length - offset, fps),
             playrate = (math.abs(playrate - 1) < 0.001) and "" or playrate
         })
 
