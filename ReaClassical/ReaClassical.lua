@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.6
+@version 26.5.7
 @changelog
-  Build Edit List: Make timecodes relative to time selection start
+  Various: Remove child conforming to parent logic
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
