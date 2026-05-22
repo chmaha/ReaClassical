@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.7
+@version 26.5.8
 @changelog
-  Various: Remove child conforming to parent logic
-  Prepare Takes: Show messagebox if misaligned child items are discovered
+  Prepare Takes: Only deal with position, length and offset for conforming child items
+  Create CD Markers: When first ISRC is deleted, remove all subsequent ISRC when in automatic mode
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
