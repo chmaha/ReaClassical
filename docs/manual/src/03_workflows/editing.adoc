@@ -4,7 +4,7 @@ In ReaClassical 26 and following, source-destination editing is truly anywhere t
 
 ==== Preparing Takes (optional)
 
-Prepare Takes is no longer a required step before editing. ReaClassical's editing functions now find peer items by midpoint matching rather than relying on explicit group IDs, and child item edges and fades are conformed to their parent automatically whenever an edit operation runs. That said, Prepare Takes might still worth running on projects with manually imported material since it immediately corrects any drifted child item edges and fades, and applies colours based on take number or folder.
+Prepare Takes is no longer a required step before editing. ReaClassical's editing functions now find peer items by midpoint matching rather than relying on explicit group IDs. That said, Prepare Takes kbd:[T] might still worth running on projects with manually imported material since it immediately corrects any drifted child item positions and lengths, and applies colours based on take number or folder.
 
 ==== Editing Step-by-Step
 
