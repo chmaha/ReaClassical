@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.8
+@version 26.5.9
 @changelog
-  Prepare Takes: Only deal with position, length and offset for conforming child items
-  Create CD Markers: When first ISRC is deleted, remove all subsequent ISRC when in automatic mode
+  Create CD Markers: Allow for hyphens in ISRC paste
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
