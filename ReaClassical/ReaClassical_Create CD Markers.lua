@@ -2223,9 +2223,7 @@ function editor_main()
                                     if first_isrc then
                                         md.isrc = increment_isrc(first_isrc, track_number_counter - 1)
                                     else
-                                        if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
-                                            md.isrc = ""
-                                        end
+                                        md.isrc = ""
                                     end
                                 end
                             end
