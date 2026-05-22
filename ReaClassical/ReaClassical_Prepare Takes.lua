@@ -296,21 +296,35 @@ function do_processing_step()
                 string.format("%d misaligned child item(s) found. Fix them now?", #misaligned),
                 "ReaClassical - Misaligned Items", 4)
             if answer == 6 then
+                local unfix_count = 0
                 for _, entry in ipairs(misaligned) do
                     local ref_item = entry.ref
                     local ref_take = GetActiveTake(ref_item)
                     if ref_take then
-                        local ref_pos   = GetMediaItemInfo_Value(ref_item, "D_POSITION")
-                        local ref_len   = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
-                        local ref_soffs = GetMediaItemTakeInfo_Value(ref_take, "D_STARTOFFS")
-                        local peer      = entry.peer
-                        local peer_take = GetActiveTake(peer)
+                        local ref_pos     = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+                        local ref_len     = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+                        local ref_soffs   = GetMediaItemTakeInfo_Value(ref_take, "D_STARTOFFS")
+                        local ref_source  = GetMediaItemTake_Source(ref_take)
+                        local ref_src_len = GetMediaSourceLength(ref_source)
+                        local peer        = entry.peer
+                        local peer_take   = GetActiveTake(peer)
                         if peer_take then
-                            SetMediaItemInfo_Value(peer, "D_POSITION", ref_pos)
-                            SetMediaItemInfo_Value(peer, "D_LENGTH", ref_len)
-                            SetMediaItemTakeInfo_Value(peer_take, "D_STARTOFFS", ref_soffs)
+                            local peer_source  = GetMediaItemTake_Source(peer_take)
+                            local peer_src_len = GetMediaSourceLength(peer_source)
+                            if math.abs(ref_src_len - peer_src_len) < 0.001 then
+                                SetMediaItemInfo_Value(peer, "D_POSITION", ref_pos)
+                                SetMediaItemInfo_Value(peer, "D_LENGTH", ref_len)
+                                SetMediaItemTakeInfo_Value(peer_take, "D_STARTOFFS", ref_soffs)
+                            else
+                                unfix_count = unfix_count + 1
+                            end
                         end
                     end
+                end
+                if unfix_count > 0 then
+                    MB(string.format(
+                        "%d child item(s) could not be fixed — the underlying audio files are a different length to the parent.\nThese items need to be replaced manually.",
+                        unfix_count), "ReaClassical - Fix Warning", 0)
                 end
             end
         end
