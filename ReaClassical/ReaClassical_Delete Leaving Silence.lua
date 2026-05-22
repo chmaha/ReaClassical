@@ -346,43 +346,19 @@ function select_midpoint_peers()
         seed_items[#seed_items + 1] = GetSelectedMediaItem(0, i)
     end
     for _, ref_item in ipairs(seed_items) do
-        local ref_take = GetActiveTake(ref_item)
-        if ref_take then
-            local ref_pos            = GetMediaItemInfo_Value(ref_item, "D_POSITION")
-            local ref_len            = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
-            local ref_soffs          = GetMediaItemTakeInfo_Value(ref_take, "D_STARTOFFS")
-            local ref_fadeinlen      = GetMediaItemInfo_Value(ref_item, "D_FADEINLEN")
-            local ref_fadeoutlen     = GetMediaItemInfo_Value(ref_item, "D_FADEOUTLEN")
-            local ref_fadeinlen_auto = GetMediaItemInfo_Value(ref_item, "D_FADEINLEN_AUTO")
-            local ref_fadeoutlen_auto= GetMediaItemInfo_Value(ref_item, "D_FADEOUTLEN_AUTO")
-            local ref_fadeinshape    = GetMediaItemInfo_Value(ref_item, "C_FADEINSHAPE")
-            local ref_fadeoutshape   = GetMediaItemInfo_Value(ref_item, "C_FADEOUTSHAPE")
-            local mid = ref_pos + ref_len * 0.5
-            local tolerance = 0.0001
-            for t = folder_start, folder_end do
-                local track = GetTrack(0, t)
-                local n = CountTrackMediaItems(track)
-                for i = 0, n - 1 do
-                    local item = GetTrackMediaItem(track, i)
-                    local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
-                    local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
-                    if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
-                        SetMediaItemSelected(item, true)
-                        if item ~= ref_item then
-                            local peer_take = GetActiveTake(item)
-                            if peer_take then
-                                SetMediaItemInfo_Value(item, "D_POSITION",        ref_pos)
-                                SetMediaItemInfo_Value(item, "D_LENGTH",          ref_len)
-                                SetMediaItemTakeInfo_Value(peer_take, "D_STARTOFFS", ref_soffs)
-                                SetMediaItemInfo_Value(item, "D_FADEINLEN",       ref_fadeinlen)
-                                SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      ref_fadeoutlen)
-                                SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO",  ref_fadeinlen_auto)
-                                SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", ref_fadeoutlen_auto)
-                                SetMediaItemInfo_Value(item, "C_FADEINSHAPE",     ref_fadeinshape)
-                                SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE",    ref_fadeoutshape)
-                            end
-                        end
-                    end
+        local ref_pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+        local ref_len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+        local mid = ref_pos + ref_len * 0.5
+        local tolerance = 0.0001
+        for t = folder_start, folder_end do
+            local track = GetTrack(0, t)
+            local n = CountTrackMediaItems(track)
+            for i = 0, n - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                    SetMediaItemSelected(item, true)
                 end
             end
         end

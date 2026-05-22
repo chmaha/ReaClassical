@@ -320,7 +320,9 @@ function split_at_dest_in()
             while true do
                 local retval, isrgn, pos, _, _, markrgnindexnumber = EnumProjectMarkers(i)
                 if not retval then break end
-                if not isrgn and markrgnindexnumber == 996 then marker_pos = pos; break end
+                if not isrgn and markrgnindexnumber == 996 then
+                    marker_pos = pos; break
+                end
                 i = i + 1
             end
 
@@ -353,7 +355,7 @@ function split_at_dest_in()
                         if marker_pos > item_start and marker_pos < item_end then
                             local new_len = item_end - marker_pos
                             SetMediaItemInfo_Value(item, "D_POSITION", marker_pos)
-                            SetMediaItemInfo_Value(item, "D_LENGTH",   new_len)
+                            SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
                         end
                     end
                 end
@@ -444,7 +446,7 @@ end
 ---------------------------------------------------------------------
 
 function restore_ripple_state(state)
-    Main_OnCommand(40309, 0) -- Ripple off (known baseline)
+    Main_OnCommand(40309, 0)     -- Ripple off (known baseline)
     if state == "all" then
         Main_OnCommand(40311, 0) -- Ripple all tracks
     elseif state == "per" then
@@ -544,15 +546,15 @@ function markers()
         end
     end
 
-    local source_in  = sd_markers["SOURCE-IN"].count
-    local source_out = sd_markers["SOURCE-OUT"].count
-    local dest_in    = sd_markers["DEST-IN"].count
-    local dest_out   = sd_markers["DEST-OUT"].count
+    local source_in    = sd_markers["SOURCE-IN"].count
+    local source_out   = sd_markers["SOURCE-OUT"].count
+    local dest_in      = sd_markers["DEST-IN"].count
+    local dest_out     = sd_markers["DEST-OUT"].count
 
-    local sin  = sd_markers["SOURCE-IN"].proj
-    local sout = sd_markers["SOURCE-OUT"].proj
-    local din  = sd_markers["DEST-IN"].proj
-    local dout = sd_markers["DEST-OUT"].proj
+    local sin          = sd_markers["SOURCE-IN"].proj
+    local sout         = sd_markers["SOURCE-OUT"].proj
+    local din          = sd_markers["DEST-IN"].proj
+    local dout         = sd_markers["DEST-OUT"].proj
 
     local source_count = source_in + source_out
     local dest_count   = dest_in + dest_out
@@ -595,7 +597,9 @@ end
 
 function check_overlapping_items()
     local track = GetSelectedTrack(0, 0)
-    if not track then MB("No track selected!", "Error", 0); return end
+    if not track then
+        MB("No track selected!", "Error", 0); return
+    end
     local cursor_pos = GetCursorPosition()
     local num_items = CountTrackMediaItems(track)
     local overlapping = false
@@ -608,7 +612,9 @@ function check_overlapping_items()
             for j = i + 1, num_items - 1 do
                 local item2 = GetTrackMediaItem(track, j)
                 local start2 = GetMediaItemInfo_Value(item2, "D_POSITION")
-                if start2 < end1 and cursor_pos >= start2 then overlapping = true; break end
+                if start2 < end1 and cursor_pos >= start2 then
+                    overlapping = true; break
+                end
             end
         end
         if overlapping then break end
@@ -717,9 +723,18 @@ function adaptive_delete()
             local item_sel = GetMediaItemInfo_Value(item, "B_UISEL") == 1
             if item_sel then
                 local intersectmatches = 0
-                if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then intersectmatches = intersectmatches + 1 end
-                if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then intersectmatches = intersectmatches + 1 end
-                if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then intersectmatches = intersectmatches + 1 end
+                if time_sel_start >= item_pos and time_sel_end <= item_pos + item_len then
+                    intersectmatches =
+                        intersectmatches + 1
+                end
+                if item_pos >= time_sel_start and item_pos + item_len <= time_sel_end then
+                    intersectmatches =
+                        intersectmatches + 1
+                end
+                if time_sel_start <= item_pos + item_len and time_sel_end >= item_pos + item_len then
+                    intersectmatches =
+                        intersectmatches + 1
+                end
                 if time_sel_end >= item_pos and time_sel_start < item_pos then intersectmatches = intersectmatches + 1 end
                 if intersectmatches > 0 then table.insert(items_in_time_sel, item) end
             end
@@ -760,8 +775,11 @@ function fix_marker_pair(id_in, id_out)
     local total = num_markers + num_regions
     for i = 0, total - 1 do
         local _, _, pos, _, name, id = EnumProjectMarkers2(0, i)
-        if id == id_in then in_pos = pos; in_name = name
-        elseif id == id_out then out_pos = pos; out_name = name end
+        if id == id_in then
+            in_pos = pos; in_name = name
+        elseif id == id_out then
+            out_pos = pos; out_name = name
+        end
     end
     if not in_pos or not out_pos then return end
     if out_pos < in_pos then
@@ -814,7 +832,7 @@ function nudge_xfades_inside_dest_markers()
     local out_zone_left  = dest_out_pos
     local out_zone_right = dest_out_pos + xfade_len
 
-    local sel_track = GetSelectedTrack(0, 0)
+    local sel_track      = GetSelectedTrack(0, 0)
     if not sel_track then return end
     local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
     local num_tracks = CountTracks(0)
@@ -841,8 +859,8 @@ function nudge_xfades_inside_dest_markers()
         local ref_track = GetTrack(0, folder_start)
         local n = CountTrackMediaItems(ref_track)
         for i = 0, n - 2 do
-            local item_a = GetTrackMediaItem(ref_track, i)
-            local item_b = GetTrackMediaItem(ref_track, i + 1)
+            local item_a  = GetTrackMediaItem(ref_track, i)
+            local item_b  = GetTrackMediaItem(ref_track, i + 1)
             local a_start = GetMediaItemInfo_Value(item_a, "D_POSITION")
             local a_end   = a_start + GetMediaItemInfo_Value(item_a, "D_LENGTH")
             local b_start = GetMediaItemInfo_Value(item_b, "D_POSITION")
@@ -864,9 +882,9 @@ function nudge_xfades_inside_dest_markers()
         end
         for _, item in ipairs(peers_b) do
             local old_end = GetMediaItemInfo_Value(item, "D_POSITION")
-                          + GetMediaItemInfo_Value(item, "D_LENGTH")
+                + GetMediaItemInfo_Value(item, "D_LENGTH")
             SetMediaItemInfo_Value(item, "D_POSITION", new_b_start)
-            SetMediaItemInfo_Value(item, "D_LENGTH",   old_end - new_b_start)
+            SetMediaItemInfo_Value(item, "D_LENGTH", old_end - new_b_start)
         end
     end
 
@@ -892,7 +910,9 @@ function reposition_dest_out()
     local dest_out_name, dest_out_color = nil, 0
     for i = 0, num_markers + num_regions - 1 do
         local _, _, _, _, name, id, color = EnumProjectMarkers3(0, i)
-        if id == 997 then dest_out_name = name; dest_out_color = color; break end
+        if id == 997 then
+            dest_out_name = name; dest_out_color = color; break
+        end
     end
     if not dest_out_name then return end
     local cursor_pos = GetCursorPosition()
@@ -907,7 +927,9 @@ function reposition_dest_in(xfade_len)
     local dest_in_name, dest_in_color = nil, 0
     for i = 0, num_markers + num_regions - 1 do
         local _, _, _, _, name, id, color = EnumProjectMarkers3(0, i)
-        if id == 996 then dest_in_name = name; dest_in_color = color; break end
+        if id == 996 then
+            dest_in_name = name; dest_in_color = color; break
+        end
     end
     if not dest_in_name then return end
     local first_item = get_selected_media_item_at(0)
@@ -955,43 +977,19 @@ function select_midpoint_peers()
         seed_items[#seed_items + 1] = GetSelectedMediaItem(0, i)
     end
     for _, ref_item in ipairs(seed_items) do
-        local ref_take = GetActiveTake(ref_item)
-        if ref_take then
-            local ref_pos            = GetMediaItemInfo_Value(ref_item, "D_POSITION")
-            local ref_len            = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
-            local ref_soffs          = GetMediaItemTakeInfo_Value(ref_take, "D_STARTOFFS")
-            local ref_fadeinlen      = GetMediaItemInfo_Value(ref_item, "D_FADEINLEN")
-            local ref_fadeoutlen     = GetMediaItemInfo_Value(ref_item, "D_FADEOUTLEN")
-            local ref_fadeinlen_auto = GetMediaItemInfo_Value(ref_item, "D_FADEINLEN_AUTO")
-            local ref_fadeoutlen_auto= GetMediaItemInfo_Value(ref_item, "D_FADEOUTLEN_AUTO")
-            local ref_fadeinshape    = GetMediaItemInfo_Value(ref_item, "C_FADEINSHAPE")
-            local ref_fadeoutshape   = GetMediaItemInfo_Value(ref_item, "C_FADEOUTSHAPE")
-            local mid = ref_pos + ref_len * 0.5
-            local tolerance = 0.0001
-            for t = folder_start, folder_end do
-                local track = GetTrack(0, t)
-                local n = CountTrackMediaItems(track)
-                for i = 0, n - 1 do
-                    local item = GetTrackMediaItem(track, i)
-                    local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
-                    local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
-                    if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
-                        SetMediaItemSelected(item, true)
-                        if item ~= ref_item then
-                            local peer_take = GetActiveTake(item)
-                            if peer_take then
-                                SetMediaItemInfo_Value(item, "D_POSITION",        ref_pos)
-                                SetMediaItemInfo_Value(item, "D_LENGTH",          ref_len)
-                                SetMediaItemTakeInfo_Value(peer_take, "D_STARTOFFS", ref_soffs)
-                                SetMediaItemInfo_Value(item, "D_FADEINLEN",       ref_fadeinlen)
-                                SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      ref_fadeoutlen)
-                                SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO",  ref_fadeinlen_auto)
-                                SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", ref_fadeoutlen_auto)
-                                SetMediaItemInfo_Value(item, "C_FADEINSHAPE",     ref_fadeinshape)
-                                SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE",    ref_fadeoutshape)
-                            end
-                        end
-                    end
+        local ref_pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+        local ref_len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+        local mid = ref_pos + ref_len * 0.5
+        local tolerance = 0.0001
+        for t = folder_start, folder_end do
+            local track = GetTrack(0, t)
+            local n = CountTrackMediaItems(track)
+            for i = 0, n - 1 do
+                local item = GetTrackMediaItem(track, i)
+                local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+                if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                    SetMediaItemSelected(item, true)
                 end
             end
         end
