@@ -3,6 +3,7 @@
 @version 26.5.7
 @changelog
   Various: Remove child conforming to parent logic
+  Prepare Takes: Show messagebox if misaligned child items are discovered
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
