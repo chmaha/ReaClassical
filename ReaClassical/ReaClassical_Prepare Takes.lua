@@ -43,7 +43,7 @@ end
 
 local group_state = GetToggleCommandState(1156)
 if group_state ~= 1 then
-    Main_OnCommand(1156, 0)     -- Enable item grouping
+    Main_OnCommand(1156, 0) -- Enable item grouping
 end
 
 set_action_options(2)
@@ -253,10 +253,8 @@ function do_processing_step()
         processing_step = 3.5
         return false
     elseif processing_step == 3.5 then
-        -- Conform child items to their parent: copy position, length, source offset
-        -- and fade lengths/shapes from each parent track item to all folder peers.
-        -- Corrects any child misalignment before coloring begins.
         local num_tracks = CountTracks(0)
+        local misaligned = {}
         for t = 0, num_tracks - 1 do
             local track = GetTrack(0, t)
             if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
@@ -272,6 +270,34 @@ function do_processing_step()
                 local n = CountTrackMediaItems(track)
                 for i = 0, n - 1 do
                     local ref_item = GetTrackMediaItem(track, i)
+                    local ref_pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+                    local ref_len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+                    local peers = get_folder_items_at_midpoint(ref_item, folder_start, folder_end)
+                    for _, peer in ipairs(peers) do
+                        if peer ~= ref_item then
+                            local peer_pos = GetMediaItemInfo_Value(peer, "D_POSITION")
+                            local peer_len = GetMediaItemInfo_Value(peer, "D_LENGTH")
+                            if math.abs(peer_pos - ref_pos) > 0.0001 or math.abs(peer_len - ref_len) > 0.0001 then
+                                table.insert(misaligned, {
+                                    ref = ref_item,
+                                    peer = peer,
+                                    folder_start = folder_start,
+                                    folder_end = folder_end
+                                })
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        if #misaligned > 0 then
+            local answer = MB(
+                string.format("%d misaligned child item(s) found. Fix them now?", #misaligned),
+                "ReaClassical - Misaligned Items", 4)
+            if answer == 6 then -- Yes
+                for _, entry in ipairs(misaligned) do
+                    local ref_item = entry.ref
                     local ref_take = GetActiveTake(ref_item)
                     if ref_take then
                         local ref_pos             = GetMediaItemInfo_Value(ref_item, "D_POSITION")
@@ -283,22 +309,18 @@ function do_processing_step()
                         local ref_fadeoutlen_auto = GetMediaItemInfo_Value(ref_item, "D_FADEOUTLEN_AUTO")
                         local ref_fadeinshape     = GetMediaItemInfo_Value(ref_item, "C_FADEINSHAPE")
                         local ref_fadeoutshape    = GetMediaItemInfo_Value(ref_item, "C_FADEOUTSHAPE")
-                        local peers               = get_folder_items_at_midpoint(ref_item, folder_start, folder_end)
-                        for _, peer in ipairs(peers) do
-                            if peer ~= ref_item then
-                                local peer_take = GetActiveTake(peer)
-                                if peer_take then
-                                    SetMediaItemInfo_Value(peer, "D_POSITION", ref_pos)
-                                    SetMediaItemInfo_Value(peer, "D_LENGTH", ref_len)
-                                    SetMediaItemTakeInfo_Value(peer_take, "D_STARTOFFS", ref_soffs)
-                                    SetMediaItemInfo_Value(peer, "D_FADEINLEN", ref_fadeinlen)
-                                    SetMediaItemInfo_Value(peer, "D_FADEOUTLEN", ref_fadeoutlen)
-                                    SetMediaItemInfo_Value(peer, "D_FADEINLEN_AUTO", ref_fadeinlen_auto)
-                                    SetMediaItemInfo_Value(peer, "D_FADEOUTLEN_AUTO", ref_fadeoutlen_auto)
-                                    SetMediaItemInfo_Value(peer, "C_FADEINSHAPE", ref_fadeinshape)
-                                    SetMediaItemInfo_Value(peer, "C_FADEOUTSHAPE", ref_fadeoutshape)
-                                end
-                            end
+                        local peer                = entry.peer
+                        local peer_take           = GetActiveTake(peer)
+                        if peer_take then
+                            SetMediaItemInfo_Value(peer, "D_POSITION", ref_pos)
+                            SetMediaItemInfo_Value(peer, "D_LENGTH", ref_len)
+                            SetMediaItemTakeInfo_Value(peer_take, "D_STARTOFFS", ref_soffs)
+                            SetMediaItemInfo_Value(peer, "D_FADEINLEN", ref_fadeinlen)
+                            SetMediaItemInfo_Value(peer, "D_FADEOUTLEN", ref_fadeoutlen)
+                            SetMediaItemInfo_Value(peer, "D_FADEINLEN_AUTO", ref_fadeinlen_auto)
+                            SetMediaItemInfo_Value(peer, "D_FADEOUTLEN_AUTO", ref_fadeoutlen_auto)
+                            SetMediaItemInfo_Value(peer, "C_FADEINSHAPE", ref_fadeinshape)
+                            SetMediaItemInfo_Value(peer, "C_FADEOUTSHAPE", ref_fadeoutshape)
                         end
                     end
                 end
