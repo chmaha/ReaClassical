@@ -2205,6 +2205,11 @@ function editor_main()
                             if manual_isrc_entry then
                                 -- In manual mode, validate after input
                                 if changed then
+                                    local stripped = md.isrc:gsub("%-", "")
+                                    if stripped ~= md.isrc then
+                                        md.isrc = stripped
+                                        any_changed = true -- force write-back so visual updates immediately
+                                    end
                                     if md.isrc ~= "" and not md.isrc:match(isrc_pattern) then
                                         md.isrc = prev_isrc -- revert if invalid
                                     end
@@ -2214,10 +2219,17 @@ function editor_main()
                                 if i == 0 then
                                     if md.isrc == "" then
                                         first_isrc = nil
-                                    elseif md.isrc:match(isrc_pattern) then
-                                        first_isrc = md.isrc
                                     else
-                                        md.isrc = first_isrc or ""
+                                        local stripped = md.isrc:gsub("%-", "")
+                                        if stripped ~= md.isrc then
+                                            md.isrc = stripped
+                                            any_changed = true -- force write-back so visual updates immediately
+                                        end
+                                        if md.isrc:match(isrc_pattern) then
+                                            first_isrc = md.isrc
+                                        else
+                                            md.isrc = first_isrc or ""
+                                        end
                                     end
                                 else
                                     if first_isrc then
