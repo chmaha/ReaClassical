@@ -66,6 +66,7 @@ function main()
         end
         local _, item1 = select_check()
         if item1 and check_next_item_overlap(item1) then
+            Main_OnCommand(40310, 0) -- enable ripple-per-track
             Main_OnCommand(41827, 0)
         else
             if sdmousehover == 1 then
