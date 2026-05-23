@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.9
+@version 26.5.10
 @changelog
-  Create CD Markers: Allow for hyphens in ISRC paste
+  Classical Crossfade Editor: Force ripple-per-track when opening
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
