@@ -137,7 +137,6 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     local proj = EnumProjects(-1)
     if not proj then return end
 
-    -- Get the existing marker's track number from ext state
     local ext_key = (marker_type == "SOURCE-IN") and "SourceInTrackNum" or "SourceOutTrackNum"
     local _, stored = GetProjExtState(0, "ReaClassical", ext_key)
     local marker_track_num = tonumber(stored)
@@ -148,7 +147,6 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
     for i = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, _, raw_label, markrgnindexnumber = EnumProjectMarkers2(proj, i)
         if not isrgn and markrgnindexnumber == marker_id then
-            -- Accept both "PREFIX:LABEL" and bare "LABEL" forms
             local label = raw_label:match(":(.+)$") or raw_label
             if label == marker_type then
                 marker_pos = pos
@@ -161,17 +159,13 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            else
-                DeleteProjectMarker(project, marker_id, false)
-            end
+            if project == nil then break end
+            DeleteProjectMarker(project, marker_id, false)
             i = i + 1
         end
         return
     end
 
-    -- Check for matching partner marker
     local other_id = (marker_type == "SOURCE-IN") and 999 or 998
     local other_type = (marker_type == "SOURCE-IN") and "SOURCE-OUT" or "SOURCE-IN"
     local other_ext_key = (marker_type == "SOURCE-IN") and "SourceOutTrackNum" or "SourceInTrackNum"
@@ -183,21 +177,16 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         marker_track_num and other_track_num == marker_track_num
 
     if not is_pair then
-        -- No pair: just delete old marker, do NOT convert singles
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            else
-                DeleteProjectMarker(project, marker_id, false)
-            end
+            if project == nil then break end
+            DeleteProjectMarker(project, marker_id, false)
             i = i + 1
         end
         return
     end
 
-    -- Determine IN and OUT positions
     local in_pos, out_pos
     if marker_type == "SOURCE-IN" then
         in_pos = marker_pos
@@ -207,52 +196,54 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         out_pos = marker_pos
     end
 
-    -- Guard: do not convert if pair is backwards (OUT before IN)
     if in_pos >= out_pos then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            else
-                DeleteProjectMarker(project, marker_id, false)
-            end
+            if project == nil then break end
+            DeleteProjectMarker(project, marker_id, false)
             i = i + 1
         end
         return
     end
 
-    -- Find the item the existing pair lives in
     local item_in, take_in = get_item_at_position(in_pos, marker_track_num)
     local item_out, _ = get_item_at_position(out_pos, marker_track_num)
 
-    -- Guard: do not convert if IN and OUT span multiple items
     if not item_in or not item_out or item_in ~= item_out then
         local i = 0
         while true do
             local project, _ = EnumProjects(i)
-            if project == nil then
-                break
-            else
-                DeleteProjectMarker(project, marker_id, false)
-            end
+            if project == nil then break end
+            DeleteProjectMarker(project, marker_id, false)
             i = i + 1
         end
         return
     end
 
-    -- Check for existing S-AUD on the item the pair lives in
+    -- If the new marker lands in the same item as the existing pair,
+    -- just delete the single marker being replaced — no S-AUD conversion
+    local new_item, _ = get_item_at_position(new_pos, new_track_number)
+    if new_item and new_item == item_in then
+        local i = 0
+        while true do
+            local project, _ = EnumProjects(i)
+            if project == nil then break end
+            DeleteProjectMarker(project, marker_id, false)
+            i = i + 1
+        end
+        return
+    end
+
+    -- Different item: convert existing pair to S-AUD
     local _, existing_chunk = GetItemStateChunk(item_in, "", false)
     local has_saud = existing_chunk and
         existing_chunk:find("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+") ~= nil
 
-    -- If the target item already has an S-AUD take marker, remove it first
-    -- so the new pair replaces it (only one S-AUD allowed per item)
     if has_saud then
         local stripped = existing_chunk:gsub("\n%s*TKM%s+%-?[%d%.e%+%-]+%s+S%-AUD%s+[^\n]*", "")
         SetItemStateChunk(item_in, stripped, false)
     end
-
 
     if take_in then
         local src_in = project_pos_to_source_pos(take_in, item_in, in_pos)
@@ -262,7 +253,6 @@ function convert_pair_to_take_marker(marker_id, marker_type, new_pos, new_track_
         end
     end
 
-    -- Delete both project markers across all tabs
     local i = 0
     while true do
         local project, _ = EnumProjects(i)
