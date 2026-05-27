@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.12
+@version 26.5.13
 @changelog
-  Mission Control: Allow tab key to move to next tab of tracks
+  Mission Control: Allow for cyclical tabbing and fix click on tab headers
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
