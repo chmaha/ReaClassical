@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.10
+@version 26.5.11
 @changelog
-  Classical Crossfade Editor: Force ripple-per-track when opening
+  Source Audition Mode: Do not create initial S-AUD when continuing to add new real source markers in the same item
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
