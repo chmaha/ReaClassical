@@ -227,10 +227,8 @@ function main()
 
         if num_tabs > 1 then
             if ImGui.BeginTabBar(ctx, "##tabs") then
-                if pending_tab_switch ~= nil then
-                    current_tab = pending_tab_switch
-                    pending_tab_switch = nil
-                end
+                local target_tab = pending_tab_switch
+                pending_tab_switch = nil
 
                 for tab = 0, num_tabs - 1 do
                     local start_idx = tab * TRACKS_PER_TAB + 1
@@ -238,7 +236,7 @@ function main()
                     local tab_label = string.format("Tracks %d-%d", start_idx, end_idx)
 
                     local tab_flags = ImGui.TabItemFlags_None
-                    if current_tab == tab then
+                    if target_tab ~= nil and target_tab == tab then
                         tab_flags = ImGui.TabItemFlags_SetSelected
                     end
 
@@ -3107,6 +3105,7 @@ function draw_track_controls(start_idx, end_idx)
         end
 
         -- Handle TAB key to move to next track name input
+        -- Handle TAB key to move to next track name input
         if ImGui.IsItemActive(ctx) then
             if ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and not ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
                 -- TAB: Move forward to next track
@@ -3114,8 +3113,12 @@ function draw_track_controls(start_idx, end_idx)
                     focus_track_input = i + 1
                 elseif i == end_idx and current_tab < math.ceil(#mixer_tracks / TRACKS_PER_TAB) - 1 then
                     -- Last track in current tab - switch to next tab
-                    current_tab = current_tab + 1
+                    pending_tab_switch = current_tab + 1
                     focus_track_input = end_idx + 1
+                elseif i == end_idx and i == #mixer_tracks then
+                    -- Last track overall - wrap back to first tab, first track
+                    pending_tab_switch = 0
+                    focus_track_input = 1
                 end
             elseif ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
                 -- Shift+TAB: Move backwards to previous track
@@ -3123,8 +3126,8 @@ function draw_track_controls(start_idx, end_idx)
                     focus_track_input = i - 1
                 elseif i == start_idx and current_tab > 0 then
                     -- First track in current tab - switch to previous tab
-                    current_tab = current_tab - 1
-                    local prev_tab_end = current_tab * TRACKS_PER_TAB + TRACKS_PER_TAB
+                    pending_tab_switch = current_tab - 1
+                    local prev_tab_end = (current_tab - 1) * TRACKS_PER_TAB + TRACKS_PER_TAB
                     focus_track_input = math.min(prev_tab_end, #mixer_tracks)
                 end
             end
