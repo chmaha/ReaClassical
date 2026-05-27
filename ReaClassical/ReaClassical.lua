@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.11
+@version 26.5.12
 @changelog
-  Source Audition Mode: Do not create initial S-AUD when continuing to add new real source markers in the same item
+  Mission Control: Allow tab key to move to next tab of tracks
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
