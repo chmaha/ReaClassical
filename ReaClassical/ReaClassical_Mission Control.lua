@@ -110,6 +110,7 @@ local track_has_hyphen = {}
 local volume_values = {}
 local aux_volume_values = {}
 local current_tab = 0
+local pending_tab_switch = nil
 local selected_track = nil
 local sync_needed = false
 local pan_reset = {}
@@ -226,12 +227,22 @@ function main()
 
         if num_tabs > 1 then
             if ImGui.BeginTabBar(ctx, "##tabs") then
+                if pending_tab_switch ~= nil then
+                    current_tab = pending_tab_switch
+                    pending_tab_switch = nil
+                end
+
                 for tab = 0, num_tabs - 1 do
                     local start_idx = tab * TRACKS_PER_TAB + 1
                     local end_idx = math.min(start_idx + TRACKS_PER_TAB - 1, #mixer_tracks)
                     local tab_label = string.format("Tracks %d-%d", start_idx, end_idx)
 
-                    if ImGui.BeginTabItem(ctx, tab_label) then
+                    local tab_flags = ImGui.TabItemFlags_None
+                    if current_tab == tab then
+                        tab_flags = ImGui.TabItemFlags_SetSelected
+                    end
+
+                    if ImGui.BeginTabItem(ctx, tab_label, nil, tab_flags) then
                         current_tab = tab
                         draw_track_controls(start_idx, end_idx)
                         ImGui.EndTabItem(ctx)
@@ -1419,31 +1430,26 @@ function main()
 
                         -- Handle TAB key to move to next/previous renameable special track input
                         if ImGui.IsItemActive(ctx) then
-                            if ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and not ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
-                                -- TAB: Find next renameable track
-                                local next_idx = nil
-                                for i = idx + 1, #aux_submix_tracks do
-                                    local next_aux = aux_submix_tracks[i]
-                                    if next_aux.type == "aux" or next_aux.type == "submix" or next_aux.type == "reference" then
-                                        next_idx = i
-                                        break
+                            if ImGui.IsItemActive(ctx) then
+                                if ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and not ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                                    -- TAB: Move forward to next track
+                                    if i < end_idx then
+                                        focus_track_input = i + 1
+                                    elseif i == end_idx and current_tab < math.ceil(#mixer_tracks / TRACKS_PER_TAB) - 1 then
+                                        -- Last track in current tab - switch to next tab
+                                        pending_tab_switch = current_tab + 1
+                                        focus_track_input = end_idx + 1
                                     end
-                                end
-                                if next_idx then
-                                    focus_special_input = next_idx
-                                end
-                            elseif ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
-                                -- Shift+TAB: Find previous renameable track
-                                local prev_idx = nil
-                                for i = idx - 1, 1, -1 do
-                                    local prev_aux = aux_submix_tracks[i]
-                                    if prev_aux.type == "aux" or prev_aux.type == "submix" or prev_aux.type == "reference" then
-                                        prev_idx = i
-                                        break
+                                elseif ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                                    -- Shift+TAB: Move backwards to previous track
+                                    if i > start_idx then
+                                        focus_track_input = i - 1
+                                    elseif i == start_idx and current_tab > 0 then
+                                        -- First track in current tab - switch to previous tab
+                                        pending_tab_switch = current_tab - 1
+                                        local prev_tab_end = (current_tab - 1) * TRACKS_PER_TAB + TRACKS_PER_TAB
+                                        focus_track_input = math.min(prev_tab_end, #mixer_tracks)
                                     end
-                                end
-                                if prev_idx then
-                                    focus_special_input = prev_idx
                                 end
                             end
                         end
