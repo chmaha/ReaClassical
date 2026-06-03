@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.5.13
+@version 26.6
 @changelog
-  Mission Control: Allow for cyclical tabbing and fix click on tab headers
+  Find Take: Small fix to matching logic
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
