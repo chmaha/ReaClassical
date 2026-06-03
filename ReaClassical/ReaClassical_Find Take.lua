@@ -60,55 +60,53 @@ function main()
     session_name = session_name:match("^%s*(.-)%s*$") -- Trim spaces around the session name
     SetProjExtState(0, "ReaClassical", "SessionNameSearch", session_name)
 
-    local found = false
     local num_of_items = CountMediaItems(0)
 
-    -- FIRST: Try to find using stored P_EXT:item_take_num
-    for i = 0, num_of_items - 1 do
-        local item = GetMediaItem(0, i)
-        local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+    local function search(ignore_edit)
+        -- FIRST: Try to find using stored P_EXT:item_take_num
+        for i = 0, num_of_items - 1 do
+            local item = GetMediaItem(0, i)
+            local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
 
-        if stored_take_num and stored_take_num ~= "" then
-            local take_num = tonumber(stored_take_num)
-            if take_num == take_choice then
-                -- Check session name if provided
-                local session_match = true
-                if session_name and session_name ~= "" then
-                    local take = GetActiveTake(item)
-                    if take then
-                        if find_takes_using_items == 0 then
-                            -- Check filename for session
-                            local src = GetMediaItemTake_Source(take)
-                            local filename = GetMediaSourceFileName(src, "")
-                            session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
-                            nil
-                        else
-                            -- Check take name for session
-                            local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                            session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
-                            nil
+            if stored_take_num and stored_take_num ~= "" then
+                local take_num = tonumber(stored_take_num)
+                if take_num == take_choice then
+                    -- Check session name if provided
+                    local session_match = true
+                    if session_name and session_name ~= "" then
+                        local take = GetActiveTake(item)
+                        if take then
+                            if find_takes_using_items == 0 then
+                                -- Check filename for session
+                                local src = GetMediaItemTake_Source(take)
+                                local filename = GetMediaSourceFileName(src, "")
+                                session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
+                                nil
+                            else
+                                -- Check take name for session
+                                local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                                session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
+                                nil
+                            end
                         end
                     end
-                end
 
-                -- Check if not an edit
-                local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+                    -- Check if not an edit (skipped in fallback pass)
+                    local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
 
-                if session_match and not edit then
-                    found = true
-                    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-                    SetEditCurPos(item_start, true, false)
-                    Main_OnCommand(40769, 0) -- unselect all items
-                    SetMediaItemSelected(item, true)
-                    select_midpoint_peers()
-                    break
+                    if session_match and (ignore_edit or not edit) then
+                        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                        SetEditCurPos(item_start, true, false)
+                        Main_OnCommand(40769, 0) -- unselect all items
+                        SetMediaItemSelected(item, true)
+                        select_midpoint_peers()
+                        return true
+                    end
                 end
             end
         end
-    end
 
-    -- If not found in P_EXT, fall back to original search methods
-    if not found then
+        -- If not found in P_EXT, fall back to original search methods
         if find_takes_using_items == 0 then -- search using filenames
             for i = 0, num_of_items - 1, 1 do
                 local item = GetMediaItem(0, i)
@@ -131,14 +129,13 @@ function main()
 
                     local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
 
-                    if take_capture == take_choice and session_match and not edit then
-                        found = true
+                    if take_capture == take_choice and session_match and (ignore_edit or not edit) then
                         local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
                         SetEditCurPos(item_start, true, false)
                         Main_OnCommand(40769, 0) -- unselect all items
                         SetMediaItemSelected(item, true)
                         select_midpoint_peers()
-                        break
+                        return true
                     end
                 end
             end
@@ -154,28 +151,33 @@ function main()
                     end
 
                     if take_name and session_match then
+                        local item_found = false
                         if take_choice then
                             local take_num = tonumber(take_name:match("(%d+)"))
-                            if take_num == take_choice then
-                                found = true
-                            end
+                            if take_num == take_choice then item_found = true end
                         else
-                            found = true
+                            item_found = true
                         end
 
-                        if found then
-                            local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-                            SetEditCurPos(item_start, true, false)
-                            Main_OnCommand(40769, 0)
-                            SetMediaItemSelected(item, true)
-                            select_midpoint_peers()
-                            break
+                        if item_found then
+                            local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+                            if ignore_edit or not edit then
+                                local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+                                SetEditCurPos(item_start, true, false)
+                                Main_OnCommand(40769, 0)
+                                SetMediaItemSelected(item, true)
+                                select_midpoint_peers()
+                                return true
+                            end
                         end
                     end
                 end
             end
         end
+        return false
     end
+
+    local found = search(false) or search(true)
 
     if not found and (take_choice or session_name ~= "") then
         local response = MB("Take not found. Try again?", "Find Take", 4)
