@@ -80,12 +80,12 @@ function main()
                             -- Check filename for session
                             local src = GetMediaItemTake_Source(take)
                             local filename = GetMediaSourceFileName(src, "")
-                            session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~=
+                            session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
                             nil
                         else
                             -- Check take name for session
                             local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                            session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~=
+                            session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
                             nil
                         end
                     end
@@ -126,7 +126,7 @@ function main()
                     local session_match = true
 
                     if session_name and session_name ~= "" then
-                        session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                        session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~= nil
                     end
 
                     local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
@@ -150,7 +150,7 @@ function main()
                     local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
                     local session_match = true
                     if session_name and session_name ~= "" then
-                        session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^i]*%f[%A]") ~= nil
+                        session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~= nil
                     end
 
                     if take_name and session_match then
