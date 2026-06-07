@@ -22,7 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, format_time, get_project_age, calculate_stats, get_reaper_version, get_reaclassical_version
+local main, format_time, format_session_time, get_project_age, get_session_time,
+      reset_session_timer, calculate_stats, get_reaper_version, get_reaclassical_version
 
 ---------------------------------------------------------------------
 
@@ -53,6 +54,36 @@ local ctx = ImGui.CreateContext('ReaClassical Stats')
 local window_open = true
 
 local stats = {}
+
+---------------------------------------------------------------------
+
+-- Initialise session timer: write current time only if not already set
+do
+    local retval, existing = GetProjExtState(0, "ReaClassical", "SessionStart")
+    if not retval or existing == "" then
+        SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
+    end
+end
+
+---------------------------------------------------------------------
+
+function reset_session_timer()
+    SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
+    calculate_stats()
+end
+
+---------------------------------------------------------------------
+
+function get_session_time()
+    local retval, stored = GetProjExtState(0, "ReaClassical", "SessionStart")
+    if retval and stored ~= "" then
+        local start = tonumber(stored)
+        if start then
+            return format_session_time(os.time() - start)
+        end
+    end
+    return "n/a"
+end
 
 ---------------------------------------------------------------------
 
@@ -102,6 +133,15 @@ end
 
 ---------------------------------------------------------------------
 
+function format_session_time(seconds)
+    if not seconds then return "n/a" end
+    local h = math.floor(seconds / 3600)
+    local m = math.floor((seconds % 3600) / 60)
+    return string.format("%dh %02dm", h, m)
+end
+
+---------------------------------------------------------------------
+
 function get_project_age()
     local retval, creation_date = GetProjExtState(0, "ReaClassical", "CreationDate")
     if retval and creation_date ~= "" then
@@ -132,6 +172,7 @@ end
 
 function calculate_stats()
     local project_age = get_project_age()
+    local session_time = get_session_time()
     local reaper_version = get_reaper_version()
     local reaclassical_version = get_reaclassical_version()
 
@@ -251,6 +292,7 @@ function calculate_stats()
         album_end = format_time(album_end),
         num_cd_markers = num_cd_markers,
         project_age = project_age,
+        session_time = session_time,
         total_project_length = format_time(total_project_length),
         total_source_length = format_time(total_source_length),
         num_items = num_items,
@@ -306,6 +348,11 @@ function main()
             -- Project Stats Section
             ImGui.Text(ctx, "Project Stats:")
             ImGui.Text(ctx, "- Project age: " .. stats.project_age)
+            ImGui.Text(ctx, "- Session time: " .. stats.session_time)
+            ImGui.SameLine(ctx)
+            if ImGui.SmallButton(ctx, "Reset") then
+                reset_session_timer()
+            end
             ImGui.Text(ctx, "- Total project length: " .. stats.total_project_length)
             ImGui.Text(ctx, "- Total length of all source material: " .. stats.total_source_length)
             ImGui.Text(ctx, "- Total number of items: " .. tostring(stats.num_items))
@@ -339,6 +386,7 @@ function main()
                     .. "- Number of CD markers: " .. tostring(stats.num_cd_markers) .. "\n\n"
                     .. "Project Stats:\n"
                     .. "- Project age: " .. stats.project_age .. "\n"
+                    .. "- Session time: " .. stats.session_time .. "\n"
                     .. "- Total project length: " .. stats.total_project_length .. "\n"
                     .. "- Total length of all source material: " .. stats.total_source_length .. "\n"
                     .. "- Total number of items: " .. tostring(stats.num_items) .. "\n"
