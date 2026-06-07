@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, duplicate_project_in_new_tab, flatten_all_folders
 local make_all_tracks_one_folder, delete_empty_tracks, reset_all_routing
-local add_rc_ext_state
+local add_rc_ext_state, tag_source_tracks
 
 ---------------------------------------------------------------------
 
@@ -40,6 +40,7 @@ function main()
     delete_empty_tracks()
     reset_all_routing()
     make_all_tracks_one_folder()
+    tag_source_tracks()
     add_rc_ext_state()
     local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
@@ -186,6 +187,16 @@ function add_rc_ext_state()
     SetProjExtState(0, "ReaClassical", "RCProject", "y")
     local creation_date = os.date("%Y-%m-%d %H:%M:%S", os.time())
     SetProjExtState(0, "ReaClassical", "CreationDate", creation_date)
+end
+
+---------------------------------------------------------------------
+
+function tag_source_tracks()
+    local num_tracks = CountTracks(0)
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        GetSetMediaTrackInfo_String(track, "P_EXT:Source", "y", true)
+    end
 end
 
 ---------------------------------------------------------------------

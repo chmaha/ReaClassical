@@ -148,8 +148,17 @@ function main()
     wipe_track_names()
     add_rcmaster()
     local updated_folders = folder_check()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 
+    -- Tag source tracks before handing off
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        if rcmaster_state ~= "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:Source", "y", true)
+        end
+    end
+
+    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     if updated_folders == 1 then
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     else
@@ -164,10 +173,10 @@ function main()
 
     PreventUIRefresh(-1)
 
-    if updated_folders == 1 then -- run F7 again
-        Main_OnCommand(F7_sync, 0)
-    else                         -- run F8 again
-        Main_OnCommand(F8_sync, 0)
+    if updated_folders == 1 then
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+    else
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     end
 
     local fit_project_vertically = NamedCommandLookup("_RS444f747139500db030a1c4e03b8a0805ac502dfe")
