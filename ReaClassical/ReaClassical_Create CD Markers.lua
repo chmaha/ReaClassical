@@ -1449,7 +1449,7 @@ function update_marker_and_region(item)
 
     for idx = 0, num_markers + num_regions - 1 do
         local _, isrgn, pos, rgnend, _, markrgnID, color = EnumProjectMarkers3(0, idx)
-        if isrgn and pos <= item_pos and item_pos <= rgnend then
+        if isrgn and item_pos >= pos and item_pos < rgnend then
             if track_color == color then
                 SetProjectMarkerByIndex(0, idx, true, pos, rgnend, markrgnID,
                     parse_item_name(clean_name, false).title, color)
