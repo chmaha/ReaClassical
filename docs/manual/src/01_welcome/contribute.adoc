@@ -1,4 +1,4 @@
-=== Support Tiers and Donations.
+=== Support Tiers and Donations
 
 ReaClassical offers optional paid support tiers for users who wish to fund ongoing development or require professional assistance. The *Supporter* ($10/month or $100/year) and *Pro* ($25/month or $250/year) tiers provide Discord roles and access to development discussions or priority support respectively. The *Studio* tier ($100/month or $1,000/year) adds up to two live audio/video support sessions per month, ideal for professionals who need hands-on help during production. The *Institution* tier ($2,000/year) is designed for organizations such as music schools, conservatoires, colleges, and universities, and includes structured training sessions for your team, multi-user support, onboarding, and scheduled check-ins. All tiers are available via the https://reaclassical.org/support.html[ReaClassical Support] page.
 
