@@ -45,6 +45,10 @@ Enable "Record Takes Horizontally" while in vertical workflow to record takes le
 .Record Panel Options
 image::record_panel_options.png[Record Panel Options]
 
+====== Allow Take Recording Anywhere
+
+This setting overrides the default safety feature of only allowing new recorded items after the final item on the folder. This is useful if you record musical material out of order and wish to place new items at an arbitrary position on the project timeline.
+
 ====== Scheduled Recording
 
 To start (and optionally end) a recording at specific times or manually start a recording to end at a certain time or after a certain duration, right-click on the Record Panel window and add the appropriate entry or entries in HH:MM format. After pressing btn:[OK], the Record Panel window will display information above the take number. If you enter a start or end time earlier or equal to the current time, the function will assume a next day schedule and will annotate the time with an asterisk (*). Likewise, with both a start and end time, if the end time is earlier than or equal to start, it will assume a time 24 hours later. Don't forget to arm your tracks before walking away!
