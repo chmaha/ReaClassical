@@ -1,11 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.1
+@version 26.6.2
 @changelog
-  Find Take: Silently check S-D edited items if take number not found in unedited sources
-  Convert and Explode: Mark tracks as source before running workflow sync
-  Create CD Markers: Correct region name mismatch when Digital Release Only is enabled
-  Statistics: Track/Reset session time
+  Record Panel: Allow for take recording anywhere on the timeline
+  Documentation: Add new support tier info
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
