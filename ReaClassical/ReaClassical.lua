@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.2
+@version 26.6.3
 @changelog
-  Record Panel: Allow for take recording anywhere on the timeline
-  Documentation: Add new support tier info
+  Mixer Snapshots: Fix vol, pan and mute refs when converting to automation
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
