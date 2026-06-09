@@ -1987,7 +1987,7 @@ function convert_snapshots_to_automation()
         end
 
         if has_changes(send_params.volume) then
-          local env = GetTrackSendEnvelope(track, 0, send_idx, 0)
+          local env = BR_GetMediaTrackSendInfo_Envelope(track, 0, send_idx, 0)  -- volume
           if env then
             insert_automation_points(env, send_params.volume, true)
             Envelope_SortPoints(env)
@@ -1997,7 +1997,7 @@ function convert_snapshots_to_automation()
         end
 
         if has_changes(send_params.pan) then
-          local env = GetTrackSendEnvelope(track, 0, send_idx, 1)
+          local env = BR_GetMediaTrackSendInfo_Envelope(track, 0, send_idx, 1)  -- pan
           if env then
             insert_automation_points(env, send_params.pan, false)
             Envelope_SortPoints(env)
@@ -2007,7 +2007,7 @@ function convert_snapshots_to_automation()
         end
 
         if has_changes(send_params.mute) then
-          local env = GetTrackSendEnvelope(track, 0, send_idx, 2)
+          local env = BR_GetMediaTrackSendInfo_Envelope(track, 0, send_idx, 2)  -- mute
           if env then
             -- Invert send mute values before inserting
             local inverted_send_mute_points = {}
