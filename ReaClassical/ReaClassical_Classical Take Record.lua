@@ -232,7 +232,10 @@ function main()
     set_rec_arm_for_selected_tracks(1)
     unselect_folder_children()
 
-    avoid_take_lanes()
+    local _, allow_overlap = GetProjExtState(0, "ReaClassical", "AllowOverlappingTakes")
+    if allow_overlap ~= "1" then
+        avoid_take_lanes()
+    end
 
     if rec_arm ~= 1 then
         TrackList_AdjustWindows(false)
@@ -246,7 +249,9 @@ function main()
     local cursor_pos = GetCursorPosition()
     save_prefs(cursor_pos)
 
-    avoid_take_lanes()
+    if allow_overlap ~= "1" then
+        avoid_take_lanes()
+    end
 
     PreventUIRefresh(-1)
     Main_OnCommand(1013, 0) -- Transport: Record

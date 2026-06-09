@@ -70,7 +70,7 @@ end
 
 local group_state = GetToggleCommandState(1156)
 if group_state ~= 1 then
-  Main_OnCommand(1156, 0)       -- Enable item grouping
+  Main_OnCommand(1156, 0) -- Enable item grouping
 end
 
 check_prefs()
@@ -90,6 +90,8 @@ local _, reset = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
 local _, start_text = GetProjExtState(0, "ReaClassical", "Recording Start")
 local _, end_text = GetProjExtState(0, "ReaClassical", "Recording End")
 local _, duration_text = GetProjExtState(0, "ReaClassical", "Recording Duration")
+local _, allow_overlap_val = GetProjExtState(0, "ReaClassical", "AllowOverlappingTakes")
+local allow_overlapping_takes = (allow_overlap_val == "1")
 local calc_end_time
 local start_next_day = ""
 local end_next_day = ""
@@ -1353,7 +1355,27 @@ function draw(playstate)
   if ImGui.BeginPopup(ctx, "settings_popup") then
     marker_actions_running = false
     laststate = nil
+    ImGui.Spacing(ctx)
+    if ImGui.BeginTable(ctx, "global_settings_table", 2, ImGui.TableFlags_SizingStretchProp) then
+      ImGui.TableSetupColumn(ctx, "labels", ImGui.TableColumnFlags_WidthFixed, 230)
+      ImGui.TableSetupColumn(ctx, "inputs", ImGui.TableColumnFlags_WidthFixed, 250)
 
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Allow Take Recording Anywhere:")
+      ImGui.TableSetColumnIndex(ctx, 1)
+      local rv_ao, new_ao = ImGui.Checkbox(ctx, "##allow_overlap", allow_overlapping_takes)
+      if rv_ao then
+        allow_overlapping_takes = new_ao
+        SetProjExtState(0, "ReaClassical", "AllowOverlappingTakes", allow_overlapping_takes and "1" or "0")
+      end
+
+      ImGui.EndTable(ctx)
+    end
+
+    ImGui.Spacing(ctx)
+    ImGui.Spacing(ctx)
     ImGui.Text(ctx, "Take Counter Settings")
     ImGui.Separator(ctx)
     ImGui.Spacing(ctx)
