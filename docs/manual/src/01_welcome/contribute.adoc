@@ -1,8 +1,6 @@
-=== Support Tiers and Donations
+=== Donate
 
-ReaClassical offers optional paid support tiers for users who wish to fund ongoing development or require professional assistance. The *Supporter* ($10/month or $100/year) and *Pro* ($25/month or $250/year) tiers provide Discord roles and access to development discussions or priority support respectively. The *Studio* tier ($100/month or $1,000/year) adds up to two live audio/video support sessions per month, ideal for professionals who need hands-on help during production. The *Institution* tier ($2,000/year) is designed for organizations such as music schools, conservatoires, colleges, and universities, and includes structured training sessions for your team, multi-user support, onboarding, and scheduled check-ins. All tiers are available via the https://reaclassical.org/support.html[ReaClassical Support] page.
-
-I also welcome one-off monetary donations. You can use the https://reaclassical.org/support.html[ReaClassical Support] page to do so. A good reference point for one-off donations per major release is the cost equivalent of a commercial REAPER license or higher. For monthly donations perhaps gauge how much it costs for you to go out for a restaurant meal or do groceries in your own country.
+I welcome monetary donations. You can use https://donate.stripe.com/5kQ8wPfUTaC80yP6xK3gk0a[Stripe] to do so. A good reference point for one-off donations per major release is the cost equivalent of a commercial REAPER license or higher. For monthly donations perhaps gauge how much it costs for you to go out for a restaurant meal or do groceries in your own country.
 
 === Other Ways to Contribute
 
