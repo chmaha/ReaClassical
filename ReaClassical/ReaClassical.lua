@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.3
+@version 26.6.4
 @changelog
-  Mixer Snapshots: Fix vol, pan and mute refs when converting to automation
+  Documentation: Revert to donations and no support tiers
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
