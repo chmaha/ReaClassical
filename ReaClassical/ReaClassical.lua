@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.4
+@version 26.6.5
 @changelog
-  Documentation: Revert to donations and no support tiers
+  Find Takes: Fix filename pattern logic
+  Find Takes: Select parent track of found take
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
