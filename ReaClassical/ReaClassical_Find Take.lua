@@ -81,12 +81,13 @@ function main()
                                 local src = GetMediaItemTake_Source(take)
                                 local filename = GetMediaSourceFileName(src, "")
                                 session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
-                                nil
+                                    nil
                             else
                                 -- Check take name for session
                                 local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-                                session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
-                                nil
+                                session_match = take_name:lower():match("%f[%a]" ..
+                                    session_name:lower() .. "[^%a]*%f[%A]") ~=
+                                    nil
                             end
                         end
                     end
@@ -99,7 +100,7 @@ function main()
                         SetEditCurPos(item_start, true, false)
                         Main_OnCommand(40769, 0) -- unselect all items
                         SetMediaItemSelected(item, true)
-                        select_midpoint_peers()
+                        select_midpoint_peers(GetMediaItemTrack(item))
                         return true
                     end
                 end
@@ -134,7 +135,7 @@ function main()
                         SetEditCurPos(item_start, true, false)
                         Main_OnCommand(40769, 0) -- unselect all items
                         SetMediaItemSelected(item, true)
-                        select_midpoint_peers()
+                        select_midpoint_peers(GetMediaItemTrack(item))
                         return true
                     end
                 end
@@ -147,7 +148,8 @@ function main()
                     local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
                     local session_match = true
                     if session_name and session_name ~= "" then
-                        session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~= nil
+                        session_match = take_name:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
+                        nil
                     end
 
                     if take_name and session_match then
@@ -166,7 +168,7 @@ function main()
                                 SetEditCurPos(item_start, true, false)
                                 Main_OnCommand(40769, 0)
                                 SetMediaItemSelected(item, true)
-                                select_midpoint_peers()
+                                select_midpoint_peers(GetMediaItemTrack(item))
                                 return true
                             end
                         end
@@ -189,8 +191,7 @@ end
 
 ---------------------------------------------------------------------
 
-function select_midpoint_peers()
-    local sel_track = GetSelectedTrack(0, 0)
+function select_midpoint_peers(sel_track)
     if not sel_track then return end
     local track_num = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
     local num_tracks = CountTracks(0)
@@ -242,6 +243,8 @@ function select_midpoint_peers()
             end
         end
     end
+    Main_OnCommand(40297, 0)
+    SetTrackSelected(GetTrack(0, folder_start), true)
 end
 
 ---------------------------------------------------------------------
