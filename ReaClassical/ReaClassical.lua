@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.6
+@version 26.6.7
 @changelog
-  Find Takes: Fix item name patterning
+  Donations: Revert to PayPal
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
