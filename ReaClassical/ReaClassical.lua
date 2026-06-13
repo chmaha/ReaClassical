@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.5
+@version 26.6.6
 @changelog
-  Find Takes: Fix filename pattern logic
-  Find Takes: Select parent track of found take
+  Find Takes: Fix item name patterning
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
