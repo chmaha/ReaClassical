@@ -1,6 +1,6 @@
 === Donate
 
-I welcome monetary donations. You can use https://donate.stripe.com/5kQ8wPfUTaC80yP6xK3gk0a[Stripe] to do so. A good reference point for one-off donations per major release is the cost equivalent of a commercial REAPER license or higher. For monthly donations perhaps gauge how much it costs for you to go out for a restaurant meal or do groceries in your own country.
+I welcome monetary donations. You can use https://www.paypal.com/donate/?hosted_button_id=AG386BGS42BJN[PayPal] to do so. A good reference point for one-off donations per major release is the cost equivalent of a commercial REAPER license or higher. For monthly donations perhaps gauge how much it costs for you to go out for a restaurant meal or do groceries in your own country.
 
 === Other Ways to Contribute
 
