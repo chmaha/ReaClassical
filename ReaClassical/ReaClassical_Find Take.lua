@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, select_midpoint_peers
+local main, select_midpoint_peers, session_matches
 
 ---------------------------------------------------------------------
 
@@ -80,8 +80,7 @@ function main()
                                 -- Check filename for session
                                 local src = GetMediaItemTake_Source(take)
                                 local filename = GetMediaSourceFileName(src, "")
-                                session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~=
-                                    nil
+                                session_match = session_matches(filename, session_name)
                             else
                                 -- Check take name for session
                                 local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
@@ -115,17 +114,11 @@ function main()
                 if take then
                     local src = GetMediaItemTake_Source(take)
                     local filename = GetMediaSourceFileName(src, "")
-                    local take_capture = tonumber(
-                    -- Case: (###)[chan X].wav  or  ### [chan X].wav  (with or without space)
-                        filename:match("(%d+)%)?%s*%[chan%s*%d+%]%.[^%.]+$")
-                        -- Case: (###).wav  or  ###.wav
-                        or filename:match("(%d+)%)?%.[^%.]+$")
-                    )
+                    local take_capture = tonumber(filename:match("_T(%d+)%.[^%.]+$"))
 
                     local session_match = true
-
                     if session_name and session_name ~= "" then
-                        session_match = filename:lower():match("%f[%a]" .. session_name:lower() .. "[^%a]*%f[%A]") ~= nil
+                        session_match = session_matches(filename, session_name)
                     end
 
                     local edit, _ = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
@@ -245,6 +238,13 @@ function select_midpoint_peers(sel_track)
     end
     Main_OnCommand(40297, 0)
     SetTrackSelected(GetTrack(0, folder_start), true)
+end
+
+---------------------------------------------------------------------
+
+function session_matches(filename, sname)
+    local segment1 = filename:lower():match("^([^_]+)_")
+    return segment1 ~= nil and segment1:find(sname:lower(), 1, true) ~= nil
 end
 
 ---------------------------------------------------------------------
