@@ -365,8 +365,10 @@ end
 ---------------------------------------------------------------------
 
 function get_track_length(src_track_number)
-    local track = GetTrack(0, src_track_number)
+    local track = GetTrack(0, src_track_number - 1)
+    if not track then return 0 end
     local num_of_items = GetTrackNumMediaItems(track)
+    if num_of_items == 0 then return 0 end
     local item = GetTrackMediaItem(track, num_of_items - 1)
     local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
     local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")

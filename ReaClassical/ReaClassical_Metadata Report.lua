@@ -329,7 +329,7 @@ function create_string(fields, num_of_markers, extension)
   local _, _, album_pos_out, _, _ = EnumProjectMarkers2(0, num_of_markers - 1)
   local album_length = format_time(album_pos_out)
   local _, _, _, _, album_meta = EnumProjectMarkers2(0, num_of_markers - 2)
-  local catalog_number = album_meta:match('CATALOG=([%w%d]+)') or ""
+  local catalog_number = (album_meta and album_meta:match('CATALOG=([%w%d]+)')) or ""
   local out_str
 
   if catalog_number ~= "" then
@@ -507,8 +507,10 @@ function parse_cue_file(cueFilePath, albumLength, num_of_markers)
   end
 
   -- Deal with final track length based on album length
-  local firstTimeString = string.format("%02d:%02d:%02d", tracks[#tracks].mm, tracks[#tracks].ss, tracks[#tracks].ff)
-  tracks[#tracks].length = subtract_time_strings(albumLength, firstTimeString)
+  if #tracks > 0 then
+    local firstTimeString = string.format("%02d:%02d:%02d", tracks[#tracks].mm, tracks[#tracks].ss, tracks[#tracks].ff)
+    tracks[#tracks].length = subtract_time_strings(albumLength, firstTimeString)
+  end
 
   return albumTitle, albumPerformer, tracks
 end

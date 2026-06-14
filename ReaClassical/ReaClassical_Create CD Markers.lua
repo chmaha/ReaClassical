@@ -414,6 +414,7 @@ function cd_markers(selected_track, num_of_items, track_color)
 
     for i = 0, num_of_items - 1, 1 do
         local current_start, take_name, manual_offset, current_item = find_current_start(selected_track, i)
+        if take_name then
         local final_offset = offset + manual_offset
         if not take_name:match("^@") then
             local added_marker = create_marker(current_start, marker_count, take_name, final_offset,
@@ -438,6 +439,7 @@ function cd_markers(selected_track, num_of_items, track_color)
                 previous_takename = take_name
                 marker_count = marker_count + 1
             end
+        end
         end
     end
     if marker_count == 0 then
@@ -1634,7 +1636,7 @@ function editor_main()
                 for i = 0, CountTrackMediaItems(selected_track) - 1 do
                     local item = GetTrackMediaItem(selected_track, i)
                     local take = GetActiveTake(item)
-                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    local name = take and select(2, GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)) or ""
                     if name:match("^@") then
                         album_metadata = parse_item_name(name, true)
                         album_item = item
@@ -1647,7 +1649,7 @@ function editor_main()
                 for i = 0, item_count - 1 do
                     local item = GetTrackMediaItem(selected_track, i)
                     local take = GetActiveTake(item)
-                    local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    local name = take and select(2, GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)) or ""
                     if name and name:match("%S") and not name:match("^@") then
                         track_items_metadata[i] = parse_item_name(name, false)
                     end

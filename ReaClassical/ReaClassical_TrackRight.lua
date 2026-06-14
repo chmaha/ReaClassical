@@ -174,7 +174,7 @@ function get_cd_track_items(start_item, folder_track)
     for i = start_number + 1, num_items - 1 do
         local item = GetTrackMediaItem(folder_track, i)
         local take = GetActiveTake(item)
-        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        local take_name = take and select(2, GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)) or ""
         if is_cd_track_start(take_name) then break end
         table.insert(items, item)
     end
@@ -190,7 +190,7 @@ function get_next_cd_track_item(start_item, folder_track)
     while i < num_items do
         local item = GetTrackMediaItem(folder_track, i)
         local take = GetActiveTake(item)
-        local _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        local take_name = take and select(2, GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)) or ""
         if is_cd_track_start(take_name) then return item end
         i = i + 1
     end

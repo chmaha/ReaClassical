@@ -601,11 +601,10 @@ function main()
                     if first_hw then
                         -- Remove the mono flag (1024) if present to get the actual channel
                         if first_hw >= 1024 then
-                            pending_hw_routing_changes.manual[i].hw_channel = hw_out - 1024
+                            pending_hw_routing_changes.manual[i].hw_channel = first_hw - 1024
                         else
-                            pending_hw_routing_changes.manual[i].hw_channel = hw_out
+                            pending_hw_routing_changes.manual[i].hw_channel = first_hw
                         end
-                        break
                     end
                 end
                 for idx, aux_info in ipairs(aux_submix_tracks) do
@@ -625,11 +624,10 @@ function main()
                         local first_hw = next(fresh_hw)
                         if first_hw then
                             if first_hw >= 1024 then
-                                pending_hw_routing_changes.special[idx].hw_channel = hw_out - 1024
+                                pending_hw_routing_changes.special[idx].hw_channel = first_hw - 1024
                             else
-                                pending_hw_routing_changes.special[idx].hw_channel = hw_out
+                                pending_hw_routing_changes.special[idx].hw_channel = first_hw
                             end
-                            break
                         end
                     end
                 end
@@ -1428,26 +1426,19 @@ function main()
 
                         -- Handle TAB key to move to next/previous renameable special track input
                         if ImGui.IsItemActive(ctx) then
-                            if ImGui.IsItemActive(ctx) then
-                                if ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and not ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
-                                    -- TAB: Move forward to next track
-                                    if i < end_idx then
-                                        focus_track_input = i + 1
-                                    elseif i == end_idx and current_tab < math.ceil(#mixer_tracks / TRACKS_PER_TAB) - 1 then
-                                        -- Last track in current tab - switch to next tab
-                                        pending_tab_switch = current_tab + 1
-                                        focus_track_input = end_idx + 1
-                                    end
-                                elseif ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
-                                    -- Shift+TAB: Move backwards to previous track
-                                    if i > start_idx then
-                                        focus_track_input = i - 1
-                                    elseif i == start_idx and current_tab > 0 then
-                                        -- First track in current tab - switch to previous tab
-                                        pending_tab_switch = current_tab - 1
-                                        local prev_tab_end = (current_tab - 1) * TRACKS_PER_TAB + TRACKS_PER_TAB
-                                        focus_track_input = math.min(prev_tab_end, #mixer_tracks)
-                                    end
+                            if ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and not ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                                -- TAB: Move forward to next special track (wrap to first)
+                                if idx < #aux_submix_tracks then
+                                    focus_special_input = idx + 1
+                                else
+                                    focus_special_input = 1
+                                end
+                            elseif ImGui.IsKeyPressed(ctx, ImGui.Key_Tab) and ImGui.IsKeyDown(ctx, ImGui.Mod_Shift) then
+                                -- Shift+TAB: Move backwards to previous special track (wrap to last)
+                                if idx > 1 then
+                                    focus_special_input = idx - 1
+                                else
+                                    focus_special_input = #aux_submix_tracks
                                 end
                             end
                         end

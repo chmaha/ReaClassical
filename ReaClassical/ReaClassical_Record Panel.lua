@@ -1299,6 +1299,7 @@ function draw(playstate)
   ImGui.SetCursorPos(ctx, buttons_start_x, rank_y)
 
   local display_index = recording_rank == "" and 9 or tonumber(recording_rank)
+  if not display_index or not RANKS[display_index] then display_index = 9 end
 
   ImGui.PushStyleColor(ctx, ImGui.Col_FrameBg, RANKS[display_index].rgba)
   ImGui.SetNextItemWidth(ctx, total_button_width / 2)

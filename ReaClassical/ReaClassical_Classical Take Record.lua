@@ -93,10 +93,12 @@ function main()
             for i = 0, num_of_selected_items - 1 do
                 local item = get_selected_media_item_at(i)
                 local take = GetActiveTake(item)
-                if use_only_take_num == 0 then
-                    GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. take_prefix .. padded_number, true)
-                else
-                    GetSetMediaItemTakeInfo_String(take, "P_NAME", padded_number, true)
+                if take then
+                    if use_only_take_num == 0 then
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", session_name .. take_prefix .. padded_number, true)
+                    else
+                        GetSetMediaItemTakeInfo_String(take, "P_NAME", padded_number, true)
+                    end
                 end
             end
         end
@@ -132,7 +134,7 @@ function main()
 
             local num_tracks = CountTracks(0)
             local selected_track = GetSelectedTrack(0, 0)
-            local current_num = GetMediaTrackInfo_Value(selected_track, 'IP_TRACKNUMBER')
+            local current_num = selected_track and GetMediaTrackInfo_Value(selected_track, 'IP_TRACKNUMBER') or 0
             local bool = false
             for i = current_num, num_tracks - 1, 1 do
                 local track = GetTrack(0, i)

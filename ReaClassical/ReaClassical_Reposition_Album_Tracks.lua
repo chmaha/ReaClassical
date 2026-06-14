@@ -82,10 +82,11 @@ function main()
 
     if not bool then
         return
-    elseif gap == "" then
+    elseif tonumber(gap) == nil then
         MB("Please enter a number!", "Reposition Album Tracks", 0)
         return
     else
+        gap = tonumber(gap)
         -- Get all CD track groups from the folder
         local cd_track_groups = get_cd_track_groups(folder_track)
 

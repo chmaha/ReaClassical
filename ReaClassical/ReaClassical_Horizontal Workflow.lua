@@ -86,6 +86,7 @@ function main()
     elseif folder_check() > 1 then
         return
     elseif folder_check() == 1 then
+        local is_empty = false
         local _, RCProject = GetProjExtState(0, "ReaClassical", "RCProject")
         if RCProject ~= "y" then
             local _, _, _, _, mixer_tracks = create_track_table(is_empty)
@@ -97,8 +98,6 @@ function main()
                 SetProjExtState(0, "ReaClassical", "RCProject", "y")
             end
         end
-
-        local is_empty = false
         SetCursorContext(1, nil)
         remove_track_groups()
         delete_non_rc_tracks()

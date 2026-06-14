@@ -181,7 +181,7 @@ function main()
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         local first_item = selected_items[0]
 
-        local item_color = GetMediaItemInfo_Value(first_item, "I_CUSTOMCOLOR")
+        local item_color = first_item and GetMediaItemInfo_Value(first_item, "I_CUSTOMCOLOR") or 0
 
         for _, v in pairs(selected_items) do
             SetMediaItemSelected(v, true)

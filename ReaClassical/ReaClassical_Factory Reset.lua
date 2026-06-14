@@ -103,7 +103,7 @@ function copy_file(source, destination)
         os.remove(backup_destination)
         local success, err = os.rename(destination, backup_destination)
         if not success then
-            MB("Error creating backup: " .. err, "ReaClassical Reset", 0)
+            MB("Error creating backup: " .. (err or "unknown error"), "ReaClassical Reset", 0)
             return
         end
     end

@@ -115,7 +115,7 @@ end
 
 function solo()
     local selected_track = GetSelectedTrack(0, 0)
-    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+    local parent = selected_track and GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH") or 0
 
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
