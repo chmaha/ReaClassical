@@ -25,6 +25,7 @@ local main, parse_markers, write_rcmeta_file
 local get_txt_file, get_track_color_from_marker
 local count_markers, create_filename, create_cue_entries, create_string
 local ext_mod, save_cue_file, format_time, parse_cue_file, create_plaintext_report
+local get_export_dir
 local create_html_report, any_isrc_present, time_to_mmssff, subtract_time_strings
 local add_pregaps_to_table
 
@@ -66,10 +67,10 @@ function main()
   local fields, extension, production_year = create_cue_entries(filename, metadata)
 
   local string, catalog_number, album_length = create_string(fields, num_of_markers, extension)
-  local path, slash, cue_file = save_cue_file(fields, string, prefix)
+  local export_dir, slash, cue_file = save_cue_file(fields, string, prefix)
 
-  local txtOutputPath = path .. slash .. prefix .. 'album_report.txt'
-  local HTMLOutputPath = path .. slash .. prefix .. 'album_report.html'
+  local txtOutputPath = export_dir .. slash .. prefix .. 'album_report.txt'
+  local HTMLOutputPath = export_dir .. slash .. prefix .. 'album_report.html'
   local albumTitle, albumPerformer, tracks = parse_cue_file(cue_file, album_length, num_of_markers)
   if albumTitle and albumPerformer and #tracks > 0 then
     create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPath, album_length, catalog_number,
@@ -226,7 +227,8 @@ function get_txt_file(track_name)
     prefix = prefix_match .. "_"
   end
 
-  local file = path .. slash .. prefix .. 'metadata.txt'
+  local export_dir = get_export_dir(path, slash, prefix)
+  local file = export_dir .. slash .. prefix .. 'metadata.txt'
   return file, prefix
 end
 
@@ -416,6 +418,24 @@ end
 
 ----------------------------------------------------------
 
+function get_export_dir(path, slash, prefix)
+  local export_dir = path .. slash .. "Exports"
+  local subdir = prefix:match("^(.-)_$")
+  if subdir and subdir ~= "" then
+    if subdir == "D" then
+      subdir = "Destination Folder"
+    else
+      local source_num = subdir:match("^S(%d+)$")
+      if source_num then subdir = "Source " .. source_num .. " Folder" end
+    end
+    export_dir = export_dir .. slash .. subdir
+  end
+  RecursiveCreateDirectory(export_dir, 0)
+  return export_dir
+end
+
+----------------------------------------------------------
+
 function save_cue_file(fields, out_str, prefix)
   local _, path = EnumProjects(-1)
   local slash = package.config:sub(1, 1)
@@ -425,7 +445,8 @@ function save_cue_file(fields, out_str, prefix)
     local pattern = "(.+)" .. slash .. ".+[.][Rr][Pp][Pp]"
     path = path:match(pattern)
   end
-  local file = path .. slash .. prefix .. fields[5]:match('^(.+)[.].+') .. '.cue'
+  local export_dir = get_export_dir(path, slash, prefix)
+  local file = export_dir .. slash .. prefix .. fields[5]:match('^(.+)[.].+') .. '.cue'
   local f = io.open(file, 'w')
   if f then
     f:write(out_str)
@@ -437,7 +458,7 @@ function save_cue_file(fields, out_str, prefix)
       "Create CUE file", 0)
     ShowConsoleMsg(out_str)
   end
-  return path, slash, file
+  return export_dir, slash, file
 end
 
 ----------------------------------------------------------

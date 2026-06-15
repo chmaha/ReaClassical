@@ -42,6 +42,10 @@ local shift_folder_items_and_markers, shift_all_markers_and_regions
 local editor_main, parse_item_name, serialize_metadata, increment_isrc
 local update_marker_and_region, update_album_marker, propagate_album_field
 local track_has_valid_items, track_has_any_named_items, create_metadata_report_and_cue
+local render_ddp_preset, render_cue_audio_preset, render_flac_preset, render_opus_preset
+local render_mp3_preset
+local open_render_dialog
+local get_export_subdir, get_export_dir, get_active_folder_track
 
 ---------------------------------------------------------------------
 -- Shared state
@@ -415,31 +419,31 @@ function cd_markers(selected_track, num_of_items, track_color)
     for i = 0, num_of_items - 1, 1 do
         local current_start, take_name, manual_offset, current_item = find_current_start(selected_track, i)
         if take_name then
-        local final_offset = offset + manual_offset
-        if not take_name:match("^@") then
-            local added_marker = create_marker(current_start, marker_count, take_name, final_offset,
-                track_color, current_item)
-            if added_marker then
-                if take_name:match("^!") and marker_count > 0 then
-                    AddProjectMarker2(0, false, frame_check(current_start - (pregap_len + final_offset)), 0, "!",
-                        marker_count,
-                        track_color)
-                end
-                if marker_count > 0 then
-                    if current_start - previous_start < 4 then
-                        redbook_track_length_errors = redbook_track_length_errors + 1
+            local final_offset = offset + manual_offset
+            if not take_name:match("^@") then
+                local added_marker = create_marker(current_start, marker_count, take_name, final_offset,
+                    track_color, current_item)
+                if added_marker then
+                    if take_name:match("^!") and marker_count > 0 then
+                        AddProjectMarker2(0, false, frame_check(current_start - (pregap_len + final_offset)), 0, "!",
+                            marker_count,
+                            track_color)
                     end
-                    AddProjectMarker2(0, true, frame_check(previous_start - previous_offset),
-                        frame_check(current_start - final_offset),
-                        previous_takename:match("^[!]*([^|]*)"),
-                        marker_count, track_color)
+                    if marker_count > 0 then
+                        if current_start - previous_start < 4 then
+                            redbook_track_length_errors = redbook_track_length_errors + 1
+                        end
+                        AddProjectMarker2(0, true, frame_check(previous_start - previous_offset),
+                            frame_check(current_start - final_offset),
+                            previous_takename:match("^[!]*([^|]*)"),
+                            marker_count, track_color)
+                    end
+                    previous_start = current_start
+                    previous_offset = final_offset
+                    previous_takename = take_name
+                    marker_count = marker_count + 1
                 end
-                previous_start = current_start
-                previous_offset = final_offset
-                previous_takename = take_name
-                marker_count = marker_count + 1
             end
-        end
         end
     end
     if marker_count == 0 then
@@ -1548,6 +1552,170 @@ function create_metadata_report_and_cue()
 end
 
 ---------------------------------------------------------------------
+
+function get_active_folder_track()
+    local track = GetSelectedTrack(0, 0)
+    if not track then return nil, false end
+
+    local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+    if depth == 1 then return track, false end
+
+    local track_index = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1
+    for i = track_index - 1, 0, -1 do
+        local t = GetTrack(0, i)
+        local t_depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
+        if t_depth < 0 then
+            -- Hit a folder-closing track, so selected track is outside any folder
+            break
+        end
+        if t_depth == 1 then
+            return t, false
+        end
+    end
+    return nil, true
+end
+
+---------------------------------------------------------------------
+
+function get_export_subdir()
+    local track = get_active_folder_track()
+    if not track then return "" end
+    local _, track_name = GetTrackName(track)
+    -- Extract disc/side prefix (D:, S1:, S2:, etc.) as used elsewhere in ReaClassical
+    local prefix = track_name:match("^([^:]+):") or ""
+    if prefix == "D" then return "Destination Folder" end
+    local source_num = prefix:match("^S(%d+)$")
+    if source_num then return "Source " .. source_num .. " Folder" end
+    return prefix
+end
+
+---------------------------------------------------------------------
+
+function get_export_dir()
+    local subdir = get_export_subdir()
+    local rel_dir = (subdir ~= "") and ("Exports/" .. subdir .. "/") or "Exports/"
+
+    -- Ensure the (possibly nested) export directory exists before rendering,
+    -- since REAPER may not create multi-level subfolders on its own
+    local slash = package.config:sub(1, 1)
+    local abs_dir = GetProjectPath() .. slash .. "Exports"
+    if subdir ~= "" then
+        abs_dir = abs_dir .. slash .. subdir
+    end
+    RecursiveCreateDirectory(abs_dir, 0)
+
+    return rel_dir
+end
+
+---------------------------------------------------------------------
+
+function render_ddp_preset()
+    local proj = 0
+
+    -- " pdd" = DDP format chunk, decoded from base64 " pdd" -> 20 70 64 64
+    local fmt = string.char(0x20, 0x70, 0x64, 0x64)
+    GetSetProjectInfo_String(proj, "RENDER_FORMAT", fmt, true)
+
+    GetSetProjectInfo(proj, "RENDER_SRATE", 44100, true)
+    GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
+    GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 1, true)
+
+    local export_dir = get_export_dir()
+    GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir .. "DDP", true)
+    GetSetProjectInfo_String(proj, "RENDER_PATTERN", "IMAGE.DAT", true)
+
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)
+
+    Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
+end
+
+---------------------------------------------------------------------
+
+function render_cue_audio_preset()
+    local proj = 0
+
+    -- WAV 16-bit sink config, base64-encoded (see ReaClassical-render.ini "WAV 44.1k 16-bit")
+    GetSetProjectInfo_String(proj, "RENDER_FORMAT", "ZXZhdxAAAA==", true)
+
+    GetSetProjectInfo(proj, "RENDER_SRATE", 44100, true)
+    GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
+    GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 1, true) -- entire project
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)   -- master mix
+
+    local export_dir = get_export_dir()
+    GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
+    GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$project", true)
+
+    Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
+end
+
+---------------------------------------------------------------------
+
+function render_flac_preset()
+    local proj = 0
+
+    -- FLAC 16-bit sink config, base64-encoded (see ReaClassical-render.ini "FLAC 44.1k 16-bit")
+    GetSetProjectInfo_String(proj, "RENDER_FORMAT", "Y2FsZhAAAAAFAAAA", true)
+
+    GetSetProjectInfo(proj, "RENDER_SRATE", 44100, true)
+    GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
+    GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)   -- master mix
+
+    local export_dir = get_export_dir()
+    GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
+    GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$format_$samplerate_$bitdepth/$regionnumber $region", true)
+
+    Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
+end
+
+---------------------------------------------------------------------
+
+function render_opus_preset()
+    local proj = 0
+
+    -- Opus 160kbps sink config, base64-encoded (see ReaClassical-render.ini "OPUS 160kbps")
+    GetSetProjectInfo_String(proj, "RENDER_FORMAT", "U2dnTwAAIEMACgAAAAIAAAA=", true)
+
+    GetSetProjectInfo(proj, "RENDER_SRATE", 48000, true)
+    GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
+    GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions/markers
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 3, true)
+
+    local export_dir = get_export_dir()
+    GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
+    GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$format_160/$regionnumber $region", true)
+
+    Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
+end
+
+---------------------------------------------------------------------
+
+function render_mp3_preset()
+    local proj = 0
+
+    -- MP3 320kbps sink config, base64-encoded (see ReaClassical-render.ini "MP3 320kbps")
+    GetSetProjectInfo_String(proj, "RENDER_FORMAT", "bDNwbUABAAAAAAAAAgAAAP////8EAAAAQAEAAAAAAAA=", true)
+
+    GetSetProjectInfo(proj, "RENDER_SRATE", 44100, true)
+    GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
+    GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)   -- master mix
+
+    local export_dir = get_export_dir()
+    GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
+    GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$format_320/$regionnumber $region", true)
+
+    Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
+end
+
+---------------------------------------------------------------------
+
+function open_render_dialog()
+    Main_OnCommand(40015, 0) -- File: Render project to disk...
+end
+
+---------------------------------------------------------------------
 --                    METADATA EDITOR GUI
 ---------------------------------------------------------------------
 
@@ -1563,33 +1731,8 @@ function editor_main()
     window_open = open_ref
 
     if opened then
-        local selected_track = GetSelectedTrack(0, 0)
-        local no_folder_found = false
-        if selected_track then
-            local depth = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
-            if depth ~= 1 then
-                local track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1
-                local folder_track = nil
-                for i = track_index - 1, 0, -1 do
-                    local t = GetTrack(0, i)
-                    local t_depth = GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH")
-                    if t_depth < 0 then
-                        -- Hit a folder-closing track, so selected track is outside any folder
-                        break
-                    end
-                    if t_depth == 1 then
-                        folder_track = t
-                        break
-                    end
-                end
-                if folder_track then
-                    selected_track = folder_track
-                else
-                    no_folder_found = true
-                end
-            end
-        end
-        if selected_track and no_folder_found then
+        local selected_track, no_folder_found = get_active_folder_track()
+        if no_folder_found then
             ImGui.Text(ctx, "Please select the parent track of a folder.")
         elseif selected_track and not track_has_valid_items(selected_track) then
             if track_has_any_named_items(selected_track) then
@@ -2273,6 +2416,47 @@ function editor_main()
         else
             ImGui.Text(ctx, "No track selected. Please select a folder track to edit metadata.")
         end
+        -- Bottom-right render preset buttons
+        ImGui.Dummy(ctx, 0, 10)
+        ImGui.Separator(ctx)
+
+        local render_buttons = {
+            { label = "DDP",       fn = render_ddp_preset,       tooltip = "Apply the DDP render preset and render silently" },
+            { label = "Cue Audio", fn = render_cue_audio_preset, tooltip = "Apply the Cue Audio render preset and render silently" },
+            { label = "FLAC",      fn = render_flac_preset,      tooltip = "Apply the FLAC 44.1/16 render preset and render silently" },
+            { label = "Opus 160",  fn = render_opus_preset,      tooltip = "Apply the Opus 160 render preset and render silently" },
+            { label = "MP3 320",   fn = render_mp3_preset,       tooltip = "Apply the MP3 320 render preset and render silently" },
+            { label = "Custom",    fn = open_render_dialog,      tooltip = "Open the REAPER render dialog for custom render settings" },
+        }
+
+        local btn_pad_x = select(1, ImGui.GetStyleVar(ctx, ImGui.StyleVar_FramePadding))
+        local item_spacing_x = select(1, ImGui.GetStyleVar(ctx, ImGui.StyleVar_ItemSpacing))
+        local bottom_avail_w = select(1, ImGui.GetContentRegionAvail(ctx))
+
+        local export_label = "Render:"
+        local export_label_w = ImGui.CalcTextSize(ctx, export_label) + item_spacing_x
+
+        local total_btn_w = export_label_w
+        for _, b in ipairs(render_buttons) do
+            total_btn_w = total_btn_w + ImGui.CalcTextSize(ctx, b.label) + btn_pad_x * 2
+        end
+        total_btn_w = total_btn_w + item_spacing_x * (#render_buttons - 1)
+
+        ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + bottom_avail_w - total_btn_w)
+        ImGui.AlignTextToFramePadding(ctx)
+        ImGui.Text(ctx, export_label)
+        ImGui.SameLine(ctx)
+        for i, b in ipairs(render_buttons) do
+            if i > 1 then ImGui.SameLine(ctx) end
+            if ImGui.Button(ctx, b.label) then
+                recalculate()
+                b.fn()
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, b.tooltip)
+            end
+        end
+
         -- keyboard shortcut capture
         if not ImGui.IsAnyItemActive(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_Y, false) then
             window_open = false
