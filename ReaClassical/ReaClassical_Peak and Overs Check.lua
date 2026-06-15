@@ -58,7 +58,8 @@ local MERGE_GAP = 0.3  -- seconds; nearby overs are merged into one entry
 local MAX_OVERS = 500  -- safety cap on number of reported overs
 local LN10 = math.log(10)
 
-local threshold = -1.0
+local _, saved_threshold = GetProjExtState(0, "ReaClassical", "PeaksThreshold")
+local threshold = tonumber(saved_threshold) or -1.0
 local scanned = false
 local overs = {}
 local state = {}
@@ -249,12 +250,13 @@ function main()
             ImGui.SliderFlags_AlwaysClamp)
         if changed_t then
             threshold = new_t
+            SetProjExtState(0, "ReaClassical", "PeaksThreshold", tostring(threshold))
         end
         if ImGui.IsItemHovered(ctx) then
             ImGui.SetTooltip(ctx, "Ctrl+click to type a precise value")
         end
 
-        if ImGui.Button(ctx, "Scan Project", -1, 0) then
+        if ImGui.Button(ctx, "Re-scan", -1, 0) then
             scan()
         end
 
@@ -291,7 +293,7 @@ function main()
                 end
             end
         else
-            ImGui.Text(ctx, "Click 'Scan Project' to analyse.")
+            ImGui.Text(ctx, "Click 'Re-scan' to analyse.")
         end
 
         ImGui.End(ctx)
@@ -304,4 +306,5 @@ end
 
 ---------------------------------------------------------------------
 
+scan()
 defer(main)
