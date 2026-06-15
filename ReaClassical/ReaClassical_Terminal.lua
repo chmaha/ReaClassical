@@ -1,0 +1,4268 @@
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+
+local workflow = ""
+
+---------------------------------------------------------------------
+-- Word lists (ported from ReaClassical_Mission Control.lua)
+---------------------------------------------------------------------
+
+local pair_words = {
+    "2ch", "pair", "paire", "paar", "coppia", "par", "para", "пара", "对", "ペア",
+    "쌍", "زوج", "pari", "пар", "πάρoς", "двойка", "קבוצה", "çift",
+    "pár", "pāris", "pora", "jozi", "जोड़ी", "คู่", "pasang", "cặp",
+    "stereo", "stéréo", "estéreo", "立体声", "ステレオ", "스테레오",
+    "ستيريو", "στερεοφωνικός", "סטריאו", "stereotipas", "स्टीरियो",
+    "สเตอริโอ", "âm thanh nổi", "paarig", "doppel", "duo"
+}
+
+local left_words = {
+    "l", "left", "gauche", "sinistra", "izquierda", "esquerda", "ліворуч", "слева", "vlevo", "balra", "vänster",
+    "vasakule", "venstre", "vänstra", "levý", "левый", "lijevo", "stânga", "sol", "kushoto", "ซ้าย", "बाएँ", "बायां",
+    "links", "linke", "lewa", "lewy", "lewe", "lewo"
+}
+
+local right_words = {
+    "r", "right", "droite", "destra", "derecha", "direita", "праворуч", "справа", "vpravo", "jobbra", "höger",
+    "paremale", "høyre", "högra", "pravý", "правый", "desno", "dreapta", "sağ", "kulia", "ขวา", "दाएँ", "दायां",
+    "rechts", "rechte", "prawa", "prawy", "prawe", "prawo"
+}
+
+local RANK_LETTERS = { e = 1, v = 2, g = 3, o = 4, b = 5, p = 6, u = 7, f = 8, n = 9 }
+
+local RANK_PREFIXES = {
+    "Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start", ""
+}
+
+---------------------------------------------------------------------
+-- Output
+---------------------------------------------------------------------
+
+function say(msg)
+    ShowConsoleMsg(tostring(msg) .. "\n")
+end
+
+---------------------------------------------------------------------
+-- Generic helpers
+---------------------------------------------------------------------
+
+function trackname_check(track, pattern)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(name, pattern)
+end
+
+function clamp(value, lo, hi)
+    if value < lo then return lo end
+    if value > hi then return hi end
+    return value
+end
+
+function trim(s)
+    return s:match("^%s*(.-)%s*$")
+end
+
+---------------------------------------------------------------------
+-- dB / pan helpers (ported from ReaClassical_Edit Automation.lua)
+---------------------------------------------------------------------
+
+function linear_to_db(val)
+    if val <= 0.0000000298023223876953125 then
+        return -150.0
+    end
+    return 20 * math.log(val, 10)
+end
+
+function db_to_linear(db)
+    if db <= -150 then
+        return 0.0
+    end
+    return 10 ^ (db / 20)
+end
+
+function format_pan(panVal)
+    if math.abs(panVal) < 0.01 then
+        return "C"
+    elseif panVal < 0 then
+        return tostring(math.floor(-panVal * 100 + 0.5)) .. "L"
+    else
+        return tostring(math.floor(panVal * 100 + 0.5)) .. "R"
+    end
+end
+
+-- Parses a percentage string such as "+25", "-5" or "0" into a linear
+-- pan value in the range -1..1.
+function pct_to_pan(str)
+    local n = tonumber(str)
+    if not n then return nil end
+    return clamp(n / 100, -1, 1)
+end
+
+---------------------------------------------------------------------
+-- Track enumeration (ported from ReaClassical_Mission Control.lua
+-- and ReaClassical_Vertical Workflow.lua)
+---------------------------------------------------------------------
+
+function get_rcmaster()
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        if state == "y" or trackname_check(track, "^RCMASTER") then
+            return track, i
+        end
+    end
+    return nil
+end
+
+-- Port of create_mixer_table() (Mission Control.lua) returning a plain,
+-- track-order array of "M:" mixer tracks. Index N == "mixer track N".
+function get_mixer_tracks()
+    local tracks = {}
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        if state == "y" then
+            table.insert(tracks, track)
+        end
+    end
+    return tracks
+end
+
+-- Port of get_special_tracks() (Mission Control.lua:2277-2375)
+function get_special_tracks()
+    local tracks = {}
+
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+
+        if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
+            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y" then
+            local track_type = "other"
+            local has_routing = false
+
+            if aux_state == "y" then
+                track_type = "aux"
+                has_routing = true
+            elseif submix_state == "y" then
+                track_type = "submix"
+                has_routing = true
+            elseif rt_state == "y" then
+                track_type = "roomtone"
+            elseif ref_state == "y" then
+                track_type = "reference"
+            elseif live_state == "y" then
+                track_type = "live"
+            elseif listenback_state == "y" then
+                track_type = "listenback"
+            elseif rcmaster_state == "y" then
+                track_type = "rcmaster"
+            end
+
+            local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
+            local has_hyphen = (rcm_disconnect == "y")
+
+            local display_name
+            if track_type == "aux" or track_type == "submix" then
+                display_name = name:gsub("^[@#]:?", ""):gsub("%-$", "")
+            elseif track_type == "reference" then
+                display_name = name:gsub("^REF:?", ""):gsub("%-$", "")
+            elseif track_type == "roomtone" then
+                display_name = ""
+            elseif track_type == "live" then
+                display_name = ""
+            elseif track_type == "listenback" then
+                display_name = ""
+            elseif track_type == "rcmaster" then
+                display_name = ""
+            else
+                display_name = name:gsub("%-$", "")
+            end
+
+            table.insert(tracks, {
+                track = track,
+                name = display_name,
+                full_name = name,
+                type = track_type,
+                has_hyphen = has_hyphen,
+                has_routing = has_routing,
+                index = i
+            })
+        end
+    end
+
+    local type_priority = {
+        aux = 1,
+        submix = 2,
+        roomtone = 3,
+        rcmaster = 4,
+        live = 5,
+        reference = 6,
+        listenback = 7
+    }
+
+    table.sort(tracks, function(a, b)
+        local priority_a = type_priority[a.type] or 99
+        local priority_b = type_priority[b.type] or 99
+        if priority_a ~= priority_b then
+            return priority_a < priority_b
+        else
+            return a.index < b.index
+        end
+    end)
+
+    return tracks
+end
+
+-- type is "aux" or "submix" (etc.), preserving original track order
+function get_special_tracks_by_type(t)
+    local result = {}
+    for _, info in ipairs(get_special_tracks()) do
+        if info.type == t then
+            table.insert(result, info)
+        end
+    end
+    return result
+end
+
+-- Resolves a 1-based index into a list of special tracks (aux/submix/
+-- reference/etc.). If num_str is "" (no index given), succeeds only when
+-- exactly one track of that type exists in the project; if more than one
+-- exists, the caller must specify an index. num_prefix is the symbol used
+-- in "not found" messages for an explicit index (e.g. "@", "#", "").
+-- Returns (info, nil) on success, or (nil, error_message) otherwise.
+function resolve_special_index(list, num_str, type_label, num_prefix)
+    if num_str ~= "" then
+        local info = list[tonumber(num_str)]
+        if info then return info end
+        return nil, "No " .. type_label .. " track " .. num_prefix .. num_str
+    end
+
+    if #list == 0 then
+        return nil, "No " .. type_label .. " track found"
+    elseif #list == 1 then
+        return list[1]
+    end
+
+    return nil, "Multiple " .. type_label .. " tracks in project. Add a number to specify which one to work on"
+end
+
+-- Port of create_track_table() (Vertical Workflow.lua:858-933)
+function build_track_table(is_empty)
+    local track_table = {}
+    local num_of_tracks = CountTracks(0)
+    local rcmaster_index
+    local j = 0
+    local k = 1
+    local prev_k = 1
+    local groups_equal = true
+    local mixer_tracks = {}
+    for i = 0, num_of_tracks - 1, 1 do
+        local track = GetTrack(0, i)
+        local parent = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
+        local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+        local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
+        local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
+        local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
+        local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        if parent == 1 then
+            if j > 1 and k ~= prev_k then
+                groups_equal = false
+            end
+            j = j + 1
+            prev_k = k
+            k = 1
+            track_table[j] = { parent = track, tracks = {} }
+            if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", tostring(k), true) end
+        elseif trackname_check(track, "^M:") or mixer_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "y", true)
+            local mod_name = string.match(name, "^M:(.*)") or name
+            GetSetMediaTrackInfo_String(track, "P_NAME", "M:" .. mod_name, true)
+            table.insert(mixer_tracks, track)
+        elseif trackname_check(track, "^@") or aux_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:aux", "y", true)
+            local mod_name = string.match(name, "@?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "@" .. mod_name, true)
+        elseif trackname_check(track, "^#") or submix_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:submix", "y", true)
+            local mod_name = string.match(name, "#?(.*)")
+            GetSetMediaTrackInfo_String(track, "P_NAME", "#" .. mod_name, true)
+        elseif trackname_check(track, "^RoomTone") or rt_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "RoomTone", true)
+        elseif trackname_check(track, "^LIVE") or live_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:live", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "LIVE", true)
+        elseif trackname_check(track, "^REF") or ref_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "y", true)
+            local mod_name = name:match("^REF:?(.*)") or name
+            if name ~= "REF" then
+                GetSetMediaTrackInfo_String(track, "P_NAME", "REF:" .. mod_name, true)
+            end
+        elseif trackname_check(track, "^LISTENBACK") or listenback_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "LISTENBACK", true)
+        elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
+            rcmaster_index = i
+        else
+            if j > 0 then
+                table.insert(track_table[j].tracks, track)
+                if is_empty then GetSetMediaTrackInfo_String(track, "P_EXT:mix_order", tostring(k + 1), true) end
+            else
+                groups_equal = false
+            end
+            k = k + 1
+        end
+    end
+    if j > 1 and k ~= prev_k then
+        groups_equal = false
+    end
+    return track_table, rcmaster_index, k, j, mixer_tracks, groups_equal
+end
+
+-- Returns track_table, rcmaster_index, folder_count, tracks_per_group, mixer_tracks
+function get_track_table()
+    local track_table, rcmaster_index, _, folder_count, mixer_tracks = build_track_table(false)
+    local tracks_per_group = 1
+    if track_table[1] then
+        tracks_per_group = #track_table[1].tracks + 1
+    end
+    return track_table, rcmaster_index, folder_count, tracks_per_group, mixer_tracks
+end
+
+---------------------------------------------------------------------
+-- Routing helpers
+---------------------------------------------------------------------
+
+function route_to_track(src, dst)
+    SetMediaTrackInfo_Value(src, "B_MAINSEND", 0)
+    CreateTrackSend(src, dst)
+end
+
+function has_send_to(src, dst)
+    local n = GetTrackNumSends(src, 0)
+    for i = 0, n - 1 do
+        if GetTrackSendInfo_Value(src, 0, i, "P_DESTTRACK") == dst then
+            return true
+        end
+    end
+    return false
+end
+
+function remove_send_to(src, dst)
+    local n = GetTrackNumSends(src, 0)
+    for i = n - 1, 0, -1 do
+        if GetTrackSendInfo_Value(src, 0, i, "P_DESTTRACK") == dst then
+            RemoveTrackSend(src, 0, i)
+        end
+    end
+end
+
+function find_send_index(src, dst)
+    local n = GetTrackNumSends(src, 0)
+    for i = 0, n - 1 do
+        if GetTrackSendInfo_Value(src, 0, i, "P_DESTTRACK") == dst then
+            return i
+        end
+    end
+    return nil
+end
+
+-- Toggles a track's RCMASTER connection on/off, mirroring
+-- Mission Control.lua's P_EXT:rcm_disconnect convention plus the
+-- actual send created/removed by route_tracks().
+function set_rcm_connection(track, connect)
+    local rcmaster = get_rcmaster()
+    if not rcmaster then return false end
+    GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", connect and "" or "y", true)
+    if connect then
+        if not has_send_to(track, rcmaster) then
+            route_to_track(track, rcmaster)
+        end
+    else
+        remove_send_to(track, rcmaster)
+    end
+    return true
+end
+
+---------------------------------------------------------------------
+-- Target / list resolution
+---------------------------------------------------------------------
+
+-- Resolves a single-track selector token to a MediaTrack, returning
+-- (track, nil) on success or (nil, err) if a specific error message should
+-- be shown instead of the caller's generic "Unknown target" message:
+--   "rcm"  -> RCMASTER
+--   "@N"   -> Nth aux track ("@" alone -> the only aux track, if exactly one)
+--   "#N"   -> Nth submix track ("#" alone -> the only submix track, if exactly one)
+--   "N"    -> mixer track N
+function resolve_target(token)
+    if token == "rcm" then
+        return get_rcmaster()
+    end
+
+    local aux_n = token:match("^@(%d*)$")
+    if aux_n then
+        local info, err = resolve_special_index(get_special_tracks_by_type("aux"), aux_n, "aux", "@")
+        return info and info.track, err
+    end
+
+    local sub_n = token:match("^#(%d*)$")
+    if sub_n then
+        local info, err = resolve_special_index(get_special_tracks_by_type("submix"), sub_n, "submix", "#")
+        return info and info.track, err
+    end
+
+    local mixer_n = token:match("^(%d+)$")
+    if mixer_n then
+        local mixer = get_mixer_tracks()
+        return mixer[tonumber(mixer_n)]
+    end
+
+    return nil
+end
+
+-- Expands a list token ("*", "1", "1,3", "4-6", "1,4-6") into an array of
+-- 1-based indices in 1..count, in ascending order of appearance.
+function expand_index_list(token, count)
+    if token == "*" then
+        local result = {}
+        for n = 1, count do table.insert(result, n) end
+        return result
+    end
+
+    local result = {}
+    for part in token:gmatch("[^,]+") do
+        local a, b = part:match("^(%d+)-(%d+)$")
+        if a then
+            for n = tonumber(a), tonumber(b) do table.insert(result, n) end
+        else
+            local n = tonumber(part)
+            if n then table.insert(result, n) end
+        end
+    end
+    return result
+end
+
+-- Expands a track-list token ("*", "1", "1,3", "4-6", "1,4-6") into an
+-- array of mixer tracks, in get_mixer_tracks() order.
+function parse_track_list(token)
+    local mixer = get_mixer_tracks()
+    local result = {}
+    for _, n in ipairs(expand_index_list(token, #mixer)) do
+        if mixer[n] then table.insert(result, mixer[n]) end
+    end
+    return result
+end
+
+-- Resolves any track-selector token into an array of tracks, plus an
+-- optional error message (returned when the array is empty and a specific
+-- message should be shown instead of the caller's generic fallback).
+-- "@..."/"#..." resolve against the aux/submix lists (each accepting "*",
+-- "N", "N-M", "N,M", "N,M-P", ..., or nothing at all for "the only one");
+-- "rcm" resolves to RCMASTER; everything else is a mixer-track list via
+-- parse_track_list(). Used so that mute/solo/pan/fader/etc. commands all
+-- accept single, range, comma-separated and "*" targets uniformly across
+-- mixer tracks, auxes and submixes.
+function resolve_target_list(token)
+    if token == "rcm" then
+        local rcmaster = get_rcmaster()
+        return rcmaster and { rcmaster } or {}
+    end
+
+    if token == "@" or token == "#" then
+        local type_label = (token == "@") and "aux" or "submix"
+        local info, err = resolve_special_index(get_special_tracks_by_type(type_label), "", type_label, token)
+        return info and { info.track } or {}, err
+    end
+
+    local aux_list = token:match("^@(.+)$")
+    if aux_list then
+        local specials = get_special_tracks_by_type("aux")
+        local result = {}
+        for _, n in ipairs(expand_index_list(aux_list, #specials)) do
+            if specials[n] then table.insert(result, specials[n].track) end
+        end
+        return result
+    end
+
+    local sub_list = token:match("^#(.+)$")
+    if sub_list then
+        local specials = get_special_tracks_by_type("submix")
+        local result = {}
+        for _, n in ipairs(expand_index_list(sub_list, #specials)) do
+            if specials[n] then table.insert(result, specials[n].track) end
+        end
+        return result
+    end
+
+    return parse_track_list(token)
+end
+
+---------------------------------------------------------------------
+-- Track renaming (port of rename_tracks(), Mission Control.lua:2510-2566)
+---------------------------------------------------------------------
+
+-- Renames mixer track at 1-based "position" (in get_mixer_tracks() order)
+-- to new_name, plus the position-matching track in every folder, applying
+-- the D:/S{n}: prefix convention for vertical workflows. Preserves the
+-- track's existing RCMASTER-connection state.
+function rename_mixer_position(mixer_tracks, position, new_name)
+    local mixer_track = mixer_tracks[position]
+    if not mixer_track then return false end
+
+    local _, rcm_disconnect = GetSetMediaTrackInfo_String(mixer_track, "P_EXT:rcm_disconnect", "", false)
+
+    local clean_name = new_name:gsub("%-$", "")
+    GetSetMediaTrackInfo_String(mixer_track, "P_NAME", "M:" .. clean_name, true)
+
+    local folder_number = 0
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+        if folder_depth == 1 then
+            folder_number = folder_number + 1
+            local track_index = i + (position - 1)
+            local target_track = GetTrack(0, track_index)
+            if target_track then
+                GetSetMediaTrackInfo_String(target_track, "P_EXT:rcm_disconnect", rcm_disconnect, true)
+                local prefix = ""
+                if workflow == "Vertical" then
+                    if folder_number == 1 then
+                        prefix = "D:"
+                    else
+                        prefix = "S" .. (folder_number - 1) .. ":"
+                    end
+                end
+                GetSetMediaTrackInfo_String(target_track, "P_NAME", prefix .. clean_name, true)
+            end
+        end
+    end
+    return true
+end
+
+-- Valid language values for album= lg= field (mirrors Create CD Markers.lua dropdown).
+local VALID_LANGUAGES = {
+    "Albanian", "Amharic", "Arabic", "Armenian", "Assamese", "Azerbaijani",
+    "Bambora", "Basque", "Bengali", "Bielorussian", "Breton", "Bulgarian",
+    "Burmese", "Catalan", "Chinese", "Churash", "Croatian", "Czech", "Danish",
+    "Dari", "Dutch", "English", "Esperanto", "Estonian", "Faroese", "Finnish",
+    "Flemish", "French", "Frisian", "Fulani", "Gaelic", "Galician", "Georgian",
+    "German", "Greek", "Gujurati", "Gurani", "Hausa", "Hebrew", "Hindi",
+    "Hungarian", "Icelandic", "Indonesian", "Irish", "Italian", "Japanese",
+    "Kannada", "Kazakh", "Khmer", "Korean", "Laotian", "Lappish", "Latin",
+    "Latvian", "Lithuanian", "Luxembourgian", "Macedonian", "Malagasay",
+    "Malaysian", "Maltese", "Marathi", "Moldavian", "Ndebele", "Nepali",
+    "Norwegian", "Occitan", "Oriya", "Papamiento", "Persian", "Polish",
+    "Portugese", "Punjabi", "Pushtu", "Quechua", "Romanian", "Romansh",
+    "Russian", "Ruthenian", "Serbian", "Serbo-croat", "Shona", "Sinhalese",
+    "Slovak", "Slovenian", "Somali", "Spanish", "SrananTongo", "Swahili",
+    "Swedish", "Tadzhik", "Tamil", "Tatar", "Telugu", "Thai", "Turkish",
+    "Ukrainian", "Urdu", "Uzbek", "Vietnamese", "Wallon", "Welsh", "Zulu",
+}
+
+---------------------------------------------------------------------
+-- Marker metadata helpers (Metadata Report.lua / Create CD Markers.lua
+-- pipe-delimited "Title|KEY=VAL|KEY=VAL" convention)
+---------------------------------------------------------------------
+
+-- Rebuilds a "#Title|KEY=VAL" / "@Title|KEY=VAL" marker name string.
+-- new_title: nil/"" leaves the title unchanged, otherwise replaces it.
+-- field_updates: map of KEY -> value, where "" leaves the field
+-- unchanged, "0" clears it, and any other value sets it.
+function rebuild_marker_name(name, prefix, new_title, field_updates)
+    local body = name:sub(2)
+    local title = body:match("^([^|]*)") or ""
+    if new_title and new_title ~= "" then
+        title = new_title
+    end
+
+    local fields = {}
+    local order = {}
+    for key, val in body:gmatch("|(%u+)=([^|]*)") do
+        fields[key] = val
+        table.insert(order, key)
+    end
+
+    for key, val in pairs(field_updates or {}) do
+        if val == "0" then
+            fields[key] = nil
+        elseif val ~= "" then
+            if fields[key] == nil then
+                table.insert(order, key)
+            end
+            fields[key] = val
+        end
+    end
+
+    local result = prefix .. title
+    for _, key in ipairs(order) do
+        if fields[key] ~= nil then
+            result = result .. "|" .. key .. "=" .. fields[key]
+        end
+    end
+    return result
+end
+
+-- Finds the marker linked to a media item via its P_EXT:cdmarker GUID.
+-- Returns mark_index, retval, isrgn, pos, rgnend, name, markrgnID, color
+function get_item_cd_marker(item)
+    local ok, guid = GetSetMediaItemInfo_String(item, "P_EXT:cdmarker", "", false)
+    if not ok or guid == "" then return nil end
+
+    local ok_index, mark_index_str = GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:" .. guid, "", false)
+    if not ok_index or mark_index_str == "" then return nil end
+
+    local mark_index = tonumber(mark_index_str)
+    if not mark_index then return nil end
+
+    local retval, isrgn, pos, rgnend, name, markrgnID, color = EnumProjectMarkers3(0, mark_index)
+    if not retval then return nil end
+    return mark_index, isrgn, pos, rgnend, name, markrgnID, color
+end
+
+-- Finds the album marker ("@Title|...") - returns the same shape as
+-- get_item_cd_marker (minus the leading mark_index argument check).
+function get_album_marker()
+    local num_markers, num_regions = CountProjectMarkers(0)
+    for idx = 0, num_markers + num_regions - 1 do
+        local retval, isrgn, pos, rgnend, name, markrgnID, color = EnumProjectMarkers3(0, idx)
+        if retval and not isrgn and name:match("^@") then
+            return idx, isrgn, pos, rgnend, name, markrgnID, color
+        end
+    end
+    return nil
+end
+
+---------------------------------------------------------------------
+-- Command handlers (one "try_*" function per category). Each returns
+-- true if it matched and handled the command, false otherwise.
+---------------------------------------------------------------------
+
+function try_project_setup(cmd)
+    local v_count = cmd:match("^(%d+)v$")
+    if v_count then
+        if workflow ~= "" then
+            say("This command must be run on an empty project or empty project tab.")
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "TrackCount", v_count)
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+        workflow = wf
+        return true
+    end
+
+    local h_count, h_names = cmd:match("^(%d+)h=(.+)$")
+    if not h_count then
+        h_count = cmd:match("^(%d+)h$")
+    end
+    if h_count then
+        if workflow ~= "" then
+            say("This command must be run on an empty project or empty project tab.")
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "TrackCount", h_count)
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+        workflow = wf
+        if h_names and h_names ~= "" then
+            local mixer_tracks = get_mixer_tracks()
+            local position = 1
+            for name in h_names:gmatch("[^,]+") do
+                rename_mixer_position(mixer_tracks, position, trim(name))
+                position = position + 1
+            end
+        end
+        return true
+    end
+
+    if cmd == "convert=h" then
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+        workflow = wf
+        return true
+    end
+
+    if cmd == "convert=v" then
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+        workflow = wf
+        return true
+    end
+
+    return false
+end
+
+function strip_rank_prefix(name)
+    local all_prefixes = { "Excellent", "Very Good", "Good", "OK", "Below Average", "Poor", "Unusable", "False Start" }
+    for _, prefix in ipairs(all_prefixes) do
+        if name == prefix then return "" end
+        name = name:gsub("^" .. prefix .. "%-", "")
+    end
+    return name
+end
+
+-- Rebuilds the active take's display name from a base name and an
+-- item-rank index ("1".."9" or "" for no rank), per Notes.lua.
+function apply_item_name(item, base_name, rank_str)
+    local take = GetActiveTake(item)
+    if not take then return end
+
+    local final_name = base_name
+    if rank_str and rank_str ~= "" then
+        local idx = tonumber(rank_str)
+        local prefix = idx and RANK_PREFIXES[idx]
+        if prefix and prefix ~= "" then
+            if base_name ~= "" then
+                final_name = prefix .. "-" .. base_name
+            else
+                final_name = prefix
+            end
+        end
+    end
+    GetSetMediaItemTakeInfo_String(take, "P_NAME", final_name, true)
+end
+
+function try_naming(cmd)
+    local names = cmd:match("^n=(.+)$")
+    if names then
+        local mixer_tracks = get_mixer_tracks()
+        local position = 1
+        for name in names:gmatch("[^,]+") do
+            if not rename_mixer_position(mixer_tracks, position, trim(name)) then
+                say("No mixer track at position " .. position)
+            end
+            position = position + 1
+        end
+        return true
+    end
+
+    local pos, single_name = cmd:match("^(%d+)n=(.+)$")
+    if pos then
+        local mixer_tracks = get_mixer_tracks()
+        if not rename_mixer_position(mixer_tracks, tonumber(pos), trim(single_name)) then
+            say("No mixer track at position " .. pos)
+        end
+        return true
+    end
+
+    local sub_n, sub_name = cmd:match("^#(%d*)n=(.+)$")
+    if sub_name then
+        local info, err = resolve_special_index(get_special_tracks_by_type("submix"), sub_n, "submix", "#")
+        if info then
+            GetSetMediaTrackInfo_String(info.track, "P_NAME", "#" .. trim(sub_name), true)
+        else
+            say(err)
+        end
+        return true
+    end
+
+    local aux_n, aux_name = cmd:match("^@(%d*)n=(.+)$")
+    if aux_name then
+        local info, err = resolve_special_index(get_special_tracks_by_type("aux"), aux_n, "aux", "@")
+        if info then
+            GetSetMediaTrackInfo_String(info.track, "P_NAME", "@" .. trim(aux_name), true)
+        else
+            say(err)
+        end
+        return true
+    end
+
+    local ref_n, ref_name = cmd:match("^ref(%d*)n=(.+)$")
+    if ref_name then
+        local info, err = resolve_special_index(get_special_tracks_by_type("reference"), ref_n, "REF", "")
+        if info then
+            GetSetMediaTrackInfo_String(info.track, "P_NAME", "REF:" .. trim(ref_name), true)
+        else
+            say(err)
+        end
+        return true
+    end
+
+    if cmd == "pn?" then
+        local _, notes = GetSetProjectNotes(0, false, "")
+        say(notes ~= "" and notes or "No project notes set")
+        return true
+    end
+
+    local proj_note = cmd:match("^pn=(.*)$")
+    if proj_note then
+        GetSetProjectNotes(0, true, proj_note)
+        return true
+    end
+
+    if cmd == "tn?" then
+        local track = GetSelectedTrack(0, 0)
+        if not track then say("No track selected"); return true end
+        local _, notes = GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
+        say(notes ~= "" and notes or "No track notes set")
+        return true
+    end
+
+    local track_note = cmd:match("^tn=(.*)$")
+    if track_note then
+        local track = GetSelectedTrack(0, 0)
+        if not track then
+            say("No track selected")
+            return true
+        end
+        GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", track_note, true)
+        return true
+    end
+
+    -- in=Title (no comma): rename the active take of the selected item
+    local item_name = cmd:match("^in=([^,]*)$")
+    if item_name then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then
+            say("No item selected")
+            return true
+        end
+        local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+        apply_item_name(item, trim(item_name), rank_str)
+        return true
+    end
+
+    if cmd == "ino?" then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then say("No item selected"); return true end
+        local _, notes = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
+        say(notes ~= "" and notes or "No item notes set")
+        return true
+    end
+
+    local item_notes = cmd:match("^ino=(.*)$")
+    if item_notes then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then
+            say("No item selected")
+            return true
+        end
+        GetSetMediaItemInfo_String(item, "P_NOTES", item_notes, true)
+        return true
+    end
+
+    if cmd == "ir?" then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then say("No item selected"); return true end
+        local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+        local rank_index = tonumber(rank_str) or 9
+        local label = RANK_PREFIXES[rank_index]
+        say("Rank: " .. (label ~= "" and label or "None"))
+        return true
+    end
+
+    local rank_letter = cmd:match("^ir=([evgobpufn])$")
+    if rank_letter then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then
+            say("No item selected")
+            return true
+        end
+        local rank_index = RANK_LETTERS[rank_letter]
+        local rank_str = (rank_index == 9) and "" or tostring(rank_index)
+        GetSetMediaItemInfo_String(item, "P_EXT:item_rank", rank_str, true)
+
+        local take = GetActiveTake(item)
+        local base_name = ""
+        if take then
+            local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            base_name = strip_rank_prefix(name)
+        end
+        apply_item_name(item, base_name, rank_str)
+        return true
+    end
+
+    if cmd == "itn?" then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then say("No item selected"); return true end
+        local _, tn = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+        say(tn ~= "" and ("Take number: " .. tn) or "No take number set")
+        return true
+    end
+
+    local take_num = cmd:match("^itn=(%d+)$")
+    if take_num then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then
+            say("No item selected")
+            return true
+        end
+        GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", take_num == "0" and "" or take_num, true)
+        return true
+    end
+
+    return false
+end
+
+-- folder is track_table[n] = { parent = track, tracks = {...} }.
+-- position 1 == parent ("D:"/folder track), position N (N>1) == its
+-- (N-1)th child, matching the mixer-track-position convention.
+function get_folder_position_track(folder, position)
+    if position == 1 then
+        return folder.parent
+    end
+    return folder.tracks[position - 1]
+end
+
+-- Port of auto_assign() (Mission Control.lua:2592-2675), simplified to
+-- operate on the destination folder (track_table[1]) and the project's
+-- mixer tracks directly.
+function auto_assign_inputs(start_input)
+    local mixer_tracks = get_mixer_tracks()
+    local track_table = get_track_table()
+    if not track_table[1] then
+        say("No folders found")
+        return
+    end
+
+    local max_inputs = GetNumAudioInputs()
+    local input_channel = start_input - 1
+
+    for i = 1, #mixer_tracks do
+        local mixer_track = mixer_tracks[i]
+        local d_track = get_folder_position_track(track_table[1], i)
+        if d_track then
+            local _, raw_name = GetSetMediaTrackInfo_String(mixer_track, "P_NAME", "", false)
+            local track_name = raw_name:match("^M:(.*)") or raw_name
+            local lower_name = track_name:lower()
+
+            local is_pair = false
+            for _, word in ipairs(pair_words) do
+                if lower_name:match("%s" .. word .. "$") or lower_name:match(word .. "$") then
+                    is_pair = true
+                    break
+                end
+            end
+
+            local is_left, is_right = false, false
+            for _, word in ipairs(left_words) do
+                if lower_name:match("%s" .. word .. "$") or lower_name:match("^" .. word .. "%s") then
+                    is_left = true
+                    break
+                end
+            end
+            if not is_left then
+                for _, word in ipairs(right_words) do
+                    if lower_name:match("%s" .. word .. "$") or lower_name:match("^" .. word .. "%s") then
+                        is_right = true
+                        break
+                    end
+                end
+            end
+
+            if is_left then
+                SetMediaTrackInfo_Value(mixer_track, "D_PAN", -1.0)
+            elseif is_right then
+                SetMediaTrackInfo_Value(mixer_track, "D_PAN", 1.0)
+            end
+
+            if input_channel < max_inputs then
+                if is_pair and (input_channel + 1 < max_inputs) then
+                    SetMediaTrackInfo_Value(d_track, "I_RECINPUT", 1024 + input_channel)
+                    input_channel = input_channel + 2
+                else
+                    SetMediaTrackInfo_Value(d_track, "I_RECINPUT", input_channel)
+                    input_channel = input_channel + 1
+                end
+            else
+                SetMediaTrackInfo_Value(d_track, "I_RECINPUT", -1)
+            end
+        end
+    end
+
+    if workflow == "Vertical" then
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+    end
+end
+
+-- Checks that hardware input channel start_ch (1-based) exists, and for a
+-- stereo pair, that start_ch+1 also exists.
+function hw_input_exists(start_ch, is_stereo)
+    local max_inputs = GetNumAudioInputs()
+    if start_ch < 1 or start_ch > max_inputs then return false end
+    if is_stereo and start_ch + 1 > max_inputs then return false end
+    return true
+end
+
+function try_input_config(cmd)
+    -- N=mono or N=mono,X: set track N of every folder to mono, recording
+    -- from hardware input X (1-based) if given, else hardware input N.
+    local mono_pos, mono_input = cmd:match("^(%d+)=mono,(%d+)$")
+    if not mono_pos then
+        mono_pos = cmd:match("^(%d+)=mono$")
+    end
+    if mono_pos then
+        local n = tonumber(mono_pos)
+        local input_num = mono_input and tonumber(mono_input) or n
+        if not hw_input_exists(input_num, false) then
+            say("Hardware input " .. input_num .. " does not exist")
+            return true
+        end
+        local input_ch = input_num - 1
+        local track_table = get_track_table()
+        for _, folder in ipairs(track_table) do
+            local track = get_folder_position_track(folder, n)
+            if track then
+                SetMediaTrackInfo_Value(track, "I_RECINPUT", input_ch)
+            end
+        end
+        return true
+    end
+
+    -- N=stereo or N=stereo,X: set track N of every folder to a stereo input
+    -- pair starting at hardware channel X (1-based) if given, else channel N
+    -- (I_RECINPUT = 1024 + (X-1)), mirroring the mono/stereo radio button in
+    -- Mission Control's input selector.
+    local stereo_pos, stereo_input = cmd:match("^(%d+)=stereo,(%d+)$")
+    if not stereo_pos then
+        stereo_pos = cmd:match("^(%d+)=stereo$")
+    end
+    if stereo_pos then
+        local n = tonumber(stereo_pos)
+        local start_ch = stereo_input and tonumber(stereo_input) or n
+        if not hw_input_exists(start_ch, true) then
+            say("Hardware inputs " .. start_ch .. "/" .. (start_ch + 1) .. " do not exist")
+            return true
+        end
+        local track_table = get_track_table()
+        for _, folder in ipairs(track_table) do
+            local track = get_folder_position_track(folder, n)
+            if track then
+                SetMediaTrackInfo_Value(track, "I_RECINPUT", 1024 + (start_ch - 1))
+            end
+        end
+        return true
+    end
+
+    local stereo_n, stereo_m = cmd:match("^(%d+)-(%d+)=stereo$")
+    if stereo_n then
+        local n, m = tonumber(stereo_n), tonumber(stereo_m)
+        if not hw_input_exists(n, true) then
+            say("Hardware inputs " .. n .. "/" .. (n + 1) .. " do not exist")
+            return true
+        end
+        local track_table = get_track_table()
+        for _, folder in ipairs(track_table) do
+            local track_n = get_folder_position_track(folder, n)
+            local track_m = get_folder_position_track(folder, m)
+            if track_n then
+                SetMediaTrackInfo_Value(track_n, "I_RECINPUT", 1024 + (n - 1))
+            end
+            if track_m then
+                SetMediaTrackInfo_Value(track_m, "I_RECINPUT", -1)
+            end
+        end
+        return true
+    end
+
+    local rd_pos, rd_val = cmd:match("^(%d+)rd=([yn])$")
+    if rd_pos then
+        local mixer_tracks = get_mixer_tracks()
+        local track = mixer_tracks[tonumber(rd_pos)]
+        if track then
+            GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", rd_val == "y" and "y" or "", true)
+        else
+            say("No mixer track at position " .. rd_pos)
+        end
+        return true
+    end
+
+    local rd_all = cmd:match("^%*rd=([yn])$")
+    if rd_all then
+        for _, track in ipairs(get_mixer_tracks()) do
+            GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", rd_all == "y" and "y" or "", true)
+        end
+        return true
+    end
+
+    local ai_start = cmd:match("^ai=(%d+)$")
+    if ai_start then
+        auto_assign_inputs(tonumber(ai_start))
+        return true
+    end
+
+    return false
+end
+
+function try_selection(cmd)
+    if cmd == "sel?" then
+        local n = CountSelectedTracks(0)
+        if n == 0 then
+            say("No tracks selected")
+        else
+            local names = {}
+            for i = 0, n - 1 do
+                local track = GetSelectedTrack(0, i)
+                local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+                table.insert(names, name)
+            end
+            say("Selected tracks: " .. table.concat(names, ", "))
+        end
+
+        local item_count = CountSelectedMediaItems(0)
+        if item_count == 0 then
+            say("No items selected")
+        else
+            local item_names = {}
+            for i = 0, item_count - 1 do
+                local item = GetSelectedMediaItem(0, i)
+                local take = GetActiveTake(item)
+                local name = ""
+                if take then
+                    _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                end
+                table.insert(item_names, name ~= "" and name or "(unnamed)")
+            end
+            say(item_count .. " item(s) selected: " .. table.concat(item_names, ", "))
+        end
+        return true
+    end
+
+    if cmd == "time?" then
+        say(format_timestr_pos(GetCursorPosition(), "", -1))
+        return true
+    end
+
+    local sel_n = cmd:match("^sel=(%d+)$")
+    if sel_n then
+        local mixer = get_mixer_tracks()
+        local track = mixer[tonumber(sel_n)]
+        if track then
+            SetOnlyTrackSelected(track)
+        else
+            say("No mixer track at position " .. sel_n)
+        end
+        return true
+    end
+
+    local sel_add = cmd:match("^sel=%+(%d+)$")
+    if sel_add then
+        local mixer = get_mixer_tracks()
+        local track = mixer[tonumber(sel_add)]
+        if track then
+            SetTrackSelected(track, true)
+        else
+            say("No mixer track at position " .. sel_add)
+        end
+        return true
+    end
+
+    return false
+end
+
+function try_markers(cmd)
+    local mk_name = cmd:match("^mk=(.+)$")
+    if mk_name then
+        AddProjectMarker2(0, false, GetCursorPosition(), 0, trim(mk_name), -1, 0)
+        return true
+    end
+
+    if cmd == "mk?" then
+        local cursor = GetCursorPosition()
+        local num_markers, num_regions = CountProjectMarkers(0)
+        local best_name, best_pos
+        for idx = 0, num_markers + num_regions - 1 do
+            local retval, isrgn, pos, _, name = EnumProjectMarkers3(0, idx)
+            if retval and not isrgn and pos <= cursor then
+                if not best_pos or pos > best_pos then
+                    best_pos = pos
+                    best_name = name
+                end
+            end
+        end
+        if best_name then
+            say(best_name .. " @ " .. format_timestr_pos(best_pos, "", -1))
+        else
+            say("No marker found before cursor")
+        end
+        return true
+    end
+
+    local rg_a, rg_b = cmd:match("^rg=([^,]+),(.+)$")
+    if rg_a then
+        rg_a, rg_b = trim(rg_a), trim(rg_b)
+        local pos_a, pos_b
+        local num_markers, num_regions = CountProjectMarkers(0)
+        for idx = 0, num_markers + num_regions - 1 do
+            local retval, isrgn, pos, _, name = EnumProjectMarkers3(0, idx)
+            if retval and not isrgn then
+                if name == rg_a then pos_a = pos end
+                if name == rg_b then pos_b = pos end
+            end
+        end
+        if not pos_a or not pos_b then
+            say("Could not find both markers")
+            return true
+        end
+        local start_pos, end_pos = math.min(pos_a, pos_b), math.max(pos_a, pos_b)
+        AddProjectMarker2(0, true, start_pos, end_pos, "", -1, 0)
+        return true
+    end
+
+    return false
+end
+
+function try_mute_solo(cmd)
+    -- <target>xs: exclusive solo — unsolo/unmute every mixer track, then solo
+    -- only the specified tracks. Target follows the same syntax as <target>s.
+    local xs_target = cmd:match("^([%d,%-%*@#]+)xs$")
+    if xs_target then
+        local tracks, err = resolve_target_list(xs_target)
+        if #tracks == 0 then
+            say(err or "No matching tracks")
+            return true
+        end
+        for _, track in ipairs(get_mixer_tracks()) do
+            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+        end
+        for _, track in ipairs(tracks) do
+            SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+        end
+        return true
+    end
+
+    -- <target>m / <target>s / <target>um / <target>us, where <target> is
+    -- a mixer track list ("1", "1,3", "4-6", "1,4-6", "*") or a single
+    -- "@N" aux / "#N" submix.
+    local target_str, op = cmd:match("^([%d,%-%*@#]+)(u?[ms])$")
+    if target_str then
+        local tracks, err = resolve_target_list(target_str)
+        if #tracks == 0 then
+            say(err or "No matching tracks")
+            return true
+        end
+
+        if op == "m" then
+            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 1) end
+        elseif op == "um" then
+            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 0) end
+        elseif op == "s" then
+            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 2) end
+        elseif op == "us" then
+            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 0) end
+        end
+        return true
+    end
+
+    -- <target>i=1 / <target>i=0: flip / reset track polarity (B_PHASE).
+    local pol_target, pol_val = cmd:match("^([%d,%-%*@#]+)i=([01])$")
+    if pol_target then
+        local tracks, err = resolve_target_list(pol_target)
+        if #tracks == 0 then
+            say(err or "No matching tracks")
+            return true
+        end
+
+        for _, track in ipairs(tracks) do
+            SetMediaTrackInfo_Value(track, "B_PHASE", tonumber(pol_val))
+        end
+        return true
+    end
+
+    -- <target>i? query: report polarity for each track.
+    local pol_query_str = cmd:match("^([%d,%-%*@#]+)i%?$")
+    if pol_query_str then
+        local tracks, err = resolve_target_list(pol_query_str)
+        if #tracks == 0 then
+            say(err or "No matching tracks")
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            local phase = GetMediaTrackInfo_Value(track, "B_PHASE")
+            say(name .. " polarity: " .. (phase == 1 and "inverted" or "normal"))
+        end
+        return true
+    end
+
+    -- <target>m? / <target>s? query forms.
+    local query_str, query_op = cmd:match("^([%d,%-%*@#]+)([ms])%?$")
+    if query_str then
+        local tracks, err = resolve_target_list(query_str)
+        if #tracks == 0 then
+            say(err or "No matching tracks")
+            return true
+        end
+
+        for _, track in ipairs(tracks) do
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            if query_op == "m" then
+                local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
+                say(name .. " mute: " .. (muted and "on" or "off"))
+            else
+                local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+                say(name .. " solo: " .. (soloed and "on" or "off"))
+            end
+        end
+        return true
+    end
+
+    return false
+end
+
+-- <target> here is a mixer track list ("1", "1,3", "4-6", "1,4-6", "*")
+-- or a single "@N" aux / "#N" submix / "rcm", resolved via
+-- resolve_target_list() so pan/fader commands accept single, range,
+-- comma-separated and "*" targets uniformly.
+function try_pan(cmd)
+    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*]*)(.+)$")
+    if not target_str then return false end
+
+    local delta = rest:match("^p([+-]%d+)$")
+    if delta then
+        local tracks, err = resolve_target_list(target_str)
+        if #tracks == 0 then
+            say(err or ("Unknown target: " .. target_str))
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            local pan = GetMediaTrackInfo_Value(track, "D_PAN")
+            pan = clamp(pan + tonumber(delta) / 100, -1, 1)
+            SetMediaTrackInfo_Value(track, "D_PAN", pan)
+        end
+        return true
+    end
+
+    local abs_val = rest:match("^p=([+-]?%d+)$")
+    if abs_val then
+        local tracks, err = resolve_target_list(target_str)
+        if #tracks == 0 then
+            say(err or ("Unknown target: " .. target_str))
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            SetMediaTrackInfo_Value(track, "D_PAN", pct_to_pan(abs_val))
+        end
+        return true
+    end
+
+    if rest == "p?" then
+        local tracks, err = resolve_target_list(target_str)
+        if #tracks == 0 then
+            say(err or ("Unknown target: " .. target_str))
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            say(name .. ": " .. format_pan(GetMediaTrackInfo_Value(track, "D_PAN")))
+        end
+        return true
+    end
+
+    return false
+end
+
+function try_fader(cmd)
+    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*]*)(.+)$")
+    if not target_str then return false end
+
+    local delta = rest:match("^f([+-]%d+)$")
+    if delta then
+        local tracks, err = resolve_target_list(target_str)
+        if #tracks == 0 then
+            say(err or ("Unknown target: " .. target_str))
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            local db = linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL")) + tonumber(delta)
+            SetMediaTrackInfo_Value(track, "D_VOL", db_to_linear(db))
+        end
+        return true
+    end
+
+    local abs_db = rest:match("^f=([+-]?%d+)$")
+    if abs_db then
+        local tracks, err = resolve_target_list(target_str)
+        if #tracks == 0 then
+            say(err or ("Unknown target: " .. target_str))
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            SetMediaTrackInfo_Value(track, "D_VOL", db_to_linear(tonumber(abs_db)))
+        end
+        return true
+    end
+
+    if rest == "f?" then
+        local tracks, err = resolve_target_list(target_str)
+        if #tracks == 0 then
+            say(err or ("Unknown target: " .. target_str))
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            say(string.format("%s: %.1f dB", name, linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL"))))
+        end
+        return true
+    end
+
+    return false
+end
+
+-- Parses ",key=value,key=value..." into a field_updates table, mapping
+-- the short keys used in terminal commands to the pipe-delimited marker
+-- field names from ReaClassical_Metadata Report.lua.
+function parse_ddp_fields(rest, field_map)
+    local updates = {}
+    for kv in rest:gmatch(",([^,]*)") do
+        local k, v = kv:match("^(%a+)=(.*)$")
+        if k and field_map[k] then
+            updates[field_map[k]] = v
+        end
+    end
+    return updates
+end
+
+function try_ddp(cmd)
+    -- in? query: report CD marker / take metadata for the selected item.
+    if cmd == "in?" then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then say("No item selected"); return true end
+        local mark_index, _, _, _, name = get_item_cd_marker(item)
+        local raw
+        if mark_index then
+            raw = name or ""
+        else
+            local take = GetActiveTake(item)
+            if not take then say("No active take"); return true end
+            local _, tname = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            raw = tname or ""
+        end
+        local stripped = raw:match("^[#@](.*)") or raw
+        local lines = {}
+        local first = true
+        for part in (stripped .. "|"):gmatch("([^|]*)|") do
+            if first then
+                lines[#lines + 1] = "Title: " .. (part ~= "" and part or "(none)")
+                first = false
+            else
+                local k, v = part:match("^([^=]+)=(.*)$")
+                if k then lines[#lines + 1] = k .. ": " .. v end
+            end
+        end
+        say(table.concat(lines, "\n"))
+        return true
+    end
+
+    -- in=Title,pf=...,sw=...,cp=...,ar=...,msg=...,isrc=...
+    local title, rest = cmd:match("^in=([^,]*)(,.+)$")
+    if title then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then
+            say("No item selected")
+            return true
+        end
+
+        local mark_index, _, pos, rgnend, name, markrgnID, color = get_item_cd_marker(item)
+        if not mark_index then
+            say("No CD marker linked to this item")
+            return true
+        end
+
+        local field_map = {
+            pf = "PERFORMER", sw = "SONGWRITER", cp = "COMPOSER",
+            ar = "ARRANGER", msg = "MESSAGE", isrc = "ISRC"
+        }
+        local updates = parse_ddp_fields(rest, field_map)
+        local new_name = rebuild_marker_name(name, "#", trim(title), updates)
+        SetProjectMarkerByIndex(0, mark_index, false, pos, rgnend, markrgnID, new_name, color)
+
+        local take = GetActiveTake(item)
+        if take then
+            GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name:sub(2), true)
+        end
+
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- album? query: report @-item metadata from the folder track.
+    if cmd == "album?" then
+        local sel_track = GetSelectedTrack(0, 0)
+        local folder_track = sel_track
+        if folder_track then
+            local depth = GetMediaTrackInfo_Value(folder_track, "I_FOLDERDEPTH")
+            if depth ~= 1 then
+                local idx = GetMediaTrackInfo_Value(folder_track, "IP_TRACKNUMBER") - 1
+                folder_track = nil
+                for i = idx - 1, 0, -1 do
+                    local t = GetTrack(0, i)
+                    if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                        folder_track = t
+                        break
+                    end
+                end
+            end
+        end
+        local at_name = nil
+        if folder_track then
+            for i = 0, CountTrackMediaItems(folder_track) - 1 do
+                local item = GetTrackMediaItem(folder_track, i)
+                local take = GetActiveTake(item)
+                if take then
+                    local _, n = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    if n and n:match("^@") then
+                        at_name = n
+                        break
+                    end
+                end
+            end
+        end
+        if not at_name then
+            say("No album metadata found (run createcd first or use album= to set metadata)")
+            return true
+        end
+        local stripped = at_name:sub(2)
+        local lines = {}
+        local first = true
+        for part in (stripped .. "|"):gmatch("([^|]*)|") do
+            if first then
+                lines[#lines + 1] = "Album title: " .. (part ~= "" and part or "(none)")
+                first = false
+            else
+                local k, v = part:match("^([^=]+)=(.*)$")
+                if k then lines[#lines + 1] = k .. ": " .. v end
+            end
+        end
+        say(table.concat(lines, "\n"))
+        return true
+    end
+
+    -- album=Title,cat=...,pf=...,sw=...,cp=...,ar=...,id=...,msg=...
+    -- Finds or creates the @-prefixed item on the folder track, updates its
+    -- take name (the source of truth for album metadata), then re-runs
+    -- createcd to sync all markers/regions.
+    local album_title, album_rest = cmd:match("^album=([^,]*)(.*)$")
+    if album_title then
+        -- Walk selected track up to its folder parent to find the @-item
+        local sel_track = GetSelectedTrack(0, 0)
+        local folder_track = sel_track
+        if folder_track then
+            local depth = GetMediaTrackInfo_Value(folder_track, "I_FOLDERDEPTH")
+            if depth ~= 1 then
+                local idx = GetMediaTrackInfo_Value(folder_track, "IP_TRACKNUMBER") - 1
+                folder_track = nil
+                for i = idx - 1, 0, -1 do
+                    local t = GetTrack(0, i)
+                    if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                        folder_track = t
+                        break
+                    end
+                end
+            end
+        end
+        local field_map = {
+            cat = "CATALOG", pf = "PERFORMER", sw = "SONGWRITER", cp = "COMPOSER",
+            ar = "ARRANGER", id = "IDENTIFICATION", msg = "MESSAGE", lg = "LANGUAGE"
+        }
+        local updates = parse_ddp_fields(album_rest, field_map)
+        -- Validate language against the known dropdown list (case-insensitive).
+        if updates["LANGUAGE"] and updates["LANGUAGE"] ~= "" and updates["LANGUAGE"] ~= "0" then
+            local canonical = nil
+            local lower_input = updates["LANGUAGE"]:lower()
+            for _, lang in ipairs(VALID_LANGUAGES) do
+                if lang:lower() == lower_input then
+                    canonical = lang
+                    break
+                end
+            end
+            if not canonical then
+                say("Unknown language: " .. updates["LANGUAGE"])
+                return true
+            end
+            updates["LANGUAGE"] = canonical
+        end
+        -- Sync "Manual Contributors Entry" proj state with whether people fields
+        -- are being explicitly set or cleared.
+        local people_fields = { "PERFORMER", "SONGWRITER", "COMPOSER", "ARRANGER" }
+        local has_people_values = false
+        local any_people_specified = false
+        local all_people_zeroed = true
+        for _, f in ipairs(people_fields) do
+            if updates[f] and updates[f] ~= "" then
+                any_people_specified = true
+                if updates[f] ~= "0" then
+                    has_people_values = true
+                    all_people_zeroed = false
+                end
+            end
+        end
+        if has_people_values then
+            SetProjExtState(0, "ReaClassical", "manual_people_entry", "1")
+        elseif any_people_specified and all_people_zeroed then
+            SetProjExtState(0, "ReaClassical", "manual_people_entry", "0")
+        end
+        -- Use the existing @-item name as base so un-specified fields are preserved.
+        -- When no @-item exists yet, only include COMPOSER/PERFORMER=Various defaults
+        -- if the user isn't setting any people fields themselves (to avoid polluting
+        -- an explicit cp=Bach with a stray pf=Various from the scaffold).
+        local base_name = nil
+        if folder_track then
+            for i = 0, CountTrackMediaItems(folder_track) - 1 do
+                local item = GetTrackMediaItem(folder_track, i)
+                local take = GetActiveTake(item)
+                if take then
+                    local _, n = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    if n and n:match("^@") then
+                        base_name = n
+                        break
+                    end
+                end
+            end
+        end
+        if not base_name then
+            base_name = has_people_values
+                and "@MyAlbumTitle|MESSAGE=Created with ReaClassical"
+                or  "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various|MESSAGE=Created with ReaClassical"
+        end
+        local new_name = rebuild_marker_name(base_name, "@", trim(album_title), updates)
+        _G.RC_TERMINAL_ARGS = { action = "set_album", name = new_name }
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    return false
+end
+
+function try_undo_redo(cmd)
+    local n = cmd:match("^(%d*)z$")
+    if n then
+        for _ = 1, tonumber(n) or 1 do
+            Main_OnCommand(40029, 0)
+        end
+        return true
+    end
+
+    n = cmd:match("^(%d*)y$")
+    if n then
+        for _ = 1, tonumber(n) or 1 do
+            Main_OnCommand(40030, 0)
+        end
+        return true
+    end
+
+    return false
+end
+
+-- Moves mixer track N up/down by one position, porting reorder_track()
+-- (Mission Control.lua:2679-2721): only the single "M:" track is physically
+-- reordered within the mixer block (folder tracks keep their I_FOLDERDEPTH
+-- positions intact), then the Vertical/Horizontal Workflow sync moves each
+-- folder's media items, rec inputs and names to follow the new mixer order.
+function move_mixer_track(n, direction)
+    local mixer_tracks = get_mixer_tracks()
+    local target = (direction == "down") and (n + 1) or (n - 1)
+    if target < 1 or target > #mixer_tracks then
+        return false
+    end
+
+    local from_track = mixer_tracks[n]
+
+    local before_track
+    if target < n then
+        before_track = mixer_tracks[target]
+    elseif target < #mixer_tracks then
+        before_track = mixer_tracks[target + 1]
+    else
+        before_track = nil
+    end
+
+    Main_OnCommand(40297, 0) -- Unselect all tracks
+    SetTrackSelected(from_track, true)
+
+    local before_idx
+    if before_track then
+        before_idx = GetMediaTrackInfo_Value(before_track, "IP_TRACKNUMBER") - 1
+    else
+        before_idx = CountTracks(0)
+    end
+    ReorderSelectedTracks(before_idx, 0)
+
+    local _, _, folder_count = get_track_table()
+    if folder_count > 1 then
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+    else
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+    end
+    local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+    workflow = wf
+
+    return true
+end
+
+function try_reorder(cmd)
+    local n_str, count_str = cmd:match("^(%d+)u(%d*)$")
+    local direction = "up"
+    if not n_str then
+        n_str, count_str = cmd:match("^(%d+)d(%d*)$")
+        direction = "down"
+    end
+    if not n_str then return false end
+
+    local n = tonumber(n_str)
+    local count = tonumber(count_str) or 1
+    if count < 1 then count = 1 end
+
+    for _ = 1, count do
+        if not move_mixer_track(n, direction) then
+            say("Cannot move mixer track " .. n .. " " .. direction)
+            break
+        end
+        if direction == "up" then
+            n = n - 1
+        else
+            n = n + 1
+        end
+    end
+    return true
+end
+
+-- Appends one new track to every folder plus a corresponding "M:" mixer
+-- track, names the new position, then re-syncs via the active workflow
+-- script (mirrors ReaClassical_Add Aux.lua's end-of-script dofile).
+function add_mixer_track(name)
+    local track_table, _, folder_count, tracks_per_group = get_track_table()
+    if folder_count == 0 or not track_table[1] then
+        say("No folders found")
+        return
+    end
+
+    -- New mixer-block track, appended after the existing mixer block.
+    local mixer_insert_idx = (folder_count + 1) * tracks_per_group
+    InsertTrackAtIndex(mixer_insert_idx, true)
+    local new_mixer_track = GetTrack(0, mixer_insert_idx)
+    SetMediaTrackInfo_Value(new_mixer_track, "I_FOLDERDEPTH", 0)
+    GetSetMediaTrackInfo_String(new_mixer_track, "P_EXT:mixer", "y", true)
+    GetSetMediaTrackInfo_String(new_mixer_track, "P_EXT:mix_order", tostring(tracks_per_group + 1), true)
+
+    -- Capture each folder's color (parent track's color, falling back to
+    -- its first child's color if the parent has none) before inserting,
+    -- so the new track in each folder can match it.
+    local folder_colors = {}
+    for f = 0, folder_count - 1 do
+        local folder = track_table[f + 1]
+        local folder_color = GetTrackColor(folder.parent)
+        if folder_color == 0 and folder.tracks[1] then
+            folder_color = GetTrackColor(folder.tracks[1])
+        end
+        folder_colors[f] = folder_color
+    end
+
+    -- New child track at the end of every folder (high to low so each
+    -- folder's insertion index stays valid). Tag each new track as
+    -- Destination (first folder) or Source (other folders) so that
+    -- delete_non_rc_tracks() in the Vertical/Horizontal Workflow sync
+    -- (run below) doesn't treat it as a stray non-RC track and remove it.
+    for f = folder_count - 1, 0, -1 do
+        local insert_idx = (f + 1) * tracks_per_group
+        local last_child_idx = insert_idx - 1
+        InsertTrackAtIndex(insert_idx, true)
+        local new_track = GetTrack(0, insert_idx)
+        SetMediaTrackInfo_Value(new_track, "I_FOLDERDEPTH", -1)
+        local last_child = GetTrack(0, last_child_idx)
+        SetMediaTrackInfo_Value(last_child, "I_FOLDERDEPTH", 0)
+        if folder_colors[f] ~= 0 then
+            SetTrackColor(new_track, folder_colors[f])
+        end
+        if f == 0 then
+            GetSetMediaTrackInfo_String(new_track, "P_EXT:Destination", "y", true)
+        else
+            GetSetMediaTrackInfo_String(new_track, "P_EXT:Source", "y", true)
+        end
+    end
+
+    local mixer_tracks = get_mixer_tracks()
+    local new_position = #mixer_tracks
+    rename_mixer_position(mixer_tracks, new_position, name or ("Track " .. new_position))
+
+    if folder_count > 1 then
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+    else
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+    end
+    local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+    workflow = wf
+end
+
+-- Generalized port of delete_tracks()/delete_mixer()
+-- (Delete Track From All Groups.lua:106-140).
+function remove_mixer_track(n)
+    local _, _, folder_count, tracks_per_group = get_track_table()
+    local child_count = tracks_per_group - 1
+    local track_idx = n - 1
+
+    if folder_count == 0 then
+        say("No folders found")
+        return
+    end
+    if tracks_per_group == 2 then
+        say("Already at the minimum number of tracks to form a folder")
+        return
+    end
+    if track_idx <= 0 or track_idx > child_count then
+        say("Cannot remove mixer track " .. n)
+        return
+    end
+
+    if track_idx == child_count then
+        move_mixer_track(n, "up")
+        track_idx = track_idx - 1
+        n = n - 1
+    end
+
+    local similar_tracks = {}
+    for i = track_idx + (folder_count - 1) * tracks_per_group, track_idx, -tracks_per_group do
+        table.insert(similar_tracks, i)
+    end
+    for _, idx in ipairs(similar_tracks) do
+        DeleteTrack(GetTrack(0, idx))
+    end
+
+    local mixer_location = (folder_count * (tracks_per_group - 1)) + track_idx
+    DeleteTrack(GetTrack(0, mixer_location))
+
+    if folder_count > 1 then
+        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+    else
+        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+    end
+    local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+    workflow = wf
+end
+
+function try_add_remove(cmd)
+    local add_name = cmd:match("^add=(.+)$")
+    if cmd == "add" or add_name then
+        add_mixer_track(add_name and trim(add_name) or nil)
+        return true
+    end
+
+    local rm_n = cmd:match("^rm(%d+)$")
+    if rm_n then
+        remove_mixer_track(tonumber(rm_n))
+        return true
+    end
+
+    local aux_name = cmd:match("^add@=(.+)$")
+    if cmd == "add@" or aux_name then
+        dofile(script_path .. "ReaClassical_Add Aux.lua")
+        if aux_name then
+            local list = get_special_tracks_by_type("aux")
+            local info = list[#list]
+            if info then
+                GetSetMediaTrackInfo_String(info.track, "P_NAME", "@" .. trim(aux_name), true)
+            end
+        end
+        return true
+    end
+
+    local sub_name = cmd:match("^add#=(.+)$")
+    if cmd == "add#" or sub_name then
+        dofile(script_path .. "ReaClassical_Add Submix.lua")
+        if sub_name then
+            local list = get_special_tracks_by_type("submix")
+            local info = list[#list]
+            if info then
+                GetSetMediaTrackInfo_String(info.track, "P_NAME", "#" .. trim(sub_name), true)
+            end
+        end
+        return true
+    end
+
+    local rm_aux = cmd:match("^rm@(%d*)$")
+    if rm_aux then
+        local info, err = resolve_special_index(get_special_tracks_by_type("aux"), rm_aux, "aux", "@")
+        if info then
+            DeleteTrack(info.track)
+        else
+            say(err)
+        end
+        return true
+    end
+
+    local rm_sub = cmd:match("^rm#(%d*)$")
+    if rm_sub then
+        local info, err = resolve_special_index(get_special_tracks_by_type("submix"), rm_sub, "submix", "#")
+        if info then
+            DeleteTrack(info.track)
+        else
+            say(err)
+        end
+        return true
+    end
+
+    -- addlb=N: add a listenback track armed on hardware input N (1-based),
+    -- or just retune the input if a listenback track already exists.
+    local lb_input = cmd:match("^addlb=(%d+)$")
+    if lb_input then
+        local existing = get_special_tracks_by_type("listenback")
+        if #existing > 0 then
+            SetMediaTrackInfo_Value(existing[1].track, "I_RECINPUT", tonumber(lb_input) - 1)
+            return true
+        end
+
+        local insert_idx = CountTracks(0)
+        InsertTrackAtIndex(insert_idx, false)
+        local lb_track = GetTrack(0, insert_idx)
+
+        GetSetMediaTrackInfo_String(lb_track, "P_EXT:listenback", "y", true)
+        GetSetMediaTrackInfo_String(lb_track, "P_NAME", "LISTENBACK", true)
+        SetMediaTrackInfo_Value(lb_track, "I_RECINPUT", tonumber(lb_input) - 1)
+        SetMediaTrackInfo_Value(lb_track, "I_RECMON", 1)
+        SetMediaTrackInfo_Value(lb_track, "I_RECARM", 1)
+        SetMediaTrackInfo_Value(lb_track, "I_RECMODE", 2)
+        SetMediaTrackInfo_Value(lb_track, "B_MAINSEND", 1)
+        SetMediaTrackInfo_Value(lb_track, "B_SHOWINTCP", 0)
+        SetMediaTrackInfo_Value(lb_track, "B_SHOWINMIXER", 1)
+        SetMediaTrackInfo_Value(lb_track, "D_VOL", 1.0)
+
+        local fx_idx = TrackFX_AddByName(lb_track, "ListenbackMicMonitor", false, -1)
+        if fx_idx < 0 then
+            TrackFX_AddByName(lb_track, "JS:ListenbackMicMonitor", false, -1)
+        end
+
+        return true
+    end
+
+    if cmd == "rmlb" then
+        local lb_list = get_special_tracks_by_type("listenback")
+        if #lb_list == 0 then
+            say("No listenback track found")
+            return true
+        end
+        DeleteTrack(lb_list[1].track)
+        return true
+    end
+
+    local rm_ref = cmd:match("^rmref(%d*)$")
+    if rm_ref then
+        local info, err = resolve_special_index(get_special_tracks_by_type("reference"), rm_ref, "REF", "")
+        if info then
+            DeleteTrack(info.track)
+        else
+            say(err)
+        end
+        return true
+    end
+
+    if cmd == "rmrt" then
+        local rt_list = get_special_tracks_by_type("roomtone")
+        if #rt_list == 0 then
+            say("No RoomTone track found")
+            return true
+        end
+        DeleteTrack(rt_list[1].track)
+        return true
+    end
+
+    if cmd == "rmlive" then
+        local live_list = get_special_tracks_by_type("live")
+        if #live_list == 0 then
+            say("No LIVE track found")
+            return true
+        end
+        DeleteTrack(live_list[1].track)
+        return true
+    end
+
+    return false
+end
+
+-- True for any single-track selector token understood by resolve_target:
+-- "rcm", "N", "@N", "#N", "@" (the only aux), "#" (the only submix).
+function is_target(str)
+    return str == "rcm" or str:match("^%d+$") ~= nil or str:match("^[%#@]%d*$") ~= nil
+end
+
+function try_routing_fx(cmd)
+    local rcmp = cmd:match("^rcmp=([+-]?%d+)$")
+    if rcmp then
+        local rcmaster = get_rcmaster()
+        if rcmaster then
+            SetMediaTrackInfo_Value(rcmaster, "D_PAN", pct_to_pan(rcmp))
+        else
+            say("No RCMASTER track found")
+        end
+        return true
+    end
+
+    if cmd == "*/*#" or cmd == "*/*@" then
+        local kind = (cmd == "*/*#") and "submix" or "aux"
+        local targets = get_special_tracks_by_type(kind)
+        for _, mixer_track in ipairs(get_mixer_tracks()) do
+            for _, info in ipairs(targets) do
+                remove_send_to(mixer_track, info.track)
+            end
+        end
+        return true
+    end
+
+    -- List/range forms: "<list>-rcm" (connect) / "<list>/rcm" (disconnect)
+    -- <list> is "*", "N", "N-M", "N,M", "N,M-P", ... (mixer tracks)
+    local list_target = cmd:match("^([%d,%-%*]+)-rcm$")
+    local list_connect = true
+    if not list_target then
+        list_target = cmd:match("^([%d,%-%*]+)/rcm$")
+        list_connect = false
+    end
+    if list_target then
+        local tracks, err = resolve_target_list(list_target)
+        if #tracks == 0 then
+            say(err or ("Unknown target: " .. list_target))
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            set_rcm_connection(track, list_connect)
+        end
+        return true
+    end
+
+    local query_target = cmd:match("^([%#@]?%d*)-rcm%?$")
+    if query_target then
+        local track, err = resolve_target(query_target)
+        if not track then
+            say(err or ("Unknown target: " .. query_target))
+            return true
+        end
+        local _, state = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
+        say("RCM connection: " .. (state == "y" and "disconnected" or "connected"))
+        return true
+    end
+
+    local rcm_target = cmd:match("^([%#@]?%d*)-rcm$")
+    local connect = true
+    if not rcm_target then
+        rcm_target = cmd:match("^([%#@]?%d*)/rcm$")
+        connect = false
+    end
+    if rcm_target then
+        local track, err = resolve_target(rcm_target)
+        if not track then
+            say(err or ("Unknown target: " .. rcm_target))
+            return true
+        end
+        set_rcm_connection(track, connect)
+        return true
+    end
+
+    local fx_target, fx_name, fx_pos = cmd:match("^([%#@]?%d*)fx=([^,]+),(%d+)$")
+    if not fx_target then
+        fx_target, fx_name = cmd:match("^([%#@]?%d*)fx=(.+)$")
+    end
+    if not fx_target then
+        local rcm_fx_name, rcm_fx_pos = cmd:match("^rcmfx=([^,]+),(%d+)$")
+        if not rcm_fx_name then
+            rcm_fx_name = cmd:match("^rcmfx=(.+)$")
+        end
+        if rcm_fx_name then
+            fx_target, fx_name, fx_pos = "rcm", rcm_fx_name, rcm_fx_pos
+        end
+    end
+    if fx_target then
+        local track, err = resolve_target(fx_target)
+        if not track then
+            say(err or ("Unknown target: " .. fx_target))
+            return true
+        end
+        local idx = TrackFX_AddByName(track, trim(fx_name), false, -1)
+        if idx < 0 then
+            say("FX not found: " .. fx_name)
+        elseif fx_pos then
+            TrackFX_CopyToTrack(track, idx, track, tonumber(fx_pos) - 1, true)
+        end
+        return true
+    end
+
+    local a, b = cmd:match("^([^%-/]+)-([^%-/]+)$")
+    if a and is_target(a) and is_target(b) then
+        local track_a, err_a = resolve_target(a)
+        local track_b, err_b = resolve_target(b)
+        if track_a and track_b then
+            CreateTrackSend(track_a, track_b)
+        else
+            say(err_a or err_b or "Unknown target")
+        end
+        return true
+    end
+
+    local ra, rb = cmd:match("^([^%-/]+)/([^%-/]+)$")
+    if ra and is_target(ra) and is_target(rb) then
+        local track_a, err_a = resolve_target(ra)
+        local track_b, err_b = resolve_target(rb)
+        if track_a and track_b then
+            remove_send_to(track_a, track_b)
+        else
+            say(err_a or err_b or "Unknown target")
+        end
+        return true
+    end
+
+    return false
+end
+
+function format_session_time(seconds)
+    local h = math.floor(seconds / 3600)
+    local m = math.floor((seconds % 3600) / 60)
+    return string.format("%dh %02dm", h, m)
+end
+
+function get_project_age_str()
+    local retval, creation_date = GetProjExtState(0, "ReaClassical", "CreationDate")
+    if retval and creation_date ~= "" then
+        local year, month, day, hour, min, sec = creation_date:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
+        if year then
+            local t = os.time({
+                year = tonumber(year) or 0, month = tonumber(month) or 0, day = tonumber(day) or 0,
+                hour = tonumber(hour) or 0, min = tonumber(min) or 0, sec = tonumber(sec) or 0
+            })
+            local age = os.time() - t
+            local days = math.floor(age / 86400)
+            if days >= 365 then return "> 1 year" end
+            local hours = math.floor((age % 86400) / 3600)
+            local minutes = math.floor((age % 3600) / 60)
+            return string.format("%d days, %dh %02dm", days, hours, minutes)
+        end
+    end
+    return "n/a"
+end
+
+function get_session_time_str()
+    local retval, stored = GetProjExtState(0, "ReaClassical", "SessionStart")
+    if retval and stored ~= "" then
+        local start = tonumber(stored)
+        if start then return format_session_time(os.time() - start) end
+    end
+    return "n/a"
+end
+
+function get_reaclassical_version()
+    if not APIExists("ReaPack_GetOwner") then return "n/a" end
+    local path = ({ get_action_context() })[2]
+    if not path or path == "" then return "n/a" end
+    local entry = ReaPack_GetOwner(path)
+    if not entry then return "n/a" end
+    local info = { ReaPack_GetEntryInfo(entry) }
+    ReaPack_FreeEntry(entry)
+    return (info[1] and info[7] and info[7] ~= "") and info[7] or "n/a"
+end
+
+---------------------------------------------------------------------
+
+function try_stats(cmd)
+    if cmd == "stats?" then
+        local _, existing = GetProjExtState(0, "ReaClassical", "SessionStart")
+        if existing == "" then
+            SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
+        end
+
+        local _, _, folder_count, tracks_per_group, mixer_tracks = get_track_table()
+        local num_tracks = CountTracks(0)
+        local num_items = CountMediaItems(0)
+
+        local num_cd_markers, num_regions = 0, 0
+        local total_project_length, album_end = 0, nil
+        local nm, nr = CountProjectMarkers(0)
+        for i = 0, nm + nr - 1 do
+            local retval, isrgn, pos, _, name = EnumProjectMarkers(i)
+            if retval then
+                if name:match("^#") then num_cd_markers = num_cd_markers + 1 end
+                if name == "=END" then album_end = pos end
+                if isrgn then num_regions = num_regions + 1 end
+            end
+        end
+
+        for i = 0, num_items - 1 do
+            local item = GetMediaItem(0, i)
+            if item then
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+                total_project_length = math.max(total_project_length, pos + len)
+            end
+        end
+
+        local total_source_length = 0
+        local counted_folders = 0
+        for i = 0, num_tracks - 1 do
+            local track = GetTrack(0, i)
+            if track then
+                local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+                if depth == 1 then counted_folders = counted_folders + 1 end
+                if counted_folders > 1 then
+                    for j = 0, CountTrackMediaItems(track) - 1 do
+                        local item = GetTrackMediaItem(track, j)
+                        if item then
+                            total_source_length = total_source_length + GetMediaItemInfo_Value(item, "D_LENGTH")
+                        end
+                    end
+                end
+            end
+        end
+
+        local num_sd_edits, num_splits = 0, 0
+        if num_tracks > 0 then
+            local first_track = GetTrack(0, 0)
+            local ti_count = CountTrackMediaItems(first_track)
+            for j = 0, ti_count - 1 do
+                local item = GetTrackMediaItem(first_track, j)
+                if item then
+                    local _, sd = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+                    if sd ~= "" then num_sd_edits = num_sd_edits + 1 end
+                end
+            end
+            for j = 0, ti_count - 1 do
+                local item1 = GetTrackMediaItem(first_track, j)
+                if item1 then
+                    local p1 = GetMediaItemInfo_Value(item1, "D_POSITION")
+                    local e1 = p1 + GetMediaItemInfo_Value(item1, "D_LENGTH")
+                    for k = j + 1, ti_count - 1 do
+                        local item2 = GetTrackMediaItem(first_track, k)
+                        if item2 and GetMediaItemInfo_Value(item2, "D_POSITION") < e1 then
+                            num_splits = num_splits + 1
+                        end
+                    end
+                end
+            end
+        end
+
+        local num_fx, num_auto = 0, 0
+        for i = 0, num_tracks - 1 do
+            local track = GetTrack(0, i)
+            if track then
+                num_fx = num_fx + TrackFX_GetCount(track)
+                for e = 0, CountTrackEnvelopes(track) - 1 do
+                    local env = GetTrackEnvelope(track, e)
+                    if env then
+                        local _, chunk = GetEnvelopeStateChunk(env, "", false)
+                        if chunk:match("VIS 1") and CountEnvelopePoints(env) > 0 then
+                            num_auto = num_auto + 1
+                        end
+                    end
+                end
+            end
+        end
+
+        local num_special = #get_special_tracks()
+
+        say("Workflow: " .. (workflow ~= "" and workflow or "(none)") ..
+            " | REAPER " .. (GetAppVersion():match("^(%d+%.%d+)") or "?") ..
+            " | ReaClassical " .. get_reaclassical_version())
+        say("")
+        say("Album Stats:")
+        say("  Final album length: " .. (album_end and format_timestr(album_end, "") or "n/a"))
+        say("  CD markers: " .. num_cd_markers)
+        say("")
+        say("Project Stats:")
+        say("  Project age: " .. get_project_age_str())
+        say("  Session time: " .. get_session_time_str() .. "  (reset with stats=reset)")
+        say("  Total project length: " .. format_timestr(total_project_length, ""))
+        say("  Total source material: " .. format_timestr(total_source_length, ""))
+        say("  Items: " .. num_items)
+        say("  Folders: " .. folder_count .. ", tracks per group: " .. tracks_per_group ..
+            ", mixer tracks: " .. #mixer_tracks)
+        say("  Special tracks: " .. num_special .. ", regions: " .. num_regions)
+        say("")
+        say("Edit Stats:")
+        say("  S-D edits: " .. num_sd_edits .. ", item splits: " .. num_splits)
+        say("")
+        say("FX & Automation:")
+        say("  FX: " .. num_fx .. ", automation lanes: " .. num_auto)
+        say("")
+        say("Mixer tracks:")
+        for i, track in ipairs(mixer_tracks) do
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            say(string.format("  %d: %s", i, name))
+        end
+        local aux_tracks = get_special_tracks_by_type("aux")
+        if #aux_tracks > 0 then
+            say("Aux tracks:")
+            for i, info in ipairs(aux_tracks) do
+                say(string.format("  @%d: %s", i, info.name))
+            end
+        end
+        local submix_tracks = get_special_tracks_by_type("submix")
+        if #submix_tracks > 0 then
+            say("Submix tracks:")
+            for i, info in ipairs(submix_tracks) do
+                say(string.format("  #%d: %s", i, info.name))
+            end
+        end
+        local rcmaster = get_rcmaster()
+        if rcmaster then
+            local _, rname = GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "", false)
+            say("RCMASTER: " .. rname)
+        else
+            say("RCMASTER: none")
+        end
+        say("")
+        say("Selection: " .. CountSelectedTracks(0) .. " track(s), " ..
+            CountSelectedMediaItems(0) .. " item(s) | cursor: " ..
+            format_timestr(GetCursorPosition(), ""))
+
+        return true
+    end
+
+    if cmd == "stats=reset" then
+        SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
+        say("Session timer reset")
+        return true
+    end
+
+    return false
+end
+
+-- pr=N, pr=a,N, pr=0, pa=N: delegate to ReaClassical_Set Item Playback Rate.lua
+-- via the headless hook, so timestretch ripples subsequent items in the same
+-- folder exactly as the GUI tool does.
+function try_playrate_pitch(cmd)
+    if cmd == "pr=0" then
+        _G.RC_TERMINAL_ARGS = { action = "reset_rate" }
+        dofile(script_path .. "ReaClassical_Set Item Playback Rate.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- pr=a,N -> absolute rate change of N% from normal speed
+    local abs_rate = cmd:match("^pr=a,([+-]?[%d.]+)$")
+    if abs_rate then
+        _G.RC_TERMINAL_ARGS = { action = "rate", value = tonumber(abs_rate), relative = false }
+        dofile(script_path .. "ReaClassical_Set Item Playback Rate.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- pr=N -> rate change of N% relative to the current rate
+    local rel_rate = cmd:match("^pr=([+-]?[%d.]+)$")
+    if rel_rate then
+        _G.RC_TERMINAL_ARGS = { action = "rate", value = tonumber(rel_rate), relative = true }
+        dofile(script_path .. "ReaClassical_Set Item Playback Rate.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- pa=N -> set pitch to N semitones (pa=0 resets to normal)
+    local pitch = cmd:match("^pa=([+-]?[%d.]+)$")
+    if pitch then
+        _G.RC_TERMINAL_ARGS = { action = "pitch", value = tonumber(pitch) }
+        dofile(script_path .. "ReaClassical_Set Item Playback Rate.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    if cmd == "pr?" then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then say("No item selected"); return true end
+        local take = GetActiveTake(item)
+        if not take then say("No active take"); return true end
+        local rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+        say(string.format("Playrate: %.4f%s", rate, math.abs(rate - 1.0) < 0.0001 and " (normal)" or ""))
+        return true
+    end
+
+    if cmd == "pa?" then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then say("No item selected"); return true end
+        local take = GetActiveTake(item)
+        if not take then say("No active take"); return true end
+        local pitch_val = GetMediaItemTakeInfo_Value(take, "D_PITCH")
+        say(string.format("Pitch: %+.2f semitones%s", pitch_val, math.abs(pitch_val) < 0.001 and " (normal)" or ""))
+        return true
+    end
+
+    return false
+end
+
+function try_misc(cmd)
+    if cmd == "newtab" then
+        Main_OnCommand(40859, 0) -- File: New project tab
+        return true
+    end
+
+    if cmd == "help" then
+        dofile(script_path .. "ReaClassical_Help.lua")
+        return true
+    end
+
+    if cmd == "factoryreset" then
+        dofile(script_path .. "ReaClassical_Factory Reset.lua")
+        return true
+    end
+
+    if cmd == "update" then
+        local action = NamedCommandLookup("_REAPACK_SYNC")
+        if action ~= 0 then
+            Main_OnCommand(action, 0)
+        else
+            say("ReaPack is not installed")
+        end
+        return true
+    end
+
+    -- import or import=dest: scan the project's media folder for new audio
+    -- files and import them (Smart Import), via the headless hook in
+    -- ReaClassical_Smart Import Audio.lua. "dest" also duplicates each
+    -- session's takes onto the destination folder.
+    if cmd == "import" or cmd == "import=dest" then
+        _G.RC_TERMINAL_ARGS = { include_destination = (cmd == "import=dest") }
+        dofile(script_path .. "ReaClassical_Smart Import Audio.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- import=smart,1[,dest]   -> one folder per take (same as plain "import")
+    -- import=smart,2[,dest]   -> round-robin across the current number of source folders
+    -- import=smart,3,N[,dest] -> round-robin across N folders (created if needed)
+    -- Optional trailing ",dest" includes the destination folder (D:) in the
+    -- distribution, matching the GUI's "Include destination folder" checkbox.
+    local smart_mode, smart_rest = cmd:match("^import=smart,([123])(.*)$")
+    if smart_mode then
+        smart_mode = tonumber(smart_mode)
+        local args = {}
+        local dest
+
+        if smart_mode == 3 then
+            local folder_count
+            folder_count, dest = smart_rest:match("^,(%d+),(dest)$")
+            if not folder_count then
+                folder_count = smart_rest:match("^,(%d+)$")
+            end
+            if not folder_count then
+                say("import=smart,3 requires a folder count, e.g. import=smart,3,5")
+                return true
+            end
+            args.robin_folder_count = tonumber(folder_count)
+        else
+            dest = smart_rest:match("^,(dest)$")
+            if smart_rest ~= "" and not dest then
+                say("Unknown command: " .. cmd)
+                return true
+            end
+            if smart_mode == 2 then
+                args.robin_folder_count = "current"
+            end
+        end
+
+        args.include_destination = (dest == "dest")
+        _G.RC_TERMINAL_ARGS = args
+        dofile(script_path .. "ReaClassical_Smart Import Audio.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- import=N or import=N,session       -> import only take N (optionally
+    --   restricted to a session, default "default"), placed at the edit cursor
+    -- import=N-M or import=N-M,session   -> import takes N..M, same restrictions
+    local take_a, take_b, take_session = cmd:match("^import=(%d+)-(%d+),(.+)$")
+    if not take_a then
+        take_a, take_b = cmd:match("^import=(%d+)-(%d+)$")
+    end
+    if not take_a then
+        local take_n, session = cmd:match("^import=(%d+),(.+)$")
+        if take_n then
+            take_a, take_b, take_session = take_n, take_n, session
+        end
+    end
+    if not take_a then
+        local take_n = cmd:match("^import=(%d+)$")
+        if take_n then
+            take_a, take_b = take_n, take_n
+        end
+    end
+    if take_a then
+        _G.RC_TERMINAL_ARGS = {
+            include_destination = false,
+            at_cursor = true,
+            filter = {
+                take_min = tonumber(take_a),
+                take_max = tonumber(take_b),
+                session = take_session and trim(take_session) or "default",
+            },
+        }
+        dofile(script_path .. "ReaClassical_Smart Import Audio.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- repos=N: reposition CD track groups on the selected folder track,
+    -- leaving N seconds between each group, via the headless hook in
+    -- ReaClassical_Reposition_Album_Tracks.lua.
+    local repos_arg = cmd:match("^repos=(.+)$")
+    if repos_arg then
+        local gap = tonumber(repos_arg)
+        if not gap then
+            say("Please enter a number")
+            return true
+        end
+        _G.RC_TERMINAL_ARGS = { gap = gap }
+        dofile(script_path .. "ReaClassical_Reposition_Album_Tracks.lua")
+        -- Reposition skips createcd in terminal mode; sync markers now.
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- find=N or find=N,session or find=,session: locate a take by number
+    -- and/or session name, via the headless hook in ReaClassical_Find Take.lua.
+    local find_args = cmd:match("^find=(.*)$")
+    if find_args then
+        local take_str, session_name = find_args:match("^([^,]*),(.*)$")
+        if not take_str then
+            take_str = find_args
+            session_name = ""
+        end
+        local take_choice = tonumber(take_str)
+        if not take_choice and session_name ~= "" then take_choice = 1 end
+        _G.RC_TERMINAL_ARGS = { take_choice = take_choice, session_name = trim(session_name) }
+        dofile(script_path .. "ReaClassical_Find Take.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- buildlist=source or buildlist=bwf: build an HTML edit list using either
+    -- source-file timing or BWF start-offset timing.
+    local buildlist_type = cmd:match("^buildlist=(.+)$")
+    if buildlist_type then
+        if buildlist_type == "source" then
+            dofile(script_path .. "ReaClassical_Build Edit List.lua")
+            say("Edit list built")
+        elseif buildlist_type == "bwf" then
+            _G.RC_TERMINAL_ARGS = { offset = 0 }
+            dofile(script_path .. "ReaClassical_Build Edit List using BWF offset.lua")
+            _G.RC_TERMINAL_ARGS = nil
+            say("Edit list built")
+        else
+            say("Unknown buildlist type: " .. buildlist_type)
+        end
+        return true
+    end
+
+    -- createcd: create CD/DDP markers for the selected folder track, via the
+    -- headless hook in ReaClassical_Create CD Markers.lua, without opening
+    -- the DDP Metadata Editor.
+    if cmd == "createcd" then
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- peak?: scan all unmuted tracks and jump the edit cursor to the peak position.
+    if cmd == "peak?" then
+        _G.RC_TERMINAL_ARGS = { jump_to_peak = true }
+        dofile(script_path .. "ReaClassical_Peak and Overs Check.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- overs?: scan all unmuted tracks for the peak level and any overs above
+    -- the saved threshold, via the headless hook in
+    -- ReaClassical_Peak and Overs Check.lua.
+    if cmd == "overs?" then
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Peak and Overs Check.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- overs=N: same as overs?, but using N dB as the over threshold for this
+    -- scan (also saved as the new default threshold).
+    local overs_threshold = cmd:match("^overs=([%-%d%.]+)$")
+    if overs_threshold then
+        local threshold = tonumber(overs_threshold)
+        if not threshold then
+            say("Please enter a number")
+            return true
+        end
+        _G.RC_TERMINAL_ARGS = { threshold = threshold }
+        dofile(script_path .. "ReaClassical_Peak and Overs Check.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- digital=y|1 or digital=n|0: toggle Digital Release Only mode (no pregap
+    -- or frame-snapping offsets; used for streaming-only deliverables).
+    -- digital?: query the current setting.
+    local dr_val = cmd:match("^digital=([yn10])$")
+    if dr_val then
+        local on = (dr_val == "y" or dr_val == "1")
+        SetProjExtState(0, "ReaClassical", "digital_release_only", on and "1" or "0")
+        say("Digital release only: " .. (on and "on" or "off"))
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    if cmd == "digital?" then
+        local _, val = GetProjExtState(0, "ReaClassical", "digital_release_only")
+        say("Digital release only: " .. (val == "1" and "on" or "off"))
+        return true
+    end
+
+    -- isrc=y|1 or isrc=n|0: toggle Manual ISRC Entry mode. When on, all ISRC
+    -- codes are entered independently per track; when off, they auto-increment
+    -- from the first track's ISRC.
+    -- isrc?: query the current setting.
+    local isrc_val = cmd:match("^isrc=([yn10])$")
+    if isrc_val then
+        local on = (isrc_val == "y" or isrc_val == "1")
+        SetProjExtState(0, "ReaClassical", "manual_isrc_entry", on and "1" or "0")
+        say("Manual ISRC entry: " .. (on and "on" or "off"))
+        return true
+    end
+
+    if cmd == "isrc?" then
+        local _, val = GetProjExtState(0, "ReaClassical", "manual_isrc_entry")
+        say("Manual ISRC entry: " .. (val == "1" and "on" or "off"))
+        return true
+    end
+
+    -- offsets+: record the current CD marker positions as per-item OFFSET
+    -- fields, so subsequent createcd runs preserve the manual positions.
+    if cmd == "offsets+" then
+        dofile(script_path .. "ReaClassical_Add CD Marker Offsets.lua")
+        say("Marker offsets updated")
+        return true
+    end
+
+    -- offsets-: strip all OFFSET fields from the selected folder track's items,
+    -- reverting to automatic marker placement on the next createcd run.
+    if cmd == "offsets-" then
+        dofile(script_path .. "ReaClassical_Remove All CD Marker Offsets.lua")
+        say("Marker offsets removed")
+        return true
+    end
+
+    -- offsets?: report whether any marker offsets are active on the selected track.
+    if cmd == "offsets?" then
+        local track = GetSelectedTrack(0, 0)
+        if not track then say("No track selected"); return true end
+        local has_offsets = false
+        for i = 0, CountTrackMediaItems(track) - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local take = GetActiveTake(item)
+            if take then
+                local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                if name and name:match("|OFFSET=") then
+                    has_offsets = true
+                    break
+                end
+            end
+        end
+        say("Marker offsets: " .. (has_offsets and "active" or "none"))
+        return true
+    end
+
+    -- tu / td: move the selected album track item one position up or down in
+    -- the timeline, then re-sync CD markers headlessly.
+    if cmd == "tu" or cmd == "td" then
+        local id_str = cmd == "tu"
+            and "_RS18fe066cb8806e30b0371fc30a79c67ce2b807f1"
+            or  "_RS6d1212ff49d4205e6f7f0d7c30ae539d3da05f6f"
+        local named_cmd_id = NamedCommandLookup(id_str)
+        if named_cmd_id == 0 then
+            say("Move Album Track " .. (cmd == "tu" and "Up" or "Down") .. " script not installed")
+            return true
+        end
+        -- Suppress any GUI that the named command might trigger via createcd.
+        SetProjExtState(0, "ReaClassical", "ddp_silent", "y")
+        Main_OnCommand(named_cmd_id, 0)
+        SetProjExtState(0, "ReaClassical", "ddp_silent", "")
+        -- Re-sync markers headlessly in case the named command skipped createcd.
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        say("Album track moved " .. (cmd == "tu" and "up" or "down"))
+        return true
+    end
+
+    -- render=ddp|cue|wav|flac|opus|mp3|custom: run createcd headlessly then apply
+    -- the chosen render preset. "custom" opens the REAPER render dialog instead.
+    -- Plain "render" is an alias for "render=custom".
+    local render_fmt = cmd:match("^render=(.+)$") or (cmd == "render" and "custom")
+    if render_fmt then
+        local valid = { ddp = true, cue = true, wav = true, flac = true, opus = true, mp3 = true, custom = true }
+        if not valid[render_fmt] then
+            say("Unknown format: " .. render_fmt .. " (use ddp, cue, wav, flac, opus, mp3, custom)")
+            return true
+        end
+        _G.RC_TERMINAL_ARGS = { action = "render", format = render_fmt }
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    return false
+end
+
+---------------------------------------------------------------------
+-- Mixer Snapshot helpers (headless; no ImGui required)
+-- Data format is identical to ReaClassical_Mixer Snapshots.lua so
+-- the two scripts share the same project-state storage.
+---------------------------------------------------------------------
+
+function snap_serialize_table(tbl, indent)
+    indent = indent or 0
+    local result = {}
+    local prefix = string.rep("  ", indent)
+    table.insert(result, "{\n")
+    for k, v in pairs(tbl) do
+        local key_str = type(k) == "number" and ("[" .. k .. "]") or ('["' .. tostring(k) .. '"]')
+        if type(v) == "table" then
+            table.insert(result, prefix .. "  " .. key_str .. " = " ..
+                snap_serialize_table(v, indent + 1) .. ",\n")
+        elseif type(v) == "string" then
+            table.insert(result, prefix .. "  " .. key_str ..
+                ' = "' .. v:gsub('"', '\\"') .. '",\n')
+        elseif type(v) == "number" or type(v) == "boolean" then
+            table.insert(result, prefix .. "  " .. key_str .. " = " .. tostring(v) .. ",\n")
+        end
+    end
+    table.insert(result, prefix .. "}")
+    return table.concat(result)
+end
+
+function snap_deserialize_table(str)
+    if not str or str == "" then return nil end
+    local func = load("return " .. str)
+    return func and func() or nil
+end
+
+function snap_is_special_track(track)
+    local _, mixer = GetSetMediaTrackInfo_String(track, "P_EXT:mixer",  "", false)
+    local _, aux   = GetSetMediaTrackInfo_String(track, "P_EXT:aux",    "", false)
+    local _, sub   = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+    return mixer == "y" or aux == "y" or sub == "y"
+end
+
+function snap_find_track_by_guid(guid)
+    for i = 0, CountTracks(0) - 1 do
+        local t = GetTrack(0, i)
+        if GetTrackGUID(t) == guid then return t end
+    end
+    return nil
+end
+
+function snap_get_item_by_guid(guid)
+    for i = 0, CountMediaItems(0) - 1 do
+        local item = GetMediaItem(0, i)
+        if BR_GetMediaItemGUID(item) == guid then return item end
+    end
+    return nil
+end
+
+function snap_get_track_state(track)
+    local s = {}
+    s.volume = GetMediaTrackInfo_Value(track, "D_VOL")
+    s.pan    = GetMediaTrackInfo_Value(track, "D_PAN")
+    s.mute   = GetMediaTrackInfo_Value(track, "B_MUTE")
+    s.solo   = GetMediaTrackInfo_Value(track, "I_SOLO")
+    s.phase  = GetMediaTrackInfo_Value(track, "B_PHASE")
+    s.width  = GetMediaTrackInfo_Value(track, "D_WIDTH")
+    s.guid   = GetTrackGUID(track)
+    s.fx_chain = {}
+    for i = 0, TrackFX_GetCount(track) - 1 do
+        local fx = { enabled = TrackFX_GetEnabled(track, i),
+                     name    = select(2, TrackFX_GetFXName(track, i, "")),
+                     params  = {} }
+        for p = 0, TrackFX_GetNumParams(track, i) - 1 do
+            fx.params[p] = TrackFX_GetParam(track, i, p)
+        end
+        s.fx_chain[i] = fx
+    end
+    s.sends = {}
+    for i = 0, GetTrackNumSends(track, 0) - 1 do
+        s.sends[i] = {
+            volume    = GetTrackSendInfo_Value(track, 0, i, "D_VOL"),
+            pan       = GetTrackSendInfo_Value(track, 0, i, "D_PAN"),
+            mute      = GetTrackSendInfo_Value(track, 0, i, "B_MUTE"),
+            dest_guid = GetTrackGUID(BR_GetMediaTrackSendInfo_Track(track, 0, i, 1)),
+        }
+    end
+    s.hw_outs = {}
+    for i = 0, GetTrackNumSends(track, 1) - 1 do
+        s.hw_outs[i] = {
+            volume  = GetTrackSendInfo_Value(track, 1, i, "D_VOL"),
+            pan     = GetTrackSendInfo_Value(track, 1, i, "D_PAN"),
+            mute    = GetTrackSendInfo_Value(track, 1, i, "B_MUTE"),
+            channel = GetTrackSendInfo_Value(track, 1, i, "I_DSTCHAN"),
+        }
+    end
+    return s
+end
+
+function snap_apply_track_state(track, state, flags)
+    if not track then return end
+    if flags.volume then SetMediaTrackInfo_Value(track, "D_VOL",   state.volume) end
+    if flags.pan    then SetMediaTrackInfo_Value(track, "D_PAN",   state.pan)    end
+    if flags.mute   then SetMediaTrackInfo_Value(track, "B_MUTE",  state.mute)   end
+    if flags.solo   then SetMediaTrackInfo_Value(track, "I_SOLO",  state.solo)   end
+    if flags.phase  then SetMediaTrackInfo_Value(track, "B_PHASE", state.phase)  end
+    if flags.width and state.width then
+        SetMediaTrackInfo_Value(track, "D_WIDTH", state.width)
+    end
+    if flags.fx then
+        for fx_idx, fx in pairs(state.fx_chain) do
+            if TrackFX_GetCount(track) > fx_idx then
+                TrackFX_SetEnabled(track, fx_idx, fx.enabled)
+                for p, v in pairs(fx.params) do
+                    TrackFX_SetParam(track, fx_idx, p, v)
+                end
+            end
+        end
+    end
+    if flags.sends then
+        for i, send in pairs(state.sends) do
+            if GetTrackNumSends(track, 0) > i then
+                SetTrackSendInfo_Value(track, 0, i, "D_VOL",  send.volume)
+                SetTrackSendInfo_Value(track, 0, i, "D_PAN",  send.pan)
+                SetTrackSendInfo_Value(track, 0, i, "B_MUTE", send.mute)
+            end
+        end
+    end
+    if flags.routing and state.sends then
+        local n = GetTrackNumSends(track, 0)
+        for i = n - 1, 0, -1 do RemoveTrackSend(track, 0, i) end
+        local rcmaster_guid = nil
+        for i = 0, CountTracks(0) - 1 do
+            local tr = GetTrack(0, i)
+            local _, rcs = GetSetMediaTrackInfo_String(tr, "P_EXT:rcmaster", "", false)
+            if rcs == "y" then rcmaster_guid = GetTrackGUID(tr); break end
+        end
+        local has_rcm = false
+        for _, send in pairs(state.sends) do
+            local dst = snap_find_track_by_guid(send.dest_guid)
+            if dst then
+                local idx = CreateTrackSend(track, dst)
+                if idx >= 0 then
+                    SetTrackSendInfo_Value(track, 0, idx, "D_VOL",  send.volume)
+                    SetTrackSendInfo_Value(track, 0, idx, "D_PAN",  send.pan)
+                    SetTrackSendInfo_Value(track, 0, idx, "B_MUTE", send.mute)
+                    if rcmaster_guid and send.dest_guid == rcmaster_guid then
+                        has_rcm = true
+                    end
+                end
+            end
+        end
+        if snap_is_special_track(track) then
+            GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect",
+                has_rcm and "" or "y", true)
+        end
+        if state.hw_outs then
+            local hw_n = GetTrackNumSends(track, 1)
+            for i = 0, math.min(hw_n - 1, #state.hw_outs) do
+                if state.hw_outs[i] then
+                    SetTrackSendInfo_Value(track, 1, i, "D_VOL",  state.hw_outs[i].volume)
+                    SetTrackSendInfo_Value(track, 1, i, "D_PAN",  state.hw_outs[i].pan)
+                    SetTrackSendInfo_Value(track, 1, i, "D_MUTE", state.hw_outs[i].mute)
+                end
+            end
+        end
+    end
+end
+
+function snap_recall_snapshot(snapshot, flags)
+    if not snapshot then return end
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if snap_is_special_track(track) and snapshot.tracks[i] then
+            snap_apply_track_state(track, snapshot.tracks[i], flags)
+        end
+    end
+    UpdateArrange()
+    TrackList_AdjustWindows(false)
+end
+
+function snap_find_by_item_guid(snaps, guid)
+    for _, s in ipairs(snaps) do
+        if s.item_guid == guid then return s end
+    end
+    return nil
+end
+
+function snap_get_item_position(guid)
+    local item = snap_get_item_by_guid(guid)
+    if item then return GetMediaItemInfo_Value(item, "D_POSITION") end
+    return math.huge
+end
+
+function snap_find_at_cursor(snaps, cursor_pos)
+    for _, s in ipairs(snaps) do
+        local item = snap_get_item_by_guid(s.item_guid)
+        if item then
+            local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_end   = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
+            if cursor_pos >= item_start and cursor_pos < item_end then
+                return s
+            end
+        end
+    end
+    local prev_snap, prev_pos = nil, -1
+    for _, s in ipairs(snaps) do
+        local item = snap_get_item_by_guid(s.item_guid)
+        if item then
+            local p = GetMediaItemInfo_Value(item, "D_POSITION")
+            if p < cursor_pos and p > prev_pos then
+                prev_pos = p
+                prev_snap = s
+            end
+        end
+    end
+    return prev_snap
+end
+
+function snap_load_bank(bank)
+    local retval, str = GetProjExtState(0, "MixerSnapshots", "data_" .. bank)
+    if retval > 0 and str ~= "" then
+        local data = snap_deserialize_table(str)
+        if data then
+            return data.snapshots or {}, {
+                volume  = data.recall_volume  ~= false,
+                pan     = data.recall_pan     ~= false,
+                mute    = data.recall_mute    ~= false,
+                solo    = data.recall_solo    ~= false,
+                phase   = data.recall_phase   ~= false,
+                width   = data.recall_width   ~= false,
+                fx      = data.recall_fx      ~= false,
+                sends   = data.recall_sends   ~= false,
+                routing = data.recall_routing ~= false,
+                disable_auto_recall = data.disable_auto_recall or false,
+                switch_mid_gap      = data.switch_mid_gap ~= false,
+                counter             = data.counter or 0,
+                bank_folder_selection = data.bank_folder_selection or "all",
+            }
+        end
+    end
+    return {}, {
+        volume=true, pan=true, mute=true, solo=true, phase=true,
+        width=true, fx=true, sends=true, routing=true,
+        disable_auto_recall=false, switch_mid_gap=true, counter=0,
+        bank_folder_selection="all",
+    }
+end
+
+function snap_save_bank(bank, snaps, flags)
+    local data = {
+        counter             = flags.counter or 0,
+        snapshots           = snaps,
+        disable_auto_recall = flags.disable_auto_recall or false,
+        switch_mid_gap      = flags.switch_mid_gap ~= false,
+        bank_folder_selection = flags.bank_folder_selection or "all",
+        recall_volume       = flags.volume  ~= false,
+        recall_pan          = flags.pan     ~= false,
+        recall_mute         = flags.mute    ~= false,
+        recall_solo         = flags.solo    ~= false,
+        recall_phase        = flags.phase   ~= false,
+        recall_width        = flags.width   ~= false,
+        recall_fx           = flags.fx      ~= false,
+        recall_sends        = flags.sends   ~= false,
+        recall_routing      = flags.routing ~= false,
+    }
+    SetProjExtState(0, "MixerSnapshots", "data_" .. bank, snap_serialize_table(data))
+end
+
+function snap_get_current_bank()
+    local _, bank = GetProjExtState(0, "MixerSnapshots", "current_bank")
+    if bank == "" then bank = "A" end
+    return bank
+end
+
+function snap_set_current_bank(bank)
+    SetProjExtState(0, "MixerSnapshots", "current_bank", bank)
+end
+
+function snap_sort_by_timeline(snaps)
+    table.sort(snaps, function(a, b)
+        return snap_get_item_position(a.item_guid) < snap_get_item_position(b.item_guid)
+    end)
+end
+
+-- Port of convert_snapshots_to_automation() from Mixer Snapshots.lua.
+-- All logic is pure REAPER API; no ImGui dependency.
+function snap_convert_to_automation(snaps, flags)
+    if #snaps == 0 then
+        say("No snapshots to convert")
+        return
+    end
+
+    Undo_BeginBlock()
+
+    -- Clear existing automation from special tracks
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if snap_is_special_track(track) then
+            for e = 0, CountTrackEnvelopes(track) - 1 do
+                local env = GetTrackEnvelope(track, e)
+                DeleteEnvelopePointRange(env, -1000000, 1000000)
+                GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
+                GetSetEnvelopeInfo_String(env, "ACTIVE",  "0", true)
+                GetSetEnvelopeInfo_String(env, "ARM",     "0", true)
+            end
+        end
+    end
+
+    -- Sort snapshots by timeline position
+    local sorted = {}
+    for i, snap in ipairs(snaps) do
+        local item = snap_get_item_by_guid(snap.item_guid)
+        if item then
+            table.insert(sorted, {
+                snap = snap,
+                pos  = GetMediaItemInfo_Value(item, "D_POSITION"),
+                idx  = i,
+            })
+        end
+    end
+    table.sort(sorted, function(a, b) return a.pos < b.pos end)
+
+    -- Collect parameter values at each snapshot position, keyed by track GUID
+    local param_changes = {}
+    for _, sd in ipairs(sorted) do
+        local item = snap_get_item_by_guid(sd.snap.item_guid)
+        if item then
+            local snap_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            for _, ts in pairs(sd.snap.tracks) do
+                local tg = ts.guid
+                if not param_changes[tg] then
+                    param_changes[tg] = {
+                        volume = {}, pan = {}, mute = {}, solo = {},
+                        phase  = {}, width = {}, fx = {}, sends = {},
+                    }
+                end
+                local pc = param_changes[tg]
+                table.insert(pc.volume, { pos = snap_pos, value = ts.volume, snap_idx = sd.idx })
+                table.insert(pc.pan,    { pos = snap_pos, value = ts.pan,    snap_idx = sd.idx })
+                table.insert(pc.mute,   { pos = snap_pos, value = ts.mute,   snap_idx = sd.idx })
+                table.insert(pc.solo,   { pos = snap_pos, value = ts.solo,   snap_idx = sd.idx })
+                table.insert(pc.phase,  { pos = snap_pos, value = ts.phase,  snap_idx = sd.idx })
+                if ts.width then
+                    table.insert(pc.width, { pos = snap_pos, value = ts.width, snap_idx = sd.idx })
+                end
+                for fx_idx, fx in pairs(ts.fx_chain) do
+                    if not pc.fx[fx_idx] then pc.fx[fx_idx] = {} end
+                    for param_idx, val in pairs(fx.params) do
+                        if not pc.fx[fx_idx][param_idx] then
+                            pc.fx[fx_idx][param_idx] = {}
+                        end
+                        table.insert(pc.fx[fx_idx][param_idx],
+                            { pos = snap_pos, value = val, snap_idx = sd.idx })
+                    end
+                end
+                for si, send in pairs(ts.sends) do
+                    if not pc.sends[si] then
+                        pc.sends[si] = { volume = {}, pan = {}, mute = {} }
+                    end
+                    table.insert(pc.sends[si].volume,
+                        { pos = snap_pos, value = send.volume, snap_idx = sd.idx })
+                    table.insert(pc.sends[si].pan,
+                        { pos = snap_pos, value = send.pan,    snap_idx = sd.idx })
+                    table.insert(pc.sends[si].mute,
+                        { pos = snap_pos, value = send.mute,   snap_idx = sd.idx })
+                end
+            end
+        end
+    end
+
+    local auto_count    = 0
+    local tracks_w_auto = {}
+
+    local function has_changes(points)
+        if #points < 2 then return false end
+        local first = points[1].value
+        for i = 2, #points do
+            if math.abs(points[i].value - first) > 0.0001 then return true end
+        end
+        return false
+    end
+
+    local function get_or_create_envelope(track, param_name)
+        local env = GetTrackEnvelopeByName(track, param_name)
+        if env then
+            GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
+            GetSetEnvelopeInfo_String(env, "ACTIVE",  "1", true)
+            GetSetEnvelopeInfo_String(env, "ARM",     "1", true)
+            return env
+        end
+        local num_sel, saved = CountSelectedTracks(0), {}
+        for i = 0, num_sel - 1 do saved[i] = GetSelectedTrack(0, i) end
+        Main_OnCommand(40297, 0)
+        SetTrackSelected(track, true)
+        local action_ids = { Volume = 40406, Pan = 40407, Mute = 40867, Width = 41870 }
+        local action = action_ids[param_name]
+        if action then
+            local had = false
+            for e = 0, CountTrackEnvelopes(track) - 1 do
+                local _, nm = GetEnvelopeName(GetTrackEnvelope(track, e), "")
+                if nm == param_name then had = true; break end
+            end
+            if not had then Main_OnCommand(action, 0) end
+        end
+        Main_OnCommand(40297, 0)
+        for i = 0, num_sel - 1 do SetTrackSelected(saved[i], true) end
+        env = GetTrackEnvelopeByName(track, param_name)
+        if env then
+            GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
+            GetSetEnvelopeInfo_String(env, "ACTIVE",  "1", true)
+            GetSetEnvelopeInfo_String(env, "ARM",     "1", true)
+        end
+        return env
+    end
+
+    -- Inserts stepped automation points with optional gap-midpoint switching
+    -- and a 35 ms ramp before each value change (mirrors GUI behaviour).
+    -- Also resets all changing parameters to neutral on the first call
+    -- (idempotent — safe to call once per envelope per conversion run).
+    local function insert_automation_points(env, points, needs_scaling)
+        local to_write, prev = {}, nil
+        for _, pt in ipairs(points) do
+            if not prev or math.abs(pt.value - prev) > 0.0001 then
+                table.insert(to_write, pt); prev = pt.value
+            end
+        end
+        if #to_write == 0 then return end
+
+        -- Reset all parameters that will receive automation to neutral
+        for tg, pc in pairs(param_changes) do
+            local tr = snap_find_track_by_guid(tg)
+            if tr then
+                if has_changes(pc.volume) then SetMediaTrackInfo_Value(tr, "D_VOL",   1.0) end
+                if has_changes(pc.pan)    then SetMediaTrackInfo_Value(tr, "D_PAN",   0.0) end
+                if has_changes(pc.mute)   then SetMediaTrackInfo_Value(tr, "B_MUTE",  0)   end
+                if has_changes(pc.phase)  then SetMediaTrackInfo_Value(tr, "B_PHASE", 0)   end
+                if has_changes(pc.width)  then SetMediaTrackInfo_Value(tr, "D_WIDTH", 1.0) end
+                for si, sp in pairs(pc.sends) do
+                    if has_changes(sp.volume) then
+                        SetTrackSendInfo_Value(tr, 0, si, "D_VOL",  1.0)
+                    end
+                    if has_changes(sp.pan) then
+                        SetTrackSendInfo_Value(tr, 0, si, "D_PAN",  0.0)
+                    end
+                    if has_changes(sp.mute) then
+                        SetTrackSendInfo_Value(tr, 0, si, "B_MUTE", 0)
+                    end
+                end
+            end
+        end
+
+        local auto_points = {}
+        table.insert(auto_points, { pos = 0, value = to_write[1].value })
+
+        local folder_sel = flags.bank_folder_selection or "all"
+
+        for i = 1, #to_write do
+            local pt        = to_write[i]
+            local snap      = snaps[pt.snap_idx]
+            local snap_item = snap and snap_get_item_by_guid(snap.item_guid)
+            if not snap_item then goto continue_pt end
+
+            local snap_start  = GetMediaItemInfo_Value(snap_item, "D_POSITION")
+            local snap_folder = GetMediaItem_Track(snap_item)
+            local target_pos  = snap_start
+
+            if i > 1 and flags.switch_mid_gap then
+                local prev_pt   = to_write[i - 1]
+                local prev_snap = snaps[prev_pt.snap_idx]
+                local prev_item = prev_snap and snap_get_item_by_guid(prev_snap.item_guid)
+                if prev_item then
+                    local prev_folder = GetMediaItem_Track(prev_item)
+                    local should_check = (folder_sel == "all")
+                    if not should_check then
+                        local _, pg = GetSetMediaTrackInfo_String(prev_folder, "GUID", "", false)
+                        local _, sg = GetSetMediaTrackInfo_String(snap_folder, "GUID", "", false)
+                        if pg == folder_sel or sg == folder_sel then should_check = true end
+                    end
+                    if should_check then
+                        local snap_guid  = BR_GetMediaItemGUID(snap_item)
+                        local latest_end = -1
+                        local has_overlap = false
+                        for k = 0, CountMediaItems(0) - 1 do
+                            local it = GetMediaItem(0, k)
+                            if BR_GetMediaItemGUID(it) ~= snap_guid then
+                                local check_it = (folder_sel == "all")
+                                if not check_it then
+                                    local it_tr = GetMediaItem_Track(it)
+                                    local _, itg = GetSetMediaTrackInfo_String(it_tr, "GUID", "", false)
+                                    check_it = (itg == folder_sel)
+                                end
+                                if check_it then
+                                    local it_s = GetMediaItemInfo_Value(it, "D_POSITION")
+                                    local it_e = it_s + GetMediaItemInfo_Value(it, "D_LENGTH")
+                                    if it_s < snap_start and it_e > snap_start then
+                                        has_overlap = true; break
+                                    end
+                                    if it_e < snap_start and it_e > latest_end then
+                                        latest_end = it_e
+                                    end
+                                end
+                            end
+                        end
+                        if not has_overlap and latest_end >= 0 then
+                            local gap = snap_start - latest_end
+                            if gap > 0.001 then
+                                target_pos = latest_end + gap / 2
+                            end
+                        end
+                    end
+                end
+            end
+
+            if i > 1 then
+                table.insert(auto_points, { pos = target_pos - 0.035, value = to_write[i-1].value })
+            end
+            table.insert(auto_points, { pos = target_pos, value = pt.value })
+
+            ::continue_pt::
+        end
+
+        for _, ap in ipairs(auto_points) do
+            local v = needs_scaling and ScaleToEnvelopeMode(1, ap.value) or ap.value
+            InsertEnvelopePoint(env, ap.pos, v, 0, 0, false, true)
+        end
+    end
+
+    -- Write automation lanes for every track whose parameters actually change
+    for tg, pc in pairs(param_changes) do
+        local track = snap_find_track_by_guid(tg)
+        if track then
+            local got_auto = false
+            SetMediaTrackInfo_Value(track, "I_AUTOMODE", 1) -- read mode
+
+            if has_changes(pc.volume) then
+                local env = get_or_create_envelope(track, "Volume")
+                if env then
+                    insert_automation_points(env, pc.volume, true)
+                    Envelope_SortPoints(env)
+                    auto_count = auto_count + 1; got_auto = true
+                end
+            end
+            if has_changes(pc.pan) then
+                local inv = {}
+                for _, pt in ipairs(pc.pan) do
+                    table.insert(inv, { pos = pt.pos, value = -pt.value, snap_idx = pt.snap_idx })
+                end
+                local env = get_or_create_envelope(track, "Pan")
+                if env then
+                    insert_automation_points(env, inv, false)
+                    Envelope_SortPoints(env)
+                    auto_count = auto_count + 1; got_auto = true
+                end
+            end
+            if has_changes(pc.mute) then
+                local inv = {}
+                for _, pt in ipairs(pc.mute) do
+                    table.insert(inv, { pos = pt.pos,
+                        value = pt.value == 1 and 0 or 1, snap_idx = pt.snap_idx })
+                end
+                local env = get_or_create_envelope(track, "Mute")
+                if env then
+                    insert_automation_points(env, inv, false)
+                    Envelope_SortPoints(env)
+                    auto_count = auto_count + 1; got_auto = true
+                end
+            end
+            if has_changes(pc.solo) then
+                local env = GetTrackEnvelopeByName(track, "Solo")
+                if env then
+                    insert_automation_points(env, pc.solo, false)
+                    Envelope_SortPoints(env)
+                    auto_count = auto_count + 1; got_auto = true
+                end
+            end
+            if has_changes(pc.phase) then
+                local env = GetTrackEnvelopeByName(track, "Phase")
+                           or GetTrackEnvelopeByName(track, "Polarity")
+                if env then
+                    insert_automation_points(env, pc.phase, false)
+                    Envelope_SortPoints(env)
+                    auto_count = auto_count + 1; got_auto = true
+                end
+            end
+            if has_changes(pc.width) then
+                local env = get_or_create_envelope(track, "Width")
+                if env then
+                    insert_automation_points(env, pc.width, false)
+                    Envelope_SortPoints(env)
+                    auto_count = auto_count + 1; got_auto = true
+                end
+            end
+            for fx_idx, fx_params in pairs(pc.fx) do
+                for param_idx, pts in pairs(fx_params) do
+                    if has_changes(pts) then
+                        local env = GetFXEnvelope(track, fx_idx, param_idx, true)
+                        if env then
+                            insert_automation_points(env, pts, false)
+                            Envelope_SortPoints(env)
+                            GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
+                            GetSetEnvelopeInfo_String(env, "ACTIVE",  "1", true)
+                            GetSetEnvelopeInfo_String(env, "ARM",     "1", true)
+                            auto_count = auto_count + 1; got_auto = true
+                        end
+                    end
+                end
+            end
+            for si, sp in pairs(pc.sends) do
+                if has_changes(sp.volume) or has_changes(sp.pan) or has_changes(sp.mute) then
+                    local num_sel, saved = CountSelectedTracks(0), {}
+                    for k = 0, num_sel - 1 do saved[k] = GetSelectedTrack(0, k) end
+                    Main_OnCommand(40297, 0)
+                    SetTrackSelected(track, true)
+                    Main_OnCommand(41327, 0) -- Track: Toggle send envelopes visible
+                    Main_OnCommand(40297, 0)
+                    for k = 0, num_sel - 1 do SetTrackSelected(saved[k], true) end
+
+                    if has_changes(sp.volume) then
+                        local env = BR_GetMediaTrackSendInfo_Envelope(track, 0, si, 0)
+                        if env then
+                            insert_automation_points(env, sp.volume, true)
+                            Envelope_SortPoints(env)
+                            auto_count = auto_count + 1; got_auto = true
+                        end
+                    end
+                    if has_changes(sp.pan) then
+                        local env = BR_GetMediaTrackSendInfo_Envelope(track, 0, si, 1)
+                        if env then
+                            insert_automation_points(env, sp.pan, false)
+                            Envelope_SortPoints(env)
+                            auto_count = auto_count + 1; got_auto = true
+                        end
+                    end
+                    if has_changes(sp.mute) then
+                        local inv = {}
+                        for _, pt in ipairs(sp.mute) do
+                            table.insert(inv, { pos = pt.pos,
+                                value = pt.value == 1 and 0 or 1, snap_idx = pt.snap_idx })
+                        end
+                        local env = BR_GetMediaTrackSendInfo_Envelope(track, 0, si, 2)
+                        if env then
+                            insert_automation_points(env, inv, false)
+                            Envelope_SortPoints(env)
+                            auto_count = auto_count + 1; got_auto = true
+                        end
+                    end
+                end
+            end
+
+            if got_auto then tracks_w_auto[track] = true end
+        end
+    end
+
+    -- Show in TCP any tracks that received automation
+    for track in pairs(tracks_w_auto) do
+        if GetMediaTrackInfo_Value(track, "B_SHOWINTCP") == 0 then
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+            local _, guid  = GetSetMediaTrackInfo_String(track, "GUID",      "", false)
+            local _, mixer = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+            local key = (mixer == "y") and ("mixer_tcp_visible_" .. guid)
+                                        or ("tcp_visible_"       .. guid)
+            SetProjExtState(0, "ReaClassical_MissionControl", key, "1")
+        end
+    end
+
+    UpdateArrange()
+    TrackList_AdjustWindows(false)
+    Undo_EndBlock("Convert Mixer Snapshots to Automation", -1)
+    say(auto_count .. " automation lane" .. (auto_count ~= 1 and "s" or "") ..
+        " created from " .. #snaps .. " snapshot" .. (#snaps ~= 1 and "s" or ""))
+end
+
+---------------------------------------------------------------------
+
+local function snap_daemon_cmd()
+    if not APIExists("AddRemoveReaScript") then return 0 end
+    local path = script_path .. "ReaClassical_Mixer Snapshots Daemon.lua"
+    return AddRemoveReaScript(true, 0, path, true)
+end
+
+local function snap_daemon_running()
+    local _, ts = GetProjExtState(0, "MixerSnapshots", "daemon_heartbeat")
+    return (os.time() - (tonumber(ts) or 0)) < 5
+end
+
+---------------------------------------------------------------------
+
+function try_snapshots(cmd)
+    -- snap? — list all snapshots in current bank (timeline order)
+    if cmd == "snap?" then
+        local bank = snap_get_current_bank()
+        local snaps = snap_load_bank(bank)
+        if #snaps == 0 then
+            say("No snapshots in bank " .. bank)
+            return true
+        end
+        snap_sort_by_timeline(snaps)
+        say("Bank " .. bank .. " (" .. #snaps .. " snapshot" .. (#snaps ~= 1 and "s" or "") .. "):")
+        for i, s in ipairs(snaps) do
+            local item = snap_get_item_by_guid(s.item_guid)
+            local pos_str = item and format_timestr_pos(GetMediaItemInfo_Value(item, "D_POSITION"), "", -1) or "?"
+            local name = s.item_name ~= "" and s.item_name or s.item_guid:sub(1, 13) .. "..."
+            local pipe = name:find("|")
+            if pipe then name = name:sub(1, pipe - 1) end
+            say(string.format("  %d: %s @ %s  [%s %s]", i, name, pos_str,
+                s.date or "", s.time or ""))
+        end
+        return true
+    end
+
+    -- snap.bank? — query active bank
+    if cmd == "snap.bank?" then
+        say("Snapshot bank: " .. snap_get_current_bank())
+        return true
+    end
+
+    -- snap.bank=X — switch active bank
+    local new_bank = cmd:match("^snap%.bank=([ABCD])$")
+    if new_bank then
+        snap_set_current_bank(new_bank)
+        say("Snapshot bank: " .. new_bank)
+        return true
+    end
+
+    -- snap.ar? — query auto-recall state for current bank
+    if cmd == "snap.ar?" then
+        local bank = snap_get_current_bank()
+        local _, flags = snap_load_bank(bank)
+        say("Auto-recall (bank " .. bank .. "): " ..
+            (flags.disable_auto_recall and "off" or "on"))
+        return true
+    end
+
+    -- snap.ar=y/n — enable/disable auto-recall for current bank
+    local ar_val = cmd:match("^snap%.ar=([yn])$")
+    if ar_val then
+        local bank = snap_get_current_bank()
+        local snaps, flags = snap_load_bank(bank)
+        flags.disable_auto_recall = (ar_val == "n")
+        snap_save_bank(bank, snaps, flags)
+        say("Auto-recall (bank " .. bank .. "): " ..
+            (flags.disable_auto_recall and "off" or "on"))
+        return true
+    end
+
+    -- snap.gapfolder? — show current gap-detection folder for current bank
+    if cmd == "snap.gapfolder?" then
+        local bank = snap_get_current_bank()
+        local _, flags = snap_load_bank(bank)
+        local sel = flags.bank_folder_selection or "all"
+        if sel == "all" then
+            say("Gap folder (bank " .. bank .. "): all")
+        else
+            local tr   = snap_find_track_by_guid(sel)
+            local name = ""
+            if tr then
+                _, name = GetSetMediaTrackInfo_String(tr, "P_NAME", "", false)
+            end
+            say("Gap folder (bank " .. bank .. "): " .. (name ~= "" and name or sel))
+        end
+        return true
+    end
+
+    -- snap.gapfolder=all  or  snap.gapfolder=<track name>
+    local gf_val = cmd:match("^snap%.gapfolder=(.+)$")
+    if gf_val then
+        local bank = snap_get_current_bank()
+        local snaps, flags = snap_load_bank(bank)
+        if gf_val == "all" then
+            flags.bank_folder_selection = "all"
+            snap_save_bank(bank, snaps, flags)
+            say("Gap folder (bank " .. bank .. "): all")
+        else
+            local found = nil
+            for i = 0, CountTracks(0) - 1 do
+                local t = GetTrack(0, i)
+                local _, tn = GetSetMediaTrackInfo_String(t, "P_NAME", "", false)
+                if tn == gf_val then found = t; break end
+            end
+            if not found then
+                say("No track named '" .. gf_val .. "' found")
+            else
+                local _, tg = GetSetMediaTrackInfo_String(found, "GUID", "", false)
+                flags.bank_folder_selection = tg
+                snap_save_bank(bank, snaps, flags)
+                say("Gap folder (bank " .. bank .. "): " .. gf_val)
+            end
+        end
+        return true
+    end
+
+    -- snapcopy=X — copy bank X into current bank (snapshots only)
+    local copy_bank = cmd:match("^snapcopy=([ABCD])$")
+    if copy_bank then
+        local bank = snap_get_current_bank()
+        if copy_bank == bank then
+            say("Already in bank " .. bank)
+            return true
+        end
+        local src_snaps = snap_load_bank(copy_bank)
+        local _, dst_flags = snap_load_bank(bank)
+        snap_save_bank(bank, src_snaps, dst_flags)
+        say("Copied " .. #src_snaps .. " snapshot" .. (#src_snaps ~= 1 and "s" or "") ..
+            " from bank " .. copy_bank .. " to bank " .. bank)
+        return true
+    end
+
+    -- snapclear — delete all snapshots in current bank
+    if cmd == "snapclear" then
+        local bank = snap_get_current_bank()
+        local _, flags = snap_load_bank(bank)
+        flags.counter = 0
+        snap_save_bank(bank, {}, flags)
+        say("Bank " .. bank .. " cleared")
+        return true
+    end
+
+    -- snap+ — create or update snapshot for the selected item
+    if cmd == "snap+" then
+        local item = GetSelectedMediaItem(0, 0)
+        if not item then say("No item selected"); return true end
+        local item_guid = BR_GetMediaItemGUID(item)
+        local take = GetActiveTake(item)
+        local item_name = ""
+        if take then
+            _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+        end
+        local bank = snap_get_current_bank()
+        local snaps, flags = snap_load_bank(bank)
+        local existing_idx = nil
+        for i, s in ipairs(snaps) do
+            if s.item_guid == item_guid then existing_idx = i; break end
+        end
+        local snapshot = {
+            item_guid = item_guid,
+            item_name = item_name or "",
+            date      = os.date("%Y-%m-%d"),
+            time      = os.date("%H:%M:%S"),
+            notes     = existing_idx and (snaps[existing_idx].notes or "") or "",
+            tracks    = {},
+        }
+        for i = 0, CountTracks(0) - 1 do
+            local track = GetTrack(0, i)
+            if snap_is_special_track(track) then
+                snapshot.tracks[i] = snap_get_track_state(track)
+            end
+        end
+        local display = item_name ~= "" and item_name or item_guid:sub(1, 13)
+        if existing_idx then
+            snaps[existing_idx] = snapshot
+            say("Snapshot updated: " .. display)
+        else
+            flags.counter = (flags.counter or 0) + 1
+            table.insert(snaps, snapshot)
+            say("Snapshot created: " .. display)
+        end
+        snap_save_bank(bank, snaps, flags)
+        if not snap_daemon_running() then
+            local cid = snap_daemon_cmd()
+            if cid ~= 0 then
+                Main_OnCommand(cid, 0)
+                say("Snapshot daemon started")
+            end
+        end
+        return true
+    end
+
+    -- snaprecall — recall snapshot matching the current cursor/item position
+    if cmd == "snaprecall" then
+        local bank = snap_get_current_bank()
+        local snaps, flags = snap_load_bank(bank)
+        local item = GetSelectedMediaItem(0, 0)
+        local snap = item and snap_find_by_item_guid(snaps, BR_GetMediaItemGUID(item))
+        if not snap then
+            snap = snap_find_at_cursor(snaps, GetCursorPosition())
+        end
+        if snap then
+            snap_recall_snapshot(snap, flags)
+            local name = snap.item_name ~= "" and snap.item_name or "snapshot"
+            say("Recalled: " .. name)
+        else
+            say("No snapshot at cursor position")
+        end
+        return true
+    end
+
+    -- snapN — recall snapshot N (1-based, timeline order)
+    local snap_n = cmd:match("^snap(%d+)$")
+    if snap_n then
+        local bank = snap_get_current_bank()
+        local snaps, flags = snap_load_bank(bank)
+        snap_sort_by_timeline(snaps)
+        local n = tonumber(snap_n)
+        local snap = snaps[n]
+        if not snap then
+            say("No snapshot " .. n .. " in bank " .. bank)
+            return true
+        end
+        snap_recall_snapshot(snap, flags)
+        local name = snap.item_name ~= "" and snap.item_name or snap.item_guid:sub(1, 13)
+        say("Recalled snapshot " .. n .. ": " .. name)
+        return true
+    end
+
+    -- snap-N — delete snapshot N (1-based, timeline order)
+    local del_n = cmd:match("^snap%-(%d+)$")
+    if del_n then
+        local bank = snap_get_current_bank()
+        local snaps, flags = snap_load_bank(bank)
+        snap_sort_by_timeline(snaps)
+        local n = tonumber(del_n)
+        if not snaps[n] then
+            say("No snapshot " .. n .. " in bank " .. bank)
+            return true
+        end
+        local name = snaps[n].item_name ~= "" and snaps[n].item_name
+            or snaps[n].item_guid:sub(1, 13)
+        table.remove(snaps, n)
+        snap_save_bank(bank, snaps, flags)
+        say("Deleted snapshot " .. n .. ": " .. name)
+        return true
+    end
+
+    -- snap2auto — convert all snapshots in current bank to automation lanes
+    if cmd == "snap2auto" then
+        local bank = snap_get_current_bank()
+        local snaps, flags = snap_load_bank(bank)
+        snap_convert_to_automation(snaps, flags)
+        return true
+    end
+
+    -- snap.open — start the Mixer Snapshots Daemon
+    if cmd == "snap.open" then
+        local cid = snap_daemon_cmd()
+        if cid == 0 then
+            say("Mixer Snapshots Daemon script not found")
+            return true
+        end
+        if snap_daemon_running() then
+            say("Snapshot daemon already running")
+        else
+            Main_OnCommand(cid, 0)
+            say("Snapshot daemon started")
+        end
+        return true
+    end
+
+    -- snap.close — stop the Mixer Snapshots Daemon
+    if cmd == "snap.close" then
+        local cid = snap_daemon_cmd()
+        if cid == 0 then
+            say("Mixer Snapshots Daemon script not found")
+            return true
+        end
+        if not snap_daemon_running() then
+            say("Snapshot daemon is not running")
+        else
+            Main_OnCommand(cid, 0)
+            SetProjExtState(0, "MixerSnapshots", "daemon_heartbeat", "0")
+            say("Snapshot daemon stopped")
+        end
+        return true
+    end
+
+    -- snapdaemon? — check whether the headless auto-recall daemon is running
+    if cmd == "snapdaemon?" then
+        local _, ts = GetProjExtState(0, "MixerSnapshots", "daemon_heartbeat")
+        local t = tonumber(ts) or 0
+        if snap_daemon_running() then
+            say(string.format("Snapshot daemon: running (last heartbeat %ds ago)", os.time() - t))
+        else
+            say("Snapshot daemon: stopped  (use snap.open to start)")
+        end
+        return true
+    end
+
+    -- snapauto- — clear all automation from special tracks
+    if cmd == "snapauto-" then
+        Undo_BeginBlock()
+        local count = 0
+        for i = 0, CountTracks(0) - 1 do
+            local track = GetTrack(0, i)
+            if snap_is_special_track(track) then
+                local n = CountTrackEnvelopes(track)
+                for e = 0, n - 1 do
+                    local env = GetTrackEnvelope(track, e)
+                    DeleteEnvelopePointRange(env, -1000000, 1000000)
+                    GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
+                    GetSetEnvelopeInfo_String(env, "ACTIVE",  "0", true)
+                    GetSetEnvelopeInfo_String(env, "ARM",     "0", true)
+                end
+                if n > 0 then count = count + 1 end
+            end
+        end
+        UpdateArrange()
+        TrackList_AdjustWindows(false)
+        Undo_EndBlock("Clear Mixer Snapshot Automation", -1)
+        say("Cleared automation from " .. count .. " track" .. (count ~= 1 and "s" or ""))
+        return true
+    end
+
+    return false
+end
+
+---------------------------------------------------------------------
+-- Prepare Takes + Preferences helpers
+---------------------------------------------------------------------
+
+local PREF_LABELS = {
+    "S-D Crossfade Length (ms)",
+    "CD Track Offset (ms)",
+    "INDEX0 Length (s) (>= 1)",
+    "Album Lead-out Time (s)",
+    "No Auto Item Coloring",
+    "No Ranking Color",
+    "REF = Overdub Guide",
+    "Add S-D Markers at Mouse Hover",
+    "Alt Audition Playback Rate",
+    "Year of Production",
+    "CUE Audio Format",
+    "Floating Destination Folder",
+    "Find Takes Using Item Names",
+    "Show Only Item Take Numbers",
+    "Source Audition Mode",
+}
+local PREF_BINARY = { [5]=true,[6]=true,[7]=true,[8]=true,[12]=true,[13]=true,[14]=true,[15]=true }
+local PREF_N = 15
+local PREF_FMT_VALID = { WAV=true, FLAC=true, MP3=true, AIFF=true }
+local PREF_KEYS = {
+    xfade=1, offset=2, index0=3, leadout=4, nocolor=5,
+    norank=6, refguide=7, sdmarkers=8, altrate=9, year=10,
+    cuefmt=11, floatdest=12, itemnames=13, takenums=14, srcmode=15,
+}
+
+local function pref_resolve(key)
+    local n = tonumber(key)
+    if n then return (n >= 1 and n <= PREF_N) and math.floor(n) or nil end
+    return PREF_KEYS[key:lower()]
+end
+
+local function pref_load()
+    local year = os.date("%Y")
+    local default = "35,200,3,7,0,0,0,0,0.75," .. year .. ",WAV,0,0,0,0"
+    local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
+    if saved == "" then saved = default end
+    if select(2, saved:gsub(",", ",")) + 1 ~= PREF_N then saved = default end
+    local t = {}
+    for v in saved:gmatch("([^,]+)") do t[#t+1] = v end
+    return t
+end
+
+local function pref_save(t)
+    SetProjExtState(0, "ReaClassical", "Preferences", table.concat(t, ","))
+end
+
+local function pref_validate(idx, val)
+    if idx == 11 then
+        local fmt = val:upper()
+        if not PREF_FMT_VALID[fmt] then
+            return false, nil, "CUE Audio Format must be WAV, FLAC, AIFF or MP3"
+        end
+        return true, fmt
+    end
+    local num = tonumber(val)
+    if not num then return false, nil, "must be a number" end
+    if num < 0 then return false, nil, "must not be negative" end
+    if PREF_BINARY[idx] then
+        if num ~= 0 and num ~= 1 then return false, nil, "must be 0 or 1 (boolean field)" end
+        return true, tostring(math.floor(num))
+    end
+    if idx == 3 and num < 1 then return false, nil, "INDEX0 Length must be >= 1" end
+    if idx ~= 9 and num ~= math.floor(num) then
+        return false, nil, "must be a whole number (only field 9 accepts decimals)"
+    end
+    return true, tostring(num)
+end
+
+---------------------------------------------------------------------
+
+function try_prepare_prefs(cmd)
+    -- prepare — run Prepare Takes headlessly
+    if cmd == "prepare" then
+        if CountMediaItems(0) == 0 then say("No items in project"); return true end
+        _G.RC_TERMINAL_ARGS = {}
+        dofile(script_path .. "ReaClassical_Prepare Takes.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- pref? — list all 15 preferences
+    if cmd == "pref?" then
+        local t = pref_load()
+        local out = { "Preferences:" }
+        for i = 1, PREF_N do
+            out[#out+1] = string.format("  %2d. %-40s %s", i, PREF_LABELS[i], t[i])
+        end
+        say(table.concat(out, "\n"))
+        return true
+    end
+
+    -- pref.key? — query single preference by keyword or index
+    local key_q = cmd:match("^pref%.([%w]+)%?$")
+    if key_q then
+        local idx = pref_resolve(key_q)
+        if not idx then
+            say("Unknown preference: " .. key_q); return true
+        end
+        local t = pref_load()
+        say(string.format("pref %d (%s) = %s", idx, PREF_LABELS[idx], t[idx]))
+        return true
+    end
+
+    -- pref.key=value — set single preference with validation
+    local key_s, val_s = cmd:match("^pref%.([%w]+)=(.+)$")
+    if key_s then
+        local idx = pref_resolve(key_s)
+        if not idx then
+            say("Unknown preference: " .. key_s); return true
+        end
+        local ok, norm, err = pref_validate(idx, val_s)
+        if not ok or not norm then
+            say("pref " .. idx .. ": " .. (err or "invalid value")); return true
+        end
+        local t = pref_load()
+        t[idx] = norm
+        pref_save(t)
+        say(string.format("pref %d (%s) → %s", idx, PREF_LABELS[idx], norm))
+        return true
+    end
+
+    return false
+end
+
+---------------------------------------------------------------------
+-- Record Panel helpers (headless, no ImGui)
+---------------------------------------------------------------------
+
+local function rec_get_take_count(session_name)
+    local sep = package.config:sub(1, 1)
+    local media_path = GetProjectPath(0)
+    local max_take = 0
+    local i = 0
+    while true do
+        local filename = EnumerateFiles(media_path .. sep .. session_name, i)
+        if not filename then break end
+        local n = tonumber(filename:match(".*[^%d](%d+)%)?%.%a+$"))
+        if n and n > max_take then max_take = n end
+        i = i + 1
+    end
+    return max_take
+end
+
+local function rec_update_wildcards(sess, take_num)
+    if not APIExists("SNM_SetStringConfigVar") then return end
+    local sep = package.config:sub(1, 1)
+    local s_dir = sess ~= "" and (sess .. sep) or ""
+    local s_sfx = sess ~= "" and (sess .. "_") or ""
+    local padded = string.format("%03d", math.max(1, tonumber(take_num) or 1))
+    SNM_SetStringConfigVar("recfile_wildcards", s_dir .. s_sfx .. "$tracknameornumber_T" .. padded)
+end
+
+local function rec_daemon_cmd()
+    if not APIExists("AddRemoveReaScript") then return 0 end
+    local path = script_path .. "ReaClassical_Record Panel Daemon.lua"
+    return AddRemoveReaScript(true, 0, path, true)
+end
+
+local function rec_daemon_running()
+    local _, ts = GetProjExtState(0, "ReaClassical", "rec_daemon_heartbeat")
+    return (os.time() - (tonumber(ts) or 0)) < 5
+end
+
+---------------------------------------------------------------------
+
+function try_record(cmd)
+    -- rec.open — start the Record Panel Daemon and arm the selected folder
+    if cmd == "rec.open" then
+        local cid = rec_daemon_cmd()
+        if cid == 0 then
+            say("Record Panel Daemon script not found")
+            return true
+        end
+        local already_running = rec_daemon_running()
+        if not already_running then
+            SetProjExtState(0, "ReaClassical", "rec_daemon_stop", "")
+            Main_OnCommand(cid, 0)
+            -- Pre-set the Panel toggle so F9 (called below) sees it as open
+            -- before the daemon's first defer frame fires
+            local panel_id = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
+            if panel_id ~= 0 then SetToggleCommandState(1, panel_id, 1) end
+        end
+        -- Arm the selected folder (first-press F9 behaviour) if nothing is armed yet
+        local any_armed = false
+        for i = 0, CountTracks(0) - 1 do
+            local t = GetTrack(0, i)
+            local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
+            if lb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1 then
+                any_armed = true; break
+            end
+        end
+        if not any_armed and APIExists("AddRemoveReaScript") then
+            local f9_cid = AddRemoveReaScript(true, 0,
+                script_path .. "ReaClassical_Classical Take Record.lua", true)
+            if f9_cid ~= 0 then Main_OnCommand(f9_cid, 0) end
+        end
+        say(already_running and "Record daemon already running" or "Record daemon started")
+        return true
+    end
+
+    -- rec.close — signal the daemon to stop itself cleanly
+    if cmd == "rec.close" then
+        local cid = rec_daemon_cmd()
+        if cid == 0 then
+            say("Record Panel Daemon script not found")
+            return true
+        end
+        if not rec_daemon_running() then
+            say("Record daemon is not running")
+        else
+            -- Signal the daemon to stop on its next frame; it resets the Panel
+            -- toggle state itself so F9 opens the GUI again.
+            SetProjExtState(0, "ReaClassical", "rec_daemon_stop", "1")
+            -- Invalidate heartbeat immediately so rec.open can restart right away
+            SetProjExtState(0, "ReaClassical", "rec_daemon_heartbeat", "0")
+            say("Record daemon stopped")
+        end
+        return true
+    end
+
+    -- rec.daemon? — check daemon status
+    if cmd == "rec.daemon?" then
+        local _, ts = GetProjExtState(0, "ReaClassical", "rec_daemon_heartbeat")
+        local t = tonumber(ts) or 0
+        if rec_daemon_running() then
+            say(string.format("Record daemon: running (last heartbeat %ds ago)", os.time() - t))
+        else
+            say("Record daemon: stopped  (use rec.open to start)")
+        end
+        return true
+    end
+
+    -- rec? — show all settings
+    if cmd == "rec?" then
+        local _, sess     = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        local _, take_str = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+        local _, override = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
+        local _, start_t  = GetProjExtState(0, "ReaClassical", "Recording Start")
+        local _, end_t    = GetProjExtState(0, "ReaClassical", "Recording End")
+        local _, dur      = GetProjExtState(0, "ReaClassical", "Recording Duration")
+        local _, overlap  = GetProjExtState(0, "ReaClassical", "AllowOverlappingTakes")
+        local _, horiz    = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+        local n = tonumber(take_str) or 0
+        local take_display = n > 0
+            and string.format("T%03d (%s)", n, override == "1" and "manual override" or "auto")
+            or "auto-detect"
+        say(table.concat({
+            "Recording settings:",
+            string.format("  session:    %s", sess ~= "" and sess or "(none)"),
+            string.format("  take:       %s", take_display),
+            string.format("  start:      %s", start_t ~= "" and start_t or "(none)"),
+            string.format("  end:        %s", end_t   ~= "" and end_t   or "(none)"),
+            string.format("  duration:   %s", dur     ~= "" and dur     or "(none)"),
+            string.format("  overlap:    %s", overlap == "1" and "yes" or "no"),
+            string.format("  horizontal: %s", horiz   == "1" and "yes" or "no"),
+            string.format("  daemon:     %s", rec_daemon_running() and "running" or "stopped"),
+        }, "\n"))
+        return true
+    end
+
+    -- rec.session=name — set session name (scans existing files for correct next take)
+    local sess_set = cmd:match("^rec%.session=(.+)$")
+    if sess_set then
+        sess_set = trim(sess_set)
+        SetProjExtState(0, "ReaClassical", "TakeSessionName", sess_set)
+        SetProjExtState(0, "ReaClassical", "TakeCounterOverride", "0")
+        local max_found = rec_get_take_count(sess_set)
+        local next_take = max_found + 1
+        SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(next_take))
+        rec_update_wildcards(sess_set, next_take)
+        say(string.format("Session: %s  (next take: T%03d)", sess_set, next_take))
+        return true
+    end
+
+    -- rec.session? — query session name
+    if cmd == "rec.session?" then
+        local _, sess = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        say("Session: " .. (sess ~= "" and sess or "(none)"))
+        return true
+    end
+
+    -- rec.session- — clear session name
+    if cmd == "rec.session-" then
+        SetProjExtState(0, "ReaClassical", "TakeSessionName", "")
+        SetProjExtState(0, "ReaClassical", "TakeCounterOverride", "0")
+        local max_found = rec_get_take_count("")
+        local next_take = max_found + 1
+        SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(next_take))
+        rec_update_wildcards("", next_take)
+        say(string.format("Session cleared  (next take: T%03d)", next_take))
+        return true
+    end
+
+    -- rec.take=N — set specific take with validation against existing files
+    local take_n_str = cmd:match("^rec%.take=(%d+)$")
+    if take_n_str then
+        local n = tonumber(take_n_str)
+        local _, sess = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        local max_found = rec_get_take_count(sess)
+        if n < max_found then
+            say(string.format(
+                "Cannot set take to %d — highest found is T%03d. Use rec.take=%d or higher.",
+                n, max_found, max_found))
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(n))
+        SetProjExtState(0, "ReaClassical", "TakeCounterOverride", "1")
+        rec_update_wildcards(sess, n)
+        say(string.format("Take set to T%03d (manual override)", n))
+        return true
+    end
+
+    -- rec.take=auto — disable override, revert to file-scan auto-detection
+    if cmd == "rec.take=auto" then
+        local _, sess = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        SetProjExtState(0, "ReaClassical", "TakeCounterOverride", "0")
+        local max_found = rec_get_take_count(sess)
+        local next_take = max_found + 1
+        SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(next_take))
+        rec_update_wildcards(sess, next_take)
+        say(string.format("Take: auto-detect  (next: T%03d)", next_take))
+        return true
+    end
+
+    -- rec.take? — query take number and mode
+    if cmd == "rec.take?" then
+        local _, take_str = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+        local _, override = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
+        local n = tonumber(take_str) or 0
+        if n > 0 then
+            say(string.format("Take: T%03d (%s)", n,
+                override == "1" and "manual override" or "auto"))
+        else
+            say("Take: auto-detect (not yet set)")
+        end
+        return true
+    end
+
+    -- rec.take+ — manually increment take by 1 (also updates wildcards)
+    if cmd == "rec.take+" then
+        local _, take_str = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+        local _, sess = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        local n = math.max(1, (tonumber(take_str) or 0) + 1)
+        SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(n))
+        SetProjExtState(0, "ReaClassical", "TakeCounterOverride", "1")
+        rec_update_wildcards(sess, n)
+        say(string.format("Take incremented to T%03d", n))
+        return true
+    end
+
+    -- rec.start=HH:MM — set recording start time
+    local start_val = cmd:match("^rec%.start=(.+)$")
+    if start_val then
+        if not start_val:match("^%d+:%d%d$") then
+            say("Invalid format — use HH:MM (e.g. rec.start=20:00)")
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "Recording Start", start_val)
+        say("Recording start: " .. start_val)
+        return true
+    end
+
+    -- rec.start? — query start time
+    if cmd == "rec.start?" then
+        local _, v = GetProjExtState(0, "ReaClassical", "Recording Start")
+        say("Recording start: " .. (v ~= "" and v or "(none)"))
+        return true
+    end
+
+    -- rec.end=HH:MM — set recording end time
+    local end_val = cmd:match("^rec%.end=(.+)$")
+    if end_val then
+        if not end_val:match("^%d+:%d%d$") then
+            say("Invalid format — use HH:MM (e.g. rec.end=23:00)")
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "Recording End", end_val)
+        say("Recording end: " .. end_val)
+        return true
+    end
+
+    -- rec.end? — query end time
+    if cmd == "rec.end?" then
+        local _, v = GetProjExtState(0, "ReaClassical", "Recording End")
+        say("Recording end: " .. (v ~= "" and v or "(none)"))
+        return true
+    end
+
+    -- rec.duration=HH:MM — set recording duration
+    local dur_val = cmd:match("^rec%.duration=(.+)$")
+    if dur_val then
+        if not dur_val:match("^%d+:%d%d$") then
+            say("Invalid format — use HH:MM (e.g. rec.duration=02:30)")
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "Recording Duration", dur_val)
+        say("Recording duration: " .. dur_val)
+        return true
+    end
+
+    -- rec.duration? — query duration
+    if cmd == "rec.duration?" then
+        local _, v = GetProjExtState(0, "ReaClassical", "Recording Duration")
+        say("Recording duration: " .. (v ~= "" and v or "(none)"))
+        return true
+    end
+
+    -- rec.time- — clear all time window fields at once
+    if cmd == "rec.time-" then
+        SetProjExtState(0, "ReaClassical", "Recording Start",    "")
+        SetProjExtState(0, "ReaClassical", "Recording End",      "")
+        SetProjExtState(0, "ReaClassical", "Recording Duration", "")
+        say("Recording time window cleared")
+        return true
+    end
+
+    -- rec.overlap=y/n — allow overlapping takes
+    local overlap_val = cmd:match("^rec%.overlap=([yn])$")
+    if overlap_val then
+        local v = overlap_val == "y" and "1" or "0"
+        SetProjExtState(0, "ReaClassical", "AllowOverlappingTakes", v)
+        say("Allow overlapping takes: " .. (v == "1" and "yes" or "no"))
+        return true
+    end
+
+    -- rec.overlap? — query overlap setting
+    if cmd == "rec.overlap?" then
+        local _, v = GetProjExtState(0, "ReaClassical", "AllowOverlappingTakes")
+        say("Allow overlapping takes: " .. (v == "1" and "yes" or "no"))
+        return true
+    end
+
+    -- rec.horizontal=y/n — record takes horizontally (vertical workflow)
+    local horiz_val = cmd:match("^rec%.horizontal=([yn])$")
+    if horiz_val then
+        local v = horiz_val == "y" and "1" or "0"
+        SetProjExtState(0, "ReaClassical", "RecordTakesHorizontally", v)
+        say("Record takes horizontally: " .. (v == "1" and "yes" or "no"))
+        return true
+    end
+
+    -- rec.horizontal? — query horizontal setting
+    if cmd == "rec.horizontal?" then
+        local _, v = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+        say("Record takes horizontally: " .. (v == "1" and "yes" or "no"))
+        return true
+    end
+
+    return false
+end
+
+---------------------------------------------------------------------
+-- Dispatcher
+---------------------------------------------------------------------
+
+function execute_command(cmd)
+    if cmd == "" then return end
+
+    if try_project_setup(cmd) then return end
+    if try_naming(cmd) then return end
+    if try_input_config(cmd) then return end
+    if try_selection(cmd) then return end
+    if try_markers(cmd) then return end
+    if try_mute_solo(cmd) then return end
+    if try_pan(cmd) then return end
+    if try_fader(cmd) then return end
+    if try_ddp(cmd) then return end
+    if try_undo_redo(cmd) then return end
+    if try_reorder(cmd) then return end
+    if try_add_remove(cmd) then return end
+    if try_routing_fx(cmd) then return end
+    if try_stats(cmd) then return end
+    if try_playrate_pitch(cmd) then return end
+    if try_snapshots(cmd) then return end
+    if try_prepare_prefs(cmd) then return end
+    if try_record(cmd) then return end
+    if try_misc(cmd) then return end
+
+    say("Unknown command: " .. cmd)
+end
+
+---------------------------------------------------------------------
+-- Entry point
+---------------------------------------------------------------------
+
+function main()
+    local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+    workflow = wf
+
+    local retval, input = GetUserInputs("ReaClassical Terminal", 1, "Command:,extrawidth=300", "")
+    if not retval then return end
+
+    local commands = {}
+    for c in input:gmatch("[^;]+") do
+        c = trim(c)
+        if c ~= "" then table.insert(commands, c) end
+    end
+    if #commands == 0 then return end
+
+    if workflow == "" then
+        local first = commands[1]
+        if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab") then
+            say("Please create a ReaClassical project first (e.g. 6v)")
+            return
+        end
+    end
+
+    Undo_BeginBlock()
+    for _, c in ipairs(commands) do
+        execute_command(c)
+    end
+    Undo_EndBlock("ReaClassical Terminal: " .. input, -1)
+    UpdateArrange()
+end
+
+main()

@@ -21,7 +21,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main
 local get_selected_media_items, count_selected_media_items
-local apply_rate_change, apply_pitch_change
+local apply_rate_change, apply_pitch_change, notify
 local get_folder_children, get_all_items_at_midpoints
 local get_items_at_midpoint
 local is_folder_track, get_parent_folder
@@ -29,7 +29,7 @@ local is_folder_track, get_parent_folder
 ---------------------------------------------------------------------
 
 local imgui_exists = APIExists("ImGui_GetVersion")
-if not imgui_exists then
+if not imgui_exists and not _G.RC_TERMINAL_ARGS then
     MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
     return
 end
@@ -53,11 +53,14 @@ end
 
 set_action_options(2)
 
-package.path = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui = require 'imgui' '0.10'
-
-local ctx = ImGui.CreateContext('ReaClassical Playrate and Pitch Adjuster')
+local ImGui, ctx
 local window_open = true
+
+if not _G.RC_TERMINAL_ARGS then
+    package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+    ImGui = require 'imgui' '0.10'
+    ctx = ImGui.CreateContext('ReaClassical Playrate and Pitch Adjuster')
+end
 
 local DEFAULT_W = 320
 local DEFAULT_H = 420
@@ -69,6 +72,19 @@ local pitch_str = "0.0"
 local message_text = ""
 local message_timer = 0
 local message_duration = 3.0
+
+---------------------------------------------------------------------
+
+-- Reports a status message: to the console when run headlessly from the
+-- Terminal, or as a transient on-screen message in the GUI.
+function notify(msg)
+    if _G.RC_TERMINAL_ARGS then
+        say(msg)
+    else
+        message_text = msg
+        message_timer = ImGui.GetTime(ctx)
+    end
+end
 
 ---------------------------------------------------------------------
 
@@ -228,8 +244,7 @@ function apply_rate_change(new_rate_val, relative_mode)
     local sel_items = get_selected_media_items()
     if #sel_items == 0 then
         PreventUIRefresh(-1)
-        message_text = "No items selected."
-        message_timer = ImGui.GetTime(ctx)
+        notify("No items selected.")
         Undo_EndBlock("RC Time Stretch (no-op)", -1)
         return
     end
@@ -246,8 +261,7 @@ function apply_rate_change(new_rate_val, relative_mode)
     end
     if folder_item_count > 1 then
         PreventUIRefresh(-1)
-        message_text = "Please select only one item at a time."
-        message_timer = ImGui.GetTime(ctx)
+        notify("Please select only one item at a time.")
         Undo_EndBlock("RC Time Stretch (no-op)", -1)
         return
     end
@@ -263,8 +277,7 @@ function apply_rate_change(new_rate_val, relative_mode)
     local folder_take = GetActiveTake(folder_item)
     if not folder_take then
         PreventUIRefresh(-1)
-        message_text = "Selected item has no take."
-        message_timer = ImGui.GetTime(ctx)
+        notify("Selected item has no take.")
         Undo_EndBlock("RC Time Stretch (no-op)", -1)
         return
     end
@@ -347,10 +360,9 @@ function apply_rate_change(new_rate_val, relative_mode)
     PreventUIRefresh(-1)
 
     local mode_str = relative_mode and string.format("%.2f%% relative", new_rate_val)
-        or string.format("%.4fs absolute", new_rate_val)
-    message_text = string.format("Time-stretched (%s) on %d item(s)\nRippled by %.4fs.",
-        mode_str, #all_target_items, total_delta)
-    message_timer = ImGui.GetTime(ctx)
+        or string.format("%.2f%% absolute", new_rate_val)
+    notify(string.format("Time-stretched (%s) on %d item(s)\nRippled by %.4fs.",
+        mode_str, #all_target_items, total_delta))
 
     Undo_EndBlock(string.format("RC Time Stretch (%s)", mode_str), -1)
 end
@@ -364,8 +376,7 @@ function apply_pitch_change(semitones)
     local sel_items = get_selected_media_items()
     if #sel_items == 0 then
         PreventUIRefresh(-1)
-        message_text = "No items selected."
-        message_timer = ImGui.GetTime(ctx)
+        notify("No items selected.")
         Undo_EndBlock("RC Pitch Adjust (no-op)", -1)
         return
     end
@@ -380,8 +391,7 @@ function apply_pitch_change(semitones)
     end
     if folder_item_count > 1 then
         PreventUIRefresh(-1)
-        message_text = "Please select only one item at a time."
-        message_timer = ImGui.GetTime(ctx)
+        notify("Please select only one item at a time.")
         Undo_EndBlock("RC Pitch Adjust (no-op)", -1)
         return
     end
@@ -398,9 +408,8 @@ function apply_pitch_change(semitones)
 
     UpdateArrange()
     PreventUIRefresh(-1)
-    message_text = string.format("Pitch set to %.2f semitones on %d item(s).",
-        semitones, #all_target_items)
-    message_timer = ImGui.GetTime(ctx)
+    notify(string.format("Pitch set to %.2f semitones on %d item(s).",
+        semitones, #all_target_items))
     Undo_EndBlock(string.format("RC Pitch Adjust (%.2f semitones)", semitones), -1)
 end
 
@@ -531,5 +540,17 @@ function main()
 end
 
 ---------------------------------------------------------------------
+
+if _G.RC_TERMINAL_ARGS then
+    local args = _G.RC_TERMINAL_ARGS
+    if args.action == "rate" then
+        apply_rate_change(args.value, args.relative)
+    elseif args.action == "reset_rate" then
+        reset_to_normal()
+    elseif args.action == "pitch" then
+        apply_pitch_change(args.value)
+    end
+    return
+end
 
 defer(main)

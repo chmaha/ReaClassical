@@ -878,12 +878,15 @@ function draw_table()
       if ImGui.Selectable(ctx, tostring(i), selected_snapshot == snap) then
         selected_snapshot = snap
         recall_snapshot(snap)
-        -- Move edit cursor to item start if auto-recall is enabled
+        -- Move edit cursor to item start and select item if auto-recall is enabled
         if not disable_auto_recall then
           local item = get_item_by_guid(snap.item_guid)
           if item then
             local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
             SetEditCurPos(item_pos, true, true)
+            SelectAllMediaItems(0, false)
+            SetMediaItemSelected(item, true)
+            UpdateArrange()
           end
         end
       end
@@ -912,6 +915,9 @@ function draw_table()
           if item then
             local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
             SetEditCurPos(item_pos, true, true)
+            SelectAllMediaItems(0, false)
+            SetMediaItemSelected(item, true)
+            UpdateArrange()
           end
         end
       end
@@ -928,6 +934,9 @@ function draw_table()
           if item then
             local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
             SetEditCurPos(item_pos, true, true)
+            SelectAllMediaItems(0, false)
+            SetMediaItemSelected(item, true)
+            UpdateArrange()
           end
         end
       end

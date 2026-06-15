@@ -38,20 +38,22 @@ if workflow == "" then
     return
 end
 
-local imgui_exists = APIExists("ImGui_GetVersion")
-if not imgui_exists then
-    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
-    return
+local ImGui, ctx
+
+if not _G.RC_TERMINAL_ARGS then
+    local imgui_exists = APIExists("ImGui_GetVersion")
+    if not imgui_exists then
+        MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+        return
+    end
+
+    set_action_options(2)
+
+    package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+    ImGui = require 'imgui' '0.10'
+
+    ctx = ImGui.CreateContext('ReaClassical Peak and Overs Check')
 end
-
-set_action_options(2)
-
-package.path = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui = require 'imgui' '0.10'
-
----------------------------------------------------------------------
-
-local ctx = ImGui.CreateContext('ReaClassical Peak and Overs Check')
 
 local PEAK_RATE = 100  -- peak samples per second analysed (~10ms resolution)
 local MERGE_GAP = 0.3  -- seconds; nearby overs are merged into one entry
@@ -306,5 +308,33 @@ end
 
 ---------------------------------------------------------------------
 
+if _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.threshold then
+    threshold = _G.RC_TERMINAL_ARGS.threshold
+    SetProjExtState(0, "ReaClassical", "PeaksThreshold", tostring(threshold))
+end
+
 scan()
+
+if _G.RC_TERMINAL_ARGS then
+    local lines = {}
+    if state.peak_db then
+        lines[#lines + 1] = string.format("Peak level: %.2f dB @ %s (%s)",
+            state.peak_db, format_pos(state.peak_pos), state.peak_track_name)
+        if _G.RC_TERMINAL_ARGS.jump_to_peak then
+            go_to(state.peak_pos, state.peak_track)
+        end
+    else
+        lines[#lines + 1] = "No audio found on unmuted tracks."
+    end
+    lines[#lines + 1] = string.format("Overs (>= %.1f dB): %d", threshold, #overs)
+    if #overs >= MAX_OVERS then
+        lines[#lines + 1] = "(list truncated at " .. MAX_OVERS .. " entries)"
+    end
+    for _, o in ipairs(overs) do
+        lines[#lines + 1] = string.format("  %.2f dB @ %s (%s)", o.db, format_pos(o.pos), o.track_name)
+    end
+    say(table.concat(lines, "\n"))
+    return
+end
+
 defer(main)

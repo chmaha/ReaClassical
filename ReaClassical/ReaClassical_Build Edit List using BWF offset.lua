@@ -343,6 +343,10 @@ end
 ---------------------------------------------------------------------
 
 function get_offset()
+    if _G.RC_TERMINAL_ARGS then
+        return _G.RC_TERMINAL_ARGS.offset or 0
+    end
+
     local retval, input = GetUserInputs("Frame Offset", 1, "Enter offset (frames):", "0")
     if retval then
         return tonumber(input) or 0

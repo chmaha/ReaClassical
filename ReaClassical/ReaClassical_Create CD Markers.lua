@@ -67,10 +67,12 @@ if not SWS_exists then
     return
 end
 
-local imgui_exists = APIExists("ImGui_GetVersion")
-if not imgui_exists then
-    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
-    return
+if not _G.RC_TERMINAL_ARGS then
+    local imgui_exists = APIExists("ImGui_GetVersion")
+    if not imgui_exists then
+        MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+        return
+    end
 end
 
 ---------------------------------------------------------------------
@@ -93,12 +95,17 @@ end
 -- Metadata Editor state
 ---------------------------------------------------------------------
 
-set_action_options(2)
+local ImGui, ctx
 
-package.path = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui = require 'imgui' '0.10'
+if not _G.RC_TERMINAL_ARGS then
+    set_action_options(2)
 
-local ctx = ImGui.CreateContext('DDP Metadata Editor')
+    package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+    ImGui = require 'imgui' '0.10'
+
+    ctx = ImGui.CreateContext('DDP Metadata Editor')
+end
+
 local window_open = true
 
 local labels = { "Title", "Performer", "Songwriter", "Composer", "Arranger", "Message", "ISRC" }
@@ -1651,6 +1658,26 @@ end
 
 ---------------------------------------------------------------------
 
+function render_wav_preset()
+    local proj = 0
+
+    -- WAV 16-bit sink config, base64-encoded (see ReaClassical-render.ini "WAV 44.1k 16-bit")
+    GetSetProjectInfo_String(proj, "RENDER_FORMAT", "ZXZhdxAAAA==", true)
+
+    GetSetProjectInfo(proj, "RENDER_SRATE", 44100, true)
+    GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
+    GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)   -- master mix
+
+    local export_dir = get_export_dir()
+    GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
+    GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$format_$samplerate_$bitdepth/$regionnumber $region", true)
+
+    Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
+end
+
+---------------------------------------------------------------------
+
 function render_flac_preset()
     local proj = 0
 
@@ -2423,6 +2450,7 @@ function editor_main()
         local render_buttons = {
             { label = "DDP",       fn = render_ddp_preset,       tooltip = "Apply the DDP render preset and render silently" },
             { label = "Cue Audio", fn = render_cue_audio_preset, tooltip = "Apply the Cue Audio render preset and render silently" },
+            { label = "WAV",       fn = render_wav_preset,       tooltip = "Apply the WAV 44.1/16 render preset and render silently" },
             { label = "FLAC",      fn = render_flac_preset,      tooltip = "Apply the FLAC 44.1/16 render preset and render silently" },
             { label = "Opus 160",  fn = render_opus_preset,      tooltip = "Apply the Opus 160 render preset and render silently" },
             { label = "MP3 320",   fn = render_mp3_preset,       tooltip = "Apply the MP3 320 render preset and render silently" },
@@ -2471,14 +2499,105 @@ end
 --                         ENTRY POINT
 ---------------------------------------------------------------------
 
+-- Headless render: re-create CD markers then apply the chosen render preset.
+if _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.action == "render" then
+    local sel_track = GetSelectedTrack(0, 0)
+    if sel_track then
+        points = {}
+        Undo_BeginBlock()
+        local success = run_create_cd_markers(sel_track)
+        Undo_EndBlock("Create CD/DDP Markers", -1)
+        if not success then return end
+    end
+    local fmt = _G.RC_TERMINAL_ARGS.format
+    if     fmt == "ddp"    then render_ddp_preset()
+    elseif fmt == "cue"    then render_cue_audio_preset()
+    elseif fmt == "wav"    then render_wav_preset()
+    elseif fmt == "flac"   then render_flac_preset()
+    elseif fmt == "opus"   then render_opus_preset()
+    elseif fmt == "mp3"    then render_mp3_preset()
+    elseif fmt == "custom" then open_render_dialog()
+    end
+    if fmt ~= "custom" then
+        say("Rendered: " .. fmt:upper())
+    end
+    return
+end
+
+-- Headless set_album: find or create the @-item on the folder track, update
+-- its take name, then regenerate CD/DDP markers from it.
+if _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.action == "set_album" then
+    local sel_track = GetSelectedTrack(0, 0)
+    if not sel_track then
+        say("Error: No track selected.")
+        return
+    end
+    local depth = GetMediaTrackInfo_Value(sel_track, "I_FOLDERDEPTH")
+    if depth ~= 1 then
+        local track_index = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+        local folder_track = nil
+        for i = track_index - 1, 0, -1 do
+            local t = GetTrack(0, i)
+            if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                folder_track = t
+                break
+            end
+        end
+        if not folder_track then
+            say("Error: No folder track found.")
+            return
+        end
+        sel_track = folder_track
+    end
+    if not get_info(sel_track) then
+        split_and_tag_final_item(sel_track)
+    end
+    for i = 0, CountTrackMediaItems(sel_track) - 1 do
+        local item = GetTrackMediaItem(sel_track, i)
+        local take = GetActiveTake(item)
+        if take then
+            local _, n = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+            if n and n:match("^@") then
+                GetSetMediaItemTakeInfo_String(take, "P_NAME", _G.RC_TERMINAL_ARGS.name, true)
+                break
+            end
+        end
+    end
+    points = {}
+    Undo_BeginBlock()
+    local success = run_create_cd_markers(sel_track)
+    Undo_EndBlock("Create CD/DDP Markers", -1)
+    if success then
+        say("Album metadata set, CD/DDP markers updated")
+    end
+    return
+end
+
 -- Initial run: create CD markers, then open editor
 local selected_track = GetSelectedTrack(0, 0)
-if selected_track then
+if not selected_track then
+    if _G.RC_TERMINAL_ARGS then
+        say("Error: No track selected.")
+        return
+    end
+else
     points = {}
     Undo_BeginBlock()
     local success = run_create_cd_markers(selected_track)
     Undo_EndBlock("Create CD/DDP Markers", -1)
     if not success then return end
+    if _G.RC_TERMINAL_ARGS then
+        say("CD/DDP markers created")
+        return
+    end
+end
+
+-- When called by Add/Remove CD Marker Offsets scripts, they set ddp_silent="y"
+-- to indicate the markers were refreshed internally and the GUI should not open.
+local _, ddp_silent_flag = GetProjExtState(0, "ReaClassical", "ddp_silent")
+if ddp_silent_flag == "y" then
+    SetProjExtState(0, "ReaClassical", "ddp_silent", "")
+    return
 end
 
 defer(editor_main)

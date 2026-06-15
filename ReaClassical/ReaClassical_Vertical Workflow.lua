@@ -89,8 +89,10 @@ function main()
             fold_small()
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
             copy_track_names(table, mixer_table)
-            local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
-            Main_OnCommand(mission_control, 0)
+            if not _G.RC_TERMINAL_ARGS then
+                local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
+                Main_OnCommand(mission_control, 0)
+            end
             set_recording_to_primary_and_secondary(end_of_sources)
         end
         SetProjExtState(0, "ReaClassical", "TrackCount", "")

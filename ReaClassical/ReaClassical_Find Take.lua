@@ -49,16 +49,6 @@ function main()
 
     local take_choice
     local _, session_name = GetProjExtState(0, "ReaClassical", "SessionNameSearch")
-    ::start::
-    local retval, inputs = GetUserInputs('Find Take', 2, 'Take Number:,Session Name (optional):', ',' .. session_name)
-    if not retval then return end
-
-    take_choice, session_name = inputs:match("([^,]*),([^,]*)")
-    take_choice = tonumber(take_choice)
-    if not take_choice and session_name ~= "" then take_choice = 1 end
-
-    session_name = session_name:match("^%s*(.-)%s*$") -- Trim spaces around the session name
-    SetProjExtState(0, "ReaClassical", "SessionNameSearch", session_name)
 
     local num_of_items = CountMediaItems(0)
 
@@ -173,12 +163,39 @@ function main()
         return false
     end
 
-    local found = search(false) or search(true)
+    if _G.RC_TERMINAL_ARGS then
+        take_choice = _G.RC_TERMINAL_ARGS.take_choice
+        session_name = _G.RC_TERMINAL_ARGS.session_name or ""
 
-    if not found and (take_choice or session_name ~= "") then
-        local response = MB("Take not found. Try again?", "Find Take", 4)
-        if response == 6 then
-            goto start
+        local found = search(false) or search(true)
+        if found then
+            say("Take found")
+        else
+            say("Take not found")
+        end
+    else
+        while true do
+            local retval, inputs = GetUserInputs(
+                'Find Take', 2, 'Take Number:,Session Name (optional):', ',' .. session_name)
+            if not retval then return end
+
+            take_choice, session_name = inputs:match("([^,]*),([^,]*)")
+            take_choice = tonumber(take_choice)
+            if not take_choice and session_name ~= "" then take_choice = 1 end
+
+            session_name = session_name:match("^%s*(.-)%s*$") -- Trim spaces around the session name
+            SetProjExtState(0, "ReaClassical", "SessionNameSearch", session_name)
+
+            local found = search(false) or search(true)
+
+            if not found and (take_choice or session_name ~= "") then
+                local response = MB("Take not found. Try again?", "Find Take", 4)
+                if response ~= 6 then
+                    break
+                end
+            else
+                break
+            end
         end
     end
 end

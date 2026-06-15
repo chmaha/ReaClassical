@@ -35,21 +35,21 @@ local update_progress, do_processing_step
 local extract_take_number_from_filename
 
 -- Check for ReaImGui
-local imgui_exists = APIExists("ImGui_GetVersion")
-if not imgui_exists then
-    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
-    return
+local ImGui
+if not _G.RC_TERMINAL_ARGS then
+    local imgui_exists = APIExists("ImGui_GetVersion")
+    if not imgui_exists then
+        MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+        return
+    end
+    set_action_options(2)
+    package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+    ImGui = require 'imgui' '0.10'
 end
-
 local group_state = GetToggleCommandState(1156)
 if group_state ~= 1 then
     Main_OnCommand(1156, 0) -- Enable item grouping
 end
-
-set_action_options(2)
-
-package.path = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui = require 'imgui' '0.10'
 local ctx = nil
 local window_open = true
 local progress_stage = ""
@@ -292,9 +292,14 @@ function do_processing_step()
         end
 
         if #misaligned > 0 then
-            local answer = MB(
-                string.format("%d misaligned child item(s) found. Fix them now?", #misaligned),
-                "ReaClassical - Misaligned Items", 4)
+            local answer
+            if _G.RC_TERMINAL_ARGS then
+                answer = 6 -- auto-fix in headless mode
+            else
+                answer = MB(
+                    string.format("%d misaligned child item(s) found. Fix them now?", #misaligned),
+                    "ReaClassical - Misaligned Items", 4)
+            end
             if answer == 6 then
                 local unfix_count = 0
                 for _, entry in ipairs(misaligned) do
@@ -322,9 +327,15 @@ function do_processing_step()
                     end
                 end
                 if unfix_count > 0 then
-                    MB(string.format(
-                        "%d child item(s) could not be fixed — the underlying audio files are a different length to the parent.\nThese items need to be replaced manually.",
-                        unfix_count), "ReaClassical - Fix Warning", 0)
+                    if _G.RC_TERMINAL_ARGS then
+                        say(string.format(
+                            "Warning: %d child item(s) could not be fixed (audio files are different lengths — replace manually).",
+                            unfix_count))
+                    else
+                        MB(string.format(
+                            "%d child item(s) could not be fixed — the underlying audio files are a different length to the parent.\nThese items need to be replaced manually.",
+                            unfix_count), "ReaClassical - Fix Warning", 0)
+                    end
                 end
             end
         end
@@ -731,9 +742,11 @@ num_of_project_items = CountMediaItems(0)
 if num_of_project_items == 0 then return end
 
 PreventUIRefresh(1)
-ctx = ImGui.CreateContext("ReaClassical Prepare Takes")
-update_progress("Initializing", 0, "Starting preparation...")
-defer(main)
+if not _G.RC_TERMINAL_ARGS then
+    ctx = ImGui.CreateContext("ReaClassical Prepare Takes")
+    update_progress("Initializing", 0, "Starting preparation...")
+    defer(main)
+end
 
 ---------------------------------------------------------------------
 
@@ -897,4 +910,20 @@ function extract_take_number_from_filename(item)
     local take_num = string.match(filename, "(%d+)%.[^.]+$")
     if take_num then return tonumber(take_num) end
     return nil
+end
+
+---------------------------------------------------------------------
+
+if _G.RC_TERMINAL_ARGS then
+    frame_count = 3 -- skip initial frame delay; all functions now defined
+    local ok, err = pcall(function()
+        while not do_processing_step() do end
+    end)
+    if not ok then
+        PreventUIRefresh(-1)
+        say("Prepare Takes error: " .. tostring(err))
+        return
+    end
+    SetProjExtState(0, "ReaClassical", "Prepared_Takes", "y")
+    say("Prepare Takes: complete")
 end

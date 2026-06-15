@@ -78,8 +78,10 @@ function main()
             groupings_mcp()
             remove_spacers(rcmaster_index)
             SetProjExtState(0, "ReaClassical", "Workflow", "Horizontal")
-            local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
-            Main_OnCommand(mission_control, 0)
+            if not _G.RC_TERMINAL_ARGS then
+                local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
+                Main_OnCommand(mission_control, 0)
+            end
             set_recording_to_primary_and_secondary(mixer_track_table)
         end
         SetProjExtState(0, "ReaClassical", "TrackCount", "")

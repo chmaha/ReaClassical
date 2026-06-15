@@ -148,13 +148,13 @@ function parse_markers()
             missing_album_metadata = true
           end
 
-          -- Assign error message to error_msg variable
-          if missing_album_metadata then
-            error_msg = "Note: One or more tracks specify " ..
-                "performer, songwriter, composer, or arranger\n" ..
-                "without an associated album-wide entry and " ..
-                "therefore won't currently be added to the DDP metadata."
-          end
+          -- -- Assign error message to error_msg variable
+          -- if missing_album_metadata then
+          --   error_msg = "Note: One or more tracks specify " ..
+          --       "performer, songwriter, composer, or arranger\n" ..
+          --       "without an associated album-wide entry and " ..
+          --       "therefore won't currently be added to the DDP metadata."
+          -- end
 
           table.insert(metadata.tracks, track_data)
         end

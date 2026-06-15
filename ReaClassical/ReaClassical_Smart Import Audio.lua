@@ -139,6 +139,9 @@ function main()
     if has_existing_items then
         start_pos = project_end + 10
     end
+    if _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.at_cursor then
+        start_pos = GetCursorPosition()
+    end
 
     local used_files = get_used_source_files()
     local all_files  = scan_media_folder_recursive(get_project_media_path())
@@ -210,6 +213,41 @@ function main()
         return
     end
 
+    -- Terminal hook: restrict to a specific take number/range and/or session
+    -- name (e.g. "import=3,morning" or "import=4-7"), so a quick single-take
+    -- import doesn't sweep in every other unused file.
+    if _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.filter then
+        local f = _G.RC_TERMINAL_ARGS.filter
+        local filtered_files = {}
+        for _, pf in ipairs(parsed_files) do
+            local info = pf.info
+            if info.take_num >= f.take_min and info.take_num <= f.take_max
+                and (not f.session or info.session_name == f.session) then
+                table.insert(filtered_files, pf)
+            end
+        end
+
+        if #filtered_files == 0 then
+            say("No matching takes found")
+            Undo_EndBlock("Import Audio (Cancelled)", -1)
+            PreventUIRefresh(-1)
+            return
+        end
+
+        parsed_files = filtered_files
+        name_seen    = {}
+        needed_names = {}
+        for _, pf in ipairs(parsed_files) do
+            if not name_seen[pf.info.track_name] then
+                name_seen[pf.info.track_name] = true
+                table.insert(needed_names, {
+                    base_name    = pf.info.track_name,
+                    display_name = pf.info.track_name_display,
+                })
+            end
+        end
+    end
+
     -- Helper: build sessions table from parsed_files against current tracks.
     -- Called after ensure_tracks_exist() so all referenced tracks exist.
     local function build_sessions()
@@ -259,7 +297,7 @@ function main()
         return sessions, session_names, get_tracks(workflow)
     end
 
-    if imgui_exists then
+    if imgui_exists and not _G.RC_TERMINAL_ARGS then
         -- Initialise ImGui once; all dialogs share the same context.
         if not ImGui then
             package.path = ImGui_GetBuiltinPath() .. '/?.lua'
@@ -375,7 +413,22 @@ function main()
     end
 
     if workflow == "Vertical" then
-        import_vertical(sessions, session_names, tracks, errors, false, start_pos)
+        if _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.include_destination then
+            include_destination = true
+        end
+
+        local robin_folder_count = _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.robin_folder_count
+        if robin_folder_count then
+            if robin_folder_count == "current" then
+                robin_folder_count = include_destination
+                    and (count_source_folders() + 1) or count_source_folders()
+            end
+            robin_folder_count = math.max(1, robin_folder_count)
+            import_vertical_round_robin(sessions, session_names, tracks, errors,
+                robin_folder_count, include_destination, start_pos)
+        else
+            import_vertical(sessions, session_names, tracks, errors, include_destination, start_pos)
+        end
     else
         import_horizontal(sessions, session_names, tracks, errors, start_pos)
     end
@@ -397,9 +450,17 @@ function finish_import(errors)
     Main_OnCommand(zoom_horizontally, 0)
 
     if #errors > 0 then
-        MB("The following issues were found:\n\n" .. table.concat(errors, "\n"), "Import Errors", 0)
+        if _G.RC_TERMINAL_ARGS then
+            say("Import issues: " .. table.concat(errors, "; "))
+        else
+            MB("The following issues were found:\n\n" .. table.concat(errors, "\n"), "Import Errors", 0)
+        end
     else
-        MB("Files imported successfully!", "ReaClassical Smart Import", 0)
+        if _G.RC_TERMINAL_ARGS then
+            say("Files imported successfully")
+        else
+            MB("Files imported successfully!", "ReaClassical Smart Import", 0)
+        end
     end
 
     UpdateArrange()

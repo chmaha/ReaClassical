@@ -78,15 +78,21 @@ function main()
         return
     end
 
-    local bool, gap = GetUserInputs('Reposition Tracks', 1, "No. of seconds between items?", ',')
-
-    if not bool then
-        return
-    elseif tonumber(gap) == nil then
-        MB("Please enter a number!", "Reposition Album Tracks", 0)
-        return
+    local gap
+    if _G.RC_TERMINAL_ARGS then
+        gap = _G.RC_TERMINAL_ARGS.gap
     else
-        gap = tonumber(gap)
+        local bool, input = GetUserInputs('Reposition Tracks', 1, "No. of seconds between items?", ',')
+        if not bool then
+            return
+        elseif tonumber(input) == nil then
+            MB("Please enter a number!", "Reposition Album Tracks", 0)
+            return
+        end
+        gap = tonumber(input)
+    end
+
+    do
         -- Get all CD track groups from the folder
         local cd_track_groups = get_cd_track_groups(folder_track)
 
@@ -160,8 +166,12 @@ function main()
 
     local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
     local _, run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
-    if run == "yes" then Main_OnCommand(create_cd_markers, 0) end
+    if run == "yes" and not _G.RC_TERMINAL_ARGS then Main_OnCommand(create_cd_markers, 0) end
     Undo_EndBlock("Reposition Tracks", 0)
+
+    if _G.RC_TERMINAL_ARGS then
+        say("Tracks repositioned")
+    end
 end
 
 ---------------------------------------------------------------------
