@@ -17,6 +17,8 @@ A folder requires at least two tracks. If you really only need a single micropho
 
 A _horizontal_ workflow approach means that recorded or imported takes are arranged left-to-right in a single folder. A _vertical_ workflow approach is designed for recorded takes of similar material to be stacked vertically.
 
+WARNING: You cannot make folders within folders in ReaClassical. Think of it like using a digital or analogue console. There are plenty of ways to control sets of tracks including routing through submixes via Mission Control. 
+
 ==== Mission Control
 
 As soon as you press btn:[OK], you will see the Mission Control window.
