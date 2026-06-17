@@ -4596,6 +4596,15 @@ function restart_reaper()
     end
 end
 
+-- Native Windows CPU architecture (PROCESSOR_ARCHITEW6432 reflects the real
+-- host arch when running under WOW64; falls back to PROCESSOR_ARCHITECTURE).
+function windows_arch()
+    local arch = os.getenv("PROCESSOR_ARCHITEW6432") or os.getenv("PROCESSOR_ARCHITECTURE") or ""
+    return arch:upper()
+end
+
+local OSARA_BASE_URL = "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/OSARA/"
+
 function try_osara_install(cmd)
     if cmd ~= "installosara" then return false end
 
@@ -4606,24 +4615,26 @@ function try_osara_install(cmd)
 
     local exec_cmd, plugin_file
     if string.find(system, "^Win") then
-        local url = "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/osara-win.zip"
-        local zip_path = resource_path .. separator .. "osara-win.zip"
-        plugin_file = userplugins_path .. separator .. "reaper_osara64.dll"
+        local filename
+        if system == "Win32" then
+            filename = "reaper_osara32.dll"
+        elseif windows_arch():find("ARM64") then
+            filename = "reaper_osara_arm64ec.dll"
+        else
+            filename = "reaper_osara64.dll"
+        end
+        local url = OSARA_BASE_URL .. filename
+        plugin_file = userplugins_path .. separator .. filename
         exec_cmd = string.format(
             'powershell -NoProfile -ExecutionPolicy Bypass -Command "' ..
             "$ProgressPreference='SilentlyContinue'; " ..
-            "Invoke-WebRequest -Uri '%s' -OutFile '%s'; " ..
-            "Expand-Archive -Path '%s' -DestinationPath '%s' -Force; " ..
-            "Remove-Item -Path '%s' -Force" ..
+            "Invoke-WebRequest -Uri '%s' -OutFile '%s'" ..
             '"',
-            url, zip_path, zip_path, userplugins_path, zip_path)
+            url, plugin_file)
     elseif string.find(system, "^OSX") or string.find(system, "^macOS") then
-        local url = "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/osara-macos.zip"
-        local zip_path = resource_path .. separator .. "osara-macos.zip"
+        local url = OSARA_BASE_URL .. "reaper_osara.dylib"
         plugin_file = userplugins_path .. separator .. "reaper_osara.dylib"
-        exec_cmd = string.format(
-            "curl -fsSL -o '%s' '%s' && unzip -o '%s' -d '%s' && rm -f '%s'",
-            zip_path, url, zip_path, userplugins_path, zip_path)
+        exec_cmd = string.format("curl -fsSL -o '%s' '%s'", plugin_file, url)
     else
         say("installosara is only supported on Windows and macOS")
         return true
