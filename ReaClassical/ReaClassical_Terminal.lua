@@ -63,7 +63,12 @@ local RANK_PREFIXES = {
 ---------------------------------------------------------------------
 
 function say(msg)
-    ShowConsoleMsg(tostring(msg) .. "\n")
+    -- drop showconsolemsg on public release
+    if osara_outputMessage then
+        osara_outputMessage(tostring(msg))
+    else
+        ShowConsoleMsg(tostring(msg) .. "\n")
+    end
 end
 
 ---------------------------------------------------------------------
@@ -4225,10 +4230,11 @@ function try_osara_install(cmd)
     local resource_path = GetResourcePath()
     local userplugins_path = resource_path .. separator .. "UserPlugins"
 
-    local exec_cmd
+    local exec_cmd, plugin_file
     if string.find(system, "^Win") then
         local url = "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/osara-win.zip"
         local zip_path = resource_path .. separator .. "osara-win.zip"
+        plugin_file = userplugins_path .. separator .. "reaper_osara64.dll"
         exec_cmd = string.format(
             'powershell -NoProfile -ExecutionPolicy Bypass -Command "' ..
             "$ProgressPreference='SilentlyContinue'; " ..
@@ -4240,6 +4246,7 @@ function try_osara_install(cmd)
     elseif string.find(system, "^OSX") or string.find(system, "^macOS") then
         local url = "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/osara-macos.zip"
         local zip_path = resource_path .. separator .. "osara-macos.zip"
+        plugin_file = userplugins_path .. separator .. "reaper_osara.dylib"
         exec_cmd = string.format(
             "curl -fsSL -o '%s' '%s' && unzip -o '%s' -d '%s' && rm -f '%s'",
             zip_path, url, zip_path, userplugins_path, zip_path)
@@ -4248,11 +4255,24 @@ function try_osara_install(cmd)
         return true
     end
 
-    local response = MB(
-        "This will download OSARA and install it into REAPER's UserPlugins folder," ..
-        "\nthen restart REAPER to load it." ..
-        "\n\nAre you sure you want to continue?",
-        "Install OSARA", 4)
+    local already_installed = false
+    local existing = io.open(plugin_file, "rb")
+    if existing then
+        existing:close()
+        already_installed = true
+    end
+
+    local prompt
+    if already_installed then
+        prompt = "OSARA already appears to be installed in UserPlugins." ..
+            "\n\nReinstall it anyway? REAPER will restart afterwards."
+    else
+        prompt = "This will download OSARA and install it into REAPER's UserPlugins folder," ..
+            "\nthen restart REAPER to load it." ..
+            "\n\nAre you sure you want to continue?"
+    end
+
+    local response = MB(prompt, "Install OSARA", 4)
     if response ~= 6 then return true end
 
     say("Downloading and installing OSARA, please wait...")
