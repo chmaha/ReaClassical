@@ -1541,6 +1541,210 @@ function try_fader(cmd)
     return false
 end
 
+---------------------------------------------------------------------
+-- Automation (port of apply_automation() in
+-- ReaClassical_Insert Automation.lua, driven by fixed parameters instead
+-- of ImGui sliders, operating on the current track selection)
+---------------------------------------------------------------------
+
+-- Maps the short addauto= parameter token to its built-in track-envelope
+-- name (per get_track_envelopes() in ReaClassical_Insert Automation.lua),
+-- whether it needs dB<->linear conversion, and the action ID that shows
+-- (and thereby creates) that envelope when it doesn't already exist.
+local AUTOMATION_PARAMS = {
+    vol      = { name = "Volume",          db = true,  show_cmd = 40406 },
+    pan      = { name = "Pan",             db = false, show_cmd = 40407 },
+    width    = { name = "Width",           db = false, show_cmd = 41870 },
+    mute     = { name = "Mute",            db = false, show_cmd = 40867 },
+    trimvol  = { name = "Trim Volume",     db = true,  show_cmd = 42020 },
+    prevol   = { name = "Volume (Pre-FX)", db = true,  show_cmd = 41865 },
+    prepan   = { name = "Pan (Pre-FX)",    db = false, show_cmd = 41867 },
+    prewidth = { name = "Width (Pre-FX)",  db = false, show_cmd = 41869 },
+}
+
+-- Converts a user-facing addauto= value (dB for volume-like params, -1..1
+-- for pan/width, 0/1 for mute) into the raw value the envelope stores.
+-- Pan is negated to match REAPER's internal envelope sign convention, per
+-- denormalize_value() in ReaClassical_Insert Automation.lua.
+function automation_raw_value(info, value)
+    if info.db then return db_to_linear(value) end
+    if info.name == "Pan" or info.name == "Pan (Pre-FX)" then return -value end
+    return value
+end
+
+-- Default track value to fall back on when no envelope point exists yet
+-- at a ramp boundary, per get_default_track_value() in
+-- ReaClassical_Insert Automation.lua.
+function automation_default_value(track, info)
+    if info.name == "Volume" or info.name == "Volume (Pre-FX)" or info.name == "Trim Volume" then
+        return GetMediaTrackInfo_Value(track, "D_VOL")
+    elseif info.name == "Pan" or info.name == "Pan (Pre-FX)" then
+        return GetMediaTrackInfo_Value(track, "D_PAN")
+    elseif info.name == "Width" or info.name == "Width (Pre-FX)" then
+        return GetMediaTrackInfo_Value(track, "D_WIDTH")
+    elseif info.name == "Mute" then
+        return 1 - GetMediaTrackInfo_Value(track, "B_MUTE")
+    end
+    return 1.0
+end
+
+function automation_envelope_value_at(env, time)
+    local br_env = BR_EnvAlloc(env, false)
+    local value = BR_EnvValueAtPos(br_env, time)
+    BR_EnvFree(br_env, false)
+    return value
+end
+
+-- Deletes any automation item(s) on env whose range overlaps [start_t,
+-- end_t), so a newly-inserted item replaces overlapping automation
+-- instead of silently stacking an invisible duplicate on top of it (a
+-- particular trap for blind users, who can't see the overlap to notice
+-- it happened).
+function delete_overlapping_automation_items(env, start_t, end_t)
+    local count = CountAutomationItems(env)
+    if count == 0 then return end
+    local any = false
+    for i = 0, count - 1 do
+        local pos = GetSetAutomationItemInfo(env, i, "D_POSITION", 0, false)
+        local len = GetSetAutomationItemInfo(env, i, "D_LENGTH", 0, false)
+        local overlaps = pos < end_t and (pos + len) > start_t
+        GetSetAutomationItemInfo(env, i, "D_UISEL", overlaps and 1 or 0, true)
+        if overlaps then any = true end
+    end
+    if any then
+        Main_OnCommand(42086, 0) -- Envelope: Delete automation items
+    end
+end
+
+-- Applies info/value/ramp_in/ramp_out to each track in tracks, at the
+-- current time selection (with ramps outside it, creating an automation
+-- item) or at the edit cursor (with an optional ramp-in) if there is no
+-- time selection, mirroring apply_automation() in
+-- ReaClassical_Insert Automation.lua.
+-- Requires a time selection: open-ended "from the cursor to the end of
+-- the piece" changes belong to the Mixer Snapshot Manager instead, so
+-- addauto= always applies between a time selection's bounds (with ramps
+-- outside it) and creates an automation item there.
+function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end)
+    local target_value = automation_raw_value(info, value)
+    local needs_scaling = info.name == "Volume" or info.name == "Volume (Pre-FX)" or info.name == "Trim Volume"
+
+    for _, track in ipairs(tracks) do
+        local env = GetTrackEnvelopeByName(track, info.name)
+        if not env then
+            SetOnlyTrackSelected(track)
+            Main_OnCommand(info.show_cmd, 0)
+            env = GetTrackEnvelopeByName(track, info.name)
+        end
+        if env then
+            local target_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
+
+            local ramp_in_start = ts_start - ramp_in
+            local ramp_out_end = ts_end + ramp_out
+
+            local val_before
+            if ramp_in > 0 then
+                val_before = automation_envelope_value_at(env, ramp_in_start)
+            else
+                val_before = automation_envelope_value_at(env, ts_start - 0.001)
+            end
+            val_before = val_before or automation_default_value(track, info)
+
+            local val_after
+            if ramp_out > 0 then
+                val_after = automation_envelope_value_at(env, ramp_out_end)
+            else
+                val_after = automation_envelope_value_at(env, ts_end + 0.001)
+            end
+            val_after = val_after or automation_default_value(track, info)
+
+            local clear_start = ramp_in > 0 and ramp_in_start or (ts_start - 0.002)
+            local clear_end = ramp_out > 0 and ramp_out_end or (ts_end + 0.002)
+            DeleteEnvelopePointRange(env, clear_start - 0.001, clear_end + 0.001)
+
+            local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
+            local val_after_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_after) or val_after
+
+            if ramp_in > 0 then
+                InsertEnvelopePoint(env, ramp_in_start, val_before_to_insert, 0, 0, false, true)
+                InsertEnvelopePoint(env, ts_start, target_to_insert, 0, 0, false, true)
+            else
+                InsertEnvelopePoint(env, ts_start - 0.001, val_before_to_insert, 0, 0, false, true)
+                InsertEnvelopePoint(env, ts_start, target_to_insert, 0, 0, false, true)
+            end
+
+            if ramp_out > 0 then
+                InsertEnvelopePoint(env, ts_end, target_to_insert, 0, 0, false, true)
+                InsertEnvelopePoint(env, ramp_out_end, val_after_to_insert, 0, 0, false, true)
+            else
+                InsertEnvelopePoint(env, ts_end, target_to_insert, 0, 0, false, true)
+                InsertEnvelopePoint(env, ts_end + 0.001, val_after_to_insert, 0, 0, false, true)
+            end
+
+            Envelope_SortPoints(env)
+
+            local item_start = ramp_in > 0 and (ts_start - ramp_in) or (ts_start - 0.002)
+            local item_end = ramp_out > 0 and (ts_end + ramp_out) or (ts_end + 0.002)
+            delete_overlapping_automation_items(env, item_start, item_end)
+            InsertAutomationItem(env, -1, item_start, item_end - item_start)
+        end
+    end
+end
+
+-- addauto=<param>,<value>[,<ramp_in>[,<ramp_out>]]: applies automation to
+-- the currently-selected tracks (see sel=/sel? in try_selection()) across
+-- the current time selection, with ramps outside its bounds, creating an
+-- automation item there. Requires a time selection — open-ended changes
+-- with no end point belong to the Mixer Snapshot Manager instead.
+-- <param> is one of vol/pan/width/mute/trimvol/prevol/prepan/prewidth;
+-- FX parameters aren't supported here since they have no stable short
+-- name across plugins. <value> is dB for the volume-like params, -1..1
+-- for pan/width, 0/1 for mute. <ramp_in>/<ramp_out> are seconds and
+-- default to 0.
+function try_automation(cmd)
+    local rest = cmd:match("^addauto=(.+)$")
+    if not rest then return false end
+
+    local parts = {}
+    for part in rest:gmatch("[^,]+") do
+        table.insert(parts, trim(part))
+    end
+
+    local param_key = parts[1] and parts[1]:lower()
+    local info = param_key and AUTOMATION_PARAMS[param_key]
+    if not info then
+        say("Unknown automation parameter. Use one of: vol, pan, width, mute, trimvol, prevol, prepan, prewidth")
+        return true
+    end
+
+    local value = tonumber(parts[2])
+    if not value then
+        say("Usage: addauto=<param>,<value>[,<ramp_in>[,<ramp_out>]]")
+        return true
+    end
+
+    local ramp_in = tonumber(parts[3]) or 0
+    local ramp_out = tonumber(parts[4]) or 0
+
+    local ts_start, ts_end = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
+    if ts_start == ts_end then
+        say("No time selection: make a time selection first, or use the Mixer Snapshot Manager for open-ended changes")
+        return true
+    end
+
+    local tracks = {}
+    for i = 0, CountSelectedTracks(0) - 1 do
+        table.insert(tracks, GetSelectedTrack(0, i))
+    end
+    if #tracks == 0 then
+        say("No tracks selected")
+        return true
+    end
+
+    apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end)
+    return true
+end
+
 -- Parses ",key=value,key=value..." into a field_updates table, mapping
 -- the short keys used in terminal commands to the pipe-delimited marker
 -- field names from ReaClassical_Metadata Report.lua.
@@ -4394,6 +4598,7 @@ function execute_command(cmd)
     if try_mute_solo(cmd) then return end
     if try_pan(cmd) then return end
     if try_fader(cmd) then return end
+    if try_automation(cmd) then return end
     if try_ddp(cmd) then return end
     if try_undo_redo(cmd) then return end
     if try_reorder(cmd) then return end

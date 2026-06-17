@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, apply_automation, linear_to_db, db_to_linear, get_envelope_value_at_time
 local format_time, get_selected_tracks, get_track_envelopes, get_track_fx_params
 local normalize_value, denormalize_value, get_default_track_value
-local get_fx_param_range, is_toggle_parameter
+local get_fx_param_range, is_toggle_parameter, delete_overlapping_automation_items
 
 ---------------------------------------------------------------------
 
@@ -304,8 +304,34 @@ end
 
 ---------------------------------------------------------------------
 
+-- Deletes any automation item(s) on env whose range overlaps [start_t,
+-- end_t), so a newly-inserted item replaces overlapping automation
+-- instead of silently stacking an invisible duplicate on top of it.
+function delete_overlapping_automation_items(env, start_t, end_t)
+  local count = CountAutomationItems(env)
+  if count == 0 then return end
+  local any = false
+  for i = 0, count - 1 do
+    local pos = GetSetAutomationItemInfo(env, i, "D_POSITION", 0, false)
+    local len = GetSetAutomationItemInfo(env, i, "D_LENGTH", 0, false)
+    local overlaps = pos < end_t and (pos + len) > start_t
+    GetSetAutomationItemInfo(env, i, "D_UISEL", overlaps and 1 or 0, true)
+    if overlaps then any = true end
+  end
+  if any then
+    Main_OnCommand(42086, 0) -- Envelope: Delete automation items
+  end
+end
+
+---------------------------------------------------------------------
+
+-- Requires a time selection: open-ended "from the cursor to the end of
+-- the piece" changes belong to the Mixer Snapshot Manager instead, so
+-- this always applies between the time selection's bounds (with ramps
+-- outside it) and creates an automation item there.
 function apply_automation()
   if #selected_tracks == 0 then return end
+  if not has_time_sel or start_time == end_time then return end
 
   local target_envelope_info = advanced_mode and selected_envelope or {
     type = "track",
@@ -365,109 +391,66 @@ function apply_automation()
           target_envelope_info.name == "Volume (Pre-FX)" or
           target_envelope_info.name == "Trim Volume")
 
-    if has_time_sel and (start_time ~= end_time) then
-      -- Time selection mode with ramps OUTSIDE the selection
-      local actual_start = start_time
-      local actual_end = end_time
+    -- Ramps OUTSIDE the time selection
+    local actual_start = start_time
+    local actual_end = end_time
 
-      -- Calculate ramp start/end times OUTSIDE the time selection
-      local ramp_in_start = actual_start - ramp_in
-      local ramp_out_end = actual_end + ramp_out
+    -- Calculate ramp start/end times OUTSIDE the time selection
+    local ramp_in_start = actual_start - ramp_in
+    local ramp_out_end = actual_end + ramp_out
 
-      -- Get values at boundaries BEFORE deleting anything
-      local val_before, val_after
+    -- Get values at boundaries BEFORE deleting anything
+    local val_before, val_after
 
-      if ramp_in > 0 then
-        val_before = get_envelope_value_at_time(env, ramp_in_start)
-        if not val_before then
-          val_before = get_default_track_value(track, target_envelope_info)
-        end
-      else
-        val_before = get_envelope_value_at_time(env, actual_start - 0.001)
-        if not val_before then
-          val_before = get_default_track_value(track, target_envelope_info)
-        end
-      end
-
-      if ramp_out > 0 then
-        val_after = get_envelope_value_at_time(env, ramp_out_end)
-        if not val_after then
-          val_after = get_default_track_value(track, target_envelope_info)
-        end
-      else
-        val_after = get_envelope_value_at_time(env, actual_end + 0.001)
-        if not val_after then
-          val_after = get_default_track_value(track, target_envelope_info)
-        end
-      end
-
-      -- Clear existing points in the entire range including ramps
-      local clear_start = ramp_in > 0 and ramp_in_start or (actual_start - 0.002)
-      local clear_end = ramp_out > 0 and ramp_out_end or (actual_end + 0.002)
-      DeleteEnvelopePointRange(env, clear_start - 0.001, clear_end + 0.001)
-
-      -- Scale values if needed (only for volume envelopes)
-      local target_val_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
-      local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
-      local val_after_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_after) or val_after
-
-      -- Add points based on ramp settings
-      if ramp_in > 0 then
-        InsertEnvelopePoint(env, ramp_in_start, val_before_to_insert, 0, 0, false, true)
-        InsertEnvelopePoint(env, actual_start, target_val_to_insert, 0, 0, false, true)
-      else
-        InsertEnvelopePoint(env, actual_start - 0.001, val_before_to_insert, 0, 0, false, true)
-        InsertEnvelopePoint(env, actual_start, target_val_to_insert, 0, 0, false, true)
-      end
-
-      if ramp_out > 0 then
-        InsertEnvelopePoint(env, actual_end, target_val_to_insert, 0, 0, false, true)
-        InsertEnvelopePoint(env, ramp_out_end, val_after_to_insert, 0, 0, false, true)
-      else
-        InsertEnvelopePoint(env, actual_end, target_val_to_insert, 0, 0, false, true)
-        InsertEnvelopePoint(env, actual_end + 0.001, val_after_to_insert, 0, 0, false, true)
+    if ramp_in > 0 then
+      val_before = get_envelope_value_at_time(env, ramp_in_start)
+      if not val_before then
+        val_before = get_default_track_value(track, target_envelope_info)
       end
     else
-      -- Edit cursor mode with optional ramp in
-      local cursor_pos = GetCursorPosition()
-      local ramp_start = cursor_pos - ramp_in
-
-      -- Get value BEFORE deleting anything
-      local val_before
-      if ramp_in > 0 then
-        val_before = get_envelope_value_at_time(env, ramp_start)
-        if not val_before then
-          val_before = get_default_track_value(track, target_envelope_info)
-        end
-      else
-        val_before = get_envelope_value_at_time(env, cursor_pos - 0.001)
-        if not val_before then
-          val_before = get_default_track_value(track, target_envelope_info)
-        end
+      val_before = get_envelope_value_at_time(env, actual_start - 0.001)
+      if not val_before then
+        val_before = get_default_track_value(track, target_envelope_info)
       end
+    end
 
-      -- Delete existing points from ramp start onwards
-      local num_points = CountEnvelopePoints(env)
-      local delete_from = ramp_in > 0 and ramp_start or (cursor_pos - 0.002)
-      for i = num_points - 1, 0, -1 do
-        local _, time = GetEnvelopePoint(env, i)
-        if time >= delete_from then
-          DeleteEnvelopePointEx(env, -1, i)
-        end
+    if ramp_out > 0 then
+      val_after = get_envelope_value_at_time(env, ramp_out_end)
+      if not val_after then
+        val_after = get_default_track_value(track, target_envelope_info)
       end
-
-      -- Scale values if needed (only for volume envelopes)
-      local target_val_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
-      local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
-
-      -- Insert new points
-      if ramp_in > 0 then
-        InsertEnvelopePoint(env, ramp_start, val_before_to_insert, 0, 0, false, true)
-        InsertEnvelopePoint(env, cursor_pos, target_val_to_insert, 0, 0, false, true)
-      else
-        InsertEnvelopePoint(env, cursor_pos - 0.001, val_before_to_insert, 0, 0, false, true)
-        InsertEnvelopePoint(env, cursor_pos, target_val_to_insert, 0, 0, false, true)
+    else
+      val_after = get_envelope_value_at_time(env, actual_end + 0.001)
+      if not val_after then
+        val_after = get_default_track_value(track, target_envelope_info)
       end
+    end
+
+    -- Clear existing points in the entire range including ramps
+    local clear_start = ramp_in > 0 and ramp_in_start or (actual_start - 0.002)
+    local clear_end = ramp_out > 0 and ramp_out_end or (actual_end + 0.002)
+    DeleteEnvelopePointRange(env, clear_start - 0.001, clear_end + 0.001)
+
+    -- Scale values if needed (only for volume envelopes)
+    local target_val_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
+    local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
+    local val_after_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_after) or val_after
+
+    -- Add points based on ramp settings
+    if ramp_in > 0 then
+      InsertEnvelopePoint(env, ramp_in_start, val_before_to_insert, 0, 0, false, true)
+      InsertEnvelopePoint(env, actual_start, target_val_to_insert, 0, 0, false, true)
+    else
+      InsertEnvelopePoint(env, actual_start - 0.001, val_before_to_insert, 0, 0, false, true)
+      InsertEnvelopePoint(env, actual_start, target_val_to_insert, 0, 0, false, true)
+    end
+
+    if ramp_out > 0 then
+      InsertEnvelopePoint(env, actual_end, target_val_to_insert, 0, 0, false, true)
+      InsertEnvelopePoint(env, ramp_out_end, val_after_to_insert, 0, 0, false, true)
+    else
+      InsertEnvelopePoint(env, actual_end, target_val_to_insert, 0, 0, false, true)
+      InsertEnvelopePoint(env, actual_end + 0.001, val_after_to_insert, 0, 0, false, true)
     end
 
     Envelope_SortPoints(env)
@@ -475,8 +458,8 @@ function apply_automation()
     ::continue::
   end
 
-  -- Create automation items if requested (only in time selection mode)
-  if create_auto_item and has_time_sel and (start_time ~= end_time) then
+  -- Create automation items if requested
+  if create_auto_item then
     for _, track in ipairs(selected_tracks) do
       local env
       if target_envelope_info.type == "track" then
@@ -489,6 +472,11 @@ function apply_automation()
         -- Use time selection range (including ramps if any)
         local item_start = ramp_in > 0 and (start_time - ramp_in) or (start_time - 0.002)
         local item_end = ramp_out > 0 and (end_time + ramp_out) or (end_time + 0.002)
+
+        -- Remove any existing automation item(s) that overlap the new
+        -- range first, so the new item replaces them instead of stacking
+        -- an overlapping duplicate on top
+        delete_overlapping_automation_items(env, item_start, item_end)
 
         -- Create automation item
         InsertAutomationItem(env, -1, item_start, item_end - item_start)
@@ -660,6 +648,11 @@ function main()
     if opened then
       if #selected_tracks == 0 then
         ImGui.TextWrapped(ctx, "Please select one or more tracks to apply automation.")
+      elseif not has_time_sel then
+        ImGui.TextWrapped(ctx, "Please make a time selection to apply automation.")
+        ImGui.Spacing(ctx)
+        ImGui.TextWrapped(ctx,
+          "For open-ended changes with no end point, use the Mixer Snapshot Manager instead.")
       else
         -- Display selected tracks
         if #selected_tracks == 1 then
@@ -726,7 +719,7 @@ function main()
 
                   -- Update value for newly selected envelope
                   local first_track = selected_tracks[1]
-                  local query_time = has_time_sel and start_time or GetCursorPosition()
+                  local query_time = start_time
                   local env = GetTrackEnvelopeByName(first_track, env_info.name)
 
                   if env then
@@ -786,7 +779,7 @@ function main()
 
                         -- Update value for newly selected parameter
                         local first_track = selected_tracks[1]
-                        local query_time = has_time_sel and start_time or GetCursorPosition()
+                        local query_time = start_time
                         local env = GetFXEnvelope(first_track, param_info.fx_idx, param_info.param_idx, false)
 
                         if env then
@@ -1020,166 +1013,99 @@ function main()
 
         ImGui.Separator(ctx)
 
-        -- Mode indicator
-        if has_time_sel then
-          ImGui.Text(ctx, "Mode: Time Selection")
-          ImGui.Text(ctx, string.format("Range: %s - %s", format_time(start_time), format_time(end_time)))
+        -- Mode indicator (always a time selection now: open-ended changes
+        -- with no end point belong to the Mixer Snapshot Manager instead)
+        ImGui.Text(ctx, "Mode: Time Selection")
+        ImGui.Text(ctx, string.format("Range: %s - %s", format_time(start_time), format_time(end_time)))
 
-          ImGui.Spacing(ctx)
+        ImGui.Spacing(ctx)
 
-          -- Ramp controls (outside the time selection)
-          local is_toggle = false
-          if advanced_mode and selected_envelope then
-            if selected_envelope.type == "track" then
-              is_toggle = is_toggle_parameter(selected_tracks[1], nil, nil, selected_envelope)
-            elseif selected_envelope.type == "fx" then
-              is_toggle = is_toggle_parameter(selected_tracks[1], selected_envelope.fx_idx, selected_envelope.param_idx,
-                selected_envelope)
+        -- Ramp controls (outside the time selection)
+        local is_toggle = false
+        if advanced_mode and selected_envelope then
+          if selected_envelope.type == "track" then
+            is_toggle = is_toggle_parameter(selected_tracks[1], nil, nil, selected_envelope)
+          elseif selected_envelope.type == "fx" then
+            is_toggle = is_toggle_parameter(selected_tracks[1], selected_envelope.fx_idx, selected_envelope.param_idx,
+              selected_envelope)
+          end
+        end
+
+        if is_toggle then
+          ImGui.BeginDisabled(ctx)
+        end
+
+        ImGui.Text(ctx, "Ramp In (seconds before selection):")
+        ImGui.SetNextItemWidth(ctx, -1)
+        local changed_in, new_in = ImGui.SliderDouble(ctx, "##ramp_in", ramp_in, 0.0, 10.0, "%.2f sec")
+        if changed_in then
+          ramp_in = math.max(0, new_in)
+        end
+
+        if ImGui.IsItemHovered(ctx) then
+          ImGui.SetTooltip(ctx, "Right-click to type value")
+        end
+
+        if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+          ImGui.OpenPopup(ctx, "ramp_in_input")
+        end
+
+        if ImGui.BeginPopup(ctx, "ramp_in_input") then
+          ImGui.Text(ctx, "Enter ramp in (seconds):")
+          ImGui.SetNextItemWidth(ctx, 100)
+          local ramp_in_buf = string.format("%.2f", ramp_in)
+          local rv, buf = ImGui.InputText(ctx, "##rampininput", ramp_in_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+          if rv then
+            local val = tonumber(buf)
+            if val then
+              ramp_in = math.max(0, val)
             end
+            ImGui.CloseCurrentPopup(ctx)
           end
+          ImGui.EndPopup(ctx)
+        end
 
-          if is_toggle then
-            ImGui.BeginDisabled(ctx)
-          end
 
-          ImGui.Text(ctx, "Ramp In (seconds before selection):")
-          ImGui.SetNextItemWidth(ctx, -1)
-          local changed_in, new_in = ImGui.SliderDouble(ctx, "##ramp_in", ramp_in, 0.0, 10.0, "%.2f sec")
-          if changed_in then
-            ramp_in = math.max(0, new_in)
-          end
+        ImGui.Text(ctx, "Ramp Out (seconds after selection):")
+        ImGui.SetNextItemWidth(ctx, -1)
+        local changed_out, new_out = ImGui.SliderDouble(ctx, "##ramp_out", ramp_out, 0.0, 10.0, "%.2f sec")
+        if changed_out then
+          ramp_out = math.max(0, new_out)
+        end
 
-          if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Right-click to type value")
-          end
+        if ImGui.IsItemHovered(ctx) then
+          ImGui.SetTooltip(ctx, "Right-click to type value")
+        end
 
-          if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-            ImGui.OpenPopup(ctx, "ramp_in_input")
-          end
+        if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
+          ImGui.OpenPopup(ctx, "ramp_out_input")
+        end
 
-          if ImGui.BeginPopup(ctx, "ramp_in_input") then
-            ImGui.Text(ctx, "Enter ramp in (seconds):")
-            ImGui.SetNextItemWidth(ctx, 100)
-            local ramp_in_buf = string.format("%.2f", ramp_in)
-            local rv, buf = ImGui.InputText(ctx, "##rampininput", ramp_in_buf, ImGui.InputTextFlags_EnterReturnsTrue)
-            if rv then
-              local val = tonumber(buf)
-              if val then
-                ramp_in = math.max(0, val)
-              end
-              ImGui.CloseCurrentPopup(ctx)
+        if ImGui.BeginPopup(ctx, "ramp_out_input") then
+          ImGui.Text(ctx, "Enter ramp out (seconds):")
+          ImGui.SetNextItemWidth(ctx, 100)
+          local ramp_out_buf = string.format("%.2f", ramp_out)
+          local rv, buf = ImGui.InputText(ctx, "##rampoutinput", ramp_out_buf, ImGui.InputTextFlags_EnterReturnsTrue)
+          if rv then
+            local val = tonumber(buf)
+            if val then
+              ramp_out = math.max(0, val)
             end
-            ImGui.EndPopup(ctx)
+            ImGui.CloseCurrentPopup(ctx)
           end
-
-
-          ImGui.Text(ctx, "Ramp Out (seconds after selection):")
-          ImGui.SetNextItemWidth(ctx, -1)
-          local changed_out, new_out = ImGui.SliderDouble(ctx, "##ramp_out", ramp_out, 0.0, 10.0, "%.2f sec")
-          if changed_out then
-            ramp_out = math.max(0, new_out)
-          end
-
-          if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Right-click to type value")
-          end
-
-          if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-            ImGui.OpenPopup(ctx, "ramp_out_input")
-          end
-
-          if ImGui.BeginPopup(ctx, "ramp_out_input") then
-            ImGui.Text(ctx, "Enter ramp out (seconds):")
-            ImGui.SetNextItemWidth(ctx, 100)
-            local ramp_out_buf = string.format("%.2f", ramp_out)
-            local rv, buf = ImGui.InputText(ctx, "##rampoutinput", ramp_out_buf, ImGui.InputTextFlags_EnterReturnsTrue)
-            if rv then
-              local val = tonumber(buf)
-              if val then
-                ramp_out = math.max(0, val)
-              end
-              ImGui.CloseCurrentPopup(ctx)
-            end
-            ImGui.EndPopup(ctx)
-          end
-          if is_toggle then
-            ImGui.EndDisabled(ctx)
-          end
-        else
-          ImGui.Text(ctx, "Mode: Edit Cursor to End")
-          local cursor_pos = GetCursorPosition()
-          ImGui.Text(ctx, string.format("Cursor: %s", format_time(cursor_pos)))
-
-          ImGui.Spacing(ctx)
-
-          local is_toggle = false
-          if advanced_mode and selected_envelope then
-            if selected_envelope.type == "track" then
-              is_toggle = is_toggle_parameter(selected_tracks[1], nil, nil, selected_envelope)
-            elseif selected_envelope.type == "fx" then
-              is_toggle = is_toggle_parameter(selected_tracks[1], selected_envelope.fx_idx, selected_envelope.param_idx,
-                selected_envelope)
-            end
-          end
-
-          if is_toggle then
-            ImGui.BeginDisabled(ctx)
-          end
-          -- Ramp in control for cursor mode
-          ImGui.Text(ctx, "Ramp In (seconds before cursor):")
-          ImGui.SetNextItemWidth(ctx, -1)
-          local changed_in, new_in = ImGui.SliderDouble(ctx, "##ramp_in_cursor", ramp_in, 0.0, 10.0, "%.2f sec")
-          if changed_in then
-            ramp_in = math.max(0, new_in)
-          end
-
-          if ImGui.IsItemHovered(ctx) then
-            ImGui.SetTooltip(ctx, "Right-click to type value")
-          end
-
-          if ImGui.IsItemClicked(ctx, ImGui.MouseButton_Right) then
-            ImGui.OpenPopup(ctx, "ramp_in_cursor_input")
-          end
-
-          if ImGui.BeginPopup(ctx, "ramp_in_cursor_input") then
-            ImGui.Text(ctx, "Enter ramp in (seconds):")
-            ImGui.SetNextItemWidth(ctx, 100)
-            local ramp_in_buf = string.format("%.2f", ramp_in)
-            local rv, buf = ImGui.InputText(ctx, "##rampincursorinput", ramp_in_buf,
-              ImGui.InputTextFlags_EnterReturnsTrue)
-            if rv then
-              local val = tonumber(buf)
-              if val then
-                ramp_in = math.max(0, val)
-              end
-              ImGui.CloseCurrentPopup(ctx)
-            end
-            ImGui.EndPopup(ctx)
-          end
-          if is_toggle then
-            ImGui.EndDisabled(ctx)
-          end
+          ImGui.EndPopup(ctx)
+        end
+        if is_toggle then
+          ImGui.EndDisabled(ctx)
         end
 
         ImGui.Spacing(ctx)
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
 
-        -- Create automation item checkbox (only enabled in time selection mode)
-        if not has_time_sel then
-          ImGui.BeginDisabled(ctx)
-        end
-        
         local changed_auto_item, new_auto_item = ImGui.Checkbox(ctx, "Create automation item", create_auto_item)
         if changed_auto_item then
           create_auto_item = new_auto_item
-        end
-        
-        if not has_time_sel then
-          ImGui.EndDisabled(ctx)
-          if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
-            ImGui.SetTooltip(ctx, "Automation items are only available in time selection mode")
-          end
         end
 
         -- Keep window open checkbox with persistence
