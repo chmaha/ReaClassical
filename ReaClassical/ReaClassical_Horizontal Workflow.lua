@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, create_destination_group, solo, trackname_check
-local mixer, folder_check, groupings_mcp, check_mixer_order
+local mixer, folder_check, flatten_nested_folders, groupings_mcp, check_mixer_order
 local media_razor_group, remove_track_groups, get_color_table
 local remove_spacers, copy_track_names
 local add_rcmaster, route_to_track, special_check, remove_connections
@@ -55,6 +55,9 @@ function main()
 
     local num_of_tracks = CountTracks(0)
     local rcmaster_exists
+    if num_of_tracks > 0 and folder_check() > 0 then
+        flatten_nested_folders()
+    end
     PreventUIRefresh(1)
     if num_of_tracks == 0 then
         local is_empty = true
@@ -425,6 +428,48 @@ function folder_check()
         end
     end
     return folders
+end
+
+---------------------------------------------------------------------
+
+-- Collapses any folder nested inside another folder (e.g. a user-made
+-- spot mic grouping) back to a flat single level, since the rest of
+-- this script assumes folders are never more than one level deep.
+function flatten_nested_folders()
+    local total_tracks = CountTracks(0)
+    local tracks, depths, new_depths = {}, {}, {}
+    for i = 0, total_tracks - 1, 1 do
+        tracks[i + 1] = GetTrack(0, i)
+        depths[i + 1] = GetMediaTrackInfo_Value(tracks[i + 1], "I_FOLDERDEPTH")
+        new_depths[i + 1] = depths[i + 1]
+    end
+
+    local stack = {}
+    for i = 1, total_tracks, 1 do
+        local depth = depths[i]
+        if depth == 1 then
+            if #stack == 0 then
+                table.insert(stack, true)
+            else
+                table.insert(stack, false)
+                new_depths[i] = 0
+            end
+        elseif depth < 0 then
+            local closed_real = 0
+            for _ = 1, -depth do
+                if table.remove(stack) then
+                    closed_real = closed_real + 1
+                end
+            end
+            new_depths[i] = -closed_real
+        end
+    end
+
+    for i = 1, total_tracks, 1 do
+        if new_depths[i] ~= depths[i] then
+            SetMediaTrackInfo_Value(tracks[i], "I_FOLDERDEPTH", new_depths[i])
+        end
+    end
 end
 
 ---------------------------------------------------------------------
