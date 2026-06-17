@@ -4371,6 +4371,71 @@ local function rec_daemon_running()
     return (os.time() - (tonumber(ts) or 0)) < 5
 end
 
+-- Port of is_special_track() (Meterbridge.lua): excludes mixer/aux/submix/
+-- roomtone/live/REF/RCMASTER tracks, plus listenback (kept permanently
+-- armed for cue/foldback monitoring, so it never counts as "recording").
+local function rec_is_special_track(track)
+    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster" }
+    for _, key in ipairs(keys) do
+        local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
+        if val == "y" then return true end
+    end
+    return false
+end
+
+local function rec_track_label(tr)
+    local ok, name = GetSetMediaTrackInfo_String(tr, "P_NAME", "", false)
+    return (ok and name ~= "" and name) or ("Track " .. GetMediaTrackInfo_Value(tr, "IP_TRACKNUMBER"))
+end
+
+-- Port of get_input_label() (Meterbridge.lua), always preferring hardware
+-- channel names (falling back to numeric channel numbers) since there's no
+-- GUI here to offer a toggle.
+local function rec_input_label(tr)
+    local rec_input = math.floor(GetMediaTrackInfo_Value(tr, "I_RECINPUT"))
+
+    if rec_input == -1 or rec_input == 4096 then
+        return "-"
+    end
+
+    if (rec_input & 4096) ~= 0 and rec_input > 4096 then
+        return "MIDI"
+    end
+
+    local start_channel = rec_input & 1023
+    local is_stereo = (rec_input & 1024) ~= 0
+    local is_multichannel = (rec_input & 2048) ~= 0
+    local first_input = start_channel + 1
+
+    local hw_name1 = GetInputChannelName(start_channel)
+
+    if is_stereo then
+        local hw_name2 = GetInputChannelName(start_channel + 1)
+        if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
+            local base1 = hw_name1:match("^(.+)%s+%d+$") or hw_name1
+            local base2 = hw_name2:match("^(.+)%s+%d+$") or hw_name2
+            if base1 == base2 then
+                return string.format("%s+%s", hw_name1, hw_name2)
+            else
+                return string.format("%s/%s", hw_name1, hw_name2)
+            end
+        end
+        return string.format("%d-%d", first_input, first_input + 1)
+    elseif is_multichannel then
+        local num_channels = math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN"))
+        if hw_name1 and hw_name1 ~= "" then
+            return string.format("%s+%d", hw_name1, num_channels - 1)
+        end
+        return string.format("%d-%d", first_input, first_input + num_channels - 1)
+    else
+        if hw_name1 and hw_name1 ~= "" then
+            return hw_name1
+        end
+        return string.format("%d", first_input)
+    end
+end
+
+
 ---------------------------------------------------------------------
 
 function try_record(cmd)
@@ -4450,6 +4515,7 @@ function try_record(cmd)
         local _, dur      = GetProjExtState(0, "ReaClassical", "Recording Duration")
         local _, overlap  = GetProjExtState(0, "ReaClassical", "AllowOverlappingTakes")
         local _, horiz    = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+        local _, clip_rep = GetProjExtState(0, "ReaClassical", "ClipReporting")
         local n = tonumber(take_str) or 0
         local take_display = n > 0
             and string.format("T%03d (%s)", n, override == "1" and "manual override" or "auto")
@@ -4463,6 +4529,7 @@ function try_record(cmd)
             string.format("  duration:   %s", dur     ~= "" and dur     or "(none)"),
             string.format("  overlap:    %s", overlap == "1" and "yes" or "no"),
             string.format("  horizontal: %s", horiz   == "1" and "yes" or "no"),
+            string.format("  clip:       %s", clip_rep == "0" and "no" or "yes"),
             string.format("  daemon:     %s", rec_daemon_running() and "running" or "stopped"),
         }, "\n"))
         return true
@@ -4653,6 +4720,56 @@ function try_record(cmd)
     if cmd == "rec.horizontal?" then
         local _, v = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
         say("Record takes horizontally: " .. (v == "1" and "yes" or "no"))
+        return true
+    end
+
+    -- rec.clip=y/n — toggle OSARA clip announcements from the Record Panel
+    -- Daemon for rec-armed tracks (on by default; unset ProjExtState == on)
+    local clip_val = cmd:match("^rec%.clip=([yn])$")
+    if clip_val then
+        local v = clip_val == "y" and "1" or "0"
+        SetProjExtState(0, "ReaClassical", "ClipReporting", v)
+        say("Clip reporting: " .. (v == "1" and "yes" or "no"))
+        return true
+    end
+
+    -- rec.clip? — query clip reporting setting
+    if cmd == "rec.clip?" then
+        local _, v = GetProjExtState(0, "ReaClassical", "ClipReporting")
+        say("Clip reporting: " .. (v == "0" and "no" or "yes"))
+        return true
+    end
+
+    -- rec.levels? — report the current peak hold (dB) for every rec-armed
+    -- track, in track order, for an immediate "lay of the land" overview.
+    -- Reads REAPER's own peak hold directly (same value Meterbridge shows
+    -- and rec.levels- clears), so it works whether or not the Record Panel
+    -- Daemon is running, and reflects the loudest moment since the last
+    -- clear (manual, via rec.levels-, or an acknowledged clip).
+    if cmd == "rec.levels?" then
+        local lines = {}
+        for i = 0, CountTracks(0) - 1 do
+            local tr = GetTrack(0, i)
+            if GetMediaTrackInfo_Value(tr, "I_RECARM") == 1 and not rec_is_special_track(tr) then
+                local num_channels = math.max(1, math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN")))
+                local db = -150
+                for ch = 0, math.min(num_channels, 64) - 1 do
+                    db = math.max(db, Track_GetPeakHoldDB(tr, ch, false) * 100)
+                end
+                lines[#lines + 1] = string.format("%s, input %s: %.1f dB",
+                    rec_track_label(tr), rec_input_label(tr), db)
+            end
+        end
+        say(#lines > 0 and table.concat(lines, "\n") or "No rec-armed tracks")
+        return true
+    end
+
+    -- rec.levels- — clear peak/RMS hold values via REAPER's native
+    -- "Track: Reset all peak/RMS values" action, so the next rec.levels?
+    -- reflects only what happens from this point on
+    if cmd == "rec.levels-" then
+        Main_OnCommand(40527, 0)
+        say("Peak hold values cleared")
         return true
     end
 

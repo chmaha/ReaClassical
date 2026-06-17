@@ -48,6 +48,18 @@ local _, prev_recfilename = get_config_var_string("recfile_wildcards")
 local rec_color      = ColorToNative(255, 0, 0)    | 0x1000000
 local recpause_color = ColorToNative(255, 255, 127) | 0x1000000
 
+-- Clip reporting: a channel "clips" when its peak hold reaches this level.
+-- -0.3 dB matches the usual clip-LED threshold (essentially full scale,
+-- with a little headroom for float/int rounding) rather than the
+-- user-tunable "over" threshold used by Peak and Overs Check.lua, which is
+-- a separate, post-hoc analysis feature.
+local CLIP_THRESHOLD_DB = -0.3
+-- Minimum time between repeat clip announcements for the same track, so
+-- sustained/continuous clipping doesn't flood OSARA with one announcement
+-- per defer frame.
+local CLIP_ANNOUNCE_COOLDOWN = 2.0
+local clip_last_announce = {} -- track GUID -> time_precise() of last announcement
+
 local RANKS = {
     { name = "Excellent",     rgba = 0x39FF1499, prefix = "Excellent" },
     { name = "Very Good",     rgba = 0x32CD3299, prefix = "Very Good" },
@@ -375,6 +387,128 @@ local function disarm_all_tracks()
 end
 
 ---------------------------------------------------------------------
+-- Clip reporting (mirrors track selection / input-label logic from
+-- ReaClassical_Meterbridge.lua, headless + OSARA-announced instead of
+-- ImGui-drawn)
+---------------------------------------------------------------------
+
+local function say(msg)
+    if osara_outputMessage then
+        osara_outputMessage(tostring(msg))
+    end
+end
+
+local function clip_is_special_track(track)
+    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster" }
+    for _, key in ipairs(keys) do
+        local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
+        if val == "y" then return true end
+    end
+    return false
+end
+
+local function clip_reporting_enabled()
+    local _, v = GetProjExtState(0, "ReaClassical", "ClipReporting")
+    return v ~= "0" -- unset ("") defaults to on
+end
+
+local function clip_track_label(tr)
+    local ok, name = GetSetMediaTrackInfo_String(tr, "P_NAME", "", false)
+    return (ok and name ~= "" and name) or ("Track " .. GetMediaTrackInfo_Value(tr, "IP_TRACKNUMBER"))
+end
+
+-- Port of get_input_label() (Meterbridge.lua), always preferring hardware
+-- channel names (falling back to numeric channel numbers) since there's no
+-- GUI here to offer a toggle.
+local function clip_input_label(tr)
+    local rec_input = math.floor(GetMediaTrackInfo_Value(tr, "I_RECINPUT"))
+
+    if rec_input == -1 or rec_input == 4096 then
+        return "-"
+    end
+
+    if (rec_input & 4096) ~= 0 and rec_input > 4096 then
+        return "MIDI"
+    end
+
+    local start_channel = rec_input & 1023
+    local is_stereo = (rec_input & 1024) ~= 0
+    local is_multichannel = (rec_input & 2048) ~= 0
+    local first_input = start_channel + 1
+
+    local hw_name1 = GetInputChannelName(start_channel)
+
+    if is_stereo then
+        local hw_name2 = GetInputChannelName(start_channel + 1)
+        if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
+            local base1 = hw_name1:match("^(.+)%s+%d+$") or hw_name1
+            local base2 = hw_name2:match("^(.+)%s+%d+$") or hw_name2
+            if base1 == base2 then
+                return string.format("%s+%s", hw_name1, hw_name2)
+            else
+                return string.format("%s/%s", hw_name1, hw_name2)
+            end
+        end
+        return string.format("%d-%d", first_input, first_input + 1)
+    elseif is_multichannel then
+        local num_channels = math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN"))
+        if hw_name1 and hw_name1 ~= "" then
+            return string.format("%s+%d", hw_name1, num_channels - 1)
+        end
+        return string.format("%d-%d", first_input, first_input + num_channels - 1)
+    else
+        if hw_name1 and hw_name1 ~= "" then
+            return hw_name1
+        end
+        return string.format("%d", first_input)
+    end
+end
+
+-- Polls peak hold (read-only — does NOT clear it) for every rec-armed
+-- track. REAPER's peak hold otherwise persists indefinitely (same value
+-- Meterbridge's "Clear All Holds" and the Terminal's rec.levels- manually
+-- reset), so leaving it alone here means rec.levels? always sees the same
+-- "since last manual clear" picture this function is looking at — nothing
+-- is silently wiped just to check for clips. A track's hold is only
+-- cleared, right here, at the moment a clip on it is actually announced,
+-- so it starts fresh for detecting the *next* clip instead of re-reporting
+-- the same stale one forever. Repeat announcements for the same track are
+-- further throttled by CLIP_ANNOUNCE_COOLDOWN so sustained clipping
+-- doesn't flood OSARA with one announcement per defer frame.
+local function check_track_clips()
+    if not clip_reporting_enabled() then return end
+
+    local now = time_precise()
+    for i = 0, CountTracks(0) - 1 do
+        local tr = GetTrack(0, i)
+        if tr and GetMediaTrackInfo_Value(tr, "I_RECARM") == 1 and not clip_is_special_track(tr) then
+            local num_channels = math.max(1, math.floor(GetMediaTrackInfo_Value(tr, "I_NCHAN")))
+            local clip_db
+            for ch = 0, math.min(num_channels, 64) - 1 do
+                local db = Track_GetPeakHoldDB(tr, ch, false) * 100
+                if db >= CLIP_THRESHOLD_DB and (not clip_db or db > clip_db) then
+                    clip_db = db
+                end
+            end
+
+            if clip_db then
+                local guid = GetTrackGUID(tr)
+                local last = clip_last_announce[guid] or 0
+                if (now - last) >= CLIP_ANNOUNCE_COOLDOWN then
+                    clip_last_announce[guid] = now
+                    say(string.format("Clip: %s, input %s, at %s",
+                        clip_track_label(tr), clip_input_label(tr),
+                        format_timestr_pos(GetPlayPosition(), "", -1)))
+                    for ch = 0, math.min(num_channels, 64) - 1 do
+                        Track_GetPeakHoldDB(tr, ch, true)
+                    end
+                end
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
 -- Main defer loop
 ---------------------------------------------------------------------
 
@@ -409,10 +543,12 @@ local function main()
         last_recorded_take = 0
         recording_rank     = ""
         recording_note     = ""
+        clip_last_announce = {}
     end
 
     check_session_change()
     check_override()
+    check_track_clips()
 
     local playstate = GetPlayState()
 
