@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, is_special_track, get_rc_folders, solo, say
+local format_peak, format_input, announce_track, get_feed_track
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local ref_is_guide = 0
@@ -38,6 +39,66 @@ function say(msg)
     if osara_outputMessage then
         osara_outputMessage(tostring(msg))
     end
+end
+
+---------------------------------------------------------------------
+
+function get_feed_track(track)
+    -- Each source/folder track sends to its own dedicated channel-strip
+    -- track tagged P_EXT:mixer ("M:<name>", see create_single_mixer in the
+    -- Workflow scripts). That's the track Meterbridge displays a peak for.
+    local num_sends = GetTrackNumSends(track, 0)
+    for i = 0, num_sends - 1 do
+        local dest = GetTrackSendInfo_Value(track, 0, i, "P_DESTTRACK")
+        if dest and ValidatePtr(dest, "MediaTrack*") then
+            local _, mixer_state = GetSetMediaTrackInfo_String(dest, "P_EXT:mixer", "", false)
+            if mixer_state == "y" then return dest end
+        end
+    end
+    return track
+end
+
+---------------------------------------------------------------------
+
+function format_peak(track)
+    -- Matches ReaClassical_Meterbridge.lua's numeric display: peak hold,
+    -- not cleared (clearing would also reset the visible meter's hold line).
+    local peak = -150.0
+    local num_chans = math.min(GetMediaTrackInfo_Value(track, "I_NCHAN"), 2)
+    for ch = 0, num_chans - 1 do
+        local val = Track_GetPeakHoldDB(track, ch, false) * 100
+        if val > peak then peak = val end
+    end
+    if peak <= -150.0 then return "silence" end
+    return string.format("peak %.1f dB", peak)
+end
+
+---------------------------------------------------------------------
+
+function format_input(track)
+    if GetMediaTrackInfo_Value(track, "I_RECARM") ~= 1 then return nil end
+    local rec_input = GetMediaTrackInfo_Value(track, "I_RECINPUT")
+    if rec_input < 0 then return "armed, no input" end
+    if rec_input & 4096 ~= 0 then
+        local midi_chan = rec_input & 31
+        return midi_chan == 0 and "armed, MIDI all channels" or ("armed, MIDI channel " .. midi_chan)
+    end
+    local chan = (rec_input & 1023) + 1
+    if rec_input & 1024 ~= 0 then
+        return "armed, inputs " .. chan .. " and " .. (chan + 1)
+    end
+    return "armed, input " .. chan
+end
+
+---------------------------------------------------------------------
+
+function announce_track(track, label)
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local meter_track = get_feed_track(track)
+    local parts = { label .. ": " .. name, format_peak(meter_track) }
+    local input_info = format_input(track)
+    if input_info then parts[#parts + 1] = input_info end
+    say(table.concat(parts, ", "))
 end
 
 ---------------------------------------------------------------------
@@ -160,8 +221,7 @@ function main()
     TrackList_AdjustWindows(false)
     UpdateArrange()
     UpdateTimeline()
-    local _, name = GetSetMediaTrackInfo_String(first_folder.track, "P_NAME", "", false)
-    say("Folder: " .. name)
+    announce_track(first_folder.track, "Folder")
 end
 
 ---------------------------------------------------------------------

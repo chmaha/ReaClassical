@@ -23,6 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, clamp, lin_to_db, color_for_db, is_m_track, is_other_master_track
+local is_special_track
 local get_tracks_to_display, get_input_label, get_track_label, refresh_tracks
 local clear_all_holds, draw_single_meter, draw_graphical_meter
 local display_track_row
@@ -248,15 +249,27 @@ end
 
 ---------------------------------------------------------------------
 
+function is_special_track(track)
+  local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster" }
+  for _, key in ipairs(keys) do
+    local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
+    if val == "y" then return true end
+  end
+  return false
+end
+
+---------------------------------------------------------------------
+
 function get_tracks_to_display()
   local rec_armed = {}
   local m_tracks = {}
   local other_masters = {}
 
-  -- First check for rec-armed tracks
+  -- First check for rec-armed tracks (listenback tracks are kept permanently
+  -- armed for cue/foldback monitoring, so they don't count as "recording")
   for i = 0, CountTracks(0) - 1 do
     local tr = GetTrack(0, i)
-    if tr and GetMediaTrackInfo_Value(tr, "I_RECARM") == 1 then
+    if tr and GetMediaTrackInfo_Value(tr, "I_RECARM") == 1 and not is_special_track(tr) then
       rec_armed[#rec_armed + 1] = tr
     end
   end

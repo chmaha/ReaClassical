@@ -495,7 +495,6 @@ function media_razor_group()
         for _ = 1, num_of_folders, 1 do
             select_children_of_selected_folders()
             Main_OnCommand(42578, 0) -- Track: Create rcmaster_exists track media/razor editing group
-            ShowConsoleMsg("here!")
             select_next_folder()
         end
     else
