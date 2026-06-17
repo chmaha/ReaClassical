@@ -462,8 +462,11 @@ function resolve_target(token)
 end
 
 -- Expands a list token ("*", "1", "1,3", "4-6", "1,4-6") into an array of
--- 1-based indices in 1..count, in ascending order of appearance.
+-- 1-based indices in 1..count, in ascending order of appearance. Strips
+-- all whitespace first so "1, 3" / " 1 - 3 " (spaces users instinctively
+-- type after commas/dashes) parse the same as "1,3" / "1-3".
 function expand_index_list(token, count)
+    token = token:gsub("%s+", "")
     if token == "*" then
         local result = {}
         for n = 1, count do table.insert(result, n) end
@@ -953,6 +956,34 @@ function get_folder_position_track(folder, position)
     return folder.tracks[position - 1]
 end
 
+-- Resolves a folder label ("D" or "S<n>", matching the D:/S{n}: naming
+-- convention used by rename_mixer_position()) to its track_table entry.
+function resolve_folder_label(track_table, label)
+    if label == "D" then
+        if not track_table[1] then return nil, "No folders found" end
+        return track_table[1]
+    end
+    local s_n = label:match("^S(%d+)$")
+    if s_n then
+        local folder = track_table[tonumber(s_n) + 1]
+        if not folder then return nil, "No folder S" .. s_n end
+        return folder
+    end
+    return nil, "Unknown folder " .. label
+end
+
+-- Resolves a position-list token ("1", "1,3", "2-4", "*") within folder
+-- into an array of actual tracks, via get_folder_position_track().
+function resolve_folder_position_list(folder, positions_str)
+    local tracks_per_group = #folder.tracks + 1
+    local tracks = {}
+    for _, p in ipairs(expand_index_list(positions_str, tracks_per_group)) do
+        local track = get_folder_position_track(folder, p)
+        if track then table.insert(tracks, track) end
+    end
+    return tracks
+end
+
 -- Port of auto_assign() (Mission Control.lua:2592-2675), simplified to
 -- operate on the destination folder (track_table[1]) and the project's
 -- mixer tracks directly.
@@ -1172,27 +1203,86 @@ function try_selection(cmd)
         return true
     end
 
-    local sel_n = cmd:match("^sel=(%d+)$")
-    if sel_n then
-        local mixer = get_mixer_tracks()
-        local track = mixer[tonumber(sel_n)]
-        if track then
-            SetOnlyTrackSelected(track)
-        else
-            say("No mixer track at position " .. sel_n)
+    -- sel=+<folder>,<positions>: add regular track(s) inside <folder> (a
+    -- "D"/"S<n>" label, per the D:/S{n}: naming convention) at the given
+    -- position(s) within that folder ("1", "1,3", "2-4", "*", per
+    -- get_folder_position_track()) to the current selection.
+    local add_label, add_positions = cmd:match("^sel=%+%s*(%a[%a%d]*)%s*,%s*([%d,%-%*%s]+)$")
+    if add_label then
+        local folder, err = resolve_folder_label(get_track_table(), add_label)
+        if not folder then
+            say(err)
+            return true
         end
+        local tracks = resolve_folder_position_list(folder, add_positions)
+        if #tracks == 0 then
+            say("No matching tracks")
+            return true
+        end
+        for _, track in ipairs(tracks) do SetTrackSelected(track, true) end
         return true
     end
 
-    local sel_add = cmd:match("^sel=%+(%d+)$")
-    if sel_add then
-        local mixer = get_mixer_tracks()
-        local track = mixer[tonumber(sel_add)]
-        if track then
-            SetTrackSelected(track, true)
-        else
-            say("No mixer track at position " .. sel_add)
+    -- sel=<folder>,<positions>: exclusively select the same.
+    local sel_label, sel_positions = cmd:match("^sel=%s*(%a[%a%d]*)%s*,%s*([%d,%-%*%s]+)$")
+    if sel_label then
+        local folder, err = resolve_folder_label(get_track_table(), sel_label)
+        if not folder then
+            say(err)
+            return true
         end
+        local tracks = resolve_folder_position_list(folder, sel_positions)
+        if #tracks == 0 then
+            say("No matching tracks")
+            return true
+        end
+        SetOnlyTrackSelected(tracks[1])
+        for i = 2, #tracks do SetTrackSelected(tracks[i], true) end
+        return true
+    end
+
+    -- sel=+<positions> / sel=<positions> with no folder label: only valid
+    -- in Horizontal workflow, which has exactly one folder, so the
+    -- position is unambiguous; Vertical projects must specify the folder
+    -- via sel=D,N / sel=S1,N etc., since they have more than one folder.
+    local add_positions_only = cmd:match("^sel=%+%s*([%d,%-%*%s]+)$")
+    if add_positions_only then
+        if workflow ~= "Horizontal" then
+            say("Specify a folder, e.g. sel=+D," .. add_positions_only .. " or sel=+S1," .. add_positions_only)
+            return true
+        end
+        local track_table = get_track_table()
+        if not track_table[1] then
+            say("No folders found")
+            return true
+        end
+        local tracks = resolve_folder_position_list(track_table[1], add_positions_only)
+        if #tracks == 0 then
+            say("No matching tracks")
+            return true
+        end
+        for _, track in ipairs(tracks) do SetTrackSelected(track, true) end
+        return true
+    end
+
+    local sel_positions_only = cmd:match("^sel=%s*([%d,%-%*%s]+)$")
+    if sel_positions_only then
+        if workflow ~= "Horizontal" then
+            say("Specify a folder, e.g. sel=D," .. sel_positions_only .. " or sel=S1," .. sel_positions_only)
+            return true
+        end
+        local track_table = get_track_table()
+        if not track_table[1] then
+            say("No folders found")
+            return true
+        end
+        local tracks = resolve_folder_position_list(track_table[1], sel_positions_only)
+        if #tracks == 0 then
+            say("No matching tracks")
+            return true
+        end
+        SetOnlyTrackSelected(tracks[1])
+        for i = 2, #tracks do SetTrackSelected(tracks[i], true) end
         return true
     end
 
@@ -1254,9 +1344,9 @@ end
 function try_mute_solo(cmd)
     -- <target>xs: exclusive solo — unsolo/unmute every mixer track, then solo
     -- only the specified tracks. Target follows the same syntax as <target>s.
-    local xs_target = cmd:match("^([%d,%-%*@#]+)xs$")
+    local xs_target = cmd:match("^([%d,%-%*@#%s]+)xs$")
     if xs_target then
-        local tracks, err = resolve_target_list(xs_target)
+        local tracks, err = resolve_target_list((xs_target:gsub("%s+", "")))
         if #tracks == 0 then
             say(err or "No matching tracks")
             return true
@@ -1274,9 +1364,9 @@ function try_mute_solo(cmd)
     -- <target>m / <target>s / <target>um / <target>us, where <target> is
     -- a mixer track list ("1", "1,3", "4-6", "1,4-6", "*") or a single
     -- "@N" aux / "#N" submix.
-    local target_str, op = cmd:match("^([%d,%-%*@#]+)(u?[ms])$")
+    local target_str, op = cmd:match("^([%d,%-%*@#%s]+)(u?[ms])$")
     if target_str then
-        local tracks, err = resolve_target_list(target_str)
+        local tracks, err = resolve_target_list((target_str:gsub("%s+", "")))
         if #tracks == 0 then
             say(err or "No matching tracks")
             return true
@@ -1295,9 +1385,9 @@ function try_mute_solo(cmd)
     end
 
     -- <target>i=1 / <target>i=0: flip / reset track polarity (B_PHASE).
-    local pol_target, pol_val = cmd:match("^([%d,%-%*@#]+)i=([01])$")
+    local pol_target, pol_val = cmd:match("^([%d,%-%*@#%s]+)i=([01])$")
     if pol_target then
-        local tracks, err = resolve_target_list(pol_target)
+        local tracks, err = resolve_target_list((pol_target:gsub("%s+", "")))
         if #tracks == 0 then
             say(err or "No matching tracks")
             return true
@@ -1310,9 +1400,9 @@ function try_mute_solo(cmd)
     end
 
     -- <target>i? query: report polarity for each track.
-    local pol_query_str = cmd:match("^([%d,%-%*@#]+)i%?$")
+    local pol_query_str = cmd:match("^([%d,%-%*@#%s]+)i%?$")
     if pol_query_str then
-        local tracks, err = resolve_target_list(pol_query_str)
+        local tracks, err = resolve_target_list((pol_query_str:gsub("%s+", "")))
         if #tracks == 0 then
             say(err or "No matching tracks")
             return true
@@ -1326,9 +1416,9 @@ function try_mute_solo(cmd)
     end
 
     -- <target>m? / <target>s? query forms.
-    local query_str, query_op = cmd:match("^([%d,%-%*@#]+)([ms])%?$")
+    local query_str, query_op = cmd:match("^([%d,%-%*@#%s]+)([ms])%?$")
     if query_str then
-        local tracks, err = resolve_target_list(query_str)
+        local tracks, err = resolve_target_list((query_str:gsub("%s+", "")))
         if #tracks == 0 then
             say(err or "No matching tracks")
             return true
@@ -1355,8 +1445,9 @@ end
 -- resolve_target_list() so pan/fader commands accept single, range,
 -- comma-separated and "*" targets uniformly.
 function try_pan(cmd)
-    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*]*)(.+)$")
+    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*%s]*)(.+)$")
     if not target_str then return false end
+    target_str = target_str:gsub("%s+", "")
 
     local delta = rest:match("^p([+-]%d+)$")
     if delta then
@@ -1403,8 +1494,9 @@ function try_pan(cmd)
 end
 
 function try_fader(cmd)
-    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*]*)(.+)$")
+    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*%s]*)(.+)$")
     if not target_str then return false end
+    target_str = target_str:gsub("%s+", "")
 
     local delta = rest:match("^f([+-]%d+)$")
     if delta then
@@ -2052,14 +2144,14 @@ function try_routing_fx(cmd)
 
     -- List/range forms: "<list>-rcm" (connect) / "<list>/rcm" (disconnect)
     -- <list> is "*", "N", "N-M", "N,M", "N,M-P", ... (mixer tracks)
-    local list_target = cmd:match("^([%d,%-%*]+)-rcm$")
+    local list_target = cmd:match("^([%d,%-%*%s]+)-rcm$")
     local list_connect = true
     if not list_target then
-        list_target = cmd:match("^([%d,%-%*]+)/rcm$")
+        list_target = cmd:match("^([%d,%-%*%s]+)/rcm$")
         list_connect = false
     end
     if list_target then
-        local tracks, err = resolve_target_list(list_target)
+        local tracks, err = resolve_target_list((list_target:gsub("%s+", "")))
         if #tracks == 0 then
             say(err or ("Unknown target: " .. list_target))
             return true

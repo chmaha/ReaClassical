@@ -25,8 +25,6 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, exclusive_select_folder_parent, solo
 local find_marker_pos, play_segment
 
-local ROLL = 3.0
-
 ---------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
@@ -73,7 +71,8 @@ function main()
     local marker_pos = find_marker_pos(998, "SOURCE-IN")
     if not marker_pos then return end
 
-    local stop_pos = marker_pos + ROLL
+    local out_pos = find_marker_pos(999, "SOURCE-OUT")
+    local stop_pos = (out_pos and out_pos > marker_pos) and out_pos or nil
     play_segment(marker_pos, stop_pos)
 end
 
@@ -248,6 +247,8 @@ end
 function play_segment(start_pos, stop_pos)
     SetEditCurPos(start_pos, false, false)
     OnPlayButton()
+
+    if not stop_pos then return end
 
     local function check_stop()
         if GetPlayState() & 1 == 0 then
