@@ -110,6 +110,7 @@ function main()
         move_to_project_tab(source_proj)
         restore_ripple_state(source_ripple)
         move_to_project_tab(initial_proj)
+        SNM_SetIntConfigVar("scrubmode", scrubmode)
     end
 
     if proj_marker_count == 1 then
@@ -222,7 +223,6 @@ function main()
         restore_all_ripple()
     end
 
-    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Insert with timestretching', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

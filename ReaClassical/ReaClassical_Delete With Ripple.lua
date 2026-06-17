@@ -52,6 +52,10 @@ function main()
         return
     end
 
+    local _, scrubmode = get_config_var_string("scrubmode")
+    scrubmode = tonumber(scrubmode) or 0
+    SNM_SetIntConfigVar("scrubmode", 0)
+
     Main_OnCommand(40927, 0) -- Options: Enable auto-crossfade on split
     Main_OnCommand(41121, 0) -- Options: Disable trim content behind media items when editing
     local group_state = GetToggleCommandState(1156)
@@ -73,6 +77,7 @@ function main()
         select_midpoint_peers()
         local folder = GetSelectedTrack(0, 0)
         if not folder then
+            SNM_SetIntConfigVar("scrubmode", scrubmode)
             return
         end
         if workflow == "Vertical" then
@@ -100,6 +105,7 @@ function main()
     else
         MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete With Ripple", 0)
     end
+    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Cut and Ripple', 0)
     PreventUIRefresh(-1)
     UpdateArrange()

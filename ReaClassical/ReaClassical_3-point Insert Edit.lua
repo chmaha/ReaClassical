@@ -107,6 +107,7 @@ function main()
         move_to_project_tab(source_proj)
         restore_ripple_state(source_ripple)
         move_to_project_tab(initial_proj)
+        SNM_SetIntConfigVar("scrubmode", scrubmode)
     end
 
     if proj_marker_count == 1 then
@@ -237,7 +238,6 @@ function main()
 
     restore_view(initial_curpos, initial_selected_items, initial_selected_tracks)
 
-    SNM_SetIntConfigVar("scrubmode", scrubmode)
     Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
