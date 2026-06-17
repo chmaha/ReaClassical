@@ -1616,6 +1616,27 @@ function delete_overlapping_automation_items(env, start_t, end_t)
     end
 end
 
+-- Returns the ramp-inclusive range remembered from the most recent
+-- addauto=/addautoitem= call (see apply_terminal_automation()), but only
+-- if [ts_start, ts_end] still exactly matches the exact selection bounds
+-- that call was given — i.e. nothing has changed the selection since.
+-- Returns nil, nil otherwise, so a stale memory can never silently apply
+-- to a selection the user has since moved on from.
+function remembered_automation_range(ts_start, ts_end)
+    local _, core_start_str = GetProjExtState(0, "ReaClassical", "LastAutoCoreStart")
+    local _, core_end_str = GetProjExtState(0, "ReaClassical", "LastAutoCoreEnd")
+    local core_start, core_end = tonumber(core_start_str), tonumber(core_end_str)
+    if not (core_start and core_end
+        and math.abs(core_start - ts_start) < 0.0005
+        and math.abs(core_end - ts_end) < 0.0005) then
+        return nil, nil
+    end
+
+    local _, full_start_str = GetProjExtState(0, "ReaClassical", "LastAutoFullStart")
+    local _, full_end_str = GetProjExtState(0, "ReaClassical", "LastAutoFullEnd")
+    return tonumber(full_start_str), tonumber(full_end_str)
+end
+
 -- Applies info/value/ramp_in/ramp_out to each track in tracks, across the
 -- current time selection (with ramps outside it), mirroring
 -- apply_automation() in ReaClassical_Insert Automation.lua. Any existing
@@ -1624,9 +1645,22 @@ end
 -- prior item-based one (and vice versa) instead of being silently masked
 -- underneath it. An automation item is only created over the new range
 -- when as_item is true; otherwise the change is written directly as
--- envelope points on the main lane. Afterward, the time selection is
--- extended to cover the ramps too, so a follow-up delauto (which acts on
--- the time selection) correctly clears the whole thing, ramps included.
+-- envelope points on the main lane.
+--
+-- If this exact time selection was just used for a previous
+-- addauto=/addautoitem= call (per remembered_automation_range()), that
+-- call's full ramp-inclusive range is cleared too, even if it was wider
+-- than this one's — so reusing the same selection reliably replaces
+-- whatever's there (ramps included) instead of leaving old ramp debris
+-- behind. The new edit's own shape (and what gets remembered afterward)
+-- is still exactly what this call asked for, not the wider clear range.
+--
+-- Afterward, the time selection itself is left untouched (it stays
+-- exactly as the user set it); instead, the ramp-inclusive range is
+-- remembered in project state so a follow-up delauto or addauto=/
+-- addautoitem= can silently widen to cover it, without changing what's
+-- shown as selected. See try_delete_automation() for how that memory is
+-- only trusted while the selection hasn't changed since.
 function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end, as_item)
     local target_value = automation_raw_value(info, value)
     local needs_scaling = info.name == "Volume" or info.name == "Volume (Pre-FX)" or info.name == "Trim Volume"
@@ -1635,6 +1669,20 @@ function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_st
     local ramp_out_end = ts_end + ramp_out
     local affected_start = ramp_in > 0 and ramp_in_start or (ts_start - 0.002)
     local affected_end = ramp_out > 0 and ramp_out_end or (ts_end + 0.002)
+
+    local clear_start, clear_end = affected_start, affected_end
+    local prev_full_start, prev_full_end = remembered_automation_range(ts_start, ts_end)
+    if prev_full_start and prev_full_end then
+        clear_start = math.min(clear_start, prev_full_start)
+        clear_end = math.max(clear_end, prev_full_end)
+    end
+
+    -- Sample the "before"/"after" values from just outside the full
+    -- clear range (not just this call's own range), so the new ramp
+    -- blends from the genuine surrounding context rather than a
+    -- soon-to-be-deleted point from a previous wider edit.
+    local query_before_time = clear_start - 0.001
+    local query_after_time = clear_end + 0.001
 
     for _, track in ipairs(tracks) do
         local env = GetTrackEnvelopeByName(track, info.name)
@@ -1646,25 +1694,14 @@ function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_st
         if env then
             local target_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
 
-            delete_overlapping_automation_items(env, affected_start, affected_end)
+            delete_overlapping_automation_items(env, clear_start, clear_end)
 
-            local val_before
-            if ramp_in > 0 then
-                val_before = automation_envelope_value_at(env, ramp_in_start)
-            else
-                val_before = automation_envelope_value_at(env, ts_start - 0.001)
-            end
-            val_before = val_before or automation_default_value(track, info)
+            local val_before = automation_envelope_value_at(env, query_before_time)
+                or automation_default_value(track, info)
+            local val_after = automation_envelope_value_at(env, query_after_time)
+                or automation_default_value(track, info)
 
-            local val_after
-            if ramp_out > 0 then
-                val_after = automation_envelope_value_at(env, ramp_out_end)
-            else
-                val_after = automation_envelope_value_at(env, ts_end + 0.001)
-            end
-            val_after = val_after or automation_default_value(track, info)
-
-            DeleteEnvelopePointRange(env, affected_start - 0.001, affected_end + 0.001)
+            DeleteEnvelopePointRange(env, clear_start - 0.001, clear_end + 0.001)
 
             local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
             local val_after_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_after) or val_after
@@ -1693,7 +1730,14 @@ function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_st
         end
     end
 
-    GetSet_LoopTimeRange2(0, true, false, affected_start, affected_end, false)
+    -- Remember both the exact selection bounds the user gave us and the
+    -- ramp-inclusive range actually affected, so try_delete_automation()
+    -- can widen to the latter only while the visible selection still
+    -- matches the former (i.e. nothing has changed it since).
+    SetProjExtState(0, "ReaClassical", "LastAutoCoreStart", tostring(ts_start))
+    SetProjExtState(0, "ReaClassical", "LastAutoCoreEnd", tostring(ts_end))
+    SetProjExtState(0, "ReaClassical", "LastAutoFullStart", tostring(affected_start))
+    SetProjExtState(0, "ReaClassical", "LastAutoFullEnd", tostring(affected_end))
 end
 
 -- addauto=<param>,<value>[,<ramp_in>[,<ramp_out>]]: applies automation to
@@ -1763,18 +1807,48 @@ function try_automation(cmd)
     return true
 end
 
--- delauto (bare command, no arguments): deletes ALL built-in envelope
--- automation on the currently-selected tracks within the current time
--- selection — both plain points and any overlapping automation item
--- (ramps included), across every built-in param
+-- delauto / delauto=* (bare, or explicit "*"): deletes ALL built-in
+-- envelope automation on the currently-selected tracks within the
+-- current time selection — both plain points and any overlapping
+-- automation item (ramps included), across every built-in param
 -- (vol/pan/width/mute/trimvol/prevol/prepan/prewidth) that already has
--- an envelope. No need to specify a param or distinguish points vs.
--- item: the time selection left over right after an
+-- an envelope. delauto=<param>[,<param>...] instead restricts the
+-- deletion to just the named envelope(s) — needed once a track has more
+-- than one automation lane active, so clearing one doesn't sweep up the
+-- others. The time selection left over right after an
 -- addauto=/addautoitem= call is normally exactly the area to undo, and
 -- the user can always recreate a time selection to cover whatever needs
 -- clearing. Requires a time selection.
+--
+-- If the selection still exactly matches the bounds most recently given
+-- to addauto=/addautoitem= (i.e. nothing has changed it since), this
+-- silently widens the deletion to that call's ramp-inclusive range too —
+-- without changing what's shown as selected — so the ramps get cleared
+-- even though the visible selection only covers their flat middle.
 function try_delete_automation(cmd)
-    if cmd ~= "delauto" then return false end
+    local target_infos
+    if cmd == "delauto" then
+        target_infos = AUTOMATION_PARAMS
+    else
+        local rest = cmd:match("^delauto=(.+)$")
+        if not rest then return false end
+
+        if rest == "*" then
+            target_infos = AUTOMATION_PARAMS
+        else
+            target_infos = {}
+            for part in rest:gmatch("[^,]+") do
+                local key = trim(part):lower()
+                local info = AUTOMATION_PARAMS[key]
+                if not info then
+                    say("Unknown automation parameter: " .. trim(part) ..
+                        ". Use one of: vol, pan, width, mute, trimvol, prevol, prepan, prewidth, or *")
+                    return true
+                end
+                target_infos[key] = info
+            end
+        end
+    end
 
     local ts_start, ts_end = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
     if ts_start == ts_end then
@@ -1791,17 +1865,22 @@ function try_delete_automation(cmd)
         return true
     end
 
-    -- Pad the boundaries slightly: addauto=/addautoitem= place a ramp
-    -- point exactly at the time selection's edge, and extend the
-    -- selection to that exact same value, so a zero-margin delete can
-    -- leave that boundary point behind depending on REAPER's range
-    -- inclusivity/float precision at the edge.
-    local del_start = ts_start - 0.001
-    local del_end = ts_end + 0.001
+    local del_start, del_end = ts_start, ts_end
+    local full_start, full_end = remembered_automation_range(ts_start, ts_end)
+    if full_start and full_end then
+        del_start, del_end = full_start, full_end
+    end
+
+    -- Pad the boundaries slightly: a ramp point sits exactly at the
+    -- edge of the (possibly widened) deletion range, so a zero-margin
+    -- delete can leave it behind depending on REAPER's range
+    -- inclusivity/float precision right at that edge.
+    del_start = del_start - 0.001
+    del_end = del_end + 0.001
 
     local any_item = false
     for _, track in ipairs(tracks) do
-        for _, info in pairs(AUTOMATION_PARAMS) do
+        for _, info in pairs(target_infos) do
             local env = GetTrackEnvelopeByName(track, info.name)
             if env then
                 local count = CountAutomationItems(env)
