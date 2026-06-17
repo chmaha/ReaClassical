@@ -4202,6 +4202,72 @@ function try_record(cmd)
 end
 
 ---------------------------------------------------------------------
+-- OSARA installer (downloads/extracts via OS-builtin tools only:
+-- PowerShell on Windows, curl/unzip on macOS)
+---------------------------------------------------------------------
+
+-- Mirrors ReaClassical_Factory Reset.lua's ExecUpdate() restart sequence.
+function restart_reaper()
+    Main_OnCommand(40886, 0)
+    if IsProjectDirty(0) == 0 then
+        Main_OnCommand(40063, 0)
+        Main_OnCommand(40004, 0)
+    else
+        MB("Restart cancelled due to unsaved changes.", "ReaClassical", 0)
+    end
+end
+
+function try_osara_install(cmd)
+    if cmd ~= "installosara" then return false end
+
+    local system = GetOS()
+    local separator = package.config:sub(1, 1)
+    local resource_path = GetResourcePath()
+    local userplugins_path = resource_path .. separator .. "UserPlugins"
+
+    local exec_cmd
+    if string.find(system, "^Win") then
+        local url = "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/osara-win.zip"
+        local zip_path = resource_path .. separator .. "osara-win.zip"
+        exec_cmd = string.format(
+            'powershell -NoProfile -ExecutionPolicy Bypass -Command "' ..
+            "$ProgressPreference='SilentlyContinue'; " ..
+            "Invoke-WebRequest -Uri '%s' -OutFile '%s'; " ..
+            "Expand-Archive -Path '%s' -DestinationPath '%s' -Force; " ..
+            "Remove-Item -Path '%s' -Force" ..
+            '"',
+            url, zip_path, zip_path, userplugins_path, zip_path)
+    elseif string.find(system, "^OSX") or string.find(system, "^macOS") then
+        local url = "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/osara-macos.zip"
+        local zip_path = resource_path .. separator .. "osara-macos.zip"
+        exec_cmd = string.format(
+            "curl -fsSL -o '%s' '%s' && unzip -o '%s' -d '%s' && rm -f '%s'",
+            zip_path, url, zip_path, userplugins_path, zip_path)
+    else
+        say("installosara is only supported on Windows and macOS")
+        return true
+    end
+
+    local response = MB(
+        "This will download OSARA and install it into REAPER's UserPlugins folder," ..
+        "\nthen restart REAPER to load it." ..
+        "\n\nAre you sure you want to continue?",
+        "Install OSARA", 4)
+    if response ~= 6 then return true end
+
+    say("Downloading and installing OSARA, please wait...")
+    local ok = os.execute(exec_cmd)
+    if not ok then
+        say("Failed to download/install OSARA. Check your internet connection and try again.")
+        return true
+    end
+
+    say("OSARA installed. Restarting REAPER...")
+    restart_reaper()
+    return true
+end
+
+---------------------------------------------------------------------
 -- Dispatcher
 ---------------------------------------------------------------------
 
@@ -4227,6 +4293,7 @@ function execute_command(cmd)
     if try_prepare_prefs(cmd) then return end
     if try_record(cmd) then return end
     if try_misc(cmd) then return end
+    if try_osara_install(cmd) then return end
 
     say("Unknown command: " .. cmd)
 end
