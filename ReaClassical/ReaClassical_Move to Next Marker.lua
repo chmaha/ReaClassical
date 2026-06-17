@@ -22,7 +22,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, solo
+local main, solo, say, announce_marker_at
+
+---------------------------------------------------------------------
+
+function say(msg)
+    if osara_outputMessage then
+        osara_outputMessage(tostring(msg))
+    end
+end
+
+function announce_marker_at(pos)
+    local num_markers, num_regions = CountProjectMarkers(0)
+    for idx = 0, num_markers + num_regions - 1 do
+        local retval, isrgn, mpos, _, name, num = EnumProjectMarkers3(0, idx)
+        if retval and not isrgn and math.abs(mpos - pos) < 1e-6 then
+            say(num .. ": " .. (name ~= "" and name or "(unnamed)"))
+            return
+        end
+    end
+end
 
 function main()
     local curPos = GetCursorPosition()
@@ -39,7 +58,7 @@ function main()
             local track_num = tonumber(name:match("^(%d+):"))
             if track_num and name:match("SAI") then
                 track_markers[track_num] = track_markers[track_num] or {}
-                table.insert(track_markers[track_num], { pos = pos, idx = idx })
+                table.insert(track_markers[track_num], { pos = pos, idx = idx, name = name })
             end
         end
     end
@@ -47,6 +66,7 @@ function main()
     if next(track_markers) == nil then
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(40173, 0)
+        announce_marker_at(GetCursorPosition())
         return
     end
 
@@ -64,6 +84,7 @@ function main()
                     Main_OnCommand(40297, 0) -- unselect all tracks
                     SetTrackSelected(track, true)
                     solo()                   -- call your existing solo function
+                    say(marker.idx .. ": " .. marker.name)
                     return
                 end
             end

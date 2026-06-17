@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, move_to_item, get_selected_media_item_at, say, announce_current_item
+local main, get_selected_media_item_at, say, announce_current_item
 
 ---------------------------------------------------------------------
 
@@ -60,28 +60,11 @@ function main()
         return
     end
 
-    move_to_item()
+    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
 
     UpdateArrange()
     UpdateTimeline()
     announce_current_item()
-end
-
----------------------------------------------------------------------
-
-function move_to_item()
-    local item = get_selected_media_item_at(0)
-    local item_start
-    if item then
-        item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-    end
-    local cursor_position = GetCursorPosition()
-    if item_start and cursor_position > item_start then
-        Main_OnCommand(40416, 0)     -- Select and move to prev item
-        Main_OnCommand(40416, 0)     -- Select and move to prev item
-    else
-        Main_OnCommand(40416, 0)     -- Select and move to prev item
-    end
 end
 
 ---------------------------------------------------------------------

@@ -21,7 +21,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, solo, say, announce_marker_at
+
+local main, is_special_track, get_rc_folders, solo, say
+
+local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
+local ref_is_guide = 0
+if input ~= "" then
+    local t = {}
+    for entry in input:gmatch('([^,]+)') do t[#t + 1] = entry end
+    if t[7] then ref_is_guide = tonumber(t[7]) or 0 end
+end
 
 ---------------------------------------------------------------------
 
@@ -31,75 +40,32 @@ function say(msg)
     end
 end
 
-function announce_marker_at(pos)
-    local num_markers, num_regions = CountProjectMarkers(0)
-    for idx = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, mpos, _, name, num = EnumProjectMarkers3(0, idx)
-        if retval and not isrgn and math.abs(mpos - pos) < 1e-6 then
-            say(num .. ": " .. (name ~= "" and name or "(unnamed)"))
-            return
-        end
+---------------------------------------------------------------------
+
+function is_special_track(track)
+    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster" }
+    for _, key in ipairs(keys) do
+        local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
+        if val == "y" then return true end
     end
+    return false
 end
 
-function main()
-    local playPos = GetPlayPosition()   -- current playhead
-    local editPos = GetCursorPosition() -- edit cursor
-    local sel_track = GetSelectedTrack(0, 0)
-    local start_track_idx = sel_track and math.floor(GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER")) or 1
-    local num_tracks = CountTracks(0)
+---------------------------------------------------------------------
 
-    -- If playhead is > 2s ahead of edit cursor, just move to edit cursor
-    if playPos - editPos > 2 then
-        SetEditCurPos(editPos, true, true)
-        return
-    end
-
-    -- collect all SAI markers by track
-    local track_markers = {}
-    local num_markers = CountProjectMarkers(0)
-    for i = 0, num_markers - 1 do
-        local _, isrgn, pos, _, name, idx = EnumProjectMarkers(i)
-        if not isrgn then
-            local track_num = tonumber(name:match("^(%d+):"))
-            if track_num and name:match("SAI") then
-                track_markers[track_num] = track_markers[track_num] or {}
-                table.insert(track_markers[track_num], { pos = pos, idx = idx, name = name })
-            end
+function get_rc_folders()
+    local folders = {}
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 and not is_special_track(track) then
+            table.insert(folders, { track = track, idx = i })
         end
     end
-
-    if next(track_markers) == nil then
-        Main_OnCommand(40289, 0) -- Item: Unselect all items
-        Main_OnCommand(40172, 0)
-        announce_marker_at(GetCursorPosition())
-        return
-    end
-
-    -- search for previous marker starting from current track, going backward
-    for offset = 0, num_tracks - 1 do
-        local track_idx = ((start_track_idx - offset - 1 + num_tracks) % num_tracks) + 1
-        local markers = track_markers[track_idx]
-        if markers then
-            table.sort(markers, function(a, b) return a.pos > b.pos end) -- sort descending
-            for _, marker in ipairs(markers) do
-                if offset > 0 or marker.pos < editPos - 1e-9 then
-                    local track = GetTrack(0, track_idx - 1)
-                    SetEditCurPos(marker.pos, true, true) -- move cursor and scroll
-                    Main_OnCommand(40297, 0)              -- unselect all tracks
-                    SetTrackSelected(track, true)
-                    solo()                                -- call your existing solo function
-                    say(marker.idx .. ": " .. marker.name)
-                    return
-                end
-            end
-        end
-    end
+    return folders
 end
 
 function solo()
     Main_OnCommand(40491, 0) -- un-arm all tracks for recording
-    -- Re-arm listenback tracks
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
@@ -108,7 +74,7 @@ function solo()
         end
     end
     local selected_track = GetSelectedTrack(0, 0)
-    local parent = GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH")
+    local parent = selected_track and GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH") or 0
 
     for i = 0, CountTracks(0) - 1, 1 do
         local track = GetTrack(0, i)
@@ -177,5 +143,27 @@ function solo()
     end
 end
 
--- call it
+---------------------------------------------------------------------
+
+function main()
+    local folders = get_rc_folders()
+    if #folders == 0 then
+        say("No ReaClassical folders found.")
+        return
+    end
+
+    local first_folder = folders[1]
+    PreventUIRefresh(1)
+    SetOnlyTrackSelected(first_folder.track)
+    solo()
+    PreventUIRefresh(-1)
+    TrackList_AdjustWindows(false)
+    UpdateArrange()
+    UpdateTimeline()
+    local _, name = GetSetMediaTrackInfo_String(first_folder.track, "P_NAME", "", false)
+    say("Folder: " .. name)
+end
+
+---------------------------------------------------------------------
+
 main()
