@@ -1616,18 +1616,25 @@ function delete_overlapping_automation_items(env, start_t, end_t)
     end
 end
 
--- Applies info/value/ramp_in/ramp_out to each track in tracks, at the
--- current time selection (with ramps outside it, creating an automation
--- item) or at the edit cursor (with an optional ramp-in) if there is no
--- time selection, mirroring apply_automation() in
--- ReaClassical_Insert Automation.lua.
--- Requires a time selection: open-ended "from the cursor to the end of
--- the piece" changes belong to the Mixer Snapshot Manager instead, so
--- addauto= always applies between a time selection's bounds (with ramps
--- outside it) and creates an automation item there.
-function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end)
+-- Applies info/value/ramp_in/ramp_out to each track in tracks, across the
+-- current time selection (with ramps outside it), mirroring
+-- apply_automation() in ReaClassical_Insert Automation.lua. Any existing
+-- automation item overlapping the affected range is deleted first
+-- regardless of as_item, so a plain-points edit correctly replaces a
+-- prior item-based one (and vice versa) instead of being silently masked
+-- underneath it. An automation item is only created over the new range
+-- when as_item is true; otherwise the change is written directly as
+-- envelope points on the main lane. Afterward, the time selection is
+-- extended to cover the ramps too, so a follow-up delauto (which acts on
+-- the time selection) correctly clears the whole thing, ramps included.
+function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end, as_item)
     local target_value = automation_raw_value(info, value)
     local needs_scaling = info.name == "Volume" or info.name == "Volume (Pre-FX)" or info.name == "Trim Volume"
+
+    local ramp_in_start = ts_start - ramp_in
+    local ramp_out_end = ts_end + ramp_out
+    local affected_start = ramp_in > 0 and ramp_in_start or (ts_start - 0.002)
+    local affected_end = ramp_out > 0 and ramp_out_end or (ts_end + 0.002)
 
     for _, track in ipairs(tracks) do
         local env = GetTrackEnvelopeByName(track, info.name)
@@ -1639,8 +1646,7 @@ function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_st
         if env then
             local target_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
 
-            local ramp_in_start = ts_start - ramp_in
-            local ramp_out_end = ts_end + ramp_out
+            delete_overlapping_automation_items(env, affected_start, affected_end)
 
             local val_before
             if ramp_in > 0 then
@@ -1658,9 +1664,7 @@ function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_st
             end
             val_after = val_after or automation_default_value(track, info)
 
-            local clear_start = ramp_in > 0 and ramp_in_start or (ts_start - 0.002)
-            local clear_end = ramp_out > 0 and ramp_out_end or (ts_end + 0.002)
-            DeleteEnvelopePointRange(env, clear_start - 0.001, clear_end + 0.001)
+            DeleteEnvelopePointRange(env, affected_start - 0.001, affected_end + 0.001)
 
             local val_before_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_before) or val_before
             local val_after_to_insert = needs_scaling and ScaleToEnvelopeMode(1, val_after) or val_after
@@ -1683,26 +1687,40 @@ function apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_st
 
             Envelope_SortPoints(env)
 
-            local item_start = ramp_in > 0 and (ts_start - ramp_in) or (ts_start - 0.002)
-            local item_end = ramp_out > 0 and (ts_end + ramp_out) or (ts_end + 0.002)
-            delete_overlapping_automation_items(env, item_start, item_end)
-            InsertAutomationItem(env, -1, item_start, item_end - item_start)
+            if as_item then
+                InsertAutomationItem(env, -1, affected_start, affected_end - affected_start)
+            end
         end
     end
+
+    GetSet_LoopTimeRange2(0, true, false, affected_start, affected_end, false)
 end
 
 -- addauto=<param>,<value>[,<ramp_in>[,<ramp_out>]]: applies automation to
 -- the currently-selected tracks (see sel=/sel? in try_selection()) across
--- the current time selection, with ramps outside its bounds, creating an
--- automation item there. Requires a time selection — open-ended changes
--- with no end point belong to the Mixer Snapshot Manager instead.
+-- the current time selection, with ramps outside its bounds, written
+-- directly as envelope points (no automation item) — convenient for
+-- building up a multi-step "staircase" automation curve one call at a
+-- time. addautoitem=... takes the same arguments but wraps the change in
+-- an automation item instead, so it can be moved/resized/deleted as a
+-- unit. Either form replaces any pre-existing automation item overlapping
+-- the affected range. Afterward, the time selection is extended to cover
+-- any ramps, so a follow-up delauto clears the whole thing (ramps
+-- included) without the user needing to redraw the selection. Both
+-- require a time selection — open-ended changes with no end point belong
+-- to the Mixer Snapshot Manager instead.
 -- <param> is one of vol/pan/width/mute/trimvol/prevol/prepan/prewidth;
 -- FX parameters aren't supported here since they have no stable short
 -- name across plugins. <value> is dB for the volume-like params, -1..1
 -- for pan/width, 0/1 for mute. <ramp_in>/<ramp_out> are seconds and
 -- default to 0.
 function try_automation(cmd)
+    local as_item = false
     local rest = cmd:match("^addauto=(.+)$")
+    if not rest then
+        rest = cmd:match("^addautoitem=(.+)$")
+        as_item = true
+    end
     if not rest then return false end
 
     local parts = {}
@@ -1719,7 +1737,7 @@ function try_automation(cmd)
 
     local value = tonumber(parts[2])
     if not value then
-        say("Usage: addauto=<param>,<value>[,<ramp_in>[,<ramp_out>]]")
+        say("Usage: addauto=<param>,<value>[,<ramp_in>[,<ramp_out>]] (or addautoitem=...)")
         return true
     end
 
@@ -1741,7 +1759,67 @@ function try_automation(cmd)
         return true
     end
 
-    apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end)
+    apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end, as_item)
+    return true
+end
+
+-- delauto (bare command, no arguments): deletes ALL built-in envelope
+-- automation on the currently-selected tracks within the current time
+-- selection — both plain points and any overlapping automation item
+-- (ramps included), across every built-in param
+-- (vol/pan/width/mute/trimvol/prevol/prepan/prewidth) that already has
+-- an envelope. No need to specify a param or distinguish points vs.
+-- item: the time selection left over right after an
+-- addauto=/addautoitem= call is normally exactly the area to undo, and
+-- the user can always recreate a time selection to cover whatever needs
+-- clearing. Requires a time selection.
+function try_delete_automation(cmd)
+    if cmd ~= "delauto" then return false end
+
+    local ts_start, ts_end = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
+    if ts_start == ts_end then
+        say("No time selection found")
+        return true
+    end
+
+    local tracks = {}
+    for i = 0, CountSelectedTracks(0) - 1 do
+        table.insert(tracks, GetSelectedTrack(0, i))
+    end
+    if #tracks == 0 then
+        say("No tracks selected")
+        return true
+    end
+
+    -- Pad the boundaries slightly: addauto=/addautoitem= place a ramp
+    -- point exactly at the time selection's edge, and extend the
+    -- selection to that exact same value, so a zero-margin delete can
+    -- leave that boundary point behind depending on REAPER's range
+    -- inclusivity/float precision at the edge.
+    local del_start = ts_start - 0.001
+    local del_end = ts_end + 0.001
+
+    local any_item = false
+    for _, track in ipairs(tracks) do
+        for _, info in pairs(AUTOMATION_PARAMS) do
+            local env = GetTrackEnvelopeByName(track, info.name)
+            if env then
+                local count = CountAutomationItems(env)
+                for i = 0, count - 1 do
+                    local pos = GetSetAutomationItemInfo(env, i, "D_POSITION", 0, false)
+                    local len = GetSetAutomationItemInfo(env, i, "D_LENGTH", 0, false)
+                    local overlaps = pos < del_end and (pos + len) > del_start
+                    GetSetAutomationItemInfo(env, i, "D_UISEL", overlaps and 1 or 0, true)
+                    if overlaps then any_item = true end
+                end
+                DeleteEnvelopePointRange(env, del_start, del_end)
+            end
+        end
+    end
+    if any_item then
+        Main_OnCommand(42086, 0) -- Envelope: Delete automation items
+    end
+    UpdateArrange()
     return true
 end
 
@@ -4599,6 +4677,7 @@ function execute_command(cmd)
     if try_pan(cmd) then return end
     if try_fader(cmd) then return end
     if try_automation(cmd) then return end
+    if try_delete_automation(cmd) then return end
     if try_ddp(cmd) then return end
     if try_undo_redo(cmd) then return end
     if try_reorder(cmd) then return end

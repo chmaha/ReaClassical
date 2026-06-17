@@ -399,6 +399,14 @@ function apply_automation()
     local ramp_in_start = actual_start - ramp_in
     local ramp_out_end = actual_end + ramp_out
 
+    -- Remove any existing automation item(s) overlapping the affected
+    -- range first, regardless of create_auto_item, so a plain-points
+    -- edit correctly replaces a prior item-based one (and vice versa)
+    -- instead of being silently masked underneath it
+    local affected_start = ramp_in > 0 and ramp_in_start or (actual_start - 0.002)
+    local affected_end = ramp_out > 0 and ramp_out_end or (actual_end + 0.002)
+    delete_overlapping_automation_items(env, affected_start, affected_end)
+
     -- Get values at boundaries BEFORE deleting anything
     local val_before, val_after
 
@@ -427,9 +435,7 @@ function apply_automation()
     end
 
     -- Clear existing points in the entire range including ramps
-    local clear_start = ramp_in > 0 and ramp_in_start or (actual_start - 0.002)
-    local clear_end = ramp_out > 0 and ramp_out_end or (actual_end + 0.002)
-    DeleteEnvelopePointRange(env, clear_start - 0.001, clear_end + 0.001)
+    DeleteEnvelopePointRange(env, affected_start - 0.001, affected_end + 0.001)
 
     -- Scale values if needed (only for volume envelopes)
     local target_val_to_insert = needs_scaling and ScaleToEnvelopeMode(1, target_value) or target_value
@@ -469,16 +475,10 @@ function apply_automation()
       end
 
       if env then
-        -- Use time selection range (including ramps if any)
+        -- Use time selection range (including ramps if any); any
+        -- overlapping automation item was already removed above
         local item_start = ramp_in > 0 and (start_time - ramp_in) or (start_time - 0.002)
         local item_end = ramp_out > 0 and (end_time + ramp_out) or (end_time + 0.002)
-
-        -- Remove any existing automation item(s) that overlap the new
-        -- range first, so the new item replaces them instead of stacking
-        -- an overlapping duplicate on top
-        delete_overlapping_automation_items(env, item_start, item_end)
-
-        -- Create automation item
         InsertAutomationItem(env, -1, item_start, item_end - item_start)
       end
     end
@@ -511,6 +511,17 @@ function main()
     keep_window_open = false
   end
   -- If empty string (first run), keep_window_open retains its default value of false
+
+  -- Load create-automation-item state from project: remember the user's
+  -- last choice rather than trying to guess it from existing automation,
+  -- so it stays predictable across applies
+  local _, create_item_str = GetProjExtState(0, "ReaClassical", "CreateAutomationItem")
+  if create_item_str == "1" then
+    create_auto_item = true
+  elseif create_item_str == "0" then
+    create_auto_item = false
+  end
+  -- If empty string (first run), create_auto_item retains its default value of true
 
   -- Get currently selected tracks
   local tracks = get_selected_tracks()
@@ -1106,6 +1117,8 @@ function main()
         local changed_auto_item, new_auto_item = ImGui.Checkbox(ctx, "Create automation item", create_auto_item)
         if changed_auto_item then
           create_auto_item = new_auto_item
+          -- Save to project extended state so this choice persists
+          SetProjExtState(0, "ReaClassical", "CreateAutomationItem", create_auto_item and "1" or "0")
         end
 
         -- Keep window open checkbox with persistence
