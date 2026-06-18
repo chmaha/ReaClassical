@@ -24,6 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
+local humanize_track_name = require("ReaClassical_Track_Naming")
 
 local workflow = ""
 
@@ -124,40 +125,6 @@ function pct_to_pan(str)
     local n = tonumber(str)
     if not n then return nil end
     return clamp(n / 100, -1, 1)
-end
-
--- Translates a raw P_NAME's internal prefix encoding into a spoken label,
--- e.g. "M:Violin" -> "Mixer track Violin", "#Strings" -> "Submix Strings",
--- "@" (no custom name) -> "Auxiliary". REF/LISTENBACK get a word-spaced
--- form ("Reference", "Listen back") since OSARA otherwise tries to spell
--- them out letter-by-letter as acronyms.
-function humanize_track_name(name)
-    if not name or name == "" then return "(unnamed)" end
-
-    local rest = name:match("^M:(.*)$")
-    if rest then return rest ~= "" and ("Mixer track " .. rest) or "Mixer track" end
-
-    rest = name:match("^D:(.*)$")
-    if rest then return rest ~= "" and ("Destination " .. rest) or "Destination" end
-
-    local src_num, src_rest = name:match("^S(%d+):(.*)$")
-    if src_num then
-        return src_rest ~= "" and ("Source " .. src_num .. " " .. src_rest) or ("Source " .. src_num)
-    end
-
-    rest = name:match("^@(.*)$")
-    if rest then return rest ~= "" and ("Auxiliary " .. rest) or "Auxiliary" end
-
-    rest = name:match("^#(.*)$")
-    if rest then return rest ~= "" and ("Submix " .. rest) or "Submix" end
-
-    rest = name:match("^REF:?(.*)$")
-    if rest then return rest ~= "" and ("Reference " .. rest) or "Reference" end
-
-    if name == "LISTENBACK" then return "Listen back" end
-    if name == "RCMASTER" then return "RC Master" end
-
-    return name
 end
 
 ---------------------------------------------------------------------
@@ -1208,7 +1175,7 @@ function try_selection(cmd)
             for i = 0, n - 1 do
                 local track = GetSelectedTrack(0, i)
                 local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-                table.insert(names, name)
+                table.insert(names, humanize_track_name(name))
             end
             say("Selected tracks: " .. table.concat(names, ", "))
         end

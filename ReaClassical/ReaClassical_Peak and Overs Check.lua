@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local humanize_track_name = require("ReaClassical_Track_Naming")
+
 local main, scan, scan_item, format_pos, go_to, is_rcmaster, chain_gain
 
 ---------------------------------------------------------------------
@@ -218,6 +222,7 @@ function scan()
             local num_items = CountTrackMediaItems(track)
             if num_items > 0 then
                 local _, track_name = GetTrackName(track)
+                track_name = humanize_track_name(track_name)
                 local track_gain = chain_gain(track)
                 for i = 0, num_items - 1 do
                     local item = GetTrackMediaItem(track, i)

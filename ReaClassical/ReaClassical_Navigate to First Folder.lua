@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local humanize_track_name = require("ReaClassical_Track_Naming")
+
 local main, is_special_track, get_rc_folders, solo, say
 local format_peak, format_input, announce_track, get_feed_track
 
@@ -95,7 +99,7 @@ end
 function announce_track(track, label)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local meter_track = get_feed_track(track)
-    local parts = { label .. ": " .. name, format_peak(meter_track) }
+    local parts = { label .. ": " .. humanize_track_name(name), format_peak(meter_track) }
     local input_info = format_input(track)
     if input_info then parts[#parts + 1] = input_info end
     say(table.concat(parts, ", "))

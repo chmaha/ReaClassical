@@ -43,6 +43,8 @@ end
 local RECORD_PANEL_ID = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
 local separator   = package.config:sub(1, 1)
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local humanize_track_name = require("ReaClassical_Track_Naming")
 local _, prev_recfilename = get_config_var_string("recfile_wildcards")
 
 local rec_color      = ColorToNative(255, 0, 0)    | 0x1000000
@@ -440,7 +442,8 @@ end
 
 local function clip_track_label(tr)
     local ok, name = GetSetMediaTrackInfo_String(tr, "P_NAME", "", false)
-    return (ok and name ~= "" and name) or ("Track " .. GetMediaTrackInfo_Value(tr, "IP_TRACKNUMBER"))
+    return (ok and name ~= "" and humanize_track_name(name))
+        or ("Track " .. GetMediaTrackInfo_Value(tr, "IP_TRACKNUMBER"))
 end
 
 -- Port of get_input_label() (Meterbridge.lua), always preferring hardware
