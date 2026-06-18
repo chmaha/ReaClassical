@@ -366,6 +366,32 @@ local function apply_rank_and_notes_by_guids()
     UpdateArrange()
 end
 
+-- Mirrors the "WEB REMOTE" channel in ReaClassical_Record Panel.lua: external
+-- callers (here, the Terminal's rec.rank=/rec.note= commands) drop a pending
+-- rank/note into ext state rather than calling into this script directly.
+-- While recording, this just updates recording_rank/recording_note so the
+-- existing color_run_once path applies them when the take stops. Once
+-- stopped, there's no future stop transition to trigger that path, so we
+-- apply immediately to the last-recorded take here.
+local function check_web_remote_pending()
+    local _, pending = GetProjExtState(0, "ReaClassical", "WebRemote_Pending")
+    if pending ~= "1" then return end
+    local _, web_rank = GetProjExtState(0, "ReaClassical", "WebRemote_Rank")
+    local _, web_note = GetProjExtState(0, "ReaClassical", "WebRemote_Note")
+    recording_rank = web_rank
+    recording_note = web_note
+    SetProjExtState(0, "ReaClassical", "WebRemote_Pending", "0")
+
+    local ps = GetPlayState()
+    if ps == 0 or ps == 1 then
+        check_prefs()
+        local current_take = take_text
+        take_text = last_recorded_take
+        apply_rank_and_notes_by_guids()
+        take_text = current_take
+    end
+end
+
 ---------------------------------------------------------------------
 -- Track disarm (mirrors Record Panel's disarm_all_tracks)
 ---------------------------------------------------------------------
@@ -548,6 +574,7 @@ local function main()
 
     check_session_change()
     check_override()
+    check_web_remote_pending()
     check_track_clips()
 
     local playstate = GetPlayState()

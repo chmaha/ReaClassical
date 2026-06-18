@@ -4518,6 +4518,131 @@ function try_record(cmd)
         return true
     end
 
+    -- rec.go — press F9 (arms the selected folder, or starts recording if
+    -- already armed), matching the Record Panel's Arm/Rec button
+    if cmd == "rec.go" then
+        if GetPlayState() ~= 0 then
+            say("Already recording")
+            return true
+        end
+        if not APIExists("AddRemoveReaScript") then
+            say("AddRemoveReaScript API not found (install SWS extension)")
+            return true
+        end
+        local f9_cid = AddRemoveReaScript(true, 0,
+            script_path .. "ReaClassical_Classical Take Record.lua", true)
+        if f9_cid == 0 then
+            say("Classical Take Record script not found")
+            return true
+        end
+        Main_OnCommand(f9_cid, 0)
+        -- F9 announces "Take N" itself once recording actually starts; if it
+        -- only armed (nothing was armed before), announce what got armed.
+        if GetPlayState() == 0 then
+            local armed_folder
+            for i = 0, CountTracks(0) - 1 do
+                local t = GetTrack(0, i)
+                local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
+                if lb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1
+                    and GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                    armed_folder = t; break
+                end
+            end
+            if armed_folder then
+                local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+                if wf == "Vertical" then
+                    local _, folder_name = GetSetMediaTrackInfo_String(armed_folder, "P_NAME", "", false)
+                    local prefix = folder_name:match("^([^:]+):") or folder_name
+                    say("Armed: " .. (prefix ~= "" and prefix or "Unnamed folder"))
+                else
+                    say("Folder armed")
+                end
+            end
+        end
+        return true
+    end
+
+    -- rec.stop — press F9 to stop the current recording
+    if cmd == "rec.stop" then
+        if GetPlayState() == 0 then
+            say("Not recording")
+            return true
+        end
+        if not APIExists("AddRemoveReaScript") then
+            say("AddRemoveReaScript API not found (install SWS extension)")
+            return true
+        end
+        local f9_cid = AddRemoveReaScript(true, 0,
+            script_path .. "ReaClassical_Classical Take Record.lua", true)
+        if f9_cid == 0 then
+            say("Classical Take Record script not found")
+            return true
+        end
+        Main_OnCommand(f9_cid, 0)
+        say("Stopped")
+        return true
+    end
+
+    -- rec.pause — toggle pause/unpause while recording
+    if cmd == "rec.pause" then
+        local ps = GetPlayState()
+        if ps ~= 5 and ps ~= 6 then
+            say("Not recording")
+            return true
+        end
+        Main_OnCommand(1008, 0) -- Transport: Pause
+        say(GetPlayState() == 6 and "Paused" or "Resumed")
+        return true
+    end
+
+    -- rec.next — move to the next recording section (Vertical workflow only)
+    if cmd == "rec.next" then
+        local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+        if wf ~= "Vertical" then
+            say("Next Section is only available in Vertical workflow")
+            return true
+        end
+        if GetPlayState() ~= 0 then
+            say("Stop recording before moving to next section")
+            return true
+        end
+        if not APIExists("AddRemoveReaScript") then
+            say("AddRemoveReaScript API not found (install SWS extension)")
+            return true
+        end
+        local next_cid = AddRemoveReaScript(true, 0,
+            script_path .. "ReaClassical_Set Next Recording Section.lua", true)
+        if next_cid == 0 then
+            say("Set Next Recording Section script not found")
+            return true
+        end
+        Main_OnCommand(next_cid, 0)
+        say("Moved to next recording section")
+        return true
+    end
+
+    -- rec.split — stop and immediately start a new take, incrementing the
+    -- take number (Horizontal) or moving to the next folder (Vertical),
+    -- matching the Record Panel's "+Take" button (Shift+F9)
+    if cmd == "rec.split" then
+        if GetPlayState() == 0 then
+            say("Not recording")
+            return true
+        end
+        if not APIExists("AddRemoveReaScript") then
+            say("AddRemoveReaScript API not found (install SWS extension)")
+            return true
+        end
+        local inc_cid = AddRemoveReaScript(true, 0,
+            script_path .. "ReaClassical_Increment Take Number While Recording.lua", true)
+        if inc_cid == 0 then
+            say("Increment Take Number While Recording script not found")
+            return true
+        end
+        Main_OnCommand(inc_cid, 0)
+        return true
+    end
+
     -- rec.daemon? — check daemon status
     if cmd == "rec.daemon?" then
         local _, ts = GetProjExtState(0, "ReaClassical", "rec_daemon_heartbeat")
@@ -4647,6 +4772,29 @@ function try_record(cmd)
         SetProjExtState(0, "ReaClassical", "TakeCounterOverride", "1")
         rec_update_wildcards(sess, n)
         say(string.format("Take incremented to T%03d", n))
+        return true
+    end
+
+    -- rec.rank=letter — set rank for the take currently recording (applied
+    -- when it stops) or, if stopped, the last-recorded take. Mirrors the
+    -- Record Panel's rank dropdown via the same WebRemote_* ext-state channel.
+    local rec_rank_letter = cmd:match("^rec%.rank=([evgobpufn])$")
+    if rec_rank_letter then
+        local rank_index = RANK_LETTERS[rec_rank_letter]
+        local rank_str = (rank_index == 9) and "" or tostring(rank_index)
+        SetProjExtState(0, "ReaClassical", "WebRemote_Rank", rank_str)
+        SetProjExtState(0, "ReaClassical", "WebRemote_Pending", "1")
+        say("Rank: " .. (RANK_PREFIXES[rank_index] ~= "" and RANK_PREFIXES[rank_index] or "None"))
+        return true
+    end
+
+    -- rec.note=text — set notes for the take currently recording (applied
+    -- when it stops) or, if stopped, the last-recorded take.
+    local rec_note_val = cmd:match("^rec%.note=(.*)$")
+    if rec_note_val then
+        SetProjExtState(0, "ReaClassical", "WebRemote_Note", rec_note_val)
+        SetProjExtState(0, "ReaClassical", "WebRemote_Pending", "1")
+        say(rec_note_val ~= "" and ("Note: " .. rec_note_val) or "Note cleared")
         return true
     end
 
