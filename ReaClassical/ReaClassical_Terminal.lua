@@ -5592,21 +5592,34 @@ function main()
     end
     if #commands == 0 then return end
 
-    if workflow == "" then
-        local first = commands[1]
-        if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab"
-                or first == "update" or first == "installosara") then
-            say("Please create a ReaClassical project first (e.g. 6v)")
+    -- Give VoiceOver/OSARA time to finish announcing the focus change
+    -- caused by the dialog closing before we speak the result, otherwise
+    -- the announcement gets stomped and only the focused control's
+    -- accessibility role (e.g. "text") is heard.
+    local dialog_closed_time = time_precise()
+    local function run_commands()
+        if time_precise() - dialog_closed_time < 0.2 then
+            defer(run_commands)
             return
         end
-    end
 
-    Undo_BeginBlock()
-    for _, c in ipairs(commands) do
-        execute_command(c)
+        if workflow == "" then
+            local first = commands[1]
+            if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab"
+                    or first == "update" or first == "installosara") then
+                say("Please create a ReaClassical project first (e.g. 6v)")
+                return
+            end
+        end
+
+        Undo_BeginBlock()
+        for _, c in ipairs(commands) do
+            execute_command(c)
+        end
+        Undo_EndBlock("ReaClassical Terminal: " .. input, -1)
+        UpdateArrange()
     end
-    Undo_EndBlock("ReaClassical Terminal: " .. input, -1)
-    UpdateArrange()
+    run_commands()
 end
 
 main()
