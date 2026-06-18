@@ -1172,6 +1172,29 @@ function try_input_config(cmd)
         return true
     end
 
+    -- <target>rd?: report record-enabled state and input (mono/stereo) for
+    -- one or more mixer tracks, mirroring the rd= setter's target syntax.
+    local rd_query_str = cmd:match("^([%d,%-%*%s]+)rd%?$")
+    if rd_query_str then
+        local tracks, err = resolve_target_list((rd_query_str:gsub("%s+", "")))
+        if #tracks == 0 then
+            say(err or "No matching tracks")
+            return true
+        end
+        for _, track in ipairs(tracks) do
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            local _, disabled = GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", "", false)
+            say(humanize_track_name(name) .. " record: " .. (disabled == "y" and "disabled" or "enabled")
+                .. ", input: " .. rec_input_description(track))
+        end
+        return true
+    end
+
+    if cmd == "ai" then
+        auto_assign_inputs(1)
+        return true
+    end
+
     local ai_start = cmd:match("^ai=(%d+)$")
     if ai_start then
         auto_assign_inputs(tonumber(ai_start))
@@ -1438,6 +1461,7 @@ function try_track_query(cmd)
     if ref:match("^%d+$") then
         local _, disabled = GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", "", false)
         table.insert(lines, "  record: " .. (disabled == "y" and "disabled" or "enabled"))
+        table.insert(lines, "  input: " .. rec_input_description(track))
     end
 
     local rcmaster = get_rcmaster()
@@ -4518,6 +4542,24 @@ local function rec_is_special_track(track)
     return false
 end
 
+-- Same decoding as rec_input_label(), but spelling out "none"/mono/stereo
+-- for the rd? and N? terminal queries instead of the daemon status table's
+-- compact "-" placeholder.
+function rec_input_description(tr)
+    local rec_input = math.floor(GetMediaTrackInfo_Value(tr, "I_RECINPUT"))
+
+    if rec_input == -1 or rec_input == 4096 then
+        return "none"
+    end
+
+    if (rec_input & 4096) ~= 0 and rec_input > 4096 then
+        return "MIDI"
+    end
+
+    local is_stereo = (rec_input & 1024) ~= 0
+    return rec_input_label(tr) .. " (" .. (is_stereo and "stereo" or "mono") .. ")"
+end
+
 local function rec_track_label(tr)
     local ok, name = GetSetMediaTrackInfo_String(tr, "P_NAME", "", false)
     return (ok and name ~= "" and name) or ("Track " .. GetMediaTrackInfo_Value(tr, "IP_TRACKNUMBER"))
@@ -4526,7 +4568,7 @@ end
 -- Port of get_input_label() (Meterbridge.lua), always preferring hardware
 -- channel names (falling back to numeric channel numbers) since there's no
 -- GUI here to offer a toggle.
-local function rec_input_label(tr)
+function rec_input_label(tr)
     local rec_input = math.floor(GetMediaTrackInfo_Value(tr, "I_RECINPUT"))
 
     if rec_input == -1 or rec_input == 4096 then
