@@ -682,12 +682,25 @@ end
 -- true if it matched and handled the command, false otherwise.
 ---------------------------------------------------------------------
 
+-- Replaces the current project with a blank one (prompting to save unsaved
+-- changes first, same as File: New project), so Nv/Nh can be run again from
+-- inside an existing ReaClassical project instead of only on an empty one.
+-- Returns false if the user cancelled the save prompt.
+function start_fresh_project()
+    Main_OnCommand(40023, 0) -- File: New project
+    local _, wf_after = GetProjExtState(0, "ReaClassical", "Workflow")
+    return wf_after == ""
+end
+
 function try_project_setup(cmd)
     local v_count = cmd:match("^(%d+)v$")
     if v_count then
         if workflow ~= "" then
-            say("This command must be run on an empty project or empty project tab.")
-            return true
+            if not start_fresh_project() then
+                say("Cancelled")
+                return true
+            end
+            workflow = ""
         end
         SetProjExtState(0, "ReaClassical", "TrackCount", v_count)
         _G.RC_TERMINAL_ARGS = {}
@@ -704,8 +717,11 @@ function try_project_setup(cmd)
     end
     if h_count then
         if workflow ~= "" then
-            say("This command must be run on an empty project or empty project tab.")
-            return true
+            if not start_fresh_project() then
+                say("Cancelled")
+                return true
+            end
+            workflow = ""
         end
         SetProjExtState(0, "ReaClassical", "TrackCount", h_count)
         _G.RC_TERMINAL_ARGS = {}
@@ -5229,7 +5245,8 @@ function main()
 
     if workflow == "" then
         local first = commands[1]
-        if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab") then
+        if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab"
+                or first == "update" or first == "installosara") then
             say("Please create a ReaClassical project first (e.g. 6v)")
             return
         end
