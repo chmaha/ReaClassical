@@ -4882,6 +4882,21 @@ function try_record(cmd)
         return true
     end
 
+    -- rec.latest? — scan the project media folder (honoring the current
+    -- session name, if set) for the highest take number found on disk,
+    -- as opposed to rec.take? which reports the upcoming take number.
+    if cmd == "rec.latest?" then
+        local _, sess = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        local max_found = rec_get_take_count(sess)
+        if max_found > 0 then
+            say(string.format("Latest take on disk: T%03d%s", max_found,
+                sess ~= "" and (" (session: " .. sess .. ")") or ""))
+        else
+            say("No takes found on disk" .. (sess ~= "" and (" for session: " .. sess) or ""))
+        end
+        return true
+    end
+
     -- rec.take+ — manually increment take by 1 (also updates wildcards)
     if cmd == "rec.take+" then
         local _, take_str = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
