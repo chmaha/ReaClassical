@@ -126,6 +126,40 @@ function pct_to_pan(str)
     return clamp(n / 100, -1, 1)
 end
 
+-- Translates a raw P_NAME's internal prefix encoding into a spoken label,
+-- e.g. "M:Violin" -> "Mixer track Violin", "#Strings" -> "Submix Strings",
+-- "@" (no custom name) -> "Auxiliary". REF/LISTENBACK get a word-spaced
+-- form ("Reference", "Listen back") since OSARA otherwise tries to spell
+-- them out letter-by-letter as acronyms.
+function humanize_track_name(name)
+    if not name or name == "" then return "(unnamed)" end
+
+    local rest = name:match("^M:(.*)$")
+    if rest then return rest ~= "" and ("Mixer track " .. rest) or "Mixer track" end
+
+    rest = name:match("^D:(.*)$")
+    if rest then return rest ~= "" and ("Destination " .. rest) or "Destination" end
+
+    local src_num, src_rest = name:match("^S(%d+):(.*)$")
+    if src_num then
+        return src_rest ~= "" and ("Source " .. src_num .. " " .. src_rest) or ("Source " .. src_num)
+    end
+
+    rest = name:match("^@(.*)$")
+    if rest then return rest ~= "" and ("Auxiliary " .. rest) or "Auxiliary" end
+
+    rest = name:match("^#(.*)$")
+    if rest then return rest ~= "" and ("Submix " .. rest) or "Submix" end
+
+    rest = name:match("^REF:?(.*)$")
+    if rest then return rest ~= "" and ("Reference " .. rest) or "Reference" end
+
+    if name == "LISTENBACK" then return "Listen back" end
+    if name == "RCMASTER" then return "RC Master" end
+
+    return name
+end
+
 ---------------------------------------------------------------------
 -- Track enumeration (ported from ReaClassical_Mission Control.lua
 -- and ReaClassical_Vertical Workflow.lua)
@@ -1341,6 +1375,122 @@ function try_markers(cmd)
     return false
 end
 
+-- Display label for a routing-chain hop: "RCM", or the destination's
+-- humanized name (e.g. "Mixer track Violin", "Submix Strings").
+function routing_label_for_track(dest, rcmaster)
+    if rcmaster and dest == rcmaster then return "RC Master" end
+    local _, name = GetSetMediaTrackInfo_String(dest, "P_NAME", "", false)
+    return humanize_track_name(name)
+end
+
+-- Walks every outgoing send from start_track, following each destination's
+-- own sends in turn, until each branch either reaches RCM or dead-ends.
+-- Returns an array of { path = {labels...}, reached = bool }. Guards against
+-- cycles/runaway chains with a visited-set per branch and a depth cap.
+function build_routing_chains(start_track, rcmaster)
+    local chains = {}
+
+    local function walk(track, path, visited)
+        local n = GetTrackNumSends(track, 0)
+        if n == 0 then
+            if #path > 0 then table.insert(chains, { path = path, reached = false }) end
+            return
+        end
+        for i = 0, n - 1 do
+            local dest = GetTrackSendInfo_Value(track, 0, i, "P_DESTTRACK")
+            local new_path = {}
+            for _, p in ipairs(path) do table.insert(new_path, p) end
+            table.insert(new_path, routing_label_for_track(dest, rcmaster))
+
+            if rcmaster and dest == rcmaster then
+                table.insert(chains, { path = new_path, reached = true })
+            elseif visited[dest] or #new_path > 8 then
+                table.insert(chains, { path = new_path, reached = false })
+            else
+                local new_visited = {}
+                for k, v in pairs(visited) do new_visited[k] = v end
+                new_visited[dest] = true
+                walk(dest, new_path, new_visited)
+            end
+        end
+    end
+
+    walk(start_track, {}, { [start_track] = true })
+    return chains
+end
+
+-- <ref>? — full single-track summary (mute, solo, fader, pan, phase, routing
+-- to RCM, and FX chain) in one say() call. <ref> is a single-track token
+-- resolved via resolve_target() ("1", "@", "@N", "#", "#N", "rcm");
+-- deliberately not offered for "*" or ranges, since that would be a wall of
+-- speech.
+function try_track_query(cmd)
+    local ref = cmd == "rcm?" and "rcm"
+        or cmd:match("^([%#@]%d*)%?$")
+        or cmd:match("^(%d+)%?$")
+    if not ref then return false end
+
+    local track, err = resolve_target(ref)
+    if not track then
+        say(err or ("Unknown target: " .. ref))
+        return true
+    end
+
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
+    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+    local db = linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL"))
+    local phase = GetMediaTrackInfo_Value(track, "B_PHASE") == 1
+
+    local lines = {
+        humanize_track_name(name),
+        "  mute:  " .. (muted and "on" or "off"),
+        "  solo:  " .. (soloed and "on" or "off"),
+        string.format("  fader: %.1f dB", db),
+        "  pan:   " .. format_pan(GetMediaTrackInfo_Value(track, "D_PAN")),
+        "  phase: " .. (phase and "inverted" or "normal"),
+    }
+
+    -- Record input (rd=) only ever applies to plain mixer refs.
+    if ref:match("^%d+$") then
+        local _, disabled = GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", "", false)
+        table.insert(lines, "  record: " .. (disabled == "y" and "disabled" or "enabled"))
+    end
+
+    local rcmaster = get_rcmaster()
+    if ref ~= "rcm" then
+        local chains = build_routing_chains(track, rcmaster)
+        if #chains == 0 then
+            table.insert(lines, "  routing: not connected to RCM")
+        elseif #chains == 1 then
+            local c = chains[1]
+            table.insert(lines, "  routing: " .. table.concat(c.path, " to ")
+                .. (c.reached and "" or " (not connected to RCM)"))
+        else
+            table.insert(lines, "  routing:")
+            for _, c in ipairs(chains) do
+                table.insert(lines, "    " .. table.concat(c.path, " to ")
+                    .. (c.reached and "" or " (not connected to RCM)"))
+            end
+        end
+    end
+
+    local fx_count = TrackFX_GetCount(track)
+    if fx_count == 0 then
+        table.insert(lines, "  FX: (none)")
+    else
+        table.insert(lines, "  FX:")
+        for i = 0, fx_count - 1 do
+            local _, fx_name = TrackFX_GetFXName(track, i, "")
+            local enabled = TrackFX_GetEnabled(track, i)
+            table.insert(lines, string.format("    %d. %s (%s)", i + 1, fx_name, enabled and "on" or "off"))
+        end
+    end
+
+    say(table.concat(lines, "\n"))
+    return true
+end
+
 function try_mute_solo(cmd)
     -- <target>xs: exclusive solo — unsolo/unmute every mixer track, then solo
     -- only the specified tracks. Target follows the same syntax as <target>s.
@@ -1410,7 +1560,7 @@ function try_mute_solo(cmd)
         for _, track in ipairs(tracks) do
             local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
             local phase = GetMediaTrackInfo_Value(track, "B_PHASE")
-            say(name .. " polarity: " .. (phase == 1 and "inverted" or "normal"))
+            say(humanize_track_name(name) .. " polarity: " .. (phase == 1 and "inverted" or "normal"))
         end
         return true
     end
@@ -1426,6 +1576,7 @@ function try_mute_solo(cmd)
 
         for _, track in ipairs(tracks) do
             local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            name = humanize_track_name(name)
             if query_op == "m" then
                 local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
                 say(name .. " mute: " .. (muted and "on" or "off"))
@@ -1485,7 +1636,7 @@ function try_pan(cmd)
         end
         for _, track in ipairs(tracks) do
             local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            say(name .. ": " .. format_pan(GetMediaTrackInfo_Value(track, "D_PAN")))
+            say(humanize_track_name(name) .. ": " .. format_pan(GetMediaTrackInfo_Value(track, "D_PAN")))
         end
         return true
     end
@@ -1533,7 +1684,8 @@ function try_fader(cmd)
         end
         for _, track in ipairs(tracks) do
             local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            say(string.format("%s: %.1f dB", name, linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL"))))
+            local db = linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL"))
+            say(string.format("%s: %.1f dB", humanize_track_name(name), db))
         end
         return true
     end
@@ -2776,7 +2928,7 @@ function try_stats(cmd)
         say("Mixer tracks:")
         for i, track in ipairs(mixer_tracks) do
             local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            say(string.format("  %d: %s", i, name))
+            say(string.format("  %d: %s", i, humanize_track_name(name)))
         end
         local aux_tracks = get_special_tracks_by_type("aux")
         if #aux_tracks > 0 then
@@ -2795,9 +2947,9 @@ function try_stats(cmd)
         local rcmaster = get_rcmaster()
         if rcmaster then
             local _, rname = GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "", false)
-            say("RCMASTER: " .. rname)
+            say("RC Master: " .. humanize_track_name(rname))
         else
-            say("RCMASTER: none")
+            say("RC Master: none")
         end
         say("")
         say("Selection: " .. CountSelectedTracks(0) .. " track(s), " ..
@@ -5053,6 +5205,7 @@ function execute_command(cmd)
     if try_input_config(cmd) then return end
     if try_selection(cmd) then return end
     if try_markers(cmd) then return end
+    if try_track_query(cmd) then return end
     if try_mute_solo(cmd) then return end
     if try_pan(cmd) then return end
     if try_fader(cmd) then return end
