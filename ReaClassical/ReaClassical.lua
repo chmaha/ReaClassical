@@ -1,8 +1,36 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.7
+@version 26.6.8pre1
 @changelog
-  Donations: Revert to PayPal
+  NEW: accessibility layer
+  NEW: Terminal commands including complete domain-specific language
+  NEW: Various reporting functions that announce via OSARA
+  NEW: Peak and overs check
+  NEW: Audition to/from source/destination IN/OUT
+  NEW: Move to first item on track
+  NEW: Move to last item on track
+  NEW: Navigate to next/previous folder
+  NEW: Navigate to next/previous track in folder
+  NEW: Navigate to next/previous envelope lane (announces track and automation type)
+  NEW: Toggle record monitoring off and on
+  S-D edit functions: Unify scrubmode toggle
+  Add generic lua high/medium risk error guards across many functions
+  Move all files associated with exports into Exports folders
+  Group exports by folder
+  Mixer Snapshots: Select item when clicking on table row
+  Meterbridge: Fix meters when listenback present
+  Workflow sync: Auto-flatten nested folders
+  Add OSARA install terminal command
+  Add clip reporting
+  Create CD Markers: Add automatic metadata to renders and push to custom button
+  Automation: Limit inserting via time selection
+  Automation: Auto overwrite overlapping automation items
+  Combine prev/next item with move to and select previous/next envelope point/item while on envelope lane
+  Add Shortcuts for Fast forward and rewind functions
+  Add Shortcuts for Scrub left and right
+  Add Shortcuts for delete/move nearest marker to cursor
+  Add Shortcuts for Nudge item left/right
+  Add Shortcuts for trim item edges to edit cursor
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -16,8 +44,18 @@
   [main] ReaClassical_Add Source IN marker.lua
   [main] ReaClassical_Add Source OUT marker.lua
   [nomain] ReaClassical_Add Submix.lua
+  [main] ReaClassical_Announce Take Number.lua
+  [main] ReaClassical_Announce Timeline Position.lua
   [main] ReaClassical_Audio Calculator.lua
   [main] ReaClassical_Audition.lua
+  [main] ReaClassical_Audition from Destination IN marker.lua
+  [main] ReaClassical_Audition from Destination OUT marker.lua
+  [main] ReaClassical_Audition from Source IN marker.lua
+  [main] ReaClassical_Audition from Source OUT marker.lua
+  [main] ReaClassical_Audition to Destination IN marker.lua
+  [main] ReaClassical_Audition to Destination OUT marker.lua
+  [main] ReaClassical_Audition to Source IN marker.lua
+  [main] ReaClassical_Audition to Source OUT marker.lua
   [main] ReaClassical_Audition_with_playrate.lua
   [main] ReaClassical_Auto Solo Folder.lua
   [main] ReaClassical_Build Edit List.lua
@@ -57,14 +95,26 @@
   [main] ReaClassical_Microphone Indicator.lua
   [main] ReaClassical_Mixer Snapshots.lua
   [main] ReaClassical_Mission Control.lua
+  [nomain] ReaClassical_Mixer Snapshots Daemon.lua
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Move to Destination IN marker.lua
   [main] ReaClassical_Move to Destination OUT marker.lua
+  [main] ReaClassical_Move to First Item on Track.lua
+  [main] ReaClassical_Move to Last Item on Track.lua
   [main] ReaClassical_Move to Next Marker.lua
   [main] ReaClassical_Move to Previous Marker.lua
   [main] ReaClassical_Move to Source IN marker.lua
   [main] ReaClassical_Move to Source OUT marker.lua
+  [main] ReaClassical_Navigate to First Folder.lua
+  [main] ReaClassical_Navigate to Next Envelope Lane.lua
+  [main] ReaClassical_Navigate to Next Folder.lua
+  [main] ReaClassical_Navigate to Next Track in Folder.lua
+  [main] ReaClassical_Navigate to Previous Envelope Lane.lua
+  [main] ReaClassical_Navigate to Previous Folder.lua
+  [main] ReaClassical_Navigate to Previous Track in Folder.lua
+  [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Notes.lua
+  [main] ReaClassical_Peak and Overs Check.lua
   [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
   [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade with playrate.lua
   [main=crossfade_editor] ReaClassical_Play Bottom Lane Only.lua
@@ -78,6 +128,7 @@
   [main] ReaClassical_Previous Item or Fade.lua
   [main] ReaClassical_Promote Source to Destination.lua
   [main] ReaClassical_Record Panel.lua
+  [nomain] ReaClassical_Record Panel Daemon.lua
   [main] ReaClassical_Regions from items.lua
   [main] ReaClassical_Remove All CD Marker Offsets.lua
   [main] ReaClassical_Remove All Item Fades.lua
@@ -93,6 +144,8 @@
   [main] ReaClassical_Smart Import Audio.lua
   [main] ReaClassical_Source Markers to Item Edge.lua
   [main] ReaClassical_Split Items at Markers.lua
+  [main] ReaClassical_Terminal.lua
+  [main] ReaClassical_Toggle Monitor.lua
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
   [nomain] ReaClassical_Vertical Workflow.lua
@@ -114,6 +167,7 @@
   [theme] ReaClassical WaveColors Light.ReaperThemeZip
   [www] ReaClassical_remote.html
   ReaClassical_Colors_Table.lua
+  ReaClassical_Track_Naming.lua
   ReaClassical.ini
   ReaClassical-kb.ini
   ReaClassical-mouse.ini
