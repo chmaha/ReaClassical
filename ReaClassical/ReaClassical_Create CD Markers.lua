@@ -1840,6 +1840,11 @@ end
 ---------------------------------------------------------------------
 
 function open_render_dialog()
+    apply_render_metadata()
+    -- Enable "embed metadata if format supports" without disturbing whatever
+    -- else the user has configured (stems, bounds, etc.) in the render dialog
+    local current_settings = GetSetProjectInfo(0, "RENDER_SETTINGS", 0, false)
+    GetSetProjectInfo(0, "RENDER_SETTINGS", current_settings | 512, true)
     Main_OnCommand(40015, 0) -- File: Render project to disk...
 end
 
