@@ -459,6 +459,27 @@ function resolve_target(token)
         return mixer[tonumber(mixer_n)]
     end
 
+    local ref_n = token:match("^ref(%d*)$")
+    if ref_n then
+        local info, err = resolve_special_index(get_special_tracks_by_type("reference"), ref_n, "reference", "ref")
+        return info and info.track, err
+    end
+
+    if token == "rt" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("roomtone"), "", "RoomTone", "")
+        return info and info.track, err
+    end
+
+    if token == "live" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("live"), "", "LIVE", "")
+        return info and info.track, err
+    end
+
+    if token == "lb" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("listenback"), "", "Listenback", "")
+        return info and info.track, err
+    end
+
     return nil
 end
 
@@ -539,7 +560,75 @@ function resolve_target_list(token)
         return result
     end
 
+    if token == "ref" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("reference"), "", "reference", "ref")
+        return info and { info.track } or {}, err
+    end
+
+    local ref_list = token:match("^ref(.+)$")
+    if ref_list then
+        local specials = get_special_tracks_by_type("reference")
+        local result = {}
+        for _, n in ipairs(expand_index_list(ref_list, #specials)) do
+            if specials[n] then table.insert(result, specials[n].track) end
+        end
+        return result
+    end
+
+    if token == "rt" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("roomtone"), "", "RoomTone", "")
+        return info and { info.track } or {}, err
+    end
+
+    if token == "live" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("live"), "", "LIVE", "")
+        return info and { info.track } or {}, err
+    end
+
+    if token == "lb" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("listenback"), "", "Listenback", "")
+        return info and { info.track } or {}, err
+    end
+
     return parse_track_list(token)
+end
+
+-- Tries each known word-based special-track prefix (ref[list], rt, live,
+-- lb) against the start of cmd, returning (target_token, remainder) if cmd
+-- starts with one. Matched via fixed literal prefixes rather than folding
+-- letters into the shared numeric/@/# character class, since a generic
+-- greedy/backtracking split would misparse e.g. "refum" as target "refu" +
+-- op "m" instead of target "ref" + op "um" (the same ambiguity "u" already
+-- creates against the "um"/"us" mute/solo suffixes for any letter-based
+-- target name). Each prefix's allowed trailing chars stop at the first
+-- letter, so the remainder always starts exactly where the op begins.
+-- The optional ref index deliberately excludes "-" even though
+-- expand_index_list() supports dash ranges elsewhere: since "rest" below is
+-- unconstrained (.*), Lua never backtracks into the index class, so a
+-- trailing "-" would otherwise get swallowed as a (bogus) range start
+-- against operators like "-rcm" (e.g. "ref-rcm" or "ref2-rcm" must split
+-- before the dash, not after it).
+function split_word_target(cmd)
+    local rest = cmd:match("^ref[%d,%*]*(.*)$")
+    if rest then return cmd:sub(1, #cmd - #rest), rest end
+    rest = cmd:match("^rt(.*)$")
+    if rest then return "rt", rest end
+    rest = cmd:match("^live(.*)$")
+    if rest then return "live", rest end
+    rest = cmd:match("^lb(.*)$")
+    if rest then return "lb", rest end
+    return nil, nil
+end
+
+-- Comma-joined humanized names for a list of tracks, for confirming which
+-- tracks a batch command (mute/solo/pan/fader/etc.) just applied to.
+function track_names_str(tracks)
+    local names = {}
+    for _, track in ipairs(tracks) do
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        table.insert(names, humanize_track_name(name))
+    end
+    return table.concat(names, ", ")
 end
 
 ---------------------------------------------------------------------
@@ -796,11 +885,17 @@ function try_naming(cmd)
     if names then
         local mixer_tracks = get_mixer_tracks()
         local position = 1
+        local renamed = {}
         for name in names:gmatch("[^,]+") do
-            if not rename_mixer_position(mixer_tracks, position, trim(name)) then
+            if rename_mixer_position(mixer_tracks, position, trim(name)) then
+                table.insert(renamed, trim(name))
+            else
                 say("No mixer track at position " .. position)
             end
             position = position + 1
+        end
+        if #renamed > 0 then
+            say("Renamed: " .. table.concat(renamed, ", "))
         end
         return true
     end
@@ -808,7 +903,9 @@ function try_naming(cmd)
     local pos, single_name = cmd:match("^(%d+)n=(.+)$")
     if pos then
         local mixer_tracks = get_mixer_tracks()
-        if not rename_mixer_position(mixer_tracks, tonumber(pos), trim(single_name)) then
+        if rename_mixer_position(mixer_tracks, tonumber(pos), trim(single_name)) then
+            say("Renamed to " .. trim(single_name))
+        else
             say("No mixer track at position " .. pos)
         end
         return true
@@ -819,6 +916,7 @@ function try_naming(cmd)
         local info, err = resolve_special_index(get_special_tracks_by_type("submix"), sub_n, "submix", "#")
         if info then
             GetSetMediaTrackInfo_String(info.track, "P_NAME", "#" .. trim(sub_name), true)
+            say("Submix renamed to " .. trim(sub_name))
         else
             say(err)
         end
@@ -830,6 +928,7 @@ function try_naming(cmd)
         local info, err = resolve_special_index(get_special_tracks_by_type("aux"), aux_n, "aux", "@")
         if info then
             GetSetMediaTrackInfo_String(info.track, "P_NAME", "@" .. trim(aux_name), true)
+            say("Aux renamed to " .. trim(aux_name))
         else
             say(err)
         end
@@ -841,6 +940,7 @@ function try_naming(cmd)
         local info, err = resolve_special_index(get_special_tracks_by_type("reference"), ref_n, "REF", "")
         if info then
             GetSetMediaTrackInfo_String(info.track, "P_NAME", "REF:" .. trim(ref_name), true)
+            say("Reference renamed to " .. trim(ref_name))
         else
             say(err)
         end
@@ -856,6 +956,7 @@ function try_naming(cmd)
     local proj_note = cmd:match("^pn=(.*)$")
     if proj_note then
         GetSetProjectNotes(0, true, proj_note)
+        say("Project notes updated")
         return true
     end
 
@@ -875,6 +976,7 @@ function try_naming(cmd)
             return true
         end
         GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", track_note, true)
+        say("Track notes updated")
         return true
     end
 
@@ -888,6 +990,7 @@ function try_naming(cmd)
         end
         local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
         apply_item_name(item, trim(item_name), rank_str)
+        say("Item renamed to " .. trim(item_name))
         return true
     end
 
@@ -907,6 +1010,7 @@ function try_naming(cmd)
             return true
         end
         GetSetMediaItemInfo_String(item, "P_NOTES", item_notes, true)
+        say("Item notes updated")
         return true
     end
 
@@ -938,6 +1042,8 @@ function try_naming(cmd)
             base_name = strip_rank_prefix(name)
         end
         apply_item_name(item, base_name, rank_str)
+        local label = RANK_PREFIXES[rank_index]
+        say("Rank: " .. (label ~= "" and label or "None"))
         return true
     end
 
@@ -957,6 +1063,7 @@ function try_naming(cmd)
             return true
         end
         GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", take_num == "0" and "" or take_num, true)
+        say(take_num == "0" and "Take number cleared" or ("Take number set to " .. take_num))
         return true
     end
 
@@ -1070,6 +1177,8 @@ function auto_assign_inputs(start_input)
     if workflow == "Vertical" then
         dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     end
+
+    say("Inputs auto-assigned starting at input " .. start_input)
 end
 
 -- Checks that hardware input channel start_ch (1-based) exists, and for a
@@ -1079,6 +1188,16 @@ function hw_input_exists(start_ch, is_stereo)
     if start_ch < 1 or start_ch > max_inputs then return false end
     if is_stereo and start_ch + 1 > max_inputs then return false end
     return true
+end
+
+-- Position N's track name is the same in every folder (set via the Nn=
+-- naming command), so the first folder's name speaks for all of them when
+-- announcing a per-position input change applied across the whole table.
+local function position_name(track_table, position)
+    local track = track_table[1] and get_folder_position_track(track_table[1], position)
+    if not track then return "Position " .. position end
+    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return humanize_track_name(name)
 end
 
 function try_input_config(cmd)
@@ -1103,6 +1222,7 @@ function try_input_config(cmd)
                 SetMediaTrackInfo_Value(track, "I_RECINPUT", input_ch)
             end
         end
+        say(position_name(track_table, n) .. " set to mono, input " .. input_num)
         return true
     end
 
@@ -1128,6 +1248,7 @@ function try_input_config(cmd)
                 SetMediaTrackInfo_Value(track, "I_RECINPUT", 1024 + (start_ch - 1))
             end
         end
+        say(position_name(track_table, n) .. " set to stereo, input " .. start_ch .. "/" .. (start_ch + 1))
         return true
     end
 
@@ -1149,6 +1270,8 @@ function try_input_config(cmd)
                 SetMediaTrackInfo_Value(track_m, "I_RECINPUT", -1)
             end
         end
+        say(position_name(track_table, n) .. " set to stereo with " .. position_name(track_table, m)
+            .. ", input " .. n .. "/" .. (n + 1))
         return true
     end
 
@@ -1158,6 +1281,8 @@ function try_input_config(cmd)
         local track = mixer_tracks[tonumber(rd_pos)]
         if track then
             GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", rd_val == "y" and "y" or "", true)
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            say(humanize_track_name(name) .. " record " .. (rd_val == "y" and "disabled" or "enabled"))
         else
             say("No mixer track at position " .. rd_pos)
         end
@@ -1169,6 +1294,7 @@ function try_input_config(cmd)
         for _, track in ipairs(get_mixer_tracks()) do
             GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", rd_all == "y" and "y" or "", true)
         end
+        say("Record " .. (rd_all == "y" and "disabled" or "enabled") .. " for all tracks")
         return true
     end
 
@@ -1260,6 +1386,7 @@ function try_selection(cmd)
             return true
         end
         for _, track in ipairs(tracks) do SetTrackSelected(track, true) end
+        say("Added to selection: " .. track_names_str(tracks))
         return true
     end
 
@@ -1278,6 +1405,7 @@ function try_selection(cmd)
         end
         SetOnlyTrackSelected(tracks[1])
         for i = 2, #tracks do SetTrackSelected(tracks[i], true) end
+        say("Selected: " .. track_names_str(tracks))
         return true
     end
 
@@ -1302,6 +1430,7 @@ function try_selection(cmd)
             return true
         end
         for _, track in ipairs(tracks) do SetTrackSelected(track, true) end
+        say("Added to selection: " .. track_names_str(tracks))
         return true
     end
 
@@ -1323,6 +1452,7 @@ function try_selection(cmd)
         end
         SetOnlyTrackSelected(tracks[1])
         for i = 2, #tracks do SetTrackSelected(tracks[i], true) end
+        say("Selected: " .. track_names_str(tracks))
         return true
     end
 
@@ -1332,7 +1462,9 @@ end
 function try_markers(cmd)
     local mk_name = cmd:match("^mk=(.+)$")
     if mk_name then
-        AddProjectMarker2(0, false, GetCursorPosition(), 0, trim(mk_name), -1, 0)
+        local pos = GetCursorPosition()
+        AddProjectMarker2(0, false, pos, 0, trim(mk_name), -1, 0)
+        say("Marker added: " .. trim(mk_name) .. " @ " .. format_timestr_pos(pos, "", -1))
         return true
     end
 
@@ -1375,6 +1507,7 @@ function try_markers(cmd)
         end
         local start_pos, end_pos = math.min(pos_a, pos_b), math.max(pos_a, pos_b)
         AddProjectMarker2(0, true, start_pos, end_pos, "", -1, 0)
+        say("Region created: " .. rg_a .. " to " .. rg_b)
         return true
     end
 
@@ -1434,6 +1567,10 @@ function try_track_query(cmd)
     local ref = cmd == "rcm?" and "rcm"
         or cmd:match("^([%#@]%d*)%?$")
         or cmd:match("^(%d+)%?$")
+        or cmd:match("^(ref%d*)%?$")
+        or (cmd == "rt?" and "rt")
+        or (cmd == "live?" and "live")
+        or (cmd == "lb?" and "lb")
     if not ref then return false end
 
     local track, err = resolve_target(ref)
@@ -1499,6 +1636,75 @@ function try_track_query(cmd)
 end
 
 function try_mute_solo(cmd)
+    -- Word-based special-track targets (ref[list], rt, live, lb) for
+    -- mute/solo/polarity, resolved up front since these prefixes are
+    -- ordinary letters and would otherwise collide with the regex-based
+    -- numeric/@/# pattern matching below (see split_word_target()).
+    local word_target, word_op = split_word_target(cmd)
+    if word_target then
+        local tracks, err = resolve_target_list(word_target)
+        if #tracks == 0 then
+            say(err or "No matching tracks")
+            return true
+        end
+
+        if word_op == "xs" then
+            for _, track in ipairs(get_mixer_tracks()) do
+                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+                SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+            end
+            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 2) end
+            say("Soloed " .. track_names_str(tracks))
+            return true
+        elseif word_op == "m" or word_op == "um" or word_op == "s" or word_op == "us" then
+            local op_word
+            if word_op == "m" then
+                for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 1) end
+                op_word = "Muted"
+            elseif word_op == "um" then
+                for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 0) end
+                op_word = "Unmuted"
+            elseif word_op == "s" then
+                for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 2) end
+                op_word = "Soloed"
+            else
+                for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 0) end
+                op_word = "Unsoloed"
+            end
+            say(op_word .. " " .. track_names_str(tracks))
+            return true
+        elseif word_op == "i=0" or word_op == "i=1" then
+            local pol_val = word_op:match("i=([01])")
+            for _, track in ipairs(tracks) do
+                SetMediaTrackInfo_Value(track, "B_PHASE", tonumber(pol_val))
+            end
+            say((pol_val == "1" and "Inverted" or "Normal") .. " polarity: " .. track_names_str(tracks))
+            return true
+        elseif word_op == "i?" then
+            for _, track in ipairs(tracks) do
+                local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+                local phase = GetMediaTrackInfo_Value(track, "B_PHASE")
+                say(humanize_track_name(name) .. " polarity: " .. (phase == 1 and "inverted" or "normal"))
+            end
+            return true
+        elseif word_op == "m?" or word_op == "s?" then
+            for _, track in ipairs(tracks) do
+                local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+                name = humanize_track_name(name)
+                if word_op == "m?" then
+                    local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
+                    say(name .. " mute: " .. (muted and "on" or "off"))
+                else
+                    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+                    say(name .. " solo: " .. (soloed and "on" or "off"))
+                end
+            end
+            return true
+        end
+        -- Unrecognized suffix after a recognized word target (e.g. ref?,
+        -- handled by try_track_query instead): fall through.
+    end
+
     -- <target>xs: exclusive solo — unsolo/unmute every mixer track, then solo
     -- only the specified tracks. Target follows the same syntax as <target>s.
     local xs_target = cmd:match("^([%d,%-%*@#%s]+)xs$")
@@ -1515,6 +1721,7 @@ function try_mute_solo(cmd)
         for _, track in ipairs(tracks) do
             SetMediaTrackInfo_Value(track, "I_SOLO", 2)
         end
+        say("Soloed " .. track_names_str(tracks))
         return true
     end
 
@@ -1529,15 +1736,21 @@ function try_mute_solo(cmd)
             return true
         end
 
+        local op_word
         if op == "m" then
             for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 1) end
+            op_word = "Muted"
         elseif op == "um" then
             for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 0) end
+            op_word = "Unmuted"
         elseif op == "s" then
             for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 2) end
+            op_word = "Soloed"
         elseif op == "us" then
             for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 0) end
+            op_word = "Unsoloed"
         end
+        say(op_word .. " " .. track_names_str(tracks))
         return true
     end
 
@@ -1553,6 +1766,7 @@ function try_mute_solo(cmd)
         for _, track in ipairs(tracks) do
             SetMediaTrackInfo_Value(track, "B_PHASE", tonumber(pol_val))
         end
+        say((pol_val == "1" and "Inverted" or "Normal") .. " polarity: " .. track_names_str(tracks))
         return true
     end
 
@@ -1603,9 +1817,12 @@ end
 -- resolve_target_list() so pan/fader commands accept single, range,
 -- comma-separated and "*" targets uniformly.
 function try_pan(cmd)
-    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*%s]*)(.+)$")
-    if not target_str then return false end
-    target_str = target_str:gsub("%s+", "")
+    local target_str, rest = split_word_target(cmd)
+    if not target_str then
+        target_str, rest = cmd:match("^([%#@]?[%d,%-%*%s]*)(.+)$")
+        if not target_str then return false end
+        target_str = target_str:gsub("%s+", "")
+    end
 
     local delta = rest:match("^p([+-]%d+)$")
     if delta then
@@ -1618,6 +1835,8 @@ function try_pan(cmd)
             local pan = GetMediaTrackInfo_Value(track, "D_PAN")
             pan = clamp(pan + tonumber(delta) / 100, -1, 1)
             SetMediaTrackInfo_Value(track, "D_PAN", pan)
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            say(humanize_track_name(name) .. " pan: " .. format_pan(pan))
         end
         return true
     end
@@ -1629,9 +1848,11 @@ function try_pan(cmd)
             say(err or ("Unknown target: " .. target_str))
             return true
         end
+        local pan = pct_to_pan(abs_val)
         for _, track in ipairs(tracks) do
-            SetMediaTrackInfo_Value(track, "D_PAN", pct_to_pan(abs_val))
+            SetMediaTrackInfo_Value(track, "D_PAN", pan)
         end
+        say("Pan set to " .. format_pan(pan) .. ": " .. track_names_str(tracks))
         return true
     end
 
@@ -1652,9 +1873,12 @@ function try_pan(cmd)
 end
 
 function try_fader(cmd)
-    local target_str, rest = cmd:match("^([%#@]?[%d,%-%*%s]*)(.+)$")
-    if not target_str then return false end
-    target_str = target_str:gsub("%s+", "")
+    local target_str, rest = split_word_target(cmd)
+    if not target_str then
+        target_str, rest = cmd:match("^([%#@]?[%d,%-%*%s]*)(.+)$")
+        if not target_str then return false end
+        target_str = target_str:gsub("%s+", "")
+    end
 
     local delta = rest:match("^f([+-]%d+)$")
     if delta then
@@ -1666,6 +1890,8 @@ function try_fader(cmd)
         for _, track in ipairs(tracks) do
             local db = linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL")) + tonumber(delta)
             SetMediaTrackInfo_Value(track, "D_VOL", db_to_linear(db))
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            say(string.format("%s: %.1f dB", humanize_track_name(name), db))
         end
         return true
     end
@@ -1680,6 +1906,7 @@ function try_fader(cmd)
         for _, track in ipairs(tracks) do
             SetMediaTrackInfo_Value(track, "D_VOL", db_to_linear(tonumber(abs_db)))
         end
+        say("Volume set to " .. abs_db .. " dB: " .. track_names_str(tracks))
         return true
     end
 
@@ -1963,6 +2190,7 @@ function try_automation(cmd)
     end
 
     apply_terminal_automation(tracks, info, value, ramp_in, ramp_out, ts_start, ts_end, as_item)
+    say(info.name .. " automation" .. (as_item and " item" or "") .. " added: " .. track_names_str(tracks))
     return true
 end
 
@@ -2058,6 +2286,7 @@ function try_delete_automation(cmd)
         Main_OnCommand(42086, 0) -- Envelope: Delete automation items
     end
     UpdateArrange()
+    say("Automation deleted: " .. track_names_str(tracks))
     return true
 end
 
@@ -2292,17 +2521,21 @@ end
 function try_undo_redo(cmd)
     local n = cmd:match("^(%d*)z$")
     if n then
-        for _ = 1, tonumber(n) or 1 do
+        local count = tonumber(n) or 1
+        for _ = 1, count do
             Main_OnCommand(40029, 0)
         end
+        say("Undone " .. count .. (count == 1 and " step" or " steps"))
         return true
     end
 
     n = cmd:match("^(%d*)y$")
     if n then
-        for _ = 1, tonumber(n) or 1 do
+        local count = tonumber(n) or 1
+        for _ = 1, count do
             Main_OnCommand(40030, 0)
         end
+        say("Redone " .. count .. (count == 1 and " step" or " steps"))
         return true
     end
 
@@ -2368,16 +2601,24 @@ function try_reorder(cmd)
     local count = tonumber(count_str) or 1
     if count < 1 then count = 1 end
 
+    local track = get_mixer_tracks()[n]
+    local _, name = track and GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local moved = false
+
     for _ = 1, count do
         if not move_mixer_track(n, direction) then
             say("Cannot move mixer track " .. n .. " " .. direction)
             break
         end
+        moved = true
         if direction == "up" then
             n = n - 1
         else
             n = n + 1
         end
+    end
+    if moved then
+        say(humanize_track_name(name) .. " moved to position " .. n)
     end
     return true
 end
@@ -2438,7 +2679,8 @@ function add_mixer_track(name)
 
     local mixer_tracks = get_mixer_tracks()
     local new_position = #mixer_tracks
-    rename_mixer_position(mixer_tracks, new_position, name or ("Track " .. new_position))
+    local final_name = name or ("Track " .. new_position)
+    rename_mixer_position(mixer_tracks, new_position, final_name)
 
     if folder_count > 1 then
         dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
@@ -2447,6 +2689,8 @@ function add_mixer_track(name)
     end
     local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
     workflow = wf
+
+    say("Track added: " .. final_name)
 end
 
 -- Generalized port of delete_tracks()/delete_mixer()
@@ -2468,6 +2712,10 @@ function remove_mixer_track(n)
         say("Cannot remove mixer track " .. n)
         return
     end
+
+    local removed_track = get_mixer_tracks()[n]
+    local _, removed_name = GetSetMediaTrackInfo_String(removed_track, "P_NAME", "", false)
+    removed_name = humanize_track_name(removed_name)
 
     if track_idx == child_count then
         move_mixer_track(n, "up")
@@ -2493,6 +2741,8 @@ function remove_mixer_track(n)
     end
     local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
     workflow = wf
+
+    say("Track removed: " .. removed_name)
 end
 
 function try_add_remove(cmd)
@@ -2511,12 +2761,14 @@ function try_add_remove(cmd)
     local aux_name = cmd:match("^add@=(.+)$")
     if cmd == "add@" or aux_name then
         dofile(script_path .. "ReaClassical_Add Aux.lua")
-        if aux_name then
-            local list = get_special_tracks_by_type("aux")
-            local info = list[#list]
-            if info then
+        local list = get_special_tracks_by_type("aux")
+        local info = list[#list]
+        if info then
+            if aux_name then
                 GetSetMediaTrackInfo_String(info.track, "P_NAME", "@" .. trim(aux_name), true)
             end
+            local _, name = GetSetMediaTrackInfo_String(info.track, "P_NAME", "", false)
+            say("Aux added: " .. humanize_track_name(name))
         end
         return true
     end
@@ -2524,12 +2776,14 @@ function try_add_remove(cmd)
     local sub_name = cmd:match("^add#=(.+)$")
     if cmd == "add#" or sub_name then
         dofile(script_path .. "ReaClassical_Add Submix.lua")
-        if sub_name then
-            local list = get_special_tracks_by_type("submix")
-            local info = list[#list]
-            if info then
+        local list = get_special_tracks_by_type("submix")
+        local info = list[#list]
+        if info then
+            if sub_name then
                 GetSetMediaTrackInfo_String(info.track, "P_NAME", "#" .. trim(sub_name), true)
             end
+            local _, name = GetSetMediaTrackInfo_String(info.track, "P_NAME", "", false)
+            say("Submix added: " .. humanize_track_name(name))
         end
         return true
     end
@@ -2538,7 +2792,9 @@ function try_add_remove(cmd)
     if rm_aux then
         local info, err = resolve_special_index(get_special_tracks_by_type("aux"), rm_aux, "aux", "@")
         if info then
+            local _, name = GetSetMediaTrackInfo_String(info.track, "P_NAME", "", false)
             DeleteTrack(info.track)
+            say("Aux removed: " .. humanize_track_name(name))
         else
             say(err)
         end
@@ -2549,7 +2805,9 @@ function try_add_remove(cmd)
     if rm_sub then
         local info, err = resolve_special_index(get_special_tracks_by_type("submix"), rm_sub, "submix", "#")
         if info then
+            local _, name = GetSetMediaTrackInfo_String(info.track, "P_NAME", "", false)
             DeleteTrack(info.track)
+            say("Submix removed: " .. humanize_track_name(name))
         else
             say(err)
         end
@@ -2563,6 +2821,7 @@ function try_add_remove(cmd)
         local existing = get_special_tracks_by_type("listenback")
         if #existing > 0 then
             SetMediaTrackInfo_Value(existing[1].track, "I_RECINPUT", tonumber(lb_input) - 1)
+            say("Listenback input set to " .. lb_input)
             return true
         end
 
@@ -2586,6 +2845,7 @@ function try_add_remove(cmd)
             TrackFX_AddByName(lb_track, "JS:ListenbackMicMonitor", false, -1)
         end
 
+        say("Listenback track added, input " .. lb_input)
         return true
     end
 
@@ -2596,6 +2856,7 @@ function try_add_remove(cmd)
             return true
         end
         DeleteTrack(lb_list[1].track)
+        say("Listenback track removed")
         return true
     end
 
@@ -2603,7 +2864,9 @@ function try_add_remove(cmd)
     if rm_ref then
         local info, err = resolve_special_index(get_special_tracks_by_type("reference"), rm_ref, "REF", "")
         if info then
+            local _, name = GetSetMediaTrackInfo_String(info.track, "P_NAME", "", false)
             DeleteTrack(info.track)
+            say("Reference track removed: " .. humanize_track_name(name))
         else
             say(err)
         end
@@ -2617,6 +2880,7 @@ function try_add_remove(cmd)
             return true
         end
         DeleteTrack(rt_list[1].track)
+        say("RoomTone track removed")
         return true
     end
 
@@ -2627,6 +2891,7 @@ function try_add_remove(cmd)
             return true
         end
         DeleteTrack(live_list[1].track)
+        say("LIVE track removed")
         return true
     end
 
@@ -2637,14 +2902,22 @@ end
 -- "rcm", "N", "@N", "#N", "@" (the only aux), "#" (the only submix).
 function is_target(str)
     return str == "rcm" or str:match("^%d+$") ~= nil or str:match("^[%#@]%d*$") ~= nil
+        or str:match("^ref%d*$") ~= nil or str == "rt" or str == "live" or str == "lb"
 end
 
 function try_routing_fx(cmd)
+    -- Word-based special-track targets (ref[list], rt, live, lb), resolved
+    -- up front since these prefixes are ordinary letters (see
+    -- split_word_target()). Shared by the -rcm/rcm?/fx= blocks below.
+    local word_target, word_rest = split_word_target(cmd)
+
     local rcmp = cmd:match("^rcmp=([+-]?%d+)$")
     if rcmp then
         local rcmaster = get_rcmaster()
         if rcmaster then
-            SetMediaTrackInfo_Value(rcmaster, "D_PAN", pct_to_pan(rcmp))
+            local pan = pct_to_pan(rcmp)
+            SetMediaTrackInfo_Value(rcmaster, "D_PAN", pan)
+            say("RC Master pan: " .. format_pan(pan))
         else
             say("No RCMASTER track found")
         end
@@ -2659,15 +2932,20 @@ function try_routing_fx(cmd)
                 remove_send_to(mixer_track, info.track)
             end
         end
+        say("All sends to " .. kind .. "es removed")
         return true
     end
 
     -- List/range forms: "<list>-rcm" (connect) / "<list>/rcm" (disconnect)
-    -- <list> is "*", "N", "N-M", "N,M", "N,M-P", ... (mixer tracks)
-    local list_target = cmd:match("^([%d,%-%*%s]+)-rcm$")
+    -- <list> is "*", "N", "N-M", "N,M", "N,M-P", ... (mixer tracks), or
+    -- "ref"/"ref<list>" for reference tracks.
+    local is_ref_list = word_target and word_target:match("^ref")
+    local list_target = (is_ref_list and word_rest == "-rcm" and word_target)
+        or cmd:match("^([%d,%-%*%s]+)-rcm$")
     local list_connect = true
     if not list_target then
-        list_target = cmd:match("^([%d,%-%*%s]+)/rcm$")
+        list_target = (is_ref_list and word_rest == "/rcm" and word_target)
+            or cmd:match("^([%d,%-%*%s]+)/rcm$")
         list_connect = false
     end
     if list_target then
@@ -2679,10 +2957,12 @@ function try_routing_fx(cmd)
         for _, track in ipairs(tracks) do
             set_rcm_connection(track, list_connect)
         end
+        say((list_connect and "Connected to RCM: " or "Disconnected from RCM: ") .. track_names_str(tracks))
         return true
     end
 
-    local query_target = cmd:match("^([%#@]?%d*)-rcm%?$")
+    local query_target = (word_target and word_rest == "-rcm?" and word_target)
+        or cmd:match("^([%#@]?%d*)-rcm%?$")
     if query_target then
         local track, err = resolve_target(query_target)
         if not track then
@@ -2694,10 +2974,12 @@ function try_routing_fx(cmd)
         return true
     end
 
-    local rcm_target = cmd:match("^([%#@]?%d*)-rcm$")
+    local rcm_target = (word_target and word_rest == "-rcm" and word_target)
+        or cmd:match("^([%#@]?%d*)-rcm$")
     local connect = true
     if not rcm_target then
-        rcm_target = cmd:match("^([%#@]?%d*)/rcm$")
+        rcm_target = (word_target and word_rest == "/rcm" and word_target)
+            or cmd:match("^([%#@]?%d*)/rcm$")
         connect = false
     end
     if rcm_target then
@@ -2707,10 +2989,20 @@ function try_routing_fx(cmd)
             return true
         end
         set_rcm_connection(track, connect)
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        say((connect and "Connected to RCM: " or "Disconnected from RCM: ") .. humanize_track_name(name))
         return true
     end
 
-    local fx_target, fx_name, fx_pos = cmd:match("^([%#@]?%d*)fx=([^,]+),(%d+)$")
+    local fx_target, fx_name, fx_pos
+    if word_target then
+        fx_name, fx_pos = word_rest:match("^fx=([^,]+),(%d+)$")
+        if not fx_name then fx_name = word_rest:match("^fx=(.+)$") end
+        if fx_name then fx_target = word_target end
+    end
+    if not fx_target then
+        fx_target, fx_name, fx_pos = cmd:match("^([%#@]?%d*)fx=([^,]+),(%d+)$")
+    end
     if not fx_target then
         fx_target, fx_name = cmd:match("^([%#@]?%d*)fx=(.+)$")
     end
@@ -2732,8 +3024,12 @@ function try_routing_fx(cmd)
         local idx = TrackFX_AddByName(track, trim(fx_name), false, -1)
         if idx < 0 then
             say("FX not found: " .. fx_name)
-        elseif fx_pos then
-            TrackFX_CopyToTrack(track, idx, track, tonumber(fx_pos) - 1, true)
+        else
+            if fx_pos then
+                TrackFX_CopyToTrack(track, idx, track, tonumber(fx_pos) - 1, true)
+            end
+            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            say("FX added to " .. humanize_track_name(name) .. ": " .. trim(fx_name))
         end
         return true
     end
@@ -2744,6 +3040,9 @@ function try_routing_fx(cmd)
         local track_b, err_b = resolve_target(b)
         if track_a and track_b then
             CreateTrackSend(track_a, track_b)
+            local _, name_a = GetSetMediaTrackInfo_String(track_a, "P_NAME", "", false)
+            local _, name_b = GetSetMediaTrackInfo_String(track_b, "P_NAME", "", false)
+            say("Send created: " .. humanize_track_name(name_a) .. " to " .. humanize_track_name(name_b))
         else
             say(err_a or err_b or "Unknown target")
         end
@@ -2756,6 +3055,9 @@ function try_routing_fx(cmd)
         local track_b, err_b = resolve_target(rb)
         if track_a and track_b then
             remove_send_to(track_a, track_b)
+            local _, name_a = GetSetMediaTrackInfo_String(track_a, "P_NAME", "", false)
+            local _, name_b = GetSetMediaTrackInfo_String(track_b, "P_NAME", "", false)
+            say("Send removed: " .. humanize_track_name(name_a) .. " to " .. humanize_track_name(name_b))
         else
             say(err_a or err_b or "Unknown target")
         end
@@ -4285,7 +4587,11 @@ function try_snapshots(cmd)
     if cmd == "snap2auto" then
         local bank = snap_get_current_bank()
         local snaps, flags = snap_load_bank(bank)
+        local had_snaps = #snaps > 0
         snap_convert_to_automation(snaps, flags)
+        if had_snaps then
+            say("Snapshots converted to automation")
+        end
         return true
     end
 
@@ -4817,6 +5123,7 @@ function try_record(cmd)
             return true
         end
         Main_OnCommand(inc_cid, 0)
+        say("Take split")
         return true
     end
 
