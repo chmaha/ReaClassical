@@ -42,7 +42,21 @@ function announce_current_item()
     if take then
         _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
     end
-    say(name ~= "" and name or "(unnamed)")
+    if name == "" then
+        say("(unnamed)")
+        return
+    end
+    local prefix, take_num = name:match("^(.+)_T(%d+)$")
+    if take_num then
+        say(prefix .. " take " .. tonumber(take_num))
+        return
+    end
+    local only_num = name:match("^(%d+)$")
+    if only_num then
+        say("Take " .. tonumber(only_num))
+        return
+    end
+    say(name)
 end
 
 ---------------------------------------------------------------------

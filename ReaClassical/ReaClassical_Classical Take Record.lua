@@ -31,6 +31,15 @@ local select_children_of_selected_folders, reset_playback_rate
 local unselect_folder_children, set_rec_arm_for_selected_tracks
 local find_mixer_track_for_track, is_mixer_disabled
 local avoid_take_lanes, find_recording_folder, get_record_takes_horizontally
+local say
+
+---------------------------------------------------------------------
+
+function say(msg)
+    if osara_outputMessage then
+        osara_outputMessage(tostring(msg))
+    end
+end
 ---------------------------------------------------------------------
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -258,6 +267,9 @@ function main()
     PreventUIRefresh(-1)
     Main_OnCommand(1013, 0) -- Transport: Record
     Undo_EndBlock('Classical Take Record', 0)
+
+    local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+    if take_num ~= "" then say("Take " .. take_num) end
 
     UpdateArrange()
     UpdateTimeline()

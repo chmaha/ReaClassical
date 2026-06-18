@@ -4469,7 +4469,32 @@ function try_record(cmd)
                 script_path .. "ReaClassical_Classical Take Record.lua", true)
             if f9_cid ~= 0 then Main_OnCommand(f9_cid, 0) end
         end
-        say(already_running and "Record daemon already running" or "Record daemon started")
+
+        local status_msg = already_running and "Record daemon already running" or "Record daemon started"
+        local armed_folder
+        for i = 0, CountTracks(0) - 1 do
+            local t = GetTrack(0, i)
+            local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
+            if lb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1
+                and GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                armed_folder = t; break
+            end
+        end
+        if armed_folder then
+            local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+            local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
+            if wf == "Vertical" then
+                local _, folder_name = GetSetMediaTrackInfo_String(armed_folder, "P_NAME", "", false)
+                local prefix = folder_name:match("^([^:]+):") or folder_name
+                status_msg = status_msg .. ". Armed: " .. (prefix ~= "" and prefix or "Unnamed folder")
+            else
+                status_msg = status_msg .. ". Folder armed"
+            end
+            if take_num ~= "" then
+                status_msg = status_msg .. ", upcoming take " .. take_num
+            end
+        end
+        say(status_msg)
         return true
     end
 
