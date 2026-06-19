@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local main
 
 ---------------------------------------------------------------------
@@ -51,6 +55,7 @@ function main()
         i = i + 1
     end
     PreventUIRefresh(-1)
+    say("All S-AUD markers deleted")
 end
 
 ---------------------------------------------------------------------

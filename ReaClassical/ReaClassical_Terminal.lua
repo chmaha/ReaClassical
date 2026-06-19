@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
+local humanize_timestr = require("ReaClassical_Time_Naming")
 
 local workflow = ""
 
@@ -99,42 +100,6 @@ function humanize_item_name(name)
         return "Take " .. tonumber(only_num)
     end
     return name
-end
-
--- Speaks a format_timestr_pos() position in words, dropping leading
--- zero-valued units: "0:03:56:45" -> "3 minutes, 56 seconds, 45
--- frames"; "1:23:45.678" -> "1 hour, 23 minutes, 45 seconds, 678
--- milliseconds"; all-zero -> "At beginning of project". The last unit is
--- CD frames (mode 5, "h:m:s:f" -- ReaClassical's default) or milliseconds
--- (mode 0, "h:m:s.mmm"), detected via SWS's projtimemode2 config var since
--- format_timestr_pos() itself doesn't say which format it used. Any other
--- ruler format (bars/beats, samples, seconds-only) doesn't split into
--- exactly 4 numeric groups and is returned unchanged.
-function humanize_timestr(str)
-    local mode = APIExists("SNM_GetIntConfigVar") and SNM_GetIntConfigVar("projtimemode2", -1) or -1
-    local last_unit_name = (mode == 5) and "frame" or "millisecond"
-
-    local nums = {}
-    for part in str:gmatch("%d+") do table.insert(nums, tonumber(part)) end
-    if #nums ~= 4 then return str end
-
-    local unit_names = { "hour", "minute", "second", last_unit_name }
-
-    local first_nonzero
-    for i, n in ipairs(nums) do
-        if n ~= 0 then
-            first_nonzero = i; break
-        end
-    end
-    if not first_nonzero then return "At beginning of project" end
-
-    local parts = {}
-    for i = first_nonzero, 4 do
-        local n = nums[i]
-        table.insert(parts, n .. " " .. unit_names[i] .. (n == 1 and "" or "s"))
-    end
-
-    return table.concat(parts, ", ")
 end
 
 ---------------------------------------------------------------------

@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local main, folder_check, get_track_number, get_track_prefix
 local move_destination_folder, calculate_destination_info, get_tracks_per_group
 local get_selected_media_item_at, count_selected_media_items
@@ -118,6 +122,7 @@ function main()
     local out_label = (workflow == "Horizontal") and "SOURCE-OUT" or (track_prefix .. ":SOURCE-OUT")
     AddProjectMarker2(0, false, left_pos, 0, in_label, 998, marker_color)
     AddProjectMarker2(0, false, right_pos, 0, out_label, 999, marker_color)
+    say("Source markers set")
     Main_OnCommand(40635, 0) -- remove time selection
     PreventUIRefresh(-1)
     Undo_EndBlock("Source Markers to Item Edge", 0)

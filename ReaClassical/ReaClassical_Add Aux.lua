@@ -28,6 +28,8 @@ local route_to_track, trackname_check, scroll_to_first_track
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -87,6 +89,7 @@ function main()
     end
 
     Undo_EndBlock("Add Aux", 0)
+    say("Aux bus added")
 end
 
 ---------------------------------------------------------------------

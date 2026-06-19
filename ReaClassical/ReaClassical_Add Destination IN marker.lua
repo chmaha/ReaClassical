@@ -22,6 +22,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+local humanize_timestr = require("ReaClassical_Time_Naming")
+
 local main, get_color_table, return_check_length
 local get_track_prefix, get_track_number, folder_check
 
@@ -111,6 +116,7 @@ function main()
         local marker_label = (workflow == "Horizontal") and "DEST-IN" or (track_prefix .. ":DEST-IN")
         AddProjectMarker2(0, false, cur_pos, 0, marker_label, 996, marker_color)
         SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
+        say("Added  " .. marker_label .. " @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
     end
     PreventUIRefresh(-1)
 end
@@ -118,8 +124,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

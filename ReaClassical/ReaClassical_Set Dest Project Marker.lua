@@ -22,6 +22,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+local humanize_timestr = require("ReaClassical_Time_Naming")
+
 local main
 
 ---------------------------------------------------------------------
@@ -51,6 +56,7 @@ function main()
     i = i + 1
   end
   AddProjectMarker2(-1, false, cur_pos, 0, "DEST PROJECT", 1001, ColorToNative(183, 79, 105) | 0x1000000)
+  say("Added  Dest Project @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
 end
 
 ---------------------------------------------------------------------

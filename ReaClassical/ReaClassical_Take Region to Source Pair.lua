@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local main, folder_check, get_track_number, get_track_prefix
 local get_color_table
 local source_pos_to_project_pos, project_pos_to_source_pos
@@ -120,6 +124,7 @@ function main()
 
     -- Remove the S-AUD take marker via chunk manipulation
     remove_take_marker_by_chunk(selected_item, marker_info.src_start, "S-AUD")
+    say("Source markers set from take region")
 
     PreventUIRefresh(-1)
 end
@@ -435,8 +440,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 
