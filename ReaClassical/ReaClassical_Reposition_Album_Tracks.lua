@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local main, empty_items_check
 local get_cd_track_groups, get_items_containing_midpoint
 local get_parent_folder, get_folder_children

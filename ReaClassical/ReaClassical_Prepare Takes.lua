@@ -32,6 +32,10 @@ if not _G.RC_TERMINAL_ARGS and APIExists("osara_outputMessage") and GetExtState(
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local main, get_color_table
 local xfade_check, empty_items_check, folder_check
 local trackname_check, delete_empty_items, pastel_color
@@ -814,7 +818,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end

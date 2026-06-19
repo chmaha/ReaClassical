@@ -29,6 +29,10 @@ if not _G.RC_TERMINAL_ARGS and APIExists("osara_outputMessage") and GetExtState(
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local main
 local get_selected_media_items, count_selected_media_items
 local apply_rate_change, apply_pitch_change, notify

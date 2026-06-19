@@ -77,6 +77,8 @@ local cached_has_existing_items = false
 local cached_start_pos = 0
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
 
 ---------------------------------------------------------------------
 

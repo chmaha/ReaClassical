@@ -32,6 +32,10 @@ if not _G.RC_TERMINAL_ARGS and APIExists("osara_outputMessage") and GetExtState(
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 ---------------------------------------------------------------------
 -- Forward declarations
 ---------------------------------------------------------------------
@@ -1565,7 +1569,6 @@ end
 ---------------------------------------------------------------------
 
 function create_metadata_report_and_cue()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     dofile(script_path .. "ReaClassical_Metadata Report.lua")
 end
 

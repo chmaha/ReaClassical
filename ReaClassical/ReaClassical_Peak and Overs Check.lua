@@ -35,6 +35,7 @@ end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
+local say = require("ReaClassical_Announce")
 
 local main, scan, scan_item, format_pos, go_to, is_rcmaster, chain_gain
 
