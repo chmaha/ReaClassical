@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre10
+@version 26.6.8pre11
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -169,6 +169,7 @@
   [www] ReaClassical_remote.html
   ReaClassical_Colors_Table.lua
   ReaClassical_Track_Naming.lua
+  ReaClassical_Time_Naming.lua
   ReaClassical_Announce.lua
   ReaClassical.ini
   ReaClassical-kb.ini
