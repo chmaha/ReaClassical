@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre6
+@version 26.6.8pre7
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -123,6 +123,7 @@
   [main=crossfade_editor] ReaClassical_Play Right Crossfade Item.lua
   [main=crossfade_editor] ReaClassical_Play Right Crossfade Item with playrate.lua
   [main=crossfade_editor] ReaClassical_Play Top Lane Only.lua
+  [main] ReaClassical_Play Stop.lua
   [main] ReaClassical_Preferences.lua
   [main] ReaClassical_Prepare Takes.lua
   [main] ReaClassical_Previous Item or Fade.lua
@@ -168,6 +169,7 @@
   [www] ReaClassical_remote.html
   ReaClassical_Colors_Table.lua
   ReaClassical_Track_Naming.lua
+  ReaClassical_Announce.lua
   ReaClassical.ini
   ReaClassical-kb.ini
   ReaClassical-mouse.ini
