@@ -81,6 +81,7 @@ function main()
             -- Fallback: nothing armed, just stop
             Main_OnCommand(40667, 0) -- Transport: Stop
             PreventUIRefresh(-1)
+            say("Recording Stopped")
             return
         end
 
@@ -182,6 +183,7 @@ function main()
         Undo_EndBlock('Classical Take Record Stop', 0)
         UpdateArrange()
         UpdateTimeline()
+        say("Recording Stopped")
         return
     end
 
@@ -254,6 +256,13 @@ function main()
         Undo_EndBlock('Classical Take Record', 0)
         UpdateArrange()
         UpdateTimeline()
+        if workflow == "Vertical" then
+            local _, folder_name = GetSetMediaTrackInfo_String(first_selected_track, "P_NAME", "", false)
+            local prefix = folder_name:match("^([^:]+):") or folder_name
+            say("Armed: " .. (prefix ~= "" and prefix or "Unnamed folder"))
+        else
+            say("Folder armed")
+        end
         return
     end
 
@@ -269,7 +278,7 @@ function main()
     Undo_EndBlock('Classical Take Record', 0)
 
     local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
-    if take_num ~= "" then say("Take " .. take_num) end
+    if take_num ~= "" then say("Recording take " .. take_num) end
 
     UpdateArrange()
     UpdateTimeline()

@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, say, get_item_at_cursor, extract_take_number
+local main, say, get_item_at_cursor, humanize_item_name
 
 ---------------------------------------------------------------------
 
@@ -48,9 +48,18 @@ end
 
 ---------------------------------------------------------------------
 
-function extract_take_number(name)
-    local number = name:match("(%d+)$")
-    return number and tonumber(number) or nil
+-- Mirrors announce_current_item() (Next/Previous Item or Fade.lua):
+-- "008" -> "Take 8", "Beethoven_T006" -> "Beethoven take 6".
+function humanize_item_name(name)
+    local prefix, take_num = name:match("^(.+)_T(%d+)$")
+    if take_num then
+        return prefix .. " take " .. tonumber(take_num)
+    end
+    local only_num = name:match("^(%d+)$")
+    if only_num then
+        return "Take " .. tonumber(only_num)
+    end
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -75,10 +84,10 @@ function main()
     end
 
     local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
-    local take_number = extract_take_number(name)
+    local humanized = humanize_item_name(name)
 
-    if take_number then
-        say("Take " .. take_number)
+    if humanized then
+        say(humanized)
     else
         say("No take number found in item name.")
     end

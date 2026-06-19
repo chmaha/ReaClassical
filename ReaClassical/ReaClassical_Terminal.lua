@@ -91,6 +91,57 @@ function trim(s)
     return s:match("^%s*(.-)%s*$")
 end
 
+-- Speaks recorded take/item names without their zero-padding, mirroring
+-- announce_current_item() (Next/Previous Item or Fade.lua): "008" -> "Take
+-- 8", "Beethoven_T006" -> "Beethoven take 6". Anything else (a manually
+-- typed item name) passes through unchanged.
+function humanize_item_name(name)
+    if not name or name == "" then return name end
+    local prefix, take_num = name:match("^(.+)_T(%d+)$")
+    if take_num then
+        return prefix .. " take " .. tonumber(take_num)
+    end
+    local only_num = name:match("^(%d+)$")
+    if only_num then
+        return "Take " .. tonumber(only_num)
+    end
+    return name
+end
+
+-- Speaks a format_timestr_pos() position in words, dropping leading
+-- zero-valued units: "0:03:56:45" -> "3 minutes, 56 seconds, 45
+-- frames"; "1:23:45.678" -> "1 hour, 23 minutes, 45 seconds, 678
+-- milliseconds"; all-zero -> "At beginning of project". The last unit is
+-- CD frames (mode 5, "h:m:s:f" -- ReaClassical's default) or milliseconds
+-- (mode 0, "h:m:s.mmm"), detected via SWS's projtimemode2 config var since
+-- format_timestr_pos() itself doesn't say which format it used. Any other
+-- ruler format (bars/beats, samples, seconds-only) doesn't split into
+-- exactly 4 numeric groups and is returned unchanged.
+function humanize_timestr(str)
+    local mode = APIExists("SNM_GetIntConfigVar") and SNM_GetIntConfigVar("projtimemode2", -1) or -1
+    local last_unit_name = (mode == 5) and "frame" or "millisecond"
+
+    local nums = {}
+    for part in str:gmatch("%d+") do table.insert(nums, tonumber(part)) end
+    if #nums ~= 4 then return str end
+
+    local unit_names = { "hour", "minute", "second", last_unit_name }
+
+    local first_nonzero
+    for i, n in ipairs(nums) do
+        if n ~= 0 then first_nonzero = i; break end
+    end
+    if not first_nonzero then return "At beginning of project" end
+
+    local parts = {}
+    for i = first_nonzero, 4 do
+        local n = nums[i]
+        table.insert(parts, n .. " " .. unit_names[i] .. (n == 1 and "" or "s"))
+    end
+
+    return table.concat(parts, ", ")
+end
+
 ---------------------------------------------------------------------
 -- dB / pan helpers (ported from ReaClassical_Edit Automation.lua)
 ---------------------------------------------------------------------
@@ -1642,7 +1693,7 @@ function try_selection(cmd)
                 if take then
                     _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
                 end
-                table.insert(item_names, name ~= "" and name or "(unnamed)")
+                table.insert(item_names, name ~= "" and humanize_item_name(name) or "(unnamed)")
             end
             say(item_count .. " item(s) selected: " .. table.concat(item_names, ", "))
         end
@@ -1650,7 +1701,7 @@ function try_selection(cmd)
     end
 
     if cmd == "time?" then
-        say(format_timestr_pos(GetCursorPosition(), "", -1))
+        say(humanize_timestr(format_timestr_pos(GetCursorPosition(), "", -1)))
         return true
     end
 
@@ -4730,7 +4781,7 @@ function try_snapshots(cmd)
         for i, s in ipairs(snaps) do
             local item = snap_get_item_by_guid(s.item_guid)
             local pos_str = item and format_timestr_pos(GetMediaItemInfo_Value(item, "D_POSITION"), "", -1) or "?"
-            local name = s.item_name ~= "" and s.item_name or s.item_guid:sub(1, 13) .. "..."
+            local name = s.item_name ~= "" and humanize_item_name(s.item_name) or s.item_guid:sub(1, 13) .. "..."
             local pipe = name:find("|")
             if pipe then name = name:sub(1, pipe - 1) end
             say(string.format("  %d: %s @ %s  [%s %s]", i, name, pos_str,
@@ -4876,7 +4927,7 @@ function try_snapshots(cmd)
                 snapshot.tracks[i] = snap_get_track_state(track)
             end
         end
-        local display = item_name ~= "" and item_name or item_guid:sub(1, 13)
+        local display = item_name ~= "" and humanize_item_name(item_name) or item_guid:sub(1, 13)
         if existing_idx then
             snaps[existing_idx] = snapshot
             say("Snapshot updated: " .. display)
@@ -4907,7 +4958,7 @@ function try_snapshots(cmd)
         end
         if snap then
             snap_recall_snapshot(snap, flags)
-            local name = snap.item_name ~= "" and snap.item_name or "snapshot"
+            local name = snap.item_name ~= "" and humanize_item_name(snap.item_name) or "snapshot"
             say("Recalled: " .. name)
         else
             say("No snapshot at cursor position")
@@ -4928,7 +4979,7 @@ function try_snapshots(cmd)
             return true
         end
         snap_recall_snapshot(snap, flags)
-        local name = snap.item_name ~= "" and snap.item_name or snap.item_guid:sub(1, 13)
+        local name = snap.item_name ~= "" and humanize_item_name(snap.item_name) or snap.item_guid:sub(1, 13)
         say("Recalled snapshot " .. n .. ": " .. name)
         return true
     end
@@ -4944,7 +4995,7 @@ function try_snapshots(cmd)
             say("No snapshot " .. n .. " in bank " .. bank)
             return true
         end
-        local name = snaps[n].item_name ~= "" and snaps[n].item_name
+        local name = snaps[n].item_name ~= "" and humanize_item_name(snaps[n].item_name)
             or snaps[n].item_guid:sub(1, 13)
         table.remove(snaps, n)
         snap_save_bank(bank, snaps, flags)
@@ -5404,30 +5455,9 @@ function try_record(cmd)
             say("Classical Take Record script not found")
             return true
         end
+        -- Classical Take Record.lua now announces "Armed: ..."/"Folder
+        -- armed" or "Recording take N" itself, so nothing further to say.
         Main_OnCommand(f9_cid, 0)
-        -- F9 announces "Take N" itself once recording actually starts; if it
-        -- only armed (nothing was armed before), announce what got armed.
-        if GetPlayState() == 0 then
-            local armed_folder
-            for i = 0, CountTracks(0) - 1 do
-                local t = GetTrack(0, i)
-                local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
-                if lb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1
-                    and GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
-                    armed_folder = t; break
-                end
-            end
-            if armed_folder then
-                local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
-                if wf == "Vertical" then
-                    local _, folder_name = GetSetMediaTrackInfo_String(armed_folder, "P_NAME", "", false)
-                    local prefix = folder_name:match("^([^:]+):") or folder_name
-                    say("Armed: " .. (prefix ~= "" and prefix or "Unnamed folder"))
-                else
-                    say("Folder armed")
-                end
-            end
-        end
         return true
     end
 
@@ -5447,8 +5477,9 @@ function try_record(cmd)
             say("Classical Take Record script not found")
             return true
         end
+        -- Classical Take Record.lua now announces "Recording Stopped"
+        -- itself, so nothing further to say.
         Main_OnCommand(f9_cid, 0)
-        say("Stopped")
         return true
     end
 
