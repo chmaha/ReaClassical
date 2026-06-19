@@ -118,7 +118,7 @@ function main()
         local marker_label = (workflow == "Horizontal") and "DEST-OUT" or (track_prefix .. ":DEST-OUT")
         AddProjectMarker2(0, false, cur_pos, 0, marker_label, 997, marker_color)
         SetProjExtState(0, "ReaClassical", "DestOutTrackNum", tostring(track_number))
-        say("Added destination out @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
+        say("Added Destination Out @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
 
         if other_dest_track_num and other_dest_track_num ~= track_number then
             MB("Warning: Dest OUT marker group does not match Dest IN!", "Add Dest Marker OUT", 0)
