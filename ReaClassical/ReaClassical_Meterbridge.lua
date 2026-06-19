@@ -22,6 +22,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+-- ReaImGui windows are unusable/distracting for a blind user relying on
+-- OSARA + the Terminal instead of the mouse, so skip opening this GUI when
+-- OSARA is installed unless allowgui=y has been set in the Terminal. Calls
+-- coming from the Terminal itself (_G.RC_TERMINAL_ARGS set) always bypass
+-- this -- they never open a GUI in the first place.
+if not _G.RC_TERMINAL_ARGS and APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y" then
+    osara_outputMessage("GUI blocked (OSARA detected) -- use allowgui=y in the Terminal to override")
+    return
+end
+
 local main, clamp, lin_to_db, color_for_db, is_m_track, is_other_master_track
 local is_special_track
 local get_tracks_to_display, get_input_label, get_track_label, refresh_tracks

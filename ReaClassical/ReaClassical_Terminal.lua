@@ -3774,6 +3774,22 @@ function try_misc(cmd)
         return true
     end
 
+    -- allowgui=y/n: override the OSARA-installed GUI block so ReaImGui
+    -- windows (Mission Control, Notes, Preferences, etc.) can be opened
+    -- again even with OSARA active; allowgui? reports the current state.
+    local allowgui_val = cmd:match("^allowgui=([yn])$")
+    if allowgui_val then
+        SetExtState("ReaClassical", "AllowGui", allowgui_val, true)
+        say(allowgui_val == "y" and "GUI windows allowed" or "GUI windows blocked while OSARA is installed")
+        return true
+    end
+
+    if cmd == "allowgui?" then
+        local allowed = GetExtState("ReaClassical", "AllowGui") == "y"
+        say(allowed and "GUI windows allowed" or "GUI windows blocked while OSARA is installed")
+        return true
+    end
+
     if cmd == "update" then
         local action = NamedCommandLookup("_REAPACK_SYNC")
         if action ~= 0 then
