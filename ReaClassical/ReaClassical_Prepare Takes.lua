@@ -925,5 +925,7 @@ if _G.RC_TERMINAL_ARGS then
         return
     end
     SetProjExtState(0, "ReaClassical", "Prepared_Takes", "y")
-    say("Prepare Takes: complete")
+    if not _G.RC_TERMINAL_ARGS.silent then
+        say("Prepare Takes: complete")
+    end
 end

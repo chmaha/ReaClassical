@@ -236,6 +236,35 @@ end
 
 ---------------------------------------------------------------------
 
+-- Selects the item on track whose span is closest to the edit cursor
+-- (0 if the cursor falls inside it), so switching folders lands on
+-- something relevant instead of leaving the previous folder's items
+-- selected or none at all.
+function select_nearest_item_to_cursor(track)
+    local cursor = GetCursorPosition()
+    local best_item, best_dist
+    for i = 0, CountTrackMediaItems(track) - 1 do
+        local item = GetTrackMediaItem(track, i)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+        local dist
+        if cursor >= pos and cursor <= pos + len then
+            dist = 0
+        else
+            dist = math.min(math.abs(cursor - pos), math.abs(cursor - (pos + len)))
+        end
+        if not best_dist or dist < best_dist then
+            best_dist = dist
+            best_item = item
+        end
+    end
+    if best_item then
+        SetMediaItemSelected(best_item, true)
+    end
+end
+
+---------------------------------------------------------------------
+
 function main()
     local folders = get_rc_folders()
     if #folders == 0 then
@@ -269,6 +298,8 @@ function main()
     PreventUIRefresh(1)
     SetOnlyTrackSelected(prev_folder.track)
     solo()
+    Main_OnCommand(40289, 0) -- Item: Unselect all items
+    select_nearest_item_to_cursor(prev_folder.track)
     PreventUIRefresh(-1)
     TrackList_AdjustWindows(false)
     UpdateArrange()

@@ -781,6 +781,265 @@ function start_fresh_project()
     return wf_after == ""
 end
 
+-- Port of get_items_at_midpoint() (Mission Control.lua:3612-3631).
+function get_items_at_midpoint(ref_item, folder_start, folder_end)
+    local pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(ref_item, "D_LENGTH")
+    local mid = pos + len * 0.5
+    local tolerance = 0.0001
+    local result = {}
+    for t = folder_start, folder_end do
+        local track = GetTrack(0, t)
+        local n = CountTrackMediaItems(track)
+        for i = 0, n - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local ipos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local ilen = GetMediaItemInfo_Value(item, "D_LENGTH")
+            if mid >= (ipos - tolerance) and mid <= (ipos + ilen + tolerance) then
+                result[#result + 1] = item
+            end
+        end
+    end
+    return result
+end
+
+-- Port of consolidate_folders_to_first() (Mission Control.lua:3635-3863).
+-- Required before converting Vertical -> Horizontal: Horizontal workflow
+-- expects exactly one folder, so every other folder's items get appended
+-- end-to-end onto the first folder's matching track slots first, and the
+-- now-empty folders are removed. Without this step, convert=h either
+-- leaves extra folders behind or hands the Horizontal Workflow script a
+-- track layout it doesn't know how to convert.
+function consolidate_folders_to_first()
+    local num_tracks = CountTracks(0)
+    local folders = {}
+
+    local i = 0
+    while i < num_tracks do
+        local track = GetTrack(0, i)
+        local folder_depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+
+        if folder_depth == 1 then
+            local folder_info = { parent = track, children = {} }
+            table.insert(folders, folder_info)
+
+            i = i + 1
+            local current_depth = 1
+            while i < num_tracks and current_depth > 0 do
+                local child_track = GetTrack(0, i)
+                local child_depth = GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
+                table.insert(folder_info.children, child_track)
+                current_depth = current_depth + child_depth
+                if current_depth <= 0 then break end
+                i = i + 1
+            end
+        end
+        i = i + 1
+    end
+
+    if #folders < 2 then return end
+
+    -- Collect items from each folder, grouping peers by midpoint instead of I_GROUPID.
+    -- Each "midpoint group" is a set of items that share the same midpoint position --
+    -- they are treated as a unit when consolidating, just as grouped items were before.
+    for _, folder in ipairs(folders) do
+        local all_folder_tracks = { folder.parent }
+        for _, child in ipairs(folder.children) do
+            table.insert(all_folder_tracks, child)
+        end
+
+        -- Build a set of all items in this folder
+        local folder_item_set = {}
+        for _, track in ipairs(all_folder_tracks) do
+            local item_count = CountTrackMediaItems(track)
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(track, j)
+                folder_item_set[item] = true
+            end
+        end
+
+        -- Group items by midpoint: use the parent (folder.parent) track's items
+        -- as reference items, then find their peers across the folder.
+        local midpoint_groups = {} -- list of {items = {...}, ref_pos = pos}
+        local seen = {}
+
+        -- Resolve folder track index range for scoped midpoint lookup
+        local folder_start_idx = GetMediaTrackInfo_Value(folder.parent, "IP_TRACKNUMBER") - 1
+        local folder_end_idx = folder_start_idx
+        for _, child in ipairs(folder.children) do
+            folder_end_idx = GetMediaTrackInfo_Value(child, "IP_TRACKNUMBER") - 1
+        end
+
+        local parent_item_count = CountTrackMediaItems(folder.parent)
+        for j = 0, parent_item_count - 1 do
+            local ref_item = GetTrackMediaItem(folder.parent, j)
+            if not seen[ref_item] then
+                local peers = get_items_at_midpoint(ref_item, folder_start_idx, folder_end_idx)
+
+                -- Only keep peers that are actually in this folder
+                local group_items = {}
+                for _, peer in ipairs(peers) do
+                    if folder_item_set[peer] then
+                        group_items[#group_items + 1] = peer
+                        seen[peer] = true
+                    end
+                end
+                local ref_pos = GetMediaItemInfo_Value(ref_item, "D_POSITION")
+                table.insert(midpoint_groups, { items = group_items, ref_pos = ref_pos })
+            end
+        end
+
+        -- Collect any remaining folder items not reached via the parent track
+        local ungrouped_items = {}
+        for _, track in ipairs(all_folder_tracks) do
+            local item_count = CountTrackMediaItems(track)
+            for j = 0, item_count - 1 do
+                local item = GetTrackMediaItem(track, j)
+                if not seen[item] then
+                    seen[item] = true
+                    table.insert(ungrouped_items, item)
+                end
+            end
+        end
+
+        folder.midpoint_groups = midpoint_groups
+        folder.ungrouped_items = ungrouped_items
+    end
+
+    -- Find earliest and latest positions in first folder
+    local first_folder = folders[1]
+    local first_folder_earliest = math.huge
+    local latest_end = 0
+
+    for _, group in ipairs(first_folder.midpoint_groups) do
+        for _, item in ipairs(group.items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
+            if pos < first_folder_earliest then first_folder_earliest = pos end
+            if item_end > latest_end then latest_end = item_end end
+        end
+    end
+    for _, item in ipairs(first_folder.ungrouped_items) do
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
+        if pos < first_folder_earliest then first_folder_earliest = pos end
+        if item_end > latest_end then latest_end = item_end end
+    end
+
+    -- Shift first folder to start at 0 if needed
+    if first_folder_earliest ~= 0 and first_folder_earliest ~= math.huge then
+        local shift = -first_folder_earliest
+        for _, group in ipairs(first_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                SetMediaItemInfo_Value(item, "D_POSITION", pos + shift)
+            end
+        end
+        for _, item in ipairs(first_folder.ungrouped_items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetMediaItemInfo_Value(item, "D_POSITION", pos + shift)
+        end
+        latest_end = latest_end + shift
+    end
+
+    local first_folder_tracks = { first_folder.parent }
+    for _, child in ipairs(first_folder.children) do
+        table.insert(first_folder_tracks, child)
+    end
+
+    local current_position = (latest_end > 0) and (latest_end + 10) or 0
+
+    for folder_idx = 2, #folders do
+        local source_folder = folders[folder_idx]
+
+        -- Find earliest position in this folder
+        local folder_earliest = math.huge
+        for _, group in ipairs(source_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                if pos < folder_earliest then folder_earliest = pos end
+            end
+        end
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if pos < folder_earliest then folder_earliest = pos end
+        end
+
+        local folder_offset = current_position - folder_earliest
+
+        local source_folder_tracks = { source_folder.parent }
+        for _, child in ipairs(source_folder.children) do
+            table.insert(source_folder_tracks, child)
+        end
+
+        local function move_item_to_first_folder(item, new_pos)
+            local source_track = GetMediaItem_Track(item)
+            local source_track_pos = nil
+            for idx, folder_track in ipairs(source_folder_tracks) do
+                if folder_track == source_track then
+                    source_track_pos = idx; break
+                end
+            end
+            if source_track_pos and source_track_pos <= #first_folder_tracks then
+                local dest_track = first_folder_tracks[source_track_pos]
+                MoveMediaItemToTrack(item, dest_track)
+                SetMediaItemInfo_Value(item, "D_POSITION", new_pos)
+            end
+        end
+
+        for _, group in ipairs(source_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+                move_item_to_first_folder(item, original_pos + folder_offset)
+            end
+        end
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local original_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            move_item_to_first_folder(item, original_pos + folder_offset)
+        end
+
+        -- Find end of all items now in this folder's slots
+        local folder_end = 0
+        for _, group in ipairs(source_folder.midpoint_groups) do
+            for _, item in ipairs(group.items) do
+                local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+                    GetMediaItemInfo_Value(item, "D_LENGTH")
+                if item_end > folder_end then folder_end = item_end end
+            end
+        end
+        for _, item in ipairs(source_folder.ungrouped_items) do
+            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") +
+                GetMediaItemInfo_Value(item, "D_LENGTH")
+            if item_end > folder_end then folder_end = item_end end
+        end
+
+        current_position = folder_end + 10
+    end
+
+    -- Delete only empty folders (2 onwards)
+    Main_OnCommand(40297, 0) -- Unselect all
+    for folder_idx = 2, #folders do
+        local folder = folders[folder_idx]
+        local has_items = CountTrackMediaItems(folder.parent) > 0
+        if not has_items then
+            for _, child in ipairs(folder.children) do
+                if CountTrackMediaItems(child) > 0 then
+                    has_items = true; break
+                end
+            end
+        end
+        if not has_items then
+            SetTrackSelected(folder.parent, true)
+            for _, child in ipairs(folder.children) do
+                SetTrackSelected(child, true)
+            end
+        end
+    end
+
+    Main_OnCommand(40005, 0) -- Remove selected tracks
+    Main_OnCommand(40297, 0) -- Unselect all
+end
+
 function try_project_setup(cmd)
     local v_count = cmd:match("^(%d+)v$")
     if v_count then
@@ -829,21 +1088,46 @@ function try_project_setup(cmd)
         return true
     end
 
+    -- Mirrors Mission Control's "Convert to Horizontal" button: Horizontal
+    -- workflow expects exactly one folder, so every other folder's items
+    -- must be consolidated onto the first folder before re-syncing, or the
+    -- Workflow script is left with a track layout it can't convert.
     if cmd == "convert=h" then
+        if workflow == "Horizontal" then
+            say("The project already uses a Horizontal workflow")
+            return true
+        end
+        consolidate_folders_to_first()
         _G.RC_TERMINAL_ARGS = {}
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
+        if CountMediaItems(0) > 0 then
+            _G.RC_TERMINAL_ARGS = { silent = true }
+            dofile(script_path .. "ReaClassical_Prepare Takes.lua")
+            _G.RC_TERMINAL_ARGS = nil
+        end
+        say("Conversion to Horizontal workflow complete")
         return true
     end
 
     if cmd == "convert=v" then
+        if workflow == "Vertical" then
+            say("The project already uses a Vertical workflow")
+            return true
+        end
         _G.RC_TERMINAL_ARGS = {}
         dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
+        if CountMediaItems(0) > 0 then
+            _G.RC_TERMINAL_ARGS = { silent = true }
+            dofile(script_path .. "ReaClassical_Prepare Takes.lua")
+            _G.RC_TERMINAL_ARGS = nil
+        end
+        say("Conversion to Vertical workflow complete")
         return true
     end
 
