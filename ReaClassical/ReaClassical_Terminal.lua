@@ -63,14 +63,7 @@ local RANK_PREFIXES = {
 -- Output
 ---------------------------------------------------------------------
 
-function say(msg)
-    -- drop showconsolemsg on public release
-    if osara_outputMessage then
-        osara_outputMessage(tostring(msg))
-    else
-        ShowConsoleMsg(tostring(msg) .. "\n")
-    end
-end
+local say = require("ReaClassical_Announce")
 
 ---------------------------------------------------------------------
 -- Generic helpers
@@ -3787,6 +3780,23 @@ function try_misc(cmd)
     if cmd == "allowgui?" then
         local allowed = GetExtState("ReaClassical", "AllowGui") == "y"
         say(allowed and "GUI windows allowed" or "GUI windows blocked while OSARA is installed")
+        return true
+    end
+
+    -- debug=y/n: toggle the console-message fallback used by say() (in
+    -- ReaClassical_Announce.lua) on platforms without OSARA (e.g. testing
+    -- on Linux), so announcements can be checked without the real plugin
+    -- installed; debug? reports the current state.
+    local debug_val = cmd:match("^debug=([yn])$")
+    if debug_val then
+        SetExtState("ReaClassical", "DebugAnnounce", debug_val, true)
+        say(debug_val == "y" and "Debug announcements on" or "Debug announcements off")
+        return true
+    end
+
+    if cmd == "debug?" then
+        local on = GetExtState("ReaClassical", "DebugAnnounce") == "y"
+        say(on and "Debug announcements on" or "Debug announcements off")
         return true
     end
 

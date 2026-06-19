@@ -22,33 +22,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main
-
 ---------------------------------------------------------------------
-local say = require("ReaClassical_Announce")
 
--- Wraps native command 40044 ("Transport: Play/stop") so the resulting
--- play state gets announced -- 40044 gives no feedback of its own, so
--- without this a screen reader user has no way to tell whether pressing
--- it started or stopped playback.
-function main()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        local modifier = "Ctrl"
-        local system = GetOS()
-        if string.find(system, "^OSX") or string.find(system, "^macOS") then
-            modifier = "Cmd"
-        end
-        MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
-        return
+-- Shared announcement function for every non-ImGui ReaClassical script.
+-- Speaks via OSARA when it's installed; otherwise stays silent unless
+-- debug=y has been set in the Terminal (debug=y/debug?/debug=n), in which
+-- case it prints to the console instead -- lets development/testing of
+-- announcements happen on platforms without OSARA (e.g. Linux) without
+-- spamming the console for ordinary end users who simply don't have
+-- OSARA installed.
+local function say(msg)
+    if osara_outputMessage then
+        osara_outputMessage(tostring(msg))
+    elseif GetExtState("ReaClassical", "DebugAnnounce") == "y" then
+        ShowConsoleMsg(tostring(msg) .. "\n")
     end
-
-    Main_OnCommand(40044, 0) -- Transport: Play/stop
-
-    say(GetPlayState() ~= 0 and "Playing" or "Stopped")
 end
 
 ---------------------------------------------------------------------
 
-main()
+return say

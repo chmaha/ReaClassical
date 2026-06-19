@@ -25,17 +25,12 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
+local say = require("ReaClassical_Announce")
 
-local main, is_special_track, get_folder_parent, get_folder_tracks, say
+local main, is_special_track, get_folder_parent, get_folder_tracks
 local format_peak, format_input, announce_track, get_feed_track
 
 ---------------------------------------------------------------------
-
-function say(msg)
-    if osara_outputMessage then
-        osara_outputMessage(tostring(msg))
-    end
-end
 
 ---------------------------------------------------------------------
 

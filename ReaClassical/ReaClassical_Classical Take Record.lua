@@ -31,15 +31,11 @@ local select_children_of_selected_folders, reset_playback_rate
 local unselect_folder_children, set_rec_arm_for_selected_tracks
 local find_mixer_track_for_track, is_mixer_disabled
 local avoid_take_lanes, find_recording_folder, get_record_takes_horizontally
-local say
 
----------------------------------------------------------------------
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
 
-function say(msg)
-    if osara_outputMessage then
-        osara_outputMessage(tostring(msg))
-    end
-end
 ---------------------------------------------------------------------
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -532,8 +528,6 @@ end
 -----------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

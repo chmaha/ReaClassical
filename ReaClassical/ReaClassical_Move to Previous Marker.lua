@@ -21,15 +21,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, solo, say, announce_marker_at
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
+local main, solo, announce_marker_at
 
 ---------------------------------------------------------------------
-
-function say(msg)
-    if osara_outputMessage then
-        osara_outputMessage(tostring(msg))
-    end
-end
 
 function announce_marker_at(pos)
     local num_markers, num_regions = CountProjectMarkers(0)

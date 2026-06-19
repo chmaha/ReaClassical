@@ -420,11 +420,7 @@ end
 -- ImGui-drawn)
 ---------------------------------------------------------------------
 
-local function say(msg)
-    if osara_outputMessage then
-        osara_outputMessage(tostring(msg))
-    end
-end
+local say = require("ReaClassical_Announce")
 
 local function clip_is_special_track(track)
     local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster" }

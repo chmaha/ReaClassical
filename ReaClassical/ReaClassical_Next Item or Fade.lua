@@ -22,17 +22,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, get_selected_media_item_at, say, announce_current_item
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
+local main, get_selected_media_item_at, announce_current_item
 local get_envelope_stops, get_selected_stop_index, select_only_stop
 local announce_envelope_stop, move_envelope, clear_all_envelope_selections
-
----------------------------------------------------------------------
-
-function say(msg)
-    if osara_outputMessage then
-        osara_outputMessage(tostring(msg))
-    end
-end
 
 ---------------------------------------------------------------------
 
