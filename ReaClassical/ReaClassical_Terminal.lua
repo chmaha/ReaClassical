@@ -1310,8 +1310,9 @@ function try_input_config(cmd)
         for _, track in ipairs(tracks) do
             local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
             local _, disabled = GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", "", false)
+            local source = get_source_for_mixer(track) or track
             say(humanize_track_name(name) .. " record: " .. (disabled == "y" and "disabled" or "enabled")
-                .. ", input: " .. rec_input_description(track))
+                .. ", input: " .. rec_input_description(source))
         end
         return true
     end
@@ -1453,6 +1454,61 @@ function try_selection(cmd)
         SetOnlyTrackSelected(tracks[1])
         for i = 2, #tracks do SetTrackSelected(tracks[i], true) end
         say("Selected: " .. track_names_str(tracks))
+        return true
+    end
+
+    -- tr=<query>: jump to (select) the first track in the current folder
+    -- (the one containing the currently selected track) whose humanized
+    -- name contains <query> (case-insensitive substring match).
+    local tr_query = cmd:match("^tr=(.+)$")
+    if tr_query then
+        local selected = GetSelectedTrack(0, 0)
+        if not selected then
+            say("No track selected")
+            return true
+        end
+
+        local folder
+        for _, f in ipairs(get_track_table()) do
+            if f.parent == selected then
+                folder = f
+                break
+            end
+            for _, t in ipairs(f.tracks) do
+                if t == selected then
+                    folder = f
+                    break
+                end
+            end
+            if folder then break end
+        end
+        if not folder then
+            say("Not in a ReaClassical folder")
+            return true
+        end
+
+        -- If the folder is collapsed (I_FOLDERCOMPACT 2), its children
+        -- aren't selectable/visible -- the selected track will be the
+        -- parent in that case, so reveal them the same way the "Show
+        -- Children" action does before searching.
+        if GetMediaTrackInfo_Value(folder.parent, "I_FOLDERCOMPACT") == 2 then
+            dofile(script_path .. "ReaClassical_Show Children.lua")
+        end
+
+        local candidates = { folder.parent }
+        for _, t in ipairs(folder.tracks) do table.insert(candidates, t) end
+
+        local query = trim(tr_query):lower()
+        for _, t in ipairs(candidates) do
+            local _, name = GetSetMediaTrackInfo_String(t, "P_NAME", "", false)
+            if humanize_track_name(name):lower():find(query, 1, true) then
+                SetOnlyTrackSelected(t)
+                TrackList_AdjustWindows(false)
+                say(humanize_track_name(name))
+                return true
+            end
+        end
+        say("No track found matching: " .. trim(tr_query))
         return true
     end
 
@@ -1598,7 +1654,7 @@ function try_track_query(cmd)
     if ref:match("^%d+$") then
         local _, disabled = GetSetMediaTrackInfo_String(track, "P_EXT:input_disabled", "", false)
         table.insert(lines, "  record: " .. (disabled == "y" and "disabled" or "enabled"))
-        table.insert(lines, "  input: " .. rec_input_description(track))
+        table.insert(lines, "  input: " .. rec_input_description(get_source_for_mixer(track) or track))
     end
 
     local rcmaster = get_rcmaster()
@@ -2588,37 +2644,66 @@ function move_mixer_track(n, direction)
     return true
 end
 
+-- <positions>u<count> / <positions>d<count>: move one or more mixer tracks
+-- up/down within the mixer order. <positions> is a single index ("6") or a
+-- contiguous block ("6,7" or "1-3", per expand_index_list()) -- the moved
+-- tracks must stay adjacent, so cross-cutting lists like "1,3" aren't
+-- supported. Each block-step is a chain of adjacent move_mixer_track()
+-- swaps (ascending for "up", descending for "down"), which leapfrogs the
+-- block past the single neighbor track on the move side while preserving
+-- the block's internal order.
 function try_reorder(cmd)
-    local n_str, count_str = cmd:match("^(%d+)u(%d*)$")
+    local positions_str, count_str = cmd:match("^([%d,%-%s]+)u(%d*)$")
     local direction = "up"
-    if not n_str then
-        n_str, count_str = cmd:match("^(%d+)d(%d*)$")
+    if not positions_str then
+        positions_str, count_str = cmd:match("^([%d,%-%s]+)d(%d*)$")
         direction = "down"
     end
-    if not n_str then return false end
+    if not positions_str then return false end
 
-    local n = tonumber(n_str)
+    local mixer_tracks = get_mixer_tracks()
+    local positions = expand_index_list(positions_str, #mixer_tracks)
+    if #positions == 0 then return false end
+    table.sort(positions)
+
+    for i = 2, #positions do
+        if positions[i] ~= positions[i - 1] + 1 then
+            say("Only a contiguous block of tracks can be moved together")
+            return true
+        end
+    end
+
     local count = tonumber(count_str) or 1
     if count < 1 then count = 1 end
 
-    local track = get_mixer_tracks()[n]
-    local _, name = track and GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    local moved = false
+    local names = {}
+    for _, p in ipairs(positions) do
+        local track = mixer_tracks[p]
+        local _, name = track and GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        table.insert(names, humanize_track_name(name))
+    end
+
+    local p1, pk = positions[1], positions[#positions]
+    local moved = 0
 
     for _ = 1, count do
-        if not move_mixer_track(n, direction) then
-            say("Cannot move mixer track " .. n .. " " .. direction)
-            break
-        end
-        moved = true
         if direction == "up" then
-            n = n - 1
+            if p1 - 1 < 1 then break end
+            for n = p1, pk do move_mixer_track(n, "up") end
+            p1, pk = p1 - 1, pk - 1
         else
-            n = n + 1
+            if pk + 1 > #mixer_tracks then break end
+            for n = pk, p1, -1 do move_mixer_track(n, "down") end
+            p1, pk = p1 + 1, pk + 1
         end
+        moved = moved + 1
     end
-    if moved then
-        say(humanize_track_name(name) .. " moved to position " .. n)
+
+    if moved == 0 then
+        say("Cannot move " .. table.concat(names, ", ") .. " " .. direction)
+    else
+        local pos_str = (p1 == pk) and tostring(p1) or (p1 .. "-" .. pk)
+        say(table.concat(names, ", ") .. " moved to position " .. pos_str)
     end
     return true
 end
@@ -4846,6 +4931,23 @@ local function rec_is_special_track(track)
         if val == "y" then return true end
     end
     return false
+end
+
+-- ai/auto_assign_inputs() writes I_RECINPUT to the source/destination track
+-- (the one actually armed for recording), not to its "M:" mixer channel-
+-- strip track -- so rd?/N? must read I_RECINPUT from that same track,
+-- found here by reversing the mixer track's feed send (mirrors
+-- find_mixer_for_track() in ReaClassical_Record Panel.lua, in reverse).
+function get_source_for_mixer(mixer_track)
+    for i = 0, CountTracks(0) - 1 do
+        local t = GetTrack(0, i)
+        for s = 0, GetTrackNumSends(t, 0) - 1 do
+            if GetTrackSendInfo_Value(t, 0, s, "P_DESTTRACK") == mixer_track then
+                return t
+            end
+        end
+    end
+    return nil
 end
 
 -- Same decoding as rec_input_label(), but spelling out "none"/mono/stereo

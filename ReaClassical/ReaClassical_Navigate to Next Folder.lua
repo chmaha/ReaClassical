@@ -96,10 +96,10 @@ end
 
 ---------------------------------------------------------------------
 
-function announce_track(track, label)
+function announce_track(track)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local meter_track = get_feed_track(track)
-    local parts = { label .. ": " .. humanize_track_name(name), format_peak(meter_track) }
+    local parts = { humanize_track_name(name), format_peak(meter_track) }
     local input_info = format_input(track)
     if input_info then parts[#parts + 1] = input_info end
     say(table.concat(parts, ", "))
@@ -273,7 +273,7 @@ function main()
     TrackList_AdjustWindows(false)
     UpdateArrange()
     UpdateTimeline()
-    announce_track(next_folder.track, "Folder")
+    announce_track(next_folder.track)
 end
 
 ---------------------------------------------------------------------

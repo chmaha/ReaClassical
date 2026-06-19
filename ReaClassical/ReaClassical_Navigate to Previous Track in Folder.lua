@@ -88,10 +88,14 @@ end
 
 ---------------------------------------------------------------------
 
-function announce_track(track, label)
+-- position is the track's 1-based slot within its folder (parent track is
+-- 1, children follow), so "track 9" in an 8-track-per-folder project reads
+-- as "1" once it's the first track of the next folder.
+function announce_track(track, position)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local meter_track = get_feed_track(track)
-    local parts = { label .. ": " .. humanize_track_name(name), format_peak(meter_track) }
+    local label = position and (position .. " " .. humanize_track_name(name)) or humanize_track_name(name)
+    local parts = { label, format_peak(meter_track) }
     local input_info = format_input(track)
     if input_info then parts[#parts + 1] = input_info end
     say(table.concat(parts, ", "))
@@ -190,7 +194,7 @@ function main()
     local prev_track = tracks[current_pos - 1]
     SetOnlyTrackSelected(prev_track.track)
     TrackList_AdjustWindows(false)
-    announce_track(prev_track.track, "Track")
+    announce_track(prev_track.track, current_pos - 1)
 end
 
 ---------------------------------------------------------------------
