@@ -130,7 +130,7 @@ function main()
         local marker_label = (workflow == "Horizontal") and "SOURCE-IN" or (track_prefix .. ":SOURCE-IN")
         AddProjectMarker2(0, false, cur_pos, 0, marker_label, 998, marker_color)
         SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
-        say("Added  " .. marker_label .. " @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
+        say("Added source in @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
     end
     PreventUIRefresh(-1)
 end

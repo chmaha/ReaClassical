@@ -56,7 +56,7 @@ function main()
     i = i + 1
   end
   AddProjectMarker2(-1, false, cur_pos, 0, "DEST PROJECT", 1001, ColorToNative(183, 79, 105) | 0x1000000)
-  say("Added  Dest Project @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
+  say("Added Dest Project @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
 end
 
 ---------------------------------------------------------------------

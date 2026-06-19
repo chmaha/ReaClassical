@@ -116,7 +116,7 @@ function main()
         local marker_label = (workflow == "Horizontal") and "DEST-IN" or (track_prefix .. ":DEST-IN")
         AddProjectMarker2(0, false, cur_pos, 0, marker_label, 996, marker_color)
         SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
-        say("Added  " .. marker_label .. " @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
+        say("Added Destination In @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
     end
     PreventUIRefresh(-1)
 end

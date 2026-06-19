@@ -120,7 +120,7 @@ function main()
         local marker_label = (workflow == "Horizontal") and "SOURCE-OUT" or (track_prefix .. ":SOURCE-OUT")
         AddProjectMarker2(0, false, cur_pos, 0, marker_label, 999, marker_color)
         SetProjExtState(0, "ReaClassical", "SourceOutTrackNum", tostring(track_number))
-        say("Added  " .. marker_label .. " @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
+        say("Added Source Out @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
 
         if other_source_track_num and other_source_track_num ~= track_number then
             MB("Warning: Source OUT marker group does not match Source IN!", "Add Source Marker OUT", 0)
