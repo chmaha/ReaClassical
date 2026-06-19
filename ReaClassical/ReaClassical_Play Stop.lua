@@ -25,6 +25,9 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main
 
 ---------------------------------------------------------------------
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
 
 -- Wraps native command 40044 ("Transport: Play/stop") so the resulting

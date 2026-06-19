@@ -255,7 +255,12 @@ function main()
         if workflow == "Vertical" then
             local _, folder_name = GetSetMediaTrackInfo_String(first_selected_track, "P_NAME", "", false)
             local prefix = folder_name:match("^([^:]+):") or folder_name
-            say("Armed: " .. (prefix ~= "" and prefix or "Unnamed folder"))
+
+            local spoken_prefix = prefix
+                :gsub("^D$", "Destination")
+                :gsub("^S(%d+)$", "Source %1")
+
+            say("Armed: " .. (spoken_prefix ~= "" and spoken_prefix or "Unnamed folder"))
         else
             say("Folder armed")
         end

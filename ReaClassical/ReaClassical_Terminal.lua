@@ -122,7 +122,9 @@ function humanize_timestr(str)
 
     local first_nonzero
     for i, n in ipairs(nums) do
-        if n ~= 0 then first_nonzero = i; break end
+        if n ~= 0 then
+            first_nonzero = i; break
+        end
     end
     if not first_nonzero then return "At beginning of project" end
 
@@ -1290,7 +1292,9 @@ function try_naming(cmd)
 
     if cmd == "tn?" then
         local track = GetSelectedTrack(0, 0)
-        if not track then say("No track selected"); return true end
+        if not track then
+            say("No track selected"); return true
+        end
         local _, notes = GetSetMediaTrackInfo_String(track, "P_EXT:track_notes", "", false)
         say(notes ~= "" and notes or "No track notes set")
         return true
@@ -1324,7 +1328,9 @@ function try_naming(cmd)
 
     if cmd == "ino?" then
         local item = GetSelectedMediaItem(0, 0)
-        if not item then say("No item selected"); return true end
+        if not item then
+            say("No item selected"); return true
+        end
         local _, notes = GetSetMediaItemInfo_String(item, "P_NOTES", "", false)
         say(notes ~= "" and notes or "No item notes set")
         return true
@@ -1344,7 +1350,9 @@ function try_naming(cmd)
 
     if cmd == "ir?" then
         local item = GetSelectedMediaItem(0, 0)
-        if not item then say("No item selected"); return true end
+        if not item then
+            say("No item selected"); return true
+        end
         local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
         local rank_index = tonumber(rank_str) or 9
         local label = RANK_PREFIXES[rank_index]
@@ -1377,7 +1385,9 @@ function try_naming(cmd)
 
     if cmd == "itn?" then
         local item = GetSelectedMediaItem(0, 0)
-        if not item then say("No item selected"); return true end
+        if not item then
+            say("No item selected"); return true
+        end
         local _, tn = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
         say(tn ~= "" and ("Take number: " .. tn) or "No take number set")
         return true
@@ -2322,14 +2332,14 @@ end
 -- whether it needs dB<->linear conversion, and the action ID that shows
 -- (and thereby creates) that envelope when it doesn't already exist.
 local AUTOMATION_PARAMS = {
-    vol      = { name = "Volume",          db = true,  show_cmd = 40406 },
-    pan      = { name = "Pan",             db = false, show_cmd = 40407 },
-    width    = { name = "Width",           db = false, show_cmd = 41870 },
-    mute     = { name = "Mute",            db = false, show_cmd = 40867 },
-    trimvol  = { name = "Trim Volume",     db = true,  show_cmd = 42020 },
-    prevol   = { name = "Volume (Pre-FX)", db = true,  show_cmd = 41865 },
-    prepan   = { name = "Pan (Pre-FX)",    db = false, show_cmd = 41867 },
-    prewidth = { name = "Width (Pre-FX)",  db = false, show_cmd = 41869 },
+    vol      = { name = "Volume", db = true, show_cmd = 40406 },
+    pan      = { name = "Pan", db = false, show_cmd = 40407 },
+    width    = { name = "Width", db = false, show_cmd = 41870 },
+    mute     = { name = "Mute", db = false, show_cmd = 40867 },
+    trimvol  = { name = "Trim Volume", db = true, show_cmd = 42020 },
+    prevol   = { name = "Volume (Pre-FX)", db = true, show_cmd = 41865 },
+    prepan   = { name = "Pan (Pre-FX)", db = false, show_cmd = 41867 },
+    prewidth = { name = "Width (Pre-FX)", db = false, show_cmd = 41869 },
 }
 
 -- Converts a user-facing addauto= value (dB for volume-like params, -1..1
@@ -2397,8 +2407,8 @@ function remembered_automation_range(ts_start, ts_end)
     local _, core_end_str = GetProjExtState(0, "ReaClassical", "LastAutoCoreEnd")
     local core_start, core_end = tonumber(core_start_str), tonumber(core_end_str)
     if not (core_start and core_end
-        and math.abs(core_start - ts_start) < 0.0005
-        and math.abs(core_end - ts_end) < 0.0005) then
+            and math.abs(core_start - ts_start) < 0.0005
+            and math.abs(core_end - ts_end) < 0.0005) then
         return nil, nil
     end
 
@@ -2692,14 +2702,18 @@ function try_ddp(cmd)
     -- in? query: report CD marker / take metadata for the selected item.
     if cmd == "in?" then
         local item = GetSelectedMediaItem(0, 0)
-        if not item then say("No item selected"); return true end
+        if not item then
+            say("No item selected"); return true
+        end
         local mark_index, _, _, _, name = get_item_cd_marker(item)
         local raw
         if mark_index then
             raw = name or ""
         else
             local take = GetActiveTake(item)
-            if not take then say("No active take"); return true end
+            if not take then
+                say("No active take"); return true
+            end
             local _, tname = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
             raw = tname or ""
         end
@@ -2735,8 +2749,12 @@ function try_ddp(cmd)
         end
 
         local field_map = {
-            pf = "PERFORMER", sw = "SONGWRITER", cp = "COMPOSER",
-            ar = "ARRANGER", msg = "MESSAGE", isrc = "ISRC"
+            pf = "PERFORMER",
+            sw = "SONGWRITER",
+            cp = "COMPOSER",
+            ar = "ARRANGER",
+            msg = "MESSAGE",
+            isrc = "ISRC"
         }
         local updates = parse_ddp_fields(rest, field_map)
         local new_name = rebuild_marker_name(name, "#", trim(title), updates)
@@ -2829,8 +2847,14 @@ function try_ddp(cmd)
             end
         end
         local field_map = {
-            cat = "CATALOG", pf = "PERFORMER", sw = "SONGWRITER", cp = "COMPOSER",
-            ar = "ARRANGER", id = "IDENTIFICATION", msg = "MESSAGE", lg = "LANGUAGE"
+            cat = "CATALOG",
+            pf = "PERFORMER",
+            sw = "SONGWRITER",
+            cp = "COMPOSER",
+            ar = "ARRANGER",
+            id = "IDENTIFICATION",
+            msg = "MESSAGE",
+            lg = "LANGUAGE"
         }
         local updates = parse_ddp_fields(album_rest, field_map)
         -- Validate language against the known dropdown list (case-insensitive).
@@ -2890,7 +2914,7 @@ function try_ddp(cmd)
         if not base_name then
             base_name = has_people_values
                 and "@MyAlbumTitle|MESSAGE=Created with ReaClassical"
-                or  "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various|MESSAGE=Created with ReaClassical"
+                or "@MyAlbumTitle|COMPOSER=Various|PERFORMER=Various|MESSAGE=Created with ReaClassical"
         end
         local new_name = rebuild_marker_name(base_name, "@", trim(album_title), updates)
         _G.RC_TERMINAL_ARGS = { action = "set_album", name = new_name }
@@ -3492,8 +3516,12 @@ function get_project_age_str()
         local year, month, day, hour, min, sec = creation_date:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
         if year then
             local t = os.time({
-                year = tonumber(year) or 0, month = tonumber(month) or 0, day = tonumber(day) or 0,
-                hour = tonumber(hour) or 0, min = tonumber(min) or 0, sec = tonumber(sec) or 0
+                year = tonumber(year) or 0,
+                month = tonumber(month) or 0,
+                day = tonumber(day) or 0,
+                hour = tonumber(hour) or 0,
+                min = tonumber(min) or 0,
+                sec = tonumber(sec) or 0
             })
             local age = os.time() - t
             local days = math.floor(age / 86400)
@@ -3730,9 +3758,13 @@ function try_playrate_pitch(cmd)
 
     if cmd == "pr?" then
         local item = GetSelectedMediaItem(0, 0)
-        if not item then say("No item selected"); return true end
+        if not item then
+            say("No item selected"); return true
+        end
         local take = GetActiveTake(item)
-        if not take then say("No active take"); return true end
+        if not take then
+            say("No active take"); return true
+        end
         local rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
         say(string.format("Playrate: %.4f%s", rate, math.abs(rate - 1.0) < 0.0001 and " (normal)" or ""))
         return true
@@ -3740,9 +3772,13 @@ function try_playrate_pitch(cmd)
 
     if cmd == "pa?" then
         local item = GetSelectedMediaItem(0, 0)
-        if not item then say("No item selected"); return true end
+        if not item then
+            say("No item selected"); return true
+        end
         local take = GetActiveTake(item)
-        if not take then say("No active take"); return true end
+        if not take then
+            say("No active take"); return true
+        end
         local pitch_val = GetMediaItemTakeInfo_Value(take, "D_PITCH")
         say(string.format("Pitch: %+.2f semitones%s", pitch_val, math.abs(pitch_val) < 0.001 and " (normal)" or ""))
         return true
@@ -4049,7 +4085,9 @@ function try_misc(cmd)
     -- offsets?: report whether any marker offsets are active on the selected track.
     if cmd == "offsets?" then
         local track = GetSelectedTrack(0, 0)
-        if not track then say("No track selected"); return true end
+        if not track then
+            say("No track selected"); return true
+        end
         local has_offsets = false
         for i = 0, CountTrackMediaItems(track) - 1 do
             local item = GetTrackMediaItem(track, i)
@@ -4071,7 +4109,7 @@ function try_misc(cmd)
     if cmd == "tu" or cmd == "td" then
         local id_str = cmd == "tu"
             and "_RS18fe066cb8806e30b0371fc30a79c67ce2b807f1"
-            or  "_RS6d1212ff49d4205e6f7f0d7c30ae539d3da05f6f"
+            or "_RS6d1212ff49d4205e6f7f0d7c30ae539d3da05f6f"
         local named_cmd_id = NamedCommandLookup(id_str)
         if named_cmd_id == 0 then
             say("Move Album Track " .. (cmd == "tu" and "Up" or "Down") .. " script not installed")
@@ -4142,8 +4180,8 @@ function snap_deserialize_table(str)
 end
 
 function snap_is_special_track(track)
-    local _, mixer = GetSetMediaTrackInfo_String(track, "P_EXT:mixer",  "", false)
-    local _, aux   = GetSetMediaTrackInfo_String(track, "P_EXT:aux",    "", false)
+    local _, mixer = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+    local _, aux   = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
     local _, sub   = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
     return mixer == "y" or aux == "y" or sub == "y"
 end
@@ -4165,19 +4203,21 @@ function snap_get_item_by_guid(guid)
 end
 
 function snap_get_track_state(track)
-    local s = {}
-    s.volume = GetMediaTrackInfo_Value(track, "D_VOL")
-    s.pan    = GetMediaTrackInfo_Value(track, "D_PAN")
-    s.mute   = GetMediaTrackInfo_Value(track, "B_MUTE")
-    s.solo   = GetMediaTrackInfo_Value(track, "I_SOLO")
-    s.phase  = GetMediaTrackInfo_Value(track, "B_PHASE")
-    s.width  = GetMediaTrackInfo_Value(track, "D_WIDTH")
-    s.guid   = GetTrackGUID(track)
+    local s    = {}
+    s.volume   = GetMediaTrackInfo_Value(track, "D_VOL")
+    s.pan      = GetMediaTrackInfo_Value(track, "D_PAN")
+    s.mute     = GetMediaTrackInfo_Value(track, "B_MUTE")
+    s.solo     = GetMediaTrackInfo_Value(track, "I_SOLO")
+    s.phase    = GetMediaTrackInfo_Value(track, "B_PHASE")
+    s.width    = GetMediaTrackInfo_Value(track, "D_WIDTH")
+    s.guid     = GetTrackGUID(track)
     s.fx_chain = {}
     for i = 0, TrackFX_GetCount(track) - 1 do
-        local fx = { enabled = TrackFX_GetEnabled(track, i),
-                     name    = select(2, TrackFX_GetFXName(track, i, "")),
-                     params  = {} }
+        local fx = {
+            enabled = TrackFX_GetEnabled(track, i),
+            name    = select(2, TrackFX_GetFXName(track, i, "")),
+            params  = {}
+        }
         for p = 0, TrackFX_GetNumParams(track, i) - 1 do
             fx.params[p] = TrackFX_GetParam(track, i, p)
         end
@@ -4206,11 +4246,11 @@ end
 
 function snap_apply_track_state(track, state, flags)
     if not track then return end
-    if flags.volume then SetMediaTrackInfo_Value(track, "D_VOL",   state.volume) end
-    if flags.pan    then SetMediaTrackInfo_Value(track, "D_PAN",   state.pan)    end
-    if flags.mute   then SetMediaTrackInfo_Value(track, "B_MUTE",  state.mute)   end
-    if flags.solo   then SetMediaTrackInfo_Value(track, "I_SOLO",  state.solo)   end
-    if flags.phase  then SetMediaTrackInfo_Value(track, "B_PHASE", state.phase)  end
+    if flags.volume then SetMediaTrackInfo_Value(track, "D_VOL", state.volume) end
+    if flags.pan then SetMediaTrackInfo_Value(track, "D_PAN", state.pan) end
+    if flags.mute then SetMediaTrackInfo_Value(track, "B_MUTE", state.mute) end
+    if flags.solo then SetMediaTrackInfo_Value(track, "I_SOLO", state.solo) end
+    if flags.phase then SetMediaTrackInfo_Value(track, "B_PHASE", state.phase) end
     if flags.width and state.width then
         SetMediaTrackInfo_Value(track, "D_WIDTH", state.width)
     end
@@ -4227,8 +4267,8 @@ function snap_apply_track_state(track, state, flags)
     if flags.sends then
         for i, send in pairs(state.sends) do
             if GetTrackNumSends(track, 0) > i then
-                SetTrackSendInfo_Value(track, 0, i, "D_VOL",  send.volume)
-                SetTrackSendInfo_Value(track, 0, i, "D_PAN",  send.pan)
+                SetTrackSendInfo_Value(track, 0, i, "D_VOL", send.volume)
+                SetTrackSendInfo_Value(track, 0, i, "D_PAN", send.pan)
                 SetTrackSendInfo_Value(track, 0, i, "B_MUTE", send.mute)
             end
         end
@@ -4240,7 +4280,9 @@ function snap_apply_track_state(track, state, flags)
         for i = 0, CountTracks(0) - 1 do
             local tr = GetTrack(0, i)
             local _, rcs = GetSetMediaTrackInfo_String(tr, "P_EXT:rcmaster", "", false)
-            if rcs == "y" then rcmaster_guid = GetTrackGUID(tr); break end
+            if rcs == "y" then
+                rcmaster_guid = GetTrackGUID(tr); break
+            end
         end
         local has_rcm = false
         for _, send in pairs(state.sends) do
@@ -4248,8 +4290,8 @@ function snap_apply_track_state(track, state, flags)
             if dst then
                 local idx = CreateTrackSend(track, dst)
                 if idx >= 0 then
-                    SetTrackSendInfo_Value(track, 0, idx, "D_VOL",  send.volume)
-                    SetTrackSendInfo_Value(track, 0, idx, "D_PAN",  send.pan)
+                    SetTrackSendInfo_Value(track, 0, idx, "D_VOL", send.volume)
+                    SetTrackSendInfo_Value(track, 0, idx, "D_PAN", send.pan)
                     SetTrackSendInfo_Value(track, 0, idx, "B_MUTE", send.mute)
                     if rcmaster_guid and send.dest_guid == rcmaster_guid then
                         has_rcm = true
@@ -4265,8 +4307,8 @@ function snap_apply_track_state(track, state, flags)
             local hw_n = GetTrackNumSends(track, 1)
             for i = 0, math.min(hw_n - 1, #state.hw_outs) do
                 if state.hw_outs[i] then
-                    SetTrackSendInfo_Value(track, 1, i, "D_VOL",  state.hw_outs[i].volume)
-                    SetTrackSendInfo_Value(track, 1, i, "D_PAN",  state.hw_outs[i].pan)
+                    SetTrackSendInfo_Value(track, 1, i, "D_VOL", state.hw_outs[i].volume)
+                    SetTrackSendInfo_Value(track, 1, i, "D_PAN", state.hw_outs[i].pan)
                     SetTrackSendInfo_Value(track, 1, i, "D_MUTE", state.hw_outs[i].mute)
                 end
             end
@@ -4330,46 +4372,55 @@ function snap_load_bank(bank)
         local data = snap_deserialize_table(str)
         if data then
             return data.snapshots or {}, {
-                volume  = data.recall_volume  ~= false,
-                pan     = data.recall_pan     ~= false,
-                mute    = data.recall_mute    ~= false,
-                solo    = data.recall_solo    ~= false,
-                phase   = data.recall_phase   ~= false,
-                width   = data.recall_width   ~= false,
-                fx      = data.recall_fx      ~= false,
-                sends   = data.recall_sends   ~= false,
-                routing = data.recall_routing ~= false,
-                disable_auto_recall = data.disable_auto_recall or false,
-                switch_mid_gap      = data.switch_mid_gap ~= false,
-                counter             = data.counter or 0,
+                volume                = data.recall_volume ~= false,
+                pan                   = data.recall_pan ~= false,
+                mute                  = data.recall_mute ~= false,
+                solo                  = data.recall_solo ~= false,
+                phase                 = data.recall_phase ~= false,
+                width                 = data.recall_width ~= false,
+                fx                    = data.recall_fx ~= false,
+                sends                 = data.recall_sends ~= false,
+                routing               = data.recall_routing ~= false,
+                disable_auto_recall   = data.disable_auto_recall or false,
+                switch_mid_gap        = data.switch_mid_gap ~= false,
+                counter               = data.counter or 0,
                 bank_folder_selection = data.bank_folder_selection or "all",
             }
         end
     end
     return {}, {
-        volume=true, pan=true, mute=true, solo=true, phase=true,
-        width=true, fx=true, sends=true, routing=true,
-        disable_auto_recall=false, switch_mid_gap=true, counter=0,
-        bank_folder_selection="all",
+        volume = true,
+        pan = true,
+        mute = true,
+        solo = true,
+        phase = true,
+        width = true,
+        fx = true,
+        sends = true,
+        routing = true,
+        disable_auto_recall = false,
+        switch_mid_gap = true,
+        counter = 0,
+        bank_folder_selection = "all",
     }
 end
 
 function snap_save_bank(bank, snaps, flags)
     local data = {
-        counter             = flags.counter or 0,
-        snapshots           = snaps,
-        disable_auto_recall = flags.disable_auto_recall or false,
-        switch_mid_gap      = flags.switch_mid_gap ~= false,
+        counter               = flags.counter or 0,
+        snapshots             = snaps,
+        disable_auto_recall   = flags.disable_auto_recall or false,
+        switch_mid_gap        = flags.switch_mid_gap ~= false,
         bank_folder_selection = flags.bank_folder_selection or "all",
-        recall_volume       = flags.volume  ~= false,
-        recall_pan          = flags.pan     ~= false,
-        recall_mute         = flags.mute    ~= false,
-        recall_solo         = flags.solo    ~= false,
-        recall_phase        = flags.phase   ~= false,
-        recall_width        = flags.width   ~= false,
-        recall_fx           = flags.fx      ~= false,
-        recall_sends        = flags.sends   ~= false,
-        recall_routing      = flags.routing ~= false,
+        recall_volume         = flags.volume ~= false,
+        recall_pan            = flags.pan ~= false,
+        recall_mute           = flags.mute ~= false,
+        recall_solo           = flags.solo ~= false,
+        recall_phase          = flags.phase ~= false,
+        recall_width          = flags.width ~= false,
+        recall_fx             = flags.fx ~= false,
+        recall_sends          = flags.sends ~= false,
+        recall_routing        = flags.routing ~= false,
     }
     SetProjExtState(0, "MixerSnapshots", "data_" .. bank, snap_serialize_table(data))
 end
@@ -4408,8 +4459,8 @@ function snap_convert_to_automation(snaps, flags)
                 local env = GetTrackEnvelope(track, e)
                 DeleteEnvelopePointRange(env, -1000000, 1000000)
                 GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
-                GetSetEnvelopeInfo_String(env, "ACTIVE",  "0", true)
-                GetSetEnvelopeInfo_String(env, "ARM",     "0", true)
+                GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
+                GetSetEnvelopeInfo_String(env, "ARM", "0", true)
             end
         end
     end
@@ -4438,16 +4489,22 @@ function snap_convert_to_automation(snaps, flags)
                 local tg = ts.guid
                 if not param_changes[tg] then
                     param_changes[tg] = {
-                        volume = {}, pan = {}, mute = {}, solo = {},
-                        phase  = {}, width = {}, fx = {}, sends = {},
+                        volume = {},
+                        pan = {},
+                        mute = {},
+                        solo = {},
+                        phase = {},
+                        width = {},
+                        fx = {},
+                        sends = {},
                     }
                 end
                 local pc = param_changes[tg]
                 table.insert(pc.volume, { pos = snap_pos, value = ts.volume, snap_idx = sd.idx })
-                table.insert(pc.pan,    { pos = snap_pos, value = ts.pan,    snap_idx = sd.idx })
-                table.insert(pc.mute,   { pos = snap_pos, value = ts.mute,   snap_idx = sd.idx })
-                table.insert(pc.solo,   { pos = snap_pos, value = ts.solo,   snap_idx = sd.idx })
-                table.insert(pc.phase,  { pos = snap_pos, value = ts.phase,  snap_idx = sd.idx })
+                table.insert(pc.pan, { pos = snap_pos, value = ts.pan, snap_idx = sd.idx })
+                table.insert(pc.mute, { pos = snap_pos, value = ts.mute, snap_idx = sd.idx })
+                table.insert(pc.solo, { pos = snap_pos, value = ts.solo, snap_idx = sd.idx })
+                table.insert(pc.phase, { pos = snap_pos, value = ts.phase, snap_idx = sd.idx })
                 if ts.width then
                     table.insert(pc.width, { pos = snap_pos, value = ts.width, snap_idx = sd.idx })
                 end
@@ -4468,9 +4525,9 @@ function snap_convert_to_automation(snaps, flags)
                     table.insert(pc.sends[si].volume,
                         { pos = snap_pos, value = send.volume, snap_idx = sd.idx })
                     table.insert(pc.sends[si].pan,
-                        { pos = snap_pos, value = send.pan,    snap_idx = sd.idx })
+                        { pos = snap_pos, value = send.pan, snap_idx = sd.idx })
                     table.insert(pc.sends[si].mute,
-                        { pos = snap_pos, value = send.mute,   snap_idx = sd.idx })
+                        { pos = snap_pos, value = send.mute, snap_idx = sd.idx })
                 end
             end
         end
@@ -4492,8 +4549,8 @@ function snap_convert_to_automation(snaps, flags)
         local env = GetTrackEnvelopeByName(track, param_name)
         if env then
             GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
-            GetSetEnvelopeInfo_String(env, "ACTIVE",  "1", true)
-            GetSetEnvelopeInfo_String(env, "ARM",     "1", true)
+            GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
+            GetSetEnvelopeInfo_String(env, "ARM", "1", true)
             return env
         end
         local num_sel, saved = CountSelectedTracks(0), {}
@@ -4506,7 +4563,9 @@ function snap_convert_to_automation(snaps, flags)
             local had = false
             for e = 0, CountTrackEnvelopes(track) - 1 do
                 local _, nm = GetEnvelopeName(GetTrackEnvelope(track, e), "")
-                if nm == param_name then had = true; break end
+                if nm == param_name then
+                    had = true; break
+                end
             end
             if not had then Main_OnCommand(action, 0) end
         end
@@ -4515,8 +4574,8 @@ function snap_convert_to_automation(snaps, flags)
         env = GetTrackEnvelopeByName(track, param_name)
         if env then
             GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
-            GetSetEnvelopeInfo_String(env, "ACTIVE",  "1", true)
-            GetSetEnvelopeInfo_String(env, "ARM",     "1", true)
+            GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
+            GetSetEnvelopeInfo_String(env, "ARM", "1", true)
         end
         return env
     end
@@ -4538,17 +4597,17 @@ function snap_convert_to_automation(snaps, flags)
         for tg, pc in pairs(param_changes) do
             local tr = snap_find_track_by_guid(tg)
             if tr then
-                if has_changes(pc.volume) then SetMediaTrackInfo_Value(tr, "D_VOL",   1.0) end
-                if has_changes(pc.pan)    then SetMediaTrackInfo_Value(tr, "D_PAN",   0.0) end
-                if has_changes(pc.mute)   then SetMediaTrackInfo_Value(tr, "B_MUTE",  0)   end
-                if has_changes(pc.phase)  then SetMediaTrackInfo_Value(tr, "B_PHASE", 0)   end
-                if has_changes(pc.width)  then SetMediaTrackInfo_Value(tr, "D_WIDTH", 1.0) end
+                if has_changes(pc.volume) then SetMediaTrackInfo_Value(tr, "D_VOL", 1.0) end
+                if has_changes(pc.pan) then SetMediaTrackInfo_Value(tr, "D_PAN", 0.0) end
+                if has_changes(pc.mute) then SetMediaTrackInfo_Value(tr, "B_MUTE", 0) end
+                if has_changes(pc.phase) then SetMediaTrackInfo_Value(tr, "B_PHASE", 0) end
+                if has_changes(pc.width) then SetMediaTrackInfo_Value(tr, "D_WIDTH", 1.0) end
                 for si, sp in pairs(pc.sends) do
                     if has_changes(sp.volume) then
-                        SetTrackSendInfo_Value(tr, 0, si, "D_VOL",  1.0)
+                        SetTrackSendInfo_Value(tr, 0, si, "D_VOL", 1.0)
                     end
                     if has_changes(sp.pan) then
-                        SetTrackSendInfo_Value(tr, 0, si, "D_PAN",  0.0)
+                        SetTrackSendInfo_Value(tr, 0, si, "D_PAN", 0.0)
                     end
                     if has_changes(sp.mute) then
                         SetTrackSendInfo_Value(tr, 0, si, "B_MUTE", 0)
@@ -4585,8 +4644,8 @@ function snap_convert_to_automation(snaps, flags)
                         if pg == folder_sel or sg == folder_sel then should_check = true end
                     end
                     if should_check then
-                        local snap_guid  = BR_GetMediaItemGUID(snap_item)
-                        local latest_end = -1
+                        local snap_guid   = BR_GetMediaItemGUID(snap_item)
+                        local latest_end  = -1
                         local has_overlap = false
                         for k = 0, CountMediaItems(0) - 1 do
                             local it = GetMediaItem(0, k)
@@ -4620,7 +4679,7 @@ function snap_convert_to_automation(snaps, flags)
             end
 
             if i > 1 then
-                table.insert(auto_points, { pos = target_pos - 0.035, value = to_write[i-1].value })
+                table.insert(auto_points, { pos = target_pos - 0.035, value = to_write[i - 1].value })
             end
             table.insert(auto_points, { pos = target_pos, value = pt.value })
 
@@ -4663,8 +4722,11 @@ function snap_convert_to_automation(snaps, flags)
             if has_changes(pc.mute) then
                 local inv = {}
                 for _, pt in ipairs(pc.mute) do
-                    table.insert(inv, { pos = pt.pos,
-                        value = pt.value == 1 and 0 or 1, snap_idx = pt.snap_idx })
+                    table.insert(inv, {
+                        pos = pt.pos,
+                        value = pt.value == 1 and 0 or 1,
+                        snap_idx = pt.snap_idx
+                    })
                 end
                 local env = get_or_create_envelope(track, "Mute")
                 if env then
@@ -4683,7 +4745,7 @@ function snap_convert_to_automation(snaps, flags)
             end
             if has_changes(pc.phase) then
                 local env = GetTrackEnvelopeByName(track, "Phase")
-                           or GetTrackEnvelopeByName(track, "Polarity")
+                    or GetTrackEnvelopeByName(track, "Polarity")
                 if env then
                     insert_automation_points(env, pc.phase, false)
                     Envelope_SortPoints(env)
@@ -4706,8 +4768,8 @@ function snap_convert_to_automation(snaps, flags)
                             insert_automation_points(env, pts, false)
                             Envelope_SortPoints(env)
                             GetSetEnvelopeInfo_String(env, "VISIBLE", "1", true)
-                            GetSetEnvelopeInfo_String(env, "ACTIVE",  "1", true)
-                            GetSetEnvelopeInfo_String(env, "ARM",     "1", true)
+                            GetSetEnvelopeInfo_String(env, "ACTIVE", "1", true)
+                            GetSetEnvelopeInfo_String(env, "ARM", "1", true)
                             auto_count = auto_count + 1; got_auto = true
                         end
                     end
@@ -4742,8 +4804,11 @@ function snap_convert_to_automation(snaps, flags)
                     if has_changes(sp.mute) then
                         local inv = {}
                         for _, pt in ipairs(sp.mute) do
-                            table.insert(inv, { pos = pt.pos,
-                                value = pt.value == 1 and 0 or 1, snap_idx = pt.snap_idx })
+                            table.insert(inv, {
+                                pos = pt.pos,
+                                value = pt.value == 1 and 0 or 1,
+                                snap_idx = pt.snap_idx
+                            })
                         end
                         local env = BR_GetMediaTrackSendInfo_Envelope(track, 0, si, 2)
                         if env then
@@ -4763,10 +4828,10 @@ function snap_convert_to_automation(snaps, flags)
     for track in pairs(tracks_w_auto) do
         if GetMediaTrackInfo_Value(track, "B_SHOWINTCP") == 0 then
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
-            local _, guid  = GetSetMediaTrackInfo_String(track, "GUID",      "", false)
+            local _, guid  = GetSetMediaTrackInfo_String(track, "GUID", "", false)
             local _, mixer = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
-            local key = (mixer == "y") and ("mixer_tcp_visible_" .. guid)
-                                        or ("tcp_visible_"       .. guid)
+            local key      = (mixer == "y") and ("mixer_tcp_visible_" .. guid)
+                or ("tcp_visible_" .. guid)
             SetProjExtState(0, "ReaClassical_MissionControl", key, "1")
         end
     end
@@ -4883,7 +4948,9 @@ function try_snapshots(cmd)
             for i = 0, CountTracks(0) - 1 do
                 local t = GetTrack(0, i)
                 local _, tn = GetSetMediaTrackInfo_String(t, "P_NAME", "", false)
-                if tn == gf_val then found = t; break end
+                if tn == gf_val then
+                    found = t; break
+                end
             end
             if not found then
                 say("No track named '" .. gf_val .. "' found")
@@ -4926,7 +4993,9 @@ function try_snapshots(cmd)
     -- snap+ — create or update snapshot for the selected item
     if cmd == "snap+" then
         local item = GetSelectedMediaItem(0, 0)
-        if not item then say("No item selected"); return true end
+        if not item then
+            say("No item selected"); return true
+        end
         local item_guid = BR_GetMediaItemGUID(item)
         local take = GetActiveTake(item)
         local item_name = ""
@@ -4937,7 +5006,9 @@ function try_snapshots(cmd)
         local snaps, flags = snap_load_bank(bank)
         local existing_idx = nil
         for i, s in ipairs(snaps) do
-            if s.item_guid == item_guid then existing_idx = i; break end
+            if s.item_guid == item_guid then
+                existing_idx = i; break
+            end
         end
         local snapshot = {
             item_guid = item_guid,
@@ -5098,8 +5169,8 @@ function try_snapshots(cmd)
                     local env = GetTrackEnvelope(track, e)
                     DeleteEnvelopePointRange(env, -1000000, 1000000)
                     GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
-                    GetSetEnvelopeInfo_String(env, "ACTIVE",  "0", true)
-                    GetSetEnvelopeInfo_String(env, "ARM",     "0", true)
+                    GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
+                    GetSetEnvelopeInfo_String(env, "ARM", "0", true)
                 end
                 if n > 0 then count = count + 1 end
             end
@@ -5135,13 +5206,25 @@ local PREF_LABELS = {
     "Show Only Item Take Numbers",
     "Source Audition Mode",
 }
-local PREF_BINARY = { [5]=true,[6]=true,[7]=true,[8]=true,[12]=true,[13]=true,[14]=true,[15]=true }
+local PREF_BINARY = { [5] = true, [6] = true, [7] = true, [8] = true, [12] = true, [13] = true, [14] = true, [15] = true }
 local PREF_N = 15
-local PREF_FMT_VALID = { WAV=true, FLAC=true, MP3=true, AIFF=true }
+local PREF_FMT_VALID = { WAV = true, FLAC = true, MP3 = true, AIFF = true }
 local PREF_KEYS = {
-    xfade=1, offset=2, index0=3, leadout=4, nocolor=5,
-    norank=6, refguide=7, sdmarkers=8, altrate=9, year=10,
-    cuefmt=11, floatdest=12, itemnames=13, takenums=14, srcmode=15,
+    xfade = 1,
+    offset = 2,
+    index0 = 3,
+    leadout = 4,
+    nocolor = 5,
+    norank = 6,
+    refguide = 7,
+    sdmarkers = 8,
+    altrate = 9,
+    year = 10,
+    cuefmt = 11,
+    floatdest = 12,
+    itemnames = 13,
+    takenums = 14,
+    srcmode = 15,
 }
 
 local function pref_resolve(key)
@@ -5157,7 +5240,7 @@ local function pref_load()
     if saved == "" then saved = default end
     if select(2, saved:gsub(",", ",")) + 1 ~= PREF_N then saved = default end
     local t = {}
-    for v in saved:gmatch("([^,]+)") do t[#t+1] = v end
+    for v in saved:gmatch("([^,]+)") do t[#t + 1] = v end
     return t
 end
 
@@ -5192,7 +5275,9 @@ end
 function try_prepare_prefs(cmd)
     -- prepare — run Prepare Takes headlessly
     if cmd == "prepare" then
-        if CountMediaItems(0) == 0 then say("No items in project"); return true end
+        if CountMediaItems(0) == 0 then
+            say("No items in project"); return true
+        end
         _G.RC_TERMINAL_ARGS = {}
         dofile(script_path .. "ReaClassical_Prepare Takes.lua")
         _G.RC_TERMINAL_ARGS = nil
@@ -5204,7 +5289,7 @@ function try_prepare_prefs(cmd)
         local t = pref_load()
         local out = { "Preferences:" }
         for i = 1, PREF_N do
-            out[#out+1] = string.format("  %2d. %-40s %s", i, PREF_LABELS[i], t[i])
+            out[#out + 1] = string.format("  %2d. %-40s %s", i, PREF_LABELS[i], t[i])
         end
         say(table.concat(out, "\n"))
         return true
@@ -5381,7 +5466,6 @@ function rec_input_label(tr)
     end
 end
 
-
 ---------------------------------------------------------------------
 
 function try_record(cmd)
@@ -5432,7 +5516,13 @@ function try_record(cmd)
             if wf == "Vertical" then
                 local _, folder_name = GetSetMediaTrackInfo_String(armed_folder, "P_NAME", "", false)
                 local prefix = folder_name:match("^([^:]+):") or folder_name
-                status_msg = status_msg .. ". Armed: " .. (prefix ~= "" and prefix or "Unnamed folder")
+
+                local spoken_prefix = prefix
+                    :gsub("^D$", "Destination")
+                    :gsub("^S(%d+)$", "Source %1")
+
+                status_msg = status_msg .. ". Armed: " ..
+                    (spoken_prefix ~= "" and spoken_prefix or "Unnamed folder")
             else
                 status_msg = status_msg .. ". Folder armed"
             end
@@ -5584,16 +5674,16 @@ function try_record(cmd)
 
     -- rec? — show all settings
     if cmd == "rec?" then
-        local _, sess     = GetProjExtState(0, "ReaClassical", "TakeSessionName")
-        local _, take_str = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
-        local _, override = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
-        local _, start_t  = GetProjExtState(0, "ReaClassical", "Recording Start")
-        local _, end_t    = GetProjExtState(0, "ReaClassical", "Recording End")
-        local _, dur      = GetProjExtState(0, "ReaClassical", "Recording Duration")
-        local _, overlap  = GetProjExtState(0, "ReaClassical", "AllowOverlappingTakes")
-        local _, horiz    = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
-        local _, clip_rep = GetProjExtState(0, "ReaClassical", "ClipReporting")
-        local n = tonumber(take_str) or 0
+        local _, sess      = GetProjExtState(0, "ReaClassical", "TakeSessionName")
+        local _, take_str  = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+        local _, override  = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
+        local _, start_t   = GetProjExtState(0, "ReaClassical", "Recording Start")
+        local _, end_t     = GetProjExtState(0, "ReaClassical", "Recording End")
+        local _, dur       = GetProjExtState(0, "ReaClassical", "Recording Duration")
+        local _, overlap   = GetProjExtState(0, "ReaClassical", "AllowOverlappingTakes")
+        local _, horiz     = GetProjExtState(0, "ReaClassical", "RecordTakesHorizontally")
+        local _, clip_rep  = GetProjExtState(0, "ReaClassical", "ClipReporting")
+        local n            = tonumber(take_str) or 0
         local take_display = n > 0
             and string.format("T%03d (%s)", n, override == "1" and "manual override" or "auto")
             or "auto-detect"
@@ -5602,10 +5692,10 @@ function try_record(cmd)
             string.format("  session:    %s", sess ~= "" and sess or "(none)"),
             string.format("  take:       %s", take_display),
             string.format("  start:      %s", start_t ~= "" and start_t or "(none)"),
-            string.format("  end:        %s", end_t   ~= "" and end_t   or "(none)"),
-            string.format("  duration:   %s", dur     ~= "" and dur     or "(none)"),
+            string.format("  end:        %s", end_t ~= "" and end_t or "(none)"),
+            string.format("  duration:   %s", dur ~= "" and dur or "(none)"),
             string.format("  overlap:    %s", overlap == "1" and "yes" or "no"),
-            string.format("  horizontal: %s", horiz   == "1" and "yes" or "no"),
+            string.format("  horizontal: %s", horiz == "1" and "yes" or "no"),
             string.format("  clip:       %s", clip_rep == "0" and "no" or "yes"),
             string.format("  daemon:     %s", rec_daemon_running() and "running" or "stopped"),
         }, "\n"))
@@ -5799,8 +5889,8 @@ function try_record(cmd)
 
     -- rec.time- — clear all time window fields at once
     if cmd == "rec.time-" then
-        SetProjExtState(0, "ReaClassical", "Recording Start",    "")
-        SetProjExtState(0, "ReaClassical", "Recording End",      "")
+        SetProjExtState(0, "ReaClassical", "Recording Start", "")
+        SetProjExtState(0, "ReaClassical", "Recording End", "")
         SetProjExtState(0, "ReaClassical", "Recording Duration", "")
         say("Recording time window cleared")
         return true
