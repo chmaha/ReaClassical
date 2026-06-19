@@ -6139,7 +6139,7 @@ function main()
         if workflow == "" then
             local first = commands[1]
             if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab"
-                    or first == "update" or first == "installosara") then
+                    or first == "update" or first == "installosara" or first == "factoryreset") then
                 say("Please create a ReaClassical project first (e.g. 6v)")
                 return
             end
