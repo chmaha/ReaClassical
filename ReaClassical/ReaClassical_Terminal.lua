@@ -3683,7 +3683,7 @@ function try_stats(cmd)
     return false
 end
 
--- pr=N, pr=a,N, pr=0, pa=N: delegate to ReaClassical_Set Item Playback Rate.lua
+-- pr=N, pr=a,N, pr=0, pt=N: delegate to ReaClassical_Set Item Playback Rate.lua
 -- via the headless hook, so timestretch ripples subsequent items in the same
 -- folder exactly as the GUI tool does.
 function try_playrate_pitch(cmd)
@@ -3712,8 +3712,8 @@ function try_playrate_pitch(cmd)
         return true
     end
 
-    -- pa=N -> set pitch to N semitones (pa=0 resets to normal)
-    local pitch = cmd:match("^pa=([+-]?[%d.]+)$")
+    -- pt=N -> set pitch to N semitones (pt=0 resets to normal)
+    local pitch = cmd:match("^pt=([+-]?[%d.]+)$")
     if pitch then
         _G.RC_TERMINAL_ARGS = { action = "pitch", value = tonumber(pitch) }
         dofile(script_path .. "ReaClassical_Set Item Playback Rate.lua")
@@ -3735,7 +3735,7 @@ function try_playrate_pitch(cmd)
         return true
     end
 
-    if cmd == "pa?" then
+    if cmd == "pt?" then
         local item = GetSelectedMediaItem(0, 0)
         if not item then
             say("No item selected"); return true
@@ -3758,8 +3758,14 @@ function try_misc(cmd)
         return true
     end
 
+    -- help — open this guide (the published HTML version of the Terminal
+    -- command reference) in the user's default browser.
     if cmd == "help" then
-        dofile(script_path .. "ReaClassical_Help.lua")
+        if not APIExists("CF_ShellExecute") then
+            say("SWS/S&M extension required to open the link")
+            return true
+        end
+        CF_ShellExecute("https://reaclassical.org/rcterminal.html")
         return true
     end
 
@@ -4952,8 +4958,8 @@ function try_snapshots(cmd)
         return true
     end
 
-    -- snapcopy=X — copy bank X into current bank (snapshots only)
-    local copy_bank = cmd:match("^snapcopy=([ABCD])$")
+    -- snap.copy=X — copy bank X into current bank (snapshots only)
+    local copy_bank = cmd:match("^snap%.copy=([ABCD])$")
     if copy_bank then
         local bank = snap_get_current_bank()
         if copy_bank == bank then
@@ -4968,8 +4974,8 @@ function try_snapshots(cmd)
         return true
     end
 
-    -- snapclear — delete all snapshots in current bank
-    if cmd == "snapclear" then
+    -- snap.clear — delete all snapshots in current bank
+    if cmd == "snap.clear" then
         local bank = snap_get_current_bank()
         local _, flags = snap_load_bank(bank)
         flags.counter = 0
@@ -5088,14 +5094,26 @@ function try_snapshots(cmd)
         return true
     end
 
-    -- snap2auto — convert all snapshots in current bank to automation lanes
-    if cmd == "snap2auto" then
+    -- snap.auto — convert all snapshots in current bank to automation lanes.
+    -- The daemon's job is auto-recalling snapshot states; once that data is
+    -- baked into real automation, REAPER plays it back natively and the
+    -- daemon is no longer needed, so stop it if it's running.
+    if cmd == "snap.auto" then
         local bank = snap_get_current_bank()
         local snaps, flags = snap_load_bank(bank)
         local had_snaps = #snaps > 0
         snap_convert_to_automation(snaps, flags)
         if had_snaps then
-            say("Snapshots converted to automation")
+            local msg = "Snapshots converted to automation"
+            if snap_daemon_running() then
+                local cid = snap_daemon_cmd()
+                if cid ~= 0 then
+                    Main_OnCommand(cid, 0)
+                    SetProjExtState(0, "MixerSnapshots", "daemon_heartbeat", "0")
+                    msg = msg .. ". Snapshot daemon stopped (no longer needed)"
+                end
+            end
+            say(msg)
         end
         return true
     end
@@ -5133,8 +5151,8 @@ function try_snapshots(cmd)
         return true
     end
 
-    -- snapdaemon? — check whether the headless auto-recall daemon is running
-    if cmd == "snapdaemon?" then
+    -- snap.daemon? — check whether the headless auto-recall daemon is running
+    if cmd == "snap.daemon?" then
         local _, ts = GetProjExtState(0, "MixerSnapshots", "daemon_heartbeat")
         local t = tonumber(ts) or 0
         if snap_daemon_running() then
@@ -5145,8 +5163,10 @@ function try_snapshots(cmd)
         return true
     end
 
-    -- snapauto- — clear all automation from special tracks
-    if cmd == "snapauto-" then
+    -- snap.auto- — clear all automation from special tracks. This is the
+    -- reverse of snap.auto: with the automation gone, recall is back to
+    -- depending on mixer snapshots, so make sure the daemon is running.
+    if cmd == "snap.auto-" then
         Undo_BeginBlock()
         local count = 0
         for i = 0, CountTracks(0) - 1 do
@@ -5166,7 +5186,16 @@ function try_snapshots(cmd)
         UpdateArrange()
         TrackList_AdjustWindows(false)
         Undo_EndBlock("Clear Mixer Snapshot Automation", -1)
-        say("Cleared automation from " .. count .. " track" .. (count ~= 1 and "s" or ""))
+
+        local msg = "Cleared automation from " .. count .. " track" .. (count ~= 1 and "s" or "")
+        if not snap_daemon_running() then
+            local cid = snap_daemon_cmd()
+            if cid ~= 0 then
+                Main_OnCommand(cid, 0)
+                msg = msg .. ". Snapshot daemon started"
+            end
+        end
+        say(msg)
         return true
     end
 

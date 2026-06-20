@@ -77,7 +77,9 @@ function main()
     -- OSARA users won't have the (ReaImGui) Record Panel GUI open to keep
     -- the daemon's heartbeat alive, so make sure the headless daemon is
     -- running too -- same daemon-start step as the Terminal's rec.open.
-    if APIExists("osara_outputMessage") then
+    -- Also start it for rec.arm/rec.start regardless of OSARA, since those
+    -- are explicitly the precision/headless entry points into recording.
+    if APIExists("osara_outputMessage") or mode == "arm" or mode == "start" then
         local _, ts = GetProjExtState(0, "ReaClassical", "rec_daemon_heartbeat")
         local daemon_running = (os.time() - (tonumber(ts) or 0)) < 5
         if not daemon_running and APIExists("AddRemoveReaScript") then
