@@ -84,6 +84,7 @@
   [main] ReaClassical_Find Take.lua
   [main] ReaClassical_Heal Edit.lua
   [main] ReaClassical_Help.lua
+  [main] ReaClassical_Hide Automation Lanes.lua
   [main] ReaClassical_Hide Children.lua
   [nomain] ReaClassical_Horizontal Workflow.lua
   [main] ReaClassical_Increment Take Number While Recording.lua
@@ -114,6 +115,10 @@
   [main] ReaClassical_Navigate to Previous Track in Folder.lua
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Notes.lua
+  [main] ReaClassical_Nudge Item Left.lua
+  [main] ReaClassical_Nudge Item Right.lua
+  [main] ReaClassical_Nudge Marker Left.lua
+  [main] ReaClassical_Nudge Marker Right.lua
   [main] ReaClassical_Peak and Overs Check.lua
   [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
   [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade with playrate.lua
@@ -123,6 +128,7 @@
   [main=crossfade_editor] ReaClassical_Play Right Crossfade Item.lua
   [main=crossfade_editor] ReaClassical_Play Right Crossfade Item with playrate.lua
   [main=crossfade_editor] ReaClassical_Play Top Lane Only.lua
+  [main] ReaClassical_Play Stop Moving Edit Cursor.lua
   [main] ReaClassical_Play Stop.lua
   [main] ReaClassical_Preferences.lua
   [main] ReaClassical_Prepare Takes.lua
@@ -134,11 +140,13 @@
   [main] ReaClassical_Remove All CD Marker Offsets.lua
   [main] ReaClassical_Remove All Item Fades.lua
   [main] ReaClassical_Remove Take Names.lua
+  [main] ReaClassical_Repeat Last Terminal Command.lua
   [main] ReaClassical_Reposition_Album_Tracks.lua
   [main] ReaClassical_S-D Edit.lua
   [main] ReaClassical_Set Dest Project Marker.lua
   [main] ReaClassical_Set Next Recording Section.lua
   [main] ReaClassical_Set Source Project Marker.lua
+  [main] ReaClassical_Show Automation Lanes.lua
   [main] ReaClassical_Show Children.lua
   [main] ReaClassical_Show Source Audition Table.lua
   [main] ReaClassical_Show Statistics.lua
@@ -171,6 +179,7 @@
   ReaClassical_Track_Naming.lua
   ReaClassical_Time_Naming.lua
   ReaClassical_Announce.lua
+  ReaClassical_Folder_Naming.lua
   ReaClassical.ini
   ReaClassical-kb.ini
   ReaClassical-mouse.ini

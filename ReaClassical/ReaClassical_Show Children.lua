@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- Expose all Reaper functions globally
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
-local main, arm_all_active_envs, fold_small
+local main, fold_small
 
 ---------------------------------------------------------------------
 
@@ -44,56 +44,8 @@ function main()
     return
   end
 
-  local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
-  mastering = tonumber(mastering) or 0
-
-  local armed_automation = false
-  local shown_children = false
-
-  local selected_tracks_count = CountSelectedTracks(0)
-  for i = 0, selected_tracks_count - 1 do
-    local track = GetSelectedTrack(0, i)
-    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-
-    local is_special_track = string.match(name, "^M:")
-        or string.match(name, "^#")
-        or string.match(name, "^@")
-        or string.match(name, "^RoomTone")
-        or string.match(name, "^RCMASTER")
-
-    if mastering == 1 and is_special_track then
-      Main_OnCommand(40888, 0) -- Show all active envelopes
-
-      -- Iterate over all tracks including master track
-      for j = -1, CountTracks(0) - 1 do
-        local automation_track = (j == -1) and GetMasterTrack(0) or GetTrack(0, j)
-        if GetMediaTrackInfo_Value(automation_track, "I_SELECTED") == 1 then
-          arm_all_active_envs(automation_track)
-        end
-      end
-      armed_automation = true
-    else
-      -- Fold all tracks (non-mastering mode)
-      fold_small()
-      shown_children = true
-    end
-  end
-
-  if armed_automation then say("Automation armed") end
-  if shown_children then say("Children shown") end
-end
-
----------------------------------------------------------------------
-
-function arm_all_active_envs(track)
-  local _, chunk = GetTrackStateChunk(track, "", false)
-
-  -- Look for any envelope block with ACT 1 (active), then set ARM 1
-  chunk = chunk:gsub("(<.-ENV.-\n.-ACT 1.-\n.-ARM )%d", function(prefix)
-    return prefix .. "1"
-  end)
-
-  SetTrackStateChunk(track, chunk, false)
+  fold_small()
+  say("Children shown")
 end
 
 ---------------------------------------------------------------------

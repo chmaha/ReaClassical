@@ -41,22 +41,7 @@ function main()
             .. "+N to use this function.", "ReaClassical Error", 0)
     return
   end
-  local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
-  mastering = (mastering ~= "" and tonumber(mastering)) or 0
-
-  local selected_tracks = CountSelectedTracks(0)
-
-  for i = 0, selected_tracks - 1 do
-    local track = GetSelectedTrack(0, i)
-    local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    local special = string.match(name, "^M:") or string.match(name, "^#") or string.match(name, "^@") or
-        string.match(name, "^RoomTone") or string.match(name, "^REF") or string.match(name, "^RCMASTER")
-    if mastering == 1 and special then
-      Main_OnCommand(40889, 0) -- Envelope: Hide all envelopes for tracks
-    else
-      collapse_folder()
-    end
-  end
+  collapse_folder()
   say("Children hidden")
 end
 
