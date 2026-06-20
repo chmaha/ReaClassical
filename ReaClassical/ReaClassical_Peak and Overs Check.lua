@@ -167,12 +167,27 @@ function scan_item(item, track, track_name, track_gain)
     local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
     local playrate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
     local start_offs = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
-    local gain = GetMediaItemTakeInfo_Value(take, "D_VOL") * track_gain
+    -- D_VOL exists on both the item (the "item volume" actions/properties
+    -- field) and the take (the take volume control) -- both apply.
+    local item_vol = GetMediaItemInfo_Value(item, "D_VOL")
+    local take_vol = GetMediaItemTakeInfo_Value(take, "D_VOL")
+    local gain = item_vol * take_vol * track_gain
 
-    if playrate <= 0 or item_len <= 0 then return end
+    -- Item volume drawn directly on the item (a "Volume" take envelope) isn't
+    -- covered by D_VOL once it has its own points, so factor it in separately.
+    local vol_env = GetTakeEnvelopeByName(take, "Volume")
+    local br_vol_env = vol_env and BR_EnvAlloc(vol_env, false) or nil
+
+    if playrate <= 0 or item_len <= 0 then
+        if br_vol_env then BR_EnvFree(br_vol_env, false) end
+        return
+    end
 
     local num_samples = math.floor(item_len * playrate * PEAK_RATE + 0.5)
-    if num_samples < 1 then return end
+    if num_samples < 1 then
+        if br_vol_env then BR_EnvFree(br_vol_env, false) end
+        return
+    end
 
     -- buf layout is two interleaved blocks: maximums, then minimums
     local frame_count = num_channels * num_samples
@@ -193,10 +208,12 @@ function scan_item(item, track, track_name, track_gain)
             local v = math.max(math.abs(vals[idx]), math.abs(vals[frame_count + idx]))
             if v > peak then peak = v end
         end
-        peak = peak * gain
+
+        local pos = item_pos + (f - 1) / (PEAK_RATE * playrate)
+        local env_gain = br_vol_env and BR_EnvValueAtPos(br_vol_env, pos) or 1.0
+        peak = peak * gain * env_gain
 
         local db = peak > 0 and (20 * math.log(peak) / LN10) or -150
-        local pos = item_pos + (f - 1) / (PEAK_RATE * playrate)
 
         if not state.peak_db or db > state.peak_db then
             state.peak_db = db
@@ -218,6 +235,8 @@ function scan_item(item, track, track_name, track_gain)
             end
         end
     end
+
+    if br_vol_env then BR_EnvFree(br_vol_env, false) end
 end
 
 ---------------------------------------------------------------------
