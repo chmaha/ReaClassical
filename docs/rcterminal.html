@@ -1,0 +1,2880 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 26.2.4.2 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
+	<style type="text/css">
+		@page { size: 8.5in 11in; margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 115%; background: transparent }
+		h1 { margin-bottom: 0.08in; background: transparent; page-break-after: avoid }
+		h1.western { font-weight: bold; font-size: 18pt; font-family: "Liberation Sans", sans-serif }
+		h1.cjk { font-weight: bold; font-size: 18pt; font-family: "Noto Sans CJK SC" }
+		h1.ctl { font-weight: bold; font-family: "Noto Sans Devanagari"; font-size: 18pt }
+		h2 { margin-top: 0.14in; margin-bottom: 0.08in; background: transparent; page-break-after: avoid }
+		h2.western { font-weight: bold; font-size: 16pt; font-family: "Liberation Sans", sans-serif }
+		h2.cjk { font-weight: bold; font-size: 16pt; font-family: "Noto Sans CJK SC" }
+		h2.ctl { font-weight: bold; font-family: "Noto Sans Devanagari"; font-size: 16pt }
+		h3 { margin-top: 0.1in; margin-bottom: 0.08in; background: transparent; page-break-after: avoid }
+		h3.western { font-weight: bold; font-size: 14pt; font-family: "Liberation Sans", sans-serif }
+		h3.cjk { font-weight: bold; font-size: 14pt; font-family: "Noto Sans CJK SC" }
+		h3.ctl { font-weight: bold; font-family: "Noto Sans Devanagari"; font-size: 14pt }
+		td p { widows: 0; orphans: 0; background: transparent }
+		th p { widows: 0; text-align: center; orphans: 0; font-weight: bold; background: transparent }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><h1 class="western">
+ReaClassical Terminal — Complete Command Guide</h1>
+<p>The Terminal is a single text-entry dialog (run the &quot;ReaClassical
+Terminal&quot; script/action) that lets you type one or more
+ReaClassical commands instead of using the mouse or ImGui windows. It
+is built for screen-reader use: every command speaks a confirmation
+through OSARA (or prints to the console if OSARA isn't installed).</p>
+<h2 class="western">How to use the Terminal</h2>
+<ul>
+	<li><p>Run the script. A single-line input box appears: &quot;Command:&quot;.</p></li>
+	<li><p>Type a command and press Enter.</p></li>
+	<li><p>You can run several commands in one go by separating them
+	with a semicolon: <font face="Liberation Mono, monospace">1m;2m;3s</font>
+	mutes tracks 1 and 2 and solos track 3.</p></li>
+	<li><p>Commands are case-sensitive and must match the patterns below
+	exactly (no extra spaces inside tokens, though spaces around
+	commas/dashes in lists are tolerated, e.g. <font face="Liberation Mono, monospace">1,
+	3</font> and <font face="Liberation Mono, monospace">1 - 3</font>
+	both work).</p></li>
+	<li><p>The very first command in a brand-new project must be a
+	project-setup command (<font face="Liberation Mono, monospace">Nv</font>,
+	<font face="Liberation Mono, monospace">Nh</font>, <font face="Liberation Mono, monospace">newtab</font>,
+	<font face="Liberation Mono, monospace">update</font>, or
+	<font face="Liberation Mono, monospace">installosara</font>) —
+	everything else requires an existing ReaClassical project.</p></li>
+	<li><p>Type <font face="Liberation Mono, monospace">help</font> to
+	open the full PDF manual.</p></li>
+	<li><p>Type <font face="Liberation Mono, monospace">!</font> on its
+	own to repeat whatever command(s) you last ran. The &quot;ReaClassical
+	Repeat Last Terminal Command&quot; reascript does the same thing
+	from a keyboard shortcut without opening the Terminal dialog at all.</p></li>
+</ul>
+<h3 class="western">Target syntax used throughout</h3>
+<p>Many commands take a <font face="Liberation Mono, monospace">&lt;target&gt;</font>
+— this is resolved consistently everywhere:</p>
+<ul>
+	<li><p>A plain number <font face="Liberation Mono, monospace">N</font>
+	= mixer track N (e.g. <font face="Liberation Mono, monospace">3</font>).</p></li>
+	<li><p>A list: <font face="Liberation Mono, monospace">1,3</font> /
+	<font face="Liberation Mono, monospace">4-6</font> / <font face="Liberation Mono, monospace">1,4-6</font>
+	/ <font face="Liberation Mono, monospace">*</font> (all mixer
+	tracks).</p></li>
+	<li><p><font face="Liberation Mono, monospace">@N</font> = aux track
+	N; <font face="Liberation Mono, monospace">@</font> alone = the only
+	aux track (if there's exactly one); <font face="Liberation Mono, monospace">@1,2</font>
+	/ <font face="Liberation Mono, monospace">@*</font> etc. for lists
+	of auxes.</p></li>
+	<li><p><font face="Liberation Mono, monospace">#N</font> = submix
+	track N; same rules as aux but with <font face="Liberation Mono, monospace">#</font>.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rcm</font> = the
+	RCMASTER track.</p></li>
+	<li><p><font face="Liberation Mono, monospace">refN</font> =
+	reference track N; <font face="Liberation Mono, monospace">ref</font>
+	alone = the only reference track (if there's exactly one); <font face="Liberation Mono, monospace">ref1,2</font>
+	for a list of references. Note: dash ranges (<font face="Liberation Mono, monospace">ref1-3</font>)
+	aren't supported — use a comma list instead.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rt</font> = the
+	RoomTone track.</p></li>
+	<li><p><font face="Liberation Mono, monospace">live</font> = the
+	LIVE track.</p></li>
+	<li><p><font face="Liberation Mono, monospace">lb</font> = the
+	Listenback track.</p></li>
+</ul>
+<h3 class="western">Folder/position syntax (vertical/horizontal
+workflows)</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">D</font> = the
+	Destination folder; <font face="Liberation Mono, monospace">S1</font>,
+	<font face="Liberation Mono, monospace">S2</font>, … = Source
+	folders.</p></li>
+	<li><p>Within a folder, a position is <font face="Liberation Mono, monospace">1</font>
+	(the folder/parent track itself) or <font face="Liberation Mono, monospace">2</font>,
+	<font face="Liberation Mono, monospace">3</font>, … (its child
+	tracks, matching mixer-track position order).</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">1. Project Setup</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">Nv</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Start a brand-new project using the <b>Vertical</b> workflow with
+				N tracks per folder (e.g. <font face="Liberation Mono, monospace">6v</font>).
+				If a ReaClassical project is already open, you'll be asked to
+				save first.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">Nh</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Start a brand-new project using the <b>Horizontal</b> workflow
+				with N tracks (e.g. <font face="Liberation Mono, monospace">6h</font>).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">Nh=Name1,Name2,...</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Same as <font face="Liberation Mono, monospace">Nh</font>, also
+				naming each mixer track in one step, e.g.
+				<font face="Liberation Mono, monospace">4h=Violin,Viola,Cello,Bass</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">convert=h</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Convert the current (vertical) project to Horizontal workflow.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">convert=v</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Convert the current (horizontal) project to Vertical workflow.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<p>Typical first step in any session: <font face="Liberation Mono, monospace">6v</font>
+(six mixer tracks, vertical/classical session workflow) or
+<font face="Liberation Mono, monospace">4h=Violin,Viola,Cello,Bass</font>
+(horizontal/quick setup with names).</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">6v</font> — Start a
+	new Vertical-workflow project with 6 mixer tracks per folder. Use
+	this for a multi-take classical recording session.</p></li>
+	<li><p><font face="Liberation Mono, monospace">4h=Violin,Viola,Cello,Bass</font>
+	— Start a new Horizontal-workflow project with 4 named tracks in
+	one step. Good for a quick quartet setup where every take lives on
+	the same 4 tracks.</p></li>
+	<li><p><font face="Liberation Mono, monospace">convert=v</font> —
+	You started in Horizontal (quick setup) but the session turned into
+	a multi-take recording project, so you switch to Vertical without
+	losing existing work.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">2. Naming Tracks, Items, and Notes</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">n=Name1,Name2,...</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Rename mixer tracks 1, 2, 3… in order, all at once.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">Nn=Name</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Rename only mixer track N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">#Nn=Name</font> (or
+				<font face="Liberation Mono, monospace">#n=Name</font> if only
+				one submix)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Rename submix N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">@Nn=Name</font> (or
+				<font face="Liberation Mono, monospace">@n=Name</font> if only
+				one aux)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Rename aux N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">refNn=Name</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Rename reference track N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pn?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the project notes.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pn=text</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set the project notes.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">tn?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak notes on the currently selected track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">tn=text</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set notes on the currently selected track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">in=Title</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Rename the active take of the selected item (no comma — for
+				plain renames; see DDP section for comma form).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">ino?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the selected item's notes.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">ino=text</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set the selected item's notes.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">ir?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the selected item's rank (Excellent/Very Good/Good/OK/Below
+				Average/Poor/Unusable/False Start/None).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">ir=letter</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Set the item's rank: <font face="Liberation Mono, monospace">e</font>=Excellent,
+				<font face="Liberation Mono, monospace">v</font>=Very Good,
+				<font face="Liberation Mono, monospace">g</font>=Good, <font face="Liberation Mono, monospace">o</font>=OK,
+				<font face="Liberation Mono, monospace">b</font>=Below Average,
+				<font face="Liberation Mono, monospace">p</font>=Poor,
+				<font face="Liberation Mono, monospace">u</font>=Unusable,
+				<font face="Liberation Mono, monospace">f</font>=False Start,
+				<font face="Liberation Mono, monospace">n</font>=None.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">itn?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the selected item's take number.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">itn=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Set the selected item's take number (<font face="Liberation Mono, monospace">itn=0</font>
+				clears it).</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">n=Violin,Viola,Cello,Bass</font>
+	— Rename all four mixer tracks in one command right after project
+	setup.</p></li>
+	<li><p><font face="Liberation Mono, monospace">3n=2nd Violin</font>
+	— You realize track 3 should say &quot;2nd Violin&quot; instead of
+	whatever it's currently called; rename just that one.</p></li>
+	<li><p><font face="Liberation Mono, monospace">ir=g</font> — Mark
+	the take you just listened to as &quot;Good&quot;.</p></li>
+	<li><p><font face="Liberation Mono, monospace">ir?</font> — Before
+	deciding whether to keep recording, check the rank already assigned
+	to the selected take.</p></li>
+	<li><p><font face="Liberation Mono, monospace">tn=Close mic clipped
+	at bar 12, used room mic instead</font> — Leave a note on a track
+	explaining an editorial decision for future reference.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">3. Recording Setup — Inputs</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">N=mono</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set mixer-position N (in every folder) to mono, recording from
+				hardware input N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">N=mono,X</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, but recording from hardware input X instead of N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">N=stereo</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set mixer-position N to a stereo pair starting at hardware input
+				N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">N=stereo,X</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Stereo pair starting at hardware input X.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">N-M=stereo</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Pair position N (stereo, starting at hardware input N) with
+				position M, disabling M's own input (used to combine two mono
+				slots into one stereo pair).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">Nrd=y</font> / <font face="Liberation Mono, monospace">Nrd=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Disable / enable record-arming for mixer track N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">*rd=y</font> / <font face="Liberation Mono, monospace">*rd=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Disable / enable record-arming for <b>all</b> mixer tracks.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;rd?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Speak record-enabled state and input (mono/stereo) for one or
+				more tracks, e.g. <font face="Liberation Mono, monospace">1-3rd?</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">ai</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Auto-assign inputs starting at hardware input 1, guessing
+				mono/stereo and L/R pan from track names (recognizes
+				&quot;L&quot;/&quot;R&quot;/&quot;stereo&quot;/&quot;pair&quot;
+				in many languages).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">ai=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Auto-assign inputs starting at hardware input N.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">ai</font> — Your
+	interface's inputs are plugged in order matching your track order;
+	auto-assign everything starting at input 1 instead of configuring
+	each track by hand.</p></li>
+	<li><p><font face="Liberation Mono, monospace">ai=5</font> — The
+	first 4 hardware inputs are already used by another rig; auto-assign
+	all tracks starting at input 5 instead.</p></li>
+	<li><p><font face="Liberation Mono, monospace">1=stereo,3</font> —
+	Track 1 (&quot;Main Pair&quot;) should record a stereo pair starting
+	at hardware inputs 3/4, not 1/2.</p></li>
+	<li><p><font face="Liberation Mono, monospace">2=mono,5</font> —
+	Track 2 (&quot;Spot Mic&quot;) is a single mic plugged into hardware
+	input 5.</p></li>
+	<li><p><font face="Liberation Mono, monospace">*rd=n</font> —
+	Before a playback-only rehearsal pass, disable record-arming on
+	every track so nothing accidentally records.</p></li>
+	<li><p><font face="Liberation Mono, monospace">1rd?</font> —
+	Confirm track 1 is actually armed and check what input it's
+	listening to before you start a take.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">4. Recording — Transport &amp; Takes (Record
+Panel)</h2>
+<p>F9 (the Classical Take Record reascript) still works as a single
+toggle button: first press arms the selected folder, second press
+starts recording, and pressing it again while recording stops the
+take — no change there. <font face="Liberation Mono, monospace">rec.arm</font>
+and <font face="Liberation Mono, monospace">rec.start</font> give the
+Terminal the same two steps with precision instead of a toggle: each
+only ever does its own job, and announces the current state (&quot;Already
+armed: …&quot;, &quot;Already recording&quot;, &quot;Not armed
+yet&quot;) rather than silently doing nothing or the wrong thing. If
+OSARA is installed, F9 also starts the headless Record Panel daemon
+itself (the same daemon-start step as <font face="Liberation Mono, monospace">rec.open</font>)
+the first time it's pressed and the daemon isn't already running, so
+you get its background take/level tracking even if you jump straight
+to F9 without ever running <font face="Liberation Mono, monospace">rec.open</font>.
+<font face="Liberation Mono, monospace">rec.arm</font> and <font face="Liberation Mono, monospace">rec.start</font>
+do the same daemon auto-start regardless of whether OSARA is
+installed, since they're explicitly the precision/headless entry
+points into recording.</p>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.open</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Start the headless Record Panel daemon and arm the selected
+				folder (first F9 press equivalent).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.close</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Stop the Record Panel daemon.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.arm</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Arm the selected folder without starting recording. If it's
+				already armed (or already recording), just announces that instead
+				of changing anything.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.start</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Start recording on the already-armed folder. If nothing is armed
+				yet (or already recording), just announces that instead of arming
+				it for you — run <font face="Liberation Mono, monospace">rec.arm</font>
+				first.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.stop</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Press F9 to stop the current recording. In Vertical workflow,
+				also announces which folder is now armed (e.g. &quot;Recording
+				Stopped. Source 4 folder armed&quot;) — F9 itself announces the
+				same thing when used to stop.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.pause</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Toggle pause/resume while recording.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.next</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Move to the next recording section (Vertical workflow only; must
+				be stopped first).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.split</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Stop and immediately start a new take (Shift+F9 equivalent —
+				increments take number / moves to next folder).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.daemon?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Report whether the Record Panel daemon is running.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak a full summary of all recording settings (session, take,
+				time window, overlap, horizontal, clip reporting, daemon status).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.session=name</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set the session name (scans disk for the correct next take
+				number).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.session?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the current session name.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.session-</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Clear the session name.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.take=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Manually set the upcoming take number (rejected if lower than the
+				highest take already on disk).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.take=auto</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Revert to automatic take-number detection.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.take?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the upcoming take number and whether it's manual or auto.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.latest?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Scan disk and report the highest take number actually found (for
+				the current session).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.take+</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Manually increment the take number by 1.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.rank=letter</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Set the rank (same letters as <font face="Liberation Mono, monospace">ir=</font>)
+				for the take currently recording (or the last one, if stopped).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.note=text</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set notes for the take currently recording (or the last one, if
+				stopped).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.start=HH:MM</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set a scheduled recording start time.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.start?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the scheduled start time.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.end=HH:MM</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set a scheduled recording end time.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.end?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the scheduled end time.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.duration=HH:MM</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set a target recording duration.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.duration?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the target duration.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.time-</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Clear start/end/duration all at once.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.overlap=y</font> / <font face="Liberation Mono, monospace">=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Allow / disallow overlapping takes.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.overlap?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Query the overlap setting.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.horizontal=y</font> /
+				<font face="Liberation Mono, monospace">=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Record takes horizontally even in a Vertical-workflow project.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.horizontal?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Query that setting.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.clip=y</font> / <font face="Liberation Mono, monospace">=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Turn OSARA clip (overload) announcements on/off for rec-armed
+				tracks.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.clip?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Query the clip-reporting setting.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.levels?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the current peak-hold level (dB) for every rec-armed track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rec.levels-</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Clear all peak/RMS hold values.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">rec.open</font> —
+	At the start of a session, open the Record Panel daemon and arm the
+	selected folder, ready to go.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rec.session=MahlerSym5_Mvt1</font>
+	— Name the session so every take is filed and numbered
+	consistently on disk.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rec.arm</font> —
+	Get the folder armed and confirmed (e.g. &quot;Armed: Source 2&quot;)
+	before telling a performer you're ready.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rec.start</font> —
+	Once armed, start the take precisely on cue.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rec.split</font> —
+	Mid-take, the conductor stops and restarts; split here instead of
+	stopping and re-arming manually so the next take number increments
+	automatically.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rec.rank=g</font> —
+	Right after a take finishes, rank it &quot;Good&quot; without
+	leaving the Terminal.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rec.stop</font> —
+	End the recording.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rec.levels?</font> —
+	Between takes, check whether any mic clipped by reviewing the peak
+	hold on every armed track.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">5. Importing Audio</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Smart Import: scan the project media folder for new audio files
+				and import them, one folder per take.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=dest</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, but also duplicate each session's takes onto the
+				Destination folder.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=smart,1</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Same as plain <font face="Liberation Mono, monospace">import</font>
+				(one folder per take).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=smart,2</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Round-robin distribute new takes across the current number of
+				source folders.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=smart,3,N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Round-robin distribute across N folders (creating folders as
+				needed).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				Add <font face="Liberation Mono, monospace">,dest</font> to any
+				of the above</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Also includes the Destination folder in the distribution, e.g.
+				<font face="Liberation Mono, monospace">import=smart,2,dest</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Import only take number N, placed at the edit cursor.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=N,session</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, restricted to the named session.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=N-M</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Import takes N through M.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">import=N-M,session</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, restricted to the named session.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">find=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Locate take N on disk (default/most-recent session) and report
+				it.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">find=N,session</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Locate take N within a named session.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">find=,session</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Locate take 1 within a named session.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">import</font> — You
+	recorded several takes that landed in the project media folder; pull
+	them all in, one folder per take.</p></li>
+	<li><p><font face="Liberation Mono, monospace">import=smart,2,dest</font>
+	— Distribute newly recorded takes round-robin across your existing
+	source folders, and also copy them onto the Destination folder for
+	comping.</p></li>
+	<li><p><font face="Liberation Mono, monospace">import=12,MahlerSym5_Mvt1</font>
+	— Only take 12 from the &quot;MahlerSym5_Mvt1&quot; session is
+	missing from the timeline; import just that one at the edit cursor.</p></li>
+	<li><p><font face="Liberation Mono, monospace">find=7</font> — You
+	remember take 7 sounded great but can't recall which folder it
+	landed in; locate it.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">6. Selection</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">sel?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the currently selected tracks and items.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">time?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the current edit-cursor position.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">sel=D,positions</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Exclusively select track(s) at the given position(s) within
+				folder D (Destination). Positions: <font face="Liberation Mono, monospace">1</font>
+				(folder track), <font face="Liberation Mono, monospace">2</font>,<font face="Liberation Mono, monospace">3</font>,…
+				(children), or a list/range/<font face="Liberation Mono, monospace">*</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">sel=S1,positions</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Same, for Source folder 1 (and <font face="Liberation Mono, monospace">S2</font>,
+				<font face="Liberation Mono, monospace">S3</font>… for further
+				source folders).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">sel=+D,positions</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				<b>Add</b> to the current selection instead of replacing it.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">sel=positions</font> /
+				<font face="Liberation Mono, monospace">sel=+positions</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Folder-less shorthand — only works in <b>Horizontal</b>
+				workflow (which has exactly one folder), e.g. <font face="Liberation Mono, monospace">sel=1,3</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">tr=text</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Jump to (select) the first track in the <b>current</b> folder —
+				the one containing the currently selected track — whose name
+				contains <font face="Liberation Mono, monospace">text</font>
+				(case-insensitive). Expands a collapsed folder first if needed.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">sel=D,*</font> —
+	Select every track in the Destination folder before running <font face="Liberation Mono, monospace">prepare</font>
+	or applying automation to the whole comp.</p></li>
+	<li><p><font face="Liberation Mono, monospace">sel=S2,3</font> —
+	Select just the cello track (position 3) within Source folder 2, to
+	check that specific take.</p></li>
+	<li><p><font face="Liberation Mono, monospace">sel=+S1,1</font> —
+	Add Source folder 1's parent track to whatever's already selected,
+	so you can compare two takes' folder tracks together.</p></li>
+	<li><p><font face="Liberation Mono, monospace">sel?</font> — After
+	clicking around, confirm exactly what's currently selected before
+	running a destructive command like <font face="Liberation Mono, monospace">delauto</font>.</p></li>
+	<li><p><font face="Liberation Mono, monospace">tr=cello</font> —
+	From anywhere in the current folder, jump straight to the track
+	named &quot;Cello&quot; without counting positions.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">7. Editing Tools</h2>
+<h3 class="western">Markers &amp; regions</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">mk=Name</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Add a marker named &quot;Name&quot; at the edit cursor.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">mk?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the name and position of the nearest marker at-or-before
+				the cursor.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rg=NameA,NameB</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Create a region spanning from marker &quot;NameA&quot; to marker
+				&quot;NameB&quot;.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Undo / redo</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">z</font> / <font face="Liberation Mono, monospace">Nz</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Undo one step / N steps.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">y</font> / <font face="Liberation Mono, monospace">Ny</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Redo one step / N steps.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Reordering mixer tracks</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">Nu</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Move mixer track N up one position.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">NuC</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Move mixer track N up C positions, e.g. <font face="Liberation Mono, monospace">3u2</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">Nd</font> / <font face="Liberation Mono, monospace">NdC</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Move mixer track N down one / C positions.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">positionsu</font> /
+				<font face="Liberation Mono, monospace">positionsuC</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Move a <b>contiguous block</b> of mixer tracks up one / C
+				positions, keeping their relative order — <font face="Liberation Mono, monospace">positions</font>
+				is a list/range like <font face="Liberation Mono, monospace">6,7</font>
+				or <font face="Liberation Mono, monospace">1-3</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">positionsd</font> /
+				<font face="Liberation Mono, monospace">positionsdC</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, moving the block down.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Adding / removing tracks</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">add</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Add a new mixer track (and matching child track in every folder),
+				named &quot;Track N&quot;.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">add=Name</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, with a chosen name.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rmN</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove mixer track N (and its counterpart in every folder). Won't
+				go below the minimum 2-track folder size.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">add@</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Add a new aux track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">add@=Name</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, with a chosen name.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">add#</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Add a new submix track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">add#=Name</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, with a chosen name.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rm@N</font> (or <font face="Liberation Mono, monospace">rm@</font>)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove aux track N (or the only aux track).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rm#N</font> (or <font face="Liberation Mono, monospace">rm#</font>)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove submix track N (or the only submix track).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">addlb=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Add a Listenback (cue/foldback) track armed on hardware input N —
+				or just retune the input if one already exists.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rmlb</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove the Listenback track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rmrefN</font> (or <font face="Liberation Mono, monospace">rmref</font>)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove reference track N (or the only one).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rmrt</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove the RoomTone track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rmlive</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove the LIVE track.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Playback rate &amp; pitch (selected item)</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pr=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Change the selected item's playback rate by N% relative to its
+				current rate (timestretch; ripples subsequent items in the
+				folder).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pr=a,N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set an absolute rate change of N% from normal speed.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pr=0</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Reset playback rate to normal.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pr?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the current playback rate.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pt=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Set pitch to N semitones (<font face="Liberation Mono, monospace">pt=0</font>
+				resets to normal).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pt?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the current pitch.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Prepare Takes</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">prepare</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Run &quot;Prepare Takes&quot; headlessly over all items in the
+				project.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">mk=Movement II Start</font>
+	— Drop a marker at the cursor so you can navigate straight back to
+	this spot later.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rg=Movement II
+	Start,Movement II End</font> — Turn two markers you've already
+	placed into a region, e.g. for looping playback over that movement.</p></li>
+	<li><p><font face="Liberation Mono, monospace">z</font> — Undo the
+	last action; <font face="Liberation Mono, monospace">3z</font>
+	undoes the last three in one go.</p></li>
+	<li><p><font face="Liberation Mono, monospace">3u2</font> — Mixer
+	track 3 (&quot;Cello&quot;) should sit two slots higher in the mixer
+	order (e.g. above the violins); move it up 2 positions.</p></li>
+	<li><p><font face="Liberation Mono, monospace">6,7u2</font> / <font face="Liberation Mono, monospace">1-3d</font>
+	— Move the cello+bass pair (mixer tracks 6 and 7) up two slots
+	together, or shift the violins block (1-3) down one slot, without
+	breaking up their order.</p></li>
+	<li><p><font face="Liberation Mono, monospace">add=Room Mic L</font>
+	— A room mic pair wasn't part of the original setup; add a new
+	mixer track (and matching child track in every folder) for it.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rm5</font> — Track
+	5 turned out to be unused; remove it from every folder and the
+	mixer.</p></li>
+	<li><p><font face="Liberation Mono, monospace">pr=-5</font> — The
+	selected take is a hair too fast compared to the other takes you're
+	comping against; slow it by 5% to match.</p></li>
+	<li><p><font face="Liberation Mono, monospace">pt=0</font> — Reset
+	a pitch-shifted item back to normal after an experiment.</p></li>
+	<li><p><font face="Liberation Mono, monospace">prepare</font> —
+	Once all takes for the piece are imported and ranked, run Prepare
+	Takes to get them into editable shape.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">8. Mixing</h2>
+<h3 class="western">Mute / solo</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;m</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Mute the target(s), e.g. <font face="Liberation Mono, monospace">1m</font>,
+				<font face="Liberation Mono, monospace">1,3m</font>, <font face="Liberation Mono, monospace">4-6m</font>,
+				<font face="Liberation Mono, monospace">*m</font>, <font face="Liberation Mono, monospace">@1m</font>,
+				<font face="Liberation Mono, monospace">#m</font>, <font face="Liberation Mono, monospace">refm</font>,
+				<font face="Liberation Mono, monospace">rtm</font>, <font face="Liberation Mono, monospace">livem</font>,
+				<font face="Liberation Mono, monospace">lbm</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;um</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Unmute.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;s</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Solo (in addition to anything already soloed).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;us</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Unsolo.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;xs</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				<b>Exclusive</b> solo: clears mute/solo on every mixer track
+				first, then solos only the given target(s).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;m?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak mute state.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;s?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak solo state.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Pan</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;p+N</font>
+				/ <font face="Liberation Mono, monospace">&lt;target&gt;p-N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Nudge pan by N percentage points toward right/left, e.g. <font face="Liberation Mono, monospace">1p+10</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;p=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Set pan to an absolute percent, -100 (full left) to +100 (full
+				right), e.g. <font face="Liberation Mono, monospace">1p=-50</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;p?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak current pan (e.g. &quot;25L&quot;, &quot;C&quot;, &quot;10R&quot;).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rcmp=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set RCMASTER's pan directly (percent, signed).</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Fader (volume)</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;f+N</font>
+				/ <font face="Liberation Mono, monospace">&lt;target&gt;f-N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Nudge volume by N dB.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;f=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set volume to an absolute N dB.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;f?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak current volume in dB.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Polarity / phase</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;i=1</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Invert polarity.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;i=0</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Normal polarity.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;target&gt;i?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak polarity state.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Full single-track summary</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">N?</font> / <font face="Liberation Mono, monospace">@N?</font>
+				/ <font face="Liberation Mono, monospace">#N?</font> / <font face="Liberation Mono, monospace">rcm?</font>
+				/ <font face="Liberation Mono, monospace">refN?</font> / <font face="Liberation Mono, monospace">rt?</font>
+				/ <font face="Liberation Mono, monospace">live?</font> / <font face="Liberation Mono, monospace">lb?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak a complete report for one track: mute, solo, fader, pan,
+				phase, (record input, for mixer tracks), routing chain to
+				RCMASTER, and FX chain.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Routing</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;list&gt;-rcm</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Connect the given mixer track(s) (or <font face="Liberation Mono, monospace">ref</font>/<font face="Liberation Mono, monospace">ref&lt;list&gt;</font>)
+				to RCMASTER, e.g. <font face="Liberation Mono, monospace">1-3-rcm</font>,
+				<font face="Liberation Mono, monospace">*-rcm</font>, <font face="Liberation Mono, monospace">ref1,2-rcm</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;list&gt;/rcm</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Disconnect the given mixer track(s) (or <font face="Liberation Mono, monospace">ref</font>/<font face="Liberation Mono, monospace">ref&lt;list&gt;</font>)
+				from RCMASTER.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;ref&gt;-rcm?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Query whether a single target (including <font face="Liberation Mono, monospace">refN</font>,
+				<font face="Liberation Mono, monospace">rt</font>, <font face="Liberation Mono, monospace">live</font>,
+				<font face="Liberation Mono, monospace">lb</font>) is connected
+				to RCMASTER.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">*/*#</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove all sends from every mixer track to every submix.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">*/*@</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove all sends from every mixer track to every aux.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">A-B</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Create a send from target A to target B (any two single targets —
+				mixer/aux/submix/rcm/refN/rt/live/lb), e.g. <font face="Liberation Mono, monospace">1-@1</font>,
+				<font face="Liberation Mono, monospace">1-ref2</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">A/B</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Remove the send from A to B.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">FX</h3>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;ref&gt;fx=PluginName</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Add an FX plugin by name to a single target
+				(mixer/aux/submix/refN/rt/live/lb), appended at the end of the
+				chain.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">&lt;ref&gt;fx=PluginName,N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, but move the new FX to chain position N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">rcmfx=PluginName</font>
+				(or <font face="Liberation Mono, monospace">,N</font>)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, targeting RCMASTER specifically.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Automation (envelopes)</h3>
+<p>Requires a time selection and at least one selected track.</p>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">addauto=param,value</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Write automation for <font face="Liberation Mono, monospace">param</font>
+				(one of <font face="Liberation Mono, monospace">vol</font>,<font face="Liberation Mono, monospace">pan</font>,<font face="Liberation Mono, monospace">width</font>,<font face="Liberation Mono, monospace">mute</font>,<font face="Liberation Mono, monospace">trimvol</font>,<font face="Liberation Mono, monospace">prevol</font>,<font face="Liberation Mono, monospace">prepan</font>,<font face="Liberation Mono, monospace">prewidth</font>)
+				to <font face="Liberation Mono, monospace">value</font> across
+				the time selection, on all selected tracks. <font face="Liberation Mono, monospace">value</font>
+				is dB for volume-type params, -1..1 for pan/width, 0/1 for mute.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">addauto=param,value,rampIn</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Same, with a ramp-in of <font face="Liberation Mono, monospace">rampIn</font>
+				seconds before the selection.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">addauto=param,value,rampIn,rampOut</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same, plus a ramp-out after the selection.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">addautoitem=...</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Same arguments as <font face="Liberation Mono, monospace">addauto=</font>,
+				but wraps the change in an automation <b>item</b>
+				(movable/resizable as a unit) instead of plain points.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">delauto</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Delete ALL built-in automation (points and items) on selected
+				tracks within the time selection (including any ramps from the
+				most recent <font face="Liberation Mono, monospace">addauto</font>/<font face="Liberation Mono, monospace">addautoitem</font>
+				on that exact selection).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">delauto=param</font> (or
+				<font face="Liberation Mono, monospace">param1,param2,...</font>)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Delete only the named envelope(s).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">delauto=*</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Same as bare <font face="Liberation Mono, monospace">delauto</font>.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">1,3m</font> — Mute
+	the first violin and cello sections to check what the rest of the
+	ensemble sounds like alone.</p></li>
+	<li><p><font face="Liberation Mono, monospace">4-6xs</font> —
+	Exclusive-solo the back-row tracks (4 through 6), clearing any other
+	mute/solo state first, to spot-check that section in isolation.</p></li>
+	<li><p><font face="Liberation Mono, monospace">1p=-30</font> — Pan
+	the first violins 30% left to widen the stereo image.</p></li>
+	<li><p><font face="Liberation Mono, monospace">2f=-2.5</font> —
+	Pull the second violins down 2.5 dB relative to the rest of the mix.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rcmp=0</font> —
+	Recenter RCMASTER's pan after an experiment.</p></li>
+	<li><p><font face="Liberation Mono, monospace">1i=1</font> —
+	Invert polarity on track 1 because it's out of phase with a spot
+	mic.</p></li>
+	<li><p><font face="Liberation Mono, monospace">1?</font> — Get a
+	full spoken status report (mute/solo/fader/pan/phase/routing/FX) on
+	track 1 before deciding what to change.</p></li>
+	<li><p><font face="Liberation Mono, monospace">1-rcm</font> —
+	Connect track 1 to RCMASTER after adding it, since new tracks aren't
+	routed there automatically.</p></li>
+	<li><p><font face="Liberation Mono, monospace">*/*@</font> — Strip
+	every mixer track's send to the auxes in one shot, e.g. before
+	rebuilding a reverb bus from scratch.</p></li>
+	<li><p><font face="Liberation Mono, monospace">1fx=ReaEQ</font> —
+	Add an EQ plugin to track 1.</p></li>
+	<li><p><font face="Liberation Mono, monospace">rcmfx=ReaComp,1</font>
+	— Add a compressor to RCMASTER and place it first in the chain
+	(e.g. ahead of an existing limiter).</p></li>
+	<li><p><font face="Liberation Mono, monospace">addauto=vol,-6,2,2</font>
+	— With a time selection over a too-loud passage, pull volume down
+	6 dB with 2-second ramps in and out.</p></li>
+	<li><p><font face="Liberation Mono, monospace">delauto=vol</font> —
+	Remove just the volume automation you added over the current time
+	selection, leaving pan/mute automation intact.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">9. Mixer Snapshot Manager (headless)</h2>
+<p>Snapshots capture the full mixer state
+(volume/pan/mute/solo/phase/width/FX/sends/routing) tied to a
+specific media item, for instant recall during playback (e.g.
+switching mic perspective mid-take).</p>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap+</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Create (or update) a snapshot from the current mixer state, tied
+				to the selected item.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				List all snapshots in the current bank, in timeline order.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snapN</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Recall snapshot N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap-N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Delete snapshot N.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snaprecall</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Recall whichever snapshot matches the selected item (or, failing
+				that, the edit cursor position).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.clear</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Delete all snapshots in the current bank.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.bank?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the active bank (A/B/C/D).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.bank=X</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Switch the active bank.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.copy=X</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Copy bank X's snapshots into the current bank.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.ar?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Query auto-recall (whether snapshots fire automatically during
+				playback) for the current bank.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.ar=y</font> / <font face="Liberation Mono, monospace">=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Turn auto-recall on/off.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.gapfolder?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Show which folder is used for gap/mid-point detection in this
+				bank.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.gapfolder=all</font>
+				/ <font face="Liberation Mono, monospace">=TrackName</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set gap-detection scope to all tracks or one named folder.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.auto</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Convert every snapshot in the current bank into real automation
+				lanes. The daemon is no longer needed once automation is driving
+				recall, so this also stops it if it's running.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.auto-</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Clear all automation previously created from snapshots. Recall
+				now depends on the snapshots again, so this also starts the
+				daemon if it isn't already running.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.open</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Start the Mixer Snapshot daemon (needed for auto-recall during
+				playback).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.close</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Stop the daemon.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">snap.daemon?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Report whether the daemon is running.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">snap+</font> — With
+	the selected item being a passage where you want to switch from the
+	main pair to a spot mic balance, capture the current mixer state as
+	a snapshot tied to that item.</p></li>
+	<li><p><font face="Liberation Mono, monospace">snap.ar=y</font> then
+	<font face="Liberation Mono, monospace">snap.open</font> — Turn on
+	auto-recall and start the daemon so snapshots fire automatically as
+	playback crosses each tagged item.</p></li>
+	<li><p><font face="Liberation Mono, monospace">snap?</font> —
+	Before a playback run-through, review every snapshot you've created
+	and where they land on the timeline.</p></li>
+	<li><p><font face="Liberation Mono, monospace">snap3</font> —
+	Manually jump to snapshot 3's mixer state without needing playback
+	to reach it.</p></li>
+	<li><p><font face="Liberation Mono, monospace">snap.auto</font> —
+	Once you're happy with how the snapshots sound, bake them into real
+	automation lanes; the daemon stops automatically since the project
+	no longer depends on it.</p></li>
+	<li><p><font face="Liberation Mono, monospace">snap-2</font> —
+	Delete snapshot 2 because that perspective change is no longer
+	needed.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">10. Album / DDP / CD Metadata</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">in?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the CD-marker / take metadata for the selected item.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">in=Title,pf=...,sw=...,cp=...,ar=...,msg=...,isrc=...</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Set CD-track metadata for the selected item: title, performer,
+				songwriter, composer, arranger, message, ISRC. Omit any field to
+				leave it unchanged; set a field to <font face="Liberation Mono, monospace">0</font>
+				to clear it.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">album?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak album-level metadata for the project.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">album=Title,cat=...,pf=...,sw=...,cp=...,ar=...,id=...,msg=...,lg=...</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set album metadata: title, catalog number, performer, songwriter,
+				composer, arranger, identification, message, language (must match
+				a valid language name).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">createcd</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				(Re)build CD/DDP markers for the selected folder track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">digital=y</font> / <font face="Liberation Mono, monospace">=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Toggle &quot;Digital Release Only&quot; mode (no
+				pregap/frame-snap offsets, for streaming-only releases).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">digital?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Query that setting.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">isrc=y</font> / <font face="Liberation Mono, monospace">=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Toggle Manual ISRC Entry (on: enter every ISRC independently;
+				off: auto-increment from the first track).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">isrc?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Query that setting.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">offsets+</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Record current CD marker positions as manual offsets (preserved
+				on future <font face="Liberation Mono, monospace">createcd</font>
+				runs).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">offsets-</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Clear all manual marker offsets, reverting to automatic
+				placement.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">offsets?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Report whether manual offsets are active on the selected track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">tu</font> / <font face="Liberation Mono, monospace">td</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Move the selected album track up/down in running order (markers
+				re-sync automatically).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">repos=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Reposition CD track groups on the selected folder, leaving N
+				seconds of gap between each.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">buildlist=source</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build an HTML edit list using source-file timing.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">buildlist=bwf</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build an HTML edit list using BWF (Broadcast Wave) start-offset
+				timing.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">album=Beethoven Piano
+	Sonatas,cp=Beethoven,pf=Jane Smith</font> — Set the album title,
+	composer, and performer for the whole release before building CD
+	markers.</p></li>
+	<li><p><font face="Liberation Mono, monospace">in=Sonata No. 14
+	&quot;Moonlight&quot; I. Adagio,pf=Jane Smith,isrc=USS122600001</font>
+	— Tag the selected track item with its title, performer, and ISRC
+	code.</p></li>
+	<li><p><font face="Liberation Mono, monospace">createcd</font> —
+	After finishing edits on a folder, (re)build the CD/DDP markers so
+	track boundaries reflect the current arrangement.</p></li>
+	<li><p><font face="Liberation Mono, monospace">tu</font> — The
+	selected album track should come earlier in the running order; nudge
+	it up one slot.</p></li>
+	<li><p><font face="Liberation Mono, monospace">repos=2</font> —
+	Space out CD track groups with a 2-second gap between each, e.g.
+	after reordering several movements.</p></li>
+	<li><p><font face="Liberation Mono, monospace">digital=y</font> —
+	This release is streaming-only, so turn off pregap/frame-snapping
+	before building markers.</p></li>
+	<li><p><font face="Liberation Mono, monospace">offsets+</font> —
+	You manually nudged a marker's position and want future <font face="Liberation Mono, monospace">createcd</font>
+	runs to preserve it instead of recalculating automatically.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">11. Rendering / Export</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">render=ddp</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build CD markers, then render a DDP image.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">render=cue</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build CD markers, then render a CUE sheet + audio.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">render=wav</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build CD markers, then render WAV.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">render=flac</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build CD markers, then render FLAC.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">render=opus</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build CD markers, then render Opus.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">render=mp3</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build CD markers, then render MP3.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">render=custom</font> (or
+				plain <font face="Liberation Mono, monospace">render</font>)</p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Build CD markers, then open REAPER's normal Render dialog.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">render=wav</font> —
+	Bounce a quick WAV of the album for a reference listen before
+	committing to a final master.</p></li>
+	<li><p><font face="Liberation Mono, monospace">render=ddp</font> —
+	Deliver a manufacturing-ready DDP image once the album is finalized.</p></li>
+	<li><p><font face="Liberation Mono, monospace">render=mp3</font> —
+	Export an MP3 to send the client a quick preview by email.</p></li>
+	<li><p><font face="Liberation Mono, monospace">render=custom</font>
+	— You need a non-standard render configuration (e.g. a specific
+	sample rate); open the full Render dialog instead of a preset.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">12. Stats, Diagnostics &amp; Preferences</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">stats?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak a full project report: workflow, REAPER/ReaClassical
+				versions, album length, CD marker count, project age, session
+				time, total/source length, item/folder/track counts, edits
+				(S-D/splits), FX/automation counts, and a list of every
+				mixer/aux/submix/RCMASTER track.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">stats=reset</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Reset the session timer.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">peak?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Scan all unmuted tracks and jump the edit cursor to the loudest
+				point.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">overs?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Scan all unmuted tracks for peak level and any &quot;overs&quot;
+				above the saved threshold.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">overs=N</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Same scan, using N dB as the over threshold (also saved as the
+				new default).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pref?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				List all 15 ReaClassical preferences with their current values.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pref.key?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Query a single preference (by keyword or 1–15 index). Keywords:
+				<font face="Liberation Mono, monospace">xfade</font>, <font face="Liberation Mono, monospace">offset</font>,
+				<font face="Liberation Mono, monospace">index0</font>, <font face="Liberation Mono, monospace">leadout</font>,
+				<font face="Liberation Mono, monospace">nocolor</font>, <font face="Liberation Mono, monospace">norank</font>,
+				<font face="Liberation Mono, monospace">refguide</font>,
+				<font face="Liberation Mono, monospace">sdmarkers</font>,
+				<font face="Liberation Mono, monospace">altrate</font>, <font face="Liberation Mono, monospace">year</font>,
+				<font face="Liberation Mono, monospace">cuefmt</font>, <font face="Liberation Mono, monospace">floatdest</font>,
+				<font face="Liberation Mono, monospace">itemnames</font>,
+				<font face="Liberation Mono, monospace">takenums</font>, <font face="Liberation Mono, monospace">srcmode</font>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">pref.key=value</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Set a single preference (validated — numeric ranges, 0/1
+				booleans, or WAV/FLAC/MP3/AIFF for <font face="Liberation Mono, monospace">cuefmt</font>).</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">stats?</font> — Get
+	a full spoken overview of the project (length, item/track counts,
+	FX/automation, mixer layout) to orient yourself in an unfamiliar or
+	long-running session.</p></li>
+	<li><p><font face="Liberation Mono, monospace">overs?</font> —
+	Before rendering, scan for any clipped peaks across all unmuted
+	tracks.</p></li>
+	<li><p><font face="Liberation Mono, monospace">overs=-3</font> —
+	Tighten the over-detection threshold to -3 dB for a stricter check
+	ahead of a critical master.</p></li>
+	<li><p><font face="Liberation Mono, monospace">peak?</font> — Jump
+	straight to the single loudest moment in the project to check it by
+	ear.</p></li>
+	<li><p><font face="Liberation Mono, monospace">pref.xfade=50</font>
+	— Increase the default S-D crossfade length to 50 ms for a
+	smoother edit style.</p></li>
+	<li><p><font face="Liberation Mono, monospace">pref.cuefmt=FLAC</font>
+	— Switch the CUE sheet's audio format from the default WAV to
+	FLAC.</p></li>
+	<li><p><font face="Liberation Mono, monospace">pref?</font> —
+	Review every current preference value before changing one, so you
+	know what you're starting from.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">13. Miscellaneous / Setup Utilities</h2>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="128*"/>
+	<col width="128*"/>
+	<thead>
+		<tr valign="top">
+			<th width="50%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left">
+				Command</p>
+			</th>
+			<th width="50%" style="border: 1px solid #000000; padding: 0.04in"><p align="left">
+				Effect</p>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">newtab</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Open a new REAPER project tab.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">help</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Open the full ReaClassical PDF manual.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">factoryreset</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Run the ReaClassical Factory Reset script.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">update</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Trigger a ReaPack synchronization (checks for updates).</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">installosara</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Download and install the OSARA screen-reader accessibility plugin
+				(Windows/macOS only), then restart REAPER.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">allowgui=y</font> /
+				<font face="Liberation Mono, monospace">allowgui=n</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Allow/block ReaImGui windows (Mission Control, Notes,
+				Preferences, etc.) from opening while OSARA is installed —
+				they're blocked by default in that case, since they're unusable
+				with a screen reader.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">allowgui?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak whether GUI windows are currently allowed or blocked.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">debug=on</font> /
+				<font face="Liberation Mono, monospace">debug=off</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Display console messages in addition to OSARA announcements</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">nudge=ms</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Set the ReaClassical project-level nudge amount, in milliseconds,
+				used by the &quot;Nudge Marker Left&quot;/&quot;Right&quot; and
+				&quot;Nudge Item Left&quot;/&quot;Right&quot; reascripts.
+				REAPER's own item-nudge amount/unit isn't exposed to ReaScript,
+				so this is tracked independently per project. Defaults to 5 ms if
+				never set.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				<font face="Liberation Mono, monospace">nudge?</font></p>
+			</td>
+			<td width="50%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left">
+				Speak the current nudge amount.</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Examples</h3>
+<ul>
+	<li><p><font face="Liberation Mono, monospace">installosara</font> —
+	Setting up a brand-new machine; install the screen-reader plugin
+	before doing anything else.</p></li>
+	<li><p><font face="Liberation Mono, monospace">update</font> —
+	Check ReaPack for newer versions of ReaClassical at the start of a
+	session.</p></li>
+	<li><p><font face="Liberation Mono, monospace">newtab</font> —
+	Start a second, unrelated project (e.g. a different concert) without
+	closing the current one.</p></li>
+	<li><p><font face="Liberation Mono, monospace">help</font> — Open
+	the full PDF manual to look up something this guide doesn't cover.</p></li>
+	<li><p><font face="Liberation Mono, monospace">allowgui=y</font> —
+	A sighted collaborator needs to use Mission Control on this
+	OSARA-enabled machine; let GUI windows open again.</p></li>
+	<li><p><font face="Liberation Mono, monospace">nudge=10</font> —
+	Switch to 10 ms steps for fine-tuning a marker position, then nudge
+	it with the &quot;Nudge Marker Left&quot;/&quot;Right&quot;
+	reascripts (these select a marker automatically after auditioning
+	from/to it). The same amount also drives &quot;Nudge Item
+	Left&quot;/&quot;Right&quot;, which shift the selected item (and its
+	synced peers across tracks in the same folder) and ripple every
+	later item in that folder along with it.</p></li>
+</ul>
+<hr/>
+
+<h2 class="western">Suggested learning order for a new user</h2>
+<ol>
+	<li><p><b>Setup</b>: <font face="Liberation Mono, monospace">6v</font>
+	(or <font face="Liberation Mono, monospace">4h=Violin,Viola,Cello,Bass</font>)
+	→ confirm with <font face="Liberation Mono, monospace">stats?</font>.</p></li>
+	<li><p><b>Inputs</b>: <font face="Liberation Mono, monospace">ai</font>
+	or manual <font face="Liberation Mono, monospace">1=stereo</font>,
+	<font face="Liberation Mono, monospace">2=mono,3</font> → check
+	with <font face="Liberation Mono, monospace">1rd?</font>.</p></li>
+	<li><p><b>Recording</b>: <font face="Liberation Mono, monospace">rec.session=Take1</font>,
+	<font face="Liberation Mono, monospace">rec.arm</font> then
+	<font face="Liberation Mono, monospace">rec.start</font> (or just
+	press F9 twice), <font face="Liberation Mono, monospace">rec.stop</font>
+	to stop, <font face="Liberation Mono, monospace">rec?</font> to
+	review.</p></li>
+	<li><p><b>Importing</b> (if recorded outside the session, or doing a
+	second pass): <font face="Liberation Mono, monospace">import</font>
+	or <font face="Liberation Mono, monospace">import=smart,2,dest</font>.</p></li>
+	<li><p><b>Selecting &amp; editing</b>: <font face="Liberation Mono, monospace">sel=D,*</font>,
+	<font face="Liberation Mono, monospace">mk=Start</font>, <font face="Liberation Mono, monospace">pr=-5</font>
+	to slow a passage, <font face="Liberation Mono, monospace">prepare</font>
+	once takes are gathered.</p></li>
+	<li><p><b>Mixing</b>: <font face="Liberation Mono, monospace">1f=-3</font>,
+	<font face="Liberation Mono, monospace">2p=-20</font>, <font face="Liberation Mono, monospace">1-rcm</font>,
+	<font face="Liberation Mono, monospace">1fx=ReaEQ</font>,
+	<font face="Liberation Mono, monospace">addauto=vol,-6,2,2</font>.</p></li>
+	<li><p><b>Mixer snapshots</b> (for live perspective switches):
+	<font face="Liberation Mono, monospace">snap+</font>, <font face="Liberation Mono, monospace">snap.ar=y</font>,
+	<font face="Liberation Mono, monospace">snap.open</font>.</p></li>
+	<li><p><b>Album assembly</b>: <font face="Liberation Mono, monospace">createcd</font>,
+	<font face="Liberation Mono, monospace">album=My
+	Recital,cp=Bach,pf=Various</font>.</p></li>
+	<li><p><b>Rendering</b>: <font face="Liberation Mono, monospace">render=ddp</font>
+	or <font face="Liberation Mono, monospace">render=wav</font>.</p></li>
+	<li><p><b>Check anytime</b>: <font face="Liberation Mono, monospace">stats?</font>,
+	<font face="Liberation Mono, monospace">overs?</font>, <font face="Liberation Mono, monospace">peak?</font>.</p></li>
+</ol>
+<p><br/>
+<br/>
+
+</p>
+</body>
+</html>
