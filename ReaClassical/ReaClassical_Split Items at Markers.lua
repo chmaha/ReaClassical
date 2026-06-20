@@ -28,6 +28,10 @@ local select_midpoint_peers
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -53,11 +57,14 @@ function main()
         return
     end
 
-    split_items_at_markers()
+    local marker_count = split_items_at_markers()
     Undo_EndBlock('ReaClassical Split Items at Markers', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+    if marker_count and marker_count > 0 then
+        say("Items split at " .. marker_count .. " marker" .. (marker_count > 1 and "s" or ""))
+    end
 end
 
 ---------------------------------------------------------------------
@@ -283,6 +290,7 @@ function split_items_at_markers()
 
     Main_OnCommand(40289, 0) -- Unselect all items
     SetEditCurPos(cursor_pos, false, false)
+    return #marker_data
 end
 
 ---------------------------------------------------------------------

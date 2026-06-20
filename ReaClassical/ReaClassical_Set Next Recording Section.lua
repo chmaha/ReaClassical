@@ -31,6 +31,10 @@ local find_mixer_track_for_track, is_mixer_disabled
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
 if workflow == "" then
     MB("Please create a vertical workflow ReaClassical project using F8 to use this function.",
@@ -134,6 +138,7 @@ function main()
         UpdateArrange()
         UpdateTimeline()
         Undo_EndBlock("Next Section (horizontal takes mode)", -1)
+        say("Next recording section set")
         return
     end
 
@@ -176,6 +181,7 @@ function main()
     UpdateArrange()
     UpdateTimeline()
     Undo_EndBlock("Set up next recording section", -1)
+    say("Next recording section set")
 end
 
 ---------------------------------------------------------------------

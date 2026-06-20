@@ -27,6 +27,12 @@ local get_regular_track, handle_invalid, move_up
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
+---------------------------------------------------------------------
+
 function main()
   Undo_BeginBlock()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -80,6 +86,7 @@ function main()
 
   if track_idx > 0 then
     delete_mixer(folder_count, tracks_per_group, track_idx)
+    say("Track removed from all folders")
   else
     local messages = {
       [-1] = "Please select a mixer track not associated with the parent track",
@@ -89,8 +96,6 @@ function main()
       handle_invalid(messages[track_idx], orig_selection)
     end
   end
-
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 
     if folder_count > 1 then
         dofile(script_path .. "ReaClassical_Vertical Workflow.lua")

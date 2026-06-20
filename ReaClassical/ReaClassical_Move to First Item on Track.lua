@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local function main()
     local track = GetSelectedTrack(0, 0)
     if not track then return end
@@ -36,6 +40,7 @@ local function main()
     SetMediaItemSelected(item, true)
     SetEditCurPos(pos, true, true)
     UpdateArrange()
+    say("Moved to first item")
 end
 
 main()

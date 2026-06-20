@@ -28,6 +28,10 @@ local get_selected_media_item_at, count_selected_media_items
 local collapse_folder, fold_small, wipe_track_names
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     Undo_BeginBlock()
 
@@ -158,7 +162,6 @@ function main()
         end
     end
 
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     if updated_folders == 1 then
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     else
@@ -189,6 +192,7 @@ function main()
     Main_OnCommand(mission_control, 0)
 
     Undo_EndBlock("Explode Multi-channel", 0)
+    say("Multi-channel exploded, project configured")
 end
 
 ---------------------------------------------------------------------

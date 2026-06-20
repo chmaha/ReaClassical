@@ -27,6 +27,10 @@ local find_marker_pos, play_segment
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
     MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
@@ -58,7 +62,10 @@ function main()
     end
 
     local marker_count, folder_prefix = markers()
-    if marker_count == 0 then return end
+    if marker_count == 0 then
+        say("No source in marker found")
+        return
+    end
 
     if workflow == "horizontal" then
         exclusive_select_folder_parent(nil)

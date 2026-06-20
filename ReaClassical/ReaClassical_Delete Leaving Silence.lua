@@ -29,6 +29,10 @@ local select_midpoint_peers
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -70,6 +74,7 @@ function main()
         DeleteProjectMarker(nil, 999, false)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         Main_OnCommand(41990, 0) -- Toggle ripple per-track (on)
+        say("Deleted leaving silence")
     else
         MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
     end

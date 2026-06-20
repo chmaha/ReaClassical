@@ -45,6 +45,10 @@ if not SWS_exists then
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -241,6 +245,7 @@ function main()
         clean_up(is_selected, dest_in, dest_out, source_in, source_out)
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         restore_all_ripple()
+        say("S-D edit complete")
     else
         MB(
             "Please add at least 2 valid source-destination markers: \n" ..
@@ -654,8 +659,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

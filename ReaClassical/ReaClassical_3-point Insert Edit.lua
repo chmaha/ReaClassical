@@ -44,6 +44,10 @@ if not SWS_exists then
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -242,6 +246,7 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+    say("Insert edit complete")
 end
 
 ---------------------------------------------------------------------

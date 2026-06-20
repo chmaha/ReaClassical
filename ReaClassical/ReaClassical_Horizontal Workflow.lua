@@ -38,6 +38,10 @@ local select_next_folder, make_folder, select_all_parents
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     Undo_BeginBlock()
     local group_state = GetToggleCommandState(1156)
@@ -192,6 +196,7 @@ function main()
     Undo_EndBlock('Horizontal Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
+    say("Horizontal workflow applied")
 end
 
 ---------------------------------------------------------------------
@@ -587,8 +592,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

@@ -27,6 +27,10 @@ local main, arm_all_active_envs, fold_small
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
   local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
   if workflow == "" then
@@ -42,6 +46,9 @@ function main()
 
   local _, mastering = GetProjExtState(0, "ReaClassical", "MasteringModeSet")
   mastering = tonumber(mastering) or 0
+
+  local armed_automation = false
+  local shown_children = false
 
   local selected_tracks_count = CountSelectedTracks(0)
   for i = 0, selected_tracks_count - 1 do
@@ -64,11 +71,16 @@ function main()
           arm_all_active_envs(automation_track)
         end
       end
+      armed_automation = true
     else
       -- Fold all tracks (non-mastering mode)
       fold_small()
+      shown_children = true
     end
   end
+
+  if armed_automation then say("Automation armed") end
+  if shown_children then say("Children shown") end
 end
 
 ---------------------------------------------------------------------

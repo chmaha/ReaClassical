@@ -26,7 +26,22 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
 
-local main, select_midpoint_peers, session_matches
+local main, select_midpoint_peers, session_matches, get_folder_label
+
+---------------------------------------------------------------------
+
+function get_folder_label(track)
+    if not track then return "" end
+    local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+    local folder = (depth == 1) and track or GetParentTrack(track)
+    if not folder then return "" end
+    local _, name = GetTrackName(folder)
+    local prefix = name:match("^(.-):") or name
+    if prefix:match("^D") then return "Destination" end
+    local snum = prefix:match("^S(%d+)$")
+    if snum then return "Source " .. snum end
+    return prefix
+end
 
 ---------------------------------------------------------------------
 
@@ -173,7 +188,9 @@ function main()
 
         local found = search(false) or search(true)
         if found then
-            say("Take found")
+            local found_track = GetSelectedTrack(0, 0)
+            local label = get_folder_label(found_track)
+            say("Take found" .. (label ~= "" and (" in " .. label) or ""))
         else
             say("Take not found")
         end
@@ -193,11 +210,17 @@ function main()
             local found = search(false) or search(true)
 
             if not found and (take_choice or session_name ~= "") then
+                say("Take not found")
                 local response = MB("Take not found. Try again?", "Find Take", 4)
                 if response ~= 6 then
                     break
                 end
             else
+                if found then
+                    local found_track = GetSelectedTrack(0, 0)
+                    local label = get_folder_label(found_track)
+                    say("Take found" .. (label ~= "" and (" in " .. label) or ""))
+                end
                 break
             end
         end

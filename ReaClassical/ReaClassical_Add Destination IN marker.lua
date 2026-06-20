@@ -26,6 +26,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
 local humanize_timestr = require("ReaClassical_Time_Naming")
+local humanize_folder_phrase = require("ReaClassical_Folder_Naming")
 
 local main, get_color_table, return_check_length
 local get_track_prefix, get_track_number, folder_check
@@ -116,7 +117,9 @@ function main()
         local marker_label = (workflow == "Horizontal") and "DEST-IN" or (track_prefix .. ":DEST-IN")
         AddProjectMarker2(0, false, cur_pos, 0, marker_label, 996, marker_color)
         SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
-        say("Added Destination In @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
+        local folder_phrase = humanize_folder_phrase(track_prefix)
+        say("Added destination in @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1))
+            .. (folder_phrase ~= "" and (" in " .. folder_phrase) or ""))
     end
     PreventUIRefresh(-1)
 end

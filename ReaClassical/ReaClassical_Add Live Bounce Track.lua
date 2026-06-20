@@ -101,7 +101,8 @@ function main()
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
-    Undo_EndBlock("Add Aux", 0)
+    Undo_EndBlock("Add Live Bounce Track", 0)
+    say("Live bounce track added")
 end
 
 ---------------------------------------------------------------------
@@ -143,7 +144,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

@@ -28,6 +28,10 @@ local select_item_under_cursor_on_selected_track
 local select_midpoint_peers
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -136,6 +140,7 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+    say("Crossfade created")
 end
 
 ---------------------------------------------------------------------

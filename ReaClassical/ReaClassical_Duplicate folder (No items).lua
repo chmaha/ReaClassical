@@ -27,6 +27,10 @@ local unselect_folder_children, delete_items
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -78,7 +82,6 @@ function main()
     delete_items()
     unselect_folder_children()
 
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     solo()
     PreventUIRefresh(-1)
@@ -90,6 +93,7 @@ function main()
     end)
 
     Undo_EndBlock('Duplicate folder (No items)', 0)
+    say("Folder duplicated")
 end
 
 ---------------------------------------------------------------------

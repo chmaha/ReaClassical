@@ -25,6 +25,10 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, exclusive_select_folder_parent, solo
 local find_marker_pos, play_segment
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local ROLL = 3.0
 
 ---------------------------------------------------------------------
@@ -60,7 +64,10 @@ function main()
     end
 
     local marker_count, folder_prefix = markers()
-    if marker_count == 0 then return end
+    if marker_count == 0 then
+        say("No destination out marker found")
+        return
+    end
 
     if workflow == "horizontal" then
         exclusive_select_folder_parent(nil)

@@ -18,29 +18,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- luacheck: ignore 113
-
-for key in pairs(reaper) do _G[key] = reaper[key] end
-
-local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
-local say = require("ReaClassical_Announce")
-
-local function main()
-    local track = GetSelectedTrack(0, 0)
-    if not track then return end
-
-    local count = CountTrackMediaItems(track)
-    if count == 0 then return end
-
-    local item = GetTrackMediaItem(track, count - 1)
-    local pos  = GetMediaItemInfo_Value(item, "D_POSITION")
-
-    Main_OnCommand(40289, 0) -- Item: Unselect all items
-    SetMediaItemSelected(item, true)
-    SetEditCurPos(pos, true, true)
-    UpdateArrange()
-    say("Moved to last item")
+-- Converts a track prefix (e.g. "D", "S1", "S2", or a bare track number)
+-- into a humanized folder phrase suitable for screen-reader announcements,
+-- e.g. "destination folder", "source 2 folder", "folder 1".
+local function humanize_folder_phrase(prefix)
+    if not prefix or prefix == "" then return "" end
+    if prefix:match("^D") then return "destination folder" end
+    local snum = prefix:match("^S(%d+)$")
+    if snum then return "source " .. snum .. " folder" end
+    if prefix:match("^%d+$") then return "folder " .. prefix end
+    return prefix .. " folder"
 end
 
-main()
+return humanize_folder_phrase

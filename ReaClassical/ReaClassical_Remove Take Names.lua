@@ -26,6 +26,9 @@ local main, clean_take_names
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
 
 function main()
     Undo_BeginBlock()
@@ -65,7 +68,10 @@ function main()
 
     local response = MB(
         "Are you sure you would like to remove item take names from the selected folder track?", "Remove Take Names", 4)
-    if response == 6 then clean_take_names(selected_track, num_of_items) end
+    if response == 6 then
+        clean_take_names(selected_track, num_of_items)
+        say("Take names removed")
+    end
 
     Undo_EndBlock('Remove Take Names', 0)
 end

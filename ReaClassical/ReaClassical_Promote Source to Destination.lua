@@ -25,6 +25,10 @@ local main, swap_selected_source_with_destination
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -40,7 +44,7 @@ function main()
         return
     end
 
-    swap_selected_source_with_destination()
+    local promoted_name = swap_selected_source_with_destination()
 
     -- Prepare Takes
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
@@ -50,6 +54,9 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+    if promoted_name then
+        say("Destination promoted: " .. promoted_name)
+    end
 end
 
 ---------------------------------------------------------------------
@@ -106,8 +113,10 @@ function swap_selected_source_with_destination()
     GetSetMediaTrackInfo_String(selected_source, "P_EXT:Source", "", true)
     GetSetMediaTrackInfo_String(selected_source, "P_EXT:destination", "y", true)
 
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+
+    local _, promoted_name = GetSetMediaTrackInfo_String(selected_source, "P_NAME", "", false)
+    return promoted_name
 end
 
 ---------------------------------------------------------------------

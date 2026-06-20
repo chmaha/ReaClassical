@@ -28,6 +28,8 @@ local scroll_to_first_track
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -90,6 +92,7 @@ function main()
     end
 
     Undo_EndBlock("Add Reference track", 0)
+    say("Reference track added")
 end
 
 ---------------------------------------------------------------------
@@ -129,7 +132,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

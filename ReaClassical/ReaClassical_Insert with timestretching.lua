@@ -43,6 +43,10 @@ if not SWS_exists then
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -141,7 +145,7 @@ function main()
         if total_selected == 0 then
             Main_OnCommand(40020, 0) -- Time Selection: Remove time selection and loop point selection
             MB("Please make sure there is material to copy between your source markers.",
-                "Insert with timestretching", 0)
+                "4-point with timestretching", 0)
             if moveable_dest == 1 then move_destination_folder(track_number) end
             restore_all_ripple()
             return
@@ -216,6 +220,7 @@ function main()
         if moveable_dest == 1 then move_destination_folder(track_number) end
         Main_OnCommand(40289, 0) -- Item: Unselect all items
         restore_all_ripple()
+        say("Edit completed with timestretching")
     else
         MB("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT",
             "Insert with timestretching", 0)
@@ -223,7 +228,7 @@ function main()
         restore_all_ripple()
     end
 
-    Undo_EndBlock('Insert with timestretching', 0)
+    Undo_EndBlock('S-D edit with timestretching', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

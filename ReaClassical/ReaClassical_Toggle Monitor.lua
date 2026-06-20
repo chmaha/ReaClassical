@@ -26,6 +26,10 @@ local main, get_input_tracks
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function get_input_tracks()
     local tracks = {}
     local num_tracks = CountTracks(0)
@@ -67,6 +71,7 @@ function main()
         SetMediaTrackInfo_Value(track, "I_RECMON", new_state)
     end
     Undo_EndBlock("Toggle Monitor (" .. (state_names[new_state] or "") .. ")", -1)
+    say("Monitor: " .. (state_names[new_state] or ""))
 end
 
 ---------------------------------------------------------------------

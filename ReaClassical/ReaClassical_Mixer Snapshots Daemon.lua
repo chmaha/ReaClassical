@@ -29,7 +29,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 set_action_options(1) -- re-running this script stops the daemon
+
+if GetExtState("ReaClassical", "MixerSnapDaemonRunning") == "1" then
+    SetExtState("ReaClassical", "MixerSnapDaemonRunning", "0", false)
+    say("Mixer snapshot daemon stopped")
+    return
+end
+SetExtState("ReaClassical", "MixerSnapDaemonRunning", "1", false)
+say("Mixer snapshot daemon started")
 
 ---------------------------------------------------------------------
 -- Helpers (mirror of ReaClassical_Terminal.lua snap_* functions and

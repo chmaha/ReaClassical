@@ -29,6 +29,10 @@ local is_in_child_track, get_parent_folder
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -106,6 +110,7 @@ function main()
     SetMediaItemSelected(selected_item, true)
     PreventUIRefresh(-1)
     Undo_EndBlock("Move Track Left", -1)
+    say("Track moved left")
 end
 
 ---------------------------------------------------------------------

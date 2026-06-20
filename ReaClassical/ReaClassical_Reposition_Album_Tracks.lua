@@ -173,9 +173,7 @@ function main()
     if run == "yes" and not _G.RC_TERMINAL_ARGS then Main_OnCommand(create_cd_markers, 0) end
     Undo_EndBlock("Reposition Tracks", 0)
 
-    if _G.RC_TERMINAL_ARGS then
-        say("Tracks repositioned")
-    end
+    say("Tracks repositioned")
 end
 
 ---------------------------------------------------------------------

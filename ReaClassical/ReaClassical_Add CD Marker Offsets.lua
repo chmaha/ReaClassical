@@ -31,6 +31,10 @@ if not SWS_exists then
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 ---------------------------------------------------------------------
 
 function main()
@@ -75,6 +79,7 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+    say((updated or 0) .. " CD marker offsets updated")
 end
 
 ---------------------------------------------------------------------

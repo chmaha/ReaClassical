@@ -25,6 +25,10 @@ local main, duplicate_first_folder, sync_based_on_workflow, solo
 local trackname_check
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     Undo_BeginBlock()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -50,6 +54,7 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+    say("Source material copied")
 end
 
 ---------------------------------------------------------------------
@@ -70,7 +75,6 @@ end
 ---------------------------------------------------------------------
 
 function sync_based_on_workflow(workflow)
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     if workflow == "Vertical" then
         dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
     elseif workflow == "Horizontal" then

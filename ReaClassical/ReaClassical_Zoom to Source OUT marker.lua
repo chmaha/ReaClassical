@@ -26,6 +26,12 @@ local main, markers, exclusive_select_folder_parent, zoom, solo
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+local humanize_timestr = require("ReaClassical_Time_Naming")
+local humanize_folder_phrase = require("ReaClassical_Folder_Naming")
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -41,7 +47,10 @@ function main()
 
     local marker_count, folder_prefix = markers()
 
-    if marker_count == 0 then return end
+    if marker_count == 0 then
+        say("No source out marker found")
+        return
+    end
 
     if workflow == "horizontal" then
         exclusive_select_folder_parent(nil)
@@ -52,6 +61,9 @@ function main()
     GoToMarker(0, 999, false)
     zoom()
     solo()
+    local folder_phrase = folder_prefix and humanize_folder_phrase(folder_prefix) or ""
+    say("Zoomed to source out @ " .. humanize_timestr(format_timestr_pos(GetCursorPosition(), "", -1))
+        .. (folder_phrase ~= "" and (" in " .. folder_phrase) or ""))
 end
 
 ---------------------------------------------------------------------

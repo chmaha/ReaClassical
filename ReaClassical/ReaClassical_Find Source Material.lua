@@ -30,6 +30,25 @@ local get_folder_range_for_item
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
+local function humanize_item_name(name)
+    if not name or name == "" then return name end
+    local prefix, take_num = name:match("^(.+)_T(%d+)$")
+    if take_num then
+        return prefix .. " take " .. tonumber(take_num)
+    end
+    local only_num = name:match("^(%d+)$")
+    if only_num then
+        return "Take " .. tonumber(only_num)
+    end
+    return name
+end
+
+---------------------------------------------------------------------
+
 -- Resolves the folder track range (0-based indices) that contains ref_item.
 function get_folder_range_for_item(ref_item)
     local track = GetMediaItem_Track(ref_item)
@@ -234,6 +253,10 @@ function main()
     Undo_EndBlock("Find Source Material (multi-tab)", 0)
     PreventUIRefresh(-1)
     UpdateArrange()
+
+    local source_take = GetActiveTake(source_item)
+    local source_name = source_take and GetTakeName(source_take) or ""
+    say("Source found: " .. humanize_item_name(source_name ~= "" and source_name or "untitled item"))
 end
 
 ---------------------------------------------------------------------

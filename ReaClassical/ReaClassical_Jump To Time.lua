@@ -26,6 +26,11 @@ local main, time_to_seconds
 local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+local humanize_timestr = require("ReaClassical_Time_Naming")
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -102,6 +107,7 @@ function main()
             end
 
             SetEditCurPos(cursor_position, true, false)
+            say("Jumped to " .. humanize_timestr(format_timestr_pos(cursor_position, "", -1)))
         else
             return
         end

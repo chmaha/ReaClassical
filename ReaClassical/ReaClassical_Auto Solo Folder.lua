@@ -35,6 +35,10 @@ if not SWS_exists then
     return
 end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local ref_is_guide = 0
 if input ~= "" then
@@ -163,10 +167,13 @@ function main()
 
         -- If a child track was clicked, find and select its folder parent instead
         local parent_track, parent_idx = get_folder_parent(track)
+        local selected_folder_track
         if parent_track then
             SetOnlyTrackSelected(parent_track)
+            selected_folder_track = parent_track
         else
             SetOnlyTrackSelected(track)
+            selected_folder_track = track
         end
 
         local has_folders = false
@@ -198,6 +205,8 @@ function main()
         UpdateArrange()
         UpdateTimeline()
         TrackList_AdjustWindows(false)
+        local _, folder_name = GetTrackName(selected_folder_track)
+        say("Folder selected: " .. folder_name)
     end
 end
 

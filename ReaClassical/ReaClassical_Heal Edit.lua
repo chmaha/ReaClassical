@@ -28,6 +28,10 @@ local get_folder_range
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
@@ -54,6 +58,7 @@ function main()
     if selected then
         heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
             total_selected_length)
+        say("Edit healed")
     end
 
     Undo_EndBlock('Heal Edit', 0)

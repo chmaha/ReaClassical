@@ -40,6 +40,10 @@ local select_all_parents, delete_non_rc_tracks
 
 ---------------------------------------------------------------------
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+
 function main()
     Undo_BeginBlock()
     PreventUIRefresh(1)
@@ -288,6 +292,7 @@ function main()
     Undo_EndBlock('Vertical Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
+    say("Vertical workflow ready")
 end
 
 ---------------------------------------------------------------------
@@ -765,8 +770,6 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

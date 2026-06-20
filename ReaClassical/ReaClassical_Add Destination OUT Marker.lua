@@ -26,6 +26,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
 local humanize_timestr = require("ReaClassical_Time_Naming")
+local humanize_folder_phrase = require("ReaClassical_Folder_Naming")
 
 local main, get_color_table
 local get_track_prefix, get_track_number, folder_check, other_dest_marker_check
@@ -118,7 +119,9 @@ function main()
         local marker_label = (workflow == "Horizontal") and "DEST-OUT" or (track_prefix .. ":DEST-OUT")
         AddProjectMarker2(0, false, cur_pos, 0, marker_label, 997, marker_color)
         SetProjExtState(0, "ReaClassical", "DestOutTrackNum", tostring(track_number))
-        say("Added Destination Out @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1)))
+        local folder_phrase = humanize_folder_phrase(track_prefix)
+        say("Added destination out @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1))
+            .. (folder_phrase ~= "" and (" in " .. folder_phrase) or ""))
 
         if other_dest_track_num and other_dest_track_num ~= track_number then
             MB("Warning: Dest OUT marker group does not match Dest IN!", "Add Dest Marker OUT", 0)
