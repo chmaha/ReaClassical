@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, markers, exclusive_select_folder_parent, solo
-local find_marker_pos, play_segment
+local find_marker_pos, play_segment, select_marker_exclusive
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
@@ -79,6 +79,7 @@ function main()
 
     local marker_pos = find_marker_pos(997, "DEST-OUT")
     if not marker_pos then return end
+    select_marker_exclusive(997, "DEST-OUT")
 
     local start_pos = math.max(0, marker_pos - ROLL)
     play_segment(start_pos, marker_pos)
@@ -225,6 +226,28 @@ function solo()
         if rcmaster_state == "y" then
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+-- Selects the marker matching (marker_id, marker_type) and deselects every
+-- other (non-region) marker, so it's ready for a follow-up Nudge Marker
+-- Left/Right without having to click it in the ruler.
+function select_marker_exclusive(marker_id, marker_type)
+    local proj = EnumProjects(-1)
+    if not proj then return end
+
+    local total = GetNumRegionsOrMarkers(proj)
+    for i = 0, total - 1 do
+        local marker = GetRegionOrMarker(proj, i, "")
+        if GetRegionOrMarkerInfo_Value(proj, marker, "B_ISREGION") == 0 then
+            local number = GetRegionOrMarkerInfo_Value(proj, marker, "I_NUMBER")
+            local _, raw_label = GetSetRegionOrMarkerInfo_String(proj, marker, "P_NAME", "", false)
+            local label = raw_label:match(":(.+)$") or raw_label
+            local is_target = (number == marker_id and label == marker_type)
+            SetRegionOrMarkerInfo_Value(proj, marker, "B_UISEL", is_target and 1 or 0)
         end
     end
 end

@@ -3801,6 +3801,29 @@ function try_misc(cmd)
         return true
     end
 
+    -- nudge=<ms>: sets the ReaClassical project-level nudge amount (in
+    -- milliseconds) used by the Nudge Marker Left/Right reascripts; nudge?
+    -- reports the current value. REAPER's own item-nudge amount/unit isn't
+    -- exposed to ReaScript, so this is tracked independently per project.
+    local nudge_ms = cmd:match("^nudge=([%d%.]+)$")
+    if nudge_ms then
+        local ms = tonumber(nudge_ms)
+        if not ms or ms <= 0 then
+            say("nudge= requires a positive number of milliseconds")
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "NudgeMs", tostring(ms))
+        say("Nudge amount set to " .. ms .. " milliseconds")
+        return true
+    end
+
+    if cmd == "nudge?" then
+        local _, stored = GetProjExtState(0, "ReaClassical", "NudgeMs")
+        local ms = tonumber(stored) or 5
+        say("Nudge amount: " .. ms .. " milliseconds")
+        return true
+    end
+
     if cmd == "update" then
         local action = NamedCommandLookup("_REAPACK_SYNC")
         if action ~= 0 then
@@ -6080,8 +6103,32 @@ function main()
     local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
     workflow = wf
 
-    local retval, input = GetUserInputs("ReaClassical Terminal", 1, "Command:,extrawidth=300", "")
-    if not retval then return end
+    local input
+    local repeating = _G.RC_REPEAT_LAST == true
+
+    if repeating then
+        local _, last = GetProjExtState(0, "ReaClassical", "LastTerminalCommand")
+        if last == "" then
+            say("No previous command to repeat")
+            return
+        end
+        input = last
+    else
+        local retval, user_input = GetUserInputs("ReaClassical Terminal", 1, "Command:,extrawidth=300", "")
+        if not retval then return end
+        input = trim(user_input)
+
+        if input == "!" then
+            local _, last = GetProjExtState(0, "ReaClassical", "LastTerminalCommand")
+            if last == "" then
+                say("No previous command to repeat")
+                return
+            end
+            input = last
+        elseif input ~= "" then
+            SetProjExtState(0, "ReaClassical", "LastTerminalCommand", input)
+        end
+    end
 
     local commands = {}
     for c in input:gmatch("[^;]+") do
@@ -6093,10 +6140,11 @@ function main()
     -- Give VoiceOver/OSARA time to finish announcing the focus change
     -- caused by the dialog closing before we speak the result, otherwise
     -- the announcement gets stomped and only the focused control's
-    -- accessibility role (e.g. "text") is heard.
+    -- accessibility role (e.g. "text") is heard. Not needed when repeating
+    -- the last command since no dialog was ever opened.
     local dialog_closed_time = time_precise()
     local function run_commands()
-        if time_precise() - dialog_closed_time < 0.2 then
+        if not repeating and time_precise() - dialog_closed_time < 0.2 then
             defer(run_commands)
             return
         end
