@@ -3784,19 +3784,19 @@ function try_misc(cmd)
         return true
     end
 
-    -- debug=y/n: toggle the console-message fallback used by say() (in
+    -- debug=on/off: toggle the console-message fallback used by say() (in
     -- ReaClassical_Announce.lua) on platforms without OSARA (e.g. testing
     -- on Linux), so announcements can be checked without the real plugin
     -- installed; debug? reports the current state.
-    local debug_val = cmd:match("^debug=([yn])$")
-    if debug_val then
+    local debug_val = cmd:match("^debug=(%a+)$")
+    if debug_val == "on" or debug_val == "off" then
         SetExtState("ReaClassical", "DebugAnnounce", debug_val, true)
-        say(debug_val == "y" and "Debug announcements on" or "Debug announcements off")
+        say(debug_val == "on" and "Debug announcements on" or "Debug announcements off")
         return true
     end
 
     if cmd == "debug?" then
-        local on = GetExtState("ReaClassical", "DebugAnnounce") == "y"
+        local on = GetExtState("ReaClassical", "DebugAnnounce") == "on"
         say(on and "Debug announcements on" or "Debug announcements off")
         return true
     end

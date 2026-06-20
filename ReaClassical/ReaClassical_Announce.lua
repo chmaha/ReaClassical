@@ -26,15 +26,15 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 -- Shared announcement function for every non-ImGui ReaClassical script.
 -- Speaks via OSARA when it's installed; otherwise stays silent unless
--- debug=y has been set in the Terminal (debug=y/debug?/debug=n), in which
--- case it prints to the console instead -- lets development/testing of
--- announcements happen on platforms without OSARA (e.g. Linux) without
+-- debug=on has been set in the Terminal (debug=on/debug?/debug=off), in
+-- which case it prints to the console instead -- lets development/testing
+-- of announcements happen on platforms without OSARA (e.g. Linux) without
 -- spamming the console for ordinary end users who simply don't have
 -- OSARA installed.
 local function say(msg)
     if osara_outputMessage then
         osara_outputMessage(tostring(msg))
-    elseif GetExtState("ReaClassical", "DebugAnnounce") == "y" then
+    elseif GetExtState("ReaClassical", "DebugAnnounce") == "on" then
         ShowConsoleMsg(tostring(msg) .. "\n")
     end
 end
