@@ -5542,26 +5542,26 @@ function try_record(cmd)
         return true
     end
 
-    -- rec.go — press F9 (arms the selected folder, or starts recording if
-    -- already armed), matching the Record Panel's Arm/Rec button
-    if cmd == "rec.go" then
-        if GetPlayState() ~= 0 then
-            say("Already recording")
-            return true
-        end
-        if not APIExists("AddRemoveReaScript") then
-            say("AddRemoveReaScript API not found (install SWS extension)")
-            return true
-        end
-        local f9_cid = AddRemoveReaScript(true, 0,
-            script_path .. "ReaClassical_Classical Take Record.lua", true)
-        if f9_cid == 0 then
-            say("Classical Take Record script not found")
-            return true
-        end
-        -- Classical Take Record.lua now announces "Armed: ..."/"Folder
-        -- armed" or "Recording take N" itself, so nothing further to say.
-        Main_OnCommand(f9_cid, 0)
+    -- rec.arm — arm the selected folder for recording without starting it.
+    -- If it's already armed (or already recording), just announces that
+    -- instead of changing anything -- the precise counterpart to rec.start,
+    -- with F9 still doing both steps in one press via the classic toggle.
+    if cmd == "rec.arm" then
+        _G.RC_TERMINAL_ARGS = { mode = "arm" }
+        dofile(script_path .. "ReaClassical_Classical Take Record.lua")
+        _G.RC_TERMINAL_ARGS = nil
+        return true
+    end
+
+    -- rec.start — start recording on the already-armed folder. If nothing
+    -- is armed yet (or already recording), just announces that instead of
+    -- arming it for you -- use rec.arm first. Bare "rec.start" is distinct
+    -- from "rec.start=HH:MM"/"rec.start?" below (the scheduled-start-time
+    -- setting), since those require a trailing "=" or "?".
+    if cmd == "rec.start" then
+        _G.RC_TERMINAL_ARGS = { mode = "start" }
+        dofile(script_path .. "ReaClassical_Classical Take Record.lua")
+        _G.RC_TERMINAL_ARGS = nil
         return true
     end
 

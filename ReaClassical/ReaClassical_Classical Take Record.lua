@@ -31,6 +31,7 @@ local select_children_of_selected_folders, reset_playback_rate
 local unselect_folder_children, set_rec_arm_for_selected_tracks
 local find_mixer_track_for_track, is_mixer_disabled
 local avoid_take_lanes, find_recording_folder, get_record_takes_horizontally
+local spoken_folder_label
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
@@ -67,10 +68,40 @@ function main()
         return
     end
 
+    -- "mode" is set by the Terminal's rec.arm/rec.start commands (via
+    -- _G.RC_TERMINAL_ARGS) to request just the arm step or just the start-
+    -- recording step. F9 itself (and rec.stop) call this with no mode set,
+    -- preserving the classic single-button arm-then-record-then-stop toggle.
+    local mode = _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.mode
+
+    -- OSARA users won't have the (ReaImGui) Record Panel GUI open to keep
+    -- the daemon's heartbeat alive, so make sure the headless daemon is
+    -- running too -- same daemon-start step as the Terminal's rec.open.
+    if APIExists("osara_outputMessage") then
+        local _, ts = GetProjExtState(0, "ReaClassical", "rec_daemon_heartbeat")
+        local daemon_running = (os.time() - (tonumber(ts) or 0)) < 5
+        if not daemon_running and APIExists("AddRemoveReaScript") then
+            local daemon_cid = AddRemoveReaScript(true, 0,
+                script_path .. "ReaClassical_Record Panel Daemon.lua", true)
+            if daemon_cid ~= 0 then
+                SetProjExtState(0, "ReaClassical", "rec_daemon_stop", "")
+                Main_OnCommand(daemon_cid, 0)
+                local panel_id = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
+                if panel_id ~= 0 then SetToggleCommandState(1, panel_id, 1) end
+            end
+        end
+    end
+
     PreventUIRefresh(1)
     local _, rec_wildcards = get_config_var_string("recfile_wildcards")
 
     if GetPlayState() ~= 0 then
+        if mode == "arm" or mode == "start" then
+            PreventUIRefresh(-1)
+            say("Already recording")
+            return
+        end
+
         -- Find the folder that is actually recording
         local recording_folder = find_recording_folder()
         if not recording_folder then
@@ -175,11 +206,23 @@ function main()
             unselect_folder_children()
         end
 
+        -- In Vertical workflow, by this point the now-armed folder (the
+        -- next one, a freshly duplicated one, or the same one again) is
+        -- left as the sole selected track by the logic above.
+        local stop_msg = "Recording Stopped"
+        if workflow == "Vertical" then
+            local armed_track = GetSelectedTrack(0, 0)
+            local label = armed_track and spoken_folder_label(workflow, armed_track)
+            if label then
+                stop_msg = stop_msg .. ". " .. label .. " folder armed"
+            end
+        end
+
         PreventUIRefresh(-1)
         Undo_EndBlock('Classical Take Record Stop', 0)
         UpdateArrange()
         UpdateTimeline()
-        say("Recording Stopped")
+        say(stop_msg)
         return
     end
 
@@ -216,8 +259,22 @@ function main()
         end
     end
 
-    Undo_BeginBlock()
     local rec_arm = GetMediaTrackInfo_Value(first_selected, "I_RECARM")
+
+    if mode == "arm" and rec_arm == 1 then
+        PreventUIRefresh(-1)
+        local label = spoken_folder_label(workflow, first_selected)
+        say(label and ("Already armed: " .. label) or "Folder already armed")
+        return
+    end
+
+    if mode == "start" and rec_arm ~= 1 then
+        PreventUIRefresh(-1)
+        say("Not armed yet -- use rec.arm first")
+        return
+    end
+
+    Undo_BeginBlock()
 
     local record_panel = NamedCommandLookup("_RSbd41ad183cae7b18bccb86b087f719e945278160")
     local state = GetToggleCommandState(record_panel)
@@ -252,18 +309,8 @@ function main()
         Undo_EndBlock('Classical Take Record', 0)
         UpdateArrange()
         UpdateTimeline()
-        if workflow == "Vertical" then
-            local _, folder_name = GetSetMediaTrackInfo_String(first_selected_track, "P_NAME", "", false)
-            local prefix = folder_name:match("^([^:]+):") or folder_name
-
-            local spoken_prefix = prefix
-                :gsub("^D$", "Destination")
-                :gsub("^S(%d+)$", "Source %1")
-
-            say("Armed: " .. (spoken_prefix ~= "" and spoken_prefix or "Unnamed folder"))
-        else
-            say("Folder armed")
-        end
+        local label = spoken_folder_label(workflow, first_selected_track)
+        say(label and ("Armed: " .. label) or "Folder armed")
         return
     end
 
@@ -283,6 +330,23 @@ function main()
 
     UpdateArrange()
     UpdateTimeline()
+end
+
+---------------------------------------------------------------------
+
+-- Returns a humanized folder label ("Destination", "Source 2", ...) for
+-- Vertical-workflow announcements, or nil in Horizontal workflow (where
+-- callers fall back to the generic "Folder armed"/"Folder already armed").
+function spoken_folder_label(workflow, track)
+    if workflow ~= "Vertical" then return nil end
+    local _, folder_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    local prefix = folder_name:match("^([^:]+):") or folder_name
+
+    local spoken_prefix = prefix
+        :gsub("^D$", "Destination")
+        :gsub("^S(%d+)$", "Source %1")
+
+    return spoken_prefix ~= "" and spoken_prefix or "Unnamed folder"
 end
 
 ---------------------------------------------------------------------
