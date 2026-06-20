@@ -1,0 +1,58 @@
+/* Plain, semantic HTML by design (the Terminal guide is meant to read
+   cleanly with a screen reader) -- this stylesheet only adds the light
+   visual structure (heading sizes, spacing, table borders) that the
+   original LibreOffice export had, for sighted readers. It doesn't change
+   the markup or wording in any way. */
+
+body {
+  font-size: 12pt;
+  line-height: 1.15;
+}
+
+p, li {
+  margin-bottom: 0.1in;
+}
+
+h1 {
+  font-size: 18pt;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 16pt;
+  font-weight: bold;
+  margin-top: 0.14in;
+}
+
+h3 {
+  font-size: 14pt;
+  font-weight: bold;
+  margin-top: 0.1in;
+}
+
+a:link {
+  color: #000080;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #800000;
+  text-decoration: underline;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #000;
+  padding: 0.04in 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: bold;
+  text-align: center;
+}
