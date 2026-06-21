@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre17
+@version 26.6.8pre18
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -13,6 +13,26 @@
   NEW: Navigate to next/previous track in folder
   NEW: Navigate to next/previous envelope lane (announces track and automation type)
   NEW: Toggle record monitoring off and on
+  NEW: Headless Record Panel daemon -- keeps F9/take-counting/clip-reporting working for OSARA users without opening the Record Panel GUI
+  NEW: Headless Mixer Snapshots daemon -- same auto-recall as the GUI snapshot window, without needing it open
+  NEW: Play/Stop replacement for Spacebar that announces transport state (plus an edit-cursor-following variant)
+  NEW: Repeat Last Terminal Command shortcut
+  NEW: Nudge Marker Left/Right shortcuts
+  NEW: Hide/Show Automation Lanes commands
+  NEW: Humanized track/folder/time names in spoken announcements
+  NEW: Online Terminal Guide (linked from Help for OSARA users), plain HTML build pipeline
+  NEW: GUI windows blocked by default when OSARA is installed (allowgui= override)
+  NEW: debug=on/off mode for testing announcements without OSARA installed
+  Terminal: tr=<query> jumps to a track by name within the current folder
+  Terminal: sel=+<folder>,<positions> adds tracks to selection by folder label/position
+  Terminal: mixer reordering (Nu/Nd) now supports moving a contiguous block of tracks together
+  Terminal: tolerate stray whitespace around commas/dashes in position lists
+  Terminal: rec.latest? reports the highest take number found on disk
+  Terminal: query inputs / basic autoinput command
+  Allow factoryreset at any time, even outside a project
+  Announce next armed folder automatically in Vertical workflow
+  Ensure functions like Prepare Takes/Create CD Markers run headless (not silently skipped or popping a stray GUI) when triggered as a side effect of another command
+  Clip reporting now factors in item volume (D_VOL)
   S-D edit functions: Unify scrubmode toggle
   Add generic lua high/medium risk error guards across many functions
   Move all files associated with exports into Exports folders
