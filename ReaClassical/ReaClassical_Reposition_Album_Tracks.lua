@@ -168,9 +168,17 @@ function main()
         end
     end
 
-    local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
     local _, run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
-    if run == "yes" and not _G.RC_TERMINAL_ARGS then Main_OnCommand(create_cd_markers, 0) end
+    if run == "yes" and not _G.RC_TERMINAL_ARGS then
+        if not (APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y") then
+            local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
+            Main_OnCommand(create_cd_markers, 0)
+        else
+            _G.RC_TERMINAL_ARGS = {}
+            dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+            _G.RC_TERMINAL_ARGS = nil
+        end
+    end
     Undo_EndBlock("Reposition Tracks", 0)
 
     say("Tracks repositioned")

@@ -22,15 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
--- ReaImGui windows are unusable/distracting for a blind user relying on
--- OSARA + the Terminal instead of the mouse, so skip opening this GUI when
--- OSARA is installed unless allowgui=y has been set in the Terminal. Calls
--- coming from the Terminal itself (_G.RC_TERMINAL_ARGS set) always bypass
--- this -- they never open a GUI in the first place.
-if not _G.RC_TERMINAL_ARGS and APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y" then
-    osara_outputMessage("GUI blocked (OSARA detected) -- use allowgui=y in the Terminal to override")
-    return
-end
+-- Unlike other ReaImGui tools, this progress window needs no mouse/keyboard
+-- input and auto-closes on its own, so it's left open even when OSARA is
+-- installed -- the say() announcements below give blind users the same
+-- feedback sighted users get from watching the progress bar.
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
@@ -703,6 +698,9 @@ function main()
         end
 
         processing_complete = do_processing_step()
+        if processing_complete then
+            say("Prepare Takes: complete")
+        end
         defer(main)
     elseif processing_complete then
         local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoResize
@@ -759,6 +757,7 @@ PreventUIRefresh(1)
 if not _G.RC_TERMINAL_ARGS then
     ctx = ImGui.CreateContext("ReaClassical Prepare Takes")
     update_progress("Initializing", 0, "Starting preparation...")
+    say("Preparing takes")
     defer(main)
 end
 

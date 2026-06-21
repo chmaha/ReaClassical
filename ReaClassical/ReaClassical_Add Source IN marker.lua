@@ -46,8 +46,10 @@ end
 local _, opened_string = GetProjExtState(0, "ReaClassical", "toolbaropened")
 
 if opened_string ~= "y" then
-    local editing_toolbar = reaper.NamedCommandLookup("_RSdcbfd5e17e15e31f892e3fefdb1969b81d22b6df")
-    Main_OnCommand(editing_toolbar, 0)
+    if not (APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y") then
+        local editing_toolbar = reaper.NamedCommandLookup("_RSdcbfd5e17e15e31f892e3fefdb1969b81d22b6df")
+        Main_OnCommand(editing_toolbar, 0)
+    end
     SetProjExtState(0, "ReaClassical", "toolbaropened", "y")
 end
 

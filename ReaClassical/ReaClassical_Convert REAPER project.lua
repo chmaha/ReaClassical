@@ -55,8 +55,10 @@ function main()
         .. "placed onto the ReaClassical mixer tracks.\n"
         .. "Recreate any custom routing and bus FX using ReaClassical's Mission Control."
         , "ReaClassical Conversion", 0)
-    local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
-    Main_OnCommand(mission_control, 0)
+    if not (APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y") then
+        local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
+        Main_OnCommand(mission_control, 0)
+    end
 end
 
 ---------------------------------------------------------------------

@@ -188,8 +188,11 @@ function main()
     local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
     Main_OnCommand(prepare_takes, 0)
 
-    local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
-    Main_OnCommand(mission_control, 0)
+    local gui_blocked = APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y"
+    if not gui_blocked then
+        local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
+        Main_OnCommand(mission_control, 0)
+    end
 
     Undo_EndBlock("Explode Multi-channel", 0)
     say("Multi-channel exploded, project configured")

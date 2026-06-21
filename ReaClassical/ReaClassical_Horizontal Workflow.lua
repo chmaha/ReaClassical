@@ -35,12 +35,12 @@ local process_dest, check_hidden_track_items
 local set_recording_to_primary_and_secondary, reorder_special_tracks
 local select_children_of_selected_folders, unselect_folder_children
 local select_next_folder, make_folder, select_all_parents
+local color_folder_children
 
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
-local say = require("ReaClassical_Announce")
 
 function main()
     Undo_BeginBlock()
@@ -84,8 +84,16 @@ function main()
             route_tracks(rcmaster, track_table, num)
             groupings_mcp()
             remove_spacers(rcmaster_index)
+
+            -- Color the destination folder the same way Prepare Takes would,
+            -- so it's not left default grey for users who never run it.
+            local colors = get_color_table()
+            SetMediaTrackInfo_Value(track_table[1].parent, "I_CUSTOMCOLOR", colors.dest_items)
+            color_folder_children(track_table[1].parent, colors.dest_items)
+
             SetProjExtState(0, "ReaClassical", "Workflow", "Horizontal")
-            if not _G.RC_TERMINAL_ARGS then
+            if not _G.RC_TERMINAL_ARGS
+                and not (APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y") then
                 local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
                 Main_OnCommand(mission_control, 0)
             end
@@ -196,7 +204,6 @@ function main()
     Undo_EndBlock('Horizontal Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
-    say("Horizontal workflow applied")
 end
 
 ---------------------------------------------------------------------
@@ -593,6 +600,25 @@ end
 
 function get_color_table()
     return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function color_folder_children(parent_track, folder_color)
+    if not parent_track or not folder_color then return end
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local idx = parent_idx + 1
+    local depth = 1
+    while idx < num_tracks and depth > 0 do
+        local tr = GetTrack(0, idx)
+        if not tr then break end
+        local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+        if depth > 0 then SetMediaTrackInfo_Value(tr, "I_CUSTOMCOLOR", folder_color) end
+        depth = depth + folder_depth
+        if depth <= 0 then break end
+        idx = idx + 1
+    end
 end
 
 ---------------------------------------------------------------------

@@ -40,21 +40,34 @@ function main()
 
     PreventUIRefresh(1)
     local first_track = duplicate_first_folder()
-    sync_based_on_workflow(workflow)
-
-    -- Prepare Takes
-    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-    Main_OnCommand(prepare_takes, 0)
-
-    SetOnlyTrackSelected(first_track)
-    solo()
-    Main_OnCommand(40289, 0) -- unselect all items
-
-    Undo_EndBlock('Copy Destination Material to Source', -1)
-    PreventUIRefresh(-1)
-    UpdateArrange()
-    UpdateTimeline()
     say("Source material copied")
+
+    -- sync_based_on_workflow below reselects/solos/folds several tracks in a
+    -- row, each of which OSARA announces automatically -- without this brief
+    -- pause those announcements stomp the one above before it's heard.
+    local say_time = time_precise()
+    local function continue_after_announcement()
+        if time_precise() - say_time < 0.2 then
+            defer(continue_after_announcement)
+            return
+        end
+
+        sync_based_on_workflow(workflow)
+
+        -- Prepare Takes
+        local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+        Main_OnCommand(prepare_takes, 0)
+
+        SetOnlyTrackSelected(first_track)
+        solo()
+        Main_OnCommand(40289, 0) -- unselect all items
+
+        Undo_EndBlock('Copy Destination Material to Source', -1)
+        PreventUIRefresh(-1)
+        UpdateArrange()
+        UpdateTimeline()
+    end
+    continue_after_announcement()
 end
 
 ---------------------------------------------------------------------

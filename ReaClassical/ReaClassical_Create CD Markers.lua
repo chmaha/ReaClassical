@@ -2706,7 +2706,9 @@ else
     Undo_EndBlock("Create CD/DDP Markers", -1)
     if not success then return end
     if _G.RC_TERMINAL_ARGS then
-        say("CD/DDP markers created")
+        if not _G.RC_TERMINAL_ARGS.silent then
+            say("CD/DDP markers created")
+        end
         return
     end
 end

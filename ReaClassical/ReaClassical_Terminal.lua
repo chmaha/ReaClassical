@@ -5786,13 +5786,11 @@ function try_record(cmd)
     -- rec.take? — query take number and mode
     if cmd == "rec.take?" then
         local _, take_str = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
-        local _, override = GetProjExtState(0, "ReaClassical", "TakeCounterOverride")
         local n = tonumber(take_str) or 0
         if n > 0 then
-            say(string.format("Take: T%03d (%s)", n,
-                override == "1" and "manual override" or "auto"))
+            say(string.format("Next is take %d", n))
         else
-            say("Take: auto-detect (not yet set)")
+            say("Next take not yet set")
         end
         return true
     end
@@ -5804,8 +5802,7 @@ function try_record(cmd)
         local _, sess = GetProjExtState(0, "ReaClassical", "TakeSessionName")
         local max_found = rec_get_take_count(sess)
         if max_found > 0 then
-            say(string.format("Latest take on disk: T%03d%s", max_found,
-                sess ~= "" and (" (session: " .. sess .. ")") or ""))
+            say(string.format("Latest is take %d", max_found))
         else
             say("No takes found on disk" .. (sess ~= "" and (" for session: " .. sess) or ""))
         end
@@ -6181,7 +6178,8 @@ function main()
         if workflow == "" then
             local first = commands[1]
             if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab"
-                    or first == "update" or first == "installosara" or first == "factoryreset") then
+                    or first == "update" or first == "installosara" or first == "factoryreset" or first == "help"
+                    or first == "debug=on" or first == "debug=off") then
                 say("Please create a ReaClassical project first (e.g. 6v)")
                 return
             end

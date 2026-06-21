@@ -37,12 +37,12 @@ local set_recording_to_primary_and_secondary
 local reorder_special_tracks, select_children_of_selected_folders
 local select_next_folder, collapse_folder, fold_small, make_folder
 local select_all_parents, delete_non_rc_tracks
+local pastel_color, color_folder_children
 
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
-local say = require("ReaClassical_Announce")
 
 function main()
     Undo_BeginBlock()
@@ -88,6 +88,18 @@ function main()
             create_single_mixer(num, end_of_sources)
             local table, rcmaster_index, tracks_per_group, _, mixer_table = create_track_table(is_empty)
             route_tracks(rcmaster, table, end_of_sources)
+
+            -- Color folders the same way Prepare Takes would (destination
+            -- folder gets dest_items, every other folder gets a pastel color
+            -- in order), so they're not left default grey for users who
+            -- never run it.
+            local colors = get_color_table()
+            for i, folder_info in ipairs(table) do
+                local folder_color = (i == 1) and colors.dest_items or pastel_color(i - 2)
+                SetMediaTrackInfo_Value(folder_info.parent, "I_CUSTOMCOLOR", folder_color)
+                color_folder_children(folder_info.parent, folder_color)
+            end
+
             media_razor_group()
             reset_spacers(tracks_per_group, rcmaster_index)
             Main_OnCommand(40939, 0) -- select track 01
@@ -96,7 +108,8 @@ function main()
             fold_small()
             SetProjExtState(0, "ReaClassical", "Workflow", "Vertical")
             copy_track_names(table, mixer_table)
-            if not _G.RC_TERMINAL_ARGS then
+            if not _G.RC_TERMINAL_ARGS
+                and not (APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y") then
                 local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
                 Main_OnCommand(mission_control, 0)
             end
@@ -292,7 +305,6 @@ function main()
     Undo_EndBlock('Vertical Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
-    say("Vertical workflow ready")
 end
 
 ---------------------------------------------------------------------
@@ -771,6 +783,48 @@ end
 
 function get_color_table()
     return require("ReaClassical_Colors_Table")
+end
+
+---------------------------------------------------------------------
+
+function pastel_color(index)
+    local golden_ratio_conjugate = 0.61803398875
+    local hue                    = (index * golden_ratio_conjugate) % 1.0
+    local saturation             = 0.45 + 0.15 * math.sin(index * 1.7)
+    local lightness              = 0.70 + 0.1 * math.cos(index * 1.1)
+    local function h2rgb(p, q, t)
+        if t < 0 then t = t + 1 end
+        if t > 1 then t = t - 1 end
+        if t < 1 / 6 then return p + (q - p) * 6 * t end
+        if t < 1 / 2 then return q end
+        if t < 2 / 3 then return p + (q - p) * (2 / 3 - t) * 6 end
+        return p
+    end
+    local q = lightness < 0.5 and (lightness * (1 + saturation)) or (lightness + saturation - lightness * saturation)
+    local p = 2 * lightness - q
+    local r = h2rgb(p, q, hue + 1 / 3)
+    local g = h2rgb(p, q, hue)
+    local b = h2rgb(p, q, hue - 1 / 3)
+    return ColorToNative(math.floor(r * 255 + 0.5), math.floor(g * 255 + 0.5), math.floor(b * 255 + 0.5)) | 0x1000000
+end
+
+---------------------------------------------------------------------
+
+function color_folder_children(parent_track, folder_color)
+    if not parent_track or not folder_color then return end
+    local parent_idx = GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    local num_tracks = CountTracks(0)
+    local idx = parent_idx + 1
+    local depth = 1
+    while idx < num_tracks and depth > 0 do
+        local tr = GetTrack(0, idx)
+        if not tr then break end
+        local folder_depth = GetMediaTrackInfo_Value(tr, "I_FOLDERDEPTH")
+        if depth > 0 then SetMediaTrackInfo_Value(tr, "I_CUSTOMCOLOR", folder_color) end
+        depth = depth + folder_depth
+        if depth <= 0 then break end
+        idx = idx + 1
+    end
 end
 
 ---------------------------------------------------------------------

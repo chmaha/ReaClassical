@@ -44,6 +44,7 @@ function main()
     set_first_folder_items_color()
     local first_track = duplicate_first_folder()
     delete_first_group_items()
+    say("Destination material moved to source")
     sync_based_on_workflow(workflow)
 
     -- Prepare Takes
@@ -58,7 +59,6 @@ function main()
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
-    say("Destination material moved to source")
 end
 
 ---------------------------------------------------------------------

@@ -56,9 +56,16 @@ function main()
     SetProjExtState(0, "ReaClassical", "ddp_refresh_trigger", "y")
     local track = GetSelectedTrack(0, 0)
     remove_offsets(track)
-    SetProjExtState(0, "ReaClassical", "ddp_silent", "y")
-    local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
-    Main_OnCommand(create_cd_markers, 0)
+
+    if not (APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y") then
+        SetProjExtState(0, "ReaClassical", "ddp_silent", "y")
+        local create_cd_markers = NamedCommandLookup("_RSa00edf5f46de174e455de2f03cf326ab3db034b9")
+        Main_OnCommand(create_cd_markers, 0)
+    else
+        _G.RC_TERMINAL_ARGS = { silent = true }
+        dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+        _G.RC_TERMINAL_ARGS = nil
+    end
 
     Undo_EndBlock('Remove All CD Marker Offsets', 0)
     PreventUIRefresh(-1)
