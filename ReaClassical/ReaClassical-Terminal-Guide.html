@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ReaClassical Terminal — Complete Command Guide</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+body {
+font-size: 12pt;
+line-height: 1.15;
+}
+p, li {
+margin-bottom: 0.1in;
+}
+h1 {
+font-size: 18pt;
+font-weight: bold;
+}
+h2 {
+font-size: 16pt;
+font-weight: bold;
+margin-top: 0.14in;
+}
+h3 {
+font-size: 14pt;
+font-weight: bold;
+margin-top: 0.1in;
+}
+a:link {
+color: #000080;
+text-decoration: underline;
+}
+a:visited {
+color: #800000;
+text-decoration: underline;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+}
+th, td {
+border: 1px solid #000;
+padding: 0.04in 8px;
+text-align: left;
+vertical-align: top;
+}
+th {
+font-weight: bold;
+text-align: center;
+}
+</style>
+</head>
+<body>
+<h1 id="reaclassical-terminal-complete-command-guide">ReaClassical
+Terminal — Complete Command Guide</h1>
+<p>The Terminal is a single text-entry dialog (run the “ReaClassical
+Terminal” script/action) that lets you type one or more ReaClassical
+commands instead of using the mouse or ImGui windows. It is built for
+screen-reader use: every command speaks a confirmation through OSARA (or
+prints to the console if OSARA isn’t installed).</p>
+<h2 id="how-to-use-the-terminal">How to use the Terminal</h2>
+<ul>
+<li>Run the script. A single-line input box appears: “Command:”.</li>
+<li>Type a command and press Enter.</li>
+<li>You can run several commands in one go by separating them with a
+semicolon: <code>1m;2m;3s</code> mutes tracks 1 and 2 and solos track
+3.</li>
+<li>Commands are case-sensitive and must match the patterns below
+exactly (no extra spaces inside tokens, though spaces around
+commas/dashes in lists are tolerated, e.g. <code>1, 3</code> and
+<code>1 - 3</code> both work).</li>
+<li>The very first command in a brand-new project must be a
+project-setup command (<code>Nv</code>, <code>Nh</code>,
+<code>newtab</code>, <code>update</code>, or <code>installosara</code>)
+— everything else requires an existing ReaClassical project.</li>
+<li>Type <code>help</code> to open this guide (published as HTML at
+https://reaclassical.org/rcterminal.html) in your default browser.
+(Separately, the <code>H</code> keyboard shortcut normally opens the
+full ReaClassical PDF manual, but switches to the HTML version at
+reaclassical.org/manual when OSARA is installed, since HTML reads far
+better with a screen reader than a PDF.)</li>
+<li>Type <code>!</code> on its own to repeat whatever command(s) you
+last ran. The “ReaClassical Repeat Last Terminal Command” reascript does
+the same thing from a keyboard shortcut without opening the Terminal
+dialog at all.</li>
+</ul>
+<h3 id="target-syntax-used-throughout">Target syntax used
+throughout</h3>
+<p>Many commands take a <code>&lt;target&gt;</code> — this is resolved
+consistently everywhere: - A plain number <code>N</code> = mixer track N
+(e.g. <code>3</code>). - A list: <code>1,3</code> / <code>4-6</code> /
+<code>1,4-6</code> / <code>*</code> (all mixer tracks). -
+<code>@N</code> = aux track N; <code>@</code> alone = the only aux track
+(if there’s exactly one); <code>@1,2</code> / <code>@*</code> etc. for
+lists of auxes. - <code>#N</code> = submix track N; same rules as aux
+but with <code>#</code>. - <code>rcm</code> = the RCMASTER track. -
+<code>refN</code> = reference track N; <code>ref</code> alone = the only
+reference track (if there’s exactly one); <code>ref1,2</code> for a list
+of references. Note: dash ranges (<code>ref1-3</code>) aren’t supported
+— use a comma list instead. - <code>rt</code> = the RoomTone track. -
+<code>live</code> = the LIVE track. - <code>lb</code> = the Listenback
+track.</p>
+<h3 id="folderposition-syntax-verticalhorizontal-workflows">Folder/position
+syntax (vertical/horizontal workflows)</h3>
+<ul>
+<li><code>D</code> = the Destination folder; <code>S1</code>,
+<code>S2</code>, … = Source folders.</li>
+<li>Within a folder, a position is <code>1</code> (the folder/parent
+track itself) or <code>2</code>, <code>3</code>, … (its child tracks,
+matching mixer-track position order).</li>
+</ul>
+<hr />
+<h2 id="project-setup">1. Project Setup</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Nv</code></td>
+<td>Start a brand-new project using the <strong>Vertical</strong>
+workflow with N tracks per folder (e.g. <code>6v</code>). If a
+ReaClassical project is already open, you’ll be asked to save
+first.</td>
+</tr>
+<tr>
+<td><code>Nh</code></td>
+<td>Start a brand-new project using the <strong>Horizontal</strong>
+workflow with N tracks (e.g. <code>6h</code>).</td>
+</tr>
+<tr>
+<td><code>Nh=Name1,Name2,...</code></td>
+<td>Same as <code>Nh</code>, also naming each mixer track in one step,
+e.g. <code>4h=Violin,Viola,Cello,Bass</code>.</td>
+</tr>
+<tr>
+<td><code>convert=h</code></td>
+<td>Convert the current (vertical) project to Horizontal workflow.</td>
+</tr>
+<tr>
+<td><code>convert=v</code></td>
+<td>Convert the current (horizontal) project to Vertical workflow.</td>
+</tr>
+</tbody>
+</table>
+<p>Typical first step in any session: <code>6v</code> (six mixer tracks,
+vertical/classical session workflow) or
+<code>4h=Violin,Viola,Cello,Bass</code> (horizontal/quick setup with
+names).</p>
+<h3 id="examples">Examples</h3>
+<ul>
+<li><code>6v</code> — Start a new Vertical-workflow project with 6 mixer
+tracks per folder. Use this for a multi-take classical recording
+session.</li>
+<li><code>4h=Violin,Viola,Cello,Bass</code> — Start a new
+Horizontal-workflow project with 4 named tracks in one step. Good for a
+quick quartet setup where every take lives on the same 4 tracks.</li>
+<li><code>convert=v</code> — You started in Horizontal (quick setup) but
+the session turned into a multi-take recording project, so you switch to
+Vertical without losing existing work.</li>
+</ul>
+<hr />
+<h2 id="naming-tracks-items-and-notes">2. Naming Tracks, Items, and
+Notes</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n=Name1,Name2,...</code></td>
+<td>Rename mixer tracks 1, 2, 3… in order, all at once.</td>
+</tr>
+<tr>
+<td><code>Nn=Name</code></td>
+<td>Rename only mixer track N.</td>
+</tr>
+<tr>
+<td><code>#Nn=Name</code> (or <code>#n=Name</code> if only one
+submix)</td>
+<td>Rename submix N.</td>
+</tr>
+<tr>
+<td><code>@Nn=Name</code> (or <code>@n=Name</code> if only one aux)</td>
+<td>Rename aux N.</td>
+</tr>
+<tr>
+<td><code>refNn=Name</code></td>
+<td>Rename reference track N.</td>
+</tr>
+<tr>
+<td><code>pn?</code></td>
+<td>Speak the project notes.</td>
+</tr>
+<tr>
+<td><code>pn=text</code></td>
+<td>Set the project notes.</td>
+</tr>
+<tr>
+<td><code>tn?</code></td>
+<td>Speak notes on the currently selected track.</td>
+</tr>
+<tr>
+<td><code>tn=text</code></td>
+<td>Set notes on the currently selected track.</td>
+</tr>
+<tr>
+<td><code>in=Title</code></td>
+<td>Rename the active take of the selected item (no comma — for plain
+renames; see DDP section for comma form).</td>
+</tr>
+<tr>
+<td><code>ino?</code></td>
+<td>Speak the selected item’s notes.</td>
+</tr>
+<tr>
+<td><code>ino=text</code></td>
+<td>Set the selected item’s notes.</td>
+</tr>
+<tr>
+<td><code>ir?</code></td>
+<td>Speak the selected item’s rank (Excellent/Very Good/Good/OK/Below
+Average/Poor/Unusable/False Start/None).</td>
+</tr>
+<tr>
+<td><code>ir=letter</code></td>
+<td>Set the item’s rank: <code>e</code>=Excellent, <code>v</code>=Very
+Good, <code>g</code>=Good, <code>o</code>=OK, <code>b</code>=Below
+Average, <code>p</code>=Poor, <code>u</code>=Unusable,
+<code>f</code>=False Start, <code>n</code>=None.</td>
+</tr>
+<tr>
+<td><code>itn?</code></td>
+<td>Speak the selected item’s take number.</td>
+</tr>
+<tr>
+<td><code>itn=N</code></td>
+<td>Set the selected item’s take number (<code>itn=0</code> clears
+it).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-1">Examples</h3>
+<ul>
+<li><code>n=Violin,Viola,Cello,Bass</code> — Rename all four mixer
+tracks in one command right after project setup.</li>
+<li><code>3n=2nd Violin</code> — You realize track 3 should say “2nd
+Violin” instead of whatever it’s currently called; rename just that
+one.</li>
+<li><code>ir=g</code> — Mark the take you just listened to as
+“Good”.</li>
+<li><code>ir?</code> — Before deciding whether to keep recording, check
+the rank already assigned to the selected take.</li>
+<li><code>tn=Close mic clipped at bar 12, used room mic instead</code> —
+Leave a note on a track explaining an editorial decision for future
+reference.</li>
+</ul>
+<hr />
+<h2 id="recording-setup-inputs">3. Recording Setup — Inputs</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>N=mono</code></td>
+<td>Set mixer-position N (in every folder) to mono, recording from
+hardware input N.</td>
+</tr>
+<tr>
+<td><code>N=mono,X</code></td>
+<td>Same, but recording from hardware input X instead of N.</td>
+</tr>
+<tr>
+<td><code>N=stereo</code></td>
+<td>Set mixer-position N to a stereo pair starting at hardware input
+N.</td>
+</tr>
+<tr>
+<td><code>N=stereo,X</code></td>
+<td>Stereo pair starting at hardware input X.</td>
+</tr>
+<tr>
+<td><code>N-M=stereo</code></td>
+<td>Pair position N (stereo, starting at hardware input N) with position
+M, disabling M’s own input (used to combine two mono slots into one
+stereo pair).</td>
+</tr>
+<tr>
+<td><code>Nrd=y</code> / <code>Nrd=n</code></td>
+<td>Disable / enable record-arming for mixer track N.</td>
+</tr>
+<tr>
+<td><code>*rd=y</code> / <code>*rd=n</code></td>
+<td>Disable / enable record-arming for <strong>all</strong> mixer
+tracks.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;rd?</code></td>
+<td>Speak record-enabled state and input (mono/stereo) for one or more
+tracks, e.g. <code>1-3rd?</code>.</td>
+</tr>
+<tr>
+<td><code>ai</code></td>
+<td>Auto-assign inputs starting at hardware input 1, guessing
+mono/stereo and L/R pan from track names (recognizes
+“L”/“R”/“stereo”/“pair” in many languages).</td>
+</tr>
+<tr>
+<td><code>ai=N</code></td>
+<td>Auto-assign inputs starting at hardware input N.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-2">Examples</h3>
+<ul>
+<li><code>ai</code> — Your interface’s inputs are plugged in order
+matching your track order; auto-assign everything starting at input 1
+instead of configuring each track by hand.</li>
+<li><code>ai=5</code> — The first 4 hardware inputs are already used by
+another rig; auto-assign all tracks starting at input 5 instead.</li>
+<li><code>1=stereo,3</code> — Track 1 (“Main Pair”) should record a
+stereo pair starting at hardware inputs 3/4, not 1/2.</li>
+<li><code>2=mono,5</code> — Track 2 (“Spot Mic”) is a single mic plugged
+into hardware input 5.</li>
+<li><code>*rd=n</code> — Before a playback-only rehearsal pass, disable
+record-arming on every track so nothing accidentally records.</li>
+<li><code>1rd?</code> — Confirm track 1 is actually armed and check what
+input it’s listening to before you start a take.</li>
+</ul>
+<hr />
+<h2 id="recording-transport-takes-record-panel">4. Recording — Transport
+&amp; Takes (Record Panel)</h2>
+<p>F9 (the Classical Take Record reascript) still works as a single
+toggle button: first press arms the selected folder, second press starts
+recording, and pressing it again while recording stops the take — no
+change there. <code>rec.arm</code> and <code>rec.start</code> give the
+Terminal the same two steps with precision instead of a toggle: each
+only ever does its own job, and announces the current state (“Already
+armed: …”, “Already recording”, “Not armed yet”) rather than silently
+doing nothing or the wrong thing. If OSARA is installed, F9 also starts
+the headless Record Panel daemon itself (the same daemon-start step as
+<code>rec.open</code>) the first time it’s pressed and the daemon isn’t
+already running, so you get its background take/level tracking even if
+you jump straight to F9 without ever running <code>rec.open</code>.
+<code>rec.arm</code> and <code>rec.start</code> do the same daemon
+auto-start regardless of whether OSARA is installed, since they’re
+explicitly the precision/headless entry points into recording.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rec.open</code></td>
+<td>Start the headless Record Panel daemon and arm the selected folder
+(first F9 press equivalent).</td>
+</tr>
+<tr>
+<td><code>rec.close</code></td>
+<td>Stop the Record Panel daemon.</td>
+</tr>
+<tr>
+<td><code>rec.arm</code></td>
+<td>Arm the selected folder without starting recording. If it’s already
+armed (or already recording), just announces that instead of changing
+anything.</td>
+</tr>
+<tr>
+<td><code>rec.start</code></td>
+<td>Start recording on the already-armed folder. If nothing is armed yet
+(or already recording), just announces that instead of arming it for you
+— run <code>rec.arm</code> first.</td>
+</tr>
+<tr>
+<td><code>rec.stop</code></td>
+<td>Press F9 to stop the current recording. In Vertical workflow, also
+announces which folder is now armed (e.g. “Recording Stopped. Source 4
+folder armed”) — F9 itself announces the same thing when used to
+stop.</td>
+</tr>
+<tr>
+<td><code>rec.pause</code></td>
+<td>Toggle pause/resume while recording.</td>
+</tr>
+<tr>
+<td><code>rec.next</code></td>
+<td>Move to the next recording section (Vertical workflow only; must be
+stopped first).</td>
+</tr>
+<tr>
+<td><code>rec.split</code></td>
+<td>Stop and immediately start a new take (Shift+F9 equivalent —
+increments take number / moves to next folder).</td>
+</tr>
+<tr>
+<td><code>rec.daemon?</code></td>
+<td>Report whether the Record Panel daemon is running.</td>
+</tr>
+<tr>
+<td><code>rec?</code></td>
+<td>Speak a full summary of all recording settings (session, take, time
+window, overlap, horizontal, clip reporting, daemon status).</td>
+</tr>
+<tr>
+<td><code>rec.session=name</code></td>
+<td>Set the session name (scans disk for the correct next take
+number).</td>
+</tr>
+<tr>
+<td><code>rec.session?</code></td>
+<td>Speak the current session name.</td>
+</tr>
+<tr>
+<td><code>rec.session-</code></td>
+<td>Clear the session name.</td>
+</tr>
+<tr>
+<td><code>rec.take=N</code></td>
+<td>Manually set the upcoming take number (rejected if lower than the
+highest take already on disk).</td>
+</tr>
+<tr>
+<td><code>rec.take=auto</code></td>
+<td>Revert to automatic take-number detection.</td>
+</tr>
+<tr>
+<td><code>rec.take?</code></td>
+<td>Speak the upcoming take number and whether it’s manual or auto.</td>
+</tr>
+<tr>
+<td><code>rec.latest?</code></td>
+<td>Scan disk and report the highest take number actually found (for the
+current session).</td>
+</tr>
+<tr>
+<td><code>rec.take+</code></td>
+<td>Manually increment the take number by 1.</td>
+</tr>
+<tr>
+<td><code>rec.rank=letter</code></td>
+<td>Set the rank (same letters as <code>ir=</code>) for the take
+currently recording (or the last one, if stopped).</td>
+</tr>
+<tr>
+<td><code>rec.note=text</code></td>
+<td>Set notes for the take currently recording (or the last one, if
+stopped).</td>
+</tr>
+<tr>
+<td><code>rec.start=HH:MM</code></td>
+<td>Set a scheduled recording start time.</td>
+</tr>
+<tr>
+<td><code>rec.start?</code></td>
+<td>Speak the scheduled start time.</td>
+</tr>
+<tr>
+<td><code>rec.end=HH:MM</code></td>
+<td>Set a scheduled recording end time.</td>
+</tr>
+<tr>
+<td><code>rec.end?</code></td>
+<td>Speak the scheduled end time.</td>
+</tr>
+<tr>
+<td><code>rec.duration=HH:MM</code></td>
+<td>Set a target recording duration.</td>
+</tr>
+<tr>
+<td><code>rec.duration?</code></td>
+<td>Speak the target duration.</td>
+</tr>
+<tr>
+<td><code>rec.time-</code></td>
+<td>Clear start/end/duration all at once.</td>
+</tr>
+<tr>
+<td><code>rec.overlap=y</code> / <code>=n</code></td>
+<td>Allow / disallow overlapping takes.</td>
+</tr>
+<tr>
+<td><code>rec.overlap?</code></td>
+<td>Query the overlap setting.</td>
+</tr>
+<tr>
+<td><code>rec.horizontal=y</code> / <code>=n</code></td>
+<td>Record takes horizontally even in a Vertical-workflow project.</td>
+</tr>
+<tr>
+<td><code>rec.horizontal?</code></td>
+<td>Query that setting.</td>
+</tr>
+<tr>
+<td><code>rec.clip=y</code> / <code>=n</code></td>
+<td>Turn OSARA clip (overload) announcements on/off for rec-armed
+tracks.</td>
+</tr>
+<tr>
+<td><code>rec.clip?</code></td>
+<td>Query the clip-reporting setting.</td>
+</tr>
+<tr>
+<td><code>rec.levels?</code></td>
+<td>Speak the current peak-hold level (dB) for every rec-armed
+track.</td>
+</tr>
+<tr>
+<td><code>rec.levels-</code></td>
+<td>Clear all peak/RMS hold values.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-3">Examples</h3>
+<ul>
+<li><code>rec.open</code> — At the start of a session, open the Record
+Panel daemon and arm the selected folder, ready to go.</li>
+<li><code>rec.session=MahlerSym5_Mvt1</code> — Name the session so every
+take is filed and numbered consistently on disk.</li>
+<li><code>rec.arm</code> — Get the folder armed and confirmed
+(e.g. “Armed: Source 2”) before telling a performer you’re ready.</li>
+<li><code>rec.start</code> — Once armed, start the take precisely on
+cue.</li>
+<li><code>rec.split</code> — Mid-take, the conductor stops and restarts;
+split here instead of stopping and re-arming manually so the next take
+number increments automatically.</li>
+<li><code>rec.rank=g</code> — Right after a take finishes, rank it
+“Good” without leaving the Terminal.</li>
+<li><code>rec.stop</code> — End the recording.</li>
+<li><code>rec.levels?</code> — Between takes, check whether any mic
+clipped by reviewing the peak hold on every armed track.</li>
+</ul>
+<hr />
+<h2 id="importing-audio">5. Importing Audio</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>import</code></td>
+<td>Smart Import: scan the project media folder for new audio files and
+import them, one folder per take.</td>
+</tr>
+<tr>
+<td><code>import=dest</code></td>
+<td>Same, but also duplicate each session’s takes onto the Destination
+folder.</td>
+</tr>
+<tr>
+<td><code>import=smart,1</code></td>
+<td>Same as plain <code>import</code> (one folder per take).</td>
+</tr>
+<tr>
+<td><code>import=smart,2</code></td>
+<td>Round-robin distribute new takes across the current number of source
+folders.</td>
+</tr>
+<tr>
+<td><code>import=smart,3,N</code></td>
+<td>Round-robin distribute across N folders (creating folders as
+needed).</td>
+</tr>
+<tr>
+<td>Add <code>,dest</code> to any of the above</td>
+<td>Also includes the Destination folder in the distribution,
+e.g. <code>import=smart,2,dest</code>.</td>
+</tr>
+<tr>
+<td><code>import=N</code></td>
+<td>Import only take number N, placed at the edit cursor.</td>
+</tr>
+<tr>
+<td><code>import=N,session</code></td>
+<td>Same, restricted to the named session.</td>
+</tr>
+<tr>
+<td><code>import=N-M</code></td>
+<td>Import takes N through M.</td>
+</tr>
+<tr>
+<td><code>import=N-M,session</code></td>
+<td>Same, restricted to the named session.</td>
+</tr>
+<tr>
+<td><code>find=N</code></td>
+<td>Locate take N on disk (default/most-recent session) and report
+it.</td>
+</tr>
+<tr>
+<td><code>find=N,session</code></td>
+<td>Locate take N within a named session.</td>
+</tr>
+<tr>
+<td><code>find=,session</code></td>
+<td>Locate take 1 within a named session.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-4">Examples</h3>
+<ul>
+<li><code>import</code> — You recorded several takes that landed in the
+project media folder; pull them all in, one folder per take.</li>
+<li><code>import=smart,2,dest</code> — Distribute newly recorded takes
+round-robin across your existing source folders, and also copy them onto
+the Destination folder for comping.</li>
+<li><code>import=12,MahlerSym5_Mvt1</code> — Only take 12 from the
+“MahlerSym5_Mvt1” session is missing from the timeline; import just that
+one at the edit cursor.</li>
+<li><code>find=7</code> — You remember take 7 sounded great but can’t
+recall which folder it landed in; locate it.</li>
+</ul>
+<hr />
+<h2 id="selection">6. Selection</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sel?</code></td>
+<td>Speak the currently selected tracks and items.</td>
+</tr>
+<tr>
+<td><code>time?</code></td>
+<td>Speak the current edit-cursor position.</td>
+</tr>
+<tr>
+<td><code>sel=D,positions</code></td>
+<td>Exclusively select track(s) at the given position(s) within folder D
+(Destination). Positions: <code>1</code> (folder track),
+<code>2</code>,<code>3</code>,… (children), or a
+list/range/<code>*</code>.</td>
+</tr>
+<tr>
+<td><code>sel=S1,positions</code></td>
+<td>Same, for Source folder 1 (and <code>S2</code>, <code>S3</code>… for
+further source folders).</td>
+</tr>
+<tr>
+<td><code>sel=+D,positions</code></td>
+<td><strong>Add</strong> to the current selection instead of replacing
+it.</td>
+</tr>
+<tr>
+<td><code>sel=positions</code> / <code>sel=+positions</code></td>
+<td>Folder-less shorthand — only works in <strong>Horizontal</strong>
+workflow (which has exactly one folder), e.g. <code>sel=1,3</code>.</td>
+</tr>
+<tr>
+<td><code>tr=text</code></td>
+<td>Jump to (select) the first track in the <strong>current</strong>
+folder — the one containing the currently selected track — whose name
+contains <code>text</code> (case-insensitive). Expands a collapsed
+folder first if needed.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-5">Examples</h3>
+<ul>
+<li><code>sel=D,*</code> — Select every track in the Destination folder
+before running <code>prepare</code> or applying automation to the whole
+comp.</li>
+<li><code>sel=S2,3</code> — Select just the cello track (position 3)
+within Source folder 2, to check that specific take.</li>
+<li><code>sel=+S1,1</code> — Add Source folder 1’s parent track to
+whatever’s already selected, so you can compare two takes’ folder tracks
+together.</li>
+<li><code>sel?</code> — After clicking around, confirm exactly what’s
+currently selected before running a destructive command like
+<code>delauto</code>.</li>
+<li><code>tr=cello</code> — From anywhere in the current folder, jump
+straight to the track named “Cello” without counting positions.</li>
+</ul>
+<hr />
+<h2 id="editing-tools">7. Editing Tools</h2>
+<h3 id="markers-regions">Markers &amp; regions</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mk=Name</code></td>
+<td>Add a marker named “Name” at the edit cursor.</td>
+</tr>
+<tr>
+<td><code>mk?</code></td>
+<td>Speak the name and position of the nearest marker at-or-before the
+cursor.</td>
+</tr>
+<tr>
+<td><code>rg=NameA,NameB</code></td>
+<td>Create a region spanning from marker “NameA” to marker “NameB”.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="undo-redo">Undo / redo</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>z</code> / <code>Nz</code></td>
+<td>Undo one step / N steps.</td>
+</tr>
+<tr>
+<td><code>y</code> / <code>Ny</code></td>
+<td>Redo one step / N steps.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reordering-mixer-tracks">Reordering mixer tracks</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Nu</code></td>
+<td>Move mixer track N up one position.</td>
+</tr>
+<tr>
+<td><code>NuC</code></td>
+<td>Move mixer track N up C positions, e.g. <code>3u2</code>.</td>
+</tr>
+<tr>
+<td><code>Nd</code> / <code>NdC</code></td>
+<td>Move mixer track N down one / C positions.</td>
+</tr>
+<tr>
+<td><code>positionsu</code> / <code>positionsuC</code></td>
+<td>Move a <strong>contiguous block</strong> of mixer tracks up one / C
+positions, keeping their relative order — <code>positions</code> is a
+list/range like <code>6,7</code> or <code>1-3</code>.</td>
+</tr>
+<tr>
+<td><code>positionsd</code> / <code>positionsdC</code></td>
+<td>Same, moving the block down.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="adding-removing-tracks">Adding / removing tracks</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>add</code></td>
+<td>Add a new mixer track (and matching child track in every folder),
+named “Track N”.</td>
+</tr>
+<tr>
+<td><code>add=Name</code></td>
+<td>Same, with a chosen name.</td>
+</tr>
+<tr>
+<td><code>rmN</code></td>
+<td>Remove mixer track N (and its counterpart in every folder). Won’t go
+below the minimum 2-track folder size.</td>
+</tr>
+<tr>
+<td><code>add@</code></td>
+<td>Add a new aux track.</td>
+</tr>
+<tr>
+<td><code>add@=Name</code></td>
+<td>Same, with a chosen name.</td>
+</tr>
+<tr>
+<td><code>add#</code></td>
+<td>Add a new submix track.</td>
+</tr>
+<tr>
+<td><code>add#=Name</code></td>
+<td>Same, with a chosen name.</td>
+</tr>
+<tr>
+<td><code>rm@N</code> (or <code>rm@</code>)</td>
+<td>Remove aux track N (or the only aux track).</td>
+</tr>
+<tr>
+<td><code>rm#N</code> (or <code>rm#</code>)</td>
+<td>Remove submix track N (or the only submix track).</td>
+</tr>
+<tr>
+<td><code>addlb=N</code></td>
+<td>Add a Listenback (cue/foldback) track armed on hardware input N — or
+just retune the input if one already exists.</td>
+</tr>
+<tr>
+<td><code>rmlb</code></td>
+<td>Remove the Listenback track.</td>
+</tr>
+<tr>
+<td><code>rmrefN</code> (or <code>rmref</code>)</td>
+<td>Remove reference track N (or the only one).</td>
+</tr>
+<tr>
+<td><code>rmrt</code></td>
+<td>Remove the RoomTone track.</td>
+</tr>
+<tr>
+<td><code>rmlive</code></td>
+<td>Remove the LIVE track.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="playback-rate-pitch-selected-item">Playback rate &amp; pitch
+(selected item)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pr=N</code></td>
+<td>Change the selected item’s playback rate by N% relative to its
+current rate (timestretch; ripples subsequent items in the folder).</td>
+</tr>
+<tr>
+<td><code>pr=a,N</code></td>
+<td>Set an absolute rate change of N% from normal speed.</td>
+</tr>
+<tr>
+<td><code>pr=0</code></td>
+<td>Reset playback rate to normal.</td>
+</tr>
+<tr>
+<td><code>pr?</code></td>
+<td>Speak the current playback rate.</td>
+</tr>
+<tr>
+<td><code>pt=N</code></td>
+<td>Set pitch to N semitones (<code>pt=0</code> resets to normal).</td>
+</tr>
+<tr>
+<td><code>pt?</code></td>
+<td>Speak the current pitch.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="prepare-takes">Prepare Takes</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prepare</code></td>
+<td>Run “Prepare Takes” headlessly over all items in the project.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-6">Examples</h3>
+<ul>
+<li><code>mk=Movement II Start</code> — Drop a marker at the cursor so
+you can navigate straight back to this spot later.</li>
+<li><code>rg=Movement II Start,Movement II End</code> — Turn two markers
+you’ve already placed into a region, e.g. for looping playback over that
+movement.</li>
+<li><code>z</code> — Undo the last action; <code>3z</code> undoes the
+last three in one go.</li>
+<li><code>3u2</code> — Mixer track 3 (“Cello”) should sit two slots
+higher in the mixer order (e.g. above the violins); move it up 2
+positions.</li>
+<li><code>6,7u2</code> / <code>1-3d</code> — Move the cello+bass pair
+(mixer tracks 6 and 7) up two slots together, or shift the violins block
+(1-3) down one slot, without breaking up their order.</li>
+<li><code>add=Room Mic L</code> — A room mic pair wasn’t part of the
+original setup; add a new mixer track (and matching child track in every
+folder) for it.</li>
+<li><code>rm5</code> — Track 5 turned out to be unused; remove it from
+every folder and the mixer.</li>
+<li><code>pr=-5</code> — The selected take is a hair too fast compared
+to the other takes you’re comping against; slow it by 5% to match.</li>
+<li><code>pt=0</code> — Reset a pitch-shifted item back to normal after
+an experiment.</li>
+<li><code>prepare</code> — Once all takes for the piece are imported and
+ranked, run Prepare Takes to get them into editable shape.</li>
+</ul>
+<hr />
+<h2 id="mixing">8. Mixing</h2>
+<h3 id="mute-solo">Mute / solo</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;m</code></td>
+<td>Mute the target(s), e.g. <code>1m</code>, <code>1,3m</code>,
+<code>4-6m</code>, <code>*m</code>, <code>@1m</code>, <code>#m</code>,
+<code>refm</code>, <code>rtm</code>, <code>livem</code>,
+<code>lbm</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;um</code></td>
+<td>Unmute.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;s</code></td>
+<td>Solo (in addition to anything already soloed).</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;us</code></td>
+<td>Unsolo.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;xs</code></td>
+<td><strong>Exclusive</strong> solo: clears mute/solo on every mixer
+track first, then solos only the given target(s).</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;m?</code></td>
+<td>Speak mute state.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;s?</code></td>
+<td>Speak solo state.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pan">Pan</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;p+N</code> / <code>&lt;target&gt;p-N</code></td>
+<td>Nudge pan by N percentage points toward right/left,
+e.g. <code>1p+10</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;p=N</code></td>
+<td>Set pan to an absolute percent, -100 (full left) to +100 (full
+right), e.g. <code>1p=-50</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;p?</code></td>
+<td>Speak current pan (e.g. “25L”, “C”, “10R”).</td>
+</tr>
+<tr>
+<td><code>rcmp=N</code></td>
+<td>Set RCMASTER’s pan directly (percent, signed).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fader-volume">Fader (volume)</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;f+N</code> / <code>&lt;target&gt;f-N</code></td>
+<td>Nudge volume by N dB.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;f=N</code></td>
+<td>Set volume to an absolute N dB.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;f?</code></td>
+<td>Speak current volume in dB.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="polarity-phase">Polarity / phase</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;i=1</code></td>
+<td>Invert polarity.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;i=0</code></td>
+<td>Normal polarity.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;i?</code></td>
+<td>Speak polarity state.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="full-single-track-summary">Full single-track summary</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>N?</code> / <code>@N?</code> / <code>#N?</code> /
+<code>rcm?</code> / <code>refN?</code> / <code>rt?</code> /
+<code>live?</code> / <code>lb?</code></td>
+<td>Speak a complete report for one track: mute, solo, fader, pan,
+phase, (record input, for mixer tracks), routing chain to RCMASTER, and
+FX chain.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="routing">Routing</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;list&gt;-rcm</code></td>
+<td>Connect the given mixer track(s) (or
+<code>ref</code>/<code>ref&lt;list&gt;</code>) to RCMASTER,
+e.g. <code>1-3-rcm</code>, <code>*-rcm</code>,
+<code>ref1,2-rcm</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;list&gt;/rcm</code></td>
+<td>Disconnect the given mixer track(s) (or
+<code>ref</code>/<code>ref&lt;list&gt;</code>) from RCMASTER.</td>
+</tr>
+<tr>
+<td><code>&lt;ref&gt;-rcm?</code></td>
+<td>Query whether a single target (including <code>refN</code>,
+<code>rt</code>, <code>live</code>, <code>lb</code>) is connected to
+RCMASTER.</td>
+</tr>
+<tr>
+<td><code>*/*#</code></td>
+<td>Remove all sends from every mixer track to every submix.</td>
+</tr>
+<tr>
+<td><code>*/*@</code></td>
+<td>Remove all sends from every mixer track to every aux.</td>
+</tr>
+<tr>
+<td><code>A-B</code></td>
+<td>Create a send from target A to target B (any two single targets —
+mixer/aux/submix/rcm/refN/rt/live/lb), e.g. <code>1-@1</code>,
+<code>1-ref2</code>.</td>
+</tr>
+<tr>
+<td><code>A/B</code></td>
+<td>Remove the send from A to B.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fx">FX</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;ref&gt;fx=PluginName</code></td>
+<td>Add an FX plugin by name to a single target
+(mixer/aux/submix/refN/rt/live/lb), appended at the end of the
+chain.</td>
+</tr>
+<tr>
+<td><code>&lt;ref&gt;fx=PluginName,N</code></td>
+<td>Same, but move the new FX to chain position N.</td>
+</tr>
+<tr>
+<td><code>rcmfx=PluginName</code> (or <code>,N</code>)</td>
+<td>Same, targeting RCMASTER specifically.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="automation-envelopes">Automation (envelopes)</h3>
+<p>Requires a time selection and at least one selected track.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addauto=param,value</code></td>
+<td>Write automation for <code>param</code> (one of
+<code>vol</code>,<code>pan</code>,<code>width</code>,<code>mute</code>,<code>trimvol</code>,<code>prevol</code>,<code>prepan</code>,<code>prewidth</code>)
+to <code>value</code> across the time selection, on all selected tracks.
+<code>value</code> is dB for volume-type params, -1..1 for pan/width,
+0/1 for mute.</td>
+</tr>
+<tr>
+<td><code>addauto=param,value,rampIn</code></td>
+<td>Same, with a ramp-in of <code>rampIn</code> seconds before the
+selection.</td>
+</tr>
+<tr>
+<td><code>addauto=param,value,rampIn,rampOut</code></td>
+<td>Same, plus a ramp-out after the selection.</td>
+</tr>
+<tr>
+<td><code>addautoitem=...</code></td>
+<td>Same arguments as <code>addauto=</code>, but wraps the change in an
+automation <strong>item</strong> (movable/resizable as a unit) instead
+of plain points.</td>
+</tr>
+<tr>
+<td><code>delauto</code></td>
+<td>Delete ALL built-in automation (points and items) on selected tracks
+within the time selection (including any ramps from the most recent
+<code>addauto</code>/<code>addautoitem</code> on that exact
+selection).</td>
+</tr>
+<tr>
+<td><code>delauto=param</code> (or <code>param1,param2,...</code>)</td>
+<td>Delete only the named envelope(s).</td>
+</tr>
+<tr>
+<td><code>delauto=*</code></td>
+<td>Same as bare <code>delauto</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-7">Examples</h3>
+<ul>
+<li><code>1,3m</code> — Mute the first violin and cello sections to
+check what the rest of the ensemble sounds like alone.</li>
+<li><code>4-6xs</code> — Exclusive-solo the back-row tracks (4 through
+6), clearing any other mute/solo state first, to spot-check that section
+in isolation.</li>
+<li><code>1p=-30</code> — Pan the first violins 30% left to widen the
+stereo image.</li>
+<li><code>2f=-2.5</code> — Pull the second violins down 2.5 dB relative
+to the rest of the mix.</li>
+<li><code>rcmp=0</code> — Recenter RCMASTER’s pan after an
+experiment.</li>
+<li><code>1i=1</code> — Invert polarity on track 1 because it’s out of
+phase with a spot mic.</li>
+<li><code>1?</code> — Get a full spoken status report
+(mute/solo/fader/pan/phase/routing/FX) on track 1 before deciding what
+to change.</li>
+<li><code>1-rcm</code> — Connect track 1 to RCMASTER after adding it,
+since new tracks aren’t routed there automatically.</li>
+<li><code>*/*@</code> — Strip every mixer track’s send to the auxes in
+one shot, e.g. before rebuilding a reverb bus from scratch.</li>
+<li><code>1fx=ReaEQ</code> — Add an EQ plugin to track 1.</li>
+<li><code>rcmfx=ReaComp,1</code> — Add a compressor to RCMASTER and
+place it first in the chain (e.g. ahead of an existing limiter).</li>
+<li><code>addauto=vol,-6,2,2</code> — With a time selection over a
+too-loud passage, pull volume down 6 dB with 2-second ramps in and
+out.</li>
+<li><code>delauto=vol</code> — Remove just the volume automation you
+added over the current time selection, leaving pan/mute automation
+intact.</li>
+</ul>
+<hr />
+<h2 id="mixer-snapshot-manager-headless">9. Mixer Snapshot Manager
+(headless)</h2>
+<p>Snapshots capture the full mixer state
+(volume/pan/mute/solo/phase/width/FX/sends/routing) tied to a specific
+media item, for instant recall during playback (e.g. switching mic
+perspective mid-take).</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>snap+</code></td>
+<td>Create (or update) a snapshot from the current mixer state, tied to
+the selected item.</td>
+</tr>
+<tr>
+<td><code>snap?</code></td>
+<td>List all snapshots in the current bank, in timeline order.</td>
+</tr>
+<tr>
+<td><code>snapN</code></td>
+<td>Recall snapshot N.</td>
+</tr>
+<tr>
+<td><code>snap-N</code></td>
+<td>Delete snapshot N.</td>
+</tr>
+<tr>
+<td><code>snaprecall</code></td>
+<td>Recall whichever snapshot matches the selected item (or, failing
+that, the edit cursor position).</td>
+</tr>
+<tr>
+<td><code>snap.clear</code></td>
+<td>Delete all snapshots in the current bank.</td>
+</tr>
+<tr>
+<td><code>snap.bank?</code></td>
+<td>Speak the active bank (A/B/C/D).</td>
+</tr>
+<tr>
+<td><code>snap.bank=X</code></td>
+<td>Switch the active bank.</td>
+</tr>
+<tr>
+<td><code>snap.copy=X</code></td>
+<td>Copy bank X’s snapshots into the current bank.</td>
+</tr>
+<tr>
+<td><code>snap.ar?</code></td>
+<td>Query auto-recall (whether snapshots fire automatically during
+playback) for the current bank.</td>
+</tr>
+<tr>
+<td><code>snap.ar=y</code> / <code>=n</code></td>
+<td>Turn auto-recall on/off.</td>
+</tr>
+<tr>
+<td><code>snap.gapfolder?</code></td>
+<td>Show which folder is used for gap/mid-point detection in this
+bank.</td>
+</tr>
+<tr>
+<td><code>snap.gapfolder=all</code> / <code>=TrackName</code></td>
+<td>Set gap-detection scope to all tracks or one named folder.</td>
+</tr>
+<tr>
+<td><code>snap.auto</code></td>
+<td>Convert every snapshot in the current bank into real automation
+lanes. The daemon is no longer needed once automation is driving recall,
+so this also stops it if it’s running.</td>
+</tr>
+<tr>
+<td><code>snap.auto-</code></td>
+<td>Clear all automation previously created from snapshots. Recall now
+depends on the snapshots again, so this also starts the daemon if it
+isn’t already running.</td>
+</tr>
+<tr>
+<td><code>snap.open</code></td>
+<td>Start the Mixer Snapshot daemon (needed for auto-recall during
+playback).</td>
+</tr>
+<tr>
+<td><code>snap.close</code></td>
+<td>Stop the daemon.</td>
+</tr>
+<tr>
+<td><code>snap.daemon?</code></td>
+<td>Report whether the daemon is running.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-8">Examples</h3>
+<ul>
+<li><code>snap+</code> — With the selected item being a passage where
+you want to switch from the main pair to a spot mic balance, capture the
+current mixer state as a snapshot tied to that item.</li>
+<li><code>snap.ar=y</code> then <code>snap.open</code> — Turn on
+auto-recall and start the daemon so snapshots fire automatically as
+playback crosses each tagged item.</li>
+<li><code>snap?</code> — Before a playback run-through, review every
+snapshot you’ve created and where they land on the timeline.</li>
+<li><code>snap3</code> — Manually jump to snapshot 3’s mixer state
+without needing playback to reach it.</li>
+<li><code>snap.auto</code> — Once you’re happy with how the snapshots
+sound, bake them into real automation lanes; the daemon stops
+automatically since the project no longer depends on it.</li>
+<li><code>snap-2</code> — Delete snapshot 2 because that perspective
+change is no longer needed.</li>
+</ul>
+<hr />
+<h2 id="album-ddp-cd-metadata">10. Album / DDP / CD Metadata</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>in?</code></td>
+<td>Speak the CD-marker / take metadata for the selected item.</td>
+</tr>
+<tr>
+<td><code>in=Title,pf=...,sw=...,cp=...,ar=...,msg=...,isrc=...</code></td>
+<td>Set CD-track metadata for the selected item: title, performer,
+songwriter, composer, arranger, message, ISRC. Omit any field to leave
+it unchanged; set a field to <code>0</code> to clear it.</td>
+</tr>
+<tr>
+<td><code>album?</code></td>
+<td>Speak album-level metadata for the project.</td>
+</tr>
+<tr>
+<td><code>album=Title,cat=...,pf=...,sw=...,cp=...,ar=...,id=...,msg=...,lg=...</code></td>
+<td>Set album metadata: title, catalog number, performer, songwriter,
+composer, arranger, identification, message, language (must match a
+valid language name).</td>
+</tr>
+<tr>
+<td><code>createcd</code></td>
+<td>(Re)build CD/DDP markers for the selected folder track.</td>
+</tr>
+<tr>
+<td><code>digital=y</code> / <code>=n</code></td>
+<td>Toggle “Digital Release Only” mode (no pregap/frame-snap offsets,
+for streaming-only releases).</td>
+</tr>
+<tr>
+<td><code>digital?</code></td>
+<td>Query that setting.</td>
+</tr>
+<tr>
+<td><code>isrc=y</code> / <code>=n</code></td>
+<td>Toggle Manual ISRC Entry (on: enter every ISRC independently; off:
+auto-increment from the first track).</td>
+</tr>
+<tr>
+<td><code>isrc?</code></td>
+<td>Query that setting.</td>
+</tr>
+<tr>
+<td><code>offsets+</code></td>
+<td>Record current CD marker positions as manual offsets (preserved on
+future <code>createcd</code> runs).</td>
+</tr>
+<tr>
+<td><code>offsets-</code></td>
+<td>Clear all manual marker offsets, reverting to automatic
+placement.</td>
+</tr>
+<tr>
+<td><code>offsets?</code></td>
+<td>Report whether manual offsets are active on the selected track.</td>
+</tr>
+<tr>
+<td><code>tu</code> / <code>td</code></td>
+<td>Move the selected album track up/down in running order (markers
+re-sync automatically).</td>
+</tr>
+<tr>
+<td><code>repos=N</code></td>
+<td>Reposition CD track groups on the selected folder, leaving N seconds
+of gap between each.</td>
+</tr>
+<tr>
+<td><code>buildlist=source</code></td>
+<td>Build an HTML edit list using source-file timing.</td>
+</tr>
+<tr>
+<td><code>buildlist=bwf</code></td>
+<td>Build an HTML edit list using BWF (Broadcast Wave) start-offset
+timing.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-9">Examples</h3>
+<ul>
+<li><code>album=Beethoven Piano Sonatas,cp=Beethoven,pf=Jane Smith</code>
+— Set the album title, composer, and performer for the whole release
+before building CD markers.</li>
+<li><code>in=Sonata No. 14 &quot;Moonlight&quot; I. Adagio,pf=Jane Smith,isrc=USS122600001</code>
+— Tag the selected track item with its title, performer, and ISRC
+code.</li>
+<li><code>createcd</code> — After finishing edits on a folder, (re)build
+the CD/DDP markers so track boundaries reflect the current
+arrangement.</li>
+<li><code>tu</code> — The selected album track should come earlier in
+the running order; nudge it up one slot.</li>
+<li><code>repos=2</code> — Space out CD track groups with a 2-second gap
+between each, e.g. after reordering several movements.</li>
+<li><code>digital=y</code> — This release is streaming-only, so turn off
+pregap/frame-snapping before building markers.</li>
+<li><code>offsets+</code> — You manually nudged a marker’s position and
+want future <code>createcd</code> runs to preserve it instead of
+recalculating automatically.</li>
+</ul>
+<hr />
+<h2 id="rendering-export">11. Rendering / Export</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>render=ddp</code></td>
+<td>Build CD markers, then render a DDP image.</td>
+</tr>
+<tr>
+<td><code>render=cue</code></td>
+<td>Build CD markers, then render a CUE sheet + audio.</td>
+</tr>
+<tr>
+<td><code>render=wav</code></td>
+<td>Build CD markers, then render WAV.</td>
+</tr>
+<tr>
+<td><code>render=flac</code></td>
+<td>Build CD markers, then render FLAC.</td>
+</tr>
+<tr>
+<td><code>render=opus</code></td>
+<td>Build CD markers, then render Opus.</td>
+</tr>
+<tr>
+<td><code>render=mp3</code></td>
+<td>Build CD markers, then render MP3.</td>
+</tr>
+<tr>
+<td><code>render=custom</code> (or plain <code>render</code>)</td>
+<td>Build CD markers, then open REAPER’s normal Render dialog.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-10">Examples</h3>
+<ul>
+<li><code>render=wav</code> — Bounce a quick WAV of the album for a
+reference listen before committing to a final master.</li>
+<li><code>render=ddp</code> — Deliver a manufacturing-ready DDP image
+once the album is finalized.</li>
+<li><code>render=mp3</code> — Export an MP3 to send the client a quick
+preview by email.</li>
+<li><code>render=custom</code> — You need a non-standard render
+configuration (e.g. a specific sample rate); open the full Render dialog
+instead of a preset.</li>
+</ul>
+<hr />
+<h2 id="stats-diagnostics-preferences">12. Stats, Diagnostics &amp;
+Preferences</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stats?</code></td>
+<td>Speak a full project report: workflow, REAPER/ReaClassical versions,
+album length, CD marker count, project age, session time, total/source
+length, item/folder/track counts, edits (S-D/splits), FX/automation
+counts, and a list of every mixer/aux/submix/RCMASTER track.</td>
+</tr>
+<tr>
+<td><code>stats=reset</code></td>
+<td>Reset the session timer.</td>
+</tr>
+<tr>
+<td><code>peak?</code></td>
+<td>Scan all unmuted tracks and jump the edit cursor to the loudest
+point.</td>
+</tr>
+<tr>
+<td><code>overs?</code></td>
+<td>Scan all unmuted tracks for peak level and any “overs” above the
+saved threshold.</td>
+</tr>
+<tr>
+<td><code>overs=N</code></td>
+<td>Same scan, using N dB as the over threshold (also saved as the new
+default).</td>
+</tr>
+<tr>
+<td><code>pref?</code></td>
+<td>List all 15 ReaClassical preferences with their current values.</td>
+</tr>
+<tr>
+<td><code>pref.key?</code></td>
+<td>Query a single preference (by keyword or 1–15 index). Keywords:
+<code>xfade</code>, <code>offset</code>, <code>index0</code>,
+<code>leadout</code>, <code>nocolor</code>, <code>norank</code>,
+<code>refguide</code>, <code>sdmarkers</code>, <code>altrate</code>,
+<code>year</code>, <code>cuefmt</code>, <code>floatdest</code>,
+<code>itemnames</code>, <code>takenums</code>,
+<code>srcmode</code>.</td>
+</tr>
+<tr>
+<td><code>pref.key=value</code></td>
+<td>Set a single preference (validated — numeric ranges, 0/1 booleans,
+or WAV/FLAC/MP3/AIFF for <code>cuefmt</code>).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-11">Examples</h3>
+<ul>
+<li><code>stats?</code> — Get a full spoken overview of the project
+(length, item/track counts, FX/automation, mixer layout) to orient
+yourself in an unfamiliar or long-running session.</li>
+<li><code>overs?</code> — Before rendering, scan for any clipped peaks
+across all unmuted tracks.</li>
+<li><code>overs=-3</code> — Tighten the over-detection threshold to -3
+dB for a stricter check ahead of a critical master.</li>
+<li><code>peak?</code> — Jump straight to the single loudest moment in
+the project to check it by ear.</li>
+<li><code>pref.xfade=50</code> — Increase the default S-D crossfade
+length to 50 ms for a smoother edit style.</li>
+<li><code>pref.cuefmt=FLAC</code> — Switch the CUE sheet’s audio format
+from the default WAV to FLAC.</li>
+<li><code>pref?</code> — Review every current preference value before
+changing one, so you know what you’re starting from.</li>
+</ul>
+<hr />
+<h2 id="miscellaneous-setup-utilities">13. Miscellaneous / Setup
+Utilities</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>newtab</code></td>
+<td>Open a new REAPER project tab.</td>
+</tr>
+<tr>
+<td><code>help</code></td>
+<td>Open this guide (the published HTML version, at
+https://reaclassical.org/rcterminal.html) in your default browser.</td>
+</tr>
+<tr>
+<td><code>factoryreset</code></td>
+<td>Run the ReaClassical Factory Reset script.</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td>Trigger a ReaPack synchronization (checks for updates).</td>
+</tr>
+<tr>
+<td><code>installosara</code></td>
+<td>Download and install the OSARA screen-reader accessibility plugin
+(Windows/macOS only), then restart REAPER.</td>
+</tr>
+<tr>
+<td><code>allowgui=y</code> / <code>allowgui=n</code></td>
+<td>Allow/block ReaImGui windows (Mission Control, Notes, Preferences,
+etc.) from opening while OSARA is installed — they’re blocked by default
+in that case, since they’re unusable with a screen reader.</td>
+</tr>
+<tr>
+<td><code>allowgui?</code></td>
+<td>Speak whether GUI windows are currently allowed or blocked.</td>
+</tr>
+<tr>
+<td><code>debug=on</code> / <code>debug=off</code></td>
+<td>Display console messages in addition to OSARA announcements</td>
+</tr>
+<tr>
+<td><code>nudge=ms</code></td>
+<td>Set the ReaClassical project-level nudge amount, in milliseconds,
+used by the “Nudge Marker Left”/“Right” and “Nudge Item Left”/“Right”
+reascripts. REAPER’s own item-nudge amount/unit isn’t exposed to
+ReaScript, so this is tracked independently per project. Defaults to 5
+ms if never set.</td>
+</tr>
+<tr>
+<td><code>nudge?</code></td>
+<td>Speak the current nudge amount.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples-12">Examples</h3>
+<ul>
+<li><code>installosara</code> — Setting up a brand-new machine; install
+the screen-reader plugin before doing anything else.</li>
+<li><code>update</code> — Check ReaPack for newer versions of
+ReaClassical at the start of a session.</li>
+<li><code>newtab</code> — Start a second, unrelated project (e.g. a
+different concert) without closing the current one.</li>
+<li><code>help</code> — Open this guide in your browser to look
+something up.</li>
+<li><code>allowgui=y</code> — A sighted collaborator needs to use
+Mission Control on this OSARA-enabled machine; let GUI windows open
+again.</li>
+<li><code>nudge=10</code> — Switch to 10 ms steps for fine-tuning a
+marker position, then nudge it with the “Nudge Marker Left”/“Right”
+reascripts (these select a marker automatically after auditioning
+from/to it). The same amount also drives “Nudge Item Left”/“Right”,
+which shift the selected item (and its synced peers across tracks in the
+same folder) and ripple every later item in that folder along with
+it.</li>
+</ul>
+<hr />
+<h2 id="suggested-learning-order-for-a-new-user">Suggested learning
+order for a new user</h2>
+<ol type="1">
+<li><strong>Setup</strong>: <code>6v</code> (or
+<code>4h=Violin,Viola,Cello,Bass</code>) → confirm with
+<code>stats?</code>.</li>
+<li><strong>Inputs</strong>: <code>ai</code> or manual
+<code>1=stereo</code>, <code>2=mono,3</code> → check with
+<code>1rd?</code>.</li>
+<li><strong>Recording</strong>: <code>rec.session=Take1</code>,
+<code>rec.arm</code> then <code>rec.start</code> (or just press F9
+twice), <code>rec.stop</code> to stop, <code>rec?</code> to review.</li>
+<li><strong>Importing</strong> (if recorded outside the session, or
+doing a second pass): <code>import</code> or
+<code>import=smart,2,dest</code>.</li>
+<li><strong>Selecting &amp; editing</strong>: <code>sel=D,*</code>,
+<code>mk=Start</code>, <code>pr=-5</code> to slow a passage,
+<code>prepare</code> once takes are gathered.</li>
+<li><strong>Mixing</strong>: <code>1f=-3</code>, <code>2p=-20</code>,
+<code>1-rcm</code>, <code>1fx=ReaEQ</code>,
+<code>addauto=vol,-6,2,2</code>.</li>
+<li><strong>Mixer snapshots</strong> (for live perspective switches):
+<code>snap+</code>, <code>snap.ar=y</code>, <code>snap.open</code>.</li>
+<li><strong>Album assembly</strong>: <code>createcd</code>,
+<code>album=My Recital,cp=Bach,pf=Various</code>.</li>
+<li><strong>Rendering</strong>: <code>render=ddp</code> or
+<code>render=wav</code>.</li>
+<li><strong>Check anytime</strong>: <code>stats?</code>,
+<code>overs?</code>, <code>peak?</code>.</li>
+</ol>
+</body>
+</html>

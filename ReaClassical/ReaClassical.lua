@@ -207,6 +207,8 @@
   ReaClassical-render.ini
   ReaClassical-metadata.ini
   reaclassical-splash.png
+  ReaClassical-Manual.html
+  ReaClassical-Terminal-Guide.html
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
