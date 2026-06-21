@@ -82,6 +82,7 @@ local RANKS = {
 local take_count         = 0
 local take_text          = 0
 local iterated_filenames = false
+local rec_name_set       = false
 local session            = ""
 local session_dir        = ""
 local session_suffix     = ""
@@ -145,11 +146,17 @@ local function do_get_take_count(session_name)
     return take_count
 end
 
+-- Mirrors Record Panel.lua's rec_name_set guard: the global recfile_wildcards
+-- config var only needs writing once per actual change, not every defer
+-- frame -- CurrentTakeNumber (project-scoped) is cheap enough to keep fresh
+-- unconditionally.
 local function update_wildcards()
+    SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(take_text))
+    if rec_name_set then return end
     local padded = string.format("%03d", math.max(1, tonumber(take_text) or 1))
     SNM_SetStringConfigVar("recfile_wildcards",
         session_dir .. session_suffix .. "$tracknameornumber_T" .. padded)
-    SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(take_text))
+    rec_name_set = true
 end
 
 ---------------------------------------------------------------------
@@ -164,6 +171,7 @@ local function check_session_change()
         session_dir        = session ~= "" and (session .. separator) or ""
         session_suffix     = session ~= "" and (session .. "_")       or ""
         iterated_filenames = false
+        rec_name_set       = false
     end
 end
 
@@ -175,6 +183,7 @@ local function check_override()
 
     if last_override == "1" and (override == "0" or override == "") then
         iterated_filenames = false
+        rec_name_set       = false
     end
     if override == "1" then
         local _, cur = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
@@ -183,6 +192,7 @@ local function check_override()
             take_count        = n - 1
             take_text         = n
             iterated_filenames = true
+            rec_name_set       = false
         end
     end
 
@@ -557,6 +567,7 @@ local function main()
         take_count         = 0
         take_text          = 0
         iterated_filenames = false
+        rec_name_set       = false
         session            = ""
         session_dir        = ""
         session_suffix     = ""
@@ -623,6 +634,7 @@ local function main()
             -- Recording just started: lock in this take number
             take_count         = take_count + 1
             take_text          = take_count
+            rec_name_set       = false
             last_recorded_take = take_count
             color_run_once     = true
             SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(take_text))
