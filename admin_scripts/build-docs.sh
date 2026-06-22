@@ -2,10 +2,14 @@ RC_install_manual_html="$HOME/Desktop/ReaClassical_26/Scripts/chmaha Scripts/Rea
 RC_package_manual_html="$HOME/code/chmaha/ReaClassical/ReaClassical/ReaClassical-Manual.html"
 RC_install_terminal_html="$HOME/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Terminal-Guide.html"
 RC_package_terminal_html="$HOME/code/chmaha/ReaClassical/ReaClassical/ReaClassical-Terminal-Guide.html"
+RC_install_shortcuts_html="$HOME/Desktop/ReaClassical_26/Scripts/chmaha Scripts/ReaClassical/ReaClassical-Shortcuts.html"
+RC_package_shortcuts_html="$HOME/code/chmaha/ReaClassical/ReaClassical/ReaClassical-Shortcuts.html"
 front_matter="docs/manual/src/front_matter/front_matter.adoc"
 index="docs/manual/src/index.adoc"
 terminal_guide="docs/terminal_guide.md"
 terminal_html="docs/rcterminal.html"
+kb_ini="ReaClassical/ReaClassical-kb.ini"
+shortcuts_html="docs/rcshortcuts.html"
 current_date=$(TZ=UTC date "+%Y-%m-%d %H:%M:%S")
 sed -i "s/\`Updated:.*/\`Updated: $current_date UTC\`/" "$front_matter" \
 && sed -i "s/^Generated.*/Generated $current_date UTC/" "$index" \
@@ -27,5 +31,8 @@ sed -i "s/\`Updated:.*/\`Updated: $current_date UTC\`/" "$front_matter" \
     --metadata lang=en \
     --metadata document-css=false \
     --css=docs/css/rcterminal.css \
-&& cp "$RC_package_terminal_html" "$RC_install_terminal_html"
+&& cp "$RC_package_terminal_html" "$RC_install_terminal_html" \
+&& ruby admin_scripts/shortcuts_generator.rb "$kb_ini" "$shortcuts_html" \
+&& cp "$shortcuts_html" "$RC_package_shortcuts_html" \
+&& cp "$RC_package_shortcuts_html" "$RC_install_shortcuts_html"
 
