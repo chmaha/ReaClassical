@@ -1606,8 +1606,32 @@ length, item/folder/track counts, edits (S-D/splits), FX/automation
 counts, and a list of every mixer/aux/submix/RCMASTER track.</td>
 </tr>
 <tr>
-<td><code>stats=reset</code></td>
-<td>Reset the session timer.</td>
+<td><code>stats.key?</code></td>
+<td>Query a single stat. Keywords: <code>ver</code> (REAPER/ReaClassical
+versions), <code>albumlen</code> (final album length),
+<code>cdmarkers</code>, <code>age</code> (project age),
+<code>session</code> (session time), <code>projlen</code> (total project
+length), <code>srclen</code> (total source material length),
+<code>items</code>, <code>folders</code> (folder count, tracks per
+group), <code>special</code> (special track count),
+<code>regions</code>, <code>edits</code> (S-D edits, item splits),
+<code>fx</code> (FX count, automation lanes), <code>tracks</code>
+(mixer/aux/submix/RCMASTER listing), <code>sel</code> (selected
+tracks/items, cursor position).</td>
+</tr>
+<tr>
+<td><code>stats.session</code></td>
+<td>Start/reset the session timer.</td>
+</tr>
+<tr>
+<td><code>stats.cp</code></td>
+<td>Copy the full <code>stats?</code> report text to the clipboard
+(requires the SWS extension).</td>
+</tr>
+<tr>
+<td><code>stats.cpver</code></td>
+<td>Copy just the REAPER/ReaClassical version line to the clipboard
+(requires the SWS extension).</td>
 </tr>
 <tr>
 <td><code>peak?</code></td>
@@ -1650,6 +1674,16 @@ or WAV/FLAC/MP3/AIFF for <code>cuefmt</code>).</td>
 <li><code>stats?</code> — Get a full spoken overview of the project
 (length, item/track counts, FX/automation, mixer layout) to orient
 yourself in an unfamiliar or long-running session.</li>
+<li><code>stats.session?</code> — Just check how long you’ve been
+working this session, without the full report.</li>
+<li><code>stats.session</code> — Start a fresh session clock at the top
+of a new working block.</li>
+<li><code>stats.fx?</code> — Quickly check FX/automation counts
+mid-session without the full report.</li>
+<li><code>stats.cp</code> — Paste the full project report into an email
+to a client or collaborator.</li>
+<li><code>stats.cpver</code> — Paste just the version info into a bug
+report.</li>
 <li><code>overs?</code> — Before rendering, scan for any clipped peaks
 across all unmuted tracks.</li>
 <li><code>overs=-3</code> — Tighten the over-detection threshold to -3

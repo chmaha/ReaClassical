@@ -469,7 +469,10 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 | Command | Effect |
 |---|---|
 | `stats?` | Speak a full project report: workflow, REAPER/ReaClassical versions, album length, CD marker count, project age, session time, total/source length, item/folder/track counts, edits (S-D/splits), FX/automation counts, and a list of every mixer/aux/submix/RCMASTER track. |
-| `stats=reset` | Reset the session timer. |
+| `stats.key?` | Query a single stat. Keywords: `ver` (REAPER/ReaClassical versions), `albumlen` (final album length), `cdmarkers`, `age` (project age), `session` (session time), `projlen` (total project length), `srclen` (total source material length), `items`, `folders` (folder count, tracks per group), `special` (special track count), `regions`, `edits` (S-D edits, item splits), `fx` (FX count, automation lanes), `tracks` (mixer/aux/submix/RCMASTER listing), `sel` (selected tracks/items, cursor position). |
+| `stats.session` | Start/reset the session timer. |
+| `stats.cp` | Copy the full `stats?` report text to the clipboard (requires the SWS extension). |
+| `stats.cpver` | Copy just the REAPER/ReaClassical version line to the clipboard (requires the SWS extension). |
 | `peak?` | Scan all unmuted tracks and jump the edit cursor to the loudest point. |
 | `overs?` | Scan all unmuted tracks for peak level and any "overs" above the saved threshold. |
 | `overs=N` | Same scan, using N dB as the over threshold (also saved as the new default). |
@@ -480,6 +483,11 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 ### Examples
 
 - `stats?` — Get a full spoken overview of the project (length, item/track counts, FX/automation, mixer layout) to orient yourself in an unfamiliar or long-running session.
+- `stats.session?` — Just check how long you've been working this session, without the full report.
+- `stats.session` — Start a fresh session clock at the top of a new working block.
+- `stats.fx?` — Quickly check FX/automation counts mid-session without the full report.
+- `stats.cp` — Paste the full project report into an email to a client or collaborator.
+- `stats.cpver` — Paste just the version info into a bug report.
 - `overs?` — Before rendering, scan for any clipped peaks across all unmuted tracks.
 - `overs=-3` — Tighten the over-detection threshold to -3 dB for a stricter check ahead of a critical master.
 - `peak?` — Jump straight to the single loudest moment in the project to check it by ear.
