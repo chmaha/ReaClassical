@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre19
+@version 26.6.8pre20
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
