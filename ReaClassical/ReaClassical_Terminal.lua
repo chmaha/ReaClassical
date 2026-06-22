@@ -3521,6 +3521,199 @@ end
 
 ---------------------------------------------------------------------
 
+-- Gathers every project-wide number used by stats? and stats.key? so neither
+-- has to duplicate the track/item scans.
+function compute_stats()
+    local _, _, folder_count, tracks_per_group, mixer_tracks = get_track_table()
+    local num_tracks = CountTracks(0)
+    local num_items = CountMediaItems(0)
+
+    local num_cd_markers, num_regions = 0, 0
+    local total_project_length, album_end = 0, nil
+    local nm, nr = CountProjectMarkers(0)
+    for i = 0, nm + nr - 1 do
+        local retval, isrgn, pos, _, name = EnumProjectMarkers(i)
+        if retval then
+            if name:match("^#") then num_cd_markers = num_cd_markers + 1 end
+            if name == "=END" then album_end = pos end
+            if isrgn then num_regions = num_regions + 1 end
+        end
+    end
+
+    for i = 0, num_items - 1 do
+        local item = GetMediaItem(0, i)
+        if item then
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            total_project_length = math.max(total_project_length, pos + len)
+        end
+    end
+
+    local total_source_length = 0
+    local counted_folders = 0
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+            if depth == 1 then counted_folders = counted_folders + 1 end
+            if counted_folders > 1 then
+                for j = 0, CountTrackMediaItems(track) - 1 do
+                    local item = GetTrackMediaItem(track, j)
+                    if item then
+                        total_source_length = total_source_length + GetMediaItemInfo_Value(item, "D_LENGTH")
+                    end
+                end
+            end
+        end
+    end
+
+    local num_sd_edits, num_splits = 0, 0
+    if num_tracks > 0 then
+        local first_track = GetTrack(0, 0)
+        local ti_count = CountTrackMediaItems(first_track)
+        for j = 0, ti_count - 1 do
+            local item = GetTrackMediaItem(first_track, j)
+            if item then
+                local _, sd = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+                if sd ~= "" then num_sd_edits = num_sd_edits + 1 end
+            end
+        end
+        for j = 0, ti_count - 1 do
+            local item1 = GetTrackMediaItem(first_track, j)
+            if item1 then
+                local p1 = GetMediaItemInfo_Value(item1, "D_POSITION")
+                local e1 = p1 + GetMediaItemInfo_Value(item1, "D_LENGTH")
+                for k = j + 1, ti_count - 1 do
+                    local item2 = GetTrackMediaItem(first_track, k)
+                    if item2 and GetMediaItemInfo_Value(item2, "D_POSITION") < e1 then
+                        num_splits = num_splits + 1
+                    end
+                end
+            end
+        end
+    end
+
+    local num_fx, num_auto = 0, 0
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if track then
+            num_fx = num_fx + TrackFX_GetCount(track)
+            for e = 0, CountTrackEnvelopes(track) - 1 do
+                local env = GetTrackEnvelope(track, e)
+                if env then
+                    local _, chunk = GetEnvelopeStateChunk(env, "", false)
+                    if chunk:match("VIS 1") and CountEnvelopePoints(env) > 0 then
+                        num_auto = num_auto + 1
+                    end
+                end
+            end
+        end
+    end
+
+    return {
+        folder_count = folder_count,
+        tracks_per_group = tracks_per_group,
+        mixer_tracks = mixer_tracks,
+        num_items = num_items,
+        num_cd_markers = num_cd_markers,
+        num_regions = num_regions,
+        total_project_length = total_project_length,
+        album_end = album_end,
+        total_source_length = total_source_length,
+        num_sd_edits = num_sd_edits,
+        num_splits = num_splits,
+        num_fx = num_fx,
+        num_auto = num_auto,
+        num_special = #get_special_tracks(),
+    }
+end
+
+local function get_ver_str()
+    return "ReaClassical " .. get_reaclassical_version() .. ", REAPER " ..
+        (GetAppVersion():match("^(%d+%.%d+)") or "?")
+end
+
+local function add_tracks_lines(lines, s)
+    lines[#lines + 1] = "Mixer tracks:"
+    for i, track in ipairs(s.mixer_tracks) do
+        local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        lines[#lines + 1] = string.format("  %d: %s", i, humanize_track_name(name))
+    end
+    local aux_tracks = get_special_tracks_by_type("aux")
+    if #aux_tracks > 0 then
+        lines[#lines + 1] = "Aux tracks:"
+        for i, info in ipairs(aux_tracks) do
+            lines[#lines + 1] = string.format("  @%d: %s", i, info.name)
+        end
+    end
+    local submix_tracks = get_special_tracks_by_type("submix")
+    if #submix_tracks > 0 then
+        lines[#lines + 1] = "Submix tracks:"
+        for i, info in ipairs(submix_tracks) do
+            lines[#lines + 1] = string.format("  #%d: %s", i, info.name)
+        end
+    end
+    local rcmaster = get_rcmaster()
+    if rcmaster then
+        local _, rname = GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "", false)
+        lines[#lines + 1] = "RC Master: " .. humanize_track_name(rname)
+    else
+        lines[#lines + 1] = "RC Master: none"
+    end
+end
+
+local function add_selection_line(lines)
+    lines[#lines + 1] = "Selection: " .. CountSelectedTracks(0) .. " track(s), " ..
+        CountSelectedMediaItems(0) .. " item(s), cursor: " ..
+        format_timestr(GetCursorPosition(), "")
+end
+
+-- Builds the same lines stats? speaks, for both speech and stats.cp clipboard text.
+local function build_report_lines(s)
+    local lines = {}
+    lines[#lines + 1] = "Workflow: " .. (workflow ~= "" and workflow or "(none)") .. ", " .. get_ver_str()
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = "Album Stats:"
+    lines[#lines + 1] = "  Final album length: " .. (s.album_end and format_timestr(s.album_end, "") or "n/a")
+    lines[#lines + 1] = "  CD markers: " .. s.num_cd_markers
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = "Project Stats:"
+    lines[#lines + 1] = "  Project age: " .. get_project_age_str()
+    lines[#lines + 1] = "  Session time: " .. get_session_time_str()
+    lines[#lines + 1] = "  Total project length: " .. format_timestr(s.total_project_length, "")
+    lines[#lines + 1] = "  Total source material: " .. format_timestr(s.total_source_length, "")
+    lines[#lines + 1] = "  Items: " .. s.num_items
+    lines[#lines + 1] = "  Folders: " .. s.folder_count .. ", tracks per group: " .. s.tracks_per_group ..
+        ", mixer tracks: " .. #s.mixer_tracks
+    lines[#lines + 1] = "  Special tracks: " .. s.num_special .. ", regions: " .. s.num_regions
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = "Edit Stats:"
+    lines[#lines + 1] = "  S-D edits: " .. s.num_sd_edits .. ", item splits: " .. s.num_splits
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = "FX & Automation:"
+    lines[#lines + 1] = "  FX: " .. s.num_fx .. ", automation lanes: " .. s.num_auto
+    lines[#lines + 1] = ""
+    add_tracks_lines(lines, s)
+    lines[#lines + 1] = ""
+    add_selection_line(lines)
+    return lines
+end
+
+local function say_lines(lines)
+    for _, line in ipairs(lines) do
+        say(line)
+    end
+end
+
+local function copy_to_clipboard(text)
+    if not APIExists("CF_SetClipboard") then
+        say("SWS extension required for clipboard copy")
+        return
+    end
+    CF_SetClipboard(text)
+    say("Copied to clipboard")
+end
+
 function try_stats(cmd)
     if cmd == "stats?" then
         local _, existing = GetProjExtState(0, "ReaClassical", "SessionStart")
@@ -3528,155 +3721,115 @@ function try_stats(cmd)
             SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
         end
 
-        local _, _, folder_count, tracks_per_group, mixer_tracks = get_track_table()
-        local num_tracks = CountTracks(0)
-        local num_items = CountMediaItems(0)
-
-        local num_cd_markers, num_regions = 0, 0
-        local total_project_length, album_end = 0, nil
-        local nm, nr = CountProjectMarkers(0)
-        for i = 0, nm + nr - 1 do
-            local retval, isrgn, pos, _, name = EnumProjectMarkers(i)
-            if retval then
-                if name:match("^#") then num_cd_markers = num_cd_markers + 1 end
-                if name == "=END" then album_end = pos end
-                if isrgn then num_regions = num_regions + 1 end
-            end
-        end
-
-        for i = 0, num_items - 1 do
-            local item = GetMediaItem(0, i)
-            if item then
-                local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-                local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                total_project_length = math.max(total_project_length, pos + len)
-            end
-        end
-
-        local total_source_length = 0
-        local counted_folders = 0
-        for i = 0, num_tracks - 1 do
-            local track = GetTrack(0, i)
-            if track then
-                local depth = GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
-                if depth == 1 then counted_folders = counted_folders + 1 end
-                if counted_folders > 1 then
-                    for j = 0, CountTrackMediaItems(track) - 1 do
-                        local item = GetTrackMediaItem(track, j)
-                        if item then
-                            total_source_length = total_source_length + GetMediaItemInfo_Value(item, "D_LENGTH")
-                        end
-                    end
-                end
-            end
-        end
-
-        local num_sd_edits, num_splits = 0, 0
-        if num_tracks > 0 then
-            local first_track = GetTrack(0, 0)
-            local ti_count = CountTrackMediaItems(first_track)
-            for j = 0, ti_count - 1 do
-                local item = GetTrackMediaItem(first_track, j)
-                if item then
-                    local _, sd = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
-                    if sd ~= "" then num_sd_edits = num_sd_edits + 1 end
-                end
-            end
-            for j = 0, ti_count - 1 do
-                local item1 = GetTrackMediaItem(first_track, j)
-                if item1 then
-                    local p1 = GetMediaItemInfo_Value(item1, "D_POSITION")
-                    local e1 = p1 + GetMediaItemInfo_Value(item1, "D_LENGTH")
-                    for k = j + 1, ti_count - 1 do
-                        local item2 = GetTrackMediaItem(first_track, k)
-                        if item2 and GetMediaItemInfo_Value(item2, "D_POSITION") < e1 then
-                            num_splits = num_splits + 1
-                        end
-                    end
-                end
-            end
-        end
-
-        local num_fx, num_auto = 0, 0
-        for i = 0, num_tracks - 1 do
-            local track = GetTrack(0, i)
-            if track then
-                num_fx = num_fx + TrackFX_GetCount(track)
-                for e = 0, CountTrackEnvelopes(track) - 1 do
-                    local env = GetTrackEnvelope(track, e)
-                    if env then
-                        local _, chunk = GetEnvelopeStateChunk(env, "", false)
-                        if chunk:match("VIS 1") and CountEnvelopePoints(env) > 0 then
-                            num_auto = num_auto + 1
-                        end
-                    end
-                end
-            end
-        end
-
-        local num_special = #get_special_tracks()
-
-        say("Workflow: " .. (workflow ~= "" and workflow or "(none)") ..
-            " | REAPER " .. (GetAppVersion():match("^(%d+%.%d+)") or "?") ..
-            " | ReaClassical " .. get_reaclassical_version())
-        say("")
-        say("Album Stats:")
-        say("  Final album length: " .. (album_end and format_timestr(album_end, "") or "n/a"))
-        say("  CD markers: " .. num_cd_markers)
-        say("")
-        say("Project Stats:")
-        say("  Project age: " .. get_project_age_str())
-        say("  Session time: " .. get_session_time_str() .. "  (reset with stats=reset)")
-        say("  Total project length: " .. format_timestr(total_project_length, ""))
-        say("  Total source material: " .. format_timestr(total_source_length, ""))
-        say("  Items: " .. num_items)
-        say("  Folders: " .. folder_count .. ", tracks per group: " .. tracks_per_group ..
-            ", mixer tracks: " .. #mixer_tracks)
-        say("  Special tracks: " .. num_special .. ", regions: " .. num_regions)
-        say("")
-        say("Edit Stats:")
-        say("  S-D edits: " .. num_sd_edits .. ", item splits: " .. num_splits)
-        say("")
-        say("FX & Automation:")
-        say("  FX: " .. num_fx .. ", automation lanes: " .. num_auto)
-        say("")
-        say("Mixer tracks:")
-        for i, track in ipairs(mixer_tracks) do
-            local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            say(string.format("  %d: %s", i, humanize_track_name(name)))
-        end
-        local aux_tracks = get_special_tracks_by_type("aux")
-        if #aux_tracks > 0 then
-            say("Aux tracks:")
-            for i, info in ipairs(aux_tracks) do
-                say(string.format("  @%d: %s", i, info.name))
-            end
-        end
-        local submix_tracks = get_special_tracks_by_type("submix")
-        if #submix_tracks > 0 then
-            say("Submix tracks:")
-            for i, info in ipairs(submix_tracks) do
-                say(string.format("  #%d: %s", i, info.name))
-            end
-        end
-        local rcmaster = get_rcmaster()
-        if rcmaster then
-            local _, rname = GetSetMediaTrackInfo_String(rcmaster, "P_NAME", "", false)
-            say("RC Master: " .. humanize_track_name(rname))
-        else
-            say("RC Master: none")
-        end
-        say("")
-        say("Selection: " .. CountSelectedTracks(0) .. " track(s), " ..
-            CountSelectedMediaItems(0) .. " item(s) | cursor: " ..
-            format_timestr(GetCursorPosition(), ""))
-
+        say_lines(build_report_lines(compute_stats()))
         return true
     end
 
-    if cmd == "stats=reset" then
+    if cmd == "stats.cp" then
+        local _, existing = GetProjExtState(0, "ReaClassical", "SessionStart")
+        if existing == "" then
+            SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
+        end
+
+        copy_to_clipboard(table.concat(build_report_lines(compute_stats()), "\n"))
+        return true
+    end
+
+    if cmd == "stats.cpver" then
+        copy_to_clipboard(get_ver_str())
+        return true
+    end
+
+    if cmd == "stats.ver?" then
+        say(get_ver_str())
+        return true
+    end
+
+    if cmd == "stats.albumlen?" then
+        local s = compute_stats()
+        say("Final album length: " .. (s.album_end and format_timestr(s.album_end, "") or "n/a"))
+        return true
+    end
+
+    if cmd == "stats.cdmarkers?" then
+        say("CD markers: " .. compute_stats().num_cd_markers)
+        return true
+    end
+
+    if cmd == "stats.age?" then
+        say("Project age: " .. get_project_age_str())
+        return true
+    end
+
+    if cmd == "stats.session?" then
+        local _, existing = GetProjExtState(0, "ReaClassical", "SessionStart")
+        if existing == "" then
+            SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
+        end
+        say("Session time: " .. get_session_time_str())
+        return true
+    end
+
+    if cmd == "stats.session" then
         SetProjExtState(0, "ReaClassical", "SessionStart", tostring(os.time()))
         say("Session timer reset")
+        return true
+    end
+
+    if cmd == "stats.projlen?" then
+        say("Total project length: " .. format_timestr(compute_stats().total_project_length, ""))
+        return true
+    end
+
+    if cmd == "stats.srclen?" then
+        say("Total source material: " .. format_timestr(compute_stats().total_source_length, ""))
+        return true
+    end
+
+    if cmd == "stats.items?" then
+        say("Items: " .. compute_stats().num_items)
+        return true
+    end
+
+    if cmd == "stats.folders?" then
+        local s = compute_stats()
+        say("Folders: " .. s.folder_count .. ", tracks per group: " .. s.tracks_per_group)
+        return true
+    end
+
+    if cmd == "stats.special?" then
+        say("Special tracks: " .. compute_stats().num_special)
+        return true
+    end
+
+    if cmd == "stats.regions?" then
+        say("Regions: " .. compute_stats().num_regions)
+        return true
+    end
+
+    if cmd == "stats.edits?" then
+        local s = compute_stats()
+        say("S-D edits: " .. s.num_sd_edits .. ", item splits: " .. s.num_splits)
+        return true
+    end
+
+    if cmd == "stats.fx?" then
+        local s = compute_stats()
+        say("FX: " .. s.num_fx .. ", automation lanes: " .. s.num_auto)
+        return true
+    end
+
+    if cmd == "stats.tracks?" then
+        local lines = {}
+        add_tracks_lines(lines, compute_stats())
+        say_lines(lines)
+        return true
+    end
+
+    if cmd == "stats.sel?" then
+        local lines = {}
+        add_selection_line(lines)
+        say_lines(lines)
         return true
     end
 
