@@ -3758,14 +3758,24 @@ function try_misc(cmd)
         return true
     end
 
-    -- help — open this guide (the published HTML version of the Terminal
-    -- command reference) in the user's default browser.
+    -- help — open the local offline copy of the Terminal command reference.
     if cmd == "help" then
         if not APIExists("CF_ShellExecute") then
-            say("SWS/S&M extension required to open the link")
+            say("SWS/S&M extension required to open the guide")
             return true
         end
-        CF_ShellExecute("https://reaclassical.org/rcterminal.html")
+        local resource_path = GetResourcePath()
+        local pathseparator = package.config:sub(1, 1)
+        local html = table.concat({
+            resource_path, "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-Terminal-Guide.html"
+        }, pathseparator)
+        local file = io.open(html, "r")
+        if file then
+            io.close(file)
+            CF_ShellExecute(html)
+        else
+            say("Re-install ReaClassical metapackage via ReaPack first")
+        end
         return true
     end
 

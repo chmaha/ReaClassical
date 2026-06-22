@@ -27,26 +27,24 @@ local main, file_exists, get_path
 ---------------------------------------------------------------------
 
 function main()
-    -- OSARA users get the online HTML manual instead of the PDF -- it reads
-    -- far better with a screen reader than a PDF does.
-    if APIExists("osara_outputMessage") then
-        if APIExists("CF_ShellExecute") then
-            CF_ShellExecute("https://reaclassical.org/manual")
+    if not APIExists("CF_ShellExecute") then
+        if APIExists("osara_outputMessage") then
+            osara_outputMessage("SWS/S&M extension required to open the manual")
         else
-            osara_outputMessage("SWS/S&M extension required to open the link")
+            MB("SWS/S&M extension required to open the manual", "ReaClassical Error", 0)
         end
         return
     end
 
     local resource_path = GetResourcePath()
-    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-Manual.pdf")
-    local pdf = resource_path .. relative_path
-    local bool = file_exists(pdf)
+    local relative_path = get_path("", "Scripts", "chmaha Scripts", "ReaClassical", "ReaClassical-Manual.html")
+    local html = resource_path .. relative_path
+    local bool = file_exists(html)
     if bool == true then
-        CF_ShellExecute(pdf)
+        CF_ShellExecute(html)
     else
         MB("Re-install ReaClassical metapackage via ReaPack first!",
-            "ReaClassical PDF Manual not found!", 0)
+            "ReaClassical HTML Manual not found!", 0)
     end
 end
 
