@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre20
+@version 26.6.8pre21
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -19,6 +19,7 @@
   NEW: Repeat Last Terminal Command shortcut
   NEW: Nudge Marker Left/Right shortcuts
   NEW: Hide/Show Automation Lanes commands
+  NEW: Shortcuts guide
   NEW: Humanized track/folder/time names in spoken announcements
   NEW: Online Terminal Guide (linked from Help for OSARA users), plain HTML build pipeline
   NEW: GUI windows blocked by default when OSARA is installed (allowgui= override)
