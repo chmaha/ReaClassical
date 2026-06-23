@@ -2637,11 +2637,15 @@ function auto_assign(start_input)
             end
         end
 
-        -- Set pan only for explicit left/right (don't touch pair/stereo pan)
+        -- Set pan for explicit left/right; pair/stereo resets to center
+        -- (so renaming a previously left/right track back to a pair name
+        -- doesn't leave a stale hard pan). Any other name is untouched.
         if is_left then
             SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", -1.0)
         elseif is_right then
             SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", 1.0)
+        elseif is_pair then
+            SetMediaTrackInfo_Value(track_info.mixer_track, "D_PAN", 0.0)
         end
 
         -- Assign inputs

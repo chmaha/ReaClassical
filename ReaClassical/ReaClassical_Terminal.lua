@@ -1109,7 +1109,10 @@ function try_project_setup(cmd)
             local mixer_tracks = get_mixer_tracks()
             local position = 1
             for name in v_names:gmatch("[^,]+") do
-                rename_mixer_position(mixer_tracks, position, trim(name))
+                local clean_name = trim(name)
+                rename_mixer_position(mixer_tracks, position, clean_name)
+                local mixer_track = mixer_tracks[position]
+                if mixer_track then apply_pan_from_name(mixer_track, clean_name) end
                 position = position + 1
             end
         end
@@ -1139,7 +1142,10 @@ function try_project_setup(cmd)
             local mixer_tracks = get_mixer_tracks()
             local position = 1
             for name in h_names:gmatch("[^,]+") do
-                rename_mixer_position(mixer_tracks, position, trim(name))
+                local clean_name = trim(name)
+                rename_mixer_position(mixer_tracks, position, clean_name)
+                local mixer_track = mixer_tracks[position]
+                if mixer_track then apply_pan_from_name(mixer_track, clean_name) end
                 position = position + 1
             end
         end
@@ -1458,6 +1464,48 @@ function resolve_folder_position_list(folder, positions_str)
     return tracks
 end
 
+-- Shared by auto_assign_inputs() and project-creation naming (Nv=/Nh=):
+-- pans a mixer track hard left/right if its name ends/starts with a
+-- left/right word. A pair/stereo name resets pan to center, since a
+-- renamed-from-left/right track should not keep a stale hard pan. Any
+-- other name is left untouched, preserving manual pan adjustments.
+-- name should already have any "M:" prefix stripped.
+function apply_pan_from_name(mixer_track, name)
+    local lower_name = name:lower()
+
+    local is_pair = false
+    for _, word in ipairs(pair_words) do
+        if lower_name:match("%s" .. word .. "$") or lower_name:match(word .. "$") then
+            is_pair = true
+            break
+        end
+    end
+
+    local is_left, is_right = false, false
+    for _, word in ipairs(left_words) do
+        if lower_name:match("%s" .. word .. "$") or lower_name:match("^" .. word .. "%s") then
+            is_left = true
+            break
+        end
+    end
+    if not is_left then
+        for _, word in ipairs(right_words) do
+            if lower_name:match("%s" .. word .. "$") or lower_name:match("^" .. word .. "%s") then
+                is_right = true
+                break
+            end
+        end
+    end
+
+    if is_left then
+        SetMediaTrackInfo_Value(mixer_track, "D_PAN", -1.0)
+    elseif is_right then
+        SetMediaTrackInfo_Value(mixer_track, "D_PAN", 1.0)
+    elseif is_pair then
+        SetMediaTrackInfo_Value(mixer_track, "D_PAN", 0.0)
+    end
+end
+
 -- Port of auto_assign() (Mission Control.lua:2592-2675), simplified to
 -- operate on the destination folder (track_table[1]) and the project's
 -- mixer tracks directly.
@@ -1488,27 +1536,7 @@ function auto_assign_inputs(start_input)
                 end
             end
 
-            local is_left, is_right = false, false
-            for _, word in ipairs(left_words) do
-                if lower_name:match("%s" .. word .. "$") or lower_name:match("^" .. word .. "%s") then
-                    is_left = true
-                    break
-                end
-            end
-            if not is_left then
-                for _, word in ipairs(right_words) do
-                    if lower_name:match("%s" .. word .. "$") or lower_name:match("^" .. word .. "%s") then
-                        is_right = true
-                        break
-                    end
-                end
-            end
-
-            if is_left then
-                SetMediaTrackInfo_Value(mixer_track, "D_PAN", -1.0)
-            elseif is_right then
-                SetMediaTrackInfo_Value(mixer_track, "D_PAN", 1.0)
-            end
+            apply_pan_from_name(mixer_track, track_name)
 
             if input_channel < max_inputs then
                 if is_pair and (input_channel + 1 < max_inputs) then
