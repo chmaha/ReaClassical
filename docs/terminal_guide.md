@@ -51,6 +51,7 @@ Any `<target>?`-style query (mute/solo/polarity/pan/fader/peak/record-input stat
 | Command | Effect |
 |---|---|
 | `Nv` | Start a brand-new project using the **Vertical** workflow with N tracks per folder, e.g. `8v`. If a ReaClassical project is already open, you'll be asked to save first. |
+| `Nv=Name1,Name2,...` | Same as `Nv`, also naming each mixer track in one step, e.g. `2v=Violin,Cello`. |
 | `Nh` | Start a brand-new project using the **Horizontal** workflow with N tracks, e.g. `4h`. |
 | `Nh=Name1,Name2,...` | Same as `Nh`, also naming each mixer track in one step, e.g. `2h=Violin,Cello`. |
 | `convert=h` | Convert the current (vertical) project to Horizontal workflow. |
@@ -61,6 +62,7 @@ Typical first step in any session: `6v` (six mixer tracks, vertical/classical se
 ### Other examples
 
 - `6v` — Start a new Vertical-workflow project with 6 mixer tracks per folder. Use this for a multi-take classical recording session.
+- `6v=Violin,Viola,Cello,Bass,Horn,Oboe` — Same, also naming all 6 mixer tracks in one step.
 - `6h` — Start a new Horizontal-workflow project with 6 tracks, left unnamed for now.
 - `4h=Violin,Viola,Cello,Bass` — Start a new Horizontal-workflow project with 4 named tracks in one step. Good for a quick quartet setup where every take lives on the same 4 tracks.
 - `convert=v` — You started in Horizontal (quick setup) but the session turned into a multi-take recording project, so you switch to Vertical without losing existing work.

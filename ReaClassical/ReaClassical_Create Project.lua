@@ -177,6 +177,7 @@ local function main()
                 else
                     dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
                 end
+                if APIExists("SNM_SetIntConfigVar") then SNM_SetIntConfigVar("scrubmode", 1) end
                 ImGui.End(ctx)
                 return -- Exit immediately
             end

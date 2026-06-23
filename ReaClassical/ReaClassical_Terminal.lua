@@ -1086,7 +1086,10 @@ function consolidate_folders_to_first()
 end
 
 function try_project_setup(cmd)
-    local v_count = cmd:match("^(%d+)v$")
+    local v_count, v_names = cmd:match("^(%d+)v=(.+)$")
+    if not v_count then
+        v_count = cmd:match("^(%d+)v$")
+    end
     if v_count then
         if workflow ~= "" then
             if not start_fresh_project() then
@@ -1101,6 +1104,15 @@ function try_project_setup(cmd)
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
+        if APIExists("SNM_SetIntConfigVar") then SNM_SetIntConfigVar("scrubmode", 1) end
+        if v_names and v_names ~= "" then
+            local mixer_tracks = get_mixer_tracks()
+            local position = 1
+            for name in v_names:gmatch("[^,]+") do
+                rename_mixer_position(mixer_tracks, position, trim(name))
+                position = position + 1
+            end
+        end
         return true
     end
 
@@ -1122,6 +1134,7 @@ function try_project_setup(cmd)
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
+        if APIExists("SNM_SetIntConfigVar") then SNM_SetIntConfigVar("scrubmode", 1) end
         if h_names and h_names ~= "" then
             local mixer_tracks = get_mixer_tracks()
             local position = 1
@@ -6577,7 +6590,7 @@ function main()
 
         if workflow == "" then
             local first = commands[1]
-            if not (first:match("^%d+v$") or first:match("^%d+h") or first == "newtab"
+            if not (first:match("^%d+v") or first:match("^%d+h") or first == "newtab"
                     or first == "update" or first == "installosara" or first == "factoryreset" or first == "help"
                     or first == "debug=on" or first == "debug=off") then
                 say("Please create a ReaClassical project first (e.g. 6v)")
