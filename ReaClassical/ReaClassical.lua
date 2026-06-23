@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre21
+@version 26.6.8pre22
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -65,6 +65,7 @@
   [main] ReaClassical_Add Source IN marker.lua
   [main] ReaClassical_Add Source OUT marker.lua
   [nomain] ReaClassical_Add Submix.lua
+  [main] ReaClassical_Announce RCMASTER Peak.lua
   [main] ReaClassical_Announce Take Number.lua
   [main] ReaClassical_Announce Timeline Position.lua
   [main] ReaClassical_Audio Calculator.lua
@@ -167,6 +168,7 @@
   [main] ReaClassical_Set Dest Project Marker.lua
   [main] ReaClassical_Set Next Recording Section.lua
   [main] ReaClassical_Set Source Project Marker.lua
+  [main] ReaClassical_Shortcuts.lua
   [main] ReaClassical_Show Automation Lanes.lua
   [main] ReaClassical_Show Children.lua
   [main] ReaClassical_Show Source Audition Table.lua
@@ -209,6 +211,7 @@
   ReaClassical-metadata.ini
   reaclassical-splash.png
   ReaClassical-Manual.html
+  ReaClassical-Shortcuts.html
   ReaClassical-Terminal-Guide.html
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
