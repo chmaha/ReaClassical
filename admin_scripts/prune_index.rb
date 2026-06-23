@@ -13,14 +13,21 @@ begin
 
         if versions.any?
             sorted_versions = versions.map { |v| Gem::Version.new(v) rescue nil }.compact.sort
-            versions_to_keep = sorted_versions.last(3).map(&:to_s)
+            regular_versions, prereleases = sorted_versions.partition { |v| !v.prerelease? }
+
+            # Regular releases make up the 3 kept slots; prereleases (e.g.
+            # "...pre23") don't count against that limit, but only the
+            # single latest prerelease survives -- older preN builds are
+            # always pruned once a newer one exists.
+            versions_to_keep = regular_versions.last(3).map(&:to_s)
+            versions_to_keep << prereleases.last.to_s if prereleases.any?
 
             xml_doc.xpath("//category[@name='#{category_name}']/reapack/version").each do |node|
                 version = node.attribute('name').value
                 node.remove unless versions_to_keep.include?(version)
             end
 
-            puts "Kept last three versions for #{category_name}: #{versions_to_keep.join(', ')}"
+            puts "Kept versions for #{category_name}: #{versions_to_keep.join(', ')}"
         else
             puts "No versions found for #{category_name}"
         end
