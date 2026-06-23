@@ -183,4 +183,3 @@ shortcuts = parse_keymap(text)
 html = generate_html(shortcuts)
 
 File.write(out_path, html)
-puts "HTML successfully written to: #{out_path}"

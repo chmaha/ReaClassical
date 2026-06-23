@@ -28,7 +28,7 @@ local humanize_track_name = require("ReaClassical_Track_Naming")
 local say = require("ReaClassical_Announce")
 
 local main, is_special_track, get_rc_folders, solo
-local format_peak, format_input, announce_track, get_feed_track
+local format_peak, format_input, format_mute_solo, announce_track, get_feed_track
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
 local ref_is_guide = 0
@@ -91,12 +91,25 @@ end
 
 ---------------------------------------------------------------------
 
+function format_mute_solo(track)
+    local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
+    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+    if muted and soloed then return "muted and soloed" end
+    if muted then return "muted" end
+    if soloed then return "soloed" end
+    return nil
+end
+
+---------------------------------------------------------------------
+
 function announce_track(track)
     local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     local meter_track = get_feed_track(track)
     local parts = { humanize_track_name(name), format_peak(meter_track) }
     local input_info = format_input(track)
     if input_info then parts[#parts + 1] = input_info end
+    local mute_solo_info = format_mute_solo(meter_track)
+    if mute_solo_info then parts[#parts + 1] = mute_solo_info end
     say(table.concat(parts, ", "))
 end
 
