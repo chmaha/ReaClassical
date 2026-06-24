@@ -61,15 +61,33 @@ end
 ---------------------------------------------------------------------
 
 function main()
+    local playstate = GetPlayState()
+
+    -- Recording (5) or paused-while-recording (6): there's no finished item
+    -- yet, so report the take number F9/rec.arm already locked in for this
+    -- recording rather than looking for an item.
+    if playstate & 4 == 4 then
+        local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+        if take_num ~= "" then
+            say("Recording take " .. take_num)
+        else
+            say("No take number found.")
+        end
+        return
+    end
+
     local track = GetSelectedTrack(0, 0)
     if not track then
         say("No track selected.")
         return
     end
 
-    local item = get_item_at_cursor(track, GetCursorPosition())
+    local is_playing = playstate & 1 == 1
+    local cursor_pos = is_playing and GetPlayPosition() or GetCursorPosition()
+
+    local item = get_item_at_cursor(track, cursor_pos)
     if not item then
-        say("No item under edit cursor.")
+        say(is_playing and "No item under playhead." or "No item under edit cursor.")
         return
     end
 
@@ -82,10 +100,16 @@ function main()
     local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
     local humanized = humanize_item_name(name)
 
-    if humanized then
-        say(humanized)
-    else
+    if not humanized then
         say("No take number found in item name.")
+        return
+    end
+
+    if is_playing then
+        local only_num = humanized:match("^Take (%d+)$")
+        say(only_num and ("Playing take " .. only_num) or ("Playing " .. humanized))
+    else
+        say(humanized)
     end
 end
 

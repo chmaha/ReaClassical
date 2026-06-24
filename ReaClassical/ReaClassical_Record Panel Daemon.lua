@@ -638,6 +638,10 @@ local function main()
             last_recorded_take = take_count
             color_run_once     = true
             SetProjExtState(0, "ReaClassical", "CurrentTakeNumber", tostring(take_text))
+        elseif playstate == 6 and last_play_state == 5 then
+            say("Paused recording take " .. take_text)
+        elseif playstate == 5 and last_play_state == 6 then
+            say("Recording take " .. take_text)
         end
     end
 

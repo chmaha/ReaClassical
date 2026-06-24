@@ -25,18 +25,37 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local humanize_timestr = require("ReaClassical_Time_Naming")
 
-local main
+local function get_selected_media_item_at(index)
+    local selected_count = 0
+    local total_items = CountMediaItems(0)
 
----------------------------------------------------------------------
+    for i = 0, total_items - 1 do
+        local item = GetMediaItem(0, i)
+        if IsMediaItemSelected(item) then
+            if selected_count == index then
+                return item
+            end
+            selected_count = selected_count + 1
+        end
+    end
 
-function main()
-    local is_playing = GetPlayState() & 1 == 1
-    local pos = is_playing and GetPlayPosition() or GetCursorPosition()
-    say(humanize_timestr(format_timestr_pos(pos, "", -1)))
+    return nil
 end
 
----------------------------------------------------------------------
+local function main()
+    local item = get_selected_media_item_at(0)
+    if not item then
+        say("No item selected")
+        return
+    end
+
+    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+
+    SetEditCurPos(pos + len, true, true)
+    UpdateArrange()
+    say("Moved to end of item")
+end
 
 main()

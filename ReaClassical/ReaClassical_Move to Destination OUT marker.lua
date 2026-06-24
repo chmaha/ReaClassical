@@ -58,7 +58,7 @@ function main()
     GoToMarker(0, 997, false)
     solo()
     local folder_phrase = folder_prefix and humanize_folder_phrase(folder_prefix) or ""
-    say("Moved to destination out @ " .. humanize_timestr(format_timestr_pos(GetCursorPosition(), "", -1))
+    say("Destination out @ " .. humanize_timestr(format_timestr_pos(GetCursorPosition(), "", -1))
         .. (folder_phrase ~= "" and (" in " .. folder_phrase) or ""))
 end
 

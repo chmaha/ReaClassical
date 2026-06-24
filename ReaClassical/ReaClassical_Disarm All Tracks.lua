@@ -25,18 +25,30 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local humanize_timestr = require("ReaClassical_Time_Naming")
 
-local main
+-- Disarms every track in the project except the listenback (cue/foldback
+-- monitoring) track, which stays armed -- mirrors how
+-- clear_all_rec_armed_except_live treats it in Classical Take Record.
+local function main()
+    PreventUIRefresh(1)
+    Undo_BeginBlock()
 
----------------------------------------------------------------------
+    local num_tracks = CountTracks(0)
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        local _, lb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        if lb_flag ~= "y" then
+            SetMediaTrackInfo_Value(track, "I_RECARM", 0)
+        end
+    end
 
-function main()
-    local is_playing = GetPlayState() & 1 == 1
-    local pos = is_playing and GetPlayPosition() or GetCursorPosition()
-    say(humanize_timestr(format_timestr_pos(pos, "", -1)))
+    TrackList_AdjustWindows(false)
+    PreventUIRefresh(-1)
+    Undo_EndBlock("Disarm All Tracks", 0)
+    UpdateArrange()
+    UpdateTimeline()
+
+    say("All tracks disarmed")
 end
-
----------------------------------------------------------------------
 
 main()

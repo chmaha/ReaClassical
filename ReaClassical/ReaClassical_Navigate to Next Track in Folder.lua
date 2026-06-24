@@ -28,7 +28,7 @@ local humanize_track_name = require("ReaClassical_Track_Naming")
 local say = require("ReaClassical_Announce")
 
 local main, is_special_track, get_folder_parent, get_folder_tracks
-local format_peak, format_input, format_mute_solo, announce_track, get_feed_track
+local format_peak, format_mute_solo, announce_track, get_feed_track
 
 ---------------------------------------------------------------------
 
@@ -66,23 +66,6 @@ end
 
 ---------------------------------------------------------------------
 
-function format_input(track)
-    if GetMediaTrackInfo_Value(track, "I_RECARM") ~= 1 then return nil end
-    local rec_input = GetMediaTrackInfo_Value(track, "I_RECINPUT")
-    if rec_input < 0 then return "armed, no input" end
-    if rec_input & 4096 ~= 0 then
-        local midi_chan = rec_input & 31
-        return midi_chan == 0 and "armed, MIDI all channels" or ("armed, MIDI channel " .. midi_chan)
-    end
-    local chan = (rec_input & 1023) + 1
-    if rec_input & 1024 ~= 0 then
-        return "armed, inputs " .. chan .. " and " .. (chan + 1)
-    end
-    return "armed, input " .. chan
-end
-
----------------------------------------------------------------------
-
 function format_mute_solo(track)
     local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
     local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
@@ -102,8 +85,6 @@ function announce_track(track, position)
     local meter_track = get_feed_track(track)
     local label = position and (position .. " " .. humanize_track_name(name)) or humanize_track_name(name)
     local parts = { label, format_peak(meter_track) }
-    local input_info = format_input(track)
-    if input_info then parts[#parts + 1] = input_info end
     local mute_solo_info = format_mute_solo(meter_track)
     if mute_solo_info then parts[#parts + 1] = mute_solo_info end
     say(table.concat(parts, ", "))

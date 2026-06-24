@@ -235,7 +235,12 @@ end
 -- Selects the marker matching (marker_id, marker_type) and deselects every
 -- other (non-region) marker, so it's ready for a follow-up Nudge Marker
 -- Left/Right without having to click it in the ruler.
+-- GetNumRegionsOrMarkers/GetRegionOrMarker/etc. are REAPER 7.62+ only -- on
+-- older builds this is a silent no-op, since it's purely a convenience for
+-- a follow-up Nudge Marker Left/Right and play_segment() doesn't need it.
 function select_marker_exclusive(marker_id, marker_type)
+    if not APIExists("GetNumRegionsOrMarkers") then return end
+
     local proj = EnumProjects(-1)
     if not proj then return end
 

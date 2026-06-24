@@ -5968,23 +5968,7 @@ function try_record(cmd)
         end
         if armed_folder then
             local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
-            local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
-            if wf == "Vertical" then
-                local _, folder_name = GetSetMediaTrackInfo_String(armed_folder, "P_NAME", "", false)
-                local prefix = folder_name:match("^([^:]+):") or folder_name
-
-                local spoken_prefix = prefix
-                    :gsub("^D$", "Destination")
-                    :gsub("^S(%d+)$", "Source %1")
-
-                status_msg = status_msg .. ". Armed: " ..
-                    (spoken_prefix ~= "" and spoken_prefix or "Unnamed folder")
-            else
-                status_msg = status_msg .. ". Folder armed"
-            end
-            if take_num ~= "" then
-                status_msg = status_msg .. ", upcoming take " .. take_num
-            end
+            status_msg = status_msg .. (take_num ~= "" and (". Armed for take " .. take_num) or ". Folder armed")
         end
         say(status_msg)
         return true
@@ -6049,13 +6033,15 @@ function try_record(cmd)
             say("Classical Take Record script not found")
             return true
         end
-        -- Classical Take Record.lua now announces "Recording Stopped"
+        -- Classical Take Record.lua now announces "Stopped recording take N"
         -- itself, so nothing further to say.
         Main_OnCommand(f9_cid, 0)
         return true
     end
 
-    -- rec.pause — toggle pause/unpause while recording
+    -- rec.pause — toggle pause/unpause while recording. The Record Panel
+    -- Daemon announces "Paused recording take N" / "Recording take N"
+    -- itself on its next frame, so nothing further to say here.
     if cmd == "rec.pause" then
         local ps = GetPlayState()
         if ps ~= 5 and ps ~= 6 then
@@ -6063,7 +6049,6 @@ function try_record(cmd)
             return true
         end
         Main_OnCommand(1008, 0) -- Transport: Pause
-        say(GetPlayState() == 6 and "Paused" or "Resumed")
         return true
     end
 

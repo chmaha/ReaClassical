@@ -253,6 +253,7 @@ function main()
     end
 
     Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
+    Main_OnCommand(40034, 0) -- Item grouping: Select all items in group(s)
 
     UpdateArrange()
     UpdateTimeline()

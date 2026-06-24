@@ -211,7 +211,7 @@ function main()
         -- In Vertical workflow, by this point the now-armed folder (the
         -- next one, a freshly duplicated one, or the same one again) is
         -- left as the sole selected track by the logic above.
-        local stop_msg = "Recording Stopped"
+        local stop_msg = take_number and ("Stopped recording take " .. take_number) or "Recording Stopped"
         if workflow == "Vertical" then
             local armed_track = GetSelectedTrack(0, 0)
             local label = armed_track and spoken_folder_label(workflow, armed_track)
@@ -265,8 +265,8 @@ function main()
 
     if mode == "arm" and rec_arm == 1 then
         PreventUIRefresh(-1)
-        local label = spoken_folder_label(workflow, first_selected)
-        say(label and ("Already armed: " .. label) or "Folder already armed")
+        local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+        say(take_num ~= "" and ("Already armed for take " .. take_num) or "Folder already armed")
         return
     end
 
@@ -311,8 +311,8 @@ function main()
         Undo_EndBlock('Classical Take Record', 0)
         UpdateArrange()
         UpdateTimeline()
-        local label = spoken_folder_label(workflow, first_selected_track)
-        say(label and ("Armed: " .. label) or "Folder armed")
+        local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
+        say(take_num ~= "" and ("Armed for take " .. take_num) or "Folder armed")
         return
     end
 

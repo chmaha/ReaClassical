@@ -97,6 +97,7 @@
   [nomain] ReaClassical_Delete Track From All Groups.lua
   [main] ReaClassical_Delete With Ripple.lua
   [main] ReaClassical_Destination Markers to Item Edge.lua
+  [main] ReaClassical_Disarm All Tracks.lua
   [main] ReaClassical_Duplicate folder (No items).lua
   [main] ReaClassical_Edit Automation.lua
   [main] ReaClassical_Editing Toolbar.lua
@@ -122,6 +123,7 @@
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Move to Destination IN marker.lua
   [main] ReaClassical_Move to Destination OUT marker.lua
+  [main] ReaClassical_Move to End of Selected Item.lua
   [main] ReaClassical_Move to First Item on Track.lua
   [main] ReaClassical_Move to Last Item on Track.lua
   [main] ReaClassical_Move to Next Marker.lua

@@ -81,7 +81,12 @@ end
 -- Nudges every selected (non-region) project marker by `amount` seconds,
 -- clamped at 0. Returns how many were moved, plus the label of the last
 -- one moved (used for the single-marker announcement).
+-- GetNumRegionsOrMarkers/etc. are REAPER 7.62+ only -- on older builds
+-- there's no way to read marker selection state at all, so this is a
+-- no-op (reported the same as "no marker selected").
 function nudge_selected_markers(amount)
+    if not APIExists("GetNumRegionsOrMarkers") then return 0 end
+
     Undo_BeginBlock()
 
     local proj = EnumProjects(-1)

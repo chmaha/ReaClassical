@@ -274,6 +274,7 @@ function move_to_item()
     else
         Main_OnCommand(40416, 0)     -- Select and move to prev item
     end
+    Main_OnCommand(40034, 0)         -- Item grouping: Select all items in group(s)
 end
 
 ---------------------------------------------------------------------
