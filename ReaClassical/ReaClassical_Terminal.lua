@@ -1091,6 +1091,10 @@ function try_project_setup(cmd)
         v_count = cmd:match("^(%d+)v$")
     end
     if v_count then
+        if tonumber(v_count) < 2 then
+            say("Each folder needs a minimum of 2 tracks")
+            return true
+        end
         if workflow ~= "" then
             if not start_fresh_project() then
                 say("Cancelled")
@@ -1124,6 +1128,10 @@ function try_project_setup(cmd)
         h_count = cmd:match("^(%d+)h$")
     end
     if h_count then
+        if tonumber(h_count) < 2 then
+            say("Each folder needs a minimum of 2 tracks")
+            return true
+        end
         if workflow ~= "" then
             if not start_fresh_project() then
                 say("Cancelled")
@@ -6512,6 +6520,62 @@ function try_osara_install(cmd)
 end
 
 ---------------------------------------------------------------------
+-- REAPER self-updater: "updatereaper" installs the latest public release;
+-- "updatereaper=VERSION" installs a specific version (main, dev, or RC --
+-- e.g. "updatereaper=752" or "updatereaper=7.52" for 7.52, or
+-- "updatereaper=596+dev1009"/"updatereaper=597rc1" for a dev/RC build).
+-- Unlike the GUI tool, version lookups search the full historical archive
+-- with no cutoff. This closes all open projects (REAPER's own save-changes
+-- prompt protects unsaved work), downloads, and installs/restarts
+-- immediately -- see ReaClassical_Update REAPER.lua for the actual
+-- download/install logic, which runs as its own deferred script so a large
+-- download doesn't block REAPER's UI thread.
+---------------------------------------------------------------------
+
+function try_update_reaper(cmd)
+    if cmd ~= "updatereaper" and not cmd:match("^updatereaper=") then return false end
+
+    if not APIExists("AddRemoveReaScript") then
+        say("AddRemoveReaScript API not found (install SWS extension)")
+        return true
+    end
+
+    local version = cmd:match("^updatereaper=(.+)$")
+    SetExtState("ReaClassical_UpdateReaper", "mode", version and "version" or "latest", false)
+    if version then
+        SetExtState("ReaClassical_UpdateReaper", "version", version, false)
+    end
+
+    local update_cid = AddRemoveReaScript(true, 0,
+        script_path .. "ReaClassical_Update REAPER.lua", true)
+    if update_cid == 0 then
+        say("Update REAPER script not found")
+        return true
+    end
+    Main_OnCommand(update_cid, 0)
+    return true
+end
+
+---------------------------------------------------------------------
+-- Commands that shouldn't be remembered for "!" (repeat last command):
+-- one-shot setup/destructive/external-resource actions where blindly
+-- replaying them again would be pointless at best (help, newtab) or
+-- actively unwanted (Nv/Nh discards the project just created;
+-- factoryreset/installosara/update/updatereaper download or reset things).
+---------------------------------------------------------------------
+
+function is_unrepeatable_command(full_input)
+    local first = trim(full_input:match("^([^;]+)") or "")
+    if first == "help" or first == "newtab" or first == "factoryreset"
+        or first == "installosara" or first == "update"
+        or first == "updatereaper" or first:match("^updatereaper=")
+        or first:match("^%d+v") or first:match("^%d+h") then
+        return true
+    end
+    return false
+end
+
+---------------------------------------------------------------------
 -- Dispatcher
 ---------------------------------------------------------------------
 
@@ -6543,6 +6607,7 @@ function execute_command(cmd)
     if try_record(cmd) then return end
     if try_misc(cmd) then return end
     if try_osara_install(cmd) then return end
+    if try_update_reaper(cmd) then return end
 
     say("Unknown command: " .. cmd)
 end
@@ -6577,7 +6642,7 @@ function main()
                 return
             end
             input = last
-        elseif input ~= "" then
+        elseif input ~= "" and not is_unrepeatable_command(input) then
             SetProjExtState(0, "ReaClassical", "LastTerminalCommand", input)
         end
     end
@@ -6605,6 +6670,7 @@ function main()
             local first = commands[1]
             if not (first:match("^%d+v") or first:match("^%d+h") or first == "newtab"
                     or first == "update" or first == "installosara" or first == "factoryreset" or first == "help"
+                    or first == "updatereaper" or first:match("^updatereaper=")
                     or first == "debug=on" or first == "debug=off") then
                 say("Please create a ReaClassical project first (e.g. 6v)")
                 return

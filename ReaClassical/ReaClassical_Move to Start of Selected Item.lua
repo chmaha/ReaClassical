@@ -67,9 +67,8 @@ local function main()
     end
 
     local pos = GetMediaItemInfo_Value(item, "D_POSITION")
-    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
 
-    SetEditCurPos(pos + len, true, true)
+    SetEditCurPos(pos, true, true)
     UpdateArrange()
 
     local take = GetActiveTake(item)
@@ -77,7 +76,7 @@ local function main()
     if take then
         _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
     end
-    say("Moved to end of " .. humanize_take_name(name))
+    say("Moved to start of " .. humanize_take_name(name))
 end
 
 main()

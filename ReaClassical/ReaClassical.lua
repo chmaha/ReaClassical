@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre25
+@version 26.6.8pre26
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -55,16 +55,11 @@
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
-  [nomain] ReaClassical_Add Aux.lua
   [main] ReaClassical_Add CD Marker Offsets.lua
   [main] ReaClassical_Add Destination IN marker.lua
   [main] ReaClassical_Add Destination OUT Marker.lua
-  [nomain] ReaClassical_Add Live Bounce Track.lua
-  [nomain] ReaClassical_Add Ref Track.lua
-  [nomain] ReaClassical_Add RoomTone Track.lua
   [main] ReaClassical_Add Source IN marker.lua
   [main] ReaClassical_Add Source OUT marker.lua
-  [nomain] ReaClassical_Add Submix.lua
   [main] ReaClassical_Announce RCMASTER Peak.lua
   [main] ReaClassical_Announce Take Number.lua
   [main] ReaClassical_Announce Timeline Position.lua
@@ -94,7 +89,6 @@
   [main] ReaClassical_Delete All S-D markers.lua
   [main] ReaClassical_Delete Leaving Silence.lua
   [main] ReaClassical_Delete S-D Project Markers.lua
-  [nomain] ReaClassical_Delete Track From All Groups.lua
   [main] ReaClassical_Delete With Ripple.lua
   [main] ReaClassical_Destination Markers to Item Edge.lua
   [main] ReaClassical_Disarm All Tracks.lua
@@ -109,17 +103,14 @@
   [main] ReaClassical_Help.lua
   [main] ReaClassical_Hide Automation Lanes.lua
   [main] ReaClassical_Hide Children.lua
-  [nomain] ReaClassical_Horizontal Workflow.lua
   [main] ReaClassical_Increment Take Number While Recording.lua
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Insert with timestretching.lua
   [main] ReaClassical_Jump To Time.lua
-  [nomain] ReaClassical_Metadata Report.lua
   [main] ReaClassical_Meterbridge.lua
   [main] ReaClassical_Microphone Indicator.lua
   [main] ReaClassical_Mixer Snapshots.lua
   [main] ReaClassical_Mission Control.lua
-  [nomain] ReaClassical_Mixer Snapshots Daemon.lua
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Move to Destination IN marker.lua
   [main] ReaClassical_Move to Destination OUT marker.lua
@@ -130,6 +121,7 @@
   [main] ReaClassical_Move to Previous Marker.lua
   [main] ReaClassical_Move to Source IN marker.lua
   [main] ReaClassical_Move to Source OUT marker.lua
+  [main] ReaClassical_Move to Start of Selected Item.lua
   [main] ReaClassical_Navigate to First Folder.lua
   [main] ReaClassical_Navigate to Next Envelope Lane.lua
   [main] ReaClassical_Navigate to Next Folder.lua
@@ -159,7 +151,6 @@
   [main] ReaClassical_Previous Item or Fade.lua
   [main] ReaClassical_Promote Source to Destination.lua
   [main] ReaClassical_Record Panel.lua
-  [nomain] ReaClassical_Record Panel Daemon.lua
   [main] ReaClassical_Regions from items.lua
   [main] ReaClassical_Remove All CD Marker Offsets.lua
   [main] ReaClassical_Remove All Item Fades.lua
@@ -182,7 +173,6 @@
   [main] ReaClassical_Toggle Monitor.lua
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
-  [nomain] ReaClassical_Vertical Workflow.lua
   [main] ReaClassical_Whole Project View.lua
   [main] ReaClassical_Whole Project View Horizontal.lua
   [main] ReaClassical_Whole Project View Vertical.lua
@@ -200,6 +190,10 @@
   [theme] ReaClassical WaveColors Dark.ReaperThemeZip
   [theme] ReaClassical WaveColors Light.ReaperThemeZip
   [www] ReaClassical_remote.html
+  ReaClassical_Add Live Bounce Track.lua
+  ReaClassical_Add Ref Track.lua
+  ReaClassical_Add RoomTone Track.lua
+  ReaClassical_Add Aux.lua
   ReaClassical_Colors_Table.lua
   ReaClassical_Track_Naming.lua
   ReaClassical_Time_Naming.lua
@@ -215,6 +209,14 @@
   ReaClassical-Manual.html
   ReaClassical-Shortcuts.html
   ReaClassical-Terminal-Guide.html
+  ReaClassical_Update REAPER.lua
+  ReaClassical_Record Panel Daemon.lua
+  ReaClassical_Mixer Snapshots Daemon.lua
+  ReaClassical_Vertical Workflow.lua
+  ReaClassical_Metadata Report.lua
+  ReaClassical_Horizontal Workflow.lua
+  ReaClassical_Delete Track From All Groups.lua
+  ReaClassical_Add Submix.lua
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 

@@ -61,7 +61,7 @@ function format_peak(track)
         if val > peak then peak = val end
     end
     if peak <= -150.0 then return "silence" end
-    return string.format("peak %.1f dB", peak)
+    return string.format("%.1f dB", peak)
 end
 
 ---------------------------------------------------------------------
