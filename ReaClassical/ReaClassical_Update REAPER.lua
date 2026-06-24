@@ -26,11 +26,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- The actual download/install shell commands below (curl/powershell setup,
 -- dmg-mount-and-copy with administrator-privilege fallback on macOS, the
--- pkexec install script on Linux, the silent NSIS install on Windows) are
--- a deliberately near-verbatim port of FeedTheCat's "REAPER Update Utility"
--- (see FTC Tools/Various/REAPER Update Utility.lua) -- getting shell
--- quoting wrong here could leave REAPER half-installed, so this reuses the
--- exact, already-proven command strings rather than rewriting them.
+-- pkexec install script on Linux, the silent NSIS install on Windows),
+-- plus the platform/arch detection and download-link parsing, are a
+-- deliberately near-verbatim port of "REAPER Update Utility" by
+-- Ilias-Timon Poulakis (FeedTheCat) -- see FTC Tools/Various/REAPER Update
+-- Utility.lua in this repository -- getting shell quoting wrong here could
+-- leave REAPER half-installed, so this reuses the exact, already-proven
+-- command strings rather than rewriting them.
 --
 -- Deliberately NOT ported from that tool: the GUI/settings/version-history
 -- menu (replaced by the Terminal commands + unlimited archive search
@@ -38,6 +40,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- "reopen projects after restart" option (it depends on a startup-hook
 -- companion script we don't install, so it would be silently inert here;
 -- REAPER reopens its last project per its own normal preference instead).
+--
+-- "REAPER Update Utility" is licensed under the MIT License:
+--
+-- Copyright (c) Ilias-Timon Poulakis (FeedTheCat)
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a
+-- copy of this software and associated documentation files (the
+-- "Software"), to deal in the Software without restriction, including
+-- without limitation the rights to use, copy, modify, merge, publish,
+-- distribute, sublicense, and/or sell copies of the Software, and to
+-- permit persons to whom the Software is furnished to do so, subject to
+-- the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included
+-- in all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+-- OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+-- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+-- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+-- CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+-- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+-- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -- luacheck: ignore 113
 
@@ -61,7 +86,7 @@ end
 
 atexit(finish)
 
-local mode = GetExtState(EXT_NS, "mode") -- "latest" or "version"
+local mode = GetExtState(EXT_NS, "mode") -- "latest", "version", or "recommended"
 local requested_version = GetExtState(EXT_NS, "version")
 DeleteExtState(EXT_NS, "mode", false)
 DeleteExtState(EXT_NS, "version", false)
@@ -99,6 +124,12 @@ end
 local main_dlink = "https://www.reaper.fm/download.php"
 local dev_dlink = "https://www.landoleet.org/"
 local old_dlink = "https://www.landoleet.org/old/"
+local rec_dlink = "https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+
+-- download.php is a page, not a directory -- the actual files live one
+-- level up, at the site root. dev_dlink/old_dlink are already real
+-- directories the files live in, so they're used as-is.
+local main_site_root = "https://www.reaper.fm/"
 
 local install_path = GetExePath()
 local res_path = GetResourcePath()
@@ -132,12 +163,14 @@ local step_path = tmp_path .. ("reaclassical_uutil_%s_step.txt"):format(install_
 local main_path = tmp_path .. ("reaclassical_uutil_%s_main.html"):format(install_id)
 local dev_path = tmp_path .. ("reaclassical_uutil_%s_dev.html"):format(install_id)
 local old_path = tmp_path .. ("reaclassical_uutil_%s_old.html"):format(install_id)
+local rec_path = tmp_path .. ("reaclassical_uutil_%s_rec.txt"):format(install_id)
 local log_path = tmp_path .. ("reaclassical_uutil_%s_log.txt"):format(install_id)
 
 os.remove(step_path)
 os.remove(main_path)
 os.remove(dev_path)
 os.remove(old_path)
+os.remove(rec_path)
 
 local chosen_link, chosen_version, dfile_name
 
@@ -192,16 +225,19 @@ local function get_file_pattern()
 end
 
 -- Returns the FIRST matching download link in `html` (the newest release
--- on that page) plus its raw (undotted) version string.
-local function parse_first_link(html, dlink)
+-- on that page) plus its raw (undotted) version string. `site_root` must
+-- already be the directory the files actually live in (e.g.
+-- "https://www.reaper.fm/", NOT the "download.php" page URL itself, since
+-- that page lives one directory above the files it links to) -- the
+-- caller is responsible for that, this just concatenates directly (so it
+-- works correctly for old_dlink's "/old/" subdirectory too).
+local function parse_first_link(html, site_root)
     local href_pattern = get_file_pattern()
     for line in html:gmatch("[^\n]+") do
         local file_name = line:match(href_pattern)
         if file_name then
-            local site = dlink:match("(.-%..-%..-/)")
-            local link = site .. file_name
-            local raw_version = file_name:match("reaper(.-)[_%-]")
-            return link, raw_version
+            local raw_version = file_name:match("reaper(.-)_")
+            return site_root .. file_name, raw_version
         end
     end
     return nil
@@ -210,15 +246,15 @@ end
 -- Scans every matching download link in `html` for one whose raw version
 -- normalizes to `target_norm`. No limit on how far back this searches --
 -- unlike the GUI tool's version-history menu, the whole page is scanned.
-local function find_link_for_version(html, dlink, target_norm)
+-- See parse_first_link() above re: `site_root`.
+local function find_link_for_version(html, site_root, target_norm)
     local href_pattern = get_file_pattern()
     for line in html:gmatch("[^\n]+") do
         local file_name = line:match(href_pattern)
         if file_name then
-            local raw_version = file_name:match("reaper(.-)[_%-]")
+            local raw_version = file_name:match("reaper(.-)_")
             if raw_version and normalize_version(raw_version) == target_norm then
-                local site = dlink:match("(.-%..-%..-/)")
-                return site .. file_name, raw_version
+                return site_root .. file_name, raw_version
             end
         end
     end
@@ -231,6 +267,26 @@ local function read_file(path)
     local content = file:read("*a")
     file:close()
     return content
+end
+
+-- Mirrors the project's own install scripts:
+-- awk '/====/{getline; print}' -- the recommended version is the line
+-- right after a line containing "====".
+local function parse_recommended_version(content)
+    local lines = {}
+    for line in (content .. "\n"):gmatch("(.-)\r?\n") do
+        lines[#lines + 1] = line
+    end
+    for i, line in ipairs(lines) do
+        if line:match("====") then
+            local nxt = lines[i + 1]
+            if nxt then
+                nxt = nxt:gsub("^%s+", ""):gsub("%s+$", "")
+                if nxt ~= "" then return nxt end
+            end
+        end
+    end
+    return nil
 end
 
 ---------------------------------------------------------------------
@@ -427,6 +483,24 @@ local function announce_not_found()
     finish()
 end
 
+local function fetch_live_pages()
+    -- The dev/rc page fetch is best-effort and run as its own detached
+    -- command (read_file() above already tolerates dev_path not existing),
+    -- so it's never chained into the success/failure check below -- this
+    -- sidesteps needing a "succeed regardless" operator that's spelled
+    -- differently on cmd.exe ("&") vs /bin/sh ("; or "|| true").
+    local dev_cmd = dl_cmd .. " >> %s 2>&1"
+    dev_cmd = dev_cmd:format(dev_dlink, dev_path, log_path)
+    run_shell(dev_cmd)
+
+    local cmd = dl_cmd .. " >> %s 2>&1"
+    cmd = cmd:format(main_dlink, main_path, log_path)
+    cmd = cmd .. " && echo after_live > %s"
+    cmd = cmd .. " || echo err_internet > %s"
+    cmd = cmd:format(step_path, step_path)
+    run_shell(cmd)
+end
+
 local function Main()
     local step_file = io.open(step_path, "r")
     if step_file then
@@ -435,6 +509,25 @@ local function Main()
         os.remove(step_path)
 
         Log("\n------------- Step", step, "---------------")
+
+        if step == "after_rec" then
+            local rec_content = read_file(rec_path)
+            os.remove(rec_path)
+            local parsed = rec_content and parse_recommended_version(rec_content)
+            if not parsed then
+                say("Could not determine the recommended REAPER version")
+                finish()
+                return
+            end
+            requested_version = parsed
+            mode = "version"
+            -- `parsed` is whatever text literally follows "====" in the file
+            -- (could already be dotted, e.g. "7.75") -- say it as-is rather
+            -- than running it through display_version(), which assumes an
+            -- undotted raw filename version and would double up the dot.
+            say("Recommended REAPER version is " .. parsed .. ". Checking...")
+            fetch_live_pages()
+        end
 
         if step == "after_live" then
             local main_html = read_file(main_path)
@@ -449,34 +542,37 @@ local function Main()
             end
 
             if mode == "latest" then
-                local link, raw_version = parse_first_link(main_html, main_dlink)
+                local link, raw_version = parse_first_link(main_html, main_site_root)
                 if not link then
                     say("Could not find a REAPER download link. The download page format may have changed.")
                     finish()
                     return
                 end
+                -- proceed_with() may kick off an async download (non-terminal)
+                -- rather than finishing -- don't return here, fall through to
+                -- the unconditional defer(Main) at the bottom so the step-file
+                -- poll loop keeps running.
                 proceed_with(link, raw_version)
-                return
+            else
+                local norm = normalize_version(requested_version)
+                local link, raw_version = find_link_for_version(main_html, main_site_root, norm)
+                if not link and dev_html then
+                    link, raw_version = find_link_for_version(dev_html, dev_dlink, norm)
+                end
+                if link then
+                    proceed_with(link, raw_version)
+                else
+                    -- Not on either live page -- search the full historical
+                    -- archive (no artificial limit, unlike the GUI tool's
+                    -- version menu).
+                    local cmd = dl_cmd .. " >> %s 2>&1"
+                    cmd = cmd:format(old_dlink, old_path, log_path)
+                    cmd = cmd .. " && echo after_history > %s"
+                    cmd = cmd .. " || echo err_internet > %s"
+                    cmd = cmd:format(step_path, step_path)
+                    run_shell(cmd)
+                end
             end
-
-            local norm = normalize_version(requested_version)
-            local link, raw_version = find_link_for_version(main_html, main_dlink, norm)
-            if not link and dev_html then
-                link, raw_version = find_link_for_version(dev_html, dev_dlink, norm)
-            end
-            if link then
-                proceed_with(link, raw_version)
-                return
-            end
-
-            -- Not on either live page -- search the full historical archive
-            -- (no artificial limit, unlike the GUI tool's version menu).
-            local cmd = dl_cmd .. " >> %s 2>&1"
-            cmd = cmd:format(old_dlink, old_path, log_path)
-            cmd = cmd .. " && echo after_history > %s"
-            cmd = cmd .. " || echo err_internet > %s"
-            cmd = cmd:format(step_path, step_path)
-            run_shell(cmd)
         end
 
         if step == "after_history" then
@@ -517,28 +613,22 @@ local function Main()
 end
 
 ---------------------------------------------------------------------
--- Kick off: fetch both live pages (main release + current dev/rc build)
+-- Kick off: fetch both live pages (main release + current dev/rc build),
+-- or first resolve "recommended" to a concrete version number
 ---------------------------------------------------------------------
 
-say(mode == "latest" and "Checking for the latest REAPER version..."
-    or ("Checking for REAPER version " .. (requested_version or "?") .. "..."))
-
-do
-    -- The dev/rc page fetch is best-effort and run as its own detached
-    -- command (read_file() above already tolerates dev_path not existing),
-    -- so it's never chained into the success/failure check below -- this
-    -- sidesteps needing a "succeed regardless" operator that's spelled
-    -- differently on cmd.exe ("&") vs /bin/sh ("; or "|| true").
-    local dev_cmd = dl_cmd .. " >> %s 2>&1"
-    dev_cmd = dev_cmd:format(dev_dlink, dev_path, log_path)
-    run_shell(dev_cmd)
-
+if mode == "recommended" then
+    say("Checking for the recommended REAPER version...")
     local cmd = dl_cmd .. " >> %s 2>&1"
-    cmd = cmd:format(main_dlink, main_path, log_path)
-    cmd = cmd .. " && echo after_live > %s"
+    cmd = cmd:format(rec_dlink, rec_path, log_path)
+    cmd = cmd .. " && echo after_rec > %s"
     cmd = cmd .. " || echo err_internet > %s"
     cmd = cmd:format(step_path, step_path)
     run_shell(cmd)
+else
+    say(mode == "latest" and "Checking for the latest REAPER version..."
+        or ("Checking for REAPER version " .. (requested_version or "?") .. "..."))
+    fetch_live_pages()
 end
 
 defer(Main)

@@ -88,8 +88,9 @@ commas/dashes in lists are tolerated, e.g. <code>1, 3</code> and
 <code>1 - 3</code> both work).</li>
 <li>The very first command in a brand-new project must be a
 project-setup command (<code>Nv</code>, <code>Nh</code>,
-<code>newtab</code>, <code>update</code>, or <code>installosara</code>)
-— everything else requires an existing ReaClassical project.</li>
+<code>newtab</code>, <code>update</code>, <code>installosara</code>, or
+<code>updatereaper</code>) — everything else requires an existing
+ReaClassical project.</li>
 <li>Type <code>help</code> to open this guide (published as HTML at
 https://reaclassical.org/rcterminal.html) in your default browser.
 (Separately, the <code>H</code> keyboard shortcut normally opens the
@@ -99,7 +100,13 @@ better with a screen reader than a PDF.)</li>
 <li>Type <code>!</code> on its own to repeat whatever command(s) you
 last ran. The “ReaClassical Repeat Last Terminal Command” reascript does
 the same thing from a keyboard shortcut without opening the Terminal
-dialog at all.</li>
+dialog at all. One-shot setup/destructive commands aren’t remembered for
+this — <code>Nv</code>/<code>Nh</code>, <code>newtab</code>,
+<code>help</code>, <code>factoryreset</code>, <code>installosara</code>,
+<code>update</code>, and
+<code>updatereaper</code>/<code>updatereaper=...</code> are never saved
+as the repeat target, so <code>!</code> always falls back to the last
+“real” command instead.</li>
 </ul>
 <h3 id="target-syntax-used-throughout">Target syntax used
 throughout</h3>
@@ -193,8 +200,10 @@ matching mixer-track position order).</li>
 <td><code>Nv</code></td>
 <td>Start a brand-new project using the <strong>Vertical</strong>
 workflow with N tracks per folder, e.g. <code>8v</code>. If a
-ReaClassical project is already open, you’ll be asked to save
-first.</td>
+ReaClassical project is already open, you’ll be asked to save first. N
+must be at least 2 (each folder needs a minimum of 2 tracks) —
+<code>1v</code> announces an error instead of silently doing
+nothing.</td>
 </tr>
 <tr>
 <td><code>Nv=Name1,Name2,...</code></td>
@@ -204,7 +213,8 @@ e.g. <code>2v=Violin,Cello</code>.</td>
 <tr>
 <td><code>Nh</code></td>
 <td>Start a brand-new project using the <strong>Horizontal</strong>
-workflow with N tracks, e.g. <code>4h</code>.</td>
+workflow with N tracks, e.g. <code>4h</code>. Same N ≥ 2 minimum as
+<code>Nv</code>.</td>
 </tr>
 <tr>
 <td><code>Nh=Name1,Name2,...</code></td>
@@ -443,15 +453,16 @@ recording, and pressing it again while recording stops the take — no
 change there. <code>rec.arm</code> and <code>rec.start</code> give the
 Terminal the same two steps with precision instead of a toggle: each
 only ever does its own job, and announces the current state (“Already
-armed: …”, “Already recording”, “Not armed yet”) rather than silently
-doing nothing or the wrong thing. If OSARA is installed, F9 also starts
-the headless Record Panel daemon itself (the same daemon-start step as
-<code>rec.open</code>) the first time it’s pressed and the daemon isn’t
-already running, so you get its background take/level tracking even if
-you jump straight to F9 without ever running <code>rec.open</code>.
-<code>rec.arm</code> and <code>rec.start</code> do the same daemon
-auto-start regardless of whether OSARA is installed, since they’re
-explicitly the precision/headless entry points into recording.</p>
+armed for take 6”, “Already recording”, “Not armed yet”) rather than
+silently doing nothing or the wrong thing. If OSARA is installed, F9
+also starts the headless Record Panel daemon itself (the same
+daemon-start step as <code>rec.open</code>) the first time it’s pressed
+and the daemon isn’t already running, so you get its background
+take/level tracking even if you jump straight to F9 without ever running
+<code>rec.open</code>. <code>rec.arm</code> and <code>rec.start</code>
+do the same daemon auto-start regardless of whether OSARA is installed,
+since they’re explicitly the precision/headless entry points into
+recording.</p>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -475,8 +486,9 @@ explicitly the precision/headless entry points into recording.</p>
 </tr>
 <tr>
 <td><code>rec.arm</code></td>
-<td>Arm the selected folder without starting recording. If it’s already
-armed (or already recording), just announces that instead of changing
+<td>Arm the selected folder without starting recording, announcing the
+upcoming take number (e.g. “Armed for take 6”). If it’s already armed
+(or already recording), just announces that instead of changing
 anything.</td>
 </tr>
 <tr>
@@ -487,14 +499,18 @@ anything.</td>
 </tr>
 <tr>
 <td><code>rec.stop</code></td>
-<td>Press F9 to stop the current recording. In Vertical workflow, also
-announces which folder is now armed (e.g. “Recording Stopped. Source 4
-folder armed”) — F9 itself announces the same thing when used to
-stop.</td>
+<td>Press F9 to stop the current recording, announcing the take number
+that was just recorded (e.g. “Stopped recording take 6”). In Vertical
+workflow, also announces which folder is now armed (e.g. “Stopped
+recording take 6. Source 4 folder armed”) — F9 itself announces the same
+thing when used to stop.</td>
 </tr>
 <tr>
 <td><code>rec.pause</code></td>
-<td>Toggle pause/resume while recording.</td>
+<td>Toggle pause/resume while recording. The Record Panel daemon
+announces “Paused recording take 6” / “Recording take 6” on its own a
+moment later, regardless of whether pause was triggered here, by the
+Record Panel’s button, or by its keyboard shortcut.</td>
 </tr>
 <tr>
 <td><code>rec.next</code></td>
@@ -1949,6 +1965,25 @@ https://reaclassical.org/rcterminal.html) in your default browser.</td>
 (Windows/macOS only), then restart REAPER.</td>
 </tr>
 <tr>
+<td><code>updatereaper</code></td>
+<td>Download and install the latest public (main-release) REAPER
+version. Closes all open projects (you’ll be prompted to save unsaved
+work) and restarts REAPER once the install finishes.</td>
+</tr>
+<tr>
+<td><code>updatereaper=VERSION</code></td>
+<td>Install a specific (main-release) REAPER version,
+e.g. <code>updatereaper=752</code> or <code>updatereaper=7.52</code>
+(both mean 7.52; the dot is optional). Searches the full version archive
+with no cutoff, so older versions work too.</td>
+</tr>
+<tr>
+<td><code>updatereaper=rec</code></td>
+<td>Install whichever REAPER version ReaClassical currently
+recommends/tests against (also accepts
+<code>updatereaper=recommended</code>).</td>
+</tr>
+<tr>
 <td><code>allowgui=y</code> / <code>allowgui=n</code></td>
 <td>Allow/block ReaImGui windows (Mission Control, Notes, Preferences,
 etc.) from opening while OSARA is installed — they’re blocked by default
@@ -1980,6 +2015,11 @@ per project. Defaults to 5 ms if never set.</td>
 <ul>
 <li><code>installosara</code> — Setting up a brand-new machine; install
 the screen-reader plugin before doing anything else.</li>
+<li><code>updatereaper</code> — Keep REAPER itself current with the
+latest public release.</li>
+<li><code>updatereaper=rec</code> — Match REAPER to the version
+ReaClassical is actually tested against, rather than whatever’s
+newest.</li>
 <li><code>update</code> — Check ReaPack for newer versions of
 ReaClassical at the start of a session.</li>
 <li><code>newtab</code> — Start a second, unrelated project (e.g. a

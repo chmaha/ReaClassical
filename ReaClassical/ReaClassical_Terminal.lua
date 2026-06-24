@@ -6523,7 +6523,9 @@ end
 -- REAPER self-updater: "updatereaper" installs the latest public release;
 -- "updatereaper=VERSION" installs a specific version (main, dev, or RC --
 -- e.g. "updatereaper=752" or "updatereaper=7.52" for 7.52, or
--- "updatereaper=596+dev1009"/"updatereaper=597rc1" for a dev/RC build).
+-- "updatereaper=596+dev1009"/"updatereaper=597rc1" for a dev/RC build);
+-- "updatereaper=rec" (or "=recommended") installs whatever version is
+-- currently listed at the project's tested_reaper_ver.txt on GitHub.
 -- Unlike the GUI tool, version lookups search the full historical archive
 -- with no cutoff. This closes all open projects (REAPER's own save-changes
 -- prompt protects unsaved work), downloads, and installs/restarts
@@ -6541,8 +6543,13 @@ function try_update_reaper(cmd)
     end
 
     local version = cmd:match("^updatereaper=(.+)$")
-    SetExtState("ReaClassical_UpdateReaper", "mode", version and "version" or "latest", false)
+    local mode = "latest"
     if version then
+        local lower = version:lower()
+        mode = (lower == "rec" or lower == "recommended") and "recommended" or "version"
+    end
+    SetExtState("ReaClassical_UpdateReaper", "mode", mode, false)
+    if mode == "version" then
         SetExtState("ReaClassical_UpdateReaper", "version", version, false)
     end
 

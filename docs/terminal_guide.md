@@ -8,9 +8,9 @@ The Terminal is a single text-entry dialog (run the "ReaClassical Terminal" scri
 - Type a command and press Enter.
 - You can run several commands in one go by separating them with a semicolon: `1m;2m;3s` mutes tracks 1 and 2 and solos track 3.
 - Commands are case-sensitive and must match the patterns below exactly (no extra spaces inside tokens, though spaces around commas/dashes in lists are tolerated, e.g. `1, 3` and `1 - 3` both work).
-- The very first command in a brand-new project must be a project-setup command (`Nv`, `Nh`, `newtab`, `update`, or `installosara`) — everything else requires an existing ReaClassical project.
+- The very first command in a brand-new project must be a project-setup command (`Nv`, `Nh`, `newtab`, `update`, `installosara`, or `updatereaper`) — everything else requires an existing ReaClassical project.
 - Type `help` to open this guide (published as HTML at https://reaclassical.org/rcterminal.html) in your default browser. (Separately, the `H` keyboard shortcut normally opens the full ReaClassical PDF manual, but switches to the HTML version at reaclassical.org/manual when OSARA is installed, since HTML reads far better with a screen reader than a PDF.)
-- Type `!` on its own to repeat whatever command(s) you last ran. The "ReaClassical Repeat Last Terminal Command" reascript does the same thing from a keyboard shortcut without opening the Terminal dialog at all.
+- Type `!` on its own to repeat whatever command(s) you last ran. The "ReaClassical Repeat Last Terminal Command" reascript does the same thing from a keyboard shortcut without opening the Terminal dialog at all. One-shot setup/destructive commands aren't remembered for this — `Nv`/`Nh`, `newtab`, `help`, `factoryreset`, `installosara`, `update`, and `updatereaper`/`updatereaper=...` are never saved as the repeat target, so `!` always falls back to the last "real" command instead.
 
 ### Target syntax used throughout
 
@@ -50,9 +50,9 @@ Any `<target>?`-style query (mute/solo/polarity/pan/fader/peak/record-input stat
 
 | Command | Effect |
 |---|---|
-| `Nv` | Start a brand-new project using the **Vertical** workflow with N tracks per folder, e.g. `8v`. If a ReaClassical project is already open, you'll be asked to save first. |
+| `Nv` | Start a brand-new project using the **Vertical** workflow with N tracks per folder, e.g. `8v`. If a ReaClassical project is already open, you'll be asked to save first. N must be at least 2 (each folder needs a minimum of 2 tracks) — `1v` announces an error instead of silently doing nothing. |
 | `Nv=Name1,Name2,...` | Same as `Nv`, also naming each mixer track in one step, e.g. `2v=Violin,Cello`. |
-| `Nh` | Start a brand-new project using the **Horizontal** workflow with N tracks, e.g. `4h`. |
+| `Nh` | Start a brand-new project using the **Horizontal** workflow with N tracks, e.g. `4h`. Same N ≥ 2 minimum as `Nv`. |
 | `Nh=Name1,Name2,...` | Same as `Nh`, also naming each mixer track in one step, e.g. `2h=Violin,Cello`. |
 | `convert=h` | Convert the current (vertical) project to Horizontal workflow. |
 | `convert=v` | Convert the current (horizontal) project to Vertical workflow. |
@@ -126,16 +126,16 @@ Typical first step in any session: `6v` (six mixer tracks, vertical/classical se
 
 ## 4. Recording — Transport & Takes (Record Panel)
 
-F9 (the Classical Take Record reascript) still works as a single toggle button: first press arms the selected folder, second press starts recording, and pressing it again while recording stops the take — no change there. `rec.arm` and `rec.start` give the Terminal the same two steps with precision instead of a toggle: each only ever does its own job, and announces the current state ("Already armed: …", "Already recording", "Not armed yet") rather than silently doing nothing or the wrong thing. If OSARA is installed, F9 also starts the headless Record Panel daemon itself (the same daemon-start step as `rec.open`) the first time it's pressed and the daemon isn't already running, so you get its background take/level tracking even if you jump straight to F9 without ever running `rec.open`. `rec.arm` and `rec.start` do the same daemon auto-start regardless of whether OSARA is installed, since they're explicitly the precision/headless entry points into recording.
+F9 (the Classical Take Record reascript) still works as a single toggle button: first press arms the selected folder, second press starts recording, and pressing it again while recording stops the take — no change there. `rec.arm` and `rec.start` give the Terminal the same two steps with precision instead of a toggle: each only ever does its own job, and announces the current state ("Already armed for take 6", "Already recording", "Not armed yet") rather than silently doing nothing or the wrong thing. If OSARA is installed, F9 also starts the headless Record Panel daemon itself (the same daemon-start step as `rec.open`) the first time it's pressed and the daemon isn't already running, so you get its background take/level tracking even if you jump straight to F9 without ever running `rec.open`. `rec.arm` and `rec.start` do the same daemon auto-start regardless of whether OSARA is installed, since they're explicitly the precision/headless entry points into recording.
 
 | Command | Effect |
 |---|---|
 | `rec.open` | Start the headless Record Panel daemon and arm the selected folder (first F9 press equivalent). |
 | `rec.close` | Stop the Record Panel daemon. |
-| `rec.arm` | Arm the selected folder without starting recording. If it's already armed (or already recording), just announces that instead of changing anything. |
+| `rec.arm` | Arm the selected folder without starting recording, announcing the upcoming take number (e.g. "Armed for take 6"). If it's already armed (or already recording), just announces that instead of changing anything. |
 | `rec.start` | Start recording on the already-armed folder. If nothing is armed yet (or already recording), just announces that instead of arming it for you — run `rec.arm` first. |
-| `rec.stop` | Press F9 to stop the current recording. In Vertical workflow, also announces which folder is now armed (e.g. "Recording Stopped. Source 4 folder armed") — F9 itself announces the same thing when used to stop. |
-| `rec.pause` | Toggle pause/resume while recording. |
+| `rec.stop` | Press F9 to stop the current recording, announcing the take number that was just recorded (e.g. "Stopped recording take 6"). In Vertical workflow, also announces which folder is now armed (e.g. "Stopped recording take 6. Source 4 folder armed") — F9 itself announces the same thing when used to stop. |
+| `rec.pause` | Toggle pause/resume while recording. The Record Panel daemon announces "Paused recording take 6" / "Recording take 6" on its own a moment later, regardless of whether pause was triggered here, by the Record Panel's button, or by its keyboard shortcut. |
 | `rec.next` | Move to the next recording section (Vertical workflow only; must be stopped first). |
 | `rec.split` | Stop and immediately start a new take (Shift+F9 equivalent — increments take number / moves to next folder). |
 | `rec.daemon?` | Report whether the Record Panel daemon is running. |
@@ -554,6 +554,9 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 | `factoryreset` | Run the ReaClassical Factory Reset script. |
 | `update` | Trigger a ReaPack synchronization (checks for updates). |
 | `installosara` | Download and install the OSARA screen-reader accessibility plugin (Windows/macOS only), then restart REAPER. |
+| `updatereaper` | Download and install the latest public (main-release) REAPER version. Closes all open projects (you'll be prompted to save unsaved work) and restarts REAPER once the install finishes. |
+| `updatereaper=VERSION` | Install a specific (main-release) REAPER version, e.g. `updatereaper=752` or `updatereaper=7.52` (both mean 7.52; the dot is optional). Searches the full version archive with no cutoff, so older versions work too. |
+| `updatereaper=rec` | Install whichever REAPER version ReaClassical currently recommends/tests against (also accepts `updatereaper=recommended`). |
 | `allowgui=y` / `allowgui=n` | Allow/block ReaImGui windows (Mission Control, Notes, Preferences, etc.) from opening while OSARA is installed — they're blocked by default in that case, since they're unusable with a screen reader. |
 | `allowgui?` | Speak whether GUI windows are currently allowed or blocked. |
 | `debug=on` / `debug=off` | Display console messages in addition to OSARA announcements |
@@ -563,6 +566,8 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 ### Other examples
 
 - `installosara` — Setting up a brand-new machine; install the screen-reader plugin before doing anything else.
+- `updatereaper` — Keep REAPER itself current with the latest public release.
+- `updatereaper=rec` — Match REAPER to the version ReaClassical is actually tested against, rather than whatever's newest.
 - `update` — Check ReaPack for newer versions of ReaClassical at the start of a session.
 - `newtab` — Start a second, unrelated project (e.g. a different concert) without closing the current one.
 - `help` — Open this guide in your browser to look something up.
