@@ -104,9 +104,19 @@ def parse_keymap(text)
                     mod_str == 'None' ? key_str : "#{mod_str}+#{key_str}"
                   end
 
-    is_reaclassical = final_path.include?('ReaClassical')
-    type = is_reaclassical ? 'ReaClassical' : 'Internal / Extension'
-    display_name = is_reaclassical ? final_name.sub(/^ReaClassical_/, '').sub(/\.lua$/i, '') : final_name
+    is_xfm        = final_path.include?('ReaClassical_XFM')
+    is_reaclassical = !is_xfm && final_path.include?('ReaClassical')
+    type = if is_xfm then 'ReaClassical XFade Mode'
+           elsif is_reaclassical then 'ReaClassical'
+           else 'Internal / Extension'
+           end
+    display_name = if is_xfm
+                     final_name.sub(/^ReaClassical_XFM /, '').sub(/\.lua$/i, '')
+                   elsif is_reaclassical
+                     final_name.sub(/^ReaClassical_/, '').sub(/\.lua$/i, '')
+                   else
+                     final_name
+                   end
 
     shortcut_list << { name: display_name, type: type, shortcut: combination }
   end
