@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre31
+@version 26.6.8pre32
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -12,6 +12,9 @@
   NEW: Navigate to next/previous folder
   NEW: Navigate to next/previous track in folder
   NEW: Navigate to next/previous envelope lane (announces track and automation type)
+  NEW: Accessible Automation Navigator -- keyboard-navigable gfx window for adding track/FX automation or snapshot values (OSARA/debug mode; supports ramp in/out)
+  NEW: Toggle Special Tracks -- jump between folder tracks and special tracks (mixer/aux/submix/ref/live/roomtone); envelope lane navigation works within special track context
+  NEW: XFM (Accessible Fade Editor) -- headless crossfade editing mode with shortcuts for nudging, slipping, widening/narrowing, fade shape cycling, item volume, and auditioning; designed for blind engineers working without the Classical Crossfade Editor GUI
   NEW: Toggle record monitoring off and on
   NEW: Headless Record Panel daemon -- keeps F9/take-counting/clip-reporting working for OSARA users without opening the Record Panel GUI
   NEW: Headless Mixer Snapshots daemon -- same auto-recall as the GUI snapshot window, without needing it open
@@ -67,6 +70,7 @@
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
+  [main] ReaClassical_Accessible Automation Navigator.lua
   [main] ReaClassical_Add CD Marker Offsets.lua
   [main] ReaClassical_Add Destination IN marker.lua
   [main] ReaClassical_Add Destination OUT Marker.lua
@@ -76,7 +80,6 @@
   [main] ReaClassical_Announce Take Number.lua
   [main] ReaClassical_Announce Timeline Position.lua
   [main] ReaClassical_Audio Calculator.lua
-  [main] ReaClassical_Audition.lua
   [main] ReaClassical_Audition from Destination IN marker.lua
   [main] ReaClassical_Audition from Destination OUT marker.lua
   [main] ReaClassical_Audition from Source IN marker.lua
@@ -85,12 +88,13 @@
   [main] ReaClassical_Audition to Destination OUT marker.lua
   [main] ReaClassical_Audition to Source IN marker.lua
   [main] ReaClassical_Audition to Source OUT marker.lua
+  [main] ReaClassical_Audition.lua
   [main] ReaClassical_Audition_with_playrate.lua
   [main] ReaClassical_Auto Solo Folder.lua
-  [main] ReaClassical_Build Edit List.lua
   [main] ReaClassical_Build Edit List using BWF offset.lua
-  [main] ReaClassical_Classical Crossfade.lua
+  [main] ReaClassical_Build Edit List.lua
   [main] ReaClassical_Classical Crossfade Editor.lua
+  [main] ReaClassical_Classical Crossfade.lua
   [main] ReaClassical_Classical Take Record.lua
   [main] ReaClassical_Colorize.lua
   [main] ReaClassical_Convert REAPER project.lua
@@ -116,14 +120,13 @@
   [main] ReaClassical_Hide Automation Lanes.lua
   [main] ReaClassical_Hide Children.lua
   [main] ReaClassical_Increment Take Number While Recording.lua
-  [main] ReaClassical_Accessible Automation Navigator.lua
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Insert with timestretching.lua
   [main] ReaClassical_Jump To Time.lua
   [main] ReaClassical_Meterbridge.lua
   [main] ReaClassical_Microphone Indicator.lua
-  [main] ReaClassical_Mixer Snapshots.lua
   [main] ReaClassical_Mission Control.lua
+  [main] ReaClassical_Mixer Snapshots.lua
   [main] ReaClassical_Move Destination Material to Source.lua
   [main] ReaClassical_Move to Destination IN marker.lua
   [main] ReaClassical_Move to Destination OUT marker.lua
@@ -172,6 +175,7 @@
   [main] ReaClassical_Reposition_Album_Tracks.lua
   [main] ReaClassical_S-D Edit.lua
   [main] ReaClassical_Set Dest Project Marker.lua
+  [main] ReaClassical_Set Item Playback Rate.lua
   [main] ReaClassical_Set Next Recording Section.lua
   [main] ReaClassical_Set Source Project Marker.lua
   [main] ReaClassical_Shortcuts.lua
@@ -182,14 +186,15 @@
   [main] ReaClassical_Smart Import Audio.lua
   [main] ReaClassical_Source Markers to Item Edge.lua
   [main] ReaClassical_Split Items at Markers.lua
+  [main] ReaClassical_Take Region to Source Pair.lua
   [main] ReaClassical_Terminal.lua
   [main] ReaClassical_Toggle Monitor.lua
   [main] ReaClassical_Toggle Special Tracks.lua
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
-  [main] ReaClassical_Whole Project View.lua
   [main] ReaClassical_Whole Project View Horizontal.lua
   [main] ReaClassical_Whole Project View Vertical.lua
+  [main] ReaClassical_Whole Project View.lua
   [main] ReaClassical_XFM Audition Crossfade.lua
   [main] ReaClassical_XFM Audition Left Item.lua
   [main] ReaClassical_XFM Audition Right Item.lua
@@ -234,8 +239,6 @@
   [main] ReaClassical_Zoom to Destination OUT marker.lua
   [main] ReaClassical_Zoom to Source IN marker.lua
   [main] ReaClassical_Zoom to Source OUT marker.lua
-  [main] ReaClassical_Take Region to Source Pair.lua
-  [main] ReaClassical_Set Item Playback Rate.lua
   [jsfx] ListenbackMicMonitor.jsfx
   [rpp] ReaClassical.RPP
   [rpp] Room_Tone_Gen.RPP

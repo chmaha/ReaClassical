@@ -560,7 +560,8 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 | `updatereaper=rec` | Synonym for the bare `updatereaper` command (also accepts `updatereaper=recommended`). |
 | `allowgui=y` / `allowgui=n` | Allow/block ReaImGui windows (Mission Control, Notes, Preferences, etc.) from opening while OSARA is installed — they're blocked by default in that case, since they're unusable with a screen reader. |
 | `allowgui?` | Speak whether GUI windows are currently allowed or blocked. |
-| `debug=on` / `debug=off` | Display console messages in addition to OSARA announcements |
+| `debug=on` / `debug=off` | Display console messages in addition to OSARA announcements. Stored per project, so a new project always starts with debug off. |
+| `debug?` | Speak whether debug announcements are currently on or off for this project. |
 | `nudge=ms` | Set the ReaClassical project-level nudge amount, in milliseconds, used by the "Nudge Marker Left"/"Right" and "Nudge Item Left"/"Right" reascripts, e.g. `nudge=20`. REAPER's own item-nudge amount/unit isn't exposed to ReaScript, so this is tracked independently per project. Defaults to 5 ms if never set. |
 | `nudge?` | Speak the current nudge amount. |
 
