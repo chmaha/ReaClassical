@@ -29,8 +29,78 @@ local say = require("ReaClassical_Announce")
 
 local main, is_special_track, get_folder_parent, get_folder_tracks
 local format_peak, format_mute_solo, announce_track, get_feed_track
+local get_visible_special_tracks, announce_special_track, apply_solo_for_special
+
+local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback" }
 
 ---------------------------------------------------------------------
+
+function get_visible_special_tracks()
+    local list = {}
+    for i = 0, CountTracks(0) - 1 do
+        local t = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(t, "B_SHOWINTCP") == 1 then
+            for _, pext in ipairs(SPECIAL_PEXTS) do
+                local _, v = GetSetMediaTrackInfo_String(t, "P_EXT:" .. pext, "", false)
+                if v == "y" then
+                    list[#list + 1] = { track = t, pext = pext }
+                    break
+                end
+            end
+        end
+    end
+    return list
+end
+
+---------------------------------------------------------------------
+
+function announce_special_track(t, pext)
+    local _, name = GetSetMediaTrackInfo_String(t, "P_NAME", "", false)
+    if pext == "mixer" then
+        local s = name:match("^M:(.+)") or ""
+        say(s ~= "" and ("mixer " .. s) or "mixer")
+    elseif pext == "aux" then
+        local s = name:match("^@(.+)") or ""
+        say(s ~= "" and (s .. " auxiliary") or "auxiliary")
+    elseif pext == "submix" then
+        local s = name:match("^#(.+)") or ""
+        say(s ~= "" and (s .. " submix") or "submix")
+    elseif pext == "rcref" then
+        local s = name:match("^REF:(.+)") or ""
+        say(s ~= "" and (s .. " reference") or "reference")
+    elseif pext == "live" then
+        say("live")
+    elseif pext == "roomtone" then
+        say("room tone")
+    elseif pext == "listenback" then
+        say("listenback")
+    else
+        say(name ~= "" and name or pext)
+    end
+end
+
+---------------------------------------------------------------------
+
+function apply_solo_for_special(t, pext)
+    if pext == "rcref" then
+        Main_OnCommand(40340, 0) -- unsolo all tracks
+        SetMediaTrackInfo_Value(t, "B_MUTE", 0)
+        SetMediaTrackInfo_Value(t, "I_SOLO", 1)
+    elseif pext == "live" then
+        Main_OnCommand(40340, 0) -- unsolo all tracks first
+        SetMediaTrackInfo_Value(t, "B_MUTE", 0)
+        SetMediaTrackInfo_Value(t, "I_SOLO", 2) -- exclusive solo
+    end
+end
+
+---------------------------------------------------------------------
+
+local function clear_solo_if_special(t, pext)
+    if pext == "rcref" or pext == "live" then
+        Main_OnCommand(40340, 0)
+        SetMediaTrackInfo_Value(t, "B_MUTE", 1)
+    end
+end
 
 ---------------------------------------------------------------------
 
@@ -152,6 +222,29 @@ function main()
     local selected = GetSelectedTrack(0, 0)
     if not selected then
         say("No track selected.")
+        return
+    end
+
+    if is_special_track(selected) then
+        local specials = get_visible_special_tracks()
+        local current_pos = nil
+        for i, s in ipairs(specials) do
+            if s.track == selected then current_pos = i break end
+        end
+        if not current_pos then
+            say("Not in a ReaClassical folder.")
+            return
+        end
+        if current_pos <= 1 then
+            say("First special track")
+            return
+        end
+        clear_solo_if_special(specials[current_pos].track, specials[current_pos].pext)
+        local prev_s = specials[current_pos - 1]
+        SetOnlyTrackSelected(prev_s.track)
+        TrackList_AdjustWindows(false)
+        apply_solo_for_special(prev_s.track, prev_s.pext)
+        announce_special_track(prev_s.track, prev_s.pext)
         return
     end
 

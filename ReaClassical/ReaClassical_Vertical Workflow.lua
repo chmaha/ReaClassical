@@ -1503,6 +1503,19 @@ function reorder_special_tracks()
     for _, t in ipairs(listenback_tracks) do SetTrackSelected(t, true) end
     ReorderSelectedTracks(CountTracks(0), 0)
     Main_OnCommand(40297, 0)
+
+    -- When OSARA is present, ensure navigable special tracks are visible in the
+    -- TCP so the blind engineer can reach them with the toggle shortcut.
+    -- rcmaster and listenback stay hidden by design.
+    if APIExists("osara_outputMessage") then
+        local visible_groups = { m_tracks, aux_tracks, submix_tracks, roomtone_tracks,
+                                 live_tracks, ref_tracks }
+        for _, group in ipairs(visible_groups) do
+            for _, t in ipairs(group) do
+                SetMediaTrackInfo_Value(t, "B_SHOWINTCP", 1)
+            end
+        end
+    end
 end
 
 ---------------------------------------------------------------------

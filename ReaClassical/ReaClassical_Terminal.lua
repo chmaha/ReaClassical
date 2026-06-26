@@ -3217,6 +3217,9 @@ function add_mixer_track(name)
     SetMediaTrackInfo_Value(new_mixer_track, "I_FOLDERDEPTH", 0)
     GetSetMediaTrackInfo_String(new_mixer_track, "P_EXT:mixer", "y", true)
     GetSetMediaTrackInfo_String(new_mixer_track, "P_EXT:mix_order", tostring(tracks_per_group + 1), true)
+    if APIExists("osara_outputMessage") then
+        SetMediaTrackInfo_Value(new_mixer_track, "B_SHOWINTCP", 1)
+    end
 
     -- Capture each folder's color (parent track's color, falling back to
     -- its first child's color if the parent has none) before inserting,

@@ -29,6 +29,24 @@ local say = require("ReaClassical_Announce")
 
 local main, announce_selected_envelope
 
+local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback" }
+
+local function is_special_track(t)
+    for _, pext in ipairs(SPECIAL_PEXTS) do
+        local _, v = GetSetMediaTrackInfo_String(t, "P_EXT:" .. pext, "", false)
+        if v == "y" then return true end
+    end
+    return false
+end
+
+local function get_track_envelopes(t)
+    local envs = {}
+    for i = 0, CountTrackEnvelopes(t) - 1 do
+        envs[#envs + 1] = GetTrackEnvelope(t, i)
+    end
+    return envs
+end
+
 ---------------------------------------------------------------------
 
 -- Announces "<humanized track name>, <envelope name>" (e.g. "Destination
@@ -78,6 +96,32 @@ function main()
         end
         MB("Please create a ReaClassical project via " .. modifier
             .. "+N to use this function.", "ReaClassical Error", 0)
+        return
+    end
+
+    local sel_track = GetSelectedTrack(0, 0)
+    if sel_track and is_special_track(sel_track) then
+        local envs = get_track_envelopes(sel_track)
+        if #envs == 0 then
+            say("No envelope lanes on this track")
+            return
+        end
+        local cur_env = GetSelectedEnvelope(0)
+        local cur_pos = nil
+        if cur_env and Envelope_GetParentTrack(cur_env) == sel_track then
+            for i, env in ipairs(envs) do
+                if env == cur_env then cur_pos = i; break end
+            end
+        end
+        if cur_pos and cur_pos <= 1 then
+            say("First envelope lane")
+            return
+        end
+        local prev_pos = cur_pos and (cur_pos - 1) or #envs
+        SetCursorContext(2, envs[prev_pos])
+        UpdateArrange()
+        UpdateTimeline()
+        announce_selected_envelope()
         return
     end
 
