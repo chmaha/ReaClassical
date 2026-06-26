@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre27
+@version 26.6.8pre28
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -52,6 +52,18 @@
   Add Shortcuts for delete/move nearest marker to cursor
   Add Shortcuts for Nudge item left/right
   Add Shortcuts for trim item edges to edit cursor
+  NEW: Disarm All Tracks shortcut
+  NEW: Update REAPER command/shortcut
+  NEW: Move to Start/End of Selected Item shortcuts
+  NEW: Announce Timeline Position shortcut
+  NEW: Announce RC Master Peak shortcut
+  Terminal: mute/pan batch commands for tracks and RC Master, with spoken confirmation
+  Set pan at project creation; allow resetting a pan pair to center
+  Terminal: vertical workflow track/folder creation now supports specifying names
+  Terminal: more uniform command syntax
+  Terminal: installosara/update now work from a blank REAPER window
+  Headless Record Panel daemon: map remaining GUI Record Panel recording actions
+  Announce take number on next/previous item and new take recording
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -176,6 +188,43 @@
   [main] ReaClassical_Whole Project View.lua
   [main] ReaClassical_Whole Project View Horizontal.lua
   [main] ReaClassical_Whole Project View Vertical.lua
+  [main] ReaClassical_XFM Cycle Fade Shape.lua
+  [main] ReaClassical_XFM Grow Fade End 3x.lua
+  [main] ReaClassical_XFM Grow Fade End.lua
+  [main] ReaClassical_XFM Grow Fade Start 3x.lua
+  [main] ReaClassical_XFM Grow Fade Start.lua
+  [main] ReaClassical_XFM Item Volume Down 0.2dB.lua
+  [main] ReaClassical_XFM Item Volume Down 1dB.lua
+  [main] ReaClassical_XFM Item Volume Reset.lua
+  [main] ReaClassical_XFM Item Volume Up 0.2dB.lua
+  [main] ReaClassical_XFM Item Volume Up 1dB.lua
+  [main] ReaClassical_XFM Match Left Item Fade.lua
+  [main] ReaClassical_XFM Match Right Item Fade.lua
+  [main] ReaClassical_XFM Mode Daemon.lua
+  [main] ReaClassical_XFM Narrow Crossfade 3x.lua
+  [main] ReaClassical_XFM Narrow Crossfade.lua
+  [main] ReaClassical_XFM Nudge Item Left 3x.lua
+  [main] ReaClassical_XFM Nudge Item Left.lua
+  [main] ReaClassical_XFM Nudge Item Right 3x.lua
+  [main] ReaClassical_XFM Nudge Item Right.lua
+  [main] ReaClassical_XFM Reset.lua
+  [main] ReaClassical_XFM Select Both Items.lua
+  [main] ReaClassical_XFM Select Left Item.lua
+  [main] ReaClassical_XFM Select Right Item.lua
+  [main] ReaClassical_XFM Shift Crossfade Left 3x.lua
+  [main] ReaClassical_XFM Shift Crossfade Left.lua
+  [main] ReaClassical_XFM Shift Crossfade Right 3x.lua
+  [main] ReaClassical_XFM Shift Crossfade Right.lua
+  [main] ReaClassical_XFM Shrink Fade End 3x.lua
+  [main] ReaClassical_XFM Shrink Fade End.lua
+  [main] ReaClassical_XFM Shrink Fade Start 3x.lua
+  [main] ReaClassical_XFM Shrink Fade Start.lua
+  [main] ReaClassical_XFM Slip Item Left 3x.lua
+  [main] ReaClassical_XFM Slip Item Left.lua
+  [main] ReaClassical_XFM Slip Item Right 3x.lua
+  [main] ReaClassical_XFM Slip Item Right.lua
+  [main] ReaClassical_XFM Widen Crossfade 3x.lua
+  [main] ReaClassical_XFM Widen Crossfade.lua
   [main] ReaClassical_Zoom to Destination IN marker.lua
   [main] ReaClassical_Zoom to Destination OUT marker.lua
   [main] ReaClassical_Zoom to Source IN marker.lua
@@ -198,6 +247,7 @@
   ReaClassical_Track_Naming.lua
   ReaClassical_Time_Naming.lua
   ReaClassical_Announce.lua
+  ReaClassical_XFM_Utils.lua
   ReaClassical_Folder_Naming.lua
   ReaClassical.ini
   ReaClassical-kb.ini
