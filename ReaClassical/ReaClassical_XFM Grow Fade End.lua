@@ -62,7 +62,7 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      fi + amt)
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", fi + amt)
         end
-        say("Fade ends grown to " .. math.floor((old_fo + amt) * 1000 + 0.5) .. "ms")
+        say("Fade ends grown to " .. math.floor((old_fo + amt) * 1000 + 0.5)  .. " milliseconds")
     elseif sel == "left" then
         for _, item in ipairs(ctx.group1) do
             local l  = GetMediaItemInfo_Value(item, "D_LENGTH")
@@ -71,14 +71,14 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      fo + amt)
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", fo + amt)
         end
-        say("Fade-out end grown to " .. math.floor((old_fo + amt) * 1000 + 0.5) .. "ms")
+        say("Fade-out end grown to " .. math.floor((old_fo + amt) * 1000 + 0.5)  .. " milliseconds")
     else
         for _, item in ipairs(ctx.group2) do
             local fi = GetMediaItemInfo_Value(item, "D_FADEINLEN")
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      fi + amt)
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", fi + amt)
         end
-        say("Fade-in end grown to " .. math.floor((old_fi + amt) * 1000 + 0.5) .. "ms")
+        say("Fade-in end grown to " .. math.floor((old_fi + amt) * 1000 + 0.5)  .. " milliseconds")
     end
 
     UpdateArrange()

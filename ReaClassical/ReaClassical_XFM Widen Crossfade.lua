@@ -69,7 +69,7 @@ local function main()
     UpdateTimeline()
     PreventUIRefresh(-1)
     Undo_EndBlock("XFM Widen", -1)
-    say("Crossfade widened to " .. math.floor((old_fo + amt) * 1000 + 0.5) .. "ms")
+    say("Crossfade widened to " .. math.floor((old_fo + amt) * 1000 + 0.5)  .. " milliseconds")
 end
 
 ---------------------------------------------------------------------

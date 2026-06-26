@@ -76,7 +76,7 @@ local function main()
     UpdateTimeline()
     PreventUIRefresh(-1)
     Undo_EndBlock("XFM Narrow", -1)
-    say("Crossfade narrowed to " .. math.floor(math.max(min_fade, fo - amt) * 1000 + 0.5) .. "ms")
+    say("Crossfade narrowed to " .. math.floor(math.max(min_fade, fo - amt) * 1000 + 0.5)  .. " milliseconds")
 end
 
 ---------------------------------------------------------------------

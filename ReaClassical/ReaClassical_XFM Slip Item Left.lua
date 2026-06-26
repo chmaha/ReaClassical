@@ -24,9 +24,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 --   item2.soffs += amt, item2.length -= amt  (later source plays at item2.pos)
 --   Downstream ripples left. item1 and item2.pos untouched.
 --
--- Left item selected (= Nudge Left on item2):
---   item1.length -= amt, item2.pos -= amt    (boundary moves left)
---   Downstream ripples left. Overlap preserved. item2.soffs untouched.
+-- Left item selected (= Nudge Right on item2, opposite direction):
+--   item1.length += amt, item2.pos += amt    (boundary moves right)
+--   Downstream ripples right. Overlap preserved. item2.soffs untouched.
 
 -- luacheck: ignore 113
 
@@ -53,10 +53,7 @@ local function main()
     local amt = xfu.nudge_amount()
     local ms  = math.floor(amt * 1000 + 0.5)
 
-    if ctx.selection == "left" then
-        local l1 = GetMediaItemInfo_Value(ctx.item1, "D_LENGTH")
-        if l1 - amt < 0.001 then say("Cannot slip: left item too short"); return end
-    else
+    if ctx.selection == "right" then
         local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
         if l2 - amt < 0.001 then say("Cannot slip: right item too short"); return end
     end
@@ -71,28 +68,28 @@ local function main()
     local old_end1 = ctx.end1
 
     if ctx.selection == "left" then
-        -- Position-based: B shrinks left, C shifts left, overlap preserved
+        -- Position-based: B extends right, C shifts right, overlap preserved
         for _, item in ipairs(ctx.group1) do
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
-            SetMediaItemInfo_Value(item, "D_LENGTH", l - amt)
+            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
         end
         for _, item in ipairs(ctx.group2) do
             local p = GetMediaItemInfo_Value(item, "D_POSITION")
-            SetMediaItemInfo_Value(item, "D_POSITION", p - amt)
+            SetMediaItemInfo_Value(item, "D_POSITION", p + amt)
         end
-        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
-        xfu.set_xfade_state(ctx.folder_track, ctx.center - amt)
-        say("Left item slipped left by " .. ms .. "ms")
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, amt, skip)
+        xfu.set_xfade_state(ctx.folder_track, ctx.center + amt)
+        say("Left item slipped left by " .. ms .. " milliseconds")
     else
         -- Soffs-based: C source moves forward, C shrinks from right
         for _, item in ipairs(ctx.group2) do
             local s = xfu.get_item_soffs(item)
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
             xfu.set_item_soffs(item,           s + amt)
-            SetMediaItemInfo_Value(item, "D_LENGTH", l - amt)
+            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
         end
         xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
-        say("Right item slipped left by " .. ms .. "ms")
+        say("Right item slipped left by " .. ms .. " milliseconds")
     end
 
     UpdateArrange()

@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 -- XFM Nudge Item Left (selection-aware):
 --   Right selected → item1 right edge contracts + item2 shifts left; overlap unchanged; downstream ripple.
---   Left selected  → item2.soffs += amt, item2.length -= amt (slip left on item2); downstream ripple left.
+--   Left selected  → item2.soffs -= amt, item2.length += amt (slip right on item2); downstream ripple right.
 --   Both selected  → blocked.
 
 -- luacheck: ignore 113
@@ -54,10 +54,10 @@ local function main()
         return
 
     elseif sel == "left" then
-        -- Soffs-based: slip item2 right (later source content). item1 untouched.
-        local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
-        if l2 - amt < 0.001 then
-            say("Cannot nudge: right item too short")
+        -- Soffs-based: slip item2 right (earlier source content). item1 untouched.
+        local s2 = xfu.get_item_soffs(ctx.item2)
+        if s2 - amt < 0 then
+            say("Cannot nudge: already at source start")
             PreventUIRefresh(-1)
             Undo_EndBlock("XFM Nudge Item Left", -1)
             return
@@ -66,14 +66,14 @@ local function main()
         for _, item in ipairs(ctx.group2) do
             local s = xfu.get_item_soffs(item)
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
-            xfu.set_item_soffs(item,                    math.max(0,     s + amt))
-            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
+            xfu.set_item_soffs(item, math.max(0, s - amt))
+            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
         end
         local skip = {}
         for _, it in ipairs(ctx.group1) do skip[it] = true end
         for _, it in ipairs(ctx.group2) do skip[it] = true end
-        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
-        say("Left item nudged left by " .. ms .. "ms")
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, amt, skip)
+        say("Left item nudged left by " .. ms .. " milliseconds")
 
     else
         -- Position-based: contract item1 right edge + shift item2 left. Overlap unchanged.
@@ -97,7 +97,7 @@ local function main()
         for _, it in ipairs(ctx.group2) do skip[it] = true end
         xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
         xfu.set_xfade_state(ctx.folder_track, ctx.center - amt)
-        say("Right item nudged left by " .. ms .. "ms")
+        say("Right item nudged left by " .. ms .. " milliseconds")
     end
 
     UpdateArrange()

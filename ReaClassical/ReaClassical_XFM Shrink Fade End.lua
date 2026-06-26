@@ -71,7 +71,7 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      math.max(min_fade, f - amt))
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", math.max(min_fade, f - amt))
         end
-        say("Fade ends shrunk to " .. math.floor(math.max(min_fade, old_fo - amt) * 1000 + 0.5) .. "ms")
+        say("Fade ends shrunk to " .. math.floor(math.max(min_fade, old_fo - amt) * 1000 + 0.5)  .. " milliseconds")
     elseif sel == "left" then
         if GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN") - amt < min_fade then
             say("Cannot shrink: fade-out too short")
@@ -84,7 +84,7 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      math.max(min_fade, f - amt))
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", math.max(min_fade, f - amt))
         end
-        say("Fade-out end shrunk to " .. math.floor(math.max(min_fade, old_fo - amt) * 1000 + 0.5) .. "ms")
+        say("Fade-out end shrunk to " .. math.floor(math.max(min_fade, old_fo - amt) * 1000 + 0.5)  .. " milliseconds")
     else
         if GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN") - amt < min_fade then
             say("Cannot shrink: fade-in too short")
@@ -95,7 +95,7 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      math.max(min_fade, f - amt))
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", math.max(min_fade, f - amt))
         end
-        say("Fade-in end shrunk to " .. math.floor(math.max(min_fade, old_fi - amt) * 1000 + 0.5) .. "ms")
+        say("Fade-in end shrunk to " .. math.floor(math.max(min_fade, old_fi - amt) * 1000 + 0.5)  .. " milliseconds")
     end
 
     UpdateArrange()

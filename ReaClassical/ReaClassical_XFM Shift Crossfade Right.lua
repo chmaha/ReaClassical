@@ -68,14 +68,14 @@ local function main()
             SetMediaItemInfo_Value(item, "D_LENGTH",   math.max(0.001, l - amt))
         end
         xfu.set_xfade_state(ctx.folder_track, ctx.center + amt)
-        say("Crossfade shifted right by " .. ms .. "ms")
+        say("Crossfade shifted right by " .. ms  .. " milliseconds")
 
     elseif sel == "left" then
         for _, item in ipairs(ctx.group1) do
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
             SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
         end
-        say("Fade-out shifted right by " .. ms .. "ms")
+        say("Fade-out shifted right by " .. ms  .. " milliseconds")
 
     else
         for _, item in ipairs(ctx.group2) do
@@ -86,7 +86,7 @@ local function main()
             xfu.set_item_soffs(item,                   s + amt)
             SetMediaItemInfo_Value(item, "D_LENGTH",   math.max(0.001, l - amt))
         end
-        say("Fade-in shifted right by " .. ms .. "ms")
+        say("Fade-in shifted right by " .. ms  .. " milliseconds")
     end
 
     UpdateArrange()
