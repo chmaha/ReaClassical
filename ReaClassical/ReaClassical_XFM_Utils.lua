@@ -258,9 +258,17 @@ end
 
 -- OSARA-friendly shape name.
 function M.shape_name(s)
+    local names = {
+        [0] = "Linear",
+        "Equal Power",
+        "Inverse Power",
+        "High Blend",
+        "Low Blend",
+        "S-Curve",
+        "S-Curve Steep",
+    }
     local n = math.floor(s)
-    if n == 7 then return "Default" end
-    return "Shape " .. n
+    return names[n] or ("Shape " .. n)
 end
 
 ---------------------------------------------------------------------
