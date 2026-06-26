@@ -18,15 +18,15 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Slip right. Mechanism differs by selection:
+-- Slip right: waveform or boundary moves right.
 --
 -- Right item selected:
---   item2.soffs += amt, item2.length -= amt  (soffs-based: later source at item2.pos)
---   Downstream ripples left. item1 and item2.pos untouched.
+--   item2.soffs -= amt, item2.length += amt  (earlier source plays at item2.pos)
+--   Downstream ripples right. item1 and item2.pos untouched.
 --
--- Left item selected (= Nudge Left on item2, opposite direction):
---   item1.length -= amt, item2.pos -= amt    (position-based: boundary moves left)
---   Downstream ripples left. Overlap preserved. item2.soffs untouched.
+-- Left item selected (= Nudge Right on item2):
+--   item1.length += amt, item2.pos += amt    (boundary moves right)
+--   Downstream ripples right. Overlap preserved. item2.soffs untouched.
 
 -- luacheck: ignore 113
 
@@ -51,51 +51,51 @@ local function main()
     end
 
     local amt = xfu.nudge_amount()
+    local ms  = math.floor(amt * 1000 + 0.5)
 
-    if ctx.selection == "left" then
-        local l1 = GetMediaItemInfo_Value(ctx.item1, "D_LENGTH")
-        if l1 - amt < 0.001 then say("Cannot slip: left item too short"); return end
-    else
-        local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
-        if l2 - amt < 0.001 then say("Cannot slip: right item too short"); return end
+    if ctx.selection == "right" then
+        local s2 = xfu.get_item_soffs(ctx.item2)
+        if s2 - amt < 0 then say("Cannot slip: already at source start"); return end
     end
+
+    local skip = {}
+    for _, it in ipairs(ctx.group1) do skip[it] = true end
+    for _, it in ipairs(ctx.group2) do skip[it] = true end
 
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
     local old_end1 = ctx.end1
-    local skip = {}
-    for _, it in ipairs(ctx.group1) do skip[it] = true end
-    for _, it in ipairs(ctx.group2) do skip[it] = true end
 
     if ctx.selection == "left" then
-        -- Position-based: B shrinks, C shifts left, overlap preserved
+        -- Position-based: B extends right, C shifts right, overlap preserved
         for _, item in ipairs(ctx.group1) do
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
-            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
+            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
         end
         for _, item in ipairs(ctx.group2) do
             local p = GetMediaItemInfo_Value(item, "D_POSITION")
-            SetMediaItemInfo_Value(item, "D_POSITION", math.max(0, p - amt))
+            SetMediaItemInfo_Value(item, "D_POSITION", p + amt)
         end
-        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
-        xfu.set_xfade_state(ctx.folder_track, ctx.center - amt)
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, amt, skip)
+        xfu.set_xfade_state(ctx.folder_track, ctx.center + amt)
+        say("Left item slipped right by " .. ms .. "ms")
     else
-        -- Soffs-based: C source moves forward, C shrinks from right
+        -- Soffs-based: C source moves back, C grows from right
         for _, item in ipairs(ctx.group2) do
             local s = xfu.get_item_soffs(item)
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
-            xfu.set_item_soffs(item,                    math.max(0,     s + amt))
-            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
+            xfu.set_item_soffs(item,           math.max(0,     s - amt))
+            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
         end
-        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, amt, skip)
+        say("Right item slipped right by " .. ms .. "ms")
     end
 
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
     Undo_EndBlock("XFM Slip Item Right", -1)
-    say("Item slipped right")
 end
 
 ---------------------------------------------------------------------

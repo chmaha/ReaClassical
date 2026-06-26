@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 -- XFM Nudge Item Left (selection-aware):
 --   Right selected → item1 right edge contracts + item2 shifts left; overlap unchanged; downstream ripple.
---   Left selected  → item2.soffs += amt, item2.length -= amt (slip right on item2); downstream ripple left.
+--   Left selected  → item2.soffs += amt, item2.length -= amt (slip left on item2); downstream ripple left.
 --   Both selected  → blocked.
 
 -- luacheck: ignore 113
@@ -41,6 +41,7 @@ local function main()
     if not ctx then say("No crossfade context"); return end
 
     local amt = xfu.nudge_amount()
+    local ms  = math.floor(amt * 1000 + 0.5)
     local sel = ctx.selection
 
     Undo_BeginBlock()
@@ -72,7 +73,7 @@ local function main()
         for _, it in ipairs(ctx.group1) do skip[it] = true end
         for _, it in ipairs(ctx.group2) do skip[it] = true end
         xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
-        say("Left item nudged left")
+        say("Left item nudged left by " .. ms .. "ms")
 
     else
         -- Position-based: contract item1 right edge + shift item2 left. Overlap unchanged.
@@ -96,7 +97,7 @@ local function main()
         for _, it in ipairs(ctx.group2) do skip[it] = true end
         xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
         xfu.set_xfade_state(ctx.folder_track, ctx.center - amt)
-        say("Right item nudged left")
+        say("Right item nudged left by " .. ms .. "ms")
     end
 
     UpdateArrange()

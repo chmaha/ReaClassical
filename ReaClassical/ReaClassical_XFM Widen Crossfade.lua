@@ -41,7 +41,8 @@ local function main()
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
 
-    local amt = xfu.nudge_amount()
+    local amt    = xfu.nudge_amount()
+    local old_fo = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
 
     Undo_BeginBlock()
     PreventUIRefresh(1)
@@ -68,7 +69,7 @@ local function main()
     UpdateTimeline()
     PreventUIRefresh(-1)
     Undo_EndBlock("XFM Widen", -1)
-    say("Crossfade widened")
+    say("Crossfade widened to " .. math.floor((old_fo + amt) * 1000 + 0.5) .. "ms")
 end
 
 ---------------------------------------------------------------------

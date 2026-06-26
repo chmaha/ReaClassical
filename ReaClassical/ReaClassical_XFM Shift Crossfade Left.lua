@@ -43,6 +43,7 @@ local function main()
     if not ctx then say("No crossfade context"); return end
 
     local amt = xfu.nudge_amount()
+    local ms  = math.floor(amt * 1000 + 0.5)
     local sel = ctx.selection
 
     if ctx.len1 - amt < 0.001 then
@@ -67,14 +68,14 @@ local function main()
             SetMediaItemInfo_Value(item, "D_LENGTH",   l + amt)
         end
         xfu.set_xfade_state(ctx.folder_track, ctx.center - amt)
-        say("Crossfade shifted left")
+        say("Crossfade shifted left by " .. ms .. "ms")
 
     elseif sel == "left" then
         for _, item in ipairs(ctx.group1) do
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
             SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
         end
-        say("Fade-out shifted left")
+        say("Fade-out shifted left by " .. ms .. "ms")
 
     else
         for _, item in ipairs(ctx.group2) do
@@ -85,7 +86,7 @@ local function main()
             xfu.set_item_soffs(item,                   math.max(0, s - amt))
             SetMediaItemInfo_Value(item, "D_LENGTH",   l + amt)
         end
-        say("Fade-in shifted left")
+        say("Fade-in shifted left by " .. ms .. "ms")
     end
 
     UpdateArrange()

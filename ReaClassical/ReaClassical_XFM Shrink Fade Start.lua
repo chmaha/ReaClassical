@@ -42,8 +42,10 @@ local function main()
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
 
-    local sel = ctx.selection
-    local amt = xfu.nudge_amount()
+    local sel    = ctx.selection
+    local amt    = xfu.nudge_amount()
+    local old_fo = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
+    local old_fi = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
 
     Undo_BeginBlock()
     PreventUIRefresh(1)
@@ -73,7 +75,7 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      math.max(min_fade, f - amt))
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", math.max(min_fade, f - amt))
         end
-        say("Both fade starts shrunk")
+        say("Fade starts shrunk to " .. math.floor(math.max(min_fade, old_fo - amt) * 1000 + 0.5) .. "ms")
     elseif sel == "left" then
         if GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN") - amt < min_fade then
             say("Cannot shrink: fade-out too short")
@@ -84,7 +86,7 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      math.max(min_fade, f - amt))
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", math.max(min_fade, f - amt))
         end
-        say("Fade-out start shrunk")
+        say("Fade-out start shrunk to " .. math.floor(math.max(min_fade, old_fo - amt) * 1000 + 0.5) .. "ms")
     else
         if GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN") - amt < min_fade then
             say("Cannot shrink: fade-in too short")
@@ -101,7 +103,7 @@ local function main()
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      math.max(min_fade, f - amt))
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", math.max(min_fade, f - amt))
         end
-        say("Fade-in start shrunk")
+        say("Fade-in start shrunk to " .. math.floor(math.max(min_fade, old_fi - amt) * 1000 + 0.5) .. "ms")
     end
 
     UpdateArrange()
