@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre30
+@version 26.6.8pre31
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -116,6 +116,7 @@
   [main] ReaClassical_Hide Automation Lanes.lua
   [main] ReaClassical_Hide Children.lua
   [main] ReaClassical_Increment Take Number While Recording.lua
+  [main] ReaClassical_Accessible Automation Navigator.lua
   [main] ReaClassical_Insert Automation.lua
   [main] ReaClassical_Insert with timestretching.lua
   [main] ReaClassical_Jump To Time.lua
@@ -183,6 +184,7 @@
   [main] ReaClassical_Split Items at Markers.lua
   [main] ReaClassical_Terminal.lua
   [main] ReaClassical_Toggle Monitor.lua
+  [main] ReaClassical_Toggle Special Tracks.lua
   [main] ReaClassical_TrackLeft.lua
   [main] ReaClassical_TrackRight.lua
   [main] ReaClassical_Whole Project View.lua
