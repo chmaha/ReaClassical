@@ -1924,9 +1924,15 @@ https://reaclassical.org/rcterminal.html) in your default browser.</td>
 </tr>
 <tr>
 <td><code>updatereaper</code></td>
-<td>Download and install the latest public (main-release) REAPER
-version. Closes all open projects (you’ll be prompted to save unsaved
-work) and restarts REAPER once the install finishes.</td>
+<td>Download and install the REAPER version ReaClassical currently
+recommends/tests against. Closes all open projects (you’ll be prompted
+to save unsaved work) and restarts REAPER once the install finishes.
+Same as <code>updatereaper=rec</code>.</td>
+</tr>
+<tr>
+<td><code>updatereaper=latest</code></td>
+<td>Install the latest public (main-release) REAPER version rather than
+the recommended one.</td>
 </tr>
 <tr>
 <td><code>updatereaper=VERSION</code></td>
@@ -1937,8 +1943,7 @@ with no cutoff, so older versions work too.</td>
 </tr>
 <tr>
 <td><code>updatereaper=rec</code></td>
-<td>Install whichever REAPER version ReaClassical currently
-recommends/tests against (also accepts
+<td>Synonym for the bare <code>updatereaper</code> command (also accepts
 <code>updatereaper=recommended</code>).</td>
 </tr>
 <tr>
@@ -1973,11 +1978,10 @@ per project. Defaults to 5 ms if never set.</td>
 <ul>
 <li><code>installosara</code> — Setting up a brand-new machine; install
 the screen-reader plugin before doing anything else.</li>
-<li><code>updatereaper</code> — Keep REAPER itself current with the
-latest public release.</li>
-<li><code>updatereaper=rec</code> — Match REAPER to the version
-ReaClassical is actually tested against, rather than whatever’s
-newest.</li>
+<li><code>updatereaper</code> — Match REAPER to the version ReaClassical
+is actually tested against (the safe default).</li>
+<li><code>updatereaper=latest</code> — Keep REAPER itself current with
+the latest public release.</li>
 <li><code>update</code> — Check ReaPack for newer versions of
 ReaClassical at the start of a session.</li>
 <li><code>newtab</code> — Start a second, unrelated project (e.g. a

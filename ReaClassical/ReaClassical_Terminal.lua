@@ -6520,12 +6520,13 @@ function try_osara_install(cmd)
 end
 
 ---------------------------------------------------------------------
--- REAPER self-updater: "updatereaper" installs the latest public release;
+-- REAPER self-updater: "updatereaper" (bare) installs the recommended/tested
+-- version listed at the project's tested_reaper_ver.txt on GitHub;
+-- "updatereaper=latest" installs the latest public release;
 -- "updatereaper=VERSION" installs a specific version (main, dev, or RC --
 -- e.g. "updatereaper=752" or "updatereaper=7.52" for 7.52, or
 -- "updatereaper=596+dev1009"/"updatereaper=597rc1" for a dev/RC build);
--- "updatereaper=rec" (or "=recommended") installs whatever version is
--- currently listed at the project's tested_reaper_ver.txt on GitHub.
+-- "updatereaper=rec" (or "=recommended") is a synonym for the bare command.
 -- Unlike the GUI tool, version lookups search the full historical archive
 -- with no cutoff. This closes all open projects (REAPER's own save-changes
 -- prompt protects unsaved work), downloads, and installs/restarts
@@ -6543,10 +6544,16 @@ function try_update_reaper(cmd)
     end
 
     local version = cmd:match("^updatereaper=(.+)$")
-    local mode = "latest"
+    local mode = "recommended"
     if version then
         local lower = version:lower()
-        mode = (lower == "rec" or lower == "recommended") and "recommended" or "version"
+        if lower == "rec" or lower == "recommended" then
+            mode = "recommended"
+        elseif lower == "latest" then
+            mode = "latest"
+        else
+            mode = "version"
+        end
     end
     SetExtState("ReaClassical_UpdateReaper", "mode", mode, false)
     if mode == "version" then

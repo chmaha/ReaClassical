@@ -115,6 +115,8 @@ end
 
 local function at_exit()
     Main_OnCommand(24800, 0)  -- clear back to main keymap section
+    local ctx = xfu.get_xfade_context()
+    if ctx then xfu.select_items(ctx.group2) end
     SetExtState("ReaClassical", "XFadeMode",      "", false)
     SetExtState("ReaClassical", "XFadeSelection", "", false)
     SetExtState("ReaClassical", "XFadeCenter",    "", false)
