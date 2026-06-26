@@ -18,9 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Xfade Nudge Item Left (selection-aware):
---   Left selected  → item1 right edge contracts only; overlap shrinks; no ripple; fades updated.
+-- XFM Nudge Item Left (selection-aware):
 --   Right selected → item1 right edge contracts + item2 shifts left; overlap unchanged; downstream ripple.
+--   Left selected  → item2.soffs += amt, item2.length -= amt (slip right on item2); downstream ripple left.
 --   Both selected  → blocked.
 
 -- luacheck: ignore 113
@@ -30,7 +30,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local xfu = require("ReaClassical_XFade_Utils")
+local xfu = require("ReaClassical_XFM_Utils")
 
 ---------------------------------------------------------------------
 
@@ -43,32 +43,45 @@ local function main()
     local amt = xfu.nudge_amount()
     local sel = ctx.selection
 
-    if ctx.len1 - amt < 0.001 then
-        say("Cannot nudge: left item too short")
-        return
-    end
-
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
     if sel == "both" then
         say("Select left or right item first")
         PreventUIRefresh(-1)
-        Undo_EndBlock("Xfade Nudge Item Left", -1)
+        Undo_EndBlock("XFM Nudge Item Left", -1)
         return
 
     elseif sel == "left" then
-        -- Contract item1 right edge only. Overlap shrinks. No ripple.
-        for _, item in ipairs(ctx.group1) do
+        -- Soffs-based: slip item2 right (later source content). item1 untouched.
+        local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
+        if l2 - amt < 0.001 then
+            say("Cannot nudge: right item too short")
+            PreventUIRefresh(-1)
+            Undo_EndBlock("XFM Nudge Item Left", -1)
+            return
+        end
+        local old_end1 = ctx.end1
+        for _, item in ipairs(ctx.group2) do
+            local s = xfu.get_item_soffs(item)
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            xfu.set_item_soffs(item,                    math.max(0,     s + amt))
             SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
         end
-        xfu.update_xfade_fades(ctx)
-        xfu.set_xfade_state(ctx.folder_track, ctx.center - amt * 0.5)
+        local skip = {}
+        for _, it in ipairs(ctx.group1) do skip[it] = true end
+        for _, it in ipairs(ctx.group2) do skip[it] = true end
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
         say("Left item nudged left")
 
     else
-        -- Contract item1 right edge + shift item2 left. Overlap unchanged. Downstream ripple.
+        -- Position-based: contract item1 right edge + shift item2 left. Overlap unchanged.
+        if ctx.len1 - amt < 0.001 then
+            say("Cannot nudge: left item too short")
+            PreventUIRefresh(-1)
+            Undo_EndBlock("XFM Nudge Item Left", -1)
+            return
+        end
         local old_end1 = ctx.end1
         for _, item in ipairs(ctx.group1) do
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
@@ -89,7 +102,7 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("Xfade Nudge Item Left", -1)
+    Undo_EndBlock("XFM Nudge Item Left", -1)
 end
 
 ---------------------------------------------------------------------

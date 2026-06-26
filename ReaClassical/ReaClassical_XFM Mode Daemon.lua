@@ -34,7 +34,7 @@ local _, _, section_id, cmd_id = get_action_context()
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local xfu = require("ReaClassical_XFade_Utils")
+local xfu = require("ReaClassical_XFM_Utils")
 
 ---------------------------------------------------------------------
 

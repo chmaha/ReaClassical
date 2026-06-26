@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local xfu = require("ReaClassical_XFade_Utils")
+local xfu = require("ReaClassical_XFM_Utils")
 
 local main, nudge_items
 local get_selected_media_items, is_folder_track, get_parent_folder
@@ -35,7 +35,7 @@ local get_folder_children, get_items_at_midpoint, get_all_items_at_midpoints
 
 function main()
     if xfu.is_xfade_mode() then
-        say("Use Xfade Nudge Left in crossfade mode")
+        say("Use XFM Nudge Left in crossfade mode")
         return
     end
 

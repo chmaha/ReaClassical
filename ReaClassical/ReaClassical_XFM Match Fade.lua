@@ -30,7 +30,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local xfu = require("ReaClassical_XFade_Utils")
+local xfu = require("ReaClassical_XFM_Utils")
 
 ---------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("Xfade Match Fade", -1)
+    Undo_EndBlock("XFM Match Fade", -1)
     say("Fade matched: " .. xfu.shape_name(fadeout_shape)
         .. ", " .. string.format("%.0f", fadeout_len * 1000) .. " ms")
 end

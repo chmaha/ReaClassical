@@ -18,10 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Xfade Nudge Item Right (selection-aware):
---   Left selected  → item1 right edge extends only; overlap grows; no ripple; fades updated.
---   Right selected → item1 right edge extends + item2 shifts right; overlap unchanged; downstream ripple.
---   Both selected  → blocked.
+-- XFM Shift Right (selection-aware). No ripple.
+--   Both selected  → whole xfade shifts right: item1.length += amt; item2 shifts right with
+--                    waveform pinned and right edge fixed.
+--   Left selected  → fade-out shifts right: item1.length += amt only (FADEOUTLEN unchanged).
+--   Right selected → fade-in shifts right: item2.pos += amt, item2.soffs += amt,
+--                    item2.length -= amt (right edge fixed, FADEINLEN unchanged).
 
 -- luacheck: ignore 113
 
@@ -30,7 +32,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local xfu = require("ReaClassical_XFade_Utils")
+local xfu = require("ReaClassical_XFM_Utils")
 
 ---------------------------------------------------------------------
 
@@ -43,48 +45,53 @@ local function main()
     local amt = xfu.nudge_amount()
     local sel = ctx.selection
 
+    if sel == "right" and ctx.len2 - amt < 0.001 then
+        say("Cannot shift: right item too short")
+        return
+    end
+
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
     if sel == "both" then
-        say("Select left or right item first")
-        PreventUIRefresh(-1)
-        Undo_EndBlock("Xfade Nudge Item Right", -1)
-        return
-
-    elseif sel == "left" then
-        -- Extend item1 right edge only. Overlap grows. No ripple.
-        for _, item in ipairs(ctx.group1) do
-            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
-            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
-        end
-        xfu.update_xfade_fades(ctx)
-        xfu.set_xfade_state(ctx.folder_track, ctx.center + amt * 0.5)
-        say("Left item nudged right")
-
-    else
-        -- Extend item1 right edge + shift item2 right. Overlap unchanged. Downstream ripple.
-        local old_end1 = ctx.end1
         for _, item in ipairs(ctx.group1) do
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
             SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
         end
         for _, item in ipairs(ctx.group2) do
             local p = GetMediaItemInfo_Value(item, "D_POSITION")
+            local s = xfu.get_item_soffs(item)
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
             SetMediaItemInfo_Value(item, "D_POSITION", p + amt)
+            xfu.set_item_soffs(item,                   s + amt)
+            SetMediaItemInfo_Value(item, "D_LENGTH",   math.max(0.001, l - amt))
         end
-        local skip = {}
-        for _, it in ipairs(ctx.group1) do skip[it] = true end
-        for _, it in ipairs(ctx.group2) do skip[it] = true end
-        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, amt, skip)
         xfu.set_xfade_state(ctx.folder_track, ctx.center + amt)
-        say("Right item nudged right")
+        say("Crossfade shifted right")
+
+    elseif sel == "left" then
+        for _, item in ipairs(ctx.group1) do
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
+        end
+        say("Fade-out shifted right")
+
+    else
+        for _, item in ipairs(ctx.group2) do
+            local p = GetMediaItemInfo_Value(item, "D_POSITION")
+            local s = xfu.get_item_soffs(item)
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            SetMediaItemInfo_Value(item, "D_POSITION", p + amt)
+            xfu.set_item_soffs(item,                   s + amt)
+            SetMediaItemInfo_Value(item, "D_LENGTH",   math.max(0.001, l - amt))
+        end
+        say("Fade-in shifted right")
     end
 
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("Xfade Nudge Item Right", -1)
+    Undo_EndBlock("XFM Shift Right", -1)
 end
 
 ---------------------------------------------------------------------

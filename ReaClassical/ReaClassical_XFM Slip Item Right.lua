@@ -18,10 +18,15 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Slip the right item's source content right (later source plays at item2.pos):
---   item2.soffs += amt  (later content)
---   item2.length -= amt (right edge retracts to maintain downstream crossfade)
---   Downstream items ripple left by amt. item1 and item2.pos are untouched.
+-- Slip right. Mechanism differs by selection:
+--
+-- Right item selected:
+--   item2.soffs += amt, item2.length -= amt  (soffs-based: later source at item2.pos)
+--   Downstream ripples left. item1 and item2.pos untouched.
+--
+-- Left item selected (= Nudge Left on item2, opposite direction):
+--   item1.length -= amt, item2.pos -= amt    (position-based: boundary moves left)
+--   Downstream ripples left. Overlap preserved. item2.soffs untouched.
 
 -- luacheck: ignore 113
 
@@ -30,7 +35,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local xfu = require("ReaClassical_XFade_Utils")
+local xfu = require("ReaClassical_XFM_Utils")
 
 ---------------------------------------------------------------------
 
@@ -46,38 +51,50 @@ local function main()
     end
 
     local amt = xfu.nudge_amount()
-    -- right selected: soffs+=amt, len-=amt, ripple left  (dir=1, normal)
-    -- left selected:  soffs-=amt, len+=amt, ripple right (dir=-1, reversed)
-    local dir = (ctx.selection == "left") and -1 or 1
 
-    if dir == 1 then
+    if ctx.selection == "left" then
+        local l1 = GetMediaItemInfo_Value(ctx.item1, "D_LENGTH")
+        if l1 - amt < 0.001 then say("Cannot slip: left item too short"); return end
+    else
         local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
         if l2 - amt < 0.001 then say("Cannot slip: right item too short"); return end
-    else
-        local s2 = xfu.get_item_soffs(ctx.item2)
-        if s2 - amt < 0 then say("Cannot slip: already at source start"); return end
     end
 
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
     local old_end1 = ctx.end1
-    for _, item in ipairs(ctx.group2) do
-        local s = xfu.get_item_soffs(item)
-        local l = GetMediaItemInfo_Value(item, "D_LENGTH")
-        xfu.set_item_soffs(item,                    math.max(0,     s + amt * dir))
-        SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt * dir))
-    end
-
     local skip = {}
     for _, it in ipairs(ctx.group1) do skip[it] = true end
     for _, it in ipairs(ctx.group2) do skip[it] = true end
-    xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt * dir, skip)
+
+    if ctx.selection == "left" then
+        -- Position-based: B shrinks, C shifts left, overlap preserved
+        for _, item in ipairs(ctx.group1) do
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
+        end
+        for _, item in ipairs(ctx.group2) do
+            local p = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetMediaItemInfo_Value(item, "D_POSITION", math.max(0, p - amt))
+        end
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
+        xfu.set_xfade_state(ctx.folder_track, ctx.center - amt)
+    else
+        -- Soffs-based: C source moves forward, C shrinks from right
+        for _, item in ipairs(ctx.group2) do
+            local s = xfu.get_item_soffs(item)
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            xfu.set_item_soffs(item,                    math.max(0,     s + amt))
+            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
+        end
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
+    end
 
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("Xfade Slip Item Right", -1)
+    Undo_EndBlock("XFM Slip Item Right", -1)
     say("Item slipped right")
 end
 

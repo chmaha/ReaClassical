@@ -36,13 +36,13 @@ if not SWS_exists then
     return
 end
 
--- When OSARA is installed (or debug=on), delegate to the headless Xfade Mode
+-- When OSARA is installed (or debug=on), delegate to the headless XFM Mode
 -- Daemon. AddRemoveReaScript registers it on the fly if needed and returns a
 -- stable command ID -- same pattern as Classical Take Record / Record Panel Daemon.
 if osara_outputMessage then
     if APIExists("AddRemoveReaScript") then
         local daemon_cid = AddRemoveReaScript(true, 0,
-            script_path .. "ReaClassical_Xfade Mode Daemon.lua", false)
+            script_path .. "ReaClassical_XFM Mode Daemon.lua", false)
         if daemon_cid ~= 0 then
             Main_OnCommand(daemon_cid, 0)
         end

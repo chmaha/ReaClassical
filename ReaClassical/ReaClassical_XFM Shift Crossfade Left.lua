@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Xfade Shift Left (selection-aware). No ripple.
+-- XFM Shift Left (selection-aware). No ripple.
 --   Both selected  → whole xfade shifts left: item1.length -= amt; item2 shifts left with
 --                    waveform pinned and right edge fixed.
 --   Left selected  → fade-out shifts left: item1.length -= amt only (FADEOUTLEN unchanged).
@@ -32,7 +32,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-local xfu = require("ReaClassical_XFade_Utils")
+local xfu = require("ReaClassical_XFM_Utils")
 
 ---------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("Xfade Shift Left", -1)
+    Undo_EndBlock("XFM Shift Left", -1)
 end
 
 ---------------------------------------------------------------------
