@@ -22,6 +22,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+require("ReaClassical_Announce")  -- installs osara_outputMessage shim when debug=on
+
 local main, select_check, check_next_item_overlap, get_selected_media_item_at
 
 ---------------------------------------------------------------------
@@ -29,6 +33,20 @@ local main, select_check, check_next_item_overlap, get_selected_media_item_at
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
     MB('Please install SWS/S&M extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
+-- When OSARA is installed (or debug=on), delegate to the headless Xfade Mode
+-- Daemon. AddRemoveReaScript registers it on the fly if needed and returns a
+-- stable command ID -- same pattern as Classical Take Record / Record Panel Daemon.
+if osara_outputMessage then
+    if APIExists("AddRemoveReaScript") then
+        local daemon_cid = AddRemoveReaScript(true, 0,
+            script_path .. "ReaClassical_Xfade Mode Daemon.lua", false)
+        if daemon_cid ~= 0 then
+            Main_OnCommand(daemon_cid, 0)
+        end
+    end
     return
 end
 

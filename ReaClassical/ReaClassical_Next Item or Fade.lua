@@ -25,8 +25,10 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
+local xfu = require("ReaClassical_XFade_Utils")
 
 local main, get_selected_media_item_at, announce_current_item
+local navigate_xfade
 local get_envelope_stops, get_selected_stop_index, select_only_stop
 local announce_envelope_stop, move_envelope, clear_all_envelope_selections
 
@@ -231,6 +233,56 @@ end
 
 ---------------------------------------------------------------------
 
+function navigate_xfade(direction)
+    local idx    = tonumber(GetExtState("ReaClassical", "XFadeFolderIdx"))
+    local center = tonumber(GetExtState("ReaClassical", "XFadeCenter"))
+    if not idx or not center then say("No crossfade context"); return end
+
+    local folder_track = GetTrack(0, idx)
+    if not folder_track then say("No crossfade context"); return end
+
+    local xfades = xfu.find_crossfades(folder_track)
+    if #xfades == 0 then say("No crossfades found"); return end
+
+    -- Find the index of the current crossfade.
+    local cur_i = 1
+    local best_dist
+    for i, xf in ipairs(xfades) do
+        local d = math.abs(xf.center - center)
+        if not best_dist or d < best_dist then
+            cur_i = i; best_dist = d
+        end
+    end
+
+    local next_i = cur_i + direction
+    local boundary
+    if next_i < 1 then
+        next_i = 1; boundary = "First"
+    elseif next_i > #xfades then
+        next_i = #xfades; boundary = "Last"
+    end
+
+    local target = xfades[next_i]
+    xfu.set_xfade_state(folder_track, target.center)
+    xfu.set_selection("both")
+
+    local mid1   = target.pos1 + target.len1 * 0.5
+    local mid2   = target.pos2 + GetMediaItemInfo_Value(target.item2, "D_LENGTH") * 0.5
+    local group1 = xfu.get_items_at_midpoint(folder_track, mid1)
+    local group2 = xfu.get_items_at_midpoint(folder_track, mid2)
+    local all    = {}
+    for _, it in ipairs(group1) do all[#all + 1] = it end
+    for _, it in ipairs(group2) do all[#all + 1] = it end
+    xfu.select_items(all)
+    SetEditCurPos(target.center, true, false)
+
+    local prefix = boundary and (boundary .. " crossfade") or
+        ("Crossfade " .. next_i .. " of " .. #xfades)
+    say(prefix)
+end
+
+---------------------------------------------------------------------
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -241,6 +293,13 @@ function main()
         end
         MB("Please create a ReaClassical project via " .. modifier
             .. "+N to use this function.", "ReaClassical Error", 0)
+        return
+    end
+
+    if xfu.is_xfade_mode() then
+        navigate_xfade(1)
+        UpdateArrange()
+        UpdateTimeline()
         return
     end
 

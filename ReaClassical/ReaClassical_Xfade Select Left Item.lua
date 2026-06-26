@@ -22,25 +22,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
----------------------------------------------------------------------
-
--- When debug=on is set via the Terminal, install a global osara_outputMessage
--- shim that prints to the console. This makes every OSARA check in every
--- ReaClassical script (e.g. "if osara_outputMessage then") behave as if OSARA
--- is installed, so headless/blind code paths can be tested on Linux or any
--- platform without a real screen reader. Ordinary users without OSARA and
--- without debug mode are unaffected: the shim is never installed.
-if not osara_outputMessage and GetExtState("ReaClassical", "DebugAnnounce") == "on" then
-    osara_outputMessage = function(msg) ShowConsoleMsg(tostring(msg) .. "\n") end
-end
-
--- Shared announcement function for every non-ImGui ReaClassical script.
-local function say(msg)
-    if osara_outputMessage then
-        osara_outputMessage(tostring(msg))
-    end
-end
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;"
+local say = require("ReaClassical_Announce")
+local xfu = require("ReaClassical_XFade_Utils")
 
 ---------------------------------------------------------------------
 
-return say
+local function main()
+    if not xfu.is_xfade_mode() then return end
+
+    local ctx = xfu.get_xfade_context()
+    if not ctx then say("No crossfade context"); return end
+
+    xfu.select_items(ctx.group1)
+    xfu.set_selection("left")
+    say("Left item selected")
+end
+
+---------------------------------------------------------------------
+
+main()
