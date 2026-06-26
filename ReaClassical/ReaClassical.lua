@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre29
+@version 26.6.8pre30
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -188,6 +188,9 @@
   [main] ReaClassical_Whole Project View.lua
   [main] ReaClassical_Whole Project View Horizontal.lua
   [main] ReaClassical_Whole Project View Vertical.lua
+  [main] ReaClassical_XFM Audition Crossfade.lua
+  [main] ReaClassical_XFM Audition Left Item.lua
+  [main] ReaClassical_XFM Audition Right Item.lua
   [main] ReaClassical_XFM Cycle Fade Shape.lua
   [main] ReaClassical_XFM Grow Fade End 3x.lua
   [main] ReaClassical_XFM Grow Fade End.lua
