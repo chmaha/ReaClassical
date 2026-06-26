@@ -75,9 +75,9 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("XFM Match Fade", -1)
+    Undo_EndBlock("XFM Match Left Item Fade", -1)
     say("Fade matched: " .. xfu.shape_name(fadeout_shape)
-        .. ", " .. string.format("%.0f", fadeout_len * 1000) .. " ms")
+        .. ", " .. string.format("%.0f", fadeout_len * 1000) .. " milliseconds")
 end
 
 ---------------------------------------------------------------------

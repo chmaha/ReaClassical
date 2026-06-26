@@ -86,6 +86,8 @@ if GetToggleCommandState(40310) ~= 1 then
     Main_OnCommand(40310, 0)
 end
 
+Main_OnCommand(24800, 0)  -- clear any section override
+Main_OnCommand(24803, 0)  -- switch to alt-1 keymap section
 SetExtState("ReaClassical", "XFadeMode", "1", false)
 xfu.set_xfade_state(folder_track, xf.center)
 xfu.set_selection("both")
@@ -112,6 +114,7 @@ local function main()
 end
 
 local function at_exit()
+    Main_OnCommand(24800, 0)  -- clear back to main keymap section
     SetExtState("ReaClassical", "XFadeMode",      "", false)
     SetExtState("ReaClassical", "XFadeSelection", "", false)
     SetExtState("ReaClassical", "XFadeCenter",    "", false)
