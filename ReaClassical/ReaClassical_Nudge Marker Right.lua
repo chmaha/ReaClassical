@@ -66,13 +66,16 @@ function main()
     local ms = tonumber(stored) or 5
     local amount = ms / 1000
 
-    local moved, label = nudge_selected_markers(amount)
+    local moved, label, new_pos = nudge_selected_markers(amount)
     if moved == 0 then
         say("No marker selected")
-    elseif moved == 1 then
-        say(humanize_marker_label(label) .. " nudged " .. ms .. " milliseconds right")
     else
-        say(moved .. " markers nudged " .. ms .. " milliseconds right")
+        SetEditCurPos(new_pos, true, true)
+        if moved == 1 then
+            say(humanize_marker_label(label) .. " nudged " .. ms .. " milliseconds right")
+        else
+            say(moved .. " markers nudged " .. ms .. " milliseconds right")
+        end
     end
 end
 
@@ -92,7 +95,7 @@ function nudge_selected_markers(amount)
     local proj = EnumProjects(-1)
     local total = GetNumRegionsOrMarkers(proj)
     local moved = 0
-    local last_label
+    local last_label, last_pos
 
     for i = 0, total - 1 do
         local marker = GetRegionOrMarker(proj, i, "")
@@ -105,13 +108,14 @@ function nudge_selected_markers(amount)
             local _, name = GetSetRegionOrMarkerInfo_String(proj, marker, "P_NAME", "", false)
             moved = moved + 1
             last_label = name ~= "" and name or "Marker"
+            last_pos   = new_pos
         end
     end
 
     Undo_EndBlock("Nudge marker right", -1)
     UpdateArrange()
     UpdateTimeline()
-    return moved, last_label
+    return moved, last_label, last_pos
 end
 
 ---------------------------------------------------------------------

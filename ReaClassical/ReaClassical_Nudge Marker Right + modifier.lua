@@ -63,8 +63,9 @@ function main()
     end
 
     local _, stored = GetProjExtState(0, "ReaClassical", "NudgeMs")
-    local ms = tonumber(stored) or 5
-    local amount = -(ms / 1000)
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local ms = (tonumber(stored) or 5) * (tonumber(stored_mod) or 5)
+    local amount = ms / 1000
 
     local moved, label, new_pos = nudge_selected_markers(amount)
     if moved == 0 then
@@ -72,9 +73,9 @@ function main()
     else
         SetEditCurPos(new_pos, true, true)
         if moved == 1 then
-            say(humanize_marker_label(label) .. " nudged " .. ms .. " milliseconds left")
+            say(humanize_marker_label(label) .. " nudged " .. ms .. " milliseconds right")
         else
-            say(moved .. " markers nudged " .. ms .. " milliseconds left")
+            say(moved .. " markers nudged " .. ms .. " milliseconds right")
         end
     end
 end
@@ -112,7 +113,7 @@ function nudge_selected_markers(amount)
         end
     end
 
-    Undo_EndBlock("Nudge marker left", -1)
+    Undo_EndBlock("Nudge marker right modifier", -1)
     UpdateArrange()
     UpdateTimeline()
     return moved, last_label, last_pos

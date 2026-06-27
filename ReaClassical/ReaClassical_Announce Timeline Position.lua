@@ -32,9 +32,25 @@ local main
 ---------------------------------------------------------------------
 
 function main()
-    local is_playing = GetPlayState() & 1 == 1
-    local pos = is_playing and GetPlayPosition() or GetCursorPosition()
-    say(humanize_timestr(format_timestr_pos(pos, "", -1)))
+    local state = GetPlayState()
+    local pos = state ~= 0 and GetPlayPosition() or GetCursorPosition()
+    local timestr = humanize_timestr(format_timestr_pos(pos, "", -1))
+
+    if state == 0 then
+        say(timestr)
+    else
+        local label
+        if state & 4 == 4 and state & 2 == 2 then
+            label = "recording paused"
+        elseif state & 4 == 4 then
+            label = "recording"
+        elseif state & 2 == 2 then
+            label = "paused"
+        else
+            label = "playing"
+        end
+        say(timestr .. ", " .. label)
+    end
 end
 
 ---------------------------------------------------------------------

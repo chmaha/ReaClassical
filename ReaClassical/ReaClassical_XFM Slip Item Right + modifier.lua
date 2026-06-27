@@ -50,7 +50,8 @@ local function main()
         return
     end
 
-    local amt = xfu.nudge_amount() * 3
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local amt = xfu.nudge_amount() * (tonumber(stored_mod) or 5)
     local ms  = math.floor(amt * 1000 + 0.5)
 
     if ctx.selection == "right" then
@@ -98,7 +99,7 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("XFM Slip Item Right 3x", -1)
+    Undo_EndBlock("XFM Slip Item Right modifier", -1)
 end
 
 ---------------------------------------------------------------------

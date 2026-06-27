@@ -4275,6 +4275,28 @@ function try_misc(cmd)
         return true
     end
 
+    -- mod=<n>: sets the multiplier applied by the "+ modifier" scripts
+    -- (Nudge Marker Left/Right + modifier, XFM Shift Crossfade Left/Right + modifier).
+    -- mod? reports the current value. Defaults to 5 if never set.
+    local mod_val = cmd:match("^mod=([%d%.]+)$")
+    if mod_val then
+        local n = tonumber(mod_val)
+        if not n or n <= 0 then
+            say("mod= requires a positive number")
+            return true
+        end
+        SetProjExtState(0, "ReaClassical", "ModifierFactor", tostring(n))
+        say("Modifier set to " .. n)
+        return true
+    end
+
+    if cmd == "mod?" then
+        local _, stored = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+        local n = tonumber(stored) or 5
+        say("Modifier: " .. n)
+        return true
+    end
+
     if cmd == "update" then
         local action = NamedCommandLookup("_REAPACK_SYNC")
         if action ~= 0 then

@@ -63,7 +63,8 @@ function main()
     end
 
     local _, stored = GetProjExtState(0, "ReaClassical", "NudgeMs")
-    local ms = tonumber(stored) or 5
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local ms = (tonumber(stored) or 5) * (tonumber(stored_mod) or 5)
     local amount = -(ms / 1000)
 
     local moved, label, new_pos = nudge_selected_markers(amount)
@@ -112,7 +113,7 @@ function nudge_selected_markers(amount)
         end
     end
 
-    Undo_EndBlock("Nudge marker left", -1)
+    Undo_EndBlock("Nudge marker left modifier", -1)
     UpdateArrange()
     UpdateTimeline()
     return moved, last_label, last_pos

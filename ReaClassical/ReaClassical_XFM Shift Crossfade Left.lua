@@ -92,6 +92,9 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
+    local new_end1 = ctx.pos1 + ctx.len1
+    if sel ~= "right" then new_end1 = new_end1 - amt end
+    SetEditCurPos(new_end1, true, true)
     Undo_EndBlock("XFM Shift Left", -1)
 end
 

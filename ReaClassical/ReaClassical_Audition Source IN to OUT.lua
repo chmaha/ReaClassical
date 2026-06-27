@@ -25,13 +25,11 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, markers, exclusive_select_folder_parent, solo
 local find_marker_pos, play_segment, select_marker_exclusive
 
+---------------------------------------------------------------------
+
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
-
-local ROLL = 2.0
-
----------------------------------------------------------------------
 
 local SWS_exists = APIExists("CF_GetSWSVersion")
 if not SWS_exists then
@@ -65,7 +63,7 @@ function main()
 
     local marker_count, folder_prefix = markers()
     if marker_count == 0 then
-        say("No destination out marker found")
+        say("No source in marker found")
         return
     end
 
@@ -77,12 +75,21 @@ function main()
 
     solo()
 
-    local marker_pos = find_marker_pos(997, "DEST-OUT")
-    if not marker_pos then return end
-    select_marker_exclusive(997, "DEST-OUT")
+    local in_pos = find_marker_pos(998, "SOURCE-IN")
+    if not in_pos then return end
+    select_marker_exclusive(998, "SOURCE-IN")
 
-    local start_pos = math.max(0, marker_pos - ROLL)
-    play_segment(start_pos, marker_pos)
+    local out_pos = find_marker_pos(999, "SOURCE-OUT")
+    if not out_pos then
+        say("No source out marker found")
+        return
+    end
+    if out_pos <= in_pos then
+        say("Source out marker must be after source in marker")
+        return
+    end
+
+    play_segment(in_pos, out_pos)
 end
 
 ---------------------------------------------------------------------
@@ -98,11 +105,11 @@ function markers()
         local _, num_markers, num_regions = CountProjectMarkers(proj)
         for i = 0, num_markers + num_regions - 1 do
             local _, _, _, _, raw_label, _ = EnumProjectMarkers2(proj, i)
-            local prefix = string.match(raw_label, "^(.+):DEST%-OUT$")
+            local prefix = string.match(raw_label, "^(.+):SOURCE%-IN$")
             if prefix then
                 marker_count = 1
                 folder_prefix = prefix ~= "" and prefix or nil
-            elseif string.match(raw_label, "^DEST%-OUT$") then
+            elseif string.match(raw_label, "^SOURCE%-IN$") then
                 marker_count = 1
             end
         end

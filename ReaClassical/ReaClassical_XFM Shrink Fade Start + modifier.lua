@@ -43,7 +43,8 @@ local function main()
     if not ctx then say("No crossfade context"); return end
 
     local sel    = ctx.selection
-    local amt    = xfu.nudge_amount() * 3
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local amt    = xfu.nudge_amount() * (tonumber(stored_mod) or 5)
     local old_fo = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
     local old_fi = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
 
@@ -53,11 +54,11 @@ local function main()
     if sel == "both" then
         if GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN") - amt < min_fade then
             say("Cannot shrink: fade-out too short")
-            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start 3x", -1); return
+            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start modifier", -1); return
         end
         if GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN") - amt < min_fade then
             say("Cannot shrink: fade-in too short")
-            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start 3x", -1); return
+            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start modifier", -1); return
         end
         for _, item in ipairs(ctx.group1) do
             local f = GetMediaItemInfo_Value(item, "D_FADEOUTLEN")
@@ -79,7 +80,7 @@ local function main()
     elseif sel == "left" then
         if GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN") - amt < min_fade then
             say("Cannot shrink: fade-out too short")
-            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start 3x", -1); return
+            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start modifier", -1); return
         end
         for _, item in ipairs(ctx.group1) do
             local f = GetMediaItemInfo_Value(item, "D_FADEOUTLEN")
@@ -90,7 +91,7 @@ local function main()
     else
         if GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN") - amt < min_fade then
             say("Cannot shrink: fade-in too short")
-            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start 3x", -1); return
+            PreventUIRefresh(-1); Undo_EndBlock("XFM Shrink Fade Start modifier", -1); return
         end
         for _, item in ipairs(ctx.group2) do
             local p = GetMediaItemInfo_Value(item, "D_POSITION")
@@ -109,7 +110,7 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("XFM Shrink Fade Start 3x", -1)
+    Undo_EndBlock("XFM Shrink Fade Start modifier", -1)
 end
 
 ---------------------------------------------------------------------

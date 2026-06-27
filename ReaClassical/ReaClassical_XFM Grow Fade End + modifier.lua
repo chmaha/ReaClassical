@@ -18,10 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Grow the START of the selected item's fade (selection-aware):
---   Both   → item1 D_FADEOUTLEN grows AND item2 left edge moves left (right edge fixed). No ripple.
---   Left   → D_FADEOUTLEN on item1 grows only; item1 boundaries unchanged (fade-out start moves earlier).
---   Right  → item2 left edge moves left (pos/startoffs/fadeinlen grow, length compensates); right edge fixed. No ripple.
+-- Grow the END of the selected item's fade (selection-aware):
+--   Both   → item1 right edge grows AND item2 D_FADEINLEN grows.
+--   Left   → item1 right edge moves right (D_LENGTH + D_FADEOUTLEN both grow; fade-out start anchored).
+--   Right  → D_FADEINLEN on item2 grows only; item2 boundaries unchanged.
+-- No ripple.
 
 -- luacheck: ignore 113
 
@@ -41,7 +42,8 @@ local function main()
     if not ctx then say("No crossfade context"); return end
 
     local sel    = ctx.selection
-    local amt    = xfu.nudge_amount() * 3
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local amt    = xfu.nudge_amount() * (tonumber(stored_mod) or 5)
     local old_fo = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
     local old_fi = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
 
@@ -50,48 +52,40 @@ local function main()
 
     if sel == "both" then
         for _, item in ipairs(ctx.group1) do
+            local l  = GetMediaItemInfo_Value(item, "D_LENGTH")
             local fo = GetMediaItemInfo_Value(item, "D_FADEOUTLEN")
+            SetMediaItemInfo_Value(item, "D_LENGTH",          l  + amt)
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      fo + amt)
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", fo + amt)
         end
         for _, item in ipairs(ctx.group2) do
-            local p  = GetMediaItemInfo_Value(item, "D_POSITION")
-            local s  = xfu.get_item_soffs(item)
-            local l  = GetMediaItemInfo_Value(item, "D_LENGTH")
             local fi = GetMediaItemInfo_Value(item, "D_FADEINLEN")
-            SetMediaItemInfo_Value(item, "D_POSITION",       math.max(0, p - amt))
-            xfu.set_item_soffs(item,                         math.max(0, s - amt))
-            SetMediaItemInfo_Value(item, "D_LENGTH",         l + amt)
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      fi + amt)
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", fi + amt)
         end
-        say("Fade starts grown to " .. math.floor((old_fo + amt) * 1000 + 0.5)  .. " milliseconds")
+        say("Fade ends grown to " .. math.floor((old_fo + amt) * 1000 + 0.5)  .. " milliseconds")
     elseif sel == "left" then
         for _, item in ipairs(ctx.group1) do
+            local l  = GetMediaItemInfo_Value(item, "D_LENGTH")
             local fo = GetMediaItemInfo_Value(item, "D_FADEOUTLEN")
+            SetMediaItemInfo_Value(item, "D_LENGTH",          l  + amt)
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      fo + amt)
             SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", fo + amt)
         end
-        say("Fade-out start grown to " .. math.floor((old_fo + amt) * 1000 + 0.5)  .. " milliseconds")
+        say("Fade-out end grown to " .. math.floor((old_fo + amt) * 1000 + 0.5)  .. " milliseconds")
     else
         for _, item in ipairs(ctx.group2) do
-            local p  = GetMediaItemInfo_Value(item, "D_POSITION")
-            local s  = xfu.get_item_soffs(item)
-            local l  = GetMediaItemInfo_Value(item, "D_LENGTH")
             local fi = GetMediaItemInfo_Value(item, "D_FADEINLEN")
-            SetMediaItemInfo_Value(item, "D_POSITION",       math.max(0, p - amt))
-            xfu.set_item_soffs(item,                         math.max(0, s - amt))
-            SetMediaItemInfo_Value(item, "D_LENGTH",         l + amt)
             SetMediaItemInfo_Value(item, "D_FADEINLEN",      fi + amt)
             SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", fi + amt)
         end
-        say("Fade-in start grown to " .. math.floor((old_fi + amt) * 1000 + 0.5)  .. " milliseconds")
+        say("Fade-in end grown to " .. math.floor((old_fi + amt) * 1000 + 0.5)  .. " milliseconds")
     end
 
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("XFM Grow Fade Start 3x", -1)
+    Undo_EndBlock("XFM Grow Fade End modifier", -1)
 end
 
 ---------------------------------------------------------------------

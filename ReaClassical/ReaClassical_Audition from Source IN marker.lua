@@ -79,8 +79,7 @@ function main()
     if not marker_pos then return end
     select_marker_exclusive(998, "SOURCE-IN")
 
-    local out_pos = find_marker_pos(999, "SOURCE-OUT")
-    local stop_pos = (out_pos and out_pos > marker_pos) and out_pos or nil
+    local stop_pos = marker_pos + 2.0
     play_segment(marker_pos, stop_pos)
 end
 

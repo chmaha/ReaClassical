@@ -18,15 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Slip left: waveform or boundary moves left.
---
--- Right item selected:
---   item2.soffs += amt, item2.length -= amt  (later source plays at item2.pos)
---   Downstream ripples left. item1 and item2.pos untouched.
---
--- Left item selected (= Nudge Right on item2, opposite direction):
---   item1.length += amt, item2.pos += amt    (boundary moves right)
---   Downstream ripples right. Overlap preserved. item2.soffs untouched.
+-- XFM Shift Right (selection-aware). No ripple.
+--   Both selected  → whole xfade shifts right: item1.length += amt; item2 shifts right with
+--                    waveform pinned and right edge fixed.
+--   Left selected  → fade-out shifts right: item1.length += amt only (FADEOUTLEN unchanged).
+--   Right selected → fade-in shifts right: item2.pos += amt, item2.soffs += amt,
+--                    item2.length -= amt (right edge fixed, FADEINLEN unchanged).
 
 -- luacheck: ignore 113
 
@@ -45,57 +42,62 @@ local function main()
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
 
-    if ctx.selection == "both" then
-        say("Slip requires single item selected")
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local modifier = tonumber(stored_mod) or 5
+    local amt = xfu.nudge_amount() * modifier
+    local ms  = math.floor(amt * 1000 + 0.5)
+    local sel = ctx.selection
+
+    if sel == "right" and ctx.len2 - amt < 0.001 then
+        say("Cannot shift: right item too short")
         return
     end
-
-    local amt = xfu.nudge_amount() * 3
-    local ms  = math.floor(amt * 1000 + 0.5)
-
-    if ctx.selection == "right" then
-        local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
-        if l2 - amt < 0.001 then say("Cannot slip: right item too short"); return end
-    end
-
-    local skip = {}
-    for _, it in ipairs(ctx.group1) do skip[it] = true end
-    for _, it in ipairs(ctx.group2) do skip[it] = true end
 
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
-    local old_end1 = ctx.end1
-
-    if ctx.selection == "left" then
-        -- Position-based: B extends right, C shifts right, overlap preserved
+    if sel == "both" then
         for _, item in ipairs(ctx.group1) do
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
             SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
         end
         for _, item in ipairs(ctx.group2) do
             local p = GetMediaItemInfo_Value(item, "D_POSITION")
-            SetMediaItemInfo_Value(item, "D_POSITION", p + amt)
-        end
-        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, amt, skip)
-        xfu.set_xfade_state(ctx.folder_track, ctx.center + amt)
-        say("Left item slipped left by " .. ms .. " milliseconds")
-    else
-        -- Soffs-based: C source moves forward, C shrinks from right
-        for _, item in ipairs(ctx.group2) do
             local s = xfu.get_item_soffs(item)
             local l = GetMediaItemInfo_Value(item, "D_LENGTH")
-            xfu.set_item_soffs(item,           s + amt)
-            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
+            SetMediaItemInfo_Value(item, "D_POSITION", p + amt)
+            xfu.set_item_soffs(item,                   s + amt)
+            SetMediaItemInfo_Value(item, "D_LENGTH",   math.max(0.001, l - amt))
         end
-        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
-        say("Right item slipped left by " .. ms .. " milliseconds")
+        xfu.set_xfade_state(ctx.folder_track, ctx.center + amt)
+        say("Crossfade shifted right by " .. ms  .. " milliseconds")
+
+    elseif sel == "left" then
+        for _, item in ipairs(ctx.group1) do
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
+        end
+        say("Fade-out shifted right by " .. ms  .. " milliseconds")
+
+    else
+        for _, item in ipairs(ctx.group2) do
+            local p = GetMediaItemInfo_Value(item, "D_POSITION")
+            local s = xfu.get_item_soffs(item)
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            SetMediaItemInfo_Value(item, "D_POSITION", p + amt)
+            xfu.set_item_soffs(item,                   s + amt)
+            SetMediaItemInfo_Value(item, "D_LENGTH",   math.max(0.001, l - amt))
+        end
+        say("Fade-in shifted right by " .. ms  .. " milliseconds")
     end
 
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("XFM Slip Item Left 3x", -1)
+    local new_end1 = ctx.pos1 + ctx.len1
+    if sel ~= "right" then new_end1 = new_end1 + amt end
+    SetEditCurPos(new_end1, true, true)
+    Undo_EndBlock("XFM Shift Right modifier", -1)
 end
 
 ---------------------------------------------------------------------

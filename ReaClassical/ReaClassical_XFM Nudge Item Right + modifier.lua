@@ -40,7 +40,8 @@ local function main()
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
 
-    local amt = xfu.nudge_amount() * 3
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local amt = xfu.nudge_amount() * (tonumber(stored_mod) or 5)
     local ms  = math.floor(amt * 1000 + 0.5)
     local sel = ctx.selection
 
@@ -50,7 +51,7 @@ local function main()
     if sel == "both" then
         say("Select left or right item first")
         PreventUIRefresh(-1)
-        Undo_EndBlock("XFM Nudge Item Right 3x", -1)
+        Undo_EndBlock("XFM Nudge Item Right modifier", -1)
         return
 
     elseif sel == "left" then
@@ -59,7 +60,7 @@ local function main()
         if l2 - amt < 0.001 then
             say("Cannot nudge: right item too short")
             PreventUIRefresh(-1)
-            Undo_EndBlock("XFM Nudge Item Right 3x", -1)
+            Undo_EndBlock("XFM Nudge Item Right modifier", -1)
             return
         end
         local old_end1 = ctx.end1
@@ -97,7 +98,7 @@ local function main()
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("XFM Nudge Item Right 3x", -1)
+    Undo_EndBlock("XFM Nudge Item Right modifier", -1)
 end
 
 ---------------------------------------------------------------------

@@ -564,6 +564,8 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 | `debug?` | Speak whether debug announcements are currently on or off for this project. |
 | `nudge=ms` | Set the ReaClassical project-level nudge amount, in milliseconds, used by the "Nudge Marker Left"/"Right" and "Nudge Item Left"/"Right" reascripts, e.g. `nudge=20`. REAPER's own item-nudge amount/unit isn't exposed to ReaScript, so this is tracked independently per project. Defaults to 5 ms if never set. |
 | `nudge?` | Speak the current nudge amount. |
+| `mod=n` | Set the multiplier applied by the "+ modifier" scripts (Nudge Marker Left/Right + modifier, XFM Shift Crossfade Left/Right + modifier), e.g. `mod=10`. These scripts move by nudge amount × modifier, so with `nudge=5` and `mod=10` each press moves 50 ms. Defaults to 5 if never set. |
+| `mod?` | Speak the current modifier value. |
 
 ### Other examples
 
