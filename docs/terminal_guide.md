@@ -521,6 +521,7 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 | `stats.session` | Start/reset the session timer. |
 | `stats.cp` | Copy the full `stats?` report text to the clipboard (requires the SWS extension). |
 | `stats.cpver` | Copy just the REAPER/ReaClassical version line to the clipboard (requires the SWS extension). |
+| `hitake?` | Speak the highest take number found across all items currently in the project (by scanning item names for `_TNNN` and pure-numeric patterns). Useful for checking how far a session has progressed without opening the Record Panel. Compare with `rec.latest?`, which scans audio files on disk for the current session. |
 | `peak?` | Scan all unmuted tracks and jump the edit cursor to the loudest point. |
 | `overs?` | Scan all unmuted tracks for peak level and any "overs" above the saved threshold. |
 | `overs=N` | Same scan, using N dB as the over threshold (also saved as the new default), e.g. `overs=-2`. |
@@ -538,6 +539,7 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 - `stats.cpver` — Paste just the version info into a bug report.
 - `overs?` — Before rendering, scan for any clipped peaks across all unmuted tracks.
 - `overs=-3` — Tighten the over-detection threshold to -3 dB for a stricter check ahead of a critical master.
+- `hitake?` — After a long session, quickly confirm the highest take number in the project before deciding what number to record next.
 - `peak?` — Jump straight to the single loudest moment in the project to check it by ear.
 - `pref.xfade=50` — Increase the default S-D crossfade length to 50 ms for a smoother edit style.
 - `pref.cuefmt=FLAC` — Switch the CUE sheet's audio format from the default WAV to FLAC.

@@ -1821,6 +1821,15 @@ tracks/items, cursor position), e.g. <code>stats.albumlen?</code>.</td>
 (requires the SWS extension).</td>
 </tr>
 <tr>
+<td><code>hitake?</code></td>
+<td>Speak the highest take number found across all items currently in
+the project (by scanning item names for <code>_TNNN</code> and
+pure-numeric patterns). Useful for checking how far a session has
+progressed without opening the Record Panel. Compare with
+<code>rec.latest?</code>, which scans audio files on disk for the
+current session.</td>
+</tr>
+<tr>
 <td><code>peak?</code></td>
 <td>Scan all unmuted tracks and jump the edit cursor to the loudest
 point.</td>
@@ -1876,6 +1885,9 @@ report.</li>
 across all unmuted tracks.</li>
 <li><code>overs=-3</code> — Tighten the over-detection threshold to -3
 dB for a stricter check ahead of a critical master.</li>
+<li><code>hitake?</code> — After a long session, quickly confirm the
+highest take number in the project before deciding what number to record
+next.</li>
 <li><code>peak?</code> — Jump straight to the single loudest moment in
 the project to check it by ear.</li>
 <li><code>pref.xfade=50</code> — Increase the default S-D crossfade

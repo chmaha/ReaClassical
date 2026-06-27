@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre34
+@version 26.6.8pre35
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -76,6 +76,8 @@
   [main] ReaClassical_Add Destination OUT Marker.lua
   [main] ReaClassical_Add Source IN marker.lua
   [main] ReaClassical_Add Source OUT marker.lua
+  [main] ReaClassical_Announce Highest Take.lua
+  [main] ReaClassical_Announce Items in Folder.lua
   [main] ReaClassical_Announce RCMASTER Peak.lua
   [main] ReaClassical_Announce Take Number.lua
   [main] ReaClassical_Announce Timeline Position.lua
@@ -178,6 +180,7 @@
   [main] ReaClassical_Repeat Last Terminal Command.lua
   [main] ReaClassical_Reposition_Album_Tracks.lua
   [main] ReaClassical_S-D Edit.lua
+  [main] ReaClassical_Select All Items in Folder.lua
   [main] ReaClassical_Set Dest Project Marker.lua
   [main] ReaClassical_Set Item Playback Rate.lua
   [main] ReaClassical_Set Next Recording Section.lua
