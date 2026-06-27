@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre32
+@version 26.6.8pre33
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -80,10 +80,12 @@
   [main] ReaClassical_Announce Take Number.lua
   [main] ReaClassical_Announce Timeline Position.lua
   [main] ReaClassical_Audio Calculator.lua
+  [main] ReaClassical_Audition Destination IN to OUT.lua
   [main] ReaClassical_Audition from Destination IN marker.lua
   [main] ReaClassical_Audition from Destination OUT marker.lua
   [main] ReaClassical_Audition from Source IN marker.lua
   [main] ReaClassical_Audition from Source OUT marker.lua
+  [main] ReaClassical_Audition Source IN to OUT.lua
   [main] ReaClassical_Audition to Destination IN marker.lua
   [main] ReaClassical_Audition to Destination OUT marker.lua
   [main] ReaClassical_Audition to Source IN marker.lua
@@ -149,7 +151,9 @@
   [main] ReaClassical_Notes.lua
   [main] ReaClassical_Nudge Item Left.lua
   [main] ReaClassical_Nudge Item Right.lua
+  [main] ReaClassical_Nudge Marker Left + modifier.lua
   [main] ReaClassical_Nudge Marker Left.lua
+  [main] ReaClassical_Nudge Marker Right + modifier.lua
   [main] ReaClassical_Nudge Marker Right.lua
   [main] ReaClassical_Peak and Overs Check.lua
   [main=crossfade_editor] ReaClassical_Play Both Items of Crossfade.lua
@@ -199,9 +203,9 @@
   [main] ReaClassical_XFM Audition Left Item.lua
   [main] ReaClassical_XFM Audition Right Item.lua
   [main] ReaClassical_XFM Cycle Fade Shape.lua
-  [main] ReaClassical_XFM Grow Fade End 3x.lua
+  [main] ReaClassical_XFM Grow Fade End + modifier.lua
   [main] ReaClassical_XFM Grow Fade End.lua
-  [main] ReaClassical_XFM Grow Fade Start 3x.lua
+  [main] ReaClassical_XFM Grow Fade Start + modifier.lua
   [main] ReaClassical_XFM Grow Fade Start.lua
   [main] ReaClassical_XFM Item Volume Down 0.2dB.lua
   [main] ReaClassical_XFM Item Volume Down 1dB.lua
@@ -211,29 +215,29 @@
   [main] ReaClassical_XFM Match Left Item Fade.lua
   [main] ReaClassical_XFM Match Right Item Fade.lua
   [main] ReaClassical_XFM Mode Daemon.lua
-  [main] ReaClassical_XFM Narrow Crossfade 3x.lua
+  [main] ReaClassical_XFM Narrow Crossfade + modifier.lua
   [main] ReaClassical_XFM Narrow Crossfade.lua
-  [main] ReaClassical_XFM Nudge Item Left 3x.lua
+  [main] ReaClassical_XFM Nudge Item Left + modifier.lua
   [main] ReaClassical_XFM Nudge Item Left.lua
-  [main] ReaClassical_XFM Nudge Item Right 3x.lua
+  [main] ReaClassical_XFM Nudge Item Right + modifier.lua
   [main] ReaClassical_XFM Nudge Item Right.lua
   [main] ReaClassical_XFM Reset.lua
   [main] ReaClassical_XFM Select Both Items.lua
   [main] ReaClassical_XFM Select Left Item.lua
   [main] ReaClassical_XFM Select Right Item.lua
-  [main] ReaClassical_XFM Shift Crossfade Left 3x.lua
+  [main] ReaClassical_XFM Shift Crossfade Left + modifier.lua
   [main] ReaClassical_XFM Shift Crossfade Left.lua
-  [main] ReaClassical_XFM Shift Crossfade Right 3x.lua
+  [main] ReaClassical_XFM Shift Crossfade Right + modifier.lua
   [main] ReaClassical_XFM Shift Crossfade Right.lua
-  [main] ReaClassical_XFM Shrink Fade End 3x.lua
+  [main] ReaClassical_XFM Shrink Fade End + modifier.lua
   [main] ReaClassical_XFM Shrink Fade End.lua
-  [main] ReaClassical_XFM Shrink Fade Start 3x.lua
+  [main] ReaClassical_XFM Shrink Fade Start + modifier.lua
   [main] ReaClassical_XFM Shrink Fade Start.lua
-  [main] ReaClassical_XFM Slip Item Left 3x.lua
+  [main] ReaClassical_XFM Slip Item Left + modifier.lua
   [main] ReaClassical_XFM Slip Item Left.lua
-  [main] ReaClassical_XFM Slip Item Right 3x.lua
+  [main] ReaClassical_XFM Slip Item Right + modifier.lua
   [main] ReaClassical_XFM Slip Item Right.lua
-  [main] ReaClassical_XFM Widen Crossfade 3x.lua
+  [main] ReaClassical_XFM Widen Crossfade + modifier.lua
   [main] ReaClassical_XFM Widen Crossfade.lua
   [main] ReaClassical_Zoom to Destination IN marker.lua
   [main] ReaClassical_Zoom to Destination OUT marker.lua
