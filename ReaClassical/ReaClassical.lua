@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre35
+@version 26.6.8pre36
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -70,7 +70,7 @@
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
-  [main] ReaClassical_Accessible Automation Navigator.lua
+  [main] ReaClassical_Accessible Edit Automation.lua
   [main] ReaClassical_Add CD Marker Offsets.lua
   [main] ReaClassical_Add Destination IN marker.lua
   [main] ReaClassical_Add Destination OUT Marker.lua
@@ -151,7 +151,9 @@
   [main] ReaClassical_Next Item or Fade.lua
   [main] ReaClassical_Notes.lua
   [main] ReaClassical_Nudge Item Left.lua
+  [main] ReaClassical_Nudge Item Left x modifier.lua
   [main] ReaClassical_Nudge Item Right.lua
+  [main] ReaClassical_Nudge Item Right x modifier.lua
   [main] ReaClassical_Nudge Marker Left x modifier.lua
   [main] ReaClassical_Nudge Marker Left.lua
   [main] ReaClassical_Nudge Marker Right x modifier.lua
@@ -281,6 +283,7 @@
   ReaClassical_Horizontal Workflow.lua
   ReaClassical_Delete Track From All Groups.lua
   ReaClassical_Add Submix.lua
+  ReaClassical_Accessible Edit Automation.lua
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
