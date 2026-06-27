@@ -94,7 +94,6 @@
   [main] ReaClassical_Audition to Source OUT marker.lua
   [main] ReaClassical_Audition.lua
   [main] ReaClassical_Audition_with_playrate.lua
-  [main] ReaClassical_Auto Solo Folder.lua
   [main] ReaClassical_Build Edit List using BWF offset.lua
   [main] ReaClassical_Build Edit List.lua
   [main] ReaClassical_Classical Crossfade Editor.lua

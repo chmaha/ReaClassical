@@ -94,6 +94,38 @@ local last_char       = 0
 
 ---------------------------------------------------------------------
 
+local function has_time_selection()
+    local s, e = GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
+    return e > s
+end
+
+-- Returns the mixer track (M: track) that receives audio from src, or src
+-- itself if no mixer destination is found (e.g. already on a mixer track).
+local function get_snap_track(src)
+    local _, ms = GetSetMediaTrackInfo_String(src, "P_EXT:mixer", "", false)
+    local _, nm = GetSetMediaTrackInfo_String(src, "P_NAME", "", false)
+    if ms == "y" or (nm and nm:match("^M:")) then return src end
+    for s = 0, GetTrackNumSends(src, 0) - 1 do
+        local dest = GetTrackSendInfo_Value(src, 0, s, "P_DESTTRACK")
+        if dest then
+            local _, ds = GetSetMediaTrackInfo_String(dest, "P_EXT:mixer", "", false)
+            local _, dn = GetSetMediaTrackInfo_String(dest, "P_NAME", "", false)
+            if ds == "y" or (dn and dn:match("^M:")) then return dest end
+        end
+    end
+    return src
+end
+
+-- Show track in TCP and sync Mission Control extstate so it survives a MC reopen.
+local function show_in_tcp(t)
+    SetMediaTrackInfo_Value(t, "B_SHOWINTCP", 1)
+    local _, ms   = GetSetMediaTrackInfo_String(t, "P_EXT:mixer", "", false)
+    local _, guid = GetSetMediaTrackInfo_String(t, "GUID", "", false)
+    local mc_key  = (ms == "y") and ("mixer_tcp_visible_" .. guid) or ("tcp_visible_" .. guid)
+    SetProjExtState(0, "ReaClassical_MissionControl", mc_key, "1")
+    TrackList_AdjustWindows(false)
+end
+
 local function db_to_linear(db)
     if db <= -150 then return 0.0 end
     return 10 ^ (db / 20)
@@ -113,9 +145,11 @@ local function display_to_snap_native(tp, display_val)
 end
 
 -- Converts display_val to the value stored in the envelope point.
--- Pan envelopes use inverted sign vs D_PAN (REAPER internal convention).
+-- Pan envelopes use inverted sign vs D_PAN (REAPER internal convention: +1=left, -1=right).
+-- Volume envelopes require ScaleToEnvelopeMode(1, linear) to handle
+-- non-linear envelope scaling modes (matches Insert Automation behaviour).
 local function display_to_env_native(tp, display_val)
-    if tp.is_vol   then return db_to_linear(display_val) end
+    if tp.is_vol   then return ScaleToEnvelopeMode(1, db_to_linear(display_val)) end
     if tp.is_pan   then return -(display_val / 100) end
     if tp.is_width then return display_val / 100 end
     return display_val
@@ -226,7 +260,7 @@ function get_default_value()
         if n == "Volume" or n == "Volume (Pre-FX)" or n == "Trim Volume" then
             return GetMediaTrackInfo_Value(track, "D_VOL")
         elseif n == "Pan" or n == "Pan (Pre-FX)" then
-            return GetMediaTrackInfo_Value(track, "D_PAN")
+            return -GetMediaTrackInfo_Value(track, "D_PAN")
         elseif n == "Width" or n == "Width (Pre-FX)" then
             return GetMediaTrackInfo_Value(track, "D_WIDTH")
         elseif n == "Mute" then
@@ -325,10 +359,8 @@ function draw_window()
         end
     elseif state == STATE_PARAM then
         gfx.drawstr("[Param]  " .. param_list[param_sel].name)
-    elseif state == STATE_TYPE then
-        gfx.drawstr("[Type]  " .. TYPE_LABELS[TYPE_OPTIONS[type_idx]])
     elseif state == STATE_VALUE then
-        gfx.drawstr("[Value]  " .. (value_str == "" and "_" or value_str))
+        gfx.drawstr("[" .. TYPE_LABELS[TYPE_OPTIONS[type_idx]] .. "]  " .. (value_str == "" and "_" or value_str))
     elseif state == STATE_RAMP_IN then
         gfx.drawstr("[Ramp in]  " .. (ramp_in_str == "" and "(none)" or ramp_in_str .. "s"))
     elseif state == STATE_RAMP_OUT then
@@ -438,6 +470,7 @@ function insert_track_param(display_val, ins_type)
     else
         say(string.format("Added %s %s at %.2f", tp.label, label, display_val))
     end
+    show_in_tcp(track)
     Undo_EndBlock("Track Automation: " .. tp.label, -1)
     UpdateArrange()
     UpdateTimeline()
@@ -489,6 +522,7 @@ function insert_fx_param(display_val, ins_type)
 
     local label = ins_type == "item" and "automation item" or "automation point"
     say(string.format("Added %s %s at %.3f", param_entry.name, label, display_val))
+    show_in_tcp(track)
     Undo_EndBlock("FX Automation: " .. fx_entry.name .. " > " .. param_entry.name, -1)
     UpdateArrange()
     UpdateTimeline()
@@ -524,6 +558,15 @@ local function handle_digits(char, str_var_getter, str_var_setter)
     end
 end
 
+-- Determines mode from time selection state and goes straight to value entry.
+-- No time selection → snapshot; time selection → automation item.
+local function enter_value_state()
+    type_idx  = has_time_selection() and 3 or 1   -- "item" or "snapshot"
+    value_str = ""
+    state     = STATE_VALUE
+    say(get_value_prompt())
+end
+
 ---------------------------------------------------------------------
 
 function handle_key(char)
@@ -557,9 +600,7 @@ function handle_key(char)
             track_param_sel = track_param_sel < #TRACK_PARAMS and track_param_sel + 1 or 1
             say(TRACK_PARAMS[track_param_sel].label)
         elseif char == KEY_ENTER then
-            state = STATE_TYPE
-            say(TYPE_LABELS[TYPE_OPTIONS[type_idx]]
-                .. ". Up and down to change, Enter to confirm, Escape to go back")
+            enter_value_state()
         elseif char == KEY_ESC then
             state = STATE_SOURCE
             say(SOURCE_LABELS[SOURCE_OPTIONS[source_idx]])
@@ -600,33 +641,10 @@ function handle_key(char)
             param_sel = param_sel < #param_list and param_sel + 1 or 1
             announce_param()
         elseif char == KEY_ENTER then
-            state = STATE_TYPE
-            say(TYPE_LABELS[TYPE_OPTIONS[type_idx]]
-                .. ". Up and down to change, Enter to confirm, Escape to go back")
+            enter_value_state()
         elseif char == KEY_ESC then
             state = STATE_FX
             announce_fx()
-        end
-
-    elseif state == STATE_TYPE then
-        if char == KEY_UP or char == KEY_LEFT then
-            type_idx = type_idx > 1 and type_idx - 1 or #TYPE_OPTIONS
-            say(TYPE_LABELS[TYPE_OPTIONS[type_idx]])
-        elseif char == KEY_DOWN or char == KEY_RIGHT then
-            type_idx = type_idx < #TYPE_OPTIONS and type_idx + 1 or 1
-            say(TYPE_LABELS[TYPE_OPTIONS[type_idx]])
-        elseif char == KEY_ENTER then
-            value_str = ""
-            state = STATE_VALUE
-            say(get_value_prompt())
-        elseif char == KEY_ESC then
-            if SOURCE_OPTIONS[source_idx] == "track" then
-                state = STATE_TRACK_PARAM
-                say(TRACK_PARAMS[track_param_sel].label)
-            else
-                state = STATE_PARAM
-                announce_param()
-            end
         end
 
     elseif state == STATE_VALUE then
@@ -661,8 +679,13 @@ function handle_key(char)
                 end
             end
         elseif char == KEY_ESC then
-            state = STATE_TYPE
-            say(TYPE_LABELS[TYPE_OPTIONS[type_idx]])
+            if SOURCE_OPTIONS[source_idx] == "track" then
+                state = STATE_TRACK_PARAM
+                say(TRACK_PARAMS[track_param_sel].label)
+            else
+                state = STATE_PARAM
+                announce_param()
+            end
         end
 
     elseif state == STATE_RAMP_IN then
@@ -741,17 +764,19 @@ if workflow == "" then
     return
 end
 
-track = GetSelectedTrack(0, 0)
-if not track then
+local selected = GetSelectedTrack(0, 0)
+if not selected then
     say("No track selected")
     return
 end
+track = get_snap_track(selected)
 
 init_fx_list()
 
 gfx.init("Accessible Automation Navigator", 480, 44, 0)
 
-say("Accessible Automation Navigator. "
+local mode_label = has_time_selection() and "Set automation" or "Set snapshot value"
+say(mode_label .. ". "
     .. SOURCE_LABELS[SOURCE_OPTIONS[source_idx]]
     .. ". Up and down to browse, Enter to select, Escape to close")
 

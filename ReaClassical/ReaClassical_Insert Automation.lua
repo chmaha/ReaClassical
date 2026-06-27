@@ -38,6 +38,7 @@ local main, apply_automation, linear_to_db, db_to_linear, get_envelope_value_at_
 local format_time, get_selected_tracks, get_track_envelopes, get_track_fx_params
 local normalize_value, denormalize_value, get_default_track_value
 local get_fx_param_range, is_toggle_parameter, delete_overlapping_automation_items
+local get_snap_track
 
 ---------------------------------------------------------------------
 
@@ -99,7 +100,24 @@ local keep_window_open    = false
 -- Track last FX count to detect changes
 local last_fx_count       = 0
 
-local create_auto_item    = true
+---------------------------------------------------------------------
+
+-- Returns the mixer track (M: track) that receives audio from src, or src
+-- itself if none is found (e.g. already on a mixer track).
+function get_snap_track(src)
+  local _, ms = GetSetMediaTrackInfo_String(src, "P_EXT:mixer", "", false)
+  local _, nm = GetSetMediaTrackInfo_String(src, "P_NAME", "", false)
+  if ms == "y" or (nm and nm:match("^M:")) then return src end
+  for s = 0, GetTrackNumSends(src, 0) - 1 do
+    local dest = GetTrackSendInfo_Value(src, 0, s, "P_DESTTRACK")
+    if dest then
+      local _, ds = GetSetMediaTrackInfo_String(dest, "P_EXT:mixer", "", false)
+      local _, dn = GetSetMediaTrackInfo_String(dest, "P_NAME", "", false)
+      if ds == "y" or (dn and dn:match("^M:")) then return dest end
+    end
+  end
+  return src
+end
 
 ---------------------------------------------------------------------
 
@@ -107,7 +125,7 @@ function get_selected_tracks()
   local tracks = {}
   local count = CountSelectedTracks(0)
   for i = 0, count - 1 do
-    tracks[#tracks + 1] = GetSelectedTrack(0, i)
+    tracks[#tracks + 1] = get_snap_track(GetSelectedTrack(0, i))
   end
   return tracks
 end
@@ -476,26 +494,30 @@ function apply_automation()
     ::continue::
   end
 
-  -- Create automation items if requested
-  if create_auto_item then
-    for _, track in ipairs(selected_tracks) do
-      local env
-      if target_envelope_info.type == "track" then
-        env = GetTrackEnvelopeByName(track, target_envelope_info.name)
-      elseif target_envelope_info.type == "fx" then
-        env = GetFXEnvelope(track, target_envelope_info.fx_idx, target_envelope_info.param_idx, false)
-      end
-
-      if env then
-        -- Use time selection range (including ramps if any); any
-        -- overlapping automation item was already removed above
-        local item_start = ramp_in > 0 and (start_time - ramp_in) or (start_time - 0.002)
-        local item_end = ramp_out > 0 and (end_time + ramp_out) or (end_time + 0.002)
-        InsertAutomationItem(env, -1, item_start, item_end - item_start)
-      end
+  -- Always create automation items (covering the full range including ramps)
+  for _, track in ipairs(selected_tracks) do
+    local env
+    if target_envelope_info.type == "track" then
+      env = GetTrackEnvelopeByName(track, target_envelope_info.name)
+    elseif target_envelope_info.type == "fx" then
+      env = GetFXEnvelope(track, target_envelope_info.fx_idx, target_envelope_info.param_idx, false)
     end
+
+    if env then
+      local item_start = ramp_in > 0 and (start_time - ramp_in) or (start_time - 0.002)
+      local item_end = ramp_out > 0 and (end_time + ramp_out) or (end_time + 0.002)
+      InsertAutomationItem(env, -1, item_start, item_end - item_start)
+    end
+
+    -- Ensure the mixer track is visible in the TCP, and sync Mission Control state
+    SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+    local _, ms   = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+    local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
+    local mc_key  = (ms == "y") and ("mixer_tcp_visible_" .. guid) or ("tcp_visible_" .. guid)
+    SetProjExtState(0, "ReaClassical_MissionControl", mc_key, "1")
   end
 
+  TrackList_AdjustWindows(false)
   UpdateArrange()
 
   -- Only close window if keep_window_open is false
@@ -523,17 +545,6 @@ function main()
     keep_window_open = false
   end
   -- If empty string (first run), keep_window_open retains its default value of false
-
-  -- Load create-automation-item state from project: remember the user's
-  -- last choice rather than trying to guess it from existing automation,
-  -- so it stays predictable across applies
-  local _, create_item_str = GetProjExtState(0, "ReaClassical", "CreateAutomationItem")
-  if create_item_str == "1" then
-    create_auto_item = true
-  elseif create_item_str == "0" then
-    create_auto_item = false
-  end
-  -- If empty string (first run), create_auto_item retains its default value of true
 
   -- Get currently selected tracks
   local tracks = get_selected_tracks()
@@ -1044,15 +1055,8 @@ function main()
         ImGui.Spacing(ctx)
 
         -- Ramp controls (outside the time selection)
-        local is_toggle = false
-        if advanced_mode and selected_envelope then
-          if selected_envelope.type == "track" then
-            is_toggle = is_toggle_parameter(selected_tracks[1], nil, nil, selected_envelope)
-          elseif selected_envelope.type == "fx" then
-            is_toggle = is_toggle_parameter(selected_tracks[1], selected_envelope.fx_idx, selected_envelope.param_idx,
-              selected_envelope)
-          end
-        end
+        local is_toggle = advanced_mode and selected_envelope and
+            selected_envelope.type == "track" and selected_envelope.name == "Mute"
 
         if is_toggle then
           ImGui.BeginDisabled(ctx)
@@ -1125,13 +1129,6 @@ function main()
         ImGui.Spacing(ctx)
         ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
-
-        local changed_auto_item, new_auto_item = ImGui.Checkbox(ctx, "Create automation item", create_auto_item)
-        if changed_auto_item then
-          create_auto_item = new_auto_item
-          -- Save to project extended state so this choice persists
-          SetProjExtState(0, "ReaClassical", "CreateAutomationItem", create_auto_item and "1" or "0")
-        end
 
         -- Keep window open checkbox with persistence
         local changed_keep, new_keep = ImGui.Checkbox(ctx, "Keep window open after applying", keep_window_open)
