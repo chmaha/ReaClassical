@@ -699,7 +699,7 @@ function main()
 
         processing_complete = do_processing_step()
         if processing_complete then
-            say("Prepare Takes: complete")
+            say("Takes prepared")
         end
         defer(main)
     elseif processing_complete then
@@ -928,6 +928,9 @@ end
 
 if _G.RC_TERMINAL_ARGS then
     frame_count = 3 -- skip initial frame delay; all functions now defined
+    if not _G.RC_TERMINAL_ARGS.silent then
+        say("Preparing takes")
+    end
     local ok, err = pcall(function()
         while not do_processing_step() do end
     end)
@@ -937,7 +940,8 @@ if _G.RC_TERMINAL_ARGS then
         return
     end
     SetProjExtState(0, "ReaClassical", "Prepared_Takes", "y")
+    PreventUIRefresh(-1)
     if not _G.RC_TERMINAL_ARGS.silent then
-        say("Prepare Takes: complete")
+        say("Takes prepared")
     end
 end

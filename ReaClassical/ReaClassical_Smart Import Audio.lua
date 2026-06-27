@@ -453,9 +453,6 @@ end
 function finish_import(errors)
     Undo_EndBlock("Import Audio", -1)
 
-    local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
-    Main_OnCommand(prepare_takes, 0)
-
     PreventUIRefresh(-1)
 
     local zoom_horizontally = NamedCommandLookup("_RSe4ae3f4797f2fb7f209512fc22ad6ef9854ca770")
@@ -473,6 +470,13 @@ function finish_import(errors)
         else
             MB("Files imported successfully!", "ReaClassical Smart Import", 0)
         end
+    end
+
+    if _G.RC_TERMINAL_ARGS then
+        dofile(script_path .. "ReaClassical_Prepare Takes.lua")
+    else
+        local prepare_takes = NamedCommandLookup("_RS11b4fc93fee68b53e4133563a4eb1ec4c2f2b4c1")
+        Main_OnCommand(prepare_takes, 0)
     end
 
     UpdateArrange()
@@ -1154,6 +1158,7 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors,
                     for i = 1, folder_count do folder_positions[i] = next_round_start end
                 end
 
+                local take_items = {}
                 for track_obj, filepath in pairs(take_data) do
                     local target_track = find_track_in_folder_list(folder_track_list, track_obj.base_name)
                     if target_track then
@@ -1172,11 +1177,22 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors,
                                     or  session_name .. "_T" .. string.format("%03d", take_num)
                                 GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
                             end
+                            table.insert(take_items, item)
                         end
                     else
                         table.insert(errors, string.format(
                             "Could not find track '%s' in source folder %d for take T%03d",
                             track_obj.base_name, folder_idx, take_num))
+                    end
+                end
+                if #take_items > 1 then
+                    local min_len = math.huge
+                    for _, it in ipairs(take_items) do
+                        local l = GetMediaItemInfo_Value(it, "D_LENGTH")
+                        if l < min_len then min_len = l end
+                    end
+                    for _, it in ipairs(take_items) do
+                        SetMediaItemInfo_Value(it, "D_LENGTH", min_len)
                     end
                 end
 
@@ -1230,6 +1246,7 @@ function import_horizontal(sessions, session_names, tracks, errors, start_pos)
         for _, take_num in ipairs(take_nums) do
             local take_data = session_data[take_num]
             local max_len   = 0
+            local take_items = {}
 
             for track_obj, filepath in pairs(take_data) do
                 SetOnlyTrackSelected(track_obj.track)
@@ -1247,6 +1264,17 @@ function import_horizontal(sessions, session_names, tracks, errors, start_pos)
                             or  session_name .. "_T" .. string.format("%03d", take_num)
                         GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
                     end
+                    table.insert(take_items, item)
+                end
+            end
+            if #take_items > 1 then
+                local min_len = math.huge
+                for _, it in ipairs(take_items) do
+                    local l = GetMediaItemInfo_Value(it, "D_LENGTH")
+                    if l < min_len then min_len = l end
+                end
+                for _, it in ipairs(take_items) do
+                    SetMediaItemInfo_Value(it, "D_LENGTH", min_len)
                 end
             end
 
@@ -1314,6 +1342,7 @@ function import_vertical(sessions, session_names, tracks, errors, use_destinatio
                 table.insert(errors, string.format(
                     "Could not find source folder %d for take T%03d", take_idx, take_num))
             else
+                local take_items = {}
                 for track_obj, filepath in pairs(take_data) do
                     local target_track = find_track_in_folder_list(folder_track_list, track_obj.base_name)
                     if target_track then
@@ -1332,11 +1361,22 @@ function import_vertical(sessions, session_names, tracks, errors, use_destinatio
                                     or  session_name .. "_T" .. string.format("%03d", take_num)
                                 GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
                             end
+                            table.insert(take_items, item)
                         end
                     else
                         table.insert(errors, string.format(
                             "Could not find track '%s' in source folder %d for take T%03d",
                             track_obj.base_name, take_idx, take_num))
+                    end
+                end
+                if #take_items > 1 then
+                    local min_len = math.huge
+                    for _, it in ipairs(take_items) do
+                        local l = GetMediaItemInfo_Value(it, "D_LENGTH")
+                        if l < min_len then min_len = l end
+                    end
+                    for _, it in ipairs(take_items) do
+                        SetMediaItemInfo_Value(it, "D_LENGTH", min_len)
                     end
                 end
             end
