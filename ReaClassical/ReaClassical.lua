@@ -283,6 +283,7 @@
   ReaClassical_Horizontal Workflow.lua
   ReaClassical_Delete Track From All Groups.lua
   ReaClassical_Add Submix.lua
+  ReaClassical_Accessible Automation Navigator.lua
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
