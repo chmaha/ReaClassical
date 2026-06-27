@@ -29,7 +29,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
 
-local ROLL = 2.0
+local ROLL = 3.0
 
 ---------------------------------------------------------------------
 

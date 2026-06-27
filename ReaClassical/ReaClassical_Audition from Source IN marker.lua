@@ -79,7 +79,7 @@ function main()
     if not marker_pos then return end
     select_marker_exclusive(998, "SOURCE-IN")
 
-    local stop_pos = marker_pos + 2.0
+    local stop_pos = marker_pos + 3.0
     play_segment(marker_pos, stop_pos)
 end
 
