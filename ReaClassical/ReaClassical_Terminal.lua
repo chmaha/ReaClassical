@@ -4604,6 +4604,27 @@ function try_misc(cmd)
         return true
     end
 
+    if cmd == "hitake?" then
+        local highest = 0
+        for i = 0, CountMediaItems(0) - 1 do
+            local item = GetMediaItem(0, i)
+            local take = GetActiveTake(item)
+            if take then
+                local _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                local n
+                local t = name:match("_T(%d+)$")
+                if t then n = tonumber(t) end
+                if not n then
+                    local p = name:match("^(%d+)$")
+                    if p then n = tonumber(p) end
+                end
+                if n and n > highest then highest = n end
+            end
+        end
+        say(highest > 0 and ("Highest take: " .. highest) or "No take numbers found.")
+        return true
+    end
+
     return false
 end
 

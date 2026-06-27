@@ -28,7 +28,7 @@ local say = require("ReaClassical_Announce")
 
 ---------------------------------------------------------------------
 
-local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback" }
+local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "rcmaster" }
 
 ---------------------------------------------------------------------
 
@@ -62,6 +62,8 @@ local function announce_special(t, pext)
         say("room tone")
     elseif pext == "listenback" then
         say("listenback")
+    elseif pext == "rcmaster" then
+        say("RC Master")
     else
         say(name ~= "" and name or pext)
     end

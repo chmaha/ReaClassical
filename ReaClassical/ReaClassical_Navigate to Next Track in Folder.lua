@@ -31,7 +31,7 @@ local main, is_special_track, get_folder_parent, get_folder_tracks
 local format_peak, format_mute_solo, announce_track, get_feed_track
 local get_visible_special_tracks, announce_special_track, apply_solo_for_special
 
-local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback" }
+local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "rcmaster" }
 
 ---------------------------------------------------------------------
 
@@ -76,6 +76,8 @@ function announce_special_track(t, pext)
         say("room tone")
     elseif pext == "listenback" then
         say("listenback")
+    elseif pext == "rcmaster" then
+        say("RC Master")
     else
         say(name ~= "" and name or pext)
     end
