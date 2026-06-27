@@ -146,8 +146,20 @@ function check_for_automation_on_special_tracks()
         local _, active_str = GetSetEnvelopeInfo_String(env, "ACTIVE", "", false)
         local _, arm_str = GetSetEnvelopeInfo_String(env, "ARM", "", false)
 
-        -- If any of these are "1", the envelope is considered active
-        if visible_str == "1" or active_str == "1" or arm_str == "1" then
+        -- Only count as automation if there are base-layer points beyond t=0;
+        -- the t=0 anchor cannot be removed when automation items exist, so ignore it.
+        local has_real_points = false
+        local pt_count = CountEnvelopePointsEx(env, -1)
+        for pi = 0, pt_count - 1 do
+            local _, pt_t = GetEnvelopePointEx(env, -1, pi)
+            if pt_t > 0.001 then
+                has_real_points = true
+                break
+            end
+        end
+
+        if (visible_str == "1" or active_str == "1" or arm_str == "1")
+            and has_real_points then
           has_automation = true
           break
         end
@@ -1373,21 +1385,40 @@ function clear_all_automation()
     local is_special = is_special_track(track)
 
     if mixer_state == "y" or is_special then
-      -- Delete all envelope points on all envelopes
+      -- Clear base-layer points; if automation items exist, delete only in gaps between them
       local num_envelopes = CountTrackEnvelopes(track)
+      local has_ai = false
       for env_idx = 0, num_envelopes - 1 do
         local env = GetTrackEnvelope(track, env_idx)
-        DeleteEnvelopePointRange(env, -1000000, 1000000)
-        GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
-        GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
-        GetSetEnvelopeInfo_String(env, "ARM", "0", true)
+        local ai_count = CountAutomationItems(env)
+        if ai_count == 0 then
+          DeleteEnvelopePointRange(env, -1000000, 1000000)
+          GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
+          GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
+          GetSetEnvelopeInfo_String(env, "ARM", "0", true)
+        else
+          has_ai = true
+          local ranges = {}
+          for ai = 0, ai_count - 1 do
+            local pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
+            local len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
+            table.insert(ranges, { s = pos, e = pos + len })
+          end
+          table.sort(ranges, function(a, b) return a.s < b.s end)
+          DeleteEnvelopePointRange(env, -1000000, ranges[1].s)
+          for i = 1, #ranges - 1 do
+            DeleteEnvelopePointRange(env, ranges[i].e, ranges[i + 1].s)
+          end
+          DeleteEnvelopePointRange(env, ranges[#ranges].e, 1000000)
+        end
       end
       if num_envelopes > 0 then
         cleared_count = cleared_count + 1
       end
 
-      -- Mark track for hiding from TCP
-      table.insert(tracks_to_hide, track)
+      if not has_ai then
+        table.insert(tracks_to_hide, track)
+      end
     end
   end
 
@@ -1436,14 +1467,30 @@ function convert_snapshots_to_automation()
     local is_special = is_special_track(track)
 
     if mixer_state == "y" or is_special then
-      -- Delete all envelope points on all envelopes
+      -- Clear base-layer points; if automation items exist, delete only in gaps between them
       local num_envelopes = CountTrackEnvelopes(track)
       for env_idx = 0, num_envelopes - 1 do
         local env = GetTrackEnvelope(track, env_idx)
-        DeleteEnvelopePointRange(env, -1000000, 1000000)
-        GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
-        GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
-        GetSetEnvelopeInfo_String(env, "ARM", "0", true)
+        local ai_count = CountAutomationItems(env)
+        if ai_count == 0 then
+          DeleteEnvelopePointRange(env, -1000000, 1000000)
+          GetSetEnvelopeInfo_String(env, "VISIBLE", "0", true)
+          GetSetEnvelopeInfo_String(env, "ACTIVE", "0", true)
+          GetSetEnvelopeInfo_String(env, "ARM", "0", true)
+        else
+          local ranges = {}
+          for ai = 0, ai_count - 1 do
+            local pos = GetSetAutomationItemInfo(env, ai, "D_POSITION", 0, false)
+            local len = GetSetAutomationItemInfo(env, ai, "D_LENGTH", 0, false)
+            table.insert(ranges, { s = pos, e = pos + len })
+          end
+          table.sort(ranges, function(a, b) return a.s < b.s end)
+          DeleteEnvelopePointRange(env, -1000000, ranges[1].s)
+          for i = 1, #ranges - 1 do
+            DeleteEnvelopePointRange(env, ranges[i].e, ranges[i + 1].s)
+          end
+          DeleteEnvelopePointRange(env, ranges[#ranges].e, 1000000)
+        end
       end
     end
   end
