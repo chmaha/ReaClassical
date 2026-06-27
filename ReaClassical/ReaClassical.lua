@@ -1,6 +1,6 @@
 @description ReaClassical
 @author chmaha
-@version 26.6.8pre36
+@version 26.6.8pre37
 @changelog
   NEW: accessibility layer
   NEW: Terminal commands including complete domain-specific language
@@ -283,7 +283,6 @@
   ReaClassical_Horizontal Workflow.lua
   ReaClassical_Delete Track From All Groups.lua
   ReaClassical_Add Submix.lua
-  ReaClassical_Accessible Edit Automation.lua
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
