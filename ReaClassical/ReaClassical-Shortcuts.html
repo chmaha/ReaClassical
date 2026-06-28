@@ -27,6 +27,7 @@ tr:hover { background-color: #fdfdfd; }
 <th width="20%">Shortcut</th>
 </tr>
 <tr><td><strong>3-point Insert Edit</strong></td><td><code>ReaClassical</code></td><td>F3</td></tr>
+<tr><td><strong>Accessible Edit Automation</strong></td><td><code>ReaClassical</code></td><td>Ctrl+I</td></tr>
 <tr><td><strong>Add CD Marker Offsets</strong></td><td><code>ReaClassical</code></td><td>Shift+O</td></tr>
 <tr><td><strong>Add Destination IN marker</strong></td><td><code>ReaClassical</code></td><td>1</td></tr>
 <tr><td><strong>Add Destination OUT Marker</strong></td><td><code>ReaClassical</code></td><td>2</td></tr>
@@ -36,6 +37,7 @@ tr:hover { background-color: #fdfdfd; }
 <tr><td><strong>Add/edit envelope point value at cursor</strong></td><td><code>Internal / Extension</code></td><td>Ctrl+Shift+E</td></tr>
 <tr><td><strong>Add/edit take marker at play position or edit cursor</strong></td><td><code>Internal / Extension</code></td><td>Shift+N</td></tr>
 <tr><td><strong>Announce Highest Take</strong></td><td><code>ReaClassical</code></td><td>Shift+T</td></tr>
+<tr><td><strong>Announce Items in Folder</strong></td><td><code>ReaClassical</code></td><td>Alt+F</td></tr>
 <tr><td><strong>Announce RCMASTER Peak</strong></td><td><code>ReaClassical</code></td><td>Alt+P</td></tr>
 <tr><td><strong>Announce Take Number</strong></td><td><code>ReaClassical</code></td><td>Alt+A</td></tr>
 <tr><td><strong>Announce Timeline Position</strong></td><td><code>ReaClassical</code></td><td>Ctrl+Shift+J</td></tr>
@@ -160,9 +162,11 @@ tr:hover { background-color: #fdfdfd; }
 <tr><td><strong>Notes</strong></td><td><code>ReaClassical</code></td><td>N</td></tr>
 <tr><td><strong>Nudge Item Left</strong></td><td><code>ReaClassical</code></td><td>Ctrl+[</td></tr>
 <tr><td><strong>Nudge Item Left</strong></td><td><code>ReaClassical XFade Mode</code></td><td>Ctrl+Left</td></tr>
+<tr><td><strong>Nudge Item Left x modifier</strong></td><td><code>ReaClassical</code></td><td>Ctrl+{</td></tr>
 <tr><td><strong>Nudge Item Left x modifier</strong></td><td><code>ReaClassical XFade Mode</code></td><td>Ctrl+Shift+Left</td></tr>
 <tr><td><strong>Nudge Item Right</strong></td><td><code>ReaClassical</code></td><td>Ctrl+]</td></tr>
 <tr><td><strong>Nudge Item Right</strong></td><td><code>ReaClassical XFade Mode</code></td><td>Ctrl+Right</td></tr>
+<tr><td><strong>Nudge Item Right x modifier</strong></td><td><code>ReaClassical</code></td><td>Ctrl+}</td></tr>
 <tr><td><strong>Nudge Item Right x modifier</strong></td><td><code>ReaClassical XFade Mode</code></td><td>Ctrl+Shift+Right</td></tr>
 <tr><td><strong>Nudge Marker Left</strong></td><td><code>ReaClassical</code></td><td>{</td></tr>
 <tr><td><strong>Nudge Marker Left x modifier</strong></td><td><code>ReaClassical</code></td><td>Alt+[</td></tr>
@@ -172,16 +176,9 @@ tr:hover { background-color: #fdfdfd; }
 <tr><td><strong>Pause</strong></td><td><code>Internal / Extension</code></td><td>Ctrl+F9</td></tr>
 <tr><td><strong>Pause</strong></td><td><code>Internal / Extension</code></td><td>Ctrl+F9</td></tr>
 <tr><td><strong>Peak and Overs Check</strong></td><td><code>ReaClassical</code></td><td>Shift+P</td></tr>
-<tr><td><strong>Play Both Items of Crossfade</strong></td><td><code>ReaClassical</code></td><td>A</td></tr>
-<tr><td><strong>Play Both Items of Crossfade with playrate</strong></td><td><code>ReaClassical</code></td><td>Shift+A</td></tr>
-<tr><td><strong>Play Bottom Lane Only</strong></td><td><code>ReaClassical</code></td><td>C</td></tr>
-<tr><td><strong>Play Left Crossfade Item</strong></td><td><code>ReaClassical</code></td><td>S</td></tr>
-<tr><td><strong>Play Left Crossfade Item with playrate</strong></td><td><code>ReaClassical</code></td><td>Shift+S</td></tr>
-<tr><td><strong>Play Right Crossfade Item</strong></td><td><code>ReaClassical</code></td><td>D</td></tr>
-<tr><td><strong>Play Right Crossfade Item with playrate</strong></td><td><code>ReaClassical</code></td><td>Shift+D</td></tr>
 <tr><td><strong>Play Stop</strong></td><td><code>ReaClassical</code></td><td>Space</td></tr>
 <tr><td><strong>Play Stop</strong></td><td><code>ReaClassical</code></td><td>Space</td></tr>
-<tr><td><strong>Play Top Lane Only</strong></td><td><code>ReaClassical</code></td><td>E</td></tr>
+<tr><td><strong>Play Stop Moving Edit Cursor</strong></td><td><code>ReaClassical</code></td><td>Shift+Space</td></tr>
 <tr><td><strong>Play left item only, not soloed, out of bounds audio only</strong></td><td><code>Internal / Extension</code></td><td>Alt+S</td></tr>
 <tr><td><strong>Play right item only, out of bounds audio only</strong></td><td><code>Internal / Extension</code></td><td>Alt+D</td></tr>
 <tr><td><strong>Play/stop from start of pre-roll</strong></td><td><code>Internal / Extension</code></td><td>Space</td></tr>
@@ -268,6 +265,14 @@ tr:hover { background-color: #fdfdfd; }
 <tr><td><strong>Whole Project View Vertical</strong></td><td><code>ReaClassical</code></td><td>Ctrl+Alt+Up</td></tr>
 <tr><td><strong>Widen Crossfade</strong></td><td><code>ReaClassical XFade Mode</code></td><td>L</td></tr>
 <tr><td><strong>Widen Crossfade x modifier</strong></td><td><code>ReaClassical XFade Mode</code></td><td>Shift+L</td></tr>
+<tr><td><strong>XFGUI_Play Both Items of Crossfade</strong></td><td><code>ReaClassical</code></td><td>A</td></tr>
+<tr><td><strong>XFGUI_Play Both Items of Crossfade with playrate</strong></td><td><code>ReaClassical</code></td><td>Shift+A</td></tr>
+<tr><td><strong>XFGUI_Play Bottom Lane Only</strong></td><td><code>ReaClassical</code></td><td>C</td></tr>
+<tr><td><strong>XFGUI_Play Left Crossfade Item</strong></td><td><code>ReaClassical</code></td><td>S</td></tr>
+<tr><td><strong>XFGUI_Play Left Crossfade Item with playrate</strong></td><td><code>ReaClassical</code></td><td>Shift+S</td></tr>
+<tr><td><strong>XFGUI_Play Right Crossfade Item</strong></td><td><code>ReaClassical</code></td><td>D</td></tr>
+<tr><td><strong>XFGUI_Play Right Crossfade Item with playrate</strong></td><td><code>ReaClassical</code></td><td>Shift+D</td></tr>
+<tr><td><strong>XFGUI_Play Top Lane Only</strong></td><td><code>ReaClassical</code></td><td>E</td></tr>
 <tr><td><strong>Zoom horizontally (MIDI CC relative/mousewheel)</strong></td><td><code>Internal / Extension</code></td><td>Mousewheel</td></tr>
 <tr><td><strong>Zoom in horizontal</strong></td><td><code>Internal / Extension</code></td><td>+</td></tr>
 <tr><td><strong>Zoom in horizontal</strong></td><td><code>Internal / Extension</code></td><td>=</td></tr>

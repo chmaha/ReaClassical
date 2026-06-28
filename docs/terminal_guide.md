@@ -558,7 +558,7 @@ Snapshots capture the full mixer state (volume/pan/mute/solo/phase/width/FX/send
 | `installosara` | Download and install the OSARA screen-reader accessibility plugin (Windows/macOS only), then restart REAPER. |
 | `updatereaper` | Download and install the REAPER version ReaClassical currently recommends/tests against. Closes all open projects (you'll be prompted to save unsaved work) and restarts REAPER once the install finishes. Same as `updatereaper=rec`. |
 | `updatereaper=latest` | Install the latest public (main-release) REAPER version rather than the recommended one. |
-| `updatereaper=VERSION` | Install a specific (main-release) REAPER version, e.g. `updatereaper=752` or `updatereaper=7.52` (both mean 7.52; the dot is optional). Searches the full version archive with no cutoff, so older versions work too. |
+| `updatereaper=VERSION` | Install a specific (main-release) REAPER version, e.g. `updatereaper=752` or `updatereaper=7.52` (both mean 7.52; the dot is optional). Searches the full version archive with no cutoff, so older versions work too (provided they are recommended version or higher). |
 | `updatereaper=rec` | Synonym for the bare `updatereaper` command (also accepts `updatereaper=recommended`). |
 | `allowgui=y` / `allowgui=n` | Allow/block ReaImGui windows (Mission Control, Notes, Preferences, etc.) from opening while OSARA is installed — they're blocked by default in that case, since they're unusable with a screen reader. |
 | `allowgui?` | Speak whether GUI windows are currently allowed or blocked. |
