@@ -69,6 +69,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+local script_file = debug.getinfo(1, "S").source:sub(2)
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say = require("ReaClassical_Announce")
 
@@ -82,6 +83,7 @@ SetExtState(EXT_NS, "busy", "1", false)
 
 local function finish()
     DeleteExtState(EXT_NS, "busy", false)
+    AddRemoveReaScript(false, 0, script_file, true)
 end
 
 atexit(finish)
@@ -441,9 +443,12 @@ end
 ---------------------------------------------------------------------
 
 local dl_cmd = "curl -f -k -L %s -o %s"
+local has_curl = not platform:match("Win")
+local head_cmd = "curl -f -k -L -I %s"
 if platform:match("Win") then
     local _, exit_code = run_shell("curl --version", 1000)
-    if exit_code ~= 0 then
+    has_curl = exit_code == 0
+    if not has_curl then
         dl_cmd = 'powershell.exe -windowstyle hidden (new-object \z
                 System.Net.WebClient).DownloadFile(\'%s\', \'%s\')'
     end
@@ -481,6 +486,28 @@ end
 local function announce_not_found()
     say("REAPER version " .. (requested_version or "?") .. " not found")
     finish()
+end
+
+-- Constructs a direct download URL from reaper.fm's stable file archive for
+-- clean version numbers (no dev/RC suffix). Dev/RC builds are on landoleet.org
+-- and would already have been found in the page searches above.
+local function stable_direct_url(norm)
+    if norm:match("[^%d]") then return nil end
+    local major = norm:match("^(.-)%d%d$")
+    if not major or major == "" then return nil end
+    local base = "https://www.reaper.fm/files/" .. major .. ".x/"
+    local fname
+    if platform:match("Win") then
+        fname = "reaper" .. norm .. "_" .. arch .. "-install.exe"
+    elseif platform:match("OSX") then
+        fname = "reaper" .. norm .. "_" .. arch .. ".dmg"
+    elseif platform:match("macOS") then
+        fname = "reaper" .. norm .. "_universal.dmg"
+    elseif platform:match("Other") then
+        fname = "reaper" .. norm .. "_linux_" .. arch .. ".tar.xz"
+    end
+    if not fname then return nil end
+    return base .. fname, norm
 end
 
 local function fetch_live_pages()
@@ -529,6 +556,25 @@ local function Main()
             fetch_live_pages()
         end
 
+        if step == "after_rec_ver" then
+            local rec_content = read_file(rec_path)
+            os.remove(rec_path)
+            local rec_ver = rec_content and parse_recommended_version(rec_content)
+            if rec_ver then
+                local norm_req = normalize_version(requested_version)
+                local norm_rec = normalize_version(rec_ver)
+                local req_num = tonumber(norm_req:match("^(%d+)"))
+                local rec_num = tonumber(norm_rec:match("^(%d+)"))
+                if req_num and rec_num and req_num < rec_num then
+                    say("Cannot install REAPER " .. (requested_version or "?") ..
+                        " -- older than the recommended version (" .. rec_ver .. ")")
+                    finish()
+                    return
+                end
+            end
+            fetch_live_pages()
+        end
+
         if step == "after_live" then
             local main_html = read_file(main_path)
             os.remove(main_path)
@@ -555,22 +601,39 @@ local function Main()
                 proceed_with(link, raw_version)
             else
                 local norm = normalize_version(requested_version)
+                local is_dev_rc = norm:match("[^%d]") ~= nil
                 local link, raw_version = find_link_for_version(main_html, main_site_root, norm)
-                if not link and dev_html then
+                if not link and is_dev_rc and dev_html then
                     link, raw_version = find_link_for_version(dev_html, dev_dlink, norm)
                 end
                 if link then
                     proceed_with(link, raw_version)
-                else
-                    -- Not on either live page -- search the full historical
-                    -- archive (no artificial limit, unlike the GUI tool's
-                    -- version menu).
+                elseif is_dev_rc then
+                    -- Dev/RC not on live pages: search the full landoleet archive
                     local cmd = dl_cmd .. " >> %s 2>&1"
                     cmd = cmd:format(old_dlink, old_path, log_path)
                     cmd = cmd .. " && echo after_history > %s"
                     cmd = cmd .. " || echo err_internet > %s"
                     cmd = cmd:format(step_path, step_path)
                     run_shell(cmd)
+                else
+                    -- Clean stable not on download.php: try direct reaper.fm archive URL
+                    local direct_link, direct_raw = stable_direct_url(norm)
+                    if direct_link and has_curl then
+                        chosen_link = direct_link
+                        chosen_version = direct_raw
+                        local cmd = head_cmd .. " >> %s 2>&1"
+                        cmd = cmd:format(direct_link, log_path)
+                        cmd = cmd .. " && echo after_stable_head > %s"
+                        cmd = cmd .. " || echo err_no_stable > %s"
+                        cmd = cmd:format(step_path, step_path)
+                        run_shell(cmd)
+                    elseif direct_link then
+                        proceed_with(direct_link, direct_raw)
+                    else
+                        announce_not_found()
+                        return
+                    end
                 end
             end
         end
@@ -590,6 +653,15 @@ local function Main()
                 return
             end
             proceed_with(link, raw_version)
+        end
+
+        if step == "after_stable_head" then
+            proceed_with(chosen_link, chosen_version)
+        end
+
+        if step == "err_no_stable" then
+            announce_not_found()
+            return
         end
 
         if step == "windows_install" then start_windows_install() end
@@ -625,9 +697,19 @@ if mode == "recommended" then
     cmd = cmd .. " || echo err_internet > %s"
     cmd = cmd:format(step_path, step_path)
     run_shell(cmd)
+elseif mode == "version" then
+    say("Checking for REAPER version " .. (requested_version or "?") .. "...")
+    -- Fetch the recommended version before searching so we can refuse
+    -- requests that are older than the floor. The step fires on both
+    -- success and failure so the search proceeds even when offline.
+    local cmd = dl_cmd .. " >> %s 2>&1"
+    cmd = cmd:format(rec_dlink, rec_path, log_path)
+    cmd = cmd .. " && echo after_rec_ver > %s"
+    cmd = cmd .. " || echo after_rec_ver > %s"
+    cmd = cmd:format(step_path, step_path)
+    run_shell(cmd)
 else
-    say(mode == "latest" and "Checking for the latest REAPER version..."
-        or ("Checking for REAPER version " .. (requested_version or "?") .. "..."))
+    say("Checking for the latest REAPER version...")
     fetch_live_pages()
 end
 
