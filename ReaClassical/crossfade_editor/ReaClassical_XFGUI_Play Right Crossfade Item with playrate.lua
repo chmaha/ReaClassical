@@ -32,6 +32,8 @@ if input ~= "" then
     if table[9] then audition_speed = tonumber(table[9]) or 0.75 end
 end
 
+set_action_options(3)
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -45,7 +47,6 @@ function main()
         return
     end
 
-    DeleteProjectMarker(nil, 1016, false)
     CSurf_OnPlayRateChange(audition_speed)
     local in_bounds = GetToggleCommandStateEx(32065, 43664)
     if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end

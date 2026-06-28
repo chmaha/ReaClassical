@@ -21,9 +21,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, move_cursor_to_time_selection_midpoint, get_color_table
-local on_stop, marker_actions
+local main, move_cursor_to_time_selection_midpoint, stop_at_midpoint
 ---------------------------------------------------------------------
+
+set_action_options(3)
 
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
@@ -46,23 +47,19 @@ function main()
     if right_mute == 0 then CrossfadeEditor_OnCommand(43634) end
     local midpoint = move_cursor_to_time_selection_midpoint()
     if not midpoint then
-        local in_bounds = GetToggleCommandStateEx(32065, 43664)
-        if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
+        local in_bounds2 = GetToggleCommandStateEx(32065, 43664)
+        if in_bounds2 ~= 1 then CrossfadeEditor_OnCommand(43664) end
         CrossfadeEditor_OnCommand(43483)
         CSurf_OnPlayRateChange(1)
         CrossfadeEditor_OnCommand(43491) -- this creates the time selection
         midpoint = move_cursor_to_time_selection_midpoint()
         if not midpoint then return end -- still no selection, give up silently
     end
-    local colors = get_color_table()
     CSurf_OnPlayRateChange(1)
     -- prevent action 43491 from not playing if mouse cursor doesn't move
     CrossfadeEditor_OnCommand(43483) -- decrease preview momentarily
-
     CrossfadeEditor_OnCommand(43491) -- set pre/post and play both items
-    AddProjectMarker2(0, false, midpoint, 0, "!1016", 1016, colors.audition)
-    marker_actions()
-    on_stop()
+    defer(function() stop_at_midpoint(midpoint) end)
 end
 
 ---------------------------------------------------------------------
@@ -72,89 +69,24 @@ function move_cursor_to_time_selection_midpoint()
     if start_time == end_time then
         return nil -- no active time selection
     end
-
     local midpoint = (start_time + end_time) / 2
-    SetEditCurPos(midpoint, true, false) -- move cursor, seek playback if playing
+    SetEditCurPos(midpoint, true, false)
     return midpoint
 end
 
 ---------------------------------------------------------------------
 
-function get_color_table()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
-    return require("ReaClassical_Colors_Table")
-end
-
----------------------------------------------------------------------
-
-function on_stop()
+function stop_at_midpoint(midpoint)
     if GetPlayState() == 0 then
-        DeleteProjectMarker(nil, 1016, false)
-        Main_OnCommand(41185, 0) -- Item properties: Unsolo all
+        Main_OnCommand(41185, 0)
         return
-    else
-        defer(on_stop)
     end
-end
-
----------------------------------------------------------------------
-
-function marker_actions()
-    local markers = {}
-    local next_idx = 1
-    local tolerance = 0.05 -- seconds (50 ms)
-
-    -- Pre-scan markers once
-    local num_markers, num_regions = CountProjectMarkers(0)
-    for i = 0, num_markers + num_regions - 1 do
-        local retval, isrgn, pos, _, name, mark_idx = EnumProjectMarkers(i)
-        if retval and not isrgn and name:sub(1, 1) == "!" then
-            local cmd = tonumber(name:sub(2))
-            if cmd then
-                table.insert(markers, { pos = pos, cmd = cmd, mark_idx = mark_idx })
-            end
-        end
+    if GetPlayPosition() >= midpoint then
+        Main_OnCommand(1016, 0)
+        Main_OnCommand(41185, 0)
+        return
     end
-
-    table.sort(markers, function(a, b) return a.pos < b.pos end)
-
-    local function reset_marker_index(play_pos)
-        for i, m in ipairs(markers) do
-            if m.pos >= play_pos then
-                next_idx = i
-                return
-            end
-        end
-        next_idx = 1
-    end
-
-    local function check_next_marker()
-        local state = GetPlayState()
-        if state & 1 == 0 then
-            reset_marker_index(GetCursorPosition())
-        else
-            if markers[next_idx] then
-                local play_pos = GetPlayPosition()
-                local target = markers[next_idx]
-                if play_pos >= target.pos - tolerance then
-                    Main_OnCommand(target.cmd, 0)
-                    -- Check immediately if playback has stopped
-                    if GetPlayState() & 1 == 0 then
-                        return -- stop script entirely
-                    end
-                    next_idx = next_idx + 1
-                    if next_idx > #markers then
-                        next_idx = 1
-                    end
-                end
-            end
-        end
-        defer(check_next_marker)
-    end
-
-    reset_marker_index(GetCursorPosition())
-    check_next_marker()
+    defer(function() stop_at_midpoint(midpoint) end)
 end
 
 ---------------------------------------------------------------------

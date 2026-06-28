@@ -33,6 +33,8 @@ if input ~= "" then
     if table[9] then audition_speed = tonumber(table[9]) or 0.75 end
 end
 
+set_action_options(3)
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then

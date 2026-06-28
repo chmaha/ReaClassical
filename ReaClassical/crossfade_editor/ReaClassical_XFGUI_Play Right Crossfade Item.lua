@@ -24,6 +24,8 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, move_cursor_to_time_selection_midpoint
 ---------------------------------------------------------------------
 
+set_action_options(3)
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -37,7 +39,6 @@ function main()
         return
     end
 
-    DeleteProjectMarker(nil, 1016, false)
     CSurf_OnPlayRateChange(1)
     local in_bounds = GetToggleCommandStateEx(32065, 43664)
     if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end

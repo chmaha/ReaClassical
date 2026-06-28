@@ -25,6 +25,8 @@ local main
 
 ---------------------------------------------------------------------
 
+set_action_options(3)
+
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
