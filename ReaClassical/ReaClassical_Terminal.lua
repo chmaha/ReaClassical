@@ -1170,6 +1170,10 @@ function try_project_setup(cmd)
             return true
         end
         consolidate_folders_to_first()
+        DeleteProjectMarker(nil, 996, false)
+        DeleteProjectMarker(nil, 997, false)
+        DeleteProjectMarker(nil, 998, false)
+        DeleteProjectMarker(nil, 999, false)
         _G.RC_TERMINAL_ARGS = {}
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil
@@ -1189,6 +1193,10 @@ function try_project_setup(cmd)
             say("The project already uses a Vertical workflow")
             return true
         end
+        DeleteProjectMarker(nil, 996, false)
+        DeleteProjectMarker(nil, 997, false)
+        DeleteProjectMarker(nil, 998, false)
+        DeleteProjectMarker(nil, 999, false)
         _G.RC_TERMINAL_ARGS = {}
         dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil

@@ -325,6 +325,10 @@ function main()
                 ImGui.SetCursorPosX(ctx, (window_width - total_width) / 2)
 
                 if ImGui.Button(ctx, "Yes", button_width, 0) then
+                    DeleteProjectMarker(nil, 996, false)
+                    DeleteProjectMarker(nil, 997, false)
+                    DeleteProjectMarker(nil, 998, false)
+                    DeleteProjectMarker(nil, 999, false)
                     dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
                     init()
                     local whole_view = NamedCommandLookup("_RS63665092232578f8c8d10c5936ca5013a9ecab51")
@@ -362,6 +366,10 @@ function main()
 
                 if ImGui.Button(ctx, "Yes", button_width, 0) then
                     consolidate_folders_to_first()
+                    DeleteProjectMarker(nil, 996, false)
+                    DeleteProjectMarker(nil, 997, false)
+                    DeleteProjectMarker(nil, 998, false)
+                    DeleteProjectMarker(nil, 999, false)
                     dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
                     init()
                     ImGui.CloseCurrentPopup(ctx)
