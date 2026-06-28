@@ -329,7 +329,7 @@ function main()
                     DeleteProjectMarker(nil, 997, false)
                     DeleteProjectMarker(nil, 998, false)
                     DeleteProjectMarker(nil, 999, false)
-                    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+                    dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
                     init()
                     local whole_view = NamedCommandLookup("_RS63665092232578f8c8d10c5936ca5013a9ecab51")
                     Main_OnCommand(whole_view, 0)
@@ -370,7 +370,7 @@ function main()
                     DeleteProjectMarker(nil, 997, false)
                     DeleteProjectMarker(nil, 998, false)
                     DeleteProjectMarker(nil, 999, false)
-                    dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+                    dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
                     init()
                     ImGui.CloseCurrentPopup(ctx)
                     Main_OnCommand(prepare_takes, 0)
@@ -2007,19 +2007,19 @@ function main()
             if ImGui.Button(ctx, "OK", 100, 0) then
                 -- Add tracks based on counts
                 for i = 1, add_special_counts.aux do
-                    dofile(script_path .. "ReaClassical_Add Aux.lua")
+                    dofile(script_path .. "lib/ReaClassical_Add Aux.lua")
                 end
 
                 for i = 1, add_special_counts.submix do
-                    dofile(script_path .. "ReaClassical_Add Submix.lua")
+                    dofile(script_path .. "lib/ReaClassical_Add Submix.lua")
                 end
 
                 if not has_roomtone and add_special_counts.roomtone > 0 then
-                    dofile(script_path .. "ReaClassical_Add RoomTone Track.lua")
+                    dofile(script_path .. "lib/ReaClassical_Add RoomTone Track.lua")
                 end
 
                 for i = 1, add_special_counts.reference do
-                    dofile(script_path .. "ReaClassical_Add Ref Track.lua")
+                    dofile(script_path .. "lib/ReaClassical_Add Ref Track.lua")
                 end
 
                 if not has_listenback and add_special_counts.listenback > 0 then
@@ -2054,7 +2054,7 @@ function main()
                 end
 
                 if not has_live and add_special_counts.live > 0 then
-                    dofile(script_path .. "ReaClassical_Add Live Bounce Track.lua")
+                    dofile(script_path .. "lib/ReaClassical_Add Live Bounce Track.lua")
                 end
 
                 init()
@@ -2599,9 +2599,9 @@ end
 
 function sync()
     if workflow == "Vertical" then
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     elseif workflow == "Horizontal" then
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     end
 end
 
@@ -2752,7 +2752,7 @@ function delete_mixer_track(track_info)
     SetTrackSelected(track_info.mixer_track, true)
 
     -- Run the delete mixer command
-    dofile(script_path .. "ReaClassical_Delete Track From All Groups.lua")
+    dofile(script_path .. "lib/ReaClassical_Delete Track From All Groups.lua")
 
     -- Completely reinitialize
     selected_track = nil
@@ -2861,9 +2861,9 @@ function add_mixer_track(name)
 
     -- Run sync based on workflow
     if folder_count > 1 then
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     else
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     end
 
     -- Restore rec inputs after sync

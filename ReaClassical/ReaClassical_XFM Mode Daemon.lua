@@ -32,7 +32,7 @@ set_action_options(1)
 local _, _, section_id, cmd_id = get_action_context()
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local xfu = require("ReaClassical_XFM_Utils")
 

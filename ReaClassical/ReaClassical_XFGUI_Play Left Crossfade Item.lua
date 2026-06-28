@@ -25,14 +25,6 @@ local main, move_cursor_to_time_selection_midpoint, get_color_table
 local on_stop, marker_actions
 ---------------------------------------------------------------------
 
-local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
-local audition_speed = 0.75
-if input ~= "" then
-    local table = {}
-    for entry in input:gmatch('([^,]+)') do table[#table + 1] = entry end
-    if table[9] then audition_speed = tonumber(table[9]) or 0.75 end
-end
-
 function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -63,7 +55,7 @@ function main()
         if not midpoint then return end -- still no selection, give up silently
     end
     local colors = get_color_table()
-    CSurf_OnPlayRateChange(audition_speed)
+    CSurf_OnPlayRateChange(1)
     -- prevent action 43491 from not playing if mouse cursor doesn't move
     CrossfadeEditor_OnCommand(43483) -- decrease preview momentarily
 
@@ -90,7 +82,7 @@ end
 
 function get_color_table()
     local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
+    package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

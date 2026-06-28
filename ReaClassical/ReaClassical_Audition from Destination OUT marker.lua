@@ -26,7 +26,7 @@ local main, markers, exclusive_select_folder_parent, solo
 local find_marker_pos, play_segment, select_marker_exclusive
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 local ROLL = 3.0

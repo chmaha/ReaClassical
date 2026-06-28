@@ -27,7 +27,7 @@ local main, markers, exclusive_select_folder_parent, zoom, solo
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local humanize_timestr = require("ReaClassical_Time_Naming")
 local humanize_folder_phrase = require("ReaClassical_Folder_Naming")

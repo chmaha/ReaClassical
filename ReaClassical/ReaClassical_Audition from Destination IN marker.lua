@@ -28,7 +28,7 @@ local find_marker_pos, play_segment, select_marker_exclusive
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 local SWS_exists = APIExists("CF_GetSWSVersion")

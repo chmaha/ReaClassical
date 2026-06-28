@@ -27,7 +27,7 @@ local get_selected_media_item_at, count_selected_media_items
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local humanize_timestr = require("ReaClassical_Time_Naming")
 

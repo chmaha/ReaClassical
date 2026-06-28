@@ -173,9 +173,9 @@ local function main()
                 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
                 -- Run appropriate command based on workflow type
                 if workflow_type == 0 then
-                    dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+                    dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
                 else
-                    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+                    dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
                 end
                 if APIExists("SNM_SetIntConfigVar") then SNM_SetIntConfigVar("scrubmode", 1) end
                 ImGui.End(ctx)

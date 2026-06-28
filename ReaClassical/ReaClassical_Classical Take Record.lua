@@ -34,7 +34,7 @@ local avoid_take_lanes, find_recording_folder, get_record_takes_horizontally
 local spoken_folder_label
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 ---------------------------------------------------------------------
@@ -84,7 +84,7 @@ function main()
         local daemon_running = (os.time() - (tonumber(ts) or 0)) < 5
         if not daemon_running and APIExists("AddRemoveReaScript") then
             local daemon_cid = AddRemoveReaScript(true, 0,
-                script_path .. "ReaClassical_Record Panel Daemon.lua", true)
+                script_path .. "lib/ReaClassical_Record Panel Daemon.lua", true)
             if daemon_cid ~= 0 then
                 SetProjExtState(0, "ReaClassical", "rec_daemon_stop", "")
                 Main_OnCommand(daemon_cid, 0)

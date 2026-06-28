@@ -29,7 +29,7 @@ local collapse_folder, fold_small, wipe_track_names
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 function main()
@@ -163,9 +163,9 @@ function main()
     end
 
     if updated_folders == 1 then
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     else
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     end
 
     if int == 6 and channel_count == 2 then
@@ -177,9 +177,9 @@ function main()
     PreventUIRefresh(-1)
 
     if updated_folders == 1 then
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     else
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     end
 
     local fit_project_vertically = NamedCommandLookup("_RS444f747139500db030a1c4e03b8a0805ac502dfe")

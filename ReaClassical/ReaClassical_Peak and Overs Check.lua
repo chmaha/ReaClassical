@@ -33,7 +33,7 @@ if not _G.RC_TERMINAL_ARGS and APIExists("osara_outputMessage") and GetExtState(
 end
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
 local say = require("ReaClassical_Announce")
 

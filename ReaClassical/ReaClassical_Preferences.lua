@@ -490,9 +490,9 @@ end
 function sync_based_on_workflow(workflow)
     local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
     if workflow == "Vertical" then
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     elseif workflow == "Horizontal" then
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     end
 end
 

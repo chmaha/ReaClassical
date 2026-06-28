@@ -28,7 +28,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 -- feedback sighted users get from watching the progress bar.
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 local main, get_color_table
@@ -817,7 +817,7 @@ end
 ---------------------------------------------------------------------
 
 function get_color_table()
-    package.path = package.path .. ";" .. script_path .. "?.lua;"
+    package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
     return require("ReaClassical_Colors_Table")
 end
 

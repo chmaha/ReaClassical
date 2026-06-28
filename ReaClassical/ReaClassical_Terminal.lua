@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
 local humanize_timestr = require("ReaClassical_Time_Naming")
 
@@ -1104,7 +1104,7 @@ function try_project_setup(cmd)
         end
         SetProjExtState(0, "ReaClassical", "TrackCount", v_count)
         _G.RC_TERMINAL_ARGS = {}
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
@@ -1141,7 +1141,7 @@ function try_project_setup(cmd)
         end
         SetProjExtState(0, "ReaClassical", "TrackCount", h_count)
         _G.RC_TERMINAL_ARGS = {}
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
@@ -1175,7 +1175,7 @@ function try_project_setup(cmd)
         DeleteProjectMarker(nil, 998, false)
         DeleteProjectMarker(nil, 999, false)
         _G.RC_TERMINAL_ARGS = {}
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
@@ -1198,7 +1198,7 @@ function try_project_setup(cmd)
         DeleteProjectMarker(nil, 998, false)
         DeleteProjectMarker(nil, 999, false)
         _G.RC_TERMINAL_ARGS = {}
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
         _G.RC_TERMINAL_ARGS = nil
         local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
         workflow = wf
@@ -1569,7 +1569,7 @@ function auto_assign_inputs(start_input)
     end
 
     if workflow == "Vertical" then
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     end
 
     say("Inputs auto-assigned starting at input " .. start_input)
@@ -3132,9 +3132,9 @@ function move_mixer_track(n, direction)
 
     local _, _, folder_count = get_track_table()
     if folder_count > 1 then
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     else
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     end
     local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
     workflow = wf
@@ -3271,9 +3271,9 @@ function add_mixer_track(name)
     rename_mixer_position(mixer_tracks, new_position, final_name)
 
     if folder_count > 1 then
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     else
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     end
     local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
     workflow = wf
@@ -3323,9 +3323,9 @@ function remove_mixer_track(n)
     DeleteTrack(GetTrack(0, mixer_location))
 
     if folder_count > 1 then
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     else
-        dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
     end
     local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
     workflow = wf
@@ -3348,7 +3348,7 @@ function try_add_remove(cmd)
 
     local aux_name = cmd:match("^add@=(.+)$")
     if cmd == "add@" or aux_name then
-        dofile(script_path .. "ReaClassical_Add Aux.lua")
+        dofile(script_path .. "lib/ReaClassical_Add Aux.lua")
         local list = get_special_tracks_by_type("aux")
         local info = list[#list]
         if info then
@@ -3363,7 +3363,7 @@ function try_add_remove(cmd)
 
     local sub_name = cmd:match("^add#=(.+)$")
     if cmd == "add#" or sub_name then
-        dofile(script_path .. "ReaClassical_Add Submix.lua")
+        dofile(script_path .. "lib/ReaClassical_Add Submix.lua")
         local list = get_special_tracks_by_type("submix")
         local info = list[#list]
         if info then
@@ -5353,7 +5353,7 @@ end
 
 local function snap_daemon_cmd()
     if not APIExists("AddRemoveReaScript") then return 0 end
-    local path = script_path .. "ReaClassical_Mixer Snapshots Daemon.lua"
+    local path = script_path .. "lib/ReaClassical_Mixer Snapshots Daemon.lua"
     return AddRemoveReaScript(true, 0, path, true)
 end
 
@@ -5908,7 +5908,7 @@ end
 
 local function rec_daemon_cmd()
     if not APIExists("AddRemoveReaScript") then return 0 end
-    local path = script_path .. "ReaClassical_Record Panel Daemon.lua"
+    local path = script_path .. "lib/ReaClassical_Record Panel Daemon.lua"
     return AddRemoveReaScript(true, 0, path, true)
 end
 
@@ -6647,7 +6647,7 @@ function try_update_reaper(cmd)
     end
 
     local update_cid = AddRemoveReaScript(true, 0,
-        script_path .. "ReaClassical_Update REAPER.lua", true)
+        script_path .. "lib/ReaClassical_Update REAPER.lua", true)
     if update_cid == 0 then
         say("Update REAPER script not found")
         return true

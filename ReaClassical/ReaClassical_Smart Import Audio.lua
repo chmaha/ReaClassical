@@ -77,7 +77,7 @@ local cached_has_existing_items = false
 local cached_start_pos = 0
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 ---------------------------------------------------------------------
@@ -1220,7 +1220,7 @@ function create_folders_if_needed(target_count)
             delete_items()
             unselect_folder_children()
         end
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
         Main_OnCommand(40297, 0)
     end
 end
@@ -1317,7 +1317,7 @@ function import_vertical(sessions, session_names, tracks, errors, use_destinatio
             delete_items()
             unselect_folder_children()
         end
-        dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
         Main_OnCommand(40297, 0)
     end
 

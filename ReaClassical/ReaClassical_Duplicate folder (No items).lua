@@ -28,7 +28,7 @@ local unselect_folder_children, delete_items
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 function main()
@@ -82,7 +82,7 @@ function main()
     delete_items()
     unselect_folder_children()
 
-    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+    dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
     solo()
     PreventUIRefresh(-1)
     UpdateArrange()

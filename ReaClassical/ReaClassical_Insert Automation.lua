@@ -30,7 +30,7 @@ local ia_script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 local osara_active = APIExists("osara_outputMessage")
 local debug_active = GetExtState("ReaClassical", "DebugAnnounce") == "on"
 if not _G.RC_TERMINAL_ARGS and (osara_active or debug_active) and GetExtState("ReaClassical", "AllowGui") ~= "y" then
-    dofile(ia_script_path .. "ReaClassical_Accessible Automation Navigator.lua")
+    dofile(ia_script_path .. "lib/ReaClassical_Accessible Automation Navigator.lua")
     return
 end
 

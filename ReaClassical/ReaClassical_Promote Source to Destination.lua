@@ -26,7 +26,7 @@ local main, swap_selected_source_with_destination
 ---------------------------------------------------------------------
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-package.path = package.path .. ";" .. script_path .. "?.lua;"
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
 function main()
@@ -113,7 +113,7 @@ function swap_selected_source_with_destination()
     GetSetMediaTrackInfo_String(selected_source, "P_EXT:Source", "", true)
     GetSetMediaTrackInfo_String(selected_source, "P_EXT:destination", "y", true)
 
-    dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+    dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
 
     local _, promoted_name = GetSetMediaTrackInfo_String(selected_source, "P_NAME", "", false)
     return promoted_name
