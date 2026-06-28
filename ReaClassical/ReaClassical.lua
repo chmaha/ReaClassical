@@ -70,17 +70,15 @@
 @metapackage
 @provides
   [main] *.lua
-  [main=crossfade_editor] ReaClassical_XFGUI_*.lua
+  [main=crossfade_editor] crossfade_editor/*.lua
   [jsfx] *.jsfx
   [rpp] *.RPP
   [theme] ReaClassical*.ReaperThemeZip
   [www] ReaClassical_remote.html
   *.ini
   lib/*.lua
-  reaclassical-splash.png
-  ReaClassical-Manual.html
-  ReaClassical-Shortcuts.html
-  ReaClassical-Terminal-Guide.html
+  *.png
+  ReaClassical-*.html
 @about
   These functions, along with the included custom project template and theme, provide everything you need for professional classical music editing, mixing and mastering in REAPER.
 
