@@ -26,6 +26,24 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 
+local function get_humanized_name(item)
+    local take = GetActiveTake(item)
+    local name = ""
+    if take then
+        _, name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    end
+    if name == "" then return nil end
+    local prefix, take_num = name:match("^(.+)_T(%d+)$")
+    if take_num then
+        return prefix .. " take " .. tonumber(take_num)
+    end
+    local only_num = name:match("^(%d+)$")
+    if only_num then
+        return "take " .. tonumber(only_num)
+    end
+    return name
+end
+
 local function main()
     local track = GetSelectedTrack(0, 0)
     if not track then return end
@@ -40,7 +58,12 @@ local function main()
     SetMediaItemSelected(item, true)
     SetEditCurPos(pos, true, true)
     UpdateArrange()
-    say("Moved to first item")
+    local human_name = get_humanized_name(item)
+    if human_name then
+        say("Moved to first item " .. human_name)
+    else
+        say("Moved to first item")
+    end
 end
 
 main()

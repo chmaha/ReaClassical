@@ -27,7 +27,7 @@ package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. 
 local say = require("ReaClassical_Announce")
 local xfu = require("ReaClassical_XFM_Utils")
 
-local main, get_selected_media_item_at, announce_current_item
+local main, move_to_next_item, get_selected_media_item_at, announce_current_item
 local navigate_xfade
 local get_envelope_stops, get_selected_stop_index, select_only_stop
 local announce_envelope_stop, move_envelope, clear_all_envelope_selections
@@ -233,6 +233,57 @@ end
 
 ---------------------------------------------------------------------
 
+function move_to_next_item()
+    local item = get_selected_media_item_at(0)
+    if not item then
+        Main_OnCommand(40417, 0)
+        Main_OnCommand(40034, 0)
+        return
+    end
+
+    local item_pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local item_len = GetMediaItemInfo_Value(item, "D_LENGTH")
+    local item_end = item_pos + item_len
+    local cursor_pos = GetCursorPosition()
+    local eps = 0.00001
+
+    if cursor_pos < item_end - eps then
+        -- Cursor is inside the item; standard navigation is reliable.
+        Main_OnCommand(40417, 0)
+        Main_OnCommand(40034, 0)
+        return
+    end
+
+    -- Cursor is at or past item end. 40417 only finds items starting strictly
+    -- after the cursor, so it skips the next item when items are back-to-back
+    -- or overlapping (crossfade). Navigate by track index instead.
+    local track = GetMediaItem_Track(item)
+    local item_count = CountTrackMediaItems(track)
+    local item_idx = nil
+    for i = 0, item_count - 1 do
+        if GetTrackMediaItem(track, i) == item then
+            item_idx = i
+            break
+        end
+    end
+
+    if item_idx == nil or item_idx >= item_count - 1 then
+        -- Not found or already last item; let the standard command handle it.
+        Main_OnCommand(40417, 0)
+        Main_OnCommand(40034, 0)
+        return
+    end
+
+    local next_item = GetTrackMediaItem(track, item_idx + 1)
+    local next_pos = GetMediaItemInfo_Value(next_item, "D_POSITION")
+    Main_OnCommand(40289, 0)        -- Unselect all items
+    SetMediaItemSelected(next_item, true)
+    SetEditCurPos(next_pos, true, false)
+    Main_OnCommand(40034, 0)        -- Select all items in group
+end
+
+---------------------------------------------------------------------
+
 function navigate_xfade(direction)
     local idx    = tonumber(GetExtState("ReaClassical", "XFadeFolderIdx"))
     local center = tonumber(GetExtState("ReaClassical", "XFadeCenter"))
@@ -311,8 +362,7 @@ function main()
         return
     end
 
-    Main_OnCommand(40417, 0) -- Item navigation: Select and move to next item
-    Main_OnCommand(40034, 0) -- Item grouping: Select all items in group(s)
+    move_to_next_item()
 
     UpdateArrange()
     UpdateTimeline()
