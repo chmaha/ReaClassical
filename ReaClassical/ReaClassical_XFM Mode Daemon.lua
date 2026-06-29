@@ -81,6 +81,19 @@ if not xf then
     return
 end
 
+-- On the first entry for this xfade in the current REAPER session, clear any
+-- stale ProjExtState snapshot left over from a previous session.  A non-
+-- persistent ExtState marker tracks whether we have already done this; it
+-- vanishes when REAPER restarts, so every new session gets a clean slate
+-- while re-entries within the same session preserve the snapshot (allowing
+-- the user to exit, re-enter, and still revert to the pre-edit state).
+local snap_key       = xfu.xfade_snap_key(xf.item1)
+local session_marker = "XFSnapInit_" .. snap_key
+if GetExtState("ReaClassical", session_marker) == "" then
+    SetProjExtState(0, "ReaClassical", snap_key, "")
+    SetExtState("ReaClassical", session_marker, "1", false)
+end
+
 -- Enable ripple per-track while in xfade mode.
 if GetToggleCommandState(40310) ~= 1 then
     Main_OnCommand(40310, 0)

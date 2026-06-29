@@ -59,7 +59,7 @@ local function main()
         if s2 - amt < 0 then say("Cannot slip: already at source start"); return end
     else
         local l1 = GetMediaItemInfo_Value(ctx.item1, "D_LENGTH")
-        if l1 - amt < 0.001 then say("Cannot slip: left item too short"); return end
+        if l1 - ctx.overlap - amt < 0.001 then say("Cannot slip: left item's pre-fade content too short"); return end
     end
 
     local skip = {}

@@ -273,6 +273,40 @@ end
 
 ---------------------------------------------------------------------
 
+---------------------------------------------------------------------
+-- Boundary guards
+---------------------------------------------------------------------
+
+local XFADE_MIN_GAP = 0.001  -- 1 ms: smallest allowed non-overlap margin / overlap
+
+-- Prevent item2 from eating into item1's pre-fade content, or item1 from
+-- being consumed when overlap grows. Both reduce to the same arithmetic:
+-- the available headroom in item1 = len1 - overlap must stay >= XFADE_MIN_GAP.
+function M.check_item1_headroom(ctx, amt)
+    if ctx.len1 - ctx.overlap - amt < XFADE_MIN_GAP then
+        return false, "Cannot move: would consume left item"
+    end
+    return true
+end
+
+-- Prevent item1 from eating into item2's post-fade content, or item2 from
+-- being consumed when overlap grows. Headroom in item2 = len2 - overlap.
+function M.check_item2_headroom(ctx, amt)
+    if ctx.len2 - ctx.overlap - amt < XFADE_MIN_GAP then
+        return false, "Cannot move: would consume right item"
+    end
+    return true
+end
+
+-- Prevent the crossfade overlap from dropping to zero (items would disconnect).
+function M.check_min_overlap(ctx, amt)
+    if ctx.overlap - amt < XFADE_MIN_GAP then
+        return false, "Cannot reduce: crossfade would disconnect"
+    end
+    return true
+end
+
+---------------------------------------------------------------------
 -- Derive a ProjExtState key from item1's GUID (stable across position changes).
 function M.xfade_snap_key(item1)
     local _, guid = GetSetMediaItemInfo_String(item1, "GUID", "", false)
@@ -283,26 +317,29 @@ end
 -- this xfade (identified by item1's GUID). Called from every modifying XFM
 -- action before any changes are made, so reverts always go back to the state
 -- that existed before the user first touched this xfade in the session.
+-- The snapshot key is cleared by the Mode Daemon on entry so stale cross-session
+-- data never prevents a fresh capture.
 function M.ensure_xfade_snapshot(ctx)
     local key = M.xfade_snap_key(ctx.item1)
     local _, existing = GetProjExtState(0, "ReaClassical", key)
     if existing ~= "" then return end
 
-    local soffs1   = M.get_item_soffs(ctx.item1)
-    local soffs2   = M.get_item_soffs(ctx.item2)
-    local len1     = GetMediaItemInfo_Value(ctx.item1, "D_LENGTH")
-    local len2     = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
-    local overlap  = ctx.end1 - ctx.pos2
-    local fo_len   = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
-    local fi_len   = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
-    local fo_shp   = GetMediaItemInfo_Value(ctx.item1, "C_FADEOUTSHAPE")
-    local fi_shp   = GetMediaItemInfo_Value(ctx.item2, "C_FADEINSHAPE")
-    local vol1     = GetMediaItemInfo_Value(ctx.item1, "D_VOL")
-    local vol2     = GetMediaItemInfo_Value(ctx.item2, "D_VOL")
+    local pos1      = GetMediaItemInfo_Value(ctx.item1, "D_POSITION")
+    local soffs1    = M.get_item_soffs(ctx.item1)
+    local soffs2    = M.get_item_soffs(ctx.item2)
+    local len1      = GetMediaItemInfo_Value(ctx.item1, "D_LENGTH")
+    local len2      = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
+    local overlap   = ctx.end1 - ctx.pos2
+    local fo_len    = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
+    local fi_len    = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
+    local fo_shp    = GetMediaItemInfo_Value(ctx.item1, "C_FADEOUTSHAPE")
+    local fi_shp    = GetMediaItemInfo_Value(ctx.item2, "C_FADEINSHAPE")
+    local vol1      = GetMediaItemInfo_Value(ctx.item1, "D_VOL")
+    local vol2      = GetMediaItemInfo_Value(ctx.item2, "D_VOL")
 
     SetProjExtState(0, "ReaClassical", key, string.format(
-        "%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%d,%d,%.9f,%.9f",
-        len1, soffs1, overlap, len2, soffs2,
+        "%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%d,%d,%.9f,%.9f",
+        pos1, len1, soffs1, overlap, len2, soffs2,
         fo_len, fi_len, math.floor(fo_shp), math.floor(fi_shp),
         vol1, vol2
     ))
@@ -321,23 +358,24 @@ function M.revert_xfade_snapshot()
 
     local f = {}
     for v in data:gmatch("([^,]+)") do f[#f + 1] = tonumber(v) end
-    if #f < 11 then return false, "Snapshot data corrupt" end
+    if #f < 12 then return false, "Snapshot data corrupt" end
 
-    local len1    = f[1]
-    local soffs1  = f[2]
-    local overlap = f[3]
-    local len2    = f[4]
-    local soffs2  = f[5]
-    local fo_len  = f[6]
-    local fi_len  = f[7]
-    local fo_shp  = f[8]
-    local fi_shp  = f[9]
-    local vol1    = f[10]
-    local vol2    = f[11]
+    local pos1    = f[1]
+    local len1    = f[2]
+    local soffs1  = f[3]
+    local overlap = f[4]
+    local len2    = f[5]
+    local soffs2  = f[6]
+    local fo_len  = f[7]
+    local fi_len  = f[8]
+    local fo_shp  = f[9]
+    local fi_shp  = f[10]
+    local vol1    = f[11]
+    local vol2    = f[12]
 
     -- Ripple reference: item2's current right edge.
     local old_end2  = ctx.end2
-    local new_end1  = ctx.pos1 + len1
+    local new_end1  = pos1 + len1
     local new_pos2  = new_end1 - overlap
     local new_end2  = new_pos2 + len2
     local delta     = new_end2 - old_end2

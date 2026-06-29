@@ -57,7 +57,7 @@ local function main()
 
     if ctx.selection == "right" then
         local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
-        if l2 - amt < 0.001 then say("Cannot slip: right item too short"); return end
+        if l2 - ctx.overlap - amt < 0.001 then say("Cannot slip: right item's post-fade content too short"); return end
     end
 
     local skip = {}

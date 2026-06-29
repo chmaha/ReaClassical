@@ -79,8 +79,8 @@ local function main()
 
     else
         -- Position-based: contract item1 right edge + shift item2 left. Overlap unchanged.
-        if ctx.len1 - amt < 0.001 then
-            say("Cannot nudge: left item too short")
+        if ctx.len1 - ctx.overlap - amt < 0.001 then
+        say("Cannot nudge: left item's pre-fade content too short")
             PreventUIRefresh(-1)
             Undo_EndBlock("XFM Nudge Item Left modifier", -1)
             return

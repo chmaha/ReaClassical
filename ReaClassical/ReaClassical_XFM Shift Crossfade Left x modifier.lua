@@ -49,9 +49,12 @@ local function main()
     local ms  = math.floor(amt * 1000 + 0.5)
     local sel = ctx.selection
 
-    if ctx.len1 - amt < 0.001 then
-        say("Cannot shift: left item too short")
-        return
+    if sel == "left" then
+        local ok, err = xfu.check_min_overlap(ctx, amt)
+        if not ok then say(err); return end
+    else
+        local ok, err = xfu.check_item1_headroom(ctx, amt)
+        if not ok then say(err); return end
     end
 
     Undo_BeginBlock()

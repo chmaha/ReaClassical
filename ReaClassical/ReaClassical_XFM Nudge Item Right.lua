@@ -57,8 +57,8 @@ local function main()
     elseif sel == "left" then
         -- Soffs-based: slip item2 left (later source content). item1 untouched.
         local l2 = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
-        if l2 - amt < 0.001 then
-            say("Cannot nudge: right item too short")
+        if l2 - ctx.overlap - amt < 0.001 then
+            say("Cannot nudge: right item's post-fade content too short")
             PreventUIRefresh(-1)
             Undo_EndBlock("XFM Nudge Item Right", -1)
             return

@@ -46,6 +46,9 @@ local function main()
     local amt    = xfu.nudge_amount() * (tonumber(stored_mod) or 5)
     local old_fo = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
 
+    local ok, err = xfu.check_item1_headroom(ctx, amt)
+    if not ok then say(err); return end
+
     Undo_BeginBlock()
     PreventUIRefresh(1)
 

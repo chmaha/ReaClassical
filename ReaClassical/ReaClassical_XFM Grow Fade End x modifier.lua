@@ -48,6 +48,11 @@ local function main()
     local old_fo = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
     local old_fi = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
 
+    if sel == "both" or sel == "left" then
+        local ok, err = xfu.check_item2_headroom(ctx, amt)
+        if not ok then say(err); return end
+    end
+
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
