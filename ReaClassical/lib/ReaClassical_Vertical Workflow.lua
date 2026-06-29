@@ -302,6 +302,10 @@ function main()
     end
 
     PreventUIRefresh(-1)
+    if num_of_tracks == 0 then
+        local first_track = GetTrack(0, 0)
+        if first_track then SetTrackSelected(first_track, true) end
+    end
     Undo_EndBlock('Vertical Workflow', 0)
     UpdateArrange()
     UpdateTimeline()
