@@ -2687,6 +2687,7 @@ if _G.RC_TERMINAL_ARGS and _G.RC_TERMINAL_ARGS.action == "set_album" then
     local success = run_create_cd_markers(sel_track)
     Undo_EndBlock("Create CD/DDP Markers", -1)
     if success then
+        create_metadata_report_and_cue()
         say("Album metadata set, CD/DDP markers updated")
     end
     return
@@ -2706,6 +2707,7 @@ else
     Undo_EndBlock("Create CD/DDP Markers", -1)
     if not success then return end
     if _G.RC_TERMINAL_ARGS then
+        create_metadata_report_and_cue()
         if not _G.RC_TERMINAL_ARGS.silent then
             say("CD/DDP markers created")
         end

@@ -743,6 +743,12 @@ local VALID_LANGUAGES = {
 -- pipe-delimited "Title|KEY=VAL|KEY=VAL" convention)
 ---------------------------------------------------------------------
 
+function increment_isrc(isrc, offset)
+    local prefix, year, seq = isrc:match("^(%a%a%w%w%w)(%d%d)(%d%d%d%d%d)$")
+    if not prefix then return isrc end
+    return string.format("%s%s%05d", prefix, year, (tonumber(seq) + offset) % 100000)
+end
+
 -- Rebuilds a "#Title|KEY=VAL" / "@Title|KEY=VAL" marker name string.
 -- new_title: nil/"" leaves the title unchanged, otherwise replaces it.
 -- field_updates: map of KEY -> value, where "" leaves the field
@@ -1346,7 +1352,9 @@ function try_naming(cmd)
         return true
     end
 
-    -- in=Title (no comma): rename the active take of the selected item
+    -- in=Title (no comma): rename the active take of the selected item.
+    -- If the item has a linked CD marker, update only the title and preserve
+    -- all pipe-delimited DDP fields (PERFORMER=, ISRC=, etc.).
     local item_name = cmd:match("^in=([^,]*)$")
     if item_name then
         local item = GetSelectedMediaItem(0, 0)
@@ -1354,8 +1362,21 @@ function try_naming(cmd)
             say("No item selected")
             return true
         end
-        local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
-        apply_item_name(item, trim(item_name), rank_str)
+        local mark_index, _, pos, rgnend, name, markrgnID, color = get_item_cd_marker(item)
+        if mark_index then
+            local new_name = rebuild_marker_name(name, "#", trim(item_name), {})
+            SetProjectMarkerByIndex(0, mark_index, false, pos, rgnend, markrgnID, new_name, color)
+            local take = GetActiveTake(item)
+            if take then
+                GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name:sub(2), true)
+            end
+            _G.RC_TERMINAL_ARGS = {}
+            dofile(script_path .. "ReaClassical_Create CD Markers.lua")
+            _G.RC_TERMINAL_ARGS = nil
+        else
+            local _, rank_str = GetSetMediaItemInfo_String(item, "P_EXT:item_rank", "", false)
+            apply_item_name(item, trim(item_name), rank_str)
+        end
         say("Item renamed to " .. trim(item_name))
         return true
     end
@@ -2909,6 +2930,41 @@ function try_ddp(cmd)
         local take = GetActiveTake(item)
         if take then
             GetSetMediaItemTakeInfo_String(take, "P_NAME", new_name:sub(2), true)
+        end
+
+        -- ISRC auto-propagation: when ISRC is set on the first CD track and
+        -- manual_isrc_entry is off, increment and push ISRC to subsequent tracks.
+        local new_isrc = updates["ISRC"]
+        if new_isrc and new_isrc ~= "" and new_isrc ~= "0" then
+            local _, manual_isrc_str = GetProjExtState(0, "ReaClassical", "manual_isrc_entry")
+            if manual_isrc_str ~= "1" then
+                local item_track = GetMediaItemTrack(item)
+                local cd_items = {}
+                for i = 0, CountTrackMediaItems(item_track) - 1 do
+                    local t_item = GetTrackMediaItem(item_track, i)
+                    local ok, guid = GetSetMediaItemInfo_String(t_item, "P_EXT:cdmarker", "", false)
+                    if ok and guid ~= "" then
+                        cd_items[#cd_items + 1] = { item = t_item,
+                            pos = GetMediaItemInfo_Value(t_item, "D_POSITION") }
+                    end
+                end
+                table.sort(cd_items, function(a, b) return a.pos < b.pos end)
+                if #cd_items > 0 and cd_items[1].item == item then
+                    for i = 2, #cd_items do
+                        local t_item = cd_items[i].item
+                        local t_mi, _, t_pos, t_re, t_nm, t_mrid, t_col = get_item_cd_marker(t_item)
+                        if t_mi and t_nm then
+                            local auto_isrc = increment_isrc(new_isrc, i - 1)
+                            local t_new = rebuild_marker_name(t_nm, "#", nil, { ISRC = auto_isrc })
+                            SetProjectMarkerByIndex(0, t_mi, false, t_pos, t_re, t_mrid, t_new, t_col)
+                            local t_take = GetActiveTake(t_item)
+                            if t_take then
+                                GetSetMediaItemTakeInfo_String(t_take, "P_NAME", t_new:sub(2), true)
+                            end
+                        end
+                    end
+                end
+            end
         end
 
         _G.RC_TERMINAL_ARGS = {}
