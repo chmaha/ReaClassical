@@ -358,24 +358,26 @@ function M.revert_xfade_snapshot()
 
     local f = {}
     for v in data:gmatch("([^,]+)") do f[#f + 1] = tonumber(v) end
-    if #f < 12 then return false, "Snapshot data corrupt" end
+    if #f < 11 then return false, "Snapshot data corrupt" end
 
-    local pos1    = f[1]
-    local len1    = f[2]
-    local soffs1  = f[3]
-    local overlap = f[4]
-    local len2    = f[5]
-    local soffs2  = f[6]
-    local fo_len  = f[7]
-    local fi_len  = f[8]
-    local fo_shp  = f[9]
-    local fi_shp  = f[10]
-    local vol1    = f[11]
-    local vol2    = f[12]
+    -- Format v1 = 11 fields (no pos1 prefix); format v2 = 12 fields (pos1 first).
+    -- Read with an offset so both are handled transparently.
+    local o     = (#f >= 12) and 1 or 0
+    local len1    = f[1 + o]
+    local soffs1  = f[2 + o]
+    local overlap = f[3 + o]
+    local len2    = f[4 + o]
+    local soffs2  = f[5 + o]
+    local fo_len  = f[6 + o]
+    local fi_len  = f[7 + o]
+    local fo_shp  = f[8 + o]
+    local fi_shp  = f[9 + o]
+    local vol1    = f[10 + o]
+    local vol2    = f[11 + o]
 
     -- Ripple reference: item2's current right edge.
     local old_end2  = ctx.end2
-    local new_end1  = pos1 + len1
+    local new_end1  = ctx.pos1 + len1
     local new_pos2  = new_end1 - overlap
     local new_end2  = new_pos2 + len2
     local delta     = new_end2 - old_end2

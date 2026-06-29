@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 -- Reset both fades to 35ms equal-power. Always affects both fades regardless of selection.
 -- item1 FADEOUTLEN → 0.035; item2 shifts so overlap = 0.035 (waveform pinned, right edge fixed),
--- item2 FADEINLEN → 0.035. No ripple.
+-- item2 FADEINLEN → 0.035. Ripples downstream items if item2's right edge shifts.
 
 -- luacheck: ignore 113
 
@@ -43,7 +43,8 @@ local function main()
     xfu.ensure_xfade_snapshot(ctx)
 
     local current_overlap = ctx.end1 - ctx.pos2
-    local delta = TARGET - current_overlap
+    local delta    = TARGET - current_overlap
+    local old_end2 = ctx.end2
 
     Undo_BeginBlock()
     PreventUIRefresh(1)
@@ -64,6 +65,16 @@ local function main()
         SetMediaItemInfo_Value(item, "D_FADEINLEN",      TARGET)
         SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", TARGET)
         SetMediaItemInfo_Value(item, "C_FADEINSHAPE",    1)
+    end
+
+    local new_end2  = GetMediaItemInfo_Value(ctx.item2, "D_POSITION")
+                    + GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
+    local end_delta = new_end2 - old_end2
+    local skip = {}
+    for _, it in ipairs(ctx.group1) do skip[it] = true end
+    for _, it in ipairs(ctx.group2) do skip[it] = true end
+    if math.abs(end_delta) > 0.0001 then
+        xfu.ripple_folder_from(ctx.folder_track, old_end2 - 0.0001, end_delta, skip)
     end
 
     xfu.set_xfade_state(ctx.folder_track, ctx.end1 - TARGET / 2)
