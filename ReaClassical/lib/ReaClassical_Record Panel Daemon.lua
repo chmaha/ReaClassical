@@ -665,6 +665,7 @@ local function at_exit()
     SetThemeColor("ts_lane_bg",     -1)
     SetThemeColor("marker_lane_bg", -1)
     SetThemeColor("region_lane_bg", -1)
+    SetExtState("ReaClassical", "TakeDisplayStop", "1", false)
 end
 
 atexit(at_exit)

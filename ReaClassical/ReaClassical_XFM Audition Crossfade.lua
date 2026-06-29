@@ -55,6 +55,7 @@ local function main()
     if not xfu.is_xfade_mode() then return end
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     local start_pos = math.max(0, ctx.center - PRE)
     local stop_pos  = ctx.center + POST

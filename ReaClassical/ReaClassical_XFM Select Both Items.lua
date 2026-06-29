@@ -34,6 +34,7 @@ local function main()
 
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     local all = {}
     for _, it in ipairs(ctx.group1) do all[#all + 1] = it end

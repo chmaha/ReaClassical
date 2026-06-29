@@ -39,6 +39,7 @@ local function main()
 
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     local fadein_len   = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
     local fadein_shape = GetMediaItemInfo_Value(ctx.item2, "C_FADEINSHAPE")

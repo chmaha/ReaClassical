@@ -18,10 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 ]]
 
--- Raise the selected item group's volume by 0.2 dB (selection-aware).
---   Left selected  → raise item1 group volume by 0.2 dB.
---   Right selected → raise item2 group volume by 0.2 dB.
---   Both selected  → blocked.
+-- Revert the current xfade to the state captured when it was first edited
+-- this session. Ripples downstream items by the change in item2's right edge.
 
 -- luacheck: ignore 113
 
@@ -34,40 +32,25 @@ local xfu = require("ReaClassical_XFM_Utils")
 
 ---------------------------------------------------------------------
 
-local STEP_LIN = 10 ^ (0.2 / 20)  -- +0.2 dB as a linear multiplier
-
 local function main()
     if not xfu.is_xfade_mode() then return end
-
-    local ctx = xfu.get_xfade_context()
-    if not ctx then say("No crossfade context"); return end
-    xfu.ensure_xfade_snapshot(ctx)
-
-    if ctx.selection == "both" then
-        say("Select left or right item first")
-        return
-    end
-
-    local group    = ctx.selection == "left" and ctx.group1 or ctx.group2
-    local ref_item = ctx.selection == "left" and ctx.item1  or ctx.item2
-    local label    = ctx.selection == "left" and "Left"     or "Right"
-
-    local new_vol = GetMediaItemInfo_Value(ref_item, "D_VOL") * STEP_LIN
-    local new_db  = 20 * math.log(new_vol) / math.log(10)
 
     Undo_BeginBlock()
     PreventUIRefresh(1)
 
-    for _, item in ipairs(group) do
-        local v = GetMediaItemInfo_Value(item, "D_VOL")
-        SetMediaItemInfo_Value(item, "D_VOL", v * STEP_LIN)
-    end
+    local ok, err = xfu.revert_xfade_snapshot()
 
     UpdateArrange()
     UpdateTimeline()
     PreventUIRefresh(-1)
-    Undo_EndBlock("XFM Item Volume Up 0.2dB", -1)
-    say(label .. " item volume: " .. string.format("%.1f", new_db) .. " dB")
+
+    if ok then
+        Undo_EndBlock("XFM Revert", -1)
+        say("Crossfade reverted")
+    else
+        Undo_EndBlock("", -1)
+        say(err or "Revert failed")
+    end
 end
 
 ---------------------------------------------------------------------

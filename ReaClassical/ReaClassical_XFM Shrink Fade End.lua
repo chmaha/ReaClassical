@@ -41,6 +41,7 @@ local function main()
 
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     local sel    = ctx.selection
     local amt    = xfu.nudge_amount()

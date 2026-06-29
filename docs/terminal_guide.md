@@ -165,6 +165,8 @@ F9 (the Classical Take Record reascript) still works as a single toggle button: 
 | `rec.clip?` | Query the clip-reporting setting. |
 | `rec.levels?` | Speak the current peak-hold level (dB) for every rec-armed track. |
 | `rec.rmlevels` | Clear all peak/RMS hold values. |
+| `td=on` | Open the take-number companion display — a small gfx window showing the current take number colour-coded by transport state (green: stopped/playing; red: recording; yellow: paused-recording), for a sighted engineer co-present with the blind user. Closed automatically when `rec.close` is called. (Note: bare `td` with no suffix is the album-track-down command in §10.) |
+| `td=off` | Close the companion display manually. |
 
 ### Other examples
 

@@ -34,6 +34,7 @@ local function main()
 
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     xfu.select_items(ctx.group2)
     xfu.set_selection("right")

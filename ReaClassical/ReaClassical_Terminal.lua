@@ -5917,6 +5917,17 @@ local function rec_daemon_running()
     return (os.time() - (tonumber(ts) or 0)) < 5
 end
 
+local function take_display_cmd()
+    if not APIExists("AddRemoveReaScript") then return 0 end
+    local path = script_path .. "lib/ReaClassical_Take Number Display.lua"
+    return AddRemoveReaScript(true, 0, path, true)
+end
+
+local function take_display_running()
+    local ts = GetExtState("ReaClassical", "TakeDisplayHeartbeat")
+    return (os.time() - (tonumber(ts) or 0)) < 3
+end
+
 -- Port of is_special_track() (Meterbridge.lua): excludes mixer/aux/submix/
 -- roomtone/live/REF/RCMASTER tracks, plus listenback (kept permanently
 -- armed for cue/foldback monitoring, so it never counts as "recording").
@@ -6507,6 +6518,33 @@ function try_record(cmd)
     if cmd == "rec.rmlevels" then
         Main_OnCommand(40527, 0)
         say("Peak hold values cleared")
+        return true
+    end
+
+    -- td=on/off — show or hide the take-number companion display
+    if cmd == "td=on" then
+        if take_display_running() then
+            say("Take number display is already open")
+            return true
+        end
+        local cid = take_display_cmd()
+        if cid == 0 then
+            say("Take number display script not found")
+            return true
+        end
+        SetExtState("ReaClassical", "TakeDisplayStop", "", false)
+        Main_OnCommand(cid, 0)
+        say("Take number display opened")
+        return true
+    end
+
+    if cmd == "td=off" then
+        if not take_display_running() then
+            say("Take number display is not open")
+            return true
+        end
+        SetExtState("ReaClassical", "TakeDisplayStop", "1", false)
+        say("Take number display closed")
         return true
     end
 

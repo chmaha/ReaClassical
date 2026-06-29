@@ -40,6 +40,7 @@ local function main()
 
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     local current_overlap = ctx.end1 - ctx.pos2
     local delta = TARGET - current_overlap

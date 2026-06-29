@@ -39,6 +39,7 @@ local function main()
 
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     local amt = xfu.nudge_amount()
     local ms  = math.floor(amt * 1000 + 0.5)

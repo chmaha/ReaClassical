@@ -273,4 +273,105 @@ end
 
 ---------------------------------------------------------------------
 
+-- Derive a ProjExtState key from item1's GUID (stable across position changes).
+function M.xfade_snap_key(item1)
+    local _, guid = GetSetMediaItemInfo_String(item1, "GUID", "", false)
+    return "XFSnap_" .. guid:gsub("[{}%-]", "")
+end
+
+-- Save a snapshot of the current xfade state if one has not been saved yet for
+-- this xfade (identified by item1's GUID). Called from every modifying XFM
+-- action before any changes are made, so reverts always go back to the state
+-- that existed before the user first touched this xfade in the session.
+function M.ensure_xfade_snapshot(ctx)
+    local key = M.xfade_snap_key(ctx.item1)
+    local _, existing = GetProjExtState(0, "ReaClassical", key)
+    if existing ~= "" then return end
+
+    local soffs1   = M.get_item_soffs(ctx.item1)
+    local soffs2   = M.get_item_soffs(ctx.item2)
+    local len1     = GetMediaItemInfo_Value(ctx.item1, "D_LENGTH")
+    local len2     = GetMediaItemInfo_Value(ctx.item2, "D_LENGTH")
+    local overlap  = ctx.end1 - ctx.pos2
+    local fo_len   = GetMediaItemInfo_Value(ctx.item1, "D_FADEOUTLEN")
+    local fi_len   = GetMediaItemInfo_Value(ctx.item2, "D_FADEINLEN")
+    local fo_shp   = GetMediaItemInfo_Value(ctx.item1, "C_FADEOUTSHAPE")
+    local fi_shp   = GetMediaItemInfo_Value(ctx.item2, "C_FADEINSHAPE")
+    local vol1     = GetMediaItemInfo_Value(ctx.item1, "D_VOL")
+    local vol2     = GetMediaItemInfo_Value(ctx.item2, "D_VOL")
+
+    SetProjExtState(0, "ReaClassical", key, string.format(
+        "%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%d,%d,%.9f,%.9f",
+        len1, soffs1, overlap, len2, soffs2,
+        fo_len, fi_len, math.floor(fo_shp), math.floor(fi_shp),
+        vol1, vol2
+    ))
+end
+
+-- Restore the snapshotted state of the current xfade, rippling downstream
+-- items by the change in item2's right edge. Returns (true) on success or
+-- (false, reason_string) on failure.
+function M.revert_xfade_snapshot()
+    local ctx = M.get_xfade_context()
+    if not ctx then return false, "No crossfade context" end
+
+    local key = M.xfade_snap_key(ctx.item1)
+    local _, data = GetProjExtState(0, "ReaClassical", key)
+    if data == "" then return false, "No snapshot for this crossfade" end
+
+    local f = {}
+    for v in data:gmatch("([^,]+)") do f[#f + 1] = tonumber(v) end
+    if #f < 11 then return false, "Snapshot data corrupt" end
+
+    local len1    = f[1]
+    local soffs1  = f[2]
+    local overlap = f[3]
+    local len2    = f[4]
+    local soffs2  = f[5]
+    local fo_len  = f[6]
+    local fi_len  = f[7]
+    local fo_shp  = f[8]
+    local fi_shp  = f[9]
+    local vol1    = f[10]
+    local vol2    = f[11]
+
+    -- Ripple reference: item2's current right edge.
+    local old_end2  = ctx.end2
+    local new_end1  = ctx.pos1 + len1
+    local new_pos2  = new_end1 - overlap
+    local new_end2  = new_pos2 + len2
+    local delta     = new_end2 - old_end2
+
+    local skip = {}
+    for _, it in ipairs(ctx.group1) do skip[it] = true end
+    for _, it in ipairs(ctx.group2) do skip[it] = true end
+
+    for _, item in ipairs(ctx.group1) do
+        SetMediaItemInfo_Value(item, "D_LENGTH",          len1)
+        M.set_item_soffs(item,                            soffs1)
+        SetMediaItemInfo_Value(item, "D_FADEOUTLEN",      fo_len)
+        SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", fo_len)
+        SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE",    fo_shp)
+        SetMediaItemInfo_Value(item, "D_VOL",             vol1)
+    end
+    for _, item in ipairs(ctx.group2) do
+        SetMediaItemInfo_Value(item, "D_POSITION",        math.max(0, new_pos2))
+        SetMediaItemInfo_Value(item, "D_LENGTH",          len2)
+        M.set_item_soffs(item,                            soffs2)
+        SetMediaItemInfo_Value(item, "D_FADEINLEN",       fi_len)
+        SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO",  fi_len)
+        SetMediaItemInfo_Value(item, "C_FADEINSHAPE",     fi_shp)
+        SetMediaItemInfo_Value(item, "D_VOL",             vol2)
+    end
+
+    if math.abs(delta) > 0.0001 then
+        M.ripple_folder_from(ctx.folder_track, old_end2 - 0.0001, delta, skip)
+    end
+
+    M.set_xfade_state(ctx.folder_track, new_pos2 + overlap * 0.5)
+    return true
+end
+
+---------------------------------------------------------------------
+
 return M

@@ -41,6 +41,7 @@ local function main()
 
     local ctx = xfu.get_xfade_context()
     if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
 
     local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
     local modifier = tonumber(stored_mod) or 5
