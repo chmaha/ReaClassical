@@ -348,7 +348,8 @@ local function handle_key(char)
                 local ch = string.char(char)
                 edit_str = edit_str .. ch
                 review_pos = nil
-                say(ch)
+                local label = (char >= 65 and char <= 90) and ("Capital " .. ch) or ch
+                say(label)
             end
         elseif char == KEY_PASTE then
             if APIExists("CF_GetClipboard") then

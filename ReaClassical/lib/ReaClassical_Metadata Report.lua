@@ -372,6 +372,7 @@ function create_string(fields, num_of_markers, extension)
       local perf = name_out:match("PERFORMER=([^|]+)")
       local isrc_code = name_out:match('ISRC=([%w%d]+)') or ""
       name_out = name_out:match("^#([^|]+)")
+      if name_out then name_out = name_out:gsub("[\r\n]+", " "):match("^%s*(.-)%s*$") end
       local formatted_time = format_time(raw_pos_out)
 
       if not perf then perf = fields[3] end
@@ -575,7 +576,7 @@ function create_plaintext_report(albumTitle, albumPerformer, tracks, txtOutputPa
     local isrcSeparator = track.isrc and " | " or ""
 
     track.number = track.title == "pregap" and "p" or string.format("%02d", track.number or 0)
-    track.title = track.title == "pregap" and "" or track.title
+    track.title = track.title == "pregap" and "" or (track.title or "")
 
     track.title = track.title:match("^[!]*([^|]*)")
 
@@ -659,7 +660,7 @@ function create_html_report(albumTitle, albumPerformer, tracks, htmlOutputPath, 
 
   for _, track in ipairs(tracks or {}) do
     track.number = track.title == "pregap" and "p" or tostring(track.number or "")
-    track.title = track.title == "pregap" and "" or track.title
+    track.title = track.title == "pregap" and "" or (track.title or "")
 
     track.title = track.title:match("^[!]*([^|]*)")
 
