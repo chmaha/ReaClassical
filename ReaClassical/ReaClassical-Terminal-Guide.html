@@ -144,8 +144,8 @@ it.</li>
 <li><strong><code>&lt;verb&gt;&lt;target...&gt;</code></strong> — for
 actions that create, remove, or relocate a track itself, rather than
 adjusting one of its settings:
-<code>add</code>/<code>add@</code>/<code>add#</code>/<code>addlb=</code>,
-<code>rmN</code>/<code>rm@N</code>/<code>rm#N</code>/<code>rmrefN</code>/<code>rmrt</code>/<code>rmlb</code>/<code>rmlive</code>,
+<code>add</code>/<code>add@</code>/<code>add#</code>/<code>addlb=</code>/<code>addlive</code>/<code>addpb=</code>,
+<code>rmN</code>/<code>rm@N</code>/<code>rm#N</code>/<code>rmrefN</code>/<code>rmrt</code>/<code>rmlb</code>/<code>rmlive</code>/<code>rmpb</code>,
 <code>mvNu</code>/<code>mvNd</code>. There’s no existing target-slot to
 lead with in the same sense here — the verb names the structural change
 up front.</li>
@@ -1007,8 +1007,23 @@ e.g. <code>rmref2</code>.</td>
 <td>Remove the RoomTone track.</td>
 </tr>
 <tr>
+<td><code>addlive</code></td>
+<td>Add a LIVE bounce track (receives from RCMASTER, output-record
+mode). Only one allowed per project.</td>
+</tr>
+<tr>
 <td><code>rmlive</code></td>
 <td>Remove the LIVE track.</td>
+</tr>
+<tr>
+<td><code>addpb=N</code></td>
+<td>Add a PLAYBACK track routed from RCMASTER to hardware stereo pair
+starting at output N (1-based), or retune its output if it already
+exists. Default muted.</td>
+</tr>
+<tr>
+<td><code>rmpb</code></td>
+<td>Remove the PLAYBACK track.</td>
 </tr>
 </tbody>
 </table>

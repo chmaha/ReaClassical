@@ -30,7 +30,7 @@ Many commands take a `<target>` — this is resolved consistently everywhere:
 Once you know which of these three shapes a command uses, you can usually guess its name:
 
 - **`<target><keyword>[=value]`** — the most common shape, for a setting a track already has: mute (`m`/`um`), solo (`s`/`us`), exclusive solo (`xs`), pan (`p`), fader (`f`), polarity (`i`), peak (`pk`, read-only), record-arm/input, the full `<target>?` summary, and the FX sub-resource commands (`fx=`, `fx?`, `r?`, `rmfx=`, `mvfx=`, `fxon=`/`fxoff=`). The target leads because you're naming *whose* setting you're reading or changing — the same way you'd say "track 1's pan" before describing it.
-- **`<verb><target...>`** — for actions that create, remove, or relocate a track itself, rather than adjusting one of its settings: `add`/`add@`/`add#`/`addlb=`, `rmN`/`rm@N`/`rm#N`/`rmrefN`/`rmrt`/`rmlb`/`rmlive`, `mvNu`/`mvNd`. There's no existing target-slot to lead with in the same sense here — the verb names the structural change up front.
+- **`<verb><target...>`** — for actions that create, remove, or relocate a track itself, rather than adjusting one of its settings: `add`/`add@`/`add#`/`addlb=`/`addlive`/`addpb=`, `rmN`/`rm@N`/`rm#N`/`rmrefN`/`rmrt`/`rmlb`/`rmlive`/`rmpb`, `mvNu`/`mvNd`. There's no existing target-slot to lead with in the same sense here — the verb names the structural change up front.
 - **`<target>=value`** (no keyword at all) — for configuring a slot that already exists, where the value itself says what's being configured: `N=mono`/`N=stereo` (input format), `N=y`/`N=n` (record-arm). No verb is needed because assigning into an existing slot is the unmarked default action — the same reasoning lets `1fx=ReaEQ` add an FX without needing a separate `addfx=`.
 
 Removing or moving an existing **FX** sits at the boundary of the first two: FX live inside a track's chain, so the target still has to lead (to say whose chain), but the action verb (`rm`, `mv`) leads the noun within that — `1rmfx=2`, not `1fxrm=2`.
@@ -271,7 +271,10 @@ F9 (the Classical Take Record reascript) still works as a single toggle button: 
 | `rmlb` | Remove the Listenback track. |
 | `rmrefN` (or `rmref`) | Remove reference track N (or the only one), e.g. `rmref2`. |
 | `rmrt` | Remove the RoomTone track. |
+| `addlive` | Add a LIVE bounce track (receives from RCMASTER, output-record mode). Only one allowed per project. |
 | `rmlive` | Remove the LIVE track. |
+| `addpb=N` | Add a PLAYBACK track routed from RCMASTER to hardware stereo pair starting at output N (1-based), or retune its output if it already exists. Default muted. |
+| `rmpb` | Remove the PLAYBACK track. |
 
 ### Playback rate & pitch (selected item)
 | Command | Effect |
