@@ -1,4 +1,5 @@
 --[[
+@noindex
 
 This file is a part of "ReaClassical" package.
 See "ReaClassical.lua" for more information.
