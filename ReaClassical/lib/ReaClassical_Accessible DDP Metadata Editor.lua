@@ -41,11 +41,18 @@ local say = require("ReaClassical_Announce")
 local STATE_NAV = "nav"   -- choose which item to edit
 local STATE_SEQ = "seq"   -- sequential field-by-field walkthrough
 
-local KEY_UP    = 30064
-local KEY_DOWN  = 1685026670
-local KEY_ENTER = 13
-local KEY_ESC   = 27
-local KEY_BACK  = 8
+local KEY_UP          = 30064
+local KEY_DOWN        = 1685026670
+local KEY_LEFT        = 1818584692
+local KEY_RIGHT       = 1919379572
+local KEY_ENTER       = 13
+local KEY_ESC         = 27
+local KEY_BACK        = 8
+local KEY_PASTE       = 22  -- Ctrl+V / Cmd+V on Mac
+local KEY_APPLY_ALL   = 1   -- Ctrl+A: apply value to all CD tracks
+local KEY_APPLY_REST  = 18  -- Ctrl+R: apply value to this and all subsequent tracks
+local KEY_COPY_PREV   = 16  -- Ctrl+P: copy same field from previous track
+local KEY_COPY_ALBUM  = 21  -- Ctrl+U: copy same field from album level
 
 local ALBUM_FIELDS = {
     "title", "performer", "songwriter", "composer", "arranger",
@@ -86,6 +93,7 @@ local nav_idx    = 1       -- 1 = Album; 2..n+1 = CD track 1..n
 local field_idx  = 1
 local edit_str   = ""
 local last_char  = 0
+local review_pos = nil     -- nil = at end; 1..#buf = character being reviewed
 
 local folder_track         = nil
 local album_item           = nil
@@ -337,23 +345,123 @@ local function handle_key(char)
     elseif state == STATE_SEQ then
         if char >= 32 and char <= 126 then
             if #edit_str < 100 then
-                edit_str = edit_str .. string.char(char)
+                local ch = string.char(char)
+                edit_str = edit_str .. ch
+                review_pos = nil
+                say(ch)
+            end
+        elseif char == KEY_PASTE then
+            if APIExists("CF_GetClipboard") then
+                local clip = CF_GetClipboard("")
+                if clip and clip ~= "" then
+                    local space = 100 - #edit_str
+                    if space > 0 then
+                        clip = clip:sub(1, space)
+                        edit_str = edit_str .. clip
+                        review_pos = nil
+                        say("pasted: " .. clip)
+                    end
+                end
+            else
+                say("Paste requires SWS extension")
+            end
+        elseif char == KEY_APPLY_ALL then
+            local fields = get_fields(nav_idx)
+            local field_key = fields[field_idx]
+            local val = edit_str ~= "" and edit_str or get_val(nav_idx, field_key)
+            if val ~= "" then
+                for i = 1, #cd_items do cd_items[i].data[field_key] = val end
+                say("Applied to all " .. #cd_items .. " track" .. (#cd_items == 1 and "" or "s"))
+            else
+                say("Nothing to apply")
+            end
+        elseif char == KEY_APPLY_REST then
+            local fields = get_fields(nav_idx)
+            local field_key = fields[field_idx]
+            local val = edit_str ~= "" and edit_str or get_val(nav_idx, field_key)
+            if val ~= "" then
+                local start_i = nav_idx > 1 and (nav_idx - 1) or 1
+                local count = #cd_items - start_i + 1
+                for i = start_i, #cd_items do cd_items[i].data[field_key] = val end
+                say("Applied to " .. count .. " track" .. (count == 1 and "" or "s"))
+            else
+                say("Nothing to apply")
+            end
+        elseif char == KEY_COPY_PREV then
+            if nav_idx <= 1 then
+                say("Not applicable to album")
+            elseif nav_idx == 2 then
+                say("No previous track")
+            else
+                local fields = get_fields(nav_idx)
+                local field_key = fields[field_idx]
+                local prev_val = cd_items[nav_idx - 2].data[field_key] or ""
+                if prev_val ~= "" then
+                    edit_str = prev_val
+                    review_pos = nil
+                    say("Copied: " .. prev_val)
+                else
+                    say("Previous track has no value for this field")
+                end
+            end
+        elseif char == KEY_COPY_ALBUM then
+            if nav_idx == 1 then
+                say("Already on album")
+            else
+                local fields = get_fields(nav_idx)
+                local field_key = fields[field_idx]
+                local album_val = album_data[field_key] or ""
+                if album_val ~= "" then
+                    edit_str = album_val
+                    review_pos = nil
+                    say("Copied from album: " .. album_val)
+                else
+                    say("Album has no value for this field")
+                end
+            end
+        elseif char == KEY_LEFT then
+            local fields = get_fields(nav_idx)
+            local buf = edit_str ~= "" and edit_str or get_val(nav_idx, fields[field_idx])
+            if #buf == 0 then
+                say("empty")
+            elseif review_pos == nil then
+                review_pos = #buf
+                say(buf:sub(review_pos, review_pos))
+            elseif review_pos > 1 then
+                review_pos = review_pos - 1
+                say(buf:sub(review_pos, review_pos))
+            else
+                say("beginning")
+            end
+        elseif char == KEY_RIGHT then
+            local fields = get_fields(nav_idx)
+            local buf = edit_str ~= "" and edit_str or get_val(nav_idx, fields[field_idx])
+            if #buf == 0 then
+                say("empty")
+            elseif review_pos == nil or review_pos >= #buf then
+                review_pos = nil
+                say("end")
+            else
+                review_pos = review_pos + 1
+                say(buf:sub(review_pos, review_pos))
             end
         elseif char == KEY_BACK then
+            review_pos = nil
             if #edit_str > 0 then
+                local deleted = edit_str:sub(-1)
                 edit_str = edit_str:sub(1, -2)
-                say(edit_str ~= "" and edit_str or "cleared")
+                say(deleted)
             else
-                -- Load the stored value into the edit buffer (minus its last char)
-                -- so the user can modify rather than fully replace. ESC still abandons.
                 local fields = get_fields(nav_idx)
                 local cur = get_val(nav_idx, fields[field_idx])
                 if cur ~= "" then
+                    local deleted = cur:sub(-1)
                     edit_str = cur:sub(1, -2)
-                    say(edit_str ~= "" and edit_str or "cleared")
+                    say(deleted)
                 end
             end
         elseif char == KEY_ENTER then
+            review_pos = nil
             local fields    = get_fields(nav_idx)
             local field_key = fields[field_idx]
             local blocked   = false
@@ -402,6 +510,7 @@ local function handle_key(char)
                 end
             end
         elseif char == KEY_ESC then
+            review_pos = nil
             if edit_str ~= "" then
                 -- Clear typed input and re-announce the same field.
                 edit_str = ""
@@ -475,7 +584,12 @@ gfx.init("Accessible DDP Metadata Editor", 600, 44, 0)
 say(string.format(
     "DDP Metadata Editor. Album and %d CD track%s. "
     .. "Up and down to pick an item, Enter to walk through its fields, "
-    .. "Escape to save and close. Currently on: %s",
+    .. "Escape to save and close. Currently on: %s. "
+    .. "While editing a field: Control A applies value to all tracks, "
+    .. "Control R applies to this and remaining tracks, "
+    .. "Control P copies from previous track, "
+    .. "Control U copies from album level. "
+    .. "Left and right arrows review characters. Control V pastes.",
     #cd_items, #cd_items == 1 and "" or "s", nav_label(nav_idx)
 ))
 
