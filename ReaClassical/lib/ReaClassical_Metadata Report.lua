@@ -198,7 +198,7 @@ function write_rcmeta_file(metadata_file, metadata)
 
     for i, track in ipairs(metadata.tracks) do
       local track_num = string.format("%02d", i)
-      file:write(string.format("Track %s Title      = %s\n", track_num, track.title or ""))
+      file:write(string.format("Track %s Title      = %s\n", track_num, (track.title or ""):gsub("[\r\n]+", " ")))
       file:write(string.format("Track %s Performer  = %s\n", track_num, track.performer or ""))
       file:write(string.format("Track %s Songwriter = %s\n", track_num, track.songwriter or ""))
       file:write(string.format("Track %s Composer   = %s\n", track_num, track.composer or ""))

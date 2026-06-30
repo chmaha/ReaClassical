@@ -321,6 +321,13 @@ local function draw_window()
 end
 
 ---------------------------------------------------------------------
+-- Announce a single character, prefixing "Capital" for A–Z.
+local function char_label(ch)
+    local b = ch:byte(1)
+    return (b >= 65 and b <= 90) and ("Capital " .. ch) or ch
+end
+
+---------------------------------------------------------------------
 -- Key handling
 ---------------------------------------------------------------------
 
@@ -348,8 +355,7 @@ local function handle_key(char)
                 local ch = string.char(char)
                 edit_str = edit_str .. ch
                 review_pos = nil
-                local label = (char >= 65 and char <= 90) and ("Capital " .. ch) or ch
-                say(label)
+                say(char_label(ch))
             end
         elseif char == KEY_PASTE then
             if APIExists("CF_GetClipboard") then
@@ -427,10 +433,10 @@ local function handle_key(char)
                 say("empty")
             elseif review_pos == nil then
                 review_pos = #buf
-                say(buf:sub(review_pos, review_pos))
+                say(char_label(buf:sub(review_pos, review_pos)))
             elseif review_pos > 1 then
                 review_pos = review_pos - 1
-                say(buf:sub(review_pos, review_pos))
+                say(char_label(buf:sub(review_pos, review_pos)))
             else
                 say("beginning")
             end
@@ -444,21 +450,21 @@ local function handle_key(char)
                 say("end")
             else
                 review_pos = review_pos + 1
-                say(buf:sub(review_pos, review_pos))
+                say(char_label(buf:sub(review_pos, review_pos)))
             end
         elseif char == KEY_BACK then
             review_pos = nil
             if #edit_str > 0 then
                 local deleted = edit_str:sub(-1)
                 edit_str = edit_str:sub(1, -2)
-                say(deleted)
+                say(char_label(deleted))
             else
                 local fields = get_fields(nav_idx)
                 local cur = get_val(nav_idx, fields[field_idx])
                 if cur ~= "" then
                     local deleted = cur:sub(-1)
                     edit_str = cur:sub(1, -2)
-                    say(deleted)
+                    say(char_label(deleted))
                 end
             end
         elseif char == KEY_ENTER then
