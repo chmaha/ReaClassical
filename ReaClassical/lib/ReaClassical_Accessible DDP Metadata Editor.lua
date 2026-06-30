@@ -324,6 +324,7 @@ end
 -- Announce a single character, prefixing "Capital" for A–Z.
 local function char_label(ch)
     local b = ch:byte(1)
+    if b == 32 then return "space" end
     return (b >= 65 and b <= 90) and ("Capital " .. ch) or ch
 end
 
