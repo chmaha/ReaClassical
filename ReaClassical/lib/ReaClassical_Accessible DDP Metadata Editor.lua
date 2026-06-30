@@ -386,9 +386,17 @@ local function handle_key(char)
                 if field_key == "isrc" and nav_idx == 2 and not manual_isrc then
                     local new_isrc = cd_items[1].data.isrc or ""
                     if new_isrc ~= "" and new_isrc:match(ISRC_PATTERN) and #cd_items > 1 then
+                        Undo_BeginBlock()
+                        GetSetMediaItemTakeInfo_String(
+                            GetActiveTake(cd_items[1].item), "P_NAME",
+                            serialize_track(cd_items[1].data), true)
                         for i = 2, #cd_items do
                             cd_items[i].data.isrc = increment_isrc(new_isrc, i - 1)
+                            GetSetMediaItemTakeInfo_String(
+                                GetActiveTake(cd_items[i].item), "P_NAME",
+                                serialize_track(cd_items[i].data), true)
                         end
+                        Undo_EndBlock("Propagate ISRC", -1)
                         isrc_msg = " ISRC propagated to " .. (#cd_items - 1)
                             .. " further track" .. (#cd_items > 2 and "s" or "") .. "."
                     end
