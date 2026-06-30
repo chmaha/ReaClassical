@@ -22,13 +22,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
--- ReaImGui windows are unusable/distracting for a blind user relying on
--- OSARA + the Terminal instead of the mouse, so skip opening this GUI when
--- OSARA is installed unless allowgui=y has been set in the Terminal. Calls
--- coming from the Terminal itself (_G.RC_TERMINAL_ARGS set) always bypass
--- this -- they never open a GUI in the first place.
-if not _G.RC_TERMINAL_ARGS and APIExists("osara_outputMessage") and GetExtState("ReaClassical", "AllowGui") ~= "y" then
-    osara_outputMessage("GUI blocked (OSARA detected) -- use allowgui=y in the Terminal to override")
+-- Route to the accessible GFX-based metadata editor when OSARA is detected or
+-- debug=on is active, instead of opening the ReaImGui GUI. Calls from the
+-- Terminal itself (_G.RC_TERMINAL_ARGS set) always bypass this block.
+-- Use allowgui=y in the Terminal to force the GUI if needed.
+local _osara_or_debug = not _G.RC_TERMINAL_ARGS and GetExtState("ReaClassical", "AllowGui") ~= "y"
+    and (APIExists("osara_outputMessage") or GetExtState("ReaClassical", "DebugAnnounce") == "on")
+if _osara_or_debug then
+    local sp = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+    dofile(sp .. "lib/ReaClassical_Accessible DDP Metadata Editor.lua")
     return
 end
 
@@ -294,10 +296,13 @@ local pending_reinit = false
 ---------------------------------------------------------------------
 
 function run_create_cd_markers(selected_track)
-    local not_saved = check_saved_state()
-    if not_saved then
-        MB("Please save your project before running this function.", "Create CD Markers", 0)
-        return false
+    -- Skip save-state check when called headlessly (e.g. from accessible editor).
+    if not _G.RC_TERMINAL_ARGS then
+        local not_saved = check_saved_state()
+        if not_saved then
+            MB("Please save your project before running this function.", "Create CD Markers", 0)
+            return false
+        end
     end
 
     if not selected_track then
