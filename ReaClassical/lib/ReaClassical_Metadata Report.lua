@@ -104,7 +104,7 @@ function parse_markers()
       local album_marker = name:match("^@(.-)|")
       if album_marker then
         metadata.album = {
-          title = album_marker,
+          title = album_marker:gsub("[\r\n]+", " "):match("^%s*(.-)%s*$"),
           catalog = name:match("CATALOG=([^|]+)") or name:match("EAN=([^|]+)") or name:match("UPC=([^|]+)") or
               nil,
           performer = name:match("PERFORMER=([^|]+)") or nil,
