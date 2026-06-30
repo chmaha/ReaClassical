@@ -69,7 +69,7 @@
   Announce take number on next/previous item and new take recording
 @metapackage
 @provides
-  [main] *.lua
+  [main] ReaClassical_*.lua
   [main=crossfade_editor] crossfade_editor/*.lua
   [jsfx] *.jsfx
   [rpp] *.RPP

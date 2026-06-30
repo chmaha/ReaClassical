@@ -542,20 +542,33 @@ end
 
 ---------------------------------------------------------------------
 
--- Shared digit/dot/backspace handling for value-entry states.
+-- Shared digit/dot/backspace handling for value-entry states. Announces
+-- each typed character and each backspaced-away character, same as the
+-- Accessible DDP Metadata Editor. Returns true if char was consumed.
 local function handle_digits(char, str_var_getter, str_var_setter)
     local s = str_var_getter()
     if char >= 48 and char <= 57 then
-        if #s < 8 then str_var_setter(s .. string.char(char)) end
+        if #s < 8 then
+            local ch = string.char(char)
+            str_var_setter(s .. ch)
+            say(ch)
+        end
+        return true
     elseif char == 46 then
-        if not s:find("%.") then str_var_setter(s .. ".") end
+        if not s:find("%.") then
+            str_var_setter(s .. ".")
+            say(".")
+        end
+        return true
     elseif char == KEY_BACK then
         if #s > 0 then
-            s = s:sub(1, -2)
-            str_var_setter(s)
-            say(s ~= "" and s or "cleared")
+            local deleted = s:sub(-1)
+            str_var_setter(s:sub(1, -2))
+            say(deleted)
         end
+        return true
     end
+    return false
 end
 
 -- Determines mode from time selection state and goes straight to value entry.
@@ -648,17 +661,15 @@ function handle_key(char)
         end
 
     elseif state == STATE_VALUE then
-        if char >= 48 and char <= 57 then
-            if #value_str < 8 then value_str = value_str .. string.char(char) end
-        elseif char == 45 then
-            if value_str == "" then value_str = "-" end
-        elseif char == 46 then
-            if not value_str:find("%.") then value_str = value_str .. "." end
-        elseif char == KEY_BACK then
-            if #value_str > 0 then
-                value_str = value_str:sub(1, -2)
-                say(value_str ~= "" and value_str or "cleared")
+        if char == 45 then
+            if value_str == "" then
+                value_str = "-"
+                say("-")
             end
+        elseif handle_digits(char,
+            function() return value_str end,
+            function(v) value_str = v end) then
+            -- handled by handle_digits
         elseif char == KEY_ENTER then
             local val = tonumber(value_str)
             local min_v, max_v = get_value_range()
@@ -689,15 +700,10 @@ function handle_key(char)
         end
 
     elseif state == STATE_RAMP_IN then
-        if char >= 48 and char <= 57 then
-            if #ramp_in_str < 8 then ramp_in_str = ramp_in_str .. string.char(char) end
-        elseif char == 46 then
-            if not ramp_in_str:find("%.") then ramp_in_str = ramp_in_str .. "." end
-        elseif char == KEY_BACK then
-            if #ramp_in_str > 0 then
-                ramp_in_str = ramp_in_str:sub(1, -2)
-                say(ramp_in_str ~= "" and ramp_in_str or "cleared")
-            end
+        if handle_digits(char,
+            function() return ramp_in_str end,
+            function(v) ramp_in_str = v end) then
+            -- handled by handle_digits
         elseif char == KEY_ENTER then
             ramp_in_secs  = math.max(0, tonumber(ramp_in_str) or 0)
             ramp_out_str  = ""
@@ -709,15 +715,10 @@ function handle_key(char)
         end
 
     elseif state == STATE_RAMP_OUT then
-        if char >= 48 and char <= 57 then
-            if #ramp_out_str < 8 then ramp_out_str = ramp_out_str .. string.char(char) end
-        elseif char == 46 then
-            if not ramp_out_str:find("%.") then ramp_out_str = ramp_out_str .. "." end
-        elseif char == KEY_BACK then
-            if #ramp_out_str > 0 then
-                ramp_out_str = ramp_out_str:sub(1, -2)
-                say(ramp_out_str ~= "" and ramp_out_str or "cleared")
-            end
+        if handle_digits(char,
+            function() return ramp_out_str end,
+            function(v) ramp_out_str = v end) then
+            -- handled by handle_digits
         elseif char == KEY_ENTER then
             ramp_out_secs = math.max(0, tonumber(ramp_out_str) or 0)
             local stay = insert_automation(confirmed_val)

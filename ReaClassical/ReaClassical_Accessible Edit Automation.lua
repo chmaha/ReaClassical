@@ -25,14 +25,27 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
+local au  = require("ReaClassical_Automation_Info")
+
+local db_to_linear     = au.db_to_linear
+local linear_to_db     = au.linear_to_db
+local is_special_track = au.is_special_track
+local find_env_info    = au.find_env_info
+local is_vol_env       = au.is_vol_env
+local raw_to_display   = au.raw_to_display
+local format_display   = au.format_display
+local get_track_label  = au.get_track_label
 
 ---------------------------------------------------------------------
 -- State machine
 
 local STATE_PICK     = "pick"
+local STATE_ACTION   = "action"
 local STATE_VALUE    = "value"
 local STATE_RAMP_IN  = "rampin"
 local STATE_RAMP_OUT = "rampout"
+
+local ACTIONS = { "Edit", "Delete" }
 
 local KEY_UP    = 30064
 local KEY_DOWN  = 1685026670
@@ -44,6 +57,7 @@ local state     = STATE_PICK
 local found     = {}
 local pick_idx  = 1
 local item      = nil
+local action_idx = 1
 local value_str = ""
 local ri_str    = ""
 local ro_str    = ""
@@ -55,74 +69,6 @@ local new_ramp_out    = nil
 
 ---------------------------------------------------------------------
 -- Utility
-
-local function db_to_linear(db)
-    if db <= -150 then return 0.0 end
-    return 10 ^ (db / 20)
-end
-
-local function linear_to_db(val)
-    if val <= 0.0000000298023223876953125 then return -150.0 end
-    return 20 * math.log(val, 10)
-end
-
-local function is_special_track(t)
-    local checks = {
-        "P_EXT:mixer", "P_EXT:rcmaster", "P_EXT:aux", "P_EXT:submix",
-        "P_EXT:roomtone", "P_EXT:rcref", "P_EXT:live", "P_EXT:listenback"
-    }
-    for _, key in ipairs(checks) do
-        local _, v = GetSetMediaTrackInfo_String(t, key, "", false)
-        if v == "y" then return true end
-    end
-    local _, nm = GetSetMediaTrackInfo_String(t, "P_NAME", "", false)
-    nm = nm or ""
-    return nm:match("^M:") or nm:match("^RCMASTER") or
-           nm:match("^@")  or nm:match("^#")
-end
-
-local function find_env_info(track, env)
-    local STANDARD = {
-        "Volume", "Pan", "Width", "Volume (Pre-FX)",
-        "Pan (Pre-FX)", "Width (Pre-FX)", "Trim Volume", "Mute"
-    }
-    for _, name in ipairs(STANDARD) do
-        if GetTrackEnvelopeByName(track, name) == env then
-            return { type = "track", name = name }
-        end
-    end
-    for fx = 0, TrackFX_GetCount(track) - 1 do
-        for p = 0, TrackFX_GetNumParams(track, fx) - 1 do
-            if GetFXEnvelope(track, fx, p, false) == env then
-                local _, fx_name = TrackFX_GetFXName(track, fx, "")
-                local _, pname   = TrackFX_GetParamName(track, fx, p, "")
-                return { type = "fx", fx_idx = fx, param_idx = p,
-                         name = pname, fx_name = fx_name }
-            end
-        end
-    end
-    return nil
-end
-
-local function is_vol_env(env_info)
-    if env_info.type ~= "track" then return false end
-    local n = env_info.name
-    return n == "Volume" or n == "Volume (Pre-FX)" or n == "Trim Volume"
-end
-
-local function raw_to_display(env_info, raw)
-    if env_info.type == "track" then
-        local n = env_info.name
-        if n == "Volume" or n == "Volume (Pre-FX)" or n == "Trim Volume" then
-            return linear_to_db(raw)
-        elseif n == "Pan" or n == "Pan (Pre-FX)" then
-            return -(raw * 100)   -- envelope inverted; display +100 = right
-        elseif n == "Width" or n == "Width (Pre-FX)" then
-            return raw * 100
-        end
-    end
-    return raw
-end
 
 local function display_to_raw(env_info, display)
     if env_info.type == "track" then
@@ -156,32 +102,6 @@ local function get_range_info(env_info, track)
         if lo > hi then lo, hi = hi, lo end
         return lo, hi, ""
     end
-end
-
-local function format_display(env_info, dval)
-    if env_info.type == "track" then
-        local n = env_info.name
-        if n == "Volume" or n == "Volume (Pre-FX)" or n == "Trim Volume" then
-            return string.format("%.1f dB", dval)
-        elseif n == "Pan" or n == "Pan (Pre-FX)" then
-            if dval > 0.05 then return string.format("%.0fR", dval)
-            elseif dval < -0.05 then return string.format("%.0fL", -dval)
-            else return "C" end
-        elseif n == "Width" or n == "Width (Pre-FX)" then
-            return string.format("%.0f%%", dval)
-        elseif n == "Mute" then
-            return dval < 0.5 and "muted" or "unmuted"
-        end
-    end
-    return string.format("%.4g", dval)
-end
-
-local function get_track_label(track)
-    local _, nm = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    if nm and nm ~= "" then
-        return nm:match("^M:(.+)") or nm
-    end
-    return "Track " .. math.floor(GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER"))
 end
 
 local function get_boundary_raw(br_env, track, env_info)
@@ -315,6 +235,32 @@ end
 
 ---------------------------------------------------------------------
 
+-- Deselects every automation item project-wide so the global delete
+-- command (42086) only removes the one item we select afterward.
+local function deselect_all_automation_items()
+    for ti = 0, CountTracks(0) - 1 do
+        local t = GetTrack(0, ti)
+        for ei = 0, CountTrackEnvelopes(t) - 1 do
+            local e = GetTrackEnvelope(t, ei)
+            for ai = 0, CountAutomationItems(e) - 1 do
+                GetSetAutomationItemInfo(e, ai, "D_UISEL", 0, true)
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------
+
+local function delete_item()
+    deselect_all_automation_items()
+    GetSetAutomationItemInfo(item.env, item.ai_idx, "D_UISEL", 1, true)
+    Main_OnCommand(42086, 0) -- Envelope: Delete automation items
+    UpdateArrange()
+    say("Deleted " .. item.label)
+end
+
+---------------------------------------------------------------------
+
 local function apply_edit()
     local env      = item.env
     local ei       = item.env_info
@@ -330,17 +276,7 @@ local function apply_edit()
     local vb = item.orig_before
     local va = item.orig_after
 
-    -- Deselect all automation items project-wide so the global delete
-    -- command only removes the one we intend to replace.
-    for ti = 0, CountTracks(0) - 1 do
-        local t = GetTrack(0, ti)
-        for ei = 0, CountTrackEnvelopes(t) - 1 do
-            local e = GetTrackEnvelope(t, ei)
-            for ai = 0, CountAutomationItems(e) - 1 do
-                GetSetAutomationItemInfo(e, ai, "D_UISEL", 0, true)
-            end
-        end
-    end
+    deselect_all_automation_items()
     GetSetAutomationItemInfo(env, item.ai_idx, "D_UISEL", 1, true)
     Main_OnCommand(42086, 0)
 
@@ -403,6 +339,8 @@ local function draw_window()
     if state == STATE_PICK then
         gfx.drawstr(#found == 0 and "No automation items at cursor"
                                   or "[Select]  " .. found[pick_idx].label)
+    elseif state == STATE_ACTION then
+        gfx.drawstr("[Edit/Delete]  " .. ACTIONS[action_idx])
     elseif state == STATE_VALUE then
         gfx.drawstr("[Value]  " .. (value_str == "" and "(keep)" or value_str))
     elseif state == STATE_RAMP_IN then
@@ -411,6 +349,37 @@ local function draw_window()
         gfx.drawstr("[Ramp out]  " .. (ro_str == "" and "(keep)" or ro_str .. "s"))
     end
     gfx.update()
+end
+
+---------------------------------------------------------------------
+
+-- Shared digit/dot/backspace handling for value-entry states. Announces
+-- each typed character and each backspaced-away character, same as the
+-- Accessible DDP Metadata Editor. Returns true if char was consumed.
+local function handle_digits(char, getter, setter)
+    local s = getter()
+    if char >= 48 and char <= 57 then
+        if #s < 8 then
+            local ch = string.char(char)
+            setter(s .. ch)
+            say(ch)
+        end
+        return true
+    elseif char == 46 then
+        if not s:find("%.") then
+            setter(s .. ".")
+            say(".")
+        end
+        return true
+    elseif char == KEY_BACK then
+        if #s > 0 then
+            local deleted = s:sub(-1)
+            setter(s:sub(1, -2))
+            say(deleted)
+        end
+        return true
+    end
+    return false
 end
 
 ---------------------------------------------------------------------
@@ -428,26 +397,44 @@ local function handle_key(char)
             pick_idx = pick_idx < #found and pick_idx + 1 or 1
             say(found[pick_idx].label)
         elseif char == KEY_ENTER then
-            item      = found[pick_idx]
-            value_str = ""
-            state     = STATE_VALUE
-            say(get_value_prompt())
+            item       = found[pick_idx]
+            action_idx = 1
+            state      = STATE_ACTION
+            say("Edit or delete " .. item.label .. "? Up or down to choose, Enter to confirm")
         elseif char == KEY_ESC then
             return false
         end
 
-    elseif state == STATE_VALUE then
-        if char >= 48 and char <= 57 then
-            if #value_str < 8 then value_str = value_str .. string.char(char) end
-        elseif char == 45 then
-            if value_str == "" then value_str = "-" end
-        elseif char == 46 then
-            if not value_str:find("%.") then value_str = value_str .. "." end
-        elseif char == KEY_BACK then
-            if #value_str > 0 then
-                value_str = value_str:sub(1, -2)
-                say(value_str ~= "" and value_str or "cleared")
+    elseif state == STATE_ACTION then
+        if char == KEY_UP or char == KEY_DOWN then
+            action_idx = action_idx == 1 and 2 or 1
+            say(ACTIONS[action_idx])
+        elseif char == KEY_ENTER then
+            if action_idx == 1 then
+                value_str = ""
+                state     = STATE_VALUE
+                say(get_value_prompt())
+            else
+                Undo_BeginBlock()
+                delete_item()
+                Undo_EndBlock("Delete Automation Item", -1)
+                return false
             end
+        elseif char == KEY_ESC then
+            state = STATE_PICK
+            say(found[pick_idx].label)
+        end
+
+    elseif state == STATE_VALUE then
+        if char == 45 then
+            if value_str == "" then
+                value_str = "-"
+                say("-")
+            end
+        elseif handle_digits(char,
+            function() return value_str end,
+            function(v) value_str = v end) then
+            -- handled by handle_digits
         elseif char == KEY_ENTER then
             if value_str == "" then
                 new_display_val = item.display_val
@@ -470,15 +457,10 @@ local function handle_key(char)
         end
 
     elseif state == STATE_RAMP_IN then
-        if char >= 48 and char <= 57 then
-            if #ri_str < 8 then ri_str = ri_str .. string.char(char) end
-        elseif char == 46 then
-            if not ri_str:find("%.") then ri_str = ri_str .. "." end
-        elseif char == KEY_BACK then
-            if #ri_str > 0 then
-                ri_str = ri_str:sub(1, -2)
-                say(ri_str ~= "" and ri_str or "cleared")
-            end
+        if handle_digits(char,
+            function() return ri_str end,
+            function(v) ri_str = v end) then
+            -- handled by handle_digits
         elseif char == KEY_ENTER then
             new_ramp_in = ri_str == "" and item.ramp_in
                                         or math.max(0, tonumber(ri_str) or 0)
@@ -491,15 +473,10 @@ local function handle_key(char)
         end
 
     elseif state == STATE_RAMP_OUT then
-        if char >= 48 and char <= 57 then
-            if #ro_str < 8 then ro_str = ro_str .. string.char(char) end
-        elseif char == 46 then
-            if not ro_str:find("%.") then ro_str = ro_str .. "." end
-        elseif char == KEY_BACK then
-            if #ro_str > 0 then
-                ro_str = ro_str:sub(1, -2)
-                say(ro_str ~= "" and ro_str or "cleared")
-            end
+        if handle_digits(char,
+            function() return ro_str end,
+            function(v) ro_str = v end) then
+            -- handled by handle_digits
         elseif char == KEY_ENTER then
             new_ramp_out = ro_str == "" and item.ramp_out
                                          or math.max(0, tonumber(ro_str) or 0)
@@ -557,9 +534,10 @@ end
 gfx.init("Accessible Edit Automation", 600, 44, 0)
 
 if #found == 1 then
-    item      = found[1]
-    state     = STATE_VALUE
-    say(get_value_prompt())
+    item       = found[1]
+    action_idx = 1
+    state      = STATE_ACTION
+    say("Edit or delete " .. item.label .. "? Up or down to choose, Enter to confirm")
 else
     say(string.format(
         "%d automation items at cursor. Up and down to browse, Enter to select, Escape to close. %s",
