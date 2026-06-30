@@ -1747,6 +1747,7 @@ function render_ddp_preset()
     GetSetProjectInfo_String(proj, "RENDER_PATTERN", "IMAGE.DAT", true)
 
     GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)
+    GetSetProjectInfo(proj, "RENDER_DITHER",   2, true) -- triangular dither
 
     Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
 end
@@ -1763,6 +1764,7 @@ function render_cue_audio_preset()
     GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
     GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 1, true) -- entire project
     GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)   -- master mix
+    GetSetProjectInfo(proj, "RENDER_DITHER",   2, true)   -- triangular dither
 
     local export_dir = get_export_dir()
     GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
@@ -1783,6 +1785,7 @@ function render_wav_preset()
     GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
     GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions
     GetSetProjectInfo(proj, "RENDER_SETTINGS", 512, true) -- master mix + embed metadata
+    GetSetProjectInfo(proj, "RENDER_DITHER",   2,   true) -- triangular dither
 
     local export_dir = get_export_dir()
     GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
@@ -1804,6 +1807,7 @@ function render_flac_preset()
     GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
     GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions
     GetSetProjectInfo(proj, "RENDER_SETTINGS", 512, true) -- master mix + embed metadata
+    GetSetProjectInfo(proj, "RENDER_DITHER",   2,   true) -- triangular dither
 
     local export_dir = get_export_dir()
     GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
