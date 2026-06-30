@@ -28,8 +28,9 @@ function is_special_track(track)
   local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
   local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
   local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
+  local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
 
-  return mixer_state == "y" or aux_state == "y" or submix_state == "y"
+  return mixer_state == "y" or aux_state == "y" or submix_state == "y" or playback_state == "y"
 end
 
 function check_for_automation_on_special_tracks()

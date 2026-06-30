@@ -106,9 +106,10 @@ function solo()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
 
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
-            or ref_state == "y" or listenback_state == "y" then
+            or ref_state == "y" or listenback_state == "y" or playback_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -116,7 +117,7 @@ function solo()
         end
 
         if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
-                or ref_state == "y" or listenback_state == "y" or rcmaster_state == "y") then
+                or ref_state == "y" or listenback_state == "y" or rcmaster_state == "y" or playback_state == "y") then
             if IsTrackSelected(track) and parent ~= 1 then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 2)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
@@ -186,11 +187,13 @@ function mixer()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         -- Check if this is a special track that should respect Mission Control TCP visibility
         local is_special_track = (aux_state == "y" or submix_state == "y" or rt_state == "y" or
             live_state == "y" or ref_state == "y" or rcmaster_state == "y") or listenback_state == "y"
+            or playback_state == "y"
 
         -- Get Mission Control TCP visibility setting
         local mission_control_tcp_visible = nil
@@ -285,9 +288,21 @@ function mixer()
             end
         end
 
+        -- Handle PLAYBACK tracks
+        if playback_state == "y" then
+            SetTrackColor(track, colors.playback)
+            -- Use Mission Control setting if available, otherwise default to 0 (hidden)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+            end
+        end
+
         -- Show all special/mixer tracks in mixer window
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
-            or rt_state == "y" or live_state == "y" or ref_state == "y" or listenback_state == "y" then
+            or rt_state == "y" or live_state == "y" or ref_state == "y" or listenback_state == "y"
+            or playback_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)

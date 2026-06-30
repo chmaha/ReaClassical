@@ -161,6 +161,7 @@ local LISTENBACK_JSFX_NAME = "ListenbackMicMonitor"
 local LISTENBACK_TRACK_NAME = "LISTENBACK"
 local listenback_input_channel = 0
 local listenback_is_stereo = false
+local playback_hw_channel = 0 -- 0 = none, 1 = pair 1+2, 2 = pair 3+4, ...
 
 ---------------------------------------------------------------------
 
@@ -561,7 +562,8 @@ function main()
             for _, aux_info in ipairs(aux_submix_tracks) do
                 if aux_info.type == "aux" or aux_info.type == "submix" or
                     aux_info.type == "roomtone" or aux_info.type == "reference" or
-                    aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" then
+                    aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" or
+                    aux_info.type == "playback" then
                     local num_channels = get_track_num_channels(aux_info.track)
 
                     for ch = 0, max_hw_outs - num_channels, num_channels do
@@ -628,7 +630,8 @@ function main()
                 for idx, aux_info in ipairs(aux_submix_tracks) do
                     if aux_info.type == "aux" or aux_info.type == "submix" or
                         aux_info.type == "roomtone" or aux_info.type == "reference" or
-                        aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" then
+                        aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" or
+                        aux_info.type == "playback" then
                         local fresh_hw = get_hardware_outputs(aux_info.track)
                         local num_channels = get_track_num_channels(aux_info.track)
                         if aux_info.type == "listenback" then
@@ -908,7 +911,8 @@ function main()
             for idx, aux_info in ipairs(aux_submix_tracks) do
                 if aux_info.type == "aux" or aux_info.type == "submix" or
                     aux_info.type == "roomtone" or aux_info.type == "reference" or
-                    aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" then
+                    aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" or
+                    aux_info.type == "playback" then
                     ImGui.PushID(ctx, "hw_special_" .. idx)
 
                     -- Track type indicator with color
@@ -936,6 +940,9 @@ function main()
                     elseif aux_info.type == "listenback" then
                         display_prefix = "LB"
                         prefix_color = color_to_native(170, 200, 255) -- Light blue
+                    elseif aux_info.type == "playback" then
+                        display_prefix = "PB"
+                        prefix_color = color_to_native(80, 200, 180) -- Teal
                     end
 
                     -- Prefix with fixed width
@@ -1397,6 +1404,9 @@ function main()
                     elseif aux_info.type == "listenback" then
                         display_prefix = "LB"
                         prefix_color = color_to_native(170, 200, 255)
+                    elseif aux_info.type == "playback" then
+                        display_prefix = "PB"
+                        prefix_color = color_to_native(80, 200, 180) -- Teal
                     end
 
                     ImGui.PushStyleColor(ctx, ImGui.Col_Text, prefix_color)
@@ -1498,6 +1508,49 @@ function main()
                                 rec_input = (lb_new_input - 1) -- mono (no flag)
                             end
                             SetMediaTrackInfo_Value(aux_info.track, "I_RECINPUT", rec_input)
+                        end
+                    elseif aux_info.type == "playback" then
+                        -- Hardware output stereo-pair dropdown for playback
+                        ImGui.SetNextItemWidth(ctx, 180)
+                        local pb_opts = {}
+                        if playback_hw_channel == 0 then
+                            table.insert(pb_opts, "Select pair")
+                        else
+                            table.insert(pb_opts, "None")
+                        end
+                        local num_hw_outs = GetNumAudioOutputs()
+                        for ch = 0, num_hw_outs - 2, 2 do
+                            local opt_text
+                            if show_hardware_names then
+                                local hw1 = GetOutputChannelName(ch)
+                                local hw2 = GetOutputChannelName(ch + 1)
+                                if hw1 and hw1 ~= "" and hw2 and hw2 ~= "" then
+                                    opt_text = hw1 .. "+" .. hw2
+                                else
+                                    opt_text = string.format("%d+%d", ch + 1, ch + 2)
+                                end
+                            else
+                                opt_text = string.format("%d+%d", ch + 1, ch + 2)
+                            end
+                            table.insert(pb_opts, opt_text)
+                        end
+                        local pb_opts_str = table.concat(pb_opts, "\0") .. "\0"
+                        local pb_changed, pb_new_sel = ImGui.Combo(ctx, "##pb_hw" .. idx, playback_hw_channel,
+                            pb_opts_str)
+                        if pb_changed then
+                            playback_hw_channel = pb_new_sel
+                            if pb_new_sel == 0 then
+                                if GetTrackNumSends(aux_info.track, 1) > 0 then
+                                    SetTrackSendInfo_Value(aux_info.track, 1, 0, "I_DSTCHAN", -1)
+                                end
+                            else
+                                local dst_ch = (pb_new_sel - 1) * 2
+                                if GetTrackNumSends(aux_info.track, 1) == 0 then
+                                    CreateTrackSend(aux_info.track, nil)
+                                end
+                                SetTrackSendInfo_Value(aux_info.track, 1, 0, "I_DSTCHAN", dst_ch)
+                                SetTrackSendInfo_Value(aux_info.track, 1, 0, "I_SRCCHAN", 0)
+                            end
                         end
                     else
                         -- Add spacing to align with tracks that have name inputs
@@ -1683,7 +1736,7 @@ function main()
 
                     -- TCP visibility checkbox - placed just before Routing button
                     ImGui.SameLine(ctx)
-                    if aux_info.type == "listenback" then
+                    if aux_info.type == "listenback" or aux_info.type == "playback" then
                         ImGui.BeginDisabled(ctx)
                     end
                     local changed_tcp, new_tcp = ImGui.Checkbox(ctx, "TCP##tcp" .. idx, aux_submix_tcp_visible[idx])
@@ -1695,12 +1748,14 @@ function main()
                         SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. aux_guid,
                             new_tcp and "1" or "0")
                     end
-                    if aux_info.type == "listenback" then
+                    if aux_info.type == "listenback" or aux_info.type == "playback" then
                         ImGui.EndDisabled(ctx)
                     end
                     if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
                         if aux_info.type == "listenback" then
                             ImGui.SetTooltip(ctx, "Listenback is MCP only")
+                        elseif aux_info.type == "playback" then
+                            ImGui.SetTooltip(ctx, "Playback is MCP only")
                         else
                             ImGui.SetTooltip(ctx, "Show in TCP")
                         end
@@ -1894,10 +1949,12 @@ function main()
             local has_roomtone = false
             local has_live = false
             local has_listenback = false
+            local has_playback = false
             for _, track_info in ipairs(aux_submix_tracks) do
                 if track_info.type == "roomtone" then has_roomtone = true end
                 if track_info.type == "live" then has_live = true end
                 if track_info.type == "listenback" then has_listenback = true end
+                if track_info.type == "playback" then has_playback = true end
             end
 
             -- Initialize counts on first appearance
@@ -1908,7 +1965,8 @@ function main()
                     roomtone = 0,
                     reference = 0,
                     live = 0,
-                    listenback = 0
+                    listenback = 0,
+                    playback_hw = 0
                 }
             end
 
@@ -2001,6 +2059,25 @@ function main()
                 end
             end
 
+            -- Playback (max 1; HW pair selected afterwards in main list)
+            if has_playback then
+                ImGui.BeginDisabled(ctx)
+                ImGui.Text(ctx, "Playback:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.TextDisabled(ctx, "(already exists)")
+                ImGui.EndDisabled(ctx)
+            else
+                ImGui.Text(ctx, "Playback:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.SetNextItemWidth(ctx, 100)
+                local changed, new_val = ImGui.InputInt(ctx, "##playback_hw", add_special_counts.playback_hw)
+                if changed then
+                    add_special_counts.playback_hw = math.max(0, math.min(1, new_val))
+                end
+            end
+
             ImGui.Separator(ctx)
 
             -- OK button
@@ -2055,6 +2132,40 @@ function main()
 
                 if not has_live and add_special_counts.live > 0 then
                     dofile(script_path .. "lib/ReaClassical_Add Live Bounce Track.lua")
+                end
+
+                if not has_playback and add_special_counts.playback_hw > 0 then
+                    local rcmaster_track
+                    local rcmaster_idx_pos
+                    for i = 0, CountTracks(0) - 1 do
+                        local t = GetTrack(0, i)
+                        local _, rcm_state = GetSetMediaTrackInfo_String(t, "P_EXT:rcmaster", "", false)
+                        local _, t_name = GetSetMediaTrackInfo_String(t, "P_NAME", "", false)
+                        if rcm_state == "y" or t_name == "RCMASTER" then
+                            rcmaster_track = t
+                            rcmaster_idx_pos = i
+                            break
+                        end
+                    end
+                    if rcmaster_track then
+                        Undo_BeginBlock()
+                        InsertTrackAtIndex(rcmaster_idx_pos + 1, true)
+                        local pb_track = GetTrack(0, rcmaster_idx_pos + 1)
+                        GetSetMediaTrackInfo_String(pb_track, "P_NAME", "PLAYBACK", true)
+                        GetSetMediaTrackInfo_String(pb_track, "P_EXT:playback", "y", true)
+                        CreateTrackSend(rcmaster_track, pb_track)
+                        SetMediaTrackInfo_Value(pb_track, "B_MAINSEND", 0)
+                        SetMediaTrackInfo_Value(pb_track, "B_MUTE", 1)
+                        SetTrackColor(pb_track, require("ReaClassical_Colors_Table").playback)
+                        SetMediaTrackInfo_Value(pb_track, "B_SHOWINTCP", 0)
+                        SetMediaTrackInfo_Value(pb_track, "B_SHOWINMIXER", 1)
+                        if workflow == "Vertical" then
+                            dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
+                        else
+                            dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
+                        end
+                        Undo_EndBlock("Add Playback Track", -1)
+                    end
                 end
 
                 init()
@@ -2304,10 +2415,12 @@ function get_special_tracks()
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
-            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y" then
+            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
+            or playback_state == "y" then
             local track_type = "other"
             local has_routing = false
 
@@ -2327,6 +2440,8 @@ function get_special_tracks()
                 track_type = "listenback"
             elseif rcmaster_state == "y" then
                 track_type = "rcmaster"
+            elseif playback_state == "y" then
+                track_type = "playback"
             end
 
             -- Get RCMASTER connection state from P_EXT
@@ -2350,6 +2465,8 @@ function get_special_tracks()
                 display_name = ""
             elseif track_type == "rcmaster" then
                 -- RCMASTER has no additional name
+                display_name = ""
+            elseif track_type == "playback" then
                 display_name = ""
             else
                 display_name = name:gsub("%-$", "")
@@ -2375,7 +2492,8 @@ function get_special_tracks()
         rcmaster = 4,
         live = 5,
         reference = 6,
-        listenback = 7
+        listenback = 7,
+        playback = 8
     }
 
     table.sort(tracks, function(a, b)
@@ -2935,6 +3053,19 @@ function init()
             else
                 -- Mono
                 listenback_input_channel = rec_input + 1
+            end
+            break
+        end
+    end
+
+    -- Initialize playback hardware output state
+    for i, aux_info in ipairs(aux_submix_tracks) do
+        if aux_info.type == "playback" then
+            if GetTrackNumSends(aux_info.track, 1) > 0 then
+                local dst = math.floor(GetTrackSendInfo_Value(aux_info.track, 1, 0, "I_DSTCHAN"))
+                playback_hw_channel = math.floor(dst / 2) + 1 -- 1-based pair index
+            else
+                playback_hw_channel = 0
             end
             break
         end

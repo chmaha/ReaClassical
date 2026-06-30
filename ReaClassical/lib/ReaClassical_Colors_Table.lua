@@ -46,7 +46,8 @@ return {
         rank_below_average = ColorToNative(255, 191, 0) | 0x1000000,
         rank_poor = ColorToNative(255, 117, 56) | 0x1000000,
         rank_unusable = ColorToNative(220, 20, 60) | 0x1000000,
-        live = ColorToNative(255, 160, 160) | 0x1000000
+        live = ColorToNative(255, 160, 160) | 0x1000000,
+        playback = ColorToNative(80, 200, 180) | 0x1000000
     }
 
 ---------------------------------------------------------------------

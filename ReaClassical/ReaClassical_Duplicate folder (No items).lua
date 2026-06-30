@@ -112,12 +112,15 @@ function solo()
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
 
         local special_states = mixer_state == "y" or aux_state == "y" or submix_state == "y"
             or rt_state == "y" or ref_state == "y" or live_state == "y" or rcmaster_state == "y"
+            or playback_state == "y"
         local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
             or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
             or trackname_check(track, "^LIVE") or trackname_check(track, "^REF")
+            or trackname_check(track, "^PLAYBACK")
 
         if special_states or special_names then
             local num_of_sends = GetTrackNumSends(track, 0)

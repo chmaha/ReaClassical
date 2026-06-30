@@ -49,13 +49,11 @@ local KEY_BACK  = 8
 
 local ALBUM_FIELDS = {
     "title", "performer", "songwriter", "composer", "arranger",
-    "genre", "identification", "language", "catalog", "message",
-    "digital_release_only"
+    "genre", "identification", "language", "catalog", "message"
 }
 local ALBUM_LABELS = {
     "Album Title", "Performer", "Songwriter", "Composer", "Arranger",
-    "Genre", "Identification", "Language", "Catalog", "Message",
-    "Digital Release Only"
+    "Genre", "Identification", "Language", "Catalog", "Message"
 }
 
 -- ISRC is appended when applicable; see get_fields().
@@ -266,9 +264,6 @@ end
 
 local function get_val(nav_i, key)
     if nav_i == 1 then
-        if key == "digital_release_only" then
-            return digital_release_only and "on" or "off"
-        end
         return album_data[key] or ""
     end
     local cd = cd_items[nav_i - 1]
@@ -277,12 +272,7 @@ end
 
 local function set_val(nav_i, key, value)
     if nav_i == 1 then
-        if key == "digital_release_only" then
-            local v = value:lower()
-            if v == "on" or v == "off" then digital_release_only = (v == "on") end
-        else
-            album_data[key] = value
-        end
+        album_data[key] = value
     else
         local cd = cd_items[nav_i - 1]
         if cd then cd.data[key] = value end
@@ -297,11 +287,7 @@ local function announce_field()
     local fields, labels = get_fields(nav_idx)
     local key = fields[field_idx]
     local cur = get_val(nav_idx, key)
-    if key == "digital_release_only" then
-        say(labels[field_idx] .. ": " .. cur .. ". Enter to keep, type on or off to change")
-    else
-        say(labels[field_idx] .. ": " .. (cur ~= "" and cur or "empty") .. ". Enter to keep, type to change")
-    end
+    say(labels[field_idx] .. ": " .. (cur ~= "" and cur or "empty") .. ". Enter to keep, type to change")
 end
 
 ---------------------------------------------------------------------

@@ -266,11 +266,13 @@ function mixer()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         -- Check if this is a special track that should respect Mission Control TCP visibility
         local is_special_track = (aux_state == "y" or submix_state == "y" or rt_state == "y" or
             live_state == "y" or ref_state == "y" or rcmaster_state == "y") or listenback_state == "y"
+            or playback_state == "y"
 
         -- Get Mission Control TCP visibility setting
         local mission_control_tcp_visible = nil
@@ -365,9 +367,16 @@ function mixer()
             end
         end
 
+        -- Handle PLAYBACK tracks (always hidden in TCP, mixer only)
+        if playback_state == "y" then
+            SetTrackColor(track, colors.playback)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+
         -- Show all special/mixer tracks in mixer window
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rcmaster_state == "y"
-            or rt_state == "y" or live_state == "y" or ref_state == "y" or listenback_state == "y" then
+            or rt_state == "y" or live_state == "y" or ref_state == "y" or listenback_state == "y"
+            or playback_state == "y" then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 0)
@@ -779,6 +788,7 @@ function create_track_table(is_empty)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if parent == 1 then
             if j > 1 and k ~= prev_k then
@@ -817,6 +827,9 @@ function create_track_table(is_empty)
         elseif trackname_check(track, "^LISTENBACK") or listenback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "LISTENBACK", true)
+        elseif trackname_check(track, "^PLAYBACK") or playback_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:playback", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "PLAYBACK", true)
         elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else
@@ -1086,9 +1099,10 @@ function check_hidden_track_items(track_count)
             local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
             local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
             local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+            local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
 
             if mixer_state ~= "" or aux_state ~= "" or submix_state ~= ""
-                or rcmaster_state ~= "" or listenback_state ~= "" then
+                or rcmaster_state ~= "" or listenback_state ~= "" or playback_state ~= "" then
                 local item_count = CountTrackMediaItems(track)
                 if item_count > 0 then
                     return true
@@ -1367,7 +1381,7 @@ end
 function delete_non_rc_tracks()
     local rc_keys = {
         "mix_order", "mixer", "aux", "submix", "roomtone",
-        "live", "rcref", "listenback", "rcmaster", "Destination", "Source"
+        "live", "rcref", "listenback", "rcmaster", "playback", "Destination", "Source"
     }
 
     local function is_rc_track(track)

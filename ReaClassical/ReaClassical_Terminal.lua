@@ -195,10 +195,12 @@ function get_special_tracks()
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
-            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y" then
+            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
+            or playback_state == "y" then
             local track_type = "other"
             local has_routing = false
 
@@ -218,6 +220,8 @@ function get_special_tracks()
                 track_type = "listenback"
             elseif rcmaster_state == "y" then
                 track_type = "rcmaster"
+            elseif playback_state == "y" then
+                track_type = "playback"
             end
 
             local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
@@ -235,6 +239,8 @@ function get_special_tracks()
             elseif track_type == "listenback" then
                 display_name = ""
             elseif track_type == "rcmaster" then
+                display_name = ""
+            elseif track_type == "playback" then
                 display_name = ""
             else
                 display_name = name:gsub("%-$", "")
@@ -259,7 +265,8 @@ function get_special_tracks()
         rcmaster = 4,
         live = 5,
         reference = 6,
-        listenback = 7
+        listenback = 7,
+        playback = 8
     }
 
     table.sort(tracks, function(a, b)
@@ -329,6 +336,7 @@ function build_track_table(is_empty)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
+        local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if parent == 1 then
             if j > 1 and k ~= prev_k then
@@ -367,6 +375,9 @@ function build_track_table(is_empty)
         elseif trackname_check(track, "^LISTENBACK") or listenback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "LISTENBACK", true)
+        elseif trackname_check(track, "^PLAYBACK") or playback_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:playback", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "PLAYBACK", true)
         elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else
@@ -505,6 +516,11 @@ function resolve_target(token)
         return info and info.track, err
     end
 
+    if token == "pb" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("playback"), "", "Playback", "")
+        return info and info.track, err
+    end
+
     return nil
 end
 
@@ -615,6 +631,11 @@ function resolve_target_list(token)
         return info and { info.track } or {}, err
     end
 
+    if token == "pb" then
+        local info, err = resolve_special_index(get_special_tracks_by_type("playback"), "", "Playback", "")
+        return info and { info.track } or {}, err
+    end
+
     return parse_track_list(token)
 end
 
@@ -644,6 +665,8 @@ function split_word_target(cmd)
     if rest then return "live", rest end
     rest = cmd:match("^lb(.*)$")
     if rest then return "lb", rest end
+    rest = cmd:match("^pb(.*)$")
+    if rest then return "pb", rest end
     return nil, nil
 end
 
@@ -3528,6 +3551,47 @@ function try_add_remove(cmd)
         return true
     end
 
+    if cmd == "addlive" then
+        local live_list = get_special_tracks_by_type("live")
+        if #live_list > 0 then
+            say("A LIVE track already exists. Use rmlive to remove it first.")
+            return true
+        end
+        local rcmaster, rcmaster_index
+        for i = 0, CountTracks(0) - 1 do
+            local t = GetTrack(0, i)
+            local _, rcm_state = GetSetMediaTrackInfo_String(t, "P_EXT:rcmaster", "", false)
+            if trackname_check(t, "^RCMASTER") or rcm_state == "y" then
+                rcmaster = t
+                rcmaster_index = i
+                break
+            end
+        end
+        if not rcmaster then
+            say("Error: no RCMASTER track found")
+            return true
+        end
+        Undo_BeginBlock()
+        InsertTrackAtIndex(rcmaster_index + 1, true)
+        local live_track = GetTrack(0, rcmaster_index + 1)
+        GetSetMediaTrackInfo_String(live_track, "P_NAME", "LIVE", true)
+        CreateTrackSend(rcmaster, live_track)
+        SetMediaTrackInfo_Value(live_track, "B_MAINSEND", 1)
+        GetSetMediaTrackInfo_String(live_track, "P_EXT:live", "y", true)
+        SetMediaTrackInfo_Value(live_track, "I_RECMODE", 3)
+        SetMediaTrackInfo_Value(live_track, "I_RECINPUT", -1)
+        SetMediaTrackInfo_Value(live_track, "I_RECMODE_FLAGS", 2)
+        SetTrackColor(live_track, require("ReaClassical_Colors_Table").live)
+        if workflow == "Vertical" then
+            dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
+        else
+            dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
+        end
+        Undo_EndBlock("Add Live Bounce Track", 0)
+        say("Live bounce track added")
+        return true
+    end
+
     if cmd == "rmlive" then
         local live_list = get_special_tracks_by_type("live")
         if #live_list == 0 then
@@ -3539,6 +3603,71 @@ function try_add_remove(cmd)
         return true
     end
 
+    local addpb_n = cmd:match("^addpb=(%d+)$")
+    if addpb_n then
+        local hw_first = tonumber(addpb_n)
+        local pb_list = get_special_tracks_by_type("playback")
+        if #pb_list > 0 then
+            -- Track already exists — retune hardware output
+            local pb_track = pb_list[1].track
+            if GetTrackNumSends(pb_track, 1) > 0 then
+                SetTrackSendInfo_Value(pb_track, 1, 0, "I_DSTCHAN", hw_first - 1)
+                say("Playback hardware output set to " .. hw_first .. "/" .. (hw_first + 1))
+            else
+                say("Playback track has no hardware output")
+            end
+            return true
+        end
+        local rcmaster, rcmaster_index
+        for i = 0, CountTracks(0) - 1 do
+            local t = GetTrack(0, i)
+            local _, rcm_state = GetSetMediaTrackInfo_String(t, "P_EXT:rcmaster", "", false)
+            if trackname_check(t, "^RCMASTER") or rcm_state == "y" then
+                rcmaster = t
+                rcmaster_index = i
+                break
+            end
+        end
+        if not rcmaster then
+            say("Error: no RCMASTER track found")
+            return true
+        end
+        Undo_BeginBlock()
+        InsertTrackAtIndex(rcmaster_index + 1, true)
+        local pb_track = GetTrack(0, rcmaster_index + 1)
+        GetSetMediaTrackInfo_String(pb_track, "P_NAME", "PLAYBACK", true)
+        GetSetMediaTrackInfo_String(pb_track, "P_EXT:playback", "y", true)
+        CreateTrackSend(rcmaster, pb_track)
+        SetMediaTrackInfo_Value(pb_track, "B_MAINSEND", 0)
+        local hw_idx = GetTrackNumSends(pb_track, 1)
+        CreateTrackSend(pb_track, nil)
+        SetTrackSendInfo_Value(pb_track, 1, hw_idx, "I_DSTCHAN", hw_first - 1)
+        SetTrackSendInfo_Value(pb_track, 1, hw_idx, "I_SRCCHAN", 0)
+        SetMediaTrackInfo_Value(pb_track, "B_MUTE", 1)
+        SetTrackColor(pb_track, require("ReaClassical_Colors_Table").playback)
+        SetMediaTrackInfo_Value(pb_track, "B_SHOWINTCP", 0)
+        SetMediaTrackInfo_Value(pb_track, "B_SHOWINMIXER", 1)
+        if workflow == "Vertical" then
+            dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
+        else
+            dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
+        end
+        Undo_EndBlock("Add Playback Track", 0)
+        say("Playback track added (hardware output " .. hw_first .. "/" .. (hw_first + 1) .. ")")
+        return true
+    end
+
+    if cmd == "rmpb" then
+        local pb_list = get_special_tracks_by_type("playback")
+        if #pb_list == 0 then
+            say("No PLAYBACK track found")
+            return true
+        end
+        DeleteTrack(pb_list[1].track)
+        say("Playback track removed")
+        return true
+    end
+
     return false
 end
 
@@ -3546,7 +3675,7 @@ end
 -- "rcm", "N", "@N", "#N", "@" (the only aux), "#" (the only submix).
 function is_target(str)
     return str == "rcm" or str:match("^%d+$") ~= nil or str:match("^[%#@]%d*$") ~= nil
-        or str:match("^ref%d*$") ~= nil or str == "rt" or str == "live" or str == "lb"
+        or str:match("^ref%d*$") ~= nil or str == "rt" or str == "live" or str == "lb" or str == "pb"
 end
 
 function try_routing_fx(cmd)
@@ -5988,7 +6117,7 @@ end
 -- roomtone/live/REF/RCMASTER tracks, plus listenback (kept permanently
 -- armed for cue/foldback monitoring, so it never counts as "recording").
 local function rec_is_special_track(track)
-    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster" }
+    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback" }
     for _, key in ipairs(keys) do
         local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
         if val == "y" then return true end

@@ -31,7 +31,7 @@ local main, is_special_track, get_folder_parent, get_folder_tracks
 ---------------------------------------------------------------------
 
 function is_special_track(track)
-    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster" }
+    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback" }
     for _, key in ipairs(keys) do
         local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
         if val == "y" then return true end
