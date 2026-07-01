@@ -53,8 +53,10 @@ end
 
 set_action_options(2)
 
-package.path                  = ImGui_GetBuiltinPath() .. '/?.lua'
-local ImGui                   = require 'imgui' '0.10'
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = ImGui_GetBuiltinPath() .. '/?.lua;' .. script_path .. 'lib/?.lua;'
+local ImGui     = require 'imgui' '0.10'
+local snap_info = require 'ReaClassical_Mixer_Snapshot_Info'
 
 -- Global state
 local ctx                     = ImGui.CreateContext(script_name)
@@ -102,8 +104,12 @@ local recall_fx               = true
 local recall_sends            = true
 local recall_routing          = true
 
--- Column widths: #, Item Name, Date/Time, Notes, Delete
-local col_widths              = { 35, 250, 140, 350, 60 }
+-- Column widths: #, Item Name, Date/Time, Notes, Changes, Delete
+local col_widths              = { 35, 250, 140, 350, 90, 60 }
+
+-- "Changes from default" popup state, set when a row's Changes button is clicked
+local diff_popup_lines        = {}
+local diff_popup_title        = ""
 
 local last_project
 
@@ -121,11 +127,18 @@ end
 ---------------------------------------------------------------------
 
 function is_special_track(track)
-  local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
-  local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
-  local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
-
-  return mixer_state == "y" or aux_state == "y" or submix_state == "y"
+  local checks = {
+    "P_EXT:mixer", "P_EXT:rcmaster", "P_EXT:aux", "P_EXT:submix",
+    "P_EXT:roomtone", "P_EXT:rcref", "P_EXT:live", "P_EXT:listenback"
+  }
+  for _, key in ipairs(checks) do
+    local _, v = GetSetMediaTrackInfo_String(track, key, "", false)
+    if v == "y" then return true end
+  end
+  local _, nm = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+  nm = nm or ""
+  return nm:match("^M:") or nm:match("^RCMASTER") or
+         nm:match("^@") or nm:match("^#")
 end
 
 ---------------------------------------------------------------------
@@ -882,12 +895,20 @@ function draw_table()
     last_sort_direction = sort_direction
   end
 
-  if ImGui.BeginTable(ctx, "SnapshotsTable", 5, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg | ImGui.TableFlags_Resizable) then
+  -- OpenPopup's ID is hashed against the current ID stack, so it can't be
+  -- called from inside this row's PushID(i)/PushID("changes_btn") context
+  -- and still match BeginPopupModal's ID below (which is called with no
+  -- PushID active) -- defer the actual OpenPopup call until after the
+  -- table closes and the ID stack is back to that same base context.
+  local open_diff_popup = false
+
+  if ImGui.BeginTable(ctx, "SnapshotsTable", 6, ImGui.TableFlags_Borders | ImGui.TableFlags_RowBg | ImGui.TableFlags_Resizable) then
     ImGui.TableSetupColumn(ctx, "#", ImGui.TableColumnFlags_WidthFixed, col_widths[1])
     ImGui.TableSetupColumn(ctx, "Item Name", ImGui.TableColumnFlags_WidthFixed, col_widths[2])
     ImGui.TableSetupColumn(ctx, "Date/Time", ImGui.TableColumnFlags_WidthFixed, col_widths[3])
     ImGui.TableSetupColumn(ctx, "Notes", ImGui.TableColumnFlags_WidthStretch)
-    ImGui.TableSetupColumn(ctx, "Delete", ImGui.TableColumnFlags_WidthFixed, col_widths[5])
+    ImGui.TableSetupColumn(ctx, "Changes", ImGui.TableColumnFlags_WidthFixed, col_widths[5])
+    ImGui.TableSetupColumn(ctx, "Delete", ImGui.TableColumnFlags_WidthFixed, col_widths[6])
     ImGui.TableHeadersRow(ctx)
 
     for i, snap in ipairs(snapshots) do
@@ -977,8 +998,20 @@ function draw_table()
         save_snapshots_to_project()
       end
 
-      -- Column 4: Delete button
+      -- Column 4: Changes button -- shows captured values that differ from
+      -- default (0dB, center pan, unmuted, etc). FX params aren't included:
+      -- REAPER doesn't expose a plugin's true default via the API.
       ImGui.TableSetColumnIndex(ctx, 4)
+      ImGui.PushID(ctx, "changes_btn")
+      if ImGui.Button(ctx, "Changes") then
+        diff_popup_lines = snap_info.compute_snapshot_diff(snap)
+        diff_popup_title = display_name
+        open_diff_popup = true
+      end
+      ImGui.PopID(ctx)
+
+      -- Column 5: Delete button
+      ImGui.TableSetColumnIndex(ctx, 5)
       ImGui.PushID(ctx, "delete_btn")
       if ImGui.Button(ctx, "✕") then
         Undo_BeginBlock()
@@ -995,6 +1028,27 @@ function draw_table()
     end
 
     ImGui.EndTable(ctx)
+  end
+
+  if open_diff_popup then
+    ImGui.OpenPopup(ctx, "snapshot_diff_popup")
+  end
+
+  if ImGui.BeginPopupModal(ctx, "snapshot_diff_popup", true, ImGui.WindowFlags_AlwaysAutoResize) then
+    ImGui.Text(ctx, "Changes from default: " .. diff_popup_title)
+    ImGui.Separator(ctx)
+    if #diff_popup_lines == 0 then
+      ImGui.Text(ctx, "All captured values are at default")
+    else
+      for _, line in ipairs(diff_popup_lines) do
+        ImGui.Text(ctx, line)
+      end
+    end
+    ImGui.Separator(ctx)
+    if ImGui.Button(ctx, "Close", 120, 0) then
+      ImGui.CloseCurrentPopup(ctx)
+    end
+    ImGui.EndPopup(ctx)
   end
 end
 

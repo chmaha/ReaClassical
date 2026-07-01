@@ -24,11 +24,13 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
-local say = require("ReaClassical_Announce")
+local say       = require("ReaClassical_Announce")
+local snap_info = require("ReaClassical_Mixer_Snapshot_Info")
 
 local main, init_fx_list, init_param_list, handle_key, draw_window, insert_automation
 local strip_fx_name, announce_fx, announce_param
-local ensure_track_envelope, insert_track_param, insert_fx_param
+local ensure_track_envelope, insert_track_param, insert_fx_param, insert_send_param
+local init_send_list, announce_send
 local get_default_value, read_boundary, delete_overlapping_items
 
 ---------------------------------------------------------------------
@@ -37,6 +39,7 @@ local STATE_SOURCE      = "source"
 local STATE_TRACK_PARAM = "trackparam"
 local STATE_FX          = "fx"
 local STATE_PARAM       = "param"
+local STATE_SEND        = "send"
 local STATE_TYPE        = "type"
 local STATE_VALUE       = "value"
 local STATE_RAMP_IN     = "rampin"
@@ -51,8 +54,8 @@ local KEY_ENTER = 13
 local KEY_ESC   = 27
 local KEY_BACK  = 8
 
-local SOURCE_OPTIONS = { "track", "fx" }
-local SOURCE_LABELS  = { track = "Track parameters", fx = "FX" }
+local SOURCE_OPTIONS = { "track", "fx", "send" }
+local SOURCE_LABELS  = { track = "Track parameters", fx = "FX", send = "Sends" }
 
 -- env_name: exact name for GetTrackEnvelopeByName
 -- show_cmd: Main_OnCommand action that creates/shows the envelope
@@ -83,6 +86,8 @@ local fx_list         = {}
 local param_list      = {}
 local fx_sel          = 1
 local param_sel       = 1
+local send_list       = {}
+local send_sel        = 1
 local type_idx        = 1       -- default: Set snapshot value
 local value_str       = ""
 local confirmed_val   = 0
@@ -124,6 +129,46 @@ local function show_in_tcp(t)
     local mc_key  = (ms == "y") and ("mixer_tcp_visible_" .. guid) or ("tcp_visible_" .. guid)
     SetProjExtState(0, "ReaClassical_MissionControl", mc_key, "1")
     TrackList_AdjustWindows(false)
+end
+
+-- Speaks recorded take/item names without their zero-padding, mirroring
+-- announce_current_item() (Next/Previous Item or Fade.lua) and
+-- humanize_item_name() (ReaClassical_Terminal.lua): "008" -> "Take 8",
+-- "Beethoven_T006" -> "Beethoven take 6". Anything else passes through.
+local function humanize_item_name(name)
+    if not name or name == "" then return name end
+    local prefix, take_num = name:match("^(.+)_T(%d+)$")
+    if take_num then
+        return prefix .. " take " .. tonumber(take_num)
+    end
+    local only_num = name:match("^(%d+)$")
+    if only_num then
+        return "Take " .. tonumber(only_num)
+    end
+    return name
+end
+
+-- Snapshot-mode values are tied to a single selected media item rather than
+-- the edit cursor: after setting a live value, this folds that change into
+-- the same persistent Mixer Snapshot data snap.add/the GUI use (full
+-- recapture of every special track, keyed to the item's GUID), so it
+-- survives auto-recall instead of being forgotten. Caller must have already
+-- confirmed exactly one item is selected. Returns a short spoken suffix.
+local function persist_snapshot_for_selected_item()
+    local item = GetSelectedMediaItem(0, 0)
+    if not item then return "" end
+    local take = GetActiveTake(item)
+    local item_name = ""
+    if take then
+        _, item_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    end
+    local item_guid = BR_GetMediaItemGUID(item)
+    local bank = snap_info.get_current_bank()
+    local created = snap_info.capture_snapshot_for_item(item_guid, item_name, bank)
+    snap_info.ensure_daemon_running(script_path .. "ReaClassical_Mixer Snapshots Daemon.lua")
+
+    local display = item_name ~= "" and humanize_item_name(item_name) or "this item"
+    return (created and "Snapshot created for " or "Snapshot updated for ") .. display .. "."
 end
 
 local function db_to_linear(db)
@@ -207,9 +252,12 @@ local function find_normalized_for_display(display_num)
 end
 
 local function get_value_range()
-    if SOURCE_OPTIONS[source_idx] == "track" then
+    local source = SOURCE_OPTIONS[source_idx]
+    if source == "track" then
         local tp = TRACK_PARAMS[track_param_sel]
         return tp.disp_min, tp.disp_max
+    elseif source == "send" then
+        return -150, 12
     else
         local _, lo, hi = get_fx_normalized_info()
         return lo, hi
@@ -217,13 +265,16 @@ local function get_value_range()
 end
 
 local function get_value_prompt()
-    if SOURCE_OPTIONS[source_idx] == "track" then
+    local source = SOURCE_OPTIONS[source_idx]
+    if source == "track" then
         local tp   = TRACK_PARAMS[track_param_sel]
         local unit = tp.unit or ""
         if unit ~= "" then
             return string.format("Enter value %g to %g %s", tp.disp_min, tp.disp_max, unit)
         end
         return string.format("Enter value %g to %g", tp.disp_min, tp.disp_max)
+    elseif source == "send" then
+        return "Enter value -150 to 12 dB"
     else
         local is_norm, lo, hi, fmt0, fmt1 = get_fx_normalized_info()
         if is_norm then
@@ -254,7 +305,8 @@ end
 ---------------------------------------------------------------------
 
 function get_default_value()
-    if SOURCE_OPTIONS[source_idx] == "track" then
+    local source = SOURCE_OPTIONS[source_idx]
+    if source == "track" then
         local tp = TRACK_PARAMS[track_param_sel]
         local n = tp.env_name
         if n == "Volume" or n == "Volume (Pre-FX)" or n == "Trim Volume" then
@@ -267,6 +319,8 @@ function get_default_value()
             return 1 - GetMediaTrackInfo_Value(track, "B_MUTE") -- envelope: 1=unmuted
         end
         return 1.0
+    elseif source == "send" then
+        return GetTrackSendInfo_Value(track, 0, send_list[send_sel].raw_idx, "D_VOL")
     else
         local fx_raw    = fx_list[fx_sel].raw_idx
         local param_raw = param_list[param_sel].raw_idx
@@ -340,6 +394,28 @@ end
 
 ---------------------------------------------------------------------
 
+function init_send_list()
+    send_list = {}
+    local n = GetTrackNumSends(track, 0)
+    for i = 0, n - 1 do
+        local dest = BR_GetMediaTrackSendInfo_Track(track, 0, i, 1)
+        local _, nm = GetSetMediaTrackInfo_String(dest, "P_NAME", "", false)
+        if not nm or nm == "" then
+            nm = "Track " .. math.floor(GetMediaTrackInfo_Value(dest, "IP_TRACKNUMBER"))
+        end
+        send_list[#send_list + 1] = { raw_idx = i, name = nm }
+    end
+end
+
+---------------------------------------------------------------------
+
+function announce_send()
+    if #send_list == 0 then say("No sends on track") return end
+    say(send_list[send_sel].name)
+end
+
+---------------------------------------------------------------------
+
 function draw_window()
     gfx.set(0.12, 0.12, 0.12, 1)
     gfx.rect(0, 0, gfx.w, gfx.h, true)
@@ -359,6 +435,12 @@ function draw_window()
         end
     elseif state == STATE_PARAM then
         gfx.drawstr("[Param]  " .. param_list[param_sel].name)
+    elseif state == STATE_SEND then
+        if #send_list == 0 then
+            gfx.drawstr("No sends on track")
+        else
+            gfx.drawstr("[Send]  " .. send_list[send_sel].name)
+        end
     elseif state == STATE_VALUE then
         gfx.drawstr("[" .. TYPE_LABELS[TYPE_OPTIONS[type_idx]] .. "]  " .. (value_str == "" and "_" or value_str))
     elseif state == STATE_RAMP_IN then
@@ -430,24 +512,27 @@ function insert_track_param(display_val, ins_type)
 
     if ins_type == "snapshot" then
         if not tp.snap_key then
-            state = STATE_TYPE
-            say("Snapshot not available for " .. tp.label .. ". Choose Automation point or item")
+            state = STATE_TRACK_PARAM
+            say("Snapshot not available for " .. tp.label .. ". Choose a different parameter or set a time selection")
             return true
         end
         Undo_BeginBlock()
+        local msg
         if tp.is_mute then
             local muted = display_val < 0.5
             SetMediaTrackInfo_Value(track, "B_MUTE", muted and 1 or 0)
-            say(string.format("Set %s: %s", tp.label, muted and "muted" or "unmuted"))
+            msg = string.format("Set %s: %s", tp.label, muted and "muted" or "unmuted")
         else
             SetMediaTrackInfo_Value(track, tp.snap_key, display_to_snap_native(tp, display_val))
             if tp.is_vol then
-                say(string.format("Set %s to %.1f dB", tp.label, display_val))
+                msg = string.format("Set %s to %.1f dB", tp.label, display_val)
             else
-                say(string.format("Set %s to %.2f", tp.label, display_val))
+                msg = string.format("Set %s to %.2f", tp.label, display_val)
             end
         end
+        local snap_msg = persist_snapshot_for_selected_item()
         Undo_EndBlock("Set track param: " .. tp.label, -1)
+        say(msg .. (snap_msg ~= "" and (" " .. snap_msg) or ""))
         return false
     end
 
@@ -502,8 +587,10 @@ function insert_fx_param(display_val, ins_type)
 
     if ins_type == "snapshot" then
         TrackFX_SetParamNormalized(track, fx_raw, param_raw, normalized)
+        local snap_msg = persist_snapshot_for_selected_item()
         Undo_EndBlock("Set FX param: " .. fx_entry.name .. " > " .. param_entry.name, -1)
-        say(string.format("Set %s to %.3f", param_entry.name, display_val))
+        say(string.format("Set %s to %.3f.", param_entry.name, display_val)
+            .. (snap_msg ~= "" and (" " .. snap_msg) or ""))
         return false
     end
 
@@ -531,10 +618,31 @@ end
 
 ---------------------------------------------------------------------
 
+-- Sends only support an immediate "set now" value (matching how a sighted
+-- engineer drags the send fader), persisted to the selected item's
+-- snapshot -- no ramped automation items/points.
+function insert_send_param(display_val)
+    local send = send_list[send_sel]
+
+    Undo_BeginBlock()
+    SetTrackSendInfo_Value(track, 0, send.raw_idx, "D_VOL", db_to_linear(display_val))
+    local snap_msg = persist_snapshot_for_selected_item()
+    Undo_EndBlock("Set send level: " .. send.name, -1)
+
+    say(string.format("Set send to %s: %.1f dB.", send.name, display_val)
+        .. (snap_msg ~= "" and (" " .. snap_msg) or ""))
+    return false
+end
+
+---------------------------------------------------------------------
+
 function insert_automation(display_val)
+    local source = SOURCE_OPTIONS[source_idx]
     local ins_type = TYPE_OPTIONS[type_idx]
-    if SOURCE_OPTIONS[source_idx] == "track" then
+    if source == "track" then
         return insert_track_param(display_val, ins_type)
+    elseif source == "send" then
+        return insert_send_param(display_val)
     else
         return insert_fx_param(display_val, ins_type)
     end
@@ -572,9 +680,29 @@ local function handle_digits(char, str_var_getter, str_var_setter)
 end
 
 -- Determines mode from time selection state and goes straight to value entry.
--- No time selection → snapshot; time selection → automation item.
+-- No time selection → snapshot; time selection → automation item. Sends
+-- always use snapshot mode regardless of time selection (no ramped send
+-- automation). Snapshot mode requires exactly one selected media item,
+-- since the value gets tied to and persisted into that item's Mixer
+-- Snapshot rather than just poked live and forgotten.
 local function enter_value_state()
-    type_idx  = has_time_selection() and 3 or 1   -- "item" or "snapshot"
+    if SOURCE_OPTIONS[source_idx] == "send" then
+        type_idx = 1
+    else
+        type_idx = has_time_selection() and 3 or 1   -- "item" or "snapshot"
+    end
+
+    if type_idx == 1 then
+        local n = CountSelectedMediaItems(0)
+        if n == 0 then
+            say("Select a single media item first to set a snapshot value")
+            return
+        elseif n > 1 then
+            say("Select exactly one media item -- " .. n .. " are currently selected")
+            return
+        end
+    end
+
     value_str = ""
     state     = STATE_VALUE
     say(get_value_prompt())
@@ -584,14 +712,28 @@ end
 
 function handle_key(char)
     if state == STATE_SOURCE then
-        if char == KEY_UP or char == KEY_DOWN then
-            source_idx = source_idx == 1 and 2 or 1
+        if char == KEY_UP then
+            source_idx = source_idx > 1 and source_idx - 1 or #SOURCE_OPTIONS
+            say(SOURCE_LABELS[SOURCE_OPTIONS[source_idx]])
+        elseif char == KEY_DOWN then
+            source_idx = source_idx < #SOURCE_OPTIONS and source_idx + 1 or 1
             say(SOURCE_LABELS[SOURCE_OPTIONS[source_idx]])
         elseif char == KEY_ENTER then
-            if SOURCE_OPTIONS[source_idx] == "track" then
+            local source = SOURCE_OPTIONS[source_idx]
+            if source == "track" then
                 state = STATE_TRACK_PARAM
                 say("Track parameters. " .. TRACK_PARAMS[track_param_sel].label
                     .. ". Up and down to browse, Enter to select, Escape to go back")
+            elseif source == "send" then
+                init_send_list()
+                if #send_list == 0 then
+                    say("No sends on this track")
+                else
+                    send_sel = 1
+                    state = STATE_SEND
+                    say(send_list[1].name
+                        .. ". Up and down to browse, Enter to select, Escape to go back")
+                end
             else
                 if #fx_list == 0 then
                     say("No FX on this track")
@@ -660,6 +802,26 @@ function handle_key(char)
             announce_fx()
         end
 
+    elseif state == STATE_SEND then
+        if char == KEY_UP then
+            if #send_list > 0 then
+                send_sel = send_sel > 1 and send_sel - 1 or #send_list
+                announce_send()
+            end
+        elseif char == KEY_DOWN then
+            if #send_list > 0 then
+                send_sel = send_sel < #send_list and send_sel + 1 or 1
+                announce_send()
+            end
+        elseif char == KEY_ENTER then
+            if #send_list > 0 then
+                enter_value_state()
+            end
+        elseif char == KEY_ESC then
+            state = STATE_SOURCE
+            say(SOURCE_LABELS[SOURCE_OPTIONS[source_idx]])
+        end
+
     elseif state == STATE_VALUE then
         if char == 45 then
             if value_str == "" then
@@ -690,9 +852,13 @@ function handle_key(char)
                 end
             end
         elseif char == KEY_ESC then
-            if SOURCE_OPTIONS[source_idx] == "track" then
+            local source = SOURCE_OPTIONS[source_idx]
+            if source == "track" then
                 state = STATE_TRACK_PARAM
                 say(TRACK_PARAMS[track_param_sel].label)
+            elseif source == "send" then
+                state = STATE_SEND
+                announce_send()
             else
                 state = STATE_PARAM
                 announce_param()

@@ -26,6 +26,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
 local humanize_timestr = require("ReaClassical_Time_Naming")
+local snap_info = require("ReaClassical_Mixer_Snapshot_Info")
 
 local workflow = ""
 
@@ -4855,10 +4856,18 @@ function snap_deserialize_table(str)
 end
 
 function snap_is_special_track(track)
-    local _, mixer = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
-    local _, aux   = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
-    local _, sub   = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
-    return mixer == "y" or aux == "y" or sub == "y"
+    local checks = {
+        "P_EXT:mixer", "P_EXT:rcmaster", "P_EXT:aux", "P_EXT:submix",
+        "P_EXT:roomtone", "P_EXT:rcref", "P_EXT:live", "P_EXT:listenback"
+    }
+    for _, key in ipairs(checks) do
+        local _, v = GetSetMediaTrackInfo_String(track, key, "", false)
+        if v == "y" then return true end
+    end
+    local _, nm = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    nm = nm or ""
+    return nm:match("^M:") or nm:match("^RCMASTER") or
+           nm:match("^@") or nm:match("^#")
 end
 
 function snap_find_track_by_guid(guid)
@@ -5774,6 +5783,53 @@ function try_snapshots(cmd)
         snap_recall_snapshot(snap, flags)
         local name = snap.item_name ~= "" and humanize_item_name(snap.item_name) or snap.item_guid:sub(1, 13)
         say("Recalled snapshot " .. n .. ": " .. name)
+        return true
+    end
+
+    -- snap.diff (bare) — speak which track params/sends in the snapshot at
+    -- the current cursor/item position differ from default (0dB, center
+    -- pan, unmuted, etc); snap.diff=N below does the same for a specific
+    -- numbered snapshot. FX params aren't diffed -- REAPER doesn't expose a
+    -- plugin's true default value via the API.
+    if cmd == "snap.diff" then
+        local bank = snap_get_current_bank()
+        local snaps = snap_load_bank(bank)
+        local item = GetSelectedMediaItem(0, 0)
+        local snap = item and snap_find_by_item_guid(snaps, BR_GetMediaItemGUID(item))
+        if not snap then
+            snap = snap_find_at_cursor(snaps, GetCursorPosition())
+        end
+        if not snap then
+            say("No snapshot at cursor position")
+            return true
+        end
+        local lines = snap_info.compute_snapshot_diff(snap)
+        if #lines == 0 then
+            say("All captured values are at default")
+        else
+            say("Changes from default: " .. table.concat(lines, ". "))
+        end
+        return true
+    end
+
+    -- snap.diff=N — same as snap.diff, for a specific numbered snapshot
+    local diff_n = cmd:match("^snap%.diff=(%d+)$")
+    if diff_n then
+        local bank = snap_get_current_bank()
+        local snaps = snap_load_bank(bank)
+        snap_sort_by_timeline(snaps)
+        local n = tonumber(diff_n)
+        local snap = snaps[n]
+        if not snap then
+            say("No snapshot " .. n .. " in bank " .. bank)
+            return true
+        end
+        local lines = snap_info.compute_snapshot_diff(snap)
+        if #lines == 0 then
+            say("Snapshot " .. n .. ": all captured values are at default")
+        else
+            say("Snapshot " .. n .. " changes from default: " .. table.concat(lines, ". "))
+        end
         return true
     end
 
