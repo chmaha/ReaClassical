@@ -153,10 +153,10 @@ function split_items_at_markers()
     local original_item_end = original_item_start + original_item_length
 
     local marker_data = {}
-    local _, num_markers, _ = CountProjectMarkers(0)
+    local _, num_markers, num_regions = CountProjectMarkers(0)
     local has_named_markers = false
 
-    for i = 0, num_markers - 1 do
+    for i = 0, num_markers + num_regions - 1 do
         local retval, isrgn, pos, _, name, markrgnindex = EnumProjectMarkers(i)
         if retval and not isrgn then
             if pos > original_item_start and pos < original_item_end then
