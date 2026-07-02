@@ -6,8 +6,8 @@
 # Use Linux temp directory for collection
 dir=$(mktemp -d)
 echo "Using temporary directory: $dir"
-# Source directory
-src="$HOME/Desktop/ReaClassical_26/"
+# Source directory (optional first arg overrides the default)
+src="${1:-$HOME/Desktop/ReaClassical_26/}"
 
 # List of files and directories to copy
 files="BR.ini
