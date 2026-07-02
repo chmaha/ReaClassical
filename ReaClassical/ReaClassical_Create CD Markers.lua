@@ -1820,6 +1820,7 @@ function open_render_dialog()
     -- else the user has configured (stems, bounds, etc.) in the render dialog
     local current_settings = GetSetProjectInfo(0, "RENDER_SETTINGS", 0, false)
     GetSetProjectInfo(0, "RENDER_SETTINGS", current_settings | 512, true)
+    GetSetProjectInfo(0, "RENDER_DITHER", 2, true) -- triangular dither; user can change in the dialog
     Main_OnCommand(40015, 0) -- File: Render project to disk...
 end
 
