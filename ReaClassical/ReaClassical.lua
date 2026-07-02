@@ -3,6 +3,7 @@
 @version 26.7.1
 @changelog
   DDP Metadata Editor: Automatically embed metadata when using render buttons
+  DDP Metadata Editor: Set dither on custom render button
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
