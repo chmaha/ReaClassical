@@ -25,7 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main, source_markers, select_matching_folder
 local adaptive_delete, count_selected_media_items, get_selected_media_item_at
 local nudge_xfades_at_source_boundaries, get_folder_items_at_midpoint
-local select_midpoint_peers
+local select_midpoint_peers, find_folder_by_prefix
 
 ---------------------------------------------------------------------
 
@@ -97,15 +97,38 @@ end
 
 ---------------------------------------------------------------------
 
-function select_matching_folder()
-    local _, stored = GetProjExtState(0, "ReaClassical", "SourceInTrackNum")
-    local folder_number = tonumber(stored)
-    if not folder_number then return end
+function find_folder_by_prefix(prefix)
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
-        if GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") == folder_number then
-            SetOnlyTrackSelected(track)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            local _, name = GetTrackName(track)
+            if name:match("^(.-):" ) == prefix then return track end
+        end
+    end
+    return nil
+end
+
+---------------------------------------------------------------------
+
+function select_matching_folder()
+    -- Vertical: derive folder from marker label prefix
+    local _, nm, nr = CountProjectMarkers(0)
+    for i = 0, nm + nr - 1 do
+        local _, _, _, _, raw_label, id = EnumProjectMarkers2(0, i)
+        if id == 998 or id == 999 then
+            local prefix = raw_label:match("^(.-):")
+            if prefix then
+                local track = find_folder_by_prefix(prefix)
+                if track then SetOnlyTrackSelected(track); return end
+            end
             break
+        end
+    end
+    -- Horizontal: only one folder exists, select it
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            SetOnlyTrackSelected(track); return
         end
     end
 end
