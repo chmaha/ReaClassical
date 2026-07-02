@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.7
+@version 26.7.1
 @changelog
-  Add generic Lua error guards
-  Create CD Markers: Move files to export subfolders
-  Create CD Markers: Ensure dither is set for render buttons
-  NEW: Peak and Over Check function
-  Snapshot Manager: Select item when clicking on table row
-  Split Item at markers: account for regions when counting marker indexes
-  S-D edits: Find folder prefix from marker every time
+  DDP Metadata Editor: Automatically embed metadata when using render buttons
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
