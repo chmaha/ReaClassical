@@ -45,6 +45,7 @@ local track_has_valid_items, track_has_any_named_items, create_metadata_report_a
 local render_ddp_preset, render_cue_audio_preset, render_flac_preset, render_opus_preset
 local render_mp3_preset
 local open_render_dialog
+local apply_render_metadata
 local get_export_subdir, get_export_dir, get_active_folder_track
 
 ---------------------------------------------------------------------
@@ -1609,6 +1610,102 @@ end
 
 ---------------------------------------------------------------------
 
+-- Embeds track/album metadata into the rendered files via REAPER's
+-- RENDER_METADATA project info (File > Render Metadata equivalent).
+-- Per-region fields use REAPER's own render wildcards so each rendered
+-- file gets its own values; album-wide fields are written as literal text
+-- since there's no per-render-file wildcard for them.
+function apply_render_metadata()
+    local proj = 0
+    local folder_track = get_active_folder_track()
+    local genre = "Classical"
+    local album_title, album_performer, album_catalog
+
+    if folder_track then
+        local album_str = get_info(folder_track)
+        if album_str then
+            local album = parse_item_name(album_str, true)
+            if album.genre and album.genre ~= "" then genre = album.genre end
+            album_title = album.title
+            album_performer = album.performer
+            album_catalog = album.catalog
+        end
+    end
+
+    local function tag(key, value)
+        GetSetProjectInfo_String(proj, "RENDER_METADATA", key .. "|" .. value, true)
+    end
+
+    tag("APE:Artist", "$marker(PERFORMER)[|]")
+    tag("APE:Composer", "$marker(COMPOSER)[|]")
+    tag("APE:Genre", genre)
+    tag("APE:ISRC", "$marker(ISRC)[|]")
+    tag("APE:Title", "$region")
+    tag("APE:Track", "$markernumber")
+    tag("ASWG:artist", "$marker(PERFORMER)[|]")
+    tag("ASWG:composer", "$marker(COMPOSER)[|]")
+    tag("ASWG:genre", genre)
+    tag("ASWG:isrcId", "$marker(ISRC)[|]")
+    tag("ASWG:project", "$region")
+    tag("AXML:ISRC", "$marker(ISRC)[|]")
+    tag("CAFINFO:artist", "$marker(PERFORMER)[|]")
+    tag("CAFINFO:composer", "$marker(COMPOSER)[|]")
+    tag("CAFINFO:genre", genre)
+    tag("CAFINFO:title", "$region")
+    tag("CAFINFO:track number", "$markernumber")
+    tag("CART:Artist", "$marker(PERFORMER)[|]")
+    tag("CART:Category", genre)
+    tag("CART:CutID", "$markernumber")
+    tag("CART:Title", "$region")
+    tag("CUE:DISC_PERFORMER", "$marker(PERFORMER)[|]")
+    tag("CUE:DISC_TITLE", "$region")
+    tag("CUE:INDEX", "$markernumber")
+    tag("ID3:TCOM", "$marker(COMPOSER)[|]")
+    tag("ID3:TCON", genre)
+    tag("ID3:TIT2", "$region")
+    tag("ID3:TPE1", "$marker(PERFORMER)[|]")
+    tag("ID3:TRCK", "$markernumber")
+    tag("ID3:TSRC", "$marker(ISRC)[|]")
+    tag("IFF:AUTH", "$marker(PERFORMER)[|]")
+    tag("IFF:NAME", "$region")
+    tag("INFO:IART", "$marker(PERFORMER)[|]")
+    tag("INFO:IGNR", genre)
+    tag("INFO:INAM", "$region")
+    tag("INFO:TRCK", "$markernumber")
+    tag("IXML:PROJECT", "$region")
+    tag("VORBIS:ARTIST", "$marker(PERFORMER)[|]")
+    tag("VORBIS:COMPOSER", "$marker(COMPOSER)[|]")
+    tag("VORBIS:GENRE", genre)
+    tag("VORBIS:ISRC", "$marker(ISRC)[|]")
+    tag("VORBIS:PERFORMER", "$marker(PERFORMER)[|]")
+    tag("VORBIS:TITLE", "$region")
+    tag("VORBIS:TRACKNUMBER", "$markernumber")
+    tag("XMP:dc/title", "$region")
+    tag("XMP:dm/artist", "$marker(PERFORMER)[|]")
+    tag("XMP:dm/composer", "$marker(COMPOSER)[|]")
+    tag("XMP:dm/genre", genre)
+    tag("XMP:dm/trackNumber", "$markernumber")
+
+    if album_title and album_title ~= "" then
+        tag("ID3:TALB", album_title)
+        tag("VORBIS:ALBUM", album_title)
+        tag("INFO:IPRD", album_title)
+        tag("APE:Album", album_title)
+    end
+    if album_performer and album_performer ~= "" then
+        tag("ID3:TPE2", album_performer)
+        tag("VORBIS:ALBUMARTIST", album_performer)
+        tag("APE:Album Artist", album_performer)
+    end
+    if album_catalog and album_catalog ~= "" then
+        tag("ID3:TXXX:CATALOGNUMBER", album_catalog)
+        tag("VORBIS:CATALOGNUMBER", album_catalog)
+        tag("APE:Catalog", album_catalog)
+    end
+end
+
+---------------------------------------------------------------------
+
 function render_ddp_preset()
     local proj = 0
 
@@ -1662,13 +1759,14 @@ function render_flac_preset()
     GetSetProjectInfo(proj, "RENDER_SRATE", 44100, true)
     GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
     GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions
-    GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)   -- master mix
-    GetSetProjectInfo(proj, "RENDER_DITHER",   2, true)   -- triangular dither
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 512, true) -- master mix + embed metadata
+    GetSetProjectInfo(proj, "RENDER_DITHER",   2,   true) -- triangular dither
 
     local export_dir = get_export_dir()
     GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
     GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$format_$samplerate_$bitdepth/$regionnumber $region", true)
 
+    apply_render_metadata()
     Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
 end
 
@@ -1683,13 +1781,13 @@ function render_opus_preset()
     GetSetProjectInfo(proj, "RENDER_SRATE", 48000, true)
     GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
     GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions/markers
-    GetSetProjectInfo(proj, "RENDER_SETTINGS", 3, true)
-    GetSetProjectInfo(proj, "RENDER_DITHER",   2, true) -- triangular dither
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 3 | 512, true) -- embed metadata
 
     local export_dir = get_export_dir()
     GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
     GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$format_160/$regionnumber $region", true)
 
+    apply_render_metadata()
     Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
 end
 
@@ -1704,19 +1802,24 @@ function render_mp3_preset()
     GetSetProjectInfo(proj, "RENDER_SRATE", 44100, true)
     GetSetProjectInfo(proj, "RENDER_CHANNELS", 2, true)
     GetSetProjectInfo(proj, "RENDER_BOUNDSFLAG", 3, true) -- all project regions
-    GetSetProjectInfo(proj, "RENDER_SETTINGS", 0, true)   -- master mix
-    GetSetProjectInfo(proj, "RENDER_DITHER",   2, true)   -- triangular dither
+    GetSetProjectInfo(proj, "RENDER_SETTINGS", 512, true) -- master mix + embed metadata
 
     local export_dir = get_export_dir()
     GetSetProjectInfo_String(proj, "RENDER_FILE", export_dir, true)
     GetSetProjectInfo_String(proj, "RENDER_PATTERN", "$format_320/$regionnumber $region", true)
 
+    apply_render_metadata()
     Main_OnCommand(42230, 0) -- File: Render project, using the most recent render settings
 end
 
 ---------------------------------------------------------------------
 
 function open_render_dialog()
+    apply_render_metadata()
+    -- Enable "embed metadata if format supports" without disturbing whatever
+    -- else the user has configured (stems, bounds, etc.) in the render dialog
+    local current_settings = GetSetProjectInfo(0, "RENDER_SETTINGS", 0, false)
+    GetSetProjectInfo(0, "RENDER_SETTINGS", current_settings | 512, true)
     Main_OnCommand(40015, 0) -- File: Render project to disk...
 end
 
