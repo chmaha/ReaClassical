@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.7.1
+@version 26.7.2
 @changelog
-  DDP Metadata Editor: Automatically embed metadata when using render buttons
-  DDP Metadata Editor: Set dither on custom render button
+  Add generic S-D marker in/out functions
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
@@ -11,6 +10,8 @@
   [main] ReaClassical_Add CD Marker Offsets.lua
   [main] ReaClassical_Add Destination IN marker.lua
   [main] ReaClassical_Add Destination OUT Marker.lua
+  [nomain] ReaClassical_Add S-D marker IN.lua
+  [nomain] ReaClassical_Add S-D Marker OUT.lua
   [nomain] ReaClassical_Add Live Bounce Track.lua
   [nomain] ReaClassical_Add Ref Track.lua
   [nomain] ReaClassical_Add RoomTone Track.lua
