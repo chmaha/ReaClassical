@@ -157,9 +157,9 @@ $sevenZipZip = Join-Path $tempDir "7zip.zip"
 $sevenZipPath = Join-Path $tempDir "7zip"
 
 if ($arch -eq "x86") {
-    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/v27/7zip32.zip"
+    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip32.zip"
 } else {
-    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/v27/7zip.zip"
+    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip.zip"
 }
 
 Invoke-WebRequest -Uri $sevenZipUrl -OutFile $sevenZipZip -UseBasicParsing
