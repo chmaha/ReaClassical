@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.7.2
+@version 26.7.3
 @changelog
-  Add generic S-D marker in/out functions
+  Generic S-D marker in/out functions: remove announcing for RC26 version
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
