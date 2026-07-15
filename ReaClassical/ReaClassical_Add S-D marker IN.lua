@@ -24,9 +24,6 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
-local say = require("ReaClassical_Announce")
-local humanize_timestr = require("ReaClassical_Time_Naming")
-local humanize_folder_phrase = require("ReaClassical_Folder_Naming")
 
 local main, get_color_table, add_destination_in, add_source_in
 local folder_check, get_track_number, get_track_prefix
@@ -132,9 +129,6 @@ function add_destination_in(cur_pos, workflow, selected_track)
     local marker_label = (workflow == "Horizontal") and "DEST-IN" or (track_prefix .. ":DEST-IN")
     AddProjectMarker2(0, false, cur_pos, 0, marker_label, 996, marker_color)
     SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
-    local folder_phrase = humanize_folder_phrase(track_prefix)
-    say("Added destination in @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1))
-        .. (folder_phrase ~= "" and (" in " .. folder_phrase) or ""))
 end
 
 ---------------------------------------------------------------------
@@ -182,9 +176,6 @@ function add_source_in(cur_pos, workflow, track, selected_track, moveable_dest, 
     local marker_label = (workflow == "Horizontal") and "SOURCE-IN" or (track_prefix .. ":SOURCE-IN")
     AddProjectMarker2(0, false, cur_pos, 0, marker_label, 998, marker_color)
     SetProjExtState(0, "ReaClassical", "SourceInTrackNum", tostring(track_number))
-    local folder_phrase = humanize_folder_phrase(track_prefix)
-    say("Added source in @ " .. humanize_timestr(format_timestr_pos(cur_pos, "", -1))
-        .. (folder_phrase ~= "" and (" in " .. folder_phrase) or ""))
 end
 
 ---------------------------------------------------------------------
