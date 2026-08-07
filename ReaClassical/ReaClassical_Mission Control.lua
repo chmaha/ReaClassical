@@ -1192,12 +1192,12 @@ function main()
                     -- Add Fiedler if missing
                     if not fiedler_idx then
                         if rcfader_idx then
-                            -- Add Fiedler right after RCFader
-                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false,
+                            -- Add Fiedler right after RCFader.
+                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam", false,
                                 -1000 - (rcfader_idx + 1))
                         else
                             -- This shouldn't happen, but add at end as fallback
-                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam (Fiedler Audio)", false, -1)
+                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam", false, -1)
                         end
                     end
                 end
@@ -3584,10 +3584,10 @@ function check_dolby_atmos_beam_available()
         return false
     end
 
-    -- Search for the plugin
+    -- Search for the plugin (case-insensitive)
     local found = false
     for line in file:lines() do
-        if line:match("Dolby Atmos Beam") then
+        if line:lower():match("dolby atmos beam") then
             found = true
             break
         end
