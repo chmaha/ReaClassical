@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.7.3
+@version 26.8
 @changelog
-  Generic S-D marker in/out functions: remove announcing for RC26 version
+  Make Fiedler plugin search and entry more fuzzy
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
