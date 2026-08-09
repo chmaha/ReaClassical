@@ -84,4 +84,26 @@ Remove send version of Reverb]]></changelog>
       </version>
     </reapack>
   </category>
+  </category>
+  <category name="Sonata Reverb">
+    <reapack name="SonataReverb.jsfx" type="effect" desc="Sonata Reverb (chmaha)">
+      <version name="1.5" author="chmaha" time="2026-02-01T04:51:26Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/165ee8e894a878cfc7e1cd80452ce3a327556543/Sonata%20Reverb/SonataReverb.jsfx</source>
+      </version>
+      <version name="1.6" author="chmaha" time="2026-02-01T15:26:36Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/0c03c1a7d0123f3b66fc5ccc8cc96a248a1f7c92/Sonata%20Reverb/SonataReverb.jsfx</source>
+      </version>
+      <version name="1.7" author="chmaha" time="2026-02-06T14:28:06Z">
+        <source>https://github.com/chmaha/ReaClassical/raw/e84aebdfc9ef786d0cd42312cba45118a8b4ade3/Sonata%20Reverb/SonataReverb.jsfx</source>
+      </version>
+      <version name="1.8" author="chmaha" time="2026-03-02T20:23:56Z">
+        <changelog><![CDATA[Add random autopan of low-level dry signal for added liveliness]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/8d858a897c349effbcd5bf01b05077ede519cee2/Sonata%20Reverb/SonataReverb.jsfx</source>
+      </version>
+      <version name="1.9" author="chmaha" time="2026-03-25T03:10:46Z">
+        <changelog><![CDATA[Stop autopan when set to 100% dry]]></changelog>
+        <source>https://github.com/chmaha/ReaClassical/raw/7d29d30a8548d142f4a9d62c66660e8840432f11/Sonata%20Reverb/SonataReverb.jsfx</source>
+      </version>
+    </reapack>
+  </category>
 </index>
