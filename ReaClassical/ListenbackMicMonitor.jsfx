@@ -2,7 +2,7 @@ NoIndex: true
 desc:Listenback Monitor (chmaha)
 author: chmaha
 about:
-  Released under GPLv3 license
+  Released under a proprietary license
 
 slider1:0<0,1,1{Stopped/Paused Only,Always On}>Mode
 
