@@ -1,9 +1,14 @@
 # Script to install a TESTING (pre-release) build of ReaClassical on Windows
 # Works for all architectures that are compatible with REAPER
 #
-# Same as docs/win, except pinned to the public repo's permanent
-# "testing" branch (always the in-development next version) rather than
-# main (always the current release) - lets testers get an always-fresh
+# This private repo only ever tracks ONE state - whatever's currently
+# in development - so this file is the single canonical source, synced
+# verbatim by admin_scripts/copy_to_public.sh into the public repo's
+# main branch at docs/testing/win (GitHub Pages only serves from
+# main:/docs, and testing's own docs/ is deliberately empty - see that
+# script's own comment). Pinned to the public repo's permanent "testing"
+# branch (always the in-development next version) rather than main
+# (always the current release) - lets testers get an always-fresh
 # in-development build via the normal online-install flow, no offline-
 # installer-bundle-building needed. Not linked from anywhere public -
 # relayed to testers directly, same as the temporary unlock password.
