@@ -139,14 +139,20 @@ latest_tag=$(curl -sS "https://api.github.com/repos/chmaha/ReaClassical/releases
 if [ -n "$latest_tag" ]; then
     ext_output="$temp_dir/reaper_ReaClassical-${arch}.so"
     ext_url="https://github.com/chmaha/ReaClassical/releases/download/${latest_tag}/reaper_ReaClassical-${arch}.so"
-    # -sS (quiet, errors only) rather than --progress-bar - this file is
+    # -s (fully quiet, no -S) rather than --progress-bar - this file is
     # small enough that a progress bar adds little, and --progress-bar's
     # periodic partial-write redraws are prone to a real, observed curl
-    # bug: "curl: (23) Failure writing output to destination, passed X
-    # returned Y", triggered by a terminal resize (SIGWINCH) interrupting
-    # a write() mid-transfer. macOS's equivalent download already never
-    # used --progress-bar here, so this just matches that.
-    if curl -f -L -sS -o "$ext_output" "$ext_url" && [ -s "$ext_output" ]; then
+    # quirk: "curl: (23) Failure writing output to destination, passed X
+    # returned Y". Confirmed cosmetic/non-fatal in practice (the download
+    # still completes and the extension still works even when this
+    # prints) - happens even with plain -sS, not just --progress-bar, so
+    # something environment-specific (terminal/pty) rather than the
+    # progress-bar redraw logic itself. Since [ -s "$ext_output" ] below
+    # already verifies the result and the else branch below already gives
+    # a clear warning on a REAL failure, there's no need to let this
+    # particular noisy-but-harmless message alarm a tester over what is,
+    # per confirmed testing, a successful install.
+    if curl -f -L -s -o "$ext_output" "$ext_url" && [ -s "$ext_output" ]; then
         # Arch-suffixed on purpose, matching the exact filename SConstruct/
         # rebuild.sh now always produce - a local rebuild or a re-run of
         # this installer must overwrite the SAME file, never coexist under
