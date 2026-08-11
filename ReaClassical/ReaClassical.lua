@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 26.8
+@version 26.8.1
 @changelog
-  Make Fiedler plugin search and entry more fuzzy
+  Mission Control: Use EnumInstalledFX to search for dolby beam plugin
 @metapackage
 @provides
   [main] ReaClassical_3-point Insert Edit.lua
