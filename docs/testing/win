@@ -181,13 +181,18 @@ Get-ChildItem -Path $reaperExtract -Recurse | Move-Item -Destination $tempInstal
 # ------------------------
 Write-Host "Downloading ReaClassical components..."
 $resOutput = Join-Path $tempDir "Resource_Folder_Base.zip"
-$upOutput  = Join-Path $tempDir "UP_Windows-$arch.zip"
 
 Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/$branch/Installers/Resource_Folder_Base.zip" -OutFile $resOutput -UseBasicParsing
-Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/$branch/Installers/UserPlugins/UP_Windows-$arch.zip" -OutFile $upOutput -UseBasicParsing
-
 Expand-Archive -Path $resOutput -DestinationPath $tempInstallRoot -Force
-Expand-Archive -Path $upOutput  -DestinationPath (Join-Path $tempInstallRoot "UserPlugins") -Force
+
+# UserPlugins/ is just the loose ReaImGui binary now, no zip wrapper - a
+# single-file zip wasn't earning its keep once SWS/ReaPack were dropped
+# from it (see admin_scripts/copy_to_public.sh's own comment). Always
+# reaper_imgui-x64.dll regardless of detected $arch - same emulated-x64
+# reasoning as the ReaClassical extension binary below.
+$upDest = Join-Path $tempInstallRoot "UserPlugins"
+New-Item -Path $upDest -ItemType Directory -Force | Out-Null
+Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/$branch/Installers/UserPlugins/reaper_imgui-x64.dll" -OutFile (Join-Path $upDest "reaper_imgui-x64.dll") -UseBasicParsing
 
 # ------------------------
 # Download ReaClassical extension

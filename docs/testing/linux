@@ -117,12 +117,15 @@ sleep 2
 res_output="$temp_dir/Resource_Folder_Base.zip"
 res_url="https://github.com/chmaha/ReaClassical/raw/${branch}/Installers/Resource_Folder_Base.zip"
 curl -L -o "$res_output" --progress-bar "$res_url"
-up_output="$temp_dir/UP_Linux-${arch}.zip"
-up_url="https://github.com/chmaha/ReaClassical/raw/${branch}/Installers/UserPlugins/UP_Linux-${arch}.zip"
-curl -L -o "$up_output" --progress-bar "$up_url"
 sleep 2
 unzip -q "$temp_dir/Resource_Folder_Base.zip" -d "${rcfolder}/"
-unzip -q "$temp_dir/UP_Linux-${arch}.zip" -d "${rcfolder}/UserPlugins/"
+
+# UserPlugins/ is just the loose ReaImGui binary now, no zip wrapper - a
+# single-file zip wasn't earning its keep once SWS/ReaPack were dropped
+# from it (see admin_scripts/copy_to_public.sh's own comment).
+mkdir -p "${rcfolder}/UserPlugins"
+imgui_url="https://github.com/chmaha/ReaClassical/raw/${branch}/Installers/UserPlugins/reaper_imgui-${arch}.so"
+curl -L -o "${rcfolder}/UserPlugins/reaper_imgui-${arch}.so" --progress-bar "$imgui_url"
 
 echo "Downloading the ReaClassical extension..."
 sleep 1
