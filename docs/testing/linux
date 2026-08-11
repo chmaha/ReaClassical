@@ -139,20 +139,22 @@ latest_tag=$(curl -sS "https://api.github.com/repos/chmaha/ReaClassical/releases
 if [ -n "$latest_tag" ]; then
     ext_output="$temp_dir/reaper_ReaClassical-${arch}.so"
     ext_url="https://github.com/chmaha/ReaClassical/releases/download/${latest_tag}/reaper_ReaClassical-${arch}.so"
-    # -s (fully quiet, no -S) rather than --progress-bar - this file is
-    # small enough that a progress bar adds little, and --progress-bar's
-    # periodic partial-write redraws are prone to a real, observed curl
-    # quirk: "curl: (23) Failure writing output to destination, passed X
-    # returned Y". Confirmed cosmetic/non-fatal in practice (the download
-    # still completes and the extension still works even when this
-    # prints) - happens even with plain -sS, not just --progress-bar, so
-    # something environment-specific (terminal/pty) rather than the
-    # progress-bar redraw logic itself. Since [ -s "$ext_output" ] below
-    # already verifies the result and the else branch below already gives
-    # a clear warning on a REAL failure, there's no need to let this
-    # particular noisy-but-harmless message alarm a tester over what is,
-    # per confirmed testing, a successful install.
-    if curl -f -L -s -o "$ext_output" "$ext_url" && [ -s "$ext_output" ]; then
+    # 2>/dev/null - a real, repeatedly-confirmed curl quirk on at least one
+    # real tester's machine: "curl: (23) Failure writing output to
+    # destination, passed X returned Y" printed on this exact download,
+    # different X/Y each time, yet the download completes and the
+    # extension works fine regardless (confirmed via real testing) - so
+    # this is cosmetic/non-fatal, not a real transfer failure. Neither -s
+    # nor -sS suppress it (both tried, both still printed it), meaning
+    # this specific message bypasses curl's normal silent/show-error
+    # gating entirely - it's a raw stderr print from curl's own write-
+    # callback error path, not one of the messages -s/-S control. A
+    # direct shell-level stderr redirect is the only thing that actually
+    # silences it. Safe to do here: [ -s "$ext_output" ] below already
+    # verifies the real result, and the else branch already gives a
+    # tester a clear, correct warning on a genuine failure - nothing here
+    # relies on curl's own stderr for anything.
+    if curl -f -L -s -o "$ext_output" "$ext_url" 2>/dev/null && [ -s "$ext_output" ]; then
         # Arch-suffixed on purpose, matching the exact filename SConstruct/
         # rebuild.sh now always produce - a local rebuild or a re-run of
         # this installer must overwrite the SAME file, never coexist under
