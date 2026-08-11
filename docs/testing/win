@@ -214,7 +214,13 @@ try {
     $extOutput = Join-Path $tempDir "reaper_ReaClassical-x64.dll"
     $extUrl = "https://github.com/chmaha/ReaClassical/releases/download/$($latestRelease.tag_name)/reaper_ReaClassical-x64.dll"
     Invoke-WebRequest -Uri $extUrl -OutFile $extOutput -UseBasicParsing
-    Copy-Item -Path $extOutput -Destination (Join-Path $tempInstallRoot "UserPlugins\reaper_ReaClassical.dll") -Force
+    # Arch-suffixed on purpose, matching the exact filename SConstruct/
+    # rebuild.sh now always produce - a local rebuild or a re-run of this
+    # installer must overwrite the SAME file, never coexist under a
+    # different name (REAPER would load both as separate extensions and
+    # silently reject every duplicate custom_action Register() call from
+    # whichever loads second - a real repro this session).
+    Copy-Item -Path $extOutput -Destination (Join-Path $tempInstallRoot "UserPlugins\reaper_ReaClassical-x64.dll") -Force
 } catch {
     Write-Host "`nWarning: could not download the ReaClassical extension - REAPER will start without ReaClassical loaded."
     Write-Host "Retry later via the ReaClassical website, or contact chmaha for help.`n"

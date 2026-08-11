@@ -140,7 +140,13 @@ if [ -n "$latest_tag" ]; then
     ext_output="$temp_dir/reaper_ReaClassical-${arch}.so"
     ext_url="https://github.com/chmaha/ReaClassical/releases/download/${latest_tag}/reaper_ReaClassical-${arch}.so"
     if curl -f -L -o "$ext_output" --progress-bar "$ext_url" && [ -s "$ext_output" ]; then
-        cp "$ext_output" "${rcfolder}/UserPlugins/reaper_ReaClassical.so"
+        # Arch-suffixed on purpose, matching the exact filename SConstruct/
+        # rebuild.sh now always produce - a local rebuild or a re-run of
+        # this installer must overwrite the SAME file, never coexist under
+        # a different name (REAPER would load both as separate extensions
+        # and silently reject every duplicate custom_action Register()
+        # call from whichever loads second - a real repro this session).
+        cp "$ext_output" "${rcfolder}/UserPlugins/reaper_ReaClassical-${arch}.so"
     else
         printf "\nWarning: could not download the ReaClassical extension - REAPER will start without ReaClassical loaded.\n"
         printf "Retry later via the ReaClassical website, or contact chmaha for help.\n\n"
