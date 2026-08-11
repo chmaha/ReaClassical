@@ -1,23 +1,18 @@
 # Script to install ReaClassical on Windows
 # Works for all architectures that are compatible with REAPER
 
-# Copyright (C) 2022–2025 chmaha
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <https://www.gnu.org/licenses/>.
+# Copyright (C) 2022–2026 chmaha
+# All rights reserved.
+#
+# This program is proprietary software. Unauthorized copying,
+# modification, distribution, or use of this file, via any medium,
+# is strictly prohibited without prior written permission from the
+# copyright holder.
 
 $ErrorActionPreference = "Stop"
 
 # Version
-$rcver = "26"
+$rcver = "27"
 $tempDir = $null
 
 # ------------------------
@@ -56,7 +51,11 @@ $systemArch = $env:PROCESSOR_ARCHITECTURE
 switch ($systemArch) {
     "AMD64" { $arch = "x64" }
     "ARM64" { $arch = "arm64ec" }
-    "x86"   { $arch = "x86" }
+    "x86"   {
+        Write-Host "`nError: ReaClassical only supports 64-bit systems."
+        Write-Host "This machine (32-bit) is not supported."
+        exit 1
+    }
     default {
         Write-Host "Unknown architecture: $systemArch"
         exit 1
@@ -110,7 +109,7 @@ Check-Internet
 # ------------------------
 # Get tested REAPER version
 # ------------------------
-$verTxt = "https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+$verTxt = "https://raw.githubusercontent.com/chmaha/ReaClassical/v27/tested_reaper_ver.txt"
 $verContent = Invoke-WebRequest -Uri $verTxt -UseBasicParsing | Select-Object -ExpandProperty Content
 $ver = ($verContent -split "`n" | Select-String -Pattern "====" -Context 0,1).Context.PostContext[0].Trim()
 $major = $ver.Split('.')[0]
@@ -141,26 +140,17 @@ switch ($arch) {
         $reaperFile = "reaper$major$minor`_win11_arm64ec_beta-install.exe"
         $reaperUrl  = "https://www.reaper.fm/files/$major.x/$reaperFile"
     }
-    "x86" {
-        $reaperFile = "reaper$major$minor-install.exe"
-        $reaperUrl  = "https://www.reaper.fm/files/$major.x/$reaperFile"
-    }
 }
 
 $reaperOutput = Join-Path $tempDir $reaperFile
 Invoke-WebRequest -Uri $reaperUrl -OutFile $reaperOutput -UseBasicParsing
 
 # ------------------------
-# Download portable 7zip (architecture-appropriate)
+# Download portable 7zip
 # ------------------------
 $sevenZipZip = Join-Path $tempDir "7zip.zip"
 $sevenZipPath = Join-Path $tempDir "7zip"
-
-if ($arch -eq "x86") {
-    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip32.zip"
-} else {
-    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip.zip"
-}
+$sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip.zip"
 
 Invoke-WebRequest -Uri $sevenZipUrl -OutFile $sevenZipZip -UseBasicParsing
 Expand-Archive -Path $sevenZipZip -DestinationPath $sevenZipPath -Force
@@ -180,11 +170,30 @@ Write-Host "Downloading ReaClassical components..."
 $resOutput = Join-Path $tempDir "Resource_Folder_Base.zip"
 $upOutput  = Join-Path $tempDir "UP_Windows-$arch.zip"
 
-Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/main/Installers/Resource_Folder_Base.zip" -OutFile $resOutput -UseBasicParsing
-Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/UP_Windows-$arch.zip" -OutFile $upOutput -UseBasicParsing
+Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/v27/Installers/Resource_Folder_Base.zip" -OutFile $resOutput -UseBasicParsing
+Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/v27/Installers/UserPlugins/UP_Windows-$arch.zip" -OutFile $upOutput -UseBasicParsing
 
 Expand-Archive -Path $resOutput -DestinationPath $tempInstallRoot -Force
 Expand-Archive -Path $upOutput  -DestinationPath (Join-Path $tempInstallRoot "UserPlugins") -Force
+
+# ------------------------
+# Download ReaClassical extension
+# ------------------------
+# win64 and windows-arm64ec share the identical reaper_ReaClassical-x64.dll
+# (see admin_scripts/publish_release.sh), so this is the same asset for
+# both $arch cases. Wrapped in try/catch, not left to the global trap at
+# the top of this script - a failed extension download shouldn't blow away
+# the whole install (REAPER + resources are still independently useful).
+Write-Host "Downloading the ReaClassical extension..."
+$extOutput = Join-Path $tempDir "reaper_ReaClassical-x64.dll"
+$extUrl = "https://github.com/chmaha/ReaClassical/releases/latest/download/reaper_ReaClassical-x64.dll"
+try {
+    Invoke-WebRequest -Uri $extUrl -OutFile $extOutput -UseBasicParsing
+    Copy-Item -Path $extOutput -Destination (Join-Path $tempInstallRoot "UserPlugins\reaper_ReaClassical.dll") -Force
+} catch {
+    Write-Host "`nWarning: could not download the ReaClassical extension - REAPER will start without ReaClassical loaded."
+    Write-Host "Retry later via the ReaClassical website, or contact chmaha for help.`n"
+}
 
 # ------------------------
 # Copy Effects from InstallData
@@ -203,9 +212,17 @@ if (Test-Path $installDataEffects) {
 }
 
 # ------------------------
+# MOVE final install to user-selected destination BEFORE patching reaper.ini,
+# so the saved absolute theme path points at the real install location
+# rather than the temp workdir.
+# ------------------------
+Write-Host "`nFinalizing installation..."
+Move-Item -Path $tempInstallRoot -Destination $finalInstallPath -Force
+
+# ------------------------
 # Modify reaper.ini
 # ------------------------
-$iniPath = Join-Path $tempInstallRoot "reaper.ini"
+$iniPath = Join-Path $finalInstallPath "reaper.ini"
 
 # Add theme
 $iniContent = Get-Content $iniPath
@@ -213,7 +230,7 @@ $newContent = @()
 foreach ($line in $iniContent) {
     $newContent += $line
     if ($line -eq "[REAPER]") {
-        $newContent += "lastthemefn5=$tempInstallRoot\ColorThemes\ReaClassical.ReaperTheme"
+        $newContent += "lastthemefn5=$finalInstallPath\ColorThemes\ReaClassical.ReaperTheme"
     }
 }
 $newContent | Set-Content $iniPath
@@ -228,12 +245,6 @@ foreach ($line in $iniContent) {
     }
 }
 $newContent | Set-Content $iniPath
-
-# ------------------------
-# MOVE final install to user-selected destination
-# ------------------------
-Write-Host "`nFinalizing installation..."
-Move-Item -Path $tempInstallRoot -Destination $finalInstallPath -Force
 
 Write-Host "`nReaClassical installation complete!"
 Write-Host "Installed to: $finalInstallPath"

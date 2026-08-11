@@ -3,20 +3,15 @@
 # Script to install ReaClassical on Linux
 # Works for all architectures that are compatible with REAPER
 
-# Copyright (C) 2022–2025 chmaha
+# Copyright (C) 2022–2026 chmaha
+# All rights reserved.
+#
+# This program is proprietary software. Unauthorized copying,
+# modification, distribution, or use of this file, via any medium,
+# is strictly prohibited without prior written permission from the
+# copyright holder.
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-rcver="26"
+rcver="27"
 
 cleanup() {
     if [ -n "$temp_dir" ] && [ -d "$temp_dir" ]; then
@@ -38,12 +33,20 @@ trap cleanup EXIT
 
 check_internet
 
-ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/main/tested_reaper_ver.txt"
+ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/v27/tested_reaper_ver.txt"
 ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
 
 major=$(echo $ver | awk -F. '{print $1}')
 minor=$(echo $ver | awk -F. '{print $2}')
 arch=$(uname -m)
+
+case "$arch" in
+    i686|i386|armv7l)
+        printf "\nError: ReaClassical only supports 64-bit systems.\n"
+        printf "This machine (%s) is not supported.\n\n" "$arch"
+        exit 1
+        ;;
+esac
 
 printf "Welcome to the ReaClassical installer...\n\n"
 sleep 2
@@ -100,14 +103,25 @@ rmdir "${rcfolder}/REAPER"
 echo "Downloading ReaClassical files from Github..."
 sleep 2
 res_output="$temp_dir/Resource_Folder_Base.zip"
-res_url="https://github.com/chmaha/ReaClassical/raw/main/Installers/Resource_Folder_Base.zip"
+res_url="https://github.com/chmaha/ReaClassical/raw/v27/Installers/Resource_Folder_Base.zip"
 curl -L -o "$res_output" --progress-bar "$res_url"
 up_output="$temp_dir/UP_Linux-${arch}.zip"
-up_url="https://github.com/chmaha/ReaClassical/raw/main/Installers/UserPlugins/UP_Linux-${arch}.zip"
+up_url="https://github.com/chmaha/ReaClassical/raw/v27/Installers/UserPlugins/UP_Linux-${arch}.zip"
 curl -L -o "$up_output" --progress-bar "$up_url"
 sleep 2
 unzip -q "$temp_dir/Resource_Folder_Base.zip" -d "${rcfolder}/"
 unzip -q "$temp_dir/UP_Linux-${arch}.zip" -d "${rcfolder}/UserPlugins/"
+
+echo "Downloading the ReaClassical extension..."
+sleep 1
+ext_output="$temp_dir/reaper_ReaClassical-${arch}.so"
+ext_url="https://github.com/chmaha/ReaClassical/releases/latest/download/reaper_ReaClassical-${arch}.so"
+if curl -f -L -o "$ext_output" --progress-bar "$ext_url" && [ -s "$ext_output" ]; then
+    cp "$ext_output" "${rcfolder}/UserPlugins/reaper_ReaClassical.so"
+else
+    printf "\nWarning: could not download the ReaClassical extension - REAPER will start without ReaClassical loaded.\n"
+    printf "Retry later via the ReaClassical website, or contact chmaha for help.\n\n"
+fi
 
 # Copy Effects from InstallData
 echo "Copying Effects from InstallData..."
