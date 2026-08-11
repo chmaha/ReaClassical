@@ -66,7 +66,6 @@ local show_folder_browser = false
 local folder_browser_type = nil
 local folder_browser_path = ""
 local folder_browser_dirs = {}
-local os_separator = package.config:sub(1, 1)
 
 package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
@@ -82,6 +81,7 @@ local folder_tcp_visible = {}
 local mixer_tcp_visible = {}
 local pending_hw_routing_changes = {}
 local has_dolby_atmos_beam = false
+local dolby_atmos_beam_fx_name = nil
 local add_special_counts = {}
 
 local selected_folder
@@ -1133,7 +1133,7 @@ function main()
                         local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
                         if fx_name:match("RCFader") then
                             rcfader_idx = fx_idx
-                        elseif fx_name:match("VST3: Dolby Atmos Beam") then
+                        elseif fx_name:lower():match("dolby atmos beam") then
                             fiedler_idx = fx_idx
                         end
                     end
@@ -1158,7 +1158,7 @@ function main()
                         -- Find Fiedler again
                         for fx_idx = 0, fx_count - 1 do
                             local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
-                            if fx_name:match("VST3: Dolby Atmos Beam") then
+                            if fx_name:lower():match("dolby atmos beam") then
                                 fiedler_idx = fx_idx
                                 break
                             end
@@ -1184,7 +1184,7 @@ function main()
                         local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
                         if fx_name:match("RCFader") then
                             rcfader_idx = fx_idx
-                        elseif fx_name:match("VST3: Dolby Atmos Beam") then
+                        elseif fx_name:lower():match("dolby atmos beam") then
                             fiedler_idx = fx_idx
                         end
                     end
@@ -1193,11 +1193,11 @@ function main()
                     if not fiedler_idx then
                         if rcfader_idx then
                             -- Add Fiedler right after RCFader.
-                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam", false,
+                            TrackFX_AddByName(track, dolby_atmos_beam_fx_name, false,
                                 -1000 - (rcfader_idx + 1))
                         else
                             -- This shouldn't happen, but add at end as fallback
-                            TrackFX_AddByName(track, "VST3: Dolby Atmos Beam", false, -1)
+                            TrackFX_AddByName(track, dolby_atmos_beam_fx_name, false, -1)
                         end
                     end
                 end
@@ -1235,7 +1235,7 @@ function main()
 
                             -- Enable RCFader
                             TrackFX_SetEnabled(track, fx_idx, true)
-                        elseif fx_name:match("VST3: Dolby Atmos Beam") then
+                        elseif fx_name:lower():match("dolby atmos beam") then
                             -- Enable Dolby Atmos Beam
                             TrackFX_SetEnabled(track, fx_idx, true)
                         end
@@ -1258,7 +1258,7 @@ function main()
                     -- Find and disable both RCFader and Dolby Atmos Beam
                     for fx_idx = 0, fx_count - 1 do
                         local _, fx_name = TrackFX_GetFXName(track, fx_idx, "")
-                        if fx_name:match("RCFader") or fx_name:match("VST3: Dolby Atmos Beam") then
+                        if fx_name:match("RCFader") or fx_name:lower():match("dolby atmos beam") then
                             TrackFX_SetEnabled(track, fx_idx, false)
                         end
                     end
@@ -3043,7 +3043,7 @@ function init()
         aux_volume_values[i] = GetMediaTrackInfo_Value(aux_info.track, "D_VOL")
     end
     is_valid_project = true
-    has_dolby_atmos_beam = check_dolby_atmos_beam_available()
+    has_dolby_atmos_beam, dolby_atmos_beam_fx_name = check_dolby_atmos_beam_available()
     return true
 end
 
@@ -3574,27 +3574,33 @@ end
 ---------------------------------------------------------------------
 
 function check_dolby_atmos_beam_available()
-    -- Get REAPER resource path
-    local resource_path = GetResourcePath()
-    local ini_file = resource_path .. os_separator .. "reaper-vstplugins64.ini"
-
-    -- Try to open the file
-    local file = io.open(ini_file, "r")
-    if not file then
-        return false
-    end
-
-    -- Search for the plugin (case-insensitive)
-    local found = false
-    for line in file:lines() do
-        if line:lower():match("dolby atmos beam") then
-            found = true
+    -- Query REAPER's live installed-FX database directly instead of parsing
+    -- the VST cache ini file, whose name/format varies by platform and
+    -- REAPER version and isn't guaranteed to contain plain-text plugin names.
+    -- Matches any format (VST3, AU, etc.) and returns the exact name REAPER
+    -- reports, since that's what TrackFX_AddByName needs to instantiate it.
+    -- Prefer VST3 when both VST3 and AU are installed, since VST3 is the
+    -- only format available on Windows too (keeps behavior cross-platform).
+    local index = 0
+    local fallback_name = nil
+    while true do
+        local retval, name = EnumInstalledFX(index)
+        if not retval then
             break
         end
+        local lower_name = name:lower()
+        if lower_name:match("dolby atmos beam") then
+            if lower_name:match("^vst3:") then
+                return true, name
+            end
+            fallback_name = fallback_name or name
+        end
+        index = index + 1
     end
-
-    file:close()
-    return found
+    if fallback_name then
+        return true, fallback_name
+    end
+    return false, nil
 end
 
 ---------------------------------------------------------------------
