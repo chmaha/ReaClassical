@@ -150,7 +150,23 @@ echo "Downloading the ReaClassical extension..."
 # means releases/latest/download/ (what the regular docs/macos uses)
 # would never find one either. Query the full /releases list instead
 # (sorted newest-first, includes prereleases) and take the first tag.
-latest_tag=$(curl -sS "https://api.github.com/repos/chmaha/ReaClassical/releases" \
+#
+# Root cause of a real, repeatedly-confirmed bug found and fixed on
+# docs/testing/linux (identical pattern here): curl was piped directly
+# into `grep -m1`, which exits the instant it finds its first match.
+# Once this repo has more than a couple releases, curl is very often
+# still mid-write on a later chunk of the (much larger) full JSON
+# response when grep's early exit closes the pipe - a genuine SIGPIPE/
+# EPIPE, which curl reports as "curl: (23) Failure writing output to
+# destination, passed X returned Y". Fixed by capturing the full
+# response into a variable first (curl runs to its own natural
+# completion, nothing downstream can close early on it) and only
+# grepping the already-complete string afterward. ?per_page=1 also trims
+# the actual request to just the one release this needs (this endpoint's
+# pagination doesn't filter prereleases, unlike /latest, so this still
+# behaves identically to before).
+releases_json=$(curl -sS "https://api.github.com/repos/chmaha/ReaClassical/releases?per_page=1")
+latest_tag=$(echo "$releases_json" \
     | grep -m1 -oE '"tag_name":[[:space:]]*"[^"]+"' | grep -oE '"[^"]+"$' | tr -d '"')
 if [ -n "$latest_tag" ]; then
     ext_output="$temp_dir/reaper_ReaClassical-$arch.dylib"

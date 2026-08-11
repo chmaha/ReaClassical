@@ -134,27 +134,32 @@ sleep 1
 # means releases/latest/download/ (what the regular docs/linux uses)
 # would never find one either. Query the full /releases list instead
 # (sorted newest-first, includes prereleases) and take the first tag.
-latest_tag=$(curl -sS "https://api.github.com/repos/chmaha/ReaClassical/releases" \
+#
+# Root cause of a real, repeatedly-confirmed bug found and fixed here:
+# curl was piped directly into `grep -m1`, which exits the instant it
+# finds its first match. Once this repo has more than a couple releases,
+# curl is very often still mid-write on a later chunk of the (much
+# larger) full JSON response when grep's early exit closes the pipe -
+# a genuine SIGPIPE/EPIPE, which curl reports as "curl: (23) Failure
+# writing output to destination, passed X returned Y". Harmless in
+# effect (grep had already captured its match before exiting, so
+# $latest_tag still came out correct), but a real broken-pipe race, not
+# a spurious message - confirmed via direct reproduction and isolating
+# curl's own stderr for exactly this call. Fixed by capturing the full
+# response into a variable first (curl runs to its own natural
+# completion, nothing downstream can close early on it) and only
+# grepping the already-complete string afterward - no live pipe to
+# curl exists during the grep step at all. ?per_page=1 also trims the
+# actual request to just the one release this needs (this endpoint's
+# pagination doesn't filter prereleases, unlike /latest, so this still
+# behaves identically to before).
+releases_json=$(curl -sS "https://api.github.com/repos/chmaha/ReaClassical/releases?per_page=1")
+latest_tag=$(echo "$releases_json" \
     | grep -m1 -oE '"tag_name":[[:space:]]*"[^"]+"' | grep -oE '"[^"]+"$' | tr -d '"')
 if [ -n "$latest_tag" ]; then
     ext_output="$temp_dir/reaper_ReaClassical-${arch}.so"
     ext_url="https://github.com/chmaha/ReaClassical/releases/download/${latest_tag}/reaper_ReaClassical-${arch}.so"
-    # 2>/dev/null - a real, repeatedly-confirmed curl quirk on at least one
-    # real tester's machine: "curl: (23) Failure writing output to
-    # destination, passed X returned Y" printed on this exact download,
-    # different X/Y each time, yet the download completes and the
-    # extension works fine regardless (confirmed via real testing) - so
-    # this is cosmetic/non-fatal, not a real transfer failure. Neither -s
-    # nor -sS suppress it (both tried, both still printed it), meaning
-    # this specific message bypasses curl's normal silent/show-error
-    # gating entirely - it's a raw stderr print from curl's own write-
-    # callback error path, not one of the messages -s/-S control. A
-    # direct shell-level stderr redirect is the only thing that actually
-    # silences it. Safe to do here: [ -s "$ext_output" ] below already
-    # verifies the real result, and the else branch already gives a
-    # tester a clear, correct warning on a genuine failure - nothing here
-    # relies on curl's own stderr for anything.
-    if curl -f -L -s -o "$ext_output" "$ext_url" 2>/dev/null && [ -s "$ext_output" ]; then
+    if curl -f -L -o "$ext_output" --progress-bar "$ext_url" && [ -s "$ext_output" ]; then
         # Arch-suffixed on purpose, matching the exact filename SConstruct/
         # rebuild.sh now always produce - a local rebuild or a re-run of
         # this installer must overwrite the SAME file, never coexist under
