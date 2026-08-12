@@ -23,6 +23,14 @@
 
 $ErrorActionPreference = "Stop"
 
+# Force TLS 1.2 explicitly - older/enterprise Windows images (e.g. Win10
+# LTSC) don't always default Invoke-WebRequest/.NET to a protocol GitHub
+# actually accepts, and the failure can be intermittent per-request rather
+# than blanket (some downloads succeed, a later one to the same domain
+# family fails) - a real report this session matched exactly that pattern.
+# Harmless to force unconditionally even where TLS 1.2 already works.
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 # Version
 $rcver = "testing"
 $branch = "testing"

@@ -176,7 +176,9 @@ latest_tag=$(echo "$releases_json" \
 if [ -n "$latest_tag" ]; then
     ext_output="$temp_dir/reaper_ReaClassical-$arch.dylib"
     ext_url="https://github.com/chmaha/ReaClassical/releases/download/${latest_tag}/reaper_ReaClassical-$arch.dylib"
-    if curl -f -L -o "$ext_output" "$ext_url" && [ -s "$ext_output" ]; then
+    curl -f -L -o "$ext_output" "$ext_url"
+    curl_status=$?
+    if [ $curl_status -eq 0 ] && [ -s "$ext_output" ]; then
         # Arch-suffixed on purpose, matching the exact filename SConstruct/
         # rebuild.sh now always produce - a local rebuild or a re-run of
         # this installer must overwrite the SAME file, never coexist under
@@ -185,7 +187,17 @@ if [ -n "$latest_tag" ]; then
         # call from whichever loads second - a real repro this session).
         cp "$ext_output" "$rcfolder/UserPlugins/reaper_ReaClassical-$arch.dylib"
     else
-        printf "\nWarning: could not download the ReaClassical extension - REAPER will start without ReaClassical loaded.\n"
+        # Surfaces the real cause instead of a generic message - a repeat
+        # tester hitting GitHub's unauthenticated API rate limit (60/hr
+        # per IP, real and easy to hit during a heavy testing session -
+        # confirmed via this exact endpoint's own x-ratelimit-limit
+        # header) looks completely different (curl exit 22, HTTP 403/429)
+        # from the release's own asset simply not being fully uploaded
+        # yet if this ran mid-publish (curl exit 22, HTTP 404) - both
+        # previously indistinguishable from this one message alone.
+        printf "\nWarning: could not download the ReaClassical extension (curl exit %s) - REAPER will start without ReaClassical loaded.\n" "$curl_status"
+        printf "URL attempted: %s\n" "$ext_url"
+        printf "If this keeps happening, it may be GitHub's API rate limit (resets hourly) - wait a bit and retry.\n"
         printf "Retry later via the ReaClassical website, or contact chmaha for help.\n\n"
     fi
 else
