@@ -47,7 +47,12 @@ trap cleanup EXIT
 check_internet
 
 ver_txt="https://raw.githubusercontent.com/chmaha/ReaClassical/${branch}/tested_reaper_ver.txt"
-ver=$(curl -sS "$ver_txt" | awk '/====/{getline; print}')
+# --retry 3 --retry-delay 2 on every curl call in this script - see the
+# identical comment in docs/macos for the real report this addresses
+# (curl exit 56/CURLE_RECV_ERROR, most likely a fresh publish's CDN not
+# having fully propagated yet) and why this is cheap insurance
+# regardless of the exact cause.
+ver=$(curl -sS --retry 3 --retry-delay 2 "$ver_txt" | awk '/====/{getline; print}')
 
 major=$(echo $ver | awk -F. '{print $1}')
 minor=$(echo $ver | awk -F. '{print $2}')
@@ -101,7 +106,7 @@ echo "Downloading REAPER from reaper.fm..."
 sleep 2
 reaper_output="$temp_dir/reaper${major}${minor}_linux_${arch}.tar.xz"
 reaper_url="https://reaper.fm/files/${major}.x/reaper${major}${minor}_linux_${arch}.tar.xz"
-curl -L -o "$reaper_output" --progress-bar "$reaper_url"
+curl -L --retry 3 --retry-delay 2 -o "$reaper_output" --progress-bar "$reaper_url"
 
 # Check if a ReaClassical folder already exists
 if [ -d "$rcfolder" ]; then
@@ -121,7 +126,7 @@ echo "Downloading ReaClassical files from Github..."
 sleep 2
 res_output="$temp_dir/Resource_Folder_Base.zip"
 res_url="https://github.com/chmaha/ReaClassical/raw/${branch}/Installers/Resource_Folder_Base.zip"
-curl -L -o "$res_output" --progress-bar "$res_url"
+curl -L --retry 3 --retry-delay 2 -o "$res_output" --progress-bar "$res_url"
 sleep 2
 unzip -q "$temp_dir/Resource_Folder_Base.zip" -d "${rcfolder}/"
 
@@ -130,7 +135,7 @@ unzip -q "$temp_dir/Resource_Folder_Base.zip" -d "${rcfolder}/"
 # from it (see admin_scripts/copy_to_public.sh's own comment).
 mkdir -p "${rcfolder}/UserPlugins"
 imgui_url="https://github.com/chmaha/ReaClassical/raw/${branch}/Installers/UserPlugins/reaper_imgui-${arch}.so"
-curl -L -o "${rcfolder}/UserPlugins/reaper_imgui-${arch}.so" --progress-bar "$imgui_url"
+curl -L --retry 3 --retry-delay 2 -o "${rcfolder}/UserPlugins/reaper_imgui-${arch}.so" --progress-bar "$imgui_url"
 
 echo "Downloading the ReaClassical extension..."
 sleep 1
@@ -158,13 +163,13 @@ sleep 1
 # actual request to just the one release this needs (this endpoint's
 # pagination doesn't filter prereleases, unlike /latest, so this still
 # behaves identically to before).
-releases_json=$(curl -sS "https://api.github.com/repos/chmaha/ReaClassical/releases?per_page=1")
+releases_json=$(curl -sS --retry 3 --retry-delay 2 "https://api.github.com/repos/chmaha/ReaClassical/releases?per_page=1")
 latest_tag=$(echo "$releases_json" \
     | grep -m1 -oE '"tag_name":[[:space:]]*"[^"]+"' | grep -oE '"[^"]+"$' | tr -d '"')
 if [ -n "$latest_tag" ]; then
     ext_output="$temp_dir/reaper_ReaClassical-${arch}.so"
     ext_url="https://github.com/chmaha/ReaClassical/releases/download/${latest_tag}/reaper_ReaClassical-${arch}.so"
-    if curl -f -L -o "$ext_output" --progress-bar "$ext_url" && [ -s "$ext_output" ]; then
+    if curl -f -L --retry 3 --retry-delay 2 -o "$ext_output" --progress-bar "$ext_url" && [ -s "$ext_output" ]; then
         # Arch-suffixed on purpose, matching the exact filename SConstruct/
         # rebuild.sh now always produce - a local rebuild or a re-run of
         # this installer must overwrite the SAME file, never coexist under
