@@ -5,9 +5,6 @@
   Welcome to ReaClassical 27
 @metapackage
 @provides
-  ReaClassical_Loader.lua
-  ReaClassical_Cipher.lua
-  [nomain] ReaClassical_XFM Mode Daemon.lua
   [main] ReaClassical_*.lua
   ReaClassical_*.lua.rc
   [main=crossfade_editor] crossfade_editor/*.lua
