@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" commit="cfb3eff1494bd4cd95208ddb75d2ece1cb198e5d">
+<index version="1" commit="cfb3eff1494bd4cd95208ddb75d2ece1cb198e5d" name="chmaha Scripts">
   <category name="RCPlugs">
     <reapack name="rcplugs.jsfx" type="effect" desc="RCPlugs">
       <metadata>
