@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.40
+@version 27.0.41
 @changelog
-  Pack encrypted scripts into 3 shared bundles instead of ~350 individual .lua.rc files
+  Fix real ~300-400x bundle-load performance regression: independent per-entry encryption instead of one encrypted stream per bundle
 @metapackage
 @provides
   [main] ReaClassical_*.lua
