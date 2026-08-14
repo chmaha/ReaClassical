@@ -1,17 +1,17 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.39
+@version 27.0.40
 @changelog
-  Welcome to ReaClassical 27
+  Pack encrypted scripts into 3 shared bundles instead of ~350 individual .lua.rc files
 @metapackage
 @provides
   [main] ReaClassical_*.lua
-  ReaClassical_*.lua.rc
+  core.lua.rc
   [main=crossfade_editor] crossfade_editor/*.lua
-  crossfade_editor/*.lua.rc
+  xfgui.lua.rc
   [nomain] lib/ReaClassical_Mixer Snapshots Daemon.lua
   [nomain] lib/ReaClassical_Record Panel Daemon.lua
-  lib/*.lua.rc
+  lib.lua.rc
   [jsfx] *.jsfx
   [rpp] *.RPP
   [theme] ReaClassical*.ReaperThemeZip
