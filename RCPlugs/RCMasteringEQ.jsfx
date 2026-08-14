@@ -4,7 +4,8 @@ author: chmaha
 about:
   Uses DSP from airwindows "Hull2" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Hull2 (MIT License)
-  JSFX version released under GPLv3 license
+  JSFX version released under a proprietary license
+  (the airwindows DSP portion above remains MIT licensed, see LICENSE_MIT)
 
 slider1:0<0,1,1{Classical,Full}>Range
 slider2:0<-1,1,0.01>High

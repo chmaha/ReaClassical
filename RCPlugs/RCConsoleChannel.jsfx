@@ -4,7 +4,8 @@ author: chmaha
 about:
   Uses DSP from airwindows "Desk" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Deck (MIT License)
-  JSFX version released under GPLv3 license
+  JSFX version released under a proprietary license
+  (the airwindows DSP portion above remains MIT licensed, see LICENSE_MIT)
 
 in_pin:left input
 in_pin:right input

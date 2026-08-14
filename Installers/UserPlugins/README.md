@@ -1,7 +1,8 @@
 ReaImgui plugins downloaded from https://github.com/cfillion/reaimgui.
 Source code can be found in the same location.
 
-SWS and ReaPack were both removed from these bundles - ReaClassical no
-longer depends on either (native replacements for the SWS functions it
-used to call, and its own self-update mechanism in place of ReaPack).
+ReaPack plugins downloaded from https://reapack.com/.
+Source code can be found at https://codeberg.org/cfillion/reapack.
 
+SWS plugins downloaded from https://www.sws-extension.org/download/pre-release/.
+Source code can be found at https://github.com/reaper-oss/sws.

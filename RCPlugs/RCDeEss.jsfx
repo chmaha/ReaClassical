@@ -4,7 +4,8 @@ author: chmaha
 about:
   Uses DSP from airwindows "DeEss" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/DeEss (MIT License)
-  JSFX version released under GPLv3 license
+  JSFX version released under a proprietary license
+  (the airwindows DSP portion above remains MIT licensed, see LICENSE_MIT)
 
 slider1:0<0,1,0.01>Intensity
 slider2:-24<-48,0,0.01>Max DeEss (dB)

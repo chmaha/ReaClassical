@@ -4,7 +4,8 @@ author: chmaha
 about:
   Uses DSP from airwindows "PurestGain" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/PurestGain (MIT License)
-  JSFX version released under GPLv3 license
+  JSFX version released under a proprietary license
+  (the airwindows DSP portion above remains MIT licensed, see LICENSE_MIT)
 
 slider1:0<-150,12,0.01>Gain (dB)
 

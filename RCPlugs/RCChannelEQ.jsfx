@@ -4,7 +4,10 @@ author: chmaha
 about:
   Uses DSP from airwindows "Baxandall" by Chris Johnson
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/Baxandall (MIT License)
-  JSFX version released under GPLv3 license
+  Also uses the RBJ Highpass/Lowpass Filter DSP by Thomas Scott Stillwell
+  (BSD-style license, full notice below the code)
+  JSFX version released under a proprietary license
+  (the airwindows and Stillwell DSP portions above remain under their original licenses)
 
 slider1:20<0,1000,10>HPF
 slider2:20000<1000,22000,100>LPF

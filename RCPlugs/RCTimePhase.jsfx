@@ -4,7 +4,8 @@ author: chmaha
 about:
   Uses DSP from airwindows "SampleDelay" by Chris Johnson with adaptation by chmaha
   https://github.com/airwindows/airwindows/tree/master/plugins/LinuxVST/src/SampleDelay (MIT License)
-  JSFX version released under GPLv3 license
+  JSFX version released under a proprietary license
+  (the airwindows DSP portion above remains MIT licensed, see LICENSE_MIT)
 
 slider1:0<0,20,0.01>Horizontal Spot to Main Pair (m)
 slider2:0<0,10,0.01>Differential Height of Main Pair (m)

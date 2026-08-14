@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 2.7
+@version 2.8
 @changelog
-  Add ability to disable ReaVision modules
+  Update licenses
 @metapackage
 @provides
   RCComp.jsfx

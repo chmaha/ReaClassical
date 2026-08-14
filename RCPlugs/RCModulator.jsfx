@@ -3,7 +3,7 @@ desc: RCModulator (chmaha)
 author: chmaha
 about:
   Add after 100% wet static convolution reverb to give some movement to the tail
-  JSFX released under GPLv3 license
+  JSFX released under a proprietary license
 
 slider1:0.12<0,1,0.01>LFO Frequency 1 (Hz)
 slider2:0.31<0,1,0.01>LFO Frequency 2 (Hz)

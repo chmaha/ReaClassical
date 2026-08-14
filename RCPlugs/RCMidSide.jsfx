@@ -2,7 +2,7 @@ NoIndex: true
 desc:RCMidSide (chmaha)
 author: chmaha
 about:
-  Released under GPLv3 license
+  Released under a proprietary license
 
 slider1:1<0,2,1{Encode,Decode,Encode-Decode}>Mode
 slider2:0<-24,12,1>Mid Gain (dB)

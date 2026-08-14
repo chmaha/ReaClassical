@@ -2,8 +2,9 @@ NoIndex: true
 desc:RCCompressor (chmaha)
 author: chmaha
 about:
-  Express Bus Compressor (Stillwell) modified for classical music use by chmaha
-  See below the code for copyright notices, list of conditions and disclaimers
+  Uses DSP from Thomas Scott Stillwell's Express Bus Compressor
+  (BSD-style license, full notice below the code), modified for classical music use by chmaha
+  chmaha's modifications released under a proprietary license
 
 slider1:-30<-60,0,0.1>Threshold (dB)
 slider2:1.1<1.1,1.3,0.01>Ratio
