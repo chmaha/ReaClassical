@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.43
+@version 27.0.44
 @changelog
-  Add ReaClassical_Update ReaClassical.lua: real top-level launcher for lib/'s update logic
-  ReaClassical_Loader.lua: mask the unlock password field
+  Sync ReaClassical-kb.ini/-menu.ini/.ini from the live install via copy_from_live.sh
 @metapackage
 @provides
   [main] ReaClassical_*.lua
