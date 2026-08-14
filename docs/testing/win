@@ -23,6 +23,16 @@
 
 $ErrorActionPreference = "Stop"
 
+# Windows PowerShell (5.1, not PowerShell 7) renders Invoke-WebRequest's
+# progress bar by actually redrawing UI on close to every chunk received -
+# genuinely slow, not perceived-slow (real reports/measurements elsewhere
+# put it at one to two orders of magnitude versus curl/Invoke-WebRequest
+# with this suppressed). -UseBasicParsing below is unrelated (skips an
+# IE-engine dependency, doesn't touch the progress bar) - this is the
+# actual fix, and every download in this script goes through
+# Invoke-WebRequest, so setting it once here covers all of them.
+$ProgressPreference = "SilentlyContinue"
+
 # Force TLS 1.2 explicitly - older/enterprise Windows images (e.g. Win10
 # LTSC) don't always default Invoke-WebRequest/.NET to a protocol GitHub
 # actually accepts, and the failure can be intermittent per-request rather
