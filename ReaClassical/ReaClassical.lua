@@ -1,11 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.42
+@version 27.0.43
 @changelog
-  ReaClassical 27.0.42
-  Scrub personal recent-file/folder history from the shipped ReaClassical.ini template
-  Remove the C++ extension: binaries/ tree, its 2 submodules, and CI build workflows
-  Revert Factory Reset's download_fresh_defaults() to its real pre-C++-extension behavior
+  Add ReaClassical_Update ReaClassical.lua: real top-level launcher for lib/'s update logic
+  ReaClassical_Loader.lua: mask the unlock password field
 @metapackage
 @provides
   [main] ReaClassical_*.lua
