@@ -102,11 +102,7 @@ $systemArch = $env:PROCESSOR_ARCHITECTURE
 switch ($systemArch) {
     "AMD64" { $arch = "x64" }
     "ARM64" { $arch = "arm64ec" }
-    "x86"   {
-        Write-Host "`nError: ReaClassical only supports 64-bit systems."
-        Write-Host "This machine (32-bit) is not supported."
-        exit 1
-    }
+    "x86"   { $arch = "x86" }
     default {
         Write-Host "Unknown architecture: $systemArch"
         exit 1
@@ -191,17 +187,26 @@ switch ($arch) {
         $reaperFile = "reaper$major$minor`_win11_arm64ec_beta-install.exe"
         $reaperUrl  = "https://www.reaper.fm/files/$major.x/$reaperFile"
     }
+    "x86" {
+        $reaperFile = "reaper$major$minor-install.exe"
+        $reaperUrl  = "https://www.reaper.fm/files/$major.x/$reaperFile"
+    }
 }
 
 $reaperOutput = Join-Path $tempDir $reaperFile
 Invoke-WithRetry -Action { Invoke-WebRequest -Uri $reaperUrl -OutFile $reaperOutput -UseBasicParsing }
 
 # ------------------------
-# Download portable 7zip
+# Download portable 7zip (architecture-appropriate)
 # ------------------------
 $sevenZipZip = Join-Path $tempDir "7zip.zip"
 $sevenZipPath = Join-Path $tempDir "7zip"
-$sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip.zip"
+
+if ($arch -eq "x86") {
+    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip32.zip"
+} else {
+    $sevenZipUrl = "https://github.com/chmaha/7-zip/raw/main/7zip.zip"
+}
 
 Invoke-WithRetry -Action { Invoke-WebRequest -Uri $sevenZipUrl -OutFile $sevenZipZip -UseBasicParsing }
 Expand-Archive -Path $sevenZipZip -DestinationPath $sevenZipPath -Force
@@ -219,50 +224,13 @@ Get-ChildItem -Path $reaperExtract -Recurse | Move-Item -Destination $tempInstal
 # ------------------------
 Write-Host "Downloading ReaClassical components..."
 $resOutput = Join-Path $tempDir "Resource_Folder_Base.zip"
+$upOutput  = Join-Path $tempDir "UP_Windows-$arch.zip"
 
 Invoke-WithRetry -Action { Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/$branch/Installers/Resource_Folder_Base.zip" -OutFile $resOutput -UseBasicParsing }
+Invoke-WithRetry -Action { Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/$branch/Installers/UserPlugins/UP_Windows-$arch.zip" -OutFile $upOutput -UseBasicParsing }
+
 Expand-Archive -Path $resOutput -DestinationPath $tempInstallRoot -Force
-
-# UserPlugins/ is just the loose ReaImGui binary now, no zip wrapper - a
-# single-file zip wasn't earning its keep once SWS/ReaPack were dropped
-# from it (see admin_scripts/copy_to_public.sh's own comment). Always
-# reaper_imgui-x64.dll regardless of detected $arch - same emulated-x64
-# reasoning as the ReaClassical extension binary below.
-$upDest = Join-Path $tempInstallRoot "UserPlugins"
-New-Item -Path $upDest -ItemType Directory -Force | Out-Null
-Invoke-WithRetry -Action { Invoke-WebRequest -Uri "https://github.com/chmaha/ReaClassical/raw/$branch/Installers/UserPlugins/reaper_imgui-x64.dll" -OutFile (Join-Path $upDest "reaper_imgui-x64.dll") -UseBasicParsing }
-
-# ------------------------
-# Download ReaClassical extension
-# ------------------------
-# win64 and windows-arm64ec share the identical reaper_ReaClassical-x64.dll
-# (see admin_scripts/publish_release.sh), so this is the same asset for
-# both $arch cases. Wrapped in try/catch, not left to the global trap at
-# the top of this script - a failed extension download shouldn't blow away
-# the whole install (REAPER + resources are still independently useful).
-#
-# Testing builds are published --prerelease so they never become "latest"
-# for real stable users - which means releases/latest/download/ (what the
-# regular docs/win uses) would never find one either. Query the full
-# /releases list instead (sorted newest-first, includes prereleases,
-# and Invoke-RestMethod parses the JSON natively) and take the first tag.
-Write-Host "Downloading the ReaClassical extension..."
-try {
-    $latestRelease = (Invoke-WithRetry -Action { Invoke-RestMethod -Uri "https://api.github.com/repos/chmaha/ReaClassical/releases" -UseBasicParsing })[0]
-    $extOutput = Join-Path $tempDir "reaper_ReaClassical-x64.dll"
-    $extUrl = "https://github.com/chmaha/ReaClassical/releases/download/$($latestRelease.tag_name)/reaper_ReaClassical-x64.dll"
-    Invoke-WithRetry -Action { Invoke-WebRequest -Uri $extUrl -OutFile $extOutput -UseBasicParsing }
-    # Arch-suffixed on purpose, matching the exact filename SConstruct/
-    # rebuild.sh now always produce - a local rebuild or a re-run of this
-    # installer must overwrite the SAME file, never coexist under a
-    # different name (REAPER would load both as separate extensions and
-    # silently reject every duplicate custom_action Register() call from
-    # whichever loads second - a real repro this session).
-    Copy-Item -Path $extOutput -Destination (Join-Path $tempInstallRoot "UserPlugins\reaper_ReaClassical-x64.dll") -Force
-} catch {
-    Write-Host "`nWarning: could not download the ReaClassical extension - REAPER will start without ReaClassical loaded."
-    Write-Host "Retry later via the ReaClassical website, or contact chmaha for help.`n"
-}
+Expand-Archive -Path $upOutput  -DestinationPath (Join-Path $tempInstallRoot "UserPlugins") -Force
 
 # ------------------------
 # Copy Effects from InstallData

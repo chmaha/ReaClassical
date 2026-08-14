@@ -103,9 +103,8 @@ sleep 2
 # ==========================================================
 
 if [ "$arch" = "i386" ]; then
-    printf "\nError: ReaClassical only supports 64-bit systems.\n"
-    printf "This machine (32-bit Intel) is not supported.\n\n"
-    exit 1
+    dmgtype="i386"
+    echo "Using i386 dmg file..."
 elif [ "$major" -lt 10 ] || ([ "$major" -eq 10 ] && [ "$minor" -lt 15 ]); then
     dmgtype="x86_64"
     echo "Using x86_64 dmg file..."
@@ -145,72 +144,14 @@ if [ -d "$rcfolder" ]; then
     echo "Folder already exists. Adding unique suffix."
 fi
 
+up_output="$temp_dir/UP_MacOS-$arch.zip"
+up_url="https://github.com/chmaha/ReaClassical/raw/${branch}/Installers/UserPlugins/UP_MacOS-$arch.zip"
+curl -L --retry 3 --retry-delay 2 -o "$up_output" "$up_url"
+
 echo "Extracting files into $rcfolder..."
 sleep 2
 unzip -q "$res_output" -d "$rcfolder/"
-
-# UserPlugins/ is just the loose ReaImGui binary now, no zip wrapper - a
-# single-file zip wasn't earning its keep once SWS/ReaPack were dropped
-# from it (see admin_scripts/copy_to_public.sh's own comment).
-mkdir -p "$rcfolder/UserPlugins"
-imgui_url="https://github.com/chmaha/ReaClassical/raw/${branch}/Installers/UserPlugins/reaper_imgui-$arch.dylib"
-curl -L --retry 3 --retry-delay 2 -o "$rcfolder/UserPlugins/reaper_imgui-$arch.dylib" "$imgui_url"
-
-echo "Downloading the ReaClassical extension..."
-# Testing builds are published --prerelease (see admin_scripts/publish_release.sh's
-# own comment) so they never become "latest" for real stable users - which
-# means releases/latest/download/ (what the regular docs/macos uses)
-# would never find one either. Query the full /releases list instead
-# (sorted newest-first, includes prereleases) and take the first tag.
-#
-# Root cause of a real, repeatedly-confirmed bug found and fixed on
-# docs/testing/linux (identical pattern here): curl was piped directly
-# into `grep -m1`, which exits the instant it finds its first match.
-# Once this repo has more than a couple releases, curl is very often
-# still mid-write on a later chunk of the (much larger) full JSON
-# response when grep's early exit closes the pipe - a genuine SIGPIPE/
-# EPIPE, which curl reports as "curl: (23) Failure writing output to
-# destination, passed X returned Y". Fixed by capturing the full
-# response into a variable first (curl runs to its own natural
-# completion, nothing downstream can close early on it) and only
-# grepping the already-complete string afterward. ?per_page=1 also trims
-# the actual request to just the one release this needs (this endpoint's
-# pagination doesn't filter prereleases, unlike /latest, so this still
-# behaves identically to before).
-releases_json=$(curl -sS --retry 3 --retry-delay 2 "https://api.github.com/repos/chmaha/ReaClassical/releases?per_page=1")
-latest_tag=$(echo "$releases_json" \
-    | grep -m1 -oE '"tag_name":[[:space:]]*"[^"]+"' | grep -oE '"[^"]+"$' | tr -d '"')
-if [ -n "$latest_tag" ]; then
-    ext_output="$temp_dir/reaper_ReaClassical-$arch.dylib"
-    ext_url="https://github.com/chmaha/ReaClassical/releases/download/${latest_tag}/reaper_ReaClassical-$arch.dylib"
-    curl -f -L --retry 3 --retry-delay 2 -o "$ext_output" "$ext_url"
-    curl_status=$?
-    if [ $curl_status -eq 0 ] && [ -s "$ext_output" ]; then
-        # Arch-suffixed on purpose, matching the exact filename SConstruct/
-        # rebuild.sh now always produce - a local rebuild or a re-run of
-        # this installer must overwrite the SAME file, never coexist under
-        # a different name (REAPER would load both as separate extensions
-        # and silently reject every duplicate custom_action Register()
-        # call from whichever loads second - a real repro this session).
-        cp "$ext_output" "$rcfolder/UserPlugins/reaper_ReaClassical-$arch.dylib"
-    else
-        # Surfaces the real cause instead of a generic message - a repeat
-        # tester hitting GitHub's unauthenticated API rate limit (60/hr
-        # per IP, real and easy to hit during a heavy testing session -
-        # confirmed via this exact endpoint's own x-ratelimit-limit
-        # header) looks completely different (curl exit 22, HTTP 403/429)
-        # from the release's own asset simply not being fully uploaded
-        # yet if this ran mid-publish (curl exit 22, HTTP 404) - both
-        # previously indistinguishable from this one message alone.
-        printf "\nWarning: could not download the ReaClassical extension (curl exit %s) - REAPER will start without ReaClassical loaded.\n" "$curl_status"
-        printf "URL attempted: %s\n" "$ext_url"
-        printf "If this keeps happening, it may be GitHub's API rate limit (resets hourly) - wait a bit and retry.\n"
-        printf "Retry later via the ReaClassical website, or contact chmaha for help.\n\n"
-    fi
-else
-    printf "\nWarning: could not find a release to download the ReaClassical extension from.\n"
-    printf "REAPER will start without ReaClassical loaded - retry later or contact chmaha for help.\n\n"
-fi
+unzip -q "$up_output" -d "$rcfolder/UserPlugins/"
 
 echo "Adding splash screen and theme references..."
 sleep 2
