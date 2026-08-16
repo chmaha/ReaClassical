@@ -1,15 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.45
+@version 27.0.46
 @changelog
-  feeder_core: wire PARAMBASE + enable ReaControlMIDI's CC Enable on creation
-  chunk_link: PARAMBASE needs the parameter's real native-units minimum, not 0
-  Guard every real BR_EnvAlloc call site against SWS not being installed
-  BR_Envelope_Properties: fix real crash - GetSetObjectState isn't Lua-scriptable
-  wip_fx_feeder: reuse freed MIDI channels instead of climbing forever
-  Accessible Smart Import: offer Import Takes vs Import Polywav, matching the sighted GUI's tab
-  Accessible Preferences: Backspace resets the current field, add Reset All to Defaults
-  ReaClassical_Update ReaClassical.lua: use MB() instead of say() for user-facing errors
+  Item Rank: single circular list (No Rank, ranks, Item Notes), proper Up/Down
+  Fix Item Rank Up/Down direction: Down always cycles ranks, Up jumps to notes
+  Disarm All Tracks stops the record daemon; Item Rank gains note-taking; F5 nudge wording; Terminal import= comma lists; automation mode announces on silent auto-engage
+  Add IEM item edge grow/shrink actions (left/right, plain + modifier)
+  Add guard to toggle automation mode
+  Insert Automation: redirect track-level automation off shared mixer tracks
+  Add automation mode: lock+ripple-all sync, real AI tagging, snapshot-conversion rework
 @metapackage
 @provides
   [main] ReaClassical_*.lua
