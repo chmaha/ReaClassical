@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.46
+@version 27.0.47
 @changelog
-  Item Rank: single circular list (No Rank, ranks, Item Notes), proper Up/Down
-  Fix Item Rank Up/Down direction: Down always cycles ranks, Up jumps to notes
-  Disarm All Tracks stops the record daemon; Item Rank gains note-taking; F5 nudge wording; Terminal import= comma lists; automation mode announces on silent auto-engage
-  Add IEM item edge grow/shrink actions (left/right, plain + modifier)
-  Add guard to toggle automation mode
-  Insert Automation: redirect track-level automation off shared mixer tracks
-  Add automation mode: lock+ripple-all sync, real AI tagging, snapshot-conversion rework
+  Fix adding new keyboard shortcuts
 @metapackage
 @provides
   [main] ReaClassical_*.lua
