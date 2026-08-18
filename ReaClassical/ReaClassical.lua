@@ -1,11 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.50
+@version 27.0.51
 @changelog
-  Accessible Item Rank: stay open after setting rank, Space to play/stop
-  Accessible Item Rank: Left/Right/Q/W item navigation
-  Accessible Notes: live-follow selection, Left/Right/Q/W item navigation
-  remove wip fx feeder
+  Accessible Notes: Space to play/stop transport
 @metapackage
 @provides
   [main] ReaClassical_*.lua
