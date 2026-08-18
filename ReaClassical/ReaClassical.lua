@@ -1,12 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.49
+@version 27.0.50
 @changelog
-  Fix 6 "GUI blocked" guards to actually block under DebugAnnounce too
-  Accessible Notes: reorder fields to Item Name/Note/Take Number first
-  Select All Items in Folder: shift Delete's context to items, not tracks
-  Fix 9 keymap entries registered with absolute dev path, drop dead wip_fx_feeder entries
-  Add accessible Notes and Audio Calculator; Item Rank backspace-clear
+  Accessible Item Rank: stay open after setting rank, Space to play/stop
+  Accessible Item Rank: Left/Right/Q/W item navigation
+  Accessible Notes: live-follow selection, Left/Right/Q/W item navigation
+  remove wip fx feeder
 @metapackage
 @provides
   [main] ReaClassical_*.lua
