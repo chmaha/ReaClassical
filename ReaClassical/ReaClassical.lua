@@ -1,23 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.48
+@version 27.0.49
 @changelog
-  Rename RC_TERMINAL_ARGS to RC_SCRIPT_ARGS; remove 3 dead headless branches
-  DDP/CD-Text metadata validation, queued warnings, pinned render row
-  Merge worktree-snapshot-engine-security-fix
-  Cross-deselect media/automation items across Next/Previous navigation
-  Accessible Peak and Overs Check: audition the peak, mark overs/peak
-  Extract shared Snapshot Engine, fix injection/mute/GUID-matching bugs
-  Remove requires left orphaned by the Terminal.lua command reduction
-  Extract track-setup command handlers out of Terminal.lua into a shared library
-  Extract shared mixer/routing helpers from Terminal.lua into ReaClassical_Mixer_Core.lua
-  Delete all zero-dependent command families from Terminal
-  Fix three O(n^2)/redundant-scan hotspots found while comparing against Cohler's lib
-  Add browsable overs list to the accessible Peak and Overs Check
-  Add accessible branch for Peak and Overs Check
-  Combine Show/Hide Children into a single Toggle Children command
-  Terminal clean part 1
-  Regenerate docs (manual, terminal guide, shortcuts)
+  Fix 6 "GUI blocked" guards to actually block under DebugAnnounce too
+  Accessible Notes: reorder fields to Item Name/Note/Take Number first
+  Select All Items in Folder: shift Delete's context to items, not tracks
+  Fix 9 keymap entries registered with absolute dev path, drop dead wip_fx_feeder entries
+  Add accessible Notes and Audio Calculator; Item Rank backspace-clear
 @metapackage
 @provides
   [main] ReaClassical_*.lua
