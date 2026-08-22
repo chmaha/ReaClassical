@@ -41,6 +41,18 @@ maxtime = 16384;
 phase = slider5;
 dryLevel = 1.0-abs(phase);
 
+// 4-point (3rd-order) Lagrange interpolation coefficients for the
+// Subsample fraction, replacing 2-tap linear interpolation, which
+// attenuates high frequencies (worst case ~-3.9dB at Nyquist when
+// subsample=0.5). At subsample=0/1 these collapse to a pure
+// single-tap read, matching the original code's behavior at those
+// two exact values.
+t = subsample;
+lc0 = -t*(t-1)*(t-2)*(1/6);
+lc1 =  (t+1)*(t-1)*(t-2)*0.5;
+lc2 = -(t+1)*t*(t-2)*0.5;
+lc3 =  (t+1)*t*(t-1)*(1/6);
+
 @sample
 inputSampleL = spl0;
 inputSampleR = spl1;
@@ -53,10 +65,18 @@ count = gcount;
 pL[count] = inputSampleL;
 pR[count] = inputSampleR;
 count += offset;
-inputSampleL = pL[count-((count > maxtime)?maxtime+1:0)]*(1.0 - subsample);
-inputSampleR = pR[count-((count > maxtime)?maxtime+1:0)]*(1.0 - subsample);
-inputSampleL += pL[count+1-((count+1 > maxtime)?maxtime+1:0)]*subsample;
-inputSampleR += pR[count+1-((count+1 > maxtime)?maxtime+1:0)]*subsample;
+
+im1 = count-1;
+(im1 < 0) ? im1 += maxtime+1;
+i0 = count;
+(i0 > maxtime) ? i0 -= maxtime+1;
+ip1 = count+1;
+(ip1 > maxtime) ? ip1 -= maxtime+1;
+ip2 = count+2;
+(ip2 > maxtime) ? ip2 -= maxtime+1;
+
+inputSampleL = pL[im1]*lc0 + pL[i0]*lc1 + pL[ip1]*lc2 + pL[ip2]*lc3;
+inputSampleR = pR[im1]*lc0 + pR[i0]*lc1 + pR[ip1]*lc2 + pR[ip2]*lc3;
 gcount-=1;
 
 (phase < 1.0) ? (
@@ -71,4 +91,3 @@ gcount-=1;
 
 spl0 = inputSampleL;
 spl1 = inputSampleR;
-

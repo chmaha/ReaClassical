@@ -1,8 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.51
+@version 27.0.52
 @changelog
-  Accessible Notes: Space to play/stop transport
+  Allow delete with ripple to work on empty space
+  Mixer Control FX param edit: Escape reverts live value
+  Add New Project Tab wrapper that announces "New tab"
+  Add named undo blocks to S-D and generic marker add/delete scripts
+  Announce undone action; cycle FX dropdown params with Up/Down
 @metapackage
 @provides
   [main] ReaClassical_*.lua

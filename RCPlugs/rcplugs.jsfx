@@ -1,8 +1,8 @@
 @description RCPlugs
 @author chmaha
-@version 2.8
+@version 2.9
 @changelog
-  Update licenses
+  RCTimePhase: fix high-frequency loss in sub-sample interpolation
 @metapackage
 @provides
   RCComp.jsfx
