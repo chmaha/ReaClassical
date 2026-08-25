@@ -1,12 +1,19 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.52
+@version 27.0.53
 @changelog
-  Allow delete with ripple to work on empty space
-  Mixer Control FX param edit: Escape reverts live value
-  Add New Project Tab wrapper that announces "New tab"
-  Add named undo blocks to S-D and generic marker add/delete scripts
-  Announce undone action; cycle FX dropdown params with Up/Down
+  Add aria-live
+  Add shortcut to force return of focus to arrange
+  Add option for selective parameters and add accessible branch
+  Use REAPER input boxes for text entry
+  Use REAPER input box for text entry
+  Announce crossfaded take numbers
+  Auto-remove sliver edits
+  Unselect all items before selecting items associated with CD track start
+  Re-select previously selected item
+  Unnecessary since folding into smart audio import
+  Automatically and silently recalculate CD markers/regions if present
+  Fix previous marker search when transport stopped
 @metapackage
 @provides
   [main] ReaClassical_*.lua
