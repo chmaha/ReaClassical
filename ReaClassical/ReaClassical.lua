@@ -1,14 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.54
+@version 27.0.55
 @changelog
-  Snapshot-to-automation: respect deactivated recall parameters, dedupe conversion logic
-  Add Toggle RCMASTER Hardware Output Mute script
-  Replace Prepare Takes with Auto-color project + Fix Crossfade Sequence Edits
-  Add marker number to announcement
-  DDP Metadata Editor: live red-outline + tooltip for Latin-1/control-char issues
-  DDP metadata validation: report embedded control chars separately from Latin-1
-  Fix DDP re-import crash and missing waveform/peaks
+  Accessible DDP metadata editor: Enter edits one cell and stops, silence per-field sync announcements
 @metapackage
 @provides
   [main] ReaClassical_*.lua
