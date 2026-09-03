@@ -1,19 +1,14 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.53
+@version 27.0.54
 @changelog
-  Add aria-live
-  Add shortcut to force return of focus to arrange
-  Add option for selective parameters and add accessible branch
-  Use REAPER input boxes for text entry
-  Use REAPER input box for text entry
-  Announce crossfaded take numbers
-  Auto-remove sliver edits
-  Unselect all items before selecting items associated with CD track start
-  Re-select previously selected item
-  Unnecessary since folding into smart audio import
-  Automatically and silently recalculate CD markers/regions if present
-  Fix previous marker search when transport stopped
+  Snapshot-to-automation: respect deactivated recall parameters, dedupe conversion logic
+  Add Toggle RCMASTER Hardware Output Mute script
+  Replace Prepare Takes with Auto-color project + Fix Crossfade Sequence Edits
+  Add marker number to announcement
+  DDP Metadata Editor: live red-outline + tooltip for Latin-1/control-char issues
+  DDP metadata validation: report embedded control chars separately from Latin-1
+  Fix DDP re-import crash and missing waveform/peaks
 @metapackage
 @provides
   [main] ReaClassical_*.lua
