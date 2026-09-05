@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.55
+@version 27.0.56
 @changelog
-  Accessible DDP metadata editor: Enter edits one cell and stops, silence per-field sync announcements
+  Update keymap
 @metapackage
 @provides
   [main] ReaClassical_*.lua
