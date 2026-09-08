@@ -340,14 +340,57 @@ end
 
 ---------------------------------------------------------------------
 
-function get_item_by_guid(guid)
+-- Cached {item, track, start, ["end"], guid} list (position-sorted) for
+-- every item in the project, plus a guid -> entry lookup. Rebuilt only
+-- when GetProjectStateChangeCount(0) actually moves (a real edit --
+-- split/move/add/delete), not on every call:
+-- get_item_by_guid/find_snapshot_with_gap_logic/find_snapshot_at_cursor
+-- below used to re-scan every item in the project from scratch via
+-- CountMediaItems(0), up to several times per ImGui frame during
+-- playback -- on a multi-take session with thousands of items that was
+-- enough REAPER-API traffic per second to freeze the whole app. Playback
+-- alone never changes the item layout, so re-scanning on every frame
+-- bought nothing. This does NOT restrict which tracks get scanned to a
+-- "destination folder" -- get_selected_item_info() above snapshots
+-- whatever item is currently selected, anywhere in the project, so the
+-- cache has to cover every item too (an earlier version of this fix
+-- scoped it to the destination folder's subtree and broke lookups for
+-- any snapshot outside that guess).
+local all_items_cache, all_items_by_guid_cache, all_items_change_count
+
+local function get_all_items()
+  local cc = GetProjectStateChangeCount(0)
+  if all_items_cache and all_items_change_count == cc then
+    return all_items_cache, all_items_by_guid_cache
+  end
+
+  local items, by_guid = {}, {}
   for i = 0, CountMediaItems(0) - 1 do
     local item = GetMediaItem(0, i)
-    if BR_GetMediaItemGUID(item) == guid then
-      return item
-    end
+    local start = GetMediaItemInfo_Value(item, "D_POSITION")
+    local entry = {
+      item = item,
+      track = GetMediaItem_Track(item),
+      start = start,
+      ["end"] = start + GetMediaItemInfo_Value(item, "D_LENGTH"),
+      guid = BR_GetMediaItemGUID(item),
+    }
+    items[#items + 1] = entry
+    by_guid[entry.guid] = entry
   end
-  return nil
+  table.sort(items, function(a, b) return a.start < b.start end)
+
+  all_items_cache, all_items_by_guid_cache, all_items_change_count = items, by_guid, cc
+  return items, by_guid
+end
+
+-- Shares the cached lookup above instead of a fresh CountMediaItems(0)
+-- scan over the whole project on every call -- this used to run on every
+-- ImGui frame from several call sites below.
+function get_item_by_guid(guid)
+  local _, by_guid = get_all_items()
+  local entry = by_guid[guid]
+  return entry and entry.item or nil
 end
 
 ---------------------------------------------------------------------
@@ -401,10 +444,47 @@ end
 
 ---------------------------------------------------------------------
 
+-- Gap-aware and plain cursor->snapshot lookup, sharing the cached item
+-- list from get_all_items() above instead of a fresh CountMediaItems(0)
+-- scan of the whole project on every call. This ran on every ImGui frame
+-- during playback via check_auto_recall() below; on a large multi-take
+-- session that was enough REAPER-API traffic per second to freeze REAPER
+-- solid.
+local function find_snap_by_guid(guid)
+  return find_snapshot_by_item_guid(guid)
+end
+
+function find_snapshot_at_cursor(cursor_pos)
+  local all_items = get_all_items()
+  for _, di in ipairs(all_items) do
+    if cursor_pos >= di.start and cursor_pos < di["end"] then
+      local snap = find_snap_by_guid(di.guid)
+      if snap then return snap end
+      -- Item at cursor but no snapshot -- fall through to search backwards
+      break
+    end
+  end
+  local prev_snap, prev_pos = nil, -1
+  for _, di in ipairs(all_items) do
+    if di.start < cursor_pos and di.start > prev_pos then
+      local snap = find_snap_by_guid(di.guid)
+      if snap then
+        prev_pos = di.start
+        prev_snap = snap
+      end
+    end
+  end
+  return prev_snap
+end
+
+---------------------------------------------------------------------
+
 function find_snapshot_with_gap_logic(cursor_pos)
   if not switch_mid_gap then
     return find_snapshot_at_cursor(cursor_pos)
   end
+
+  local all_items = get_all_items()
 
   -- Helper function to check if a track is within a folder (or is the folder itself)
   local function is_track_in_folder(track, folder_track)
@@ -435,59 +515,38 @@ function find_snapshot_with_gap_logic(cursor_pos)
     return false
   end
 
-  -- Build list of items WITH snapshots (for snapshot lookup)
+  -- Items that have a captured snapshot; all_items is already
+  -- position-sorted, so this stays sorted too.
   local snapshot_items = {}
-  for i = 0, CountMediaItems(0) - 1 do
-    local item = GetMediaItem(0, i)
-    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-    local item_guid = BR_GetMediaItemGUID(item)
-    if find_snapshot_by_item_guid(item_guid) then
-      table.insert(snapshot_items, { item = item, start = item_start, guid = item_guid })
-    end
-  end
-  table.sort(snapshot_items, function(a, b) return a.start < b.start end)
-
-  -- Find which snapshot folders are relevant (previous and next)
-  local prev_snap_folder = nil
-  local next_snap_folder = nil
-
-  for i = #snapshot_items, 1, -1 do
-    if snapshot_items[i].start <= cursor_pos then
-      local prev_snap = find_snapshot_by_item_guid(snapshot_items[i].guid)
-      local prev_item = get_item_by_guid(prev_snap.item_guid)
-      if prev_item then
-        prev_snap_folder = GetMediaItem_Track(prev_item)
-      end
-      break
+  for _, di in ipairs(all_items) do
+    local snap = find_snap_by_guid(di.guid)
+    if snap then
+      snapshot_items[#snapshot_items + 1] = { di = di, snap = snap }
     end
   end
 
-  for _, snap_data in ipairs(snapshot_items) do
-    if snap_data.start > cursor_pos then
-      local next_snap = find_snapshot_by_item_guid(snap_data.guid)
-      local next_item = get_item_by_guid(next_snap.item_guid)
-      if next_item then
-        next_snap_folder = GetMediaItem_Track(next_item)
-      end
+  -- Nearest snapshot item at/before cursor_pos (for its folder), and the
+  -- next one strictly after it (for its folder, snapshot, and start).
+  local prev_folder
+  local next_snap, next_folder, next_start = nil, nil, math.huge
+  for _, e in ipairs(snapshot_items) do
+    if e.di.start <= cursor_pos then
+      prev_folder = e.di.track
+    else
+      next_snap, next_folder, next_start = e.snap, e.di.track, e.di.start
       break
     end
   end
 
   -- Check if cursor is on an item within the RELEVANT folders only
   local cursor_on_relevant_item = false
-  for i = 0, CountMediaItems(0) - 1 do
-    local item = GetMediaItem(0, i)
-    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-    local item_end = item_start + GetMediaItemInfo_Value(item, "D_LENGTH")
-
-    if cursor_pos >= item_start and cursor_pos < item_end then
-      local item_track = GetMediaItem_Track(item)
-      -- Check if this item is in either the previous or next snapshot's folder
-      if (prev_snap_folder and is_track_in_folder(item_track, prev_snap_folder)) or
-          (next_snap_folder and is_track_in_folder(item_track, next_snap_folder)) then
+  for _, di in ipairs(all_items) do
+    if cursor_pos >= di.start and cursor_pos < di["end"] then
+      if (prev_folder and is_track_in_folder(di.track, prev_folder)) or
+          (next_folder and is_track_in_folder(di.track, next_folder)) then
         cursor_on_relevant_item = true
-        break
       end
+      break
     end
   end
 
@@ -496,106 +555,31 @@ function find_snapshot_with_gap_logic(cursor_pos)
     return find_snapshot_at_cursor(cursor_pos)
   end
 
-
-  -- Cursor is in a GAP (not on any relevant item)
-  -- Find the next snapshot item
-  local next_snap = nil
-  local next_snap_item_start = math.huge
-  for _, snap_data in ipairs(snapshot_items) do
-    if snap_data.start > cursor_pos then
-      local snap = find_snapshot_by_item_guid(snap_data.guid)
-      if snap then
-        next_snap = snap
-        next_snap_item_start = snap_data.start
-        break
-      end
-    end
-  end
-
-  -- Find the PREVIOUS snapshot
-  local prev_snap = nil
-  for i = #snapshot_items, 1, -1 do
-    if snapshot_items[i].start <= cursor_pos then
-      prev_snap = find_snapshot_by_item_guid(snapshot_items[i].guid)
-      break
-    end
-  end
-
-  -- Find the last item end within the previous snapshot's folder
+  -- Cursor is in a GAP (not on any relevant item) -- find the last item
+  -- end within the previous snapshot's folder that ends before the next
+  -- snapshot starts.
   local last_item_end_in_prev_folder = -1
-  if prev_snap_folder then
-    for i = 0, CountMediaItems(0) - 1 do
-      local item = GetMediaItem(0, i)
-      local item_track = GetMediaItem_Track(item)
-
-      -- Only consider items in the previous snapshot's folder
-      if is_track_in_folder(item_track, prev_snap_folder) then
-        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-        local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
-        local item_end = item_start + item_length
-
-        -- Only consider items that end before the next snapshot starts
-        if item_end < next_snap_item_start and item_end > last_item_end_in_prev_folder then
-          last_item_end_in_prev_folder = item_end
-        end
+  if prev_folder then
+    for _, di in ipairs(all_items) do
+      if is_track_in_folder(di.track, prev_folder) and
+          di["end"] < next_start and di["end"] > last_item_end_in_prev_folder then
+        last_item_end_in_prev_folder = di["end"]
       end
     end
   end
 
   -- If we have both snapshots and there's a gap, check midpoint
-  if next_snap and last_item_end_in_prev_folder >= 0 and last_item_end_in_prev_folder < next_snap_item_start then
-    local gap_mid = last_item_end_in_prev_folder + (next_snap_item_start - last_item_end_in_prev_folder) / 2
+  if next_snap and last_item_end_in_prev_folder >= 0 and last_item_end_in_prev_folder < next_start then
+    local gap_mid = last_item_end_in_prev_folder + (next_start - last_item_end_in_prev_folder) / 2
 
     -- Only switch to next snapshot if cursor is past midpoint AND before the next snapshot item
-    if cursor_pos >= gap_mid and cursor_pos < next_snap_item_start then
+    if cursor_pos >= gap_mid and cursor_pos < next_start then
       return next_snap
     end
   end
 
   -- Otherwise use previous snapshot
   return find_snapshot_at_cursor(cursor_pos)
-end
-
----------------------------------------------------------------------
-
-function find_snapshot_at_cursor(cursor_pos)
-  -- First, check if cursor is directly on an item with a snapshot
-  for i = 0, CountMediaItems(0) - 1 do
-    local item = GetMediaItem(0, i)
-    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-    local item_length = GetMediaItemInfo_Value(item, "D_LENGTH")
-    local item_end = item_start + item_length
-
-    if cursor_pos >= item_start and cursor_pos < item_end then
-      local item_guid = BR_GetMediaItemGUID(item)
-      local snap = find_snapshot_by_item_guid(item_guid)
-      if snap then
-        return snap
-      end
-      -- Item at cursor but no snapshot, continue to search backwards
-      break
-    end
-  end
-
-  -- Search backwards from cursor position through all items
-  local prev_snapshot = nil
-  local prev_pos = -1
-
-  for i = 0, CountMediaItems(0) - 1 do
-    local item = GetMediaItem(0, i)
-    local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
-
-    if item_start < cursor_pos and item_start > prev_pos then
-      local item_guid = BR_GetMediaItemGUID(item)
-      local snap = find_snapshot_by_item_guid(item_guid)
-      if snap then
-        prev_pos = item_start
-        prev_snapshot = snap
-      end
-    end
-  end
-
-  return prev_snapshot
 end
 
 ---------------------------------------------------------------------
