@@ -1,12 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.57
+@version 27.0.58
 @changelog
-  Don't allow placing out marker if before in
-  Auto-correct out-of-order S-D markers for blind users
-  Add explicit Import confirmation step to Accessible Smart Import
-  Fix grow-right-edge failing on the last item on a track
-  Fix mixer snapshots scans per tick
+  Add Delete Source Folder action
 @metapackage
 @provides
   [main] ReaClassical_*.lua
