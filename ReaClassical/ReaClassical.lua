@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.58
+@version 27.0.59
 @changelog
-  Add Delete Source Folder action
+  Add configurable item edge grow/shrink amount; skip post-import zoom for accessible path
 @metapackage
 @provides
   [main] ReaClassical_*.lua

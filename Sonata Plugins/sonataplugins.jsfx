@@ -1,0 +1,11 @@
+@description Sonata Plugins
+@author chmaha
+@version 1.0
+@changelog
+  Initial metapackage release.
+@metapackage
+@provides
+  *.jsfx
+  Dependencies/*.jsfx-inc
+@about
+  A suite of JSFX effects and meters, plus the Sonata Chamber Organ instrument, for classical music mixing and mastering.

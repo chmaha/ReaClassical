@@ -1,0 +1,618 @@
+NoIndex: true
+desc: Sonata Test Signal Generator (chmaha)
+author: chmaha
+// Ported from x42/testsignal.lv2 (Robin Gareus). GPLv2+.
+// https://github.com/x42/testsignal.lv2
+
+slider1:0<0,15,1>-Mode
+slider2:-18<-24,-9,0.1>-Signal Level (dBFS)
+
+out_pin:left output
+out_pin:right output
+
+@init
+
+PI = 3.14159265358979;
+
+phase = 0;
+phase_inc = 2*PI*1000/srate;
+
+k_cnt = 0;
+k_period100 = floor(srate/100);
+k_period1 = floor(srate);
+k_period5s = floor(srate*5);
+
+f_min = 20;
+f_max = min(srate*0.5, 20000);
+swp_period = ceil(10*srate);
+swp_duration = swp_period / srate;
+swp_log_b = log(f_max/f_min) / swp_period;
+swp_log_a = f_min / (swp_log_b*srate);
+swp_cnt = 0;
+swp2_cnt = 0;
+swp3_cnt = 0;
+
+swp_period_long = ceil(30*srate);
+swp_log_b_long = log(f_max/f_min) / swp_period_long;
+swp_log_a_long = f_min / (swp_log_b_long*srate);
+swp4_cnt = 0;
+
+rseed = floor(time_precise()*1000000) % 2147483647;
+rseed == 0 ? rseed = 1;
+g_pass = 0; g_rn1 = 0;
+pk_b0 = 0; pk_b1 = 0; pk_b2 = 0; pk_b3 = 0; pk_b4 = 0; pk_b5 = 0; pk_b6 = 0;
+br_last = 0;
+single_fired = 0;
+
+reflevel_db = slider2;
+lvl_coeff_target = pow(10, 0.05*max(-24, min(-9, reflevel_db)));
+lvl_coeff = 0;
+
+mode = floor(slider1 + 0.5);
+prev_mode = mode;
+
+function next_rand_int()
+local(lo, hi)
+(
+  lo = 48271 * (rseed & 0x7fff);
+  hi = 48271 * (rseed >> 15);
+  lo += (hi & 0xffff) << 15;
+  lo += hi >> 16;
+  lo = (lo & 0x7fffffff) + (lo >> 31);
+  rseed = lo;
+  lo;
+);
+
+function next_rand_float()
+(
+  next_rand_int() / 1073741823.5 - 1.0;
+);
+
+function next_rand_gauss()
+local(x1, x2, r)
+(
+  g_pass ? ( g_pass = 0; g_rn1; ) : (
+    r = 2;
+    while (r >= 1.0 || r < 0.0000000000000000000001) (
+      x1 = next_rand_float(); x2 = next_rand_float();
+      r = x1*x1 + x2*x2;
+    );
+    r = sqrt(-2*log(r)/r);
+    g_pass = 1; g_rn1 = r*x2;
+    r*x1;
+  );
+);
+
+function gen_sine_sample()
+local(s)
+(
+  s = lvl_coeff * sin(phase);
+  phase += phase_inc;
+  phase >= 2*PI ? phase -= 2*PI;
+  s;
+);
+
+function gen_square_sample()
+local(s)
+(
+  s = sin(phase) >= 0 ? lvl_coeff : -lvl_coeff;
+  phase += phase_inc;
+  phase >= 2*PI ? phase -= 2*PI;
+  s;
+);
+
+function gen_uniform_white_sample()
+(
+  lvl_coeff * next_rand_float();
+);
+
+function gen_gaussian_white_sample()
+(
+  lvl_coeff * 0.7079 * next_rand_gauss();
+);
+
+function gen_pink_sample()
+local(white, s)
+(
+  white = (lvl_coeff/2.527) * next_rand_float();
+  pk_b0 = 0.99886*pk_b0 + white*0.0555179;
+  pk_b1 = 0.99332*pk_b1 + white*0.0750759;
+  pk_b2 = 0.96900*pk_b2 + white*0.1538520;
+  pk_b3 = 0.86650*pk_b3 + white*0.3104856;
+  pk_b4 = 0.55000*pk_b4 + white*0.5329522;
+  pk_b5 = -0.7616*pk_b5 - white*0.0168980;
+  s = pk_b0 + pk_b1 + pk_b2 + pk_b3 + pk_b4 + pk_b5 + pk_b6 + white*0.5362;
+  pk_b6 = white*0.115926;
+  s;
+);
+
+function gen_impulse_sample(period)
+local(s)
+(
+  s = 0;
+  while (k_cnt < 1) ( s = 1; k_cnt += period; );
+  k_cnt -= 1;
+  s;
+);
+
+function gen_sawtooth_sample(period)
+local(s)
+(
+  k_cnt = k_cnt % period;
+  s = lvl_coeff * (-1 + 2*k_cnt/period);
+  k_cnt = (k_cnt+1) % period;
+  s;
+);
+
+function gen_triangle_sample(period)
+local(s)
+(
+  k_cnt = k_cnt % period;
+  s = lvl_coeff * (-1 + 2*abs(1 - 2*k_cnt/period));
+  k_cnt = (k_cnt+1) % period;
+  s;
+);
+
+function gen_sweep_sample()
+local(ph)
+(
+  ph = swp_log_a * exp(swp_log_b * swp_cnt) - swp_log_a;
+  swp_cnt = (swp_cnt+1) % swp_period;
+  lvl_coeff * sin(2*PI*(ph - floor(ph)));
+);
+
+function gen_brown_sample()
+local(white)
+(
+  white = next_rand_float();
+  br_last = (br_last + 0.02*white) / 1.02;
+  lvl_coeff * br_last * 3.5;
+);
+
+function gen_sweep_linear_sample()
+local(t, cyc)
+(
+  t = swp2_cnt / srate;
+  cyc = f_min*t + (f_max-f_min)*t*t/(2*swp_duration);
+  swp2_cnt = (swp2_cnt+1) % swp_period;
+  lvl_coeff * sin(2*PI*(cyc - floor(cyc)));
+);
+
+function gen_sweep_reverse_sample()
+local(rn, ph)
+(
+  rn = swp_period - 1 - swp3_cnt;
+  ph = swp_log_a * exp(swp_log_b * rn) - swp_log_a;
+  swp3_cnt = (swp3_cnt+1) % swp_period;
+  lvl_coeff * sin(2*PI*(ph - floor(ph)));
+);
+
+function gen_sweep_long_sample()
+local(ph)
+(
+  ph = swp_log_a_long * exp(swp_log_b_long * swp4_cnt) - swp_log_a_long;
+  swp4_cnt = (swp4_cnt+1) % swp_period_long;
+  lvl_coeff * sin(2*PI*(ph - floor(ph)));
+);
+
+function gen_single_impulse_sample()
+local(s)
+(
+  s = single_fired ? 0 : 1;
+  single_fired = 1;
+  s;
+);
+
+function backspace_string(bufidx)
+local(l, i, c)
+(
+  l = strlen(bufidx);
+  l > 0 ? (
+    strcpy(#eb_tmp, "");
+    i = 0;
+    loop(l-1,
+      c = str_getchar(bufidx, i);
+      sprintf(#eb_tmp, "%s%c", #eb_tmp, c);
+      i += 1;
+    );
+    strcpy(bufidx, #eb_tmp);
+  );
+);
+
+function set_mode_short(idx)
+(
+  idx==0 ? strcpy(#mode_short, "Sine 1kHz") :
+  idx==1 ? strcpy(#mode_short, "Square 1kHz") :
+  idx==2 ? strcpy(#mode_short, "Uniform White") :
+  idx==3 ? strcpy(#mode_short, "Gaussian White") :
+  idx==4 ? strcpy(#mode_short, "Pink") :
+  idx==5 ? strcpy(#mode_short, "100Hz") :
+  idx==6 ? strcpy(#mode_short, "Log 10s") :
+  idx==7 ? strcpy(#mode_short, "1Hz") :
+  idx==8 ? strcpy(#mode_short, "0.2Hz") :
+  idx==9 ? strcpy(#mode_short, "Sawtooth 100Hz") :
+  idx==10 ? strcpy(#mode_short, "Triangle 100Hz") :
+  idx==11 ? strcpy(#mode_short, "Brown") :
+  idx==12 ? strcpy(#mode_short, "Linear 10s") :
+  idx==13 ? strcpy(#mode_short, "Reverse 10s") :
+  idx==14 ? strcpy(#mode_short, "Log 30s") :
+  strcpy(#mode_short, "Single Shot");
+);
+
+function mode_at(col, row)
+(
+  col==0 ? ( row==0?0 : row==1?1 : row==2?9 : row==3?10 : -1 ) :
+  col==1 ? ( row==0?2 : row==1?3 : row==2?4 : row==3?11 : -1 ) :
+  col==2 ? ( row==0?6 : row==1?12 : row==2?13 : row==3?14 : -1 ) :
+  col==3 ? ( row==0?5 : row==1?7 : row==2?8 : row==3?15 : -1 ) :
+  -1;
+);
+
+function set_col_header(col)
+(
+  col==0 ? strcpy(#col_hdr, "TONES") :
+  col==1 ? strcpy(#col_hdr, "NOISE") :
+  col==2 ? strcpy(#col_hdr, "SWEEP") :
+  strcpy(#col_hdr, "IMPULSES");
+);
+
+function set_col_color(col)
+(
+  col==0 ? ( colcr = 0.698; colcg = 0.675; colcb = 0.533; ) :
+  col==1 ? ( colcr = 0.863; colcg = 0.682; colcb = 0.682; ) :
+  col==2 ? ( colcr = 0.953; colcg = 0.898; colcb = 0.671; ) :
+  ( colcr = 0.765; colcg = 0.804; colcb = 0.902; );
+);
+
+function set_mode_full(idx)
+(
+  idx==0 ? strcpy(#mode_full, "1KHz Sine Wave") :
+  idx==1 ? strcpy(#mode_full, "1KHz Square Wave") :
+  idx==2 ? strcpy(#mode_full, "Uniform White Noise") :
+  idx==3 ? strcpy(#mode_full, "Gaussian White Noise") :
+  idx==4 ? strcpy(#mode_full, "Pink Noise") :
+  idx==5 ? strcpy(#mode_full, "Impulses 0dBFS, 100Hz") :
+  idx==6 ? strcpy(#mode_full, "Sine Sweep (Log), 20Hz to 20kHz in 10sec") :
+  idx==7 ? strcpy(#mode_full, "Impulses 0dBFS, 1Hz") :
+  idx==8 ? strcpy(#mode_full, "Impulses 0dBFS, 5s (0.2Hz)") :
+  idx==9 ? strcpy(#mode_full, "Sawtooth 0dBFS, 100Hz") :
+  idx==10 ? strcpy(#mode_full, "Triangle 0dBFS, 100Hz") :
+  idx==11 ? strcpy(#mode_full, "Brown Noise (-6dB/octave, aka Red Noise)") :
+  idx==12 ? strcpy(#mode_full, "Sine Sweep (Linear), 20Hz to 20kHz in 10sec") :
+  idx==13 ? strcpy(#mode_full, "Sine Sweep (Log, Reverse), 20kHz to 20Hz in 10sec") :
+  idx==14 ? strcpy(#mode_full, "Sine Sweep (Log), 20Hz to 20kHz in 30sec") :
+  strcpy(#mode_full, "Single Impulse, 0dBFS");
+);
+
+function set_mode_tip(idx)
+(
+  idx==0 ? strcpy(#mode_tip, "Reference tone for level calibration and gain-staging checks.") :
+  idx==1 ? strcpy(#mode_tip, "Reveals slew-rate limits and odd-harmonic distortion in gear.") :
+  idx==2 ? strcpy(#mode_tip, "Flat energy per Hz -- broadband noise-floor and RFI checks.") :
+  idx==3 ? strcpy(#mode_tip, "Natural-distribution white noise for dither and statistical tests.") :
+  idx==4 ? strcpy(#mode_tip, "Equal energy per octave -- standard signal for speaker/room EQ.") :
+  idx==5 ? strcpy(#mode_tip, "Fast transients -- checks meter ballistics and limiter attack.") :
+  idx==6 ? strcpy(#mode_tip, "Even per-octave coverage -- quick frequency-response sweeps.") :
+  idx==7 ? strcpy(#mode_tip, "Slow transients -- watch envelope/release behavior in real time.") :
+  idx==8 ? strcpy(#mode_tip, "Sparse transients -- spot-check peak meters and clip indicators.") :
+  idx==9 ? strcpy(#mode_tip, "Full harmonic series -- checks aliasing and harmonic distortion.") :
+  idx==10 ? strcpy(#mode_tip, "Mild odd harmonics -- gentler alternative to square wave testing.") :
+  idx==11 ? strcpy(#mode_tip, "Steeper rolloff -- subwoofer, room-mode, and low-end-only testing.") :
+  idx==12 ? strcpy(#mode_tip, "Equal time per Hz -- for measurement tools expecting linear sweeps.") :
+  idx==13 ? strcpy(#mode_tip, "Falling sweep -- checks compressor/limiter response to high-to-low energy.") :
+  idx==14 ? strcpy(#mode_tip, "Longer sweep, better SNR -- for room/RT60 impulse-response capture.") :
+  strcpy(#mode_tip, "One-shot click -- classic method to capture a room's impulse response.");
+);
+
+mouse_state = 0;
+drag_target = 0; click_target = 0; click_time = -1;
+entering_value = 0;
+strcpy(#entry_buf, "");
+
+@slider
+
+mode = floor(slider1 + 0.5);
+reflevel_db = slider2;
+
+@block
+
+db = max(-24, min(-9, reflevel_db));
+lvl_coeff_target = pow(10, 0.05*db);
+lvl_coeff += 0.1*(lvl_coeff_target - lvl_coeff) + 0.000000000001;
+
+mode != prev_mode ? (
+  mode == 6 ? swp_cnt = 0;
+  mode == 12 ? swp2_cnt = 0;
+  mode == 13 ? swp3_cnt = 0;
+  mode == 14 ? swp4_cnt = 0;
+  mode == 15 ? single_fired = 0;
+  prev_mode = mode;
+);
+
+@sample
+
+s = mode==0 ? gen_sine_sample() :
+    mode==1 ? gen_square_sample() :
+    mode==2 ? gen_uniform_white_sample() :
+    mode==3 ? gen_gaussian_white_sample() :
+    mode==4 ? gen_pink_sample() :
+    mode==5 ? gen_impulse_sample(k_period100) :
+    mode==6 ? gen_sweep_sample() :
+    mode==7 ? gen_impulse_sample(k_period1) :
+    mode==8 ? gen_impulse_sample(k_period5s) :
+    mode==9 ? gen_sawtooth_sample(k_period100) :
+    mode==10 ? gen_triangle_sample(k_period100) :
+    mode==11 ? gen_brown_sample() :
+    mode==12 ? gen_sweep_linear_sample() :
+    mode==13 ? gen_sweep_reverse_sample() :
+    mode==14 ? gen_sweep_long_sample() :
+    gen_single_impulse_sample();
+
+spl0 = s; spl1 = s;
+
+@gfx 600 520
+
+scale = max(1, gfx_ext_retina);
+gfx_h < 520*scale ? gfx_h = 520*scale;
+gfx_w < 600*scale ? gfx_w = 600*scale;
+
+mode = floor(slider1 + 0.5);
+reflevel_db = slider2;
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+MARGIN = 12*scale;
+HEADER_H = 40*scale;
+
+gfx_setfont(1, "Arial", 16*scale, 'b');
+gfx_set(0.82, 0.45, 0.32, 1);
+gfx_x = MARGIN; gfx_y = 8*scale;
+gfx_drawstr("SONATA TEST SIGNAL GENERATOR");
+gfx_setfont(1, "Arial", 11*scale, 0);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 28*scale;
+gfx_drawstr("by chmaha");
+
+function taper_pos(val, minv, maxv, uselog)
+(
+  uselog ? log(val/minv) / log(maxv/minv) : (val - minv) / (maxv - minv);
+);
+function taper_val(pos, minv, maxv, uselog)
+(
+  uselog ? minv * pow(maxv/minv, pos) : minv + pos * (maxv - minv);
+);
+function hit_circle(mx, my, cx, cy, rad)
+(
+  sqr(mx - cx) + sqr(my - cy) <= sqr(rad);
+);
+function pt_in(px, py, rx, ry, rw, rh)
+(
+  px>=rx && px<=rx+rw && py>=ry && py<=ry+rh;
+);
+
+function draw_knob(cx, cy, rad, pos, cr, cg, cb, valtext, minlabel, maxlabel, name)
+local(ang0, ang1, ang, i, tx, ty)
+(
+  ang0 = -2.35619; ang1 = 2.35619;
+
+  gfx_set(0.05, 0.05, 0.06, 1);
+  gfx_circle(cx, cy, rad + 2*scale, 1, 1);
+  gfx_set(cr*0.55, cg*0.55, cb*0.55, 1);
+  gfx_circle(cx, cy, rad, 1, 1);
+  gfx_set(cr, cg, cb, 1);
+  gfx_circle(cx, cy, rad*0.72, 1, 1);
+  gfx_set(1, 1, 1, 0.18);
+  gfx_circle(cx - rad*0.28, cy - rad*0.28, rad*0.42, 1, 1);
+
+  i = 0;
+  loop(9,
+    ang = ang0 + (ang1 - ang0) * (i / 8);
+    gfx_set(0.85, 0.85, 0.85, 0.7);
+    gfx_line(cx + sin(ang)*rad*0.82, cy - cos(ang)*rad*0.82,
+              cx + sin(ang)*rad*0.98, cy - cos(ang)*rad*0.98, 1);
+    i += 1;
+  );
+
+  ang = ang0 + (ang1 - ang0) * pos;
+  gfx_set(0.05, 0.05, 0.05, 1);
+  gfx_line(cx, cy, cx + sin(ang)*rad*0.85, cy - cos(ang)*rad*0.85, 1);
+
+  gfx_setfont(1, "Arial", 13*scale, 0);
+  gfx_set(0.85, 0.85, 0.85, 1);
+  gfx_measurestr(valtext, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy - rad - 18*scale;
+  gfx_drawstr(valtext);
+
+  gfx_setfont(1, "Arial", 10*scale, 0);
+  gfx_set(0.55, 0.55, 0.58, 1);
+  gfx_x = cx - rad - 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(minlabel);
+  gfx_measurestr(maxlabel, tx, ty);
+  gfx_x = cx + rad - tx + 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(maxlabel);
+
+  gfx_setfont(1, "Arial", 12*scale, 0);
+  gfx_set(0.8, 0.8, 0.82, 1);
+  gfx_measurestr(name, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy + rad + 18*scale;
+  gfx_drawstr(name);
+);
+
+function draw_glass(bx, by, bw, bh, cr, cg, cb)
+local(gap)
+(
+  gap = max(1, scale);
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+  gfx_set(1, 1, 1, 0.18);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+  gfx_set(1, 1, 1, 0.3);
+  gfx_rect(bx, by, bw, gap, 1);
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+);
+
+mouse_down = mouse_cap & 1;
+click = mouse_down && !mouse_state;
+mouse_just_down = click;
+
+mouse_down_r = (mouse_cap & 2) != 0;
+click_r = mouse_down_r && !mouse_state_r;
+
+GRID_COLS = 4; GRID_MAXROWS = 4;
+GRID_GAP = 8*scale; GRID_BTN_H = 32*scale;
+GRID_HDR_H = 16*scale; GRID_HDR_GAP = 6*scale;
+GRID_BTN_W = (gfx_w - MARGIN*2 - (GRID_COLS-1)*GRID_GAP) / GRID_COLS;
+GRID_Y = HEADER_H + 14*scale;
+BTN_TOP_Y = GRID_Y + GRID_HDR_H + GRID_HDR_GAP;
+
+gcol = 0;
+loop(GRID_COLS,
+  gbx = MARGIN + gcol*(GRID_BTN_W+GRID_GAP);
+  grow = 0;
+  loop(GRID_MAXROWS,
+    mi = mode_at(gcol, grow);
+    mi >= 0 ? (
+      gby = BTN_TOP_Y + grow*(GRID_BTN_H+GRID_GAP);
+      click && pt_in(mouse_x, mouse_y, gbx, gby, GRID_BTN_W, GRID_BTN_H) ? (
+        slider1 = mi; slider_automate(slider1); mode = mi;
+        mi == 6 ? swp_cnt = 0;
+        mi == 12 ? swp2_cnt = 0;
+        mi == 13 ? swp3_cnt = 0;
+        mi == 14 ? swp4_cnt = 0;
+        mi == 15 ? single_fired = 0;
+      );
+    );
+    grow += 1;
+  );
+  gcol += 1;
+);
+
+gcol = 0;
+loop(GRID_COLS,
+  gbx = MARGIN + gcol*(GRID_BTN_W+GRID_GAP);
+  set_col_color(gcol);
+
+  gfx_setfont(1, "Arial", 10*scale, 'b');
+  gfx_set(colcr, colcg, colcb, 1);
+  set_col_header(gcol);
+  gfx_measurestr(#col_hdr, chtw, chth);
+  gfx_x = gbx + (GRID_BTN_W-chtw)*0.5; gfx_y = GRID_Y;
+  gfx_drawstr(#col_hdr);
+
+  grow = 0;
+  loop(GRID_MAXROWS,
+    mi = mode_at(gcol, grow);
+    mi >= 0 ? (
+      gby = BTN_TOP_Y + grow*(GRID_BTN_H+GRID_GAP);
+      mi==mode ? draw_glass(gbx, gby, GRID_BTN_W, GRID_BTN_H, colcr, colcg, colcb)
+               : draw_glass(gbx, gby, GRID_BTN_W, GRID_BTN_H, 0.22, 0.22, 0.25);
+      gfx_setfont(1, "Arial", 13*scale, 0);
+      mi==mode ? gfx_set(0.08, 0.08, 0.08, 1) : gfx_set(0.78, 0.78, 0.80, 1);
+      set_mode_short(mi);
+      gfx_measurestr(#mode_short, gstw, gsth);
+      gfx_x = gbx + (GRID_BTN_W-gstw)*0.5; gfx_y = gby + (GRID_BTN_H-gsth)*0.5;
+      gfx_drawstr(#mode_short);
+    );
+    grow += 1;
+  );
+  gcol += 1;
+);
+
+GRID_BOTTOM = BTN_TOP_Y + GRID_MAXROWS*(GRID_BTN_H+GRID_GAP) - GRID_GAP;
+
+gfx_setfont(1, "Arial", 14*scale, 0);
+gfx_set(0.65, 0.65, 0.68, 1);
+set_mode_full(mode);
+gfx_measurestr(#mode_full, mftw, mfth);
+gfx_x = (gfx_w - mftw)*0.5; gfx_y = GRID_BOTTOM + 14*scale;
+gfx_drawstr(#mode_full);
+
+gfx_setfont(1, "Arial", 12*scale, 0);
+gfx_set(0.55, 0.55, 0.58, 1);
+set_mode_tip(mode);
+gfx_measurestr(#mode_tip, mttw, mtth);
+gfx_x = (gfx_w - mttw)*0.5; gfx_y = GRID_BOTTOM + 38*scale;
+gfx_drawstr(#mode_tip);
+
+KN_X = gfx_w*0.5; KN_Y = GRID_BOTTOM + 130*scale; KN_R = 28*scale;
+
+just_opened = 0;
+!entering_value && mouse_just_down && hit_circle(mouse_x, mouse_y, KN_X, KN_Y, KN_R) ? (
+  (click_target == 1 && time_precise() - click_time < 0.3) ? (
+    slider2 = -18; slider_automate(slider2);
+  ) : (
+    drag_target = 1; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider2, -24, -9, 0);
+  );
+  click_target = 1; click_time = time_precise();
+);
+!entering_value && click_r && hit_circle(mouse_x, mouse_y, KN_X, KN_Y, KN_R) ? (
+  entering_value = 1; just_opened = 1;
+  sprintf(#entry_buf, "%.1f", reflevel_db);
+);
+drag_target == 1 && mouse_down ? (
+  newpos = max(0, min(1, drag_start_pos + (drag_start_y - mouse_y) / (150*scale)));
+  slider2 = taper_val(newpos, -24, -9, 0); slider_automate(slider2);
+);
+!mouse_down ? drag_target = 0;
+
+sprintf(#lvltxt, "%.1f dBFS", reflevel_db);
+draw_knob(KN_X, KN_Y, KN_R, taper_pos(slider2,-24,-9,0), 0.82,0.45,0.32, #lvltxt, "-24", "-9", "Signal Level");
+
+gfx_setfont(1, "Arial", 10*scale, 0);
+gfx_set(0.5, 0.5, 0.53, 1);
+strcpy(#reftxt, "EBU: -18dBFS   US/AU: -20dBFS");
+gfx_measurestr(#reftxt, rftw, rfth);
+gfx_x = (gfx_w - rftw)*0.5; gfx_y = KN_Y + KN_R + 40*scale;
+gfx_drawstr(#reftxt);
+
+gfx_setfont(1, "Arial", 9*scale, 0);
+gfx_set(0.45, 0.45, 0.48, 1);
+strcpy(#hinttxt, "Double-click to reset, right-click to type an exact value");
+gfx_measurestr(#hinttxt, htw, hth);
+gfx_x = (gfx_w - htw)*0.5; gfx_y = KN_Y + KN_R + 56*scale;
+gfx_drawstr(#hinttxt);
+
+entering_value ? (
+  ch = gfx_getchar();
+  ch == 13 ? (
+    match("%f", #entry_buf, typed_val) ? (
+      slider2 = max(-24, min(-9, typed_val)); slider_automate(slider2);
+    );
+    entering_value = 0;
+  ) : ch == 27 ? (
+    entering_value = 0;
+  ) : ch == 8 ? (
+    backspace_string(#entry_buf);
+  ) : ((ch >= 48 && ch <= 57) || ch == 46 || ch == 45) && strlen(#entry_buf) < 10 ? (
+    sprintf(#entry_buf, "%s%c", #entry_buf, ch);
+  );
+
+  EB_W = 140*scale; EB_H = 28*scale;
+  EB_X = gfx_w*0.5 - EB_W*0.5; EB_Y = KN_Y + KN_R + 76*scale;
+
+  entering_value && click && !just_opened && !pt_in(mouse_x, mouse_y, EB_X, EB_Y, EB_W, EB_H) ? entering_value = 0;
+
+  entering_value ? (
+    gfx_set(0.05, 0.05, 0.06, 1);
+    gfx_rect(EB_X, EB_Y, EB_W, EB_H, 1);
+    gfx_set(0.82, 0.45, 0.32, 1);
+    gfx_rect(EB_X, EB_Y, EB_W, EB_H, 0);
+    gfx_setfont(1, "Arial", 13*scale, 0);
+    gfx_set(1, 1, 1, 1);
+    sprintf(#eb_disp, "%s|", #entry_buf);
+    gfx_measurestr(#eb_disp, ebtw, ebth);
+    gfx_x = EB_X + 8*scale; gfx_y = EB_Y + (EB_H-ebth)*0.5;
+    gfx_drawstr(#eb_disp);
+  );
+);
+
+mouse_state = mouse_down;
+mouse_state_r = mouse_down_r;

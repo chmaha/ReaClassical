@@ -1,0 +1,402 @@
+NoIndex: true
+desc: Sonata Gate (chmaha)
+author: chmaha
+// Ported from ZamGateX2 (zam-plugins). GPLv2+.
+// https://github.com/zamaudio/zam-plugins
+
+slider1:-60<-60,0,0.1>-Threshold (dB)
+slider2:50<0.1,500,0.1>-Attack (ms)
+slider3:100<0.1,500,0.1>-Release (ms)
+slider4:-50<-50,0,0.1>-Max Gate Close (dB)
+slider5:0<-30,30,0.1>-Makeup (dB)
+slider6:0<0,1,1{Off,On}>-Sidechain
+slider7:0<0,1,1{Gate,Duck}>-Mode
+
+in_pin:left input
+in_pin:right input
+in_pin:sidechain input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+MAX_GATE = 400;
+
+freemem = 0;
+samplesl = freemem; freemem += MAX_GATE;
+samplesr = freemem; freemem += MAX_GATE;
+
+posl = 0;
+posr = 0;
+gatestate = 0;
+
+gi = 0;
+loop(MAX_GATE,
+  samplesl[gi] = 0;
+  samplesr[gi] = 0;
+  gi += 1;
+);
+
+gr_disp = 0;
+outlevel_disp = -45;
+maxpk = 0;
+meter_ctr = 0;
+meter_len = ceil(srate * 0.05);
+
+scale = max(1, gfx_ext_retina);
+drag_target = 0; drag_start_y = 0; drag_start_pos = 0;
+click_target = 0; click_time = -1;
+mouse_state = 0;
+
+function from_db(gdb) ( exp(0.05 * gdb * log(10)); );
+function to_db(g) ( 20 * log10(g); );
+
+function pushsamplel(sample)
+(
+  posl += 1;
+  posl >= MAX_GATE ? posl = 0;
+  samplesl[posl] = sample;
+);
+
+function pushsampler(sample)
+(
+  posr += 1;
+  posr >= MAX_GATE ? posr = 0;
+  samplesr[posr] = sample;
+);
+
+function averageabs(arr)
+local(gj, avg)
+(
+  avg = 0;
+  gj = 0;
+  loop(MAX_GATE,
+    avg += arr[gj] * arr[gj];
+    gj += 1;
+  );
+  sqrt(avg / MAX_GATE);
+);
+
+@block
+
+thresdb = slider1;
+makeup = slider5;
+openshut = slider7;
+
+att = 1000 / (slider2 * srate);
+rel = 1000 / (slider3 * srate);
+usesidechain = slider6 >= 0.5;
+mingate = (slider4 == -50) ? 0 : from_db(slider4);
+
+@sample
+
+in0 = spl0;
+in1 = spl1;
+side = spl2;
+
+usesidechain ? (
+  pushsamplel(side);
+  absample = averageabs(samplesl);
+) : (
+  pushsamplel(in0);
+  pushsampler(in1);
+  absamplel = averageabs(samplesl);
+  absampler = averageabs(samplesr);
+  absample = max(absamplel, absampler);
+);
+
+openshut < 0.5 ? (
+  absample > from_db(thresdb) ? (
+    gatestate += att;
+    gatestate > 1 ? gatestate = 1;
+  ) : (
+    gatestate -= rel;
+    gatestate < mingate ? gatestate = mingate;
+  );
+) : (
+  absample > from_db(thresdb) ? (
+    gatestate -= att;
+    gatestate < mingate ? gatestate = mingate;
+  ) : (
+    gatestate += rel;
+    gatestate > 1 ? gatestate = 1;
+  );
+);
+
+mk = from_db(makeup);
+spl0 = gatestate * mk * in0;
+spl1 = gatestate * mk * in1;
+
+gainr_now = (gatestate > 0) ? -to_db(gatestate) : 45;
+
+(play_state & 1) ? (
+  pk = max(abs(spl0), abs(spl1));
+  maxpk = max(maxpk, pk);
+  meter_ctr += 1;
+  meter_ctr >= meter_len ? (
+    gr_disp = gainr_now;
+    outlevel_disp = (maxpk == 0) ? -45 : to_db(maxpk);
+    maxpk = 0;
+    meter_ctr = 0;
+  );
+);
+
+@gfx 720 380
+
+scale = max(1, gfx_ext_retina);
+gfx_w < 720*scale ? gfx_w = 720*scale;
+gfx_h < 380*scale ? gfx_h = 380*scale;
+
+MARGIN = 14*scale;
+HEADER_H = 46*scale;
+
+function taper_pos(val, minv, maxv, uselog)
+(
+  uselog ? log(val/minv) / log(maxv/minv) : (val - minv) / (maxv - minv);
+);
+function taper_val(pos, minv, maxv, uselog)
+(
+  uselog ? minv * pow(maxv/minv, pos) : minv + pos * (maxv - minv);
+);
+function hit_circle(mx, my, cx, cy, rad)
+(
+  sqr(mx - cx) + sqr(my - cy) <= sqr(rad);
+);
+function hit_rect(mx, my, x, y, w, h)
+(
+  mx >= x && mx <= x+w && my >= y && my <= y+h;
+);
+
+function draw_knob(cx, cy, rad, pos, cr, cg, cb, valtext, minlabel, maxlabel, name)
+local(ang0, ang1, ang, i, tx, ty)
+(
+  ang0 = -2.35619;
+  ang1 =  2.35619;
+
+  gfx_set(0.05, 0.05, 0.06, 1);
+  gfx_circle(cx, cy, rad + 2*scale, 1, 1);
+  gfx_set(cr*0.55, cg*0.55, cb*0.55, 1);
+  gfx_circle(cx, cy, rad, 1, 1);
+  gfx_set(cr, cg, cb, 1);
+  gfx_circle(cx, cy, rad*0.72, 1, 1);
+  gfx_set(1, 1, 1, 0.18);
+  gfx_circle(cx - rad*0.28, cy - rad*0.28, rad*0.42, 1, 1);
+
+  i = 0;
+  loop(9,
+    ang = ang0 + (ang1 - ang0) * (i / 8);
+    gfx_set(0.85, 0.85, 0.85, 0.7);
+    gfx_line(cx + sin(ang)*rad*0.82, cy - cos(ang)*rad*0.82,
+             cx + sin(ang)*rad*0.98, cy - cos(ang)*rad*0.98);
+    i += 1;
+  );
+
+  ang = ang0 + (ang1 - ang0) * pos;
+  gfx_set(0.05, 0.05, 0.05, 1);
+  gfx_line(cx, cy, cx + sin(ang)*rad*0.85, cy - cos(ang)*rad*0.85, 1);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.85, 0.85, 0.85, 1);
+  gfx_measurestr(valtext, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy - rad - 16*scale;
+  gfx_drawstr(valtext);
+
+  gfx_setfont(1, "Arial", 10*scale);
+  gfx_set(0.55, 0.55, 0.58, 1);
+  gfx_x = cx - rad - 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(minlabel);
+  gfx_measurestr(maxlabel, tx, ty);
+  gfx_x = cx + rad - tx + 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(maxlabel);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.8, 0.8, 0.82, 1);
+  gfx_measurestr(name, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy + rad + 18*scale;
+  gfx_drawstr(name);
+);
+
+function header_btn(txt, active, right_edge)
+local(tw, th, bw, bh, bx, by, cr, cg, cb, gap)
+global(gfx_x, gfx_y, hb_x, hb_y, hb_w, hb_h, scale)
+(
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_measurestr(txt, tw, th);
+  bw = tw + 16*scale; bh = 20*scale;
+  bx = right_edge - bw; by = 6*scale;
+
+  active ? ( cr = 0.30; cg = 0.65; cb = 0.75; ) : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_set(1, 1, 1, 0.9);
+  gfx_x = bx + 8*scale; gfx_y = by + 3*scale;
+  gfx_drawstr(txt);
+  hb_x = bx; hb_y = by; hb_w = bw; hb_h = bh;
+  bx;
+);
+
+function draw_bar_meter(mx0, my0, mw, mh, val, minv, maxv, cr, cg, cb, label)
+local(t, fw, tw, th)
+(
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(mx0, my0, mw, mh, 1);
+
+  t = max(0, min(1, (val - minv) / (maxv - minv)));
+  fw = mw * t;
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(mx0, my0, fw, mh, 1);
+
+  gfx_set(0.4, 0.4, 0.44, 1);
+  gfx_rect(mx0, my0, mw, mh, 0);
+
+  gfx_setfont(1, "Arial", 11*scale);
+  gfx_set(0.75, 0.75, 0.78, 1);
+  gfx_measurestr(label, tw, th);
+  gfx_x = mx0 - tw - 10*scale; gfx_y = my0 + mh*0.5 - th*0.5;
+  gfx_drawstr(label);
+);
+
+mouse_down = mouse_cap & 1;
+mouse_just_down = mouse_down && !mouse_state;
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+gfx_setfont(1, "Arial", 18*scale, 'b');
+gfx_set(0.30, 0.65, 0.75, 1);
+gfx_x = MARGIN; gfx_y = 8*scale;
+gfx_drawstr("SONATA GATE");
+gfx_setfont(1, "Arial", 11*scale);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 30*scale;
+gfx_drawstr("by chmaha");
+
+sidechain_on = slider6 >= 0.5;
+mode_on = slider7 >= 0.5;
+strcpy(#mode_txt, mode_on ? "Mode: Duck" : "Mode: Gate");
+strcpy(#sc_txt, sidechain_on ? "Sidechain: On" : "Sidechain: Off");
+
+right_edge = gfx_w - MARGIN;
+right_edge = header_btn(#mode_txt, mode_on, right_edge);
+mode_x = hb_x; mode_y = hb_y; mode_w = hb_w; mode_h = hb_h;
+right_edge = header_btn(#sc_txt, sidechain_on, right_edge - 10*scale);
+sc_x = hb_x; sc_y = hb_y; sc_w = hb_w; sc_h = hb_h;
+
+knrad = 28*scale;
+kny = HEADER_H + 24*scale + knrad;
+kstep = (gfx_w - 2*MARGIN) / 5;
+k1x = MARGIN + kstep*0.5;
+k2x = MARGIN + kstep*1.5;
+k3x = MARGIN + kstep*2.5;
+k4x = MARGIN + kstep*3.5;
+k5x = MARGIN + kstep*4.5;
+
+mouse_just_down && hit_circle(mouse_x, mouse_y, k1x, kny, knrad) ? (
+  (click_target == 1 && time_precise() - click_time < 0.3) ? (
+    slider1 = -60; slider_automate(slider1);
+  ) : (
+    drag_target = 1; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider1, -60, 0, 0);
+  );
+  click_target = 1; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k2x, kny, knrad) ? (
+  (click_target == 2 && time_precise() - click_time < 0.3) ? (
+    slider2 = 50; slider_automate(slider2);
+  ) : (
+    drag_target = 2; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider2, 0.1, 500, 1);
+  );
+  click_target = 2; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k3x, kny, knrad) ? (
+  (click_target == 3 && time_precise() - click_time < 0.3) ? (
+    slider3 = 100; slider_automate(slider3);
+  ) : (
+    drag_target = 3; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider3, 0.1, 500, 1);
+  );
+  click_target = 3; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k4x, kny, knrad) ? (
+  (click_target == 4 && time_precise() - click_time < 0.3) ? (
+    slider4 = -50; slider_automate(slider4);
+  ) : (
+    drag_target = 4; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider4, -50, 0, 0);
+  );
+  click_target = 4; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k5x, kny, knrad) ? (
+  (click_target == 5 && time_precise() - click_time < 0.3) ? (
+    slider5 = 0; slider_automate(slider5);
+  ) : (
+    drag_target = 5; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider5, -30, 30, 0);
+  );
+  click_target = 5; click_time = time_precise();
+);
+
+mouse_just_down && hit_rect(mouse_x, mouse_y, mode_x, mode_y, mode_w, mode_h) ? (
+  slider7 = mode_on ? 0 : 1; slider_automate(slider7);
+);
+mouse_just_down && hit_rect(mouse_x, mouse_y, sc_x, sc_y, sc_w, sc_h) ? (
+  slider6 = sidechain_on ? 0 : 1; slider_automate(slider6);
+);
+
+drag_target > 0 && mouse_down ? (
+  newpos = max(0, min(1, drag_start_pos + (drag_start_y - mouse_y) / (150*scale)));
+  (drag_target == 1) ? ( slider1 = taper_val(newpos, -60, 0, 0); slider_automate(slider1); );
+  (drag_target == 2) ? ( slider2 = taper_val(newpos, 0.1, 500, 1); slider_automate(slider2); );
+  (drag_target == 3) ? ( slider3 = taper_val(newpos, 0.1, 500, 1); slider_automate(slider3); );
+  (drag_target == 4) ? ( slider4 = taper_val(newpos, -50, 0, 0); slider_automate(slider4); );
+  (drag_target == 5) ? ( slider5 = taper_val(newpos, -30, 30, 0); slider_automate(slider5); );
+);
+!mouse_down ? drag_target = 0;
+mouse_state = mouse_down;
+
+draw_knob(k1x, kny, knrad, taper_pos(slider1,-60,0,0), 0.8,0.3,0.0,
+  sprintf(#, "%.1f dB", slider1), "-60", "0", "Threshold");
+draw_knob(k2x, kny, knrad, taper_pos(slider2,0.1,500,1), 0.3,0.3,0.7,
+  sprintf(#, "%.1f ms", slider2), "0.1ms", "500ms", "Attack");
+draw_knob(k3x, kny, knrad, taper_pos(slider3,0.1,500,1), 0.3,0.3,0.7,
+  sprintf(#, "%.1f ms", slider3), "0.1ms", "500ms", "Release");
+(slider4 <= -49.999) ? strcpy(#rngtxt, "Mute") : strcpy(#rngtxt, sprintf(#, "%.1f dB", slider4));
+draw_knob(k4x, kny, knrad, taper_pos(slider4,-50,0,0), 0.6,0.4,0.2,
+  #rngtxt, "-50", "0", "Range");
+draw_knob(k5x, kny, knrad, taper_pos(slider5,-30,30,0), 0.7,0.7,0.1,
+  sprintf(#, "%+.1f dB", slider5), "-30", "+30", "Makeup");
+
+my0 = kny + knrad + 84*scale;
+mh = 26*scale;
+mx0 = MARGIN + 90*scale;
+mw = k5x - mx0;
+
+draw_bar_meter(mx0, my0, mw, mh, gr_disp, 0, 40, 0.9, 0.2, 0.2, "Reduction");
+gfx_setfont(1, "Arial", 10*scale);
+gfx_set(0.6, 0.6, 0.62, 1);
+gfx_x = mx0 + mw + 6*scale; gfx_y = my0 + mh*0.5 - 6*scale;
+gfx_drawstr(sprintf(#, "%.1f dB", gr_disp));
+
+my1 = my0 + mh + 26*scale;
+draw_bar_meter(mx0, my1, mw, mh, outlevel_disp, -45, 20, 0.1, 0.8, 0.2, "Output");
+gfx_x = mx0 + mw + 6*scale; gfx_y = my1 + mh*0.5 - 6*scale;
+gfx_drawstr(sprintf(#, "%.1f dB", outlevel_disp));

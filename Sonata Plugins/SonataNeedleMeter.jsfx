@@ -1,0 +1,768 @@
+NoIndex: true
+desc: Sonata Needle Meter (chmaha)
+author: chmaha
+// Ported from x42/meters.lv2's Needle meter (Robin Gareus; DSP by Fons Adriaensen). GPLv2+.
+// https://github.com/x42/meters.lv2
+
+slider1:-18<-30,0,0.1>-Reference Level (dBFS)
+slider2:0<0,5,1>-Style
+slider3:0<0,1,1>-BM6 Side +20dB
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+PI = 3.14159265358979;
+
+function style_default_ref(s) ( s==0 ? -22 : s==3 ? -15 : -18; );
+
+vu_w = 11.1 / srate;
+vu_g = 1.5 * 1.571;
+i1_w1 = 450.0 / srate; i1_w2 = 1300.0 / srate; i1_w3 = 1.0 - 5.4/srate; i1_g = 0.5108;
+i2_w1 = 200.0 / srate; i2_w2 = 860.0 / srate; i2_w3 = 1.0 - 4.0/srate; i2_g = 0.5141;
+bm_mv_m = pow(10, 0.05 * -6);
+bm_mv_s = bm_mv_m;
+
+inited != 1 ? (
+  zv1_l = zv2_l = mv_l = 0; resv_l = 1; phv_l = 0;
+  zv1_r = zv2_r = mv_r = 0; resv_r = 1; phv_r = 0;
+
+  zi1a_l = zi1b_l = mi1_l = 0; resi1_l = 1;
+  zi1a_r = zi1b_r = mi1_r = 0; resi1_r = 1;
+
+  zi2a_l = zi2b_l = mi2_l = 0; resi2_l = 1;
+  zi2a_r = zi2b_r = mi2_r = 0; resi2_r = 1;
+
+  zbma_m = zbmb_m = mbm_m = 0; resbm_m = 1;
+  zbma_s = zbmb_s = mbm_s = 0; resbm_s = 1;
+  ph4 = 0;
+
+  mouse_state = 0;
+  drag_target = 0; click_target = 0; click_time = -1;
+
+  ref_level = style_default_ref(slider2);
+
+  inited = 1;
+);
+
+@slider
+
+style = floor(slider2 + 0.5);
+ref_level = slider1;
+s20_on = slider3 > 0.5;
+bm_mv_s = pow(10, 0.05 * (s20_on ? 14 : -6));
+
+@block
+
+resv_l ? (mv_l = 0; resv_l = 0;);
+resv_r ? (mv_r = 0; resv_r = 0;);
+resi1_l ? (mi1_l = 0; resi1_l = 0;);
+resi1_r ? (mi1_r = 0; resi1_r = 0;);
+resi2_l ? (mi2_l = 0; resi2_l = 0;);
+resi2_r ? (mi2_r = 0; resi2_r = 0;);
+resbm_m ? (mbm_m = 0; resbm_m = 0;);
+resbm_s ? (mbm_s = 0; resbm_s = 0;);
+
+@sample
+
+phv_l == 0 ? t2c_l = zv2_l * 0.5;
+t1_l = abs(spl0) - t2c_l;
+zv1_l += vu_w * (t1_l - zv1_l);
+phv_l == 3 ? (
+  zv2_l += 4*vu_w * (zv1_l - zv2_l);
+  zv2_l > mv_l ? mv_l = zv2_l;
+  phv_l = 0;
+) : ( phv_l += 1; );
+
+phv_r == 0 ? t2c_r = zv2_r * 0.5;
+t1_r = abs(spl1) - t2c_r;
+zv1_r += vu_w * (t1_r - zv1_r);
+phv_r == 3 ? (
+  zv2_r += 4*vu_w * (zv1_r - zv2_r);
+  zv2_r > mv_r ? mv_r = zv2_r;
+  phv_r = 0;
+) : ( phv_r += 1; );
+
+ph4 == 0 ? (
+  zi1a_l *= i1_w3; zi1b_l *= i1_w3;
+  zi1a_r *= i1_w3; zi1b_r *= i1_w3;
+  zi2a_l *= i2_w3; zi2b_l *= i2_w3;
+  zi2a_r *= i2_w3; zi2b_r *= i2_w3;
+  zbma_m *= i2_w3; zbmb_m *= i2_w3;
+  zbma_s *= i2_w3; zbmb_s *= i2_w3;
+);
+ph4 = (ph4+1) % 4;
+
+t_l = abs(spl0);
+t_l > zi1a_l ? zi1a_l += i1_w1 * (t_l - zi1a_l);
+t_l > zi1b_l ? zi1b_l += i1_w2 * (t_l - zi1b_l);
+comb1_l = zi1a_l + zi1b_l;
+comb1_l > mi1_l ? mi1_l = comb1_l;
+
+t_r = abs(spl1);
+t_r > zi1a_r ? zi1a_r += i1_w1 * (t_r - zi1a_r);
+t_r > zi1b_r ? zi1b_r += i1_w2 * (t_r - zi1b_r);
+comb1_r = zi1a_r + zi1b_r;
+comb1_r > mi1_r ? mi1_r = comb1_r;
+
+t2_l = abs(spl0);
+t2_l > zi2a_l ? zi2a_l += i2_w1 * (t2_l - zi2a_l);
+t2_l > zi2b_l ? zi2b_l += i2_w2 * (t2_l - zi2b_l);
+comb2_l = zi2a_l + zi2b_l;
+comb2_l > mi2_l ? mi2_l = comb2_l;
+
+t2_r = abs(spl1);
+t2_r > zi2a_r ? zi2a_r += i2_w1 * (t2_r - zi2a_r);
+t2_r > zi2b_r ? zi2b_r += i2_w2 * (t2_r - zi2b_r);
+comb2_r = zi2a_r + zi2b_r;
+comb2_r > mi2_r ? mi2_r = comb2_r;
+
+tm = bm_mv_m * abs(spl0 + spl1);
+tm > zbma_m ? zbma_m += i2_w1 * (tm - zbma_m);
+tm > zbmb_m ? zbmb_m += i2_w2 * (tm - zbmb_m);
+combm = zbma_m + zbmb_m;
+combm > mbm_m ? mbm_m = combm;
+
+ts = bm_mv_s * abs(spl0 - spl1);
+ts > zbma_s ? zbma_s += i2_w1 * (ts - zbma_s);
+ts > zbmb_s ? zbmb_s += i2_w2 * (ts - zbmb_s);
+combs = zbma_s + zbmb_s;
+combs > mbm_s ? mbm_s = combs;
+
+@gfx 660 420
+
+scale = max(1, gfx_ext_retina);
+gfx_h < 280*scale ? gfx_h = 280*scale;
+gfx_w < 660*scale ? gfx_w = 660*scale;
+
+style = floor(slider2 + 0.5);
+s20_on = slider3 > 0.5;
+
+rlgain = pow(10, 0.05 * (ref_level + 18));
+
+function curve_vu(v) ( 5.6234149 * v; );
+function curve_iec2(v)
+(
+  v *= 3.17;
+  v < 0.1 ? v*0.855 : 0.3*log(v) + 0.77633;
+);
+function curve_din(v)
+local(r)
+(
+  r = sqrt(sqrt(2.002353*v)) - 0.1885;
+  r < 0 ? 0 : r;
+);
+function curve_nor(v) ( v < 0.00001 ? 0 : 0.4166666*log10(v) + 1.125; );
+
+function tick_vu(db) ( 5.6234149 * pow(10, 0.05*(db-18)); );
+function tick_din(db)
+local(v, r)
+(
+  v = pow(10, 0.05*(db-6));
+  r = sqrt(sqrt(2.002353*v)) - 0.1885;
+  r < 0 ? 0 : r;
+);
+function tick_iec2(db)
+local(v)
+(
+  v = pow(10, 0.05*db);
+  v *= 3.17;
+  0.3*log(v) + 0.77633;
+);
+function tick_nor(db) ( (1.0/48.0)*(db-18) + 54.0/48.0; );
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+HEADER_H = 40*scale; BTN_ROW_H = 30*scale; MARGIN = 12*scale;
+
+gfx_setfont(1, "Arial", 16*scale, 'b');
+gfx_set(0.48, 0.69, 0.83, 1);
+gfx_x = MARGIN; gfx_y = 8*scale;
+gfx_drawstr("SONATA NEEDLE METER");
+gfx_setfont(1, "Arial", 11*scale, 0);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 28*scale;
+gfx_drawstr("by chmaha");
+
+function btn(bx, by, bw, bh, label, active)
+local(tw, th, cr, cg, cb, gap)
+(
+  active ? ( cr = 0.48; cg = 0.69; cb = 0.83; ) : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_setfont(1, "Arial", 11*scale, 0);
+  active ? gfx_set(1, 1, 1, 1) : gfx_set(0.78, 0.78, 0.80, 1);
+  gfx_measurestr(label, tw, th);
+  gfx_x = bx + (bw-tw)*0.5; gfx_y = by + (bh-th)*0.5;
+  gfx_drawstr(label);
+);
+
+mouse_down = mouse_cap & 1;
+click = mouse_down && !mouse_state;
+mouse_just_down = mouse_down && !mouse_state;
+
+btn_h = BTN_ROW_H - 6*scale;
+btn_w = (gfx_w - MARGIN*2 - 2*8*scale) / 3;
+row1_y = HEADER_H + 4*scale;
+row2_y = row1_y + BTN_ROW_H;
+bcol0_x = MARGIN;
+bcol1_x = bcol0_x + btn_w + 8*scale;
+bcol2_x = bcol1_x + btn_w + 8*scale;
+
+function style_click(bx, by, s)
+(
+  click && mouse_x >= bx && mouse_x <= bx+btn_w && mouse_y >= by && mouse_y <= by+btn_h ? (
+    style = s;
+    slider2 = s; slider_automate(slider2);
+    ref_level = style_default_ref(s);
+    slider1 = ref_level; slider_automate(slider1);
+  );
+);
+style_click(bcol0_x, row1_y, 0);
+style_click(bcol1_x, row1_y, 1);
+style_click(bcol2_x, row1_y, 2);
+style_click(bcol0_x, row2_y, 3);
+style_click(bcol1_x, row2_y, 4);
+style_click(bcol2_x, row2_y, 5);
+
+btn(bcol0_x, row1_y, btn_w, btn_h, "VU", style==0);
+btn(bcol1_x, row1_y, btn_w, btn_h, "BBC PPM", style==1);
+btn(bcol2_x, row1_y, btn_w, btn_h, "EBU PPM", style==2);
+btn(bcol0_x, row2_y, btn_w, btn_h, "DIN PPM", style==3);
+btn(bcol1_x, row2_y, btn_w, btn_h, "Nordic PPM", style==4);
+btn(bcol2_x, row2_y, btn_w, btn_h, "BBC M/S", style==5);
+
+mouse_state = mouse_down;
+
+function needle_ang(val)
+local(v)
+(
+  v = val < 0 ? 0 : (val > 1.05 ? 1.05 : val);
+  (v - 0.5) * (PI/2);
+);
+
+function draw_panel_frame(px, py, pw, ph)
+(
+  gfx_set(0.4, 0.4, 0.42, 1);
+  gfx_rect(px-2*scale, py-2*scale, pw+4*scale, ph+4*scale, 0);
+);
+
+function fill_panel_bg(pw, ph, cream)
+(
+  cream ? gfx_set(0.94, 0.94, 0.82, 1) : gfx_set(0.13, 0.13, 0.15, 1);
+  gfx_rect(0, 0, pw, ph, 1);
+);
+
+function draw_style_name(pw, ph, txt, cr, cg, cb)
+local(tw, th)
+(
+  gfx_setfont(1, "Arial", max(9*scale, ph*0.12), 'b');
+  gfx_set(cr, cg, cb, 1);
+  gfx_measurestr(txt, tw, th);
+  gfx_x = pw*0.5 - tw*0.5; gfx_y = ph*0.72;
+  gfx_drawstr(txt);
+);
+
+function draw_tick(xc, yc, rad, db_val, r_out_frac, r_in_frac, cr, cg, cb)
+local(ang)
+(
+  ang = needle_ang(db_val);
+  gfx_set(cr, cg, cb, 1);
+  gfx_line(xc+sin(ang)*rad*r_in_frac, yc-cos(ang)*rad*r_in_frac,
+            xc+sin(ang)*rad*r_out_frac, yc-cos(ang)*rad*r_out_frac, 1);
+);
+
+function draw_tlabel(xc, yc, rad, val, r_frac, txt, cr, cg, cb)
+local(ang, tw, th)
+(
+  gfx_setfont(1, "Arial", 10*rad, 0);
+  ang = needle_ang(val);
+  gfx_set(cr, cg, cb, 1);
+  gfx_measurestr(txt, tw, th);
+  gfx_x = xc+sin(ang)*rad*r_frac - tw*0.5; gfx_y = yc-cos(ang)*rad*r_frac - th*0.5;
+  gfx_drawstr(txt);
+);
+
+function draw_needle(xc, yc, rad, val, cr, cg, cb)
+local(ang, tipx, tipy, px, py, hw)
+(
+  ang = needle_ang(val);
+  tipx = xc+sin(ang)*rad*180; tipy = yc-cos(ang)*rad*180;
+  hw = rad * 1.0;
+  px = cos(ang)*hw; py = sin(ang)*hw;
+  gfx_set(cr, cg, cb, 1);
+  gfx_triangle(xc-px, yc-py, xc+px, yc+py, tipx+px, tipy+py, tipx-px, tipy-py);
+);
+
+function draw_arc_line(xc, yc, r, val_lo, val_hi, cr, cg, cb)
+local(steps, i, v1, v2, a1, a2, x1, y1, x2, y2)
+(
+  gfx_set(cr, cg, cb, 1);
+  steps = 32;
+  i = 0;
+  loop(steps,
+    v1 = val_lo + (val_hi-val_lo)*i/steps;
+    v2 = val_lo + (val_hi-val_lo)*(i+1)/steps;
+    a1 = needle_ang(v1); a2 = needle_ang(v2);
+    x1 = xc+sin(a1)*r; y1 = yc-cos(a1)*r;
+    x2 = xc+sin(a2)*r; y2 = yc-cos(a2)*r;
+    gfx_line(x1, y1, x2, y2, 1);
+    i += 1;
+  );
+);
+
+function draw_arc_band(xc, yc, r_lo, r_hi, val_lo, val_hi, cr, cg, cb)
+local(n_r, k, r)
+(
+  n_r = max(1, ceil((r_hi-r_lo) / max(0.5, scale)));
+  k = 0;
+  loop(n_r+1,
+    r = r_lo + (r_hi-r_lo)*k/n_r;
+    draw_arc_line(xc, yc, r, val_lo, val_hi, cr, cg, cb);
+    k += 1;
+  );
+);
+
+function face_vu(xc, yc, u)
+local(pc, val, percZ, percS)
+(
+  percZ = tick_vu(-60);
+  percS = (tick_vu(0) - percZ) / 10;
+  pc = 0;
+  loop(11,
+    val = percZ + pc*percS;
+    draw_tick(xc, yc, u, val, 170, 160, 0.1,0.1,0.1);
+    (pc % 2) == 0 ? (
+      pc == 10 ? strcpy(#facetxt, "100%") : sprintf(#facetxt, "%d", pc*10);
+      draw_tlabel(xc, yc, u, val, 148, #facetxt, 0.1,0.1,0.1);
+    );
+    pc += 1;
+  );
+
+  draw_arc_band(xc, yc, u*169.25, u*170.75, tick_vu(-60), tick_vu(0), 0.1,0.1,0.1);
+  draw_arc_band(xc, yc, u*169.25, u*172.25, tick_vu(0), tick_vu(3), 0.85,0.1,0.1);
+
+  draw_tick(xc, yc, u, tick_vu(-60), 180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-20), 180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-10), 180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-7),  180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-6),  180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-5),  180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-4),  180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-3),  180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-2),  180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(-1),  180, 170, 0.1,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(0),   180, 169.25, 0.85,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(1),   180, 170, 0.85,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(2),   180, 170, 0.85,0.1,0.1);
+  draw_tick(xc, yc, u, tick_vu(3),   180, 169.25, 0.85,0.1,0.1);
+
+  draw_tlabel(xc, yc, u, tick_vu(-20), 185, "-20", 0.1,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(-10), 185, "10", 0.1,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(-7),  185, "7", 0.1,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(-5),  185, "5", 0.1,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(-3),  185, "3", 0.1,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(-2),  185, "2", 0.1,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(-1),  185, "1", 0.1,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(0),   185, "0", 0.85,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(1),   185, "1", 0.85,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(2),   185, "2", 0.85,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_vu(3),   185, "+3", 0.85,0.1,0.1);
+);
+
+function face_bbc(xc, yc, u)
+local(i, db)
+(
+  i = 1; db = -30;
+  loop(7,
+    draw_tick(xc, yc, u, tick_iec2(db), 180, 170, 1,1,1);
+    sprintf(#facetxt, "%d", i);
+    draw_tlabel(xc, yc, u, tick_iec2(db), 188, #facetxt, 1,1,1);
+    i += 1; db += 4;
+  );
+  draw_tick(xc, yc, u, tick_iec2(-33), 180, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_iec2(-3),  180, 170, 1,1,1);
+);
+
+function face_ebu(xc, yc, u)
+local(db)
+(
+  db = -30;
+  loop(5,
+    draw_tick(xc, yc, u, tick_iec2(db), 180, 160, 1,1,1);
+    db == -18 ? strcpy(#facetxt, "TEST") : sprintf(#facetxt, "%+d", db+18);
+    draw_tlabel(xc, yc, u, tick_iec2(db), 188, #facetxt, 1,1,1);
+    db += 6;
+  );
+  draw_tick(xc, yc, u, tick_iec2(-33), 180, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_iec2(-9),  180, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_iec2(-3),  180, 170, 1,1,1);
+);
+
+function face_din(xc, yc, u)
+(
+  draw_arc_band(xc, yc, u*169.25, u*170.75, tick_din(-60), tick_din(6), 1,1,1);
+  draw_arc_band(xc, yc, u*170.75, u*176.25, tick_din(0), tick_din(6), 0.85,0.1,0.1);
+
+  draw_tick(xc, yc, u, tick_din(-60), 176, 160, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-50), 190, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-45), 176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-40), 190, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-35), 176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-30), 190, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-25), 176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-20), 190, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-15), 176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-10), 190, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-9),  180, 169.25, 0.85,0.1,0.1);
+  draw_tick(xc, yc, u, tick_din(-5),  190, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-4),  176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-3),  176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-2),  176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-1),  176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(1),   176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(2),   176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(3),   176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(4),   176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(5),   176, 170, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(0),   190, 164, 0.85,0.1,0.1);
+  draw_tick(xc, yc, u, tick_din(6),   176, 160, 1,1,1);
+
+  draw_tick(xc, yc, u, tick_din(-40),     170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-33.979), 170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-30.457), 170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-26.021), 170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-20),     170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-16.478), 170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-13.979), 170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-10.458), 170, 164, 1,1,1);
+  draw_tick(xc, yc, u, tick_din(-6.0205), 180, 164, 0.85,0.1,0.1);
+
+  draw_tlabel(xc, yc, u, tick_din(6.0205),  154, "200%", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(0),       154, "100%", 0.85,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_din(-6.0205), 154, "50%", 0.85,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_din(-10.458), 154, "30%", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-20),     154, "10%", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-26.021), 154, "5%", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-30.457), 154, "3%", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-40),     154, "1%", 1,1,1);
+
+  draw_tlabel(xc, yc, u, tick_din(-50), 196, "-50", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-30), 196, "-30", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-20), 196, "-20", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-10), 196, "-10", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(-9),  186, "-9", 0.85,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_din(-5),  196, "-5", 1,1,1);
+  draw_tlabel(xc, yc, u, tick_din(0),   196, "0", 0.85,0.1,0.1);
+  draw_tlabel(xc, yc, u, tick_din(5),   196, "+5", 1,1,1);
+);
+
+function draw_test_marker(xc, yc, u, val)
+local(ang, s, c, tx, ty, lx1, ly1, lx2, ly2, lx3, ly3, px1, py1, px2, py2, px3, py3)
+(
+  ang = needle_ang(val);
+  s = sin(ang); c = cos(ang);
+  tx = xc + s*u*170; ty = yc - c*u*170;
+  lx1 = 0; ly1 = 10*u;
+  lx2 = 6.9282*u; ly2 = -2*u;
+  lx3 = -6.9282*u; ly3 = -2*u;
+  px1 = tx + lx1*c - ly1*s; py1 = ty + lx1*s + ly1*c;
+  px2 = tx + lx2*c - ly2*s; py2 = ty + lx2*s + ly2*c;
+  px3 = tx + lx3*c - ly3*s; py3 = ty + lx3*s + ly3*c;
+  gfx_set(0.9, 0.2, 0.2, 1);
+  gfx_triangle(px1, py1, px2, py2, px3, py3);
+  gfx_set(1, 1, 1, 1);
+  gfx_line(px1, py1, px2, py2, 1);
+  gfx_line(px2, py2, px3, py3, 1);
+  gfx_line(px3, py3, px1, py1, 1);
+);
+
+function face_nor(xc, yc, u)
+local(db)
+(
+  db = -36;
+  loop(9,
+    db == 0 ? (
+      draw_test_marker(xc, yc, u, tick_nor(0));
+      draw_tlabel(xc, yc, u, tick_nor(0), 186, "TEST", 1,1,1);
+    ) : (
+      draw_tick(xc, yc, u, tick_nor(db), 180, 160, 1,1,1);
+      db != 12 ? ( sprintf(#facetxt, "%+d", db); draw_tlabel(xc, yc, u, tick_nor(db), 186, #facetxt, 1,1,1); );
+    );
+    db += 6;
+  );
+  db = -33;
+  loop(8,
+    draw_tick(xc, yc, u, tick_nor(db), 170, 160, 1,1,1);
+    db == 9 ? draw_tlabel(xc, yc, u, tick_nor(9), 186, "+9", 1,1,1);
+    db += 6;
+  );
+  draw_arc_band(xc, yc, u*149.0, u*161.0, tick_nor(6), tick_nor(12), 1,1,1);
+  draw_arc_band(xc, yc, u*150.5, u*159.5, tick_nor(6), tick_nor(12), 0.85,0.2,0.2);
+  draw_tick(xc, yc, u, tick_nor(6),  160, 148.75, 1,1,1);
+  draw_tick(xc, yc, u, tick_nor(12), 160, 148.75, 1,1,1);
+);
+
+mval_vu_l = rlgain * vu_g * mv_l; mval_vu_r = rlgain * vu_g * mv_r;
+mval_i2_l = rlgain * i2_g * mi2_l; mval_i2_r = rlgain * i2_g * mi2_r;
+mval_i1_l = rlgain * i1_g * mi1_l; mval_i1_r = rlgain * i1_g * mi1_r;
+mval_bm_m = rlgain * i2_g * mbm_m; mval_bm_s = rlgain * i2_g * mbm_s;
+
+PANEL_TOP = row2_y + BTN_ROW_H + 32*scale;
+PANEL_W = 300*scale; PANEL_H = 170*scale;
+xc_local = 149.5*scale; yc_local = 209.5*scale;
+
+single_layout = style==0 || style==2 || style==3 || style==4;
+
+PANEL_IMG_L = 1; PANEL_IMG_R = 2;
+
+single_layout ? (
+  px_l = gfx_w*0.5 - PANEL_W; px_r = gfx_w*0.5;
+  py = PANEL_TOP;
+
+  draw_panel_frame(px_l, py, PANEL_W, PANEL_H);
+  draw_panel_frame(px_r, py, PANEL_W, PANEL_H);
+
+  gfx_setimgdim(PANEL_IMG_L, PANEL_W, PANEL_H);
+  gfx_setimgdim(PANEL_IMG_R, PANEL_W, PANEL_H);
+
+  gfx_dest = PANEL_IMG_L;
+  fill_panel_bg(PANEL_W, PANEL_H, style==0);
+  style == 0 ? (
+    face_vu(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_vu(mval_vu_l), 0.1,0.1,0.1);
+    draw_style_name(PANEL_W, PANEL_H, "VU", 0.15,0.15,0.15);
+  ) : style == 2 ? (
+    face_ebu(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_iec2(mval_i2_l), 1,1,1);
+    draw_style_name(PANEL_W, PANEL_H, "EBU", 0.85,0.85,0.87);
+  ) : style == 3 ? (
+    face_din(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_din(mval_i1_l), 1,1,1);
+    draw_style_name(PANEL_W, PANEL_H, "DIN / %", 0.85,0.85,0.87);
+  ) : (
+    face_nor(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_nor(mval_i1_l), 1,1,1);
+    draw_style_name(PANEL_W, PANEL_H, "dB", 0.85,0.85,0.87);
+  );
+
+  gfx_dest = PANEL_IMG_R;
+  fill_panel_bg(PANEL_W, PANEL_H, style==0);
+  style == 0 ? (
+    face_vu(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_vu(mval_vu_r), 0.1,0.1,0.1);
+    draw_style_name(PANEL_W, PANEL_H, "VU", 0.15,0.15,0.15);
+  ) : style == 2 ? (
+    face_ebu(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_iec2(mval_i2_r), 1,1,1);
+    draw_style_name(PANEL_W, PANEL_H, "EBU", 0.85,0.85,0.87);
+  ) : style == 3 ? (
+    face_din(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_din(mval_i1_r), 1,1,1);
+    draw_style_name(PANEL_W, PANEL_H, "DIN / %", 0.85,0.85,0.87);
+  ) : (
+    face_nor(xc_local, yc_local, scale);
+    draw_needle(xc_local, yc_local, scale, curve_nor(mval_i1_r), 1,1,1);
+    draw_style_name(PANEL_W, PANEL_H, "dB", 0.85,0.85,0.87);
+  );
+
+  gfx_dest = -1; gfx_a = 1; gfx_mode = 0;
+  gfx_x = px_l; gfx_y = py; gfx_blit(PANEL_IMG_L, 1, 0);
+  gfx_x = px_r; gfx_y = py; gfx_blit(PANEL_IMG_R, 1, 0);
+
+  gfx_setfont(1, "Arial", 11*scale, 'b');
+  gfx_set(0.6, 0.6, 0.63, 1);
+  gfx_measurestr("L", ltw, lth);
+  gfx_x = px_l + (PANEL_W-ltw)*0.5; gfx_y = py - 16*scale; gfx_drawstr("L");
+  gfx_measurestr("R", rtw2, rth2);
+  gfx_x = px_r + (PANEL_W-rtw2)*0.5; gfx_y = py - 16*scale; gfx_drawstr("R");
+) : (
+  px = gfx_w*0.5 - PANEL_W*0.5; py = PANEL_TOP;
+
+  draw_panel_frame(px, py, PANEL_W, PANEL_H);
+  gfx_setimgdim(PANEL_IMG_L, PANEL_W, PANEL_H);
+  gfx_dest = PANEL_IMG_L;
+  fill_panel_bg(PANEL_W, PANEL_H, 0);
+  face_bbc(xc_local, yc_local, scale);
+
+  style == 1 ? (
+    draw_needle(xc_local, yc_local, scale, curve_iec2(mval_i2_r), 0.2,0.8,0.3);
+    draw_needle(xc_local, yc_local, scale, curve_iec2(mval_i2_l), 0.9,0.2,0.2);
+    draw_style_name(PANEL_W, PANEL_H, "BBC", 0.85,0.85,0.87);
+  ) : (
+    draw_needle(xc_local, yc_local, scale, curve_iec2(mval_bm_s), 0.9, 0.9, 0.0);
+    draw_needle(xc_local, yc_local, scale, curve_iec2(mval_bm_m), 1, 1, 1);
+    draw_style_name(PANEL_W, PANEL_H, "BBC M/S", 0.85,0.85,0.87);
+  );
+
+  gfx_dest = -1; gfx_a = 1; gfx_mode = 0;
+  gfx_x = px; gfx_y = py; gfx_blit(PANEL_IMG_L, 1, 0);
+
+  gfx_setfont(1, "Arial", 10*scale, 0);
+  style == 1 ? (
+    gfx_set(0.9,0.2,0.2,1); gfx_x=px; gfx_y=py-16*scale; gfx_drawstr("L");
+    gfx_set(0.2,0.8,0.3,1); gfx_x=px+PANEL_W-16*scale; gfx_y=py-16*scale; gfx_drawstr("R");
+  ) : (
+    gfx_set(1,1,1,1); gfx_x=px; gfx_y=py-16*scale; gfx_drawstr("M");
+    gfx_set(0.9,0.9,0.0,1); gfx_x=px+PANEL_W-16*scale; gfx_y=py-16*scale; gfx_drawstr("S");
+
+    sw_w = 40*scale; sw_h = 20*scale;
+    sw_cx = px + 45*scale; sw_cy = py + 153*scale;
+    sw_x = sw_cx - sw_w*0.5; sw_y = sw_cy - sw_h*0.5;
+
+    click && mouse_x>=sw_x && mouse_x<=sw_x+sw_w && mouse_y>=sw_y && mouse_y<=sw_y+sw_h ? (
+      s20_on = !s20_on;
+      slider3 = s20_on ? 1 : 0; slider_automate(slider3);
+      bm_mv_s = pow(10, 0.05 * (s20_on ? 14 : -6));
+    );
+
+    s20_on ? ( swcr = 0.75; swcg = 0.2; swcb = 0.2; ) : ( swcr = 0.22; swcg = 0.22; swcb = 0.25; );
+    swgap = max(1, scale);
+    gfx_set(0.04, 0.04, 0.05, 1);
+    gfx_rect(sw_x - swgap, sw_y - swgap, sw_w + 2*swgap, sw_h + 2*swgap, 1);
+    gfx_set(swcr*0.6, swcg*0.6, swcb*0.6, 1);
+    gfx_rect(sw_x, sw_y, sw_w, sw_h, 1);
+    gfx_set(swcr, swcg, swcb, 1);
+    gfx_rect(sw_x + swgap, sw_y + swgap, sw_w - 2*swgap, sw_h*0.5, 1);
+    gfx_set(1, 1, 1, s20_on ? 0.22 : 0.10);
+    gfx_rect(sw_x + swgap, sw_y + swgap, sw_w - 2*swgap, sw_h*0.32, 1);
+    gfx_set(1, 1, 1, s20_on ? 0.4 : 0.22);
+    gfx_rect(sw_x, sw_y, sw_w, swgap, 1);
+    gfx_set(0, 0, 0, 0.3);
+    gfx_rect(sw_x, sw_y + sw_h - swgap, sw_w, swgap, 1);
+    gfx_set(0.03, 0.03, 0.04, 1);
+    gfx_rect(sw_x - swgap, sw_y - swgap, sw_w + 2*swgap, sw_h + 2*swgap, 0);
+    gfx_setfont(1, "Arial", 9*scale, 'b');
+    gfx_set(1,1,1,1);
+    strcpy(#s20txt, "S+20dB");
+    gfx_measurestr(#s20txt, s20tw, s20th);
+    gfx_x = sw_cx - s20tw*0.5; gfx_y = sw_cy - s20th*0.5;
+    gfx_drawstr(#s20txt);
+  );
+);
+
+resv_l = 1; resv_r = 1; resi1_l = 1; resi1_r = 1; resi2_l = 1; resi2_r = 1;
+resbm_m = 1; resbm_s = 1;
+
+function taper_pos(val, minv, maxv, uselog)
+(
+  uselog ? log(val/minv) / log(maxv/minv) : (val - minv) / (maxv - minv);
+);
+function taper_val(pos, minv, maxv, uselog)
+(
+  uselog ? minv * pow(maxv/minv, pos) : minv + pos * (maxv - minv);
+);
+function hit_circle(mx, my, cx, cy, rad)
+(
+  sqr(mx - cx) + sqr(my - cy) <= sqr(rad);
+);
+function draw_knob(cx, cy, rad, pos, cr, cg, cb, valtext, minlabel, maxlabel, name)
+local(ang0, ang1, ang, i, tx, ty)
+(
+  ang0 = -2.35619;
+  ang1 =  2.35619;
+
+  gfx_set(0.05, 0.05, 0.06, 1);
+  gfx_circle(cx, cy, rad + 2*scale, 1, 1);
+  gfx_set(cr*0.55, cg*0.55, cb*0.55, 1);
+  gfx_circle(cx, cy, rad, 1, 1);
+  gfx_set(cr, cg, cb, 1);
+  gfx_circle(cx, cy, rad*0.72, 1, 1);
+  gfx_set(1, 1, 1, 0.18);
+  gfx_circle(cx - rad*0.28, cy - rad*0.28, rad*0.42, 1, 1);
+
+  i = 0;
+  loop(9,
+    ang = ang0 + (ang1 - ang0) * (i / 8);
+    gfx_set(0.85, 0.85, 0.85, 0.7);
+    gfx_line(cx + sin(ang)*rad*0.82, cy - cos(ang)*rad*0.82,
+             cx + sin(ang)*rad*0.98, cy - cos(ang)*rad*0.98, 1);
+    i += 1;
+  );
+
+  ang = ang0 + (ang1 - ang0) * pos;
+  gfx_set(0.05, 0.05, 0.05, 1);
+  gfx_line(cx, cy, cx + sin(ang)*rad*0.85, cy - cos(ang)*rad*0.85, 1);
+
+  gfx_setfont(1, "Arial", 12*scale, 0);
+  gfx_set(0.85, 0.85, 0.85, 1);
+  gfx_measurestr(valtext, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy - rad - 16*scale;
+  gfx_drawstr(valtext);
+
+  gfx_setfont(1, "Arial", 10*scale, 0);
+  gfx_set(0.55, 0.55, 0.58, 1);
+  gfx_x = cx - rad - 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(minlabel);
+  gfx_measurestr(maxlabel, tx, ty);
+  gfx_x = cx + rad - tx + 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(maxlabel);
+
+  gfx_setfont(1, "Arial", 12*scale, 0);
+  gfx_set(0.8, 0.8, 0.82, 1);
+  gfx_measurestr(name, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy + rad + 18*scale;
+  gfx_drawstr(name);
+);
+
+REF_KN_X = gfx_w*0.5;
+REF_KN_Y = PANEL_TOP + PANEL_H + 34*scale;
+REF_KN_R = 14*scale;
+
+mouse_just_down && hit_circle(mouse_x, mouse_y, REF_KN_X, REF_KN_Y, REF_KN_R) ? (
+  (click_target == 1 && time_precise()-click_time < 0.3) ? (
+    ref_level = style_default_ref(style); slider1 = ref_level; slider_automate(slider1);
+  ) : (
+    drag_target = 1; drag_start_y = mouse_y; drag_start_pos = taper_pos(ref_level, -30, 0, 0);
+  );
+  click_target = 1; click_time = time_precise();
+);
+drag_target == 1 && mouse_down ? (
+  newpos = max(0, min(1, drag_start_pos + (drag_start_y - mouse_y) / (150*scale)));
+  ref_level = taper_val(newpos, -30, 0, 0);
+  slider1 = ref_level; slider_automate(slider1);
+);
+!mouse_down ? drag_target = 0;
+
+strcpy(#caliblbl, style==0 ? "0 VU" : style==1 ? "'4'" : style==3 ? "'-9'" : style==5 ? "'4'" : "'TEST'");
+calib_dbfs = (style==3 ? -33 : -36) - ref_level;
+sprintf(#calibtxt, "%s=%.1fdBFS", #caliblbl, calib_dbfs);
+draw_knob(REF_KN_X, REF_KN_Y, REF_KN_R, taper_pos(ref_level,-30,0,0), 0.35,0.55,0.68, #calibtxt, "-30", "0", "Ref Level");
+
+gfx_setfont(1, "Arial", 10*scale, 0);
+gfx_set(0.6, 0.6, 0.63, 1);
+strcpy(#styletxt, style==0?"VU -- 2 separate meters, linear curve":
+                  style==1?"BBC PPM -- 1 shared meter, IEC Type IIb":
+                  style==2?"EBU PPM -- 2 separate meters, IEC Type IIb":
+                  style==3?"DIN PPM -- 2 separate meters, IEC Type I":
+                  style==4?"Nordic PPM -- 2 separate meters, IEC Type I":
+                  "BBC Mid/Side -- 1 shared meter, -6dB pre-scaled");
+gfx_x = MARGIN; gfx_y = gfx_h - 18*scale;
+gfx_drawstr(#styletxt);

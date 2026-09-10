@@ -1,0 +1,598 @@
+NoIndex: true
+desc: Sonata De-Esser (chmaha)
+author: chmaha
+// Standard mode ported from RCDeEss.jsfx, DSP from Airwindows "DeEss" (Chris Johnson, MIT).
+// Advanced mode ported from RCDeEss_Advanced.jsfx, DSP from Airwindows "DeBess" (Chris Johnson, MIT).
+// https://github.com/airwindows/airwindows
+// Band split reuses this project's own SonataMultibandComp.jsfx dual linear_svf crossover
+// (Cytomic SVF technique, https://cytomic.com/files/dsp/SvfInputMixing.pdf).
+
+slider1:0<0,1,1{Standard,Advanced}>-Mode
+slider2:0<0,1,0.01>-Intensity
+slider3:4000<200,6000,1>-Low Limit (Hz)
+slider4:9000<6000,16000,1>-High Limit (Hz)
+slider5:0<0,1,1{Off,On}>-Stereo Link
+
+slider6:-24<-48,0,0.01>-Max DeEss (dB)
+slider7:0.5<0,1,0.01>-Smoothing
+
+slider8:0.5<0,1,0.01>-Sharpness
+slider9:0.5<0,1,0.01>-Depth
+slider10:0.5<0,1,0.01>-Filter
+slider11:0<0,1,1{Full,Delta}>-Sense Monitoring
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+SVF_K = 1.5;
+
+freemem = 0;
+xo1_L_lo = freemem; freemem += 2;
+xo1_L_hi = freemem; freemem += 2;
+xo1_R_lo = freemem; freemem += 2;
+xo1_R_hi = freemem; freemem += 2;
+xo2_L_lo = freemem; freemem += 2;
+xo2_L_hi = freemem; freemem += 2;
+xo2_R_lo = freemem; freemem += 2;
+xo2_R_hi = freemem; freemem += 2;
+xo1_L_lo[0]=0; xo1_L_lo[1]=0; xo1_L_hi[0]=0; xo1_L_hi[1]=0;
+xo1_R_lo[0]=0; xo1_R_lo[1]=0; xo1_R_hi[0]=0; xo1_R_hi[1]=0;
+xo2_L_lo[0]=0; xo2_L_lo[1]=0; xo2_L_hi[0]=0; xo2_L_hi[1]=0;
+xo2_R_lo[0]=0; xo2_R_lo[1]=0; xo2_R_hi[0]=0; xo2_R_hi[1]=0;
+
+std_hist_L = freemem; freemem += 3;
+std_hist_R = freemem; freemem += 3;
+std_hist_M = freemem; freemem += 3;
+std_hist_L[0]=0; std_hist_L[1]=0; std_hist_L[2]=0;
+std_hist_R[0]=0; std_hist_R[1]=0; std_hist_R[2]=0;
+std_hist_M[0]=0; std_hist_M[1]=0; std_hist_M[2]=0;
+
+std_io_L = freemem; freemem += 4;
+std_io_R = freemem; freemem += 4;
+std_io_L[0]=0; std_io_L[1]=0; std_io_L[2]=1; std_io_L[3]=1;
+std_io_R[0]=0; std_io_R[1]=0; std_io_R[2]=1; std_io_R[3]=1;
+
+ADV_MAX = 41;
+adv_sL = freemem; freemem += ADV_MAX;
+adv_mL = freemem; freemem += ADV_MAX;
+adv_sR = freemem; freemem += ADV_MAX;
+adv_mR = freemem; freemem += ADV_MAX;
+adv_sM = freemem; freemem += ADV_MAX;
+adv_mM = freemem; freemem += ADV_MAX;
+
+adv_zi = 0;
+loop(ADV_MAX,
+  adv_sL[adv_zi]=0; adv_mL[adv_zi]=0;
+  adv_sR[adv_zi]=0; adv_mR[adv_zi]=0;
+  adv_sM[adv_zi]=0; adv_mM[adv_zi]=0;
+  adv_zi += 1;
+);
+
+adv_io_L = freemem; freemem += 4;
+adv_io_R = freemem; freemem += 4;
+adv_io_L[0]=0; adv_io_L[1]=0; adv_io_L[2]=1; adv_io_L[3]=1;
+adv_io_R[0]=0; adv_io_R[1]=0; adv_io_R[2]=1; adv_io_R[3]=1;
+
+g1 = tan($pi * 4000 / srate);
+g2 = tan($pi * 9000 / srate);
+old_lo_limit = -1;
+old_hi_limit = -1;
+flip = 0;
+
+deess_gr_disp = 0;
+
+scale = max(1, gfx_ext_retina);
+drag_target = 0; drag_start_y = 0; drag_start_pos = 0;
+click_target = 0; click_time = -1;
+mouse_state = 0;
+
+function svf_run(base, g, in, mixlow, mixhigh)
+local(g2, s0, s1, vhigh, vband, vlow, v1, v2, denom, out)
+(
+  s0 = base[0];
+  s1 = base[1];
+  g2 = g*g;
+  vhigh = in * mixhigh;
+  vband = in * 0.75;
+  vlow = in * mixlow;
+  denom = 1 + g2 + g*SVF_K;
+  v1 = -1/denom * (-s0 + g*s1 - g*SVF_K*s0 + g2*vband + g*vhigh - g*vlow - g2*SVF_K*vlow);
+  v2 = -1/denom * (-g*s0 - s1 - g*vband + g2*vhigh + g*SVF_K*vhigh - g2*vlow);
+  base[0] = 2*v1 - s0;
+  base[1] = 2*v2 - s1;
+  out = vhigh + v2;
+  out;
+);
+
+function std_sense(hist, in)
+local(s1, s2, s3, m1, m2)
+(
+  hist[2] = hist[1];
+  hist[1] = hist[0];
+  hist[0] = in;
+  s1 = hist[0]; s2 = hist[1]; s3 = hist[2];
+  m1 = (s1-s2) * ((s1-s2)/1.3);
+  m2 = (s2-s3) * ((s1-s2)/1.3);
+  abs((m1-m2) * ((m1-m2)/1.3));
+);
+
+function std_process(io, in, intensity, maxdess, iiramount, flip, sense_raw)
+local(attackspeed, sense, recovery, offset, out)
+(
+  attackspeed = 7 + sense_raw*1024;
+  sense = 1 + (intensity*intensity*sense_raw);
+  sense > intensity ? sense = intensity;
+  recovery = 1 + (0.01/sense);
+  offset = 1 - abs(in);
+
+  flip ? (
+    io[0] = io[0]*(1-(offset*iiramount)) + in*(offset*iiramount);
+    io[2] < sense ? ( io[2] = (io[2]*attackspeed+sense)/(attackspeed+1); ) : ( io[2] = 1+((io[2]-1)/recovery); );
+    io[2] > maxdess ? io[2] = maxdess;
+    rc_ratio = io[2];
+    out = io[0] + ((in - io[0])/io[2]);
+  ) : (
+    io[1] = io[1]*(1-(offset*iiramount)) + in*(offset*iiramount);
+    io[3] < sense ? ( io[3] = (io[3]*attackspeed+sense)/(attackspeed+1); ) : ( io[3] = 1+((io[3]-1)/recovery); );
+    io[3] > maxdess ? io[3] = maxdess;
+    rc_ratio = io[3];
+    out = io[1] + ((in - io[1])/io[3]);
+  );
+  out;
+);
+
+function adv_sense(sbase, mbase, in, sharpness, intensity)
+local(x, sense, mult)
+(
+  sbase[0] = in;
+  x = floor(sharpness);
+  while(x > 0) (
+    sbase[x] = sbase[x-1];
+    x -= 1;
+  );
+
+  mbase[1] = (sbase[1]-sbase[2]) * ((sbase[1]-sbase[2])/1.3);
+  x = floor(sharpness) - 1;
+  while(x > 1) (
+    mbase[x] = (sbase[x]-sbase[x+1]) * ((sbase[x-1]-sbase[x])/1.3);
+    x -= 1;
+  );
+
+  sense = abs(mbase[1]-mbase[2]) * sharpness * sharpness;
+  x = floor(sharpness) - 1;
+  while(x > 0) (
+    mult = abs(mbase[x]-mbase[x+1]) * sharpness * sharpness;
+    mult < 1.0 ? sense *= mult;
+    x -= 1;
+  );
+
+  sense = 1.0 + (intensity*intensity*sense);
+  sense > intensity ? sense = intensity;
+  sense;
+);
+
+function adv_process(io, in, depth, speed, iiramount, flip, sense)
+local(out)
+(
+  flip ? (
+    io[0] = io[0]*(1-iiramount) + in*iiramount;
+    io[2] = io[2]*(1-speed) + sense*speed;
+    io[2] > depth ? io[2] = depth;
+    rc_ratio = io[2];
+    out = (io[2] > 1.0) ? (io[0] + ((in - io[0])/io[2])) : in;
+  ) : (
+    io[1] = io[1]*(1-iiramount) + in*iiramount;
+    io[3] = io[3]*(1-speed) + sense*speed;
+    io[3] > depth ? io[3] = depth;
+    rc_ratio = io[3];
+    
+    
+    out = (io[3] > 1.0) ? (io[1] + ((in - io[1])/io[3])) : in;
+  );
+  out;
+);
+
+@block
+
+mode_advanced = slider1 >= 0.5;
+intensity = pow(slider2, 5) * (8192 / (srate/44100));
+stereo_link = slider5 >= 0.5;
+
+maxdess = 1.0 / pow(10.0, slider6/20.0);
+iiramount_std = pow(slider7, 2) / (srate/44100);
+
+sharpness_adv = max(2, slider8*40);
+speed_adv = 0.1 / sharpness_adv;
+depth_adv = 1.0 / (slider9 + 0.0001);
+iiramount_adv = slider10;
+monitoring_delta = slider11 >= 0.5;
+
+slider3 != old_lo_limit ? (
+  g1 = tan($pi * slider3 / srate);
+  old_lo_limit = slider3;
+);
+slider4 != old_hi_limit ? (
+  g2 = tan($pi * slider4 / srate);
+  old_hi_limit = slider4;
+);
+
+@sample
+
+inl = spl0;
+inr = spl1;
+
+fil1L = svf_run(xo1_L_lo, g1, inl, 1, 0);
+fil2L = svf_run(xo1_L_hi, g1, inl, 0, 1);
+fil1R = svf_run(xo1_R_lo, g1, inr, 1, 0);
+fil2R = svf_run(xo1_R_hi, g1, inr, 0, 1);
+
+fil3L = svf_run(xo2_L_lo, g2, fil2L, 1, 0);
+fil4L = svf_run(xo2_L_hi, g2, fil2L, 0, 1);
+fil3R = svf_run(xo2_R_lo, g2, fil2R, 1, 0);
+fil4R = svf_run(xo2_R_hi, g2, fil2R, 0, 1);
+
+monoMid = (fil3L + fil3R) * 0.5;
+
+mode_advanced ? (
+  stereo_link ? (
+    senseM = adv_sense(adv_sM, adv_mM, monoMid, sharpness_adv, intensity);
+    outMidL = adv_process(adv_io_L, fil3L, depth_adv, speed_adv, iiramount_adv, flip, senseM);
+    ratio_L = rc_ratio;
+    outMidR = adv_process(adv_io_R, fil3R, depth_adv, speed_adv, iiramount_adv, flip, senseM);
+    ratio_R = rc_ratio;
+  ) : (
+    senseL = adv_sense(adv_sL, adv_mL, fil3L, sharpness_adv, intensity);
+    senseR = adv_sense(adv_sR, adv_mR, fil3R, sharpness_adv, intensity);
+    outMidL = adv_process(adv_io_L, fil3L, depth_adv, speed_adv, iiramount_adv, flip, senseL);
+    ratio_L = rc_ratio;
+    outMidR = adv_process(adv_io_R, fil3R, depth_adv, speed_adv, iiramount_adv, flip, senseR);
+    ratio_R = rc_ratio;
+  );
+  monitoring_delta ? (
+    outMidL = fil3L - outMidL;
+    outMidR = fil3R - outMidR;
+  );
+) : (
+  stereo_link ? (
+    senseM = std_sense(std_hist_M, monoMid);
+    outMidL = std_process(std_io_L, fil3L, intensity, maxdess, iiramount_std, flip, senseM);
+    ratio_L = rc_ratio;
+    outMidR = std_process(std_io_R, fil3R, intensity, maxdess, iiramount_std, flip, senseM);
+    ratio_R = rc_ratio;
+  ) : (
+    senseL = std_sense(std_hist_L, fil3L);
+    senseR = std_sense(std_hist_R, fil3R);
+    outMidL = std_process(std_io_L, fil3L, intensity, maxdess, iiramount_std, flip, senseL);
+    ratio_L = rc_ratio;
+    outMidR = std_process(std_io_R, fil3R, intensity, maxdess, iiramount_std, flip, senseR);
+    ratio_R = rc_ratio;
+  );
+);
+
+flip = !flip;
+
+deess_gr_disp = 20 * log10(max(1, max(ratio_L, ratio_R)));
+
+spl0 = fil1L + outMidL + fil4L;
+spl1 = fil1R + outMidR + fil4R;
+
+@gfx 760 460
+
+scale = max(1, gfx_ext_retina);
+gfx_w < 760*scale ? gfx_w = 760*scale;
+gfx_h < 460*scale ? gfx_h = 460*scale;
+
+MARGIN = 14*scale;
+HEADER_H = 46*scale;
+
+function taper_pos(val, minv, maxv, uselog)
+(
+  uselog ? log(val/minv) / log(maxv/minv) : (val - minv) / (maxv - minv);
+);
+function taper_val(pos, minv, maxv, uselog)
+(
+  uselog ? minv * pow(maxv/minv, pos) : minv + pos * (maxv - minv);
+);
+function hit_circle(mx, my, cx, cy, rad)
+(
+  sqr(mx - cx) + sqr(my - cy) <= sqr(rad);
+);
+function hit_rect(mx, my, x, y, w, h)
+(
+  mx >= x && mx <= x+w && my >= y && my <= y+h;
+);
+
+function draw_knob(cx, cy, rad, pos, cr, cg, cb, valtext, minlabel, maxlabel, name)
+local(ang0, ang1, ang, i, tx, ty)
+(
+  ang0 = -2.35619;
+  ang1 =  2.35619;
+
+  gfx_set(0.05, 0.05, 0.06, 1);
+  gfx_circle(cx, cy, rad + 2*scale, 1, 1);
+  gfx_set(cr*0.55, cg*0.55, cb*0.55, 1);
+  gfx_circle(cx, cy, rad, 1, 1);
+  gfx_set(cr, cg, cb, 1);
+  gfx_circle(cx, cy, rad*0.72, 1, 1);
+  gfx_set(1, 1, 1, 0.18);
+  gfx_circle(cx - rad*0.28, cy - rad*0.28, rad*0.42, 1, 1);
+
+  i = 0;
+  loop(9,
+    ang = ang0 + (ang1 - ang0) * (i / 8);
+    gfx_set(0.85, 0.85, 0.85, 0.7);
+    gfx_line(cx + sin(ang)*rad*0.82, cy - cos(ang)*rad*0.82,
+             cx + sin(ang)*rad*0.98, cy - cos(ang)*rad*0.98);
+    i += 1;
+  );
+
+  ang = ang0 + (ang1 - ang0) * pos;
+  gfx_set(0.05, 0.05, 0.05, 1);
+  gfx_line(cx, cy, cx + sin(ang)*rad*0.85, cy - cos(ang)*rad*0.85, 1);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.85, 0.85, 0.85, 1);
+  gfx_measurestr(valtext, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy - rad - 16*scale;
+  gfx_drawstr(valtext);
+
+  gfx_setfont(1, "Arial", 10*scale);
+  gfx_set(0.55, 0.55, 0.58, 1);
+  gfx_x = cx - rad - 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(minlabel);
+  gfx_measurestr(maxlabel, tx, ty);
+  gfx_x = cx + rad - tx + 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(maxlabel);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.8, 0.8, 0.82, 1);
+  gfx_measurestr(name, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy + rad + 18*scale;
+  gfx_drawstr(name);
+);
+
+function header_btn(txt, active, right_edge)
+local(tw, th, bw, bh, bx, by, cr, cg, cb, gap)
+global(gfx_x, gfx_y, hb_x, hb_y, hb_w, hb_h, scale)
+(
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_measurestr(txt, tw, th);
+  bw = tw + 16*scale; bh = 20*scale;
+  bx = right_edge - bw; by = 6*scale;
+
+  active ? ( cr = 0.85; cg = 0.55; cb = 0.30; ) : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_set(1, 1, 1, 0.9);
+  gfx_x = bx + 8*scale; gfx_y = by + 3*scale;
+  gfx_drawstr(txt);
+  hb_x = bx; hb_y = by; hb_w = bw; hb_h = bh;
+  bx;
+);
+
+function draw_bar_meter(mx0, my0, mw, mh, val, minv, maxv, cr, cg, cb)
+local(t, fw)
+(
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(mx0, my0, mw, mh, 1);
+
+  t = max(0, min(1, (val - minv) / (maxv - minv)));
+  fw = mw * t;
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(mx0, my0, fw, mh, 1);
+
+  gfx_set(0.4, 0.4, 0.44, 1);
+  gfx_rect(mx0, my0, mw, mh, 0);
+);
+
+mouse_down = mouse_cap & 1;
+mouse_just_down = mouse_down && !mouse_state;
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+gfx_setfont(1, "Arial", 18*scale, 'b');
+gfx_set(0.85, 0.5, 0.25, 1);
+gfx_x = MARGIN; gfx_y = 8*scale;
+gfx_drawstr("SONATA DE-ESSER");
+gfx_setfont(1, "Arial", 11*scale);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 30*scale;
+gfx_drawstr("by chmaha");
+
+mode_on = slider1 >= 0.5;
+link_on = slider5 >= 0.5;
+mon_on = slider11 >= 0.5;
+strcpy(#mode_txt, mode_on ? "Mode: Advanced" : "Mode: Standard");
+strcpy(#link_txt, link_on ? "Stereo Link: On" : "Stereo Link: Off");
+strcpy(#mon_txt, mon_on ? "Monitor: Delta" : "Monitor: Full");
+
+right_edge = gfx_w - MARGIN;
+right_edge = header_btn(#mode_txt, mode_on, right_edge);
+mode_x=hb_x; mode_y=hb_y; mode_w=hb_w; mode_h=hb_h;
+right_edge = header_btn(#link_txt, link_on, right_edge - 10*scale);
+link_x=hb_x; link_y=hb_y; link_w=hb_w; link_h=hb_h;
+
+mode_on ? (
+  right_edge = header_btn(#mon_txt, mon_on, right_edge - 10*scale);
+  mon_x=hb_x; mon_y=hb_y; mon_w=hb_w; mon_h=hb_h;
+) : (
+  mon_x=-1000; mon_y=-1000; mon_w=0; mon_h=0;
+);
+
+mouse_just_down && hit_rect(mouse_x, mouse_y, mode_x, mode_y, mode_w, mode_h) ? (
+  slider1 = mode_on ? 0 : 1; slider_automate(slider1);
+);
+mouse_just_down && hit_rect(mouse_x, mouse_y, link_x, link_y, link_w, link_h) ? (
+  slider5 = link_on ? 0 : 1; slider_automate(slider5);
+);
+mode_on && mouse_just_down && hit_rect(mouse_x, mouse_y, mon_x, mon_y, mon_w, mon_h) ? (
+  slider11 = mon_on ? 0 : 1; slider_automate(slider11);
+);
+
+knrad = 26*scale;
+kny1 = HEADER_H + 30*scale + knrad;
+k1x = gfx_w*0.5 - 140*scale;
+k2x = gfx_w*0.5;
+k3x = gfx_w*0.5 + 140*scale;
+
+mouse_just_down && hit_circle(mouse_x, mouse_y, k1x, kny1, knrad) ? (
+  (click_target == 2 && time_precise() - click_time < 0.3) ? (
+    slider2 = 0; slider_automate(slider2);
+  ) : (
+    drag_target = 2; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider2, 0, 1, 0);
+  );
+  click_target = 2; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k2x, kny1, knrad) ? (
+  (click_target == 3 && time_precise() - click_time < 0.3) ? (
+    slider3 = 4000; slider_automate(slider3);
+  ) : (
+    drag_target = 3; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider3, 200, 6000, 1);
+  );
+  click_target = 3; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k3x, kny1, knrad) ? (
+  (click_target == 4 && time_precise() - click_time < 0.3) ? (
+    slider4 = 9000; slider_automate(slider4);
+  ) : (
+    drag_target = 4; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider4, 6000, 16000, 1);
+  );
+  click_target = 4; click_time = time_precise();
+);
+
+kny2 = kny1 + knrad + 100*scale;
+
+mode_on ? (
+  a1x = gfx_w*0.5 - 140*scale;
+  a2x = gfx_w*0.5;
+  a3x = gfx_w*0.5 + 140*scale;
+
+  mouse_just_down && hit_circle(mouse_x, mouse_y, a1x, kny2, knrad) ? (
+    (click_target == 8 && time_precise() - click_time < 0.3) ? (
+      slider8 = 0.5; slider_automate(slider8);
+    ) : (
+      drag_target = 8; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider8, 0, 1, 0);
+    );
+    click_target = 8; click_time = time_precise();
+  );
+  mouse_just_down && hit_circle(mouse_x, mouse_y, a2x, kny2, knrad) ? (
+    (click_target == 9 && time_precise() - click_time < 0.3) ? (
+      slider9 = 0.5; slider_automate(slider9);
+    ) : (
+      drag_target = 9; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider9, 0, 1, 0);
+    );
+    click_target = 9; click_time = time_precise();
+  );
+  mouse_just_down && hit_circle(mouse_x, mouse_y, a3x, kny2, knrad) ? (
+    (click_target == 10 && time_precise() - click_time < 0.3) ? (
+      slider10 = 0.5; slider_automate(slider10);
+    ) : (
+      drag_target = 10; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider10, 0, 1, 0);
+    );
+    click_target = 10; click_time = time_precise();
+  );
+) : (
+  s1x = gfx_w*0.5 - 90*scale;
+  s2x = gfx_w*0.5 + 90*scale;
+
+  mouse_just_down && hit_circle(mouse_x, mouse_y, s1x, kny2, knrad) ? (
+    (click_target == 6 && time_precise() - click_time < 0.3) ? (
+      slider6 = -24; slider_automate(slider6);
+    ) : (
+      drag_target = 6; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider6, -48, 0, 0);
+    );
+    click_target = 6; click_time = time_precise();
+  );
+  mouse_just_down && hit_circle(mouse_x, mouse_y, s2x, kny2, knrad) ? (
+    (click_target == 7 && time_precise() - click_time < 0.3) ? (
+      slider7 = 0.5; slider_automate(slider7);
+    ) : (
+      drag_target = 7; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider7, 0, 1, 0);
+    );
+    click_target = 7; click_time = time_precise();
+  );
+);
+
+drag_target > 0 && mouse_down ? (
+  newpos = max(0, min(1, drag_start_pos + (drag_start_y - mouse_y) / (150*scale)));
+  (drag_target == 2) ? ( slider2 = taper_val(newpos, 0, 1, 0); slider_automate(slider2); );
+  (drag_target == 3) ? ( slider3 = taper_val(newpos, 200, 6000, 1); slider_automate(slider3); );
+  (drag_target == 4) ? ( slider4 = taper_val(newpos, 6000, 16000, 1); slider_automate(slider4); );
+  (drag_target == 6) ? ( slider6 = taper_val(newpos, -48, 0, 0); slider_automate(slider6); );
+  (drag_target == 7) ? ( slider7 = taper_val(newpos, 0, 1, 0); slider_automate(slider7); );
+  (drag_target == 8) ? ( slider8 = taper_val(newpos, 0, 1, 0); slider_automate(slider8); );
+  (drag_target == 9) ? ( slider9 = taper_val(newpos, 0, 1, 0); slider_automate(slider9); );
+  (drag_target == 10) ? ( slider10 = taper_val(newpos, 0, 1, 0); slider_automate(slider10); );
+);
+!mouse_down ? drag_target = 0;
+mouse_state = mouse_down;
+
+draw_knob(k1x, kny1, knrad, taper_pos(slider2,0,1,0), 0.85,0.35,0.35,
+  sprintf(#, "%.0f%%", slider2*100), "0%", "100%", "Intensity");
+draw_knob(k2x, kny1, knrad, taper_pos(slider3,200,6000,1), 0.35,0.65,0.75,
+  slider3 >= 1000 ? sprintf(#, "%.2f kHz", slider3/1000) : sprintf(#, "%.0f Hz", slider3),
+  "200", "6k", "Low Limit");
+draw_knob(k3x, kny1, knrad, taper_pos(slider4,6000,16000,1), 0.35,0.65,0.75,
+  slider4 >= 1000 ? sprintf(#, "%.2f kHz", slider4/1000) : sprintf(#, "%.0f Hz", slider4),
+  "6k", "16k", "High Limit");
+
+mode_on ? (
+  draw_knob(a1x, kny2, knrad, taper_pos(slider8,0,1,0), 0.6,0.4,0.2,
+    sprintf(#, "%.0f taps", max(2, slider8*40)), "2", "40", "Sharpness");
+  draw_knob(a2x, kny2, knrad, taper_pos(slider9,0,1,0), 0.6,0.4,0.2,
+    sprintf(#, "%.0f%%", slider9*100), "0%", "100%", "Depth");
+  draw_knob(a3x, kny2, knrad, taper_pos(slider10,0,1,0), 0.6,0.4,0.2,
+    sprintf(#, "%.0f%%", slider10*100), "0%", "100%", "Filter");
+) : (
+  draw_knob(s1x, kny2, knrad, taper_pos(slider6,-48,0,0), 0.9,0.2,0.2,
+    sprintf(#, "%.1f dB", slider6), "-48", "0", "Max DeEss");
+  draw_knob(s2x, kny2, knrad, taper_pos(slider7,0,1,0), 0.6,0.4,0.2,
+    sprintf(#, "%.0f%%", slider7*100), "0%", "100%", "Smoothing");
+);
+
+MET_Y = kny2 + knrad + 70*scale;
+met_mw = 260*scale;
+met_mx = gfx_w*0.5 - met_mw*0.5;
+met_mh = 22*scale;
+
+draw_bar_meter(met_mx, MET_Y, met_mw, met_mh, deess_gr_disp, 0, 24, 0.9, 0.2, 0.2);
+gfx_setfont(1, "Arial", 10*scale);
+gfx_set(0.6, 0.6, 0.62, 1);
+gfx_x = met_mx - 68*scale; gfx_y = MET_Y + met_mh*0.5 - 6*scale;
+gfx_drawstr("Reduction");
+gfx_x = met_mx + met_mw + 6*scale; gfx_y = MET_Y + met_mh*0.5 - 6*scale;
+gfx_drawstr(sprintf(#, "%.1f dB", deess_gr_disp));
+
+gfx_setfont(1, "Arial", 10*scale);
+gfx_set(0.5, 0.5, 0.53, 1);
+gfx_measurestr("De-essing applied only between Low Limit and High Limit -- everything else passes through untouched", ftw, fth);
+gfx_x = gfx_w*0.5 - ftw*0.5; gfx_y = MET_Y + met_mh + 16*scale;
+gfx_drawstr("De-essing applied only between Low Limit and High Limit -- everything else passes through untouched");

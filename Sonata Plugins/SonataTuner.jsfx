@@ -1,0 +1,938 @@
+NoIndex: true
+desc: Sonata Tuner (chmaha)
+author: chmaha
+// Ported from x42/tuna.lv2 (Robin Gareus). GPLv2+.
+// https://github.com/x42/tuna.lv2
+
+slider1:0<0,2,1{Auto,Fixed Note,Fixed Freq}>-Mode
+slider2:0<-48,48,1>-Semitones from A4
+slider3:440<1,10000,1>-Fixed Frequency (Hz)
+slider4:440<220,880,0.1>-Tuning (A4 Hz)
+slider5:0<0,2,1{Mono Sum,Left,Right}>-Input Source
+slider6:0<0,1,1{Off,On}>-Advanced
+
+slider7:-75<-100,0,0.1>-Threshold: RMS (dB)
+slider8:-45<-50,0,0.1>-Threshold: Post-Filter (dB)
+slider9:-40<-50,10,0.1>-Threshold: FFT (dB)
+slider10:20<0,40,0.1>-Threshold: Override (dB)
+slider11:5<0,60,0.1>-Threshold: Fundamental (dB)
+slider12:-30<-100,0,0.1>-Threshold: Octave (dB)
+slider13:-15<-100,0,0.1>-Threshold: Overtones (dB)
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+function c_mul(are, aim, bre, bim)
+(
+  _cre = are*bre - aim*bim;
+  _cim = are*bim + aim*bre;
+);
+
+function c_div(are, aim, bre, bim)
+local(denom)
+(
+  denom = bre*bre + bim*bim;
+  _cre = (are*bre + aim*bim) / denom;
+  _cim = (aim*bre - are*bim) / denom;
+);
+
+function c_sqrt(are, aim)
+local(mag, re, im)
+(
+  mag = sqrt(are*are + aim*aim);
+  re = sqrt(max(0, (mag+are)*0.5));
+  im = sqrt(max(0, (mag-are)*0.5));
+  aim < 0 ? im = -im;
+  _cre = re;
+  _cim = im;
+);
+
+freemem = 0;
+bp_f = freemem; freemem += 28;
+bpi = 0;
+loop(28, bp_f[bpi] = 0; bpi += 1;);
+
+function bp_setup(freq, band)
+local(wc, ww, wl, wu, c_a, c_b, w, c_a2, c_b2, ab_2, i, omega, p_re, p_im,
+      c_re, c_im, d_re, d_im, v_re, v_im, u0_re, u0_im, u1_re, u1_im,
+      t_re, t_im, sq_re, sq_im, base, cos_w, sin_w, cos_w2, sin_w2,
+      ch_re, ch_im, cb_re, cb_im, scale_re, stage, b1v, a1v, a2v, pr_re, pr_im)
+(
+  wc = 2*$pi*freq/srate;
+  ww = 2*$pi*band/srate;
+  wl = wc - ww*0.5;
+  wu = wc + ww*0.5;
+  wu > $pi - 0.000000001 ? wu = $pi - 0.000000001;
+  wl < 0.000000001 ? wl = 0.000000001;
+  wu *= 0.5; wl *= 0.5;
+
+  c_a = cos(wu+wl) / cos(wu-wl);
+  c_b = 1 / tan(wu-wl);
+  w = 2*atan(sqrt(tan(wu)*tan(wl)));
+
+  c_a2 = c_a*c_a;
+  c_b2 = c_b*c_b;
+  ab_2 = 2*c_a*c_b;
+
+  i = 0;
+  loop(2,
+    omega = $pi*0.5 + (2*i+1)*$pi/8;
+    p_re = cos(omega); p_im = sin(omega);
+
+    c_div(1+p_re, p_im, 1-p_re, -p_im);
+    c_re = _cre; c_im = _cim;
+
+    d_re = 2*(c_b-1)*c_re + 2*(1+c_b);
+    d_im = 2*(c_b-1)*c_im;
+
+    t_re = 4*(c_b2*(c_a2-1)+1);
+    v_re = t_re*c_re; v_im = t_re*c_im;
+    v_re += 8*(c_b2*(c_a2-1)-1);
+
+    c_mul(v_re, v_im, c_re, c_im);
+    v_re = _cre; v_im = _cim;
+    v_re += 4*(c_b2*(c_a2-1)+1);
+
+    c_sqrt(v_re, v_im);
+    sq_re = _cre; sq_im = _cim;
+
+    u0_re = ab_2 - sq_re + ab_2*c_re;
+    u0_im = -sq_im + ab_2*c_im;
+    u1_re = ab_2 + sq_re + ab_2*c_re;
+    u1_im = sq_im + ab_2*c_im;
+
+    c_div(u0_re, u0_im, d_re, d_im);
+    pr_re = _cre; pr_im = _cim;
+    base = (i*2)*7;
+    bp_f[base+0] = -2*pr_re;
+    bp_f[base+1] = pr_re*pr_re + pr_im*pr_im;
+    bp_f[base+2] = 1;
+    bp_f[base+3] = 2;
+    bp_f[base+4] = 1;
+    bp_f[base+5] = 0; bp_f[base+6] = 0;
+
+    c_div(u1_re, u1_im, d_re, d_im);
+    pr_re = _cre; pr_im = _cim;
+    base = (i*2+1)*7;
+    bp_f[base+0] = -2*pr_re;
+    bp_f[base+1] = pr_re*pr_re + pr_im*pr_im;
+    bp_f[base+2] = 1;
+    bp_f[base+3] = -2;
+    bp_f[base+4] = 1;
+    bp_f[base+5] = 0; bp_f[base+6] = 0;
+
+    i += 1;
+  );
+
+  cos_w = cos(-w); sin_w = sin(-w);
+  cos_w2 = cos(-2*w); sin_w2 = sin(-2*w);
+  ch_re = 1; ch_im = 0;
+  cb_re = 1; cb_im = 0;
+  stage = 0;
+  loop(4,
+    base = stage*7;
+    a1v = bp_f[base+0]; a2v = bp_f[base+1]; b1v = bp_f[base+3];
+
+    t_re = (1 + b1v*cos_w) + cos_w2;
+    t_im = (b1v*sin_w) + sin_w2;
+    c_mul(ch_re, ch_im, t_re, t_im);
+    ch_re = _cre; ch_im = _cim;
+
+    t_re = (1 + a1v*cos_w) + a2v*cos_w2;
+    t_im = (a1v*sin_w) + a2v*sin_w2;
+    c_mul(cb_re, cb_im, t_re, t_im);
+    cb_re = _cre; cb_im = _cim;
+
+    stage += 1;
+  );
+
+  c_div(cb_re, cb_im, ch_re, ch_im);
+  scale_re = _cre;
+
+  bp_f[2] *= scale_re;
+  bp_f[3] *= scale_re;
+  bp_f[4] *= scale_re;
+);
+
+function bp_process(in)
+local(stage, base, y)
+(
+  stage = 0;
+  loop(4,
+    base = stage*7;
+    y = bp_f[base+2]*in + bp_f[base+5];
+    bp_f[base+5] = bp_f[base+3]*in - bp_f[base+0]*y + bp_f[base+6];
+    bp_f[base+6] = bp_f[base+4]*in - bp_f[base+1]*y;
+    in = y;
+    stage += 1;
+  );
+  in;
+);
+
+win_size = max(6144, srate/15);
+win_size -= 1;
+win_size = win_size | (win_size>>1);
+win_size = win_size | (win_size>>2);
+win_size = win_size | (win_size>>4);
+win_size = win_size | (win_size>>8);
+win_size = win_size | (win_size>>16);
+win_size += 1;
+win_size = min(32768, win_size);
+data_size = floor(win_size/2);
+freq_per_bin = srate/win_size;
+phasediff_step = $pi/data_size;
+fft_hop = floor(win_size/8);
+
+ringbuf = freemem; freemem += win_size;
+winbuf  = freemem; freemem += win_size;
+fftbuf  = freemem; freemem += win_size;
+power   = freemem; freemem += data_size+4;
+phase   = freemem; freemem += data_size+4;
+phase_h = freemem; freemem += data_size+4;
+
+wi = 0; winsum = 0;
+loop(win_size,
+  winbuf[wi] = 0.5 - 0.5*cos(2*$pi*wi/(win_size-1));
+  winsum += winbuf[wi];
+  wi += 1;
+);
+wisum = 2/winsum;
+wi = 0;
+loop(win_size, winbuf[wi] *= wisum; wi += 1;);
+
+wi = 0;
+loop(win_size, ringbuf[wi] = 0; wi += 1;);
+wi = 0;
+loop(data_size+4, power[wi]=0; phase[wi]=0; phase_h[wi]=0; wi += 1;);
+rboff = 0; smps = 0; fft_step = 1; phasediff_bin = 0;
+
+function scan_overtones(threshold, bin, octave, v_oct2)
+local(scan, i, lo, hi, peak_pos, keep_going)
+(
+  keep_going = 1;
+  while (keep_going) (
+    scan = max(2, bin*0.1);
+    peak_pos = 0;
+    lo = max(1, floor(bin-scan));
+    hi = ceil(bin+scan);
+    hi > data_size-2 ? hi = data_size-2;
+    i = lo;
+    while (i < hi && peak_pos == 0) (
+      (power[i] > threshold && power[i] > power[i-1] && power[i] > power[i+1]) ? (
+        peak_pos = i;
+      );
+      i += 1;
+    );
+    peak_pos > 0 ? (
+      octave *= 2;
+      octave <= 16 ? (
+        threshold *= v_oct2;
+        bin = peak_pos*2;
+      ) : (
+        keep_going = 0;
+      );
+    ) : (
+      keep_going = 0;
+    );
+  );
+  octave;
+);
+
+function freq_at_bin(b)
+local(pdiff, over)
+(
+  pdiff = phase[b] - phase_h[b] - b*phasediff_bin;
+  over = pdiff/$pi;
+  over = over|0;
+  over = (over >= 0) ? over + (over&1) : over - (over&1);
+  pdiff -= $pi*over;
+  pdiff *= (data_size/fft_step) / $pi;
+  freq_per_bin * (b + pdiff);
+);
+
+function find_note(abs_threshold, v_ovr, v_fun, v_oct, v_ovt)
+local(fundamental, octave, peak_dat, brkpos, threshold, i, o)
+(
+  fundamental = 0; octave = 0; peak_dat = 0;
+  brkpos = min(data_size-2, floor(data_size*8000/srate));
+  threshold = abs_threshold;
+  i = 1;
+  brkpos > 1 ? (
+    loop(brkpos-1,
+      (power[i] > threshold && power[i] > power[i-1] && power[i] > power[i+1]) ? (
+        o = scan_overtones(power[i]*v_oct, i*2, 2, v_ovt);
+        (o > octave || power[i] > threshold*v_ovr) ? (
+          power[i] > peak_dat ? (
+            peak_dat = power[i];
+            fundamental = i;
+            octave = o;
+            o > 2 ? threshold = peak_dat*v_fun;
+          );
+        );
+      );
+      i += 1;
+    );
+  );
+  octave == 0 ? 0 : freq_at_bin(fundamental);
+);
+
+function freq_to_scale(freq)
+local(note)
+(
+  note = floor(12*log(freq/tuning_hz)/log(2) + 69.5);
+  note = max(0, min(127, note));
+  _stn_note = note;
+  tuning_hz * pow(2, (note-69)/12);
+);
+
+rms_omega = 1 - exp(-2*$pi*15/srate);
+rms_signal = 0;
+rms_postfilter = 0;
+prev_smpl = 0;
+tuna_fc = 0;
+filter_init = 0;
+dll_initialized = 0;
+dll_b = 0; dll_c = 0; dll_e0 = 0; dll_e2 = 0; dll_t0 = 0; dll_t1 = 0;
+monotonic_cnt = 0;
+fft_note_count = 0;
+fft_scale_freq = 0;
+
+disp_freq = 0;
+disp_octave = 4;
+disp_note = 9;
+disp_cent = 0;
+disp_error = -100;
+disp_rms = -100;
+disp_strobe_time = 0;
+
+scale = max(1, gfx_ext_retina);
+drag_target = 0; drag_start_y = 0; drag_start_pos = 0;
+click_target = 0; click_time = -1;
+mouse_state = 0;
+
+@block
+
+tuning_hz = slider4;
+input_src = floor(slider5+0.5);
+mode_sel = floor(slider1+0.5);
+
+v_rms = pow(10, 0.1*slider7);
+v_flt = pow(10, 0.1*slider8);
+v_fft = pow(10, 0.1*slider9);
+v_ovr = pow(10, 0.1*slider10);
+v_fun = pow(10, 0.1*slider11);
+v_oct = pow(10, 0.1*slider12);
+v_ovt = pow(10, 0.1*slider13);
+
+mode_sel == 2 ? (
+  target_freq = slider3;
+  auto_mode = 0;
+) : mode_sel == 1 ? (
+  target_freq = tuning_hz * pow(2, slider2/12);
+  auto_mode = 0;
+) : (
+  target_freq = 0;
+  auto_mode = 1;
+);
+
+@sample
+
+in_l = spl0; in_r = spl1;
+analysis_in = input_src==1 ? in_l : input_src==2 ? in_r : (in_l+in_r)*0.5;
+
+fft_ready = 0;
+auto_mode ? (
+  ringbuf[rboff] = analysis_in;
+  rboff = (rboff+1) % win_size;
+  smps += 1;
+  smps >= fft_hop ? (
+    fft_step = smps;
+    smps = 0;
+
+    fi = 0;
+    loop(data_size, phase_h[fi] = phase[fi]; fi += 1;);
+
+    fi = 0;
+    loop(win_size,
+      ri = (rboff + fi) % win_size;
+      fftbuf[fi] = ringbuf[ri] * winbuf[fi];
+      fi += 1;
+    );
+    fft_real(fftbuf, win_size);
+    fft_permute(fftbuf, data_size);
+
+    power[0] = fftbuf[0]*fftbuf[0];
+    phase[0] = 0;
+    fi = 1;
+    data_size > 2 ? (
+      loop(data_size-2,
+        fre = fftbuf[2*fi]; fim = fftbuf[2*fi+1];
+        power[fi] = fre*fre + fim*fim;
+        phase[fi] = atan2(fim, fre);
+        fi += 1;
+      );
+    );
+    phasediff_bin = phasediff_step * fft_step;
+    fft_ready = 1;
+  );
+);
+
+rms_signal += rms_omega*(analysis_in*analysis_in - rms_signal) + 0.00000000000000000001;
+
+rms_signal < v_rms ? (
+  dll_initialized = 0;
+  fft_note_count = 0;
+  prev_smpl = 0;
+  monotonic_cnt = 0;
+) : (
+  freq = auto_mode ? tuna_fc : target_freq;
+
+  (auto_mode && fft_ready) ? (
+    fft_peakfreq = find_note(rms_signal*v_fft, v_ovr, v_fun, v_oct, v_ovt);
+    fft_peakfreq < 20 ? (
+      fft_note_count = 0;
+    ) : (
+      note_freq_candidate = freq_to_scale(fft_peakfreq);
+      note_freq_candidate == fft_scale_freq ? (
+        fft_note_count += fft_step;
+      ) : (
+        fft_note_count = 0;
+      );
+      fft_scale_freq = note_freq_candidate;
+
+      (freq != note_freq_candidate &&
+        (
+          (!dll_initialized && fft_note_count > 768)
+          || (fft_note_count > 1536 && abs(freq - note_freq_candidate) > max(5, freq*0.10))
+          || (fft_note_count > srate/8)
+        )
+      ) ? (
+        freq = note_freq_candidate;
+      );
+    );
+  );
+
+  (freq < 20 || freq > 10000) ? (
+    dll_initialized = 0;
+    prev_smpl = 0;
+  ) : (
+    freq != tuna_fc ? (
+      tuna_fc = freq;
+      dll_omega = ((tuna_fc < 50) ? 6 : 4) * $pi * tuna_fc / srate;
+      dll_b = 1.4142135623730950488 * dll_omega;
+      dll_c = dll_omega*dll_omega;
+      dll_initialized = 0;
+
+      bp_setup(tuna_fc, max(10, tuna_fc*0.10));
+      filter_init = 16;
+    );
+
+    signal = bp_process(analysis_in);
+
+    filter_init > 0 ? (
+      filter_init -= 1;
+      rms_postfilter = 0;
+    ) : (
+      rms_postfilter += rms_omega*(signal*signal - rms_postfilter) + 0.00000000000000000001;
+
+      rms_postfilter < rms_signal*v_flt ? (
+        dll_initialized = 0;
+        prev_smpl = 0;
+      ) : (
+        edge = (signal >= 0 && prev_smpl < 0) || (signal <= 0 && prev_smpl > 0);
+        edge ? (
+          !dll_initialized ? (
+            dll_initialized = 1;
+            dll_e0 = 0; dll_t0 = 0;
+            dll_e2 = srate/tuna_fc/2;
+            dll_t1 = monotonic_cnt + dll_e2;
+          ) : (
+            dll_e0 = monotonic_cnt - dll_t1;
+            dll_t0 = dll_t1;
+            dll_t1 += dll_b*dll_e0 + dll_e2;
+            dll_e2 += dll_c*dll_e0;
+
+            dfreq0 = srate/(dll_t1-dll_t0)/2;
+            dfreq2 = srate/dll_e2/2;
+            dfreq = (abs(dll_e0*tuna_fc/srate) > 0.02) ? dfreq0 : dfreq2;
+
+            note_freq = freq_to_scale(dfreq);
+            note_num = _stn_note;
+            cent = 1200*log(dfreq/note_freq)/log(2);
+
+            disp_freq = dfreq;
+            disp_cent = cent;
+            disp_octave = floor(note_num/12) - 1;
+            disp_note = note_num % 12;
+            disp_error = 100*dll_e0*note_freq/srate;
+          );
+        );
+        prev_smpl = signal;
+      );
+    );
+  );
+
+  dll_initialized ? monotonic_cnt += 1 : monotonic_cnt = 0;
+);
+
+disp_rms = (rms_signal > 0.0000000001) ? 10*log(2*rms_signal)/log(10) : -100;
+disp_strobe_time = monotonic_cnt / srate;
+
+@gfx 760 600
+
+scale = max(1, gfx_ext_retina);
+gfx_w < 760*scale ? gfx_w = 760*scale;
+gfx_h < 640*scale ? gfx_h = 640*scale;
+
+MARGIN = 14*scale;
+HEADER_H = 46*scale;
+
+function taper_pos(val, minv, maxv, uselog)
+(
+  uselog ? log(val/minv) / log(maxv/minv) : (val - minv) / (maxv - minv);
+);
+function taper_val(pos, minv, maxv, uselog)
+(
+  uselog ? minv * pow(maxv/minv, pos) : minv + pos * (maxv - minv);
+);
+function hit_circle(mx, my, cx, cy, rad)
+(
+  sqr(mx - cx) + sqr(my - cy) <= sqr(rad);
+);
+function hit_rect(mx, my, x, y, w, h)
+(
+  mx >= x && mx <= x+w && my >= y && my <= y+h;
+);
+
+function draw_knob(cx, cy, rad, pos, cr, cg, cb, valtext, minlabel, maxlabel, name)
+local(ang0, ang1, ang, i, tx, ty)
+(
+  ang0 = -2.35619;
+  ang1 =  2.35619;
+
+  gfx_set(0.05, 0.05, 0.06, 1);
+  gfx_circle(cx, cy, rad + 2*scale, 1, 1);
+  gfx_set(cr*0.55, cg*0.55, cb*0.55, 1);
+  gfx_circle(cx, cy, rad, 1, 1);
+  gfx_set(cr, cg, cb, 1);
+  gfx_circle(cx, cy, rad*0.72, 1, 1);
+  gfx_set(1, 1, 1, 0.18);
+  gfx_circle(cx - rad*0.28, cy - rad*0.28, rad*0.42, 1, 1);
+
+  i = 0;
+  loop(9,
+    ang = ang0 + (ang1 - ang0) * (i / 8);
+    gfx_set(0.85, 0.85, 0.85, 0.7);
+    gfx_line(cx + sin(ang)*rad*0.82, cy - cos(ang)*rad*0.82,
+             cx + sin(ang)*rad*0.98, cy - cos(ang)*rad*0.98);
+    i += 1;
+  );
+
+  ang = ang0 + (ang1 - ang0) * pos;
+  gfx_set(0.05, 0.05, 0.05, 1);
+  gfx_line(cx, cy, cx + sin(ang)*rad*0.85, cy - cos(ang)*rad*0.85, 1);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.85, 0.85, 0.85, 1);
+  gfx_measurestr(valtext, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy - rad - 16*scale;
+  gfx_drawstr(valtext);
+
+  gfx_setfont(1, "Arial", 10*scale);
+  gfx_set(0.55, 0.55, 0.58, 1);
+  gfx_x = cx - rad - 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(minlabel);
+  gfx_measurestr(maxlabel, tx, ty);
+  gfx_x = cx + rad - tx + 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(maxlabel);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.8, 0.8, 0.82, 1);
+  gfx_measurestr(name, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy + rad + 18*scale;
+  gfx_drawstr(name);
+);
+
+function header_btn(txt, active, right_edge)
+local(tw, th, bw, bh, bx, by, cr, cg, cb, gap)
+global(gfx_x, gfx_y, hb_x, hb_y, hb_w, hb_h, scale)
+(
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_measurestr(txt, tw, th);
+  bw = tw + 16*scale; bh = 20*scale;
+  bx = right_edge - bw; by = 6*scale;
+
+  active ? ( cr = 0.35; cg = 0.70; cb = 0.90; ) : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_set(1, 1, 1, 0.9);
+  gfx_x = bx + 8*scale; gfx_y = by + 3*scale;
+  gfx_drawstr(txt);
+  hb_x = bx; hb_y = by; hb_w = bw; hb_h = bh;
+  bx;
+);
+
+function draw_toggle_btn(bx, by, bw, bh, txt, active, cr, cg, cb)
+local(tw, th, gap)
+(
+  active ? 0 : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_setfont(1, "Arial", 11*scale);
+  gfx_set(1, 1, 1, 0.9);
+  gfx_measurestr(txt, tw, th);
+  gfx_x = bx + bw*0.5 - tw*0.5; gfx_y = by + bh*0.5 - th*0.5;
+  gfx_drawstr(txt);
+);
+
+function draw_bar_meter(mx0, my0, mw, mh, val, minv, maxv, cr, cg, cb)
+local(t, fw)
+(
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(mx0, my0, mw, mh, 1);
+
+  t = max(0, min(1, (val - minv) / (maxv - minv)));
+  fw = mw * t;
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(mx0, my0, fw, mh, 1);
+
+  gfx_set(0.4, 0.4, 0.44, 1);
+  gfx_rect(mx0, my0, mw, mh, 0);
+);
+
+mouse_down = mouse_cap & 1;
+mouse_just_down = mouse_down && !mouse_state;
+
+strobe_last_time == 0 ? strobe_last_time = disp_strobe_time;
+strobe_time_diff = disp_strobe_time - strobe_last_time;
+strobe_time_diff > 0 ? strobe_phase += strobe_time_diff * disp_cent * 4;
+strobe_last_time = disp_strobe_time;
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+gfx_setfont(1, "Arial", 18*scale, 'b');
+gfx_set(0.35, 0.70, 0.90, 1);
+gfx_x = MARGIN; gfx_y = 8*scale;
+gfx_drawstr("SONATA TUNER");
+gfx_setfont(1, "Arial", 11*scale);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 30*scale;
+gfx_drawstr("by chmaha");
+
+adv_on = slider6 >= 0.5;
+strcpy(#adv_txt, adv_on ? "Advanced: On" : "Advanced: Off");
+right_edge = gfx_w - MARGIN;
+right_edge = header_btn(#adv_txt, adv_on, right_edge);
+adv_x=hb_x; adv_y=hb_y; adv_w=hb_w; adv_h=hb_h;
+
+mouse_just_down && hit_rect(mouse_x, mouse_y, adv_x, adv_y, adv_w, adv_h) ? (
+  slider6 = adv_on ? 0 : 1; slider_automate(slider6);
+);
+
+mode_now = floor(slider1+0.5);
+MODE_Y = HEADER_H + 10*scale;
+MODE_BH = 26*scale;
+mbw = 110*scale;
+m1x = MARGIN; m2x = MARGIN + mbw + 8*scale; m3x = MARGIN + 2*(mbw+8*scale);
+
+draw_toggle_btn(m1x, MODE_Y, mbw, MODE_BH, "Auto", mode_now==0, 0.35,0.70,0.90);
+draw_toggle_btn(m2x, MODE_Y, mbw, MODE_BH, "Fixed Note", mode_now==1, 0.35,0.70,0.90);
+draw_toggle_btn(m3x, MODE_Y, mbw, MODE_BH, "Fixed Freq", mode_now==2, 0.35,0.70,0.90);
+
+mouse_just_down && hit_rect(mouse_x, mouse_y, m1x, MODE_Y, mbw, MODE_BH) ? ( slider1=0; slider_automate(slider1); );
+mouse_just_down && hit_rect(mouse_x, mouse_y, m2x, MODE_Y, mbw, MODE_BH) ? ( slider1=1; slider_automate(slider1); );
+mouse_just_down && hit_rect(mouse_x, mouse_y, m3x, MODE_Y, mbw, MODE_BH) ? ( slider1=2; slider_automate(slider1); );
+
+src_now = floor(slider5+0.5);
+sbw = 100*scale;
+s1x = gfx_w - MARGIN - 3*sbw - 16*scale;
+s2x = gfx_w - MARGIN - 2*sbw - 8*scale;
+s3x = gfx_w - MARGIN - sbw;
+
+draw_toggle_btn(s1x, MODE_Y, sbw, MODE_BH, "Mono Sum", src_now==0, 0.6,0.5,0.3);
+draw_toggle_btn(s2x, MODE_Y, sbw, MODE_BH, "Left", src_now==1, 0.6,0.5,0.3);
+draw_toggle_btn(s3x, MODE_Y, sbw, MODE_BH, "Right", src_now==2, 0.6,0.5,0.3);
+
+mouse_just_down && hit_rect(mouse_x, mouse_y, s1x, MODE_Y, sbw, MODE_BH) ? ( slider5=0; slider_automate(slider5); );
+mouse_just_down && hit_rect(mouse_x, mouse_y, s2x, MODE_Y, sbw, MODE_BH) ? ( slider5=1; slider_automate(slider5); );
+mouse_just_down && hit_rect(mouse_x, mouse_y, s3x, MODE_Y, sbw, MODE_BH) ? ( slider5=2; slider_automate(slider5); );
+
+knrad = 24*scale;
+KROW_Y = MODE_Y + MODE_BH + 24*scale + knrad;
+kc_x = gfx_w*0.5;
+ksub_x1 = gfx_w*0.5 - 130*scale;
+ksub_x2 = gfx_w*0.5 + 130*scale;
+
+mouse_just_down && hit_circle(mouse_x, mouse_y, kc_x, KROW_Y, knrad) ? (
+  (click_target == 4 && time_precise() - click_time < 0.3) ? (
+    slider4 = 440; slider_automate(slider4);
+  ) : (
+    drag_target = 4; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider4, 220, 880, 0);
+  );
+  click_target = 4; click_time = time_precise();
+);
+
+mode_now == 1 ? (
+  mouse_just_down && hit_circle(mouse_x, mouse_y, ksub_x1, KROW_Y, knrad) ? (
+    (click_target == 2 && time_precise() - click_time < 0.3) ? (
+      slider2 = 0; slider_automate(slider2);
+    ) : (
+      drag_target = 2; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider2, -48, 48, 0);
+    );
+    click_target = 2; click_time = time_precise();
+  );
+) : mode_now == 2 ? (
+  mouse_just_down && hit_circle(mouse_x, mouse_y, ksub_x1, KROW_Y, knrad) ? (
+    (click_target == 3 && time_precise() - click_time < 0.3) ? (
+      slider3 = 440; slider_automate(slider3);
+    ) : (
+      drag_target = 3; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider3, 1, 10000, 1);
+    );
+    click_target = 3; click_time = time_precise();
+  );
+);
+
+adv_on ? (
+  akrad = 20*scale;
+  AROW_Y = 530*scale;
+  astep = (gfx_w - 2*MARGIN) / 7;
+  ax0 = MARGIN + astep*0.5;
+
+  a_idx = 0;
+  loop(7,
+    aslider = 7 + a_idx;
+    axc = ax0 + astep*a_idx;
+    mouse_just_down && hit_circle(mouse_x, mouse_y, axc, AROW_Y, akrad) ? (
+      (click_target == aslider && time_precise() - click_time < 0.3) ? (
+        aslider==7 ? ( slider7=-75; slider_automate(slider7); ) :
+        aslider==8 ? ( slider8=-45; slider_automate(slider8); ) :
+        aslider==9 ? ( slider9=-40; slider_automate(slider9); ) :
+        aslider==10 ? ( slider10=20; slider_automate(slider10); ) :
+        aslider==11 ? ( slider11=5; slider_automate(slider11); ) :
+        aslider==12 ? ( slider12=-30; slider_automate(slider12); ) :
+                       ( slider13=-15; slider_automate(slider13); );
+      ) : (
+        drag_target = aslider; drag_start_y = mouse_y;
+        aslider==7 ? drag_start_pos = taper_pos(slider7,-100,0,0) :
+        aslider==8 ? drag_start_pos = taper_pos(slider8,-50,0,0) :
+        aslider==9 ? drag_start_pos = taper_pos(slider9,-50,10,0) :
+        aslider==10 ? drag_start_pos = taper_pos(slider10,0,40,0) :
+        aslider==11 ? drag_start_pos = taper_pos(slider11,0,60,0) :
+        aslider==12 ? drag_start_pos = taper_pos(slider12,-100,0,0) :
+                       drag_start_pos = taper_pos(slider13,-100,0,0);
+      );
+      click_target = aslider; click_time = time_precise();
+    );
+    a_idx += 1;
+  );
+);
+
+drag_target > 0 && mouse_down ? (
+  newpos = max(0, min(1, drag_start_pos + (drag_start_y - mouse_y) / (150*scale)));
+  (drag_target == 2)  ? ( slider2  = taper_val(newpos, -48, 48, 0);   slider_automate(slider2);  );
+  (drag_target == 3)  ? ( slider3  = taper_val(newpos, 1, 10000, 1);  slider_automate(slider3);  );
+  (drag_target == 4)  ? ( slider4  = taper_val(newpos, 220, 880, 0);  slider_automate(slider4);  );
+  (drag_target == 7)  ? ( slider7  = taper_val(newpos, -100, 0, 0);   slider_automate(slider7);  );
+  (drag_target == 8)  ? ( slider8  = taper_val(newpos, -50, 0, 0);    slider_automate(slider8);  );
+  (drag_target == 9)  ? ( slider9  = taper_val(newpos, -50, 10, 0);   slider_automate(slider9);  );
+  (drag_target == 10) ? ( slider10 = taper_val(newpos, 0, 40, 0);     slider_automate(slider10); );
+  (drag_target == 11) ? ( slider11 = taper_val(newpos, 0, 60, 0);     slider_automate(slider11); );
+  (drag_target == 12) ? ( slider12 = taper_val(newpos, -100, 0, 0);   slider_automate(slider12); );
+  (drag_target == 13) ? ( slider13 = taper_val(newpos, -100, 0, 0);   slider_automate(slider13); );
+);
+!mouse_down ? drag_target = 0;
+mouse_state = mouse_down;
+
+draw_knob(kc_x, KROW_Y, knrad, taper_pos(slider4,220,880,0), 0.35,0.70,0.90,
+  sprintf(#, "%.1f Hz", slider4), "220", "880", "Tuning (A4)");
+
+mode_now == 1 ? (
+  draw_knob(ksub_x1, KROW_Y, knrad, taper_pos(slider2,-48,48,0), 0.6,0.5,0.3,
+    sprintf(#, "%+d", floor(slider2+0.5)), "-48", "+48", "Semitones");
+) : mode_now == 2 ? (
+  draw_knob(ksub_x1, KROW_Y, knrad, taper_pos(slider3,1,10000,1), 0.6,0.5,0.3,
+    slider3 >= 1000 ? sprintf(#, "%.2f kHz", slider3/1000) : sprintf(#, "%.0f Hz", slider3),
+    "1", "10k", "Fixed Freq");
+);
+
+function notename(idx, out)
+(
+  idx==0  ? strcpy(out, "C")  :
+  idx==1  ? strcpy(out, "C#") :
+  idx==2  ? strcpy(out, "D")  :
+  idx==3  ? strcpy(out, "D#") :
+  idx==4  ? strcpy(out, "E")  :
+  idx==5  ? strcpy(out, "F")  :
+  idx==6  ? strcpy(out, "F#") :
+  idx==7  ? strcpy(out, "G")  :
+  idx==8  ? strcpy(out, "G#") :
+  idx==9  ? strcpy(out, "A")  :
+  idx==10 ? strcpy(out, "A#") :
+            strcpy(out, "B");
+);
+
+signal_locked = rms_signal >= v_rms && dll_initialized;
+
+DISP_Y = KROW_Y + knrad + 40*scale;
+DISP_H = 100*scale;
+
+acent = abs(disp_cent);
+signal_locked ? (
+  acent < 5 ? ( ncr=0.25; ncg=0.85; ncb=0.35; ) :
+  acent < 10 ? ( ncr=0.85; ncg=0.75; ncb=0.15; ) :
+               ( ncr=0.85; ncg=0.30; ncb=0.30; );
+) : ( ncr=0.4; ncg=0.4; ncb=0.44; );
+
+notename(disp_note, #ntxt);
+signal_locked ? (
+  sprintf(#bigtxt, "%s%d", #ntxt, disp_octave);
+  sprintf(#centtxt, "%+.0f cents", disp_cent);
+) : (
+  strcpy(#bigtxt, "--");
+  strcpy(#centtxt, "listening...");
+);
+
+gfx_setfont(1, "Arial", 64*scale, 'b');
+gfx_set(ncr, ncg, ncb, 1);
+gfx_measurestr(#bigtxt, btw, bth);
+gfx_x = gfx_w*0.5 - btw*0.5; gfx_y = DISP_Y;
+gfx_drawstr(#bigtxt);
+
+gfx_setfont(1, "Arial", 16*scale);
+gfx_set(0.75, 0.75, 0.78, 1);
+gfx_measurestr(#centtxt, ctw, cth);
+gfx_x = gfx_w*0.5 - ctw*0.5; gfx_y = DISP_Y + bth + 8*scale;
+gfx_drawstr(#centtxt);
+
+STROBE_Y = DISP_Y + DISP_H + 20*scale;
+STROBE_H = 26*scale;
+STROBE_X = MARGIN + 60*scale;
+STROBE_W = gfx_w - 2*MARGIN - 120*scale;
+
+gfx_set(0.04, 0.04, 0.05, 1);
+gfx_rect(STROBE_X, STROBE_Y, STROBE_W, STROBE_H, 1);
+gfx_set(0.4, 0.4, 0.44, 1);
+gfx_rect(STROBE_X, STROBE_Y, STROBE_W, STROBE_H, 0);
+
+gfx_set(ncr, ncg, ncb, signal_locked ? 0.85 : 0.25);
+dash_w = 14*scale; dash_gap = 10*scale; dash_step = dash_w+dash_gap;
+strobe_off = (strobe_phase * -6*scale) % dash_step;
+strobe_off < 0 ? strobe_off += dash_step;
+dx = STROBE_X - dash_step + strobe_off;
+while (dx < STROBE_X + STROBE_W) (
+  x0 = max(STROBE_X, dx); x1 = min(STROBE_X+STROBE_W, dx+dash_w);
+  x1 > x0 ? gfx_rect(x0, STROBE_Y, x1-x0, STROBE_H, 1);
+  dx += dash_step;
+);
+
+gfx_setfont(1, "Arial", 10*scale);
+gfx_set(0.6, 0.6, 0.62, 1);
+gfx_x = MARGIN; gfx_y = STROBE_Y + STROBE_H*0.5 - 6*scale;
+gfx_drawstr("Strobe");
+
+METER_Y = STROBE_Y + STROBE_H + 26*scale;
+METER_H = 22*scale;
+METER_X = MARGIN + 60*scale;
+METER_W = gfx_w - 2*MARGIN - 120*scale;
+
+gfx_set(0.04, 0.04, 0.05, 1);
+gfx_rect(METER_X, METER_Y, METER_W, METER_H, 1);
+cent_clamped = max(-50, min(50, disp_cent));
+zero_x = METER_X + METER_W*0.5;
+cx_pos = METER_X + METER_W*(cent_clamped+50)/100;
+gfx_set(0.35, 0.35, 0.38, 1);
+gfx_rect(zero_x-1*scale, METER_Y, 2*scale, METER_H, 1);
+signal_locked ? (
+  gfx_set(ncr, ncg, ncb, 1);
+  gfx_rect(min(zero_x,cx_pos), METER_Y, max(1,abs(cx_pos-zero_x)), METER_H, 1);
+);
+gfx_set(0.4, 0.4, 0.44, 1);
+gfx_rect(METER_X, METER_Y, METER_W, METER_H, 0);
+
+gfx_setfont(1, "Arial", 10*scale);
+gfx_set(0.6, 0.6, 0.62, 1);
+gfx_x = MARGIN; gfx_y = METER_Y + METER_H*0.5 - 6*scale;
+gfx_drawstr("Cents");
+gfx_x = METER_X - 14*scale; gfx_y = METER_Y + METER_H + 3*scale;
+gfx_drawstr("-50");
+gfx_x = METER_X + METER_W - 12*scale; gfx_y = METER_Y + METER_H + 3*scale;
+gfx_drawstr("+50");
+
+RMS_Y = METER_Y + METER_H + 30*scale;
+RMS_H = 18*scale;
+draw_bar_meter(METER_X, RMS_Y, METER_W, RMS_H, disp_rms, -100, 0, 0.3, 0.6, 0.75);
+gfx_x = MARGIN; gfx_y = RMS_Y + RMS_H*0.5 - 6*scale;
+gfx_drawstr("Signal");
+gfx_x = METER_X + METER_W + 6*scale; gfx_y = RMS_Y + RMS_H*0.5 - 6*scale;
+gfx_drawstr(sprintf(#, "%.0f dB", disp_rms));
+
+adv_on ? (
+  gfx_setfont(1, "Arial", 12*scale, 'b');
+  gfx_set(0.35, 0.70, 0.90, 1);
+  gfx_x = MARGIN; gfx_y = AROW_Y - akrad - 34*scale;
+  gfx_drawstr("ADVANCED: DETECTION THRESHOLDS");
+
+  draw_knob(ax0+astep*0, AROW_Y, akrad, taper_pos(slider7,-100,0,0), 0.30,0.65,0.60,
+    sprintf(#, "%.0f", slider7), "-100", "0", "RMS");
+  draw_knob(ax0+astep*1, AROW_Y, akrad, taper_pos(slider8,-50,0,0), 0.35,0.55,0.85,
+    sprintf(#, "%.0f", slider8), "-50", "0", "PostFilt");
+  draw_knob(ax0+astep*2, AROW_Y, akrad, taper_pos(slider9,-50,10,0), 0.55,0.45,0.80,
+    sprintf(#, "%.0f", slider9), "-50", "10", "FFT");
+  draw_knob(ax0+astep*3, AROW_Y, akrad, taper_pos(slider10,0,40,0), 0.80,0.40,0.65,
+    sprintf(#, "%.0f", slider10), "0", "40", "Override");
+  draw_knob(ax0+astep*4, AROW_Y, akrad, taper_pos(slider11,0,60,0), 0.80,0.60,0.25,
+    sprintf(#, "%.0f", slider11), "0", "60", "Fundmntl");
+  draw_knob(ax0+astep*5, AROW_Y, akrad, taper_pos(slider12,-100,0,0), 0.80,0.45,0.25,
+    sprintf(#, "%.0f", slider12), "-100", "0", "Octave");
+  draw_knob(ax0+astep*6, AROW_Y, akrad, taper_pos(slider13,-100,0,0), 0.80,0.35,0.30,
+    sprintf(#, "%.0f", slider13), "-100", "0", "Overtone");
+);

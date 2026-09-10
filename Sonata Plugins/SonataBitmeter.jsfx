@@ -1,0 +1,570 @@
+NoIndex: true
+desc: Sonata Bit Meter (chmaha)
+author: chmaha
+// Ported from x42/meters.lv2's Bitmeter (Robin Gareus). GPLv2+.
+// https://github.com/x42/meters.lv2
+
+slider1:0<0,1,1{Off,On}>-Freeze
+slider2:0<0,1,1{Off,On}>-Integrate (Average)
+slider3:0<0,2,1>-Channel
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+BIM_DHIT = 0;
+BIM_NHIT = 23;
+BIM_DONE = 280;
+BIM_NONE = 303;
+BIM_DSET = 560;
+BIM_LAST = 584;
+
+freemem = 0;
+histS = freemem; freemem += BIM_LAST;
+histS_disp = freemem; freemem += BIM_LAST;
+
+INF_THRESH = pow(2, 128);
+DENORM_MIN = pow(2, -126);
+BIM_MIN_SENTINEL = pow(10, 30);
+
+function bitm_exponent(ax)
+local(e, iter, ok)
+(
+  e = floor(log(ax) / log(2));
+  iter = 0; ok = 0;
+  while (
+    !ok ? (
+      (ax < pow(2, e)) ? ( e -= 1; ) :
+      (ax >= pow(2, e + 1)) ? ( e += 1; ) :
+      ( ok = 1; );
+    );
+    iter += 1;
+    !ok && iter < 6;
+  );
+  e;
+);
+
+function bitm_bits(mant, biased)
+local(k, mm, nv, bitset, idx)
+(
+  mm = mant; k = 0;
+  loop(23,
+    nv = floor(mm * 0.5);
+    bitset = (nv * 2.0 != mm);
+    idx = biased + k;
+    histS[BIM_DHIT + idx] += 1;
+    bitset ? (
+      histS[BIM_DONE + idx] += 1;
+      histS[BIM_DSET + k] += 1;
+    );
+    mm = nv;
+    k += 1;
+  );
+);
+
+function bitm_analyze(x)
+local(ax, e, frac, mant, biased)
+(
+  x == 0 ? (
+    bim_zero += 1;
+  ) : (
+    ax = abs(x);
+    (x != x) ? (
+      bim_nan += 1;
+    ) : (ax >= INF_THRESH) ? (
+      bim_inf += 1;
+    ) : (
+      x > 0 ? bim_pos += 1;
+
+      ax < DENORM_MIN ? (
+        bim_den += 1;
+        biased = 1;
+        mant = floor(ax / pow(2, -149) + 0.5);
+        mant > 8388607 ? mant = 8388607;
+      ) : (
+        e = bitm_exponent(ax);
+        frac = ax / pow(2, e) - 1.0;
+        mant = floor(frac * 8388608 + 0.5);
+        mant >= 8388608 ? ( mant = 0; e += 1; );
+        biased = e + 127;
+
+        bim_max < ax ? bim_max = ax;
+        bim_min > ax ? bim_min = ax;
+        histS[BIM_NHIT + biased] += 1;
+        histS[BIM_NONE + biased] += 1;
+      );
+
+      bitm_bits(mant, biased);
+    );
+  );
+  integration_time += 1;
+);
+
+function bitm_clear()
+local(i)
+(
+  i = 0;
+  loop(BIM_LAST, histS[i] = 0; i += 1;);
+  bim_min = BIM_MIN_SENTINEL;
+  bim_max = 0;
+  bim_zero = 0; bim_pos = 0;
+  integration_time = 0;
+  bim_samples = 0;
+);
+
+function bitm_snapshot()
+local(i)
+(
+  i = 0;
+  loop(BIM_LAST, histS_disp[i] = histS[i]; i += 1;);
+  disp_zero = bim_zero; disp_pos = bim_pos;
+  disp_min = bim_min; disp_max = bim_max;
+  disp_time = integration_time;
+  disp_samples = bim_samples;
+  disp_nan = bim_nan; disp_inf = bim_inf; disp_den = bim_den;
+);
+
+function bitm_reset()
+(
+  bitm_clear();
+  bim_nan = 0; bim_inf = 0; bim_den = 0;
+  bitm_snapshot();
+);
+
+bitm_reset();
+bim_resync = 0;
+
+@block
+
+bim_freeze = slider1 > 0.5;
+bim_avg = slider2 > 0.5;
+bim_chan = floor(slider3 + 0.5);
+
+bim_fps_limit = max(1, floor(srate / 5));
+
+@sample
+
+(!bim_freeze && bim_samples < 2147483647) ? (
+  (bim_chan == 0 || bim_chan == 1) ? bitm_analyze(spl0);
+  (bim_chan == 0 || bim_chan == 2) ? bitm_analyze(spl1);
+  bim_samples += 1;
+);
+
+bim_resync += 1;
+bim_resync >= bim_fps_limit ? (
+  bim_resync = 0;
+  !bim_freeze ? bitm_snapshot();
+  !bim_avg ? bitm_clear();
+);
+
+@gfx 618 460
+
+scale = max(1, gfx_ext_retina);
+gfx_h < 460*scale ? gfx_h = 460*scale;
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+MARGIN = 14*scale;
+
+gfx_setfont(1, "Arial", 20*scale, 'b');
+gfx_set(0.85, 0.55, 0.25, 1);
+gfx_x = MARGIN; gfx_y = 6*scale;
+gfx_drawstr("SONATA BIT METER");
+gfx_setfont(1, "Arial", 11*scale);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 26*scale;
+gfx_drawstr("by chmaha");
+
+function hit_rect(mx, my, x, y, w, h)
+(
+  mx >= x && mx <= x+w && my >= y && my <= y+h;
+);
+
+function header_btn(txt, active, right_edge)
+local(tw, th, bw, bh, bx, by, cr, cg, cb, gap)
+global(gfx_x, gfx_y, hb_x, hb_y, hb_w, hb_h, scale)
+(
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_measurestr(txt, tw, th);
+  bw = tw + 16*scale; bh = 20*scale;
+  bx = right_edge - bw; by = 6*scale;
+
+  active ? ( cr = 0.85; cg = 0.55; cb = 0.25; ) : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_set(1, 1, 1, 0.9);
+  gfx_x = bx + 8*scale; gfx_y = by + 3*scale;
+  gfx_drawstr(txt);
+  hb_x = bx; hb_y = by; hb_w = bw; hb_h = bh;
+  bx;
+);
+
+right_edge = gfx_w - MARGIN;
+
+strcpy(#rst_txt, "Reset");
+right_edge = header_btn(#rst_txt, 0, right_edge);
+rst_x = hb_x; rst_y = hb_y; rst_w = hb_w; rst_h = hb_h;
+
+strcpy(#frz_txt, bim_freeze ? "Freeze: On" : "Freeze: Off");
+right_edge = header_btn(#frz_txt, bim_freeze, right_edge - 10*scale);
+frz_x = hb_x; frz_y = hb_y; frz_w = hb_w; frz_h = hb_h;
+
+strcpy(#avg_txt, bim_avg ? "Integrate: On" : "Integrate: Off");
+right_edge = header_btn(#avg_txt, bim_avg, right_edge - 10*scale);
+avg_x = hb_x; avg_y = hb_y; avg_w = hb_w; avg_h = hb_h;
+
+strcpy(#chn_txt, bim_chan==0 ? "Chn: All" : bim_chan==1 ? "Chn: L" : "Chn: R");
+right_edge = header_btn(#chn_txt, 0, right_edge - 10*scale);
+chn_x = hb_x; chn_y = hb_y; chn_w = hb_w; chn_h = hb_h;
+
+function format_num(n)
+global(#fmt_out)
+(
+  n >= 1000000000 ? sprintf(#fmt_out, "%.0fM", n/1000000.0) :
+  n >= 100000000  ? sprintf(#fmt_out, "%.1fM", n/1000000.0) :
+  n >= 10000000   ? sprintf(#fmt_out, "%.2fM", n/1000000.0) :
+  n >= 100000     ? sprintf(#fmt_out, "%.0fK", n/1000.0) :
+  n >= 10000      ? sprintf(#fmt_out, "%.1fK", n/1000.0) :
+  sprintf(#fmt_out, "%d", n);
+);
+
+function format_duration(sec)
+global(#fmt_out)
+local(mins, secs)
+(
+  sec < 10 ? sprintf(#fmt_out, "%.2f\"", sec) :
+  sec < 60 ? sprintf(#fmt_out, "%.1f\"", sec) :
+  sec < 3600 ? (
+    mins = floor(sec/60); secs = floor(sec) - 60*mins;
+    sprintf(#fmt_out, "%d'%02d\"", mins, secs);
+  ) : (
+    mins = floor(sec/60) % 60;
+    sprintf(#fmt_out, "%dh%02d'", floor(sec/3600), mins);
+  );
+);
+
+function info_field(label, valuestr, x, y, w)
+local(lw, lh)
+(
+  gfx_setfont(1, "Arial", 11*scale);
+  gfx_set(0.55, 0.55, 0.58, 1);
+  gfx_x = x; gfx_y = y;
+  gfx_drawstr(label);
+  gfx_measurestr(label, lw, lh);
+  gfx_set(0.92, 0.92, 0.93, 1);
+  gfx_x = x + w*0.42; gfx_y = y;
+  gfx_drawstr(valuestr);
+);
+
+info_y0 = 46*scale;
+info_row_h = 16*scale;
+info_col_w = (gfx_w - 2*MARGIN) / 3;
+
+disp_samples < 0.1*srate ? sprintf(#tw_txt, "%d [spl]", disp_samples) : format_duration(disp_samples/srate);
+disp_samples < 0.1*srate ? 0 : strcpy(#tw_txt, #fmt_out);
+info_field("Time window:", #tw_txt, MARGIN, info_y0, info_col_w);
+
+(disp_min >= BIM_MIN_SENTINEL) ? strcpy(#min_txt, "N/A") : sprintf(#min_txt, "%.1f dBFS", 20.0*log(disp_min)/log(10));
+info_field("Smallest sample:", #min_txt, MARGIN + info_col_w, info_y0, info_col_w);
+
+(disp_max <= 0) ? strcpy(#max_txt, "N/A") : sprintf(#max_txt, "%.1f dBFS", 20.0*log(disp_max)/log(10));
+info_field("Largest sample:", #max_txt, MARGIN + 2*info_col_w, info_y0, info_col_w);
+
+format_num(disp_nan); strcpy(#nan_txt, #fmt_out);
+info_field("Not a number:", #nan_txt, MARGIN, info_y0 + info_row_h, info_col_w);
+format_num(disp_inf); strcpy(#inf_txt, #fmt_out);
+info_field("Infinity:", #inf_txt, MARGIN + info_col_w, info_y0 + info_row_h, info_col_w);
+format_num(disp_den); strcpy(#den_txt, #fmt_out);
+info_field("Denormal:", #den_txt, MARGIN + 2*info_col_w, info_y0 + info_row_h, info_col_w);
+
+function bit_unit_pos(slot)
+(
+  slot == 0 ? 0 :
+  slot <= 7 ? slot + 1.0 :
+  slot <= 15 ? slot + 1.5 :
+  slot + 2.0;
+);
+BIT_UNITS = 26;
+
+DIST_LABEL_W = 28*scale;
+DIST_KEY_W = 46*scale;
+bits_x0 = MARGIN + DIST_LABEL_W; bits_x1 = gfx_w - MARGIN - DIST_KEY_W;
+bits_w = (bits_x1 - bits_x0) / BIT_UNITS;
+
+function bitcol_x(slot) ( bits_x0 + bit_unit_pos(slot)*bits_w; );
+
+dist_y0 = 108*scale; dist_y1 = 258*scale; dist_h = dist_y1 - dist_y0;
+
+gfx_set(0.04, 0.04, 0.05, 1);
+gfx_rect(bits_x0, dist_y0, bits_x1-bits_x0, dist_h, 1);
+
+y_100 = dist_y0; y_667 = dist_y0 + dist_h/3.0; y_50 = dist_y0 + dist_h*0.5;
+y_333 = dist_y0 + dist_h*2.0/3.0; y_0pc = dist_y1;
+
+function dotted_hline(x0, x1, y)
+local(x, dl)
+(
+  dl = 3*scale;
+  x = x0;
+  while (
+    gfx_line(x, y, min(x+dl, x1), y, 0);
+    x += 2*dl;
+    x < x1;
+  );
+);
+
+function dist_col(col, val)
+local(x, barw, seth, w0h)
+(
+  x = bitcol_x(col) + 1*scale;
+  barw = bits_w - 2*scale;
+  val < 0 ? (
+    gfx_set(0.35, 0.35, 0.37, 1);
+    gfx_rect(x, dist_y0, barw, dist_h, 1);
+  ) : (
+    seth = dist_h * val;
+    w0h = dist_h - seth;
+    gfx_set(0.2, 0.2, 0.2, 1);
+    gfx_rect(x, dist_y0, barw, w0h, 1);
+    gfx_set(0.88, 0.84, 0.72, 1);
+    gfx_rect(x, dist_y0 + w0h, barw, seth, 1);
+  );
+);
+
+bim_no_data = (disp_samples == 0);
+bim_all_zero = (disp_time > 0 && disp_time == disp_zero);
+
+bim_no_data || bim_all_zero ? (
+  dist_col(0, -1);
+  dk = 1;
+  loop(23, dist_col(dk, -1); dk += 1;);
+) : (
+  dist_col(0, disp_pos / disp_time);
+  dk = 0;
+  loop(23,
+    dist_col(dk+1, histS_disp[BIM_DSET + (22-dk)] / disp_time);
+    dk += 1;
+  );
+);
+
+gfx_set(1, 1, 1, 0.35);
+dotted_hline(bits_x0, bits_x1, y_100 + 0.5);
+dotted_hline(bits_x0, bits_x1, y_0pc - 0.5);
+gfx_set(1, 1, 1, 0.16);
+dotted_hline(bits_x0, bits_x1, y_667 + 0.5);
+dotted_hline(bits_x0, bits_x1, y_333 + 0.5);
+gfx_set(1, 1, 1, 0.35);
+dotted_hline(bits_x0, bits_x0 + bits_w + 6*scale, y_50 + 0.5);
+
+gfx_setfont(1, "Arial", 9*scale);
+gfx_set(0.6, 0.6, 0.63, 1);
+gfx_measurestr("100%", tw100, th100);
+gfx_x = bits_x0 - tw100 - 5*scale; gfx_y = y_100 - 5*scale; gfx_drawstr("100%");
+gfx_measurestr("50%", tw50, th50);
+gfx_x = bits_x0 - tw50 - 5*scale; gfx_y = y_50 - 5*scale; gfx_drawstr("50%");
+gfx_measurestr("0%", tw0pc, th0pc);
+gfx_x = bits_x0 - tw0pc - 5*scale; gfx_y = y_0pc - 5*scale; gfx_drawstr("0%");
+
+key_x = bits_x1 + 8*scale; key_w = 10*scale;
+gfx_set(0.80, 0.55, 0.15, 1); gfx_rect(key_x, y_100, key_w, y_667 - y_100, 1);
+gfx_set(0.20, 0.75, 0.30, 1); gfx_rect(key_x, y_667, key_w, y_333 - y_667, 1);
+gfx_set(0.15, 0.65, 0.85, 1); gfx_rect(key_x, y_333, key_w, y_0pc - y_333, 1);
+gfx_set(0.85, 0.15, 0.15, 1); gfx_rect(key_x, y_100 - 1.5*scale, key_w, 3*scale, 1);
+gfx_set(0.15, 0.25, 0.85, 1); gfx_rect(key_x, y_0pc - 1.5*scale, key_w, 3*scale, 1);
+gfx_set(0, 0, 0, 0.5);
+gfx_rect(key_x, y_100, key_w, y_0pc - y_100, 0);
+
+function vlabel(txt, x, y0, y1)
+local(n, i, ch, cw, ch2, chh, ty)
+global(#vch, gfx_x, gfx_y)
+(
+  n = strlen(txt);
+  chh = (y1 - y0) / n;
+  i = 0;
+  loop(n,
+    ch = str_getchar(txt, i);
+    ch != 32 ? (
+      strcpy(#vch, "");
+      str_setchar(#vch, 0, ch);
+      gfx_measurestr(#vch, cw, ch2);
+      ty = y0 + i*chh + 0.5*(chh - ch2);
+      gfx_x = x - cw*0.5; gfx_y = ty;
+      gfx_drawstr(#vch);
+    );
+    i += 1;
+  );
+);
+gfx_setfont(1, "Arial", 9*scale);
+gfx_set(0.75, 0.75, 0.78, 1);
+vlabel("% time bit is set", key_x + key_w + 8*scale, y_100, y_0pc);
+
+gfx_set(0.3, 0.3, 0.33, 1);
+gfx_rect(bits_x0, dist_y0, bits_x1-bits_x0, dist_h, 0);
+
+function box_color(hit, set, use_total)
+local(scnt)
+(
+  scnt = use_total ? disp_time : hit;
+  (use_total && scnt == disp_zero) || (!use_total && hit == 0) ? (
+    gfx_set(0.5, 0.5, 0.5, 1);
+  ) : set <= 0 ? (
+    gfx_set(0.15, 0.25, 0.85, 1);
+  ) : set >= scnt ? (
+    gfx_set(0.85, 0.15, 0.15, 1);
+  ) : (3.0*set/scnt > 2.0) ? (
+    gfx_set(0.80, 0.55, 0.15, 1);
+  ) : (3.0*set/scnt < 1.0) ? (
+    gfx_set(0.15, 0.65, 0.85, 1);
+  ) : (
+    gfx_set(0.20, 0.75, 0.30, 1);
+  );
+);
+
+function draw_box(x, y, sz)
+(
+  gfx_rect(x, y, sz, sz, 1);
+  gfx_set(0, 0, 0, 1);
+  gfx_rect(x, y, sz, sz, 0);
+);
+
+sep_y1 = dist_y1 + 10*scale;
+gfx_set(0.35, 0.35, 0.38, 1);
+gfx_line(MARGIN, sep_y1, gfx_w-MARGIN, sep_y1, 0);
+gfx_setfont(1, "Arial", 11*scale, 'b');
+gfx_set(0.75, 0.75, 0.78, 1);
+gfx_x = MARGIN; gfx_y = sep_y1 + 4*scale;
+gfx_drawstr("Sign & Mantissa (23bit significand)");
+
+box1_y = sep_y1 + 22*scale; box1_sz = min(bits_w - 6*scale, 26*scale);
+gfx_setfont(1, "Arial", 9*scale);
+
+box_color(0, disp_pos, 1);
+sbx = bitcol_x(0) + (bits_w-box1_sz)*0.5; sby = box1_y;
+draw_box(sbx, sby, box1_sz);
+gfx_set(1, 1, 1, 0.9);
+mid = 0.5*box1_sz; span = 0.2*box1_sz;
+gfx_line(sbx+mid, sby+mid-span, sbx+mid, sby+mid+span, 0);
+gfx_line(sbx+mid-span, sby+mid, sbx+mid+span, sby+mid, 0);
+
+bk = 0;
+loop(23,
+  box_color(0, histS_disp[BIM_DSET + (22-bk)], 1);
+  bx2 = bitcol_x(bk+1) + (bits_w-box1_sz)*0.5;
+  draw_box(bx2, box1_y, box1_sz);
+  bk += 1;
+);
+
+MAGCOLS = 40;
+function mag_unit_pos(k) ( k + 0.5*floor(k/8); );
+MAG_UNITS = 42;
+mag_x0 = MARGIN; mag_x1 = gfx_w - MARGIN;
+mag_w = (mag_x1 - mag_x0) / MAG_UNITS;
+function magcol_x(k) ( mag_x1 - (mag_unit_pos(k)+1)*mag_w; );
+
+sep_y2 = box1_y + box1_sz + 16*scale;
+gfx_set(0.35, 0.35, 0.38, 1);
+gfx_line(MARGIN, sep_y2, gfx_w-MARGIN, sep_y2, 0);
+gfx_setfont(1, "Arial", 11*scale, 'b');
+gfx_set(0.75, 0.75, 0.78, 1);
+gfx_x = MARGIN; gfx_y = sep_y2 + 4*scale;
+gfx_drawstr("Full Scale");
+
+mag_y = sep_y2 + 22*scale; mag_sz = min(mag_w - 3*scale, 14*scale);
+mk = 0;
+loop(MAGCOLS,
+  moi = mk + 118;
+  box_color(histS_disp[BIM_DHIT + moi], histS_disp[BIM_DONE + moi], 0);
+  mbx = magcol_x(mk) + (mag_w-mag_sz)*0.5;
+  draw_box(mbx, mag_y, mag_sz);
+  mk += 1;
+);
+
+brk_x = magcol_x(32); brk_y0 = mag_y - 4*scale; brk_y1 = mag_y + mag_sz + 4*scale;
+gfx_set(0.7, 0.7, 0.73, 1);
+gfx_line(brk_x, brk_y0, brk_x, brk_y1, 0);
+gfx_line(brk_x, brk_y1, brk_x - 2.5*mag_w, brk_y1, 0);
+
+gfx_setfont(1, "Arial", 9*scale);
+gfx_set(0.55, 0.55, 0.58, 1);
+function mag_label(k, txt)
+local(lx, lw, lh)
+(
+  lx = magcol_x(k) + mag_w*0.5;
+  gfx_measurestr(txt, lw, lh);
+  gfx_x = lx - lw*0.5; gfx_y = mag_y + mag_sz + 4*scale;
+  gfx_drawstr(txt);
+);
+mag_label(0, "2^-32");
+mag_label(8, "2^-24");
+mag_label(16, "2^-16");
+mag_label(24, "2^-8");
+mag_label(32, ">1.0");
+mag_label(39, "2^7");
+
+bim_no_data ? (
+  gfx_set(0, 0, 0, 0.6);
+  gfx_rect(0, 0, gfx_w, gfx_h, 1);
+  gfx_setfont(1, "Arial", 14*scale, 'b');
+  gfx_set(1, 1, 1, 1);
+  strcpy(#nd_txt, "No data available.");
+  gfx_measurestr(#nd_txt, ndw, ndh);
+  gfx_x = 0.5*gfx_w - 0.5*ndw; gfx_y = 0.5*gfx_h - 0.5*ndh;
+  gfx_drawstr(#nd_txt);
+) : disp_samples >= 2147483647 ? (
+  gfx_set(0.9, 0.9, 0.9, 0.5);
+  gfx_rect(0, 0, gfx_w, gfx_h, 1);
+  gfx_setfont(1, "Arial", 13*scale, 'b');
+  gfx_set(0.05, 0.05, 0.05, 1);
+  strcpy(#lim_txt, "Reached 2^31 sample limit -- data acquisition suspended.");
+  gfx_measurestr(#lim_txt, lmw, lmh);
+  gfx_x = 0.5*gfx_w - 0.5*lmw; gfx_y = 0.5*gfx_h - 0.5*lmh;
+  gfx_drawstr(#lim_txt);
+) : bim_all_zero ? (
+  gfx_setfont(1, "Arial", 13*scale, 'b');
+  gfx_set(1, 1, 1, 1);
+  strcpy(#az_txt, "All samples are zero.");
+  gfx_measurestr(#az_txt, azw, azh);
+  gfx_x = 0.5*gfx_w - 0.5*azw; gfx_y = dist_y0 + 0.5*dist_h - 0.5*azh;
+  gfx_drawstr(#az_txt);
+);
+
+mouse_down = mouse_cap & 1;
+(mouse_down && !mouse_state) ? (
+  hit_rect(mouse_x, mouse_y, rst_x, rst_y, rst_w, rst_h) ? (
+    bitm_reset();
+  ) : hit_rect(mouse_x, mouse_y, frz_x, frz_y, frz_w, frz_h) ? (
+    slider1 = bim_freeze ? 0 : 1; slider_automate(slider1);
+  ) : hit_rect(mouse_x, mouse_y, avg_x, avg_y, avg_w, avg_h) ? (
+    slider2 = bim_avg ? 0 : 1; slider_automate(slider2);
+  ) : hit_rect(mouse_x, mouse_y, chn_x, chn_y, chn_w, chn_h) ? (
+    slider3 = (bim_chan + 1) % 3; slider_automate(slider3);
+  );
+);
+mouse_state = mouse_down;

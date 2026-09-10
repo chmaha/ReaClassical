@@ -1,0 +1,388 @@
+NoIndex: true
+desc: Sonata K-Meter (chmaha)
+author: chmaha
+// Ported from x42/meters.lv2's K-Meter (Robin Gareus; DSP by Fons Adriaensen). GPLv2+.
+// https://github.com/x42/meters.lv2
+
+slider1:20<12,23,1>-K-Standard
+slider2:1<0,1,1>-dBFS Toggle
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+omega = 9.72 / srate;
+hold_samples = floor(0.5 * srate + 0.5);
+
+inited != 1 ? (
+  zl1 = zl2 = zr1 = zr2 = 0;
+  tl = tr = 0;
+  rms_l = rms_r = 0;
+  peak_l = peak_r = 0;
+  cnt_l = cnt_r = 0;
+  peak_hold = 0;
+  read_flag_l = read_flag_r = 0;
+  phase4 = 0;
+
+  mouse_state = 0;
+  ctrl_state = 0;
+  inited = 1;
+);
+
+kstd = slider1;
+dbfs_on = slider2 > 0.5;
+
+@slider
+
+kstd = slider1;
+dbfs_on = slider2 > 0.5;
+
+@block
+
+zl1 = min(max(zl1, 0), 50); zl2 = min(max(zl2, 0), 50);
+zr1 = min(max(zr1, 0), 50); zr2 = min(max(zr2, 0), 50);
+
+tme = samplesblock / srate;
+fall_mult = pow(10, -0.05 * 15.0 * tme);
+
+rms_from_l = sqrt(2*zl2);
+read_flag_l ? (rms_l = rms_from_l; read_flag_l = 0;) : (rms_from_l > rms_l ? rms_l = rms_from_l;);
+tl = tl < 1000000000000 ? tl : 0;
+peak_this_l = sqrt(tl);
+peak_this_l >= peak_l ? (peak_l = peak_this_l; cnt_l = hold_samples;) : (
+  cnt_l > 0 ? cnt_l -= samplesblock : (peak_l *= fall_mult; peak_l += 0.0000000001;);
+);
+tl = 0;
+
+rms_from_r = sqrt(2*zr2);
+read_flag_r ? (rms_r = rms_from_r; read_flag_r = 0;) : (rms_from_r > rms_r ? rms_r = rms_from_r;);
+tr = tr < 1000000000000 ? tr : 0;
+peak_this_r = sqrt(tr);
+peak_this_r >= peak_r ? (peak_r = peak_this_r; cnt_r = hold_samples;) : (
+  cnt_r > 0 ? cnt_r -= samplesblock : (peak_r *= fall_mult; peak_r += 0.0000000001;);
+);
+tr = 0;
+
+peak_hold = max(peak_hold, max(peak_l, peak_r));
+
+@sample
+
+s0 = spl0*spl0;
+s0 > tl ? tl = s0;
+zl1 += omega * (s0 - zl1);
+
+s1 = spl1*spl1;
+s1 > tr ? tr = s1;
+zr1 += omega * (s1 - zr1);
+
+phase4 == 3 ? (
+  zl2 += 4*omega * (zl1 - zl2);
+  zr2 += 4*omega * (zr1 - zr2);
+  phase4 = 0;
+) : (
+  phase4 += 1;
+);
+
+zl1 == zl1 ? 0 : zl1 = 0;
+zl2 == zl2 ? 0 : zl2 = 0;
+zr1 == zr1 ? 0 : zr1 = 0;
+zr2 == zr2 ? 0 : zr2 = 0;
+
+@gfx 489 520
+
+scale = max(1, gfx_ext_retina);
+gfx_h < 400*scale ? gfx_h = 400*scale;
+gfx_w < 620*scale ? gfx_w = 620*scale;
+
+kstd = slider1;
+dbfs_on = slider2 > 0.5;
+
+function meter_deflect_k(db, krange)
+local(rv)
+(
+  db += krange;
+  db < -40 ? (
+    (db > -90 ? pow(10, db*0.05) : 0) * 500 / (krange + 45);
+  ) : (
+    rv = (db + 45) / (krange + 45);
+    rv < 1 ? rv : 1;
+  );
+);
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+HEADER_H = 40*scale; BTN_ROW_H = 28*scale; MARGIN = 12*scale;
+FOOTER_H = 22*scale;
+
+gfx_setfont(1, "Arial", 16*scale, 'b');
+gfx_set(0.85, 0.3, 0.4, 1);
+gfx_x = MARGIN; gfx_y = 8*scale;
+gfx_drawstr("SONATA K-METER");
+gfx_setfont(1, "Arial", 11*scale, 0);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 28*scale;
+gfx_drawstr("by chmaha");
+
+function btn(bx, by, bw, bh, label, active)
+local(tw, th, cr, cg, cb, gap)
+(
+  active ? ( cr = 0.85; cg = 0.3; cb = 0.4; ) : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_setfont(1, "Arial", 11*scale, 0);
+  active ? gfx_set(1, 1, 1, 1) : gfx_set(0.78, 0.78, 0.80, 1);
+  gfx_measurestr(label, tw, th);
+  gfx_x = bx + (bw-tw)*0.5; gfx_y = by + (bh-th)*0.5;
+  gfx_drawstr(label);
+);
+
+mouse_down = mouse_cap & 1;
+click = mouse_down && !mouse_state;
+
+btn_y = HEADER_H + 4*scale;
+btn_h = BTN_ROW_H - 6*scale;
+btn_w = (gfx_w - MARGIN*2 - 3*8*scale) / 4;
+btn0_x = MARGIN;
+btn1_x = btn0_x + btn_w + 8*scale;
+btn2_x = btn1_x + btn_w + 8*scale;
+btn3_x = btn2_x + btn_w + 8*scale;
+
+click && mouse_x >= btn0_x && mouse_x <= btn0_x+btn_w && mouse_y >= btn_y && mouse_y <= btn_y+btn_h ? ( kstd = 12; slider1 = kstd; slider_automate(slider1); );
+click && mouse_x >= btn1_x && mouse_x <= btn1_x+btn_w && mouse_y >= btn_y && mouse_y <= btn_y+btn_h ? ( kstd = 14; slider1 = kstd; slider_automate(slider1); );
+click && mouse_x >= btn2_x && mouse_x <= btn2_x+btn_w && mouse_y >= btn_y && mouse_y <= btn_y+btn_h ? ( kstd = 20; slider1 = kstd; slider_automate(slider1); );
+click && mouse_x >= btn3_x && mouse_x <= btn3_x+btn_w && mouse_y >= btn_y && mouse_y <= btn_y+btn_h ? ( kstd = 23; slider1 = kstd; slider_automate(slider1); );
+
+btn(btn0_x, btn_y, btn_w, btn_h, "K-12", kstd==12);
+btn(btn1_x, btn_y, btn_w, btn_h, "K-14", kstd==14);
+btn(btn2_x, btn_y, btn_w, btn_h, "K-20", kstd==20);
+btn(btn3_x, btn_y, btn_w, btn_h, "K-23", kstd==23);
+
+mouse_state = mouse_down;
+
+METER_TOP = HEADER_H + BTN_ROW_H + MARGIN + 28*scale;
+METER_BOT = gfx_h - FOOTER_H - MARGIN;
+METER_H = METER_BOT - METER_TOP;
+
+BAR_W = floor(gfx_w * 0.09);
+HALF_GAP = floor(gfx_w * 0.05);
+barL_x = floor(gfx_w*0.5) - HALF_GAP - BAR_W;
+barR_x = floor(gfx_w*0.5) + HALF_GAP;
+
+f_top = 1.0;
+f4  = meter_deflect_k(4  - kstd, kstd);
+f3  = meter_deflect_k(3  - kstd, kstd);
+f0  = meter_deflect_k(0  - kstd, kstd);
+fm20 = meter_deflect_k(-20 - kstd, kstd);
+fm40 = meter_deflect_k(-40 - kstd, kstd);
+fm60 = meter_deflect_k(-60 - kstd, kstd);
+
+function y_of_frac(f) ( floor(METER_BOT - METER_H * max(0, min(1, f))); );
+
+function draw_zone_band(bx, f_lo, f_hi, live_f, zr, zg, zb)
+local(top_f, y0, y1)
+(
+  live_f > f_lo ? (
+    top_f = min(f_hi, live_f);
+    y0 = y_of_frac(top_f);
+    y1 = y_of_frac(f_lo);
+    gfx_set(zr, zg, zb, 1);
+    gfx_rect(bx, y0, BAR_W, y1 - y0, 1);
+  );
+);
+
+function draw_gradient_band(bx, f_lo, f_hi, live_f, r_lo, g_lo, b_lo, r_hi, g_hi, b_hi)
+local(top_f, y0, y1, n, k, yy, f_here, blend)
+(
+  live_f > f_lo ? (
+    top_f = min(f_hi, live_f);
+    y0 = y_of_frac(top_f);
+    y1 = y_of_frac(f_lo);
+    n = max(1, ceil((y1 - y0) / scale));
+    k = 0;
+    loop(n,
+      yy = y0 + k*scale;
+      f_here = max(0, min(1, (METER_BOT - yy) / METER_H));
+      blend = max(0, min(1, (f_here - f_lo) / (f_hi - f_lo)));
+      gfx_set(r_lo + (r_hi-r_lo)*blend, g_lo + (g_hi-g_lo)*blend, b_lo + (b_hi-b_lo)*blend, 1);
+      gfx_rect(bx, yy, BAR_W, scale, 1);
+      k += 1;
+    );
+  );
+);
+
+function zone_color(f)
+local(blend)
+(
+  f < fm60 ? ( zcol_r = 0.0; zcol_g = 0.2; zcol_b = 0.6; ) :
+  f < fm40 ? (
+    blend = (fm40 > fm60) ? (f - fm60) / (fm40 - fm60) : 1;
+    zcol_r = 0.0; zcol_g = 0.2 + 0.4*blend; zcol_b = 0.6 - 0.4*blend;
+  ) :
+  f < fm20 ? ( zcol_r = 0.0; zcol_g = 0.667; zcol_b = 0.0; ) :
+  f < f0   ? ( zcol_r = 0.0; zcol_g = 1.0;   zcol_b = 0.0; ) :
+  f < f3   ? ( zcol_r = 1.0; zcol_g = 0.941; zcol_b = 0.0; ) :
+  f < f4   ? ( zcol_r = 1.0; zcol_g = 0.502; zcol_b = 0.0; ) :
+            ( zcol_r = 1.0; zcol_g = 0.0;   zcol_b = 0.0; );
+);
+
+function draw_kmeter(bx, rms_lin, peak_lin, label)
+local(rms_db, peak_db, live_f, peak_f, tw, th)
+(
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx, METER_TOP, BAR_W, METER_H, 1);
+
+  rms_db = rms_lin > 0.00001 ? 20*log10(rms_lin) : -200;
+  live_f = meter_deflect_k(rms_db, kstd);
+
+  draw_zone_band(bx, 0, fm60, live_f, 0.0, 0.2, 0.6);
+  draw_gradient_band(bx, fm60, fm40, live_f, 0.0,0.2,0.6, 0.0,0.6,0.2);
+  draw_zone_band(bx, fm40, fm20, live_f, 0.0, 0.667, 0.0);
+  draw_zone_band(bx, fm20, f0, live_f, 0.0, 1.0, 0.0);
+  draw_zone_band(bx, f0, f3, live_f, 1.0, 0.941, 0.0);
+  draw_zone_band(bx, f3, f4, live_f, 1.0, 0.502, 0.0);
+  draw_zone_band(bx, f4, f_top, live_f, 1.0, 0.0, 0.0);
+
+  gfx_set(0, 0, 0, 0.6);
+  ly = METER_TOP + 0.5*scale;
+  loop(floor(METER_H / (2*scale)),
+    gfx_line(bx, ly, bx + BAR_W - 1, ly, 0);
+    ly += 2*scale;
+  );
+
+  gfx_set(1, 1, 1, 0.4);
+  gfx_line(bx, y_of_frac(f0), bx + BAR_W - 1, y_of_frac(f0), 0);
+
+  peak_db = peak_lin > 0.00001 ? 20*log10(peak_lin) : -200;
+  peak_f = meter_deflect_k(peak_db, kstd);
+  peak_f > 0 ? (
+    ty = y_of_frac(peak_f);
+    zone_color(peak_f);
+    gfx_set(zcol_r, zcol_g, zcol_b, 1);
+    gfx_rect(bx, ty - 1*scale, BAR_W, 2*scale, 1);
+    gfx_set(1, 1, 1, 0.3);
+    gfx_rect(bx, ty - 1*scale, BAR_W, 2*scale, 1);
+  );
+
+  gfx_set(0.3, 0.3, 0.33, 1);
+  gfx_rect(bx, METER_TOP, BAR_W, METER_H, 0);
+
+  gfx_setfont(1, "Arial", 12*scale, 'b');
+  gfx_set(0.85, 0.85, 0.87, 1);
+  gfx_measurestr(label, tw, th);
+  gfx_x = bx + (BAR_W - tw)*0.5; gfx_y = METER_TOP - 18*scale;
+  gfx_drawstr(label);
+
+  gfx_setfont(1, "Arial", 11*scale, 0);
+  peak_db >= 0 ? gfx_set(0.95, 0.3, 0.35, 1) : gfx_set(0.8, 0.8, 0.82, 1);
+  peak_db > -200 ? sprintf(#htxt, "%.1f", peak_db) : strcpy(#htxt, "-inf");
+  gfx_measurestr(#htxt, tw, th);
+  gfx_x = bx + (BAR_W - tw)*0.5; gfx_y = METER_BOT + 6*scale;
+  gfx_drawstr(#htxt);
+);
+
+draw_kmeter(barL_x, rms_l, peak_l, "L");
+draw_kmeter(barR_x, rms_r, peak_r, "R");
+
+read_flag_l = 1; read_flag_r = 1;
+
+PK_W = min(2*HALF_GAP - 8*scale, 46*scale);
+PK_H = 20*scale;
+PK_X = floor(gfx_w*0.5) - PK_W*0.5;
+PK_Y = METER_TOP - 4*scale - PK_H;
+
+peak_hold_db = peak_hold > 0.00001 ? 20*log10(peak_hold) : -200;
+
+peak_hold_db >= -1 ? gfx_set(0.6, 0.0, 0.0, 1) : (peak_hold_db > -90 ? gfx_set(0, 0, 0, 1) : gfx_set(0.3, 0.3, 0.3, 1));
+gfx_rect(PK_X, PK_Y, PK_W, PK_H, 1);
+gfx_set(0.6, 0.6, 0.6, 1);
+gfx_rect(PK_X, PK_Y, PK_W, PK_H, 0);
+
+peak_num = dbfs_on ? peak_hold_db : peak_hold_db + kstd;
+peak_hold_db <= -90 ? strcpy(#pktxt, " -inf") : (
+  abs(peak_num) > 9.94 ? sprintf(#pktxt, "%+.0f", peak_num) : sprintf(#pktxt, "%+.1f", peak_num);
+);
+gfx_setfont(1, "Arial", 11*scale, 0);
+gfx_set(0.9, 0.9, 0.9, 1);
+gfx_measurestr(#pktxt, pktw, pkth);
+gfx_x = PK_X + (PK_W-pktw)*0.5; gfx_y = PK_Y + (PK_H-pkth)*0.5;
+gfx_drawstr(#pktxt);
+
+gfx_setfont(1, "Arial", 9*scale, 0);
+gfx_set(0.9, 0.9, 0.9, 1);
+strcpy(#pklbl, "peak");
+gfx_measurestr(#pklbl, pklw, pklh);
+gfx_x = PK_X - pklw - 4*scale; gfx_y = PK_Y + (PK_H-pklh)*0.5;
+gfx_drawstr(#pklbl);
+strcpy(#pkunit, dbfs_on ? "dBFS" : "dB");
+gfx_measurestr(#pkunit, pkuw, pkuh);
+gfx_x = PK_X + PK_W + 4*scale; gfx_y = PK_Y + (PK_H-pkuh)*0.5;
+gfx_drawstr(#pkunit);
+
+click && mouse_x>=PK_X && mouse_x<=PK_X+PK_W && mouse_y>=PK_Y && mouse_y<=PK_Y+PK_H ? (
+  (mouse_cap & 4) ? (
+    dbfs_on = !dbfs_on; slider2 = dbfs_on ? 1 : 0; slider_automate(slider2);
+  ) : (
+    peak_l = 0; peak_r = 0; cnt_l = 0; cnt_r = 0; peak_hold = 0;
+  );
+);
+
+TICK_LEN = 10*scale;
+function tick(db)
+local(f, ty, tw, th)
+(
+  db <= kstd ? (
+    f = meter_deflect_k(db - kstd, kstd);
+    f >= 0 && f <= 1 ? (
+      ty = y_of_frac(f);
+      db == 0 ? strcpy(#dbtxt, " 0") : sprintf(#dbtxt, "%+d", db);
+      gfx_measurestr(#dbtxt, tw, th);
+
+      db >= 4 ? gfx_set(0.95, 0.3, 0.35, 0.5) : (db >= 0 ? gfx_set(0.9, 0.85, 0.3, 0.5) : gfx_set(0.4, 0.4, 0.43, 0.5));
+      gfx_line(barL_x - TICK_LEN, ty, barL_x, ty, 0);
+      gfx_line(barL_x + BAR_W, ty, barR_x, ty, 0);
+      gfx_line(barR_x + BAR_W, ty, barR_x + BAR_W + TICK_LEN, ty, 0);
+
+      db >= 4 ? gfx_set(0.95, 0.3, 0.35, 1) : (db >= 0 ? gfx_set(0.9, 0.85, 0.3, 1) : gfx_set(0.55, 0.55, 0.58, 1));
+      gfx_x = barL_x - TICK_LEN - 4*scale - tw; gfx_y = ty - th*0.5;
+      gfx_drawstr(#dbtxt);
+      gfx_x = barR_x + BAR_W + TICK_LEN + 4*scale; gfx_y = ty - th*0.5;
+      gfx_drawstr(#dbtxt);
+    );
+  );
+);
+gfx_setfont(1, "Arial", 9*scale, 0);
+tick(23); tick(20); kstd==14 ? tick(14) : tick(15); tick(12); tick(9); tick(6); tick(3); tick(0);
+tick(-3); tick(-9); tick(-15); tick(-20); tick(-25); tick(-30); tick(-35); tick(-40); tick(-60);
+
+gfx_setfont(1, "Arial", 10*scale, 'b');
+gfx_set(0.6, 0.6, 0.63, 1);
+sprintf(#kstdtxt, "K-%d/RMS", kstd);
+gfx_x = MARGIN; gfx_y = METER_BOT + 24*scale;
+gfx_drawstr(#kstdtxt);

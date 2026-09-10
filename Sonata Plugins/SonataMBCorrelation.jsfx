@@ -1,0 +1,361 @@
+NoIndex: true
+desc: Sonata Multiband Correlation Meter (chmaha)
+author: chmaha
+// Reuses x42/meters.lv2's Stcorrdsp phase-correlation formula (Fons Adriaensen), applied per band. GPLv2+.
+// https://github.com/x42/meters.lv2
+
+slider1:32<4,64,1>-Bands
+slider2:1000<50,3000,1>-Avg Time (ms)
+slider3:3<0.3,12,0.01>-Band Q
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+PI = 3.14159265358979;
+MAX_BANDS = 64;
+MIN_FREQ = 20;
+MAX_FREQ = 20000;
+
+freemem = 0;
+freq = freemem; freemem += MAX_BANDS;
+b0   = freemem; freemem += MAX_BANDS;
+b2   = freemem; freemem += MAX_BANDS;
+a1   = freemem; freemem += MAX_BANDS;
+a2   = freemem; freemem += MAX_BANDS;
+x1L  = freemem; freemem += MAX_BANDS;
+x2L  = freemem; freemem += MAX_BANDS;
+y1L  = freemem; freemem += MAX_BANDS;
+y2L  = freemem; freemem += MAX_BANDS;
+x1R  = freemem; freemem += MAX_BANDS;
+x2R  = freemem; freemem += MAX_BANDS;
+y1R  = freemem; freemem += MAX_BANDS;
+y2R  = freemem; freemem += MAX_BANDS;
+zlr  = freemem; freemem += MAX_BANDS;
+zll  = freemem; freemem += MAX_BANDS;
+zrr  = freemem; freemem += MAX_BANDS;
+corr = freemem; freemem += MAX_BANDS;
+
+function calc_band(i)
+local(f0, w0, cosw, sinw, alpha, a0)
+(
+  f0 = min(freq[i], srate*0.49);
+  w0 = 2*PI*f0/srate;
+  cosw = cos(w0); sinw = sin(w0);
+  alpha = sinw / (2*bandq);
+  a0 = 1 + alpha;
+  b0[i] = alpha / a0;
+  b2[i] = -alpha / a0;
+  a1[i] = (-2*cosw) / a0;
+  a2[i] = (1 - alpha) / a0;
+);
+
+function reinit_bands()
+local(i, n)
+(
+  n = num_bands;
+  i = 0;
+  loop(n,
+    freq[i] = MIN_FREQ * pow(MAX_FREQ/MIN_FREQ, (i+0.5)/n);
+    calc_band(i);
+    x1L[i] = 0; x2L[i] = 0; y1L[i] = 0; y2L[i] = 0;
+    x1R[i] = 0; x2R[i] = 0; y1R[i] = 0; y2R[i] = 0;
+    zlr[i] = 0; zll[i] = 0; zrr[i] = 0;
+    i += 1;
+  );
+);
+
+inited != 1 ? (
+  mouse_state = 0;
+  drag_target = 0; click_target = 0; click_time = -1;
+  cur_bands = 0; cur_bandq = 0;
+  num_bands = floor(slider1 + 0.5);
+  bandq = slider3;
+  reinit_bands();
+  cur_bands = num_bands; cur_bandq = bandq;
+  corr_w2 = 1 / (max(0.001, slider2*0.001) * srate);
+  inited = 1;
+);
+
+@slider
+
+num_bands = max(4, min(MAX_BANDS, floor(slider1 + 0.5)));
+avg_ms = slider2;
+bandq = slider3;
+corr_w2 = 1 / (max(0.001, avg_ms*0.001) * srate);
+
+num_bands != cur_bands ? (
+  cur_bands = num_bands; cur_bandq = bandq;
+  reinit_bands();
+) : bandq != cur_bandq ? (
+  cur_bandq = bandq;
+  bq_i = 0;
+  loop(num_bands, calc_band(bq_i); bq_i += 1;);
+);
+
+@sample
+
+bi = 0;
+loop(num_bands,
+  bL = b0[bi]*spl0 + b2[bi]*x2L[bi] - a1[bi]*y1L[bi] - a2[bi]*y2L[bi];
+  x2L[bi] = x1L[bi]; x1L[bi] = spl0;
+  y2L[bi] = y1L[bi]; y1L[bi] = bL;
+
+  bR = b0[bi]*spl1 + b2[bi]*x2R[bi] - a1[bi]*y1R[bi] - a2[bi]*y2R[bi];
+  x2R[bi] = x1R[bi]; x1R[bi] = spl1;
+  y2R[bi] = y1R[bi]; y1R[bi] = bR;
+
+  zlr[bi] += corr_w2*(bL*bR - zlr[bi]) + 0.00000000000000000001;
+  zll[bi] += corr_w2*(bL*bL - zll[bi]) + 0.00000000000000000001;
+  zrr[bi] += corr_w2*(bR*bR - zrr[bi]) + 0.00000000000000000001;
+
+  bi += 1;
+);
+
+@gfx 900 560
+
+scale = max(1, gfx_ext_retina);
+gfx_h < 560*scale ? gfx_h = 560*scale;
+gfx_w < 900*scale ? gfx_w = 900*scale;
+
+num_bands = max(4, min(MAX_BANDS, floor(slider1 + 0.5)));
+avg_ms = slider2;
+bandq = slider3;
+corr_w2 = 1 / (max(0.001, avg_ms*0.001) * srate);
+num_bands != cur_bands ? (
+  cur_bands = num_bands; cur_bandq = bandq;
+  reinit_bands();
+) : bandq != cur_bandq ? (
+  cur_bandq = bandq;
+  bq_i = 0;
+  loop(num_bands, calc_band(bq_i); bq_i += 1;);
+);
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+MARGIN = 12*scale;
+HEADER_H = 40*scale;
+
+gfx_setfont(1, "Arial", 16*scale, 'b');
+gfx_set(0.55, 0.78, 0.45, 1);
+gfx_x = MARGIN; gfx_y = 8*scale;
+gfx_drawstr("SONATA MULTIBAND CORRELATION");
+gfx_setfont(1, "Arial", 11*scale, 0);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = MARGIN + 2*scale; gfx_y = 28*scale;
+gfx_drawstr("by chmaha");
+
+function taper_pos(val, minv, maxv, uselog)
+(
+  uselog ? log(val/minv) / log(maxv/minv) : (val - minv) / (maxv - minv);
+);
+function taper_val(pos, minv, maxv, uselog)
+(
+  uselog ? minv * pow(maxv/minv, pos) : minv + pos * (maxv - minv);
+);
+function hit_circle(mx, my, cx, cy, rad)
+(
+  sqr(mx - cx) + sqr(my - cy) <= sqr(rad);
+);
+function draw_knob(cx, cy, rad, pos, cr, cg, cb, valtext, minlabel, maxlabel, name)
+local(ang0, ang1, ang, i, tx, ty)
+(
+  ang0 = -2.35619; ang1 = 2.35619;
+
+  gfx_set(0.05, 0.05, 0.06, 1);
+  gfx_circle(cx, cy, rad + 2*scale, 1, 1);
+  gfx_set(cr*0.55, cg*0.55, cb*0.55, 1);
+  gfx_circle(cx, cy, rad, 1, 1);
+  gfx_set(cr, cg, cb, 1);
+  gfx_circle(cx, cy, rad*0.72, 1, 1);
+  gfx_set(1, 1, 1, 0.18);
+  gfx_circle(cx - rad*0.28, cy - rad*0.28, rad*0.42, 1, 1);
+
+  i = 0;
+  loop(9,
+    ang = ang0 + (ang1 - ang0) * (i / 8);
+    gfx_set(0.85, 0.85, 0.85, 0.7);
+    gfx_line(cx + sin(ang)*rad*0.82, cy - cos(ang)*rad*0.82,
+              cx + sin(ang)*rad*0.98, cy - cos(ang)*rad*0.98);
+    i += 1;
+  );
+
+  ang = ang0 + (ang1 - ang0) * pos;
+  gfx_set(0.05, 0.05, 0.05, 1);
+  gfx_line(cx, cy, cx + sin(ang)*rad*0.85, cy - cos(ang)*rad*0.85, 1);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.85, 0.85, 0.85, 1);
+  gfx_measurestr(valtext, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy - rad - 16*scale;
+  gfx_drawstr(valtext);
+
+  gfx_setfont(1, "Arial", 10*scale);
+  gfx_set(0.55, 0.55, 0.58, 1);
+  gfx_x = cx - rad - 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(minlabel);
+  gfx_measurestr(maxlabel, tx, ty);
+  gfx_x = cx + rad - tx + 4*scale; gfx_y = cy + rad + 4*scale;
+  gfx_drawstr(maxlabel);
+
+  gfx_setfont(1, "Arial", 12*scale);
+  gfx_set(0.8, 0.8, 0.82, 1);
+  gfx_measurestr(name, tx, ty);
+  gfx_x = cx - tx*0.5; gfx_y = cy + rad + 18*scale;
+  gfx_drawstr(name);
+);
+
+mouse_down = mouse_cap & 1;
+click = mouse_down && !mouse_state;
+mouse_just_down = click;
+
+knrad = 16*scale;
+kny = HEADER_H + 12*scale + knrad;
+k1x = gfx_w*0.5 - 110*scale;
+k2x = gfx_w*0.5;
+k3x = gfx_w*0.5 + 110*scale;
+
+mouse_just_down && hit_circle(mouse_x, mouse_y, k1x, kny, knrad) ? (
+  (click_target == 1 && time_precise() - click_time < 0.3) ? (
+    slider1 = 32; slider_automate(slider1);
+  ) : (
+    drag_target = 1; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider1, 4, 64, 0);
+  );
+  click_target = 1; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k2x, kny, knrad) ? (
+  (click_target == 2 && time_precise() - click_time < 0.3) ? (
+    slider2 = 1000; slider_automate(slider2);
+  ) : (
+    drag_target = 2; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider2, 50, 3000, 1);
+  );
+  click_target = 2; click_time = time_precise();
+);
+mouse_just_down && hit_circle(mouse_x, mouse_y, k3x, kny, knrad) ? (
+  (click_target == 3 && time_precise() - click_time < 0.3) ? (
+    slider3 = 3; slider_automate(slider3);
+  ) : (
+    drag_target = 3; drag_start_y = mouse_y; drag_start_pos = taper_pos(slider3, 0.3, 12, 1);
+  );
+  click_target = 3; click_time = time_precise();
+);
+drag_target > 0 && mouse_down ? (
+  newpos = max(0, min(1, drag_start_pos + (drag_start_y - mouse_y) / (150*scale)));
+  drag_target == 1 ? ( slider1 = floor(taper_val(newpos, 4, 64, 0) + 0.5); slider_automate(slider1); );
+  drag_target == 2 ? ( slider2 = taper_val(newpos, 50, 3000, 1); slider_automate(slider2); );
+  drag_target == 3 ? ( slider3 = taper_val(newpos, 0.3, 12, 1); slider_automate(slider3); );
+);
+!mouse_down ? drag_target = 0;
+
+sprintf(#bandtxt, "%d", num_bands);
+avg_ms >= 1000 ? sprintf(#avgtxt, "%.2fs", avg_ms*0.001) : sprintf(#avgtxt, "%dms", avg_ms);
+sprintf(#qtxt, "%.2f", bandq);
+draw_knob(k1x, kny, knrad, taper_pos(slider1,4,64,0), 0.35,0.65,0.45, #bandtxt, "4", "64", "Bands");
+draw_knob(k2x, kny, knrad, taper_pos(slider2,50,3000,1), 0.35,0.55,0.68, #avgtxt, "50", "3000", "Avg Time");
+draw_knob(k3x, kny, knrad, taper_pos(slider3,0.3,12,1), 0.68,0.5,0.35, #qtxt, "0.3", "12", "Band Q");
+
+mouse_state = mouse_down;
+
+FREQ_AXIS_H = 22*scale;
+CHART_LEFT = MARGIN + 36*scale;
+CHART_RIGHT = gfx_w - MARGIN;
+CHART_TOP = kny + knrad + 40*scale;
+CHART_BOTTOM = gfx_h - MARGIN - FREQ_AXIS_H;
+graph_w = CHART_RIGHT - CHART_LEFT;
+graph_h = CHART_BOTTOM - CHART_TOP;
+CHART_MIN = -0.25; CHART_MAX = 1.0;
+function val_to_scy(v)
+(
+  CHART_TOP + graph_h * (CHART_MAX - max(CHART_MIN, min(CHART_MAX, v))) / (CHART_MAX - CHART_MIN);
+);
+
+gfx_set(0.04, 0.04, 0.05, 1);
+gfx_rect(CHART_LEFT, CHART_TOP, graph_w, graph_h, 1);
+
+function grid_val_line(v, txt)
+local(gy, tw, th)
+(
+  gy = val_to_scy(v);
+  gfx_set(1, 1, 1, v == 0 ? 0.16 : 0.08);
+  gfx_line(CHART_LEFT, gy, CHART_RIGHT, gy, 0);
+  gfx_setfont(1, "Arial", 10*scale);
+  gfx_set(0.6, 0.6, 0.63, 1);
+  gfx_measurestr(txt, tw, th);
+  gfx_x = CHART_LEFT - tw - 4*scale; gfx_y = gy - th*0.5;
+  gfx_drawstr(txt);
+);
+grid_val_line(1.00, "1.00"); grid_val_line(0.75, "0.75"); grid_val_line(0.50, "0.50");
+grid_val_line(0.25, "0.25"); grid_val_line(0, "0.00"); grid_val_line(-0.25, "-0.25");
+
+colw = graph_w / num_bands;
+zero_y_px = floor(val_to_scy(0) + 0.5);
+gi = 0;
+bx_next_px = floor(CHART_LEFT + 0.5);
+loop(num_bands,
+  corr[gi] = zlr[gi] / sqrt(zll[gi]*zrr[gi] + 0.0000000001);
+  v = max(-1, min(1, corr[gi]));
+  t = (v + 1) * 0.5;
+  t < 0.5 ? (
+    cr = 1; cg = 2*t; cb = 0;
+  ) : (
+    cr = 2 - 2*t; cg = 1; cb = 0;
+  );
+  bx_px = bx_next_px;
+  bx_next_px = floor(CHART_LEFT + (gi+1)*colw + 0.5);
+  by_px = floor(val_to_scy(v) + 0.5);
+  bar_top = min(by_px, zero_y_px);
+  bar_bot = max(by_px, zero_y_px);
+  gfx_set(cr, cg, cb, 0.9);
+  gfx_rect(bx_px, bar_top, bx_next_px - bx_px, bar_bot - bar_top, 1);
+  gi += 1;
+);
+
+function dotted_vline(x, y0, y1)
+local(dash_len, dash_gap, dash_step, n_dash, di, sy)
+(
+  dash_len = 1*scale; dash_gap = 3*scale; dash_step = dash_len + dash_gap;
+  n_dash = ceil((y1-y0)/dash_step);
+  di = 0;
+  loop(n_dash,
+    sy = y0 + di*dash_step;
+    gfx_rect(x, sy, max(1,scale), min(dash_len, y1-sy), 1);
+    di += 1;
+  );
+);
+gfx_set(0, 0, 0, 0.35);
+gi = 1;
+loop(num_bands - 1,
+  bxx = floor(CHART_LEFT + gi*colw + 0.5);
+  dotted_vline(bxx, CHART_TOP, CHART_BOTTOM);
+  gi += 1;
+);
+
+gfx_setfont(1, "Arial", 9*scale, 0);
+min_label_w = 34*scale;
+max_labels = max(1, floor(graph_w / min_label_w));
+label_stride = max(1, ceil(num_bands / max_labels));
+gfx_set(0.6, 0.6, 0.63, 1);
+gi = 0;
+loop(num_bands,
+  gi % label_stride == 0 ? (
+    lx = floor(CHART_LEFT + (gi+0.5)*colw + 0.5);
+    freq[gi] < 1000 ? sprintf(#flbl, "%d", floor(freq[gi]+0.5)) :
+    freq[gi] < 10000 ? sprintf(#flbl, "%.1fk", freq[gi]/1000) :
+    sprintf(#flbl, "%.0fk", freq[gi]/1000);
+    gfx_measurestr(#flbl, ftw, fth);
+    gfx_x = lx - ftw*0.5; gfx_y = CHART_BOTTOM + 4*scale;
+    gfx_drawstr(#flbl);
+  );
+  gi += 1;
+);
+
+gfx_set(0.5, 0.5, 0.55, 1);
+gfx_line(CHART_LEFT, zero_y_px, CHART_RIGHT, zero_y_px, 0);
+gfx_set(0.4, 0.4, 0.44, 1);
+gfx_rect(CHART_LEFT, CHART_TOP, graph_w, graph_h, 0);

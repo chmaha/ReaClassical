@@ -1,0 +1,703 @@
+NoIndex: true
+desc: Sonata Spectrum Analyzer (chmaha)
+author: chmaha
+// Ported from x42/spectra.lv2 (Robin Gareus). GPLv2+.
+// https://github.com/x42/spectra.lv2
+
+slider1:4096<1024,16384,1024>-FFT Size
+slider2:0<0,1,1>-1/f (Pink Noise Spectrum)
+slider3:0<0,2,1{Hann,Blackman-Harris,Flat Top}>-Window Function
+slider4:0<0,1,1>-Peak Hold
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+options:no_meter
+
+@init
+
+PI = 3.14159265358979;
+LOG2R = 1.44269504088896;
+
+MIN_DB = -92; MAX_DB = 6; STEP_DB = 6;
+MIN_COEFF = pow(10, 0.1*MIN_DB);
+
+CAP = 32768;
+MAXFFT = 16384;
+MAXBINS = 8192;
+MAXCOLS = 16384;
+
+freemem = 0;
+FIFO    = freemem; freemem += CAP;
+FIFOR   = freemem; freemem += CAP;
+RING    = freemem; freemem += MAXFFT;
+RINGR   = freemem; freemem += MAXFFT;
+RE      = freemem; freemem += MAXFFT;
+RE2     = freemem; freemem += MAXFFT;
+WIN     = freemem; freemem += MAXFFT;
+POWER   = freemem; freemem += MAXBINS;
+POWERB  = freemem; freemem += MAXBINS;
+PHASE   = freemem; freemem += MAXBINS;
+PHASE_H = freemem; freemem += MAXBINS;
+PHASEB   = freemem; freemem += MAXBINS;
+PHASEB_H = freemem; freemem += MAXBINS;
+PXA     = freemem; freemem += MAXBINS;
+PYA     = freemem; freemem += MAXBINS;
+COLBEST = freemem; freemem += MAXCOLS;
+PEAKY   = freemem; freemem += MAXCOLS;
+
+wp = 0;
+overrun = 0;
+proc_cnt = 0;
+
+fft_n = 0; data_size = 0;
+cur_rate = 0; cur_fft_req = 4096; win_type = 0; pink_on = 0;
+rboff = 0; smps = 0; step = 0; sps = 1;
+freq_per_bin = 0; phasediff_step = 0; phasediff_bin = 0;
+log_rate = 0; log_base = 1;
+
+n_points = 0;
+plot_dirty = 1; img_size_w = 0; img_size_h = 0;
+
+mouse_state = 0; xrun_display = 0;
+
+peak_on = 0;
+last_proc_cnt = 0; last_flow_t = 0; flow_idle = 1;
+i = 0; loop(MAXCOLS, PEAKY[i] = -1; i += 1;);
+
+IMG_PLOT = 1;
+
+@sample
+
+
+proc_cnt += 1; 
+wp < CAP ? (
+  FIFO[wp] = spl0; FIFOR[wp] = spl1; wp += 1;
+) : (
+  overrun = 1;
+);
+
+@gfx 800 430
+
+scale = max(1, gfx_ext_retina);
+
+HEADER_H = 40*scale; BTN_ROW_H = 28*scale; MARGIN = 12*scale;
+FOOTER_H = 22*scale; LABEL_ROW_H = 16*scale;
+NUM_FLABELS = 10;
+PLOT_X = 0;
+PLOT_Y = HEADER_H + BTN_ROW_H + LABEL_ROW_H;
+PW = max(80, gfx_w);
+PH = max(80, gfx_h - PLOT_Y - FOOTER_H - MARGIN);
+AW = 35*scale; AH = 25*scale;
+DW = PW - AW; DH = PH - AH;
+
+function pow2round(v) local(s)(
+  s = max(1024, min(16384, floor(v)));
+  s -= 1;
+  s |= s >> 1; s |= s >> 2; s |= s >> 4; s |= s >> 8; s |= s >> 16;
+  s += 1;
+  min(16384, s);
+);
+
+function fast_log2(val) local(e, m)(
+  val > 0 ? (
+    e = floor(log(val)*LOG2R);
+    m = val/pow(2, e);
+    
+    
+    ((-1.0/3*m + 2)*m - 5.0/3) + e;
+  ) : -300;
+);
+
+function fast_log10(val)(
+  fast_log2(val)/3.3125;
+);
+
+function pw2db(a)(
+  a > 0.000000000001 ? 10*fast_log10(a) : -1500;
+);
+
+function fl_init()(
+  log_rate = (1 - 10000/cur_rate)/((5000/cur_rate)*(5000/cur_rate));
+  log_base = log10(1 + log_rate);
+);
+
+function deflect(bb)(
+  fast_log10(1 + bb*log_rate/data_size)/log_base;
+);
+
+function gen_window(nn, type)
+local(i, sumv, c, c2, c3, c4, vv, isum)(
+  c = 2*PI/(nn - 1);
+  sumv = 0;
+  type == 2 ? (
+    c2 = 2*c; c3 = 3*c; c4 = 4*c;
+    i = 0;
+    loop(nn,
+      vv = 1 - 1.93*cos(c*i) + 1.29*cos(c2*i) - 0.388*cos(c3*i) + 0.028*cos(c4*i);
+      WIN[i] = vv; sumv += vv; i += 1;
+    );
+  ) : type == 1 ? (
+    c2 = 2*c; c3 = 3*c;
+    i = 0;
+    loop(nn,
+      vv = 0.35875 - 0.48829*cos(c*i) + 0.14128*cos(c2*i) - 0.01168*cos(c3*i);
+      WIN[i] = vv; sumv += vv; i += 1;
+    );
+  ) : (
+    i = 0;
+    loop(nn,
+      vv = 0.5 - 0.5*cos(c*i);
+      WIN[i] = vv; sumv += vv; i += 1;
+    );
+  );
+  isum = 2/sumv;
+  i = 0;
+  loop(nn, WIN[i] *= isum; i += 1;);
+);
+
+function setup_fft() local(sz)(
+  sz = pow2round(cur_fft_req);
+  fft_n = sz;
+  data_size = fft_n/2;
+  freq_per_bin = cur_rate/data_size/2;
+  phasediff_step = PI/data_size;
+  phasediff_bin = 0;
+  sps = ceil(cur_rate/60);
+  rboff = 0; smps = 0; step = 0;
+  memset(RING, 0, fft_n);
+  memset(RINGR, 0, fft_n);
+  memset(RE, 0, fft_n);
+  memset(RE2, 0, fft_n);
+  memset(POWER, 0, data_size);
+  memset(POWERB, 0, data_size);
+  memset(PHASE, 0, data_size);
+  memset(PHASE_H, 0, data_size);
+  memset(PHASEB, 0, data_size);
+  memset(PHASEB_H, 0, data_size);
+  gen_window(fft_n, win_type);
+  fl_init();
+  n_points = 0;
+  plot_dirty = 1;
+);
+
+function analyze(buf, pwrb, phb, phhb) local(i, re, im)(
+  memcpy(phhb, phb, data_size);
+  pwrb[0] = buf[0]*buf[0];
+  phb[0] = 0;
+  i = 1;
+  loop(data_size - 2,
+    re = buf[2*i]; im = buf[2*i+1];
+    pwrb[i] = re*re + im*im;
+    phb[i] = atan2(im, re);
+    i += 1;
+  );
+);
+
+function merge_bins() local(i)(
+  
+  
+  i = 1;
+  loop(data_size - 2,
+    POWERB[i] > POWER[i] ? (
+      POWER[i] = POWERB[i];
+      PHASE[i] = PHASEB[i];
+      PHASE_H[i] = PHASEB_H[i];
+    );
+    i += 1;
+  );
+);
+
+function fftx_chunk(ns, base)
+local(n_off, n_siz, n_old, i, p0s, n_p1, n_p2, ran)(
+  ran = 0;
+  n_off = rboff; n_siz = fft_n; n_old = n_siz - ns;
+  i = 0;
+  loop(ns,
+    RING[(i + n_off)%n_siz]  = FIFO[base + i];
+    RINGR[(i + n_off)%n_siz] = FIFOR[base + i];
+    RE[n_old + i]  = FIFO[base + i];
+    RE2[n_old + i] = FIFOR[base + i];
+    i += 1;
+  );
+  rboff = (rboff + ns)%n_siz;
+  smps += ns;
+  smps < sps ? (
+    0; 
+  ) : (
+    step = smps; smps = 0;
+    p0s = (n_off + ns)%n_siz;
+
+    
+    p0s + n_old >= n_siz ? (
+      n_p1 = n_siz - p0s; n_p2 = n_old - n_p1;
+      memcpy(RE, RING + p0s, n_p1);
+      memcpy(RE + n_p1, RING, n_p2);
+    ) : (
+      memcpy(RE, RING + p0s, n_old);
+    );
+    i = 0;
+    loop(n_siz, RE[i] *= WIN[i]; i += 1;);
+    fft_real(RE, n_siz); fft_permute(RE, data_size);
+    analyze(RE, POWER, PHASE, PHASE_H);
+
+    
+    p0s + n_old >= n_siz ? (
+      n_p1 = n_siz - p0s; n_p2 = n_old - n_p1;
+      memcpy(RE2, RINGR + p0s, n_p1);
+      memcpy(RE2 + n_p1, RINGR, n_p2);
+    ) : (
+      memcpy(RE2, RINGR + p0s, n_old);
+    );
+    i = 0;
+    loop(n_siz, RE2[i] *= WIN[i]; i += 1;);
+    fft_real(RE2, n_siz); fft_permute(RE2, data_size);
+    analyze(RE2, POWERB, PHASEB, PHASEB_H);
+
+    merge_bins();
+    phasediff_bin = phasediff_step*step;
+    ran = 1;
+  );
+  ran;
+);
+
+function freq_at_bin(bb) local(ph, ovr)(
+  ph = PHASE[bb] - PHASE_H[bb] - bb*phasediff_bin;
+  ovr = (ph/PI)|0;
+  ovr += ovr >= 0 ? (ovr & 1) : -(ovr & 1);
+  ph -= PI*ovr;
+  ph *= floor(data_size/step)/PI;
+  freq_per_bin*(bb + ph);
+);
+
+function build_points()
+local(p, bn, i, ffpow, rwidth, rheight, aoffs_x, hscale, fb, fbe)(
+  rwidth = DW/PW;
+  rheight = DH/PH;
+  aoffs_x = AW/PW;
+  hscale = rheight/(MAX_DB - MIN_DB);
+  p = 0;
+  bn = data_size;
+  i = 1;
+  loop(bn - 2,
+    ffpow = pink_on ? POWER[i]*i*0.5 : POWER[i];
+    ffpow >= MIN_COEFF ? (
+      fb = freq_at_bin(i);
+      
+      
+      fbe = i*freq_per_bin;
+      (fb < 0 || fb > cur_rate || abs(fb - fbe) > 2*freq_per_bin) ? fb = fbe;
+      PXA[p] = deflect(fb/freq_per_bin)*rwidth + aoffs_x;
+      PYA[p] = (pw2db(ffpow) - MIN_DB)*hscale;
+      p += 1;
+    );
+    i += 1;
+  );
+  n_points = p;
+);
+
+function reset_peaks() local(i)(
+  i = 0;
+  loop(MAXCOLS, PEAKY[i] = -1; i += 1;);
+);
+
+function update_peaks() local(p, xx, yn, col)(
+  p = 0;
+  loop(n_points,
+    xx = PXA[p]*PW; yn = PYA[p];
+    yn < 0 ? yn = 0;
+    yn > 1 ? yn = 1;
+    xx >= 0 && xx <= PW ? (
+      col = floor(xx + 0.5);
+      col <= min(PW, MAXCOLS - 1) && PEAKY[col] < yn ? PEAKY[col] = yn;
+    );
+    p += 1;
+  );
+);
+
+function dash_hline(x0, x1, yy) local(dl, gp, stp, n, i, sx, th_)(
+  dl = 3*scale; gp = 5*scale; stp = dl + gp;
+  th_ = max(1, scale);
+  n = ceil((x1 - x0)/stp);
+  i = 0;
+  loop(n,
+    sx = x0 + i*stp;
+    sx < x1 ? gfx_rect(sx, floor(yy), min(dl, x1 - sx), th_, 1);
+    i += 1;
+  );
+);
+
+function flabel_freq_for_idx(idx)(
+  idx == 0 ? 20 : idx == 1 ? 50 : idx == 2 ? 100 : idx == 3 ? 200 :
+  idx == 4 ? 500 : idx == 5 ? 1000 : idx == 6 ? 2000 : idx == 7 ? 5000 :
+  idx == 8 ? 10000 : 20000;
+);
+
+function hue2rgb(p, q, t)
+(
+  t = t < 0 ? t+1 : (t > 1 ? t-1 : t);
+  t < 0.16666667 ? p + (q-p)*6*t :
+  t < 0.5 ? q :
+  t < 0.66666667 ? p + (q-p)*(0.66666667-t)*6 :
+  p;
+);
+
+function hsl2rgb(hue, sat, lum)
+local(cq, cp)
+(
+  cq = lum < 0.5 ? lum*(1+sat) : lum+sat-lum*sat;
+  cp = 2*lum - cq;
+  hcol_r = hue2rgb(cp, cq, hue + 0.33333333);
+  hcol_g = hue2rgb(cp, cq, hue);
+  hcol_b = hue2rgb(cp, cq, hue - 0.33333333);
+);
+
+function draw_bar(col, py) local(top, lw_, pos)(
+  top = PH*(1 - py);
+  lw_ = 1.5*scale;
+  pos = min(1, max(0, (col - AW)/DW)); 
+  hsl2rgb(0.02 + 0.76*pos, 0.9, 0.55);
+  gfx_set(hcol_r, hcol_g, hcol_b, 1);
+  gfx_rect(col - lw_*0.5, top, lw_, PH - top + 1, 1);
+  gfx_circle(col, top, lw_*0.5, 1, 1);
+);
+
+function draw_peak_curve(ncols)
+local(i, k, sum, cnt, win, sy, lw_)(
+  
+  
+  
+  
+  win = floor(20*scale);
+  lw_ = max(1, 1.5*scale);
+  gfx_set(0.95, 0.75, 0.15, 0.85);
+  i = 0;
+  loop(ncols + 1,
+    sum = 0; cnt = 0;
+    k = max(0, i - win);
+    loop(min(ncols, i + win) - k + 1,
+      PEAKY[k] >= 0 ? ( sum += PEAKY[k]; cnt += 1; );
+      k += 1;
+    );
+    cnt > 0 ? (
+      sy = floor(PH*(1 - sum/cnt));
+      gfx_rect(i - lw_*0.5, sy - lw_*0.5, lw_, lw_, 1);
+    );
+    i += 1;
+  );
+);
+
+function draw_plot()
+local(dbv, ty, tw_, th_, thl, i, k, gap, fy, pk_cy, pk_pc, pk_py, fm, fx, cx_, lw_, p, xx, yn, col, ncols)(
+  gfx_dest = IMG_PLOT;
+  gfx_set(0.09, 0.09, 0.10, 1);
+  gfx_rect(0, 0, PW, PH, 1);
+
+  gfx_setfont(2, "Arial", 9*scale, 0);
+  dbv = 0;
+  while(dbv > MIN_DB)(
+    ty = PH - DH*((dbv - MIN_DB)/(MAX_DB - MIN_DB));
+    dbv == 0 ? (
+      gfx_set(0.2, 0.2, 0.2, 1);
+      gfx_rect(AW, floor(ty), DW, max(1, scale), 1);
+    ) : (
+      gfx_set(0.2, 0.2, 0.2, 1);
+      dash_hline(AW, PW, ty);
+    );
+    sprintf(#lbl, "%+.0fdB", dbv);
+    gfx_set(0.6, 0.6, 0.6, 1);
+    gfx_measurestr(#lbl, tw_, th_);
+    gfx_x = AW - 2*scale - tw_;
+    gfx_y = ty - th_*0.5;
+    gfx_drawstr(#lbl);
+    dbv -= STEP_DB;
+  );
+
+  i = 0;
+  loop(NUM_FLABELS,
+    fm = flabel_freq_for_idx(i);
+    fm < cur_rate*0.5 ? (
+      fx = deflect(fm/freq_per_bin)*DW + AW;
+      lw_ = max(1, 1.25*scale);
+      cx_ = max(floor(fx + 0.5), AW + 2*scale); 
+      gfx_set(0.3, 0.3, 0.3, 1);
+      gfx_rect(cx_ - lw_*0.5, 0, lw_, PH, 1);
+    );
+    i += 1;
+  );
+
+  
+  ncols = min(PW, MAXCOLS - 1);
+  i = 0;
+  loop(ncols + 1, COLBEST[i] = -1; i += 1;);
+  p = 0;
+  loop(n_points,
+    xx = PXA[p]*PW; yn = PYA[p];
+    yn < 0 ? yn = 0;
+    yn > 1 ? yn = 1;
+    xx >= 0 && xx <= PW ? (
+      col = floor(xx + 0.5);
+      col <= ncols && COLBEST[col] < yn ? COLBEST[col] = yn;
+    );
+    p += 1;
+  );
+
+  
+  col = 0;
+  loop(ncols + 1,
+    COLBEST[col] >= 0 ? draw_bar(col, COLBEST[col]);
+    col += 1;
+  );
+
+  
+  peak_on ? (
+    gfx_set(1, 1, 1, 0.9);
+    lw_ = max(1, scale);
+    pk_pc = -100; pk_py = 0;
+    i = 0;
+    loop(ncols + 1,
+      PEAKY[i] >= 0 ? (
+        pk_cy = floor(PH*(1 - PEAKY[i]));
+        gap = i - pk_pc;
+        gap >= 2 && gap <= 6 ? ( 
+          k = 1;
+          loop(gap - 1,
+            fy = pk_py + (PEAKY[i] - pk_py)*(k/(gap - 1));
+            gfx_rect(pk_pc + k - lw_*0.5, floor(PH*(1 - fy)), lw_, lw_, 1);
+            k += 1;
+          );
+        );
+        gfx_rect(i - lw_*0.5, pk_cy, lw_, lw_, 1);
+        pk_pc = i; pk_py = PEAKY[i];
+      );
+      i += 1;
+    );
+
+    
+    draw_peak_curve(ncols);
+  );
+
+  gfx_dest = -1;
+);
+
+function btn(bx, by, bw, bh, label, active)
+local(tw_, th_, cr, cg, cb, gap)(
+  active ? ( cr = 0.85; cg = 0.3; cb = 0.4; ) : ( cr = 0.22; cg = 0.22; cb = 0.25; );
+  gap = max(1, scale);
+
+  gfx_set(0.04, 0.04, 0.05, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 1);
+
+  gfx_set(cr*0.6, cg*0.6, cb*0.6, 1);
+  gfx_rect(bx, by, bw, bh, 1);
+
+  gfx_set(cr, cg, cb, 1);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.5, 1);
+
+  gfx_set(1, 1, 1, active ? 0.22 : 0.10);
+  gfx_rect(bx + gap, by + gap, bw - 2*gap, bh*0.32, 1);
+
+  gfx_set(1, 1, 1, active ? 0.4 : 0.22);
+  gfx_rect(bx, by, bw, gap, 1);
+
+  gfx_set(0, 0, 0, 0.3);
+  gfx_rect(bx, by + bh - gap, bw, gap, 1);
+
+  gfx_set(0.03, 0.03, 0.04, 1);
+  gfx_rect(bx - gap, by - gap, bw + 2*gap, bh + 2*gap, 0);
+
+  gfx_setfont(1, "Arial", 11*scale, 0);
+  active ? gfx_set(1, 1, 1, 1) : gfx_set(0.78, 0.78, 0.80, 1);
+  gfx_measurestr(label, tw_, th_);
+  gfx_x = bx + (bw - tw_)*0.5; gfx_y = by + (bh - th_)*0.5;
+  gfx_drawstr(label);
+);
+
+function pt_in(px, py, rx, ry, rw, rh)(
+  px >= rx && px <= rx + rw && py >= ry && py <= ry + rh;
+);
+
+function fft_size_for_idx(idx)(
+  idx == 0 ? 1024 : idx == 1 ? 2048 : idx == 2 ? 4096 : idx == 3 ? 8192 : 16384;
+);
+
+
+
+srate != cur_rate || floor(slider1 + 0.5) != cur_fft_req ? (
+  cur_rate = srate;
+  cur_fft_req = floor(slider1 + 0.5);
+  setup_fft();
+);
+
+floor(slider3 + 0.5) != win_type ? (
+  win_type = floor(slider3 + 0.5);
+  gen_window(fft_n, win_type);
+  n_points > 0 ? build_points();
+  plot_dirty = 1;
+);
+
+req_pink = slider2 > 0.5;
+req_pink != pink_on ? (
+  pink_on = req_pink;
+  n_points > 0 ? build_points();
+  plot_dirty = 1;
+);
+
+req_peak = slider4 > 0.5;
+req_peak != peak_on ? (
+  peak_on = req_peak;
+  peak_on ? reset_peaks(); 
+  plot_dirty = 1;
+);
+
+
+
+
+
+now_t = time_precise();
+proc_cnt != last_proc_cnt ? (
+  last_proc_cnt = proc_cnt;
+  last_flow_t = now_t;
+  flow_idle ? (
+    flow_idle = 0;
+    peak_on ? reset_peaks(); 
+  );
+) : (
+  !flow_idle && now_t - last_flow_t > 0.25 ? flow_idle = 1;
+);
+
+
+
+gfx_set(0.09, 0.09, 0.10, 1);
+gfx_rect(0, 0, gfx_w, gfx_h, 1);
+
+gfx_setfont(1, "Arial", 16*scale, 'b');
+gfx_set(0.85, 0.3, 0.4, 1);
+gfx_x = 12*scale; gfx_y = 8*scale;
+gfx_drawstr("SONATA SPECTRUM ANALYZER");
+gfx_setfont(1, "Arial", 11*scale, 0);
+gfx_set(0.55, 0.55, 0.58, 1);
+gfx_x = 14*scale; gfx_y = 28*scale;
+gfx_drawstr("by chmaha");
+
+
+
+mouse_down = mouse_cap & 1;
+click = mouse_down && !mouse_state;
+
+btn_y = HEADER_H + 4*scale;
+btn_h = BTN_ROW_H - 6*scale;
+btn_w = (gfx_w - MARGIN*2 - 3*8*scale)/4;
+btn0_x = MARGIN;
+btn1_x = btn0_x + btn_w + 8*scale;
+btn2_x = btn1_x + btn_w + 8*scale;
+btn3_x = btn2_x + btn_w + 8*scale;
+
+fft_idx = fft_n == 1024 ? 0 : fft_n == 2048 ? 1 : fft_n == 4096 ? 2 : fft_n == 8192 ? 3 : 4;
+
+click && pt_in(mouse_x, mouse_y, btn0_x, btn_y, btn_w, btn_h) ? (
+  slider1 = fft_idx >= 4 ? fft_size_for_idx(0) : fft_size_for_idx(fft_idx + 1);
+  slider_automate(slider1);
+);
+click && pt_in(mouse_x, mouse_y, btn1_x, btn_y, btn_w, btn_h) ? (
+  slider2 = slider2 > 0.5 ? 0 : 1;
+  slider_automate(slider2);
+);
+click && pt_in(mouse_x, mouse_y, btn2_x, btn_y, btn_w, btn_h) ? (
+  slider3 = win_type >= 2 ? 0 : win_type + 1;
+  slider_automate(slider3);
+);
+click && pt_in(mouse_x, mouse_y, btn3_x, btn_y, btn_w, btn_h) ? (
+  slider4 = peak_on ? 0 : 1;
+  slider_automate(slider4);
+);
+
+sprintf(#b1, "FFT Size: %d", fft_n);
+pink_on ? strcpy(#b2, "Pink 1/f Spectrum: On") : strcpy(#b2, "Pink 1/f Spectrum: Off");
+win_type == 0 ? strcpy(#b3, "Window: Hann") :
+win_type == 1 ? strcpy(#b3, "Window: Blackman-Harris") :
+strcpy(#b3, "Window: Flat Top");
+peak_on ? strcpy(#b4, "Peak Hold: On") : strcpy(#b4, "Peak Hold: Off");
+
+btn(btn0_x, btn_y, btn_w, btn_h, #b1, 0);
+btn(btn1_x, btn_y, btn_w, btn_h, #b2, pink_on);
+btn(btn2_x, btn_y, btn_w, btn_h, #b3, 0);
+btn(btn3_x, btn_y, btn_w, btn_h, #b4, peak_on);
+
+
+
+had_overrun = overrun; overrun = 0;
+ran_any = 0; src = 0; rem = wp; wp = 0;
+rem > 0 && fft_n > 0 ? (
+  while(rem > 0)(
+    chunk = min(rem, fft_n);
+    fftx_chunk(chunk, src) ? ran_any = 1;
+    rem -= chunk; src += chunk;
+  );
+);
+ran_any ? (
+  build_points();
+  peak_on ? update_peaks();
+  plot_dirty = 1;
+);
+
+had_overrun ? xrun_display = 30 : (xrun_display > 0 ? xrun_display -= 1);
+
+
+
+(img_size_w != PW || img_size_h != PH) ? (
+  gfx_setimgdim(IMG_PLOT, PW, PH);
+  img_size_w = PW; img_size_h = PH;
+  peak_on ? reset_peaks(); 
+  plot_dirty = 1;
+);
+
+plot_dirty ? (
+  draw_plot();
+  plot_dirty = 0;
+);
+
+gfx_x = PLOT_X; gfx_y = PLOT_Y; gfx_a = 1; gfx_mode = 0;
+gfx_blit(IMG_PLOT, 1, 0);
+
+
+
+gfx_setfont(2, "Arial", 9*scale, 0);
+gfx_set(0.55, 0.55, 0.58, 1);
+i = 0;
+loop(NUM_FLABELS,
+  fm = flabel_freq_for_idx(i);
+  fm < cur_rate*0.5 ? (
+    fx = deflect(fm/freq_per_bin)*DW + AW;
+    fm >= 1000 ? sprintf(#flbl, "%dk", fm/1000) : sprintf(#flbl, "%d", fm);
+    gfx_measurestr(#flbl, tw_, th_);
+    gfx_x = max(fx - tw_*0.5, 2*scale);
+    gfx_y = PLOT_Y - LABEL_ROW_H + (LABEL_ROW_H - th_)*0.5;
+    gfx_drawstr(#flbl);
+  );
+  i += 1;
+);
+
+gfx_set(0, 0, 0, 0.45);
+gfx_rect(0, gfx_h - FOOTER_H - 2*scale, gfx_w, FOOTER_H + 2*scale, 1);
+
+gfx_mode = 1;
+sprintf(#sttxt, "SR %d Hz  |  Hop %d smp  |  FFT %d", cur_rate, sps, fft_n);
+gfx_setfont(1, "Arial", 10*scale, 0);
+gfx_set(0.6, 0.6, 0.63, 1);
+gfx_x = MARGIN; gfx_y = gfx_h - FOOTER_H + 2*scale;
+gfx_drawstr(#sttxt);
+
+xrun_display > 0 ? (
+  gfx_setfont(1, "Arial", 11*scale, 'b');
+  gfx_set(0.95, 0.3, 0.35, 1 - max(0, (30 - xrun_display)*0.03));
+  strcpy(#warntxt, "Display buffer overflow -- system too slow for current redraw rate");
+  gfx_measurestr(#warntxt, tw_, th_);
+  gfx_x = (gfx_w - tw_)*0.5; gfx_y = gfx_h - th_ - 6*scale;
+  gfx_drawstr(#warntxt);
+);
+gfx_mode = 0;
+
+mouse_state = mouse_down;
