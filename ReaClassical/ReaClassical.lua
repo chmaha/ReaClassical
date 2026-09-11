@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.59
+@version 27.0.60
 @changelog
-  Add configurable item edge grow/shrink amount; skip post-import zoom for accessible path
+  Smart Import: exclude S-D edit destination items from used-source-file check
 @metapackage
 @provides
   [main] ReaClassical_*.lua
