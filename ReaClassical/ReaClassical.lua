@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.60
+@version 27.0.61
 @changelog
-  Smart Import: exclude S-D edit destination items from used-source-file check
+  Update keymap
 @metapackage
 @provides
   [main] ReaClassical_*.lua
