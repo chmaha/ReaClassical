@@ -1,0 +1,88 @@
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+local main, clean_take_names
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
+local say = require("ReaClassical_Announce")
+
+function main()
+    Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
+        return
+    end
+
+    local first_folder_track
+    local num_tracks = CountTracks(0)
+    for i = 0, num_tracks - 1 do
+        local track = GetTrack(0, i)
+        if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+            first_folder_track = track
+            break
+        end
+    end
+
+    if not first_folder_track then
+        MB("Error: No folder track found in the project.",
+            "Remove Take Names", 0)
+        return
+    end
+
+    local num_of_items = CountTrackMediaItems(first_folder_track)
+
+    if num_of_items == 0 then
+        MB("No items found on the first folder track", "Error", 0)
+        return
+    end
+
+    local response = MB(
+        "Are you sure you would like to remove item take names from the first folder track?", "Remove Take Names", 4)
+    if response == 6 then
+        clean_take_names(first_folder_track, num_of_items)
+        say("Take names removed")
+    end
+
+    Undo_EndBlock('Remove Take Names', 0)
+end
+
+function clean_take_names(selected_track, num_of_items)
+    for i = 0, num_of_items - 1 do
+        local item = GetTrackMediaItem(selected_track, i)
+        local take = GetActiveTake(item)
+        if take then
+            GetSetMediaItemTakeInfo_String(take, "P_NAME", "", true)
+        end
+    end
+end
+
+main()

@@ -33,9 +33,11 @@
                 <li><a href="#workflow">Workflow</a></li>
                 <li><a href="#accessibility">Accessibility</a></li>
                 <li><a href="#open-source">Open Source</a></li>
+                <li><a href="#download">Download</a></li>
                 <li><a href="./manual/">Manual</a></li>
                 <li><a href="https://forum.cockos.com/forumdisplay.php?f=57" target="_blank" rel="noopener">Support</a></li>
                 <li><a href="https://www.paypal.com/donate/?hosted_button_id=AG386BGS42BJN" target="_blank" rel="noopener">Donate</a></li>
+                <li><a href="#download" class="nav-cta">Download</a></li>
             </ul>
         </div>
     </nav>
@@ -49,7 +51,7 @@
             <h1>Classical Music Production <span>Start to Finish</span></h1>
             <p class="hero-subtitle">A complete recording, editing, mixing and mastering solution for classical music engineers, built on REAPER. Every feature is fully available to blind engineers, for an experience equal to that of sighted users.</p>
             <div class="hero-cta-group">
-                <span class="btn-primary btn-disabled" aria-disabled="true">Coming Soon</span>
+                <a href="#download" class="btn-primary">Download</a>
                 <a href="#features" class="btn-secondary">Explore Features</a>
             </div>
             <p class="hero-note">ReaClassical 27 &middot; free and open source &middot; GPLv3</p>
@@ -287,7 +289,33 @@
         <div class="container">
             <div class="section-header">
                 <h2>Download ReaClassical</h2>
-                <p>ReaClassical 27 will be available to download here soon.</p>
+                <p>Get started on your platform. The script downloads the REAPER version ReaClassical was tested with, the ReaClassical resource folder and the right plugins for your system, and sets everything up in a self-contained folder. Nothing is installed system-wide.</p>
+            </div>
+            <div class="download-list">
+                <div class="download-item">
+                    <h3><svg aria-hidden="true" width="24" height="24" viewBox="0 0 384 512" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" fill="currentColor"/></svg> MacOS</h3>
+                    <p>Open a terminal and paste the following:</p>
+                    <div class="code-block">
+                        <pre class="install-code">curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.com/macos | sh</pre>
+                        <button class="copy-btn" aria-label="Copy command" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+                    </div>
+                </div>
+                <div class="download-item">
+                    <h3><svg aria-hidden="true" width="24" height="24" viewBox="-1 -1 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="9" height="9" fill="currentColor"/><rect x="11" y="0" width="9" height="9" fill="currentColor"/><rect x="0" y="11" width="9" height="9" fill="currentColor"/><rect x="11" y="11" width="9" height="9" fill="currentColor"/></svg> Windows</h3>
+                    <p>Open a PowerShell instance and paste the following:</p>
+                    <div class="code-block">
+                        <pre class="install-code">irm "https://reaclassical.com/win" | iex</pre>
+                        <button class="copy-btn" aria-label="Copy command" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+                    </div>
+                </div>
+                <div class="download-item">
+                    <h3><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="3" width="22" height="18" rx="3" fill="#1f2328"/><path d="M5 9l4 3-4 3" stroke="#e6edf3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="18" y2="15" stroke="#e6edf3" stroke-width="1.5" stroke-linecap="round"/></svg> Linux (including Raspberry Pi)</h3>
+                    <p>Open a terminal and paste the following:</p>
+                    <div class="code-block">
+                        <pre class="install-code">curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.com/linux | sh</pre>
+                        <button class="copy-btn" aria-label="Copy command" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

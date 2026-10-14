@@ -1,0 +1,42 @@
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+local _, debug_announce = GetProjExtState(0, "ReaClassical", "DebugAnnounce")
+if not APIExists("clara_outputMessage") and debug_announce == "on" then
+    reaper.clara_outputMessage = function(msg) ShowConsoleMsg(tostring(msg) .. "\n") end
+    clara_outputMessage = reaper.clara_outputMessage
+    _G.__RC_debug_shim_installed = true
+end
+
+local function say(msg, no_store)
+    if APIExists("clara_outputMessage") or _G.__RC_debug_shim_installed then
+        msg = tostring(msg)
+        if not no_store then
+            SetProjExtState(0, "ReaClassical", "LastAnnouncement", msg)
+        end
+        clara_outputMessage(msg)
+    end
+end
+
+return say

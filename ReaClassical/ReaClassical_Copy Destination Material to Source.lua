@@ -1,0 +1,162 @@
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+local main, duplicate_first_folder, sync_based_on_workflow, solo
+local trackname_check
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
+local say = require("ReaClassical_Announce")
+local track_scan = require("ReaClassical_Track_Scan")
+local track_write = require("ReaClassical_Track_Write")
+
+function main()
+    Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow ~= "Vertical" then
+        MB("This function requires a vertical ReaClassical project. " ..
+            "Please create one or convert your existing ReaClassical project using Mission Control.", "ReaClassical Error", 0)
+        return
+    end
+
+    PreventUIRefresh(1)
+    local first_track = duplicate_first_folder()
+    say("Source material copied")
+
+    local say_time = time_precise()
+    local function continue_after_announcement()
+        if time_precise() - say_time < 0.2 then
+            defer(continue_after_announcement)
+            return
+        end
+
+        sync_based_on_workflow(workflow)
+
+        dofile(script_path .. "ReaClassical_Auto-color project.lua")
+
+        SetOnlyTrackSelected(first_track)
+        solo()
+        Main_OnCommand(40289, 0)
+
+        Undo_EndBlock('Copy Destination Material to Source', -1)
+        PreventUIRefresh(-1)
+        UpdateArrange()
+        UpdateTimeline()
+    end
+    continue_after_announcement()
+end
+
+function duplicate_first_folder()
+    local first_track = GetTrack(0, 0)
+    if not first_track then return end
+    GetSetMediaTrackInfo_String(first_track, "P_EXT:Source", "y", true)
+    GetSetMediaTrackInfo_String(first_track, "P_EXT:destination", "", true)
+    SetOnlyTrackSelected(first_track)
+
+    Main_OnCommand(40062, 0)
+    GetSetMediaTrackInfo_String(first_track, "P_EXT:Source", "", true)
+    GetSetMediaTrackInfo_String(first_track, "P_EXT:destination", "y", true)
+    return first_track
+end
+
+function sync_based_on_workflow(workflow)
+    if workflow == "Vertical" then
+        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
+    elseif workflow == "Horizontal" then
+        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
+    end
+end
+
+function trackname_check(track, string)
+    local _, trackname = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return string.find(trackname, string)
+end
+
+function solo()
+    local cache = track_scan.build()
+    local set_track_value = track_write.set_track_value
+    local set_send_value = track_write.set_send_value
+
+    local selected_track = GetSelectedTrack(0, 0)
+    local parent = selected_track and GetMediaTrackInfo_Value(selected_track, "I_FOLDERDEPTH") or 0
+
+    for i = 0, CountTracks(0) - 1, 1 do
+        local track = GetTrack(0, i)
+        local t = cache.tags[track]
+        local mixer_state = t.mixer
+        local aux_state = t.aux
+        local submix_state = t.submix
+        local rt_state = t.roomtone
+        local live_state = t.live
+        local ref_state = t.rcref
+        local rcmaster_state = t.rcmaster
+        local playback_state = t.playback
+
+        local special_states = mixer_state or aux_state or submix_state
+            or rt_state or ref_state or live_state or rcmaster_state
+            or playback_state
+        local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
+            or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
+            or trackname_check(track, "^LIVE") or trackname_check(track, "^REF")
+            or trackname_check(track, "^PLAYBACK")
+
+        if special_states or special_names then
+            local num_of_sends = GetTrackNumSends(track, 0)
+            for j = 0, num_of_sends - 1, 1 do
+                set_send_value(track, 0, j, "B_MUTE", 0)
+            end
+        end
+
+        if IsTrackSelected(track) == true then
+            set_track_value(track, "B_MUTE", 0)
+        elseif not (special_states or special_names)
+            and IsTrackSelected(track) == false and GetParentTrack(track) ~= selected_track then
+            set_track_value(track, "B_MUTE", 1)
+            set_track_value(track, "I_SOLO", 0)
+        elseif not (special_states or special_names) then
+            set_track_value(track, "B_MUTE", 0)
+            set_track_value(track, "I_SOLO", 0)
+        end
+
+        local muted = GetMediaTrackInfo_Value(track, "B_MUTE")
+
+        local states_for_receives = mixer_state or aux_state
+            or submix_state or rcmaster_state
+        local names_for_receives = trackname_check(track, "^M:") or trackname_check(track, "^@")
+            or trackname_check(track, "^#") or trackname_check(track, "^RCMASTER")
+
+        if (states_for_receives or names_for_receives) and muted == 0 then
+            local receives = GetTrackNumSends(track, -1)
+            for j = 0, receives - 1, 1 do
+                local origin = GetTrackSendInfo_Value(track, -1, j, "P_SRCTRACK")
+                if origin == selected_track or parent == 1 then
+                    set_track_value(track, "B_MUTE", 0)
+                    set_track_value(track, "I_SOLO", 0)
+                    break
+                end
+            end
+        end
+    end
+end
+
+main()

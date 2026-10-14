@@ -1,0 +1,10 @@
+# Build tooling and sources stay private; only docs/ (site + manual) and the user-facing packages are published
+/admin_scripts/
+/manual/
+/site/
+/web_src/
+/Artwork/
+/RELEASING.local.md
+/dist/
+__pycache__/
+.claude/

@@ -1,0 +1,93 @@
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
+local say = require("ReaClassical_Announce")
+local humanize_marker_label = require("ReaClassical_Marker_Naming")
+
+local main, nudge_selected_markers
+
+function main()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
+        return
+    end
+
+    local _, stored = GetProjExtState(0, "ReaClassical", "NudgeMs")
+    local ms = tonumber(stored) or 5
+    local amount = ms / 1000
+
+    local moved, label, new_pos = nudge_selected_markers(amount)
+    if moved == 0 then
+        say("No marker selected")
+    else
+        SetEditCurPos(new_pos, true, true)
+        if moved == 1 then
+            say(humanize_marker_label(label) .. " nudged " .. ms .. " milliseconds right")
+        else
+            say(moved .. " markers nudged " .. ms .. " milliseconds right")
+        end
+    end
+end
+
+function nudge_selected_markers(amount)
+    if not APIExists("GetNumRegionsOrMarkers") then return 0 end
+
+    Undo_BeginBlock()
+
+    local proj = EnumProjects(-1)
+    local total = GetNumRegionsOrMarkers(proj)
+    local moved = 0
+    local last_label, last_pos
+
+    for i = 0, total - 1 do
+        local marker = GetRegionOrMarker(proj, i, "")
+        if GetRegionOrMarkerInfo_Value(proj, marker, "B_ISREGION") == 0
+            and GetRegionOrMarkerInfo_Value(proj, marker, "B_UISEL") == 1 then
+            local pos = GetRegionOrMarkerInfo_Value(proj, marker, "D_STARTPOS")
+            local new_pos = math.max(0, pos + amount)
+            SetRegionOrMarkerInfo_Value(proj, marker, "D_STARTPOS", new_pos)
+
+            local _, name = GetSetRegionOrMarkerInfo_String(proj, marker, "P_NAME", "", false)
+            moved = moved + 1
+            last_label = name ~= "" and name or "Marker"
+            last_pos   = new_pos
+        end
+    end
+
+    Undo_EndBlock("Nudge marker right", -1)
+    UpdateArrange()
+    UpdateTimeline()
+    return moved, last_label, last_pos
+end
+
+main()

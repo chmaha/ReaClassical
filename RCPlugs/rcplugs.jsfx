@@ -1,0 +1,28 @@
+@description RCPlugs
+@author chmaha
+@version 2.9
+@changelog
+  RCTimePhase: fix high-frequency loss in sub-sample interpolation
+@metapackage
+@provides
+  RCComp.jsfx
+  RCDeEss.jsfx
+  RCDeEss_Advanced.jsfx
+  RCDither.jsfx
+  RCChannelEQ.jsfx
+  RCGain.jsfx
+  RCLimiter.jsfx
+  RCParallelK.jsfx
+  RCMasteringEQ.jsfx
+  RCInflator.jsfx
+  RCTimePhase.jsfx
+  RCConsoleBus.jsfx
+  RCConsoleChannel.jsfx
+  RCConsoleFinalizer.jsfx
+  RCMidSide.jsfx
+  RCReverb.jsfx
+  ReaVisionMetering.jsfx
+  RCFader.jsfx
+  Dependencies/*.jsfx-inc
+@about
+  These plugins are suitable for classical music mixing and mastering.

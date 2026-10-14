@@ -1,0 +1,111 @@
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+local main, swap_selected_source_with_destination
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
+local say = require("ReaClassical_Announce")
+
+function main()
+    PreventUIRefresh(1)
+    Undo_BeginBlock()
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "" then
+        local modifier = "Ctrl"
+        local system = GetOS()
+        if string.find(system, "^OSX") or string.find(system, "^macOS") then
+            modifier = "Cmd"
+        end
+        MB("Please create a ReaClassical project via " .. modifier
+            .. "+N to use this function.", "ReaClassical Error", 0)
+        return
+    end
+
+    local promoted_name = swap_selected_source_with_destination()
+
+    dofile(script_path .. "ReaClassical_Auto-color project.lua")
+
+    Undo_EndBlock('Make Source Group Destination', -1)
+    PreventUIRefresh(-1)
+    UpdateArrange()
+    UpdateTimeline()
+    if promoted_name then
+        say("Destination promoted: " .. promoted_name)
+    end
+end
+
+function swap_selected_source_with_destination()
+    local track_count = CountTracks(0)
+    if track_count == 0 then return end
+
+    local sel_track = GetSelectedTrack(0, 0)
+    if not sel_track then return end
+
+    local parent_track = sel_track
+    if GetMediaTrackInfo_Value(sel_track, "I_FOLDERDEPTH") ~= 1 then
+        local idx = GetMediaTrackInfo_Value(sel_track, "IP_TRACKNUMBER") - 1
+        while idx >= 0 do
+            local t = GetTrack(0, idx)
+            if GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+                parent_track = t
+                break
+            end
+            idx = idx - 1
+        end
+    end
+
+    local _, is_source = GetSetMediaTrackInfo_String(parent_track, "P_EXT:Source", "", false)
+    if is_source ~= "y" then
+        MB("Selected track (or its parent) is not a source group.", "Swap Failed", 0)
+        return
+    end
+
+    local selected_source = parent_track
+
+    local destination_folder = nil
+    for i = 0, track_count - 1 do
+        local t = GetTrack(0, i)
+        local _, is_dest = GetSetMediaTrackInfo_String(t, "P_EXT:destination", "", false)
+        if is_dest == "y" and GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
+            destination_folder = t
+            break
+        end
+    end
+    if not destination_folder then
+        MB("No destination folder found.", "Swap Failed", 0)
+        return
+    end
+
+    GetSetMediaTrackInfo_String(destination_folder, "P_EXT:destination", "", true)
+    GetSetMediaTrackInfo_String(destination_folder, "P_EXT:Source", "y", true)
+    GetSetMediaTrackInfo_String(selected_source, "P_EXT:Source", "", true)
+    GetSetMediaTrackInfo_String(selected_source, "P_EXT:destination", "y", true)
+
+    dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
+
+    local _, promoted_name = GetSetMediaTrackInfo_String(selected_source, "P_NAME", "", false)
+    return promoted_name
+end
+
+main()

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ReaClassical Remote</title>
+<style>
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0e0f11;
+  --surface:   #161719;
+  --surface2:  #1e2022;
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.15);
+  --text:      #e8e6e1;
+  --muted:     #7a7875;
+  --accent:    #c8a96e;    /* warm gold */
+  --rec:       #ff7f7f;
+  --rec-dim:   rgba(255,127,127,0.18);
+  --pause:     #ffff7f;
+  --pause-dim: rgba(255,255,127,0.18);
+  --green:     #7fcc7f;
+  --green-dim: rgba(127,204,127,0.18);
+  --blue:      #5b8fa8;
+  --blue-dim:  rgba(91,143,168,0.18);
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --font-mono: 'JetBrains Mono', 'Fira Mono', monospace;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Google Fonts ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+/* ── Layout ───────────────────────────────────────────────────── */
+.shell {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 14px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Main card ────────────────────────────────────────────────── */
+.main-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ── Take hero ────────────────────────────────────────────────── */
+.take-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px 20px;
+  cursor: default;
+  user-select: none;
+}
+.take-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(200,169,110,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.take-badge {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 4px;
+}
+.take-number {
+  font-family: var(--font-mono);
+  font-size: clamp(72px, 22vw, 104px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  transition: color 0.25s;
+  color: var(--text);
+  cursor: pointer;
+}
+.take-number.rec     { color: var(--rec); }
+.take-number.paused  { color: var(--pause); }
+.take-number.stopped { color: var(--green); }
+.take-number.editing { color: var(--blue); }
+
+.session-row {
+  margin-top: 10px;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--muted);
+  min-height: 20px;
+}
+.session-name { color: var(--text); font-weight: 500; }
+.session-name.editing { color: var(--blue); }
+
+.workflow-pill {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px; border-radius: 20px;
+  background: var(--surface2);
+  color: var(--muted);
+  border: 0.5px solid var(--border);
+}
+
+.context-row {
+  margin-top: 5px; min-height: 17px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.context-row.edit-item { color: var(--blue); }
+.context-row.last-rec  { color: var(--green); }
+
+/* ── State strip ──────────────────────────────────────────────── */
+.state-strip {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 8px 16px;
+  border-top: 0.5px solid var(--border);
+  font-size: 12px; color: var(--muted);
+}
+.state-led {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted); flex-shrink: 0;
+}
+.state-led.recording { background: var(--rec); animation: blink 1s infinite; }
+.state-led.paused    {
+  background: var(--pause);
+  border-radius: 2px; width: 7px; height: 10px;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.state-text { font-family: var(--font-mono); font-size: 12px; }
+
+.time-info {
+  padding: 6px 16px; min-height: 26px;
+  text-align: center; font-size: 12px;
+  color: var(--accent); font-family: var(--font-mono);
+  border-top: 0.5px solid var(--border);
+  display: none;
+}
+.time-info.visible { display: block; }
+
+/* ── Divider ──────────────────────────────────────────────────── */
+.divider {
+  height: 0.5px; background: var(--border); margin: 0;
+}
+
+/* ── Transport ────────────────────────────────────────────────── */
+.transport {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 14px;
+  gap: 8px;
+}
+.tbtn {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 5px; padding: 12px 4px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tbtn:active { transform: scale(0.96); }
+.tbtn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
+.tbtn svg { width: 22px; height: 22px; }
+.tbtn-label { font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.04em; }
+
+.tbtn.arm:hover    { background: var(--green-dim); border-color: var(--green); }
+.tbtn.arm-active   { background: var(--green-dim); border-color: var(--green); }
+.tbtn.arm-active .tbtn-label { color: var(--green); }
+.tbtn.arm-active svg { color: var(--rec); }  /* red circle inside green border = armed */
+
+.tbtn.rec-active   { background: var(--rec-dim); border-color: var(--rec); }
+.tbtn.rec-active .tbtn-label { color: var(--rec); }
+.tbtn.rec-active svg { color: var(--rec); }
+
+.tbtn.stop-mode:hover  { background: var(--rec-dim); border-color: var(--rec); }
+
+.tbtn.pause-mode:hover { background: var(--pause-dim); border-color: var(--pause); }
+.tbtn.pause-active     { background: var(--pause-dim); border-color: var(--pause); }
+
+/* ── RTH checkbox ─────────────────────────────────────────────── */
+.rth-row {
+  padding: 0 14px 12px;
+  display: none;
+}
+.rth-row.visible { display: flex; align-items: center; gap: 8px; }
+.rth-row label { font-size: 13px; color: var(--muted); cursor: pointer; }
+.rth-row input[type=checkbox] {
+  width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer;
+}
+
+/* ── Rank & Notes ─────────────────────────────────────────────── */
+.rank-section {
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.section-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
+.rank-wrap { position: relative; }
+.rank-select {
+  width: 100%;
+  padding: 9px 36px 9px 36px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: inherit; font-size: 14px;
+  cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+.rank-select:focus { outline: none; border-color: var(--border2); }
+.rank-swatch {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--muted); pointer-events: none;
+  transition: background 0.2s;
+}
+.rank-chevron {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; color: var(--muted);
+}
+.notes-input {
+  width: 100%; min-height: 62px; max-height: 140px;
+  background: var(--surface2); border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text); font-family: inherit; font-size: 13px;
+  padding: 9px 11px; resize: vertical;
+  transition: border-color 0.2s;
+}
+.notes-input:focus { outline: none; border-color: var(--border2); }
+.notes-input::placeholder { color: var(--muted); }
+
+.apply-btn {
+  align-self: flex-start;
+  padding: 8px 18px;
+  background: transparent;
+  border: 0.5px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text); font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.apply-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+
+/* ── Settings card ────────────────────────────────────────────── */
+.settings-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; cursor: pointer; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.settings-header-left {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 500; color: var(--text);
+}
+.settings-header svg { color: var(--muted); }
+.chevron-icon { color: var(--muted); transition: transform 0.2s; }
+.chevron-icon.open { transform: rotate(180deg); }
+
+.settings-body {
+  display: none;
+  flex-direction: column; gap: 12px;
+  padding: 0 16px 18px;
+  border-top: 0.5px solid var(--border);
+}
+.settings-body.open { display: flex; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field > label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.field input[type=text],
+.field input[type=number] {
+  background: var(--surface2); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: 9px 11px;
+  color: var(--text); font-family: var(--font-mono); font-size: 13px;
+  transition: border-color 0.2s;
+}
+.field input:focus { outline: none; border-color: var(--border2); }
+.field input::placeholder { color: var(--muted); }
+.field input:disabled { opacity: 0.3; cursor: not-allowed; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.override-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted);
+}
+.override-row input[type=checkbox] {
+  width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer;
+}
+.settings-apply-btn {
+  align-self: flex-start; padding: 9px 20px;
+  background: var(--surface2); border: 0.5px solid var(--border2);
+  border-radius: var(--radius); color: var(--text);
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.settings-apply-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.settings-note {
+  font-size: 11px; color: var(--muted); line-height: 1.5;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--border2);
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.footer {
+  text-align: center; font-size: 11px; color: var(--muted);
+  padding: 4px 0 0;
+  line-height: 1.6;
+}
+
+/* ── Toast ────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--surface2); border: 0.5px solid var(--border2);
+  border-radius: var(--radius); padding: 9px 18px;
+  font-size: 13px; color: var(--text);
+  opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none; z-index: 999; white-space: nowrap;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 380px) {
+  .take-number { font-size: 68px; }
+  .transport { grid-template-columns: repeat(2, 1fr); }
+  .tbtn { padding: 14px 4px; }
+}
+@media (min-width: 600px) {
+  .shell { padding: 24px 20px 60px; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+
+  <!-- Main card -->
+  <div class="main-card">
+
+    <!-- Take hero -->
+    <div class="take-hero">
+      <div class="take-badge">Take</div>
+      <div class="take-number" id="takeNumber" onclick="recalcTake()" title="Tap to recalculate take count">1</div>
+      <div class="session-row">
+        <span id="workflowPill" class="workflow-pill" style="display:none"></span>
+        <span id="sessionLabel" class="session-name">—</span>
+      </div>
+      <div class="context-row" id="contextRow"></div>
+    </div>
+
+    <!-- State strip -->
+    <div class="state-strip">
+      <div class="state-led" id="stateLed"></div>
+      <span class="state-text" id="stateText">Stopped</span>
+    </div>
+
+    <!-- Time info (start/end/duration) -->
+    <div class="time-info" id="timeInfo"></div>
+
+    <div class="divider"></div>
+
+    <!-- Transport -->
+    <div class="transport">
+
+      <!-- Arm / Rec / Stop -->
+      <button class="tbtn arm" id="btnMain" onclick="handleMain()">
+        <svg id="mainIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <!-- mic icon default -->
+          <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="8" y1="22" x2="16" y2="22"/>
+        </svg>
+        <span class="tbtn-label" id="mainLabel">Arm</span>
+      </button>
+
+      <!-- Pause / Disarm -->
+      <button class="tbtn" id="btnPause" onclick="handlePause()" disabled>
+        <svg id="pauseIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="4" width="4" height="16" rx="1"/>
+          <rect x="14" y="4" width="4" height="16" rx="1"/>
+        </svg>
+        <span class="tbtn-label" id="pauseLabel">Pause</span>
+      </button>
+
+      <!-- +Take -->
+      <button class="tbtn" id="btnTake" onclick="handlePlusTake()" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <span class="tbtn-label">+Take</span>
+      </button>
+
+      <!-- Next section -->
+      <button class="tbtn" id="btnNext" onclick="handleNext()" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="13 17 18 12 13 7"/>
+          <polyline points="6 17 11 12 6 7"/>
+        </svg>
+        <span class="tbtn-label">Next</span>
+      </button>
+
+    </div>
+
+    <!-- Record takes horizontally (Vertical workflow only) -->
+    <div class="rth-row" id="rthRow">
+      <input type="checkbox" id="rthCheck" onchange="toggleRTH()" />
+      <label for="rthCheck">Record takes horizontally</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Rank & Notes -->
+    <div class="rank-section">
+      <div class="section-label">Rank &amp; notes</div>
+      <div class="context-row" id="rankContext" style="margin-top:-4px"></div>
+
+      <div class="rank-wrap">
+        <div class="rank-swatch" id="rankSwatch"></div>
+        <select class="rank-select" id="rankSelect" onchange="onRankChange()">
+          <option value="">No rank</option>
+          <option value="1">Excellent</option>
+          <option value="2">Very Good</option>
+          <option value="3">Good</option>
+          <option value="4">OK</option>
+          <option value="5">Below Average</option>
+          <option value="6">Poor</option>
+          <option value="7">Unusable</option>
+          <option value="8">False Start</option>
+        </select>
+        <svg class="rank-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+
+      <textarea class="notes-input" id="notesInput" placeholder="Notes for this take…" rows="3"></textarea>
+
+      <button class="apply-btn" onclick="applyRankAndNotes()">Apply rank &amp; notes</button>
+    </div>
+
+  </div><!-- /main-card -->
+
+  <!-- Settings card -->
+  <div class="settings-card">
+    <div class="settings-header" onclick="toggleSettings()">
+      <div class="settings-header-left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Session settings
+      </div>
+      <svg class="chevron-icon" id="settChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+
+    <div class="settings-body" id="settingsBody">
+
+      <div class="field">
+        <label>Session name</label>
+        <input type="text" id="settSession" placeholder="e.g. Brahms_Op68" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Start time (HH:MM)</label>
+          <input type="text" id="settStart" placeholder="14:30" maxlength="5" />
+        </div>
+        <div class="field">
+          <label>End time (HH:MM)</label>
+          <input type="text" id="settEnd" placeholder="17:00" maxlength="5" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Duration (HH:MM)</label>
+        <input type="text" id="settDuration" placeholder="02:30" maxlength="5" />
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="override-row">
+        <input type="checkbox" id="overrideCheck" onchange="toggleOverride()" />
+        <label for="overrideCheck">Allow take number override</label>
+      </div>
+
+      <div class="field">
+        <label>Set take number manually</label>
+        <input type="number" id="settTake" placeholder="e.g. 12" min="1" disabled />
+      </div>
+
+      <div class="settings-note" id="workflowNote"></div>
+
+      <button class="settings-apply-btn" onclick="applySettings()">Apply settings</button>
+
+    </div>
+  </div><!-- /settings-card -->
+</div><!-- /shell -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════════════════
+   Configuration — edit the named command IDs to match your
+   ReaClassical installation. Find them in REAPER's Action List
+   (right-click a script → Copy selected action command ID).
+   ══════════════════════════════════════════════════════════════ */
+const CMD = {
+  F9:           '_RS25887d941a72868731ba67ccb1abcbacb587e006',
+  INC_TAKE:     '_RSbb6037bb7fbe86a2d5a3c24cda322cf422e37612',
+  NEXT_SECTION: '_RSf1714b103174d14151f1b058f4defa9c6f10e1a1',
+  PAUSE:         1008,
+  UNSEL_ITEMS:   40289,
+};
+
+const RANKS_RGB = {
+  '':  null,
+  '1': '#39FF14', '2': '#32CD32', '3': '#00AD83', '4': '#FFFFAA',
+  '5': '#FFBF00', '6': '#FF7538', '7': '#DC143C', '8': '#444444',
+};
+
+/* ── State ──────────────────────────────────────────────────── */
+// Since this file is served by REAPER itself, origin is always correct.
+const BASE = '';   // empty = same origin, no need to specify host at all
+
+let playState   = 0;   // 0=stop 1=play 5=rec 6=rec-paused
+let anyArmed    = false;
+let armedTracks = [];  // indices of armed tracks, for disarmAll
+let takeNum     = 1;
+let workflow    = '';
+let sessionName = '';
+let rthEnabled  = false;
+let settingsOpen = false;
+
+// Settings state — populated from ProjExtState on first poll, then
+// updated locally when the user applies changes.
+let settStart    = '';
+let settEnd      = '';
+let settDur      = '';
+let settOverride = false;
+let settingsPopulated = false;  // only populate form fields once on load
+
+/* ── Helpers ────────────────────────────────────────────────── */
+function toast(msg, duration = 2200) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+/* ── Web remote core ────────────────────────────────────────── */
+async function reaperCmd(cmd) {
+  try { await fetch(`${BASE}/_/${cmd}`); } catch(e) {}
+}
+
+async function reaperGet(cmds) {
+  // cmds: string like "TRANSPORT;TRACK" or array joined with ;
+  const q = Array.isArray(cmds) ? cmds.join(';') : cmds;
+  try {
+    const r = await fetch(`${BASE}/_/${q}`);
+    if (!r.ok) return '';
+    return await r.text();
+  } catch(e) { return ''; }
+}
+
+async function projExtGet(section, key) {
+  const txt = await reaperGet(`GET/PROJEXTSTATE/${encodeURIComponent(section)}/${encodeURIComponent(key)}`);
+  // Response: "PROJEXTSTATE\tsection\tkey\tvalue\n"
+  const parts = txt.trim().split('\t');
+  return parts.length >= 4 ? parts.slice(3).join('\t') : '';
+}
+
+async function projExtSet(section, key, value) {
+  await reaperCmd(`SET/PROJEXTSTATE/${encodeURIComponent(section)}/${encodeURIComponent(key)}/${encodeURIComponent(value)}`);
+}
+
+/* ── Poll cycle ─────────────────────────────────────────────── */
+// Single request: TRANSPORT + all tracks in one round-trip.
+// "TRACK" with no index returns all tracks.
+// TRACK row format: TRACK \t index \t name \t flags \t volume \t pan \t ...
+// flags bitmask: bit 0 (1)=selected, bit 3 (8)=muted, bit 6 (64)=record-armed
+async function poll() {
+  const txt = await reaperGet('TRANSPORT;TRACK');
+  if (!txt) return;
+
+  anyArmed    = false;
+  armedTracks = [];
+
+  for (const line of txt.trim().split('\n')) {
+    const tok = line.split('\t');
+    if (tok[0] === 'TRANSPORT') {
+      playState = parseInt(tok[1]) || 0;
+    } else if (tok[0] === 'TRACK') {
+      const idx   = parseInt(tok[1]);
+      const flags = parseInt(tok[3]) || 0;
+      if (flags & 64) {          // bit 6 = record armed
+        anyArmed = true;
+        armedTracks.push(idx);
+      }
+    }
+  }
+
+  // Read ReaClassical state (batched into one fetch)
+  const rcTxt = await reaperGet([
+    'GET/PROJEXTSTATE/ReaClassical/Workflow',
+    'GET/PROJEXTSTATE/ReaClassical/TakeSessionName',
+    'GET/PROJEXTSTATE/ReaClassical/RecordTakesHorizontally',
+    'GET/PROJEXTSTATE/ReaClassical/CurrentTakeNumber',
+    'GET/PROJEXTSTATE/ReaClassical/Recording Start',
+    'GET/PROJEXTSTATE/ReaClassical/Recording End',
+    'GET/PROJEXTSTATE/ReaClassical/Recording Duration',
+    'GET/PROJEXTSTATE/ReaClassical/TakeCounterOverride',
+  ]);
+  for (const line of rcTxt.trim().split('\n')) {
+    const tok = line.split('\t');
+    if (tok[0] !== 'PROJEXTSTATE' || tok.length < 4) continue;
+    const key = tok[2];
+    const val = tok.slice(3).join('\t');
+    if      (key === 'Workflow')               workflow    = val;
+    else if (key === 'TakeSessionName')        sessionName = val;
+    else if (key === 'RecordTakesHorizontally') rthEnabled = val === '1';
+    else if (key === 'CurrentTakeNumber')      { const n = parseInt(val); if (n > 0) takeNum = n; }
+    else if (key === 'Recording Start')        settStart   = val;
+    else if (key === 'Recording End')          settEnd     = val;
+    else if (key === 'Recording Duration')     settDur     = val;
+    else if (key === 'TakeCounterOverride')    settOverride = (val === '1');
+  }
+
+  // Populate settings form fields on first successful poll only.
+  // After that the user owns those inputs until they hit Apply.
+  if (!settingsPopulated && workflow) {
+    settingsPopulated = true;
+    populateSettingsForm();
+  }
+
+  updateUI();
+}
+
+/* ── UI rendering ───────────────────────────────────────────── */
+function updateUI() {
+  const isRec    = playState === 5;
+  const isPaused = playState === 6;
+  const isRecAny = isRec || isPaused;
+  const isStopped= playState === 0;
+  const isVert   = workflow === 'Vertical';
+
+  // State LED + text
+  const led  = document.getElementById('stateLed');
+  const stxt = document.getElementById('stateText');
+  if (isRec) {
+    led.className = 'state-led recording';
+    stxt.textContent = 'Recording';
+  } else if (isPaused) {
+    led.className = 'state-led paused';
+    stxt.textContent = 'Paused';
+  } else if (playState === 1) {
+    led.className = 'state-led';
+    led.style.background = 'var(--green)';
+    stxt.textContent = 'Playing';
+  } else {
+    led.className = 'state-led';
+    led.style.background = '';
+    stxt.textContent = 'Stopped';
+  }
+
+  // Take number — colors match Lua panel exactly:
+  // stopped/playing: #7fcc7f (soft green), rec: #ff7f7f, paused: #ffff7f, editing: #4b9cd3
+  const tn = document.getElementById('takeNumber');
+  tn.textContent = takeNum;
+  tn.className = 'take-number' + (isRec ? ' rec' : isPaused ? ' paused' : ' stopped');
+
+  // Session label
+  const sl = document.getElementById('sessionLabel');
+  sl.textContent = sessionName || '—';
+
+  // Workflow pill
+  const wp = document.getElementById('workflowPill');
+  if (workflow) {
+    wp.textContent = workflow;
+    wp.style.display = '';
+  } else {
+    wp.style.display = 'none';
+  }
+
+  // ── Main button: mirrors Lua draw() logic exactly ──────────────
+  // Lua states:
+  //   isRecording          → "Stop"  (fires F9 to stop)
+  //   !isRecording, armed  → "Rec"   (fires F9 to start recording)
+  //   !isRecording, !armed → "Arm"   (fires F9 to arm selected/first folder)
+  // The button is never disabled here — Lua only disables when no track
+  // selected AND nothing armed AND no folder found, which we can't detect
+  // reliably from the web remote; we let F9 handle the no-op gracefully.
+  const btnMain  = document.getElementById('btnMain');
+  const mainIcon = document.getElementById('mainIcon');
+  const mainLbl  = document.getElementById('mainLabel');
+
+  if (isRecAny) {
+    // STOP state — square icon, red tint
+    btnMain.className = 'tbtn rec-active stop-mode';
+    mainLbl.textContent = 'Stop';
+    mainIcon.innerHTML =
+      `<rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor" stroke="none"/>`;
+  } else if (anyArmed) {
+    // REC state — filled circle, green tint (armed = ready to record)
+    btnMain.className = 'tbtn arm-active';
+    mainLbl.textContent = 'Rec';
+    mainIcon.innerHTML =
+      `<circle cx="12" cy="12" r="7" fill="currentColor" stroke="none"/>`;
+  } else {
+    // ARM state — microphone outline, neutral
+    btnMain.className = 'tbtn arm';
+    mainLbl.textContent = 'Arm';
+    mainIcon.innerHTML =
+      `<path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+       <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+       <line x1="12" y1="19" x2="12" y2="22"/>
+       <line x1="8" y1="22" x2="16" y2="22"/>`;
+  }
+
+  // ── Pause / Disarm button ──────────────────────────────────────
+  // Lua: recording  → "Pause" / "Unpause" (action 1008)
+  //      armed only → "Disarm" (disarm all tracks)
+  //      neither    → disabled "Pause"
+  const btnPause  = document.getElementById('btnPause');
+  const pauseIcon = document.getElementById('pauseIcon');
+  const pauseLbl  = document.getElementById('pauseLabel');
+
+  if (isRecAny) {
+    btnPause.disabled = false;
+    btnPause.className = isPaused ? 'tbtn pause-active' : 'tbtn pause-mode';
+    pauseLbl.textContent = isPaused ? 'Resume' : 'Pause';
+    pauseIcon.innerHTML = isPaused
+      // Play/resume triangle
+      ? `<polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>`
+      // Pause bars
+      : `<rect x="6" y="4" width="4" height="16" rx="1"/>
+         <rect x="14" y="4" width="4" height="16" rx="1"/>`;
+  } else if (anyArmed) {
+    btnPause.disabled = false;
+    btnPause.className = 'tbtn';
+    pauseLbl.textContent = 'Disarm';
+    // Crossed-mic icon for disarm
+    pauseIcon.innerHTML =
+      `<line x1="1" y1="1" x2="23" y2="23"/>
+       <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V5a3 3 0 0 0-5.94-.6"/>
+       <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
+       <line x1="12" y1="19" x2="12" y2="22"/>
+       <line x1="8" y1="22" x2="16" y2="22"/>`;
+  } else {
+    btnPause.disabled = true;
+    btnPause.className = 'tbtn';
+    pauseLbl.textContent = 'Pause';
+    pauseIcon.innerHTML =
+      `<rect x="6" y="4" width="4" height="16" rx="1"/>
+       <rect x="14" y="4" width="4" height="16" rx="1"/>`;
+  }
+
+  // +Take: only active while recording
+  document.getElementById('btnTake').disabled = !isRecAny;
+
+  // Next: only when stopped and Vertical workflow
+  document.getElementById('btnNext').disabled = !isStopped || !isVert;
+  document.getElementById('btnNext').title = !isVert
+    ? 'Next Section is only available in Vertical workflow'
+    : 'Move to next recording section';
+
+  // RTH checkbox — only show in Vertical workflow
+  const rthRow = document.getElementById('rthRow');
+  if (isVert) {
+    rthRow.className = 'rth-row visible';
+    document.getElementById('rthCheck').checked = rthEnabled;
+  } else {
+    rthRow.className = 'rth-row';
+  }
+
+  // Settings workflow note
+  const wfNote = document.getElementById('workflowNote');
+  if (workflow) {
+    wfNote.textContent = `Current workflow: ${workflow}. ${
+      isVert
+        ? 'Next Section button is available.'
+        : 'Next Section is disabled in Horizontal workflow.'}`;
+  } else {
+    wfNote.textContent = 'Workflow not yet detected — connect to REAPER first.';
+  }
+}
+
+/* ── Transport handlers ─────────────────────────────────────── */
+// Mirrors the Lua F9 button handler exactly:
+//   Arm  → unselect all items, then fire F9 (arms selected/first folder)
+//   Rec  → fire F9 (starts recording; Lua also sets filename but the
+//           running panel script does that; we just trigger)
+//   Stop → fire F9 (stops recording)
+// In all three states F9 is the correct action — same as the Lua panel.
+async function handleMain() {
+  const isRecAny = playState === 5 || playState === 6;
+  if (!isRecAny && !anyArmed) {
+    // Arm state: unselect items first (Lua does Main_OnCommand(40289))
+    await reaperCmd(CMD.UNSEL_ITEMS);
+    await new Promise(r => setTimeout(r, 50));
+  }
+  await reaperCmd(CMD.F9);
+  setTimeout(poll, 700);
+}
+
+async function handlePause() {
+  const isRecAny = playState === 5 || playState === 6;
+  if (isRecAny) {
+    await reaperCmd(CMD.PAUSE);
+  } else if (anyArmed) {
+    await disarmAll();
+  }
+  setTimeout(poll, 500);
+}
+
+async function handlePlusTake() {
+  if (playState !== 5 && playState !== 6) return;
+  await reaperCmd(CMD.INC_TAKE);
+  setTimeout(() => {
+    takeNum++;
+    document.getElementById('takeNumber').textContent = takeNum;
+  }, 250);
+}
+
+async function handleNext() {
+  if (playState !== 0 || workflow !== 'Vertical') return;
+  await reaperCmd(CMD.NEXT_SECTION);
+  setTimeout(poll, 600);
+}
+
+async function disarmAll() {
+  if (armedTracks.length === 0) return;
+  const cmds = armedTracks.map(i => `SET/TRACK/${i}/RECARM/0`);
+  await reaperCmd(cmds.join(';'));
+  toast('All tracks disarmed');
+  setTimeout(poll, 400);
+}
+
+async function recalcTake() {
+  toast('Recalculating take count…');
+  // Trigger the take counter script itself — it auto-recalculates on restart
+  // The most reliable approach is to read ProjExtState for current session
+  // and poll again to get the freshest take count (the panel Lua manages takeNum)
+  await poll();
+  toast('Refreshed from REAPER');
+}
+
+/* ── Rank & notes ───────────────────────────────────────────── */
+function onRankChange() {
+  const val = document.getElementById('rankSelect').value;
+  const swatch = document.getElementById('rankSwatch');
+  swatch.style.background = RANKS_RGB[val] || 'var(--muted)';
+}
+
+async function applyRankAndNotes() {
+  const rank = document.getElementById('rankSelect').value;
+  const note = document.getElementById('notesInput').value;
+  // Write rank and note, then set Pending=1 so the Lua picks them up.
+  // We always set Pending regardless of whether rank/note are empty,
+  // so "No rank" and cleared notes are applied correctly.
+  await projExtSet('ReaClassical', 'WebRemote_Rank', rank);
+  await projExtSet('ReaClassical', 'WebRemote_Note', note);
+  await projExtSet('ReaClassical', 'WebRemote_Pending', '1');
+  toast('Rank & notes sent');
+}
+
+/* ── RTH toggle ─────────────────────────────────────────────── */
+async function toggleRTH() {
+  const val = document.getElementById('rthCheck').checked;
+  rthEnabled = val;
+  await projExtSet('ReaClassical', 'RecordTakesHorizontally', val ? '1' : '0');
+  toast('Record takes horizontally: ' + (val ? 'on' : 'off'));
+}
+
+/* ── Settings panel ─────────────────────────────────────────── */
+function populateSettingsForm() {
+  document.getElementById('settSession').value  = sessionName;
+  document.getElementById('settStart').value    = settStart;
+  document.getElementById('settEnd').value      = settEnd;
+  document.getElementById('settDuration').value = settDur;
+  document.getElementById('overrideCheck').checked = settOverride;
+  document.getElementById('settTake').disabled  = !settOverride;
+  updateTimeInfo(settStart, settEnd, settDur);
+}
+
+function toggleSettings() {
+  settingsOpen = !settingsOpen;
+  document.getElementById('settingsBody').className = 'settings-body' + (settingsOpen ? ' open' : '');
+  document.getElementById('settChevron').className  = 'chevron-icon'  + (settingsOpen ? ' open' : '');
+}
+
+function toggleOverride() {
+  document.getElementById('settTake').disabled = !document.getElementById('overrideCheck').checked;
+}
+
+async function applySettings() {
+  const sess     = document.getElementById('settSession').value.trim();
+  const start    = document.getElementById('settStart').value.trim();
+  const end      = document.getElementById('settEnd').value.trim();
+  const dur      = document.getElementById('settDuration').value.trim();
+  const override = document.getElementById('overrideCheck').checked;
+  const takeOv   = document.getElementById('settTake').value;
+
+  // Update local state
+  sessionName  = sess;
+  settStart    = start;
+  settEnd      = end;
+  settDur      = dur;
+  settOverride = override;
+
+  const writes = [];
+  // Always write session name — even empty string, so Lua sees the clear
+  writes.push(projExtSet('ReaClassical', 'TakeSessionName', sess));
+  document.getElementById('sessionLabel').textContent = sess || '—';
+  writes.push(projExtSet('ReaClassical', 'Recording Start',    start));
+  writes.push(projExtSet('ReaClassical', 'Recording End',      end));
+  writes.push(projExtSet('ReaClassical', 'Recording Duration', dur));
+  writes.push(projExtSet('ReaClassical', 'TakeCounterOverride', override ? '1' : '0'));
+  if (override && takeOv) {
+    writes.push(projExtSet('ReaClassical', 'TakeCounterOverride_Value', takeOv));
+  }
+
+  await Promise.all(writes);
+  updateTimeInfo(start, end, dur);
+
+  const parts = [];
+  if (sess)  parts.push('Session: ' + sess);
+  if (start) parts.push('Start: ' + start);
+  if (end)   parts.push('End: ' + end);
+  if (dur)   parts.push('Duration: ' + dur);
+  toast(parts.length ? parts.join('  ·  ') : 'Settings written to REAPER');
+}
+
+function updateTimeInfo(start, end, dur) {
+  const el = document.getElementById('timeInfo');
+  let txt = '';
+  if (start && end) txt = `Start ${start}  →  End ${end}`;
+  else if (start)   txt = `Start ${start}`;
+  else if (end)     txt = `End ${end}`;
+  else if (dur)     txt = `Duration ${dur}`;
+  el.textContent = txt;
+  el.className = 'time-info' + (txt ? ' visible' : '');
+}
+
+/* ── Init ───────────────────────────────────────────────────── */
+onRankChange();
+poll();
+setInterval(poll, 2000);
+</script>
+</body>
+</html>

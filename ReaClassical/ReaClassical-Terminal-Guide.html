@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ReaClassical Terminal — Complete Command Guide</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+body {
+font-size: 12pt;
+line-height: 1.15;
+}
+p, li {
+margin-bottom: 0.1in;
+}
+h1 {
+font-size: 18pt;
+font-weight: bold;
+}
+h2 {
+font-size: 16pt;
+font-weight: bold;
+margin-top: 0.14in;
+}
+h3 {
+font-size: 14pt;
+font-weight: bold;
+margin-top: 0.1in;
+}
+a:link {
+color: #000080;
+text-decoration: underline;
+}
+a:visited {
+color: #800000;
+text-decoration: underline;
+}
+table {
+border-collapse: collapse;
+width: 100%;
+}
+th, td {
+border: 1px solid #000;
+padding: 0.04in 8px;
+text-align: left;
+vertical-align: top;
+}
+th {
+font-weight: bold;
+text-align: center;
+}
+</style>
+</head>
+<body>
+<h1 id="reaclassical-terminal-command-guide">ReaClassical Terminal —
+Command Guide</h1>
+<p>The Terminal is a single text-entry dialog (run the “ReaClassical
+Terminal” script/action) that lets you type quick mixer adjustments and
+a handful of setup/utility commands instead of using the mouse or ImGui
+windows. It is built for screen-reader use: every command speaks a
+confirmation through Clara (or prints to the console if Clara isn’t
+installed).</p>
+<p>The Terminal covers a deliberately small set of commands: fast,
+spoken-friendly power-mixer moves (mute/solo/pan/fader/peak/polarity),
+workflow conversion, importing audio, nudge/modifier amounts, and setup
+utilities (REAPER/Clara install, help, debug mode, GUI-window allow).
+Everything else in ReaClassical (project setup, recording,
+track/routing/FX editing, mixer snapshots, album/DDP metadata,
+rendering, stats/preferences) has its own dedicated reascript or
+accessible GUI — see the full ReaClassical manual.</p>
+<h2 id="how-to-use-the-terminal">How to use the Terminal</h2>
+<ul>
+<li>Run the script. A single-line input box appears: “Command:”.</li>
+<li>Type a command and press Enter.</li>
+<li>You can run several commands in one go by separating them with a
+semicolon: <code>1m;2m;3s</code> mutes tracks 1 and 2 and solos track
+3.</li>
+<li>Commands are case-sensitive and must match the patterns below
+exactly (no extra spaces inside tokens, though spaces around
+commas/dashes in lists are tolerated, e.g. <code>1, 3</code> and
+<code>1 - 3</code> both work).</li>
+<li>Every command below except
+<code>reaper</code>/<code>reaper=...</code>, <code>clara</code>,
+<code>debug=on</code>/<code>debug=off</code>, and <code>help</code>
+requires an existing ReaClassical project — create one first via Ctrl+N
+(Cmd+N on macOS).</li>
+<li>Type <code>help</code> to open this guide (shipped with ReaClassical
+as an HTML page and also published at
+https://reaclassical.com/rcterminal.html) in your default browser.
+(Separately, the <code>H</code> keyboard shortcut opens the full
+ReaClassical manual as a single HTML page.)</li>
+<li>Type <code>!</code> on its own to repeat whatever command(s) you
+last ran. <code>clara</code>,
+<code>reaper</code>/<code>reaper=...</code>, and <code>help</code> are
+never saved as the repeat target, so <code>!</code> always falls back to
+the last “real” command instead.</li>
+<li>Only the commands documented below can be typed into the Terminal
+dialog directly (or repeated via <code>!</code>) — anything else is
+reported as “Unknown command”.</li>
+</ul>
+<h3 id="target-syntax-used-throughout">Target syntax used
+throughout</h3>
+<p>Every power-mixer command below takes a <code>&lt;target&gt;</code> —
+this is resolved consistently across all of them: - A plain number
+<code>N</code> = mixer track N (e.g. <code>3</code>). - A list:
+<code>1,3</code> / <code>4-6</code> / <code>1,4-6</code> /
+<code>*</code> (all mixer tracks). - <code>@N</code> = aux track N;
+<code>@</code> alone = the only aux track (if there’s exactly one);
+<code>@1,2</code> / <code>@*</code> etc. for lists of auxes. -
+<code>#N</code> = submix track N; same rules as aux but with
+<code>#</code>. - <code>rcm</code> = the RCMASTER track. -
+<code>refN</code> = reference track N; <code>ref</code> alone = the only
+reference track (if there’s exactly one); <code>ref1,2</code> for a list
+of references. Note: dash ranges (<code>ref1-3</code>) aren’t supported
+— use a comma list instead. - <code>rt</code> = the RoomTone track. -
+<code>live</code> = the LIVE track. - <code>lb</code> = the Listenback
+track.</p>
+<h3 id="query-naming-convention">Query naming convention</h3>
+<p>Any <code>&lt;target&gt;?</code>-style query
+(mute/solo/polarity/pan/fader/peak state) speaks just the value when it
+resolves to a single track — you already know which one you asked about.
+If the target expands to several tracks (a list, range, or
+<code>*</code>), each line is prefixed with that track’s name so you can
+tell the results apart, e.g. <code>1m?</code> → <code>&quot;mute: on&quot;</code>,
+but <code>1,3m?</code> → <code>&quot;Mixer track Violin mute: on&quot;</code> /
+<code>&quot;Mixer track Cello mute: off&quot;</code>.</p>
+<hr />
+<h2 id="power-mixer">1. Power Mixer</h2>
+<h3 id="mute-solo">Mute / solo</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;m</code></td>
+<td>Mute the target(s), e.g. <code>2m</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;um</code></td>
+<td>Unmute, e.g. <code>2um</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;s</code></td>
+<td>Solo (in addition to anything already soloed),
+e.g. <code>3s</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;us</code></td>
+<td>Unsolo, e.g. <code>3us</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;xs</code></td>
+<td><strong>Exclusive</strong> solo: clears mute/solo on every mixer
+track first, then solos only the given target(s),
+e.g. <code>5xs</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;m?</code></td>
+<td>Speak mute state, e.g. <code>2m?</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;s?</code></td>
+<td>Speak solo state, e.g. <code>3s?</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pan">Pan</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;p+N</code> / <code>&lt;target&gt;p-N</code></td>
+<td>Nudge pan by N percentage points toward right/left,
+e.g. <code>3p-10</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;p=N</code></td>
+<td>Set pan to an absolute percent, -100 (full left) to +100 (full
+right), e.g. <code>2p=15</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;p?</code></td>
+<td>Speak current pan (e.g. “25L”, “C”, “10R”),
+e.g. <code>2p?</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fader-volume">Fader (volume)</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;f+N</code> / <code>&lt;target&gt;f-N</code></td>
+<td>Nudge volume by N dB, e.g. <code>3f-1</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;f=N</code></td>
+<td>Set volume to an absolute N dB, e.g. <code>4f=-6</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;f?</code></td>
+<td>Speak current volume in dB, e.g. <code>2f?</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="peak">Peak</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;pk?</code></td>
+<td>Speak the peak hold level (dB, or “silence”) for one or more tracks,
+e.g. <code>4pk?</code>. Read-only — there’s no setter, only the
+query.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="polarity-phase">Polarity / phase</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;target&gt;i=y</code></td>
+<td>Invert polarity, e.g. <code>2i=y</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;i=n</code></td>
+<td>Normal polarity, e.g. <code>2i=n</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;target&gt;i?</code></td>
+<td>Speak polarity state, e.g. <code>2i?</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-examples">Other examples</h3>
+<ul>
+<li><code>1m</code>, <code>1,3m</code>, <code>4-6m</code>,
+<code>*m</code>, <code>@1m</code>, <code>#m</code>, <code>refm</code>,
+<code>rtm</code>, <code>livem</code>, <code>lbm</code>,
+<code>rcmm</code> — every flavor of target syntax works the same way for
+mute (and equally for solo/pan/fader/polarity/peak): a single mixer
+track, a comma list, a range, all mixer tracks, an aux, a submix, the
+only reference/RoomTone/LIVE/Listenback track, and RCMASTER.</li>
+<li><code>1,3m</code> — Mute the first violin and cello sections to
+check what the rest of the ensemble sounds like alone.</li>
+<li><code>4-6xs</code> — Exclusive-solo the back-row tracks (4 through
+6), clearing any other mute/solo state first, to spot-check that section
+in isolation.</li>
+<li><code>1p+10</code> — Nudge the first violins 10% further right, a
+small adjustment relative to wherever they’re already panned.</li>
+<li><code>1p=-30</code> — Pan the first violins to an absolute 30% left,
+regardless of where they were panned before, to widen the stereo
+image.</li>
+<li><code>rcmp=0</code> — Recenter RCMASTER’s pan after an
+experiment.</li>
+<li><code>2f+2</code> — Nudge the second violins up 2 dB, a small
+relative adjustment.</li>
+<li><code>2f=-2.5</code> — Pull the second violins down to an absolute
+-2.5 dB relative to the rest of the mix.</li>
+<li><code>rcmf?</code> — Check RCMASTER’s current fader level before
+deciding whether to trim it.</li>
+<li><code>1i=y</code> — Invert polarity on track 1 because it’s out of
+phase with a spot mic.</li>
+<li><code>1i=n</code> — Revert it back to normal polarity once the phase
+issue is fixed elsewhere.</li>
+<li><code>1pk?</code> — Check track 1’s peak hold level after a take,
+without opening Meterbridge.</li>
+</ul>
+<hr />
+<h2 id="workflow-conversion">2. Workflow Conversion</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>convert=h</code></td>
+<td>Convert the current (vertical) project to Horizontal workflow.</td>
+</tr>
+<tr>
+<td><code>convert=v</code></td>
+<td>Convert the current (horizontal) project to Vertical workflow.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-examples-1">Other examples</h3>
+<ul>
+<li><code>convert=v</code> — You started in Horizontal (quick setup) but
+the session turned into a multi-take recording project, so you switch to
+Vertical without losing existing work.</li>
+</ul>
+<hr />
+<h2 id="importing-audio">3. Importing Audio</h2>
+<p>Every <code>import</code>/<code>import=smart,*</code> command below
+starts its distribution at whichever folder track (<code>D:</code> or
+<code>Sn:</code>) is currently selected in the arrange view, working
+through the folders below it (creating new ones as needed). Select the
+Destination folder first to land takes there; select nothing (or a
+non-folder track) and it starts at <code>S1:</code>.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>import</code></td>
+<td>Smart Import: scan the project media folder for new audio files and
+import them, one folder per take.</td>
+</tr>
+<tr>
+<td><code>import=smart,1</code></td>
+<td>Same as plain <code>import</code> (one folder per take).</td>
+</tr>
+<tr>
+<td><code>import=smart,2</code></td>
+<td>Round-robin distribute new takes across the current number of source
+folders.</td>
+</tr>
+<tr>
+<td><code>import=smart,3,N</code></td>
+<td>Round-robin distribute across N folders (creating folders as
+needed), e.g. <code>import=smart,3,4</code>.</td>
+</tr>
+<tr>
+<td><code>import=N</code></td>
+<td>Import only take number N, placed at the edit cursor,
+e.g. <code>import=20</code>.</td>
+</tr>
+<tr>
+<td><code>import=N,session</code></td>
+<td>Same, restricted to the named session,
+e.g. <code>import=20,Beethoven9</code>.</td>
+</tr>
+<tr>
+<td><code>import=N-M</code></td>
+<td>Import takes N through M, e.g. <code>import=3-5</code>.</td>
+</tr>
+<tr>
+<td><code>import=N-M,session</code></td>
+<td>Same, restricted to the named session,
+e.g. <code>import=3-5,Beethoven9</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-examples-2">Other examples</h3>
+<ul>
+<li><code>import</code> — You recorded several takes that landed in the
+project media folder; pull them all in, one folder per take.</li>
+<li><code>import=smart,2</code> — Distribute newly recorded takes
+round-robin across your existing source folders (starting from whichever
+folder you have selected).</li>
+<li><code>import=12,MahlerSym5_Mvt1</code> — Only take 12 from the
+“MahlerSym5_Mvt1” session is missing from the timeline; import just that
+one at the edit cursor.</li>
+</ul>
+<hr />
+<h2 id="nudge-modifier-amounts">4. Nudge &amp; Modifier Amounts</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nudge=ms</code></td>
+<td>Set the ReaClassical project-level nudge amount, in milliseconds,
+used by the “Nudge Marker Left”/“Right” and “Nudge Item Left”/“Right”
+reascripts, e.g. <code>nudge=20</code>. REAPER’s own item-nudge
+amount/unit isn’t exposed to ReaScript, so this is tracked independently
+per project. Defaults to 5 ms if never set.</td>
+</tr>
+<tr>
+<td><code>nudge?</code></td>
+<td>Speak the current nudge amount.</td>
+</tr>
+<tr>
+<td><code>mod=n</code></td>
+<td>Set the multiplier applied by the “+ modifier” scripts (Nudge Marker
+Left/Right + modifier, XFM Shift Crossfade Left/Right + modifier),
+e.g. <code>mod=10</code>. These scripts move by nudge amount × modifier,
+so with <code>nudge=5</code> and <code>mod=10</code> each press moves 50
+ms. Defaults to 5 if never set.</td>
+</tr>
+<tr>
+<td><code>mod?</code></td>
+<td>Speak the current modifier value.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-examples-3">Other examples</h3>
+<ul>
+<li><code>nudge=10</code> — Switch to 10 ms steps for fine-tuning a
+marker position, then nudge it with the “Nudge Marker Left”/“Right”
+reascripts (these select a marker automatically after auditioning
+from/to it). The same amount also drives “Nudge Item Left”/“Right”,
+which shift the selected item (and its synced peers across tracks in the
+same folder) and ripple every later item in that folder along with
+it.</li>
+</ul>
+<hr />
+<h2 id="setup-utilities">5. Setup Utilities</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>help</code></td>
+<td>Open this guide (the HTML copy installed with ReaClassical) in your
+default browser.</td>
+</tr>
+<tr>
+<td><code>clara</code></td>
+<td>Download and install the Clara screen-reader accessibility plugin
+(Windows/macOS only), removing any old OSARA plugin found in UserPlugins
+along the way, then restart REAPER.</td>
+</tr>
+<tr>
+<td><code>reaper</code></td>
+<td>Download and install the REAPER version ReaClassical currently
+recommends/tests against. Closes all open projects (you’ll be prompted
+to save unsaved work) and restarts REAPER once the install finishes.
+Same as <code>reaper=rec</code>.</td>
+</tr>
+<tr>
+<td><code>reaper=latest</code></td>
+<td>Install the latest public (main-release) REAPER version rather than
+the recommended one.</td>
+</tr>
+<tr>
+<td><code>reaper=VERSION</code></td>
+<td>Install a specific (main-release) REAPER version,
+e.g. <code>reaper=752</code> or <code>reaper=7.52</code> (both mean
+7.52; the dot is optional). Searches the full version archive with no
+cutoff, so older versions work too (provided they are recommended
+version or higher).</td>
+</tr>
+<tr>
+<td><code>reaper=rec</code></td>
+<td>Synonym for the bare <code>reaper</code> command (also accepts
+<code>reaper=recommended</code>).</td>
+</tr>
+<tr>
+<td><code>debug=on</code> / <code>debug=off</code></td>
+<td>Display console messages in addition to Clara announcements. Stored
+per project, so a new project always starts with debug off.</td>
+</tr>
+<tr>
+<td><code>debug?</code></td>
+<td>Speak whether debug announcements are currently on or off for this
+project.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-examples-4">Other examples</h3>
+<ul>
+<li><code>clara</code> — Setting up a brand-new machine; install the
+screen-reader plugin before doing anything else.</li>
+<li><code>reaper</code> — Match REAPER to the version ReaClassical is
+actually tested against (the safe default).</li>
+<li><code>reaper=latest</code> — Keep REAPER itself current with the
+latest public release.</li>
+<li><code>help</code> — Open this guide in your browser to look
+something up.</li>
+</ul>
+<hr />
+<h2 id="suggested-learning-order-for-a-new-user">Suggested learning
+order for a new user</h2>
+<ol type="1">
+<li><strong>Power mixer</strong>: <code>1f=-3</code>,
+<code>2p=-20</code>, <code>1m</code>, <code>2pk?</code> — the everyday
+moves.</li>
+<li><strong>Workflow</strong>: <code>convert=v</code> /
+<code>convert=h</code> if you need to switch mid-session.</li>
+<li><strong>Importing</strong> (if recorded outside the session, or
+doing a second pass): <code>import</code> or
+<code>import=smart,2</code>.</li>
+<li><strong>Fine-tuning steps</strong>: <code>nudge=10</code>,
+<code>mod=5</code> before using the Nudge/Modifier reascripts.</li>
+<li><strong>Setup</strong>: <code>clara</code>, <code>reaper</code>,
+<code>debug=on</code>/<code>off</code> as needed.</li>
+</ol>
+</body>
+</html>

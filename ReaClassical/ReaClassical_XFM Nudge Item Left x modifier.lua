@@ -1,0 +1,100 @@
+--[[
+@noindex
+
+This file is a part of "ReaClassical" package.
+See "ReaClassical.lua" for more information.
+
+Copyright (C) 2022–2026 chmaha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+]]
+
+-- luacheck: ignore 113
+
+for key in pairs(reaper) do _G[key] = reaper[key] end
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
+local say = require("ReaClassical_Announce")
+local xfu = require("ReaClassical_XFM_Utils")
+
+local function main()
+    if not xfu.is_xfade_mode() then return end
+
+    local ctx = xfu.get_xfade_context()
+    if not ctx then say("No crossfade context"); return end
+    xfu.ensure_xfade_snapshot(ctx)
+
+    local _, stored_mod = GetProjExtState(0, "ReaClassical", "ModifierFactor")
+    local amt = xfu.nudge_amount() * (tonumber(stored_mod) or 5)
+    local ms  = math.floor(amt * 1000 + 0.5)
+    local sel = ctx.selection
+
+    Undo_BeginBlock()
+    PreventUIRefresh(1)
+
+    if sel == "both" then
+        say("Select left or right item first")
+        PreventUIRefresh(-1)
+        Undo_EndBlock("XFM Nudge Item Left modifier", -1)
+        return
+    elseif sel == "left" then
+        local s2 = xfu.get_item_soffs(ctx.item2)
+        if s2 - amt < 0 then
+            say("Cannot nudge: already at source start")
+            PreventUIRefresh(-1)
+            Undo_EndBlock("XFM Nudge Item Left modifier", -1)
+            return
+        end
+        local old_end1 = ctx.end1
+        for _, item in ipairs(ctx.group2) do
+            local s = xfu.get_item_soffs(item)
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            xfu.set_item_soffs(item, math.max(0, s - amt))
+            SetMediaItemInfo_Value(item, "D_LENGTH", l + amt)
+        end
+        local skip = {}
+        for _, it in ipairs(ctx.group1) do skip[it] = true end
+        for _, it in ipairs(ctx.group2) do skip[it] = true end
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, amt, skip)
+        say("Left item nudged left by " .. ms .. " milliseconds")
+    else
+        if ctx.len1 - ctx.overlap - amt < 0.001 then
+        say("Cannot nudge: left item's pre-fade content too short")
+            PreventUIRefresh(-1)
+            Undo_EndBlock("XFM Nudge Item Left modifier", -1)
+            return
+        end
+        local old_end1 = ctx.end1
+        for _, item in ipairs(ctx.group1) do
+            local l = GetMediaItemInfo_Value(item, "D_LENGTH")
+            SetMediaItemInfo_Value(item, "D_LENGTH", math.max(0.001, l - amt))
+        end
+        for _, item in ipairs(ctx.group2) do
+            local p = GetMediaItemInfo_Value(item, "D_POSITION")
+            SetMediaItemInfo_Value(item, "D_POSITION", math.max(0, p - amt))
+        end
+        local skip = {}
+        for _, it in ipairs(ctx.group1) do skip[it] = true end
+        for _, it in ipairs(ctx.group2) do skip[it] = true end
+        xfu.ripple_folder_from(ctx.folder_track, old_end1 - 0.0001, -amt, skip)
+        xfu.set_xfade_state(ctx.folder_track, ctx.center - amt)
+        say("Right item nudged left by " .. ms .. " milliseconds")
+    end
+
+    UpdateArrange()
+    UpdateTimeline()
+    PreventUIRefresh(-1)
+    Undo_EndBlock("XFM Nudge Item Left modifier", -1)
+end
+
+main()
