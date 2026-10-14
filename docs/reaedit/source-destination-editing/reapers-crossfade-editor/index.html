@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>ReaEdit Manual - REAPER's Crossfade Editor</title>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+	<meta name="description" content="ReaEdit Manual - REAPER's Crossfade Editor">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="/reaedit/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/reaedit/css/common.css" rel="stylesheet">
+	<link href="/reaedit/css/screen.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div id="tree">
+
+				<a href="/reaedit/"><img class="img-responsive" src="/reaedit/images/reaedit_banner.webp" alt="ReaEdit Manual" /></a>
+
+				<form id="rc-search" role="search" action="#" onsubmit="return false">
+					<label for="rc-search-input" class="rc-sr-only">Search the manual</label>
+					<input id="rc-search-input" type="search" class="form-control" placeholder="Search the manual" autocomplete="off">
+					<div id="rc-search-status" role="status" aria-live="polite"></div>
+				</form>
+
+				<ul><li><a href="/reaedit/toc/">Table of Contents</a></li>
+
+	<li><a href="/reaedit/welcome/">Welcome</a>
+<ul>
+	<li><a href="/reaedit/welcome/introduction/">Introduction</a></li>
+	<li><a href="/reaedit/welcome/installation/">Installation</a></li>
+	<li><a href="/reaedit/welcome/your-first-edit/">Your First Edit</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/source-destination-editing/">Source-Destination Editing</a>
+<ul>
+	<li><a href="/reaedit/source-destination-editing/markers/">Markers</a></li>
+	<li><a href="/reaedit/source-destination-editing/edit-types/">Edit Types</a></li>
+	<li><a href="/reaedit/source-destination-editing/deleting/">Deleting</a></li>
+	<li><a href="/reaedit/source-destination-editing/crossfades-and-preferences/">Crossfades and Preferences</a></li>
+	<li class=active><a href="/reaedit/source-destination-editing/reapers-crossfade-editor/">REAPER's Crossfade Editor</a></li>
+	<li><a href="/reaedit/source-destination-editing/editing-between-project-tabs/">Editing Between Project Tabs</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/accessibility/">Accessibility</a>
+<ul>
+	<li><a href="/reaedit/accessibility/screen-readers/">Screen Readers</a></li>
+	<li><a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a></li>
+	<li><a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/setup-and-reference/">Setup and Reference</a>
+<ul>
+	<li><a href="/reaedit/setup-and-reference/keyboard-shortcuts/">Keyboard Shortcuts</a></li>
+	<li><a href="/reaedit/setup-and-reference/action-reference/">Action Reference</a></li>
+	<li><a href="/reaedit/setup-and-reference/troubleshooting-and-faq/">Troubleshooting and FAQ</a></li>
+	<li><a href="/reaedit/setup-and-reference/getting-help/">Getting Help</a></li>
+	<li><a href="/reaedit/setup-and-reference/changelog/">Changelog</a></li>
+</ul>
+</li>
+</ul>
+
+
+			</div> <!-- tree -->
+
+			<div class="span12" id="content">
+
+				<ul class="breadcrumb"><li><a href="/reaedit/toc/index.html">Home</a></li><li><a href="/reaedit/source-destination-editing/">Source-Destination Editing</a></li><li class="active">REAPER's Crossfade Editor</li></ul>
+				
+				<span style="float:right;padding: 0 5px 5px 5px;position:relative;bottom:-5px;"><button class="theme-changer" onclick="changetheme()" title="Change Theme"></button></span>
+
+				<h1 class="title">REAPER's Crossfade Editor</h1>
+
+				<div class="admonition note">
+<p class="admonition-title">Screen reader users: use crossfade mode instead</p>
+<p>If you use OSARA, you do not need this window. It is visual, and it is not fully accessible with a screen reader at the moment. ReaEdit's keyboard-driven <a href="/reaedit/accessibility/crossfade-mode-keyboard/">crossfade mode</a> gives OSARA users full parity with the visual editor in the features classical music engineers use, driven entirely from the keyboard: moving the crossfade and the audio inside it, widening and narrowing it, shaping the fades, listening to each side and putting it back as it was, with every step spoken. The same Crossfade Editor action starts it.</p>
+</div>
+<p><img alt="REAPER's Crossfade Editor" src="/reaedit/images/xfade_window.png" /></p>
+<p>Since version 7.40, REAPER includes a professional two-lane crossfade editor, similar in spirit to the ones in the specialist classical editing systems. It is the natural next step after an S-D edit: ReaEdit puts a crossfade at each join, and the crossfade editor lets you listen to it closely and fine-tune where it falls. It is part of REAPER itself, so it is there whether or not you use ReaEdit.</p>
+<h3 id="opening-it">Opening it</h3>
+<p>Select the <strong>right-hand item</strong> of the crossfade you want to look at, then run ReaEdit's <strong>Crossfade Editor</strong> action. To find it, open the Action List (<kbd>Actions &gt; Show action list...</kbd>) and search for <code>ReaEdit_Crossfade Editor</code>. Bind a shortcut to it, since you will use it often: <kbd>F</kbd> is a good choice, and it is easy to reach with the other editing keys. Run the action again to close the window.</p>
+<p>The action turns on ripple per track while the editor is open. If the selected item is not the right-hand item of a crossfade, it tells you so and does nothing. It needs REAPER 7.40 or later, the version that introduced the two-lane editor.</p>
+<h3 id="what-you-see">What you see</h3>
+<ul>
+<li><strong>Two lanes.</strong> The top lane shows the item on the left of the join (the one leaving the crossfade) and the bottom lane shows the item on the right (the one entering it).</li>
+<li><strong>Ghost waveforms.</strong> Each item's audio carries on past the crossfade, shown dimmed, so you can see the material that is normally hidden. This is what makes it possible to line up transients by eye and place the crossfade just before one.</li>
+<li><strong>The crossfade itself.</strong> The two white vertical lines mark where the crossfade starts and ends, and the red curves show the fade-out of the left item and the fade-in of the right item.</li>
+<li><strong>Phase alignment.</strong> The percentage at the top of the window shows how well the two items currently match in phase.</li>
+<li><strong>Item names and time.</strong> The names of the two items appear in the top corners, and a time ruler runs along the bottom.</li>
+</ul>
+<h3 id="the-controls">The controls</h3>
+<p>The top row of the window holds the settings for the crossfade:</p>
+<ul>
+<li><strong>Arrow buttons</strong> move around the crossfade and its neighbours</li>
+<li><strong>Link fade-in/fade-out edits</strong> makes changes to one fade apply to the other</li>
+<li><strong>Lock left-hand start</strong> keeps the start of the left-hand item where it is while you adjust the join</li>
+<li><strong>Crossfade length</strong> sets the length of the crossfade (type a value, and choose the units from the list beside it)</li>
+<li><strong>Phase align</strong> tries to line the two items up for the best phase match</li>
+<li><strong>Re-center</strong> brings the crossfade back to the middle of the window after you have scrolled or zoomed</li>
+</ul>
+<p>The bottom row is for listening:</p>
+<ul>
+<li><strong>Play, pause, stop and loop</strong> audition the crossfade, with the <strong>Pre-roll</strong> and <strong>Post-roll</strong> boxes setting how much audio is played before and after it</li>
+<li><strong>Solo crossfaded items</strong> plays only the items involved in the crossfade</li>
+<li><strong>Mute Left</strong> and <strong>Mute Right</strong> silence one side so you can hear the other on its own</li>
+<li><strong>Snapshots</strong>, <strong>Presets</strong> and <strong>Options</strong> store and recall settings and change how the editor behaves</li>
+</ul>
+<p>You can also work directly in the two lanes with the mouse to move the crossfade and shape the curves.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Audition the left and right items on their own (with Mute Left and Mute Right) before you judge the crossfade. A problem you can hear in one item alone will not be cured by changing the crossfade length.</p>
+</div>
+<h3 id="more-detail">More detail</h3>
+<p>REAPER's own user guide describes every control and mouse gesture in the crossfade editor, including the phase alignment and view options that this page only mentions. ReaEdit does not add keyboard shortcuts to it; the window uses REAPER's own.</p>
+
+				<div class="clear"></div>
+
+				<ul class="pager"><li class="previous"><a title="Crossfades and Preferences" href="/reaedit/source-destination-editing/crossfades-and-preferences/" class="previous"> &larr; Previous </a></li><li><a title="Source-Destination Editing" href="/reaedit/source-destination-editing/" class="active"> &uarr; Up </a></li><li class="next"><a title="Editing Between Project Tabs" href="/reaedit/source-destination-editing/editing-between-project-tabs/" class="next"> Next &rarr; </a></li></ul>
+
+			</div> <!-- content -->
+		</div> <!-- row-fluid -->
+	</div> <!-- container-fluid -->
+
+
+	<script src="/reaedit/search.js"></script>
+	<script type="text/javascript">
+		// Auto-expand the Part containing the active link
+		var active = document.querySelector('#tree .active');
+		if (active) {
+			var el = active;
+			while (el && el.id !== 'tree') {
+				if (el.tagName === 'LI' && el.parentElement && el.parentElement.parentElement && el.parentElement.parentElement.id === 'tree') {
+					el.classList.add('expanded');
+					break;
+				}
+				el = el.parentElement;
+			}
+		}
+
+		var isA = function(regex) { return navigator.userAgent.match(regex) };
+		var isAbout = function(regex) { return document.getElementsByTagName('h1')[1]?.textContent.match(regex) };
+
+		if ( (isA(/Mac/) || isAbout(/OS X/)) && (!isAbout(/Linux/)) ) {
+			var e = document.getElementsByTagName('body')[0];
+			e.className += ' mac';
+		}
+
+		function changetheme () {
+			if (document.body.classList.contains('dark-theme')) {
+				document.body.classList.remove('dark-theme');
+			} else {
+				document.body.classList.add('dark-theme');
+			}
+			localStorage.setItem('dark-theme', document.body.classList.contains('dark-theme'));
+		}
+
+		if (localStorage.getItem('dark-theme') === 'true') {
+			changetheme();
+		}
+
+		window.addEventListener('keydown', e => {
+			if (e.target.tagName !== 'INPUT') {
+				if (e.key === 'ArrowRight') {
+					var next = document.querySelector('.next a');
+					if (next) next.click();
+				} else if (e.key === 'ArrowLeft') {
+					var prev = document.querySelector('.previous a');
+					if (prev) prev.click();
+				}
+			}
+		});
+
+		window.onload = (e) => {
+			document.querySelectorAll('h2, h3, h4, h5, h6').forEach( el => {
+				let a = document.createElement('a');
+				let slug = el.id !== '' ? el.id : el.innerText;
+				el.id = slug;
+				a.href = `#${slug}`;
+				a.className = 'heading-anchor';
+				a.innerText = ' \uD83D\uDD17';
+				el.appendChild( a );
+			});
+		};
+	</script>
+
+	<script>
+		// Build obfuscated e-mail links (same scheme as the website); no-JS readers see "name [at] domain".
+		document.querySelectorAll('a.obf').forEach(function (a) {
+			var e = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
+			a.href = 'mailto:' + e;
+			a.textContent = e;
+		});
+	</script>
+</body>
+</html>

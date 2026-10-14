@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>ReaEdit Manual - Crossfade Mode (Keyboard)</title>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+	<meta name="description" content="ReaEdit Manual - Crossfade Mode (Keyboard)">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="/reaedit/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/reaedit/css/common.css" rel="stylesheet">
+	<link href="/reaedit/css/screen.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div id="tree">
+
+				<a href="/reaedit/"><img class="img-responsive" src="/reaedit/images/reaedit_banner.webp" alt="ReaEdit Manual" /></a>
+
+				<form id="rc-search" role="search" action="#" onsubmit="return false">
+					<label for="rc-search-input" class="rc-sr-only">Search the manual</label>
+					<input id="rc-search-input" type="search" class="form-control" placeholder="Search the manual" autocomplete="off">
+					<div id="rc-search-status" role="status" aria-live="polite"></div>
+				</form>
+
+				<ul><li><a href="/reaedit/toc/">Table of Contents</a></li>
+
+	<li><a href="/reaedit/welcome/">Welcome</a>
+<ul>
+	<li><a href="/reaedit/welcome/introduction/">Introduction</a></li>
+	<li><a href="/reaedit/welcome/installation/">Installation</a></li>
+	<li><a href="/reaedit/welcome/your-first-edit/">Your First Edit</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/source-destination-editing/">Source-Destination Editing</a>
+<ul>
+	<li><a href="/reaedit/source-destination-editing/markers/">Markers</a></li>
+	<li><a href="/reaedit/source-destination-editing/edit-types/">Edit Types</a></li>
+	<li><a href="/reaedit/source-destination-editing/deleting/">Deleting</a></li>
+	<li><a href="/reaedit/source-destination-editing/crossfades-and-preferences/">Crossfades and Preferences</a></li>
+	<li><a href="/reaedit/source-destination-editing/reapers-crossfade-editor/">REAPER's Crossfade Editor</a></li>
+	<li><a href="/reaedit/source-destination-editing/editing-between-project-tabs/">Editing Between Project Tabs</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/accessibility/">Accessibility</a>
+<ul>
+	<li><a href="/reaedit/accessibility/screen-readers/">Screen Readers</a></li>
+	<li class=active><a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a></li>
+	<li><a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/setup-and-reference/">Setup and Reference</a>
+<ul>
+	<li><a href="/reaedit/setup-and-reference/keyboard-shortcuts/">Keyboard Shortcuts</a></li>
+	<li><a href="/reaedit/setup-and-reference/action-reference/">Action Reference</a></li>
+	<li><a href="/reaedit/setup-and-reference/troubleshooting-and-faq/">Troubleshooting and FAQ</a></li>
+	<li><a href="/reaedit/setup-and-reference/getting-help/">Getting Help</a></li>
+	<li><a href="/reaedit/setup-and-reference/changelog/">Changelog</a></li>
+</ul>
+</li>
+</ul>
+
+
+			</div> <!-- tree -->
+
+			<div class="span12" id="content">
+
+				<ul class="breadcrumb"><li><a href="/reaedit/toc/index.html">Home</a></li><li><a href="/reaedit/accessibility/">Accessibility</a></li><li class="active">Crossfade Mode (Keyboard)</li></ul>
+				
+				<span style="float:right;padding: 0 5px 5px 5px;position:relative;bottom:-5px;"><button class="theme-changer" onclick="changetheme()" title="Change Theme"></button></span>
+
+				<h1 class="title">Crossfade Mode (Keyboard)</h1>
+
+				<p>ReaEdit includes a keyboard-driven <strong>crossfade mode</strong>. It gives you the same control over a crossfade as REAPER's two-lane crossfade editor, but entirely from the keyboard, with every action spoken. It is designed for screen reader users, and it needs <a href="https://osara.reaperaccessibility.com/">OSARA</a> to be installed, because OSARA is what speaks. If you work visually, you do not need it: use REAPER's own <a href="/reaedit/source-destination-editing/reapers-crossfade-editor/">crossfade editor</a>.</p>
+<h3 id="why-it-exists">Why it exists</h3>
+<p>REAPER's own crossfade editor is visual: you read the waveforms and drag them with the mouse. At the moment it is not fully accessible with a screen reader, so ReaEdit includes its own keyboard version, with full parity with the visual editor in the features classical music engineers use: moving the crossfade and the audio inside it, widening and narrowing it, shaping the fades, listening to each side, and putting everything back. It is driven entirely from the keyboard and every action is spoken, so you never need to see the window.</p>
+<p>REAPER's editor has a few further features that are not part of the keyboard mode: view options, which do not apply without sight, phase alignment, which classical editing does not call for, and presets.</p>
+<div class="admonition note">
+<p class="admonition-title">With and without OSARA</p>
+<p>The same action starts both. With OSARA installed it starts crossfade mode. Without OSARA it opens REAPER's own visual crossfade editor instead, as described in <a href="/reaedit/source-destination-editing/reapers-crossfade-editor/">REAPER's Crossfade Editor</a>.</p>
+</div>
+<h3 id="setting-it-up">Setting it up</h3>
+<p>You do this once.</p>
+<ol>
+<li><strong>Bind a key to the Crossfade Editor action.</strong> Open the Action List (<kbd>Actions &gt; Show action list...</kbd>), search for <code>ReaEdit_Crossfade Editor</code> and give it a shortcut. ReaEdit does not choose this key for you, so use whichever suits you; <kbd>F</kbd> is a suggestion, and it is what ReaClassical uses.</li>
+<li><strong>Create the key file.</strong> The first time you use that key with OSARA running, ReaEdit tells you the crossfade mode keys are not installed yet and offers to create them. Choose <strong>Yes</strong>. It adds the crossfade mode's actions to your Action List, which ReaPack does not do for you, writes a file called <code>ReaEdit Crossfade Mode.ReaperKeyMap</code> into REAPER's <code>KeyMaps</code> folder, and tells you where it is.</li>
+<li><strong>Import the file.</strong> In the Action List choose <strong>Import/export</strong>, then <strong>Import shortcuts/custom actions, import all sections...</strong>, and open the file.</li>
+</ol>
+<p>That is all. If you choose <strong>No</strong> at the prompt, crossfade mode starts anyway and you are asked again next time until the keys are installed; choose <strong>Cancel</strong> to do nothing for now.</p>
+<div class="admonition warning">
+<p class="admonition-title">ReaEdit uses the last alternate keyboard section, Main (alt-16)</p>
+<p>The crossfade mode keys are set in REAPER's last alternate keyboard section, <strong>Main (alt-16)</strong>, and importing the key file sets shortcuts in that section. Very few people use it, but if you have set up shortcuts of your own there, please back them up first. In the Action List choose the section <strong>Main (alt-16)</strong>, then <strong>Import/export</strong>, then <strong>Export shortcuts/custom actions for this section only...</strong>, and save the file somewhere safe. Importing the key file may replace shortcuts you already have on the same keys. It does not change your main keymap or any other section.</p>
+</div>
+<p>The keys only exist while crossfade mode is on. REAPER switches to that section when the mode starts and switches back from it when it ends, so they never touch your normal shortcuts and nothing you have bound in the main section changes. While the mode is on, REAPER's own standard shortcuts are switched off as well, so a stray key press cannot trigger something unexpected (such as deleting the selected items).</p>
+<h3 id="using-it">Using it</h3>
+<ol>
+<li><strong>Select the right-hand item of a crossfade.</strong> Or use the actions <strong>Navigate to Next Crossfade</strong> and <strong>Navigate to Previous Crossfade</strong>, which jump to a crossfade, select its right-hand item and say which one it is, for example "Crossfade 2 of 5 at 19 seconds, 950 milliseconds, take 3 to take 4, 100 milliseconds". You can bind keys to them (<kbd>Alt+W</kbd> and <kbd>Alt+Q</kbd> are suggested).</li>
+<li><strong>Press the key you bound to Crossfade Editor.</strong> You hear "Crossfade mode on". ReaEdit selects both items of the crossfade and their matching items on every track, puts the edit cursor at the centre of the crossfade, and switches on ripple per track for as long as the mode is on.</li>
+<li><strong>Use the keys below.</strong> Every action says what it did.</li>
+<li><strong>Press <kbd>Esc</kbd> to leave.</strong> Inside the mode <kbd>Esc</kbd> always leaves it, whichever key you used to start it. You hear "Crossfade mode off", and your ripple setting is put back as it was.</li>
+</ol>
+<p>If nothing is selected you hear "No items selected", and if the selected item is not the right-hand item of a crossfade you hear "No crossfade to the left of this item". The mode does not start.</p>
+<h3 id="which-side-you-are-working-on">Which side you are working on</h3>
+<p>Most actions work on the <strong>selected side</strong> of the crossfade: the left item, the right item, or both. You start with both selected. Choose with <kbd>S</kbd> (left), <kbd>D</kbd> (right) and <kbd>A</kbd> (both), and press <kbd>Alt+A</kbd> to hear which side is selected and the names of the items.</p>
+<p>A few actions need a single side and tell you if both are selected: slipping, nudging and changing an item's volume. Where an action behaves differently for the left item, the right item and both, the key table above says what it does to the selected side.</p>
+<h3 id="step-sizes">Step sizes</h3>
+<p>Slipping, nudging, shifting, widening, narrowing and changing the fades all move by the same amount, <strong>5 milliseconds</strong> to begin with. The "larger step" version of the same key moves by <strong>5 times</strong> that. Change both in <a href="/reaedit/source-destination-editing/crossfades-and-preferences/">ReaEdit's Preferences</a>: <em>XFM nudge (ms)</em> and <em>XFM x modifier multiplier</em>.</p>
+<h3 id="the-keys">The keys</h3>
+<!-- KEYS-START (generated by admin_scripts/gen_reaedit_xfm_keys.py - do not edit by hand) -->
+
+<h4 id="choosing-what-to-work-on">Choosing what to work on</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>A</kbd></td>
+<td style="text-align: left;">Select both items of the crossfade</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>S</kbd></td>
+<td style="text-align: left;">Select the left item</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>D</kbd></td>
+<td style="text-align: left;">Select the right item</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Alt+A</kbd></td>
+<td style="text-align: left;">Say which side is selected and the names of the items</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Q</kbd></td>
+<td style="text-align: left;">Go to the previous crossfade (the mode follows you)</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>W</kbd></td>
+<td style="text-align: left;">Go to the next crossfade (the mode follows you)</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<h4 id="listening">Listening</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>Z</kbd></td>
+<td style="text-align: left;">Play 1.5 seconds either side of the crossfade centre (3 seconds with the larger step)</td>
+<td style="text-align: left;"><kbd>Ctrl+Z</kbd> or <kbd>Shift+Z</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>X</kbd></td>
+<td style="text-align: left;">Play the left item up to the crossfade centre</td>
+<td style="text-align: left;"><kbd>Ctrl+X</kbd> or <kbd>Shift+X</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>C</kbd></td>
+<td style="text-align: left;">Play the right item from the crossfade centre</td>
+<td style="text-align: left;"><kbd>Ctrl+C</kbd> or <kbd>Shift+C</kbd></td>
+</tr>
+</tbody>
+</table>
+<h4 id="moving-the-audio">Moving the audio</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>←</kbd></td>
+<td style="text-align: left;">Slip the selected item's audio left (material after the crossfade moves with it)</td>
+<td style="text-align: left;"><kbd>Shift+←</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>→</kbd></td>
+<td style="text-align: left;">Slip the selected item's audio right</td>
+<td style="text-align: left;"><kbd>Shift+→</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl+←</kbd></td>
+<td style="text-align: left;">Nudge the selected item left</td>
+<td style="text-align: left;"><kbd>Ctrl+Shift+←</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl+→</kbd></td>
+<td style="text-align: left;">Nudge the selected item right</td>
+<td style="text-align: left;"><kbd>Ctrl+Shift+→</kbd></td>
+</tr>
+</tbody>
+</table>
+<h4 id="moving-the-crossfade">Moving the crossfade</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>J</kbd></td>
+<td style="text-align: left;">Shift the crossfade left (nothing after it moves)</td>
+<td style="text-align: left;"><kbd>Ctrl+J</kbd> or <kbd>Shift+J</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>K</kbd></td>
+<td style="text-align: left;">Shift the crossfade right</td>
+<td style="text-align: left;"><kbd>Ctrl+K</kbd> or <kbd>Shift+K</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>I</kbd></td>
+<td style="text-align: left;">Widen the crossfade</td>
+<td style="text-align: left;"><kbd>Ctrl+I</kbd> or <kbd>Shift+I</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>U</kbd></td>
+<td style="text-align: left;">Narrow the crossfade</td>
+<td style="text-align: left;"><kbd>Ctrl+U</kbd> or <kbd>Shift+U</kbd></td>
+</tr>
+</tbody>
+</table>
+<h4 id="fades">Fades</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>P</kbd></td>
+<td style="text-align: left;">Grow the start of the fade (start it earlier)</td>
+<td style="text-align: left;"><kbd>Ctrl+P</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>O</kbd></td>
+<td style="text-align: left;">Shrink the start of the fade</td>
+<td style="text-align: left;"><kbd>Ctrl+O</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>]</kbd></td>
+<td style="text-align: left;">Grow the end of the fade</td>
+<td style="text-align: left;"><kbd>Ctrl+[</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>[</kbd></td>
+<td style="text-align: left;">Shrink the end of the fade</td>
+<td style="text-align: left;"><kbd>Ctrl+]</kbd></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>T</kbd></td>
+<td style="text-align: left;">Cycle the fade shape</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>N</kbd></td>
+<td style="text-align: left;">Match the right item's fade-in to the left item's fade-out</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>M</kbd></td>
+<td style="text-align: left;">Match the left item's fade-out to the right item's fade-in</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<h4 id="level">Level</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>↑</kbd></td>
+<td style="text-align: left;">Raise the selected item's volume by 1 dB</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>↓</kbd></td>
+<td style="text-align: left;">Lower the selected item's volume by 1 dB</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl+↑</kbd></td>
+<td style="text-align: left;">Raise the selected item's volume by 0.2 dB</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl+↓</kbd></td>
+<td style="text-align: left;">Lower the selected item's volume by 0.2 dB</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl+0</kbd></td>
+<td style="text-align: left;">Reset the selected item's volume</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<h4 id="resetting-and-undoing">Resetting and undoing</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>0</kbd></td>
+<td style="text-align: left;">Reset both fades to an equal-power crossfade of your S-D crossfade length</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl+Alt+0</kbd></td>
+<td style="text-align: left;">Put the crossfade back as it was when you first changed it in this session</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<h4 id="playback-saving-and-leaving">Playback, saving and leaving</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Larger step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><kbd>Space</kbd></td>
+<td style="text-align: left;">Play or stop</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Ctrl+S</kbd></td>
+<td style="text-align: left;">Save the project</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><kbd>Esc</kbd></td>
+<td style="text-align: left;">Leave crossfade mode</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<!-- KEYS-END -->
+
+<h3 id="tips">Tips</h3>
+<ul>
+<li>Audition before you judge. <kbd>Z</kbd> plays either side of the crossfade, and <kbd>X</kbd> and <kbd>C</kbd> let you hear the left and right items on their own.</li>
+<li>Change one thing at a time and listen. If a change makes it worse, <strong>Revert</strong> (<kbd>Ctrl+Alt+0</kbd>) puts the crossfade back as it was when you first changed it, however many steps ago that was.</li>
+<li>When a move would use up too much of a neighbouring item, the action refuses and says why ("Cannot slip: right item's post-fade content too short"). Nothing has changed when you hear that.</li>
+<li>Everything works on all your tracks together, as ReaEdit's edits do, so the tracks stay in step.</li>
+<li>Undo works as normal. Each action is a single undo step.</li>
+</ul>
+<h3 id="if-it-does-not-work">If it does not work</h3>
+<ul>
+<li><strong>The keys do nothing.</strong> The key file has not been imported. See <em>Setting it up</em>. If you chose <strong>No</strong> at the prompt, use the Crossfade Editor key again and choose <strong>Yes</strong>, then import the file.</li>
+<li><strong>The crossfade editor opens instead of crossfade mode.</strong> OSARA was not detected. Check that it is installed and loaded; the <a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a> links to its official installation instructions.</li>
+<li><strong>"No crossfade to the left of this item".</strong> Select the <em>right-hand</em> item of the crossfade.</li>
+</ul>
+
+				<div class="clear"></div>
+
+				<ul class="pager"><li class="previous"><a title="Screen Readers" href="/reaedit/accessibility/screen-readers/" class="previous"> &larr; Previous </a></li><li><a title="Accessibility" href="/reaedit/accessibility/" class="active"> &uarr; Up </a></li><li class="next"><a title="Accessibility FAQ" href="/reaedit/accessibility/accessibility-faq/" class="next"> Next &rarr; </a></li></ul>
+
+			</div> <!-- content -->
+		</div> <!-- row-fluid -->
+	</div> <!-- container-fluid -->
+
+
+	<script src="/reaedit/search.js"></script>
+	<script type="text/javascript">
+		// Auto-expand the Part containing the active link
+		var active = document.querySelector('#tree .active');
+		if (active) {
+			var el = active;
+			while (el && el.id !== 'tree') {
+				if (el.tagName === 'LI' && el.parentElement && el.parentElement.parentElement && el.parentElement.parentElement.id === 'tree') {
+					el.classList.add('expanded');
+					break;
+				}
+				el = el.parentElement;
+			}
+		}
+
+		var isA = function(regex) { return navigator.userAgent.match(regex) };
+		var isAbout = function(regex) { return document.getElementsByTagName('h1')[1]?.textContent.match(regex) };
+
+		if ( (isA(/Mac/) || isAbout(/OS X/)) && (!isAbout(/Linux/)) ) {
+			var e = document.getElementsByTagName('body')[0];
+			e.className += ' mac';
+		}
+
+		function changetheme () {
+			if (document.body.classList.contains('dark-theme')) {
+				document.body.classList.remove('dark-theme');
+			} else {
+				document.body.classList.add('dark-theme');
+			}
+			localStorage.setItem('dark-theme', document.body.classList.contains('dark-theme'));
+		}
+
+		if (localStorage.getItem('dark-theme') === 'true') {
+			changetheme();
+		}
+
+		window.addEventListener('keydown', e => {
+			if (e.target.tagName !== 'INPUT') {
+				if (e.key === 'ArrowRight') {
+					var next = document.querySelector('.next a');
+					if (next) next.click();
+				} else if (e.key === 'ArrowLeft') {
+					var prev = document.querySelector('.previous a');
+					if (prev) prev.click();
+				}
+			}
+		});
+
+		window.onload = (e) => {
+			document.querySelectorAll('h2, h3, h4, h5, h6').forEach( el => {
+				let a = document.createElement('a');
+				let slug = el.id !== '' ? el.id : el.innerText;
+				el.id = slug;
+				a.href = `#${slug}`;
+				a.className = 'heading-anchor';
+				a.innerText = ' \uD83D\uDD17';
+				el.appendChild( a );
+			});
+		};
+	</script>
+
+	<script>
+		// Build obfuscated e-mail links (same scheme as the website); no-JS readers see "name [at] domain".
+		document.querySelectorAll('a.obf').forEach(function (a) {
+			var e = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
+			a.href = 'mailto:' + e;
+			a.textContent = e;
+		});
+	</script>
+</body>
+</html>

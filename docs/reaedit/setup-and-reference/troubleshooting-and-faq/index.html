@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>ReaEdit Manual - Troubleshooting and FAQ</title>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+	<meta name="description" content="ReaEdit Manual - Troubleshooting and FAQ">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="/reaedit/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/reaedit/css/common.css" rel="stylesheet">
+	<link href="/reaedit/css/screen.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div id="tree">
+
+				<a href="/reaedit/"><img class="img-responsive" src="/reaedit/images/reaedit_banner.webp" alt="ReaEdit Manual" /></a>
+
+				<form id="rc-search" role="search" action="#" onsubmit="return false">
+					<label for="rc-search-input" class="rc-sr-only">Search the manual</label>
+					<input id="rc-search-input" type="search" class="form-control" placeholder="Search the manual" autocomplete="off">
+					<div id="rc-search-status" role="status" aria-live="polite"></div>
+				</form>
+
+				<ul><li><a href="/reaedit/toc/">Table of Contents</a></li>
+
+	<li><a href="/reaedit/welcome/">Welcome</a>
+<ul>
+	<li><a href="/reaedit/welcome/introduction/">Introduction</a></li>
+	<li><a href="/reaedit/welcome/installation/">Installation</a></li>
+	<li><a href="/reaedit/welcome/your-first-edit/">Your First Edit</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/source-destination-editing/">Source-Destination Editing</a>
+<ul>
+	<li><a href="/reaedit/source-destination-editing/markers/">Markers</a></li>
+	<li><a href="/reaedit/source-destination-editing/edit-types/">Edit Types</a></li>
+	<li><a href="/reaedit/source-destination-editing/deleting/">Deleting</a></li>
+	<li><a href="/reaedit/source-destination-editing/crossfades-and-preferences/">Crossfades and Preferences</a></li>
+	<li><a href="/reaedit/source-destination-editing/reapers-crossfade-editor/">REAPER's Crossfade Editor</a></li>
+	<li><a href="/reaedit/source-destination-editing/editing-between-project-tabs/">Editing Between Project Tabs</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/accessibility/">Accessibility</a>
+<ul>
+	<li><a href="/reaedit/accessibility/screen-readers/">Screen Readers</a></li>
+	<li><a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a></li>
+	<li><a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/setup-and-reference/">Setup and Reference</a>
+<ul>
+	<li><a href="/reaedit/setup-and-reference/keyboard-shortcuts/">Keyboard Shortcuts</a></li>
+	<li><a href="/reaedit/setup-and-reference/action-reference/">Action Reference</a></li>
+	<li class=active><a href="/reaedit/setup-and-reference/troubleshooting-and-faq/">Troubleshooting and FAQ</a></li>
+	<li><a href="/reaedit/setup-and-reference/getting-help/">Getting Help</a></li>
+	<li><a href="/reaedit/setup-and-reference/changelog/">Changelog</a></li>
+</ul>
+</li>
+</ul>
+
+
+			</div> <!-- tree -->
+
+			<div class="span12" id="content">
+
+				<ul class="breadcrumb"><li><a href="/reaedit/toc/index.html">Home</a></li><li><a href="/reaedit/setup-and-reference/">Setup and Reference</a></li><li class="active">Troubleshooting and FAQ</li></ul>
+				
+				<span style="float:right;padding: 0 5px 5px 5px;position:relative;bottom:-5px;"><button class="theme-changer" onclick="changetheme()" title="Change Theme"></button></span>
+
+				<h1 class="title">Troubleshooting and FAQ</h1>
+
+				<h3 id="messages-and-what-they-mean">Messages and what they mean</h3>
+<dl>
+<dt>"Please add at least 2 valid source-destination markers"</dt>
+<dd>S-D Edit needs at least one destination marker and one source marker. See <a href="/reaedit/source-destination-editing/edit-types/">Edit Types</a>.</dd>
+<dt>"Please add 3 valid source-destination markers: DEST-IN, SOURCE-IN and SOURCE-OUT"</dt>
+<dd>3-point Insert Edit needs exactly those three markers.</dd>
+<dt>"Please use SOURCE-IN and SOURCE-OUT markers"</dt>
+<dd>The delete actions take their range from the source markers. See <a href="/reaedit/source-destination-editing/deleting/">Deleting</a>.</dd>
+<dt>"Please make sure there is material to copy between your source markers"</dt>
+<dd>The source range is empty, or contains no items. Check the source markers and that the tracks have material there.</dd>
+<dt>"Only one S-D project marker was found"</dt>
+<dd>Use no project markers for editing in a single project, or two (one in each tab) for editing between tabs. See <a href="/reaedit/source-destination-editing/editing-between-project-tabs/">Editing Between Project Tabs</a>.</dd>
+<dt>"Source or destination markers should be paired with the corresponding source or destination project marker"</dt>
+<dd>In a cross-tab edit, the source markers must be in the tab with the source project marker and the destination markers in the tab with the destination project marker.</dd>
+<dt>"The DEST-IN marker has been moved since the last assembly line edit"</dt>
+<dd>You moved destination IN after the previous assembly-line insert. Answer Yes to start a new sequence, No to put the marker back at the previous item's edge.</dd>
+<dt>"Crossfade shortened to N ms ... due to limited source material"</dt>
+<dd>There was not enough source material for a full crossfade at that join. Move the marker further into the take if you want the full length.</dd>
+</dl>
+<h3 id="frequently-asked-questions">Frequently asked questions</h3>
+<p>Questions about OSARA, screen readers and the keyboard crossfade mode are in the <a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a>.</p>
+<dl>
+<dt>I installed ReaEdit but see no actions.</dt>
+<dd>Search the Action List for <code>ReaEdit</code>. If you installed from the zip, you must run <code>Register ReaEdit actions.lua</code> once. If you used ReaPack, run <kbd>Extensions &gt; ReaPack &gt; Synchronize packages</kbd> and check ReaEdit is installed in <strong>Browse packages</strong>.</dd>
+<dt>How is this different from ReaClassical?</dt>
+<dd>
+<p>ReaEdit is only the source-destination editing part of ReaClassical, for people who want it in their own REAPER. ReaClassical takes a classical production from start to finish:</p>
+<ul>
+<li>An easy Create Project workflow, with a choice of horizontal or vertical workflow approaches, and project management through a dedicated Mission Control window</li>
+<li>Robust zero-collision recording with the Record Panel: automatic take numbering, session naming, rankings and notes, scheduled recording and more</li>
+<li>Smart importing</li>
+<li>Editing: everything in ReaEdit, plus healing edits, finding takes, source auditioning, automatic crossfade protection, razor editing and many more functions</li>
+<li>Mixing with a unique approach to automation: mixer snapshot scenes (faders, pan, mute, solo, FX, sends and routing) that are recalled automatically during playback and converted to real automation before rendering. Everyday automation is just as easy: select a passage, set the level and optional ramps in and out, and ReaClassical creates the automation for you, with no need to add automation points by hand</li>
+<li>Mastering that is unique in the DAW world: all your album and CD-Text metadata in one window, with the CUE file, CD-Text and HTML album report updating automatically, a DDP image a click away, and no need to keep album markers and items in sync by hand</li>
+<li>Quick rendering from the metadata editor: one click to WAV, FLAC, Opus, MP3 or a DDP image, without REAPER's render dialog</li>
+</ul>
+<p>In all, ReaClassical has nearly 300 actions.</p>
+<p>Because ReaClassical already includes all of ReaEdit's functions, if you use ReaClassical you do not need ReaEdit. If you use a screen reader, ReaClassical has its own screen reader bridge, Clara, so OSARA is not needed with ReaClassical (see the <a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a>). See <a href="https://reaclassical.com">reaclassical.com</a>.</p>
+</dd>
+<dt>I love ReaEdit! How do I move up to ReaClassical?</dt>
+<dd>
+<p>ReaClassical is free and open source, so there is nothing to buy. See <a href="https://reaclassical.com">reaclassical.com</a> for what it includes.</p>
+<ol>
+<li><strong>Install it.</strong> Run the ReaClassical installer for your system. It creates a separate, self-contained ReaClassical folder with its own REAPER, so your existing REAPER and ReaEdit are left untouched. ReaClassical cannot be installed into an existing REAPER. See <a href="https://reaclassical.com/manual/getting-started/install/">Installation</a> in the ReaClassical manual.</li>
+<li><strong>Keep your keys.</strong> ReaClassical's marker and edit keys are the ones this manual suggests (<kbd>1</kbd> to <kbd>4</kbd> for the markers, <kbd>5</kbd> for the S-D edit), so your hands already know them.</li>
+<li><strong>Bring your work across.</strong> A ReaEdit project is an ordinary REAPER project, and ReaClassical can convert an existing one. See <a href="https://reaclassical.com/manual/getting-started/converting-a-standard-reaper-project/">Converting a Standard REAPER Project</a>.</li>
+</ol>
+<p>Do not install ReaEdit into your ReaClassical instance: it already has all of these functions, and many more.</p>
+</dd>
+<dt>Do I need a licence or an account?</dt>
+<dd>No. ReaEdit is free to use.</dd>
+<dt>Does it work with my existing projects?</dt>
+<dd>Yes. It works on any project; there is nothing to convert. A project edited with ReaEdit is an ordinary REAPER project that opens in any REAPER, whether or not ReaEdit is installed.</dd>
+<dt>Why did the edit change all my tracks?</dt>
+<dd>ReaEdit treats the tracks of a project as parallel channels of one recording and edits them together. Keep material that should not be edited together in a separate project.</dd>
+</dl>
+
+				<div class="clear"></div>
+
+				<ul class="pager"><li class="previous"><a title="Action Reference" href="/reaedit/setup-and-reference/action-reference/" class="previous"> &larr; Previous </a></li><li><a title="Setup and Reference" href="/reaedit/setup-and-reference/" class="active"> &uarr; Up </a></li><li class="next"><a title="Getting Help" href="/reaedit/setup-and-reference/getting-help/" class="next"> Next &rarr; </a></li></ul>
+
+			</div> <!-- content -->
+		</div> <!-- row-fluid -->
+	</div> <!-- container-fluid -->
+
+
+	<script src="/reaedit/search.js"></script>
+	<script type="text/javascript">
+		// Auto-expand the Part containing the active link
+		var active = document.querySelector('#tree .active');
+		if (active) {
+			var el = active;
+			while (el && el.id !== 'tree') {
+				if (el.tagName === 'LI' && el.parentElement && el.parentElement.parentElement && el.parentElement.parentElement.id === 'tree') {
+					el.classList.add('expanded');
+					break;
+				}
+				el = el.parentElement;
+			}
+		}
+
+		var isA = function(regex) { return navigator.userAgent.match(regex) };
+		var isAbout = function(regex) { return document.getElementsByTagName('h1')[1]?.textContent.match(regex) };
+
+		if ( (isA(/Mac/) || isAbout(/OS X/)) && (!isAbout(/Linux/)) ) {
+			var e = document.getElementsByTagName('body')[0];
+			e.className += ' mac';
+		}
+
+		function changetheme () {
+			if (document.body.classList.contains('dark-theme')) {
+				document.body.classList.remove('dark-theme');
+			} else {
+				document.body.classList.add('dark-theme');
+			}
+			localStorage.setItem('dark-theme', document.body.classList.contains('dark-theme'));
+		}
+
+		if (localStorage.getItem('dark-theme') === 'true') {
+			changetheme();
+		}
+
+		window.addEventListener('keydown', e => {
+			if (e.target.tagName !== 'INPUT') {
+				if (e.key === 'ArrowRight') {
+					var next = document.querySelector('.next a');
+					if (next) next.click();
+				} else if (e.key === 'ArrowLeft') {
+					var prev = document.querySelector('.previous a');
+					if (prev) prev.click();
+				}
+			}
+		});
+
+		window.onload = (e) => {
+			document.querySelectorAll('h2, h3, h4, h5, h6').forEach( el => {
+				let a = document.createElement('a');
+				let slug = el.id !== '' ? el.id : el.innerText;
+				el.id = slug;
+				a.href = `#${slug}`;
+				a.className = 'heading-anchor';
+				a.innerText = ' \uD83D\uDD17';
+				el.appendChild( a );
+			});
+		};
+	</script>
+
+	<script>
+		// Build obfuscated e-mail links (same scheme as the website); no-JS readers see "name [at] domain".
+		document.querySelectorAll('a.obf').forEach(function (a) {
+			var e = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
+			a.href = 'mailto:' + e;
+			a.textContent = e;
+		});
+	</script>
+</body>
+</html>

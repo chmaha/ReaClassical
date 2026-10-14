@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>ReaEdit Manual - Edit Types</title>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+	<meta name="description" content="ReaEdit Manual - Edit Types">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="/reaedit/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/reaedit/css/common.css" rel="stylesheet">
+	<link href="/reaedit/css/screen.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div id="tree">
+
+				<a href="/reaedit/"><img class="img-responsive" src="/reaedit/images/reaedit_banner.webp" alt="ReaEdit Manual" /></a>
+
+				<form id="rc-search" role="search" action="#" onsubmit="return false">
+					<label for="rc-search-input" class="rc-sr-only">Search the manual</label>
+					<input id="rc-search-input" type="search" class="form-control" placeholder="Search the manual" autocomplete="off">
+					<div id="rc-search-status" role="status" aria-live="polite"></div>
+				</form>
+
+				<ul><li><a href="/reaedit/toc/">Table of Contents</a></li>
+
+	<li><a href="/reaedit/welcome/">Welcome</a>
+<ul>
+	<li><a href="/reaedit/welcome/introduction/">Introduction</a></li>
+	<li><a href="/reaedit/welcome/installation/">Installation</a></li>
+	<li><a href="/reaedit/welcome/your-first-edit/">Your First Edit</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/source-destination-editing/">Source-Destination Editing</a>
+<ul>
+	<li><a href="/reaedit/source-destination-editing/markers/">Markers</a></li>
+	<li class=active><a href="/reaedit/source-destination-editing/edit-types/">Edit Types</a></li>
+	<li><a href="/reaedit/source-destination-editing/deleting/">Deleting</a></li>
+	<li><a href="/reaedit/source-destination-editing/crossfades-and-preferences/">Crossfades and Preferences</a></li>
+	<li><a href="/reaedit/source-destination-editing/reapers-crossfade-editor/">REAPER's Crossfade Editor</a></li>
+	<li><a href="/reaedit/source-destination-editing/editing-between-project-tabs/">Editing Between Project Tabs</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/accessibility/">Accessibility</a>
+<ul>
+	<li><a href="/reaedit/accessibility/screen-readers/">Screen Readers</a></li>
+	<li><a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a></li>
+	<li><a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/setup-and-reference/">Setup and Reference</a>
+<ul>
+	<li><a href="/reaedit/setup-and-reference/keyboard-shortcuts/">Keyboard Shortcuts</a></li>
+	<li><a href="/reaedit/setup-and-reference/action-reference/">Action Reference</a></li>
+	<li><a href="/reaedit/setup-and-reference/troubleshooting-and-faq/">Troubleshooting and FAQ</a></li>
+	<li><a href="/reaedit/setup-and-reference/getting-help/">Getting Help</a></li>
+	<li><a href="/reaedit/setup-and-reference/changelog/">Changelog</a></li>
+</ul>
+</li>
+</ul>
+
+
+			</div> <!-- tree -->
+
+			<div class="span12" id="content">
+
+				<ul class="breadcrumb"><li><a href="/reaedit/toc/index.html">Home</a></li><li><a href="/reaedit/source-destination-editing/">Source-Destination Editing</a></li><li class="active">Edit Types</li></ul>
+				
+				<span style="float:right;padding: 0 5px 5px 5px;position:relative;bottom:-5px;"><button class="theme-changer" onclick="changetheme()" title="Change Theme"></button></span>
+
+				<h1 class="title">Edit Types</h1>
+
+				<p>The <strong>S-D Edit</strong> action makes an edit from whichever of the four markers you have set. The more markers you set, the more control you have; the ones you leave out are worked out for you.</p>
+<h3 id="4-point-edit">4-point edit</h3>
+<p>Set all four markers. The source passage replaces the destination passage. If the two are different lengths, the material after the edit moves earlier or later (ripples) to fit. This is the most precise kind of edit and the one to reach for when you know exactly what you are replacing.</p>
+<h3 id="3-point-edit">3-point edit</h3>
+<p>Set any three markers. ReaEdit works out the fourth from the length of the pair you did set:</p>
+<ul>
+<li>Destination IN, source IN and source OUT: the source passage is placed at destination IN, and the destination OUT is calculated from the source length</li>
+<li>Destination IN, destination OUT and source IN: the source OUT is calculated from the destination length</li>
+<li>and so on for the other combinations</li>
+</ul>
+<p>Three-point editing is the everyday way to work: you say where it starts, what to use, and for how long.</p>
+<h3 id="2-point-edit">2-point edit</h3>
+<p>Set one destination marker and one source marker. ReaEdit fills in the missing ends from the ends of your material:</p>
+<ul>
+<li>Destination IN and source IN: from those points to the end of the source material and to the end of the project</li>
+<li>Destination OUT and source OUT: from the start of the material and of the project up to those points</li>
+<li>Source IN and destination OUT: from source IN to the end of the source, and from the start of the project to the destination OUT</li>
+<li>Source OUT and destination IN: from the start of the source to source OUT, and from destination IN to the end of the project</li>
+</ul>
+<p>Two-point edits are useful for quickly joining the start or end of one take to another.</p>
+<h3 id="assembly-line-3-point-insert">Assembly line (3-point insert)</h3>
+<p><strong>3-point Insert Edit</strong> builds a performance from consecutive pieces without replacing anything. Set destination IN, source IN and source OUT; the action inserts the source passage at destination IN and pushes everything after it later. When it has finished, it places a new destination IN at the end of the piece it just inserted, so the next piece follows straight on: set a new source IN and OUT and run the action again. Destination OUT is not needed, because it is worked out from the length of the source passage.</p>
+<p>ReaEdit remembers the item it just inserted. If you have moved destination IN away from the end of that item since the last assembly-line edit, it asks:</p>
+<ul>
+<li><strong>Yes</strong> starts a new edit sequence at the marker where you put it</li>
+<li><strong>No</strong> moves destination IN back to the edge of the last item, so you can continue the sequence</li>
+<li><strong>Cancel</strong> does nothing</li>
+</ul>
+<h3 id="4-point-edit-with-time-stretching">4-point edit with time-stretching</h3>
+<p><strong>Insert with timestretching</strong> needs all four markers (with fewer, nothing happens). It fits the source passage to the destination passage by stretching or shrinking it, which is handy for matching a short drop or a tempo difference. Use it sparingly: a large change will be audible. If there is no material between the source markers you will see "Please make sure there is material to copy between your source markers."</p>
+<h3 id="crossfades-undo-and-what-you-will-be-told">Crossfades, undo and what you will be told</h3>
+<p>Every edit puts a crossfade at each join, with a length set in <a href="/reaedit/source-destination-editing/crossfades-and-preferences/">Preferences</a>. The whole edit is a single undo step. If ReaEdit had to shorten a crossfade because there was not enough source material, it tells you; with OSARA installed it speaks it, without OSARA it shows a message.</p>
+
+				<div class="clear"></div>
+
+				<ul class="pager"><li class="previous"><a title="Markers" href="/reaedit/source-destination-editing/markers/" class="previous"> &larr; Previous </a></li><li><a title="Source-Destination Editing" href="/reaedit/source-destination-editing/" class="active"> &uarr; Up </a></li><li class="next"><a title="Deleting" href="/reaedit/source-destination-editing/deleting/" class="next"> Next &rarr; </a></li></ul>
+
+			</div> <!-- content -->
+		</div> <!-- row-fluid -->
+	</div> <!-- container-fluid -->
+
+
+	<script src="/reaedit/search.js"></script>
+	<script type="text/javascript">
+		// Auto-expand the Part containing the active link
+		var active = document.querySelector('#tree .active');
+		if (active) {
+			var el = active;
+			while (el && el.id !== 'tree') {
+				if (el.tagName === 'LI' && el.parentElement && el.parentElement.parentElement && el.parentElement.parentElement.id === 'tree') {
+					el.classList.add('expanded');
+					break;
+				}
+				el = el.parentElement;
+			}
+		}
+
+		var isA = function(regex) { return navigator.userAgent.match(regex) };
+		var isAbout = function(regex) { return document.getElementsByTagName('h1')[1]?.textContent.match(regex) };
+
+		if ( (isA(/Mac/) || isAbout(/OS X/)) && (!isAbout(/Linux/)) ) {
+			var e = document.getElementsByTagName('body')[0];
+			e.className += ' mac';
+		}
+
+		function changetheme () {
+			if (document.body.classList.contains('dark-theme')) {
+				document.body.classList.remove('dark-theme');
+			} else {
+				document.body.classList.add('dark-theme');
+			}
+			localStorage.setItem('dark-theme', document.body.classList.contains('dark-theme'));
+		}
+
+		if (localStorage.getItem('dark-theme') === 'true') {
+			changetheme();
+		}
+
+		window.addEventListener('keydown', e => {
+			if (e.target.tagName !== 'INPUT') {
+				if (e.key === 'ArrowRight') {
+					var next = document.querySelector('.next a');
+					if (next) next.click();
+				} else if (e.key === 'ArrowLeft') {
+					var prev = document.querySelector('.previous a');
+					if (prev) prev.click();
+				}
+			}
+		});
+
+		window.onload = (e) => {
+			document.querySelectorAll('h2, h3, h4, h5, h6').forEach( el => {
+				let a = document.createElement('a');
+				let slug = el.id !== '' ? el.id : el.innerText;
+				el.id = slug;
+				a.href = `#${slug}`;
+				a.className = 'heading-anchor';
+				a.innerText = ' \uD83D\uDD17';
+				el.appendChild( a );
+			});
+		};
+	</script>
+
+	<script>
+		// Build obfuscated e-mail links (same scheme as the website); no-JS readers see "name [at] domain".
+		document.querySelectorAll('a.obf').forEach(function (a) {
+			var e = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
+			a.href = 'mailto:' + e;
+			a.textContent = e;
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>ReaEdit Manual - Accessibility FAQ</title>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+	<meta name="description" content="ReaEdit Manual - Accessibility FAQ">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="/reaedit/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/reaedit/css/common.css" rel="stylesheet">
+	<link href="/reaedit/css/screen.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div id="tree">
+
+				<a href="/reaedit/"><img class="img-responsive" src="/reaedit/images/reaedit_banner.webp" alt="ReaEdit Manual" /></a>
+
+				<form id="rc-search" role="search" action="#" onsubmit="return false">
+					<label for="rc-search-input" class="rc-sr-only">Search the manual</label>
+					<input id="rc-search-input" type="search" class="form-control" placeholder="Search the manual" autocomplete="off">
+					<div id="rc-search-status" role="status" aria-live="polite"></div>
+				</form>
+
+				<ul><li><a href="/reaedit/toc/">Table of Contents</a></li>
+
+	<li><a href="/reaedit/welcome/">Welcome</a>
+<ul>
+	<li><a href="/reaedit/welcome/introduction/">Introduction</a></li>
+	<li><a href="/reaedit/welcome/installation/">Installation</a></li>
+	<li><a href="/reaedit/welcome/your-first-edit/">Your First Edit</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/source-destination-editing/">Source-Destination Editing</a>
+<ul>
+	<li><a href="/reaedit/source-destination-editing/markers/">Markers</a></li>
+	<li><a href="/reaedit/source-destination-editing/edit-types/">Edit Types</a></li>
+	<li><a href="/reaedit/source-destination-editing/deleting/">Deleting</a></li>
+	<li><a href="/reaedit/source-destination-editing/crossfades-and-preferences/">Crossfades and Preferences</a></li>
+	<li><a href="/reaedit/source-destination-editing/reapers-crossfade-editor/">REAPER's Crossfade Editor</a></li>
+	<li><a href="/reaedit/source-destination-editing/editing-between-project-tabs/">Editing Between Project Tabs</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/accessibility/">Accessibility</a>
+<ul>
+	<li><a href="/reaedit/accessibility/screen-readers/">Screen Readers</a></li>
+	<li><a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a></li>
+	<li class=active><a href="/reaedit/accessibility/accessibility-faq/">Accessibility FAQ</a></li>
+</ul>
+</li>
+	<li><a href="/reaedit/setup-and-reference/">Setup and Reference</a>
+<ul>
+	<li><a href="/reaedit/setup-and-reference/keyboard-shortcuts/">Keyboard Shortcuts</a></li>
+	<li><a href="/reaedit/setup-and-reference/action-reference/">Action Reference</a></li>
+	<li><a href="/reaedit/setup-and-reference/troubleshooting-and-faq/">Troubleshooting and FAQ</a></li>
+	<li><a href="/reaedit/setup-and-reference/getting-help/">Getting Help</a></li>
+	<li><a href="/reaedit/setup-and-reference/changelog/">Changelog</a></li>
+</ul>
+</li>
+</ul>
+
+
+			</div> <!-- tree -->
+
+			<div class="span12" id="content">
+
+				<ul class="breadcrumb"><li><a href="/reaedit/toc/index.html">Home</a></li><li><a href="/reaedit/accessibility/">Accessibility</a></li><li class="active">Accessibility FAQ</li></ul>
+				
+				<span style="float:right;padding: 0 5px 5px 5px;position:relative;bottom:-5px;"><button class="theme-changer" onclick="changetheme()" title="Change Theme"></button></span>
+
+				<h1 class="title">Accessibility FAQ</h1>
+
+				<h3 id="osara-and-your-screen-reader">OSARA and your screen reader</h3>
+<dl>
+<dt>Do I need OSARA?</dt>
+<dd>If you are blind or low-vision, yes: OSARA is what makes ReaEdit speak, and the keyboard <a href="/reaedit/accessibility/crossfade-mode-keyboard/">crossfade mode</a> only starts when OSARA is installed. If you work visually you do not need it, and there is no reason to install it: the markers, edits and deletes work fully without it, messages appear in ordinary dialogs, and the Crossfade Editor action opens REAPER's own visual crossfade editor, which suits you better.</dd>
+<dt>How do I install OSARA?</dt>
+<dd>OSARA is a free accessibility extension for REAPER, installed separately from ReaEdit. Download it, and follow its installation instructions, from the official <a href="https://osara.reaperaccessibility.com/">OSARA website</a>. The <a href="https://www.reaperaccessibility.com/wiki/Main_Page">REAPER accessibility wiki</a> has more guidance on setting up REAPER with a screen reader, and OSARA's own project page is on <a href="https://github.com/jcsteh/osara">GitHub</a>. Restart REAPER after installing. ReaEdit finds OSARA by itself: to check, select the right-hand item of a crossfade and run the Crossfade Editor action. If you hear "Crossfade mode on", OSARA is working with ReaEdit.</dd>
+<dt>I use ReaClassical. Do I need OSARA?</dt>
+<dd>No. ReaClassical has its own screen reader bridge, Clara, which speaks everything ReaClassical does and takes the place of OSARA in a ReaClassical install (installing Clara removes any OSARA plugin, and it is installed with a single Terminal command). See <a href="https://reaclassical.com/manual/accessibility/using-reaclassical-with-a-screen-reader/">Using ReaClassical with a Screen Reader</a> in the ReaClassical manual. ReaEdit is for people who use REAPER without ReaClassical, and OSARA is what makes it speak there.</dd>
+<dt>What does ReaClassical add for blind and low-vision engineers?</dt>
+<dd>A full accessibility experience across the whole production. ReaClassical is designed so that you can carry out a complete classical production, from creating a project through recording, importing, editing, mixing, mastering and rendering, using only the keyboard and a screen reader. ReaEdit gives you the source-destination editing and the crossfade mode; ReaClassical adds accessible versions of its windows, keyboard modes for crossfades, items and the mixer, a Terminal, and guides for every stage of the workflow. See <a href="https://reaclassical.com/manual/accessibility/using-reaclassical-with-a-screen-reader/">Using ReaClassical with a Screen Reader</a> in the ReaClassical manual.</dd>
+</dl>
+<h3 id="the-keyboard-crossfade-mode">The keyboard crossfade mode</h3>
+<dl>
+<dt>Why does ReaEdit have its own crossfade mode?</dt>
+<dd>REAPER's own crossfade editor is visual, and at the moment it is not fully accessible with a screen reader. The keyboard crossfade mode has full parity with the visual editor in the features classical music engineers use, is driven entirely from the keyboard, and speaks every step. See <a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a>.</dd>
+<dt>The crossfade mode keys do nothing.</dt>
+<dd>The key file has not been imported yet. See <a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a>.</dd>
+<dt>Will the crossfade mode change my shortcuts?</dt>
+<dd>Only in one place. ReaEdit puts the crossfade mode keys in REAPER's last alternate keyboard section, <strong>Main (alt-16)</strong>, and nowhere else: your main keymap and the other sections are not touched. Very few people use alt-16, but if you have shortcuts of your own there, back them up before importing the key file, because the import may replace shortcuts on the same keys. The <a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a> chapter shows how to export that section first.</dd>
+<dt>The crossfade editor opens instead of crossfade mode.</dt>
+<dd>OSARA was not detected. Check that it is installed and loaded, and see <em>How do I install OSARA?</em> above.</dd>
+</dl>
+<h3 id="crossfade-mode-messages">Crossfade mode messages</h3>
+<dl>
+<dt>"No items selected" or "No crossfade to the left of this item"</dt>
+<dd>Crossfade mode starts from the right-hand item of a crossfade. Select it, or use Navigate to Next Crossfade, and try again. See <a href="/reaedit/accessibility/crossfade-mode-keyboard/">Crossfade Mode (Keyboard)</a>.</dd>
+<dt>"Select left or right item first"</dt>
+<dd>The action needs one side. Press <kbd>S</kbd> for the left item or <kbd>D</kbd> for the right item.</dd>
+<dt>"Slip requires single item selected"</dt>
+<dd>Slipping works on one item at a time. Choose a side with <kbd>S</kbd> or <kbd>D</kbd>.</dd>
+<dt>"Cannot slip", "Cannot nudge", "Cannot narrow" or "Cannot shrink", followed by a reason</dt>
+<dd>The move would use up too much of a neighbouring item, so ReaEdit refused and nothing changed. Use a smaller step, or move something else first.</dd>
+<dt>"No next crossfade", "No previous crossfade" or "No crossfades on this track"</dt>
+<dd>You are at the last or first crossfade, or the track has none.</dd>
+<dt>"No crossfade context"</dt>
+<dd>Crossfade mode has lost track of which crossfade it was on, usually because the items were changed outside the mode. Leave the mode and start it again.</dd>
+</dl>
+
+				<div class="clear"></div>
+
+				<ul class="pager"><li class="previous"><a title="Crossfade Mode (Keyboard)" href="/reaedit/accessibility/crossfade-mode-keyboard/" class="previous"> &larr; Previous </a></li><li><a title="Accessibility" href="/reaedit/accessibility/" class="active"> &uarr; Up </a></li><li class="next"><a title="Setup and Reference" href="/reaedit/setup-and-reference/" class="next"> Next &rarr; </a></li></ul>
+
+			</div> <!-- content -->
+		</div> <!-- row-fluid -->
+	</div> <!-- container-fluid -->
+
+
+	<script src="/reaedit/search.js"></script>
+	<script type="text/javascript">
+		// Auto-expand the Part containing the active link
+		var active = document.querySelector('#tree .active');
+		if (active) {
+			var el = active;
+			while (el && el.id !== 'tree') {
+				if (el.tagName === 'LI' && el.parentElement && el.parentElement.parentElement && el.parentElement.parentElement.id === 'tree') {
+					el.classList.add('expanded');
+					break;
+				}
+				el = el.parentElement;
+			}
+		}
+
+		var isA = function(regex) { return navigator.userAgent.match(regex) };
+		var isAbout = function(regex) { return document.getElementsByTagName('h1')[1]?.textContent.match(regex) };
+
+		if ( (isA(/Mac/) || isAbout(/OS X/)) && (!isAbout(/Linux/)) ) {
+			var e = document.getElementsByTagName('body')[0];
+			e.className += ' mac';
+		}
+
+		function changetheme () {
+			if (document.body.classList.contains('dark-theme')) {
+				document.body.classList.remove('dark-theme');
+			} else {
+				document.body.classList.add('dark-theme');
+			}
+			localStorage.setItem('dark-theme', document.body.classList.contains('dark-theme'));
+		}
+
+		if (localStorage.getItem('dark-theme') === 'true') {
+			changetheme();
+		}
+
+		window.addEventListener('keydown', e => {
+			if (e.target.tagName !== 'INPUT') {
+				if (e.key === 'ArrowRight') {
+					var next = document.querySelector('.next a');
+					if (next) next.click();
+				} else if (e.key === 'ArrowLeft') {
+					var prev = document.querySelector('.previous a');
+					if (prev) prev.click();
+				}
+			}
+		});
+
+		window.onload = (e) => {
+			document.querySelectorAll('h2, h3, h4, h5, h6').forEach( el => {
+				let a = document.createElement('a');
+				let slug = el.id !== '' ? el.id : el.innerText;
+				el.id = slug;
+				a.href = `#${slug}`;
+				a.className = 'heading-anchor';
+				a.innerText = ' \uD83D\uDD17';
+				el.appendChild( a );
+			});
+		};
+	</script>
+
+	<script>
+		// Build obfuscated e-mail links (same scheme as the website); no-JS readers see "name [at] domain".
+		document.querySelectorAll('a.obf').forEach(function (a) {
+			var e = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
+			a.href = 'mailto:' + e;
+			a.textContent = e;
+		});
+	</script>
+</body>
+</html>
