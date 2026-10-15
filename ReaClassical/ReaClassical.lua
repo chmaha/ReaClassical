@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.0
+@version 27.0.1
 @changelog
-  Initial Release
+  Update splash and manual.
 @metapackage
 @provides
   [main] ReaClassical_*.lua

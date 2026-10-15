@@ -1424,7 +1424,7 @@ body.dark-theme #rc-results .rc-more:focus {
 <li>Set recording inputs manually or automatically based on track naming</li>
 <li>Temporarily disable recording of a channel</li>
 <li>Set routing</li>
-<li>Add "special" tracks such as aux, submix, room tone, live bounce, listenback and reference tracks</li>
+<li>Add "special" tracks: aux, submix, room tone, reference, live bounce, listenback and playback (see <a href="#special-tracks">Special Tracks</a> below)</li>
 <li>Change visibility of folders and special tracks in the arrange window</li>
 <li>Add a track to all folders</li>
 <li>Delete a track from all folders</li>
@@ -1444,7 +1444,27 @@ body.dark-theme #rc-results .rc-more:focus {
 <div class="admonition accessibility">
 <p class="admonition-title">Screen reader users (Clara)</p>
 <p>Create Project and Mission Control each have a keyboard-driven equivalent: Accessible Create Project and Accessible Track Setup. Both are announced through Clara. In Mission Control the "Toggle GUI Mode" action (<kbd>Ctrl+Alt+Shift+G</kbd>) switches between the accessible window and the standard ReaImGui window. See <a href="/accessibility/using-reaclassical-with-a-screen-reader/">Using ReaClassical with a Screen Reader</a>.</p>
-</div><ul class="pager"><li class="previous"><a title="Update" href="#update" class="previous"> &larr; Previous </a></li><li><a title="Getting Started" href="#getting_started" class="active"> &uarr; Up </a></li><li class="next"><a title="Converting a Standard REAPER Project" href="#converting" class="next"> Next &rarr; </a></li></ul>
+</div>
+<h3 id="special-tracks">Special Tracks</h3>
+<p>Special tracks live alongside the mixer tracks rather than inside your folders. Add them with the Mission Control <kbd>Add Special Tracks</kbd> button: enter how many of each you want and press <kbd>OK</kbd>. You can add up to 99 each of aux, submix and reference tracks, but only one each of room tone, live bounce, listenback and playback (the dialog shows "(already exists)" once you have one). The live bounce option only appears in a horizontal workflow.</p>
+<p>Once added, each special track is listed in the Mission Control Special Tracks section with mute, solo, pan and volume controls, a TCP checkbox to show it in the arrange window, a Routing button, an FX button and a delete button (RCMASTER itself cannot be deleted). Aux, submix and reference tracks can also be renamed there, and aux and submix tracks can be moved left or right in the mixer with the arrow buttons.</p>
+<h4 id="aux-and-submix">Aux and Submix</h4>
+<p>Aux (<code>@</code>) and submix (<code>#</code>) tracks are busses that appear in the mixer only, unless you tick their TCP checkbox. Each feeds RCMASTER. ReaClassical treats them in the same way, so the difference is in how you use them:</p>
+<ul>
+<li>Use an <strong>aux</strong> for effects shared by many tracks, such as a reverb bus.</li>
+<li>Use a <strong>submix</strong> to collect related tracks, such as all the microphones on one orchestral section, so you can balance them together.</li>
+</ul>
+<p>To send a mixer track to an aux or submix, click the mixer track's <kbd>Routing</kbd> button in Mission Control and tick the destination. Untick RCMASTER there if the track should only reach the master bus via a submix. An aux or submix has its own Routing button too, so you can route one aux or submix into another as well as to RCMASTER.</p>
+<h4 id="room-tone">Room Tone</h4>
+<p>A single room tone track sits before RCMASTER, is shown in the arrange window and feeds RCMASTER. When you add it, ReaClassical imports <code>roomtone.wav</code> from your project's media folder onto it if one exists. Creating CD markers then trims the room tone to the length of the album and adds the fades. See <a href="/reference/room-tone-generation/">Room Tone Generation</a> and the room tone notes in the mastering section.</p>
+<h4 id="reference">Reference</h4>
+<p>A reference track (<code>REF</code>) sits just after RCMASTER, outside the RCMASTER structure, so it is not part of your mix. Import another recording onto it and hover over it with <kbd>A</kbd> to audition it and A/B against your own production. By default it is used this way; to use it as an overdub track instead, see <a href="/workflows/recording/#overdub-recording">Overdub recording</a> and the reference track option in Preferences <kbd>F5</kbd>.</p>
+<h4 id="live-bounce">Live Bounce</h4>
+<p>In a horizontal workflow, the live bounce track (<code>LIVE</code>) receives a send from RCMASTER and records the rough balanced stereo mix while you record the individual channels. See <a href="/workflows/recording/#live-bounce">Live Bounce</a>.</p>
+<h4 id="listenback">Listenback</h4>
+<p>The listenback track (<code>LISTENBACK</code>) lets you hear a musician who is far away from the recording setup. It is shown in the mixer only, is record-armed with input monitoring on and records nothing. Choose its input channel from the dropdown in the Special Tracks section. Monitoring mutes automatically during playback and recording unless you set the monitoring JSFX to "Always On". See <a href="/workflows/recording/#listenback">Listenback</a>.</p>
+<h4 id="playback">Playback</h4>
+<p>The playback track (<code>PLAYBACK</code>) is a mixer-only monitoring track that receives the RCMASTER mix. It is created muted, and you choose the pair of hardware outputs it plays through from the dropdown in the Special Tracks section. Press <kbd>Ctrl+Alt+Shift+P</kbd> to unmute it when you want to monitor playback on those outputs. It does not feed the master bus.</p><ul class="pager"><li class="previous"><a title="Update" href="#update" class="previous"> &larr; Previous </a></li><li><a title="Getting Started" href="#getting_started" class="active"> &uarr; Up </a></li><li class="next"><a title="Converting a Standard REAPER Project" href="#converting" class="next"> Next &rarr; </a></li></ul>
 </div>
 
 <div class="page" id="page-converting"><h2 class="clear" id="converting">Converting a Standard REAPER Project</h2>
