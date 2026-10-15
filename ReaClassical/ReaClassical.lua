@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.1
+@version 27.0.2
 @changelog
-  Update splash and manual.
+  Offline manual: fix cross-page links, add Special Tracks section
 @metapackage
 @provides
   [main] ReaClassical_*.lua
