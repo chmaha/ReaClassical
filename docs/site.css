@@ -405,6 +405,34 @@ body {
     position: relative;
 }
 
+.code-block .install-code {
+    padding-right: 5rem;
+}
+
+.copy-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-border-dark);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--color-text-light-secondary);
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--color-text-light);
+}
+
+.copy-btn:focus-visible {
+    outline-offset: 1px;
+}
+
 .script-link {
     margin-top: 0.5rem;
     font-size: 0.85rem;
