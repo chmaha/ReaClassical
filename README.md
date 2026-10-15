@@ -11,19 +11,40 @@ Free and open source under the GNU General Public License v3 (see `LICENSE`).
 - Manual: https://reaclassical.com/manual/
 - Support and discussion: the ReaClassical subforum on the [REAPER forum](https://forum.cockos.com/forumdisplay.php?f=57)
 
-## Install
+## Install ReaClassical
 
-ReaClassical 27 will be available to install here soon.
+The install script is the supported way to install ReaClassical. It downloads the REAPER version
+ReaClassical was tested with (see `tested_reaper_ver.txt`), the ReaClassical resource folder and the
+right plugins for your system, and sets everything up in a self-contained folder. Nothing is installed
+system-wide.
+
+- **macOS** (Terminal): `curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.com/macos | sh`
+- **Windows** (PowerShell): `irm "https://reaclassical.com/win" | iex`
+- **Linux, including Raspberry Pi** (terminal): `curl --proto '=https' --tlsv1.2 -sSf https://reaclassical.com/linux | sh`
+
+Updates come through ReaClassical itself (the Update action), which uses the ReaPack index below.
+
+## ReaPack indexes
+
+ReaClassical, ReaEdit and RCPlugs each have their own [ReaPack](https://reapack.com) index. Use
+Extensions > ReaPack > Import repositories and paste the URL:
+
+| Package | Index |
+|---|---|
+| ReaClassical | `https://raw.githubusercontent.com/chmaha/ReaClassical/main/index.xml` |
+| ReaEdit | `https://raw.githubusercontent.com/chmaha/ReaClassical/main/ReaEdit/index.xml` |
+| RCPlugs | `https://raw.githubusercontent.com/chmaha/ReaClassical/main/RCPlugs/index.xml` |
+
+ReaEdit (source-destination editing) and RCPlugs (the JSFX plugins) can be installed this way on any
+REAPER setup. Installing ReaClassical through ReaPack alone is unsupported; use the install script.
 
 ## Repository layout
 
 - `ReaClassical/` the scripts, theme, project templates and offline help (ReaPack package)
-- `ReaEdit/` ReaEdit, the free source-destination editing package (its own ReaPack index)
-- `RCPlugs/` the ReaClassical JSFX plugins (their own ReaPack index, `RCPlugs/index.xml`)
+- `ReaEdit/` ReaEdit, the free source-destination editing package
+- `RCPlugs/` the ReaClassical JSFX plugins
 - `Installers/` resources the install scripts download (resource folder, extensions, 7-Zip)
-- `manual/` manual sources; `site/`, `web_src/` website sources; `docs/` the built website
-  (GitHub Pages)
-- `admin_scripts/` build tooling
+- `docs/` the website and manual (GitHub Pages)
 
 ## Contributing
 
