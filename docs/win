@@ -17,23 +17,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 $ErrorActionPreference = "Stop"
-
-# Windows PowerShell (5.1, not PowerShell 7) renders Invoke-WebRequest's
-# progress bar by actually redrawing UI on close to every chunk received -
-# genuinely slow, not perceived-slow (real reports/measurements elsewhere
-# put it at one to two orders of magnitude versus curl/Invoke-WebRequest
-# with this suppressed). -UseBasicParsing below is unrelated (skips an
-# IE-engine dependency, doesn't touch the progress bar) - this is the
-# actual fix, and every download in this script goes through
-# Invoke-WebRequest, so setting it once here covers all of them.
 $ProgressPreference = "SilentlyContinue"
 
-# Force TLS 1.2 explicitly - older/enterprise Windows images (e.g. Win10
-# LTSC) don't always default Invoke-WebRequest/.NET to a protocol the servers
-# (which require TLS 1.2 or newer) actually accept, and the failure can be intermittent per-request rather
-# than blanket (some downloads succeed, a later one to the same domain
-# family fails) - a real report this session matched exactly that pattern.
-# Harmless to force unconditionally even where TLS 1.2 already works.
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Version
@@ -62,12 +47,7 @@ trap {
 # ------------------------
 # Retry wrapper
 # ------------------------
-# Invoke-WebRequest/Invoke-RestMethod have no native --retry flag (unlike
-# curl, used by docs/macos and docs/linux) - a real tester hit curl exit 56
-# (CURLE_RECV_ERROR) on macOS right after a fresh publish, most likely
-# a cache or CDN not having fully refreshed after the new release yet. Same class
-# of transient failure can happen here, so wrap every download/API call in
-# a small manual retry loop instead.
+
 function Invoke-WithRetry {
     param(
         [Parameter(Mandatory = $true)][scriptblock]$Action,
