@@ -4,7 +4,6 @@
 # Works for all architectures that are compatible with REAPER
 #
 # Installs the current release from https://github.com/chmaha/ReaClassical.
-# Generated from the pre-release installer by release_installers.py.
 
 # Copyright (C) 2022–2026 chmaha
 # This program is free software: you can redistribute it and/or modify
@@ -20,8 +19,7 @@
 
 rcver="27"
 branch="main"
-# All payload downloads (tested_reaper_ver.txt, Installers/*) come from here;
-# <base_url>/<branch>/ mirrors the public repo's branch checkouts.
+
 base_url="https://raw.githubusercontent.com/chmaha/ReaClassical"
 
 cleanup() {
