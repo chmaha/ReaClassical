@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="ReaClassical" commit="6e1a443d004789b169b83fc0e90705e2ea6f66c9">
+<index version="1" name="chmaha Scripts" commit="6e1a443d004789b169b83fc0e90705e2ea6f66c9">
   <category name="ReaClassical">
     <reapack name="ReaClassical.lua" type="script" desc="ReaClassical">
       <metadata>
