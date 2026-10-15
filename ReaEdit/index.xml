@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" name="ReaEdit" commit="6e1a443d004789b169b83fc0e90705e2ea6f66c9">
+  <category name="ReaEdit">
+    <reapack name="ReaEdit.lua" type="script" desc="ReaEdit">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+{\pard \ql \f0 \sa180 \li0 \fi0 These functions provide everything you need for professional source-destination editing in REAPER. Optional: OSARA, for spoken feedback. No other extensions are needed. For a more complete recording, editing, mixing and mastering solution for classical and other acoustic music, please see https://reaclassical.com\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="chmaha" time="2026-10-14T23:57:35Z">
+        <changelog><![CDATA[First release of ReaEdit]]></changelog>
+        <source main="main" file="ReaEdit_3-point Insert Edit.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_3-point%20Insert%20Edit.lua</source>
+        <source main="main" file="ReaEdit_Add Destination IN marker.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Add%20Destination%20IN%20marker.lua</source>
+        <source main="main" file="ReaEdit_Add Destination OUT Marker.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Add%20Destination%20OUT%20Marker.lua</source>
+        <source main="main" file="ReaEdit_Add Source IN marker.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Add%20Source%20IN%20marker.lua</source>
+        <source main="main" file="ReaEdit_Add Source OUT marker.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Add%20Source%20OUT%20marker.lua</source>
+        <source main="main" file="ReaEdit_Crossfade Editor.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Crossfade%20Editor.lua</source>
+        <source main="main" file="ReaEdit_Delete All S-D markers.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Delete%20All%20S-D%20markers.lua</source>
+        <source main="main" file="ReaEdit_Delete Leaving Silence.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Delete%20Leaving%20Silence.lua</source>
+        <source main="main" file="ReaEdit_Delete S-D Project Markers.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Delete%20S-D%20Project%20Markers.lua</source>
+        <source main="main" file="ReaEdit_Delete With Ripple.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Delete%20With%20Ripple.lua</source>
+        <source main="main" file="ReaEdit_Insert with timestretching.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Insert%20with%20timestretching.lua</source>
+        <source main="main" file="ReaEdit_Navigate to Next Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Navigate%20to%20Next%20Crossfade.lua</source>
+        <source main="main" file="ReaEdit_Navigate to Previous Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Navigate%20to%20Previous%20Crossfade.lua</source>
+        <source main="main" file="ReaEdit_Preferences.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Preferences.lua</source>
+        <source main="main" file="ReaEdit_S-D Edit.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_S-D%20Edit.lua</source>
+        <source main="main" file="ReaEdit_Set Dest Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Set%20Dest%20Project%20Marker.lua</source>
+        <source main="main" file="ReaEdit_Set Source Project Marker.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/ReaEdit_Set%20Source%20Project%20Marker.lua</source>
+        <source file="XFM/ReaEdit_Set Up Crossfade Mode Keys.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_Set%20Up%20Crossfade%20Mode%20Keys.lua</source>
+        <source file="XFM/ReaEdit_XFM Announce Selected Items.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Announce%20Selected%20Items.lua</source>
+        <source file="XFM/ReaEdit_XFM Audition Crossfade x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Audition%20Crossfade%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Audition Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Audition%20Crossfade.lua</source>
+        <source file="XFM/ReaEdit_XFM Audition Left Item x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Audition%20Left%20Item%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Audition Left Item.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Audition%20Left%20Item.lua</source>
+        <source file="XFM/ReaEdit_XFM Audition Right Item x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Audition%20Right%20Item%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Audition Right Item.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Audition%20Right%20Item.lua</source>
+        <source file="XFM/ReaEdit_XFM Cycle Fade Shape.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Cycle%20Fade%20Shape.lua</source>
+        <source file="XFM/ReaEdit_XFM Grow Fade End x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Grow%20Fade%20End%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Grow Fade End.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Grow%20Fade%20End.lua</source>
+        <source file="XFM/ReaEdit_XFM Grow Fade Start x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Grow%20Fade%20Start%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Grow Fade Start.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Grow%20Fade%20Start.lua</source>
+        <source file="XFM/ReaEdit_XFM Item Volume Down 0.2dB.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Item%20Volume%20Down%200.2dB.lua</source>
+        <source file="XFM/ReaEdit_XFM Item Volume Down 1dB.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Item%20Volume%20Down%201dB.lua</source>
+        <source file="XFM/ReaEdit_XFM Item Volume Reset.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Item%20Volume%20Reset.lua</source>
+        <source file="XFM/ReaEdit_XFM Item Volume Up 0.2dB.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Item%20Volume%20Up%200.2dB.lua</source>
+        <source file="XFM/ReaEdit_XFM Item Volume Up 1dB.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Item%20Volume%20Up%201dB.lua</source>
+        <source file="XFM/ReaEdit_XFM Match Left Item Fade.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Match%20Left%20Item%20Fade.lua</source>
+        <source file="XFM/ReaEdit_XFM Match Right Item Fade.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Match%20Right%20Item%20Fade.lua</source>
+        <source file="XFM/ReaEdit_XFM Mode Daemon.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Mode%20Daemon.lua</source>
+        <source file="XFM/ReaEdit_XFM Narrow Crossfade x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Narrow%20Crossfade%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Narrow Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Narrow%20Crossfade.lua</source>
+        <source file="XFM/ReaEdit_XFM Nudge Item Left x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Nudge%20Item%20Left%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Nudge Item Left.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Nudge%20Item%20Left.lua</source>
+        <source file="XFM/ReaEdit_XFM Nudge Item Right x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Nudge%20Item%20Right%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Nudge Item Right.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Nudge%20Item%20Right.lua</source>
+        <source file="XFM/ReaEdit_XFM Reset.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Reset.lua</source>
+        <source file="XFM/ReaEdit_XFM Revert.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Revert.lua</source>
+        <source file="XFM/ReaEdit_XFM Select Both Items.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Select%20Both%20Items.lua</source>
+        <source file="XFM/ReaEdit_XFM Select Left Item.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Select%20Left%20Item.lua</source>
+        <source file="XFM/ReaEdit_XFM Select Right Item.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Select%20Right%20Item.lua</source>
+        <source file="XFM/ReaEdit_XFM Shift Crossfade Left x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shift%20Crossfade%20Left%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Shift Crossfade Left.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shift%20Crossfade%20Left.lua</source>
+        <source file="XFM/ReaEdit_XFM Shift Crossfade Right x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shift%20Crossfade%20Right%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Shift Crossfade Right.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shift%20Crossfade%20Right.lua</source>
+        <source file="XFM/ReaEdit_XFM Shrink Fade End x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shrink%20Fade%20End%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Shrink Fade End.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shrink%20Fade%20End.lua</source>
+        <source file="XFM/ReaEdit_XFM Shrink Fade Start x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shrink%20Fade%20Start%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Shrink Fade Start.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Shrink%20Fade%20Start.lua</source>
+        <source file="XFM/ReaEdit_XFM Slip Item Left x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Slip%20Item%20Left%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Slip Item Left.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Slip%20Item%20Left.lua</source>
+        <source file="XFM/ReaEdit_XFM Slip Item Right x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Slip%20Item%20Right%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Slip Item Right.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Slip%20Item%20Right.lua</source>
+        <source file="XFM/ReaEdit_XFM Widen Crossfade x modifier.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Widen%20Crossfade%20x%20modifier.lua</source>
+        <source file="XFM/ReaEdit_XFM Widen Crossfade.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/XFM/ReaEdit_XFM%20Widen%20Crossfade.lua</source>
+        <source file="lib/ReaEdit_Announce.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_Announce.lua</source>
+        <source file="lib/ReaEdit_Audition_Playback.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_Audition_Playback.lua</source>
+        <source file="lib/ReaEdit_Marker_Enum.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_Marker_Enum.lua</source>
+        <source file="lib/ReaEdit_SD_Crossfade_Utils.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_SD_Crossfade_Utils.lua</source>
+        <source file="lib/ReaEdit_Time_Naming.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_Time_Naming.lua</source>
+        <source file="lib/ReaEdit_XFM_Keys.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_XFM_Keys.lua</source>
+        <source file="lib/ReaEdit_XFM_Setup.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_XFM_Setup.lua</source>
+        <source file="lib/ReaEdit_XFM_Utils.lua">https://github.com/chmaha/ReaClassical/raw/6e1a443d004789b169b83fc0e90705e2ea6f66c9/ReaEdit/lib/ReaEdit_XFM_Utils.lua</source>
+      </version>
+    </reapack>
+  </category>
+</index>
