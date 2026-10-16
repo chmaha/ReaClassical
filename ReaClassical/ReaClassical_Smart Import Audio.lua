@@ -40,10 +40,24 @@ if _clara_or_debug then
         return
     end
 
+    local scan_mod = require("ReaClassical_Smart_Import_Scan")
+    local poly_set = {}
+    for _, c in ipairs(polywav.scan_candidates()) do poly_set[c.filepath:gsub("\\", "/")] = true end
+    local used_set = scan_mod.get_used_source_files()
+    local has_named = false
+    for _, f in ipairs(scan_mod.scan_media_folder_recursive(scan_mod.get_project_media_path())) do
+        local n = f:gsub("\\", "/")
+        if not poly_set[n] and not used_set[n] then has_named = true break end
+    end
+    if not has_named then
+        dofile(script_path .. "lib/ReaClassical_Accessible Import Polywav.lua")
+        return
+    end
+
     local CHOICE_LABELS = { "Import Takes", "Import Polywav" }
     local CHOICE_TARGETS = {
         script_path .. "lib/ReaClassical_Accessible Smart Import.lua",
-        script_path .. "ReaClassical_Accessible Import Polywav.lua",
+        script_path .. "lib/ReaClassical_Accessible Import Polywav.lua",
     }
     local KEY_UP, KEY_DOWN, KEY_ENTER, KEY_ESC = 30064, 1685026670, 13, 27
     local choice_idx = 1
