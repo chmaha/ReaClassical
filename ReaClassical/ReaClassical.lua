@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.3
+@version 27.0.4
 @changelog
-  Fix smart import for polywavs
+  Add polywav import to accessible branch
+  Update manual re: polywavs
 @metapackage
 @provides
   [main] ReaClassical_*.lua
