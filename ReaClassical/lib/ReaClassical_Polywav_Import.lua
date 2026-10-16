@@ -460,6 +460,8 @@ function M.run(opts)
         end
     end
 
+    Main_OnCommand(40047, 0) -- Peaks: Build any missing peaks
+
     return #errors == 0, errors
 end
 
