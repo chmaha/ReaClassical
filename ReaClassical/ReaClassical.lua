@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.2
+@version 27.0.3
 @changelog
-  Offline manual: fix cross-page links, add Special Tracks section
+  Fix smart import for polywavs
 @metapackage
 @provides
   [main] ReaClassical_*.lua
