@@ -186,9 +186,11 @@ function M.compute_composition(channel_count, pattern_str)
     local ch = 1
     for i, size in ipairs(groups) do
         if size == 2 then
-            ordered_names[i] = { base_name = "ch" .. ch, display_name = string.format("Ch %d-%d (Stereo)", ch, ch + 1) }
+            local name = string.format("Ch %d-%d (Stereo)", ch, ch + 1)
+            ordered_names[i] = { base_name = name:lower(), display_name = name }
         else
-            ordered_names[i] = { base_name = "ch" .. ch, display_name = "Ch " .. ch }
+            local name = "Ch " .. ch
+            ordered_names[i] = { base_name = name:lower(), display_name = name }
         end
         ch = ch + size
     end
@@ -232,6 +234,28 @@ function M.place_take_items(filepath, groups, target_tracks)
         ch = ch + size
     end
     return items
+end
+
+-- Channel groups map to folder tracks by position. Tracks that already have
+-- a name keep it; blank ones are named after their channels.
+local function name_blank_tracks(ordered_names, workflow)
+    local mixers = {}
+    for i = 0, CountTracks(0) - 1 do
+        local track = GetTrack(0, i)
+        local _, mixer_state = GetSetMediaTrackInfo_String(track, "P_EXT:mixer", "", false)
+        if mixer_state == "y" then mixers[#mixers + 1] = track end
+    end
+
+    for i, entry in ipairs(ordered_names) do
+        local mixer = mixers[i]
+        if mixer then
+            local _, current_name = GetTrackName(mixer)
+            local stripped = current_name:gsub("^M:?", ""):gsub("^%s*(.-)%s*$", "%1")
+            if stripped == "" then
+                placement.rename_tracks({ mixer_track = mixer }, entry.display_name, false, workflow)
+            end
+        end
+    end
 end
 
 local function prepare(sessions, session_names, pattern_str, workflow)
@@ -288,13 +312,13 @@ local function record_item(item, pos, take_num, take_len, all_items, touched_tra
 end
 
 function M.run(opts)
-    local groups, ordered_names, base_names, errors =
+    local groups, ordered_names, _, errors =
         prepare(opts.sessions, opts.session_names, opts.composition_pattern, opts.workflow)
     if not groups then
         return false, errors
     end
 
-    placement.ensure_tracks_exist(ordered_names, opts.workflow)
+    name_blank_tracks(ordered_names, opts.workflow)
 
     errors = {}
     local is_vertical    = opts.workflow == "Vertical"
@@ -325,9 +349,10 @@ function M.run(opts)
         folder_tracks = placement.build_folder_track_map(tracks)
     else
         local tracks = scan.get_tracks("Horizontal")
+        local first_folder = placement.build_folder_track_map(tracks)[1] or {}
         horiz_target_tracks = {}
-        for i, base_name in ipairs(base_names) do
-            local t = scan.find_track_by_name(tracks, base_name)
+        for i = 1, #groups do
+            local t = first_folder[i]
             horiz_target_tracks[i] = t and t.track or nil
             if horiz_target_tracks[i] then touched_tracks[#touched_tracks + 1] = horiz_target_tracks[i] end
         end
@@ -366,8 +391,8 @@ function M.run(opts)
                     goto continue
                 end
 
-                for i, base_name in ipairs(base_names) do
-                    local t = placement.find_track_in_folder_list(folder_track_list, base_name)
+                for i = 1, #groups do
+                    local t = folder_track_list[i]
                     target_tracks[i] = t and t.track or nil
                 end
 

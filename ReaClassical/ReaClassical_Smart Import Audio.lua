@@ -122,6 +122,7 @@ local track_order_slots     = 0
 
 local polywav_available_candidates = {}
 local polywav_committed = false
+local polywav_only = false
 local polywav_workflow, polywav_has_existing_items
 local polywav_sessions, polywav_session_names, polywav_parse_errors
 local polywav_pattern_text      = "1"
@@ -217,6 +218,7 @@ function continue_named_track_import(workflow, has_existing_items, start_pos)
     end
 
     polywav_committed          = false
+    polywav_only               = false
     polywav_workflow           = workflow
     polywav_has_existing_items = has_existing_items
     polywav_sessions, polywav_session_names, polywav_parse_errors =
@@ -239,6 +241,27 @@ function continue_named_track_import(workflow, has_existing_items, start_pos)
         if not used_files[normalized] then
             table.insert(files, filepath)
         end
+    end
+
+    if #files == 0 and #polywav_available_candidates > 0
+        and imgui_exists and not _G.RC_SCRIPT_ARGS then
+        polywav_only = true
+        show_import_dialog({}, {}, workflow)
+
+        local function wait_for_polywav_dialog()
+            if dialog_open then
+                defer(wait_for_polywav_dialog)
+                return
+            end
+            if not polywav_committed then
+                Undo_EndBlock("Import Audio (Cancelled)", -1)
+                PreventUIRefresh(-1)
+                UpdateArrange()
+            end
+        end
+
+        wait_for_polywav_dialog()
+        return
     end
 
     if #all_files == 0 then
@@ -1012,14 +1035,16 @@ function draw_import_dialog()
     if visible then
 
     local has_polywav_tab = #polywav_available_candidates > 0
-    local show_named_content = true
+    local show_named_content = not polywav_only
 
     if has_polywav_tab then
         if not ImGui.BeginTabBar(ctx, "SmartImportTabs") then
             ImGui.End(ctx)
             return
         end
-        show_named_content = ImGui.BeginTabItem(ctx, "Named Tracks")
+        if not polywav_only then
+            show_named_content = ImGui.BeginTabItem(ctx, "Named Tracks")
+        end
     end
 
     if show_named_content then
