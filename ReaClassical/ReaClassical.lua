@@ -1,9 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.4
+@version 27.0.5
 @changelog
-  Add polywav import to accessible branch
-  Update manual re: polywavs
+  Fix missing peaks after polywav import
+  Add auto solo folder function to lib subfolder
 @metapackage
 @provides
   [main] ReaClassical_*.lua
