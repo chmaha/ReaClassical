@@ -176,6 +176,7 @@
 <li><code>221</code> makes two stereo pairs followed by mono channels for everything else</li>
 </ul>
 <p>Once the digits have been used up, the last digit repeats for as many whole groups as still fit, and anything left over becomes mono tracks. ReaClassical checks that the result fits before touching your project, then distributes the takes with the same options as Named Tracks.</p>
+<p>The channel groups are placed on the tracks of the folder in order: the first group goes to the first track, the second to the second, and so on, so the project needs at least as many tracks per folder as there are groups. Tracks that already have names keep them, so you can set up your tracks first and the channels simply follow their order. Any blank tracks are named after their channels (for example "Ch 1" or "Ch 2-3 (Stereo)"). The Polywav tab works on its own, so a media folder that contains only multi-channel files is fine.</p>
 <h3 id="importing-a-ddp-or-pmi">Importing a DDP or PMI</h3>
 <p>ReaClassical can rebuild a full CD track and album metadata layout from an existing master, for checking or remastering. Use a fresh ReaClassical project whose destination folder is empty.</p>
 <ul>
