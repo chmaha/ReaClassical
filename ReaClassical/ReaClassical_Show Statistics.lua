@@ -112,6 +112,8 @@ function main()
             ImGui.Text(ctx, "Album Stats:")
             ImGui.Text(ctx, "- Final album length: " .. stats.album_end)
             ImGui.Text(ctx, "- Number of CD markers: " .. tostring(stats.num_cd_markers))
+            ImGui.Text(ctx, "- Items outside the album: " .. tostring(stats.num_items_outside_album))
+            ImGui.Text(ctx, "- Length of material outside the album: " .. stats.outside_album_length)
             ImGui.Spacing(ctx)
 
             ImGui.Text(ctx, "Project Stats:")

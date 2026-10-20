@@ -26,10 +26,16 @@ local enum_project_markers = require("ReaClassical_Marker_Enum")
 
 local M = {}
 
+-- Same rule as Create CD Markers: on the first track, an item starting more than
+-- this many seconds after the previous item ends is not part of the album.
+local ALBUM_MAX_GAP = 60
+
 M.SECTIONS = {
     { header = "Album Stats", fields = {
         { label = "Final album length",    key = "album_end" },
         { label = "Number of CD markers",  key = "num_cd_markers" },
+        { label = "Items outside the album",            key = "num_items_outside_album" },
+        { label = "Length of material outside the album", key = "outside_album_length" },
     } },
     { header = "Project Stats", fields = {
         { label = "Project age",                          key = "project_age" },
@@ -153,6 +159,7 @@ function M.calculate()
     local num_cd_markers, num_sd_edits, num_splits, num_regions = 0, 0, 0, 0
     local num_fx, num_automation_lanes, total_source_length, total_project_length, album_end = 0, 0, 0, 0, nil
     local folder_count = 0
+    local num_items_outside_album, outside_album_length = 0, 0
 
     for i = 0, num_items - 1 do
         local item = GetMediaItem(0, i)
@@ -182,6 +189,7 @@ function M.calculate()
         local first_track = GetTrack(0, 0)
         local track_items = CountTrackMediaItems(first_track)
         local prev_end = nil
+        local album_prev_end, past_album = nil, false
         for j = 0, track_items - 1 do
             local item = GetTrackMediaItem(first_track, j)
             if item then
@@ -196,6 +204,16 @@ function M.calculate()
                     num_splits = num_splits + 1
                 end
                 prev_end = prev_end and math.max(prev_end, item_end) or item_end
+
+                if album_prev_end and item_pos - album_prev_end > ALBUM_MAX_GAP then
+                    past_album = true
+                end
+                if past_album then
+                    num_items_outside_album = num_items_outside_album + 1
+                    outside_album_length = outside_album_length + (item_end - item_pos)
+                else
+                    album_prev_end = item_end
+                end
             end
         end
     end
@@ -255,6 +273,8 @@ function M.calculate()
         reaclassical_version = reaclassical_version,
         album_end = format_time(album_end),
         num_cd_markers = num_cd_markers,
+        num_items_outside_album = num_items_outside_album,
+        outside_album_length = format_time(outside_album_length),
         project_age = project_age,
         session_time = session_time,
         total_project_length = format_time(total_project_length),

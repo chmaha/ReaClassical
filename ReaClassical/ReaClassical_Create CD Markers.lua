@@ -1006,7 +1006,7 @@ function check_first_track_for_names(track)
         local itemStart = GetMediaItemInfo_Value(item, "D_POSITION")
         local itemEnd = itemStart + GetMediaItemInfo_Value(item, "D_LENGTH")
 
-        if prevEnd and (itemStart - prevEnd) >= 60 then
+        if prevEnd and (itemStart - prevEnd) > 60 then
             break
         end
         prevEnd = itemEnd
