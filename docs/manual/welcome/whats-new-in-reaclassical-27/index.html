@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>ReaClassical Manual - What's New in ReaClassical 27</title>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+	<meta name="description" content="ReaClassical Manual - What's New in ReaClassical 27">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="/manual/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/manual/css/common.css" rel="stylesheet">
+	<link href="/manual/css/screen.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div id="tree">
+
+				<a href="/manual/"><img class="img-responsive" src="/manual/images/reaclassical_banner.webp" alt="ReaClassical Manual" /></a>
+
+				<form id="rc-search" role="search" action="#" onsubmit="return false">
+					<label for="rc-search-input" class="rc-sr-only">Search the manual</label>
+					<input id="rc-search-input" type="search" class="form-control" placeholder="Search the manual" autocomplete="off">
+					<div id="rc-search-status" role="status" aria-live="polite"></div>
+				</form>
+
+				<ul><li><a href="/manual/toc/">Table of Contents</a></li>
+
+	<li><a href="/manual/welcome/">Welcome</a>
+<ul>
+	<li><a href="/manual/welcome/introduction/">Introduction</a></li>
+	<li class=active><a href="/manual/welcome/whats-new-in-reaclassical-27/">What's New in ReaClassical 27</a></li>
+	<li><a href="/manual/welcome/documentation/">Documentation</a></li>
+	<li><a href="/manual/welcome/website/">Website</a></li>
+	<li><a href="/manual/welcome/coming-from-standard-reaper/">Coming from Standard REAPER</a></li>
+	<li><a href="/manual/welcome/donations/">Donations</a></li>
+	<li><a href="/manual/welcome/other-ways-to-contribute/">Other Ways to Contribute</a></li>
+	<li><a href="/manual/welcome/spread-the-word/">Spread the Word</a></li>
+	<li><a href="/manual/welcome/compatibility/">Compatibility</a></li>
+	<li><a href="/manual/welcome/source-code/">Source Code</a></li>
+	<li><a href="/manual/welcome/development-style/">Development Style</a></li>
+	<li><a href="/manual/welcome/versioning-style/">Versioning Style</a></li>
+	<li><a href="/manual/welcome/tools-and-languages/">Tools and Languages</a></li>
+	<li><a href="/manual/welcome/changelog/">Changelog</a></li>
+	<li><a href="/manual/welcome/thanks/">Thanks</a></li>
+</ul>
+</li>
+	<li><a href="/manual/getting-started/">Getting Started</a>
+<ul>
+	<li><a href="/manual/getting-started/licensing/">Licensing</a></li>
+	<li><a href="/manual/getting-started/install/">Install</a></li>
+	<li><a href="/manual/getting-started/update/">Update</a></li>
+	<li><a href="/manual/getting-started/project-setup/">Project Setup</a></li>
+	<li><a href="/manual/getting-started/converting-a-standard-reaper-project/">Converting a Standard REAPER Project</a></li>
+	<li><a href="/manual/getting-started/reaclassical-preferences/">ReaClassical Preferences</a></li>
+	<li><a href="/manual/getting-started/too-long-didnt-read/">Too Long; Didn't Read</a></li>
+</ul>
+</li>
+	<li><a href="/manual/accessibility/">Accessibility</a>
+<ul>
+	<li><a href="/manual/accessibility/using-reaclassical-with-a-screen-reader/">Using ReaClassical with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/getting-started-with-a-screen-reader/">Getting Started with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/recording-with-a-screen-reader/">Recording with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/importing-with-a-screen-reader/">Importing with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/navigating-a-project-with-a-screen-reader/">Navigating a Project with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/project-management-with-a-screen-reader/">Project Management with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/auditioning-with-a-screen-reader/">Auditioning with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/editing-with-a-screen-reader/">Editing with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/mixing-with-a-screen-reader/">Mixing with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/mastering-and-rendering-with-a-screen-reader/">Mastering and Rendering with a Screen Reader</a></li>
+	<li><a href="/manual/accessibility/keyboard-modes/">Keyboard Modes</a></li>
+	<li><a href="/manual/accessibility/the-terminal/">The Terminal</a></li>
+</ul>
+</li>
+	<li><a href="/manual/workflows/">Workflows</a>
+<ul>
+	<li><a href="/manual/workflows/recording/">Recording</a></li>
+	<li><a href="/manual/workflows/importing/">Importing</a></li>
+	<li><a href="/manual/workflows/navigating-a-project/">Navigating a Project</a></li>
+	<li><a href="/manual/workflows/project-management/">Project Management</a></li>
+	<li><a href="/manual/workflows/auditioning/">Auditioning</a></li>
+	<li><a href="/manual/workflows/editing/">Editing</a></li>
+	<li><a href="/manual/workflows/mixing/">Mixing</a></li>
+	<li><a href="/manual/workflows/mastering/">Mastering</a></li>
+	<li><a href="/manual/workflows/rendering/">Rendering</a></li>
+	<li><a href="/manual/workflows/collaborating-with-video-editors/">Collaborating with Video Editors</a></li>
+</ul>
+</li>
+	<li><a href="/manual/getting-help/">Getting Help</a>
+<ul>
+	<li><a href="/manual/getting-help/frequently-asked-questions/">Frequently Asked Questions</a></li>
+	<li><a href="/manual/getting-help/community-and-support/">Community and Support</a></li>
+</ul>
+</li>
+	<li><a href="/manual/reference/">Reference</a>
+<ul>
+	<li><a href="/manual/reference/keyboard-shortcuts/">Keyboard Shortcuts</a></li>
+	<li><a href="/manual/reference/recommended-free-mastering-grade-plugins/">Recommended Free Mastering-Grade Plugins</a></li>
+	<li><a href="/manual/reference/room-tone-generation/">Room Tone Generation</a></li>
+	<li><a href="/manual/reference/system-tweaks/">System Tweaks</a></li>
+</ul>
+</li>
+</ul>
+
+
+			</div> <!-- tree -->
+
+			<div class="span12" id="content">
+
+				<ul class="breadcrumb"><li><a href="/manual/toc/index.html">Home</a></li><li><a href="/manual/welcome/">Welcome</a></li><li class="active">What's New in ReaClassical 27</li></ul>
+				
+				<span style="float:right;padding: 0 5px 5px 5px;position:relative;bottom:-5px;"><button class="theme-changer" onclick="changetheme()" title="Change Theme"></button></span>
+
+				<h1 class="title">What's New in ReaClassical 27</h1>
+
+				<p>ReaClassical 27 is the biggest release so far. The headline is complete <strong>screen reader support</strong>, but there is plenty for sighted engineers too: DDP import, a CD Player, a Peak and Overs Check, quick exports on location and a tidier menu. This page is a short tour. Everything here is covered in detail in the relevant chapter, linked below.</p>
+<p>If you are updating from ReaClassical 26, see <a href="/manual/getting-started/update/">Update</a>.</p>
+<h3 id="new-functions">New Functions</h3>
+<h4 id="working-with-a-screen-reader">Working with a screen reader</h4>
+<p>ReaClassical can now be used from start to finish by a blind or low-vision engineer, with no mouse. Several parts of this are handy for sighted users too.</p>
+<ul>
+<li><strong>Clara</strong>, a REAPER extension for Windows and macOS, lets ReaClassical speak through your screen reader. Install it by typing <code>clara</code> in the Terminal</li>
+<li><strong>Accessible windows</strong> replace the mouse-driven ones (Create Project, Track Setup, Smart Import, Preferences, Notes, DDP Metadata Editor, Mixer Snapshots and more). Sighted collaborators can switch any of them back with Toggle GUI Mode (<kbd>Ctrl+Alt+Shift+G</kbd>)</li>
+<li><strong>Announcements</strong> for take number, timeline position, items in a folder, RCMASTER peak and more, with <kbd>!</kbd> to repeat the last one</li>
+<li><strong>Menu Help</strong> (<kbd>Ctrl+Alt+Shift+H</kbd>) reads out the ReaClassical menu with the shortcut for each item</li>
+<li><strong>Marker safety</strong>: with Clara installed, placing a source or destination IN marker after the existing OUT marker deletes that OUT marker and tells you, instead of leaving a broken pair</li>
+<li><strong>Keyboard modes</strong> let you finish a whole task with single keys: <strong>Crossfade Mode</strong> (<kbd>F</kbd>) to slip, nudge, widen, narrow and shape a crossfade, <strong>Item Edit Mode</strong> (<kbd>V</kbd>) for one item's fades, edges and gain, and <strong>Mixer Mode</strong> (<kbd>Alt+S</kbd>) to mute, solo, pan, flip polarity and set faders without touching track selection. <kbd>Ctrl+Alt+Shift+E</kbd> always returns you to the normal keys</li>
+<li><strong>The Terminal</strong> (<kbd>Ctrl+Enter</kbd>): type a command such as <code>1m;2m;3s</code> to mute tracks 1 and 2 and solo track 3. It also installs Clara (<code>clara</code>), sets nudge amounts and converts workflows. The <code>reaper</code> command updates REAPER itself to the version ReaClassical has been tested with (<code>reaper=latest</code> for the newest release, <code>reaper=752</code> for a specific one). The Terminal works for everyone, with or without Clara. Type <code>help</code> for the full command guide</li>
+</ul>
+<p>See <a href="/manual/accessibility/using-reaclassical-with-a-screen-reader/">Using ReaClassical with a Screen Reader</a>, <a href="/manual/accessibility/keyboard-modes/">Keyboard Modes</a> and <a href="/manual/accessibility/the-terminal/">The Terminal</a>. Every workflow chapter also has short purple <strong>Screen reader users</strong> notes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You do not need a screen reader to benefit from the new keyboard-driven tools below. Without Clara installed, ReaClassical behaves as it always has.</p>
+</div>
+<h4 id="importing">Importing</h4>
+<ul>
+<li><strong>Import DDP</strong> (<kbd>Ctrl+Alt+Shift+D</kbd>) rebuilds the CD track and album metadata layout from an existing DDP image, for checking or remastering</li>
+<li><strong>Import PMI</strong> (<kbd>Ctrl+Alt+Shift+M</kbd>) does the same from a Pyramix pre-master</li>
+<li><strong>Polywav import</strong> in Smart Import splits a multi-channel file from a portable recorder into mono and stereo tracks using a simple pattern (for example <code>221</code>: two stereo pairs, then mono). It replaces the old ExplodeMultiChannel function</li>
+</ul>
+<p>See <a href="/manual/workflows/importing/">Importing</a>.</p>
+<h4 id="recording-and-monitoring">Recording and monitoring</h4>
+<ul>
+<li><strong>Quick Export Recorded Takes</strong> (<kbd>Ctrl+Shift+D</kbd>) renders every take so far to WAV, FLAC, Opus or MP3, ready to hand to the producer or musicians on location</li>
+<li><strong>Toggle Monitor</strong> (<kbd>Ctrl+Shift+A</kbd>) cycles input monitoring across the input tracks: off, on, tape mode</li>
+<li><strong>Playback track</strong>: a new special track that sends the RCMASTER mix to its own pair of hardware outputs. Toggle it with <kbd>Ctrl+Alt+Shift+P</kbd></li>
+<li><strong>Disarm All Tracks</strong> removes every record arm in one step</li>
+<li><strong>Take Number Display</strong> (<kbd>Alt+T</kbd>) shows the current take number in a small window so a colleague can follow along</li>
+</ul>
+<p>See <a href="/manual/workflows/recording/">Recording</a>.</p>
+<h4 id="rendering">Rendering</h4>
+<p>The DDP Metadata Editor (<kbd>Y</kbd>) now has a row of <strong>Render</strong> buttons. Each renders straight away, without REAPER's render dialog, into an <code>Exports</code> subfolder:</p>
+<ul>
+<li><strong>DDP</strong> (Red Book settings) and <strong>Cue Audio</strong></li>
+<li><strong>WAV</strong>, <strong>FLAC</strong>, <strong>Opus 160</strong> and <strong>MP3 320</strong>, one file per CD track, with album and track metadata and <code>cover.jpg</code>/<code>cover.png</code> cover art embedded where the format allows</li>
+<li><strong>M: Stems</strong>, one WAV per mixer track for each CD track</li>
+<li><strong>Custom</strong>, which opens REAPER's render dialog pre-filled with your choices</li>
+</ul>
+<p>Sample rate, bit depth and dither are set with dropdowns, and a <strong>Tracks</strong> box (for example <code>1-3,5</code>) limits which CD tracks are rendered. Before rendering, ReaClassical also warns about text that DDP and CD-Text cannot hold, duplicated ISRC codes and tracks without a title.</p>
+<p>See <a href="/manual/workflows/rendering/">Rendering</a>.</p>
+<h4 id="mixing">Mixing</h4>
+<ul>
+<li><strong>Panic Mute</strong> (<kbd>Alt+K</kbd>) instantly silences everything that can reach your hardware</li>
+<li><strong>Toggle RCMASTER Hardware Output Mute</strong> (<kbd>Ctrl+Alt+Shift+T</kbd>) mutes or unmutes all of RCMASTER's hardware sends together</li>
+</ul>
+<p>See <a href="/manual/workflows/mixing/">Mixing</a>.</p>
+<h4 id="mastering">Mastering</h4>
+<ul>
+<li><strong>CD Player</strong> (<kbd>Ctrl+Alt+Shift+Y</kbd>) plays the album back like a physical CD player, including a Transition Review that plays only the joins between tracks</li>
+<li><strong>Peak and Overs Check</strong> (<kbd>Shift+P</kbd>) scans the whole project through the faders and routing up to RCMASTER, reports the highest peak and lists every over above a threshold you choose, each with a Go to button</li>
+</ul>
+<p>See <a href="/manual/workflows/mastering/">Mastering</a>.</p>
+<h4 id="editing-and-navigation">Editing and navigation</h4>
+<ul>
+<li><strong>Fix Crossfade Sequence Edits</strong> (<kbd>Shift+X</kbd>) repairs items that have drifted out of alignment across the tracks of a folder, for example after ripple-per-track was accidentally switched off</li>
+<li><strong>Auto-color project</strong> (<kbd>Shift+K</kbd>) colors items by take number or folder</li>
+<li><strong>Auditioning around S-D markers</strong> from the keyboard: <kbd>6</kbd> to <kbd>9</kbd> (with <kbd>Ctrl</kbd> and <kbd>Alt</kbd> variants) play short segments around the source and destination markers</li>
+<li><strong>Folder and track navigation</strong>: move to the next or previous folder or track in a folder, jump to the first or last item on a track, move to the start or end of the selected item, and step between crossfade groups</li>
+<li><strong>Nudging</strong> of markers (<kbd>Ctrl+,</kbd>, <kbd>Ctrl+.</kbd>) and selected items (<kbd>Alt+,</kbd>, <kbd>Alt+.</kbd>) by a project nudge amount, with larger "x modifier" versions</li>
+<li><strong>Jump to Time</strong> is now split into jumps within the project and within the selected item (<kbd>J</kbd> and <kbd>Ctrl+J</kbd>)</li>
+</ul>
+<p>See <a href="/manual/workflows/editing/">Editing</a> and <a href="/manual/workflows/navigating-a-project/">Navigating a Project</a>.</p>
+<h4 id="project-management">Project management</h4>
+<ul>
+<li><strong>Delete Source Folder</strong> (<kbd>Shift+D</kbd>) and <strong>Delete All Source Items</strong> (<kbd>Ctrl+Alt+Shift+Delete</kbd>) clear out source material in a vertical workflow</li>
+<li><strong>Support Info To Clipboard</strong> (<kbd>Shift+F1</kbd>) copies your ReaClassical and REAPER versions, ready to paste into a forum post (without the SWS extension it shows them in a message box to copy by hand)</li>
+</ul>
+<p>See <a href="/manual/workflows/project-management/">Project Management</a>.</p>
+<h4 id="new-default-theme">New default theme</h4>
+<p>ReaClassical 27 ships with a redesigned theme as the default: a graphite look with an accent color and redrawn toolbar and transport icons and panels. The Light and two WaveColors (Dark and Light) variants have all been redesigned to match, and the ReaClassical 26 themes are still included if you prefer them.</p>
+<h3 id="improvements-and-fixes">Improvements and Fixes</h3>
+<h4 id="importing_1">Importing</h4>
+<ul>
+<li><strong>Smart Import</strong> can now be run on a project that already contains material. New takes are inserted at the edit cursor and only the material that needs to move is moved (26 always added to the end)</li>
+<li><strong>Import only these takes</strong> restricts an import to a session name and/or a list such as <code>1-3,5,11-15</code></li>
+<li>In a vertical workflow, choose the <strong>starting folder</strong> and a <strong>distribution mode</strong>: one folder per take, use current folder count, or round-robin across a custom number of folders. A preview shows the result</li>
+</ul>
+<h4 id="editing">Editing</h4>
+<ul>
+<li>Every S-D edit, 3-point edit, timestretched insert and delete now <strong>removes sliver edits</strong> left near the markers, and <strong>shortens a crossfade</strong> when there is not enough source material for the full length. You are told when either happens</li>
+</ul>
+<h4 id="mixing-and-automation">Mixing and automation</h4>
+<ul>
+<li>Mixer Snapshots has a <strong>Background auto-recall</strong> option, so snapshots keep recalling after you close the window</li>
+<li><strong>Insert Automation</strong> (<kbd>I</kbd>) works on a time selection, can stay open for several adjustments in a row, and switches on <strong>automation mode</strong> automatically (source folders locked, ripple on all tracks). Toggle it yourself with <kbd>Shift+I</kbd></li>
+<li>New shortcuts to show and hide automation lanes (<kbd>Alt+D</kbd>, <kbd>Alt+E</kbd>), move between automation items (<kbd>Shift+←</kbd>, <kbd>Shift+→</kbd>) and envelope lanes (<kbd>Ctrl+Shift+↑</kbd>, <kbd>Ctrl+Shift+↓</kbd>), and edit an automation item (<kbd>Ctrl+I</kbd>)</li>
+</ul>
+<h4 id="project-setup-and-management">Project setup and management</h4>
+<ul>
+<li><strong>Mission Control</strong> can add the Playback track, move aux and submix tracks left and right in the mixer, and run Auto-color</li>
+<li><strong>Convert REAPER project</strong> now auto-colors the converted project instead of running Prepare Takes</li>
+<li><strong>Remove Take Names</strong> always works on the first folder, so no track needs to be selected first</li>
+<li><strong>Create Project</strong> needs only one track per folder (it was two)</li>
+<li><strong>Show Statistics</strong> (<kbd>F1</kbd>) now includes session time with a reset button and your ReaClassical and REAPER versions, and can copy everything to the clipboard</li>
+<li><strong>Help</strong> (<kbd>H</kbd>) opens the single-page HTML manual installed with ReaClassical. The PDF manual is gone</li>
+</ul>
+<h4 id="a-tidier-menu">A tidier menu</h4>
+<p>The ReaClassical menu has been reorganized to follow the production from start to finish.</p>
+<ul>
+<li><strong>Project Setup</strong> is now <strong>Project Management</strong>, and gathers Mission Control, Preferences, conversion, imports and folder tools in one place</li>
+<li><strong>Auditioning</strong> is split into <strong>Mouse Hover</strong> and <strong>Keyboard</strong> sections</li>
+<li><strong>Show Children</strong> and <strong>Hide Children</strong> are combined into a single <strong>Hide/Show Child tracks</strong> toggle</li>
+<li><strong>Prepare Takes</strong> has been retired. Editing functions find what they need on their own</li>
+</ul>
+<h4 id="shortcuts-that-changed">Shortcuts that changed</h4>
+<p>If you are used to ReaClassical 26, these existing actions have a new key.</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>26</th>
+<th>27</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Record Panel</td>
+<td><kbd>Ctrl+Enter</kbd></td>
+<td><kbd>Alt+Enter</kbd> (Ctrl+Enter now opens the Terminal)</td>
+</tr>
+<tr>
+<td>Jump to Time</td>
+<td><kbd>Tab</kbd></td>
+<td><kbd>J</kbd></td>
+</tr>
+<tr>
+<td>Edit Automation</td>
+<td><kbd>Ctrl+Alt+Shift+A</kbd></td>
+<td><kbd>Ctrl+I</kbd></td>
+</tr>
+<tr>
+<td>Add marker and edit</td>
+<td><kbd>Ctrl+M</kbd></td>
+<td><kbd>Alt+M</kbd></td>
+</tr>
+<tr>
+<td>Hide / Show Children</td>
+<td><kbd>E</kbd> / <kbd>D</kbd></td>
+<td><kbd>E</kbd> (one toggle)</td>
+</tr>
+<tr>
+<td>Prepare Takes</td>
+<td><kbd>T</kbd></td>
+<td>retired</td>
+</tr>
+<tr>
+<td>Auto Solo Folder</td>
+<td><kbd>Ctrl+Alt+Shift+S</kbd></td>
+<td>no default key (<kbd>Ctrl+Alt+Shift+S</kbd> is now Snapshot Add)</td>
+</tr>
+</tbody>
+</table>
+<p>The complete current list is in the <a href="/manual/reference/keyboard-shortcuts/#the-shortcuts-guide">Shortcuts Guide</a>.</p>
+<h4 id="under-the-hood">Under the hood</h4>
+<ul>
+<li>The scripts have been reorganized: the actions you use are in the main ReaClassical folder, while supporting code lives in a <code>lib</code> subfolder and the crossfade editor helpers in <code>crossfade_editor</code>.</li>
+<li>ReaClassical 27 bundles <strong>REAPER 7.78</strong> (26 shipped 7.52)</li>
+<li>New bundled JSFX: <strong>RCModulator</strong> (adds gentle movement to a static reverb tail) and the airwindows ports <strong>MagicFairyDust2</strong> and <strong>Oxide and Seek</strong>. <strong>RCTimePhase</strong> has a fix for high-frequency loss in its interpolation</li>
+<li>A new <strong>Shortcuts Guide</strong> and <strong>Terminal Command Guide</strong> are installed with ReaClassical and open in your browser</li>
+</ul>
+<h4 id="fixes-in-the-270x-releases">Fixes in the 27.0.x releases</h4>
+<ul>
+<li>Smart Import now handles polywav files correctly (27.0.3)</li>
+<li>Peaks are no longer missing after a polywav import (27.0.5)</li>
+<li>Auto Solo Folder has moved into the <code>lib</code> subfolder, in line with the other supporting scripts (27.0.5)</li>
+<li>Polywav import is available in the accessible Smart Import (27.0.4)</li>
+</ul>
+<p>For the complete list of changes in every release, see the <a href="/manual/welcome/changelog/">Changelog</a>.</p>
+
+				<div class="clear"></div>
+
+				<ul class="pager"><li class="previous"><a title="Introduction" href="/manual/welcome/introduction/" class="previous"> &larr; Previous </a></li><li><a title="Welcome" href="/manual/welcome/" class="active"> &uarr; Up </a></li><li class="next"><a title="Documentation" href="/manual/welcome/documentation/" class="next"> Next &rarr; </a></li></ul>
+
+			</div> <!-- content -->
+		</div> <!-- row-fluid -->
+	</div> <!-- container-fluid -->
+
+
+	<script src="/manual/search.js"></script>
+	<script type="text/javascript">
+		// Auto-expand the Part containing the active link
+		var active = document.querySelector('#tree .active');
+		if (active) {
+			var el = active;
+			while (el && el.id !== 'tree') {
+				if (el.tagName === 'LI' && el.parentElement && el.parentElement.parentElement && el.parentElement.parentElement.id === 'tree') {
+					el.classList.add('expanded');
+					break;
+				}
+				el = el.parentElement;
+			}
+		}
+
+		var isA = function(regex) { return navigator.userAgent.match(regex) };
+		var isAbout = function(regex) { return document.getElementsByTagName('h1')[1]?.textContent.match(regex) };
+
+		if ( (isA(/Mac/) || isAbout(/OS X/)) && (!isAbout(/Linux/)) ) {
+			var e = document.getElementsByTagName('body')[0];
+			e.className += ' mac';
+		}
+
+		function changetheme () {
+			if (document.body.classList.contains('dark-theme')) {
+				document.body.classList.remove('dark-theme');
+			} else {
+				document.body.classList.add('dark-theme');
+			}
+			localStorage.setItem('dark-theme', document.body.classList.contains('dark-theme'));
+		}
+
+		if (localStorage.getItem('dark-theme') === 'true') {
+			changetheme();
+		}
+
+		window.addEventListener('keydown', e => {
+			if (e.target.tagName !== 'INPUT') {
+				if (e.key === 'ArrowRight') {
+					var next = document.querySelector('.next a');
+					if (next) next.click();
+				} else if (e.key === 'ArrowLeft') {
+					var prev = document.querySelector('.previous a');
+					if (prev) prev.click();
+				}
+			}
+		});
+
+		window.onload = (e) => {
+			document.querySelectorAll('h2, h3, h4, h5, h6').forEach( el => {
+				let a = document.createElement('a');
+				let slug = el.id !== '' ? el.id : el.innerText;
+				el.id = slug;
+				a.href = `#${slug}`;
+				a.className = 'heading-anchor';
+				a.innerText = ' \uD83D\uDD17';
+				el.appendChild( a );
+			});
+		};
+	</script>
+
+	<script>
+		// Build obfuscated e-mail links (same scheme as the website); no-JS readers see "name [at] domain".
+		document.querySelectorAll('a.obf').forEach(function (a) {
+			var e = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
+			a.href = 'mailto:' + e;
+			a.textContent = e;
+		});
+	</script>
+</body>
+</html>
