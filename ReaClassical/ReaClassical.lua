@@ -1,9 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.5
+@version 27.0.6
 @changelog
-  Fix missing peaks after polywav import
-  Add auto solo folder function to lib subfolder
+  Calculate items and length outside of album bounds
+  Update what's new sighted summary
+  Update summary para
+  Add what's new page
 @metapackage
 @provides
   [main] ReaClassical_*.lua
