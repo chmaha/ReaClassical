@@ -43,11 +43,12 @@ local PREF_LABELS = {
     "Reference Tracks Are Overdub Guides", "Add S-D Markers at Mouse Hover", "Alternate Audition Playback Rate",
     "Year of Production", "CUE Audio Format", "Floating Destination Folder",
     "Find Takes Using Item Names", "Show Only Item Take Numbers", "Source Audition Mode",
+    "Marker Offset During Record or Play in Seconds",
 }
 local PREF_BINARY = { [5] = true, [6] = true, [7] = true, [8] = true,
     [12] = true, [13] = true, [14] = true, [15] = true }
 local PREF_FORMATS = { "WAV", "FLAC", "MP3", "AIFF" }
-local PREF_DEFAULTS = "35,200,3,7,0,0,0,0,0.75," .. os.date("%Y") .. ",WAV,0,0,0,0"
+local PREF_DEFAULTS = "35,200,3,7,0,0,0,0,0.75," .. os.date("%Y") .. ",WAV,0,0,0,0,2"
 
 local PREF_DEFAULT_VALUES = {}
 
@@ -79,7 +80,9 @@ local function load_prefs()
     if saved == "" then saved = PREF_DEFAULTS end
     local entries = {}
     for entry in saved:gmatch("([^,]+)") do entries[#entries + 1] = entry end
-    if #entries ~= #PREF_LABELS then
+    if #entries == #PREF_LABELS - 1 then
+        entries[#entries + 1] = "2"
+    elseif #entries ~= #PREF_LABELS then
         saved = PREF_DEFAULTS
         entries = {}
         for entry in saved:gmatch("([^,]+)") do entries[#entries + 1] = entry end
@@ -100,7 +103,7 @@ local function apply_pref_value(i, str)
     if not num then return "Please enter a number" end
     if num < 0 then return "Must not be negative" end
     if i == 3 and num < 1 then return "Must be at least 1" end
-    if i ~= 9 and num ~= math.floor(num) then return "Must be a whole number" end
+    if i ~= 9 and i ~= 16 and num ~= math.floor(num) then return "Must be a whole number" end
     prefs[i] = num
     save_prefs()
     return nil

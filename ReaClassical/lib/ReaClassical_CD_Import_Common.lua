@@ -162,9 +162,9 @@ function M.run(opts)
         Main_OnCommand(40691, 0)
     end
 
-    local PREF_N = 15
+    local PREF_N = 16
     local pref_year = os.date("%Y")
-    local pref_default = "35,200,3,7,0,0,0,0,0.75," .. pref_year .. ",WAV,0,0,0,0"
+    local pref_default = "35,200,3,7,0,0,0,0,0.75," .. pref_year .. ",WAV,0,0,0,0,2"
     local _, saved_prefs = GetProjExtState(0, "ReaClassical", "Preferences")
     if saved_prefs == "" or select(2, saved_prefs:gsub(",", ",")) + 1 ~= PREF_N then
         saved_prefs = pref_default

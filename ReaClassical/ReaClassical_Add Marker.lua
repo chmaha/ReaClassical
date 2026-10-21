@@ -44,6 +44,14 @@ local function find_marker_number(target_pos)
     return closest_num
 end
 
+local function get_marker_offset()
+    local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
+    local entries = {}
+    for entry in saved:gmatch("([^,]+)") do entries[#entries + 1] = entry end
+    local offset = tonumber(entries[16]) or 2
+    return math.max(offset, 0)
+end
+
 local function main()
     local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
     if workflow == "" then
@@ -57,8 +65,15 @@ local function main()
         return
     end
 
-    local pos = (GetPlayState() == 0) and GetCursorPosition() or GetPlayPosition()
-    Main_OnCommand(40157, 0)
+    local play_state = GetPlayState()
+    local active = (play_state & 1) == 1 or (play_state & 4) == 4
+    local pos = (play_state == 0) and GetCursorPosition() or GetPlayPosition()
+    if active then
+        pos = math.max(pos - get_marker_offset(), 0)
+        AddProjectMarker(0, false, pos, 0, "", -1)
+    else
+        Main_OnCommand(40157, 0)
+    end
     local marker_num = find_marker_number(pos)
     local marker_label = marker_num and ("Marker " .. marker_num .. " added @ ") or "Marker added @ "
     say(marker_label .. humanize_timestr(format_timestr_pos(pos, "", -1)))
