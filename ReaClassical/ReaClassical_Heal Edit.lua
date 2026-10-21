@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, select_previous_and_next, heal
+local main, select_previous_and_next, heal, heal_from_snapshot
 local count_selected_media_items, get_selected_media_item_at
 local deselect_items_not_on_track, get_folder_items_at_midpoint
 local get_folder_range
@@ -29,6 +29,8 @@ local get_folder_range
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
+local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
+local sd_snapshot = require("ReaClassical_SD_Snapshot")
 
 function main()
     PreventUIRefresh(1)
@@ -50,19 +52,55 @@ function main()
         Main_OnCommand(1156, 0)
     end
 
-    local selected, prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
-    total_selected_length = select_previous_and_next()
+    local status, healed_count = heal_from_snapshot()
+    if status == "done" then
+        say(healed_count > 1 and string.format("Edit healed (%d items)", healed_count)
+            or "Edit healed")
+    elseif status == nil then
+        local selected, prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
+        total_selected_length = select_previous_and_next()
 
-    if selected then
-        heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
-            total_selected_length)
-        say("Edit healed")
+        if selected then
+            heal(prev_startoffs, next_end, next_fadeout_len, next_fadeout_shape,
+                total_selected_length)
+            say("Edit healed")
+        end
     end
 
     Undo_EndBlock('Heal Edit', 0)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
+end
+
+-- Restores the replaced material from the snapshot stored with the edit.
+-- Returns "done" and the S-D item count, "refused" after reporting a problem,
+-- or nil when there is no usable snapshot (legacy like-material heal applies).
+function heal_from_snapshot()
+    local sel_count = count_selected_media_items()
+    if sel_count == 0 then return nil end
+
+    local id
+    for i = 0, sel_count - 1 do
+        local item = get_selected_media_item_at(i)
+        local _, sd_flag = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+        local _, item_id = GetSetMediaItemInfo_String(item, "P_EXT:SD_id", "", false)
+        if sd_flag ~= "y" or item_id == "" then return nil end
+        if id and id ~= item_id then
+            MB("Selected items belong to different edits.", "Error", 0)
+            return "refused"
+        end
+        id = item_id
+    end
+
+    local tracks = sd_xfade.folder_tracks(GetMediaItem_Track(get_selected_media_item_at(0)))
+    if not tracks then return nil end
+
+    local restored, count = sd_snapshot.restore(tracks, id)
+    if not restored then return nil end
+
+    Main_OnCommand(40289, 0)
+    return "done", count
 end
 
 function get_folder_range(parent_track)

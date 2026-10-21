@@ -43,6 +43,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
+local sd_snapshot = require("ReaClassical_SD_Snapshot")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
 local active_folder = require("ReaClassical_Active_Folder")
 
@@ -214,6 +215,8 @@ function main()
             { id = 997, label = "DEST-OUT" },
         })
         nudge_xfades_inside_dest_markers()
+        sd_snapshot.capture(sd_xfade.folder_tracks(GetSelectedTrack(0, 0)),
+            sd_snapshot.marker_pos(996), sd_snapshot.marker_pos(997))
         split_at_dest_in()
         Main_OnCommand(40625, 0)
         GoToMarker(0, 997, false)
@@ -238,6 +241,7 @@ function main()
         local first_pasted_item = get_selected_media_item_at(0)
 
         local shortened_in, shortened_out, applied_in, applied_out = create_crossfades(dest_workflow)
+        sd_snapshot.commit()
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
 
         clean_up(is_selected, dest_in, dest_out, source_in, source_out)
@@ -683,6 +687,7 @@ function mark_as_edit()
     for i = 0, selected_items - 1, 1 do
         local item = get_selected_media_item_at(i)
         GetSetMediaItemInfo_String(item, "P_EXT:SD", "y", true)
+        sd_snapshot.stamp(item)
     end
 end
 
