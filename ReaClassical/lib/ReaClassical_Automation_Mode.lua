@@ -33,14 +33,13 @@ local M = {}
 local RIPPLE_PER_TRACK_CMD = 40310
 local RIPPLE_ALL_TRACKS_CMD = 40311
 
-local TIMELINE_COLOR_KEYS = { "ts_lane_bg", "marker_lane_bg", "region_lane_bg" }
-local AUTOMATION_MODE_COLOR = ColorToNative(60, 90, 120) | 0x1000000
+local TOGGLE_ACTION_ID = "_RSb9efb7d4fb79b03dbab17ae1b2770205e0d576ce"
 
-local function set_timeline_color(engaged)
-    for _, key in ipairs(TIMELINE_COLOR_KEYS) do
-        SetThemeColor(key, engaged and AUTOMATION_MODE_COLOR or -1)
-    end
-    UpdateTimeline()
+local function set_toolbar_state(engaged)
+    local cmd = NamedCommandLookup(TOGGLE_ACTION_ID)
+    if cmd == 0 then return end
+    SetToggleCommandState(0, cmd, engaged and 1 or 0)
+    RefreshToolbar2(0, cmd)
 end
 
 function M.is_engaged()
@@ -63,6 +62,8 @@ local function get_source_folder_tracks()
 end
 
 local function set_source_items_locked(locked)
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    if workflow == "Horizontal" then return end
     for _, folder_track in ipairs(get_source_folder_tracks()) do
         local tracks = { folder_track }
         for _, child in ipairs(xfu.get_folder_children(folder_track)) do
@@ -86,7 +87,7 @@ function M.engage()
         Main_OnCommand(RIPPLE_ALL_TRACKS_CMD, 0)
     end
     UpdateArrange()
-    set_timeline_color(true)
+    set_toolbar_state(true)
 
     SetProjExtState(0, "ReaClassical", "AutomationModeEngaged", "1")
     say("Automation mode on")
@@ -100,7 +101,7 @@ function M.disengage()
         Main_OnCommand(RIPPLE_PER_TRACK_CMD, 0)
     end
     UpdateArrange()
-    set_timeline_color(false)
+    set_toolbar_state(false)
 
     SetProjExtState(0, "ReaClassical", "AutomationModeEngaged", "0")
     say("Automation mode off")
