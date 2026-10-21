@@ -402,7 +402,15 @@ function try_misc(cmd)
     local debug_val = cmd:match("^debug=(%a+)$")
     if debug_val == "on" or debug_val == "off" then
         SetProjExtState(0, "ReaClassical", "DebugAnnounce", debug_val)
-        say(debug_val == "on" and "Debug announcements on" or "Debug announcements off")
+        if debug_val == "on" then
+            if APIExists("clara_outputMessage") then
+                say("Debug announcements on")
+            else
+                ShowConsoleMsg("Debug announcements on\n")
+            end
+        elseif APIExists("clara_outputMessage") then
+            say("Debug announcements off")
+        end
         return true
     end
 
