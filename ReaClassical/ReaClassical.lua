@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.7
+@version 27.0.8
 @changelog
-  Allow healing of any SD edit
-  Fix automation mode for horizontal workflow and improve indicator
-  Remove auto solo folder reference in table
+  Update manual with new heal edit and automation info
 @metapackage
 @provides
   [main] ReaClassical_*.lua
