@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.8
+@version 27.0.9
 @changelog
-  Update manual with new heal edit and automation info
+  Update ini files for automation improvements
 @metapackage
 @provides
   [main] ReaClassical_*.lua
