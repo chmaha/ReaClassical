@@ -1,11 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.6
+@version 27.0.7
 @changelog
-  Calculate items and length outside of album bounds
-  Update what's new sighted summary
-  Update summary para
-  Add what's new page
+  Allow healing of any SD edit
+  Fix automation mode for horizontal workflow and improve indicator
+  Remove auto solo folder reference in table
 @metapackage
 @provides
   [main] ReaClassical_*.lua

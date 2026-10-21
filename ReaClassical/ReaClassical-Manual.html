@@ -1338,7 +1338,7 @@ body.dark-theme #rc-results .rc-more:focus {
 <h4 id="mixing-and-automation">Mixing and automation</h4>
 <ul>
 <li>Mixer Snapshots has a <strong>Background auto-recall</strong> option, so snapshots keep recalling after you close the window</li>
-<li><strong>Insert Automation</strong> (<kbd>I</kbd>) works on a time selection, can stay open for several adjustments in a row, and switches on <strong>automation mode</strong> automatically (source folders locked, ripple on all tracks). Toggle it yourself with <kbd>Shift+I</kbd></li>
+<li><strong>Insert Automation</strong> (<kbd>I</kbd>) works on a time selection, can stay open for several adjustments in a row, and switches on <strong>automation mode</strong> automatically (source folders locked, ripple on all tracks). Toggle it yourself with <kbd>Shift+I</kbd> or the new <strong>A</strong> button on the main toolbar, which lights up and animates while the mode is on. In horizontal workflow only ripple changes; nothing is locked</li>
 <li>New shortcuts to show and hide automation lanes (<kbd>Alt+D</kbd>, <kbd>Alt+E</kbd>), move between automation items (<kbd>Shift+←</kbd>, <kbd>Shift+→</kbd>) and envelope lanes (<kbd>Ctrl+Shift+↑</kbd>, <kbd>Ctrl+Shift+↓</kbd>), and edit an automation item (<kbd>Ctrl+I</kbd>)</li>
 </ul>
 <h4 id="project-setup-and-management">Project setup and management</h4>
@@ -2232,7 +2232,7 @@ body.dark-theme #rc-results .rc-more:focus {
 <p><kbd>Ctrl+,</kbd> and <kbd>Ctrl+.</kbd> nudge the selected marker left and right (each audition from or to a marker selects it automatically), and <kbd>Alt+,</kbd> and <kbd>Alt+.</kbd> nudge the selected items. Each nudge is announced, for example "Mozart take 3 nudged 10 milliseconds left". The larger "x modifier" versions are <kbd>Ctrl+Alt+,</kbd> and <kbd>Ctrl+Alt+.</kbd> for markers and <kbd>Alt+&lt;</kbd> and <kbd>Alt+&gt;</kbd> for items. Set the nudge amount with the Terminal command <code>nudge=10</code> (milliseconds) and the multiplier with <code>mod=10</code>, or under Other Settings in Accessible Preferences. In crossfade mode, the crossfade nudge keys are used instead and you are reminded of that.</p>
 <h3 id="other-editing-functions">Other Editing Functions</h3>
 <ul>
-<li><kbd>Ctrl+H</kbd> heals a patch edit, restoring the underlying material without splits ("Edit healed")</li>
+<li><kbd>Ctrl+H</kbd> heals the selected S-D edit, restoring the material it replaced ("Edit healed"). Selecting any one item of a multi-item edit heals the whole edit</li>
 <li><kbd>Ctrl+F</kbd> finds the source material of an edited item and places a source IN and OUT marker pair there, announcing "Source found" with the take</li>
 <li><kbd>X</kbd> crossfades two overlapping items when the edit cursor is in the overlap</li>
 <li><kbd>Shift+F</kbd> removes the fades from items whose edges are not part of a crossfade ("Non-overlapping item fades removed"), <kbd>Ctrl+V</kbd> pastes and announces how many items were pasted, and <kbd>Ctrl+Alt+A</kbd> selects all items in the folder</li>
@@ -2266,7 +2266,7 @@ body.dark-theme #rc-results .rc-more:focus {
 <h3 id="volume-and-fx-automation">Volume and FX Automation</h3>
 <p><kbd>I</kbd> opens the <strong>Automation Navigator</strong>, a keyboard walkthrough for inserting automation over a time selection. Make a time selection first. You choose the track (press <kbd>Shift+Enter</kbd> to toggle several tracks and apply to them in one pass), then the envelope or FX parameter, then the level and optional ramp in and out. You hear the level you are choosing while you dial it in, but ramps cannot be previewed.</p>
 <p><kbd>Ctrl+I</kbd> opens <strong>Edit Automation</strong> for an existing automation item. <kbd>Alt+D</kbd> and <kbd>Alt+E</kbd> show and hide automation lanes, <kbd>Shift+←</kbd> and <kbd>Shift+→</kbd> move between automation items and <kbd>Ctrl+Shift+↑</kbd> and <kbd>Ctrl+Shift+↓</kbd> move between envelope lanes.</p>
-<p>The first time you create an automation item, ReaClassical turns on automation mode, which locks the source-folder items and sets ripple editing to all tracks, so a ripple edit on the destination carries the automation along.</p>
+<p>The first time you create an automation item, ReaClassical turns on automation mode, which locks the source-folder items and sets ripple editing to all tracks, so a ripple edit on the destination carries the automation along (in horizontal workflow nothing is locked; only ripple changes). Toggle it with <kbd>Shift+I</kbd>; ReaClassical announces "Automation mode on" or "Automation mode off".</p>
 <h3 id="hardware-outputs-and-panic-mute">Hardware Outputs and Panic Mute</h3>
 <p><kbd>Ctrl+Alt+Shift+T</kbd> toggles the mute on RCMASTER's own hardware output sends. If any is unmuted it mutes them all, and it only unmutes when all are muted. <kbd>Alt+K</kbd> is Panic Mute, which silences everything that can reach your hardware outputs and later unmutes only the tracks it muted itself. It is available in every keyboard mode.</p>
 <h3 id="checking-levels">Checking Levels</h3>
@@ -3049,10 +3049,15 @@ body.dark-theme #rc-results .rc-more:focus {
 <h4 id="making-a-crossfade-by-hand">Making a Crossfade by Hand</h4>
 <p>If two items on a parent track overlap, place the edit cursor somewhere within the overlap and press <kbd>X</kbd> to crossfade them. The crossfade uses the <strong>S-D Crossfade Length</strong> from the <kbd>F5</kbd> preferences (35 ms by default) and is applied to every track in the folder. You can then refine it in the crossfade editor with <kbd>F</kbd>.</p>
 <h4 id="healing-edits">Healing Edits</h4>
-<p>Select a "patch" edit (one involving all 4 markers over the top of a best take, for example) and press <kbd>Ctrl+H</kbd> to heal the edit (restoring the underlying material without splits). </p>
+<p>Select any S-D edit and press <kbd>Ctrl+H</kbd> to heal it, restoring the material the edit replaced. This works for every kind of S-D edit (3-point insert, 4-point, and 4-point with timestretching), including edits where the material either side of the edit comes from different takes. ReaClassical saves the underlying material at the moment you make the edit, so there is no need for the surrounding items to match.</p>
+<p>If the edit is made up of several items (for example because the source section spans more than one source item), selecting any one of them heals the whole edit.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>This works at any point in the editing process and isn't restricted to the last edit made.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Edits made with earlier versions of ReaClassical have no saved material. These can still be healed only when the items either side of the edit come from the same source file, with the later item further along in that file (for example, a patch over the top of a single best take). If an edit has since been changed in a way that no longer matches what was saved (such as splitting one of its items), ReaClassical falls back to the same rule. Healing an edit that has another edit directly alongside it is best done in reverse order: heal the most recent edit first.</p>
 </div>
 <h4 id="finding-source-material">Finding Source Material</h4>
 <p>The items representing a S-D edit are colored according to the source material. However, you can also easily locate source material by clicking on an edited item and pressing <kbd>Ctrl+F</kbd>. A color-coordinated source IN and OUT marker pair are placed at the source location and in vertical workflow mode, the associated folder is selected. This function also works across multiple project tabs. </p>
@@ -3132,7 +3137,7 @@ body.dark-theme #rc-results .rc-more:focus {
 <li>Set the volume level and optional ramp in/out lengths and click <kbd>Apply Automation</kbd>. The ramps lie outside the time selection: ramp in is the time before the selection and ramp out the time after it.</li>
 </ol>
 <p>While you dial in the level you hear it immediately on playback; ramps cannot be previewed in this way. Check <strong>Keep window open after applying</strong> to make several adjustments in a row.</p>
-<p>The first time you create an automation item, ReaClassical engages <strong>automation mode</strong>: items on the source folders are locked and ripple editing is set to all tracks, so a ripple edit on the destination folder carries the automation along with it. You can switch automation mode on and off yourself with <kbd>Shift+I</kbd> or from the ReaClassical menu.</p>
+<p>The first time you create an automation item, ReaClassical engages <strong>automation mode</strong>: items on the source folders are locked and ripple editing is set to all tracks, so a ripple edit on the destination folder carries the automation along with it. In horizontal workflow nothing is locked; only ripple editing changes. You can switch automation mode on and off yourself with <kbd>Shift+I</kbd>, from the ReaClassical menu or with the <strong>A</strong> button on the main toolbar (it replaces the marquee selection button). The button lights up and animates while automation mode is on.</p>
 <h3 id="more-advanced-automation">More Advanced Automation</h3>
 <p>Turn on advanced mode to gain access to all envelopes associated with the track including FX parameters. If you also need to automate various aspects of the mixer tracks or special tracks, first make them visible in the track control panel by checking the box on the desired track row in Mission Control. Use <kbd>I</kbd> as before. </p>
 <h3 id="editing-automation-items">Editing Automation Items</h3>
@@ -3443,7 +3448,7 @@ body.dark-theme #rc-results .rc-more:focus {
 <h3 id="how-do-i-make-a-source-destination-edit">How do I make a source-destination edit?</h3>
 <p>Set destination IN and OUT markers with <kbd>1</kbd> and <kbd>2</kbd>, source IN and OUT markers with <kbd>3</kbd> and <kbd>4</kbd>, and press <kbd>5</kbd>. Press <kbd>F</kbd> on the right-hand item of the crossfade to fine-tune it. See <a href="#editing">Editing</a>.</p>
 <h3 id="how-do-i-undo-or-repair-an-edit">How do I undo or repair an edit?</h3>
-<p><kbd>Ctrl+Z</kbd> undoes the last action. To restore the material underneath an earlier patch edit, select it and press <kbd>Ctrl+H</kbd> to heal it. If items that should be grouped have become misaligned across the tracks of a folder, for example because ripple-per-track was switched off by accident while dragging items, select any one of them and run <strong>Fix Crossfade Sequence Edits</strong> (<kbd>Shift+X</kbd>).</p>
+<p><kbd>Ctrl+Z</kbd> undoes the last action. To restore the material underneath an earlier S-D edit, select it and press <kbd>Ctrl+H</kbd> to heal it. If items that should be grouped have become misaligned across the tracks of a folder, for example because ripple-per-track was switched off by accident while dragging items, select any one of them and run <strong>Fix Crossfade Sequence Edits</strong> (<kbd>Shift+X</kbd>).</p>
 <h3 id="why-do-my-mixer-scenes-not-sound-right-in-a-render">Why do my mixer scenes not sound right in a render?</h3>
 <p>Mixer snapshots are recalled in real time during playback, which does not work for a faster-than-realtime render. Before rendering, press <strong>Convert to Automation</strong> in the Mixer Snapshot Manager. See <a href="#mixing">Mixing</a>.</p>
 <h3 id="how-do-i-make-a-ddp-image">How do I make a DDP image?</h3>

@@ -137,7 +137,7 @@
 <p><kbd>Ctrl+,</kbd> and <kbd>Ctrl+.</kbd> nudge the selected marker left and right (each audition from or to a marker selects it automatically), and <kbd>Alt+,</kbd> and <kbd>Alt+.</kbd> nudge the selected items. Each nudge is announced, for example "Mozart take 3 nudged 10 milliseconds left". The larger "x modifier" versions are <kbd>Ctrl+Alt+,</kbd> and <kbd>Ctrl+Alt+.</kbd> for markers and <kbd>Alt+&lt;</kbd> and <kbd>Alt+&gt;</kbd> for items. Set the nudge amount with the Terminal command <code>nudge=10</code> (milliseconds) and the multiplier with <code>mod=10</code>, or under Other Settings in Accessible Preferences. In crossfade mode, the crossfade nudge keys are used instead and you are reminded of that.</p>
 <h3 id="other-editing-functions">Other Editing Functions</h3>
 <ul>
-<li><kbd>Ctrl+H</kbd> heals a patch edit, restoring the underlying material without splits ("Edit healed")</li>
+<li><kbd>Ctrl+H</kbd> heals the selected S-D edit, restoring the material it replaced ("Edit healed"). Selecting any one item of a multi-item edit heals the whole edit</li>
 <li><kbd>Ctrl+F</kbd> finds the source material of an edited item and places a source IN and OUT marker pair there, announcing "Source found" with the take</li>
 <li><kbd>X</kbd> crossfades two overlapping items when the edit cursor is in the overlap</li>
 <li><kbd>Shift+F</kbd> removes the fades from items whose edges are not part of a crossfade ("Non-overlapping item fades removed"), <kbd>Ctrl+V</kbd> pastes and announces how many items were pasted, and <kbd>Ctrl+Alt+A</kbd> selects all items in the folder</li>

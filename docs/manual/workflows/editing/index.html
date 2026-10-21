@@ -161,10 +161,15 @@
 <h4 id="making-a-crossfade-by-hand">Making a Crossfade by Hand</h4>
 <p>If two items on a parent track overlap, place the edit cursor somewhere within the overlap and press <kbd>X</kbd> to crossfade them. The crossfade uses the <strong>S-D Crossfade Length</strong> from the <kbd>F5</kbd> preferences (35 ms by default) and is applied to every track in the folder. You can then refine it in the crossfade editor with <kbd>F</kbd>.</p>
 <h4 id="healing-edits">Healing Edits</h4>
-<p>Select a "patch" edit (one involving all 4 markers over the top of a best take, for example) and press <kbd>Ctrl+H</kbd> to heal the edit (restoring the underlying material without splits). </p>
+<p>Select any S-D edit and press <kbd>Ctrl+H</kbd> to heal it, restoring the material the edit replaced. This works for every kind of S-D edit (3-point insert, 4-point, and 4-point with timestretching), including edits where the material either side of the edit comes from different takes. ReaClassical saves the underlying material at the moment you make the edit, so there is no need for the surrounding items to match.</p>
+<p>If the edit is made up of several items (for example because the source section spans more than one source item), selecting any one of them heals the whole edit.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>This works at any point in the editing process and isn't restricted to the last edit made.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Edits made with earlier versions of ReaClassical have no saved material. These can still be healed only when the items either side of the edit come from the same source file, with the later item further along in that file (for example, a patch over the top of a single best take). If an edit has since been changed in a way that no longer matches what was saved (such as splitting one of its items), ReaClassical falls back to the same rule. Healing an edit that has another edit directly alongside it is best done in reverse order: heal the most recent edit first.</p>
 </div>
 <h4 id="finding-source-material">Finding Source Material</h4>
 <p>The items representing a S-D edit are colored according to the source material. However, you can also easily locate source material by clicking on an edited item and pressing <kbd>Ctrl+F</kbd>. A color-coordinated source IN and OUT marker pair are placed at the source location and in vertical workflow mode, the associated folder is selected. This function also works across multiple project tabs. </p>
