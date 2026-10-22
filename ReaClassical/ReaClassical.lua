@@ -1,10 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.10
+@version 27.0.11
 @changelog
-  Change mixer mode first folder shortcut
-  Add Escape shortcut to exit the three accessibility modes
-  Allow offsetting generic marker placement during recording and playback
+  Default to zero seconds for marker offset
 @metapackage
 @provides
   [main] ReaClassical_*.lua
