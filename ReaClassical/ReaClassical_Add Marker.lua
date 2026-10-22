@@ -48,7 +48,7 @@ local function get_marker_offset()
     local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
     local entries = {}
     for entry in saved:gmatch("([^,]+)") do entries[#entries + 1] = entry end
-    local offset = tonumber(entries[16]) or 2
+    local offset = tonumber(entries[16]) or 0
     return math.max(offset, 0)
 end
 

@@ -47,7 +47,7 @@ package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,0,0,0,0.75,' .. year .. ',WAV,0,0,0,0,2'
+local default_values = '35,200,3,7,0,0,0,0,0.75,' .. year .. ',WAV,0,0,0,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade Length (ms)',
