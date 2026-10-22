@@ -2,18 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.10" />
+  <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>ReaClassical Terminal — Complete Command Guide</title>
   <style>
-
+code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: 1.5em;}
-div.column{flex: auto;}
-@media screen {
-div.columns{gap: min(4vw, 1.5em);}
-div.column{overflow-x: auto;}
-}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 
 ul.task-list[class]{list-style: none;}
@@ -153,40 +149,40 @@ but <code>1,3m?</code> → <code>&quot;Mixer track Violin mute: on&quot;</code> 
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;m</code></td>
 <td>Mute the target(s), e.g. <code>2m</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>&lt;target&gt;um</code></td>
 <td>Unmute, e.g. <code>2um</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;s</code></td>
 <td>Solo (in addition to anything already soloed),
 e.g. <code>3s</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>&lt;target&gt;us</code></td>
 <td>Unsolo, e.g. <code>3us</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;xs</code></td>
 <td><strong>Exclusive</strong> solo: clears mute/solo on every mixer
 track first, then solos only the given target(s),
 e.g. <code>5xs</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>&lt;target&gt;m?</code></td>
 <td>Speak mute state, e.g. <code>2m?</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;s?</code></td>
 <td>Speak solo state, e.g. <code>3s?</code>.</td>
 </tr>
@@ -199,23 +195,23 @@ e.g. <code>5xs</code>.</td>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;p+N</code> / <code>&lt;target&gt;p-N</code></td>
 <td>Nudge pan by N percentage points toward right/left,
 e.g. <code>3p-10</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>&lt;target&gt;p=N</code></td>
 <td>Set pan to an absolute percent, -100 (full left) to +100 (full
 right), e.g. <code>2p=15</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;p?</code></td>
 <td>Speak current pan (e.g. “25L”, “C”, “10R”),
 e.g. <code>2p?</code>.</td>
@@ -225,21 +221,21 @@ e.g. <code>2p?</code>.</td>
 <h3 id="fader-volume">Fader (volume)</h3>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;f+N</code> / <code>&lt;target&gt;f-N</code></td>
 <td>Nudge volume by N dB, e.g. <code>3f-1</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>&lt;target&gt;f=N</code></td>
 <td>Set volume to an absolute N dB, e.g. <code>4f=-6</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;f?</code></td>
 <td>Speak current volume in dB, e.g. <code>2f?</code>.</td>
 </tr>
@@ -252,13 +248,13 @@ e.g. <code>2p?</code>.</td>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;pk?</code></td>
 <td>Speak the peak hold level (dB, or “silence”) for one or more tracks,
 e.g. <code>4pk?</code>. Read-only — there’s no setter, only the
@@ -269,21 +265,21 @@ query.</td>
 <h3 id="polarity-phase">Polarity / phase</h3>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;i=y</code></td>
 <td>Invert polarity, e.g. <code>2i=y</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>&lt;target&gt;i=n</code></td>
 <td>Normal polarity, e.g. <code>2i=n</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>&lt;target&gt;i?</code></td>
 <td>Speak polarity state, e.g. <code>2i?</code>.</td>
 </tr>
@@ -331,17 +327,17 @@ without opening Meterbridge.</li>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>convert=h</code></td>
 <td>Convert the current (vertical) project to Horizontal workflow.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>convert=v</code></td>
 <td>Convert the current (horizontal) project to Vertical workflow.</td>
 </tr>
@@ -367,46 +363,46 @@ non-folder track) and it starts at <code>S1:</code>.</p>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>import</code></td>
 <td>Smart Import: scan the project media folder for new audio files and
 import them, one folder per take.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>import=smart,1</code></td>
 <td>Same as plain <code>import</code> (one folder per take).</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>import=smart,2</code></td>
 <td>Round-robin distribute new takes across the current number of source
 folders.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>import=smart,3,N</code></td>
 <td>Round-robin distribute across N folders (creating folders as
 needed), e.g. <code>import=smart,3,4</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>import=N</code></td>
 <td>Import only take number N, placed at the edit cursor,
 e.g. <code>import=20</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>import=N,session</code></td>
 <td>Same, restricted to the named session,
 e.g. <code>import=20,Beethoven9</code>.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>import=N-M</code></td>
 <td>Import takes N through M, e.g. <code>import=3-5</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>import=N-M,session</code></td>
 <td>Same, restricted to the named session,
 e.g. <code>import=3-5,Beethoven9</code>.</td>
@@ -432,13 +428,13 @@ one at the edit cursor.</li>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>nudge=ms</code></td>
 <td>Set the ReaClassical project-level nudge amount, in milliseconds,
 used by the “Nudge Marker Left”/“Right” and “Nudge Item Left”/“Right”
@@ -446,11 +442,11 @@ reascripts, e.g. <code>nudge=20</code>. REAPER’s own item-nudge
 amount/unit isn’t exposed to ReaScript, so this is tracked independently
 per project. Defaults to 5 ms if never set.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>nudge?</code></td>
 <td>Speak the current nudge amount.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>mod=n</code></td>
 <td>Set the multiplier applied by the “+ modifier” scripts (Nudge Marker
 Left/Right + modifier, XFM Shift Crossfade Left/Right + modifier),
@@ -458,7 +454,7 @@ e.g. <code>mod=10</code>. These scripts move by nudge amount × modifier,
 so with <code>nudge=5</code> and <code>mod=10</code> each press moves 50
 ms. Defaults to 5 if never set.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>mod?</code></td>
 <td>Speak the current modifier value.</td>
 </tr>
@@ -482,36 +478,36 @@ it.</li>
 <col style="width: 50%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Command</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>help</code></td>
 <td>Open this guide (the HTML copy installed with ReaClassical) in your
 default browser.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>clara</code></td>
 <td>Download and install the Clara screen-reader accessibility plugin
 (Windows/macOS only), removing any old OSARA plugin found in UserPlugins
 along the way, then restart REAPER.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>reaper</code></td>
 <td>Download and install the REAPER version ReaClassical currently
 recommends/tests against. Closes all open projects (you’ll be prompted
 to save unsaved work) and restarts REAPER once the install finishes.
 Same as <code>reaper=rec</code>.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>reaper=latest</code></td>
 <td>Install the latest public (main-release) REAPER version rather than
 the recommended one.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>reaper=VERSION</code></td>
 <td>Install a specific (main-release) REAPER version,
 e.g. <code>reaper=752</code> or <code>reaper=7.52</code> (both mean
@@ -519,17 +515,17 @@ e.g. <code>reaper=752</code> or <code>reaper=7.52</code> (both mean
 cutoff, so older versions work too (provided they are recommended
 version or higher).</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>reaper=rec</code></td>
 <td>Synonym for the bare <code>reaper</code> command (also accepts
 <code>reaper=recommended</code>).</td>
 </tr>
-<tr>
+<tr class="odd">
 <td><code>debug=on</code> / <code>debug=off</code></td>
 <td>Display console messages in addition to Clara announcements. Stored
 per project, so a new project always starts with debug off.</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>debug?</code></td>
 <td>Speak whether debug announcements are currently on or off for this
 project.</td>

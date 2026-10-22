@@ -1588,7 +1588,11 @@ body.dark-theme #rc-results .rc-more:focus {
 <p>Update ReaClassical works the same way and reports its result through Clara.</p>
 </div>
 <h3 id="factory-reset">Factory Reset</h3>
-<p>In the ReaClassical top menu, click on ReaClassical Factory Reset (<kbd>Ctrl+Alt+Shift+F</kbd>) to return most settings back to those presented at first install. </p>
+<p>In the ReaClassical top menu, click on ReaClassical Factory Reset (<kbd>Ctrl+Alt+Shift+F</kbd>) to return most settings back to those presented at first install. It replaces your keymap, menu, mouse modifiers, render presets, metadata and main REAPER settings (<code>reaper.ini</code>) with the ReaClassical defaults. Existing files are backed up with a <code>.backup</code> extension.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A ReaPack update replaces the ReaClassical scripts but does not touch these REAPER configuration files. If a release changes any of them (for example a new keyboard shortcut, menu entry, toolbar button or render preset), the change will not appear in your install until you run a Factory Reset. A new toolbar button is a good example: its icon arrives with the theme, but the button only shows up once the menu file has been replaced. Check the release notes and run it after updating when a release says so. Any customisations you made to those files are overwritten, so restore them from the <code>.backup</code> files afterwards if needed.</p>
+</div>
 <h3 id="updating-reaper">Updating REAPER</h3>
 <p>It is highly advisable to use the version of REAPER that ships with ReaClassical, which is the version ReaClassical has been tested against. Open the Terminal (<kbd>Ctrl+Enter</kbd>) and type <code>reaper</code> to install that tested version. <code>reaper=latest</code> installs the newest public release and <code>reaper=752</code> (for example) installs a specific one. REAPER closes your open projects (it will ask you to save any unsaved work), installs and restarts. Third-party REAPER update utilities are not included in the install package.</p><ul class="pager"><li class="previous"><a title="Install" href="#install" class="previous"> &larr; Previous </a></li><li><a title="Getting Started" href="#getting_started" class="active"> &uarr; Up </a></li><li class="next"><a title="Project Setup" href="#project_setup" class="next"> Next &rarr; </a></li></ul>
 </div>
@@ -1711,10 +1715,12 @@ body.dark-theme #rc-results .rc-more:focus {
 <dd>By default, the item names show both session name (if present) and take numbers. For quicker visual location, set to checked to only show padded take numbers. Not available during the album mastering phase. Default = unchecked.</dd>
 <dt>Source Audition Mode</dt>
 <dd>By default, when setting source in and out markers, any previously existing ones are deleted. To convert previous pairs to take marker "regions" for use in the source audition manager <kbd>Z</kbd>, set to checked. Default = unchecked.</dd>
+<dt>Marker Offset During Rec/Play (s)</dt>
+<dd>When adding a marker while recording or playing, the marker is placed this many seconds before the current position to allow for reaction time. Set to 0 to disable. Negative values are not allowed. Default = 2.</dd>
 </dl>
 <div class="admonition accessibility">
 <p class="admonition-title">Screen reader users (Clara)</p>
-<p>Accessible Preferences offers the same fifteen options as a keyboard-driven list: Up and Down move between options, Enter edits, Backspace resets the current option to its default and Escape closes. A "Reset All to Defaults" row restores everything. An additional "Other Settings" row holds three accessibility-oriented values: the marker/item nudge amount in milliseconds, the item edge grow/shrink amount in milliseconds (default 500) and the modifier multiplier applied by the "x modifier" versions of the nudge and grow/shrink actions.</p>
+<p>Accessible Preferences offers the same sixteen options as a keyboard-driven list: Up and Down move between options, Enter edits, Backspace resets the current option to its default and Escape closes. A "Reset All to Defaults" row restores everything. An additional "Other Settings" row holds three accessibility-oriented values: the marker/item nudge amount in milliseconds, the item edge grow/shrink amount in milliseconds (default 500) and the modifier multiplier applied by the "x modifier" versions of the nudge and grow/shrink actions.</p>
 </div><ul class="pager"><li class="previous"><a title="Converting a Standard REAPER Project" href="#converting" class="previous"> &larr; Previous </a></li><li><a title="Getting Started" href="#getting_started" class="active"> &uarr; Up </a></li><li class="next"><a title="Too Long; Didn't Read" href="#tldr" class="next"> Next &rarr; </a></li></ul>
 </div>
 

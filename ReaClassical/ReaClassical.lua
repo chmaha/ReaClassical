@@ -1,8 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.9
+@version 27.0.10
 @changelog
-  Update ini files for automation improvements
+  Change mixer mode first folder shortcut
+  Add Escape shortcut to exit the three accessibility modes
+  Allow offsetting generic marker placement during recording and playback
 @metapackage
 @provides
   [main] ReaClassical_*.lua

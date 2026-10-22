@@ -125,7 +125,11 @@
 <p>Update ReaClassical works the same way and reports its result through Clara.</p>
 </div>
 <h3 id="factory-reset">Factory Reset</h3>
-<p>In the ReaClassical top menu, click on ReaClassical Factory Reset (<kbd>Ctrl+Alt+Shift+F</kbd>) to return most settings back to those presented at first install. </p>
+<p>In the ReaClassical top menu, click on ReaClassical Factory Reset (<kbd>Ctrl+Alt+Shift+F</kbd>) to return most settings back to those presented at first install. It replaces your keymap, menu, mouse modifiers, render presets, metadata and main REAPER settings (<code>reaper.ini</code>) with the ReaClassical defaults. Existing files are backed up with a <code>.backup</code> extension.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A ReaPack update replaces the ReaClassical scripts but does not touch these REAPER configuration files. If a release changes any of them (for example a new keyboard shortcut, menu entry, toolbar button or render preset), the change will not appear in your install until you run a Factory Reset. A new toolbar button is a good example: its icon arrives with the theme, but the button only shows up once the menu file has been replaced. Check the release notes and run it after updating when a release says so. Any customisations you made to those files are overwritten, so restore them from the <code>.backup</code> files afterwards if needed.</p>
+</div>
 <h3 id="updating-reaper">Updating REAPER</h3>
 <p>It is highly advisable to use the version of REAPER that ships with ReaClassical, which is the version ReaClassical has been tested against. Open the Terminal (<kbd>Ctrl+Enter</kbd>) and type <code>reaper</code> to install that tested version. <code>reaper=latest</code> installs the newest public release and <code>reaper=752</code> (for example) installs a specific one. REAPER closes your open projects (it will ask you to save any unsaved work), installs and restarts. Third-party REAPER update utilities are not included in the install package.</p>
 
