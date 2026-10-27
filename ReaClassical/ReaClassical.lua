@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.11
+@version 27.0.12
 @changelog
-  Default to zero seconds for marker offset
+  Fix master FX button layering
 @metapackage
 @provides
   [main] ReaClassical_*.lua
