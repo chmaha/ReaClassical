@@ -53,6 +53,7 @@ local save_render_settings, restore_render_settings
 local save_track_mute_state, restore_track_mute_state
 local solo_folder_for_render, ensure_dir
 local get_export_subdir, apply_format_render_settings, render_export
+local get_item_take_num, parse_take_list, build_take_filter
 
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists and not _G.RC_SCRIPT_ARGS then
@@ -89,6 +90,16 @@ local EXPORT_FORMATS = {
     { key = "opus", label = "Opus 160" },
     { key = "mp3",  label = "MP3 320" },
 }
+
+local TAKE_MODES = {
+    { key = "all",      label = "All takes",      tooltip = "Export every take" },
+    { key = "list",     label = "Take list",      tooltip = "Export takes by number, e.g. 1,4-6,7" },
+    { key = "selected", label = "Selected items", tooltip = "Export selected parent items" },
+    { key = "time",     label = "Time selection", tooltip = "Export takes overlapping the time selection" },
+}
+
+local take_mode = "all"
+local take_list_text = ""
 
 function is_special_track(track)
     local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback" }
@@ -143,13 +154,78 @@ function clear_all_regions()
     end
 end
 
-function create_regions_for_track(folder_track, name_prefix)
+function get_item_take_num(item)
+    local _, stored = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+    local num = tonumber(stored)
+    if num then return num end
+    local take = GetActiveTake(item)
+    if not take then return nil end
+    local filename = GetMediaSourceFileName(GetMediaItemTake_Source(take), "")
+    num = tonumber(filename:match("_T?(%d+)%.[^%.]+$"))
+    if num then return num end
+    local _, raw_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+    local clean = (raw_name:match("^(.-)%s*|") or raw_name):match("^%s*(.-)%s*$")
+    return tonumber(clean:match("_T?(%d+)$") or clean:match("^(%d+)$"))
+end
+
+function parse_take_list(text)
+    local set = {}
+    local any = false
+    for part in text:gmatch("[^,]+") do
+        part = part:match("^%s*(.-)%s*$")
+        if part ~= "" then
+            local a, b = part:match("^(%d+)%s*%-%s*(%d+)$")
+            if a then
+                a, b = tonumber(a), tonumber(b)
+                if a > b then a, b = b, a end
+                for n = a, b do set[n] = true end
+                any = true
+            elseif part:match("^%d+$") then
+                set[tonumber(part)] = true
+                any = true
+            else
+                return nil, "Invalid take list entry: \"" .. part .. "\".\nUse numbers and ranges, e.g. 1,4-6,7"
+            end
+        end
+    end
+    if not any then return nil, "Please enter at least one take number, e.g. 1,4-6,7" end
+    return set
+end
+
+function build_take_filter(mode, list_text)
+    if mode == "list" then
+        local set, err = parse_take_list(list_text or "")
+        if not set then return nil, err end
+        return function(item)
+            local num = get_item_take_num(item)
+            return num ~= nil and set[num] == true
+        end
+    elseif mode == "selected" then
+        if CountSelectedMediaItems(0) == 0 then
+            return nil, "Please select one or more parent items to export."
+        end
+        return function(item) return IsMediaItemSelected(item) end
+    elseif mode == "time" then
+        local ts_start, ts_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
+        if ts_end <= ts_start then
+            return nil, "Please make a time selection covering the takes to export."
+        end
+        return function(item)
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            local len = GetMediaItemInfo_Value(item, "D_LENGTH")
+            return pos < ts_end and pos + len > ts_start
+        end
+    end
+    return function() return true end
+end
+
+function create_regions_for_track(folder_track, name_prefix, filter)
     local count = 0
     local num_items = GetTrackNumMediaItems(folder_track)
     for i = 0, num_items - 1 do
         local item = GetTrackMediaItem(folder_track, i)
         local take = GetActiveTake(item)
-        if take then
+        if take and filter(item) then
             local pos = GetMediaItemInfo_Value(item, "D_POSITION")
             local len = GetMediaItemInfo_Value(item, "D_LENGTH")
             local _, raw_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
@@ -279,12 +355,16 @@ function render_export(rel_dir)
     Main_OnCommand(42230, 0)
 end
 
-function run_distribute(format)
+function run_distribute(format, mode, list_text)
     local slash = package.config:sub(1, 1)
     local proj_path = GetProjectPath()
     if proj_path == "" then
         return false, "Please save the project before distributing takes."
     end
+
+    local filter, filter_err = build_take_filter(mode or "all", list_text)
+    if not filter then return false, filter_err end
+    local none_msg = (mode == nil or mode == "all") and "No items with takes found" or "No matching takes found"
 
     local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
 
@@ -308,9 +388,9 @@ function run_distribute(format)
             msg = "No ReaClassical folders found"
         else
             local folder_track = folders[1]
-            local count = create_regions_for_track(folder_track, "")
+            local count = create_regions_for_track(folder_track, "", filter)
             if count == 0 then
-                msg = "No items with takes found"
+                msg = none_msg
                 clear_all_regions()
             else
                 render_export(base_rel)
@@ -329,7 +409,7 @@ function run_distribute(format)
             for _, folder_track in ipairs(folders) do
                 solo_folder_for_render(folder_track)
 
-                local count = create_regions_for_track(folder_track, "")
+                local count = create_regions_for_track(folder_track, "", filter)
                 if count > 0 then
                     render_export(base_rel)
                     total = total + count
@@ -340,7 +420,7 @@ function run_distribute(format)
             restore_track_mute_state(mute_state)
 
             if total == 0 then
-                msg = "No items with takes found"
+                msg = none_msg
             else
                 msg = total .. " take" .. (total == 1 and "" or "s") .. " distributed to " .. base_rel
             end
@@ -444,12 +524,34 @@ function main()
         ImGui.Separator(ctx)
         ImGui.Dummy(ctx, 0, 5)
 
+        ImGui.Text(ctx, "Takes:")
+        ImGui.SameLine(ctx)
+        for i, m in ipairs(TAKE_MODES) do
+            if i > 1 then ImGui.SameLine(ctx) end
+            if ImGui.RadioButton(ctx, m.label, take_mode == m.key) then
+                take_mode = m.key
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, m.tooltip)
+            end
+        end
+        local list_disabled = take_mode ~= "list"
+        if list_disabled then ImGui.BeginDisabled(ctx) end
+        ImGui.SetNextItemWidth(ctx, -1)
+        local _, new_text = ImGui.InputTextWithHint(ctx, "##take_list", "e.g. 1,4-6,7", take_list_text)
+        take_list_text = new_text
+        if list_disabled then ImGui.EndDisabled(ctx) end
+
+        ImGui.Dummy(ctx, 0, 5)
+        ImGui.Separator(ctx)
+        ImGui.Dummy(ctx, 0, 5)
+
         ImGui.Text(ctx, "Export:")
         ImGui.SameLine(ctx)
         for i, f in ipairs(EXPORT_FORMATS) do
             if i > 1 then ImGui.SameLine(ctx) end
             if ImGui.Button(ctx, f.label) then
-                local ok, msg = run_distribute(f.key)
+                local ok, msg = run_distribute(f.key, take_mode, take_list_text)
                 if ok then
                     say(msg)
                 else
@@ -457,7 +559,7 @@ function main()
                 end
             end
             if ImGui.IsItemHovered(ctx) then
-                ImGui.SetTooltip(ctx, "Export all takes as " .. f.label)
+                ImGui.SetTooltip(ctx, "Export takes as " .. f.label)
             end
         end
 
@@ -477,7 +579,7 @@ end
 if _G.RC_SCRIPT_ARGS then
     local args = _G.RC_SCRIPT_ARGS
     if args.action == "distribute" then
-        local ok, msg = run_distribute(args.format)
+        local ok, msg = run_distribute(args.format, args.mode, args.takes)
         say(msg)
         if not ok then return end
     end

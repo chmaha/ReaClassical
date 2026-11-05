@@ -36,6 +36,7 @@ local WINDOW_TITLE = "Distribute Takes"
 local STATE_NAV    = "nav"
 local STATE_RENDER = "render"
 local STATE_EXPORT = "export"
+local STATE_TAKES  = "takes"
 
 local KEY_UP    = 30064
 local KEY_DOWN  = 1685026670
@@ -58,8 +59,21 @@ local EXPORT_FORMATS = {
     { key = "mp3",  label = "MP3 320" },
 }
 
+local TAKE_MODES = {
+    { key = "all",      label = "All takes" },
+    { key = "list",     label = "Take list" },
+    { key = "selected", label = "Selected items" },
+    { key = "time",     label = "Time selection" },
+}
+
+local NAV_COUNT = 3
+
 local state   = STATE_NAV
 local nav_idx = 1
+
+local take_mode_idx     = 1
+local take_pending_idx  = 1
+local take_list_text    = ""
 
 local render_field_idx   = 1
 local render_pending_idx = 1
@@ -67,8 +81,15 @@ local cur_samplerate, cur_bitdepth, cur_dither = render_settings.load()
 
 local export_idx = 1
 
+local function take_mode_label()
+    local m = TAKE_MODES[take_mode_idx]
+    if m.key == "list" then return m.label .. " " .. take_list_text end
+    return m.label
+end
+
 local function nav_label(i)
     if i == 1 then return "Render Settings" end
+    if i == 2 then return "Takes: " .. take_mode_label() end
     return "Export"
 end
 
@@ -95,7 +116,12 @@ local function try_refocus()
 end
 
 local function do_export(fmt)
-    _G.RC_SCRIPT_ARGS = { action = "distribute", format = fmt }
+    _G.RC_SCRIPT_ARGS = {
+        action = "distribute",
+        format = fmt,
+        mode = TAKE_MODES[take_mode_idx].key,
+        takes = take_list_text,
+    }
     dofile(parent_path .. "ReaClassical_Distribute Takes.lua")
     _G.RC_SCRIPT_ARGS = nil
 end
@@ -111,6 +137,8 @@ local function draw_window()
     elseif state == STATE_RENDER then
         local f = RENDER_FIELDS[render_field_idx]
         gfx.drawstr("[Render Settings]  " .. f.label .. ": " .. f.labels[render_pending_idx])
+    elseif state == STATE_TAKES then
+        gfx.drawstr("[Takes]  " .. TAKE_MODES[take_pending_idx].label)
     elseif state == STATE_EXPORT then
         gfx.drawstr("[Export]  Format: " .. EXPORT_FORMATS[export_idx].label)
     end
@@ -120,10 +148,10 @@ end
 local function handle_key(char)
     if state == STATE_NAV then
         if char == KEY_UP then
-            nav_idx = nav_idx > 1 and nav_idx - 1 or 2
+            nav_idx = nav_idx > 1 and nav_idx - 1 or NAV_COUNT
             say(nav_label(nav_idx))
         elseif char == KEY_DOWN then
-            nav_idx = nav_idx < 2 and nav_idx + 1 or 1
+            nav_idx = nav_idx < NAV_COUNT and nav_idx + 1 or 1
             say(nav_label(nav_idx))
         elseif char == KEY_ENTER then
             if nav_idx == 1 then
@@ -131,6 +159,10 @@ local function handle_key(char)
                 render_pending_idx = render_current_index(1)
                 state = STATE_RENDER
                 announce_render_field(true)
+            elseif nav_idx == 2 then
+                take_pending_idx = take_mode_idx
+                state = STATE_TAKES
+                say("Takes: " .. TAKE_MODES[take_pending_idx].label .. ". Up/down to change")
             else
                 export_idx = 1
                 state = STATE_EXPORT
@@ -180,6 +212,36 @@ local function handle_key(char)
         elseif char == KEY_ESC then
             state = STATE_NAV
             say("Render Settings")
+        end
+    elseif state == STATE_TAKES then
+        if char == KEY_UP then
+            take_pending_idx = take_pending_idx > 1 and take_pending_idx - 1 or #TAKE_MODES
+            say(TAKE_MODES[take_pending_idx].label)
+        elseif char == KEY_DOWN then
+            take_pending_idx = take_pending_idx < #TAKE_MODES and take_pending_idx + 1 or 1
+            say(TAKE_MODES[take_pending_idx].label)
+        elseif char == KEY_ENTER then
+            local chosen = TAKE_MODES[take_pending_idx]
+            if chosen.key == "list" then
+                local ok, input = GetUserInputs("Take list", 1,
+                    "Takes (e.g. 1,4-6,7):,extrawidth=150", take_list_text)
+                try_refocus()
+                if ok and input:match("%S") then
+                    take_list_text = input:match("^%s*(.-)%s*$")
+                    take_mode_idx = take_pending_idx
+                    state = STATE_NAV
+                    say("Takes: " .. take_mode_label() .. ". Saved")
+                else
+                    say("Take list cancelled. " .. TAKE_MODES[take_pending_idx].label)
+                end
+            else
+                take_mode_idx = take_pending_idx
+                state = STATE_NAV
+                say("Takes: " .. take_mode_label() .. ". Saved")
+            end
+        elseif char == KEY_ESC then
+            state = STATE_NAV
+            say(nav_label(2))
         end
     elseif state == STATE_EXPORT then
         if char == KEY_UP then
