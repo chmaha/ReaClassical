@@ -31,6 +31,8 @@ if input ~= "" then
     if table[9] then audition_speed = tonumber(table[9]) or 0.75 end
 end
 
+local stop_token
+
 set_action_options(3)
 
 function main()
@@ -45,6 +47,9 @@ function main()
             .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    stop_token = tostring(time_precise())
+    SetExtState("ReaClassical", "XFGUI_StopToken", stop_token, false)
     local in_bounds = GetToggleCommandStateEx(32065, 43664)
     if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end
     local left_mute = GetToggleCommandStateEx(32065, 43633)
@@ -78,6 +83,7 @@ function move_cursor_to_time_selection_midpoint()
 end
 
 function stop_at_midpoint(midpoint)
+    if GetExtState("ReaClassical", "XFGUI_StopToken") ~= stop_token then return end
     if GetPlayState() == 0 then
         Main_OnCommand(41185, 0)
         return

@@ -38,6 +38,8 @@ function main()
         return
     end
 
+    SetExtState("ReaClassical", "XFGUI_StopToken", tostring(time_precise()), false)
+
     CSurf_OnPlayRateChange(1)
     local in_bounds = GetToggleCommandStateEx(32065, 43664)
     if in_bounds ~= 1 then CrossfadeEditor_OnCommand(43664) end

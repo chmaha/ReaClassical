@@ -37,6 +37,8 @@ function main()
             .. "+N to use this function.", "ReaClassical Error", 0)
         return
     end
+
+    SetExtState("ReaClassical", "XFGUI_StopToken", tostring(time_precise()), false)
     DeleteProjectMarker(nil, 1016, false)
     local top_only = GetToggleCommandStateEx(32065, 43666)
     if top_only ~= 1 then CrossfadeEditor_OnCommand(43666) end
