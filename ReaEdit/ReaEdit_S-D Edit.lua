@@ -28,6 +28,7 @@ local create_crossfades, clean_up, get_item_guid
 local return_xfade_length
 local get_first_last_items, mark_as_edit
 local move_to_project_tab, save_source_details, adaptive_delete
+local close_empty_dest_gap
 local count_selected_media_items, get_selected_media_item_at
 local select_item_under_cursor_on_selected_track, fix_marker_pair
 local nudge_xfades_inside_dest_markers
@@ -665,6 +666,28 @@ function adaptive_delete()
         Main_OnCommand(40312, 0)
     else
         Main_OnCommand(40006, 0)
+        close_empty_dest_gap(time_sel_start, time_sel_end)
+    end
+end
+
+function close_empty_dest_gap(gap_start, gap_end)
+    local gap = gap_end - gap_start
+    if gap <= 0 then return end
+    local tracks = sd_xfade.folder_tracks(GetSelectedTrack(0, 0))
+    if not tracks then return end
+    local epsilon = 0.0001
+    local to_move = {}
+    for _, track in ipairs(tracks) do
+        for i = 0, CountTrackMediaItems(track) - 1 do
+            local item = GetTrackMediaItem(track, i)
+            local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+            if pos >= gap_end - epsilon then
+                to_move[#to_move + 1] = { item = item, pos = pos }
+            end
+        end
+    end
+    for _, entry in ipairs(to_move) do
+        SetMediaItemInfo_Value(entry.item, "D_POSITION", entry.pos - gap)
     end
 end
 
