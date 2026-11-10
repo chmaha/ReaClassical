@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.15
+@version 27.0.16
 @changelog
-  Fix keymap
+  Remove unused rename machine
+  Fix absolute refs
 @metapackage
 @provides
   [main] ReaClassical_*.lua
