@@ -1,8 +1,11 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.12
+@version 27.0.13
 @changelog
-  Fix master FX button layering
+  Various S-D edit tweaks
+  Add new Crossfade functions
+  Add various options when distributing recorded takes
+  Allow S-D edit when destination markers are not overlapping items
 @metapackage
 @provides
   [main] ReaClassical_*.lua
