@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.14
+@version 27.0.15
 @changelog
-  Add new Crossfade functions to keymap
+  Fix keymap
 @metapackage
 @provides
   [main] ReaClassical_*.lua
