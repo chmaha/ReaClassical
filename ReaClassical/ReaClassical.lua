@@ -1,11 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.13
+@version 27.0.14
 @changelog
-  Various S-D edit tweaks
-  Add new Crossfade functions
-  Add various options when distributing recorded takes
-  Allow S-D edit when destination markers are not overlapping items
+  Add new Crossfade functions to keymap
 @metapackage
 @provides
   [main] ReaClassical_*.lua
