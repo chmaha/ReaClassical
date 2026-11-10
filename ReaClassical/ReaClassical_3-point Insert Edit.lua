@@ -252,9 +252,9 @@ function main()
             parts[#parts + 1] = string.format("%d ms at source-in", math.floor(applied_in * 1000 + 0.5))
         end
         if shortened_out then
-            parts[#parts + 1] = string.format("%d ms at source-out", math.floor(applied_out * 1000 + 0.5))
+            parts[#parts + 1] = string.format("%d ms at destination-out", math.floor(applied_out * 1000 + 0.5))
         end
-        warning = "Crossfade shortened to " .. table.concat(parts, " and ") .. " due to limited source material."
+        warning = "Crossfade shortened to " .. table.concat(parts, " and ") .. " due to limited material."
     end
     if warning and not (APIExists("clara_outputMessage") or _G.__RC_debug_shim_installed) then
         MB(warning, "Assembly Line / 3-point Insert Edit", 0)
@@ -561,8 +561,7 @@ function create_crossfades()
     for i = 0, count_selected_media_items() - 1 do
         out_items[#out_items + 1] = get_selected_media_item_at(i)
     end
-    local out_neighbors = sd_xfade.get_adjacent_neighbors(out_items, "right")
-    local applied_out, shortened_out = sd_xfade.create_crossfade(out_items, out_neighbors, "right", xfade_len)
+    local applied_out, shortened_out = sd_xfade.create_out_crossfade(out_items, xfade_len)
 
     Main_OnCommand(40912, 0)
     Main_OnCommand(40289, 0)

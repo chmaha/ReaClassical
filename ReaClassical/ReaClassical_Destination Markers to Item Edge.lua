@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
+local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
 
 local main, get_selected_media_item_at, count_selected_media_items
 local folder_check, get_track_number, get_track_prefix
@@ -69,6 +70,7 @@ function main()
             local length = GetMediaItemInfo_Value(first_item, "D_LENGTH")
             right_pos = left_pos + length
         end
+        left_pos = left_pos + sd_xfade.get_in_crossfade_overlap(first_item)
     end
 
     local i = 0

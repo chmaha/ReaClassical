@@ -130,6 +130,42 @@ function M.create_crossfade(items, neighbors, edge, requested_len)
     return clamped, clamped < requested_len - 0.0001
 end
 
+function M.create_out_crossfade(items, requested_len)
+    local neighbors = M.get_adjacent_neighbors(items, "right")
+    local right_items, left_items = {}, {}
+    for i, item in ipairs(items) do
+        local nb = neighbors[i]
+        if nb then
+            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") + GetMediaItemInfo_Value(item, "D_LENGTH")
+            if GetMediaItemInfo_Value(nb, "D_POSITION") <= item_end + MIN_GAP then
+                right_items[#right_items + 1] = nb
+                left_items[#left_items + 1] = item
+            end
+        end
+    end
+    if #right_items == 0 then return 0, false end
+    return M.create_crossfade(right_items, left_items, "left", requested_len)
+end
+
+function M.get_in_crossfade_overlap(item)
+    local track = GetMediaItemTrack(item)
+    local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+    local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
+    local epsilon = 0.0001
+    local in_overlap = 0
+    for i = 0, CountTrackMediaItems(track) - 1 do
+        local other = GetTrackMediaItem(track, i)
+        if other ~= item then
+            local o_pos = GetMediaItemInfo_Value(other, "D_POSITION")
+            local o_end = o_pos + GetMediaItemInfo_Value(other, "D_LENGTH")
+            if o_pos < pos - epsilon and o_end > pos + epsilon and o_end < item_end - epsilon then
+                in_overlap = math.max(in_overlap, o_end - pos)
+            end
+        end
+    end
+    return in_overlap
+end
+
 function M.folder_tracks(ref_track)
     if not ref_track then return nil end
     if math.floor(GetMediaTrackInfo_Value(ref_track, "I_FOLDERDEPTH")) ~= 1 then

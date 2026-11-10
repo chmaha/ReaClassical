@@ -32,6 +32,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local rank_info = require("ReaClassical_Rank_Info")
+local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
 
 local function humanize_item_name(name)
     if not name or name == "" then return name end
@@ -205,9 +206,11 @@ function main()
     local edit_len = GetMediaItemInfo_Value(edit_item, "D_LENGTH")
     local playrate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
 
+    local in_xfade = sd_xfade.get_in_crossfade_overlap(edit_item)
+
     local offset_diff = edit_startoffs - src_startoffs
-    local pos_in = src_start + offset_diff
-    local pos_out = pos_in + (edit_len * playrate)
+    local pos_in = src_start + offset_diff + (in_xfade * playrate)
+    local pos_out = src_start + offset_diff + (edit_len * playrate)
 
     local i = 0
     while true do

@@ -130,6 +130,23 @@ function M.create_crossfade(items, neighbors, edge, requested_len)
     return clamped, clamped < requested_len - 0.0001
 end
 
+function M.create_out_crossfade(items, requested_len)
+    local neighbors = M.get_adjacent_neighbors(items, "right")
+    local right_items, left_items = {}, {}
+    for i, item in ipairs(items) do
+        local nb = neighbors[i]
+        if nb then
+            local item_end = GetMediaItemInfo_Value(item, "D_POSITION") + GetMediaItemInfo_Value(item, "D_LENGTH")
+            if GetMediaItemInfo_Value(nb, "D_POSITION") <= item_end + MIN_GAP then
+                right_items[#right_items + 1] = nb
+                left_items[#left_items + 1] = item
+            end
+        end
+    end
+    if #right_items == 0 then return 0, false end
+    return M.create_crossfade(right_items, left_items, "left", requested_len)
+end
+
 function M.all_tracks()
     local tracks = {}
     for i = 0, CountTracks(0) - 1 do

@@ -35,6 +35,7 @@ local M = {}
 
 local EXT = "ReaClassical"
 local PREFIX = "SDSnap_"
+local LAST_KEY = "SDSnapLast"
 local EPS = 0.0001
 
 local pending = nil
@@ -114,6 +115,43 @@ local function post_window(tracks, id, meta)
     return w_start, w_end, count
 end
 
+local function marker_signature()
+    local parts = {}
+    local pi = 0
+    while true do
+        local proj = EnumProjects(pi)
+        if not proj then break end
+        local found = {}
+        local i = 0
+        while true do
+            local ok, isrgn, pos, _, name, num = enum_project_markers(proj, i)
+            if not ok then break end
+            if not isrgn and num >= 996 and num <= 999 then
+                found[#found + 1] = string.format("%d:%d=%.6f:%s", pi, num, pos, name)
+            end
+            i = i + 1
+        end
+        table.sort(found)
+        for _, entry in ipairs(found) do parts[#parts + 1] = entry end
+        pi = pi + 1
+    end
+    return table.concat(parts, "|")
+end
+
+local function has_sd_id(tracks, id, w_start, w_end)
+    for _, track in ipairs(tracks) do
+        for i = 0, CountTrackMediaItems(track) - 1 do
+            local item = GetTrackMediaItem(track, i)
+            if get_sd_id(item) == id then
+                if not w_start then return true end
+                local pos, item_end = item_bounds(item)
+                if pos < w_end - EPS and item_end > w_start + EPS then return true end
+            end
+        end
+    end
+    return false
+end
+
 local function serialize_meta(p, counts)
     local function opt(v) return v and string.format("%.9f", v) or "-" end
     return table.concat({
@@ -141,6 +179,46 @@ local function parse_meta(str)
         pre_len = tonumber(f[7]),
         counts = f[8],
     }
+end
+
+local function read_snapshot(id)
+    local _, meta_str = GetProjExtState(0, EXT, PREFIX .. id)
+    if meta_str == "" then return nil end
+    local meta = parse_meta(meta_str)
+    if not meta then return nil end
+    local saved = {}
+    for n = 1, meta.n_items do
+        local _, val = GetProjExtState(0, EXT, PREFIX .. id .. "_" .. n)
+        local ti, rel, chunk = val:match("^(%d+)\t([^\t]+)\t(.*)$")
+        if not ti then return nil end
+        saved[#saved + 1] = { track_idx = tonumber(ti), rel = tonumber(rel),
+            chunk = unescape(chunk) }
+    end
+    return meta, saved
+end
+
+-- A repeat of the previous edit (same markers, previous S-D items fully
+-- replaced) keeps the previous snapshot so one heal restores the original.
+local function adopt_previous(p)
+    if not p.repeat_id or has_sd_id(p.tracks, p.repeat_id) then return end
+    local meta, saved = read_snapshot(p.repeat_id)
+    if not meta or meta.n_tracks ~= #p.tracks then return end
+    for _, track in ipairs(p.tracks) do
+        for i = 0, CountTrackMediaItems(track) - 1 do
+            local item = GetTrackMediaItem(track, i)
+            if get_sd_id(item) == p.id then
+                GetSetMediaItemInfo_String(item, "P_EXT:SD_id", p.repeat_id, true)
+            end
+        end
+    end
+    p.id = p.repeat_id
+    p.l_off, p.r_off = meta.l_off, meta.r_off
+    p.w_start, p.pre_len = meta.w_start, meta.pre_len
+    p.captured = {}
+    for _, entry in ipairs(saved) do
+        p.captured[#p.captured + 1] = { track_idx = entry.track_idx,
+            pos = meta.w_start + entry.rel, chunk = entry.chunk }
+    end
 end
 
 function M.marker_pos(marker_id)
@@ -197,6 +275,14 @@ function M.capture(tracks, t_left, t_right)
     if left_anchor_pos then l_off = left_anchor_pos - w_start end
     if right_anchor_end then r_off = w_end - right_anchor_end end
 
+    local repeat_id
+    local _, last = GetProjExtState(0, EXT, LAST_KEY)
+    local last_id, last_sig = last:match("^(%x+)\t(.*)$")
+    if last_id and last_sig == marker_signature()
+        and has_sd_id(tracks, last_id, w_start, w_end) then
+        repeat_id = last_id
+    end
+
     pending = {
         id = genGuid(""):gsub("[{}%-]", ""),
         tracks = tracks,
@@ -205,6 +291,7 @@ function M.capture(tracks, t_left, t_right)
         r_off = r_off,
         w_start = w_start,
         pre_len = w_end - w_start,
+        repeat_id = repeat_id,
     }
 end
 
@@ -265,6 +352,8 @@ function M.commit()
     pending = nil
     if not p then return false end
 
+    adopt_previous(p)
+
     local w_start, w_end = post_window(p.tracks, p.id, p)
     if not w_start then return false end
 
@@ -277,6 +366,7 @@ function M.commit()
             string.format("%d\t%.9f\t%s", entry.track_idx, entry.pos - p.w_start,
                 escape(entry.chunk)))
     end
+    SetProjExtState(0, EXT, LAST_KEY, p.id .. "\t" .. marker_signature())
     return true
 end
 
@@ -285,19 +375,8 @@ end
 -- number of S-D items that were healed.
 function M.restore(tracks, id)
     if not tracks or #tracks == 0 or not id or id == "" then return nil end
-    local _, meta_str = GetProjExtState(0, EXT, PREFIX .. id)
-    if meta_str == "" then return nil end
-    local meta = parse_meta(meta_str)
+    local meta, saved = read_snapshot(id)
     if not meta or meta.n_tracks ~= #tracks then return nil end
-
-    local saved = {}
-    for n = 1, meta.n_items do
-        local _, val = GetProjExtState(0, EXT, PREFIX .. id .. "_" .. n)
-        local ti, rel, chunk = val:match("^(%d+)\t([^\t]+)\t(.*)$")
-        if not ti then return nil end
-        saved[#saved + 1] = { track_idx = tonumber(ti), rel = tonumber(rel),
-            chunk = unescape(chunk) }
-    end
 
     local w_start, w_end, sd_count = post_window(tracks, id, meta)
     if not w_start then return nil end
