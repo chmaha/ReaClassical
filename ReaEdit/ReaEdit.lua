@@ -1,8 +1,8 @@
 @description ReaEdit
 @author chmaha
-@version 1.1.0
+@version 1.1
 @changelog
-  First release of ReaEdit
+  Make xfade follow RC26 conventions
 @metapackage
 @provides
   [main] ReaEdit_*.lua
