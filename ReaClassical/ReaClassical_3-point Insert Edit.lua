@@ -241,7 +241,7 @@ function main()
 
     restore_view(initial_curpos, initial_selected_items, initial_selected_tracks)
 
-    Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
+    Undo_EndBlock('Assembly Line / 3-point Insert Edit', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

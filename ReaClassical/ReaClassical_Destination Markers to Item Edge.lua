@@ -102,7 +102,7 @@ function main()
     AddProjectMarker2(0, false, right_pos, 0, out_label, 997, marker_color)
     say("Destination markers set")
 
-    Undo_EndBlock("Destination Markers to Item Edge", 0)
+    Undo_EndBlock("Destination Markers to Item Edge", -1)
 end
 
 function is_in_first_folder(item)

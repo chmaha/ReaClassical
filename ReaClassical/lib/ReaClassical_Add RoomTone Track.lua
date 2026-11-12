@@ -106,7 +106,7 @@ function main()
         roomtone_import.resize_to(rt_item, target_end)
     end
 
-    Undo_EndBlock("Add RoomTone track", 0)
+    Undo_EndBlock("Add RoomTone track", -1)
     say("RoomTone track added")
 end
 

@@ -102,9 +102,6 @@ function get_items_at_midpoint(ref_item)
 end
 
 function main()
-    PreventUIRefresh(1)
-    Undo_BeginBlock()
-
     local current_project = EnumProjects(-1, "")
 
     local _, workflow = GetProjExtState(current_project, "ReaClassical", "Workflow")
@@ -180,9 +177,8 @@ function main()
         found_via_fallback = true
     end
 
-    if source_project ~= current_project then
-        SelectProjectInstance(source_project)
-    end
+    PreventUIRefresh(1)
+    Undo_BeginBlock2(current_project)
 
     if found_via_fallback then
         local source_take = GetActiveTake(source_item)
@@ -221,6 +217,12 @@ function main()
         i = i + 1
     end
 
+    if source_project ~= current_project then
+        Undo_EndBlock2(current_project, "Find Source Material", -1)
+        SelectProjectInstance(source_project)
+        Undo_BeginBlock2(source_project)
+    end
+
     local source_track = GetMediaItemTrack(source_item)
     local color = GetTrackColor(source_track) or 0
     local prefix = get_track_prefix(source_track)
@@ -244,7 +246,7 @@ function main()
     local cmd = NamedCommandLookup("_RS7316313701a4b3bdc2e4c32420a84204827b0ae9")
     if cmd then Main_OnCommand(cmd, 0) end
 
-    Undo_EndBlock("Find Source Material (multi-tab)", 0)
+    Undo_EndBlock2(source_project, "Find Source Material", -1)
     PreventUIRefresh(-1)
     UpdateArrange()
 

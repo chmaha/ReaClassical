@@ -220,7 +220,7 @@ function main()
         if first_track then SetTrackSelected(first_track, true) end
     end
 
-    Undo_EndBlock('Horizontal Workflow', 0)
+    Undo_EndBlock('Horizontal Workflow', -1)
     UpdateArrange()
     UpdateTimeline()
 end

@@ -92,7 +92,7 @@ function main()
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
-    Undo_EndBlock("Add Reference track", 0)
+    Undo_EndBlock("Add Reference track", -1)
     say("Reference track added")
 end
 

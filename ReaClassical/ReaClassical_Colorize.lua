@@ -395,7 +395,7 @@ function apply_color_to_items(color)
 
     UpdateArrange()
     PreventUIRefresh(-1)
-    Undo_EndBlock("ReaClassical Colorize Items", 0)
+    Undo_EndBlock("ReaClassical Colorize Items", -1)
 end
 
 function remove_custom_coloring()
@@ -441,7 +441,7 @@ function remove_custom_coloring()
 
     UpdateArrange()
     PreventUIRefresh(-1)
-    Undo_EndBlock("ReaClassical Remove Custom Coloring", 0)
+    Undo_EndBlock("ReaClassical Remove Custom Coloring", -1)
 
     if restored_count > 0 then
         message_text = string.format("Restored original colors for %d item(s).", restored_count)

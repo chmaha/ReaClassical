@@ -42,7 +42,7 @@ local function main()
 
     TrackList_AdjustWindows(false)
     PreventUIRefresh(-1)
-    Undo_EndBlock("Disarm All Tracks", 0)
+    Undo_EndBlock("Disarm All Tracks", -1)
     UpdateArrange()
     UpdateTimeline()
 

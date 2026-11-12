@@ -709,7 +709,7 @@ function M.try_add_remove(cmd)
         else
             dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
         end
-        Undo_EndBlock("Add Live Bounce Track", 0)
+        Undo_EndBlock("Add Live Bounce Track", -1)
         say("Live bounce track added")
         return true
     end
@@ -773,7 +773,7 @@ function M.try_add_remove(cmd)
         else
             dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
         end
-        Undo_EndBlock("Add Playback Track", 0)
+        Undo_EndBlock("Add Playback Track", -1)
         say("Playback track added (hardware output " .. hw_first .. "/" .. (hw_first + 1) .. ")")
         return true
     end

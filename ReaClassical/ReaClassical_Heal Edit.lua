@@ -67,7 +67,7 @@ function main()
         end
     end
 
-    Undo_EndBlock('Heal Edit', 0)
+    Undo_EndBlock('Heal Edit', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

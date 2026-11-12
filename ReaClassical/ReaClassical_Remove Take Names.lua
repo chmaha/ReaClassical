@@ -72,7 +72,7 @@ function main()
         say("Take names removed")
     end
 
-    Undo_EndBlock('Remove Take Names', 0)
+    Undo_EndBlock('Remove Take Names', -1)
 end
 
 function clean_take_names(selected_track, num_of_items)

@@ -123,7 +123,7 @@ function main()
     say("Source markers set")
     Main_OnCommand(40635, 0)
     PreventUIRefresh(-1)
-    Undo_EndBlock("Source Markers to Item Edge", 0)
+    Undo_EndBlock("Source Markers to Item Edge", -1)
 end
 
 function folder_check()

@@ -61,7 +61,7 @@ function main()
         _G.RC_SCRIPT_ARGS = nil
     end
 
-    Undo_EndBlock('Remove All CD Marker Offsets', 0)
+    Undo_EndBlock('Remove All CD Marker Offsets', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

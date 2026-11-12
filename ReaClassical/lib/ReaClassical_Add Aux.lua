@@ -86,7 +86,7 @@ function main()
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
-    Undo_EndBlock("Add Aux", 0)
+    Undo_EndBlock("Add Aux", -1)
     say("Aux bus added")
 end
 

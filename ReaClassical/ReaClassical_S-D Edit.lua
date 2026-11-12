@@ -280,7 +280,7 @@ function main()
         return
     end
 
-    Undo_EndBlock('S-D Edit', 0)
+    Undo_EndBlock('S-D Edit', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

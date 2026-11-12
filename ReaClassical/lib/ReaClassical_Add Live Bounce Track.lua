@@ -101,7 +101,7 @@ function main()
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
-    Undo_EndBlock("Add Live Bounce Track", 0)
+    Undo_EndBlock("Add Live Bounce Track", -1)
     say("Live bounce track added")
 end
 

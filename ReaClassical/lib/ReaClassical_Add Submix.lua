@@ -93,7 +93,7 @@ function main()
         dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
     end
 
-    Undo_EndBlock("Add Submix", 0)
+    Undo_EndBlock("Add Submix", -1)
     say("Submix added")
 end
 

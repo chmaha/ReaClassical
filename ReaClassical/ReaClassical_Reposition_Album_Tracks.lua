@@ -155,7 +155,7 @@ function main()
         end
     end
 
-    Undo_EndBlock("Reposition Tracks", 0)
+    Undo_EndBlock("Reposition Tracks", -1)
 
     local _, run = GetProjExtState(0, "ReaClassical", "CreateCDMarkersRun?")
     if run == "yes" and not _G.RC_SCRIPT_ARGS then

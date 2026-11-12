@@ -247,7 +247,7 @@ function main()
         restore_all_ripple()
     end
 
-    Undo_EndBlock('S-D edit with timestretching', 0)
+    Undo_EndBlock('S-D edit with timestretching', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

@@ -61,7 +61,7 @@ function main()
     end
   end
 
-  Undo_EndBlock('Remove Non-Overlapping Item Fades', 0)
+  Undo_EndBlock('Remove Non-Overlapping Item Fades', -1)
   PreventUIRefresh(-1)
   UpdateArrange()
   UpdateTimeline()

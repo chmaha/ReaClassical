@@ -84,7 +84,7 @@ function main()
     else
         MB("Please use SOURCE-IN and SOURCE-OUT markers", "Delete Leaving Silence", 0)
     end
-    Undo_EndBlock('Cut and Ripple', 0)
+    Undo_EndBlock('Cut and Ripple', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

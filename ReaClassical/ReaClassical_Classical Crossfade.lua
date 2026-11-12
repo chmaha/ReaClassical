@@ -133,7 +133,7 @@ function main()
         end
     end
 
-    Undo_EndBlock('Classical Crossfade', 0)
+    Undo_EndBlock('Classical Crossfade', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

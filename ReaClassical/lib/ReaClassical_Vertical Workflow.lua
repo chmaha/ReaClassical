@@ -336,7 +336,7 @@ function main()
         local first_track = GetTrack(0, 0)
         if first_track then SetTrackSelected(first_track, true) end
     end
-    if not suppress_undo then Undo_EndBlock('Vertical Workflow', 0) end
+    if not suppress_undo then Undo_EndBlock('Vertical Workflow', -1) end
     UpdateArrange()
     UpdateTimeline()
 end

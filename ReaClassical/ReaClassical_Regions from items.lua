@@ -62,7 +62,7 @@ function main()
         end
     end
 
-    Undo_EndBlock('Regions from Items', 0)
+    Undo_EndBlock('Regions from Items', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
