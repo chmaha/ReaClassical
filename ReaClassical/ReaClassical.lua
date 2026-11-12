@@ -1,9 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.16
+@version 27.0.17
 @changelog
-  Remove unused rename machine
-  Fix absolute refs
+  Allow multi-part polywav import
 @metapackage
 @provides
   [main] ReaClassical_*.lua

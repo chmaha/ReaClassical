@@ -137,6 +137,18 @@
 <li><code>violin56.wav</code> (no underscore before the take number)</li>
 </ul>
 <p>WAV, FLAC and AIFF files are imported. A file named <code>roomtone.wav</code> is always ignored, as it is reserved for room tone.</p>
+<h4 id="split-recordings">Split Recordings</h4>
+<p>Many recorders split a long take into several files when it reaches the maximum file size. Smart Import joins these back into a single take if each file carries a four-digit <strong>part number</strong> after a "T"-style take number:</p>
+<ul>
+<li><code>trackname_Txxx_xxxx.wav</code></li>
+<li><code>sessionname_trackname_Txxx_xxxx.wav</code></li>
+</ul>
+<p>For example, <code>piano_T003_0001.wav</code>, <code>piano_T003_0002.wav</code> and <code>piano_T003_0003.wav</code> become take 3 on the piano track. The parts are placed end to end with no gap and the fades where they meet are removed, so the take plays as one continuous recording.</p>
+<p>The part number is only recognised after a take number with a "T". Without it, the last number is the take number as usual, so <code>piano_0002.wav</code> is still take 2.</p>
+<ul>
+<li>The parts don't have to start at <code>0001</code> (for example if part 1 is already in the project or has been deleted), but there can't be a missing part in the middle: parts 1 and 3 without part 2 are reported and that take is skipped</li>
+<li>Every track in a take must have the same number of parts</li>
+</ul>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Don't skip this renaming step if you want to import files easily from another DAW! Manual import by dragging in material can be time-consuming and may not allow you to use functions like searching by take number.</p>
@@ -161,7 +173,8 @@
 <li><strong>Use current folder count</strong>: takes are dealt out in turn across all the source folders that already exist from the starting folder downward (take 1 to the first, take 2 to the second, ..., then back to the first folder, to the right of the first round). No folders are created.</li>
 <li><strong>Round-robin across custom number of folders</strong>: the same dealing out, but across the number of folders you enter, creating folders if needed.</li>
 </ul>
-<p>A preview shows the result, including a warning when new folders will be created.</p>
+<p>A preview shows the result, including a warning when new folders will be created. Takes made from split recordings are listed with their part count, for example "T003 (3 parts)".</p>
+<p><strong>Gap between takes</strong> sets the space left between consecutive takes in the same folder (2 seconds by default). Set it to 0 to place takes directly against each other; the fades where they touch are then removed. This is useful for recorders that split a long recording by starting a new take number rather than adding a part number. The setting is remembered for the project and has no effect in <strong>One folder per take</strong> mode. Split recording parts are always joined with no gap, whatever this is set to.</p>
 <p><img alt="Smart Import" src="/manual/images/smart_import.png" /></p>
 <div class="admonition accessibility">
 <p class="admonition-title">Screen reader users (Clara)</p>
@@ -169,7 +182,8 @@
 </div>
 <h3 id="multi-channel-files-from-a-portable-recorder">Multi-Channel Files from a Portable Recorder</h3>
 <p>If you use a portable recorder such as a MixPre, you might have a multi-channel combined file (a "polywav"). Smart Import can split these into a set of mono and stereo tracks. The <strong>Polywav</strong> tab appears in the Smart Import window whenever the media folder contains unused files with more than two channels.</p>
-<p>The filenames must follow the take-number rule above, with an optional session name but no track name: <code>[sessionname_]Txxx.wav</code>. Every polywav imported in one go must have the same number of channels.</p>
+<p>The filenames must follow the take-number rule above, with an optional session name but no track name: <code>[sessionname_]Txxx.wav</code>. A hyphen can also separate the session name from a "T"-style take number (<code>sessionname-Txxx.wav</code>). Every polywav imported in one go must have the same number of channels.</p>
+<p>Split recordings work here too, using the same four-digit part number (see <a href="#split-recordings">Split Recordings</a>): <code>[sessionname_]Txxx_xxxx.wav</code>. This matches the naming of Zoom recorders such as the F8n Pro (firmware 1.3 or later), so files such as <code>261024-T001_0001.WAV</code> to <code>261024-T001_0005.WAV</code> import as one continuous take 1 in session "261024" without renaming. A missing part in the middle or a duplicate take stops the polywav import, with the problem files listed.</p>
 <p>Enter a <strong>channel composition pattern</strong> made of the digits 1 (mono) and 2 (stereo), read left to right across the channels of the file. For example:</p>
 <ul>
 <li><code>2</code> makes the first stereo pair, and then every remaining pair of channels is also treated as stereo</li>
