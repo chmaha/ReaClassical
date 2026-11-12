@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.18
+@version 27.0.19
 @changelog
-  Fix destination markers to item edge coloring
+  Use -1 instead of 0 for undo
 @metapackage
 @provides
   [main] ReaClassical_*.lua
