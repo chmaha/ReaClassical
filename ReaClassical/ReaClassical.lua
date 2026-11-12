@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.17
+@version 27.0.18
 @changelog
-  Allow multi-part polywav import
+  Fix destination markers to item edge coloring
 @metapackage
 @provides
   [main] ReaClassical_*.lua
