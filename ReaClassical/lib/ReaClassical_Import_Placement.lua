@@ -126,6 +126,55 @@ function M.insert_media_get_item(track, filepath)
     return item
 end
 
+function M.clear_join_fades(part_items)
+    for p = 1, #part_items - 1 do
+        for _, item in ipairs(part_items[p]) do
+            SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0)
+            SetMediaItemInfo_Value(item, "D_FADEOUTLEN_AUTO", 0)
+        end
+        for _, item in ipairs(part_items[p + 1]) do
+            SetMediaItemInfo_Value(item, "D_FADEINLEN", 0)
+            SetMediaItemInfo_Value(item, "D_FADEINLEN_AUTO", 0)
+        end
+    end
+end
+
+function M.get_take_gap()
+    local _, gap_str = GetProjExtState(0, "ReaClassical", "ImportTakeGap")
+    local gap = tonumber(gap_str)
+    if not gap or gap < 0 then return 2 end
+    return gap
+end
+
+function M.set_take_gap(gap)
+    SetProjExtState(0, "ReaClassical", "ImportTakeGap", tostring(math.max(0, gap)))
+end
+
+function M.clear_touching_fades(items)
+    local eps = 0.000001
+    local by_track = {}
+    for _, item in ipairs(items) do
+        local track = GetMediaItem_Track(item)
+        by_track[track] = by_track[track] or {}
+        table.insert(by_track[track], item)
+    end
+    for _, list in pairs(by_track) do
+        table.sort(list, function(a, b)
+            return GetMediaItemInfo_Value(a, "D_POSITION") < GetMediaItemInfo_Value(b, "D_POSITION")
+        end)
+        for i = 1, #list - 1 do
+            local a, b = list[i], list[i + 1]
+            local a_end = GetMediaItemInfo_Value(a, "D_POSITION") + GetMediaItemInfo_Value(a, "D_LENGTH")
+            if math.abs(a_end - GetMediaItemInfo_Value(b, "D_POSITION")) < eps then
+                SetMediaItemInfo_Value(a, "D_FADEOUTLEN", 0)
+                SetMediaItemInfo_Value(a, "D_FADEOUTLEN_AUTO", 0)
+                SetMediaItemInfo_Value(b, "D_FADEINLEN", 0)
+                SetMediaItemInfo_Value(b, "D_FADEINLEN_AUTO", 0)
+            end
+        end
+    end
+end
+
 function M.calculate_round_robin_distribution(take_nums, folder_count)
     local distribution = {}
     for i = 1, folder_count do distribution[i] = {} end

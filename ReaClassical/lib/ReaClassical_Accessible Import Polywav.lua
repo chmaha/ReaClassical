@@ -190,6 +190,7 @@ local function perform_import()
         target_folder_count = target_folder_count,
         start_folder_idx    = start_folder_idx,
         start_pos           = GetCursorPosition(),
+        take_gap            = placement.get_take_gap(),
     })
 
     placement.finish_import_tail({
@@ -347,8 +348,8 @@ if #candidates == 0 then
 end
 
 if #parse_errors > 0 then
-    MB("These polywav files need to be renamed to [SessionName_]T###.ext "
-        .. "(session optional, take number required):\n\n" .. table.concat(parse_errors, "\n"),
+    MB("These polywav files need to be renamed to [SessionName_]T###[_####].ext "
+        .. "(session optional, take number required, optional 4-digit split-file part number):\n\n" .. table.concat(parse_errors, "\n"),
         "Import Aborted", 0)
     return
 end

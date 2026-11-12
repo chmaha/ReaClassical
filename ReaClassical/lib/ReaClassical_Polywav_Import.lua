@@ -62,7 +62,14 @@ function M.parse_polywav_filename(filepath)
     local name_no_ext = filename:match("(.+)%.[^.]+$")
     if not name_no_ext then return nil end
 
-    local session_name, take_str = name_no_ext:match("^(.-)_T(%d+)$")
+    local session_name, take_str, part_str = name_no_ext:match("^(.-)[_-]T(%d+)_(%d%d%d%d)$")
+    if not take_str then
+        take_str, part_str = name_no_ext:match("^T(%d+)_(%d%d%d%d)$")
+        session_name = ""
+    end
+    if not take_str then
+        session_name, take_str = name_no_ext:match("^(.-)[_-]T(%d+)$")
+    end
     if not take_str then
         session_name, take_str = name_no_ext:match("^(.-)_(%d+)$")
     end
@@ -80,28 +87,59 @@ function M.parse_polywav_filename(filepath)
         filename     = filename,
         session_name = (session_name ~= "" and session_name) or "default",
         take_num     = tonumber(take_str),
+        part_num     = part_str and tonumber(part_str) or nil,
     }
+end
+
+function M.validate_take_parts(list)
+    local part_nums = {}
+    for i, c in ipairs(list) do part_nums[i] = c.part_num or false end
+    local err = scan.check_part_sequence(part_nums)
+    if err then return err end
+
+    for _, c in ipairs(list) do
+        if c.channel_count ~= list[1].channel_count then
+            return "split parts have differing channel counts"
+        end
+    end
+
+    return nil
 end
 
 function M.build_sessions(candidates)
     local sessions = {}
     local errors = {}
+    local grouped = {}
 
     for _, c in ipairs(candidates) do
         local info = M.parse_polywav_filename(c.filepath)
         if not info then
             errors[#errors + 1] = c.display_name
-                .. " (invalid filename -- expected [SessionName_]T###.ext)"
+                .. " (invalid filename -- expected [SessionName_]T###[_####].ext)"
         else
-            if not sessions[info.session_name] then sessions[info.session_name] = {} end
-            if sessions[info.session_name][info.take_num] then
-                errors[#errors + 1] = c.display_name .. string.format(
-                    " (duplicate take T%03d for session '%s')", info.take_num, info.session_name)
+            c.filename     = info.filename
+            c.session_name = info.session_name
+            c.take_num     = info.take_num
+            c.part_num     = info.part_num
+            grouped[info.session_name] = grouped[info.session_name] or {}
+            local takes = grouped[info.session_name]
+            takes[info.take_num] = takes[info.take_num] or {}
+            table.insert(takes[info.take_num], c)
+        end
+    end
+
+    for session_name, takes in pairs(grouped) do
+        for take_num, list in pairs(takes) do
+            local err = M.validate_take_parts(list)
+            if err then
+                errors[#errors + 1] = string.format("%s T%03d (%s)",
+                    session_name == "default" and "No Session Name" or session_name, take_num, err)
             else
-                c.filename     = info.filename
-                c.session_name = info.session_name
-                c.take_num     = info.take_num
-                sessions[info.session_name][info.take_num] = c
+                table.sort(list, function(a, b) return (a.part_num or 0) < (b.part_num or 0) end)
+                local entry = list[1]
+                entry.parts = list
+                sessions[session_name] = sessions[session_name] or {}
+                sessions[session_name][take_num] = entry
             end
         end
     end
@@ -322,6 +360,7 @@ function M.run(opts)
 
     errors = {}
     local is_vertical    = opts.workflow == "Vertical"
+    local take_gap       = opts.take_gap or 2
     local start_pos      = opts.start_pos or 0
     local scratch_start  = math.max(start_pos, scan.get_project_end_position() + 10)
     local pos            = scratch_start
@@ -397,7 +436,7 @@ function M.run(opts)
                 end
 
                 if round_robin and take_idx > opts.target_folder_count and folder_idx == 1 then
-                    local next_round_start = max_end_position + 2
+                    local next_round_start = max_end_position + take_gap
                     for i = 1, opts.target_folder_count do folder_positions[i] = next_round_start end
                 end
             else
@@ -405,26 +444,41 @@ function M.run(opts)
             end
 
             do
-                local items, place_err = M.place_take_items(candidate.filepath, groups, target_tracks)
-                if not items then
-                    table.insert(errors, candidate.filename .. ": " .. (place_err or "could not place audio"))
+                local take_pos
+                if round_robin then
+                    take_pos = folder_positions[((take_idx - 1) % opts.target_folder_count) + 1]
                 else
-                    local take_len = 0
-                    local take_pos
-                    if round_robin then
-                        take_pos = folder_positions[((take_idx - 1) % opts.target_folder_count) + 1]
-                    else
-                        take_pos = pos
+                    take_pos = pos
+                end
+
+                local take_len = 0
+                local part_items = {}
+                local placed_any = false
+                for part_idx, part in ipairs(candidate.parts) do
+                    local items, place_err = M.place_take_items(part.filepath, groups, target_tracks)
+                    if not items then
+                        table.insert(errors, part.filename .. ": " .. (place_err or "could not place audio"))
+                        break
                     end
+                    placed_any = true
+                    local part_len = 0
+                    local placed = {}
                     for i, item in ipairs(items) do
                         if item then
-                            take_len = record_item(item, take_pos, take_num, take_len, all_items, touched_tracks)
-                        elseif target_tracks[i] == nil then
+                            part_len = record_item(item, take_pos + take_len, take_num, part_len,
+                                all_items, touched_tracks)
+                            placed[#placed + 1] = item
+                        elseif part_idx == 1 and target_tracks[i] == nil then
                             table.insert(errors, string.format(
                                 "%s T%03d: no track for %s", session_name, take_num, ordered_names[i].display_name))
                         end
                     end
+                    part_items[#part_items + 1] = placed
+                    take_len = take_len + part_len
+                end
+                placement.clear_join_fades(part_items)
 
+                if placed_any then
                     if round_robin then
                         local folder_idx = ((take_idx - 1) % opts.target_folder_count) + 1
                         local take_end = folder_positions[folder_idx] + take_len
@@ -432,7 +486,7 @@ function M.run(opts)
                     elseif is_vertical then
                         if take_len > session_max_len then session_max_len = take_len end
                     else
-                        pos = pos + take_len + 2
+                        pos = pos + take_len + take_gap
                     end
                 end
             end
@@ -448,6 +502,8 @@ function M.run(opts)
             pos = pos + 10
         end
     end
+
+    if take_gap == 0 then placement.clear_touching_fades(all_items) end
 
     local delta = scratch_start - start_pos
     if delta > 0.0001 and #all_items > 0 then

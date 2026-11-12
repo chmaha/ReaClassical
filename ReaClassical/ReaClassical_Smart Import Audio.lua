@@ -111,6 +111,7 @@ local show_import_dialog, import_vertical_round_robin
 local show_track_order_dialog, draw_track_order_dialog
 local finish_import
 local continue_named_track_import
+local place_split_take, take_item_name, take_label, draw_take_gap_input
 
 set_action_options(2)
 
@@ -143,6 +144,7 @@ local polywav_pattern_text      = "1"
 local polywav_distribution_mode = 0
 local polywav_folder_count      = 2
 local polywav_start_folder_idx  = 2
+local take_gap = 2
 
 local cached_sessions = nil
 local cached_session_names = nil
@@ -225,6 +227,7 @@ end
 function continue_named_track_import(workflow, has_existing_items, start_pos)
     local used_files = scan.get_used_source_files()
 
+    take_gap = placement.get_take_gap()
     polywav_available_candidates = polywav.scan_candidates()
     local polywav_exclude = {}
     for _, c in ipairs(polywav_available_candidates) do
@@ -363,6 +366,7 @@ function continue_named_track_import(workflow, has_existing_items, start_pos)
     local function build_sessions()
         local tracks = scan.get_tracks(workflow)
         local sessions = {}
+        local collected = {}
 
         local unused_set = {}
         for _, entry in ipairs(track_order_unused) do
@@ -379,14 +383,52 @@ function continue_named_track_import(workflow, has_existing_items, start_pos)
                         .. " (no track match for '" .. info.track_name .. "')")
                 end
             else
-                if not sessions[info.session_name] then
-                    sessions[info.session_name] = {}
-                end
-                if not sessions[info.session_name][info.take_num] then
-                    sessions[info.session_name][info.take_num] = {}
-                end
+                collected[info.session_name] = collected[info.session_name] or {}
+                local takes = collected[info.session_name]
+                takes[info.take_num] = takes[info.take_num] or {}
+                takes[info.take_num][track_obj] = takes[info.take_num][track_obj] or {}
                 track_obj.track_name_display = info.track_name_display
-                sessions[info.session_name][info.take_num][track_obj] = pf.filepath
+                table.insert(takes[info.take_num][track_obj], { filepath = pf.filepath, part = info.part_num })
+            end
+        end
+
+        for session_name, takes in pairs(collected) do
+            for take_num, by_track in pairs(takes) do
+                local take_data, part_count, take_err = {}, nil, nil
+                for track_obj, entries in pairs(by_track) do
+                    local any_part = false
+                    for _, e in ipairs(entries) do
+                        if e.part then any_part = true end
+                    end
+                    if any_part then
+                        local part_nums = {}
+                        for i, e in ipairs(entries) do part_nums[i] = e.part or false end
+                        local err = scan.check_part_sequence(part_nums)
+                        if err then
+                            take_err = string.format("track '%s': %s", track_obj.display_name, err)
+                            break
+                        end
+                        table.sort(entries, function(a, b) return a.part < b.part end)
+                    else
+                        entries = { entries[#entries] }
+                    end
+                    if part_count and part_count ~= #entries then
+                        take_err = "tracks have differing numbers of split parts"
+                        break
+                    end
+                    part_count = #entries
+                    local files = {}
+                    for i, e in ipairs(entries) do files[i] = e.filepath end
+                    take_data[track_obj] = files
+                end
+
+                if take_err then
+                    table.insert(errors, string.format("%s T%03d not imported (%s)",
+                        session_name == "default" and "No Session Name" or session_name, take_num, take_err))
+                else
+                    sessions[session_name] = sessions[session_name] or {}
+                    sessions[session_name][take_num] = take_data
+                end
             end
         end
 
@@ -589,7 +631,8 @@ function draw_polywav_tab()
 
     if #polywav_parse_errors > 0 then
         ImGui.TextWrapped(ctx, "These polywav files need to be renamed to "
-            .. "[SessionName_]T###.ext (session optional, take number required) "
+            .. "[SessionName_]T###[_####].ext (session optional, take number required, "
+            .. "optional 4-digit split-file part number) "
             .. "before they can be imported:")
         ImGui.Spacing(ctx)
         ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFF6666FF)
@@ -616,7 +659,12 @@ function draw_polywav_tab()
         table.sort(take_nums)
 
         local labels = {}
-        for _, tn in ipairs(take_nums) do labels[#labels + 1] = string.format("T%03d", tn) end
+        for _, tn in ipairs(take_nums) do
+            local nparts = session_data[tn].parts and #session_data[tn].parts or 1
+            labels[#labels + 1] = nparts > 1
+                and string.format("T%03d (%d parts)", tn, nparts)
+                or  string.format("T%03d", tn)
+        end
         local display_name = session_name == "default" and "No Session Name" or session_name
         ImGui.Bullet(ctx)
         ImGui.SameLine(ctx)
@@ -714,6 +762,18 @@ function draw_polywav_tab()
     ImGui.Separator(ctx)
     ImGui.Spacing(ctx)
 
+    local pw_has_parts = false
+    for _, session_name in ipairs(polywav_session_names) do
+        for _, candidate in pairs(polywav_sessions[session_name]) do
+            if #candidate.parts > 1 then pw_has_parts = true end
+        end
+    end
+    draw_take_gap_input("##pw_take_gap", is_vertical and polywav_distribution_mode == 0, pw_has_parts)
+
+    ImGui.Spacing(ctx)
+    ImGui.Separator(ctx)
+    ImGui.Spacing(ctx)
+
     local button_width = (ImGui.GetContentRegionAvail(ctx) - 8) / 2
 
     local can_import = channel_count and not mismatch and groups and cap_ok
@@ -724,6 +784,7 @@ function draw_polywav_tab()
             target_folder_count = scan.total_existing_folders() - polywav_start_folder_idx + 1
         end
 
+        placement.set_take_gap(take_gap)
         placement.disable_ripple()
         local _, errors = polywav.run({
             sessions             = polywav_sessions,
@@ -734,6 +795,7 @@ function draw_polywav_tab()
             target_folder_count   = target_folder_count,
             start_folder_idx      = polywav_start_folder_idx,
             start_pos             = GetCursorPosition(),
+            take_gap              = take_gap,
         })
         finish_import(errors)
         polywav_committed = true
@@ -1214,6 +1276,20 @@ function draw_import_dialog()
             ImGui.Spacing(ctx)
         end
 
+        local takes_have_parts = false
+        for _, session_name in ipairs(active_session_names) do
+            for _, take_data in pairs(active_sessions[session_name]) do
+                for _, parts in pairs(take_data) do
+                    if #parts > 1 then takes_have_parts = true end
+                end
+            end
+        end
+        draw_take_gap_input("##take_gap", is_vertical and distribution_mode == 0, takes_have_parts)
+
+        ImGui.Spacing(ctx)
+        ImGui.Separator(ctx)
+        ImGui.Spacing(ctx)
+
         ImGui.Text(ctx, "Preview:")
 
         if is_vertical then
@@ -1242,6 +1318,7 @@ function draw_import_dialog()
         if ImGui.Button(ctx, "Import", button_width, 30) then
             import_confirmed = true
             dialog_open      = false
+            placement.set_take_gap(take_gap)
             if is_vertical then
                 SetProjExtState(0, "ReaClassical", "ImportDistributionMode", tostring(distribution_mode))
                 SetProjExtState(0, "ReaClassical", "ImportFolderCount",       tostring(target_folder_count))
@@ -1288,7 +1365,7 @@ function generate_preview_ui(sessions, session_names, folder_count, start_folder
             for _, take_num in ipairs(take_nums) do
                 ImGui.Bullet(ctx)
                 ImGui.SameLine(ctx)
-                ImGui.Text(ctx, string.format("T%03d", take_num))
+                ImGui.Text(ctx, take_label(session_data[take_num], take_num))
             end
             ImGui.Spacing(ctx)
         end
@@ -1312,7 +1389,7 @@ function generate_preview_ui(sessions, session_names, folder_count, start_folder
                 ImGui.Text(ctx, folder_label)
                 ImGui.SameLine(ctx)
                 ImGui.SetCursorPosX(ctx, take_column_x)
-                ImGui.Text(ctx, string.format("T%03d", take_num))
+                ImGui.Text(ctx, take_label(session_data[take_num], take_num))
             end
             ImGui.Spacing(ctx)
         end
@@ -1337,7 +1414,7 @@ function generate_preview_ui(sessions, session_names, folder_count, start_folder
                     ImGui.SameLine(ctx)
                     ImGui.SetCursorPosX(ctx, take_column_x)
                     for i, take_num in ipairs(takes) do
-                        ImGui.Text(ctx, string.format("T%03d", take_num))
+                        ImGui.Text(ctx, take_label(session_data[take_num], take_num))
                         if i < #takes then ImGui.SameLine(ctx) end
                     end
                     ImGui.SameLine(ctx)
@@ -1346,6 +1423,88 @@ function generate_preview_ui(sessions, session_names, folder_count, start_folder
             end
             ImGui.Spacing(ctx)
         end
+    end
+end
+
+function take_item_name(session_name, take_num)
+    if session_name == "default" then return string.format("%03d", take_num) end
+    return session_name .. "_T" .. string.format("%03d", take_num)
+end
+
+function take_label(take_data, take_num)
+    local part_count = 1
+    for _, parts in pairs(take_data) do
+        if #parts > part_count then part_count = #parts end
+    end
+    if part_count > 1 then return string.format("T%03d (%d parts)", take_num, part_count) end
+    return string.format("T%03d", take_num)
+end
+
+function place_split_take(take_data, resolve_target, take_pos, item_name, all_items)
+    local targets = {}
+    local part_count = 0
+    for track_obj, parts in pairs(take_data) do
+        targets[track_obj] = resolve_target(track_obj)
+        if #parts > part_count then part_count = #parts end
+    end
+
+    local offset = 0
+    local part_items = {}
+    for p = 1, part_count do
+        local items = {}
+        for track_obj, parts in pairs(take_data) do
+            local target = targets[track_obj]
+            if target and parts[p] then
+                SetOnlyTrackSelected(target)
+                local item = placement.insert_media_get_item(target, parts[p])
+                if item then
+                    SetMediaItemInfo_Value(item, "D_POSITION", take_pos + offset)
+                    local take = GetActiveTake(item)
+                    if take then GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true) end
+                    items[#items + 1] = item
+                    all_items[#all_items + 1] = item
+                end
+            end
+        end
+
+        local min_len = 0
+        if #items > 0 then
+            min_len = math.huge
+            for _, it in ipairs(items) do
+                local l = GetMediaItemInfo_Value(it, "D_LENGTH")
+                if l < min_len then min_len = l end
+            end
+            if #items > 1 then
+                for _, it in ipairs(items) do SetMediaItemInfo_Value(it, "D_LENGTH", min_len) end
+            end
+        end
+
+        part_items[#part_items + 1] = items
+        offset = offset + min_len
+    end
+
+    placement.clear_join_fades(part_items)
+    return offset
+end
+
+function draw_take_gap_input(id, disabled, has_parts)
+    if has_parts then
+        ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x88CCFFFF)
+        ImGui.TextWrapped(ctx, "Split-file parts (T###_####) are always joined gaplessly "
+            .. "into a single take. The gap below applies between separate takes.")
+        ImGui.PopStyleColor(ctx)
+        ImGui.Spacing(ctx)
+    end
+    ImGui.Text(ctx, "Gap between takes in seconds (0 = gapless):")
+    if disabled then ImGui.BeginDisabled(ctx) end
+    ImGui.SetNextItemWidth(ctx, 140)
+    local changed, value = ImGui.InputDouble(ctx, id, take_gap, 0.5, 1.0, "%.2f")
+    if changed then take_gap = math.max(0, value) end
+    if disabled then ImGui.EndDisabled(ctx) end
+    if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+        ImGui.SetTooltip(ctx, disabled
+            and "Not used when each take gets its own folder"
+            or  "At 0, takes butt together and fades where they touch are removed")
     end
 end
 
@@ -1384,53 +1543,25 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors,
                 table.insert(errors, string.format(
                     "Could not find source folder %d for take T%03d", folder_idx, take_num))
             else
-                local take_max_len = 0
-
                 if take_idx > folder_count and folder_idx == 1 then
-                    local next_round_start = max_end_position + 2
+                    local next_round_start = max_end_position + take_gap
                     for i = 1, folder_count do folder_positions[i] = next_round_start end
                 end
 
-                local take_items = {}
-                for track_obj, filepath in pairs(take_data) do
+                local take_max_len = place_split_take(take_data, function(track_obj)
                     local target_track = placement.find_track_in_folder_list(folder_track_list, track_obj.base_name)
-                    if target_track then
-                        SetOnlyTrackSelected(target_track.track)
-                        local item = placement.insert_media_get_item(target_track.track, filepath)
-                        if item then
-                            if not touched_seen[target_track.track] then
-                                touched_seen[target_track.track] = true
-                                touched_tracks[#touched_tracks + 1] = target_track.track
-                            end
-                            SetMediaItemInfo_Value(item, "D_POSITION", folder_positions[folder_idx])
-                            local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                            if len > take_max_len then take_max_len = len end
-                            local take = GetActiveTake(item)
-                            if take then
-                                local item_name = session_name == "default"
-                                    and string.format("%03d", take_num)
-                                    or  session_name .. "_T" .. string.format("%03d", take_num)
-                                GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
-                            end
-                            table.insert(take_items, item)
-                            table.insert(all_items, item)
-                        end
-                    else
+                    if not target_track then
                         table.insert(errors, string.format(
                             "Could not find track '%s' in source folder %d for take T%03d",
                             track_obj.base_name, folder_idx, take_num))
+                        return nil
                     end
-                end
-                if #take_items > 1 then
-                    local min_len = math.huge
-                    for _, it in ipairs(take_items) do
-                        local l = GetMediaItemInfo_Value(it, "D_LENGTH")
-                        if l < min_len then min_len = l end
+                    if not touched_seen[target_track.track] then
+                        touched_seen[target_track.track] = true
+                        touched_tracks[#touched_tracks + 1] = target_track.track
                     end
-                    for _, it in ipairs(take_items) do
-                        SetMediaItemInfo_Value(it, "D_LENGTH", min_len)
-                    end
-                end
+                    return target_track.track
+                end, folder_positions[folder_idx], take_item_name(session_name, take_num), all_items)
 
                 local take_end = folder_positions[folder_idx] + take_max_len
                 if take_end > max_end_position then max_end_position = take_end end
@@ -1439,6 +1570,8 @@ function import_vertical_round_robin(sessions, session_names, tracks, errors,
 
         pos = max_end_position + 10
     end
+
+    if take_gap == 0 then placement.clear_touching_fades(all_items) end
 
     local delta = scratch_start - start_pos
     if delta > 0.0001 then
@@ -1480,37 +1613,8 @@ function import_horizontal(sessions, session_names, tracks, errors, start_pos)
 
         for _, take_num in ipairs(take_nums) do
             local take_data = session_data[take_num]
-            local max_len   = 0
-            local take_items = {}
-
-            for track_obj, filepath in pairs(take_data) do
-                SetOnlyTrackSelected(track_obj.track)
-                local item = placement.insert_media_get_item(track_obj.track, filepath)
-                if item then
-                    SetMediaItemInfo_Value(item, "D_POSITION", pos)
-                    local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                    if len > max_len then max_len = len end
-                    local take = GetActiveTake(item)
-                    if take then
-                        local item_name = session_name == "default"
-                            and string.format("%03d", take_num)
-                            or  session_name .. "_T" .. string.format("%03d", take_num)
-                        GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
-                    end
-                    table.insert(take_items, item)
-                    table.insert(all_items, item)
-                end
-            end
-            if #take_items > 1 then
-                local min_len = math.huge
-                for _, it in ipairs(take_items) do
-                    local l = GetMediaItemInfo_Value(it, "D_LENGTH")
-                    if l < min_len then min_len = l end
-                end
-                for _, it in ipairs(take_items) do
-                    SetMediaItemInfo_Value(it, "D_LENGTH", min_len)
-                end
-            end
+            local max_len = place_split_take(take_data, function(track_obj) return track_obj.track end,
+                pos, take_item_name(session_name, take_num), all_items)
 
             for track_obj in pairs(tracks_in_session) do
                 if not take_data[track_obj] then
@@ -1520,11 +1624,13 @@ function import_horizontal(sessions, session_names, tracks, errors, start_pos)
                 end
             end
 
-            pos = pos + max_len + 2
+            pos = pos + max_len + take_gap
         end
 
         pos = pos + 10
     end
+
+    if take_gap == 0 then placement.clear_touching_fades(all_items) end
 
     local delta = scratch_start - start_pos
     if delta > 0.0001 then
@@ -1592,51 +1698,28 @@ function import_vertical(sessions, session_names, tracks, errors, start_folder_i
                 table.insert(errors, string.format(
                     "Could not find source folder %d for take T%03d", take_idx, take_num))
             else
-                local take_items = {}
-                for track_obj, filepath in pairs(take_data) do
+                local take_len = place_split_take(take_data, function(track_obj)
                     local target_track = placement.find_track_in_folder_list(folder_track_list, track_obj.base_name)
-                    if target_track then
-                        SetOnlyTrackSelected(target_track.track)
-                        local item = placement.insert_media_get_item(target_track.track, filepath)
-                        if item then
-                            if not touched_seen[target_track.track] then
-                                touched_seen[target_track.track] = true
-                                touched_tracks[#touched_tracks + 1] = target_track.track
-                            end
-                            SetMediaItemInfo_Value(item, "D_POSITION", pos)
-                            local len = GetMediaItemInfo_Value(item, "D_LENGTH")
-                            if len > max_len then max_len = len end
-                            local take = GetActiveTake(item)
-                            if take then
-                                local item_name = session_name == "default"
-                                    and string.format("%03d", take_num)
-                                    or  session_name .. "_T" .. string.format("%03d", take_num)
-                                GetSetMediaItemTakeInfo_String(take, "P_NAME", item_name, true)
-                            end
-                            table.insert(take_items, item)
-                            table.insert(all_items, item)
-                        end
-                    else
+                    if not target_track then
                         table.insert(errors, string.format(
                             "Could not find track '%s' in source folder %d for take T%03d",
                             track_obj.base_name, take_idx, take_num))
+                        return nil
                     end
-                end
-                if #take_items > 1 then
-                    local min_len = math.huge
-                    for _, it in ipairs(take_items) do
-                        local l = GetMediaItemInfo_Value(it, "D_LENGTH")
-                        if l < min_len then min_len = l end
+                    if not touched_seen[target_track.track] then
+                        touched_seen[target_track.track] = true
+                        touched_tracks[#touched_tracks + 1] = target_track.track
                     end
-                    for _, it in ipairs(take_items) do
-                        SetMediaItemInfo_Value(it, "D_LENGTH", min_len)
-                    end
-                end
+                    return target_track.track
+                end, pos, take_item_name(session_name, take_num), all_items)
+                if take_len > max_len then max_len = take_len end
             end
         end
 
         pos = pos + max_len + 10
     end
+
+    if take_gap == 0 then placement.clear_touching_fades(all_items) end
 
     local delta = scratch_start - start_pos
     if delta > 0.0001 then

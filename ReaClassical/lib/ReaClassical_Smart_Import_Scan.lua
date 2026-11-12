@@ -82,10 +82,15 @@ function M.parse_canonical_filename(filepath)
     local name_no_ext = filename:match("(.+)%.[^.]+$")
     if not name_no_ext then return nil end
 
-    local take_str = name_no_ext:match("_T(%d+)$") or name_no_ext:match("_(%d+)$")
-    if not take_str then return nil end
-
-    local name_without_take = name_no_ext:gsub("_T%d+$", ""):gsub("_%d+$", "")
+    local name_without_take
+    local take_str, part_str = name_no_ext:match("_T(%d+)_(%d%d%d%d)$")
+    if take_str then
+        name_without_take = name_no_ext:gsub("_T%d+_%d%d%d%d$", "")
+    else
+        take_str = name_no_ext:match("_T(%d+)$") or name_no_ext:match("_(%d+)$")
+        if not take_str then return nil end
+        name_without_take = name_no_ext:gsub("_T%d+$", ""):gsub("_%d+$", "")
+    end
 
     local parts = {}
     for part in name_without_take:gmatch("[^_]+") do
@@ -127,7 +132,34 @@ function M.parse_canonical_filename(filepath)
         track_name         = track_name:lower(),
         track_name_display = track_name,
         take_num           = tonumber(take_str),
+        part_num           = part_str and tonumber(part_str) or nil,
     }
+end
+
+function M.check_part_sequence(part_nums)
+    if #part_nums == 1 then return nil end
+
+    local seen = {}
+    local lo, hi = math.huge, 0
+    for _, p in ipairs(part_nums) do
+        if not p then
+            return "duplicate take: " .. #part_nums .. " files share this take number"
+        end
+        if seen[p] then
+            return string.format("duplicate part %04d", p)
+        end
+        seen[p] = true
+        if p < lo then lo = p end
+        if p > hi then hi = p end
+    end
+
+    for n = lo, hi do
+        if not seen[n] then
+            return string.format("missing split part %04d", n)
+        end
+    end
+
+    return nil
 end
 
 function M.get_tracks(workflow)

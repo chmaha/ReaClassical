@@ -144,16 +144,21 @@ function M.build_file_index()
             table.insert(index[info.track_name][info.take_num], {
                 filepath = filepath,
                 session_name = info.session_name,
+                part_num = info.part_num,
             })
         end
     end
     return index
 end
 
-function M.find_file_for_track(file_index, base_name, take_num, preferred_session)
+function M.find_file_for_track(file_index, base_name, take_num, preferred_session, part_num)
     local by_take = file_index[base_name]
-    local candidates = by_take and by_take[take_num]
-    if not candidates then return nil end
+    local all = by_take and by_take[take_num]
+    if not all then return nil end
+    local candidates = {}
+    for _, c in ipairs(all) do
+        if c.part_num == part_num then candidates[#candidates + 1] = c end
+    end
     if preferred_session then
         for _, c in ipairs(candidates) do
             if c.session_name == preferred_session then return c.filepath end
@@ -222,7 +227,8 @@ function M.replace_track_range(target_track, good_items, left, right, file_index
                 "Could not read the reference track's source filename at position %.2f",
                 GetMediaItemInfo_Value(good_item, "D_POSITION")))
         else
-            local filepath = M.find_file_for_track(file_index, base_name, info.take_num, info.session_name)
+            local filepath = M.find_file_for_track(file_index, base_name, info.take_num,
+                info.session_name, info.part_num)
             if not filepath then
                 table.insert(warnings, string.format(
                     "No matching file found for '%s' take %d", base_name, info.take_num))
