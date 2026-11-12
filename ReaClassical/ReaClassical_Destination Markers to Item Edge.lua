@@ -28,7 +28,7 @@ local say = require("ReaClassical_Announce")
 local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
 
 local main, get_selected_media_item_at, count_selected_media_items
-local folder_check, get_track_number, get_track_prefix
+local is_in_first_folder
 
 function main()
     Undo_BeginBlock()
@@ -59,6 +59,11 @@ function main()
         end
 
         local first_item = get_selected_media_item_at(0)
+        if not is_in_first_folder(first_item) then
+            MB("Please select one or more consecutive media items in the first folder.",
+                "Destination Markers to Item Edge / Time Selection: Error", 0)
+            return
+        end
         left_pos = GetMediaItemInfo_Value(first_item, "D_POSITION")
         local last_item
         if num > 1 then
@@ -85,18 +90,14 @@ function main()
         i = i + 1
     end
 
-    local track_number = math.floor(get_track_number())
-    local track_prefix = get_track_prefix()
+    SetProjExtState(0, "ReaClassical", "DestInTrackNum", "1")
+    SetProjExtState(0, "ReaClassical", "DestOutTrackNum", "1")
 
-    SetProjExtState(0, "ReaClassical", "DestInTrackNum", tostring(track_number))
-    SetProjExtState(0, "ReaClassical", "DestOutTrackNum", tostring(track_number))
+    local colors = require("ReaClassical_Colors_Table")
+    local marker_color = (workflow == "Horizontal") and colors.dest_marker or colors.dest_items
 
-    local selected_track = GetSelectedTrack(0, 0)
-    local color_track = selected_track or GetTrack(0, 0)
-    local marker_color = color_track and GetTrackColor(color_track) or 0
-
-    local in_label = (workflow == "Horizontal") and "DEST-IN" or (track_prefix .. ":DEST-IN")
-    local out_label = (workflow == "Horizontal") and "DEST-OUT" or (track_prefix .. ":DEST-OUT")
+    local in_label = (workflow == "Horizontal") and "DEST-IN" or "D:DEST-IN"
+    local out_label = (workflow == "Horizontal") and "DEST-OUT" or "D:DEST-OUT"
     AddProjectMarker2(0, false, left_pos, 0, in_label, 996, marker_color)
     AddProjectMarker2(0, false, right_pos, 0, out_label, 997, marker_color)
     say("Destination markers set")
@@ -104,47 +105,18 @@ function main()
     Undo_EndBlock("Destination Markers to Item Edge", 0)
 end
 
-function folder_check()
-    local folders = 0
-    local total_tracks = CountTracks(0)
-    for i = 0, total_tracks - 1, 1 do
+function is_in_first_folder(item)
+    local first_folder
+    for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         if GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-            folders = folders + 1
+            first_folder = track
+            break
         end
     end
-    return folders
-end
-
-function get_track_number()
-    local selected = GetSelectedTrack(0, 0)
-    if folder_check() == 0 or selected == nil then
-        return 1
-    elseif GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
-        return GetMediaTrackInfo_Value(selected, "IP_TRACKNUMBER")
-    else
-        local folder = GetParentTrack(selected)
-        return GetMediaTrackInfo_Value(folder, "IP_TRACKNUMBER")
-    end
-end
-
-function get_track_prefix()
-    local selected = GetSelectedTrack(0, 0)
-    if folder_check() == 0 or selected == nil then
-        return "1"
-    end
-    local folder
-    if GetMediaTrackInfo_Value(selected, "I_FOLDERDEPTH") == 1 then
-        folder = selected
-    else
-        folder = GetParentTrack(selected)
-    end
-    if folder then
-        local _, name = GetTrackName(folder)
-        local prefix = name:match("^(.-):")
-        if prefix then return prefix end
-    end
-    return tostring(math.floor(GetMediaTrackInfo_Value(folder or selected, "IP_TRACKNUMBER")))
+    if not first_folder then return true end
+    local track = GetMediaItem_Track(item)
+    return track == first_folder or GetParentTrack(track) == first_folder
 end
 
 function count_selected_media_items()

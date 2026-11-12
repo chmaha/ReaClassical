@@ -525,9 +525,6 @@ function do_processing_step()
             end
         end
         Undo_EndBlock('Auto-color project', -1)
-        PreventUIRefresh(-1)
-        UpdateArrange()
-        UpdateTimeline()
         update_progress("Complete", 100, "All done!")
         return true
     end
@@ -561,8 +558,13 @@ function main()
             ImGui.End(ctx)
         end
 
+        PreventUIRefresh(1)
         processing_complete = do_processing_step()
+        PreventUIRefresh(-1)
         if processing_complete then
+            TrackList_AdjustWindows(false)
+            UpdateArrange()
+            UpdateTimeline()
             say("Project colored")
         end
         defer(main)
@@ -615,7 +617,6 @@ end
 num_of_project_items = CountMediaItems(0)
 if num_of_project_items == 0 then return end
 
-PreventUIRefresh(1)
 if not _G.RC_SCRIPT_ARGS then
     ctx = ImGui.CreateContext("ReaClassical Auto-color Project")
     update_progress("Initializing", 0, "Starting coloring...")
@@ -731,6 +732,7 @@ end
 
 if _G.RC_SCRIPT_ARGS then
     frame_count = 3
+    PreventUIRefresh(1)
     if not _G.RC_SCRIPT_ARGS.silent then
         say("Coloring project")
     end
@@ -743,6 +745,9 @@ if _G.RC_SCRIPT_ARGS then
         return
     end
     PreventUIRefresh(-1)
+    TrackList_AdjustWindows(false)
+    UpdateArrange()
+    UpdateTimeline()
     if not _G.RC_SCRIPT_ARGS.silent then
         say("Project colored")
     end
