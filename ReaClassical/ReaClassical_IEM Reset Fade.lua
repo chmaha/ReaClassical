@@ -42,9 +42,12 @@ local function main()
         return
     end
 
-    local crossfaded = ctx.selection == "in"
-        and iu.left_edge_crossfaded(ctx.item)
-        or  iu.right_edge_crossfaded(ctx.item)
+    local crossfaded
+    if ctx.selection == "in" then
+        crossfaded = iu.left_edge_crossfaded(ctx.item)
+    else
+        crossfaded = iu.right_edge_crossfaded(ctx.item)
+    end
     if crossfaded then
         say((ctx.selection == "in" and "Left" or "Right")
             .. " edge is crossfaded; use crossfade mode instead")
