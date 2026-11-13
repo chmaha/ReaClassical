@@ -111,7 +111,7 @@ local show_import_dialog, import_vertical_round_robin
 local show_track_order_dialog, draw_track_order_dialog
 local finish_import
 local continue_named_track_import
-local place_split_take, take_item_name, take_label, draw_take_gap_input
+local place_split_take, take_item_name, take_label, draw_take_gap_input, footer_height
 
 set_action_options(2)
 
@@ -645,6 +645,8 @@ function draw_polywav_tab()
         return
     end
 
+    ImGui.BeginChild(ctx, "PolywavBody", 0, -footer_height())
+
     local total_takes = 0
     local channel_count, mismatch = nil, false
     for _, session_name in ipairs(polywav_session_names) do
@@ -770,7 +772,7 @@ function draw_polywav_tab()
     end
     draw_take_gap_input("##pw_take_gap", is_vertical and polywav_distribution_mode == 0, pw_has_parts)
 
-    ImGui.Spacing(ctx)
+    ImGui.EndChild(ctx)
     ImGui.Separator(ctx)
     ImGui.Spacing(ctx)
 
@@ -1124,6 +1126,7 @@ function draw_import_dialog()
     end
 
     if show_named_content then
+        ImGui.BeginChild(ctx, "NamedBody", 0, -footer_height())
         ImGui.Text(ctx, "Workflow: " .. cached_workflow)
         ImGui.Text(ctx, string.format("New files found: %d takes (%d session%s)",
             cached_total_takes, #cached_session_names,
@@ -1304,12 +1307,14 @@ function draw_import_dialog()
         end
 
         local _, avail_height = ImGui.GetContentRegionAvail(ctx)
-        ImGui.BeginChild(ctx, "PreviewScroll", 0, avail_height - 40)
+        ImGui.BeginChild(ctx, "PreviewScroll", 0, math.max(avail_height, 120))
         generate_preview_ui(active_sessions, active_session_names,
             is_vertical and (distribution_mode == 0 and nil or target_folder_count) or nil,
             start_folder_idx, cached_workflow)
         ImGui.EndChild(ctx)
+        ImGui.EndChild(ctx)
 
+        ImGui.Separator(ctx)
         ImGui.Spacing(ctx)
 
         local button_width = (ImGui.GetContentRegionAvail(ctx) - 8) / 2
@@ -1485,6 +1490,11 @@ function place_split_take(take_data, resolve_target, take_pos, item_name, all_it
 
     placement.clear_join_fades(part_items)
     return offset
+end
+
+function footer_height()
+    local _, spacing_y = ImGui.GetStyleVar(ctx, ImGui.StyleVar_ItemSpacing)
+    return 30 + spacing_y * 3 + 1
 end
 
 function draw_take_gap_input(id, disabled, has_parts)
