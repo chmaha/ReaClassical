@@ -28,12 +28,27 @@ local say = require("ReaClassical_Announce")
 local humanize_timestr = require("ReaClassical_Time_Naming")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
 
+local function is_sd_marker(num)
+    return num >= 996 and num <= 999
+end
+
+local function regular_marker_at(target_pos)
+    local num_markers = GetNumRegionsOrMarkers(0)
+    for i = 0, num_markers - 1 do
+        local _, isrgn, pos, _, _, markrgnindexnumber = enum_project_markers(0, i)
+        if not isrgn and not is_sd_marker(markrgnindexnumber)
+            and math.abs(pos - target_pos) < 1e-6 then
+            return markrgnindexnumber
+        end
+    end
+end
+
 local function find_marker_number(target_pos)
     local num_markers = GetNumRegionsOrMarkers(0)
     local closest_num, closest_diff
     for i = 0, num_markers - 1 do
         local _, isrgn, pos, _, _, markrgnindexnumber = enum_project_markers(0, i)
-        if not isrgn then
+        if not isrgn and not is_sd_marker(markrgnindexnumber) then
             local diff = math.abs(pos - target_pos)
             if not closest_diff or diff < closest_diff then
                 closest_diff = diff
@@ -70,10 +85,15 @@ local function main()
     local pos = (play_state == 0) and GetCursorPosition() or GetPlayPosition()
     if active then
         pos = math.max(pos - get_marker_offset(), 0)
-        AddProjectMarker(0, false, pos, 0, "", -1)
-    else
-        Main_OnCommand(40157, 0)
     end
+    local existing = regular_marker_at(pos)
+    if existing then
+        say("Marker " .. existing .. " already exists @ " .. humanize_timestr(format_timestr_pos(pos, "", -1)))
+        return
+    end
+    Undo_BeginBlock()
+    AddProjectMarker(0, false, pos, 0, "", -1)
+    Undo_EndBlock("Add Marker", -1)
     local marker_num = find_marker_number(pos)
     local marker_label = marker_num and ("Marker " .. marker_num .. " added @ ") or "Marker added @ "
     say(marker_label .. humanize_timestr(format_timestr_pos(pos, "", -1)))
