@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.20
+@version 27.0.21
 @changelog
-  Ensure buttons are always visible
+  Fix ternary bug in IEM
+  Allow adding generic marker on top of S-D marker
 @metapackage
 @provides
   [main] ReaClassical_*.lua
