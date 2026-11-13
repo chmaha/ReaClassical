@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.19
+@version 27.0.20
 @changelog
-  Use -1 instead of 0 for undo
+  Ensure buttons are always visible
 @metapackage
 @provides
   [main] ReaClassical_*.lua
