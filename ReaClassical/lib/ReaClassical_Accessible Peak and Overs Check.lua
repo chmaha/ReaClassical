@@ -61,7 +61,7 @@ end
 local function announce_scan_result(result)
     local parts = {}
     if result.peak_db then
-        parts[#parts + 1] = string.format("Peak: %.2f dB at %s (%s).",
+        parts[#parts + 1] = string.format("Peak before effects: %.2f dB at %s (%s).",
             result.peak_db, format_timestr_pos(result.peak_pos, "", 0), result.peak_track_name)
     else
         parts[#parts + 1] = "No audio found on unmuted tracks."
