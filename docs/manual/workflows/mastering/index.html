@@ -173,6 +173,12 @@
 <p class="admonition-title">Screen reader users (Clara)</p>
 <p><kbd>Shift+P</kbd> opens an accessible Peak and Overs Check. On opening and on every rescan it announces the peak position and the number of overs and moves the edit cursor to the peak. You can then browse the overs one at a time, hear each over's level, position and track, and audition the peak.</p>
 </div>
+<h4 id="item-peak-check">Item Peak Check</h4>
+<p>To check a single take rather than the whole project, select its parent item and press <kbd>Tab</kbd>. ReaClassical scans that item and the matching items on its child tracks, moves the edit cursor to the highest peak and selects the track it is on. It then reports the peak level, its position and the track, and how far above or below the over threshold it is. The scan takes the same gain into account as the Peak and Overs Check (item and take volume, faders and sends up to RCMASTER) but not plugins, so the reported level is before effects. The threshold is the one set in the Peak and Overs Check (−1.0 dB by default). SWS is required.</p>
+<div class="admonition accessibility">
+<p class="admonition-title">Screen reader users (Clara)</p>
+<p><kbd>Tab</kbd> announces the result instead of showing a message box.</p>
+</div>
 <h4 id="cd-player">CD Player</h4>
 <p>Press <kbd>Ctrl+Alt+Shift+Y</kbd> to play the album back like a physical CD player. The disc is always the first (destination) folder, and only it is heard. The player is a small window that needs keyboard focus, with buttons that mirror its keys for mouse users. When you switch it off with <kbd>Escape</kbd>, the cursor returns to where it was before you opened the player.</p>
 <table>

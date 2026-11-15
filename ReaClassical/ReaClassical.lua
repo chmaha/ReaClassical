@@ -1,9 +1,12 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.21
+@version 27.0.22
 @changelog
-  Fix ternary bug in IEM
-  Allow adding generic marker on top of S-D marker
+  Warn if item not selected
+  Allow exporting sections from source audition manager
+  Exclude rankings by default
+  Add fade in and fade out tools
+  Add new item peak check
 @metapackage
 @provides
   [main] ReaClassical_*.lua
