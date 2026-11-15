@@ -45,6 +45,7 @@ local find_source_marker, get_item_at_position
 local project_pos_to_source_pos, set_take_marker_with_length
 local convert_existing_pair_to_take_marker
 local remove_take_marker_by_chunk
+local draw_export_section, export_auditions, audition_passes_filter
 
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
@@ -77,6 +78,7 @@ end
 local track_scan = require("ReaClassical_Track_Scan")
 local track_write = require("ReaClassical_Track_Write")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
+local region_export = require("ReaClassical_Region_Export")
 
 local ctx         = ImGui.CreateContext('Source Audition Marker Manager')
 local window_open = true
@@ -101,6 +103,21 @@ local last_play_pos     = -1
 local sort_mode         = "time"
 
 local EXT_STATE_SECTION = "ReaClassical_SAI_Manager"
+
+local EXPORT_FILTERS    = {
+    { key = "all",    label = "All auditions" },
+    { key = "ranked", label = "Ranked only" },
+    { key = "1",      label = "Excellent only" },
+    { key = "2",      label = "Very Good or better" },
+    { key = "3",      label = "Good or better" },
+    { key = "4",      label = "OK or better" },
+}
+
+local export_rs           = region_export.load_render_settings()
+local export_roll         = tonumber(GetExtState(EXT_STATE_SECTION, "export_roll")) or 2.0
+local export_filter       = GetExtState(EXT_STATE_SECTION, "export_filter")
+if export_filter == "" then export_filter = "all" end
+local export_include_rank = GetExtState(EXT_STATE_SECTION, "export_include_rank") == "1"
 
 local audition_manager  = NamedCommandLookup("_RS238a7e78cb257490252b3dde18274d00f9a1cf10")
 SetToggleCommandState(1, audition_manager, 1)
@@ -132,6 +149,11 @@ function main()
             ImGui.Separator(ctx)
 
             local regions = get_saud_regions()
+
+            if #regions > 0 then
+                draw_export_section(regions)
+                ImGui.Separator(ctx)
+            end
 
             if #regions == 0 then
                 ImGui.Text(ctx,
@@ -302,6 +324,125 @@ function main()
         clean_up_orphans()
         SetToggleCommandState(1, audition_manager, 0)
     end
+end
+
+function audition_passes_filter(region)
+    local mdata = marker_data[region.data_key]
+    local idx = mdata and mdata.color_idx or 8
+    if export_filter == "all" then return true end
+    if export_filter == "ranked" then return idx ~= 8 end
+    return idx <= (tonumber(export_filter) or 8)
+end
+
+function export_auditions(regions, format)
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    local groups, by_folder = {}, {}
+
+    for _, region in ipairs(regions) do
+        if audition_passes_filter(region) and ValidatePtr(region.item, "MediaItem*") then
+            local item_pos = GetMediaItemInfo_Value(region.item, "D_POSITION")
+            local item_end = item_pos + GetMediaItemInfo_Value(region.item, "D_LENGTH")
+            local start = math.max(region.proj_start - export_roll, item_pos)
+            local finish = math.min(region.proj_end + export_roll, item_end)
+
+            local _, raw_name = GetSetMediaItemTakeInfo_String(region.take, "P_NAME", "", false)
+            local name = region_export.clean_take_name(raw_name, export_include_rank)
+            if name == "" then name = "Track " .. region.track_number end
+            local t = math.max(region.proj_start, 0)
+            name = name .. string.format(" %02dm%02ds", math.floor(t / 60), math.floor(t % 60))
+            local mdata = marker_data[region.data_key]
+            local notes = mdata and mdata.notes and mdata.notes:match("^%s*(.-)%s*$") or ""
+            if notes ~= "" then name = name .. " - " .. notes end
+
+            local folder = workflow == "Vertical" and GetTrack(0, region.track_number - 1) or false
+            local group = by_folder[folder]
+            if not group then
+                group = { folder = folder or nil, regions = {} }
+                by_folder[folder] = group
+                groups[#groups + 1] = group
+            end
+            group.regions[#group.regions + 1] = { start = start, finish = finish, name = name }
+        end
+    end
+
+    if #groups == 0 then
+        MB("No auditions match the current export filter.", "Source Audition Manager", 0)
+        return
+    end
+
+    local total, base_rel = region_export.render_groups({
+        format = format,
+        settings = export_rs,
+        dir_name = "Auditions",
+        undo_label = "Export Auditions",
+        groups = groups,
+    })
+    if not total then
+        MB(base_rel, "ReaClassical Error", 0)
+        return
+    end
+    say(total .. " audition" .. (total == 1 and "" or "s") .. " exported to " .. base_rel)
+end
+
+function draw_export_section(regions)
+    if not ImGui.CollapsingHeader(ctx, "Export auditions") then return end
+
+    region_export.draw_render_settings(ImGui, ctx, export_rs)
+
+    ImGui.Text(ctx, "Include:")
+    ImGui.SameLine(ctx)
+    local filter_label = EXPORT_FILTERS[1].label
+    for _, f in ipairs(EXPORT_FILTERS) do
+        if f.key == export_filter then filter_label = f.label end
+    end
+    ImGui.SetNextItemWidth(ctx, 170)
+    if ImGui.BeginCombo(ctx, "##export_filter", filter_label) then
+        for _, f in ipairs(EXPORT_FILTERS) do
+            local is_sel = (export_filter == f.key)
+            if ImGui.Selectable(ctx, f.label, is_sel) then
+                export_filter = f.key
+                SetExtState(EXT_STATE_SECTION, "export_filter", f.key, true)
+            end
+            if is_sel then ImGui.SetItemDefaultFocus(ctx) end
+        end
+        ImGui.EndCombo(ctx)
+    end
+    if ImGui.IsItemHovered(ctx) then
+        ImGui.SetTooltip(ctx, "Which auditions to export, based on the Rank column")
+    end
+
+    ImGui.SameLine(ctx)
+    local matching = 0
+    for _, region in ipairs(regions) do
+        if audition_passes_filter(region) then matching = matching + 1 end
+    end
+    ImGui.Text(ctx, string.format("(%d of %d)", matching, #regions))
+
+    ImGui.SameLine(ctx)
+    ImGui.Text(ctx, "  Pre/post-roll:")
+    ImGui.SameLine(ctx)
+    ImGui.SetNextItemWidth(ctx, 120)
+    local roll_changed, new_roll = ImGui.SliderDouble(ctx, "##export_roll", export_roll, 0, 10, "%.1f s")
+    if roll_changed then
+        export_roll = math.max(0, new_roll)
+        SetExtState(EXT_STATE_SECTION, "export_roll", string.format("%.2f", export_roll), true)
+    end
+    if ImGui.IsItemHovered(ctx) then
+        ImGui.SetTooltip(ctx, "Extra audio before and after each audition (limited to the take's item)")
+    end
+
+    local rank_changed, new_rank = ImGui.Checkbox(ctx, "Include take ranking in filenames", export_include_rank)
+    if rank_changed then
+        export_include_rank = new_rank
+        SetExtState(EXT_STATE_SECTION, "export_include_rank", new_rank and "1" or "0", true)
+    end
+    if ImGui.IsItemHovered(ctx) then
+        ImGui.SetTooltip(ctx, "Keep take rankings (e.g. Excellent, Poor) in exported filenames.\n"
+            .. "Filenames use take name, start time and notes.")
+    end
+
+    local fmt = region_export.draw_format_buttons(ImGui, ctx, "Export auditions as ")
+    if fmt then export_auditions(regions, fmt) end
 end
 
 function delete_all_saud_take_markers()
