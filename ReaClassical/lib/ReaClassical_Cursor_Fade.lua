@@ -55,6 +55,14 @@ local function workflow_ok()
     return false
 end
 
+local function warn(title, msg)
+    if APIExists("clara_outputMessage") or _G.__RC_debug_shim_installed then
+        say(msg)
+    else
+        MB(msg, title, 0)
+    end
+end
+
 local function cursor_inside(item, cursor)
     local pos = GetMediaItemInfo_Value(item, "D_POSITION")
     local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
@@ -64,7 +72,7 @@ end
 local function ask_length(title, default)
     local value = tostring(default)
     while true do
-        local ok, entered = ui_input.ask(nil, title, "Fade length in seconds", value)
+        local ok, entered = ui_input.ask(nil, title, "Fade length in seconds", value, 0)
         if not ok then
             say("Cancelled")
             return nil
@@ -101,8 +109,10 @@ end
 function M.run(is_out, default_length)
     if not workflow_ok() then return end
 
+    local title = is_out and "Fade Out From Cursor" or "Fade In To Cursor"
+
     local item = GetSelectedMediaItem(0, 0)
-    if not item then say("No item selected"); return end
+    if not item then warn(title, "Please select an item first."); return end
 
     local crossfaded
     if is_out then
@@ -111,17 +121,16 @@ function M.run(is_out, default_length)
         crossfaded = iu.left_edge_crossfaded(item)
     end
     if crossfaded then
-        say((is_out and "Right" or "Left") .. " edge is crossfaded; use the crossfade editor instead")
+        warn(title, (is_out and "Right" or "Left") .. " edge is crossfaded; use the crossfade editor instead")
         return
     end
 
     local cursor = GetCursorPosition()
     if not cursor_inside(item, cursor) then
-        say("Edit cursor is not inside the selected item")
+        warn(title, "Edit cursor is not inside the selected item")
         return
     end
 
-    local title = is_out and "Fade Out From Cursor" or "Fade In To Cursor"
     local length = ask_length(title, default_length)
     if not length then return end
 

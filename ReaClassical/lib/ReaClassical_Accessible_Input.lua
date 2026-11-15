@@ -28,9 +28,9 @@ local af = require("ReaClassical_Accessible_Focus")
 
 local M = {}
 
-function M.ask(window_title, box_title, caption, prefill)
+function M.ask(window_title, box_title, caption, prefill, extrawidth)
     local ok, csv = GetUserInputs(box_title, 1,
-        caption .. ",extrawidth=300", prefill or "")
+        caption .. ",extrawidth=" .. (extrawidth or 300), prefill or "")
     if window_title then af.refocus_existing(window_title) end
     return ok, csv or ""
 end
