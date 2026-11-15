@@ -39,6 +39,7 @@ local say = require("ReaClassical_Announce")
 
 local render_settings = require("ReaClassical_Render_Settings")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
+local rank_info = require("ReaClassical_Rank_Info")
 local samplerate_list = render_settings.samplerate_list
 local samplerate_labels = render_settings.samplerate_labels
 local bitdepth_list = render_settings.bitdepth_list
@@ -100,6 +101,7 @@ local TAKE_MODES = {
 
 local take_mode = "all"
 local take_list_text = ""
+local include_rank = GetExtState("ReaClassical", "DistributeTakesIncludeRank") == "1"
 
 function is_special_track(track)
     local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback" }
@@ -219,7 +221,7 @@ function build_take_filter(mode, list_text)
     return function() return true end
 end
 
-function create_regions_for_track(folder_track, name_prefix, filter)
+function create_regions_for_track(folder_track, name_prefix, filter, keep_rank)
     local count = 0
     local num_items = GetTrackNumMediaItems(folder_track)
     for i = 0, num_items - 1 do
@@ -230,6 +232,9 @@ function create_regions_for_track(folder_track, name_prefix, filter)
             local len = GetMediaItemInfo_Value(item, "D_LENGTH")
             local _, raw_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
             local clean = (raw_name:match("^(.-)%s*|") or raw_name):match("^%s*(.-)%s*$")
+            if not keep_rank then
+                clean = rank_info.strip_rank_prefix(clean):match("^%s*(.-)%s*$")
+            end
             local region_name = (name_prefix ~= "" and clean ~= "")
                 and (name_prefix .. " " .. clean)
                 or (name_prefix ~= "" and name_prefix or clean)
@@ -355,7 +360,7 @@ function render_export(rel_dir)
     Main_OnCommand(42230, 0)
 end
 
-function run_distribute(format, mode, list_text)
+function run_distribute(format, mode, list_text, keep_rank)
     local slash = package.config:sub(1, 1)
     local proj_path = GetProjectPath()
     if proj_path == "" then
@@ -388,7 +393,7 @@ function run_distribute(format, mode, list_text)
             msg = "No ReaClassical folders found"
         else
             local folder_track = folders[1]
-            local count = create_regions_for_track(folder_track, "", filter)
+            local count = create_regions_for_track(folder_track, "", filter, keep_rank)
             if count == 0 then
                 msg = none_msg
                 clear_all_regions()
@@ -409,7 +414,7 @@ function run_distribute(format, mode, list_text)
             for _, folder_track in ipairs(folders) do
                 solo_folder_for_render(folder_track)
 
-                local count = create_regions_for_track(folder_track, "", filter)
+                local count = create_regions_for_track(folder_track, "", filter, keep_rank)
                 if count > 0 then
                     render_export(base_rel)
                     total = total + count
@@ -542,6 +547,15 @@ function main()
         take_list_text = new_text
         if list_disabled then ImGui.EndDisabled(ctx) end
 
+        local rank_changed, new_rank = ImGui.Checkbox(ctx, "Include ranking in filenames", include_rank)
+        if rank_changed then
+            include_rank = new_rank
+            SetExtState("ReaClassical", "DistributeTakesIncludeRank", include_rank and "1" or "0", true)
+        end
+        if ImGui.IsItemHovered(ctx) then
+            ImGui.SetTooltip(ctx, "Keep take rankings (e.g. Excellent, Poor) in exported filenames")
+        end
+
         ImGui.Dummy(ctx, 0, 5)
         ImGui.Separator(ctx)
         ImGui.Dummy(ctx, 0, 5)
@@ -551,7 +565,7 @@ function main()
         for i, f in ipairs(EXPORT_FORMATS) do
             if i > 1 then ImGui.SameLine(ctx) end
             if ImGui.Button(ctx, f.label) then
-                local ok, msg = run_distribute(f.key, take_mode, take_list_text)
+                local ok, msg = run_distribute(f.key, take_mode, take_list_text, include_rank)
                 if ok then
                     say(msg)
                 else
@@ -579,7 +593,7 @@ end
 if _G.RC_SCRIPT_ARGS then
     local args = _G.RC_SCRIPT_ARGS
     if args.action == "distribute" then
-        local ok, msg = run_distribute(args.format, args.mode, args.takes)
+        local ok, msg = run_distribute(args.format, args.mode, args.takes, args.include_rank)
         say(msg)
         if not ok then return end
     end

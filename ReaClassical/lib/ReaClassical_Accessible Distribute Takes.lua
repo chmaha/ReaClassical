@@ -66,7 +66,7 @@ local TAKE_MODES = {
     { key = "time",     label = "Time selection" },
 }
 
-local NAV_COUNT = 3
+local NAV_COUNT = 4
 
 local state   = STATE_NAV
 local nav_idx = 1
@@ -74,6 +74,7 @@ local nav_idx = 1
 local take_mode_idx     = 1
 local take_pending_idx  = 1
 local take_list_text    = ""
+local include_rank      = GetExtState("ReaClassical", "DistributeTakesIncludeRank") == "1"
 
 local render_field_idx   = 1
 local render_pending_idx = 1
@@ -90,6 +91,7 @@ end
 local function nav_label(i)
     if i == 1 then return "Render Settings" end
     if i == 2 then return "Takes: " .. take_mode_label() end
+    if i == 3 then return "Ranking in filenames: " .. (include_rank and "included" or "excluded") end
     return "Export"
 end
 
@@ -121,6 +123,7 @@ local function do_export(fmt)
         format = fmt,
         mode = TAKE_MODES[take_mode_idx].key,
         takes = take_list_text,
+        include_rank = include_rank,
     }
     dofile(parent_path .. "ReaClassical_Distribute Takes.lua")
     _G.RC_SCRIPT_ARGS = nil
@@ -163,6 +166,10 @@ local function handle_key(char)
                 take_pending_idx = take_mode_idx
                 state = STATE_TAKES
                 say("Takes: " .. TAKE_MODES[take_pending_idx].label .. ". Up/down to change")
+            elseif nav_idx == 3 then
+                include_rank = not include_rank
+                SetExtState("ReaClassical", "DistributeTakesIncludeRank", include_rank and "1" or "0", true)
+                say(nav_label(3))
             else
                 export_idx = 1
                 state = STATE_EXPORT
