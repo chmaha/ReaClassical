@@ -139,6 +139,7 @@ local function save_track_mute_state()
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         state[i] = {
+            track = track,
             mute = GetMediaTrackInfo_Value(track, "B_MUTE"),
             solo = GetMediaTrackInfo_Value(track, "I_SOLO"),
         }
@@ -156,12 +157,17 @@ local function restore_track_mute_state(state)
     end
 end
 
-local function solo_folder_for_render(folder_track)
+local function solo_folder_for_render(folder_track, mute_state)
+    local original = {}
+    for _, s in pairs(mute_state) do original[s.track] = s.mute end
     local keep = { [folder_track] = true }
     for _, c in ipairs(M.get_folder_children(folder_track)) do keep[c] = true end
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
-        local mute = (M.is_special_track(track) or keep[track]) and 0 or 1
+        local mute = 1
+        if M.is_special_track(track) or keep[track] then
+            mute = original[track] or 0
+        end
         SetMediaTrackInfo_Value(track, "B_MUTE", mute)
         SetMediaTrackInfo_Value(track, "I_SOLO", 0)
     end
@@ -241,7 +247,7 @@ function M.render_groups(opts)
             end
         end
         if #added > 0 then
-            if group.folder then solo_folder_for_render(group.folder) end
+            if group.folder then solo_folder_for_render(group.folder, mute_state) end
             GetSetProjectInfo_String(0, "RENDER_FILE", base_rel, true)
             GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
             Main_OnCommand(42230, 0)
