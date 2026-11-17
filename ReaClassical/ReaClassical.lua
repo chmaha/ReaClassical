@@ -1,12 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.22
+@version 27.0.23
 @changelog
-  Warn if item not selected
-  Allow exporting sections from source audition manager
-  Exclude rankings by default
-  Add fade in and fade out tools
-  Add new item peak check
+  Respect channel mutes
+  Update manual for new features
 @metapackage
 @provides
   [main] ReaClassical_*.lua
