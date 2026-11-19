@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local main, select_matching_src_folder, copy_source, split_at_dest_in
-local create_crossfades, clean_up, ripple_lock_mode, adaptive_delete
+local create_crossfades, ripple_lock_mode, adaptive_delete
 local return_xfade_length, get_first_last_items, markers
 local mark_as_edit, move_to_project_tab, save_source_details
 local count_selected_media_items, get_selected_media_item_at
@@ -235,14 +235,14 @@ function main()
             warning = "Crossfade shortened to " .. table.concat(parts, " and ") .. " due to limited material."
         end
         if warning and not (APIExists("clara_outputMessage") or _G.__RC_debug_shim_installed) then
-            MB(warning, "Insert with timestretching", 0)
+            MB(warning, "Replace with timestretching", 0)
         end
         local completion = "Edit completed with timestretching"
         if warning then completion = completion .. ". " .. warning end
         say(completion)
     else
         MB("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT",
-            "Insert with timestretching", 0)
+            "Replace with timestretching", 0)
         if moveable_dest == 1 then move_destination_folder(track_number) end
         restore_all_ripple()
     end
@@ -253,7 +253,7 @@ function main()
     UpdateTimeline()
 
     if sliver_note ~= "" then
-        MB(sliver_note, "Insert with timestretching", 0)
+        MB(sliver_note, "Replace with timestretching", 0)
     end
 end
 
@@ -430,21 +430,6 @@ function create_crossfades(xfade_len, dest_workflow)
     Main_OnCommand(40912, 0)
     Main_OnCommand(40289, 0)
     return shortened_in, shortened_out, applied_in, applied_out
-end
-
-function clean_up(proj_marker_count)
-    local i = 0
-    while true do
-        local project, _ = EnumProjects(i)
-        if project == nil then break end
-        if proj_marker_count ~= 2 then
-            DeleteProjectMarker(project, 998, false)
-            DeleteProjectMarker(project, 999, false)
-        end
-        DeleteProjectMarker(project, 996, false)
-        DeleteProjectMarker(project, 997, false)
-        i = i + 1
-    end
 end
 
 function ripple_lock_mode()
