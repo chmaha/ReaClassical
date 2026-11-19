@@ -34,11 +34,78 @@ function M.enabled()
     return tonumber(entries[PREF_INDEX]) == 1
 end
 
-function M.get_next()
+local separator = package.config:sub(1, 1)
+local scan_cache, scan_cache_recording
+
+local function take_key(dir, filename)
+    local num = filename:match("^.*_T(%d+)[%-%(%)%d]*%.%w+$")
+    if not num then return nil end
+    return dir:gsub("\\", "/"):gsub("/+$", ""):lower() .. "|" .. num
+end
+
+local function collect_takes(dir, keys)
+    EnumerateFiles(dir, -1)
+    local i = 0
+    while true do
+        local filename = EnumerateFiles(dir, i)
+        if not filename then break end
+        local key = take_key(dir, filename)
+        if key then keys[key] = true end
+        i = i + 1
+    end
+    EnumerateSubdirectories(dir, -1)
+    local j = 0
+    while true do
+        local sub = EnumerateSubdirectories(dir, j)
+        if not sub then break end
+        collect_takes(dir .. separator .. sub, keys)
+        j = j + 1
+    end
+end
+
+local function count_recorded_takes(exclude)
+    local keys = {}
+    collect_takes(GetProjectPath(0), keys)
+    local count = 0
+    for key in pairs(keys) do
+        if not (exclude and exclude[key]) then count = count + 1 end
+    end
+    return count
+end
+
+local function item_take_keys(items)
+    local keys = {}
+    for _, item in ipairs(items) do
+        local take = GetActiveTake(item)
+        if take then
+            local path = GetMediaSourceFileName(GetMediaItemTake_Source(take), "")
+            local dir, filename = path:match("^(.*)[/\\]([^/\\]+)$")
+            local key = dir and take_key(dir, filename)
+            if key then keys[key] = true end
+        end
+    end
+    return keys
+end
+
+local function stored_next()
     local _, stored = GetProjExtState(0, "ReaClassical", COUNTER_KEY)
     local n = tonumber(stored)
-    if not n or n < 1 then return 1 end
+    if not n or n < 1 then return nil end
     return math.floor(n)
+end
+
+function M.get_next()
+    local n = stored_next()
+    if n then return n end
+    if not M.enabled() then return 1 end
+    local recording = (GetPlayState() & 4) == 4
+    if not scan_cache or scan_cache_recording ~= recording then
+        local count = count_recorded_takes()
+        if recording then count = math.max(count - 1, 0) end
+        scan_cache = count + 1
+        scan_cache_recording = recording
+    end
+    return scan_cache
 end
 
 function M.set_next(n)
@@ -70,7 +137,7 @@ function M.assign_to_guids(guid_str)
         if existing then return existing end
     end
 
-    local number = M.get_next()
+    local number = stored_next() or (count_recorded_takes(item_take_keys(items)) + 1)
     for _, item in ipairs(items) do
         GetSetMediaItemInfo_String(item, "P_EXT:global_take", tostring(number), true)
     end
